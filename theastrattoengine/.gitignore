@@ -1,0 +1,9 @@
+build/
+.gradle/
+native/obj/
+native/build-*/
+templates/new-game/build/
+templates/new-game/.gradle/
+native/bin/*-checked/
+native/bin/*-asan/
+bench-*.json

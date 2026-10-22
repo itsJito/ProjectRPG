@@ -1,0 +1,141 @@
+Astratto Engine 2.0 - RPGGAME devmap (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.2, built Oct 18 2026 03:50:16 (MSVC)
+== Character creator
+  [ ok ] creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)
+  [ ok ] 20 distinct male and 20 distinct female hairstyles (20, 20)
+  [ ok ] 20 distinct facial-hair presets including clean-shaven and the two stubbles (20)
+  [ ok ] 20 distinct tops, 20 legs and 20 shoes (60 of 60)
+  [ ok ] hairstyle row wraps after 20
+  [ ok ] choosing female removes facial hair and its row
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\01-creator.png
+  [ ok ] male figure: 32 px tall (8 head + 12 torso + 12 legs), hitbox 1.8 x 0.6 blocks
+  [ ok ] female figure: head 8x8x8, body 6x12x3, arms 3x12x4, legs 4x12x4, its own hitbox (1.8 x 0.45)
+  [ ok ] skins are painted at 128 x 128
+  [ ok ] appearance round-trips through save data
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\02-spawn.png
+  [ ok ] the player stands on the devmap
+== Leveling: all 18 skills on one table
+  [ ok ] 18 skills are registered
+  [ ok ] every skill starts at level 1
+  [ ok ] XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000
+  [ ok ] the stored table is strictly increasing and levelFor agrees at every boundary
+  [ ok ] every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000
+  [ ok ] level-ups were committed as events (72)
+  [ ok ] a repeated request pays XP once
+  [ ok ] a player level-up is celebrated (overlay and message)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\03-level-up.png
+== Interaction edge cases
+  [ ok ] the shed door offers Open and Examine
+  [ ok ] out of range: rejected, door unchanged
+  [ ok ] in range: the door opens (blocks removed)
+  [ ok ] the locked door's Open is disabled with a reason
+  [ ok ] its Pick lock is disabled with a reason (Thieving 10)
+  [ ok ] a loose item is taken exactly once
+  [ ok ] a stale target is rejected without a duplicate
+  [ ok ] the shed's tools were picked up
+  [ ok ] pickup at full inventory is refused and the item stays
+  [ ok ] the owned coins on the table are still there for the theft test
+  [ ok ] crafting interrupted mid-work consumes nothing (STARTED)
+  [ ok ] furniture and workstations are objects, not blocks: 23 pieces, their cells never meshed but still solid
+  [ ok ] block textures are 64 x 64
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04-interaction.png
+== Physical doors and breaking glass
+  [ ok ] opened, the shed door's leaves swing in on their hinges (1.75 rad) and the doorway is open
+  [ ok ] closed, the leaves swing home and latch (0.000 rad) and the cells are a shut door again
+  [ ok ] walking into the latched door, the player is held at its face (z 22.86)
+  [ ok ] opened, the player walks through the doorway into the shed (z 14.91)
+  [ ok ] a sword swung at the shed window breaks the pane (116 shards)
+      [stuck] Eda WORK at (99.1, 59.4) -> (98.5, 49.0), go to goal
+  [FAIL] the shards fell and came to rest on the ground (33 of 116)
+  [ ok ] breaking the pane was committed as an event
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04b-glass.png
+== Skill actions (each of the 18)
+      [stuck] Cole PATROL at (105.0, 82.2) -> (96.5, 82.5), go to goal
+      [stuck] Cole PATROL at (97.5, 77.8) -> (88.5, 72.5), go to goal
+  [ ok ] Woodcutting: logs cut from a real tree
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05-woodcutting.png
+  [ ok ] Firemaking: a fire is lit from logs
+      [stuck] Dag WORK at (85.0, 31.7) -> (84.0, 42.5), go to goal
+  [ ok ] Mining: copper and tin ore
+  [ ok ] a mined-out rock changes the world
+      [stuck] Cole PATROL at (106.8, 68.4) -> (113.5, 69.5), go to goal
+  [ ok ] Smithing: a bar smelted and a bronze dagger forged
+  [ ok ] Fishing: raw shrimp
+      [stuck] Dag WORK at (99.0, 55.9) -> (100.5, 68.0), go to goal
+      [stuck] Bandit WANDER at (15.2, 81.4) -> (0.0, 0.0), wander
+  [ ok ] Cooking: shrimp cooked (or burnt by the seeded check, which pays no XP)
+      [stuck] Cole PATROL at (106.4, 82.8) -> (113.5, 82.5), go to goal
+  [ ok ] Harvesting: guam picked
+  [ ok ] flax is level-gated (Harvesting 5) with a reason
+  [ ok ] Crafting: arrow shafts fletched from logs
+      (rejected: You need 1 x Logs.)
+      (rejected: You need 2 x Plank.)
+  [FAIL] Construction: a crate built into the world as blocks
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\06-construction.png
+  [ ok ] Agility: an obstacle crossed and a lap completed
+      [stuck] Bandit archer WANDER at (27.4, 83.7) -> (0.0, 0.0), wander
+      [stuck] Eda WORK at (99.1, 56.7) -> (100.5, 68.0), go to goal
+      [stuck] Dag WORK at (98.8, 59.5) -> (98.5, 49.0), go to goal
+      [stuck] Ivo WORK at (71.9, 64.9) -> (64.5, 64.5), go to goal
+      [stuck] Cole PATROL at (106.3, 68.3) -> (113.5, 69.5), go to goal
+      [stuck] Ivo WORK at (65.3, 72.9) -> (64.5, 82.0), go to goal
+      [stuck] Eda WORK at (98.8, 59.4) -> (98.5, 49.0), go to goal
+      [stuck] Ivo WORK at (62.7, 88.7) -> (60.0, 96.0), go to goal
+      [stuck] Dag WORK at (85.0, 34.3) -> (84.0, 24.0), go to goal
+      [stuck] Cole PATROL at (106.4, 82.8) -> (113.5, 82.5), go to goal
+      [stuck] Dag WORK at (86.4, 24.4) -> (87.5, 17.5), go to goal
+      [stuck] Ivo WORK at (52.6, 95.2) -> (28.5, 96.5), go to goal
+      [stuck] Ivo WORK at (43.8, 95.7) -> (28.5, 96.5), go to goal
+      [stuck] Finn SOCIALIZE at (99.2, 60.9) -> (98.5, 49.0), go to goal
+      [stuck] Ivo WORK at (37.0, 101.0) -> (27.5, 108.5), go to goal
+  [ ok ] Thieving: a pocket picked (seeded skill check, roll recorded in the event)
+      (rejected: Nothing there.)
+  [ ok ] Faith: bones buried and Ward cast for Faith points
+    non-combat skills trained by their actions: 10
+== Combat and equipment
+  [ ok ] a swing out of reach makes no contact
+  [ ok ] collision-based melee hits the dummy (6, 6)
+  [ ok ] damage is deterministic: same stats, same move, same damage
+  [ ok ] combat XP from real hits: Attack (style) and Health share
+  [ ok ] Strength and Defense styles train their skills
+  [ ok ] Defense and armor mitigate (armored dummy 3 < 6)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\07-melee.png
+  [ ok ] Strength 90 wields a Godly sword
+  [ ok ] Defense 50 cannot wear Godly armor
+  [ ok ] Defense 50 wears Steel armor
+  [FAIL] manual swaps through the inventory: sword equipped, Godly body refused
+  [FAIL] gear changes damage (Godly sword 6 > wooden 6)
+  [ ok ] heavy impact exceeding Stability staggers (telemetry: Tester's HEAVY deflected by block 3 at (12, 3, 46), s=0.69)
+java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null
+	at rpg.Acceptance.combat(Acceptance.java:473)
+	at rpg.Acceptance.run(Acceptance.java:68)
+	at rpg.Main.run(Main.java:68)
+	at rpg.Main.main(Main.java:46)
+  [FAIL] the run completed without an exception (java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null)
+
+acceptance: 61 / 66 checks passed
+  FAILED: the shards fell and came to rest on the ground (33 of 116)
+  FAILED: Construction: a crate built into the world as blocks
+  FAILED: manual swaps through the inventory: sword equipped, Godly body refused
+  FAILED: gear changes damage (Godly sword 6 > wooden 6)
+  FAILED: the run completed without an exception (java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':acceptance'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 10s

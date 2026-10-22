@@ -1,0 +1,34 @@
+package rpg.objects;
+
+import java.util.Map;
+import rpg.Rpg;
+import rpg.item.Recipes;
+
+/**
+ * A fire someone lit (Firemaking): it cooks like a range, lights its surroundings, and burns out after a time that
+ * grows with the firelighter's level and the logs used. When it goes out it leaves nothing.
+ */
+public final class Fire extends Station {
+    public double outAt;
+
+    public Fire(long id, float x, float y, float z, double outAt, long owner) {
+        super(id, "fire", "Fire", Recipes.Station.RANGE, x, y, z);
+        this.outAt = outAt;
+        this.owner = owner;
+    }
+
+    public void update(Rpg g, float dt) {
+        if (removed) return;
+        if (g.state.minutes >= outAt) {
+            removed = true;
+            g.state.commit("FireBurntOut", 0, id, jurisdiction(), 0, "at " + (int) x + "," + (int) z);
+            if (g.fx != null) g.fx.puff(x, y, z);
+            return;
+        }
+        if (g.fx != null) for (int i = 0; i < 2; i++) g.fx.flame(x, y + 0.05f, z, 1f);
+    }
+
+    @Override public String examine(Rpg g) { return "A fire. It will burn for about " + Math.max(0, (int) (outAt - g.state.minutes)) + " more minutes."; }
+
+    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("x", x); m.put("y", y); m.put("z", z); m.put("outAt", outAt); return m; }
+}

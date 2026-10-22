@@ -1,0 +1,35 @@
+RPGGAME - where the sounds come from
+
+ui/, voice/, devmapambience.ogg
+    The game's own recordings (supplied with the project's assets). The only recorded human voices the game uses are
+    voice/ - the death cries, male and female; hurt sounds are the opening moment of the same recordings.
+
+foley/footstep_*, foley/impact*
+    "Impact Sounds" 1.0 by Kenney (www.kenney.nl) - Creative Commons Zero (CC0), public domain.
+
+foley/ (beltHandle, book*, chop, cloth*, creak*, door*, drawKnife*, dropLeather, footstep00-09, handle*, knifeSlice*, metal*)
+    "RPG Audio" by Kenney (www.kenney.nl) - Creative Commons Zero (CC0), public domain.
+
+sfx/
+    "80 CC0 RPG SFX" by rubberduck (opengameart.org/content/80-cc0-rpg-sfx) - Creative Commons Zero (CC0).
+
+swish/
+    "Swishes Sound Pack" (opengameart.org/content/swishes-sound-pack) - Creative Commons Zero (CC0).
+
+animal/ (cow_*, cow_field, hens_lay, henhouse, hen_lays, hen_annoyed, rooster_*, pig_*, horse_*, sheep_*, dog_*, cat_*, ducks)
+    BigSoundBank by Joseph Sardin (bigsoundbank.com) - Creative Commons Zero (CC0), public domain. Sound numbers 2386, 2383,
+    2385, 2382, 0546, 0978, 0282, 0976, 0453, 0283, 0440, 1659, 1658, 1691, 1692, 1693, 1543, 1215, 0863, 0284, 1542, 1541,
+    0460, 2343, 2344, 2345, 2348, 2349, 2955, 0682, 0288, 1890, 0494, 1901, 1887, 1881, 0276.
+
+animal/wolf_howls.ogg
+    "Wolf howls" (Wikimedia Commons, File:Wolf_howls.ogg) - public domain.
+
+animal/bear_vocal.mp3, animal/bear_roar.mp3
+    Yellowstone sound library, NPS & MSU Acoustic Atlas / Jennifer Jerrett (Wikimedia Commons) - public domain (US National Park Service).
+
+animal/coyotes_pack.ogg
+    "Pack of coyotes howling" by Rybkovich (Wikimedia Commons, File:Pack_of_coyotes_howling.ogg) - Creative Commons
+    Attribution-ShareAlike 4.0 (CC BY-SA 4.0). Credit required; the game cuts it into single calls at load time.
+
+animal/fox_death*.ogg
+    The game's own recordings (supplied with the project's assets).

@@ -1,0 +1,201 @@
+Astratto Engine 2.0 - RPGGAME devmap (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.2, built Oct 18 2026 07:07:01 (MSVC)
+== Character creator
+  [ ok ] creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)
+  [ ok ] 20 distinct male and 20 distinct female hairstyles (20, 20)
+  [ ok ] 20 distinct facial-hair presets including clean-shaven and the two stubbles (20)
+  [ ok ] 20 distinct tops, 20 legs and 20 shoes (60 of 60)
+  [ ok ] hairstyle row wraps after 20
+  [ ok ] choosing female removes facial hair and its row
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\01-creator.png
+  [ ok ] male figure: 32 px tall (8 head + 12 torso + 12 legs), hitbox 1.8 x 0.6 blocks
+  [ ok ] female figure: head 8x8x8, body 6x12x3, arms 3x12x4, legs 4x12x4, its own hitbox (1.8 x 0.45)
+  [ ok ] skins are painted at 128 x 128
+  [ ok ] appearance round-trips through save data
+[addons] loaded [low_health.lua, session_gold.lua]
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\02-spawn.png
+  [ ok ] the player stands on the devmap
+== Leveling: all 18 skills on one table
+  [ ok ] 18 skills are registered
+  [ ok ] every skill starts at level 1
+  [ ok ] XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000
+  [ ok ] the stored table is strictly increasing and levelFor agrees at every boundary
+  [ ok ] every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000
+  [ ok ] level-ups were committed as events (72)
+  [ ok ] a repeated request pays XP once
+  [ ok ] a player level-up is celebrated (overlay and message)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\03-level-up.png
+== Interaction edge cases
+  [ ok ] the shed door offers Open and Examine
+  [ ok ] out of range: rejected, door unchanged
+  [ ok ] in range: the door opens (blocks removed)
+  [ ok ] the locked door's Open is disabled with a reason
+  [ ok ] its Pick lock is disabled with a reason (Thieving 10)
+  [ ok ] a loose item is taken exactly once
+  [ ok ] a stale target is rejected without a duplicate
+  [ ok ] the shed's tools were picked up
+  [ ok ] pickup at full inventory is refused and the item stays
+  [ ok ] the owned coins on the table are still there for the theft test
+  [ ok ] crafting interrupted mid-work consumes nothing (STARTED)
+  [ ok ] furniture and workstations are objects, not blocks: 23 pieces, their cells never meshed but still solid
+  [ ok ] block textures are 64 x 64
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04-interaction.png
+== Physical doors and breaking glass
+  [ ok ] opened, the shed door's leaves swing in on their hinges (1.75 rad) and the doorway is open
+  [ ok ] closed, the leaves swing home and latch (0.000 rad) and the cells are a shut door again
+  [ ok ] walking into the latched door, the player is held at its face (z 22.86)
+  [ ok ] opened, the player walks through the doorway into the shed (z 14.91)
+  [ ok ] a sword swung at the shed window breaks the pane (116 shards)
+      shards: 116 counted, 116 still, 66 asleep, 33 on the floor (the rest on sills and furniture)
+  [ ok ] the shards fell and came to rest, on the floor or the ledge under the window (116 of 116 still, 33 on the floor)
+  [ ok ] breaking the pane was committed as an event
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04b-glass.png
+== Interface: fragments, scenes, addons
+  [ ok ] Gold display: 99999 white, 150K yellow, 12M green, 1B blue, 2X purple
+  [ ok ] the Lua addons loaded (low_health.lua, session_gold.lua)
+  [ ok ] at rest and unhurt the HUD keeps out of the way (vitals 0.00, target 0.00, wanted 0.00)
+  [ ok ] the minimap stays up in the world
+  [ ok ] hurt, the vitals fade in (1.00) and the low-health addon reacts (1.00)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05b-hurt-hud.png
+  [ ok ] the inventory scene swaps groups in (grids 1.00, equipment 1.00) and the minimap out (0.00)
+  [ ok ] the character scene reuses the equipment doll beside the sheet, without the grids
+  [ ok ] the skills scene shows the grid and the guide
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05c-skills-scene.png
+  [ ok ] dragging an item moves it to the cell it is dropped on (7,3 -> 7,3)
+  [ ok ] dropping the wooden sword on the main-hand slot wields it
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05d-inventory-scene.png
+  [ ok ] food dropped on the action bar is eaten with its key (2 -> 1 trout)
+  [ ok ] a heavy load slows the body (45.0 kg: speed x0.77, unloaded x1.00)
+== Skill actions (each of the 18)
+  [ ok ] Woodcutting: logs cut from a real tree
+  [ ok ] a felled tree changes the world (stump)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05-woodcutting.png
+  [ ok ] Firemaking: a fire is lit from logs
+  [ ok ] Mining: copper and tin ore
+  [ ok ] a mined-out rock changes the world
+  [ ok ] Smithing: a bar smelted and a bronze dagger forged
+  [ ok ] Fishing: raw shrimp
+  [ ok ] Cooking: shrimp cooked (or burnt by the seeded check, which pays no XP)
+  [ ok ] Harvesting: guam picked
+  [ ok ] flax is level-gated (Harvesting 5) with a reason
+  [ ok ] Crafting: arrow shafts fletched from logs
+  [ ok ] Construction: a crate built into the world as blocks
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\06-construction.png
+  [ ok ] Agility: an obstacle crossed and a lap completed
+  [ ok ] Thieving: a pocket picked (seeded skill check, roll recorded in the event)
+  [ ok ] Faith: bones buried and Ward cast for Faith points
+    non-combat skills trained by their actions: 12
+== Combat and equipment
+  [ ok ] a swing out of reach makes no contact
+  [ ok ] collision-based melee hits the dummy (6, 6)
+  [ ok ] damage is deterministic: same stats, same move, same damage
+  [ ok ] combat XP from real hits: Attack (style) and Health share
+  [ ok ] Strength and Defense styles train their skills
+  [ ok ] Defense and armor mitigate (armored dummy 3 < 6)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\07-melee.png
+  [ ok ] Strength 90 wields a Godly sword
+  [ ok ] Defense 50 cannot wear Godly armor
+  [ ok ] Defense 50 wears Steel armor
+  [ ok ] manual swaps through the inventory: sword equipped, Godly body refused
+  [ ok ] gear changes damage (Godly sword 80 > wooden 6)
+  [ ok ] heavy impact exceeding Stability staggers (telemetry: Tester's HEAVY deflected by block 3 at (12, 3, 46), s=0.67)
+  [ ok ] arrows are consumed as ammunition
+  [ ok ] Archery XP from the archery target
+  [ ok ] an arrow physically hits the dummy
+  [ ok ] Magic: a spell costs mana, flies, hits, trains Magic
+  [ ok ] the hostile NPC chose to fight (goal FIGHT, reasons recorded)
+  [ ok ] the bandit struck at the player (450 -> 408 HP) or was blocked
+  [ ok ] guarding blocked or parried incoming blows
+  [ ok ] the bandit was defeated by real hits (dead, ragdoll)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\09-ragdoll.png
+  [ ok ] the bandit dropped bones and loot
+  [ ok ] dodge spends stamina and grants i-frames (spent 20.0)
+  [ ok ] all seven combat skills have earned XP from their actions (7/7)
+  [ ok ] every one of the 18 skills has earned XP through an executable action (18/18)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\10-telemetry.png
+== Intelligent NPCs
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\11-ai-inspector.png
+  [ ok ] NPCs decided (1269 decisions)
+  [ ok ] at least three agents with different goals at work ([RETURN, FIGHT, INVESTIGATE, WANDER, PATROL, STEAL, WORK, SOCIALIZE, EAT, IDLE])
+  [ ok ] agents navigated on the engine's routes (9 moved)
+  [ ok ] the worker cut real trees and sold logs into Store A (8 -> 13, Dag WC xp 57866, holds 0 logs, goal WORK, last: sold 5 logs to Store A)
+  [ ok ] every agent exposes scores and reasons for its goal
+  [ ok ] NPCs socialise with each other (16 times)
+  [ ok ] perception: line of sight is blocked by walls (occluder test)
+  [ ok ] agents hear noises (engine ears)
+  [ ok ] an unloaded worker keeps working abstractly (Woodcutting XP 57866 -> 59866)
+  [ ok ] the worker reloads with consistent identity and inventory
+== Witnessed theft and the law
+  [ ok ] stealing from the stall commits a theft
+  [ ok ] the nearby NPC witnessed it (memory recorded)
+  [ ok ] no bounty yet - nothing is reported
+  [ ok ] the witness travelled to the lawman and reported: JUR-ALPHA bounty 4
+  [ ok ] the bounty is half the stolen value, in Alpha only
+  [ ok ] the report came after travel (Eda is beside Bram)
+  [ ok ] wanted in Alpha: Ada refuses trade with the reason
+  [ ok ] not wanted in Beta: Gus would trade
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\12-wanted.png
+  [ ok ] the bounty is paid at the chancery
+  [ ok ] the second theft is witnessed too
+      witnesses stopped: [Eda]
+  [ ok ] with the witness stopped, the theft is never reported and no bounty comes of it
+  [ ok ] the stolen bread keeps its owner and stolen mark
+== Arrest: the law stands down
+  [ ok ] wanted in JUR-ALPHA (bounty 20)
+  [ ok ] the guard moves to arrest the wanted player (goal FIGHT)
+  [ ok ] the player struck the guard (1 contacts)
+  [ ok ] after the arrest no lawman strikes the player (0 hits) and none still fights them
+  [ ok ] the sentence cleared the bounty and the crimes known of it are settled
+  [ ok ] resisting and beaten down, the player is arrested rather than killed (arrests 1, alive true)
+  [ ok ] after an arrest by force no guard or lawman strikes the player again (0 hits in ten seconds) and none still fights them
+== World state: shipments
+      shipments start at Day 1, 14:42
+  [ ok ] a shipment is planned from Store A's surplus
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\13-caravan.png
+  [ ok ] cargo leaves Store A for the crate (no double counting): crate 5
+  [ ok ] the carter walked the cargo to Store B: delivered once
+  [ ok ] a delivered shipment cannot deliver again
+  [ ok ] the second shipment is on the road (IN_TRANSIT; carter WORK at (87.6, 66.2), ate bread)
+  [ ok ] the cargo was taken on the road (theft)
+  [ ok ] the intercepted shipment is LOST and cannot also deliver
+  [ ok ] cargo conservation holds after delivery and interception
+== Quest and death
+  [ ok ] talking to the quest giver opens dialogue
+  [ ok ] the test quest is ACTIVE with a letter and a journal entry
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\14-kiosk.png
+  [ ok ] the quest failed with its reason
+  [ ok ] the journal records what the player learned
+  [ ok ] Kit is not replaced: still dead after time passes
+  [ ok ] the quest cannot be completed afterwards
+== Persistence and time
+  [ ok ] saved
+  [ ok ] loaded
+  [ ok ] door state survives save/load
+  [ ok ] XP and items survive (no after-save changes leak in)
+  [ ok ] the clock and revision come back
+  [ ok ] the dead NPC stays dead and the quest stays failed with its reason
+  [ ok ] NPC memories survive (6 saved, 6 loaded)
+  [ ok ] invariants hold after load
+  [ ok ] time advance: at night NPCs replan to sleep (7)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\15-night.png
+  [ ok ] sleeping in someone else's bed is refused (This is Ada's bed.)
+  [ ok ] sleeping in a bed skips to morning and rests (Day 2, 06:00)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\16-skills-tab.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\17-inventory.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\18-equipment.png
+== Invariants
+    [ ok ] item conservation: 51 item kinds, every unit in exactly one place
+    [ ok ] shipments: 5 checked (delivered once at most, never both)
+    [ ok ] report-before-bounty: 0 bounties, each from a report
+    [ ok ] XP accounting: every skill of 18 actors matches its committed awards
+    [ ok ] XP table: 60/80/90/100 thresholds exact, 6,000,000 at 100
+    [ ok ] references: 5 crime memories and the quest's NPCs resolve
+  [ ok ] every world-state invariant holds at the end
+
+acceptance: 145 / 145 checks passed

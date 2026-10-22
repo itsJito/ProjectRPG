@@ -1,0 +1,79 @@
+// RPGGAME - devmap prototype (GDD 4.2).
+//   ./gradlew run          play: character creator, then the devmap
+//   ./gradlew acceptance   the devmap off-screen with the scripted end-to-end flows and invariant checks (GDD 4.2)
+//   ./gradlew test         rule-level tests (XP table, inventory, equipment, combat formulas, transactions)
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+dependencies {
+    implementation 'astratto:theastrattoengine:2.0.0'
+    implementation 'org.luaj:luaj-jse:3.0.1'   // the UI addon API (Lua scripts in addons/)
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+// how the game's JVM runs: ZGC (generational on JDK 21+) keeps collection pauses well under a millisecond - G1's young
+// pauses (7 - 17 ms) were the hitches left in the frame times; the heap starts at its working size, touched in
+// advance, so it never stalls a frame growing; RPG_GC=g1 measures the old way
+def rpgJvm = ['--enable-native-access=ALL-UNNAMED', '-Xms512m', '-Xmx2g', '-XX:+AlwaysPreTouch'] +
+        (System.getenv('RPG_GC') == 'g1' ? ['-XX:+UseG1GC'] : ['-XX:+UseZGC'])
+
+application {
+    mainClass = 'rpg.Main'
+    applicationDefaultJvmArgs = rpgJvm
+}
+
+tasks.named('run', JavaExec) { workingDir = projectDir }
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'failed'; exceptionFormat 'full' }
+}
+
+tasks.register('acceptance', JavaExec) {
+    group = 'verification'
+    description = 'Runs the devmap off-screen through every GDD 4.2 end-to-end flow and checks the invariants.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    workingDir = projectDir
+    jvmArgs rpgJvm
+    environment 'ASTRATTO_JAVA_FALLBACK', '0'
+    environment 'ASTRATTO_NOVSYNC', '1'
+    args '--acceptance', '--hidden', '--shots', layout.buildDirectory.dir('shots').get().asFile.absolutePath
+}
+
+tasks.register('bench', JavaExec) {
+    group = 'verification'
+    description = 'Measures frame times on the devmap (1920 x 1080, vsync off) over a fixed tour; RPG_BENCH_FRAMES frames a stop.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    workingDir = projectDir
+    jvmArgs rpgJvm
+    environment 'ASTRATTO_JAVA_FALLBACK', '0'
+    environment 'ASTRATTO_NOVSYNC', '1'
+    args '--bench'
+}
+
+tasks.register('gallery', JavaExec) {
+    group = 'verification'
+    description = 'Renders close-up screenshots of the figures (walking, strafing, swinging) and the devmap objects, for review.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    workingDir = projectDir
+    jvmArgs rpgJvm
+    environment 'ASTRATTO_NOVSYNC', '1'
+    def female = project.hasProperty('female')
+    args(['--gallery', '--hidden', '--shots', layout.buildDirectory.dir('gallery').get().asFile.absolutePath] + (female ? ['--female'] : []))
+}

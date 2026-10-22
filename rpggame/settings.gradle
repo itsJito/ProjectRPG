@@ -1,0 +1,7 @@
+// RPGGAME devmap prototype on the Astratto Engine (included as a composite build from 'astratto.engine').
+rootProject.name = 'rpggame'
+
+def engine = providers.gradleProperty('astratto.engine').getOrElse('../theastrattoengine')
+if (!file("$engine/native/include/astratto/astratto.h").isFile())
+    throw new GradleException("the Astratto Engine is not at '$engine' (set astratto.engine in gradle.properties)")
+includeBuild(engine)

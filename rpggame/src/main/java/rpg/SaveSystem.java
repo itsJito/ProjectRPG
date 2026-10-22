@@ -1,0 +1,260 @@
+package rpg;
+
+import astratto.util.Json;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import rpg.actor.Actor;
+import rpg.actor.Appearance;
+import rpg.ai.Brain;
+import rpg.ai.Memory;
+import rpg.ai.Npc;
+import rpg.interact.WorldObject;
+import rpg.item.ItemIO;
+import rpg.objects.Container;
+import rpg.objects.Fire;
+import rpg.objects.GroundItem;
+import rpg.state.DomainEvent;
+import rpg.world.DevMap;
+
+/**
+ * Save and load (GDD 3.8 invariant 7): ids, ownership, items, XP, NPC memory and life, quest facts and failure reasons,
+ * shipments, bounties, node and door states, fires, the clock and the event log all survive. Fixtures are rebuilt by
+ * id and given their saved state; things made in play are recreated from the save. The schema is versioned.
+ */
+public final class SaveSystem {
+    public static final int SCHEMA = 1;
+    private final Rpg g;
+
+    public SaveSystem(Rpg g) { this.g = g; }
+
+    public static Path slot(String name) { return Path.of("saves", name + ".json"); }
+
+    public boolean save(Path file) {
+        // a death still playing out is seen through first: the grave made, the player awake at the graveyard
+        if (g.death.active) g.death.proceed(false);
+        // an arrow or bolt in flight when the game is saved comes down where it is (a save keeps no flights): its ammunition
+        // is on the ground in the save, as it would be a moment later, instead of gone from the world
+        g.combat.landAll();
+        Map<String, Object> root = new HashMap<>();
+        root.put("schema", SCHEMA);
+        root.put("revision", g.state.revision);
+        // the world state's bookkeeping
+        Map<String, Object> st = new HashMap<>();
+        List<Object> c = new ArrayList<>(); for (long v : g.state.counters()) c.add(v);
+        st.put("counters", c);
+        st.put("minutes", g.state.minutes);
+        Map<String, Object> led = new HashMap<>(); for (var e : g.state.ledger().entrySet()) led.put(e.getKey(), e.getValue());
+        st.put("ledger", led);
+        List<Object> log = new ArrayList<>();
+        List<DomainEvent> events = g.state.all();
+        for (DomainEvent e : events.subList(Math.max(0, events.size() - 300), events.size())) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", e.id()); m.put("tick", e.tick()); m.put("min", e.gameMinutes()); m.put("rev", e.revision()); m.put("type", e.type());
+            m.put("actor", e.actor()); m.put("subject", e.subject()); m.put("jur", e.jurisdiction()); m.put("cause", e.cause()); m.put("payload", e.payload());
+            log.add(m);
+        }
+        st.put("log", log);
+        root.put("state", st);
+        root.put("player", actor(g.player));
+        List<Object> npcs = new ArrayList<>();
+        for (Npc n : g.npcs) {
+            Map<String, Object> m = actor(n);
+            m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
+            m.put("arrested", n.arrestedUntil); m.put("patrol", n.patrolIndex);
+            List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
+            m.put("memories", mem);
+            // a body lies as it lay: its fifteen points, so a load puts it back on the ground (never standing up to fall again)
+            var rd = !n.alive && n.ragdoll != 0 ? g.lastBodies.ragdoll(n.ragdoll) : null;
+            if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); m.put("pose", pose); }
+            npcs.add(m);
+        }
+        root.put("npcs", npcs);
+        List<Object> objs = new ArrayList<>();
+        for (WorldObject o : g.objects.everything()) {
+            if (o.def.equals("cargo")) continue;   // the economy saves its crates
+            if (o.id >= Ids.DYNAMIC && o.removed) continue;
+            Map<String, Object> m = o.save();
+            m.put("id", o.id); m.put("def", o.def); m.put("kind", o.getClass().getSimpleName());
+            if (o instanceof Container ct) {
+                m.put("x", ct.x); m.put("y", ct.y); m.put("z", ct.z); m.put("name", ct.name); m.put("ckind", ct.kind); m.put("ownerOnly", ct.ownerOnly);
+                // a grave keeps its standing: the seconds it has left, whether it is secured, who killed its owner
+                if (ct.kind.equals("grave")) { m.put("graveLeft", Math.max(0, ct.expiresAt - g.time)); m.put("secured", ct.secured); m.put("killer", ct.killer); m.put("honor", ct.honor); }
+            }
+            if (o instanceof rpg.objects.Corpse cp) m.put("body", cp.body);
+            objs.add(m);
+        }
+        root.put("objects", objs);
+        root.put("econ", g.econ.save());
+        root.put("animals", g.animals.save());
+        root.put("law", g.law.save());
+        root.put("undertaker", g.undertaker.save());
+        root.put("honor", g.honor.save());
+        root.put("quests", g.quests.save());
+        root.put("invariants", g.invariants.save());
+        root.put("agilityLaps", g.agility.laps);
+        root.put("xpRate", (double) g.cfg.xpRate);
+        try {
+            Files.createDirectories(file.toAbsolutePath().getParent());
+            Files.writeString(file, Json.write(root), StandardCharsets.UTF_8);
+            g.state.commit("GameSaved", g.player.id, 0, null, 0, file.toString() + " at revision " + g.state.revision);
+            return true;
+        } catch (IOException e) {
+            g.chat.warn("Could not save: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private Map<String, Object> actor(Actor a) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", a.id); m.put("name", a.name); m.put("alive", a.alive);
+        m.put("x", a.x); m.put("y", a.y); m.put("z", a.z); m.put("yaw", a.yaw);
+        m.put("hp", a.hp); m.put("stamina", a.stamina); m.put("faith", a.faith); m.put("mana", a.mana);
+        List<Object> xp = new ArrayList<>(); for (long v : a.skills.raw()) xp.add(v);
+        m.put("xp", xp);
+        m.put("inv", ItemIO.inventory(a.inv));
+        m.put("eq", ItemIO.equipment(a.eq));
+        List<Object> look = new ArrayList<>(); for (int v : a.look.toArray()) look.add(v);
+        m.put("look", look);
+        if (a instanceof rpg.actor.Player p) { m.put("style", p.style); m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
+        m.put("manaAcc", (double) a.manaAcc);
+        if (g.prayers != null) m.put("prayers", g.prayers.save(a));
+        return m;
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean load(Path file) {
+        Map<String, Object> root;
+        try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
+        catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
+        if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
+        g.interact.work.clear();
+        g.combat.projectiles.clear();
+        g.ui.closeAll();
+        Map<String, Object> st = Json.obj(root, "state");
+        List<Object> c = Json.list(st, "counters");
+        long[] counters = new long[c.size()];
+        for (int i = 0; i < counters.length; i++) counters[i] = ((Number) c.get(i)).longValue();
+        g.state.loadCounters(counters);
+        g.state.minutes = Json.num(st, "minutes", 480);
+        Map<String, Long> led = new HashMap<>();
+        for (var e : Json.obj(st, "ledger").entrySet()) led.put(e.getKey(), ((Number) e.getValue()).longValue());
+        g.state.loadLedger(led);
+        List<DomainEvent> log = new ArrayList<>();
+        for (Object o : Json.list(st, "log")) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            log.add(new DomainEvent(Json.lng(m, "id", 0), Json.lng(m, "tick", 0), Json.num(m, "min", 0), Json.lng(m, "rev", 0), Json.str(m, "type", "?"),
+                    Json.lng(m, "actor", 0), Json.lng(m, "subject", 0), Json.str(m, "jur", null), Json.lng(m, "cause", 0), Json.str(m, "payload", "")));
+        }
+        g.state.loadLog(log);
+        g.cfg.xpRate = (float) Json.num(root, "xpRate", g.cfg.xpRate);
+        // the player
+        Map<String, Object> pm = Json.obj(root, "player");
+        applyActor(g.player, pm);
+        g.player.style = Json.integer(pm, "style", 0);
+        try { g.player.spell = rpg.combat.Spells.Spell.valueOf(Json.str(pm, "spell", "SPARK")); } catch (IllegalArgumentException e) { g.player.spell = rpg.combat.Spells.Spell.SPARK; }
+        try { g.player.book = rpg.combat.Spells.Book.valueOf(Json.str(pm, "book", "STANDARD")); } catch (IllegalArgumentException e) { g.player.book = rpg.combat.Spells.Book.STANDARD; }
+        g.player.firstPerson = Json.bool(pm, "fp", false);
+        g.player.alive = Json.bool(pm, "alive", true);
+        if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
+        g.player.diedAt = -1;
+        g.teleport(g.player, g.player.x, g.player.y, g.player.z);
+        // NPCs: life and death, bodies, minds, memories
+        for (Object o : Json.list(root, "npcs")) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            Actor a = g.actor(Json.lng(m, "id", -1));
+            if (!(a instanceof Npc n)) continue;
+            boolean alive = Json.bool(m, "alive", true), loaded = Json.bool(m, "loaded", true);
+            if (n.alive && n.loaded) g.ai.despawnBody(n);
+            if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
+            applyActor(n, m);
+            n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
+            n.arrestedUntil = Json.num(m, "arrested", -1); n.patrolIndex = Json.integer(m, "patrol", 0);
+            n.memories.clear();
+            List<Object> mem = Json.list(m, "memories");
+            if (mem != null) for (Object x : mem) n.memories.add(Memory.load((Map<String, Object>) x));
+            n.goal = Brain.Goal.IDLE; n.nextThink = 0; n.fightTarget = 0; n.cs.lastAttacker = 0; n.hasGoalPos = false; n.speech = null;
+            n.alive = alive;
+            n.loaded = loaded;
+            if (alive && loaded) g.ai.spawnBody(n);
+            else if (!alive) {
+                n.diedAt = g.time;
+                n.ragdoll = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RAGDOLL);
+                g.game.commands().ragdollCreate(n.ragdoll, 1, astratto.bridge.AstrattoNative.SYDNEY_HUMAN, astratto.bridge.AstrattoNative.RAGDOLL_ACTIVE, n.x, DevMap.FLOOR, n.z, n.yaw, 0, 0, 0);
+                List<Object> pose = Json.list(m, "pose");
+                if (pose != null && pose.size() == astratto.bridge.AstrattoNative.RD_PARTICLES * 3) {
+                    float[] p = new float[pose.size()];
+                    for (int i = 0; i < p.length; i++) p[i] = ((Number) pose.get(i)).floatValue();
+                    g.game.commands().ragdollPose(n.ragdoll, 0, 0, 0, p);
+                }
+                g.game.commands().ragdollControl(n.ragdoll, astratto.bridge.AstrattoNative.CONTROL_DIE, 1);
+                if (g.gore != null) g.gore.limbsToBody(n);
+            }
+        }
+        // objects: fixtures by id; things made in play recreated
+        g.objects.everything().removeIf(o -> o.id >= Ids.DYNAMIC && !o.def.equals("cargo"));
+        for (Object o : Json.list(root, "objects")) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            long id = Json.lng(m, "id", 0);
+            if (id < Ids.DYNAMIC) { WorldObject w = g.objects.get(id); if (w != null) w.load(g, m); continue; }
+            String kind = Json.str(m, "kind", "");
+            float x = (float) Json.num(m, "x", 0), y = (float) Json.num(m, "y", 0), z = (float) Json.num(m, "z", 0);
+            switch (kind) {
+                case "GroundItem" -> { var s = ItemIO.stack(m.get("stack")); if (s != null) g.objects.add(new GroundItem(id, s, x, y, z)); }
+                case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0)));
+                case "Container", "Corpse" -> {
+                    long body = Json.lng(m, "body", 0);
+                    Container ct = body != 0 && g.actor(body) != null
+                            ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body).name, body, x, y, z, Json.lng(m, "owner", 0)))
+                            : g.objects.add(new Container(id, Json.str(m, "def", "grave"), Json.str(m, "name", "Grave"), Json.str(m, "ckind", "grave"), x, y, z, 28, Json.lng(m, "owner", 0)));
+                    if (ct instanceof rpg.objects.Corpse cp && g.actor(body) instanceof rpg.ai.Npc dead) dead.corpse = cp.id;
+                    ct.ownerOnly = Json.bool(m, "ownerOnly", false);
+                    if (ct.kind.equals("grave")) {
+                        ct.expiresAt = g.time + Json.num(m, "graveLeft", rpg.law.Undertaker.GRAVE_SECONDS);
+                        ct.secured = Json.bool(m, "secured", !DevMap.WILDS.equals(DevMap.jurisdiction(x, z)));
+                        ct.killer = Json.lng(m, "killer", 0);
+                        ct.honor = (int) Json.lng(m, "honor", 0);
+                    }
+                    ct.load(g, m);
+                }
+                default -> { }
+            }
+        }
+        g.econ.load(Json.obj(root, "econ"));
+        g.animals.load(Json.obj(root, "animals"));
+        g.law.load(Json.obj(root, "law"));
+        g.undertaker.load(Json.obj(root, "undertaker"));
+        g.honor.load(Json.obj(root, "honor"));
+        g.quests.load(Json.obj(root, "quests"));
+        g.invariants.load(Json.obj(root, "invariants"));
+        g.agility.laps = Json.integer(root, "agilityLaps", 0);
+        g.ai.syncAbstractClock();
+        g.mapDirty = true;
+        g.mapColumns.clear();   // (a load redraws the whole map)
+        g.state.commit("GameLoaded", g.player.id, 0, null, 0, file + " (saved at revision " + Json.lng(root, "revision", 0) + ")");
+        return true;
+    }
+
+    private void applyActor(Actor a, Map<String, Object> m) {
+        a.x = (float) Json.num(m, "x", a.x); a.y = (float) Json.num(m, "y", a.y); a.z = (float) Json.num(m, "z", a.z); a.yaw = (float) Json.num(m, "yaw", 0);
+        List<Object> xp = Json.list(m, "xp");
+        long[] v = new long[xp.size()];
+        for (int i = 0; i < v.length; i++) v[i] = ((Number) xp.get(i)).longValue();
+        a.skills.load(v);
+        ItemIO.inventory(a.inv, Json.list(m, "inv"));
+        ItemIO.equipment(a.eq, Json.list(m, "eq"));
+        List<Object> look = Json.list(m, "look");
+        // (a townsperson's look is theirs from the roster: an old save's rolled look could give a man a woman's body and cry)
+        if (look != null && !(a instanceof rpg.ai.Npc)) { int[] l = new int[look.size()]; for (int i = 0; i < l.length; i++) l[i] = ((Number) look.get(i)).intValue(); a.look = Appearance.fromArray(l); }
+        a.hp = (float) Json.num(m, "hp", a.maxHp()); a.stamina = (float) Json.num(m, "stamina", a.maxStamina());
+        a.faith = (float) Json.num(m, "faith", a.maxFaith()); a.mana = (float) Json.num(m, "mana", a.maxMana());
+        a.cs.cancel(); a.cs.staggered = 0;
+        a.manaAcc = (float) Json.num(m, "manaAcc", 0);
+        if (g.prayers != null) g.prayers.load(a, Json.obj(m, "prayers"));
+    }
+}

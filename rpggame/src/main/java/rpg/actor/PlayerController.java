@@ -1,0 +1,357 @@
+package rpg.actor;
+
+import rpg.Rpg;
+import rpg.actor.Actor.Combat.Move;
+import rpg.combat.CombatSystem;
+import rpg.combat.Spells;
+import rpg.item.ItemDef;
+import rpg.item.ItemDef.Family;
+import rpg.skill.Skill;
+import rpg.world.Voxels;
+
+/**
+ * The player's body and hands. Intent comes from the keyboard and mouse - or, in an automated run, from a script -
+ * and becomes: movement for the engine's mover (walk, sprint on stamina, jump, dodge, quick turn), the camera (first or
+ * third person, free aim, no lock-on), and independent hands: the main hand on the left button (tap a light swing, hold
+ * for a heavy one, draw a bow, cast from a staff) and the off hand on the right (raise a shield or guard, swing an
+ * off-hand weapon, cast from a wand, bless with a symbol).
+ *
+ * <p>The body has weight (gamefixes, Human Walk System): it gathers speed and sheds it rather than starting or stopping
+ * at once; a change of direction is carried round an arc whose rate falls with speed, and a sharp reversal at speed
+ * brakes first; sprinting is a committed forward run that steers wide and needs a moment to recover from when stopped
+ * short; aiming (a guard raised, a bow drawn, a blow charging or under way) slows the body to a deliberate strafe facing
+ * the aim and rules out the quick turn; strikes, guards and dodges have start-up and recovery that hold the body back.
+ */
+public final class PlayerController {
+    /** What the player wants this frame. */
+    public static final class Intent {
+        public float forward, strafe, lookYaw, lookPitch;
+        /** sprint: the sprint key held (Shift: a true sprint, gamefixes); sprintTap: it was just pressed; jogToggle: the jog key (Caps Lock) was just pressed. */
+        /** Space held (noclip's up). */
+        public boolean jumpHeld;
+        public boolean jogToggle;
+        public boolean sprint, sprintTap, sneak, jump, dodge, mainDown, offDown, cast, interact, interactHeld, toggleCamera;
+        /** The back key was just pressed (two taps of it close together turn the player about). */
+        public boolean backTap;
+        public int bless = -1;
+        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = backTap = sprintTap = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
+    }
+
+    private final Rpg g;
+    public final Intent in = new Intent();
+    public float camYaw, camPitch = -0.12f;
+    /** The camera, as last placed, and the aim ray through the crosshair. */
+    public float cx, cy, cz, fx, fy, fz;
+    public float aimYaw, aimPitch;
+    private boolean mainWas, offWas;
+    private float mainHeld;
+    private float stepClock;
+    /** After a sprint is stopped short, a moment to recover; a quick turn in progress (seconds left) and its heading. */
+    private float sprintRecover, quickTurn, quickYaw, quickCam, sprintTime;
+    /** When the last sprint was stopped short (the figure plants its feet and leans back: see Rig). */
+    public double sprintStopAt = -9;
+    private double lastBackTap = -9, lastGrounded = -9, lastJump = -9;
+    /** The jog kept on (Caps Lock toggles it). */
+    public boolean jogging;
+    private float jumpBuffer;
+    /** Click-to-walk: the route the engine found, followed while no movement key is held. */
+    private int[] route;
+    private int routeAt, pathRequest = 7000;
+
+    public PlayerController(Rpg g) { this.g = g; }
+
+    public void update(float dt) {
+        Player p = g.player;
+        camYaw += in.lookYaw;
+        camPitch = Math.max(-1.45f, Math.min(1.35f, camPitch + in.lookPitch));
+        if (in.toggleCamera) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
+        placeCamera(p);
+        if (!p.alive) {
+            if (g.death.active) { g.death.camera(this); g.game.commands().listener(cx, cy, cz, (float) Math.atan2(-fx, -fz)); }
+            g.game.commands().moverInput(p.body, 0, 0, 0, 0, 0, 0); in.clearEdges(); return;
+        }
+        p.aimYaw = aimYaw;
+        p.pitch = aimPitch;
+        hands(p, dt);
+        move(p, dt);
+        face(p, dt);
+        if (in.interact && g.interact.focus != null) g.interact.primary(p, g.interact.focus);
+        g.game.commands().listener(cx, cy, cz, camYaw);
+        in.clearEdges();
+    }
+
+    private void hands(Player p, float dt) {
+        ItemDef main = p.main(), off = p.off();
+        boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
+        // main hand
+        if (in.mainDown) mainHeld += dt;
+        if (bow) {
+            if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.9f);
+            if (!in.mainDown && mainWas && p.cs.draw > 0) { g.combat.shoot(p, aimYaw, aimPitch, p.cs.draw); p.cs.draw = 0; }
+        } else if (staff) {
+            if (in.mainDown && !mainWas) g.combat.cast(p, p.spell, aimYaw, aimPitch);
+        } else if (main != null && main.family == Family.CROSSBOW) {
+            // a crossbow: press to loose the loaded bolt (it loads itself again)
+            if (in.mainDown && !mainWas) g.combat.shootCrossbow(p, aimYaw, aimPitch);
+        } else if (main != null && main.family == Family.THROWN) {
+            // a throw: hold to wind up (a moment), let go to throw one from the stack
+            if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.35f);
+            if (!in.mainDown && mainWas && p.cs.draw > 0) { g.combat.throwOne(p, aimYaw, aimPitch, p.cs.draw); p.cs.draw = 0; }
+        } else if (main != null && main.toolSkill == rpg.skill.Skill.FISHING) {
+            // a net, a rod or a cage is cast, not swung: at the fishing spot the crosshair is on (or the nearest one ahead)
+            if (in.mainDown && !mainWas) castLine(p);
+        } else {
+            p.cs.charge = in.mainDown && !p.cs.busy() ? Math.min(1, mainHeld / 0.45f) : 0;
+            if (!in.mainDown && mainWas) g.combat.attack(p, false, mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false));
+        }
+        if (!in.mainDown) mainHeld = 0;
+        mainWas = in.mainDown;
+        // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
+        boolean guardItem = off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff;
+        if (guardItem) g.combat.setBlock(p, in.offDown);
+        else {
+            g.combat.setBlock(p, false);
+            if (in.offDown && !offWas && off != null) {
+                switch (off.family) {
+                    case WAND -> g.combat.cast(p, p.spell, aimYaw, aimPitch);
+                    case SYMBOL -> g.combat.bless(p, Spells.Prayer.WARD);
+                    default -> g.combat.attack(p, true, CombatSystem.lightMove(p, true));
+                }
+            }
+        }
+        offWas = in.offDown;
+        if (in.cast) g.combat.cast(p, p.spell, aimYaw, aimPitch);
+        if (in.bless >= 0 && in.bless < Spells.Prayer.values().length) g.combat.bless(p, Spells.Prayer.values()[in.bless]);
+        if (in.dodge) {
+            float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
+            float dx = fx * in.forward + rx * in.strafe, dz = fz * in.forward + rz * in.strafe;
+            if (dx == 0 && dz == 0) { dx = -fx; dz = -fz; }
+            g.combat.dodge(p, dx, dz);
+        }
+    }
+
+    /** noclip: the body flies where the camera looks, through everything (Space up, Ctrl down, Shift fast). */
+    private void fly(Player p, float dt) {
+        float cp = (float) Math.cos(camPitch), sp = (float) Math.sin(camPitch);
+        float fx = (float) -Math.sin(camYaw) * cp, fy = sp, fz = (float) -Math.cos(camYaw) * cp, rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
+        float speed = in.sprint ? 22 : 8;
+        float vx = (fx * in.forward + rx * in.strafe) * speed, vz = (fz * in.forward + rz * in.strafe) * speed;
+        float vy = fy * in.forward * speed + (in.jumpHeld ? speed : 0) - (in.sneak ? speed : 0);
+        p.x += vx * dt; p.y += vy * dt; p.z += vz * dt;
+        g.game.commands().moverPlace(p.body, p.x, p.y + 0.05f, p.z, 0, 0, 0);
+        p.vx = 0; p.vz = 0; p.sprinting = false; p.running = false; p.sneaking = false;
+    }
+
+    /** Casts the wielded fishing tool at the spot in the sights, or the nearest one in front within a cast's reach. */
+    private void castLine(Player p) {
+        rpg.objects.Node best = g.interact.focus instanceof rpg.objects.Node n && n.kind == rpg.objects.Node.Kind.FISH ? n : null;
+        if (best == null) {
+            float bestD = 6.5f;
+            float fx = (float) -Math.sin(aimYaw), fz = (float) -Math.cos(aimYaw);
+            for (rpg.objects.Node n : g.objects.nodes) {
+                if (n.kind != rpg.objects.Node.Kind.FISH) continue;
+                float dx = n.x - p.x, dz = n.z - p.z, d = (float) Math.hypot(dx, dz);
+                if (d < bestD && (dx * fx + dz * fz) / Math.max(0.1f, d) > 0.5f) { bestD = d; best = n; }
+            }
+        }
+        if (best == null) { g.chat.warn("There's nowhere to fish in front of you."); return; }
+        if (g.interact.of(p) != null && g.interact.of(p).target == best) return;
+        g.interact.request(p, best, "gather");
+    }
+
+    /** Asks the engine for a route to a point (the minimap's click-to-walk). */
+    public void walkTo(float x, float z) {
+        pathRequest++;
+        route = null;
+        g.game.commands().pathRequest(pathRequest, 1, g.player.x, g.player.y, g.player.z, x, rpg.world.DevMap.FLOOR, z, 20000);
+    }
+
+    public void onPath(int request, int[] cells) {
+        if (request != pathRequest) return;
+        if (cells == null || cells.length < 3) { g.chat.warn("You can't reach that."); g.ui.flag = null; return; }
+        route = cells; routeAt = 0;
+    }
+
+    /** Whether the player is aiming or committed to an action: the body faces the aim and moves in a deliberate strafe. */
+    public boolean strafing(Player p) { return p.firstPerson || aiming(p); }
+
+    /** Whether a weapon or spell is raised: that, not the first-person camera, is what rules out a sprint. */
+    public boolean aiming(Player p) {
+        Actor.Combat c = p.cs;
+        return c.blocking || c.draw > 0 || c.charge > 0 || c.phase != Actor.Combat.Phase.IDLE || c.castCooldown > 0.35f;
+    }
+
+    private void move(Player p, float dt) {
+        if (g.ui != null && g.ui.console.noclip) { fly(p, dt); return; }
+        float fwd = in.forward, side = in.strafe;
+        float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
+        float dx = fx * fwd + rx * side, dz = fz * fwd + rz * side, l = (float) Math.hypot(dx, dz);
+        if (l > 0.1f || in.jump) { route = null; if (g.ui != null) g.ui.flag = null; }
+        else if (route != null) {
+            while (routeAt * 3 < route.length && Math.hypot(route[routeAt * 3] + 0.5f - p.x, route[routeAt * 3 + 2] + 0.5f - p.z) < 0.45f) routeAt++;
+            if (routeAt * 3 >= route.length) { route = null; if (g.ui != null) g.ui.flag = null; }
+            else {
+                float tx = route[routeAt * 3] + 0.5f - p.x, tz = route[routeAt * 3 + 2] + 0.5f - p.z, tl = (float) Math.hypot(tx, tz);
+                dx = tx / tl; dz = tz / tl; l = 1; fwd = 1;
+                if (route[routeAt * 3 + 1] > p.y + 0.6f && p.grounded) in.jump = true;
+            }
+        }
+        if (l > 1) { dx /= l; dz /= l; l = 1; }
+        Actor.Combat c = p.cs;
+        boolean strafe = strafing(p);
+        // the quick turn: the back key tapped twice, never while aiming
+        if (in.backTap) {
+            if (g.time - lastBackTap < 0.3 && !strafe && p.grounded && quickTurn <= 0 && c.staggered <= 0 && c.dodgeT <= 0) {
+                quickTurn = 0.32f;
+                quickYaw = Actor.wrap(p.yaw + (float) Math.PI);
+                quickCam = Actor.wrap(camYaw + (float) Math.PI);
+            }
+            lastBackTap = g.time;
+        }
+        int agility = p.skills.level(Skill.AGILITY);
+        boolean moving = l > 0.1f && quickTurn <= 0;
+        // the body's velocity as it really is (walls, and whatever it walked into, have had their say)
+        float bvx = p.vx, bvz = p.vz;
+        float speedNow = (float) Math.hypot(bvx, bvz);
+        // the wish relative to the way the body faces: backward and sideways are slower than forward
+        float bfx = (float) -Math.sin(p.yaw), bfz = (float) -Math.cos(p.yaw);
+        float along = l > 0.1f ? (dx * bfx + dz * bfz) / l : 1;
+        boolean wasSprinting = p.sprinting;
+        // a sprint goes any way the keys point (gamefixes): in third person the body turns to run that way; in first person
+        // the body keeps facing the view, so a sprint to the side or back is slower than one straight ahead
+        boolean mayRun = !aiming(p) && !(strafe && !p.firstPerson);
+        // Shift held is a sprint (gamefixes: a true sprint by default, not a jog), for as long as the stamina lasts; the
+        // jog is a pace kept on with Caps Lock; out of breath, a sprint falls back to the jog until Shift is let go
+        if (in.jogToggle) jogging = !jogging;
+        boolean sprintKey = in.sprint;
+        p.running = (sprintKey || jogging) && moving && mayRun && c.staggered <= 0;
+        p.sprinting = p.running && sprintKey && p.stamina > 1 && sprintRecover <= 0;
+        sprintTime = p.sprinting ? sprintTime + dt : 0;
+        p.sneaking = in.sneak && !p.sprinting && p.alive;
+        // stopped short from a run: the feet plant and the body takes a moment to gather itself (the recovery)
+        if (wasSprinting && !p.sprinting && speedNow > g.cfg.walkSpeed * 1.15f && !moving) { sprintRecover = 0.45f; sprintStopAt = g.time; }
+        sprintRecover = Math.max(0, sprintRecover - dt);
+        quickTurn = Math.max(0, quickTurn - dt);
+        float max = p.sprinting ? g.cfg.runSpeed * (1 + agility * 0.0015f) : p.running ? g.cfg.jogSpeed * (1 + agility * 0.001f) : g.cfg.walkSpeed;
+        if (!p.running) max *= aiming(p) ? 0.75f : along < -0.3f ? 0.8f : 1f;
+        else if (p.firstPerson) max *= along > 0.7f ? 1f : along > -0.3f ? 0.82f : 0.66f;
+        if (sprintRecover > 0) max *= 0.5f;
+        if (p.sneaking) max = Math.min(max, g.cfg.sneakSpeed);
+        // committed actions: their start-up and recovery hold the body back
+        switch (c.phase) {
+            case WINDUP -> max *= 0.45f;
+            case ACTIVE -> max *= 0.25f;
+            case RECOVER -> max *= 0.5f;
+            default -> { }
+        }
+        if (c.blocking) max *= g.time - c.blockStart < g.cfg.parryWindow ? 0.3f : 0.55f;
+        if (c.charge > 0) max *= 0.7f;
+        if (c.draw > 0) max *= 0.75f;
+        if (c.slowT > 0) max *= 0.6f;
+        // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
+        float burden = p.burden();
+        max *= burden;
+        // a badly hurt leg limps (Gore)
+        if (g.gore != null) max *= g.gore.legs(p);
+        if (c.staggered > 0) max = 0;
+        if (p.sprinting) { p.stamina = Math.max(0, p.stamina - g.cfg.staminaSprint * (1 - agility * 0.004f) / burden * dt); c.regenDelay = 0.6f; }
+        float want = moving ? max : 0;
+        // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
+        // a metre or more after a sprint at 7 m/s per second of braking)
+        float accel = p.sprinting ? (sprintTime < 0.6f ? 7f : 9f) : p.running ? 8.5f : 7f;
+        float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 17f : 18f;
+        if (c.staggered > 0) decel = 22f;
+        accel *= 0.55f + 0.45f * burden;
+        if (!p.grounded) { accel *= 0.15f; decel *= 0.15f; }
+        float nvx, nvz;
+        if (speedNow > 0.5f && moving && !strafe) {
+            // carried round an arc: the heading turns at a rate that falls as speed rises
+            float cur = (float) Math.atan2(bvx, bvz), wantAng = (float) Math.atan2(dx, dz), diff = Actor.wrap(wantAng - cur);
+            float rate = p.sprinting ? 2.6f : p.running ? 5f : 8.5f;
+            float ns;
+            if (Math.abs(diff) > 2.3f && speedNow > 2f) ns = approach(speedNow, 0, decel * dt);    // reversing at speed: it brakes first
+            else {
+                cur += Math.max(-rate * dt, Math.min(rate * dt, diff));
+                // a sharp turn is paid for in speed (the feet dig in round it), not slid round at full pace
+                float turning = Math.min(1, Math.abs(diff) / 1.6f);
+                float inTurn = want * (1 - (p.sprinting ? 0.35f : 0.5f) * turning);
+                ns = approach(speedNow, inTurn, (inTurn > speedNow ? accel : decel) * dt);
+            }
+            nvx = (float) Math.sin(cur) * ns; nvz = (float) Math.cos(cur) * ns;
+        } else {
+            // from rest, or strafing: the velocity itself goes toward the wish, still at the body's acceleration
+            float wx = moving ? dx / Math.max(1e-3f, l) * want : 0, wz = moving ? dz / Math.max(1e-3f, l) * want : 0;
+            float ex = wx - bvx, ez = wz - bvz, el = (float) Math.hypot(ex, ez);
+            float a = (moving && (wx * bvx + wz * bvz) >= 0 ? accel : decel) * dt;
+            if (el <= a) { nvx = wx; nvz = wz; } else { nvx = bvx + ex / el * a; nvz = bvz + ez / el * a; }
+        }
+        if (c.dodgeT > 0) { nvx = c.dodgeX * g.cfg.dodgeSpeed; nvz = c.dodgeZ * g.cfg.dodgeSpeed; }
+        // a jump press is held for a moment (pressed just before landing, or while a swing finishes, it still jumps), and
+        // the feet count as planted a moment after leaving an edge; the late part of a swing's recovery may be jumped out of
+        if (in.jump) jumpBuffer = 0.18f; else jumpBuffer = Math.max(0, jumpBuffer - dt);
+        if (p.grounded) lastGrounded = g.time;
+        boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
+        boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
+        if (jump) { jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
+        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, 0);
+        // a footfall each time a foot is planted, in step with the gait the figure walks
+        float speed = (float) Math.hypot(nvx, nvz);
+        if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
+            stepClock += dt * Gait.steps(speed);
+            if (stepClock >= 1) {
+                stepClock -= 1;
+                if (g.sfx != null) g.sfx.footstep(p, p.sprinting ? 1f : 0.3f + 0.5f * Math.min(1, speed / g.cfg.runSpeed));
+                g.noise(p, p.x, p.y, p.z, p.sprinting ? 9 : p.sneaking ? 0.8f : speed > 3 ? 5 : 2, 0.2f);
+            }
+        } else stepClock = 0.5f;
+    }
+
+    /**
+     * Where the body faces: the aim while aiming (fast while a blow starts or a guard rises), otherwise the way it goes;
+     * standing, it turns to the aim only when the head can no longer follow it.
+     */
+    private void face(Player p, float dt) {
+        float speed = (float) Math.hypot(p.vx, p.vz);
+        Actor.Combat c = p.cs;
+        if (quickTurn > 0) {
+            p.turnToward(quickYaw, (float) Math.PI / 0.28f, dt);
+            camYaw = Actor.wrap(camYaw + Actor.wrap(quickCam - camYaw) * Math.min(1, dt / Math.max(dt, quickTurn)));
+            return;
+        }
+        if (strafing(p)) p.turnToward(p.aimYaw, c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
+        else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 3.5f : 9f, dt);
+        else if (Math.abs(Actor.wrap(p.aimYaw - p.yaw)) > 1.6f) p.turnToward(p.aimYaw, 4f, dt);
+    }
+
+    private static float approach(float v, float to, float step) { return Math.abs(to - v) <= step ? to : v + Math.signum(to - v) * step; }
+
+    /** First person at the eyes (as the head carries them through each step); third person behind the right shoulder, pulled in front of walls. Then the aim. */
+    private void placeCamera(Player p) {
+        float cp = (float) Math.cos(camPitch), sp = (float) Math.sin(camPitch);
+        fx = (float) -Math.sin(camYaw) * cp; fy = sp; fz = (float) -Math.cos(camYaw) * cp;
+        float ex = p.x, ey = p.alive ? p.eyeY() : p.y + 0.5f, ez = p.z;
+        if (p.firstPerson && p.alive && p.headValid) {
+            // the eyes where the rig last put them: the camera rides the head's bob and sway, not a fixed height
+            cx = p.headX + fx * 0.06f; cy = p.headY; cz = p.headZ + fz * 0.06f;
+        } else if (p.firstPerson) { cx = ex; cy = ey; cz = ez; }
+        else {
+            float rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
+            float px = ex + rx * 0.55f, py = ey + 0.15f, pz = ez + rz * 0.55f;
+            if (!g.vox.clear(ex, ey, ez, px, py, pz)) { px = ex; py = ey + 0.15f; pz = ez; }
+            float back = p.camDist;
+            Voxels.Hit h = g.vox.ray(px, py, pz, -fx, -fy, -fz, back + 0.3f, false);
+            if (h.hit) back = Math.max(0.3f, h.dist - 0.3f);
+            cx = px - fx * back; cy = py - fy * back; cz = pz - fz * back;
+        }
+        // aim: from the eyes at whatever the crosshair falls on
+        Voxels.Hit h = g.vox.ray(cx, cy, cz, fx, fy, fz, 80, false);
+        float t = h.hit ? h.dist : 80;
+        float ax = cx + fx * t - ex, ay = cy + fy * t - ey, az = cz + fz * t - ez;
+        if (Math.sqrt(ax * ax + ay * ay + az * az) < 1.5f) { ax = fx; ay = fy; az = fz; }
+        aimYaw = (float) Math.atan2(-ax, -az);
+        aimPitch = (float) Math.atan2(ay, Math.hypot(ax, az));
+        g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
+    }
+
+    public void snapTo(float yaw) { camYaw = yaw; g.player.yaw = yaw; g.player.aimYaw = yaw; }
+}

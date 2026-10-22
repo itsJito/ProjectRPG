@@ -1,0 +1,38 @@
+﻿cmd.exe : 'vswhere.exe' is not recognized as an internal or external command,
+At line:1 char:1
++ & cmd.exe /c 'C:\Users\John\Documents\projectrpg\theastrattoengine\na ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ('vswhere.exe' i...ternal command,:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+operable program or batch file.
+audio_service.cpp
+c_api.cpp
+audio_device.cpp
+ai_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+selftest.cpp
+services.cpp
+hardening.cpp
+impulsis.cpp
+test_module.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto_test_module.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto_test_module.exp
+bench.cpp
+example_module.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto_example_module.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\bin\windows-x64\astratto_example_module.exp

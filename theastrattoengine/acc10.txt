@@ -1,0 +1,1134 @@
+Astratto Engine 2.0 - RPGGAME devmap (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.2, built Oct 18 2026 07:07:01 (MSVC)
+== Character creator
+  [ ok ] creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)
+  [ ok ] 20 distinct male and 20 distinct female hairstyles (20, 20)
+  [ ok ] 20 distinct facial-hair presets including clean-shaven and the two stubbles (20)
+  [ ok ] 20 distinct tops, 20 legs and 20 shoes (60 of 60)
+  [ ok ] hairstyle row wraps after 20
+  [ ok ] choosing female removes facial hair and its row
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\01-creator.png
+  [ ok ] male figure: 32 px tall (8 head + 12 torso + 12 legs), hitbox 1.8 x 0.6 blocks
+  [ ok ] female figure: head 8x8x8, body 6x12x3, arms 3x12x4, legs 4x12x4, its own hitbox (1.8 x 0.45)
+  [ ok ] skins are painted at 128 x 128
+  [ ok ] appearance round-trips through save data
+      [watch] Dag t 0.0 IDLE at (89.50, 21.50) v (0.00, 0.00) goal (0.0, 0.0) - route 0 inv [Bronze axe, Bread] last 
+      [watch] Dag t 0.5 WORK at (89.25, 21.00) v (-0.85, -1.70) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread] last 
+      [watch] Dag t 1.0 WORK at (88.83, 20.15) v (-0.85, -1.70) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread] last 
+      [watch] Dag t 1.5 WORK at (88.40, 19.30) v (-0.85, -1.70) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread] last 
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\02-spawn.png
+  [ ok ] the player stands on the devmap
+== Leveling: all 18 skills on one table
+  [ ok ] 18 skills are registered
+  [ ok ] every skill starts at level 1
+  [ ok ] XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000
+  [ ok ] the stored table is strictly increasing and levelFor agrees at every boundary
+  [ ok ] every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000
+  [ ok ] level-ups were committed as events (72)
+  [ ok ] a repeated request pays XP once
+      [watch] Dag t 2.0 WORK at (87.98, 18.45) v (-0.85, -1.70) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread] last 
+  [ ok ] a player level-up is celebrated (overlay and message)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\03-level-up.png
+== Interaction edge cases
+      [watch] Dag t 2.5 WORK at (87.65, 17.80) v (-0.02, -0.04) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+  [ ok ] the shed door offers Open and Examine
+      [watch] Dag t 3.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+  [ ok ] out of range: rejected, door unchanged
+      [watch] Dag t 3.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+  [ ok ] in range: the door opens (blocks removed)
+  [ ok ] the locked door's Open is disabled with a reason
+  [ ok ] its Pick lock is disabled with a reason (Thieving 10)
+      [watch] Dag t 4.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+  [ ok ] a loose item is taken exactly once
+  [ ok ] a stale target is rejected without a duplicate
+  [ ok ] the shed's tools were picked up
+  [ ok ] pickup at full inventory is refused and the item stays
+  [ ok ] the owned coins on the table are still there for the theft test
+      [watch] Dag t 4.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+      [watch] Dag t 5.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+  [ ok ] crafting interrupted mid-work consumes nothing (STARTED)
+  [ ok ] furniture and workstations are objects, not blocks: 23 pieces, their cells never meshed but still solid
+  [ ok ] block textures are 64 x 64
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04-interaction.png
+== Physical doors and breaking glass
+      [watch] Dag t 5.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread] last gather Tree #120 -> STARTED
+      [watch] Dag t 6.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 6.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+  [ ok ] opened, the shed door's leaves swing in on their hinges (1.75 rad) and the doorway is open
+      [watch] Dag t 7.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 7.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 8.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 8.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 9.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+  [ ok ] closed, the leaves swing home and latch (0.000 rad) and the cells are a shut door again
+      [watch] Dag t 9.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 10.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 10.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+  [ ok ] walking into the latched door, the player is held at its face (z 22.86)
+      [watch] Dag t 11.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 11.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 12.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 12.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 13.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+  [ ok ] opened, the player walks through the doorway into the shed (z 14.91)
+      [watch] Dag t 13.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 14.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 14.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+  [ ok ] a sword swung at the shed window breaks the pane (116 shards)
+      [watch] Dag t 15.0 WORK at (87.65, 17.80) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 15.5 WORK at (87.65, 17.80) v (0.00, 0.00) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 16.0 WORK at (88.15, 17.25) v (1.28, -1.40) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 16.5 WORK at (88.78, 16.66) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 17.0 WORK at (89.42, 15.95) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 17.5 WORK at (90.05, 15.24) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 18.0 WORK at (90.68, 14.53) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 18.5 WORK at (91.32, 13.83) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 19.0 WORK at (91.95, 13.12) v (1.27, -1.42) goal (92.5, 12.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #120 -> STARTED
+      [watch] Dag t 19.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [FAIL] the shards fell and came to rest on the ground (33 of 116)
+  [ ok ] breaking the pane was committed as an event
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04b-glass.png
+== Skill actions (each of the 18)
+      [watch] Dag t 20.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 20.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 21.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 21.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 22.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 22.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 23.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 23.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 24.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 24.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 25.0 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 25.5 WORK at (92.29, 12.73) v (0.00, 0.00) goal (92.5, 12.5) idle route 0 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 26.0 WORK at (92.19, 12.88) v (-0.93, 1.40) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 26.5 WORK at (91.67, 13.67) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 27.0 WORK at (91.14, 14.47) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 27.5 WORK at (90.62, 15.26) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 28.0 WORK at (90.09, 16.05) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 28.5 WORK at (89.57, 16.84) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 29.0 WORK at (89.05, 17.63) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 29.5 WORK at (88.52, 18.43) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 30.0 WORK at (88.00, 19.22) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 30.5 WORK at (87.47, 20.01) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Woodcutting: logs cut from a real tree
+  [ ok ] a felled tree changes the world (stump)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05-woodcutting.png
+      [watch] Dag t 31.0 WORK at (86.95, 20.80) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 31.5 WORK at (86.42, 21.59) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 32.0 WORK at (85.90, 22.39) v (-1.05, 1.58) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Firemaking: a fire is lit from logs
+      [watch] Dag t 32.5 WORK at (85.41, 23.19) v (-0.37, 1.76) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 33.0 WORK at (85.36, 24.13) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 33.5 WORK at (85.32, 25.08) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 34.0 WORK at (85.27, 26.03) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 34.5 WORK at (85.23, 26.98) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 35.0 WORK at (85.18, 27.93) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 35.5 WORK at (85.14, 28.88) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 36.0 WORK at (85.09, 29.83) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 36.5 WORK at (85.05, 30.78) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 37.0 WORK at (85.00, 31.73) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 37.5 WORK at (84.96, 32.67) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 38.0 WORK at (84.92, 33.62) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 38.5 WORK at (84.87, 34.57) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 39.0 WORK at (84.83, 35.52) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Mining: copper and tin ore
+  [ ok ] a mined-out rock changes the world
+      [watch] Dag t 39.5 WORK at (84.78, 36.47) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 40.0 WORK at (84.74, 37.42) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 40.5 WORK at (84.69, 38.37) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 41.0 WORK at (84.65, 39.32) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 41.5 WORK at (84.60, 40.27) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 42.0 WORK at (84.68, 41.08) v (1.08, 0.70) goal (98.5, 43.0) go to goal route 11 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 42.5 WORK at (85.58, 41.24) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 43.0 WORK at (86.51, 41.40) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 43.5 WORK at (87.45, 41.56) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 44.0 WORK at (88.39, 41.73) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 44.5 WORK at (89.32, 41.89) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 45.0 WORK at (90.26, 42.06) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Smithing: a bar smelted and a bronze dagger forged
+      [watch] Dag t 45.5 WORK at (91.19, 42.22) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 46.0 WORK at (92.13, 42.38) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 46.5 WORK at (93.06, 42.55) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 47.0 WORK at (94.00, 42.71) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 47.5 WORK at (94.94, 42.87) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 48.0 WORK at (95.87, 43.04) v (1.87, 0.33) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 48.5 WORK at (96.80, 43.21) v (1.63, 0.47) goal (98.5, 49.0) go to goal route 3 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 49.0 WORK at (97.13, 43.97) v (0.46, 1.84) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 49.5 WORK at (97.36, 44.90) v (0.46, 1.84) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 50.0 WORK at (97.59, 45.82) v (0.46, 1.84) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 50.5 WORK at (97.82, 46.74) v (0.46, 1.84) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 51.0 WORK at (98.00, 47.67) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 51.5 WORK at (98.12, 48.61) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 52.0 WORK at (98.23, 49.56) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 52.5 WORK at (98.34, 50.50) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Fishing: raw shrimp
+      [watch] Dag t 53.0 WORK at (98.46, 51.44) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 53.5 WORK at (98.57, 52.39) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 54.0 WORK at (98.68, 53.33) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 54.5 WORK at (98.80, 54.27) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 55.0 WORK at (98.91, 55.22) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 55.5 WORK at (99.02, 56.16) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 56.0 WORK at (99.14, 57.10) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 56.5 WORK at (99.25, 58.05) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Cooking: shrimp cooked (or burnt by the seeded check, which pays no XP)
+      [watch] Dag t 57.0 WORK at (99.36, 58.99) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 57.5 WORK at (99.47, 59.93) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 58.0 WORK at (99.59, 60.88) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 58.5 WORK at (99.70, 61.82) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 59.0 WORK at (99.81, 62.76) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Harvesting: guam picked
+  [ ok ] flax is level-gated (Harvesting 5) with a reason
+      [watch] Dag t 59.5 WORK at (99.93, 63.71) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 60.0 WORK at (100.04, 64.65) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 60.5 WORK at (100.15, 65.59) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 61.0 WORK at (100.26, 66.54) v (0.23, 1.89) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Crafting: arrow shafts fletched from logs
+      [watch] Dag t 61.5 WORK at (99.92, 66.84) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 62.0 WORK at (99.00, 66.62) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 62.5 WORK at (98.08, 66.39) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 63.0 WORK at (97.16, 66.16) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 63.5 WORK at (96.23, 65.93) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 64.0 WORK at (95.31, 65.70) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 64.5 WORK at (94.39, 65.47) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 65.0 WORK at (93.47, 65.24) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 65.5 WORK at (92.55, 65.01) v (-1.84, -0.46) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 66.0 WORK at (91.80, 64.67) v (-0.39, -1.53) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 66.5 WORK at (91.75, 63.73) v (-0.09, -1.90) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 67.0 WORK at (91.70, 62.78) v (-0.09, -1.90) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 67.5 WORK at (91.66, 61.83) v (-0.09, -1.90) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+  [ ok ] Construction: a crate built into the world as blocks
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\06-construction.png
+      [watch] Dag t 68.0 WORK at (91.61, 60.88) v (-0.09, -1.90) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 68.5 WORK at (91.57, 59.93) v (-0.09, -1.90) goal (91.5, 58.7) go to goal route 1 inv [Bronze axe, Bread, Logs, Logs, Logs, Logs, Logs] last gather Tree #119 -> STARTED
+      [watch] Dag t 69.0 WORK at (91.51, 59.47) v (-0.26, 0.89) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 69.5 WORK at (91.33, 60.35) v (-0.37, 1.86) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 70.0 WORK at (91.14, 61.28) v (-0.37, 1.86) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+  [ ok ] Agility: an obstacle crossed and a lap completed
+      [watch] Dag t 70.5 WORK at (90.96, 62.21) v (-0.37, 1.86) goal (90.5, 64.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 71.0 WORK at (91.24, 62.88) v (1.71, 0.84) goal (100.5, 68.0) go to goal route 9 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 71.5 WORK at (91.78, 63.18) v (0.00, 0.41) goal (100.5, 68.0) go to goal route 2 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 72.0 WORK at (92.28, 63.58) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 72.5 WORK at (93.10, 64.07) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 73.0 WORK at (93.91, 64.56) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 73.5 WORK at (94.73, 65.05) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 74.0 WORK at (95.54, 65.53) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 74.5 WORK at (96.36, 66.02) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 75.0 WORK at (97.17, 66.51) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 75.5 WORK at (97.99, 67.00) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 76.0 WORK at (98.80, 67.48) v (1.63, 0.98) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 76.5 WORK at (99.06, 67.20) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 77.0 WORK at (99.03, 66.25) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 77.5 WORK at (99.00, 65.30) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 78.0 WORK at (98.97, 64.35) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 78.5 WORK at (98.94, 63.40) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 79.0 WORK at (98.91, 62.45) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 79.5 WORK at (98.88, 61.50) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 80.0 WORK at (98.85, 60.55) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 80.5 WORK at (98.82, 59.60) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 81.0 WORK at (98.79, 58.65) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 81.5 WORK at (98.76, 57.70) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 82.0 WORK at (98.73, 56.75) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 82.5 WORK at (98.70, 55.80) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 83.0 WORK at (98.67, 54.85) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 83.5 WORK at (98.64, 53.90) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 84.0 WORK at (98.61, 52.95) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 84.5 WORK at (98.58, 52.00) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 85.0 WORK at (98.55, 51.05) v (-0.06, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 85.5 WORK at (98.54, 50.10) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 86.0 WORK at (98.53, 49.15) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 86.5 WORK at (98.53, 48.20) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 87.0 WORK at (98.52, 47.25) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 87.5 WORK at (98.52, 46.30) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 88.0 WORK at (98.51, 45.35) v (-0.01, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 88.5 WORK at (98.41, 44.52) v (-1.02, -0.75) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 89.0 WORK at (97.52, 44.36) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 89.5 WORK at (96.58, 44.23) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 90.0 WORK at (95.64, 44.09) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 90.5 WORK at (94.70, 43.96) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 91.0 WORK at (93.76, 43.83) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 91.5 WORK at (92.82, 43.69) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 92.0 WORK at (91.88, 43.56) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 92.5 WORK at (90.94, 43.42) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 93.0 WORK at (90.00, 43.29) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 93.5 WORK at (89.06, 43.15) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 94.0 WORK at (88.12, 43.02) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 94.5 WORK at (87.18, 42.88) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 95.0 WORK at (86.24, 42.75) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 95.5 WORK at (85.50, 42.48) v (-0.38, -1.48) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 96.0 WORK at (85.44, 41.54) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 96.5 WORK at (85.38, 40.59) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 97.0 WORK at (85.33, 39.65) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 97.5 WORK at (85.28, 38.70) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 98.0 WORK at (85.23, 37.75) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 98.5 WORK at (85.18, 36.80) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 99.0 WORK at (85.12, 35.85) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 99.5 WORK at (85.07, 34.90) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 100.0 WORK at (85.02, 33.95) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 100.5 WORK at (84.97, 33.01) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 101.0 WORK at (84.91, 32.06) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 101.5 WORK at (84.86, 31.11) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 102.0 WORK at (84.81, 30.16) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 102.5 WORK at (84.76, 29.21) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 103.0 WORK at (84.71, 28.26) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 103.5 WORK at (84.65, 27.31) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 104.0 WORK at (84.60, 26.37) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 104.5 WORK at (84.62, 25.43) v (0.65, -1.79) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 105.0 WORK at (84.95, 24.54) v (0.65, -1.79) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, Bread, 14 x Gold coins] last sold 5 logs to Store A
+      [watch] Dag t 105.5 EAT at (85.27, 23.64) v (0.65, -1.79) goal (84.0, 42.5) go to goal route 13 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 106.0 EAT at (85.36, 23.79) v (-0.09, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 106.5 WORK at (85.32, 24.70) v (-0.01, 1.20) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 107.0 WORK at (85.48, 24.32) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 107.5 WORK at (85.75, 23.41) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 108.0 WORK at (86.02, 22.50) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 108.5 WORK at (86.29, 21.59) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 109.0 WORK at (86.56, 20.68) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 109.5 WORK at (86.83, 19.77) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 110.0 WORK at (87.10, 18.86) v (0.54, -1.82) goal (87.5, 17.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last ate bread
+      [watch] Dag t 110.5 WORK at (87.37, 17.95) v (0.47, -1.60) goal (87.5, 17.5) idle route 0 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 111.0 WORK at (87.41, 17.81) v (0.00, 0.00) goal (87.5, 17.5) idle route 0 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 111.5 EAT at (87.19, 18.32) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 112.0 EAT at (86.81, 19.19) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 112.5 EAT at (86.43, 20.06) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 113.0 EAT at (86.05, 20.93) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 113.5 EAT at (85.67, 21.80) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 114.0 EAT at (85.29, 22.67) v (-0.76, 1.74) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 114.5 EAT at (85.20, 23.61) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 115.0 EAT at (85.16, 24.56) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 115.5 EAT at (85.13, 25.51) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 116.0 EAT at (85.09, 26.46) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 116.5 EAT at (85.06, 27.41) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 117.0 EAT at (85.02, 28.36) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 117.5 EAT at (84.99, 29.31) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 118.0 EAT at (84.95, 30.26) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 118.5 EAT at (84.92, 31.21) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 119.0 EAT at (84.88, 32.15) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 119.5 EAT at (84.85, 33.10) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 120.0 EAT at (84.81, 34.05) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 120.5 EAT at (84.78, 35.00) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 121.0 EAT at (84.74, 35.95) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 121.5 EAT at (84.71, 36.90) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 122.0 EAT at (84.67, 37.85) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 122.5 EAT at (84.64, 38.80) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 123.0 EAT at (84.60, 39.75) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 123.5 EAT at (84.57, 40.70) v (-0.07, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 124.0 EAT at (85.07, 41.14) v (1.89, 0.16) goal (98.5, 43.0) go to goal route 10 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 124.5 EAT at (86.02, 41.20) v (1.90, 0.13) goal (98.5, 43.0) go to goal route 9 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 125.0 EAT at (86.96, 41.33) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 125.5 EAT at (87.89, 41.51) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 126.0 EAT at (88.83, 41.68) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 126.5 EAT at (89.76, 41.86) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 127.0 EAT at (90.69, 42.04) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 127.5 EAT at (91.63, 42.21) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 128.0 EAT at (92.56, 42.39) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 128.5 EAT at (93.49, 42.56) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 129.0 EAT at (94.43, 42.74) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 129.5 EAT at (95.36, 42.91) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 130.0 EAT at (96.30, 43.09) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 130.5 EAT at (97.02, 43.44) v (0.45, 1.84) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 131.0 EAT at (97.25, 44.36) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 131.5 EAT at (97.47, 45.29) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 132.0 EAT at (97.70, 46.21) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 132.5 EAT at (97.92, 47.13) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 133.0 EAT at (98.06, 48.07) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 133.5 EAT at (98.17, 49.01) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 134.0 EAT at (98.28, 49.96) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 134.5 EAT at (98.40, 50.90) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 135.0 EAT at (98.51, 51.84) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 135.5 EAT at (98.62, 52.79) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 136.0 EAT at (98.73, 53.73) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [FAIL] Thieving: a pocket picked (seeded skill check, roll recorded in the event)
+      [watch] Dag t 136.5 EAT at (98.85, 54.67) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 137.0 EAT at (98.96, 55.62) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] Faith: bones buried and Ward cast for Faith points
+    non-combat skills trained by their actions: 10
+== Combat and equipment
+      [watch] Dag t 137.5 EAT at (99.07, 56.56) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 138.0 EAT at (99.18, 57.50) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] a swing out of reach makes no contact
+      [watch] Dag t 138.5 EAT at (99.30, 58.45) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 139.0 EAT at (99.41, 59.39) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 139.5 EAT at (99.52, 60.33) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 140.0 EAT at (99.64, 61.28) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] collision-based melee hits the dummy (6, 6)
+  [ ok ] damage is deterministic: same stats, same move, same damage
+  [ ok ] combat XP from real hits: Attack (style) and Health share
+      [watch] Dag t 140.5 EAT at (99.75, 62.22) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 141.0 EAT at (99.86, 63.16) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 141.5 EAT at (99.97, 64.11) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 142.0 EAT at (100.09, 65.05) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] Strength and Defense styles train their skills
+      [watch] Dag t 142.5 EAT at (100.20, 65.99) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 143.0 EAT at (100.06, 66.91) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 143.5 EAT at (99.75, 67.81) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] Defense and armor mitigate (armored dummy 3 < 6)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\07-melee.png
+  [ ok ] Strength 90 wields a Godly sword
+  [ ok ] Defense 50 cannot wear Godly armor
+  [ ok ] Defense 50 wears Steel armor
+  [ ok ] manual swaps through the inventory: sword equipped, Godly body refused
+      [watch] Dag t 144.0 EAT at (99.45, 68.71) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 144.5 EAT at (99.16, 69.61) v (-0.42, 1.85) goal (97.0, 84.0) go to goal route 13 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] gear changes damage (Godly sword 80 > wooden 6)
+      [watch] Dag t 145.0 EAT at (98.95, 70.54) v (-0.42, 1.85) goal (97.0, 84.0) go to goal route 13 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 145.5 EAT at (98.76, 70.79) v (-0.26, 0.44) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 146.0 EAT at (98.67, 71.62) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] heavy impact exceeding Stability staggers (telemetry: Tester's HEAVY deflected by block 3 at (12, 3, 46), s=0.67)
+      [watch] Dag t 146.5 EAT at (98.58, 72.57) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 147.0 EAT at (98.50, 73.51) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 147.5 EAT at (98.41, 74.46) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 148.0 EAT at (98.32, 75.41) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 148.5 EAT at (98.24, 76.35) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] arrows are consumed as ammunition
+  [ ok ] Archery XP from the archery target
+      [watch] Dag t 149.0 EAT at (98.15, 77.30) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 149.5 EAT at (98.07, 78.24) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 150.0 EAT at (97.98, 79.19) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] an arrow physically hits the dummy
+      [watch] Dag t 150.5 EAT at (97.90, 80.14) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 151.0 EAT at (97.81, 81.08) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] Magic: a spell costs mana, flies, hits, trains Magic
+      [watch] Dag t 151.5 EAT at (97.72, 82.03) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 152.0 EAT at (97.71, 82.54) v (0.34, -0.71) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 152.5 EAT at (98.01, 81.71) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 153.0 EAT at (98.32, 80.81) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 153.5 EAT at (98.63, 79.91) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] the hostile NPC chose to fight (goal FIGHT, reasons recorded)
+  [ ok ] the bandit struck at the player (450 -> 448 HP) or was blocked
+  [ ok ] guarding blocked or parried incoming blows
+  [ ok ] the bandit was defeated by real hits (dead, ragdoll)
+      [watch] Dag t 154.0 EAT at (98.94, 79.02) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 154.5 EAT at (99.25, 78.12) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\09-ragdoll.png
+  [ ok ] the bandit dropped bones and loot
+      [watch] Dag t 155.0 EAT at (99.56, 77.22) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 155.5 EAT at (99.87, 76.32) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+      [watch] Dag t 156.0 EAT at (100.18, 75.42) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last gather Tree #120 -> STARTED
+  [ ok ] dodge spends stamina and grants i-frames (spent 20.0)
+  [ ok ] all seven combat skills have earned XP from their actions (7/7)
+  [FAIL] every one of the 18 skills has earned XP through an executable action (17/18)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\10-telemetry.png
+== Intelligent NPCs
+      [watch] Dag t 156.5 EAT at (100.31, 75.05) v (0.00, 0.00) goal (100.5, 74.2) hold/face route 0 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 157.0 WORK at (100.30, 75.10) v (-0.22, 0.81) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 157.5 WORK at (100.04, 75.95) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 158.0 WORK at (99.77, 76.86) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 158.5 WORK at (99.50, 77.77) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 159.0 WORK at (99.23, 78.69) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 159.5 WORK at (98.96, 79.60) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 160.0 WORK at (98.69, 80.51) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 160.5 WORK at (98.42, 81.42) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 161.0 WORK at (98.15, 82.33) v (-0.54, 1.82) goal (97.0, 84.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 161.5 WORK at (97.99, 82.72) v (-0.02, -1.07) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 162.0 WORK at (98.03, 81.80) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 162.5 WORK at (98.07, 80.85) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 163.0 WORK at (98.11, 79.90) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 163.5 WORK at (98.16, 78.95) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 164.0 WORK at (98.20, 78.01) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 164.5 WORK at (98.24, 77.06) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 165.0 WORK at (98.29, 76.11) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 165.5 WORK at (98.33, 75.16) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 166.0 WORK at (98.38, 74.21) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 166.5 WORK at (98.42, 73.26) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 167.0 WORK at (98.46, 72.31) v (0.09, -1.90) goal (100.5, 68.0) go to goal route 4 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 167.5 WORK at (98.67, 71.41) v (0.76, -1.74) goal (100.5, 68.0) go to goal route 2 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 168.0 WORK at (98.82, 70.63) v (0.84, -1.45) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 168.5 WORK at (99.41, 69.88) v (1.18, -1.49) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 169.0 WORK at (99.74, 69.07) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 169.5 WORK at (99.68, 68.12) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 170.0 WORK at (99.62, 67.17) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 170.5 WORK at (99.56, 66.22) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 171.0 WORK at (99.50, 65.28) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 171.5 WORK at (99.44, 64.33) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 172.0 WORK at (99.38, 63.38) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 172.5 WORK at (99.32, 62.43) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 173.0 WORK at (99.26, 61.48) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 173.5 WORK at (99.20, 60.54) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 174.0 WORK at (99.14, 59.59) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 174.5 WORK at (99.08, 58.64) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 175.0 WORK at (99.02, 57.69) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 175.5 WORK at (98.96, 56.74) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 176.0 WORK at (98.90, 55.80) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 176.5 WORK at (98.84, 54.85) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 177.0 WORK at (98.78, 53.90) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 177.5 WORK at (98.72, 52.95) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 178.0 WORK at (98.66, 52.00) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 178.5 WORK at (98.60, 51.06) v (-0.12, -1.90) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 179.0 WORK at (98.57, 50.11) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 179.5 WORK at (98.56, 49.16) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 180.0 WORK at (98.55, 48.21) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 180.5 WORK at (98.54, 47.26) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 181.0 WORK at (98.53, 46.31) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 181.5 WORK at (98.52, 45.36) v (-0.02, -1.90) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 182.0 WORK at (98.42, 44.53) v (-1.03, -0.75) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 182.5 WORK at (97.52, 44.37) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 183.0 WORK at (96.58, 44.23) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 183.5 WORK at (95.64, 44.10) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 184.0 WORK at (94.70, 43.96) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 184.5 WORK at (93.76, 43.83) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 185.0 WORK at (92.82, 43.69) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 185.5 WORK at (91.88, 43.56) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 186.0 WORK at (90.94, 43.42) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 186.5 WORK at (90.00, 43.29) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\11-ai-inspector.png
+      [watch] Dag t 187.0 WORK at (89.06, 43.15) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 187.5 WORK at (88.12, 43.02) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 188.0 WORK at (87.18, 42.88) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 188.5 WORK at (86.24, 42.75) v (-1.88, -0.27) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 189.0 WORK at (85.50, 42.48) v (-0.38, -1.48) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 189.5 WORK at (85.44, 41.54) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 190.0 WORK at (85.39, 40.59) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 190.5 WORK at (85.34, 39.65) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 191.0 WORK at (85.29, 38.70) v (-0.11, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 191.5 WORK at (85.23, 37.75) v (-0.11, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 192.0 WORK at (85.18, 36.80) v (-0.11, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 192.5 WORK at (85.13, 35.85) v (-0.11, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 193.0 WORK at (85.08, 34.90) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 193.5 WORK at (85.02, 33.95) v (-0.10, -1.90) goal (84.0, 24.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 194.0 EAT at (84.98, 34.01) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 194.5 EAT at (84.93, 34.96) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 195.0 EAT at (84.87, 35.91) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 195.5 EAT at (84.82, 36.85) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 196.0 EAT at (84.77, 37.80) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 196.5 EAT at (84.71, 38.75) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 197.0 EAT at (84.66, 39.70) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 197.5 EAT at (84.60, 40.65) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 198.0 EAT at (85.03, 41.14) v (1.90, 0.12) goal (98.5, 43.0) go to goal route 9 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 198.5 EAT at (85.98, 41.20) v (1.90, 0.12) goal (98.5, 43.0) go to goal route 9 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 199.0 EAT at (86.92, 41.33) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 199.5 EAT at (87.85, 41.51) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 200.0 EAT at (88.78, 41.68) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 200.5 EAT at (89.72, 41.86) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 201.0 EAT at (90.65, 42.03) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 201.5 EAT at (91.58, 42.21) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 202.0 EAT at (92.52, 42.38) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 202.5 EAT at (93.45, 42.56) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 203.0 EAT at (94.39, 42.73) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 203.5 EAT at (95.32, 42.91) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 204.0 EAT at (96.25, 43.08) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 204.5 EAT at (97.00, 43.41) v (0.52, 1.72) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 205.0 EAT at (97.23, 44.33) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 205.5 EAT at (97.46, 45.25) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 206.0 EAT at (97.68, 46.18) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 206.5 EAT at (97.91, 47.10) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 207.0 EAT at (98.05, 48.04) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 207.5 EAT at (98.17, 48.98) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 208.0 EAT at (98.28, 49.92) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 208.5 EAT at (98.39, 50.87) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 209.0 EAT at (98.50, 51.81) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 209.5 EAT at (98.62, 52.75) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 210.0 EAT at (98.73, 53.69) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 210.5 EAT at (98.84, 54.64) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 211.0 EAT at (98.95, 55.58) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 211.5 EAT at (99.07, 56.52) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 212.0 EAT at (99.18, 57.47) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 212.5 EAT at (99.29, 58.41) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 213.0 EAT at (99.41, 59.35) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 213.5 EAT at (99.52, 60.30) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 214.0 EAT at (99.63, 61.24) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 214.5 EAT at (99.74, 62.18) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 215.0 EAT at (99.86, 63.13) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [watch] Dag t 215.5 EAT at (99.97, 64.07) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 216.0 EAT at (100.08, 65.01) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+  [ ok ] NPCs decided (1064 decisions)
+  [ ok ] at least three agents with different goals at work ([RETURN, WANDER, PATROL, IDLE, STEAL, SOCIALIZE, HELD, INVESTIGATE, FIGHT, FLEE, WORK, EAT])
+  [ ok ] agents navigated on the engine's routes (9 moved)
+  [FAIL] the worker cut real trees and sold logs into Store A (8 -> 8, Dag WC xp 56616, holds 0 logs, goal EAT, last: drank from the well)
+  [ ok ] every agent exposes scores and reasons for its goal
+  [ ok ] NPCs socialise with each other (30 times)
+  [ ok ] perception: line of sight is blocked by walls (occluder test)
+      [watch] Dag t 216.5 EAT at (100.20, 65.96) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [Bronze axe, 14 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+  [ ok ] agents hear noises (engine ears)
+      [watch] Dag t 217.0 EAT at (100.17, 66.57) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+  [ ok ] an unloaded worker keeps working abstractly (Woodcutting XP 56616 -> 58366)
+      [watch] Dag t 217.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) - route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 218.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+  [ ok ] the worker reloads with consistent identity and inventory
+== Witnessed theft and the law
+      [watch] Dag t 218.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 219.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 219.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 220.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+  [ ok ] stealing from the stall commits a theft
+  [ ok ] the nearby NPC witnessed it (memory recorded)
+  [ ok ] no bounty yet - nothing is reported
+      [watch] Dag t 220.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 221.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 221.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 222.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 222.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 223.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 223.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 224.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 224.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 225.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 225.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 226.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 226.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 227.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 227.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 228.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 228.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 229.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 229.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 230.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 230.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 231.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 231.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 232.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 232.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 233.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 233.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 234.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 234.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 235.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 235.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 236.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 236.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 237.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 237.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 238.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 238.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 239.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 239.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 240.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 240.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 241.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 241.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 242.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 242.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 243.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 243.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 244.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 244.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 245.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 245.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 246.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 246.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 247.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 247.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 248.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 248.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+  [ ok ] the witness travelled to the lawman and reported: JUR-ALPHA bounty 4
+  [ ok ] the bounty is half the stolen value, in Alpha only
+  [ ok ] the report came after travel (Eda is beside Bram)
+  [ ok ] wanted in Alpha: Ada refuses trade with the reason
+  [ ok ] not wanted in Beta: Gus would trade
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\12-wanted.png
+  [ ok ] the bounty is paid at the chancery
+      [watch] Dag t 249.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 249.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 250.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 250.5 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 251.0 EAT at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [Bronze axe, Logs, 29 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+  [ ok ] the second theft is witnessed too
+      witnesses stopped: [Dag, Eda]
+      [watch] Dag t 251.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 252.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 252.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 253.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 253.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 254.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 254.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 255.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 255.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 256.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 256.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 257.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 257.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 258.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 258.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 259.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 259.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 260.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 260.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 261.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 261.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 262.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 262.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 263.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 263.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 264.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 264.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 265.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 265.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 266.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 266.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 267.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 267.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 268.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 268.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 269.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 269.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 270.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 270.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 271.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 271.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 272.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 272.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 273.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 273.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 274.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 274.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 275.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 275.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 276.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 276.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 277.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 277.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 278.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 278.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 279.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 279.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 280.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 280.5 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [watch] Dag t 281.0 IDLE at (91.50, 58.70) v (0.00, 0.00) goal (97.0, 84.0) go to goal route 0 inv [] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+  [ ok ] with the witness stopped, the theft is never reported and no bounty comes of it
+  [ ok ] the stolen bread keeps its owner and stolen mark
+== Arrest: the law stands down
+  [ ok ] wanted in JUR-ALPHA (bounty 20)
+  [ ok ] the guard moves to arrest the wanted player (goal FIGHT)
+      [watch] Dag t 281.5 EAT at (89.32, 21.61) v (-1.56, 0.94) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 282.0 EAT at (88.51, 22.10) v (-1.63, 0.98) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+  [ ok ] the player struck the guard (1 contacts)
+      [watch] Dag t 282.5 EAT at (87.69, 22.59) v (-1.63, 0.98) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 283.0 EAT at (86.88, 23.07) v (-1.63, 0.98) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 283.5 EAT at (86.06, 23.56) v (-1.63, 0.98) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 284.0 EAT at (85.56, 24.22) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 284.5 EAT at (85.50, 25.17) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 285.0 EAT at (85.45, 26.12) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 285.5 EAT at (85.39, 27.07) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 286.0 EAT at (85.34, 28.01) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 286.5 EAT at (85.28, 28.96) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 287.0 EAT at (85.23, 29.91) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 287.5 EAT at (85.17, 30.86) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 288.0 EAT at (85.12, 31.81) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 288.5 EAT at (85.06, 32.76) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 289.0 EAT at (85.01, 33.71) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 289.5 EAT at (84.96, 34.65) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 290.0 EAT at (84.90, 35.60) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 290.5 EAT at (84.85, 36.55) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 291.0 EAT at (84.79, 37.50) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 291.5 EAT at (84.74, 38.45) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 292.0 EAT at (84.68, 39.40) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+  [ ok ] after the arrest no lawman strikes the player (0 hits) and none still fights them
+  [ ok ] the sentence cleared the bounty and the crimes known of it are settled
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 292.5 EAT at (84.63, 40.34) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 293.0 EAT at (84.73, 41.12) v (1.28, 0.53) goal (98.5, 43.0) go to goal route 10 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 293.5 EAT at (85.66, 41.19) v (1.90, 0.10) goal (98.5, 43.0) go to goal route 8 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 294.0 EAT at (86.61, 41.26) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 294.5 EAT at (87.54, 41.44) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 295.0 EAT at (88.47, 41.62) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 295.5 EAT at (89.41, 41.79) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 296.0 EAT at (90.34, 41.97) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 296.5 EAT at (91.27, 42.14) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 297.0 EAT at (92.21, 42.32) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 297.5 EAT at (93.14, 42.49) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 298.0 EAT at (94.08, 42.67) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 298.5 EAT at (95.01, 42.84) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 299.0 EAT at (95.94, 43.02) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 299.5 EAT at (96.86, 43.21) v (1.39, 0.64) goal (98.5, 49.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 300.0 EAT at (97.16, 44.02) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 300.5 EAT at (97.38, 44.94) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 301.0 EAT at (97.61, 45.87) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 301.5 EAT at (97.83, 46.79) v (0.45, 1.85) goal (98.5, 49.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 302.0 EAT at (98.02, 47.72) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 302.5 EAT at (98.13, 48.66) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 303.0 EAT at (98.24, 49.61) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 303.5 EAT at (98.35, 50.55) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 304.0 EAT at (98.47, 51.49) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 304.5 EAT at (98.58, 52.44) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 305.0 EAT at (98.69, 53.38) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 305.5 EAT at (98.80, 54.32) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 306.0 EAT at (98.92, 55.27) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 306.5 EAT at (99.03, 56.21) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 307.0 EAT at (99.14, 57.15) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 307.5 EAT at (99.26, 58.10) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 308.0 EAT at (99.37, 59.04) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      cole: goal FIGHT target 1 last 'close the distance' at (101.1, 74.7) hp 167; player (105.6, 67.5) hp 30.0 resisting true bounty 20
+  [FAIL] resisting and beaten down, the player is arrested rather than killed (arrests 0, alive true)
+      [watch] Dag t 308.5 EAT at (99.48, 59.98) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 309.0 EAT at (99.59, 60.92) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 309.5 EAT at (99.71, 61.87) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 310.0 EAT at (99.82, 62.81) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 310.5 EAT at (99.93, 63.75) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 311.0 EAT at (100.05, 64.70) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 311.5 EAT at (100.16, 65.64) v (0.23, 1.89) goal (100.5, 68.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 312.0 EAT at (100.17, 66.57) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 312.5 EAT at (99.86, 67.47) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 313.0 EAT at (99.56, 68.37) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 313.5 EAT at (99.25, 69.27) v (-0.61, 1.80) goal (97.0, 84.0) go to goal route 14 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 314.0 EAT at (99.03, 70.19) v (-0.42, 1.85) goal (97.0, 84.0) go to goal route 13 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 314.5 EAT at (98.82, 70.78) v (-0.40, 0.00) goal (97.0, 84.0) go to goal route 12 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 315.0 EAT at (98.70, 71.27) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 315.5 EAT at (98.61, 72.22) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 316.0 EAT at (98.53, 73.17) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 316.5 EAT at (98.44, 74.11) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 317.0 EAT at (98.36, 75.06) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 317.5 EAT at (98.27, 76.00) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 318.0 EAT at (98.18, 76.95) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+  [FAIL] after an arrest by force no guard or lawman strikes the player again (2 hits in ten seconds) and none still fights them
+== World state: shipments
+      shipments start at Day 2, 07:00
+  [ ok ] a shipment is planned from Store A's surplus
+      [watch] Dag t 318.5 EAT at (98.10, 77.90) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 319.0 EAT at (98.01, 78.84) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 319.5 EAT at (97.93, 79.79) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 320.0 EAT at (97.84, 80.74) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 320.5 EAT at (97.76, 81.68) v (-0.17, 1.89) goal (97.0, 84.0) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 321.0 EAT at (97.68, 82.55) v (-0.01, 0.78) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 321.5 EAT at (97.89, 82.04) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 322.0 EAT at (98.20, 81.14) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 322.5 EAT at (98.51, 80.24) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 323.0 EAT at (98.82, 79.34) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 323.5 EAT at (99.13, 78.45) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 324.0 EAT at (99.45, 77.55) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 324.5 EAT at (99.76, 76.65) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 325.0 EAT at (100.07, 75.75) v (0.62, -1.80) goal (100.5, 74.2) go to goal route 1 inv [10 x Gold coins] last (abstract) cutting logs: 1 held
+      [watch] Dag t 325.5 EAT at (100.31, 75.05) v (0.03, -0.08) goal (100.5, 74.2) hold/face route 0 inv [10 x Gold coins] last drank from the well
+      [watch] Dag t 326.0 SOCIALIZE at (100.21, 75.23) v (-0.75, 1.34) goal (99.9, 76.1) hold/face route 0 inv [10 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 326.5 SOCIALIZE at (100.14, 75.35) v (0.00, 0.00) goal (99.9, 76.1) hold/face route 0 inv [10 x Gold coins] last drank from the well
+      [watch] Dag t 327.0 SOCIALIZE at (100.14, 75.35) v (0.00, 0.00) goal (99.9, 76.1) hold/face route 0 inv [10 x Gold coins] last drank from the well
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 327.5 SOCIALIZE at (100.14, 75.35) v (-0.07, 0.12) goal (99.9, 76.1) go to goal route 1 inv [10 x Gold coins] last drank from the well
+      [watch] Dag t 328.0 WORK at (100.07, 75.37) v (-0.54, -0.82) goal (99.9, 76.1) wander route 57 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 328.5 WORK at (99.68, 74.80) v (-0.94, -1.03) goal (99.9, 76.1) wander route 56 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 329.0 WORK at (99.21, 74.28) v (-0.94, -1.03) goal (99.9, 76.1) wander route 56 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 329.5 WORK at (98.85, 74.23) v (-0.51, 0.00) goal (99.9, 76.1) wander route 55 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 330.0 WORK at (98.74, 73.91) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 330.5 WORK at (98.71, 73.21) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 331.0 WORK at (98.68, 72.51) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 331.5 WORK at (98.65, 71.81) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 332.0 WORK at (98.62, 71.12) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 332.5 WORK at (98.59, 70.42) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 333.0 WORK at (98.56, 69.72) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 333.5 WORK at (98.53, 69.02) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 334.0 WORK at (98.50, 68.32) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 334.5 WORK at (98.47, 67.62) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 335.0 WORK at (98.44, 66.92) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 335.5 WORK at (98.41, 66.22) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 336.0 WORK at (98.38, 65.52) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 336.5 WORK at (98.35, 64.82) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 337.0 WORK at (98.32, 64.12) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 337.5 WORK at (98.28, 63.42) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 338.0 WORK at (98.25, 62.72) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\13-caravan.png
+      [watch] Dag t 338.5 WORK at (98.22, 62.02) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 339.0 WORK at (98.19, 61.32) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 339.5 WORK at (98.16, 60.62) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 340.0 WORK at (98.13, 59.93) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 340.5 WORK at (98.10, 59.23) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 341.0 WORK at (98.07, 58.53) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 341.5 WORK at (98.04, 57.83) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 342.0 WORK at (98.01, 57.13) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 342.5 WORK at (97.98, 56.43) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 343.0 WORK at (97.95, 55.73) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 343.5 WORK at (97.92, 55.03) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 344.0 WORK at (97.89, 54.33) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 344.5 WORK at (97.86, 53.63) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 345.0 WORK at (97.82, 52.93) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 345.5 WORK at (97.79, 52.23) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 346.0 WORK at (97.76, 51.53) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 346.5 WORK at (97.73, 50.84) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 347.0 WORK at (97.70, 50.14) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 347.5 WORK at (97.67, 49.44) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 348.0 WORK at (97.64, 48.74) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 348.5 WORK at (97.61, 48.04) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 349.0 WORK at (97.58, 47.34) v (-0.06, -1.40) goal (99.9, 76.1) wander route 28 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 349.5 WORK at (97.45, 46.66) v (-0.56, -1.28) goal (99.9, 76.1) wander route 27 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 350.0 WORK at (97.23, 46.04) v (0.00, -1.11) goal (99.9, 76.1) wander route 26 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 350.5 WORK at (97.17, 45.72) v (-0.86, -0.46) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 351.0 WORK at (96.53, 45.49) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 351.5 WORK at (95.87, 45.25) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 352.0 WORK at (95.21, 45.01) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 352.5 WORK at (94.55, 44.77) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 353.0 WORK at (93.89, 44.53) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 353.5 WORK at (93.23, 44.30) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 354.0 WORK at (92.58, 44.06) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] cargo leaves Store A for the crate (no double counting): crate 5
+      [watch] Dag t 354.5 WORK at (91.92, 43.82) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 355.0 WORK at (91.26, 43.58) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 355.5 WORK at (90.60, 43.34) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 356.0 WORK at (89.94, 43.11) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 356.5 WORK at (89.28, 42.87) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 357.0 WORK at (88.63, 42.63) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 357.5 WORK at (87.97, 42.39) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 358.0 WORK at (87.31, 42.15) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 358.5 WORK at (86.65, 41.92) v (-1.32, -0.48) goal (99.9, 76.1) wander route 16 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 359.0 WORK at (86.14, 41.50) v (-0.75, -1.18) goal (99.9, 76.1) wander route 15 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 359.5 WORK at (85.76, 40.91) v (-0.61, -1.21) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 360.0 WORK at (85.73, 40.22) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 360.5 WORK at (85.72, 39.52) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 361.0 WORK at (85.71, 38.82) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 361.5 WORK at (85.69, 38.12) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 362.0 WORK at (85.68, 37.42) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 362.5 WORK at (85.66, 36.72) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 363.0 WORK at (85.65, 36.02) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 363.5 WORK at (85.64, 35.32) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 364.0 WORK at (85.62, 34.62) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [stuck] Hale WORK at (35.68, 4.00, 120.84) -> (35.5, 120.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] Dag t 364.5 WORK at (85.61, 33.92) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 365.0 WORK at (85.59, 33.22) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 365.5 WORK at (85.58, 32.52) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 366.0 WORK at (85.57, 31.82) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 366.5 WORK at (85.55, 31.12) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 367.0 WORK at (85.54, 30.42) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 367.5 WORK at (85.52, 29.72) v (-0.03, -1.40) goal (99.9, 76.1) wander route 3 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 368.0 WORK at (85.56, 29.05) v (0.83, -0.94) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 368.5 WORK at (86.11, 28.61) v (1.09, -0.88) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 369.0 WORK at (86.65, 28.18) v (1.09, -0.88) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 369.5 WORK at (87.18, 27.75) v (0.85, -0.68) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 370.0 WORK at (87.30, 27.66) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 370.5 WORK at (87.30, 27.66) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 371.0 WORK at (87.30, 27.66) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 371.5 WORK at (87.83, 27.51) v (1.35, -0.37) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 372.0 WORK at (88.50, 27.33) v (1.35, -0.37) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 372.5 WORK at (89.18, 27.14) v (1.35, -0.37) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 373.0 WORK at (89.85, 26.95) v (1.35, -0.37) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 373.5 WORK at (90.53, 26.77) v (1.35, -0.37) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 374.0 WORK at (91.16, 26.59) v (0.96, -0.26) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 374.5 WORK at (91.26, 26.57) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 375.0 WORK at (91.26, 26.57) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 375.5 WORK at (91.26, 26.57) v (0.00, 0.00) goal (99.9, 76.1) wander route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 376.0 WORK at (91.01, 26.10) v (-0.66, -1.24) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 376.5 WORK at (90.68, 25.49) v (-0.66, -1.24) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 377.0 WORK at (90.36, 24.87) v (-0.66, -1.24) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 377.5 WORK at (90.03, 24.25) v (-0.66, -1.24) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 378.0 WORK at (89.70, 23.63) v (-0.66, -1.24) goal (99.9, 76.1) wander route 1 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] the carter walked the cargo to Store B: delivered once
+  [ ok ] a delivered shipment cannot deliver again
+      [watch] Dag t 378.5 EAT at (89.46, 23.19) v (0.00, 0.00) goal (84.0, 24.0) go to goal route 0 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 379.0 EAT at (89.05, 23.30) v (-1.84, 0.49) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 379.5 EAT at (88.13, 23.54) v (-1.84, 0.49) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 380.0 EAT at (87.21, 23.78) v (-1.84, 0.49) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 380.5 EAT at (86.29, 24.03) v (-1.84, 0.49) goal (84.0, 24.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 381.0 EAT at (85.53, 24.36) v (-0.47, 1.43) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 381.5 EAT at (85.46, 25.29) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 382.0 EAT at (85.41, 26.24) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+  [FAIL] the second shipment is on the road (none planned; carter EAT at (28.1, 101.0), drank from the well)
+== Quest and death
+      [watch] Dag t 382.5 EAT at (85.36, 27.19) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] talking to the quest giver opens dialogue
+  [ ok ] the test quest is ACTIVE with a letter and a journal entry
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\14-kiosk.png
+      [watch] Dag t 383.0 EAT at (85.30, 28.14) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 383.5 EAT at (85.25, 29.09) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] the quest failed with its reason
+  [ ok ] the journal records what the player learned
+  [ ok ] Kit is not replaced: still dead after time passes
+  [ ok ] the quest cannot be completed afterwards
+== Persistence and time
+  [ ok ] saved
+      [watch] Dag t 384.0 EAT at (85.20, 30.04) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 384.5 EAT at (85.22, 29.65) v (-0.10, 1.82) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] loaded
+  [ ok ] door state survives save/load
+  [ ok ] XP and items survive (no after-save changes leak in)
+  [ ok ] the clock and revision come back
+  [ ok ] the dead NPC stays dead and the quest stays failed with its reason
+  [ ok ] NPC memories survive
+  [ ok ] invariants hold after load
+      [watch] Dag t 385.0 EAT at (85.17, 30.59) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 385.5 EAT at (85.12, 31.54) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 386.0 EAT at (85.06, 32.49) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 386.5 EAT at (85.01, 33.44) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 387.0 EAT at (84.96, 34.39) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 387.5 EAT at (84.90, 35.34) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 388.0 EAT at (84.85, 36.28) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 388.5 EAT at (84.80, 37.23) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 389.0 EAT at (84.74, 38.18) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 389.5 EAT at (84.69, 39.13) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 390.0 EAT at (84.64, 40.08) v (-0.11, 1.90) goal (84.0, 42.5) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 390.5 EAT at (84.61, 40.99) v (0.44, 1.26) goal (98.5, 43.0) go to goal route 12 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 391.0 EAT at (85.41, 41.16) v (1.90, 0.12) goal (98.5, 43.0) go to goal route 9 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 391.5 EAT at (86.35, 41.23) v (1.88, 0.24) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 392.0 EAT at (87.29, 41.40) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 392.5 EAT at (88.22, 41.58) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 393.0 EAT at (89.16, 41.75) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 393.5 EAT at (90.09, 41.93) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 394.0 EAT at (91.02, 42.10) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 394.5 EAT at (91.96, 42.28) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+  [ ok ] time advance: at night NPCs replan to sleep (4)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\15-night.png
+  [ ok ] sleeping in someone else's bed is refused (This is Ada's bed.)
+  [ ok ] sleeping in a bed skips to morning and rests (Day 3, 06:00)
+      [watch] Dag t 395.0 EAT at (92.89, 42.45) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 395.5 EAT at (93.83, 42.63) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 396.0 EAT at (94.76, 42.80) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+      [watch] Dag t 396.5 EAT at (95.69, 42.98) v (1.87, 0.35) goal (98.5, 43.0) go to goal route 1 inv [10 x Gold coins] last no tree available; waiting
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\16-skills-tab.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\17-inventory.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\18-equipment.png
+== Invariants
+    [ ok ] item conservation: 51 item kinds, every unit in exactly one place
+    [ ok ] shipments: 3 checked (delivered once at most, never both)
+    [ ok ] report-before-bounty: 0 bounties, each from a report
+    [ ok ] XP accounting: every skill of 18 actors matches its committed awards
+    [ ok ] XP table: 60/80/90/100 thresholds exact, 6,000,000 at 100
+    [ ok ] references: 10 crime memories and the quest's NPCs resolve
+  [ ok ] every world-state invariant holds at the end
+
+acceptance: 123 / 130 checks passed
+  FAILED: the shards fell and came to rest on the ground (33 of 116)
+  FAILED: Thieving: a pocket picked (seeded skill check, roll recorded in the event)
+  FAILED: every one of the 18 skills has earned XP through an executable action (17/18)
+  FAILED: the worker cut real trees and sold logs into Store A (8 -> 8, Dag WC xp 56616, holds 0 logs, goal EAT, last: drank from the well)
+  FAILED: resisting and beaten down, the player is arrested rather than killed (arrests 0, alive true)
+  FAILED: after an arrest by force no guard or lawman strikes the player again (2 hits in ten seconds) and none still fights them
+  FAILED: the second shipment is on the road (none planned; carter EAT at (28.1, 101.0), drank from the well)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':acceptance'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3m 13s

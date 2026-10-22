@@ -1,0 +1,406 @@
+Astratto Engine 2.0 - RPGGAME devmap (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.2, built Oct 18 2026 03:50:16 (MSVC)
+== Character creator
+  [ ok ] creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)
+  [ ok ] 20 distinct male and 20 distinct female hairstyles (20, 20)
+  [ ok ] 20 distinct facial-hair presets including clean-shaven and the two stubbles (20)
+  [ ok ] 20 distinct tops, 20 legs and 20 shoes (60 of 60)
+  [ ok ] hairstyle row wraps after 20
+  [ ok ] choosing female removes facial hair and its row
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\01-creator.png
+  [ ok ] male figure: 32 px tall (8 head + 12 torso + 12 legs), hitbox 1.8 x 0.6 blocks
+  [ ok ] female figure: head 8x8x8, body 6x12x3, arms 3x12x4, legs 4x12x4, its own hitbox (1.8 x 0.45)
+  [ ok ] skins are painted at 128 x 128
+  [ ok ] appearance round-trips through save data
+      [watch] t 0.0 IDLE at (98.50, 66.50) v (0.00, 0.00) goal (0.0, 0.0) - route 0 nav 251
+      [watch] t 0.5 PATROL at (99.11, 66.62) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+      [watch] t 1.0 PATROL at (100.04, 66.81) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+      [watch] t 1.5 PATROL at (100.97, 66.99) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\02-spawn.png
+  [ ok ] the player stands on the devmap
+== Leveling: all 18 skills on one table
+  [ ok ] 18 skills are registered
+  [ ok ] every skill starts at level 1
+  [ ok ] XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000
+  [ ok ] the stored table is strictly increasing and levelFor agrees at every boundary
+  [ ok ] every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000
+  [ ok ] level-ups were committed as events (72)
+  [ ok ] a repeated request pays XP once
+      [watch] t 2.0 PATROL at (101.90, 67.18) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+  [ ok ] a player level-up is celebrated (overlay and message)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\03-level-up.png
+== Interaction edge cases
+      [watch] t 2.5 PATROL at (102.84, 67.37) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+  [ ok ] the shed door offers Open and Examine
+      [watch] t 3.0 PATROL at (103.77, 67.55) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+  [ ok ] out of range: rejected, door unchanged
+      [watch] t 3.5 PATROL at (104.70, 67.74) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 255
+  [ ok ] in range: the door opens (blocks removed)
+  [ ok ] the locked door's Open is disabled with a reason
+  [ ok ] its Pick lock is disabled with a reason (Thieving 10)
+      [watch] t 4.0 PATROL at (105.63, 67.93) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+  [ ok ] a loose item is taken exactly once
+  [ ok ] a stale target is rejected without a duplicate
+  [ ok ] the shed's tools were picked up
+  [ ok ] pickup at full inventory is refused and the item stays
+  [ ok ] the owned coins on the table are still there for the theft test
+      [watch] t 4.5 PATROL at (106.56, 68.11) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+      [watch] t 5.0 PATROL at (107.49, 68.30) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+  [ ok ] crafting interrupted mid-work consumes nothing (STARTED)
+  [ ok ] furniture and workstations are objects, not blocks: 23 pieces, their cells never meshed but still solid
+  [ ok ] block textures are 64 x 64
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04-interaction.png
+== Physical doors and breaking glass
+      [watch] t 5.5 PATROL at (108.42, 68.49) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+      [watch] t 6.0 PATROL at (109.36, 68.67) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+      [watch] t 6.5 PATROL at (110.29, 68.86) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+  [ ok ] opened, the shed door's leaves swing in on their hinges (1.75 rad) and the doorway is open
+      [watch] t 7.0 PATROL at (111.22, 69.04) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 259
+      [watch] t 7.5 PATROL at (112.15, 69.23) v (1.86, 0.37) goal (113.5, 69.5) go to goal route 1 nav 263
+      [watch] t 8.0 PATROL at (112.85, 69.37) v (0.00, 0.00) goal (113.5, 69.5) hold/face route 0 nav 263
+      [watch] t 8.5 PATROL at (112.85, 69.37) v (0.00, 0.00) goal (113.5, 69.5) hold/face route 0 nav 263
+      [watch] t 9.0 PATROL at (112.85, 69.37) v (0.00, 0.00) goal (113.5, 69.5) hold/face route 0 nav 263
+  [ ok ] closed, the leaves swing home and latch (0.000 rad) and the cells are a shut door again
+      [watch] t 9.5 PATROL at (112.85, 69.37) v (0.00, 0.00) goal (113.5, 69.5) hold/face route 0 nav 263
+      [watch] t 10.0 PATROL at (112.86, 69.61) v (0.11, 1.90) goal (113.5, 82.5) go to goal route 3 nav 263
+      [watch] t 10.5 PATROL at (112.91, 70.56) v (0.10, 1.90) goal (113.5, 82.5) go to goal route 2 nav 263
+  [ ok ] walking into the latched door, the player is held at its face (z 22.86)
+      [watch] t 11.0 PATROL at (112.97, 71.51) v (0.11, 1.90) goal (113.5, 82.5) go to goal route 3 nav 267
+      [watch] t 11.5 PATROL at (113.02, 72.46) v (0.10, 1.90) goal (113.5, 82.5) go to goal route 2 nav 267
+      [watch] t 12.0 PATROL at (113.07, 73.40) v (0.10, 1.90) goal (113.5, 82.5) go to goal route 2 nav 267
+      [watch] t 12.5 PATROL at (113.12, 74.35) v (0.10, 1.90) goal (113.5, 82.5) go to goal route 2 nav 349
+      [watch] t 13.0 PATROL at (113.17, 75.30) v (0.10, 1.90) goal (113.5, 82.5) go to goal route 2 nav 349
+  [ ok ] opened, the player walks through the doorway into the shed (z 14.91)
+      [watch] t 13.5 PATROL at (113.22, 75.78) v (0.09, 0.00) goal (113.5, 82.5) go to goal route 1 nav 349
+      [watch] t 14.0 PATROL at (113.26, 76.40) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 349
+      [watch] t 14.5 PATROL at (113.30, 77.35) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 352
+  [ ok ] a sword swung at the shed window breaks the pane (116 shards)
+      [watch] t 15.0 PATROL at (113.33, 78.30) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 352
+      [watch] t 15.5 PATROL at (113.37, 79.25) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 352
+      [watch] t 16.0 PATROL at (113.41, 80.20) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 352
+      [watch] t 16.5 PATROL at (113.45, 81.15) v (0.07, 1.90) goal (113.5, 82.5) go to goal route 1 nav 352
+      [watch] t 17.0 PATROL at (113.47, 81.86) v (0.00, 0.00) goal (113.5, 82.5) hold/face route 0 nav 352
+      [stuck] Eda WORK at (99.13, 4.00, 59.42) -> (98.5, 49.0), go to goal, v (-0.12, -1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 17.5 PATROL at (113.47, 81.86) v (0.00, 0.00) goal (113.5, 82.5) hold/face route 0 nav 352
+      [watch] t 18.0 PATROL at (113.47, 81.86) v (0.00, 0.00) goal (113.5, 82.5) hold/face route 0 nav 352
+      [watch] t 18.5 PATROL at (113.47, 81.86) v (0.00, 0.00) goal (113.5, 82.5) hold/face route 0 nav 352
+      [watch] t 19.0 PATROL at (113.23, 81.86) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 19.5 PATROL at (112.28, 81.90) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+  [FAIL] the shards fell and came to rest on the ground (33 of 116)
+  [ ok ] breaking the pane was committed as an event
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\04b-glass.png
+== Skill actions (each of the 18)
+      [watch] t 20.0 PATROL at (111.33, 81.94) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 20.5 PATROL at (110.39, 81.97) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 21.0 PATROL at (109.44, 82.00) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 21.5 PATROL at (108.49, 82.04) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 22.0 PATROL at (107.54, 82.08) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 22.5 PATROL at (106.59, 82.11) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [watch] t 23.0 PATROL at (105.64, 82.15) v (-1.90, 0.07) goal (96.5, 82.5) go to goal route 1 nav 352
+      [stuck] Cole PATROL at (105.01, 4.00, 82.17) -> (96.5, 82.5), go to goal, v (-1.90, 0.07) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 23.5 PATROL at (104.71, 82.11) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 24.0 PATROL at (103.90, 81.62) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 24.5 PATROL at (103.08, 81.14) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 25.0 PATROL at (102.26, 80.66) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 25.5 PATROL at (101.44, 80.17) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 26.0 PATROL at (100.63, 79.69) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 26.5 PATROL at (99.81, 79.20) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 27.0 PATROL at (98.99, 78.72) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [watch] t 27.5 PATROL at (98.18, 78.23) v (-1.63, -0.97) goal (88.5, 72.5) go to goal route 1 nav 352
+      [stuck] Cole PATROL at (97.47, 4.00, 77.81) -> (88.5, 72.5), go to goal, v (-1.63, -0.97) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 28.0 PATROL at (97.37, 77.75) v (-1.36, -1.04) goal (98.5, 66.5) go to goal route 1 nav 352
+      [watch] t 28.5 PATROL at (97.32, 76.90) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 352
+      [watch] t 29.0 PATROL at (97.43, 75.96) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 352
+      [watch] t 29.5 PATROL at (97.54, 75.02) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 3 nav 352
+      [watch] t 30.0 PATROL at (97.64, 74.07) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 352
+      [watch] t 30.5 PATROL at (97.75, 73.13) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 352
+  [ ok ] Woodcutting: logs cut from a real tree
+  [ ok ] a felled tree changes the world (stump)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\05-woodcutting.png
+      [watch] t 31.0 PATROL at (97.85, 72.18) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+      [watch] t 31.5 PATROL at (97.96, 71.24) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+      [watch] t 32.0 PATROL at (98.07, 70.30) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+  [ ok ] Firemaking: a fire is lit from logs
+      [watch] t 32.5 PATROL at (98.18, 69.35) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+      [watch] t 33.0 PATROL at (98.28, 68.41) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+      [watch] t 33.5 PATROL at (98.39, 67.46) v (0.21, -1.89) goal (98.5, 66.5) go to goal route 1 nav 434
+      [watch] t 34.0 PATROL at (98.43, 67.14) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 434
+      [watch] t 34.5 PATROL at (98.43, 67.14) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 434
+      [watch] t 35.0 PATROL at (98.43, 67.14) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 434
+      [watch] t 35.5 PATROL at (98.43, 67.14) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 434
+      [watch] t 36.0 PATROL at (99.04, 67.23) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 36.5 PATROL at (99.98, 67.38) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [stuck] Dag WORK at (85.01, 4.00, 31.69) -> (84.0, 42.5), go to goal, v (-0.09, 1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 37.0 PATROL at (100.92, 67.53) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 37.5 PATROL at (101.86, 67.67) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 38.0 PATROL at (102.80, 67.82) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 38.5 PATROL at (103.73, 67.97) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 39.0 PATROL at (104.67, 68.11) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+  [ ok ] Mining: copper and tin ore
+  [ ok ] a mined-out rock changes the world
+      [watch] t 39.5 PATROL at (105.61, 68.26) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [watch] t 40.0 PATROL at (106.55, 68.41) v (1.88, 0.29) goal (113.5, 69.5) go to goal route 1 nav 434
+      [stuck] Cole PATROL at (106.80, 4.00, 68.45) -> (113.5, 69.5), go to goal, v (1.88, 0.29) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 40.5 PATROL at (107.00, 68.50) v (-0.91, 0.05) goal (100.5, 68.0) go to goal route 1 nav 434
+      [watch] t 41.0 PATROL at (106.11, 68.51) v (-1.90, -0.00) goal (100.5, 68.0) go to goal route 1 nav 434
+      [watch] t 41.5 PATROL at (105.16, 68.51) v (-1.90, -0.00) goal (100.5, 68.0) go to goal route 1 nav 434
+      [watch] t 42.0 PATROL at (104.21, 68.50) v (-1.90, -0.00) goal (100.5, 68.0) go to goal route 1 nav 434
+      [watch] t 42.5 PATROL at (103.26, 68.50) v (-1.90, -0.00) goal (100.5, 68.0) go to goal route 1 nav 516
+      [watch] t 43.0 PATROL at (102.31, 68.50) v (-1.90, -0.00) goal (100.5, 68.0) go to goal route 1 nav 516
+      [watch] t 43.5 PATROL at (101.95, 68.97) v (0.16, 1.89) goal (97.0, 84.0) go to goal route 10 nav 516
+      [watch] t 44.0 PATROL at (102.03, 69.92) v (0.16, 1.89) goal (97.0, 84.0) go to goal route 10 nav 516
+      [watch] t 44.5 PATROL at (102.11, 70.77) v (0.16, 0.00) goal (97.0, 84.0) go to goal route 10 nav 516
+      [watch] t 45.0 PATROL at (102.18, 70.77) v (0.14, 0.00) goal (97.0, 84.0) go to goal route 10 nav 516
+  [ ok ] Smithing: a bar smelted and a bronze dagger forged
+      [watch] t 45.5 PATROL at (102.25, 70.95) v (0.13, 1.68) goal (97.0, 84.0) go to goal route 11 nav 517
+      [watch] t 46.0 PATROL at (102.32, 71.90) v (0.13, 1.90) goal (97.0, 84.0) go to goal route 11 nav 517
+      [watch] t 46.5 PATROL at (102.38, 72.85) v (0.13, 1.90) goal (97.0, 84.0) go to goal route 11 nav 517
+      [watch] t 47.0 PATROL at (102.30, 73.77) v (-0.78, 1.73) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 47.5 PATROL at (102.08, 74.62) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 48.0 PATROL at (101.68, 75.48) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 48.5 PATROL at (101.28, 76.34) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 49.0 PATROL at (100.88, 77.20) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 49.5 PATROL at (100.48, 78.07) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 50.0 PATROL at (100.08, 78.93) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 50.5 PATROL at (99.68, 79.79) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 51.0 PATROL at (99.29, 80.65) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 51.5 PATROL at (98.89, 81.51) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 52.0 PATROL at (98.49, 82.38) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 517
+      [watch] t 52.5 PATROL at (98.27, 83.04) v (0.74, 0.34) goal (113.5, 82.5) go to goal route 1 nav 517
+  [ ok ] Fishing: raw shrimp
+      [watch] t 53.0 PATROL at (99.14, 83.03) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 53.5 PATROL at (100.09, 82.99) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 54.0 PATROL at (101.04, 82.96) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 54.5 PATROL at (101.99, 82.92) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 55.0 PATROL at (102.94, 82.89) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [stuck] Dag WORK at (98.99, 4.00, 55.94) -> (100.5, 68.0), go to goal, v (0.23, 1.89) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [stuck] Bandit WANDER at (15.23, 4.00, 81.43) -> (0.0, 0.0), wander, v (-0.34, -1.36) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 55.5 PATROL at (103.89, 82.85) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 56.0 PATROL at (104.84, 82.82) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+      [watch] t 56.5 PATROL at (105.79, 82.78) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 517
+  [ ok ] Cooking: shrimp cooked (or burnt by the seeded check, which pays no XP)
+      [stuck] Cole PATROL at (106.39, 4.00, 82.76) -> (113.5, 82.5), go to goal, v (1.90, -0.07) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 57.0 PATROL at (106.64, 82.75) v (0.64, -0.04) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 57.5 PATROL at (106.05, 82.73) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 58.0 PATROL at (105.10, 82.71) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 58.5 PATROL at (104.15, 82.68) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 59.0 PATROL at (103.20, 82.66) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+  [ ok ] Harvesting: guam picked
+  [ ok ] flax is level-gated (Harvesting 5) with a reason
+      [watch] t 59.5 PATROL at (102.25, 82.64) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 60.0 PATROL at (101.30, 82.61) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 60.5 PATROL at (100.35, 82.59) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 517
+      [watch] t 61.0 PATROL at (99.40, 82.57) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 599
+  [ ok ] Crafting: arrow shafts fletched from logs
+      (rejected: You don't have room for the result.)
+      (rejected: You need 2 x Plank.)
+      [watch] t 61.5 PATROL at (98.45, 82.55) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 599
+  [FAIL] Construction: a crate built into the world as blocks
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\06-construction.png
+      [watch] t 62.0 PATROL at (97.50, 82.52) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 599
+      [watch] t 62.5 PATROL at (97.17, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 599
+      [watch] t 63.0 PATROL at (97.17, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 599
+      [watch] t 63.5 PATROL at (97.17, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 599
+      [watch] t 64.0 PATROL at (97.17, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 599
+  [ ok ] Agility: an obstacle crossed and a lap completed
+      [watch] t 64.5 PATROL at (96.77, 82.05) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 65.0 PATROL at (96.15, 81.33) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 65.5 PATROL at (95.52, 80.61) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 66.0 PATROL at (94.90, 79.89) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 66.5 PATROL at (94.28, 79.17) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 67.0 PATROL at (93.66, 78.45) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 67.5 PATROL at (93.04, 77.74) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 68.0 PATROL at (92.41, 77.02) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 68.5 PATROL at (91.79, 76.30) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 69.0 PATROL at (91.17, 75.58) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 69.5 PATROL at (90.55, 74.86) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 70.0 PATROL at (89.93, 74.15) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 599
+      [watch] t 70.5 PATROL at (89.30, 73.43) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 71.0 PATROL at (88.96, 73.03) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 71.5 PATROL at (88.96, 73.03) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [stuck] Bandit archer WANDER at (27.39, 4.00, 83.65) -> (0.0, 0.0), wander, v (0.13, -1.39) ground true route 1 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 72.0 PATROL at (88.96, 73.03) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 72.5 PATROL at (88.96, 73.03) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 73.0 PATROL at (89.32, 72.79) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [stuck] Eda WORK at (99.08, 4.00, 56.69) -> (100.5, 68.0), go to goal, v (0.23, 1.89) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 73.5 PATROL at (90.10, 72.25) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 74.0 PATROL at (90.89, 71.72) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 74.5 PATROL at (91.67, 71.18) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 75.0 PATROL at (92.45, 70.64) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 75.5 PATROL at (93.24, 70.11) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 76.0 PATROL at (94.02, 69.57) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 76.5 PATROL at (94.81, 69.03) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 77.0 PATROL at (95.59, 68.50) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 77.5 PATROL at (96.37, 67.96) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 78.0 PATROL at (97.16, 67.42) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 78.5 PATROL at (97.87, 66.93) v (0.64, -0.44) goal (98.5, 66.5) hold/face route 0 nav 600
+      [watch] t 79.0 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 600
+      [watch] t 79.5 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 600
+      [watch] t 80.0 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 600
+      [watch] t 80.5 PATROL at (97.98, 66.93) v (1.11, 0.18) goal (113.5, 69.5) go to goal route 1 nav 600
+      [stuck] Dag WORK at (98.81, 4.00, 59.44) -> (98.5, 49.0), go to goal, v (-0.06, -1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 81.0 PATROL at (98.89, 67.08) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 81.5 PATROL at (99.82, 67.23) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 82.0 PATROL at (100.76, 67.39) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 82.5 PATROL at (101.70, 67.54) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 83.0 PATROL at (102.63, 67.70) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [stuck] Ivo WORK at (71.88, 4.00, 64.87) -> (64.5, 64.5), go to goal, v (-1.90, -0.09) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 83.5 PATROL at (103.57, 67.85) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 84.0 PATROL at (104.51, 68.01) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [watch] t 84.5 PATROL at (105.45, 68.16) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 600
+      [stuck] Cole PATROL at (106.26, 4.00, 68.30) -> (113.5, 69.5), go to goal, v (1.87, 0.31) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 85.0 PATROL at (106.38, 68.32) v (1.60, 0.28) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 85.5 PATROL at (106.13, 68.37) v (-1.90, 0.04) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 86.0 PATROL at (105.18, 68.39) v (-1.90, 0.04) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 86.5 PATROL at (104.23, 68.42) v (-1.90, 0.04) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 87.0 PATROL at (103.28, 68.44) v (-1.90, 0.04) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 87.5 PATROL at (102.33, 68.46) v (-1.90, 0.04) goal (100.5, 68.0) go to goal route 1 nav 600
+      [watch] t 88.0 PATROL at (101.98, 68.94) v (0.15, 1.89) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 88.5 PATROL at (102.05, 69.89) v (0.15, 1.89) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 89.0 PATROL at (102.13, 70.77) v (0.15, 0.02) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 89.5 PATROL at (102.20, 70.77) v (0.13, 0.00) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 90.0 PATROL at (102.26, 71.15) v (0.11, 1.90) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 90.5 PATROL at (102.31, 72.10) v (0.11, 1.90) goal (97.0, 84.0) go to goal route 10 nav 600
+      [stuck] Ivo WORK at (65.30, 4.00, 72.89) -> (64.5, 82.0), go to goal, v (-0.16, 1.89) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 91.0 PATROL at (102.36, 73.05) v (0.11, 1.90) goal (97.0, 84.0) go to goal route 10 nav 600
+      [watch] t 91.5 PATROL at (102.23, 73.94) v (0.00, 1.67) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 92.0 PATROL at (102.00, 74.79) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 92.5 PATROL at (101.60, 75.65) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 93.0 PATROL at (101.20, 76.51) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 93.5 PATROL at (100.80, 77.37) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 94.0 PATROL at (100.40, 78.23) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 94.5 PATROL at (100.00, 79.10) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 95.0 PATROL at (99.60, 79.96) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 95.5 PATROL at (99.21, 80.82) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 96.0 PATROL at (98.81, 81.68) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 96.5 PATROL at (98.41, 82.54) v (-0.80, 1.72) goal (97.0, 84.0) go to goal route 1 nav 600
+      [watch] t 97.0 PATROL at (98.39, 83.05) v (1.53, 0.06) goal (113.5, 82.5) go to goal route 1 nav 600
+      [watch] t 97.5 PATROL at (99.33, 83.02) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [stuck] Eda WORK at (98.81, 4.00, 59.44) -> (98.5, 49.0), go to goal, v (-0.06, -1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 98.0 PATROL at (100.28, 82.98) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [watch] t 98.5 PATROL at (101.23, 82.95) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [watch] t 99.0 PATROL at (102.18, 82.91) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [stuck] Ivo WORK at (62.66, 4.00, 88.68) -> (60.0, 96.0), go to goal, v (-0.50, 1.83) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 99.5 PATROL at (103.13, 82.88) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [stuck] Dag WORK at (85.04, 4.00, 34.27) -> (84.0, 24.0), go to goal, v (-0.10, -1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 100.0 PATROL at (104.08, 82.84) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [watch] t 100.5 PATROL at (105.03, 82.81) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [watch] t 101.0 PATROL at (105.98, 82.77) v (1.90, -0.07) goal (113.5, 82.5) go to goal route 1 nav 600
+      [stuck] Cole PATROL at (106.39, 4.00, 82.76) -> (113.5, 82.5), go to goal, v (1.90, -0.07) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 101.5 PATROL at (106.65, 82.74) v (-0.20, -0.04) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 102.0 PATROL at (105.86, 82.72) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 102.5 PATROL at (104.91, 82.70) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 103.0 PATROL at (103.96, 82.68) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 103.5 PATROL at (103.01, 82.66) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 104.0 PATROL at (102.06, 82.63) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 104.5 PATROL at (101.11, 82.61) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 105.0 PATROL at (100.16, 82.59) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [stuck] Dag WORK at (86.38, 4.00, 24.37) -> (87.5, 17.5), go to goal, v (0.31, -1.88) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 105.5 PATROL at (99.21, 82.56) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 106.0 PATROL at (98.26, 82.54) v (-1.90, -0.05) goal (96.5, 82.5) go to goal route 1 nav 600
+      [watch] t 106.5 PATROL at (97.32, 82.52) v (-1.62, -0.04) goal (96.5, 82.5) hold/face route 0 nav 600
+      [watch] t 107.0 PATROL at (97.18, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 600
+      [stuck] Ivo WORK at (52.57, 4.00, 95.22) -> (28.5, 96.5), go to goal, v (-1.90, 0.10) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 107.5 PATROL at (97.18, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 600
+      [watch] t 108.0 PATROL at (97.18, 82.52) v (0.00, 0.00) goal (96.5, 82.5) hold/face route 0 nav 600
+      [watch] t 108.5 PATROL at (97.17, 82.51) v (-0.18, -0.21) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 109.0 PATROL at (96.65, 81.90) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 109.5 PATROL at (96.02, 81.18) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 110.0 PATROL at (95.40, 80.47) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 2 nav 600
+      [watch] t 110.5 PATROL at (94.78, 79.75) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 111.0 PATROL at (94.16, 79.03) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 111.5 PATROL at (93.53, 78.31) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [stuck] Ivo WORK at (43.84, 4.00, 95.67) -> (28.5, 96.5), go to goal, v (-1.90, 0.10) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 112.0 PATROL at (92.91, 77.59) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 112.5 PATROL at (92.29, 76.88) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 113.0 PATROL at (91.67, 76.16) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 113.5 PATROL at (91.05, 75.44) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 114.0 PATROL at (90.42, 74.72) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [stuck] Finn SOCIALIZE at (99.22, 4.00, 60.94) -> (98.5, 49.0), go to goal, v (-0.12, -1.90) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 114.5 PATROL at (89.80, 74.00) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 115.0 PATROL at (89.18, 73.29) v (-1.24, -1.44) goal (88.5, 72.5) go to goal route 1 nav 600
+      [watch] t 115.5 PATROL at (88.97, 73.04) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 116.0 PATROL at (88.97, 73.04) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [stuck] Ivo WORK at (36.96, 4.00, 101.00) -> (27.5, 108.5), go to goal, v (-1.49, 1.18) ground true route 1 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+      [watch] t 116.5 PATROL at (88.97, 73.04) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 117.0 PATROL at (88.97, 73.04) v (0.00, 0.00) goal (88.5, 72.5) hold/face route 0 nav 600
+      [watch] t 117.5 PATROL at (89.48, 72.69) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 118.0 PATROL at (90.26, 72.15) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 118.5 PATROL at (91.05, 71.61) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 119.0 PATROL at (91.83, 71.07) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 600
+      [watch] t 119.5 PATROL at (92.61, 70.54) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 120.0 PATROL at (93.40, 70.00) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 120.5 PATROL at (94.18, 69.46) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 121.0 PATROL at (94.96, 68.92) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 121.5 PATROL at (95.75, 68.39) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 122.0 PATROL at (96.53, 67.85) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+  [ ok ] Thieving: a pocket picked (seeded skill check, roll recorded in the event)
+      (rejected: Nothing there.)
+  [ ok ] Faith: bones buried and Ward cast for Faith points
+    non-combat skills trained by their actions: 10
+== Combat and equipment
+      [watch] t 122.5 PATROL at (97.31, 67.31) v (1.57, -1.07) goal (98.5, 66.5) go to goal route 1 nav 682
+      [watch] t 123.0 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 682
+  [ ok ] a swing out of reach makes no contact
+      [watch] t 123.5 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 682
+      [watch] t 124.0 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 682
+      [watch] t 124.5 PATROL at (97.90, 66.91) v (0.00, 0.00) goal (98.5, 66.5) hold/face route 0 nav 682
+      [watch] t 125.0 PATROL at (98.14, 66.95) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 682
+      [watch] t 125.5 PATROL at (99.07, 67.11) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 682
+  [ ok ] collision-based melee hits the dummy (6, 6)
+  [ ok ] damage is deterministic: same stats, same move, same damage
+  [ ok ] combat XP from real hits: Attack (style) and Health share
+      [watch] t 126.0 PATROL at (100.01, 67.26) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 682
+      [watch] t 126.5 PATROL at (100.95, 67.42) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+      [watch] t 127.0 PATROL at (101.89, 67.57) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+      [watch] t 127.5 PATROL at (102.82, 67.73) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+  [ ok ] Strength and Defense styles train their skills
+      [watch] t 128.0 PATROL at (103.76, 67.88) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+      [watch] t 128.5 PATROL at (104.70, 68.04) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+  [ ok ] Defense and armor mitigate (armored dummy 3 < 6)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\shots\07-melee.png
+  [ ok ] Strength 90 wields a Godly sword
+  [ ok ] Defense 50 cannot wear Godly armor
+  [ ok ] Defense 50 wears Steel armor
+  [FAIL] manual swaps through the inventory: sword equipped, Godly body refused
+      [watch] t 129.0 PATROL at (105.63, 68.20) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+      [watch] t 129.5 PATROL at (106.57, 68.35) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 683
+      [watch] t 130.0 PATROL at (107.51, 68.51) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 765
+  [FAIL] gear changes damage (Godly sword 6 > wooden 6)
+      [watch] t 130.5 PATROL at (108.44, 68.66) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 765
+      [watch] t 131.0 PATROL at (109.38, 68.82) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 765
+  [ ok ] heavy impact exceeding Stability staggers (telemetry: Tester's HEAVY deflected by block 3 at (12, 3, 46), s=0.69)
+      [watch] t 131.5 PATROL at (110.32, 68.97) v (1.87, 0.31) goal (113.5, 69.5) go to goal route 1 nav 765
+java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null
+	at rpg.Acceptance.combat(Acceptance.java:477)
+	at rpg.Acceptance.run(Acceptance.java:68)
+	at rpg.Main.run(Main.java:68)
+	at rpg.Main.main(Main.java:46)
+  [FAIL] the run completed without an exception (java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null)
+
+acceptance: 62 / 67 checks passed
+  FAILED: the shards fell and came to rest on the ground (33 of 116)
+  FAILED: Construction: a crate built into the world as blocks
+  FAILED: manual swaps through the inventory: sword equipped, Godly body refused
+  FAILED: gear changes damage (Godly sword 6 > wooden 6)
+  FAILED: the run completed without an exception (java.lang.NullPointerException: Cannot read field "amount" because the return value of "rpg.item.Equipment.get(rpg.item.ItemDef$Slot)" is null)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':acceptance'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 6s

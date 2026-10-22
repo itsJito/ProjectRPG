@@ -1,0 +1,35 @@
+Astratto Engine 2.0 - RPGGAME devmap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.2, built Oct 18 2026 07:07:01 (MSVC)
+[addons] loaded [low_health.lua, session_gold.lua]
+[sheet] items-1 (60 frames)
+[sheet] items-2 (60 frames)
+[sheet] items-3 (54 frames)
+[sheet] m-walk-side (15 frames)
+[sheet] m-stop (15 frames)
+[sheet] m-start-front (15 frames)
+[sheet] m-walk-front (15 frames)
+[sheet] m-strafe (15 frames)
+[sheet] m-backpedal (15 frames)
+[sheet] m-run (12 frames)
+[sheet] m-sprint-stop (12 frames)
+[sheet] m-turn (15 frames)
+[sheet] m-quickturn (10 frames)
+[sheet] m-light (14 frames)
+[sheet] m-heavy (22 frames)
+[sheet] m-hair (40 frames)
+[sheet] m-beards (40 frames)
+[sheet] m-tops (20 frames)
+[sheet] m-legs (20 frames)
+[sheet] m-shoes (20 frames)
+[sheet] m-bodies (3 frames)
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\gallery\m-workstations.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\gallery\m-shed-door.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\gallery\m-beds.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\gallery\m-targets.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\gallery\m-counter.png
