@@ -210,6 +210,7 @@ public final class Brain {
 
     // ------------------------------------------------------------------ acting
     public void act(Npc n, float dt) {
+        n.cs.aim = 0;   // a raised crossbow is requested again only while engaging a visible target
         n.hunger = Math.min(1, n.hunger + dt / 900f);
         n.social = Math.min(1, n.social + (n.combatant() ? 0 : dt / 300f));
         n.fatigue = n.goal == Goal.SLEEP ? Math.max(0, n.fatigue - dt / 60f) : Math.min(1, n.fatigue + dt / 2400f);

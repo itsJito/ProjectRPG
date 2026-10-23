@@ -77,14 +77,16 @@ class RigTest {
         }
     }
     @Test void freeRunningArmsCounterSwingAgainstTheLegs() {
-        Actor a = standing(); a.vz = -5;
-        Rig rig = new Rig(); Rig.State state = new Rig.State();
-        double correlation = 0;
-        for (int i = 0; i < 300; i++) {
-            a.z += a.vz / 60;
-            rig.pose(a, state, 1f / 60, i / 60f, false);
-            if (i > 90) correlation += (rig.hand[0][2] - rig.hand[1][2]) * (state.foot[0][2] - state.foot[1][2]);
+        for (boolean female : new boolean[]{false, true}) {
+            Actor a = standing(); a.vz = -5; a.look.female = female;
+            Rig rig = new Rig(); Rig.State state = new Rig.State();
+            double correlation = 0;
+            for (int i = 0; i < 300; i++) {
+                a.z += a.vz / 60;
+                rig.pose(a, state, 1f / 60, i / 60f, false);
+                if (i > 90) correlation += (rig.hand[0][2] - rig.hand[1][2]) * (state.foot[0][2] - state.foot[1][2]);
+            }
+            assertTrue(correlation < 0, "a forward leg needs a backward arm, rather than the same-side jab: " + correlation);
         }
-        assertTrue(correlation < 0, "a forward leg needs a backward arm, rather than the same-side jab: " + correlation);
     }
 }
