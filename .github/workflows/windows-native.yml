@@ -1,0 +1,25 @@
+name: Windows native build
+
+on:
+  push:
+    paths:
+      - 'theastrattoengine/native/**'
+      - '.github/workflows/windows-native.yml'
+  pull_request:
+    paths:
+      - 'theastrattoengine/native/**'
+      - '.github/workflows/windows-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile with MSVC warnings as errors and run native checks
+        working-directory: theastrattoengine
+        shell: cmd
+        run: native\build.bat

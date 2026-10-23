@@ -69,6 +69,10 @@ The Windows compiler-discovery branch also had unconditional `exit` commands aft
 
 Strict Linux release and ASan/UBSan builds pass all 110 native checks, including nonfinite/extreme path-coordinate rejection. Engine/game Gradle builds succeed. MSVC and Windows command execution are unavailable in this Linux environment; a complete Windows build has not been claimed as verified here. After updating, run `.\gradlew.bat run --no-daemon` from `rpggame`.
 
+The next Windows compile reached the self-test and reported C4838/C2220 for its two control-order array initializers. Their runtime conditional expressions now explicitly convert the control enum to the API's `uint32_t` representation. Both death/release orders remain tested; `/W4 /WX` remains enabled. Reviewed the other native-test enum conditionals and unsigned-array initializers for the same conversion. Release and sanitizer native checks pass 110/110 after this correction.
+
+The existing engine CI workflow is nested under `theastrattoengine/.github`, where GitHub does not discover workflows for this repository. A root `.github/workflows/windows-native.yml` now compiles native changes with MSVC and runs the self-test on `windows-2022`. This adds a Windows compilation gate without changing game code or dependencies. Its remote result must be checked in GitHub Actions; the Actions API is unavailable from this environment.
+
 ## Verification and artifacts
 
 - Game and engine Java builds succeed. Current suite: 44 game tests and 22 engine Java tests.

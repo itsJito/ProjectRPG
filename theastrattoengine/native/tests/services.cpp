@@ -216,8 +216,8 @@ void services_checks(const char* moduleDir) {
             r.flags = ASTRATTO_RAGDOLL_ACTIVE | ASTRATTO_RAGDOLL_STAND;
             r.x = 35.5f + order * 4; r.y = FLOOR; r.z = 20.5f;
             frame(e, c, 0.25f);
-            const uint32_t controls[] = {order == 0 ? ASTRATTO_CONTROL_RELEASE : ASTRATTO_CONTROL_DIE,
-                                         order == 0 ? ASTRATTO_CONTROL_DIE : ASTRATTO_CONTROL_RELEASE};
+            const uint32_t controls[] = {static_cast<uint32_t>(order == 0 ? ASTRATTO_CONTROL_RELEASE : ASTRATTO_CONTROL_DIE),
+                                         static_cast<uint32_t>(order == 0 ? ASTRATTO_CONTROL_DIE : ASTRATTO_CONTROL_RELEASE)};
             for (uint32_t control : controls) {
                 auto& cmd = c.add<astratto_cmd_ragdoll_control>(ASTRATTO_CMD_RAGDOLL_CONTROL);
                 cmd.handle = h; cmd.control = control;
