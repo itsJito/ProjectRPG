@@ -61,7 +61,7 @@ public final class Fixtures {
             g.interact.begin(new Work(a, this, "pray", "Praying", 2.0f, false, g.time, () -> {
                 float before = a.faith;
                 a.faith = a.maxFaith();
-                var ev = g.state.commit("Prayed", a.id, id, jurisdiction(), 0, String.format("faith %.0f -> %.0f", before, a.faith));
+                g.state.commit("Prayed", a.id, id, jurisdiction(), 0, String.format("faith %.0f -> %.0f", before, a.faith));
                 if (a == g.player) g.chat.say("You pray at the altar. Your Faith is restored.");
                 if (g.sfx != null) g.sfx.play("bless", x, y + 1, z, 0.6f);
                 return Result.ok();

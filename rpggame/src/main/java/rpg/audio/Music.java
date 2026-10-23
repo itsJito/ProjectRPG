@@ -42,8 +42,8 @@ public final class Music {
     private final List<Playing> fading = new ArrayList<>();
     private Playing now;
     private Mood mood = Mood.NONE;
-    /** Silence before the next exploration track (seconds of wall time), and how long the current mood has held. */
-    private float rest = 2f, moodHeld;
+    /** Silence before the next exploration track (seconds of wall time). */
+    private float rest = 2f;
     private Mood pendingMood = Mood.NONE;
     private float pendingFor;
     private float gain = 0.7f, duck = 1f, duckTarget = 1f;
@@ -69,7 +69,6 @@ public final class Music {
         pendingFor += dt;
         float settle = want == Mood.COMBAT ? 0 : mood == Mood.COMBAT ? 5f : want == Mood.HUNTED ? 1.5f : 3f;
         if (want != mood && pendingFor >= settle) change(want);
-        moodHeld += dt;
 
         duck += (duckTarget - duck) * Math.min(1, dt * 3);
         for (int i = fading.size() - 1; i >= 0; i--) {
@@ -102,7 +101,6 @@ public final class Music {
     private void change(Mood to) {
         Mood from = mood;
         mood = to;
-        moodHeld = 0;
         if (now != null && now.mood == to) return;
         // the same family keeps its piece (a day track carries on as night falls in the wood; it just isn't followed by another day one)
         if (now != null && family(now.mood) == family(to) && to != Mood.COMBAT && from != Mood.COMBAT) return;

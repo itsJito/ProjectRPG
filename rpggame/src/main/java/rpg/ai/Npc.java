@@ -132,6 +132,13 @@ public final class Npc extends Actor implements Interactable {
     }
 
     public void remember(Memory m, int cap) {
+        for (int i = memories.size() - 1; i >= 0; i--) {
+            Memory old = memories.get(i);
+            if (!old.sameIncident(m)) continue;
+            if (old.witnessed() && m.witnessed()) { m.reported |= old.reported; old.reported = m.reported; }
+            if (old.witnessed() && !m.witnessed() || old.witnessed() == m.witnessed() && old.confidence >= m.confidence) m = old;
+            memories.remove(i);
+        }
         memories.add(m);
         while (memories.size() > cap) {
             // forget the oldest that is not an unreported witnessed crime

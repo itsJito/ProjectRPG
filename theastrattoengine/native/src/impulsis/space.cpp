@@ -246,9 +246,12 @@ void Space::worldContacts(const VoxelWorld* w, int i, std::vector<Manifold>& out
         if (!w->solid(x, y, z)) continue;
         // a face with a solid cell beside it is inside the world's surface: never a contact
         uint32_t open = 0;
-        if (!w->solid(x - 1, y, z)) open |= 1; if (!w->solid(x + 1, y, z)) open |= 2;
-        if (!w->solid(x, y - 1, z)) open |= 4; if (!w->solid(x, y + 1, z)) open |= 8;
-        if (!w->solid(x, y, z - 1)) open |= 16; if (!w->solid(x, y, z + 1)) open |= 32;
+        if (!w->solid(x - 1, y, z)) open |= 1;
+        if (!w->solid(x + 1, y, z)) open |= 2;
+        if (!w->solid(x, y - 1, z)) open |= 4;
+        if (!w->solid(x, y + 1, z)) open |= 8;
+        if (!w->solid(x, y, z - 1)) open |= 16;
+        if (!w->solid(x, y, z + 1)) open |= 32;
         if (!open) continue;
         Manifold m;
         m.a = i; m.b = -1; m.cx = x; m.cy = y; m.cz = z; m.block = w->get(x, y, z);

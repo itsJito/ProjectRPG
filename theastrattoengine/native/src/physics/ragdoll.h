@@ -246,6 +246,8 @@ public:
     void drive(const VoxelWorld* w, float h);
     void hit(int point, float dx, float dy, float dz, float impulse, float force);
     void die();
+    /** Detaches postural control and clears its joint drives, leaving ordinary passive physics. */
+    void release();
     void collapse();
     void setBody(uint32_t brokenLimbs);
     void setIntent(const SydneyIntent& i);

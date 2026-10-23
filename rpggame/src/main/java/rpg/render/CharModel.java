@@ -95,7 +95,6 @@ public final class CharModel {
         // the rows of the side faces this segment shows (puffed ends add no rows: the texels stretch over them)
         int[] fr = s.face(p, Skin.FRONT);
         int rows = Math.min(fr[3] - rowOffset, Math.round((y1 - y0 - (topFace ? puff : 0) - (bottomFace ? puff : 0)) * Skin.T));
-        float[][] c = {{x0, y0, z0}, {x1, y1, z1}};
         // front (-z), back (+z), right (+x), left (-x): top-left corner, top-right, bottom-left, normal
         face(q, s, p, Skin.FRONT, rowOffset, rows, new float[]{x1, y1, z0}, new float[]{x0, y1, z0}, new float[]{x1, y0, z0}, 0, 0, -1);
         face(q, s, p, Skin.BACK, rowOffset, rows, new float[]{x0, y1, z1}, new float[]{x1, y1, z1}, new float[]{x0, y0, z1}, 0, 0, 1);

@@ -103,9 +103,7 @@ public final class Rumors {
             Npc teller = a, hearer = b;
             if (other != null && (best == null || weight(other) > weight(best))) { best = other; teller = b; hearer = a; }
             if (best == null) continue;
-            lastPass.put(key, g.time);
-            tell(teller, hearer, best, false);
-            passed++;
+            if (tell(teller, hearer, best, false)) { lastPass.put(key, g.time); passed++; }
         }
     }
 
@@ -127,20 +125,34 @@ public final class Rumors {
     }
 
     private static boolean knows(Npc n, Memory m) {
-        for (Memory k : n.memories) if (k.kind.equals(m.kind) && k.subject == m.subject && k.victim == m.victim && (m.eventId == 0 || k.eventId == m.eventId)) return true;
+        for (Memory k : n.memories) if (k.sameIncident(m) && (k.witnessed() || k.confidence >= m.confidence * 0.7f)) return true;
         return false;
+    }
+
+    /** Speech uses mouths/ears, distance and the same wall muffle as the shared hearing model. */
+    private boolean audible(Actor speaker, Actor listener, float reach) {
+        if (!speaker.alive || !listener.alive || speaker instanceof Npc n && !n.loaded || listener instanceof Npc n && !n.loaded) return false;
+        if (listener instanceof Npc n && n.goal == Brain.Goal.SLEEP) reach *= 0.5f;
+        float dx = speaker.x - listener.x, dy = speaker.eyeY() - listener.eyeY(), dz = speaker.z - listener.z;
+        float distance = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (distance >= reach) return false;
+        if (distance > 2.5f && !g.vox.clear(speaker.x, speaker.eyeY(), speaker.z, listener.x, listener.eyeY(), listener.z)) reach *= Stealth.WALL_MUFFLE;
+        return distance < reach;
     }
 
     /**
      * One piece of news told: the hearer remembers it as rumor (weaker), says something about it, and - if it is about
      * the player and the player is in plain sight - both look at them. If the player is close enough to hear, they do.
      */
-    public void tell(Npc teller, Npc hearer, Memory m, boolean shout) {
-        hearer.remember(m.rumorFrom(teller.name, g.state.minutes), 24);
-        if (m.subject == g.player.id) hearer.knowsPlayer = true;
+    public boolean tell(Npc teller, Npc hearer, Memory m, boolean shout) {
+        if (teller == hearer || !news(m) || m.subject == hearer.id || m.confidence < 0.25f ||
+                !teller.memories.contains(m) || knows(hearer, m) || !audible(teller, hearer, shout ? 14 : 4.5f)) return false;
+        hearer.remember(m.rumorFrom(teller), 24);
+        if (m.subject == g.player.id && teller.knowsPlayer) hearer.knowsPlayer = true;
         g.state.commit("RumorShared", teller.id, hearer.id, DevMap.jurisdiction(hearer.x, hearer.z), m.eventId, m.kind + " by " + g.nameOf(m.subject) + (shout ? " (shouted)" : ""));
         ai.shared++;
         String line = line(teller, m);
+        boolean newSpeech = !line.equals(teller.speech) || g.time >= teller.speechUntil;
         ai.say(teller, line);
         teller.gossipUntil = g.time + 3.5; hearer.gossipUntil = g.time + 3.5;
         hearer.wantYaw = (float) Math.atan2(-(teller.x - hearer.x), -(teller.z - hearer.z));
@@ -151,10 +163,11 @@ public final class Rumors {
             hearer.wantYaw = (float) Math.atan2(-(g.player.x - hearer.x), -(g.player.z - hearer.z));
             ai.reply(hearer, m.kind.equals("DEED") ? "Is that them? Huh." : m.kind.equals("MURDER") ? "That's them... over there." : "Them? I'll watch my purse.");
         }
-        if (g.player.alive && teller.distTo(g.player) < (shout ? 20 : 8) && g.vox.clear(teller.x, teller.eyeY(), teller.z, g.player.x, g.player.eyeY(), g.player.z)) {
+        if (newSpeech && audible(teller, g.player, shout ? 14 : 8)) {
             g.chat.add("[Overheard] " + teller.name + ": \"" + line + "\"", Chat.Kind.DIALOGUE);
             overheard++;
         }
+        return true;
     }
 
     /** What the teller says about it (in their own words, more certain the closer to the source they were). */
@@ -163,7 +176,8 @@ public final class Rumors {
         if (m.subject == 0) who = "someone";
         String victim = m.victim != 0 ? g.nameOf(m.victim) : "someone";
         boolean saw = m.witnessed();
-        String hedge = saw ? "I saw it myself: " : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
+        String hedge = saw ? "I saw it myself: " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
+                : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
         return switch (m.kind) {
             case "MURDER" -> hedge + who + " killed " + victim + "!";
             case "ASSAULT" -> hedge + who + " attacked " + victim + ".";
@@ -188,9 +202,7 @@ public final class Rumors {
         for (Npc o : g.npcs) {
             if (o == witness || !o.alive || !o.loaded || o.distTo(witness) > 14 || knows(o, m) || o.id == m.subject) continue;
             if (o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE) continue;
-            tell(witness, o, m, true);
-            o.nextThink = 0;
-            told++;
+            if (tell(witness, o, m, true)) { o.nextThink = 0; told++; }
         }
         if (told > 0) shouted++;
     }

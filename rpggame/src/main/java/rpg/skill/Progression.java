@@ -24,7 +24,6 @@ public final class Progression {
     public double celebratedAt = -99;
     /** Awards made, for the acceptance checks. */
     public long awards, levelUps;
-    private final List<Skills.Award> pendingCelebrations = new ArrayList<>();
 
     public Progression(Rpg g) { this.g = g; }
 

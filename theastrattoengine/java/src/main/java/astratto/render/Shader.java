@@ -64,7 +64,6 @@ public final class Shader {
 
     private int loc(String n) { return locs.computeIfAbsent(n, k -> glGetUniformLocation(id, k)); }
 
-    private final float[] buf = new float[16];
     public void mat4(String n, Mat4 m) { glUniformMatrix4fv(loc(n), false, m.m); }
     public void f1(String n, float v) { glUniform1f(loc(n), v); }
     public void i1(String n, int v) { glUniform1i(loc(n), v); }

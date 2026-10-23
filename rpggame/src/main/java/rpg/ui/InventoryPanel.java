@@ -130,7 +130,6 @@ final class InventoryPanel extends Fragment {
 
     /** One grid: its cells, its items at their footprints, the drop preview, and the mouse on it. */
     void drawGrid(Ui2D ui, Inventory inv, float x, float y, float cs, Source src) {
-        Rpg g = hud.g;
         hud.spots.put(inv, new float[]{x, y, cs});
         ui.rect(x, y, inv.w * cs, inv.h * cs, 0x40000000);
         for (int i = 1; i < inv.w; i++) ui.rect(x + i * cs, y, 1, inv.h * cs, 0x10FFFFFF);

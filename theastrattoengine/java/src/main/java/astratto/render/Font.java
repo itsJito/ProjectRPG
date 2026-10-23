@@ -66,7 +66,7 @@ public final class Font {
         float r = ((argb >> 16) & 255) / 255f, g = ((argb >> 8) & 255) / 255f, bl = (argb & 255) / 255f, a = ((argb >>> 24) & 255) / 255f;
         try (MemoryStack st = MemoryStack.stackPush()) {
             STBTTAlignedQuad q = STBTTAlignedQuad.malloc(st);
-            float[] px = {0}, py = {0};
+            float[] px = {0};
             float baseline = bakeSize * 0.78f;
             for (int i = 0; i < s.length(); i++) {
                 int c = s.charAt(i);

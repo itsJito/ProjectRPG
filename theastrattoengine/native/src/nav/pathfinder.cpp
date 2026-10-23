@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 
 // The costs below are compared for equality of outcome with the Java search they replace: no fused multiply-adds.
 #if defined(_MSC_VER)
@@ -111,6 +112,12 @@ void Pathfinder::relax(int from, int x, int y, int z, float cost, int gx, int gz
 bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuery& q, std::vector<int32_t>& out, uint32_t& expansions) {
     out.clear();
     expansions = 0;
+    // Validate before float-to-int conversion. Leave room for neighbour offsets,
+    // rounded heights and coordinate differences in the integer search math.
+    constexpr float limit = static_cast<float>(std::numeric_limits<int>::max() / 4);
+    auto safeCoordinate = [](float v) { return std::isfinite(v) && v > -limit && v < limit; };
+    if (!safeCoordinate(q.sx) || !safeCoordinate(q.sy) || !safeCoordinate(q.sz) ||
+        !safeCoordinate(q.tx) || !safeCoordinate(q.tz) || (q.goalY && !safeCoordinate(q.ty))) return false;
     const bool doors = q.doors;
     const int goalY = q.goalY ? roundInt(q.ty) : -1;
     // a new generation of the hash: every slot of the last search is stale without being cleared

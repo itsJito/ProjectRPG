@@ -27,7 +27,6 @@ final class ActionBar extends Fragment {
     ActionBar(Hud h) {
         super("actionbar");
         this.hud = h;
-        Spells.Prayer[] bs = Spells.Prayer.values();
         binds[0] = Bind.of(Spells.Prayer.WARD); binds[1] = Bind.of(Spells.Prayer.BURST_OF_STRENGTH); binds[2] = Bind.of(Spells.Prayer.MEND);
         binds[3] = Bind.of(Spells.Spell.SPARK);
         wake("combat", "scene").linger(5);

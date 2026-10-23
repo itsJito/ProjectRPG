@@ -39,6 +39,8 @@ tasks.named('run', JavaExec) { workingDir = projectDir }
 
 test {
     useJUnitPlatform()
+    environment 'ASTRATTO_JAVA_FALLBACK', '0'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
     testLogging { events 'failed'; exceptionFormat 'full' }
 }
 
@@ -75,5 +77,6 @@ tasks.register('gallery', JavaExec) {
     jvmArgs rpgJvm
     environment 'ASTRATTO_NOVSYNC', '1'
     def female = project.hasProperty('female')
-    args(['--gallery', '--hidden', '--shots', layout.buildDirectory.dir('gallery').get().asFile.absolutePath] + (female ? ['--female'] : []))
+    def shots = providers.gradleProperty('galleryDir').getOrElse(layout.buildDirectory.dir('gallery').get().asFile.absolutePath)
+    args(['--gallery', '--hidden', '--shots', shots] + (female ? ['--female'] : []))
 }

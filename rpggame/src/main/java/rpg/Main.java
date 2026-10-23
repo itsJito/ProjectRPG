@@ -239,7 +239,6 @@ public final class Main {
             it.forward = typing ? 0 : (in.keyDown(GLFW_KEY_W) ? 1 : 0) - (in.keyDown(GLFW_KEY_S) ? 1 : 0);
             it.strafe = typing ? 0 : (in.keyDown(GLFW_KEY_D) ? 1 : 0) - (in.keyDown(GLFW_KEY_A) ? 1 : 0);
             it.sprint = !typing && in.keyDown(GLFW_KEY_LEFT_SHIFT);
-            it.sprintTap = !typing && in.keyPressed(GLFW_KEY_LEFT_SHIFT);
             it.sneak = !typing && in.keyDown(GLFW_KEY_LEFT_CONTROL);
             it.jogToggle = !typing && in.keyPressed(GLFW_KEY_CAPS_LOCK);
             it.jump = !typing && in.keyPressed(GLFW_KEY_SPACE);

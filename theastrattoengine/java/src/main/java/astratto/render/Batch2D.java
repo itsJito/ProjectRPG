@@ -19,7 +19,6 @@ public final class Batch2D {
     private int vao, vbo, white;
     private FloatBuffer buf;
     private int quads, currentTex;
-    private int curMode;
     private final Mat4 proj = new Mat4();
     public int width, height;
 
@@ -60,7 +59,6 @@ public final class Batch2D {
         shader.i1("uTex", 0);
         quads = 0;
         currentTex = white;
-        curMode = 0;
     }
 
     public void end() {

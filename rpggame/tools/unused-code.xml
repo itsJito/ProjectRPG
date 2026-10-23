@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="Game unused code" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+ <description>Unused locals, private fields and private methods across the game.</description>
+ <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
+ <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
+ <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
+</ruleset>

@@ -90,7 +90,15 @@ struct Poly {
     void hull(const float* xs, const float* zs, int k) {
         int idx[8];
         for (int i = 0; i < k; i++) idx[i] = i;
-        std::sort(idx, idx + k, [&](int a, int b) { return xs[a] < xs[b] || (xs[a] == xs[b] && zs[a] < zs[b]); });
+        // At most eight sole corners: insertion sort avoids std::sort's larger
+        // internal insertion-sort window (and GCC's spurious bounds warning).
+        auto before = [&](int a, int b) { return xs[a] < xs[b] || (xs[a] == xs[b] && zs[a] < zs[b]); };
+        for (int i = 1; i < k; i++) {
+            const int value = idx[i];
+            int j = i;
+            while (j > 0 && before(value, idx[j - 1])) { idx[j] = idx[j - 1]; j--; }
+            idx[j] = value;
+        }
         int h[17], m = 0;
         auto crossz = [&](int o, int a, int b) { return (xs[a] - xs[o]) * (zs[b] - zs[o]) - (zs[a] - zs[o]) * (xs[b] - xs[o]); };
         for (int i = 0; i < k; i++) { while (m >= 2 && crossz(h[m - 2], h[m - 1], idx[i]) <= 0) m--; h[m++] = idx[i]; }
@@ -412,7 +420,7 @@ void SydneyCharacter::drive(const VoxelWorld* w, float h) {
         if (!std::isfinite(b.w.x) || !std::isfinite(b.w.y) || !std::isfinite(b.w.z) || !std::isfinite(b.v.x) || !std::isfinite(b.p.y)) { invalid = true; b.w = V3(); b.v = V3(); }
     }
     // death: when the last of the tone has drained the body is an ordinary ragdoll again and may come to rest
-    if (outcome == DEAD_OUTCOME) { r.live = false; r.driver = nullptr; }
+    if (outcome == DEAD_OUTCOME) release();
 }
 
 // ---- supraspinal: balance, the stance legs, the torso, the hands and feet
@@ -746,7 +754,33 @@ void SydneyCharacter::hit(int point, float dx, float dy, float dz, float impulse
     if (outcome == RECOVERED) outcome = NONE;
 }
 
-void SydneyCharacter::die() { alive = false; if (state != DEAD) { releaseGrips(); go(DEAD); limpT_ = 0; outcome = NONE; } }
+void SydneyCharacter::die() {
+    alive = false;
+    if (state != DEAD) { releaseGrips(); go(DEAD); limpT_ = 0; outcome = NONE; }
+    // Release may already have detached the driver; no future drive step can finish the death fade then.
+    if (body->driver != this) release();
+}
+
+void SydneyCharacter::release() {
+    releaseGrips();
+    intent = SydneyIntent();
+    activity = A_NONE;
+    effort = 0; assistUsed = 0;
+    // Impulsis retains these servo settings and warm-start impulses between steps. Dropping the driver alone
+    // leaves the last balance/get-up drive running without any controller to update or turn it off.
+    for (int j = 0; j < JOINTS; j++) {
+        impulsis::Joint* joint = body->space.joint(body->jointHandle[j]);
+        if (!joint) continue;
+        for (int axis = 0; axis < AXES; axis++) {
+            joint->damp[axis] = 0; joint->dampTarget[axis] = 0;
+            joint->dampLo[axis] = 0; joint->dampHi[axis] = 0; joint->Pdamp[axis] = 0;
+        }
+    }
+    if (!alive) outcome = DEAD_OUTCOME;
+    body->live = false;
+    body->driver = nullptr;
+}
+
 void SydneyCharacter::collapse() { if (state != DEAD && state != FALL && state != DOWN) fallNow(); }
 
 void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {

@@ -1,0 +1,13 @@
+// Opt-in audit of game and engine Java sources. Run from rpggame with --init-script tools/unused-code.gradle.
+allprojects { p ->
+    afterEvaluate {
+        if (p.name in ['rpggame', 'theastrattoengine']) {
+            p.apply plugin: 'pmd'
+            p.pmd {
+                toolVersion = '7.28.0'
+                ruleSets = []
+                ruleSetFiles = p.files(p.name == 'rpggame' ? 'tools/unused-code.xml' : '../rpggame/tools/unused-code.xml')
+            }
+        }
+    }
+}

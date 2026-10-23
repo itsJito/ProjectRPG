@@ -141,7 +141,6 @@ public abstract class AnimalBrain {
     public static final class Dog extends AnimalBrain {
         public static float HEEL = 2.4f, LEASH = 9f, SMELL = 13f, GUARD = 7f, BITE_REACH = 1.25f, BITE = 16f, BITE_EVERY = 0.9f;
         private float biteAt, sitAfter;
-        private long quarry;
 
         @Override public void think(Senses w, Intent out, float dt) {
             Thing own = w.owner();
@@ -153,14 +152,12 @@ public abstract class AnimalBrain {
             if (!th.valid && w.time() - w.hurtAt() < 4) th = w.attacker();
             if (th.valid && th.dist < 26) {
                 to("attack", w);
-                quarry = th.id;
                 out.mouthOpen = true; out.alarmed = true;
                 out.faceX = th.x; out.faceZ = th.z;
                 if (th.dist > BITE_REACH) { out.go(Move.RUN, th.x, th.y, th.z, 1); voice(w, out, in(w) < 1 ? "bark" : "growl", 1.3f); }
                 else if (w.time() >= biteAt) { biteAt = w.time() + BITE_EVERY; out.attack = th.id; out.attackKind = "bite"; out.damage = BITE; out.voice = "growl"; }
                 return;
             }
-            quarry = 0;
             // ---- something it does not like the smell of, further off: it says so, and stays where it is
             Thing far = w.infected(SMELL);
             if (far.valid) {
