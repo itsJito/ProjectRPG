@@ -114,8 +114,10 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
     expansions = 0;
     // Validate before float-to-int conversion. Leave room for neighbour offsets,
     // rounded heights and coordinate differences in the integer search math.
-    constexpr float limit = static_cast<float>(std::numeric_limits<int>::max() / 4);
-    auto safeCoordinate = [](float v) { return std::isfinite(v) && v > -limit && v < limit; };
+    auto safeCoordinate = [](float v) {
+        constexpr float limit = static_cast<float>(std::numeric_limits<int>::max() / 4);
+        return std::isfinite(v) && v > -limit && v < limit;
+    };
     if (!safeCoordinate(q.sx) || !safeCoordinate(q.sy) || !safeCoordinate(q.sz) ||
         !safeCoordinate(q.tx) || !safeCoordinate(q.tz) || (q.goalY && !safeCoordinate(q.ty))) return false;
     const bool doors = q.doors;

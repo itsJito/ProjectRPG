@@ -31,10 +31,17 @@ if /i "%1"=="checked" (
 where cl >nul 2>nul
 if not errorlevel 1 goto :compile
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-if not exist "%VSWHERE%" echo astratto: no Visual Studio installation found & exit /b 2
-for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -property installationPath`) do set "VSROOT=%%i"
-if not exist "%VSROOT%\VC\Auxiliary\Build\vcvars64.bat" echo astratto: the C++ build tools are not installed & exit /b 2
+if not exist "%VSWHERE%" (
+  echo astratto: no Visual Studio installation found
+  exit /b 2
+)
+for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSROOT=%%i"
+if not exist "%VSROOT%\VC\Auxiliary\Build\vcvars64.bat" (
+  echo astratto: the C++ build tools are not installed
+  exit /b 2
+)
 call "%VSROOT%\VC\Auxiliary\Build\vcvars64.bat" >nul
+if errorlevel 1 exit /b 2
 
 :compile
 if /i "%1"=="asan" if not exist "%VCToolsInstallDir%lib\x64\clang_rt.asan_dynamic-x86_64.lib" (

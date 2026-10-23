@@ -61,6 +61,14 @@ The material audit verifies all 47 distinct, nonempty RGBA layers are 64×64, ev
 
 Packaging previously depended on `buildNative` only when the binary directory was absent. Existing prebuilt libraries could therefore hide changed C++ sources. Engine resources now always depend on the incremental native build. Native source/header/test/module inputs, build scripts and platform are declared. A real build ran all native checks; subsequent game/gallery builds report `buildNative UP-TO-DATE` with unchanged sources. The toolchain requirements remain documented in the engine README.
 
+## Windows build correction
+
+The user's Windows rebuild exposed MSVC C3493 in `pathfinder.cpp`: the coordinate predicate referenced an enclosing floating-point `constexpr` through a captureless lambda. The limit now lives inside that lambda, so no capture is needed. Coordinate bounds and NaN/infinity rejection are unchanged. This addresses the reported compiler error and its cascading C2064 diagnostics; see Microsoft's [C3493 reference](https://github.com/MicrosoftDocs/cpp-docs/blob/main/docs/error-messages/compiler-errors-2/compiler-error-c3493.md).
+
+The Windows compiler-discovery branch also had unconditional `exit` commands after `&`, outside the preceding `if`. Missing-tool errors now use proper conditional blocks, discovery requires the C++ tools component, and a failed `vcvars64.bat` setup stops the build. Normal builds continue to compile changed native sources rather than silently packaging an older DLL.
+
+Strict Linux release and ASan/UBSan builds pass all 110 native checks, including nonfinite/extreme path-coordinate rejection. Engine/game Gradle builds succeed. MSVC and Windows command execution are unavailable in this Linux environment; a complete Windows build has not been claimed as verified here. After updating, run `.\gradlew.bat run --no-daemon` from `rpggame`.
+
 ## Verification and artifacts
 
 - Game and engine Java builds succeed. Current suite: 44 game tests and 22 engine Java tests.
