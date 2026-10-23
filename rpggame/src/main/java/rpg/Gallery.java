@@ -53,6 +53,7 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("session-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { sessionPolishShots(); return 0; }
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
         if ("field-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { fieldPolishShots(); menuShots(); return 0; }
         if ("polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { polishShots(); return 0; }
@@ -186,16 +187,20 @@ final class Gallery {
      * cut, centred on the actor, into a contact sheet. warm: frames run first, unfilmed, to reach a steady state.
      */
     private void film(String name, int n, IntConsumer drive, java.util.function.Function<Actor, float[]> camera, int warm) {
+        film(name, n, drive, camera, warm, g.player);
+    }
+
+    private void film(String name, int n, IntConsumer drive, java.util.function.Function<Actor, float[]> camera, int warm, Actor focus) {
         for (int i = 0; i < warm; i++) { drive.accept(-1); step(); }
         List<BufferedImage> tiles = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             drive.accept(i);
-            step();
+            game.tick(1f / 60);
+            draw(camera.apply(focus), 1f / 60);
             if (i % 3 == 0) {
-                float[] cam = camera.apply(g.player);
-                tiles.add(capture(cam));
-                labels.add(String.format("f%d  %.3fs  %.1fm/s", i + 1, i / 60f, Math.hypot(g.player.vx, g.player.vz)));
+                tiles.add(captureFrame());
+                labels.add(String.format("f%d  %.3fs  %.1fm/s", i + 1, i / 60f, Math.hypot(focus.vx, focus.vz)));
             }
         }
         sheet(name, tiles, labels, 8);
@@ -330,6 +335,66 @@ final class Gallery {
     }
 
     /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void motionPolishShots() {
+        place(64.5f, 62.5f, 0);
+        g.player.restore();
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, null); g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+        film("crouch-transition", 54, i -> g.controller.in.sneak = true, a -> side(a, -3.2f), 0);
+        film("crouch-walk", 54, i -> { g.controller.in.sneak = true; g.controller.in.forward = 1; }, a -> side(a, -3.2f), 12);
+        g.controller.in.sneak = false; g.controller.in.forward = 0;
+        film("bare-guard", 36, i -> g.controller.in.offDown = true, a -> quarter(a, 2.8f), 0);
+        g.controller.in.offDown = false;
+    }
+
+    private void lootPolishShots() {
+        var thief = (rpg.ai.Npc) g.actor(Ids.THIEF);
+        var dead = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        g.ai.spawnBody(dead); g.teleport(dead, 64.5f, DevMap.FLOOR, 61.7f);
+        g.teleport(g.player, 60.5f, DevMap.FLOOR, 56.5f);
+        gfx.preload(java.util.List.of(thief, dead));
+        dead.alive = false; dead.hp = 0; g.onKilled(dead, g.player, 0);
+        frames(90);
+        g.ai.spawnBody(thief); g.teleport(thief, 64.5f, DevMap.FLOOR, 62.5f);
+        thief.goal = rpg.ai.Brain.Goal.LOOT; thief.goalSince = g.time; thief.nextThink = Double.MAX_VALUE;
+        thief.lootStarted = g.time; thief.lootUntil = g.time + 0.9; thief.wantYaw = 0;
+        film("corpse-looting", 54, i -> {}, a -> side(a, -3.2f), 0, thief);
+        g.ai.unload(thief);
+    }
+
+    private void sessionPolishShots() {
+        if ("loot".equals(System.getenv("RPG_REVIEW_ONLY"))) { lootPolishShots(); return; }
+        if ("motion".equals(System.getenv("RPG_REVIEW_ONLY"))) { motionPolishShots(); return; }
+        place(64.5f, 62.5f, 0); frames(12);
+        g.player.skills.setLevel(rpg.skill.Skill.MAGIC, 25); g.player.skills.setLevel(rpg.skill.Skill.FAITH, 25); g.player.restore();
+        g.player.hp *= 0.7f; g.player.stamina *= 0.6f; g.player.mana *= 0.45f; g.player.faith *= 0.8f;
+        reviewUi("dynamic-vitals");
+        var cole = (rpg.ai.Npc) g.actor(Ids.GUARD);
+        g.teleport(cole, g.player.x + 3, DevMap.FLOOR, g.player.z);
+        var dialog = new rpg.ui.Dialog(cole.name, "The streets are quiet again. A paid bounty settles the law, but people remember what they saw. Keep your hands clean, traveller.");
+        dialog.npc = cole.id;
+        dialog.choice("Tell me about this town.", () -> {});
+        dialog.choice("How does the law work here?", () -> {});
+        dialog.choice("Goodbye.", () -> {});
+        hud.dialog(dialog); reviewUi("chatbox");
+        for (int frame = 0; frame < 39; frame++) {
+            Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "talk-f" + (frame + 1) + ".png"));
+        }
+        hud.closeAll();
+        if ("ui".equals(System.getenv("RPG_REVIEW_ONLY"))) return;
+        motionPolishShots();
+        lootPolishShots();
+        g.law.arrest(g.player, DevMap.ALPHA, cole); frames(4); reviewUi("jail-sentence");
+        view(118.4f, DevMap.FLOOR + 1.7f, 59.8f, 117, DevMap.FLOOR + 0.8f, 54, "jail-cell");
+        g.law.sleepThroughSentence();
+        gearShots();
+    }
+
+    private void reviewUi(String name) {
+        for (int i = 0; i < 12; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, name + ".png"));
+    }
+
     private void polishShots() {
         place(64.5f, 62.5f, (float) Math.PI);
         frames(20);
@@ -839,6 +904,10 @@ final class Gallery {
     /** The middle of the screen, as the camera sees the actor (the frame is drawn twice on a still camera). */
     private BufferedImage capture(float[] cam) {
         for (int i = 0; i < 2; i++) draw(cam, 0);
+        return captureFrame();
+    }
+
+    private BufferedImage captureFrame() {
         int w = win.width, h = win.height;
         ByteBuffer px = gfx.pixels(w, h);
         int size = Math.min(w, h) / 2, x0 = (w - size) / 2, y0 = (h - size) / 2;

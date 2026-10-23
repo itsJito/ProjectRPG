@@ -16,6 +16,36 @@ class RigTest {
         for (int i = 0; i < pose.length; i++) assertArrayEquals(pose[i], rig.seg[i], 1e-5f);
     }
 
+    @Test void crouchFoldsTheBodyToHalfStandingHeightWithoutScalingTheBones() {
+        Actor a = standing(); a.sneaking = true;
+        Rig rig = new Rig(); Rig.State state = new Rig.State();
+        for (int frame = 0; frame < 120; frame++) rig.pose(a, state, 1f / 60, frame / 60f, false);
+        float[] head = rig.seg[CharModel.Seg.HEAD.ordinal()];
+        float highest = -Float.MAX_VALUE;
+        for (int x : new int[]{-4, 4}) for (int y : new int[]{0, 8}) for (int z : new int[]{-4, 4}) {
+            highest = Math.max(highest, head[1] * x + head[5] * y + head[9] * z + head[13]);
+        }
+        assertTrue(highest <= Body.HEIGHT_PX * 0.5f + 0.5f, "head top " + highest);
+        assertTrue(rig.pelvis[1] > 2 && rig.pelvis[1] < 5, "a crouch bends the legs instead of shrinking them");
+        assertEquals(1, Math.sqrt(head[0] * head[0] + head[1] * head[1] + head[2] * head[2]), 1e-5);
+    }
+
+    @Test void crouchWalkingKeepsBothKneesBentInsteadOfDraggingAStraightLeg() {
+        Actor a = standing(); a.sneaking = true; a.vz = -1.45f;
+        Rig rig = new Rig(); Rig.State state = new Rig.State();
+        for (int frame = 0; frame < 180; frame++) {
+            a.z += a.vz / 60; rig.pose(a, state, 1f / 60, frame / 60f, false);
+            if (frame < 60) continue;
+            for (int side = 0; side < 2; side++) {
+                float[] hip = rig.seg[(side == 0 ? CharModel.Seg.R_LEG_UP : CharModel.Seg.L_LEG_UP).ordinal()];
+                float[] shin = rig.seg[(side == 0 ? CharModel.Seg.R_LEG_LO : CharModel.Seg.L_LEG_LO).ordinal()];
+                double distance = 0;
+                for (int axis = 0; axis < 3; axis++) { double d = shin[12 + axis] - shin[4 + axis] * Body.SHIN - hip[12 + axis]; distance += d * d; }
+                assertTrue(distance < 100, "crouch steps must retain knee flexion: " + Math.sqrt(distance));
+            }
+        }
+    }
+
     private static Actor standing() {
         Actor actor = new Actor(1, "Test", 1);
         actor.grounded = true;

@@ -36,24 +36,25 @@ public final class Rumors {
     static float weight(Memory m) {
         return switch (m.kind) {
             case "MURDER" -> 10; case "ASSAULT" -> 5; case "LIVESTOCK" -> 3; case "THEFT" -> 2.5f; case "LOCKPICKING", "VANDALISM" -> 1.5f;
-            case "DEED" -> 1.2f;
+            case "DEED" -> 1.2f; case "IMPRISONED" -> 2;
             default -> 0;
         } * m.confidence;
     }
 
     /** Whether a memory is news worth telling (a crime, or a good deed). */
-    static boolean news(Memory m) { return m.crime() || m.kind.equals("DEED"); }
+    static boolean news(Memory m) { return m.crime() || m.kind.equals("DEED") || m.kind.equals("IMPRISONED"); }
 
     /**
      * What an NPC makes of the player from everything they know (seen and heard), -1 (dread) .. +1 (warmth). A killing
      * outweighs a dozen kindnesses; a rumor counts for less than what one saw.
      */
     public float opinion(Npc n) {
-        float o = 0;
+        float o = 0, record = 0;
         long me = g.player.id;
         for (Memory m : n.memories) {
             if (m.subject != me) continue;
             float c = m.confidence * (m.witnessed() ? 1 : 0.75f);
+            if (m.kind.equals("IMPRISONED")) record = Math.max(record, Math.min(3, m.value) * c);
             o += switch (m.kind) {
                 case "MURDER" -> -0.9f * c; case "ASSAULT" -> m.victim == n.id ? -0.7f * c : -0.35f * c; case "THEFT" -> m.victim == n.id ? -0.45f * c : -0.2f * c;
                 case "LIVESTOCK" -> -0.25f * c; case "LOCKPICKING", "VANDALISM" -> -0.15f * c;
@@ -61,6 +62,8 @@ public final class Rumors {
                 default -> 0;
             };
         }
+        boolean outlaw = n.role == Npc.Role.THIEF || n.role == Npc.Role.FENCE || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
+        o += record * (g.honor.score >= 22 || outlaw ? 0.04f : -0.07f);
         if (n.greeted) o += 0.05f;
         return Math.max(-1, Math.min(1, o));
     }
@@ -68,6 +71,7 @@ public final class Rumors {
     /** Whether they dread the player: they know of a killing or an attack by them, and think the worse of them for it. */
     public boolean afraid(Npc n) {
         if (n.combatant() || n.role == Npc.Role.FENCE) return false;
+        for (Memory m : n.memories) if (m.kind.equals("IMPRISONED") && m.subject == g.player.id && m.value >= 3 && m.confidence >= 0.45f && g.honor.score <= -22) return true;
         for (Memory m : n.memories) if (!m.settled && m.subject == g.player.id && (m.kind.equals("MURDER") || m.kind.equals("ASSAULT") && m.victim == n.id)) return opinion(n) < -0.3f;
         return false;
     }
@@ -179,6 +183,7 @@ public final class Rumors {
         String hedge = saw ? "I saw it myself: " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
                 : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
         return switch (m.kind) {
+            case "IMPRISONED" -> hedge + who + " has been jailed" + (m.value > 1 ? " " + m.value + " times" : "") + ".";
             case "MURDER" -> hedge + who + " killed " + victim + "!";
             case "ASSAULT" -> hedge + who + " attacked " + victim + ".";
             case "THEFT" -> hedge + who + " robbed " + victim + ".";

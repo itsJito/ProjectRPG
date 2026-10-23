@@ -29,7 +29,7 @@ struct Mover {
     /** 2.3: how long a jump asked for is kept waiting for the ground (a press just before landing still jumps), and how
      *  long since the feet left it (a press just after stepping off an edge still jumps). */
     float jumpLeft = 0, airTime = 0;
-    bool crouch = false, climb = false;
+    bool crouch = false, wantsCrouch = false, climb = false;
     // state
     bool onGround = false, climbing = false;
     float fallSpeed = 0, stepped = 0, acc = 0;

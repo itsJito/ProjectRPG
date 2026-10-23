@@ -30,7 +30,7 @@ public final class Config {
     /** The camera's lens: motion blur (the share of a frame the shutter is open) and depth of field. Both off unless chosen. */
     public boolean motionBlur = false, depthOfField = false;
     /** The renderer's preset (AstrattoNative.QUALITY_*) and the share of the window's resolution rendered (the TAA upscales). */
-    public int quality = astratto.bridge.AstrattoNative.QUALITY_HIGH;
+    public int quality = astratto.bridge.AstrattoNative.QUALITY_MEDIUM;
     public float renderScale = 1f;
     /**
      * Dynamic resolution: the render scale follows the GPU's time, down (to minScale) when frames run over the budget of
@@ -38,8 +38,8 @@ public final class Config {
      */
     public boolean autoScale = true;
     public float minScale = 0.5f;
-    /** The frame rate aimed at (set from the monitor's refresh rate when the game starts). */
-    public int targetFps = 60;
+    /** The GPU budget for the 2013 hardware target; presentation may use the monitor's refresh rate. */
+    public int targetFps = 30;
     /** A fixed render scale from RPG_RENDER_SCALE (for measuring), or -1: none. */
     public float fixedScale() {
         String e = System.getenv("RPG_RENDER_SCALE");

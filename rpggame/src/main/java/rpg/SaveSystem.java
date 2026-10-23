@@ -66,7 +66,7 @@ public final class SaveSystem {
         for (Npc n : g.npcs) {
             Map<String, Object> m = actor(n);
             m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
-            m.put("arrested", n.arrestedUntil); m.put("patrol", n.patrolIndex);
+            m.put("arrested", n.arrestedUntil); m.put("arrestJur", n.arrestJurisdiction); m.put("patrol", n.patrolIndex);
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
             m.put("memories", mem);
             // a body lies as it lay: its fifteen points, so a load puts it back on the ground (never standing up to fall again)
@@ -173,7 +173,7 @@ public final class SaveSystem {
             if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
             applyActor(n, m);
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
-            n.arrestedUntil = Json.num(m, "arrested", -1); n.patrolIndex = Json.integer(m, "patrol", 0);
+            n.arrestedUntil = Json.num(m, "arrested", -1); n.arrestJurisdiction = Json.str(m, "arrestJur", DevMap.jurisdiction(n.x, n.z)); n.patrolIndex = Json.integer(m, "patrol", 0);
             n.memories.clear();
             List<Object> mem = Json.list(m, "memories");
             if (mem != null) for (Object x : mem) n.remember(Memory.load((Map<String, Object>) x), 24);

@@ -263,11 +263,17 @@ final class HiResItems {
      * A shield: the wooden one a round targe of planks, iron-rimmed; the metal tiers a heater of boards faced with their
      * metal, rimmed, a domed boss in the middle and the tier's charge painted across it (a chevron, a bend, a cross).
      */
+    private static void shieldGrip(VoxModel model, int x, int y) {
+        int leather = mat(0x493021);
+        for (int z = 4; z <= 12; z++) { model.set(x, y - 5, z, leather); model.set(x, y + 5, z, leather); }
+        for (int yy = y - 5; yy <= y + 5; yy++) model.set(x, yy, 12, leather);
+    }
+
     static ItemModels.Model shield(ItemDef d, Tier t) {
         Kit k = kit(t);
         if (t == null) {
             int r = 22, n = r * 2 + 1;
-            VoxModel m = new VoxModel(n, n, 6);
+            VoxModel m = new VoxModel(n, n, 16);
             for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) {
                 float dx = x - r, dy = y - r, rr = (float) Math.sqrt(dx * dx + dy * dy);
                 if (rr > r + 0.4f) continue;
@@ -281,10 +287,11 @@ final class HiResItems {
                 if (b <= 20) { m.set(x, y, 1, metal(0x9C9CA2)); if (b <= 9) m.set(x, y, 0, metal(0xB0B0B6)); }
                 if (Math.abs(dx) <= 0.5f && Math.abs(dy) < r - 3 && Math.abs(dy) > 4 || Math.abs(dy) <= 0.5f && Math.abs(dx) < r - 3 && Math.abs(dx) > 4) m.set(x, y, 1, metal(0x7A7A80));   // iron bands
             }
-            return new ItemModels.Model(m, r, r, 4);
+            shieldGrip(m, r, r);
+            return new ItemModels.Model(m, r, r, 12);
         }
         int w = 40, h = 52, cxw = w / 2;
-        VoxModel m = new VoxModel(w + 1, h + 1, 6);
+        VoxModel m = new VoxModel(w + 1, h + 1, 16);
         int face = k.blade(), rim = k.guard(), charge = switch (k.style()) { case 10 -> mat(0xE8C040); case 11 -> mat(0x6A3AA0); case 3 -> mat(0x8A1A1A); case 6 -> mat(0xE8E8F0); default -> mat(0x7A1E1E); };
         for (int x = 0; x <= w; x++) for (int y = 0; y <= h; y++) {
             // the heater's outline: straight sides for the top two thirds, curving in to a point at the foot
@@ -310,7 +317,8 @@ final class HiResItems {
             if ((x == 3 || x == w - 3) && y % 8 == 4 && v > 0.4f) m.set(x, y, 1, k.pommel());              // rivets
         }
         if (k.gem() != 0) m.set(cxw, Math.round(h * 0.62f), 0, k.gem());
-        return new ItemModels.Model(m, cxw, h * 0.55f, 4);
+        shieldGrip(m, cxw, Math.round(h * 0.55f));
+        return new ItemModels.Model(m, cxw, h * 0.55f, 12);
     }
 
 

@@ -776,6 +776,10 @@ public final class Acceptance {
         need("after the arrest no lawman strikes the player (" + hitsAfter + " hits) and none still fights them", hitsAfter == 0 && standDown);
         need("the sentence cleared the bounty and the crimes known of it are settled", g.law.bounty(g.player.id, DevMap.ALPHA) == 0
                 && g.npcs.stream().allMatch(n -> n.memories.stream().noneMatch(x -> x.crime() && x.subject == g.player.id && DevMap.ALPHA.equals(x.jurisdiction) && x.witnessed() && !x.reported)));
+        need("the player is held in a physical cell with time remaining", g.law.inCustody(g.player) && g.objects.jailDoor(DevMap.ALPHA).locked);
+        var slab = g.objects.furniture.stream().filter(f -> f.cellSlab() && f.x > 100).findFirst().orElseThrow();
+        g.teleport(g.player, slab.x - 1, DevMap.FLOOR, slab.z);
+        need("sleeping on the slab serves the sentence", slab.perform(g, g.player, "sleep", g.state.newRequestId()).committed() && !g.law.inCustody(g.player));
         // the other way an arrest happens: the player resists and is beaten down - the blow that would kill arrests instead,
         // and every blow traded before it is settled by the sentence (no guard swings on afterwards)
         var ev2 = g.state.commit("CrimeCommitted", g.player.id, Ids.MERCHANT_A, DevMap.ALPHA, 0, "THEFT value=40 (resist scenario)");
@@ -1050,7 +1054,7 @@ public final class Acceptance {
         int stains0 = gore.stainCount;
         float rx = (float) Math.cos(bandit.yaw), rz = (float) -Math.sin(bandit.yaw);
         float ax = bandit.x + rx * bandit.radius, ay = bandit.y + bandit.height * 0.66f, az = bandit.z + rz * bandit.radius;
-        need("a contact at the right shoulder's height and side is the right arm (" + rpg.combat.Gore.partAt(bandit, ax, ay, az) + ")", rpg.combat.Gore.partAt(bandit, ax, ay, az) == rpg.combat.Gore.Part.ARM_R);
+        need("a contact at the right shoulder's height and side is the right arm (" + g.gore.partAt(bandit, ax, ay, az) + ")", g.gore.partAt(bandit, ax, ay, az) == rpg.combat.Gore.Part.ARM_R);
         g.combat.resolve(g.player, bandit, bandit.maxHp() * 3, 0, rpg.item.ItemDef.DamageType.SLASH, null, ax, ay, az, "test cut", false);
         frames(30);
         need("the killing cut takes the arm off: a limb of its own in the world (" + gore.limbs.size() + " limb(s))", !bandit.alive && gore.lost(bandit, rpg.combat.Gore.Part.ARM_R) && !gore.limbs.isEmpty()
@@ -1245,7 +1249,7 @@ public final class Acceptance {
         float ax = (float) Math.cos(an.yaw), az = (float) -Math.sin(an.yaw), bx = (float) Math.sin(an.yaw), bz = (float) Math.cos(an.yaw);
         float hx = fig.legB[0] * vs, hz = fig.legB[2] * vs, hy = (fig.bodyY + fig.legB[1] - fig.legH * 0.5f) * vs;
         float px = an.x + ax * hx + bx * hz, pz = an.z + az * hx + bz * hz, py = an.y + hy;
-        var part = rpg.combat.Gore.partAt(an, px, py, pz);
+        var part = g.gore.partAt(an, px, py, pz);
         need("a blow below the barrel at the back right is the sheep's right hind leg (" + part + ")", part == rpg.combat.Gore.Part.LEG_R);
         int l0 = gore.limbs.size();
         for (int k = 0; k < 2; k++) gore.onHit(g.player, an, Math.round(an.maxHp() * 0.3f), an.maxHp() * 0.3f, ItemDef.DamageType.SLASH, px, py, pz, 1, 0, false);

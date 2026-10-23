@@ -192,6 +192,8 @@ void Mover::seen(float& sx, float& sy, float& sz) const {
 }
 
 float Mover::update(const VoxelWorld* w, float dt, float gravity, int* steps) {
+    // Keep the shorter collider until the standing volume is clear; releasing crouch must not push a body through a ceiling.
+    crouch = wantsCrouch || (crouch && !bodyFree(w, x, y, z, radius, height));
     acc += std::min(dt, 0.25f);
     float landed = 0;
     int n = 0;

@@ -167,7 +167,7 @@ Renderer::~Renderer() {
     if (decalVbo_) g_.DeleteBuffers(1, &decalVbo_);
     if (decalVao_) g_.DeleteVertexArrays(1, &decalVao_);
     Program* all[] = {&gWorld_, &gModel_, &sWorld_, &sModel_, &lighting_, &cull_, &gtao_, &aoBlur_, &ssr_, &vol_, &fogApply_, &fWorld_, &fModel_,
-                      &particle_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_};
+                      &particle_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_};
     for (Program* p : all) p->destroy(g_);
     if (leafTex_) g_.DeleteTextures(1, &leafTex_);
     GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], layerMat_, white_, shadowTex_, paletteTex_};
@@ -203,7 +203,7 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
     rng_ = JavaRandom(7).seed;
     preset(static_cast<int>(d.quality));
     q_.renderScale = d.render_scale > 0 ? d.render_scale : 1.0f;
-    // the programs are built for a world when one is first drawn; build them now for the default size to find errors at once
+    // World-dependent shaders compile once, for the actual world on its first frame. UI-only frames need none of them.
     sizeX_ = 0;
     auto src = [&](const char* n) -> std::string {
         auto it = sources_.find(n);
@@ -216,16 +216,17 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
                       {&fogApply_, "fullscreen.vert", "fog_apply.frag"}, {&fWorld_, "world.vert", "world_forward.frag"}, {&fModel_, "model.vert", "model_forward.frag"},
                       {&particle_, "particle.vert", "particle.frag"}, {&taa_, "fullscreen.vert", "taa.frag"}, {&bloomDown_, "fullscreen.vert", "bloom_down.frag"},
                       {&bloomUp_, "fullscreen.vert", "bloom_up.frag"}, {&lum_, "fullscreen.vert", "luminance.frag"}, {&exposure_, "fullscreen.vert", "exposure.frag"},
-                      {&tonemap_, "fullscreen.vert", "tonemap.frag"}, {&copy_, "fullscreen.vert", "copy.frag"}, {&ui_, "ui2d.vert", "ui2d.frag"},
+                      {&tonemap_, "fullscreen.vert", "tonemap.frag"}, {&copy_, "fullscreen.vert", "copy.frag"}, {&ui_, "ui2d.vert", "ui2d.frag"}, {&portrait_, "model.vert", "portrait.frag"},
                       {&folG_, "foliage.vert", "foliage_gbuffer.frag"}, {&folS_, "foliage.vert", "foliage_shadow.frag"},
                       {&propG_, "props.vert", "props_gbuffer.frag"}, {&propS_, "props.vert", "props_shadow.frag"}, {&decal_, "decal.vert", "decal.frag"},
                       {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}};
     for (const P& p : list) {
+        if (p.p == &gWorld_ || p.p == &lighting_ || p.p == &vol_ || p.p == &fogApply_ || p.p == &fWorld_ || p.p == &fModel_) continue;
         std::string vs = src(p.vs), fs = src(p.fs);
         if (vs.empty() || fs.empty()) { error_ = std::string("no shader source handed over for ") + (vs.empty() ? p.vs : p.fs); return false; }
         if (!p.p->build(g_, vs, fs, error_)) { error_ = std::string(p.vs) + " + " + p.fs + ": " + error_; return false; }
     }
-    const P comp[] = {{&cull_, "light_cull.comp", nullptr}, {&probeCs_, "probes.comp", nullptr}};
+    const P comp[] = {{&cull_, "light_cull.comp", nullptr}};
     for (const P& p : comp) {
         std::string cs = src(p.vs);
         if (cs.empty()) { error_ = std::string("no shader source handed over for ") + p.vs; return false; }
@@ -431,6 +432,13 @@ int32_t Renderer::mesh(const float* v, uint32_t count, uint32_t* out) {
     if (v == nullptr && count > 0) { error_ = "no vertices"; return ASTRATTO_ERR_ARGUMENT; }
     ModelMesh m;
     m.count = count;
+    if (count > 0) {
+        float lo[3] = {v[0], v[1], v[2]}, hi[3] = {v[0], v[1], v[2]};
+        for (uint32_t i = 1; i < count; i++) for (int axis = 0; axis < 3; axis++) {
+            lo[axis] = std::min(lo[axis], v[i * 10 + axis]); hi[axis] = std::max(hi[axis], v[i * 10 + axis]);
+        }
+        for (int axis = 0; axis < 3; axis++) { m.center[axis] = (lo[axis] + hi[axis]) * 0.5f; m.extent[axis] = (hi[axis] - lo[axis]) * 0.5f; }
+    }
     // see-through: any voxel under 250 of 255 opaque (as the Java model builder decides it)
     for (uint32_t i = 0; i < count; i++) if (v[i * 10 + 6] < 249.5f / 255.0f) { m.translucent = true; break; }
     g_.GenVertexArrays(1, &m.vao);
@@ -927,7 +935,7 @@ void Renderer::bankUniforms(Program& s) {
 
 // ------------------------------------------------------------------ the frame
 bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
-    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); quads_.clear();
+    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); quads_.clear(); portraits_.clear();
     hasCamera_ = false; hasClear_ = false; grading_ = Grading();
     doFoliage_ = doProps_ = doDecals_ = false;
     decalVerts_.clear();
@@ -1008,8 +1016,22 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 qd.texture = c.texture;
                 qd.v.resize(static_cast<size_t>(c.count) * 36);
                 std::memcpy(qd.v.data(), r + sizeof c, qd.v.size() * 4);
-                if (!quads_.empty() && quads_.back().texture == qd.texture) quads_.back().v.insert(quads_.back().v.end(), qd.v.begin(), qd.v.end());
+                if (!quads_.empty() && quads_.back().portrait < 0 && quads_.back().texture == qd.texture) quads_.back().v.insert(quads_.back().v.end(), qd.v.begin(), qd.v.end());
                 else quads_.push_back(std::move(qd));
+                break;
+            }
+            case ASTRATTO_RCMD_PORTRAIT: {
+                astratto_rcmd_portrait c;
+                if (!readRecord(r, head.bytes, c) || c.count > 32 || head.bytes < sizeof c + static_cast<uint64_t>(c.count) * sizeof(astratto_portrait_part)) {
+                    error_ = "invalid portrait record"; return false;
+                }
+                if (c.count == 0 || !std::isfinite(c.x) || !std::isfinite(c.y) || !std::isfinite(c.w) || !std::isfinite(c.h)
+                        || std::abs(c.x) > 32768 || std::abs(c.y) > 32768 || c.w < 1 || c.h < 1 || c.w > 8192 || c.h > 8192) break;
+                Portrait portrait{c.x, c.y, c.w, c.h, {}};
+                portrait.parts.resize(c.count);
+                std::memcpy(portrait.parts.data(), r + sizeof c, c.count * sizeof(astratto_portrait_part));
+                Quads entry; entry.portrait = static_cast<int>(portraits_.size());
+                portraits_.push_back(std::move(portrait)); quads_.push_back(std::move(entry));
                 break;
             }
             case ASTRATTO_RCMD_GRADING: {
@@ -1335,6 +1357,7 @@ void Renderer::shadowPass(VoxelWorld*) {
                 const float ddx = m.m[12] - cx, ddy = m.m[13] - cy, ddz = m.m[14] - cz;
                 const float along = ddx * lx + ddy * ly + ddz * lz;
                 if (ddx * ddx + ddy * ddy + ddz * ddz - along * along > r2) continue;
+                if (!visibleModel(m, lightFrustum)) continue;
                 sModel_.mat4("uModel", m.m);
                 const ModelMesh& mm = meshes_[m.mesh];
                 g_.BindVertexArray(mm.vao);
@@ -1398,6 +1421,22 @@ void Renderer::gbufferPass(VoxelWorld* w) {
     g_.Enable(CULL_FACE);
 }
 
+bool Renderer::visibleModel(const Model& model, const Frustum& frustum) const {
+    auto found = meshes_.find(model.mesh);
+    if (found == meshes_.end()) return false;
+    const ModelMesh& mesh = found->second;
+    float center[3], extent[3];
+    for (int axis = 0; axis < 3; axis++) {
+        center[axis] = model.m[12 + axis]; extent[axis] = 0;
+        for (int k = 0; k < 3; k++) {
+            center[axis] += model.m[k * 4 + axis] * mesh.center[k];
+            extent[axis] += std::abs(model.m[k * 4 + axis]) * mesh.extent[k];
+        }
+    }
+    // Enclosing the transformed box also handles nonuniform scales, reflections and shear conservatively.
+    return frustum.sphere(center[0], center[1], center[2], std::sqrt(extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]));
+}
+
 void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
     float csky = 1, cblk = 0;
     if (viewmodel && w) {
@@ -1407,7 +1446,7 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
     for (const Model& m : models_) {
         if (((m.flags & ASTRATTO_MODEL_VIEWMODEL) != 0) != viewmodel) continue;
         if (m.flags & (ASTRATTO_MODEL_FORWARD | ASTRATTO_MODEL_SHADOW_ONLY)) continue;
-        if (!viewmodel && !frustum_.sphere(m.m[12], m.m[13], m.m[14], 4.5f)) continue;
+        if (!viewmodel && !visibleModel(m, frustum_)) continue;
         float sky = csky, blk = cblk;
         if (!viewmodel && w) {
             const int ix = static_cast<int>(std::floor(m.m[12])), iy = static_cast<int>(std::floor(m.m[13] + 0.6f)), iz = static_cast<int>(std::floor(m.m[14]));
@@ -1656,6 +1695,7 @@ void Renderer::forwardPass(VoxelWorld*) {
     for (size_t k = 0; k < models_.size(); k++) {
         const Model& m = models_[k];
         if (!(m.flags & ASTRATTO_MODEL_FORWARD) || (m.flags & ASTRATTO_MODEL_VIEWMODEL)) continue;
+        if (!visibleModel(m, frustum_)) continue;
         const float dx = m.m[12] - cam_.x, dy = m.m[13] - cam_.y, dz = m.m[14] - cam_.z;
         fwd.push_back({dx * dx + dy * dy + dz * dz, k});
     }
@@ -1863,6 +1903,14 @@ void Renderer::quadsPass(int windowW, int windowH) {
     g_.BindVertexArray(quadVao_);
     g_.BindBuffer(ARRAY_BUFFER, quadVbo_);
     for (const Quads& qd : quads_) {
+        if (qd.portrait >= 0) {
+            portraitPass(portraits_[static_cast<size_t>(qd.portrait)], windowH);
+            g_.Viewport(0, 0, windowW, windowH);
+            g_.Disable(SCISSOR_TEST); g_.Disable(DEPTH_TEST); g_.DepthMask(TRUE_);
+            ui_.use(); ui_.mat4("uProj", proj.m); ui_.i1("uTex", 0);
+            g_.BindVertexArray(quadVao_); g_.BindBuffer(ARRAY_BUFFER, quadVbo_);
+            continue;
+        }
         const size_t n = qd.v.size() / 36;
         if (n == 0) continue;
         auto it = textures_.find(qd.texture);
@@ -1875,6 +1923,24 @@ void Renderer::quadsPass(int windowW, int windowH) {
     g_.BindVertexArray(0);
     g_.Disable(BLEND);
     g_.Enable(DEPTH_TEST);
+}
+
+void Renderer::portraitPass(const Portrait& portrait, int windowH) {
+    const int x = static_cast<int>(portrait.x), y = windowH - static_cast<int>(portrait.y + portrait.h);
+    const int w = static_cast<int>(portrait.w), h = static_cast<int>(portrait.h);
+    g_.Viewport(x, y, w, h); g_.Enable(SCISSOR_TEST); g_.Scissor(x, y, w, h);
+    g_.Enable(DEPTH_TEST); g_.DepthMask(TRUE_); g_.ClearDepth(1); g_.Clear(DEPTH_BUFFER_BIT);
+    Mat4 projection, view;
+    const float halfWidth = 0.45f * portrait.w / portrait.h;
+    projection.ortho(-halfWidth, halfWidth, -0.45f, 0.45f, 0.1f, 4);
+    view.lookAt(0, 0, -2, 0, 0, 0, 0, 1, 0); projection.mul(view);
+    portrait_.use(); portrait_.mat4("uPV", projection.m);
+    for (const auto& part : portrait.parts) {
+        auto mesh = meshes_.find(part.mesh);
+        if (mesh == meshes_.end()) continue;
+        portrait_.mat4("uModel", part.matrix); portrait_.f4("uTint", part.r, part.g, part.b, part.a);
+        g_.BindVertexArray(mesh->second.vao); g_.DrawArrays(TRIANGLES, 0, static_cast<GLsizei>(mesh->second.count));
+    }
 }
 
 int32_t Renderer::readPixels(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t* out) {

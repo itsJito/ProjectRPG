@@ -134,7 +134,7 @@ see the same events).
 
 ### 7. Independently buildable and relocatable
 
-- `./gradlew buildNative`: `native/build.bat` (Visual C++, found with vswhere) on Windows, CMake elsewhere
+- `./gradlew buildNative`: runtime library only; `native/build.bat game` (Visual C++, found with vswhere; incremental CMake when available) on Windows, CMake elsewhere. `verifyNative` builds verification tools/modules and runs the native self-test, and is required by `test`/`check`
   (`native/CMakeLists.txt`), into `native/bin/<os>-<arch>/`, then the self-test.
 - `./gradlew build`: the jar carries the native library (`astratto/natives/<os>-<arch>/`), the shaders and the
   resources; the binding extracts the library for the machine it runs on. Javadoc and sources jars are built too.

@@ -21,6 +21,7 @@ public final class Objects {
     private final List<WorldObject> list = new ArrayList<>();
     private long nextFixture = Ids.FIXTURES;
     public Door shedDoor, storeDoor, farmGate;
+    private final List<Door> jailDoors = new ArrayList<>();
     /** The farm's fixtures (GDD 3.9): the trough, the nest boxes, the farmer's chest of feed and eggs. */
     public Container trough, farmChest;
     public final List<Container> nestBoxes = new ArrayList<>();
@@ -124,13 +125,29 @@ public final class Objects {
         }
         custody = add(new Container(fid(), "custody", "The undertaker's chest", "chest", DevMap.CUSTODY_CHEST[0], f + 0.4f, DevMap.CUSTODY_CHEST[1], 100, Ids.UNDERTAKER));
         custody.locked = true; custody.lockLevel = 60;
+        for (var cell : rpg.world.Jails.CELLS) {
+            Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
+            door.spawn(g); jailDoors.add(door);
+            var p = cell.slab();
+            Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
+            slab.name = "Cell slab"; furniture.add(slab);
+        }
     }
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */
     public Container custody;
 
     /** Every door, for the frame's physics read-back and the NPCs' door manners. */
-    public Door[] doors() { return farmGate == null ? new Door[]{shedDoor, storeDoor} : new Door[]{shedDoor, storeDoor, farmGate}; }
+    public Door[] doors() {
+        List<Door> doors = new ArrayList<>(); doors.add(shedDoor); doors.add(storeDoor);
+        if (farmGate != null) doors.add(farmGate);
+        doors.addAll(jailDoors);
+        return doors.toArray(Door[]::new);
+    }
+    public Door jailDoor(String jurisdiction) {
+        for (Door door : jailDoors) if (door.name.equals(jurisdiction + " cell door")) return door;
+        return null;
+    }
 
     /** The tree or rock a block belongs to (the trunk or crown, the ore), or null. */
     public Node nodeAt(int bx, int by, int bz) {

@@ -55,7 +55,11 @@ public final class Npc extends Actor implements Interactable {
     public long watchTarget;
     CombatTactics.Plan tactic;
     double nextTactic;
-    public double lastLootAt;
+    public double lastLootAt, lootStarted = -99, lootUntil = -99;
+    public boolean asleep() {
+        return alive && !reacting && goal == Brain.Goal.SLEEP && !cs.busy()
+                && Math.hypot(x - homeX, z - homeZ) <= 1.2 && Math.hypot(vx, vz) < 0.12;
+    }
     public int lootTaken;
     public final List<Memory> memories = new ArrayList<>();
     // the mind's current state, for the inspector
@@ -75,6 +79,7 @@ public final class Npc extends Actor implements Interactable {
     /** Under the player's Friends (they will not report the player) and Charm Person (they will not fight the player), until these times. */
     public double friendUntil = -1, charmUntil = -1;
     public int patrolIndex;
+    public String arrestJurisdiction = "";
     public double busyUntil, arrestedUntil = -1, diedAt = -1, lastDialogAt = -99, chatUntil = -1;
     public long ragdoll;
     /** The body to search, once dead (0: none). */

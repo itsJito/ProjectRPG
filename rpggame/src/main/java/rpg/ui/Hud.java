@@ -116,7 +116,7 @@ public final class Hud {
 
     private void layout() {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
-        group("vitals", "vitals", Placement.at(Anchor.BOTTOM, 0, 66), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
+        group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
                 "wanted", Placement.at(Anchor.TOP_LEFT, 16, 16), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 110),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
@@ -129,7 +129,7 @@ public final class Hud {
         group("magic", "magic", inFrame("magic", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
-        group("talk", "dialogue", Placement.at(Anchor.BOTTOM, 0, 120), "pause", Placement.at(Anchor.CENTER, 0, 0));
+        group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 12), "pause", Placement.at(Anchor.CENTER, 0, 0));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
@@ -149,7 +149,6 @@ public final class Hud {
     public void openTab(int t) { go(TAB_SCENES[Math.max(0, Math.min(TAB_SCENES.length - 1, t))]); }
     public void dialog(Dialog d) {
         dialog = d; menu = null;
-        if (d != null && d.npc != 0) g.chat.add(d.speaker + ": " + d.text, rpg.Chat.Kind.DIALOGUE);
     }
     public void closeDialog() { dialog = null; }
     public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }

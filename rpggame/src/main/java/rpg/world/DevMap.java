@@ -207,6 +207,13 @@ public final class DevMap {
             wilds();
             farm();
             graveyard();
+            for (Jails.Cell cell : Jails.CELLS) {
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), BRICK);
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.frontZ(), FENCE);
+                fill(cell.gateX(), FLOOR, cell.frontZ(), cell.gateX(), FLOOR + DOOR_HEIGHT - 1, cell.frontZ(), LOCKED_DOOR);
+                Piece slab = cell.slab();
+                fill(slab.x0(), FLOOR, slab.z0(), slab.x1(), FLOOR, slab.z1(), BED);
+            }
             // furniture: the collision cells of the pieces (the game draws them)
             for (Piece p : concat(FURNITURE, GRAVEYARD_PIECES)) {
                 int id = switch (p.kind) { case "CRATE" -> CRATE; case "BOOKCASE" -> BOOKCASE; case "BED" -> BED; case "TARGET" -> TARGET; case "HEADSTONE" -> HEADSTONE; default -> TABLE; };

@@ -147,7 +147,7 @@ public final class AiSystem {
         CommandBuffer c = g.game.commands();
         n.body = g.game.reserve(KIND_MOVER);
         n.agent = g.game.reserve(KIND_AGENT);
-        c.moverCreate(n.body, n.x, DevMap.FLOOR + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, 1.2f);
+        c.moverCreate(n.body, n.x, DevMap.FLOOR + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * 0.5f);
         c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, AGENT_DOORS, (int) n.id * 7919);
         c.agentTarget(n.agent, g.player == null ? 0 : g.player.body, 0, 0, 0);
         c.moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, 0);   // a person gathers speed and sheds it (the walk has weight): no instant starts
@@ -203,6 +203,7 @@ public final class AiSystem {
             if (n.reacting) continue;           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
             brain.act(n, dt);
+            g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking ? MOVER_CROUCH : 0));
             face(n, dt);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
             footsteps(n, dt);
@@ -257,7 +258,7 @@ public final class AiSystem {
             }
             if (!n.alive || !n.loaded) continue;
             Snapshots.Mover m = bodies.mover(n.body);
-            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; }
+            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
             Snapshots.Agent a = agents.agent(n.agent);
             if (a != null) {
                 n.agentYaw = a.yaw;
@@ -350,7 +351,7 @@ public final class AiSystem {
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) {
             for (Actor a : g.actors()) {
                 if (a == n || !a.alive || a.dummy) continue;
-                if (g.law.bounty(a.id, n.homeJurisdiction) > 0 && !g.law.inCustody(a) && n.distTo(a) < (n.role == Npc.Role.LAWMAN ? 6 : 24) && canSee(n, a) && g.law.mayEngage(n, a)) return a;
+                if (g.law.bounty(a.id, n.homeJurisdiction) > 0 && !g.law.inCustody(a) && n.distTo(a) < (n.role == Npc.Role.LAWMAN ? 6 : 24) && canSee(n, a)) return a;
             }
         }
         if (!n.combatant()) {

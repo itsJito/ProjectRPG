@@ -76,14 +76,20 @@ public final class Main {
         cfg.audioDevice = !acceptance && !gallery;
         // RPG_NONDET=1: an automated run on every worker thread, as play has it (to catch what only threading shows)
         cfg.deterministic = (acceptance || gallery) && System.getenv("RPG_NONDET") == null;
+        long boot = System.nanoTime();
         Game game;
         try { game = Game.create(cfg); }
         catch (IllegalStateException e) { System.err.println(e.getMessage()); status[0] = 1; return false; }
         System.out.println(AstrattoNative.buildInfo());
+        System.out.printf("[Load] native services %.2fs%n", (System.nanoTime() - boot) / 1e9);
+        boot = System.nanoTime();
         long world = DevMap.build(game.engine());
         game.activate(world);
+        System.out.printf("[Load] devmap %.2fs%n", (System.nanoTime() - boot) / 1e9);
+        boot = System.nanoTime();
         Gfx gfx = new Gfx(game.engine(), win.width, win.height);
         Ui2D ui = new Ui2D(gfx.renderer());
+        System.out.printf("[Load] renderer and UI %.2fs%n", (System.nanoTime() - boot) / 1e9);
         boolean again = false;
         try {
             if (acceptance) status[0] = new Acceptance(win, game, gfx, ui, shots).run();
@@ -146,10 +152,10 @@ public final class Main {
             }
         }
         if (win.shouldClose() || profile == null) { music.close(); return false; }
+        long loadStarted = System.nanoTime();
         Rpg g = game.add(new Rpg(game, profile.name, profile.look, false));
         g.profile = profile;
-        // the frame rate aimed at: the monitor's own (vsync holds the game to it); unsynced, half again more
-        g.cfg.targetFps = System.getenv("ASTRATTO_NOVSYNC") != null ? Math.max(144, win.refreshRate) : win.refreshRate;
+        // Dynamic resolution targets the configured 30 FPS budget, independently of presentation refresh rate.
         g.music = music;
         Hud hud = new Hud(g, gfx);
         g.ui = hud;
@@ -157,6 +163,7 @@ public final class Main {
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
         if (!fresh && profile.hasSave() && !new SaveSystem(g).load(profile.save())) g.chat.warn("The save for " + profile.name + " could not be loaded: a fresh start.");
         if (fresh) new SaveSystem(g).save(profile.save());
+        System.out.printf("[Load] session, audio, figures and save %.2fs%n", (System.nanoTime() - loadStarted) / 1e9);
         boolean[] toTitle = {false};
         hud.onTitle = () -> { toTitle[0] = true; win.requestClose(); };
         double sessionStart = g.time;

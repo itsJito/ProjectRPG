@@ -130,10 +130,10 @@ public final class Sfx {
         // ---- synthesized: what has no recording
         make("crackle", crackle());
         make("splash", noiseBurst(0.35f, 0.4f));
-        for (int variant = 0; variant < 3; variant++) {
-            make("bow", BowAudio.release(RATE, false, 730 + variant));
-            make("crossbow", BowAudio.release(RATE, true, 830 + variant));
-        }
+        // Recorded arrow twang + bamboo swish, distributed by Flare with per-file OpenGameArt provenance.
+        one("bow", "archery/release.ogg", 0);
+        one("crossbow", "archery/release.ogg", 0);
+        one("arrow.impact", "archery/impact.ogg", 0);
         bank("bow.draw", "foley/creak", 3, ".ogg", 1);
         bank("arrow.fly", "swish/swish-", 3, ".wav", 1);
         make("zap", sweep(1400, 200, 0.25f));

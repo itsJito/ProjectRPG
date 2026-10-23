@@ -134,7 +134,7 @@ public final class Rpg implements GameModule {
         // the player
         player.x = DevMap.SPAWN_X; player.z = DevMap.SPAWN_Z; player.y = DevMap.FLOOR;
         player.body = ctx.reserve(AstrattoNative.KIND_MOVER);
-        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, 1.2f);
+        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, player.height * 0.5f);
         player.restore();
         starterKit();
         controller.snapTo((float) Math.PI);
@@ -195,6 +195,7 @@ public final class Rpg implements GameModule {
         state.minutes += dt * cfg.minutesPerSecond;
         chat.now = time; fx.now = time;
         death.update();
+        law.update();
         controller.update(dt);
         interact.update(dt);
         combat.update(dt);
@@ -221,7 +222,7 @@ public final class Rpg implements GameModule {
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
         if (m != null && !(ui != null && ui.console.noclip)) {
             player.walked += (float) Math.hypot(m.x - player.x, m.z - player.z);
-            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded;
+            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched;
         }
         ai.afterFrame(lastBodies, ctx.agents());
         reactions.afterFrame(lastBodies);

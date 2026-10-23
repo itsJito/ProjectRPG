@@ -22,7 +22,8 @@ or newer on Windows (found by `native/build.bat`, no CMake needed), CMake 3.16+ 
 renderer needs OpenGL 4.5.
 
 ```
-./gradlew buildNative     # the native core, its self-test and the example C++ module -> native/bin/<platform>/
+./gradlew buildNative     # incremental runtime library -> native/bin/<platform>/
+./gradlew verifyNative    # native tools/modules and self-test (also part of build/check/test)
 ./gradlew build           # the jar (native library, shaders, resources inside), API docs, and the tests
 ./gradlew test            # boundary, interoperability and integration tests, with ASTRATTO_JAVA_FALLBACK=0
 ```

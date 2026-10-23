@@ -189,7 +189,7 @@ The shaders are the files in `shaders/`, bundled in the jar and handed to the re
 
 ## 7. Building the native core for another platform
 
-`./gradlew buildNative` uses `native/build.bat` on Windows and CMake elsewhere (`native/CMakeLists.txt`), writing to
+`./gradlew buildNative` incrementally builds only the runtime library, using `native/build.bat game` on Windows and CMake elsewhere (`native/CMakeLists.txt`), writing to
 `native/bin/<os>-<arch>/`; `./gradlew build` bundles whatever is there into the jar under
 `astratto/natives/<os>-<arch>/`, and the Java side extracts and loads the one for the machine it runs on. A jar that
 should run on several platforms is built by running `buildNative` on each and copying the `native/bin/*` folders

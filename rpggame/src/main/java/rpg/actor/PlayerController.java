@@ -128,7 +128,7 @@ public final class PlayerController {
         if (!in.mainDown) mainHeld = 0;
         mainWas = in.mainDown;
         // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
-        boolean guardItem = off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
+        boolean guardItem = main == null && off == null || off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
         if (guardItem) g.combat.setBlock(p, in.offDown);
         else {
             g.combat.setBlock(p, false);
@@ -257,7 +257,7 @@ public final class PlayerController {
         if (!p.running) max *= aiming(p) ? 0.75f : along < -0.3f ? 0.8f : 1f;
         else if (p.firstPerson) max *= along > 0.7f ? 1f : along > -0.3f ? 0.82f : 0.66f;
         if (sprintRecover > 0) max *= 0.5f;
-        if (p.sneaking) max = Math.min(max, g.cfg.sneakSpeed);
+        if (p.sneaking || p.crouched) max = Math.min(max, g.cfg.sneakSpeed);
         // committed actions: their start-up and recovery hold the body back
         switch (c.phase) {
             case WINDUP -> max *= 0.45f;
@@ -279,8 +279,8 @@ public final class PlayerController {
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)
-        float accel = p.sprinting ? (sprintTime < 0.6f ? 7f : 9f) : p.running ? 8.5f : 7f;
-        float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 17f : 18f;
+        float accel = p.sprinting ? (sprintTime < 0.6f ? 7f : 9f) : p.running ? 12f : 14f;
+        float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 26f : 32f;
         if (c.staggered > 0) decel = 22f;
         accel *= 0.55f + 0.45f * burden;
         if (!p.grounded) { accel *= 0.15f; decel *= 0.15f; }
@@ -288,9 +288,9 @@ public final class PlayerController {
         if (speedNow > 0.5f && moving && !strafe) {
             // carried round an arc: the heading turns at a rate that falls as speed rises
             float cur = (float) Math.atan2(bvx, bvz), wantAng = (float) Math.atan2(dx, dz), diff = Actor.wrap(wantAng - cur);
-            float rate = p.sprinting ? 2.6f : p.running ? 5f : 8.5f;
+            float rate = p.sprinting ? 4.5f : p.running ? 9f : 14f;
             float ns;
-            if (Math.abs(diff) > 2.3f && speedNow > 2f) ns = approach(speedNow, 0, decel * dt);    // reversing at speed: it brakes first
+            if (Math.abs(diff) > 2.3f && speedNow > g.cfg.walkSpeed + 0.2f) ns = approach(speedNow, 0, decel * dt);    // reversing at speed: it brakes first
             else {
                 cur += Math.max(-rate * dt, Math.min(rate * dt, diff));
                 // a sharp turn is paid for in speed (the feet dig in round it), not slid round at full pace
@@ -314,7 +314,7 @@ public final class PlayerController {
         boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
         boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
         if (jump) { jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
-        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, 0);
+        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
@@ -340,7 +340,7 @@ public final class PlayerController {
             return;
         }
         if (strafing(p)) p.turnToward(p.aimYaw, c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
-        else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 3.5f : 9f, dt);
+        else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 7f : 14f, dt);
         else if (Math.abs(Actor.wrap(p.aimYaw - p.yaw)) > 1.6f) p.turnToward(p.aimYaw, 4f, dt);
     }
 

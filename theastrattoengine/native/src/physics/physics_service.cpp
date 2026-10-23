@@ -117,11 +117,13 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
             Mover* m = movers_.get(c.handle);
             if (!m) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
-            m->wishX = c.vx; m->wishZ = c.vz; m->wishY = c.vy;
-            if (c.jump > 0) { m->jump = c.jump; m->jumpLeft = 0.2f; }
+            if (!(c.flags & ASTRATTO_MOVER_STANCE_ONLY)) {
+                m->wishX = c.vx; m->wishZ = c.vz; m->wishY = c.vy;
+                if (c.jump > 0) { m->jump = c.jump; m->jumpLeft = 0.2f; }
+                m->climb = c.vy != 0;
+            }
             if (c.accel > 0) m->accel = c.accel;
-            m->crouch = (c.flags & ASTRATTO_MOVER_CROUCH) != 0;
-            m->climb = c.vy != 0;
+            m->wantsCrouch = (c.flags & ASTRATTO_MOVER_CROUCH) != 0;
             return ASTRATTO_OK;
         }
         case ASTRATTO_CMD_MOVER_PLACE: {

@@ -40,7 +40,7 @@ public final class Rig {
         int corrective = -1;
         // the hips' height (a spring), their side shift, the lean
         float hipH = -1, hipV, sway, accLean, roll, lastVx, lastVz, lastX, lastZ;
-        float headYaw, bowRaise;
+        float headYaw, bowRaise, crouchBlend;
         final float[] armSwing = new float[2];
         /** The body's velocity as the eye reads it: the mover's own flickers from one physics step to the next, and a
          *  figure driven by it raw twitches - its steps aim at a target that jumps, its lean at a spike of acceleration. */
@@ -117,14 +117,14 @@ public final class Rig {
         boolean walking = st.walking;
         float ampT = walking ? Math.min(1, st.spd / 1.2f) : 0;
         st.amp += (ampT - st.amp) * Math.min(1, dt * 5);
-        float cadence = Gait.cadence(Math.max(st.spd, 0.8f), a.sneaking);
-        float beta = Gait.stance(st.spd, a.sneaking);
+        float cadence = Gait.cadence(Math.max(st.spd, 0.8f), a.sneaking || a.crouched);
+        float beta = Gait.stance(st.spd, a.sneaking || a.crouched);
         // a walk is taken on softly bent knees, the hips settled a little: that is what lets a leg reach into a stride
         // instead of patting along on straight legs
         float strideBend = WALK_BEND * Math.min(1, st.amp * 1.4f);
         // Reach is planned for the bent stance the body is approaching. Running shortens contact instead of
         // privately accelerating the rig's cycle, which used to disagree with the footstep/noise clock.
-        reachHalf = Gait.halfReach(a.sneaking);
+        reachHalf = Gait.halfReach(a.sneaking || a.crouched);
         // Feet, torso and arms must reach the running gait together.
         float runF = Gait.runShare(st.spd);
         float hipFloor = b.hipY() - 0.35f - strideBend - PENDULUM * 1.15f;
@@ -239,7 +239,12 @@ public final class Rig {
             float dlx = c.dodgeX * rx + c.dodgeZ * rz, dlz = c.dodgeX * bx + c.dodgeZ * bz;
             extraLean += -dlz * 0.3f; roll += -dlx * 0.25f;
         }
-        if (a.sneaking) { crouch += SNEAK_CROUCH; extraLean += 0.32f; }   // creeping: knees bent (a stalk, not a squat), leaning into it
+        st.crouchBlend += ((a.sneaking || a.crouched ? 1 : 0) - st.crouchBlend) * (1 - (float) Math.exp(-16 * dt));
+        crouch += SNEAK_CROUCH * st.crouchBlend;
+        extraLean += 1.14f * st.crouchBlend;
+        float looting = a instanceof rpg.ai.Npc npc && npc.goal == rpg.ai.Brain.Goal.LOOT && time < npc.lootUntil
+                ? (float) Math.sin(Math.PI * Math.max(0, Math.min(1, (time - npc.lootStarted) / 0.9))) : 0;
+        crouch += 5 * looting; extraLean += 0.9f * looting;
         if (c.staggered > 0) { float k = Math.min(1, c.staggered / 0.4f); extraLean -= 0.32f * k; extraTwist += 0.25f * k * (float) Math.sin(time * 9 + a.id); crouch += 1.2f * k; }
         extraLean -= 0.14f * c.flash;
         if (c.blocking) { extraLean += 0.06f; extraTwist -= 0.16f; crouch += 0.8f; }
@@ -320,7 +325,7 @@ public final class Rig {
         System.arraycopy(tm, 0, hm, 0, 16);
         translate(hm, 0, b.neckY() - b.hipY(), 0);
         rotZ(hm, -(roll - st.sway * 0.03f) * 0.8f);
-        rotX(hm, lean * 0.7f);
+        rotX(hm, lean * (0.7f + 0.3f * st.crouchBlend));
         rotY(hm, -twist * 0.9f + st.headYaw);
         rotX(hm, clamp(a.pitch * 0.7f, -0.7f, 0.7f));
         float[] e = point(hm, 0, b.eyeY() - b.neckY(), -b.head[2] / 2f + 0.5f);
@@ -361,7 +366,8 @@ public final class Rig {
             float[] dir = torsoDir(0.05f * side, 0.85f, -0.55f);   // where a held weapon points at rest: carried ahead, point up
             armActive[k] = false;
             boolean attacking = mv != null && c.phase != Phase.IDLE && c.offHand != isMain;
-            boolean shieldSide = c.blocking && (isMain ? off == null : off != null && off.family == Family.SHIELD);
+            boolean bareGuard = c.blocking && main == null && off == null;
+            boolean shieldSide = c.blocking && (bareGuard || (isMain ? off == null : off != null && off.family == Family.SHIELD));
             // the arm swings with the opposite leg; a running arm is bent at the elbow
             float desiredSwing = (float) Math.tanh((footFwd[1 - k] - footFwd[k]) / Math.max(1, legLen * 0.6f));
             st.armSwing[k] += (desiredSwing - st.armSwing[k]) * (1 - (float) Math.exp(-18 * dt));
@@ -382,6 +388,7 @@ public final class Rig {
             float hz = -(u1 * (float) Math.sin(phi) + u2 * (float) Math.sin(phi + eps));
             float hx = side * (0.75f + 0.25f * (1 - runF) - 0.9f * runF * Math.max(0, opp));
             float[] rest = torsoPoint(shoulder, hx, hy, hz);
+            if (holds == null) rest = lerp(rest, new float[]{side * (b.shoulderX() + 0.6f), 4.8f, -8.5f + opp * 0.5f}, st.crouchBlend);
             if (holds != null && holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.STAFF)
                 rest = torsoPoint(shoulder, side * 0.5f, -7.4f + 0.6f * (float) Math.cos(theta), -3.8f - 1.25f * (float) Math.sin(theta));
             else if (holds != null && holds.family == Family.SHIELD) rest = torsoPoint(shoulder, side * 0.4f, -7.6f, -2.6f);
@@ -420,11 +427,15 @@ public final class Rig {
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
                 target = lerp(rest, toFigure(a, gr[0], gr[1], gr[2]), c.charge);
                 dir = norm(lerp(dir, toFigureDir(a, gr[3], gr[4], gr[5]), c.charge));
+            } else if (looting > 0.001f) {
+                armActive[k] = true;
+                target = lerp(rest, new float[]{side * 2.8f, 1.5f, -7.5f}, looting);
+                dir = new float[]{0, -1, -0.2f};
             } else if (shieldSide) {
                 armActive[k] = true;
                 // the guard: the shield (or the blade) brought across in front of the chest and up to the chin, where it
                 // covers the body from a blow - and where the eyes, behind it, can still see over it
-                target = firstPerson ? view(aim, 2.2f, side, 3.0f, 8.4f) : torsoPoint(shoulder, -side * 2.2f, -1.2f, -6.6f);
+                target = bareGuard ? torsoPoint(shoulder, -side * 0.6f, 1.5f, -3.3f) : firstPerson ? view(aim, 2.2f, side, 3.0f, 8.4f) : torsoPoint(shoulder, -side * 2.2f, -1.2f, -6.6f);
                 dir = holds != null && holds.family == Family.SHIELD ? new float[]{0, 1, 0} : norm(torsoDir(1f * -side, 0.35f, -0.4f));
             } else if (isMain && holds != null && holds.family == Family.THROWN && c.draw > 0) {
                 // winding up a throw: the hand drawn back past the ear, the elbow high
@@ -451,7 +462,7 @@ public final class Rig {
             } else if (!grounded) {
                 target = torsoPoint(shoulder, side * 2.6f, -6.5f, -3.2f);
             } else target = rest;
-            float[] pole = norm(torsoDir(side * 0.45f, -0.25f, 1f));
+            float[] pole = norm(lerp(torsoDir(side * 0.45f, -0.25f, 1f), new float[]{side, 0.1f, 0.3f}, st.crouchBlend));
             float[] elbow = ik(shoulder, target, L_ARM1, L_ARM2, pole);
             float[] grip = add(elbow, norm(sub(target, elbow)), L_ARM2);
             float[] right = {torsoRight[0], torsoRight[1], torsoRight[2]};

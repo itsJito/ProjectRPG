@@ -3,6 +3,7 @@ rem Astratto Engine - builds the native core (astratto.dll), its self-test, its 
 rem module with the Visual C++ compiler. No CMake needed: CMakeLists.txt beside this file does the same for anyone who
 rem has it, and for other platforms.
 rem   build.bat          build everything, then run the self-test
+rem   build.bat game     incrementally build only the runtime DLL (CMake when available)
 rem   build.bat notest   build only
 rem   build.bat asan     build everything with AddressSanitizer into bin\windows-x64-asan, then run the self-test there
 rem   build.bat checked  build everything with the debug runtime - every container access bounds-checked, the heap
@@ -44,6 +45,20 @@ call "%VSROOT%\VC\Auxiliary\Build\vcvars64.bat" >nul
 if errorlevel 1 exit /b 2
 
 :compile
+if /i "%1"=="game" (
+  set "CMAKE=cmake"
+  where cmake >nul 2>nul
+  if errorlevel 1 (
+    set "CMAKE=%VSROOT%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+  )
+  "!CMAKE!" --version >nul 2>nul
+  if not errorlevel 1 (
+    "!CMAKE!" -S "%HERE%." -B "%HERE%build-windows-x64-game" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DASTRATTO_PLATFORM=windows-x64 -DASTRATTO_WERROR=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+    if errorlevel 1 exit /b 1
+    "!CMAKE!" --build "%HERE%build-windows-x64-game" --target astratto
+    exit /b !errorlevel!
+  )
+)
 if /i "%1"=="asan" if not exist "%VCToolsInstallDir%lib\x64\clang_rt.asan_dynamic-x86_64.lib" (
   echo astratto: AddressSanitizer is not installed with these build tools ^(Visual Studio Installer: "C++ AddressSanitizer"^); "build.bat checked" needs nothing more
   exit /b 2
@@ -66,6 +81,8 @@ for /r "%HERE%src" %%f in (*.cpp) do set SRC=!SRC! "%%f"
 cl %FLAGS% /DASTRATTO_BUILD /LD %SRC% /Fo"%OBJ%\lib\\" /Fe"%OUT%\astratto.dll" /link /IMPLIB:"%OBJ%\astratto.lib" %NOPDB% user32.lib winmm.lib
 if errorlevel 1 ( echo astratto: the library did not build & exit /b 1 )
 del /q "%OUT%\astratto.exp" 2>nul
+
+if /i "%1"=="game" exit /b 0
 
 cl %FLAGS% "%HERE%tests\selftest.cpp" "%HERE%tests\services.cpp" "%HERE%tests\hardening.cpp" "%HERE%tests\impulsis.cpp" /Fo"%OBJ%\test\\" /Fe"%OUT%\astratto_selftest.exe" /link "%OBJ%\astratto.lib"
 if errorlevel 1 ( echo astratto: the self-test did not build & exit /b 1 )

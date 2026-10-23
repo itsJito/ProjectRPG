@@ -16,15 +16,17 @@ public final class Gait {
     /** Where a walk has fully become a run (m/s): between them the stride blends. */
     public static final float WALK_TOP = 2.6f, RUN_FROM = 3.5f;
     /** Model pixels: knee bend at a walk, the hips' pendulum drop, and the extra crouch when sneaking. */
-    public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 2.3f;
+    public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 8.6f;
 
     /** 0 at a walk, 1 at a run and faster. */
     public static float runShare(float speed) { return Math.max(0, Math.min(1, (speed - WALK_TOP) / (RUN_FROM - WALK_TOP))); }
 
     /** Comfortable half-span of a planted leg in model pixels, shared with the rig's foot targeting. */
     public static float halfReach(boolean sneaking) {
+        // Deep crouching needs short steps; full standing reach straightened the trailing leg along the floor.
+        if (sneaking) return 4.5f;
         float leg = Body.THIGH + Body.SHIN - 0.15f;
-        float hip = Body.LEGS - 0.35f - WALK_BEND - PENDULUM - (sneaking ? SNEAK_CROUCH : 0);
+        float hip = Body.LEGS - 0.35f - WALK_BEND - PENDULUM;
         return (float) Math.sqrt(Math.max(0, leg * leg - hip * hip)) * 0.95f;
     }
 

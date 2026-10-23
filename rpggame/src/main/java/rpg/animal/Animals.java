@@ -192,6 +192,8 @@ public final class Animals {
         a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
         a.yaw = (float) ((a.id * 1.7) % (2 * Math.PI));
         if (s.domestic && a.owned()) a.trust.put(a.owner, 1f);
+        a.nextThink = g.time + Math.floorMod(a.id * 73, 200) / 1000.0;
+        nextSense.put(a.id, g.time + Math.floorMod(a.id * 97, 200) / 1000.0);
         animals.add(a);
         spawnBody(a);
         return a;
@@ -672,13 +674,14 @@ public final class Animals {
 
     // ------------------------------------------------------------------ the tiers: near animals in full, far wild ones as cohort counts
     private void tiers() {
+        int spawned = 0;
         float px = g.player.x, pz = g.player.z;
         for (Animal a : new ArrayList<>(animals)) {
             if (!a.alive || a.home == null || a.home.owner != 0 || a.species.domestic && a.owned()) continue;
             if (a.distTo(px, pz) < 84 || a.baby || youngNear(a, 40) || a.dueAt > 0 || a.hp < a.maxHp() || clutchOf(a) != null || a.goal == Goal.HUNT || a.goal == Goal.DEFEND) continue;
             if (g.vox.sight(px, g.player.eyeY(), pz, a.x, a.y + a.height * 0.5f, a.z)) continue;   // never vanishes in plain view
             despawnBody(a);
-            animals.remove(a);
+            animals.remove(a); nextSense.remove(a.id);
             a.home.cohort.computeIfAbsent(a.species, k -> new int[4])[Habitat.slot(a.baby, a.female)]++;
             a.home.count("into the cohort", 1);
             dematerialized++;
@@ -697,6 +700,7 @@ public final class Animals {
                         a.range = e.getKey().predator() || e.getKey() == Species.BROWN_BEAR ? 16 : 11;
                         h.count("out of the cohort", 1);
                         materialized++;
+                        if (++spawned >= 3) { tierAt = g.time + 0.1; return; }
                     }
                 }
             }

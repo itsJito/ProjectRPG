@@ -1,5 +1,7 @@
 # Combat, perception and presentation polish
 
+Historical review of the previous pass. The synthesized bow releases described here have been replaced; see [current session review](SESSION_POLISH_REVIEW.md).
+
 This pass follows the current task list and `GDD.md` sections 2.3 (physical action combat and derived level), 2.4 (equipment), 3.3 (perception, memory and shared NPC behaviors), 3.5 (Honor) and 3.9 (animal ecology). The user's rule overrides NPC-training passages: only the session player gains skill XP; NPCs and animals retain their configured skills and derive Level from those skills. Existing save keys and the level formula remain compatible; displayed “Combat Level” labels become “Level”.
 
 ## Changes and causes

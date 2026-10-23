@@ -115,9 +115,11 @@ public final class Gore {
 
     // ------------------------------------------------------------------ a blow lands
     /** Which part a contact point is on: by its height up the body and how far to the side of the spine it is. */
-    public static Part partAt(Actor v, float px, float py, float pz) {
+    public Part partAt(Actor v, float px, float py, float pz) {
         if (v instanceof rpg.animal.Animal an) return animalPartAt(an, px, py, pz);
-        float h = (py - v.y) / Math.max(0.5f, v.height);
+        Part posed = HitVolumes.part(g, v, px, py, pz);
+        if (posed != null) return posed;
+        float h = (py - v.y) / Math.max(0.5f, v.height * (v.sneaking || v.crouched ? 0.5f : 1));
         float rx = (float) Math.cos(v.yaw), rz = (float) -Math.sin(v.yaw);
         float side = (px - v.x) * rx + (pz - v.z) * rz;
         if (h > 0.84f) return Part.HEAD;
@@ -609,7 +611,7 @@ public final class Gore {
         if (a.bloodied < 0.25f) return false;
         for (Evidence e : evidence) {
             if (e.kind == Kind.BLOOD && e.size < 0.3f) continue;
-            if (lawful(e) || e.source == a.id) continue;   // (nobody is a suspect for their own blood)
+            if (lawful(e) || e.source == a.id || g.law.settled(a.id, e.at)) continue;   // (nobody is a suspect for their own blood)
             if (g.time - e.at > 90 || Math.hypot(e.x - a.x, e.z - a.z) > 10) continue;
             long victim = e.source;
             n.remember(new Memory("MURDER", a.id, victim, DevMap.jurisdiction(e.x, e.z), g.state.minutes, 0.9f, "witnessed", e.id, 0, "caught bloodied by " + (e.kind == Kind.BODY ? "a body" : "the blood")), 24);

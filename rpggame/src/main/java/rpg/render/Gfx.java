@@ -280,7 +280,7 @@ public final class Gfx implements AutoCloseable {
         Actor p = g.player;
         if (p.alive) {
             human(p, p.look, dt, firstPerson, null);
-            cmd.shadowBody(p.x, p.y, p.z, p.radius, p.height);
+            cmd.shadowBody(p.x, p.y, p.z, p.radius, p.height * (p.crouched ? 0.5f : 1));
         } else if (g.death.ragdoll != 0) {
             // the player's own body, fallen (gamefixes: the death is watched), until it becomes the grave
             Snapshots.Ragdoll rd = g.lastBodies.ragdoll(g.death.ragdoll);
@@ -292,7 +292,10 @@ public final class Gfx implements AutoCloseable {
                 Snapshots.Ragdoll rd = g.lastBodies.ragdoll(n.ragdoll);
                 if (rd != null) { ragdoll(rd, n); continue; }
             }
-            if (n.alive && n.loaded) human(n, n.look, dt, false, sleeping(g, n));
+            if (n.alive && n.loaded) {
+                human(n, n.look, dt, false, sleeping(g, n));
+                if (n.distTo(camX, camZ) < 24 && !n.asleep()) cmd.shadowBody(n.x, n.y, n.z, n.radius, n.height * (n.crouched ? 0.5f : 1));
+            }
         }
         for (Actor d : g.dummies) dummy(d, g.time);
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.loaded && (an.alive || an.carcass() && !an.butchered) && an.distTo(camX, camZ) < 70) animal(an, dt, g.time);
@@ -325,10 +328,15 @@ public final class Gfx implements AutoCloseable {
     }
 
     private int lastH = 1080;
+    private boolean firstFrame = true;
 
     public NativeRenderer.Stats frame(int w, int h) {
         lastH = h;
         last = r.frame(cmd, w, h);
+        if (firstFrame && last != null) {
+            System.out.printf("[Load] first rendered frame %.2fs%n", last.cpuMs / 1000);
+            firstFrame = false;
+        }
         return last;
     }
 
@@ -681,7 +689,7 @@ public final class Gfx implements AutoCloseable {
 
     /** Where a sleeping NPC lies: the bed under their home, if they are in it; else null. */
     private Furniture sleeping(Rpg g, Npc n) {
-        if (n.goal != Brain.Goal.SLEEP || Math.hypot(n.x - n.homeX, n.z - n.homeZ) > 1.6) return null;
+        if (!n.asleep()) return null;
         Furniture f = g.objects.furnitureAt((int) Math.floor(n.homeX), DevMap.FLOOR, (int) Math.floor(n.homeZ));
         return f != null && f.kind == Furniture.Kind.BED && f.owner == n.id ? f : null;
     }
@@ -774,7 +782,7 @@ public final class Gfx implements AutoCloseable {
             if (holds != null) {
                 // a shield on the forearm: carried face-out at the side; raised in guard (or seen through the eyes) its face
                 // turned to the front, where the blows come from
-                if (holds.family == Family.SHIELD) held(holds, add(grip, worldDir(new float[]{0, 0, -1}), 0.08f), new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
+                if (holds.family == Family.SHIELD) held(holds, grip, new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
                 else if (holds.family == Family.BOW) heldBow(holds, grip, dir, yaw, a.cs.draw, world(rig.hand[0]));
                 else held(holds, grip, dir, yaw, !firstPerson);   // show the broad face through the eyes; carry edge-forward in third person
             }
@@ -928,6 +936,40 @@ public final class Gfx implements AutoCloseable {
     private void segMatrix(float[] local) {
         System.arraycopy(local, 0, seg.m, 0, 16);
         m.set(root).mul(seg);
+    }
+
+    private final int[] portraitMeshes = new int[8], portraitColors = new int[8];
+    private final float[][] portraitMatrices = new float[8][16];
+    private final Mat4 portraitRoot = new Mat4(), portraitHead = new Mat4();
+    private int portraitCount;
+
+    /** The actual NPC head geometry, rendered directly into a small native UI viewport. */
+    public void portrait(Npc npc, float x, float y, float w, float h, double now, float alpha) {
+        Appearance look = npc.look; Body b = npc.plan();
+        portraitCount = 0;
+        portraitRoot.identity().translate(0, 0.012f * (float) Math.sin(now * 2.1), 0)
+                .rotateY(0.16f + 0.08f * (float) Math.sin(now * 1.2)).rotateX(-0.06f)
+                .translate(0, -4 * Body.PX, 0).scale(Body.PX, Body.PX, Body.PX);
+        int[][] figure = figure(npc, look);
+        portraitPart(figure[0][Seg.HEAD.ordinal()], portraitRoot, 0xFFFFFF);
+        portraitPart(figure[1][Seg.HEAD.ordinal()], portraitRoot, 0xFFFFFF);
+        portraitHead.set(portraitRoot).translate(0, 4, 0).scale(b.head[0], b.head[1], b.head[2]);
+        portraitPart(mesh("hair:" + look.female + ":" + look.hair, () -> Meshes.hair(look.female, look.hair)), portraitHead, Appearance.hairColor(look.hairColor));
+        if (!look.female && look.beard > 0) portraitPart(mesh("beard:" + look.beard, () -> Meshes.beard(look.beard)), portraitHead, Appearance.hairColor(look.beardColor));
+        int box = mesh("portrait-box", () -> new Meshes.Boxes().add(0, 0, 0, 1, 1, 1));
+        m.set(portraitHead).translate(0, -0.34f, -0.508f).scale(0.30f, 0.17f, 0.015f);
+        portraitPart(box, m, look.skinRgb());
+        float open = (float) Math.pow(Math.max(0, Math.sin(now * Math.PI * 2 / 0.65)), 0.65);
+        m.set(portraitHead).translate(0, -0.34f, -0.521f).scale(0.22f, 0.018f + open * 0.075f, 0.016f);
+        portraitPart(box, m, 0x492024);
+        cmd.portrait(x, y, w, h, portraitMeshes, portraitMatrices, portraitColors, portraitCount, alpha);
+    }
+
+    private void portraitPart(int mesh, Mat4 matrix, int color) {
+        if (mesh == 0) return;
+        portraitMeshes[portraitCount] = mesh; portraitColors[portraitCount] = color;
+        System.arraycopy(matrix.m, 0, portraitMatrices[portraitCount], 0, 16);
+        portraitCount++;
     }
 
     private final Mat4 headBase = new Mat4(), torsoBase = new Mat4();

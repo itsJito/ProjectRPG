@@ -64,7 +64,7 @@ public final class AstrattoNative {
             CMD_SYDNEY_PROFILE = 44, CMD_SOFTBODY_CREATE = 45, CMD_SOFTBODY_IMPULSE = 46, CMD_VEHICLE_CREATE = 47, CMD_VEHICLE_INPUT = 48, CMD_VEHICLE_PLACE = 49,
             CMD_BODY_IMPULSE = 50, CMD_RAGDOLL_INTENT = 51, CMD_RAGDOLL_TRAITS = 52;
     public static final int EVT_LANDED = 32, EVT_RAGDOLL_STATE = 33, EVT_SETTLED = 34, EVT_VEHICLE_IMPACT = 35, EVT_GEAR = 36, EVT_BLOCK_HIT = 37, EVT_RAGDOLL_IMPACT = 38;
-    public static final int MOVER_FLY = 1, MOVER_CROUCH = 1 << 1, MOVER_AGENT = 1 << 2;
+    public static final int MOVER_FLY = 1, MOVER_CROUCH = 1 << 1, MOVER_AGENT = 1 << 2, MOVER_STANCE_ONLY = 1 << 3;
     public static final int RD_HEAD = 0, RD_NECK = 1, RD_PELVIS = 2, RD_L_SHOULDER = 3, RD_L_ELBOW = 4, RD_L_WRIST = 5, RD_R_SHOULDER = 6, RD_R_ELBOW = 7,
             RD_R_WRIST = 8, RD_L_HIP = 9, RD_L_KNEE = 10, RD_L_ANKLE = 11, RD_R_HIP = 12, RD_R_KNEE = 13, RD_R_ANKLE = 14, RD_PARTICLES = 15;
     public static final int SYDNEY_HUMAN = 0, SYDNEY_INFECTED = 1, SYDNEY_CRAWLER = 2, SYDNEY_GIANT = 3;
@@ -130,7 +130,7 @@ public final class AstrattoNative {
     public static int texMaxLevel(int n) { return ((n + 1) & 15) << 8; }
     public static final int RES_TEXTURE = 1, RES_MESH = 2;
     public static final int RCMD_CAMERA = 1, RCMD_ENV = 2, RCMD_LIGHT = 3, RCMD_MODEL = 4, RCMD_PARTICLES = 5, RCMD_QUADS = 6, RCMD_GRADING = 7,
-            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16;
+            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17;
     /** 2.1: the renderer's layers. */
     public static final int LAYER_FOLIAGE = 1, LAYER_PROP = 2, LAYER_DECAL = 3, INSTANCES_SHADOW = 1;
     public static final int PASS_GTAO = 1, PASS_SSR = 1 << 1, PASS_VOLUMETRICS = 1 << 2, PASS_TAA = 1 << 3, PASS_BLOOM = 1 << 4, PASS_MOTION_BLUR = 1 << 5, PASS_DEPTH_OF_FIELD = 1 << 6;

@@ -452,7 +452,8 @@ typedef struct astratto_cmd_gravity { astratto_record head; float gravity; float
 enum {
     ASTRATTO_MOVER_FLY = 1u << 0,       /* no gravity (a spectator, a test probe) */
     ASTRATTO_MOVER_CROUCH = 1u << 1,    /* the body is shorter (input flag) */
-    ASTRATTO_MOVER_AGENT = 1u << 2      /* driven by an agent: passes ASTRATTO_BLOCK_NO_COLLIDE_AI blocks */
+    ASTRATTO_MOVER_AGENT = 1u << 2,     /* driven by an agent: passes ASTRATTO_BLOCK_NO_COLLIDE_AI blocks */
+    ASTRATTO_MOVER_STANCE_ONLY = 1u << 3 /* input changes stance/acceleration while preserving AI velocity, climbing and queued jumps */
 };
 typedef struct astratto_cmd_mover_create {
     astratto_record head;
@@ -471,7 +472,7 @@ typedef struct astratto_cmd_mover_input {
     float vy;
     float jump;                        /* 0, or the upward speed of a jump to start now if it is on the ground */
     float accel;                       /* how fast it reaches the wanted velocity on the ground, m/s^2 (0 = 60) */
-    uint32_t flags;                    /* ASTRATTO_MOVER_CROUCH */
+    uint32_t flags;                    /* ASTRATTO_MOVER_CROUCH | ASTRATTO_MOVER_STANCE_ONLY */
 } astratto_cmd_mover_input;
 
 typedef struct astratto_cmd_body_place {
@@ -1333,7 +1334,9 @@ enum {
     ASTRATTO_RCMD_PROPS = 13,          /* astratto_rcmd_props: draw the PROP layers this frame (2.1) */
     ASTRATTO_RCMD_DECALS = 14,         /* astratto_rcmd_decals + vertex_count * 10 floats: draw the DECAL layers and these marks (2.1) */
     ASTRATTO_RCMD_LENS = 15,           /* astratto_rcmd_lens: motion blur and depth of field, for the passes that draw them (2.4) */
-    ASTRATTO_RCMD_SMOKE = 16           /* astratto_rcmd_smoke + count * 12 floats: volumes of smoke, dust and steam in the air (2.4) */
+    ASTRATTO_RCMD_SMOKE = 16,
+    ASTRATTO_RCMD_PORTRAIT = 17       /* astratto_rcmd_portrait + count * astratto_portrait_part; ordered among UI quads */
+
 };
 typedef struct astratto_rcmd_camera {
     astratto_record head;
@@ -1368,6 +1371,8 @@ typedef struct astratto_rcmd_model {
 typedef struct astratto_rcmd_particles { astratto_record head; uint32_t count, reserved; } astratto_rcmd_particles;
 /* 2D: quads in pixels from the top-left; a vertex is x y u v r g b a mode (0 colour, 1 texture, 2 text: alpha from red). */
 typedef struct astratto_rcmd_quads { astratto_record head; uint32_t texture, count; } astratto_rcmd_quads;
+typedef struct astratto_rcmd_portrait { astratto_record head; uint32_t count, reserved; float x, y, w, h; } astratto_rcmd_portrait;
+typedef struct astratto_portrait_part { uint32_t mesh; float matrix[16]; float r, g, b, a; } astratto_portrait_part;
 typedef struct astratto_rcmd_grading { astratto_record head; float death, hurt, infection, flash, bile, reserved; } astratto_rcmd_grading;
 typedef struct astratto_rcmd_body { astratto_record head; float x, y, z, radius, height, reserved; } astratto_rcmd_body;
 typedef struct astratto_rcmd_world { astratto_record head; astratto_handle world; } astratto_rcmd_world;

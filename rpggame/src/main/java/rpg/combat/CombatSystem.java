@@ -514,7 +514,7 @@ public final class CombatSystem {
                 float[] p = blade(a, m, s, k / 3f, reach);
                 for (Actor v : g.actors()) {
                     if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
-                    if (!inCapsule(v, p[0], p[1], p[2], 0.06f)) continue;
+                    if (!Float.isFinite(HitVolumes.ray(g, v, p[0], p[1], p[2], 0, 0, 1, 0, 0.06f))) continue;
                     a.cs.struck.add(v.id);
                     meleeContact(a, v, m, p[0], p[1], p[2]);
                     if (a.cs.phase != Phase.ACTIVE) return;
@@ -557,12 +557,6 @@ public final class CombatSystem {
     /** Whether two actors on one team may still fight (a guard arresting a resisting townsperson). */
     private boolean hostileTo(Actor a, Actor v) { return g.ai != null && g.ai.hostile(a, v); }
 
-    public static boolean inCapsule(Actor v, float px, float py, float pz, float pad) {
-        float dx = px - v.x, dz = pz - v.z, r = v.radius + pad;
-        if (dx * dx + dz * dz > r * r) return false;
-        return py >= v.y + 0.05f - pad && py <= v.y + v.height + pad;
-    }
-
     private void meleeContact(Actor a, Actor v, Move m, float px, float py, float pz) {
         ItemDef w = a.cs.offHand ? a.off() : a.main();
         boolean weapon = w != null && m != Move.PUNCH && m != Move.BASH;
@@ -584,6 +578,7 @@ public final class CombatSystem {
 
     /** Contact made: guard and parry, mitigation, HP damage, impact and stagger, feedback, XP, events. */
     public void resolve(Actor a, Actor v, float potential, float impact, DamageType type, Projectile proj, float px, float py, float pz, String how, boolean behind) {
+        if (a instanceof rpg.ai.Npc officer && (officer.role == rpg.ai.Npc.Role.GUARD || officer.role == rpg.ai.Npc.Role.LAWMAN) && g.law.inCustody(v)) return;
         contacts++;
         if (v.cs.iframes > 0 || v.gaseousT > 0 && proj == null) {
             dodged++;
@@ -595,11 +590,12 @@ public final class CombatSystem {
         ItemDef guardItem = v.off() != null && v.off().family == Family.SHIELD ? v.off() : melee && v.main() != null && v.main().guard > 0 ? v.main() : null;
         float fx = (float) -Math.sin(v.yaw), fz = (float) -Math.cos(v.yaw), tx = a.x - v.x, tz = a.z - v.z, tl = Math.max(1e-3f, (float) Math.hypot(tx, tz));
         boolean facing = (fx * tx + fz * tz) / tl > 0.35f;
-        boolean guarding = v.cs.blocking && facing && guardItem != null && type != DamageType.MAGIC;
+        boolean bare = v.main() == null && v.off() == null && !(v instanceof rpg.animal.Animal);
+        boolean guarding = v.cs.blocking && facing && (guardItem != null || bare && melee) && type != DamageType.MAGIC;
         g.noise(a, v.x, v.y, v.z, g.cfg.combatNoise, 0.8f);
         g.ai.onAttacked(v, a);
         if (v instanceof rpg.animal.Animal an && g.animals != null) g.animals.onHurt(an, a);
-        if (guarding && melee && g.time - v.cs.blockStart <= CombatMath.parryWindow(g.cfg.parryWindow, v.skills.level(Skill.DEFENSE))) {
+        if (guarding && !bare && melee && g.time - v.cs.blockStart <= CombatMath.parryWindow(g.cfg.parryWindow, v.skills.level(Skill.DEFENSE))) {
             parried++;
             a.cs.cancel();
             a.cs.staggered = 0.9f;
@@ -625,7 +621,7 @@ public final class CombatSystem {
         float blockedPart = 0;
         if (guarding) {
             // the guard stops its share - a better defender behind better armour stops more, and tires less doing it
-            float share = Math.min(0.97f, CombatMath.guardShare(guardItem.guard, v.skills.level(Skill.DEFENSE), v.eq.armor()) * g.prayers.guard(v));
+            float share = Math.min(0.97f, (bare ? Math.min(0.5f, (type == DamageType.BLUNT ? 0.25f : 0.1f) + v.skills.level(Skill.DEFENSE) * 0.002f) : CombatMath.guardShare(guardItem.guard, v.skills.level(Skill.DEFENSE), v.eq.armor())) * g.prayers.guard(v));
             blockedPart = dmg * share;
             dmg -= blockedPart;
             float cost = (blockedPart * g.cfg.staminaBlockPerDamage * 3 / CombatMath.HP_SCALE * 0.1f + impact * 0.15f) * (1 - Math.min(0.4f, v.skills.level(Skill.DEFENSE) * 0.004f));
@@ -636,8 +632,8 @@ public final class CombatSystem {
             } else v.stamina -= cost;
             v.cs.regenDelay = 0.8f;
             blocked++;
-            if (g.sfx != null) g.sfx.play("block", px, py, pz, 0.7f);
-            if (g.fx != null) g.fx.sparks(px, py, pz, 12);
+            if (g.sfx != null) g.sfx.play(bare ? "hit" : "block", px, py, pz, 0.7f);
+            if (g.fx != null && !bare) g.fx.sparks(px, py, pz, 12);
         }
         // whole HP, rounded; a blow of a quarter point and more always draws at least one (a fox's bite on the HP scale
         // is a third of a point: rounded away, no small animal could ever hurt anything)
@@ -772,18 +768,25 @@ public final class CombatSystem {
         // bodies first along the segment, then walls
         Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, false);
         float wall = h.hit ? h.dist : len;
-        for (int k = 1; k <= 4; k++) {
-            float t = wall * k / 4f / Math.max(1e-4f, len);
-            float qx = p.x + sx * t, qy = p.y + sy * t, qz = p.z + sz * t;
-            for (Actor v : g.actors()) {
-                if (v == p.owner || !v.alive || (v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v))) continue;
-                if (!inCapsule(v, qx, qy, qz, 0.08f)) continue;
-                p.done = true;
-                if (p.ammo != null) g.state.burn(p.ammo.def, 1);
-                if (p.spell == Spell.FROST_LANCE) v.cs.slowT = 3;
-                resolve(p.owner, v, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
-                return;
-            }
+        Actor struck = null;
+        float nearest = Float.POSITIVE_INFINITY;
+        float inv = 1 / Math.max(1e-6f, len);
+        for (Actor v : g.actors()) {
+            boolean body = v instanceof rpg.ai.Npc npc && npc.ragdoll != 0 && !npc.alive;
+            if (v == p.owner || !v.alive && !body || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
+            if (v.alive && v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v)) continue;
+            float distance = HitVolumes.ray(g, v, p.x, p.y, p.z, sx * inv, sy * inv, sz * inv, wall, 0.03f);
+            if (distance < nearest) { nearest = distance; struck = v; }
+        }
+        if (struck != null) {
+            float qx = p.x + sx * inv * nearest, qy = p.y + sy * inv * nearest, qz = p.z + sz * inv * nearest;
+            p.done = true;
+            if (p.ammo != null) g.state.burn(p.ammo.def, 1);
+            if (struck.alive) {
+                if (p.spell == Spell.FROST_LANCE) struck.cs.slowT = 3;
+                resolve(p.owner, struck, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
+            } else if (g.sfx != null) g.sfx.play("hit", qx, qy, qz, 0.4f);
+            return;
         }
         if (h.hit && h.block == Blocks.GLASS && g.glass != null) {
             // through the pane: it shatters, and the arrow or the bolt flies on, slowed
@@ -797,7 +800,7 @@ public final class CombatSystem {
             p.x = h.x - sx / len * 0.15f; p.y = h.y - sy / len * 0.15f; p.z = h.z - sz / len * 0.15f;
             if (p.spell != null) { if (g.fx != null) g.fx.sparks(p.x, p.y, p.z, 14); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
             if (h.block == Blocks.TARGET) { archeryTarget(p, h); return; }
-            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "wood.light" : "stone", p.x, p.y, p.z, 0.5f);
+            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.5f);
             dropArrow(p);
             return;
         }
@@ -821,7 +824,14 @@ public final class CombatSystem {
         if (g.sfx != null) g.sfx.play("wood.light", h.x, h.y, h.z, 0.6f);
     }
 
-    /** A spent arrow that missed lands where it stopped, to be picked up again. */
+    /** End a pursuit without deleting its ammunition or allowing an old shot to hit after legal settlement. */
+    public void landProjectiles(java.util.function.Predicate<Actor> owners) {
+        for (Iterator<Projectile> shots = projectiles.iterator(); shots.hasNext();) {
+            Projectile shot = shots.next();
+            if (owners.test(shot.owner)) { dropArrow(shot); shots.remove(); }
+        }
+    }
+
     /** Every projectile in flight comes down where it is now (before a save: flights are not kept). */
     public void landAll() {
         for (Projectile p : projectiles) dropArrow(p);

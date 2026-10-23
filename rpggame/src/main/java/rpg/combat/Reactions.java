@@ -62,12 +62,17 @@ public final class Reactions {
     }
 
     /** Which of the body's fifteen points is nearest where the blow landed. */
-    private static int nearestPoint(Npc n, float px, float py, float pz) {
-        if (n.posePts == null) return RD_NECK;
+    private int nearestPoint(Npc n, float px, float py, float pz) {
+        float[] points = n.posePts;
+        if (n.ragdoll != 0 && g.lastBodies != null) {
+            var body = g.lastBodies.ragdoll(n.ragdoll);
+            if (body != null) points = body.p;
+        }
+        if (points == null) return RD_NECK;
         int best = RD_NECK;
         float bd = Float.MAX_VALUE;
         for (int i = 0; i < RD_PARTICLES; i++) {
-            float dx = n.posePts[i * 3] - px, dy = n.posePts[i * 3 + 1] - py, dz = n.posePts[i * 3 + 2] - pz, d = dx * dx + dy * dy + dz * dz;
+            float dx = points[i * 3] - px, dy = points[i * 3 + 1] - py, dz = points[i * 3 + 2] - pz, d = dx * dx + dy * dy + dz * dz;
             if (d < bd) { bd = d; best = i; }
         }
         return best;
@@ -79,7 +84,18 @@ public final class Reactions {
             Npc n = held.get(i);
             if (!n.alive || n.ragdoll == 0) { n.reacting = false; held.remove(i); continue; }
             Snapshots.Ragdoll rd = bodies.ragdoll(n.ragdoll);
-            if (rd == null) continue;
+            if (rd == null) {
+                // Creation is queued for the next engine frame; a body missing after that grace period cannot recover.
+                if (g.time - n.reactSince > 0.5) {
+                    n.ragdoll = 0; // already absent in the authoritative snapshot: do not command a stale handle
+                    cancel(n);
+                    n.cs.staggered = 0;
+                    n.nextThink = 0;
+                    n.hasGoalPos = false;
+                    recovered++;
+                }
+                continue;
+            }
             // the person is where the body is: its mover follows (so others see, hear and path round it there)
             n.x = rd.comX; n.z = rd.comZ;
             if (n.body != 0) g.game.commands().moverPlace(n.body, rd.comX, DevMap.FLOOR, rd.comZ, 0, 0, 0);
@@ -101,7 +117,7 @@ public final class Reactions {
                 // inside someone else (the body may have reeled into them): stepped out to arm's length
                 float sx = rd.standX, sz = rd.standZ;
                 for (rpg.actor.Actor o : g.actors()) {
-                    if (o == n || !o.alive || o.dummy) continue;
+                    if (o == n || !o.alive || o.dummy || o instanceof Npc other && !other.loaded) continue;
                     float ox = sx - o.x, oz = sz - o.z, ol = (float) Math.hypot(ox, oz), min = n.radius + o.radius + 0.1f;
                     if (ol >= min) continue;
                     if (ol < 1e-3f) { ox = (float) Math.sin(n.yaw); oz = (float) Math.cos(n.yaw); ol = 1; }
@@ -127,6 +143,8 @@ public final class Reactions {
                 recovered++;
                 held.remove(i);
                 n.poseReset = true;
+                n.hasGoalPos = false;
+                n.nextThink = 0;
             }
         }
     }

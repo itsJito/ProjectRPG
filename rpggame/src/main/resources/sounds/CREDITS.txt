@@ -33,3 +33,17 @@ animal/coyotes_pack.ogg
 
 animal/fox_death*.ogg
     The game's own recordings (supplied with the project's assets).
+
+archery/release.ogg
+    Iwan "qubodup" Gabovitch, arrow twang mixed with a recorded bamboo-stick swish for Flare.
+    Creative Commons Attribution-ShareAlike 3.0 Unported (royalty-free; attribution and share-alike apply to this audio).
+    https://opengameart.org/content/arrow-hit-twang
+    https://opengameart.org/content/swish-bamboo-stick-weapon-swhoshes
+    Downloaded unchanged from https://github.com/flareteam/flare-game/blob/master/mods/fantasycore/soundfx/powers/shoot.ogg
+    Per-file attribution: https://github.com/flareteam/flare-game/wiki/Credits (Sound Effects Artist: Iwan Gabovitch).
+    License text: archery/CC-BY-SA-3.0.txt. No synthesized bow release is used.
+
+archery/impact.ogg
+    Iwan "qubodup" Gabovitch, "Wood wobbling rattling" (recording), CC0 / public domain.
+    https://opengameart.org/content/wood-wobbling-rattling
+    Downloaded unchanged from https://github.com/flareteam/flare-game/blob/master/mods/fantasycore/soundfx/powers/arrow_wall.ogg

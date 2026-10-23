@@ -42,7 +42,8 @@ final class HudFragments {
         hud.add(new Overlays(hud));
         hud.add(new Prompt(hud));
         hud.add(Fragment.of("death", 0, 0, () -> !g.player.alive, (ui, x, y) -> deathScreen(hud, ui)));
-        hud.add(new Vitals(hud)).wake("combat").linger(6);
+        hud.add(new Vitals(hud));
+        hud.add(new Sentence(hud));
         hud.add(new SneakMeter(hud));
         hud.add(new XpDrops(hud));
         hud.add(new Minimap(hud));
@@ -492,26 +493,59 @@ final class HudFragments {
         }
     }
 
-    // ------------------------------------------------------------------ vitals: shown when something is less than full or in a fight
+    // ------------------------------------------------------------------ vitals: compact, independently timed resource rows
     static final class Vitals extends Fragment {
-        Vitals(Hud h) { super("vitals"); }
+        private final float[] previous = {Float.NaN, Float.NaN, Float.NaN, Float.NaN};
+        private final double[] until = new double[4];
+        private final float[] opacity = new float[4];
+        Vitals(Hud h) { super("vitals"); fadeOut = 0.25f; }
         @Override protected boolean active() {
             Player p = hud.g.player;
-            return hud.scene != Hud.Scene.WORLD || p.hp < p.maxHp() - 0.5f || p.stamina < p.maxStamina() - 0.5f || p.faith < p.maxFaith() - 0.5f || p.mana < p.maxMana() - 0.5f || p.sprinting;
+            float[] values = {p.hp, p.stamina, p.mana, p.faith};
+            boolean combat = hud.g.time - p.cs.lastHurt < 6 || p.cs.busy() || p.cs.blocking;
+            boolean shown = false;
+            for (int i = 0; i < 4; i++) {
+                if (Float.isNaN(previous[i]) || Math.abs(values[i] - previous[i]) > 0.05f) until[i] = hud.g.time + 6;
+                previous[i] = values[i];
+                if (combat) until[i] = hud.g.time + 2;
+                opacity[i] = Math.min(1, Math.max(0, (float) (until[i] - hud.g.time) / 0.4f));
+                shown |= opacity[i] > 0;
+            }
+            return p.alive && shown;
         }
-        @Override public float width() { return 476; }
-        @Override public float height() { return 16; }
+        @Override public float width() { return 236; }
+        @Override public float height() { return 116; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Player p = hud.g.player;
-            float bw = (476 - 3 * 8) / 4f;
-            Object[][] v = {{"Health_Icon", p.hp, p.maxHp(), Style.HP}, {"Agility_Icon", p.stamina, p.maxStamina(), Style.STAMINA},
-                    {"Faith_Icon", p.faith, p.maxFaith(), Style.FAITH}, {"Magic_Icon", p.mana, p.maxMana(), Style.MANA}};
+            String[] names = {"Health", "Stamina", "Magic", "Faith"};
+            String[] icons = {"Health_Icon", "Agility_Icon", "Magic_Icon", "Faith_Icon"};
+            float[] values = {p.hp, p.stamina, p.mana, p.faith};
+            float[] max = {p.maxHp(), p.maxStamina(), p.maxMana(), p.maxFaith()};
+            int[] colors = {Style.HP, Style.STAMINA, Style.MANA, Style.FAITH};
             for (int i = 0; i < 4; i++) {
-                float bx = x + i * (bw + 8), val = (float) v[i][1], max = (float) v[i][2];
-                ui.img((String) v[i][0], bx, y, 14, 0xE0FFFFFF);
-                Style.bar(ui, bx + 18, y + 5, bw - 18, 5, max <= 0 ? 0 : val / max, (int) v[i][3]);
-                if (ui.hover(bx, y - 4, bw, 22)) hud.tooltip(String.format("%s %.0f / %.0f", new String[]{"Health", "Stamina", "Faith", "Mana"}[i], val, max));
+                float yy = y + i * 28, a = opacity[i];
+                if (a <= 0) continue;
+                ui.rect(x, yy, 236, 24, Style.fade(0xD51D2023, a));
+                ui.img(icons[i], x + 5, yy + 4, 16, Style.fade(0xFFFFFFFF, a));
+                ui.text(names[i], x + 27, yy + 2, 11, Style.fade(Style.TEXT, a));
+                String amount = String.format("%.0f / %.0f", values[i], max[i]);
+                ui.text(amount, x + 226 - ui.width(amount, 10), yy + 2, 10, Style.fade(Style.TEXT, a));
+                ui.rect(x + 27, yy + 17, 198, 3, Style.fade(0xFF090C0E, a));
+                ui.rect(x + 27, yy + 17, 198 * Math.max(0, Math.min(1, max[i] <= 0 ? 0 : values[i] / max[i])), 3, Style.fade(colors[i], a));
             }
+        }
+    }
+
+    static final class Sentence extends Fragment {
+        Sentence(Hud h) { super("sentence"); }
+        @Override protected boolean active() { return hud.g.law.inCustody(hud.g.player); }
+        @Override public float width() { return 360; }
+        @Override public float height() { return 70; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Style.card(ui, x, y, width(), height());
+            ui.text("IN CUSTODY  /  " + hud.g.law.sentenceJurisdiction(), x + 12, y + 9, 13, Style.ACCENT);
+            ui.text(String.format("Sentence remaining: %.0f minutes   |   Admission %d", Math.ceil(hud.g.law.sentenceRemaining()), hud.g.law.jailAdmissions()), x + 12, y + 30, 12, Style.TEXT);
+            ui.text("Sleep on the cell slab to serve the remaining time.", x + 12, y + 49, 12, Style.DIM);
         }
     }
 
@@ -979,10 +1013,11 @@ final class HudFragments {
     static final class ChatLog extends Fragment {
         private int filter;
         ChatLog(Hud h) { super("chat"); fadeOut = 1.2f; }
-        @Override protected boolean active() { return hud.dialog != null || hud.hovering(this); }
+        @Override protected boolean active() { return hud.dialog == null && hud.hovering(this); }
         @Override public float width() { return Math.min(460, hud.w - 560); }
         @Override public float height() { return 150; }
         @Override public void draw(Ui2D ui, float x, float y) {
+            if (hud.dialog != null && !hud.dialog.pauseMenu) return;
             float cw = width(), ch = 150;
             boolean hv = ui.hover(x, y, cw, ch);
             if (hv) woken(hud.now);
@@ -1006,37 +1041,47 @@ final class HudFragments {
         }
     }
 
-    // ------------------------------------------------------------------ dialogue: the NPC's words are in the bubble over their head; the answers here
+    // ------------------------------------------------------------------ Chatbox: speech replaces the Worldbox during a conversation
     static final class DialogueCard extends Fragment {
-        DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.1f; fadeOut = 0.2f; }
+        DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.12f; fadeOut = 0.15f; }
         @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu; }
-        @Override public float width() { return 520; }
+        @Override public float width() { return Math.min(660, hud.w - 32); }
         @Override public float height() {
             Dialog d = hud.dialog;
-            if (d == null) return 60;
-            int n = Math.max(1, d.choices.size());
-            int cols = n > 6 ? 3 : 1;
-            return 36 + (d.npc == 0 ? 50 : 0) + ((n + cols - 1) / cols) * 20;
+            return d == null ? 180 : Math.min(hud.h - 100, Math.max(190, 108 + Math.max(1, d.choices.size()) * 23));
         }
         @Override public void draw(Ui2D ui, float x, float y) {
             Dialog d = hud.dialog;
-            if (d == null) return;
-            float cw = 520, ch = height();
-            Style.card(ui, x, y, cw, ch);
-            ui.text(d.speaker, x + 12, y + 8, 14, Style.ACCENT);
-            float ty = y + 30;
-            if (d.npc == 0) { List<String> ls = wrap(ui, d.text, 13, cw - 24); for (int i = 0; i < Math.min(3, ls.size()); i++) ui.text(ls.get(i), x + 12, ty + i * 16, 13, Style.TEXT); ty += 50; }
-            int n = d.choices.size();
-            int cols = n > 6 ? 3 : 1, rows = (n + cols - 1) / cols;
-            float colW = (cw - 20) / cols;
-            for (int i = 0; i < n; i++) {
-                float ox = x + 10 + (i / rows) * colW, oy = ty + (i % rows) * 20;
-                boolean hv = ui.hover(ox, oy, colW, 20);
-                if (hv) ui.rect(ox, oy, colW - 4, 20, 0x18FFFFFF);
-                ui.text((i < 9 ? (i + 1) + "  " : "") + d.choices.get(i).label(), ox + 4, oy + 2, 13, hv ? Style.TEXT : Style.DIM);
-                if (ui.clicked(ox, oy, colW, 20)) { hud.choose(i); return; }
+            if (d == null || d.pauseMenu) return;
+            float cw = width(), ch = height();
+            ui.rectTex(ui.parchment, x, y, cw, ch, 0, 0, cw / 128, ch / 128, 0xFFFFFFFF);
+            ui.border(x, y, cw, ch, 1, 0xFF85714D);
+            ui.border(x + 4, y + 4, cw - 8, ch - 8, 1, 0x665F5136);
+            float nameX = x + (cw - ui.width(d.speaker, 16)) / 2;
+            ui.text(d.speaker, nameX, y + 13, 16, 0xFFFFD15E);
+            ui.text(d.speaker, nameX + 0.45f, y + 13, 16, 0xFFFFD15E);
+            boolean portrait = hud.g.actor(d.npc) instanceof Npc;
+            float tx = x + (portrait ? 126 : 16), textWidth = cw - (tx - x) - 18;
+            if (portrait) {
+                ui.rect(x + 15, y + 44, 96, 126, 0x40302015);
+                ui.flush();
+                hud.gfx.portrait((Npc) hud.g.actor(d.npc), x + 15, y + 40, 96, 126, hud.now, ui.alpha);
             }
-            if (n == 0) { ui.text("Click to continue", x + 12, ty, 12, Style.DIM); if (ui.clicked(x, y, cw, ch)) hud.dialog = null; }
+            List<String> lines = wrap(ui, d.text, 13, textWidth);
+            int rows = Math.min(3, lines.size());
+            for (int i = 0; i < rows; i++) ui.text(lines.get(i), tx, y + 43 + i * 16, 13, 0xFFF0E5CD);
+            float top = y + 48 + Math.max(2, rows) * 16;
+            int count = d.choices.size();
+            for (int i = 0; i < count; i++) {
+                float yy = top + i * 23;
+                boolean hover = live && ui.hover(tx - 4, yy, textWidth + 4, 22);
+                if (hover) ui.rect(tx - 4, yy, textWidth + 4, 22, 0x308E7447);
+                String label = (i < 9 ? (i + 1) + "  " : "") + d.choices.get(i).label();
+                float size = Math.min(12, textWidth / Math.max(1, ui.width(label, 1)));
+                ui.text(label, tx, yy + 3, size, hover ? 0xFFFFD15E : 0xFFD7C7A4);
+                if (live && ui.clicked(tx - 4, yy, textWidth + 4, 22)) { hud.choose(i); return; }
+            }
+            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.closeDialog(); }
         }
     }
 

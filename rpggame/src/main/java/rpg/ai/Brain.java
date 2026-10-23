@@ -89,8 +89,16 @@ public final class Brain {
             for (Actor a : g.actors()) if (a != n && a.alive && !a.dummy && (a == g.player || a instanceof Npc person && person.loaded) && a.bloodied >= 0.25f
                     && n.distTo(a) < distance && ai.canSee(n, a)) { bloody = a; distance = n.distTo(a); }
             if (bloody != null) {
-                n.watchTarget = bloody.id;
-                s.add(new Score(Goal.WATCH, 0.68f, "visible blood on " + bloody.name + "; checking what happened, no charge"));
+                Stealth.Aware evidence = n.aware.computeIfAbsent(bloody.id, k -> new Stealth.Aware());
+                if (g.time >= evidence.bloodQuestionAgain || bloody.bloodied > evidence.bloodSeen + 0.2f) {
+                    evidence.bloodQuestionUntil = g.time + 8;
+                    evidence.bloodQuestionAgain = g.time + 90;
+                    evidence.bloodSeen = bloody.bloodied;
+                }
+                if (g.time < evidence.bloodQuestionUntil) {
+                    n.watchTarget = bloody.id;
+                    s.add(new Score(Goal.WATCH, 0.68f, "visible blood on " + bloody.name + "; checking what happened, no charge"));
+                }
             }
         }
         if (threat != null) {
@@ -293,11 +301,12 @@ public final class Brain {
         if (!guard && !crook) return null;
         rpg.objects.Container best = null;
         float bd = Float.MAX_VALUE;
-        for (rpg.objects.Container c : g.undertaker.graves()) {
-            if (c.contents.isEmpty()) continue;
+        for (var object : g.objects.all()) {
+            if (!(object instanceof rpg.objects.Container c) || !(c.kind.equals("grave") || c instanceof rpg.objects.Corpse)) continue;
+            if (c instanceof rpg.objects.Corpse corpse ? corpse.empty(g) : c.contents.isEmpty()) continue;
             float d = (float) Math.hypot(c.x - n.x, c.z - n.z);
             if (guard) {
-                if (!c.secured || (c.heldBy != 0 && c.heldBy != n.id) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction)) continue;
+                if (!c.kind.equals("grave") || !c.secured || (c.heldBy != 0 && c.heldBy != n.id) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction)) continue;
                 if (c.heldBy == 0 && g.time - (c.expiresAt - rpg.law.Undertaker.GRAVE_SECONDS) < WORD_REACHES_WATCH) continue;
             } else {
                 if (c.secured || c.heldBy != 0 || n.graveSeen == -c.id) continue;
@@ -344,24 +353,39 @@ public final class Brain {
         if (!goTo(n, c.x, c.z, n.role != Npc.Role.THIEF, 1.0f)) return;
         if (n.arrivedAt < n.goalSince) n.arrivedAt = g.time;
         n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
-        if (g.time - n.lastLootAt < 1.3) return;
+        if (g.time >= n.lootUntil) {
+            if (g.time - n.lastLootAt < 1.3) return;
+            n.lootStarted = g.time; n.lootUntil = g.time + 0.9;
+        }
+        if (g.time < n.lootStarted + 0.6 || n.lastLootAt >= n.lootStarted) return;
         n.lastLootAt = g.time;
         int best = -1, bv = -1;
         for (int i = 0; i < c.contents.size(); i++) { ItemStack s = c.contents.get(i); if (s != null && n.canStore(s) && s.value() > bv) { bv = s.value(); best = i; } }
-        if (best < 0 || n.lootTaken >= 4) {
+        rpg.item.ItemDef.Slot worn = null;
+        Npc dead = c instanceof rpg.objects.Corpse corpse ? corpse.npc(g) : null;
+        if (dead != null) for (var slot : rpg.item.ItemDef.Slot.values()) {
+            ItemStack item = dead.eq.get(slot);
+            if (item != null && n.canStore(item) && item.value() > bv) { worn = slot; bv = item.value(); }
+        }
+        if (best < 0 && worn == null || n.lootTaken >= 4) {
             n.lastOutcome = n.lootTaken > 0 ? "took " + n.lootTaken + " thing(s) from the grave" : "nothing in the grave I can carry";
             n.graveSeen = n.lootTaken >= 4 || best < 0 ? -c.id : n.graveSeen;
             n.lootTaken = 0;
             n.nextThink = 0;
             return;
         }
-        ItemStack s = c.contents.take(best, c.contents.get(best).amount);
-        s.markStolen(c.owner);
-        n.store(s);
+        ItemStack source = worn != null ? dead.eq.get(worn) : c.contents.get(best);
+        ItemStack s = source.copyWhole();
+        boolean theft = c.isTheft(n);
+        if (theft) s.markStolen(c.owner);
+        // A stolen mark can change stack compatibility; never remove the source until the actual transfer fits.
+        if (!n.store(s)) { n.graveSeen = -c.id; n.nextThink = 0; return; }
+        if (worn != null) dead.eq.set(worn, null);
+        else c.contents.take(best, source.amount);
         n.lootTaken++;
         long req = g.state.newRequestId();
         var ev = g.state.commit(req, "GraveLooted", n.id, c.id, DevMap.jurisdiction(c.x, c.z), 0, s + " taken by " + n.name);
-        g.law.theft(n, c.owner, s, c, ev.id());
+        if (theft) g.law.theft(n, c.owner, s, c, ev.id());
         if (n.lootTaken == 1) g.ai.say(n, n.role == Npc.Role.THIEF ? "Finders keepers." : "Won't be needing this, will you?");
     }
 
@@ -458,6 +482,9 @@ public final class Brain {
             if (w == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = Math.min(n.nextThink, g.time + 0.2); return; }
             v = n.investigation = choose(n, odd.getKey(), w);
         }
+        // Continue the original lead, not whichever unrelated sound happens to rank highest now.
+        w = n.aware.get(v.subject);
+        if (g.time - v.startedAt > 50) v.stage(Investigation.Stage.DONE, g.time);
         // a fresh clue moves the spot; heard again, a timid plan gives way to fetching help
         if (w != null && Math.max(w.heardAt, w.seenAt) > v.lastClue + 0.05) {
             v.x = w.x; v.z = w.z; v.lastClue = Math.max(w.heardAt, w.seenAt); v.repeats++;
@@ -549,7 +576,7 @@ public final class Brain {
                 if (t > 12 && g.time - v.lastClue > 8) { n.sneaking = false; n.hideSet = false; v.stage(Investigation.Stage.DONE, g.time); }
             }
             case DONE -> {
-                if (w != null) w.settledAt = g.time;
+                if (w != null) { w.settledAt = g.time; w.level = Math.min(w.level, Stealth.CURIOUS); }
                 n.vigilantUntil = Math.max(n.vigilantUntil, g.time + 60);
                 if (n.speech == null) g.ai.say(n, settleLine(n, v));
                 n.investigation = null;
@@ -1017,7 +1044,7 @@ public final class Brain {
         ItemDef main = n.main();
         boolean archer = main != null && (main.family == ItemDef.Family.BOW || main.family == ItemDef.Family.CROSSBOW);
         float reach = main == null || archer ? 0.6f : main.reach;
-        boolean hasGuard = n.off() != null && n.off().family == ItemDef.Family.SHIELD || main != null && main.guard > 0 && !archer;
+        boolean hasGuard = main == null && n.off() == null || n.off() != null && n.off().family == ItemDef.Family.SHIELD || main != null && main.guard > 0 && !archer;
         // what the opponent is doing, as an eye would read it
         boolean telegraph = t.cs.phase == Actor.Combat.Phase.WINDUP && d < 3.2f;
         float reaction = Math.max(0.05f, 0.22f - n.skills.level(rpg.skill.Skill.DEFENSE) * 0.002f);
