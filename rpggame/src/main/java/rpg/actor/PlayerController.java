@@ -87,6 +87,16 @@ public final class PlayerController {
     }
 
     private void hands(Player p, float dt) {
+        if (g.traversal.busy(p)) { queuedMelee = null; mainWas = offWas = false; mainHeld = 0; return; }
+        if (g.carrying.busy(p)) {
+            queuedMelee = null; p.cs.blocking = false; p.cs.draw = p.cs.charge = 0;
+            if (in.mainDown) mainHeld += dt;
+            if (in.mainDown && mainHeld > 0.12f && g.carrying.ready(p)) p.cs.charge = Math.min(1, (mainHeld - 0.12f) / 0.23f);
+            if (!in.mainDown && mainWas && g.carrying.ready(p)) { if (mainHeld >= 0.35f) g.carrying.drop(p, true); else g.carrying.putDown(p); }
+            mainWas = in.mainDown; offWas = in.offDown;
+            if (!in.mainDown) mainHeld = 0;
+            return;
+        }
         ItemDef main = p.main(), off = p.off();
         if (queuedMelee != null && (g.time > queuedUntil || main != queuedWeapon || in.offDown || in.dodge)) queuedMelee = null;
         boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
@@ -204,6 +214,8 @@ public final class PlayerController {
 
     private void move(Player p, float dt) {
         if (g.ui != null && g.ui.console.noclip) { fly(p, dt); return; }
+        if (!g.traversal.busy(p) && in.sprint && in.forward > 0.1f && !in.sneak) g.traversal.begin(p, camYaw);
+        if (g.traversal.update(p, dt)) return;
         float fwd = in.forward, side = in.strafe;
         float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
         float dx = fx * fwd + rx * side, dz = fz * fwd + rz * side, l = (float) Math.hypot(dx, dz);
@@ -272,6 +284,7 @@ public final class PlayerController {
         // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
         float burden = p.burden();
         max *= burden;
+        if (g.carrying.busy(p)) max *= g.carrying.ready(p) ? 0.55f : 0;
         // a badly hurt leg limps (Gore)
         if (g.gore != null) max *= g.gore.legs(p);
         if (c.staggered > 0) max = 0;
@@ -341,7 +354,7 @@ public final class PlayerController {
         }
         if (strafing(p)) p.turnToward(p.aimYaw, c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
         else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 7f : 14f, dt);
-        else if (Math.abs(Actor.wrap(p.aimYaw - p.yaw)) > 1.6f) p.turnToward(p.aimYaw, 4f, dt);
+        // Standing in third person, looking moves the head; the feet turn with movement or an action.
     }
 
     private static float approach(float v, float to, float step) { return Math.abs(to - v) <= step ? to : v + Math.signum(to - v) * step; }

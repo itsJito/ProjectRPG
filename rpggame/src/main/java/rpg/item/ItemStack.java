@@ -24,6 +24,9 @@ public final class ItemStack {
     public Inventory inner;
     /** Charges left (the Fire staff's); 0 for anything without them. */
     public int charges;
+    /** A signed bounty scroll names a reported case, its subject and the last location known to the watch. */
+    public record Contract(long caseId, long target, String jurisdiction, int reward, float x, float z) {}
+    public Contract contract;
     /** A stolen stack merged from several victims: who each unit was taken from, oldest first (null: all the owner's). */
     private LinkedHashMap<Long, Integer> ledger;
 
@@ -80,7 +83,7 @@ public final class ItemStack {
     /** Part of the stack, from its front (a bag never splits: its grid is its own). */
     public ItemStack copy(int n) {
         ItemStack c = new ItemStack(def, n, owner, stolen, origin);
-        c.charges = charges;
+        c.charges = charges; c.contract = contract;
         if (stolen && ledger != null) {
             LinkedHashMap<Long, Integer> part = new LinkedHashMap<>();
             int left = n;

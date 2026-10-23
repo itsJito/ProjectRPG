@@ -265,7 +265,7 @@ final class HudFragments {
                 float d = n.distTo(g.player);
                 if (d > 26 || !gfx.project(n.x, n.y + n.height + 0.35f, n.z, p2)) continue;
                 boolean focus = g.interact.focus == n;
-                String says = talk != null && talk.npc == n.id ? talk.text : n.speech;
+                String says = talk != null && talk.npc == n.id ? talk.text : hud.settings.values.subtitles ? n.speech : null;
                 float top = p2[1] - 16;
                 if (d <= 18) {
                     if (focus || d < 7) {
@@ -616,6 +616,10 @@ final class HudFragments {
             for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z))
                 ui.disc(left + n.x / DevMap.SX * size, top + n.z / DevMap.SZ * size, 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
             for (var grave : g.undertaker.graves()) skull(ui, left + grave.x / DevMap.SX * size, top + grave.z / DevMap.SZ * size, 12, Style.TEXT);
+            for (var contract : g.bountyBoard.carried()) {
+                float mx = left + contract.x() / DevMap.SX * size, my = top + contract.z() / DevMap.SZ * size;
+                ui.disc(mx, my, 7, 0x70402010); ui.border(mx - 5, my - 5, 10, 10, 2, 0xFFFFC05A);
+            }
             if (hud.flag != null) ui.disc(left + hud.flag[0] / DevMap.SX * size, top + hud.flag[1] / DevMap.SZ * size, 4, Style.BAD);
             float px = left + g.player.x / DevMap.SX * size, py = top + g.player.z / DevMap.SZ * size;
             float yaw = g.controller.camYaw;
@@ -627,6 +631,7 @@ final class HudFragments {
             ui.text("Nearby people", side + 20, top + 110, 13, Style.TEXT); ui.disc(side + 5, top + 117, 3, Style.NPC);
             ui.text("Nearby hostiles", side + 20, top + 142, 13, Style.TEXT); ui.disc(side + 5, top + 149, 3, Style.NPC_HOSTILE);
             ui.text("Your grave", side + 20, top + 174, 13, Style.TEXT); skull(ui, side + 5, top + 181, 12, Style.TEXT);
+            ui.text("Gold square: warrant last sighting", side, top + 211, 12, Style.ACCENT);
             ui.text("Click to mark a destination", side, top + 242, 13, Style.DIM);
             ui.text("M or Esc to return", side, top + 268, 13, Style.DIM);
             if (live && ui.clicked(left, top, size, size))
@@ -877,7 +882,7 @@ final class HudFragments {
         private boolean spotted;
         private float searchLeft = -1, searchTotal = 1;
         private double builtAt = -1;
-        Wanted(Hud h) { super("wanted"); }
+        Wanted(Hud h) { super("wanted"); h.events.listen((type, detail) -> { if (type.equals("law")) builtAt = -1; }); }
         @Override protected boolean active() { refresh(); return !rows.isEmpty() || heat > 0 || searchLeft > 0 || spotted; }
         @Override public float width() { return W; }
         @Override public float height() { return 46 + (searchLeft > 0 ? 12 : 0) + rows.size() * 20 + (rows.isEmpty() ? 0 : 6); }
@@ -1043,12 +1048,20 @@ final class HudFragments {
 
     // ------------------------------------------------------------------ Chatbox: speech replaces the Worldbox during a conversation
     static final class DialogueCard extends Fragment {
+        private Dialog measured;
+        private float measuredWidth;
+        private List<String> textLines = List.of();
+        private List<String> lines(Dialog d) {
+            float width = width() - (hud.g.actor(d.npc) instanceof Npc ? 144 : 34);
+            if (d != measured || width != measuredWidth) { measured = d; measuredWidth = width; textLines = wrap(hud.ui, d.text, 13, width); }
+            return textLines;
+        }
         DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.12f; fadeOut = 0.15f; }
         @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu; }
         @Override public float width() { return Math.min(660, hud.w - 32); }
         @Override public float height() {
             Dialog d = hud.dialog;
-            return d == null ? 180 : Math.min(hud.h - 100, Math.max(190, 108 + Math.max(1, d.choices.size()) * 23));
+            return d == null || hud.ui == null ? 190 : Math.min(hud.h - 100, Math.max(190, 70 + Math.min(6, lines(d).size()) * 16 + Math.max(1, Math.min(8, d.choices.size())) * 23));
         }
         @Override public void draw(Ui2D ui, float x, float y) {
             Dialog d = hud.dialog;
@@ -1067,20 +1080,24 @@ final class HudFragments {
                 ui.flush();
                 hud.gfx.portrait((Npc) hud.g.actor(d.npc), x + 15, y + 40, 96, 126, hud.now, ui.alpha);
             }
-            List<String> lines = wrap(ui, d.text, 13, textWidth);
-            int rows = Math.min(3, lines.size());
-            for (int i = 0; i < rows; i++) ui.text(lines.get(i), tx, y + 43 + i * 16, 13, 0xFFF0E5CD);
+            List<String> lines = lines(d);
+            int rows = Math.min(6, lines.size());
+            if (live && ui.hover(tx, y + 40, textWidth, Math.max(32, rows * 16))) d.textOffset = Math.max(0, Math.min(Math.max(0, lines.size() - rows), d.textOffset - (int) ui.scroll));
+            for (int i = 0; i < rows; i++) ui.text(lines.get(i + d.textOffset), tx, y + 43 + i * 16, 13, 0xFFF0E5CD);
             float top = y + 48 + Math.max(2, rows) * 16;
             int count = d.choices.size();
-            for (int i = 0; i < count; i++) {
-                float yy = top + i * 23;
+            int visible = Math.min(8, count);
+            if (live && ui.hover(tx, top, textWidth, ch - (top - y))) d.choiceOffset = Math.max(0, Math.min(Math.max(0, count - visible), d.choiceOffset - (int) ui.scroll));
+            for (int i = d.choiceOffset; i < d.choiceOffset + visible; i++) {
+                float yy = top + (i - d.choiceOffset) * 23;
                 boolean hover = live && ui.hover(tx - 4, yy, textWidth + 4, 22);
                 if (hover) ui.rect(tx - 4, yy, textWidth + 4, 22, 0x308E7447);
-                String label = (i < 9 ? (i + 1) + "  " : "") + d.choices.get(i).label();
+                String label = (i - d.choiceOffset + 1) + "  " + d.choices.get(i).label();
                 float size = Math.min(12, textWidth / Math.max(1, ui.width(label, 1)));
                 ui.text(label, tx, yy + 3, size, hover ? 0xFFFFD15E : 0xFFD7C7A4);
                 if (live && ui.clicked(tx - 4, yy, textWidth + 4, 22)) { hud.choose(i); return; }
             }
+            if (count > visible) ui.text("Scroll for more replies", tx, y + ch - 18, 10, Style.DIM);
             if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.closeDialog(); }
         }
     }

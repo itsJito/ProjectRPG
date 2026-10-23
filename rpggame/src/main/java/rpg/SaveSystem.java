@@ -40,9 +40,12 @@ public final class SaveSystem {
         if (g.death.active) g.death.proceed(false);
         // an arrow or bolt in flight when the game is saved comes down where it is (a save keeps no flights): its ammunition
         // is on the ground in the save, as it would be a moment later, instead of gone from the world
+        g.carrying.dropAll();
+        for (Actor actor : g.actors()) g.traversal.cancel(actor);
         g.combat.landAll();
         Map<String, Object> root = new HashMap<>();
         root.put("schema", SCHEMA);
+        root.put("npcTraversalProfiles", 1);
         root.put("revision", g.state.revision);
         // the world state's bookkeeping
         Map<String, Object> st = new HashMap<>();
@@ -97,7 +100,6 @@ public final class SaveSystem {
         root.put("honor", g.honor.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
-        root.put("agilityLaps", g.agility.laps);
         root.put("xpRate", (double) g.cfg.xpRate);
         try {
             Files.createDirectories(file.toAbsolutePath().getParent());
@@ -129,13 +131,15 @@ public final class SaveSystem {
 
     @SuppressWarnings("unchecked")
     public boolean load(Path file) {
+        g.carrying.dropAll();
+        for (Actor actor : g.actors()) g.traversal.cancel(actor);
         Map<String, Object> root;
         try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
         g.interact.work.clear();
         g.combat.projectiles.clear();
-        g.ui.closeAll();
+        if (g.ui != null) g.ui.closeAll();
         Map<String, Object> st = Json.obj(root, "state");
         List<Object> c = Json.list(st, "counters");
         long[] counters = new long[c.size()];
@@ -172,6 +176,7 @@ public final class SaveSystem {
             if (n.alive && n.loaded) g.ai.despawnBody(n);
             if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
             applyActor(n, m);
+            if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
             n.arrestedUntil = Json.num(m, "arrested", -1); n.arrestJurisdiction = Json.str(m, "arrestJur", DevMap.jurisdiction(n.x, n.z)); n.patrolIndex = Json.integer(m, "patrol", 0);
             n.memories.clear();
@@ -231,7 +236,6 @@ public final class SaveSystem {
         g.honor.load(Json.obj(root, "honor"));
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
-        g.agility.laps = Json.integer(root, "agilityLaps", 0);
         g.ai.syncAbstractClock();
         g.mapDirty = true;
         g.mapColumns.clear();   // (a load redraws the whole map)

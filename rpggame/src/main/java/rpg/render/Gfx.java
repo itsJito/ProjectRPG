@@ -280,7 +280,7 @@ public final class Gfx implements AutoCloseable {
         Actor p = g.player;
         if (p.alive) {
             human(p, p.look, dt, firstPerson, null);
-            cmd.shadowBody(p.x, p.y, p.z, p.radius, p.height * (p.crouched ? 0.5f : 1));
+            cmd.shadowBody(p.x, p.y, p.z, p.radius, p.height * (p.crouched ? rpg.actor.Body.CROUCH_HEIGHT : 1));
         } else if (g.death.ragdoll != 0) {
             // the player's own body, fallen (gamefixes: the death is watched), until it becomes the grave
             Snapshots.Ragdoll rd = g.lastBodies.ragdoll(g.death.ragdoll);
@@ -294,7 +294,7 @@ public final class Gfx implements AutoCloseable {
             }
             if (n.alive && n.loaded) {
                 human(n, n.look, dt, false, sleeping(g, n));
-                if (n.distTo(camX, camZ) < 24 && !n.asleep()) cmd.shadowBody(n.x, n.y, n.z, n.radius, n.height * (n.crouched ? 0.5f : 1));
+                if (n.distTo(camX, camZ) < 24 && !n.asleep()) cmd.shadowBody(n.x, n.y, n.z, n.radius, n.height * (n.crouched ? rpg.actor.Body.CROUCH_HEIGHT : 1));
             }
         }
         for (Actor d : g.dummies) dummy(d, g.time);
@@ -604,6 +604,7 @@ public final class Gfx implements AutoCloseable {
         float standY = f.bodyY - crouch * 1.2f + bob - reachDrop;
         float lyingY = dead ? f.bw * 0.5f : f.bird ? f.bh * 0.45f : f.bh * 0.5f;
         float y = standY + (lyingY - standY) * lie;
+        if (a.goal == rpg.animal.Animal.Goal.GROOM && !dead) { a.headYaw = 0.6f * (float) Math.sin(time * 7); a.headPitch = 0.35f + 0.12f * (float) Math.sin(time * 14); }
         float pitch = (f.bird ? 0.05f * (float) Math.sin(ph * 2) * amp : running ? 0.08f * (float) Math.sin(ph) : 0) - crouch * 0.08f + lunge * 0.12f;
         if (f.hopper && amp > 0.05f) pitch += 0.25f * (float) Math.sin(ph) * Math.min(1, amp * 3);
         body.identity().translate(a.x, a.y, a.z).rotateY(a.yaw);
@@ -733,6 +734,9 @@ public final class Gfx implements AutoCloseable {
         for (Seg s : Seg.values()) {
             int flags = firstPerson && s == Seg.HEAD ? AstrattoNative.MODEL_SHADOW_ONLY : 0;
             segMatrix(rig.seg[s.ordinal()]);
+            // Perspective compensation for close bare fists; keep the world rig and hit volumes unchanged.
+            if (firstPerson && st.guardRaise > 0.001f && a.main() == null && a.off() == null &&
+                    (s == Seg.R_ARM_UP || s == Seg.R_ARM_LO || s == Seg.L_ARM_UP || s == Seg.L_ARM_LO)) m.scale(1 - st.guardRaise * 0.22f, 1, 1 - st.guardRaise * 0.22f);
             if (gone[s.ordinal()]) { if (isRoot(s)) stump(); continue; }
             put(fig[0][s.ordinal()], flags, shade, shade, shade, 0, 1, 0.85f, 0);
             ItemDef c = cover(a, s);
@@ -779,7 +783,7 @@ public final class Gfx implements AutoCloseable {
             if (gone[(k == 0 ? Seg.R_ARM_LO : Seg.L_ARM_LO).ordinal()]) continue;
             float[] grip = world(rig.hand[k]), dir = worldDir(rig.itemDir[k]);
             float yaw = a.yaw;
-            if (holds != null) {
+            if (holds != null && a.carryBody == 0 && clock - a.throwAt >= 0.45 && !(a instanceof Npc n && (n.goal == Brain.Goal.LOOT || n.goal == Brain.Goal.AID) && clock < n.lootUntil)) {
                 // a shield on the forearm: carried face-out at the side; raised in guard (or seen through the eyes) its face
                 // turned to the front, where the blows come from
                 if (holds.family == Family.SHIELD) held(holds, grip, new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
@@ -1198,7 +1202,9 @@ public final class Gfx implements AutoCloseable {
     /** A dead NPC: their own figure's segments laid between the ragdoll's particles as the engine has them. */
     private void ragdoll(Snapshots.Ragdoll rd, Actor n) {
         int[][] fig = figure(n, n.look);
-        float[] rr = right(rd.yaw);
+        // A fallen or carried body's shoulders define its frame; world yaw loses roll and pitch.
+        int ls = AstrattoNative.RD_L_SHOULDER * 3, rs = AstrattoNative.RD_R_SHOULDER * 3;
+        float[] rr = norm(new float[]{rd.p[rs] - rd.p[ls], rd.p[rs + 1] - rd.p[ls + 1], rd.p[rs + 2] - rd.p[ls + 2]});
         Object[][] bones = {
                 {Seg.TORSO, AstrattoNative.RD_PELVIS, AstrattoNative.RD_NECK, true}, {Seg.HEAD, AstrattoNative.RD_NECK, AstrattoNative.RD_HEAD, true},
                 {Seg.L_ARM_UP, AstrattoNative.RD_L_SHOULDER, AstrattoNative.RD_L_ELBOW, false}, {Seg.L_ARM_LO, AstrattoNative.RD_L_ELBOW, AstrattoNative.RD_L_WRIST, false},
@@ -1329,6 +1335,10 @@ public final class Gfx implements AutoCloseable {
                 cmd.pointLight(o.x + sd * 0.5f, fl + 1.2f, o.z, 3.5f, 2.4f * fk, 1.6f * fk, 0.7f * fk, 0);
                 m.identity().translate(o.x + sd * 0.5f, fl + 1.17f, o.z).scale(0.03f, 0.05f, 0.03f); put(box, 0, 1f, 0.8f, 0.3f, 3f, 1, 0.5f, 0);
             }
+        } else if (o instanceof Fixtures.Board) {
+            m.identity().translate(o.x, o.y - 0.2f, o.z).scale(1.5f, 1.5f, 0.14f); put(box, 0x60452C, 1, 0.85f, 0);
+            for (int side = -1; side <= 1; side += 2) { m.identity().translate(o.x + side * 0.55f, o.y - 0.55f, o.z).scale(0.1f, 1.3f, 0.14f); put(box, 0x49331E, 1, 0.85f, 0); }
+            for (int page = -1; page <= 1; page++) { m.identity().translate(o.x + page * 0.4f, o.y - 0.12f + (page == 0 ? 0.12f : 0), o.z + 0.08f).scale(0.3f, 0.53f, 0.015f); put(box, 0xBCA67A, 1, 0.95f, 0); }
         } else if (o instanceof Fixtures.Terminal) {
             m.identity().translate(o.x, DevMap.FLOOR + 0.6f, o.z).scale(0.7f, 1.2f, 0.5f); put(box, 0x30343A, 1, 0.4f, 0.5f);
             m.identity().translate(o.x, DevMap.FLOOR + 1.0f, o.z + 0.26f).scale(0.55f, 0.4f, 0.02f); put(box, 0, 0.3f, 1f, 0.6f, 2.5f, 1, 0.2f, 0);

@@ -30,6 +30,10 @@ public final class Blocks {
     public static boolean objectCell(int id) {
         return id == FURNACE || id == ANVIL || id == RANGE || id == CRAFT_TABLE || id == SAWBENCH || id == TARGET || id == CRATE || id == BOOKCASE || id == TABLE || id == BED || id == HEADSTONE;
     }
+    /** Full structural cells form the traversal graph; glass, gates, plants and thin props never do. */
+    public static boolean traversable(int id) {
+        return switch (id) { case GRASS, DIRT, STONE, BRICK, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SAND, COBBLE, ROOF, CRATE, PLASTER, BEAM -> true; default -> false; };
+    }
     /** Plants drawn as crossed planes that bodies walk through. */
     public static boolean plant(int id) { return id == HERB_PATCH || id == FLAX_PATCH; }
 

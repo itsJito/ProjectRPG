@@ -167,7 +167,7 @@ public final class Main {
         boolean[] toTitle = {false};
         hud.onTitle = () -> { toTitle[0] = true; win.requestClose(); };
         double sessionStart = g.time;
-        gameLoop(win, game, gfx, ui, g, hud, music, in);
+        try { gameLoop(win, game, gfx, ui, g, hud, music, in); } finally { hud.close(); }
         // the profile is saved as it is left (for the title, or out of the game)
         if (g.player.alive) new SaveSystem(g).save(profile.save());
         Profiles.played(profile, g, g.time - sessionStart);
@@ -213,22 +213,25 @@ public final class Main {
         boolean eMenuOpened = false;
         // a mouse button is the body's only when it went down while the mouse was looking (not on a menu): the click
         // that picks a dialogue choice or closes a window is never also a swing when the menu closes under it
-        boolean mainArmed = false, offArmed = false, wasPaused = false;
+        boolean mainArmed = false, offArmed = false, wasPaused = false, crouchToggle = false, sprintToggle = false;
+        hud.settings.displayChanged = () -> { win.setFullscreen(hud.settings.values.fullscreen); win.setVsync(hud.settings.values.vsync); };
+        hud.settings.displayChanged.run();
         hud.onQuit = win::requestClose;
         while (!win.shouldClose()) {
             long frameStart = System.nanoTime();
             win.poll();
             float dt = frameDt(last); last = System.nanoTime();
+            var preferences = hud.settings.values;
             boolean free = cursorFree || hud.captures();
             win.setCursorLocked(!free);
             mouse(ui, in);
             if (free) { mainArmed = false; offArmed = false; }
             else {
-                if (in.mousePressed(GLFW_MOUSE_BUTTON_LEFT)) mainArmed = true;
-                if (in.mousePressed(GLFW_MOUSE_BUTTON_RIGHT)) offArmed = true;
+                if (preferences.pressed(in, Preferences.Action.ATTACK)) mainArmed = true;
+                if (preferences.pressed(in, Preferences.Action.GUARD)) offArmed = true;
             }
-            if (!in.mouseDown(GLFW_MOUSE_BUTTON_LEFT)) mainArmed = false;
-            if (!in.mouseDown(GLFW_MOUSE_BUTTON_RIGHT)) offArmed = false;
+            if (!preferences.down(in, Preferences.Action.ATTACK)) mainArmed = false;
+            if (!preferences.down(in, Preferences.Action.GUARD)) offArmed = false;
             var it = g.controller.in;
             // typed text goes to the interface when its filter box has the focus; then the keys are not the body's
             StringBuilder typed = new StringBuilder();
@@ -240,27 +243,33 @@ public final class Main {
             if (hud.console.isOpen()) typed.setLength(0);
             hud.input(typed.toString(), !hud.console.isOpen() && in.keyPressed(GLFW_KEY_BACKSPACE), !hud.console.isOpen() && in.keyPressed(GLFW_KEY_R));
             boolean typing = hud.typing();
+            boolean rebinding = hud.settings.capturingKey();
+            hud.settings.keyInput(in);
+            if (rebinding) { ui.click = ui.rclick = false; }
             // the console's binds: a bound key pressed in play runs its command
             if (!typing && !hud.console.binds().isEmpty()) for (var b : hud.console.binds().keySet().toArray(new String[0])) { int key = keyCode(b); if (key >= 0 && in.keyPressed(key)) hud.console.key(b); }
             // the keyboard: movement always; the hands only while the mouse looks
-            it.forward = typing ? 0 : (in.keyDown(GLFW_KEY_W) ? 1 : 0) - (in.keyDown(GLFW_KEY_S) ? 1 : 0);
-            it.strafe = typing ? 0 : (in.keyDown(GLFW_KEY_D) ? 1 : 0) - (in.keyDown(GLFW_KEY_A) ? 1 : 0);
-            it.sprint = !typing && in.keyDown(GLFW_KEY_LEFT_SHIFT);
-            it.sneak = !typing && in.keyDown(GLFW_KEY_LEFT_CONTROL);
+            it.forward = typing ? 0 : (preferences.down(in, Preferences.Action.FORWARD) ? 1 : 0) - (preferences.down(in, Preferences.Action.BACK) ? 1 : 0);
+            it.strafe = typing ? 0 : (preferences.down(in, Preferences.Action.RIGHT) ? 1 : 0) - (preferences.down(in, Preferences.Action.LEFT) ? 1 : 0);
+            it.sprint = !typing && preferences.down(in, Preferences.Action.SPRINT);
+            if (!typing && preferences.pressed(in, Preferences.Action.CROUCH)) crouchToggle = !crouchToggle;
+            if (!typing && preferences.pressed(in, Preferences.Action.SPRINT)) sprintToggle = !sprintToggle;
+            it.sneak = !typing && (preferences.toggleCrouch ? crouchToggle : preferences.down(in, Preferences.Action.CROUCH));
+            if (preferences.toggleSprint) it.sprint = !typing && sprintToggle;
             it.jogToggle = !typing && in.keyPressed(GLFW_KEY_CAPS_LOCK);
-            it.jump = !typing && in.keyPressed(GLFW_KEY_SPACE);
-            it.jumpHeld = !typing && in.keyDown(GLFW_KEY_SPACE);
-            it.dodge = !typing && in.keyPressed(GLFW_KEY_Q);
-            it.backTap = !typing && in.keyPressed(GLFW_KEY_S);
+            it.jump = !typing && preferences.pressed(in, Preferences.Action.JUMP);
+            it.jumpHeld = !typing && preferences.down(in, Preferences.Action.JUMP);
+            it.dodge = !typing && preferences.pressed(in, Preferences.Action.DODGE);
+            it.backTap = !typing && preferences.pressed(in, Preferences.Action.BACK);
             it.cast = !free && in.keyPressed(GLFW_KEY_R);
-            it.toggleCamera = in.keyPressed(GLFW_KEY_V);
+            it.toggleCamera = preferences.pressed(in, Preferences.Action.CAMERA);
             it.mainDown = !free && mainArmed;
             it.offDown = !free && offArmed;
             float sens = 0.0025f * Math.max(0.05f, hud.console.f("sensitivity"));
-            if (!free) { it.lookYaw = -(float) in.dx * sens; it.lookPitch = -(float) in.dy * sens; }
+            if (!free) { it.lookYaw = -(float) in.dx * sens; it.lookPitch = (preferences.invertY ? 1 : -1) * (float) in.dy * sens; }
             if (!free && in.scroll != 0) g.player.camDist = Math.max(1.6f, Math.min(8, g.player.camDist - (float) in.scroll * 0.4f));
             for (int k = 0; k < 10 && !typing; k++) if (in.keyPressed(k == 9 ? GLFW_KEY_0 : GLFW_KEY_1 + k)) {
-                if (hud.dialog != null || hud.menuOpen()) hud.choose(k);
+                if (hud.dialog != null || hud.menuOpen()) hud.choose(k + (hud.dialog != null && !hud.dialog.pauseMenu ? hud.dialog.choiceOffset : 0));
                 else hud.hotkey(k);
             }
             if (hud.dialog != null && hud.dialog.pauseMenu) {
@@ -271,18 +280,24 @@ public final class Main {
             }
             // the scenes: inventory, character, skills, journal, magic
             if (!typing && !(hud.dialog != null && hud.dialog.pauseMenu)) {
-                if (in.keyPressed(GLFW_KEY_I)) hud.toggle(Hud.Scene.INVENTORY);
+                if (preferences.pressed(in, Preferences.Action.INVENTORY)) hud.toggle(Hud.Scene.INVENTORY);
                 if (in.keyPressed(GLFW_KEY_C)) hud.toggle(Hud.Scene.CHARACTER);
                 if (in.keyPressed(GLFW_KEY_K)) hud.toggle(Hud.Scene.SKILLS);
                 if (in.keyPressed(GLFW_KEY_J)) hud.toggle(Hud.Scene.JOURNAL);
-                if (in.keyPressed(GLFW_KEY_M)) hud.toggle(Hud.Scene.MAP);
+                if (preferences.pressed(in, Preferences.Action.MAP)) hud.toggle(Hud.Scene.MAP);
                 if (in.keyPressed(GLFW_KEY_B)) hud.toggle(Hud.Scene.MAGIC);
             }
             // E: a tap is the primary action, a hold opens every option
-            if (!typing && in.keyPressed(GLFW_KEY_E)) { eHeld = g.time; eMenuOpened = false; }
-            if (eHeld >= 0 && in.keyDown(GLFW_KEY_E) && !eMenuOpened && g.time - eHeld > 0.3) { hud.openInteractMenu(); eMenuOpened = true; }
-            if (in.keyReleased(GLFW_KEY_E)) { if (!eMenuOpened && !hud.captures()) it.interact = true; eHeld = -1; }
-            for (int k = 0; k < 7; k++) if (in.keyPressed(GLFW_KEY_F1 + k)) hud.openTabKey(k);
+            if (!typing && preferences.pressed(in, Preferences.Action.INTERACT)) { eHeld = g.time; eMenuOpened = false; }
+            if (eHeld >= 0 && preferences.down(in, Preferences.Action.INTERACT) && !eMenuOpened && g.time - eHeld > 0.3) {
+                if (g.carrying.target(g.interact.focus) != null) {
+                    var pickup = g.carrying.begin(g.player, g.interact.focus);
+                    if (pickup.rejected()) g.chat.warn(pickup.reason());
+                } else hud.openInteractMenu();
+                eMenuOpened = true;
+            }
+            if (preferences.released(in, Preferences.Action.INTERACT)) { if (!eMenuOpened && !hud.captures()) it.interact = true; eHeld = -1; }
+            for (int k = 0; k < 7; k++) if (k != 4 && k != 5 && in.keyPressed(GLFW_KEY_F1 + k)) hud.openTabKey(k);
             if (in.keyPressed(GLFW_KEY_F8)) hud.xpDashboard = !hud.xpDashboard;
             if (in.keyPressed(GLFW_KEY_F9)) hud.aiInspector = !hud.aiInspector;
             if (in.keyPressed(GLFW_KEY_F10)) hud.stateInspector = !hud.stateInspector;
@@ -290,14 +305,13 @@ public final class Main {
             if (in.keyPressed(GLFW_KEY_PAGE_UP)) hud.nextInspected(-1);
             if (in.keyPressed(GLFW_KEY_PAGE_DOWN)) hud.nextInspected(1);
             if (!typing && in.keyPressed(GLFW_KEY_TAB)) cursorFree = !cursorFree;
-            boolean ctrl = in.keyDown(GLFW_KEY_LEFT_CONTROL);
-            if (ctrl && in.keyPressed(GLFW_KEY_S) && new SaveSystem(g).save(g.savePath())) g.chat.add("Game saved.", Chat.Kind.DEBUG);
-            if (ctrl && in.keyPressed(GLFW_KEY_L) && new SaveSystem(g).load(g.savePath())) g.chat.add("Game loaded.", Chat.Kind.DEBUG);
+            if (!typing && !hud.captures() && in.keyPressed(GLFW_KEY_F5) && new SaveSystem(g).save(g.savePath())) g.chat.add("Game saved.", Chat.Kind.DEBUG);
+            if (!typing && !hud.captures() && in.keyPressed(GLFW_KEY_F6) && new SaveSystem(g).load(g.savePath())) g.chat.add("Game loaded.", Chat.Kind.DEBUG);
             if (in.keyPressed(GLFW_KEY_F12)) shot(gfx, win.width, win.height, new File("shots", "shot-" + System.currentTimeMillis() + ".png"));
             // Alt+Enter: the whole monitor, borderless, at its refresh rate (or back to the window)
-            if (in.keyPressed(GLFW_KEY_ENTER) && (in.keyDown(GLFW_KEY_LEFT_ALT) || in.keyDown(GLFW_KEY_RIGHT_ALT))) win.setFullscreen(!win.fullscreen);
+            if (in.keyPressed(GLFW_KEY_ENTER) && (in.keyDown(GLFW_KEY_LEFT_ALT) || in.keyDown(GLFW_KEY_RIGHT_ALT))) { win.setFullscreen(!win.fullscreen); hud.settings.values.fullscreen = win.fullscreen; }
             if (g.death.choosing() && (in.keyPressed(GLFW_KEY_ENTER) || in.keyPressed(GLFW_KEY_KP_ENTER)) && !hud.console.isOpen()) g.death.proceed(false);
-            if (in.keyPressed(GLFW_KEY_ESCAPE) && !hud.escape()) hud.dialog(menu(win, g));
+            if (!rebinding && in.keyPressed(GLFW_KEY_ESCAPE) && !hud.escape()) hud.dialog(menu(win, g));
             if (hud.screenshotRequested) { hud.screenshotRequested = false; shotNext = true; }
             // any menu pauses the whole game: no module runs, no simulated time passes, the world's sounds hold where
             // they are; only the interface, its sounds and the music go on
@@ -327,6 +341,7 @@ public final class Main {
     static Dialog menu(Window win, Rpg g) {
         Dialog d = new Dialog("Game paused", g.player.name)
                 .choice("Resume", () -> { })
+                .choice("Settings", () -> g.ui.settings.show())
                 .choice("Save game", () -> { if (new SaveSystem(g).save(g.savePath())) g.chat.add("Game saved.", Chat.Kind.DEBUG); })
                 .choice("Load last save", () -> { if (new SaveSystem(g).load(g.savePath())) g.chat.add("Game loaded.", Chat.Kind.DEBUG); })
                 .choice("Quit to title", () -> { if (g.sfx != null) g.sfx.ui("LogoutProfileButton", 0.6f); g.ui.toTitle(); })
@@ -363,7 +378,7 @@ public final class Main {
     /** One drawn frame. Paused, the world is drawn exactly as it stands (no animation advances); the interface still moves. */
     static void drawGame(Rpg g, Gfx gfx, Ui2D ui, Hud hud, int w, int h, float dt, boolean cursorFree, boolean paused) {
         var c = g.controller;
-        float shake = paused ? 0 : g.fx.shake;
+        float shake = paused || hud.settings.values.reducedMotion ? 0 : g.fx.shake;
         float sx = shake > 0 ? (float) Math.sin(g.time * 60) * shake * 0.05f : 0, sy = shake > 0 ? (float) Math.cos(g.time * 47) * shake * 0.05f : 0;
         float worldDt = paused ? 0 : dt;
         gfx.camera(c.cx + sx, c.cy + sy, c.cz, c.fx, c.fy, c.fz, w, h, worldDt);

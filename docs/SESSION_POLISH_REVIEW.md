@@ -1,5 +1,7 @@
 # Launch, custody and presentation review
 
+Historical review for the earlier pass. See [System polish review](SYSTEM_POLISH_REVIEW.md) for the current crouch, recorded audio, combat and QA results.
+
 This pass follows the current request and GDD combat, perception/memory, justice, ecology and persistence rules. Only the player gains XP. Animals and NPCs keep configured skill profiles and derive Level from them. The previous gamefixes list is not the work queue.
 
 ## Launch and hardware budget

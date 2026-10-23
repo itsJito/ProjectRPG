@@ -152,6 +152,12 @@ final class AnimalMind {
         if (lead != null && a.distTo(lead) > spacing(a)) s.add(new Score(Goal.FOLLOW, 0.42f, lead.id, "keeping with the " + groupWord(sp)));
         if (sp.diet == Species.Diet.GRAZER || sp.diet == Species.Diet.FORAGER || sp.diet == Species.Diet.SCAVENGER || sp.diet == Species.Diet.OMNIVORE)
             s.add(new Score(Goal.GRAZE, 0.3f + a.hunger * 0.3f, 0, sp.diet == Species.Diet.GRAZER ? "grazing" : "foraging"));
+        if (!restTime && a.fear < 0.2f && a.hunger < 0.55f && a.thirst < 0.55f) {
+            boolean grooms = sp == Species.CAT || sp.plan == Species.Plan.BIRD;
+            if (grooms && g.time >= a.careAgain) s.add(new Score(Goal.GROOM, 0.44f, 0, sp.plan == Species.Plan.BIRD ? "preening feathers" : "washing its face"));
+            Actor playmate = a.baby && lead != null ? lead : sp == Species.DOG && a.owned() ? g.actor(a.owner) : null;
+            if (playmate != null && playmate.alive && a.distTo(playmate) < 5 && g.time >= a.careAgain) s.add(new Score(Goal.PLAY, 0.43f, playmate.id, "play beside a familiar companion"));
+        }
         s.add(new Score(Goal.WANDER, 0.22f, 0, sp.diet == Species.Diet.HUNTER ? "roaming its range" : "wandering"));
         // (5) courting
         Animal mate = sys.mateFor(a);
@@ -193,6 +199,16 @@ final class AnimalMind {
         if (a.goal != Goal.DEFEND && a.goal != Goal.HUNT && a.cs.phase == rpg.actor.Actor.Combat.Phase.IDLE) a.wantYaw = Float.NaN;
         switch (a.goal) {
             case IDLE -> sys.desire(a, A_HOLD);
+            case GROOM -> {
+                sys.desire(a, A_HOLD); a.headDown = true;
+                if (g.time - a.goalSince > 3) { a.careAgain = g.time + 45 + a.id % 30; a.nextThink = 0; }
+            }
+            case PLAY -> {
+                if (o == null || !o.alive || a.distTo(o) > 8) { a.nextThink = 0; break; }
+                float angle = (float) (g.time * 1.4 + a.id);
+                sys.goTo(a, o.x + (float) Math.cos(angle) * 1.6f, o.z + (float) Math.sin(angle) * 1.6f, true, 0.4f);
+                if (g.time - a.goalSince > 4) { a.careAgain = g.time + 35 + a.id % 30; a.nextThink = 0; }
+            }
             case ALERT -> { sys.desire(a, A_HOLD); a.faceThreat = true; }
             case WARN -> {
                 sys.desire(a, A_HOLD); a.faceThreat = true;

@@ -116,7 +116,7 @@ public final class Stealth {
         float cone = 1;
         // someone right beside you is sensed whichever way you face - unless they creep
         float close = a.sneaking ? CLOSE_CREEPING : CLOSE;
-        if (d > close) {
+        if (d > 0.05f) {
             float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
             float cos = (fx * dx + fz * dz) / d;
             // close in, the edge of the eye (90 degrees each side); far out, only what is ahead (about 50 degrees)

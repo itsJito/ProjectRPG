@@ -22,7 +22,7 @@ import rpg.world.DevMap;
  * when it has decayed.
  */
 public final class Animal extends Actor implements Interactable {
-    public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY }
+    public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM }
 
     public final Species species;
     public boolean baby, female;
@@ -53,6 +53,7 @@ public final class Animal extends Actor implements Interactable {
     /** The heading it wants (NaN: the way it walks); its spot at the resting place. */
     public float wantYaw = Float.NaN, restOx, restOz;
     public double lastBite = -99, nextVoice, lastEgg = -1e9;
+    public double careAgain;
     /** The route last asked of the engine. */
     float rx, rz;
     boolean routed;
@@ -144,6 +145,7 @@ public final class Animal extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         if (carcass()) {
+            o.add(Option.when(carriedBy == 0 && a.carryBody == 0, "carry", "Carry carcass", 5, "That body is already being carried.", 2.2f));
             boolean blade = Animals.blade(a) != null;
             o.add(Option.when(blade && !butchered, "butcher", "Butcher", 10, butchered ? "Nothing left to take." : "You need a knife or a blade.", r));
         } else {
@@ -158,6 +160,8 @@ public final class Animal extends Actor implements Interactable {
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
+        if (action.equals("carry")) return g.carrying.begin(a, this);
+        if (carriedBy != 0) return Result.no("Put the body down first.");
         return g.animals.perform(this, a, action, req);
     }
 

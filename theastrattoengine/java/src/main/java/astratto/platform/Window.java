@@ -104,8 +104,10 @@ public final class Window {
      * time, shown at once when one is late. Plain vsync would wait for the next refresh after a late frame: on a 164 Hz
      * monitor a 7 ms frame would be held to 82 frames a second. ASTRATTO_NOVSYNC turns it off.
      */
+    private boolean vsync = true;
+    public void setVsync(boolean enabled) { vsync = enabled; applySwapInterval(); }
     private void applySwapInterval() {
-        if (env("NOVSYNC")) { glfwSwapInterval(0); return; }
+        if (!vsync || env("NOVSYNC")) { glfwSwapInterval(0); return; }
         boolean tear = glfwExtensionSupported("WGL_EXT_swap_control_tear") || glfwExtensionSupported("GLX_EXT_swap_control_tear");
         glfwSwapInterval(tear ? -1 : 1);
         adaptiveVsync = tear;

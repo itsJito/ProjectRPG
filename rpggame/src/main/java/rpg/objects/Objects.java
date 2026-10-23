@@ -79,8 +79,8 @@ public final class Objects {
         for (int[] p : DevMap.FLAXES) node(Node.Kind.PATCH, "flax", "Flax", Skill.HARVESTING, 5, Items.FLAX, 8, 1.8f, 4, g.cfg.patchRespawn, Blocks.FLAX_PATCH, p, 0, 0);
         for (int[] p : DevMap.BERRIES) node(Node.Kind.PATCH, "berry_bush", "Redberry bush", Skill.HARVESTING, 10, Items.BERRIES, 18, 2.4f, 3, g.cfg.patchRespawn, Blocks.BERRY_BUSH, p, 0, 0);
         // agility: the course wall and the town-wall shortcut
-        add(new Fixtures.Climb(fid(), "Climbing wall", 117.5f, f + 1.4f, DevMap.AG_WALL_Z + 0.5f, 1, 18, 117.5f, f, DevMap.AG_WALL_Z + 2.5f, 117.5f, DevMap.AG_WALL_Z - 1.5f));
-        add(new Fixtures.Climb(fid(), "Wall shortcut", DevMap.SHORTCUT[0] + 0.5f, f + 1.4f, DevMap.SHORTCUT[1] + 0.5f, 10, 12, DevMap.SHORTCUT[0] + 0.5f, f, DevMap.SHORTCUT[1] + 2.5f, DevMap.SHORTCUT[0] + 0.5f, DevMap.SHORTCUT[1] - 1.5f));
+        add(new Fixtures.Climb(fid(), "Climbing wall", 117.5f, f + 1.4f, DevMap.AG_WALL_Z + 0.5f));
+        add(new Fixtures.Climb(fid(), "Wall shortcut", DevMap.SHORTCUT[0] + 0.5f, f + 1.4f, DevMap.SHORTCUT[1] + 0.5f));
         // the combat lane's cabinet, the debug terminal, the stall, the kiosk
         add(new Fixtures.Cabinet(fid(), DevMap.CABINET[0] + 0.5f, f + 1f, DevMap.CABINET[1] - 0.2f));
         add(new Fixtures.Terminal(fid(), DevMap.DEBUG_TERMINAL[0] + 0.5f, f + 1.4f, DevMap.DEBUG_TERMINAL[1] + 0.5f));
@@ -132,6 +132,7 @@ public final class Objects {
             Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
             slab.name = "Cell slab"; furniture.add(slab);
         }
+        for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction()));
     }
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */

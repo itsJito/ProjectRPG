@@ -28,8 +28,12 @@ class MovementTest {
         assertTrue(Math.hypot(g.player.vx, g.player.vz) < 0.05);
         assertTrue(Math.hypot(g.player.x - x, g.player.z - z) < 0.5);
     }
-    @Test void crouchFitsUnderOneBlockAndCannotStandThroughTheCeiling() {
-        g.setBlock(60, DevMap.FLOOR + 1, 54, Blocks.STONE);
+    @Test void crouchRetainsItsShorterColliderUntilThereIsStandingRoom() {
+        g.game.commands().release(g.player.body);
+        g.player.body = g.game.reserve(astratto.bridge.AstrattoNative.KIND_MOVER);
+        // A taller probe body makes the low-clearance invariant independent of voxel rounding.
+        g.game.commands().moverCreate(g.player.body, 60.5f, DevMap.FLOOR, 54.5f, g.player.radius, 2.4f, 0.6f, 0, 2.4f * Body.CROUCH_HEIGHT);
+        g.setBlock(60, DevMap.FLOOR + 2, 54, Blocks.STONE);
         g.controller.in.sneak = true; game.tick(1f / 60);
         assertTrue(g.lastBodies.mover(g.player.body).crouched);
         float x = g.player.x, z = g.player.z;
@@ -37,7 +41,7 @@ class MovementTest {
         for (int frame = 0; frame < 10; frame++) game.tick(1f / 60);
         assertTrue(g.player.crouched);
         assertEquals(x, g.player.x, 0.01); assertEquals(z, g.player.z, 0.01);
-        g.setBlock(60, DevMap.FLOOR + 1, 54, Blocks.AIR);
+        g.setBlock(60, DevMap.FLOOR + 2, 54, Blocks.AIR);
         game.tick(1f / 60); assertFalse(g.player.crouched);
     }
     @Test void emptyHandsCanGuardMeleeButCannotParryAMetalWeaponOrStopArrows() {

@@ -33,7 +33,7 @@ public:
         std::unique_ptr<Ragdoll> body;
         std::unique_ptr<SydneyCharacter> sydney;
         int lastState = -1, lastOutcome = 0;
-        bool wasSettled = false;
+        bool wasSettled = false, kinematic = false;
     };
     struct SoftBodyRec { SoftBody body; bool wasSettled = false; };
     struct VehicleRec { Vehicle car; Vehicle::Report report; };

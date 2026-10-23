@@ -1,28 +1,11 @@
 package rpg.combat;
 
-import rpg.item.ItemDef.DamageType;
 
-/**
- * The combat formulas (GDD 2.3), as pure functions. The relationships are the GDD's; every coefficient is tuning data.
- * There is no accuracy roll and no damage roll anywhere: a hit is a physical contact, and its outcome follows from the
- * stats, the move and how it was executed.
- *
- * <pre>
- * potential melee damage = weapon base x Strength scaling x move modifier x execution
- * protection             = Defense-and-armor rating for active defense
- * final HP damage        = potential after performed defenses (armor only passively lessens magic)
- * impact                 = weapon impact x Strength force x move impact
- * stagger when impact exceeds effective Stability; then Stability resistance rises and recovers
- * </pre>
- */
+/** Physical contact decides hits; a bounded uniform integer roll decides HP damage. Active defenses act afterward. */
 public final class CombatMath {
     private CombatMath() {}
 
-    /**
-     * Damage is on the HP scale (gamefixes: HP is the Health level, 10 at Health 10, 100 at 100): every base damage - a
-     * weapon's, an arrow's, a spell's, an animal's bite - is its tier power times this, so a fresh character's wooden
-     * sword hits for about 1 and a master's godly blade for twenty and more.
-     */
+    /** Converts legacy authored item power into bonus points; spell base damage already uses HP units. */
     public static final float HP_SCALE = 0.1f;
 
     /**
@@ -30,23 +13,29 @@ public final class CombatMath {
      * wind-up and recovery a trained hand saves (to a quarter at 100), with the weapon's Attack bonus on top.
      */
     public static float attackCadence(int attack, float attackBonus) { return 1f - Math.min(0.32f, (attack - 1) * 0.0025f + attackBonus * 0.004f); }
-    /** Strength ("how hard can I hit?"): the damage of a landed blow, with the weapon's Strength bonus (a flat item bonus, scaled). */
-    public static float strengthScaling(int strength, float strengthBonus) { return (1f + (strength - 1) * 0.022f) * (1f + strengthBonus * 0.025f); }
-    public static float archeryScaling(int archery) { return 1f + (archery - 1) * 0.02f; }
-    public static float magicScaling(int magic) { return 1f + (magic - 1) * 0.022f; }
+    /** Effective level includes the trained stat, a Faith multiplier and the ordinary +8 handling baseline. */
+    public static int effectiveLevel(int level, float prayer) { return Math.max(0, (int) Math.floor(level * prayer)) + 8; }
+
+    public static int maxHit(int effectiveLevel, float strengthBonus) {
+        return Math.max(0, (int) Math.floor(0.5 + Math.max(0, effectiveLevel) * (Math.max(-64, strengthBonus) + 64) / 640.0));
+    }
+
+    /** Uniform 0..max inclusive. Player zero rolls become one only if max is positive. */
+    public static int roll(int max, boolean player, java.util.random.RandomGenerator random) {
+        if (max <= 0) return 0;
+        int result = random.nextInt(max + 1);
+        return player ? Math.max(1, result) : result;
+    }
+
     public static float strengthForce(int strength) { return 1f + (strength - 1) * 0.015f; }
 
-    /** Defense and armor combine into one rating: it drives active defence (how much a guard stops, how wide the parry window is), never a passive cut of a clean hit. */
+    /** Defense and armor combine into the active guard rating. Unblocked absorption is handled separately by armoredMax. */
     public static float protection(int defense, float armor) { return defense * 1.2f + armor; }
 
-    /**
-     * GDD 2.3 (established): neither Defense nor armour reduces the HP damage of a successful, unblocked strike - there is
-     * no passive mitigation. (Spells are the one thing armour lessens, a little: it is cloth and metal between the bolt and
-     * the skin, not a dice roll.)
-     */
-    public static float mitigation(float protection, DamageType type) {
-        if (type != DamageType.MAGIC) return 0;
-        return Math.min(0.3f, protection / (protection + 300f));
+    /** Armor reduces the maximum before rolling. Each 24 trained armor points absorbs one maximum HP. */
+    public static int armoredMax(int max, int defense, float armor) {
+        int absorbed = (int) Math.floor(Math.max(0, armor) * (1 + Math.max(0, defense) / 100f) / 24f);
+        return Math.max(0, max - absorbed);
     }
 
     /** How much of a blow a raised guard stops: the shield or blade's own guard, made better by Defense and the armour behind it. */
@@ -54,7 +43,7 @@ public final class CombatMath {
     /** The parry window (seconds): wider for a better defender. */
     public static float parryWindow(float base, int defense) { return base * (1f + Math.min(0.6f, defense * 0.006f)); }
 
-    public static float finalDamage(float potential, float mitigation) { return Math.max(0, potential * (1 - mitigation)); }
+    public static int magicMax(float spellBase, float gearBonusPct) { return Math.max(0, (int) Math.floor(spellBase * (1 + gearBonusPct / 100f))); }
 
     public static float impact(float weaponImpact, int strength, float moveImpact) { return weaponImpact * strengthForce(strength) * moveImpact; }
 
@@ -74,11 +63,4 @@ public final class CombatMath {
         return switch (m) { case LIGHT_R, LIGHT_L -> 1f; case HEAVY -> 1.9f; case THRUST -> 0.8f; case PUNCH -> 0.7f; case BASH -> 2.2f; case BITE -> 1f; };
     }
 
-    /** Execution: a staggered target or a blow from behind is worth more (deterministic, from positions and state). */
-    public static float execution(boolean targetStaggered, boolean fromBehind) {
-        float e = 1f;
-        if (targetStaggered) e *= 1.25f;
-        if (fromBehind) e *= 1.3f;
-        return e;
-    }
 }

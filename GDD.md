@@ -1,7 +1,7 @@
 # RPGGAME
 ## Game Design Document
 
-**Design status:** Definitive design baseline · **Version:** 3.18 · **Engineering handoff:** reusable-asset devmap and acceptance tests in §4.2; prototype contracts in §3.2 and §3.8; animal ecosystem and companion animals in §3.9; Magic/Faith in §2.5; stealth in §3.10; Honor in §3.5; estates/Construction, collections and estate activities in §3.11; player death and recovery in §3.12; cross-system causality and integration tests in §3.13; unified item definitions, 3D inventory/world assets and initial Gold-price anchors in §2.7  
+**Design status:** Definitive design baseline · **Version:** 3.19 · **Engineering handoff:** reusable-asset devmap and acceptance tests in §4.2; prototype contracts in §3.2 and §3.8; animal ecosystem and companion animals in §3.9; Magic/Faith in §2.5; stealth in §3.10; Honor in §3.5; estates/Construction, collections and estate activities in §3.11; player death and recovery in §3.12; cross-system causality and integration tests in §3.13; unified item definitions, 3D inventory/world assets and initial Gold-price anchors in §2.7
 **Genre:** Single-player, classless, open-world fantasy RPG  
 **Technology:** Astratto Engine; voxel environments; adapted *Absentialis* character models  
 **World:** GAMEWORLD (working title) · **Approach:** Mechanics first; authored world and narrative built around systems  
@@ -207,13 +207,13 @@ Each of the three outfit categories has **exactly twenty independent choices**; 
 
 ## 2.2 Skill system
 
-All **18 skills** independently earn XP and cap at level 100. **Starting character exception:** Health (also called **Hitpoints** in the combat-level formula) starts at **level 10**, with **10 maximum HP and 10 current HP**; the other **17 skills start at level 1**. Health starts with the cumulative XP threshold corresponding to level 10, not an inconsistent level-10/zero-XP state. Primary skill categories describe their usual role, not exclusive use.
+All **18 player skills** independently earn XP and cap at level 100. Human NPCs and animals use fixed skill profiles that determine their Level and capabilities; their actions never award XP or raise skills or Level. **Starting character exception:** Health (also called **Hitpoints** in the combat-level formula) starts at **level 10**, with **10 maximum HP and 10 current HP**; the other **17 skills start at level 1**. Health starts with the cumulative XP threshold corresponding to level 10, not an inconsistent level-10/zero-XP state. Primary skill categories describe their usual role, not exclusive use.
 
 | Category | Skill | Defined function |
 |---|---|---|
 | Combat | Attack | Speed and reliability of **player-controlled consecutive melee actions**: recovery, chaining, timing and weapon handling; **never changes hit chance or maximum HP damage** |
 | Combat | Strength | **Maximum melee HP damage**, physical force, lifting, impact, stagger, and sword-tier eligibility |
-| Combat | Defense | Better execution of **active** dodges, blocks, parries and guard control; armor-tier eligibility; **no passive evasion rolls or HP-damage reduction on unblocked hits** |
+| Combat | Defense | Better execution of **active** dodges, blocks, parries and guard control; armor-tier eligibility; **no passive evasion rolls; armor reduces the maximum HP damage before rolling** |
 | Combat | Health | Maximum HP and endurance; detailed recovery rules open |
 | Combat | Archery | Projectile offense and relevant ranged effectiveness |
 | Combat | Magic | Four unlockable spellbooks (Standard, Ancients, Lunar, Arcane); Mana-powered combat, elemental interactions, and real-world utility effects |
@@ -232,7 +232,7 @@ All **18 skills** independently earn XP and cap at level 100. **Starting charact
 
 **Cross-system XP source:** The same action-result events used by combat, gathering, cooking, crime, economy, ecology and estate tasks determine eligible XP; §3.13 specifies multi-skill attribution and forbids XP from duplicated side effects.
 
-**Training — naturally earned XP:** A player or NPC gains XP by **actually accomplishing skill-relevant actions in the persistent world**—hitting a real opponent, cooking an actual food item, cutting an available resource, completing a repair, using a spell to affect a real target, or traversing meaningful terrain. The five qualitative reward tiers for every skill identify **five gameplay-grounded activity categories**, not five mandatory minigames or rigid XP payouts. **No action has a fixed global XP award.** Its earned XP varies by the specific recipe/item, target/resource, difficulty, risk, commitment, amount of real work completed, and appropriate skill balancing; numerical values are **open**. A high-tier act usually yields more XP **per completed act** than a lower-tier act in comparable conditions, but may take longer or consume more resources. XP never comes merely from opening a menu, purchasing an item, standing idle, reusing an unchanged state, or playing an animation without a valid result. Melee hits legitimately train Attack and Strength; **all real hostile HP damage suffered awards Defense XP**, and successful active defenses can train it too. Health has its own bounded exertion/endurance contributions. Magic XP credits legitimate spell effects and damaging hits; Faith XP credits meaningful prayer-assisted combat, real protection, and existing spiritual practices rather than idle prayer drain. Quest/minigame XP lamps remain separate, explicitly authored rewards.
+**Training — naturally earned XP:** The player gains XP by **actually accomplishing skill-relevant actions in the persistent world**—hitting a real opponent, cooking an actual food item, cutting an available resource, completing a repair, using a spell to affect a real target, or traversing meaningful terrain. The five qualitative reward tiers for every skill identify **five gameplay-grounded activity categories**, not five mandatory minigames or rigid XP payouts. **No action has a fixed global XP award.** Its earned XP varies by the specific recipe/item, target/resource, difficulty, risk, commitment, amount of real work completed, and appropriate skill balancing; numerical values are **open**. A high-tier act usually yields more XP **per completed act** than a lower-tier act in comparable conditions, but may take longer or consume more resources. XP never comes merely from opening a menu, purchasing an item, standing idle, reusing an unchanged state, or playing an animation without a valid result. Melee hits legitimately train Attack and Strength; **all real hostile HP damage suffered awards Defense XP**, and successful active defenses can train it too. Health has its own bounded exertion/endurance contributions. Magic XP credits legitimate spell effects and damaging hits; Faith XP credits meaningful prayer-assisted combat, real protection, and existing spiritual practices rather than idle prayer drain. Quest/minigame XP lamps remain separate, explicitly authored rewards.
 
 **Level-up feedback:** Immediate automatic level increase, overlay message, recognizable jingle, fireworks. Skill mastery at **100** permits purchase of a corresponding **skillcape**.
 
@@ -250,7 +250,7 @@ XP(1) = 0
 XP(100) = 6_000_000
 ```
 
-Precompute and store **integer level thresholds** as runtime authority, including for NPC progression. **New-game initialization:** Health starts with **43,446 cumulative XP** (the established level-10 threshold), while each other skill begins with **0 XP** at level 1. This is a starting condition, **not** XP awarded through an action or reflected as a level-up. The per-skill level-100 cap remains **6,000,000 cumulative XP**. Future HP growth is governed by Health progression; its detailed scaling is open beyond the established 10 HP starting value.
+Precompute and store **integer level thresholds** as runtime authority, including fixed NPC and animal profile initialization. **New-game initialization:** Health starts with **43,446 cumulative XP** (the established level-10 threshold), while each other skill begins with **0 XP** at level 1. This is a starting condition, **not** XP awarded through an action or reflected as a level-up. The per-skill level-100 cap remains **6,000,000 cumulative XP**. Future HP growth is governed by Health progression; its detailed scaling is open beyond the established 10 HP starting value.
 
 | Level | Cumulative XP | Level | Cumulative XP |
 |---:|---:|---:|---:|
@@ -446,6 +446,9 @@ Player estates use the **fixed-hotspot, doorway-connected Building Mode** in §3
 
 **Agility — environmental movement, without a mandatory course or tool**
 
+Traversal is intent-driven and derived from full structural geometry, not authored teleport points. Sprint requests local ledge candidates; the mover validates occupied body space and transitions through reach, hang, mantle and exit, with two-bone hand IK and preserved entry momentum. Level 1 has ordinary movement/jumping but no parkour; level 5 may catch a two-block ledge. Higher fixed skill profiles unlock progressively higher ledges, up to the full reach at level 100. Human NPCs with sufficient fixed Agility use the same pipeline when their route is blocked. Locked gates, glass and thin props are excluded; a blocked landing aborts safely. Practice markers teach this behavior and never award automatic checkpoint XP.
+
+
 | Relative tier | Naturally occurring XP-earning act | What counts; why it differs |
 |---|---|---|
 | I · Lowest | Vault a real low obstacle during travel | Supported movement successfully clears actual geometry, subject to anti-loop limits. |
@@ -565,7 +568,7 @@ The result is **starting combat level 3**. At all seven combat skills at level 1
 
 - **Attack — How often can I hit?** Attack improves the execution of **successive player-controlled melee actions**: practical chain cadence, eligible recovery intervals, timing/input buffering, and handling within an equipped weapon's inherent startup, active frames, stamina, and recovery. Attack **does not** increase melee HP damage or make a collision succeed by random roll. A weapon's **Attack bonus** represents an authored **handling/tempo advantage**, not accuracy probability or aim assistance; the exact implementation and cap are **open**.
 - **Strength — How hard can I hit?** Strength, weapon base HP damage, the weapon's **Strength bonus**, move properties, and observable execution conditions govern the HP damage of a landed melee strike. Strength also contributes to physical force, lifting, impact/Stability, and sword-tier eligibility. Strength **does not** separately increase attack cadence or alter hit detection.
-- **Defense — Can I avoid or stop the hit?** Defense improves **active defense execution and control**: suitable dodge/parry timing, block/guard effectiveness, recovery, and stamina/stability handling when using a valid defensive action. Defense also gates protective armor. **Neither Defense nor ordinary armor introduces a passive hit/miss chance or reduces HP damage from a successful, unblocked strike.** Exact per-level advantages and armor effects are **open** and must be visible in actual defensive behavior, not hidden dice rolls.
+- **Defense — Can I avoid or stop the hit?** Defense improves **active defense execution and control**: suitable dodge/parry timing, block/guard effectiveness, recovery, and stamina/stability handling when using a valid defensive action. Defense also gates protective armor. **Neither Defense nor armor introduces a passive hit/miss chance. Armor reduces the maximum damage of unblocked hits; Defense improves trained armor absorption and active defense.** Exact per-level advantages and armor effects are **open** and must be visible in actual defensive behavior, not hidden dice rolls.
 
 **Direct action combat:**
 - Omnidirectional locomotion, fully supported first-/third-person cameras, free aim, modest contextual aiming assistance, **no hard target lock-on**, and no automatic melee target acquisition.
@@ -578,36 +581,19 @@ The result is **starting combat level 3**. At all seven combat skills at level 1
 1. **Execute an attack.** Player or NPC chooses an attack. Weapon animation, reach, pose, active collision frames, stamina, and current physical positions govern its opportunity to connect. Attack level and the weapon's Attack bonus may affect **bounded handling/chain parameters**, but may not invent contact or bypass the chosen weapon's physical speed identity.
 2. **Resolve active movement and defense.** Defenders physically reposition, dodge, block, or parry. The applicable collision, guard direction, active defense window, and response timing determine whether the strike is avoided, stopped, or countered. Defense skill may improve those **performed actions**; it cannot passively cancel an otherwise unblocked collision.
 3. **Verify exposed physical contact.** A strike deals HP damage only when its valid hit volume contacts an eligible, unprotected-by-successful-defense target during active frames. If it misses, is dodged, blocked, or parried, no ordinary unblocked HP hit is registered. There is **no subsequent Attack-vs-Defense hit-probability roll**.
-4. **Resolve landed HP damage.** Strength level, weapon base damage, weapon Strength bonus, move multiplier, and observable target/context conditions determine the result. **Attack and Defense do not multiply or subtract ordinary landed-hit HP damage**, and there is no independent random damage roll under identical conditions.
+4. **Resolve landed HP damage.** Strength level, weapon base damage, weapon Strength bonus, move multiplier, and observable target/context conditions determine the result. **Attack does not increase maximum HP damage; Defense only contributes through trained armor absorption and performed defense**, and a uniform whole-number damage roll is made only after physical contact, with armor applied to the maximum before rolling.
 5. **Resolve impact separately.** Strength, weapon impact, and move properties act against immediate Stability. Successful stagger raises temporary resistance to repeat staggers until it decays; specialized enemy/boss safeguards apply.
 6. **Commit and communicate.** Spend resources, apply HP/impact/XP, animate reactions, and record combat consequences once. Telemetry distinguishes physical miss, dodge, block, parry, damaging collision, stagger, and defensive failure; it records **no contested accuracy roll**.
 
-**Resolution sketch (structure only, not final coefficients):**
+**Resolution contract (whole HP):**
 
-```text
-AttackAction = selected weapon move + authored timing + bounded Attack handling
-PhysicalContact = hit volume intersects eligible target during active frames
-ActiveDefenseStopsHit = valid movement/dodge, block, or parry actually succeeds
+Physical contact determines whether an attack connects; there is no random hit/miss roll. For melee/ranged, `EffectiveLevel = floor(relevant skill × active Faith multiplier) + 8`; `BaseMax = floor(0.5 + EffectiveLevel × (StrengthBonus + 64) / 640)`. Strength governs melee; Archery governs ranged. Move multipliers modify the maximum before rolling. Magic uses its fixed spell base multiplied by the summed Magic Damage Bonus percentage of equipped gear, without an extra Magic-level damage multiplier.
 
-LandedMeleeHit = PhysicalContact AND NOT ActiveDefenseStopsHit
-
-if LandedMeleeHit:
-    MeleeHPDamage = G(WeaponBaseDamage, StrengthLevel,
-                      WeaponStrengthBonus, MoveDamageModifier,
-                      observable execution and target conditions)
-else:
-    MeleeHPDamage = 0
-
-On applicable landed impact:
-    Impact = H(StrengthLevel, WeaponImpact, WeaponStrengthBonus,
-               MoveImpactModifier)
-    Stagger if Impact exceeds defender's current effective Stability;
-    successful stagger temporarily raises repeat-stagger resistance.
-```
+Armor reduces the unblocked maximum before the roll. Current tuning absorbs `floor(equipped armor × (1 + Defense/100) / 24)` HP from that maximum, clamped at zero; the divisor is balance data. Roll each integer from zero through the resulting maximum with equal probability. For the player, a zero roll becomes one **only when the resulting maximum is positive**; an armor-stopped maximum remains zero. NPCs and animals retain their zero rolls. Successful parries, performed guards and matching protection prayers may still stop all damage. Impact/Stability remains a separate channel; Attack affects handling and never increases maximum damage.
 
 **Weapon speed and skill:** Higher Attack can make chains more responsive and shorten only eligible recovery/transition intervals up to strict move-family caps. It cannot turn a warhammer into a dagger or remove intentional attack commitment. A fast lower-tier weapon may outperform a slower higher-tier weapon through practical openings and sustained hit frequency—even at Attack 100. Weapon Attack bonuses scale across materials as **tempo/handling statistics**, while tier-appropriate Strength bonuses improve offensive force; numeric mapping and interplay remain open.
 
-**Armor and shields:** Armor remains tier-gated by Defense and has meaningful defensive equipment properties, but **not random miss probability and not passive percentage HP mitigation**. Benefits must be expressed through actions or state the player/NPC can see—for example, active guard stability or defense recovery if later approved. A Shield provides its own active block options when equipped and compatible with the weapon. Exact armor properties, protected contact geometry, parry and dodge timing, stamina costs, block outcomes, and Guard/Stability balance are **open**. An unblocked exposed hit is a hit, regardless of armor tier; equipment must not silently erase it.
+**Armor and shields:** Armor remains tier-gated by Defense and has meaningful defensive equipment properties, but **not random miss probability**. Benefits include visible active guard stability and a displayed reduction to the maximum HP damage that penetrates armor. A Shield provides its own active block options when equipped and compatible with the weapon. Exact armor properties, protected contact geometry, parry and dodge timing, stamina costs, block outcomes, and Guard/Stability balance are **open**. An unblocked exposed contact remains a hit; a weak weapon against overwhelming armor may have a maximum damage of zero, shown explicitly as zero damage.
 
 **Boundaries:** Ranged projectiles and offensive Magic use real 3D trajectories/contact or explicit authored area effects; neither Attack nor Defense gains post-contact melee hit RNG. Magic-only targeting accuracy and elemental weakness use the distinct spell system in §2.5; that is **not** a permission to introduce random sword misses. Health governs HP and endurance. **Faith overhead prayers are an explicit exception to ordinary active melee defense:** while Protect from Melee is legitimately active, the corresponding tagged attack deals zero matching HP damage; it does not convert Defense or armor into passive mitigation. NPC and player actions resolve through the same combat contracts, while AI uses its own perception and decisions.
 
@@ -2155,7 +2141,7 @@ All five are **real category-restricted estate containers with independent insta
 
 ### Physical loss, equipment condition, exceptions and player feedback
 
-**Violent death and repair:** Particularly forceful lethal impacts may apply a bounded penalty to **eligible degradable gear only**, committed exactly once to each item's real condition. No random damage roll is retroactively applied to a landed combat hit and gear is not arbitrarily destroyed. A player who recovers such equipment may repair it through the existing Smithing/Crafting services or the discounted estate Workshop Armor Stand, spending actual permitted materials or funds. City custody guarantees the **items**, not free repairs. Exact qualifying causes, penalties and repair recipes are Open.
+**Violent death and repair:** Particularly forceful lethal impacts may apply a bounded penalty to **eligible degradable gear only**, committed exactly once to each item's real condition. No second damage roll is retroactively applied when deciding equipment wear and gear is not arbitrarily destroyed. A player who recovers such equipment may repair it through the existing Smithing/Crafting services or the discounted estate Workshop Armor Stand, spending actual permitted materials or funds. City custody guarantees the **items**, not free repairs. Exact qualifying causes, penalties and repair recipes are Open.
 
 **Mount separation:** A living mount is not corpse equipment. When the player dies nearby, the same owned horse may remain, bolt from danger or seek an established safer location according to current animal AI, temperament and situation; its last known position and actual destination survive save/reload. The player finds it through legitimate exploration and existing bonds. This rule does not invent mounted-combat controls or summon mechanics.
 
@@ -2377,7 +2363,7 @@ This is **development priority**, not a release schedule. All established system
 ## 4.4 Open specifications (do not infer)
 
 **Critical:**
-- **Real-time Attack cadence/handling** (Attack level plus weapon Attack bonus), **Defense skill and armor contributions to performed block/parry/dodge control without RNG**, **Strength-driven landed-hit HP damage**, weapon base stats, family-specific Strength bonuses beyond the locked **13-tier Sword-bonus table**, impact/Stability, Attack cadence, HP, stamina, Magic damage/accuracy conversion and elemental-group max-hit curves, **Faith prayer drain interval arithmetic/boost stack caps (not passive regeneration)**. **The combat-level formula and starting levels are finalized in §2.3; only engineering precision and UI presentation require verification.** No passive Defense/armor evasion chance or HP damage mitigation on landed, unblocked melee hits.
+- **Real-time Attack cadence/handling** (Attack level plus weapon Attack bonus), **Defense skill and armor contributions to performed block/parry/dodge control without RNG**, **Strength-driven landed-hit HP damage**, weapon base stats, family-specific Strength bonuses beyond the locked **13-tier Sword-bonus table**, impact/Stability, Attack cadence, HP, stamina, Magic damage/accuracy conversion and elemental-group max-hit curves, **Faith prayer drain interval arithmetic/boost stack caps (not passive regeneration)**. **The combat-level formula and starting levels are finalized in §2.3; only engineering precision and UI presentation require verification.** No passive evasion chance. Armor absorption and uniform damage rolls follow §2.3; armor tuning remains open.
 - **Ninety natural skill-action routes (five per skill) and five qualitative reward tiers are established in §2.2; no fixed XP-by-route or XP-by-tier amounts are approved.** Per-result XP, resource/recipe/target scaling, effort and risk factors, anti-farm pacing and the gameplay-hour budget for ordinary and completionist play need tuning. The eleven noncombat skills’ core tools, resources, and workstations are specified; Bronze–Godly dual-use Axe/Hatchet/Pickaxe/Hammer availability is established. Tool equip/inventory access details, actual yield/speed/combat statistics, recipes, consumables, method-specific catch requirements, and optional gear benefits still require validation.
 - Final player interaction verb coverage, production targeting distances and skill-check probabilities; **equipment slot categories are established in §2.4**. Ordinary inventory base capacity, stack limits, ammunition-stack rules, exact ring count, and backpack capacity bonuses are reserved for inventory design. Prototype interaction contract in §3.2 is specified.
 - Production save serialization format, schema migrations, exact implementation architecture and near/distant performance budgets. Prototype invariants and transaction contract in §3.8 are specified.

@@ -67,7 +67,7 @@ public final class Sfx {
         bank("generic", "foley/impactGeneric_light_00", 5);
         bank("glass.light", "foley/impactGlass_light_00", 5);
         bank("glass", "foley/impactGlass_medium_00", 5);
-        bank("glass.break", "foley/impactGlass_heavy_00", 5);
+        one("glass.break", "glass/break.ogg", 0);
         bank("mine", "foley/impactMining_00", 5);
         bank("chop", "foley/chop", 1, ".ogg", -1);
         bank("door", "foley/doorOpen_", 2, ".ogg", 1);
@@ -130,8 +130,10 @@ public final class Sfx {
         // ---- synthesized: what has no recording
         make("crackle", crackle());
         make("splash", noiseBurst(0.35f, 0.4f));
-        // Recorded arrow twang + bamboo swish, distributed by Flare with per-file OpenGameArt provenance.
+        // Recorded bow releases from Wildfire Games (0 A.D.), three variations at their original 44.1 kHz.
         one("bow", "archery/release.ogg", 0);
+        one("bow", "archery/release2.ogg", 0);
+        one("bow", "archery/release3.ogg", 0);
         one("crossbow", "archery/release.ogg", 0);
         one("arrow.impact", "archery/impact.ogg", 0);
         bank("bow.draw", "foley/creak", 3, ".ogg", 1);

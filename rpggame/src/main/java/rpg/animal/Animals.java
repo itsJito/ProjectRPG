@@ -188,6 +188,7 @@ public final class Animals {
         a.bornAt = g.state.minutes - (baby ? s.mature * 0.3f : s.mature * 2);
         a.matureAt = baby ? a.bornAt + s.mature : a.bornAt;
         a.variant = (int) (a.id * 2654435761L >>> 7) & 7;
+        a.careAgain = g.time + 15 + a.id % 30;
         a.hunger = 0.1f + (a.id % 5) * 0.06f; a.thirst = (a.id % 7) * 0.05f; a.fatigue = (a.id % 3) * 0.1f;
         a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
         a.yaw = (float) ((a.id * 1.7) % (2 * Math.PI));
@@ -921,6 +922,9 @@ public final class Animals {
     }
 
     private String petLine(Animal a) {
+        if (a.baby) return "The " + a.kind().toLowerCase() + " fidgets under your hand, then looks for its mother.";
+        if (a.hunger > 0.65f) return "The " + a.kind().toLowerCase() + " noses about your hands for food.";
+        if (a.goal == Goal.REST) return "The " + a.kind().toLowerCase() + " stirs, then settles again.";
         return switch (a.species) {
             case DOG -> a.trustOf(g.player.id) > 0.5f ? "The dog leans into your hand, tail going." : "The dog sniffs your hand, then lets you scratch its ears.";
             case CAT -> a.trustOf(g.player.id) > 0.4f ? "The cat purrs and pushes its head against you." : "The cat tolerates it - just about.";
@@ -928,7 +932,14 @@ public final class Animals {
             case COW -> "The cow keeps chewing, unbothered.";
             case SHEEP -> "The sheep's fleece is thick and warm.";
             case PIG -> "The pig grunts happily.";
-            default -> "You stroke the " + a.kind().toLowerCase() + ".";
+            case CHICKEN -> "The hen settles her feathers beneath your palm, watching your fingers.";
+            case DUCK -> "The duck mutters softly and gives its tail a brisk shake.";
+            case RABBIT -> "The rabbit's nose works quickly; its ears turn toward the nearest sound.";
+            case FOX -> "The fox leans away, then returns to sniff your sleeve.";
+            case COYOTE -> "The coyote watches your other hand, wary even now.";
+            case WOLF -> "The wolf holds still, ears tilted back, testing your scent.";
+            case MOUNTAIN_LION -> "The cat follows your hand with its eyes. You keep the touch brief.";
+            case BROWN_BEAR -> "The bear huffs and shifts its weight. You give it room.";
         };
     }
 

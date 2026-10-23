@@ -13,7 +13,7 @@ public final class Dialog {
     public long npc;
     /** The game menu uses the pause presentation while retaining ordinary numbered-choice handling. */
     public boolean pauseMenu;
-    public int focusedChoice;
+    public int focusedChoice, choiceOffset, textOffset;
 
     public Dialog(String speaker, String text) { this.speaker = speaker; this.text = text; }
     public Dialog choice(String label, Runnable action) { choices.add(new Choice(label, action)); return this; }

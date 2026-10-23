@@ -2,7 +2,7 @@ package rpg.render;
 
 import astratto.render.Tex;
 import astratto.voxel.VoxModel;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import rpg.item.ItemDef;
 import rpg.item.ItemDef.Family;
@@ -31,9 +31,9 @@ public final class ItemModels {
     /** A model and where the hand holds it (voxel coordinates; for things not held, the middle of the base). */
     public record Model(VoxModel vox, float gx, float gy, float gz) {}
 
-    private static final Map<String, Model> CACHE = new HashMap<>();
+    private static final Map<String, Model> CACHE = new ConcurrentHashMap<>();
 
-    public static synchronized Model of(ItemDef d) {
+    public static Model of(ItemDef d) {
         return CACHE.computeIfAbsent(d.id, k -> fine(d));
     }
 
@@ -189,6 +189,7 @@ public final class ItemModels {
             case "fishing_rod" -> rod();
             case "lockpick" -> lockpick();
             case "sealed_letter" -> letter();
+            case "bounty_scroll" -> warrant();
             case "xp_lamp" -> lamp();
             case "chancery_key" -> key();
             default -> lump(d);
@@ -842,6 +843,15 @@ public final class ItemModels {
         for (int y = 0; y < 11; y++) { m.set(2, y, 0, metal(0x909098)); m.set(4, y + 1, 0, metal(0x80808A)); }
         m.set(1, 10, 0, metal(0x909098)); m.set(5, 11, 0, metal(0x80808A)); m.set(3, 0, 1, mat(0x5A3A20));
         return new Model(m, 3.5f, 0.5f, 1f);
+    }
+
+    private static Model warrant() {
+        VoxModel m = new VoxModel(9, 20, 5);
+        m.box(1, 2, 2, 7, 17, 2, mat(0xC6AC76));
+        for (int y : new int[]{2, 17}) for (int x = 0; x < 9; x++) for (int dy = -2; dy <= 2; dy++) for (int z = 0; z < 5; z++) if (dy * dy + (z - 2) * (z - 2) <= 5) m.set(x, y + dy, z, mat(0xB39968));
+        for (int y = 6; y <= 13; y += 2) m.box(2, y, 3, y == 12 ? 4 : 6, y, 3, mat(0x64503A));
+        m.box(3, 4, 3, 5, 6, 4, mat(0x8E3528));
+        return new Model(m, 4.5f, 0, 2.5f);
     }
 
     private static Model letter() {

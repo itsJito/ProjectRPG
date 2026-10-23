@@ -20,6 +20,7 @@ import rpg.render.Gfx;
 import rpg.ui.Hud;
 import rpg.ui.Ui2D;
 import rpg.world.DevMap;
+import rpg.world.Blocks;
 
 /**
  * The developer's review of figures, animation and objects (./gradlew gallery): every motion is filmed from a fixed
@@ -53,6 +54,7 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("system-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { systemPolishShots(); return 0; }
         if ("session-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { sessionPolishShots(); return 0; }
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
         if ("field-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { fieldPolishShots(); menuShots(); return 0; }
@@ -335,6 +337,99 @@ final class Gallery {
     }
 
     /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void systemPolishShots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        if ("extras".equals(only)) systemExtrasShots();
+        if ("guard".equals(only) || "extras".equals(only)) {
+            place(64.5f, 62.5f, 0); g.player.eq.clear(); g.player.firstPerson = true;
+            g.controller.in.offDown = true; frames(30); reviewUi("bare-guard-firstperson"); return;
+        }
+        if (only == null || only.equals("ui")) {
+            place(64.5f, 62.5f, 0); frames(10);
+            hud.settings.show(); reviewUi("settings-display");
+            // Actual tab buttons, hit by the same UI mouse path used during play.
+            for (int tab = 1; tab < 4; tab++) {
+                ui.mx = win.width / 2f - 460 + 28 + tab * 216 + 80; ui.my = (win.height - 650) / 2f + 100; ui.click = true;
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, true); ui.click = false;
+                reviewUi("settings-" + new String[]{"display", "audio", "controls", "accessibility"}[tab]);
+            }
+            hud.settings.escape();
+            var cole = (rpg.ai.Npc) g.actor(Ids.GUARD); g.teleport(cole, g.player.x + 3, g.player.y, g.player.z);
+            hud.dialog(new rpg.ui.Dialog(cole.name, "Ask your question. The watch keeps its own accounts.").choice("Tell me more.", () -> hud.dialog(new rpg.ui.Dialog(cole.name, "Once a bounty is paid, the case is closed. People may remember the quarrel, but the watch will leave you be."))));
+            hud.dialog.npc = cole.id; hud.choose(0); reviewUi("chatbox-followup");
+            for (int frame = 0; frame < 39; frame++) { Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false); if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "followup-f" + (frame + 1) + ".png")); }
+            hud.closeAll();
+            g.player.hp *= 0.6f; g.law.all().computeIfAbsent(DevMap.ALPHA, k -> new java.util.HashMap<>()).put(g.player.id, 150); g.state.commit("BountyChanged", cole.id, g.player.id, DevMap.ALPHA, 0, "review warrant"); reviewUi("wanted-layout"); g.law.all().clear();
+            g.player.firstPerson = true; g.player.eq.clear(); g.controller.in.offDown = true; frames(12); reviewUi("bare-guard-firstperson");
+            g.controller.in.offDown = false; g.player.firstPerson = false; hud.closeAll();
+        }
+        if (only == null || only.equals("menus")) menuLatencyShots();
+        if (only == null || only.equals("motion")) motionPolishShots();
+        if (only == null || only.equals("traversal")) {
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 5); g.player.restore(); g.player.eq.clear();
+            for (int x = 60; x <= 69; x++) for (int z = 55; z <= 65; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 6; y++) g.setBlock(x, y, z, Blocks.AIR);
+            for (int x = 63; x <= 65; x++) for (int y = 0; y < 2; y++) g.setBlock(x, DevMap.FLOOR + y, 59, Blocks.BRICK);
+            place(64.5f, 60.8f, 0); frames(4);
+            film("ledge-traversal", 72, i -> { if (i == 0 && !g.traversal.begin(g.player, 0)) throw new IllegalStateException("No review ledge"); }, a -> new float[]{68, DevMap.FLOOR + 2.2f, 62.5f, 64.5f, DevMap.FLOOR + 1.5f, 59.7f}, 0);
+        }
+        if (only == null || only.equals("carry")) {
+            var dead = (rpg.ai.Npc) g.actor(Ids.BANDIT_1); g.ai.spawnBody(dead); g.teleport(dead, 64.5f, DevMap.FLOOR, 61);
+            place(60.5f, 58.5f, 0); gfx.preload(java.util.List.of(dead));
+            dead.alive = false; dead.hp = 0; g.onKilled(dead, g.player, 0); frames(100);
+            var corpse = (rpg.objects.Corpse) g.objects.get(dead.corpse);
+            place(corpse.x, corpse.z + 1.2f, 0); frames(3);
+            if (g.carrying.begin(g.player, corpse).rejected()) throw new IllegalStateException("Cannot pick up review body");
+            film("body-pickup", 48, i -> {}, a -> quarter(a, -3.2f), 0);
+            film("body-carry", 36, i -> g.controller.in.forward = 1, a -> quarter(a, -3.2f), 0);
+            g.controller.in.forward = 0;
+            film("body-throw", 48, i -> g.controller.in.mainDown = i < 24, a -> side(a, -3.5f), 0);
+        }
+        if (only == null || only.equals("loot")) lootPolishShots();
+        if (only == null || only.equals("jail")) {
+            g.law.arrest(g.player, DevMap.ALPHA, (rpg.ai.Npc) g.actor(Ids.GUARD)); frames(3); reviewUi("jail-before-sleep");
+            hud.fadeThen(g.law::sleepThroughSentence);
+            for (int frame = 0; frame < 75; frame++) { Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, true); if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "jail-wake-f" + (frame + 1) + ".png")); game.pump(); }
+            reviewUi("jail-awake-inside");
+        }
+    }
+
+    private void systemExtrasShots() {
+        var thief = (rpg.ai.Npc) g.actor(Ids.THIEF);
+        var witness = (rpg.ai.Npc) g.actor(Ids.GUARD);
+        var issuer = (rpg.ai.Npc) g.actor(Ids.LAWMAN_A);
+        g.teleport(witness, issuer.x + 1, issuer.y, issuer.z);
+        var known = new rpg.ai.Stealth.Aware(); known.x = 85; known.z = 70; known.seenAt = g.time;
+        witness.aware.put(thief.id, known);
+        var evidence = new rpg.ai.Memory("THEFT", thief.id, witness.id, DevMap.ALPHA, g.state.minutes, 1, "witnessed", 900009, 100, "stolen goods");
+        witness.remember(evidence, 24);
+        if (g.law.report(witness, evidence, issuer).rejected()) throw new IllegalStateException("Review report rejected");
+        hud.dialog(g.bountyBoard.browse(DevMap.ALPHA)); reviewUi("bounty-board-chatbox"); hud.closeAll();
+        if (g.bountyBoard.accept(thief, DevMap.ALPHA).rejected()) throw new IllegalStateException("Review warrant rejected");
+        hud.go(Hud.Scene.INVENTORY); reviewUi("bounty-scroll-inventory");
+        hud.go(Hud.Scene.MAP); reviewUi("bounty-last-known-map"); hud.closeAll();
+        var cat = g.animals.display(rpg.animal.Species.CAT, false, false, 0, 64.5f, 62.5f, 0);
+        cat.goal = rpg.animal.Animal.Goal.GROOM;
+        g.teleport(g.player, 60, DevMap.FLOOR, 60);
+        film("cat-grooming", 54, i -> {}, a -> new float[]{a.x + 1.4f, a.y + 0.7f, a.z - 1.4f, a.x, a.y + 0.35f, a.z}, 0, cat);
+    }
+
+    private void menuLatencyShots() {
+        place(64.5f, 62.5f, 0); g.player.restore(); g.player.inv.clear();
+        for (String id : new String[]{"bronze_axe", "iron_pickaxe", "shortbow", "iron_arrows", "trout", "logs", "leather_body", "steel_shield"}) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(id), 1));
+        for (Hud.Scene scene : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.SKILLS, Hud.Scene.CHARACTER}) {
+            hud.go(scene); double first = 0, worst = 0;
+            for (int frame = 0; frame < 24; frame++) {
+                var c = g.controller; gfx.camera(c.cx, c.cy, c.cz, c.fx, c.fy, c.fz, win.width, win.height, 0); gfx.scene(g, false, 0, g.state.hourOfDay());
+                ui.begin(gfx.cmd); long started = System.nanoTime(); hud.draw(ui, win.width, win.height, true, 1f / 60); ui.end();
+                double millis = (System.nanoTime() - started) / 1e6; if (frame == 0) first = millis; worst = Math.max(worst, millis);
+                gfx.frame(win.width, win.height);
+            }
+            System.out.printf(java.util.Locale.ROOT, "[menu-cpu] %s first %.2f ms / worst of 24 %.2f ms%n", scene, first, worst);
+            Main.shot(gfx, win.width, win.height, new File(shots, "menu-" + scene.name().toLowerCase(java.util.Locale.ROOT) + ".png"));
+        }
+        hud.closeAll();
+    }
+
     private void motionPolishShots() {
         place(64.5f, 62.5f, 0);
         g.player.restore();

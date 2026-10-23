@@ -19,6 +19,7 @@ import rpg.item.ItemStack;
 public final class Corpse extends Container {
     /** Whose body it is. */
     public final long body;
+    public boolean delivered;
 
     public Corpse(long id, String name, long body, float x, float y, float z, long owner) {
         super(id, "corpse", name + "'s body", "corpse", x, y, z, 40, owner);
@@ -46,11 +47,14 @@ public final class Corpse extends Container {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         o.add(Option.on("open", "Search body" + (isTheft(a) ? " (theft)" : "") + (empty(g) ? " (nothing left)" : ""), 10, r));
+        o.add(Option.when(heldBy == 0 && a.carryBody == 0, "carry", "Carry body", 5, "That body is already being carried.", 2.2f));
         o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
+        if (action.equals("carry")) return g.carrying.begin(a, this);
+        if (heldBy != 0) return Result.no("Put the body down before searching it.");
         if (action.startsWith("takeworn:")) return takeWorn(g, a, ItemDef.Slot.valueOf(action.substring(9)), req);
         if (action.startsWith("takeall")) {
             // what they carried, then what they wore
@@ -81,6 +85,8 @@ public final class Corpse extends Container {
         return Result.ok();
     }
 
+    @Override public java.util.Map<String, Object> save() { var m = super.save(); m.put("delivered", delivered); return m; }
+    @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); delivered = astratto.util.Json.bool(m, "delivered", false); heldBy = 0; }
     @Override public String examine(Rpg g) {
         Npc n = npc(g);
         return n == null ? "A body." : n.name + ", dead." + (empty(g) ? " Nothing left on them." : "");

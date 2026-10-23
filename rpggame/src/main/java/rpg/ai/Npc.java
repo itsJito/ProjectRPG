@@ -67,7 +67,7 @@ public final class Npc extends Actor implements Interactable {
     public String goalReason = "", lastOutcome = "", nativeAction = "-", perceived = "";
     public final List<String> scores = new ArrayList<>();
     public double nextThink, goalSince;
-    public float gx, gz;
+    public float gx, gy, gz;
     /** A long trip's waypoints (indices into the map's travel graph), the next one, and the trip's end. */
     public int[] legs;
     public int legAt;
@@ -75,7 +75,8 @@ public final class Npc extends Actor implements Interactable {
     public boolean hasGoalPos, seesTarget;
     public int routeCells;
     public boolean stuck;
-    public long fightTarget, socialPartner;
+    public long fightTarget, socialPartner, aidTarget;
+    public int conversations;
     /** Under the player's Friends (they will not report the player) and Charm Person (they will not fight the player), until these times. */
     public double friendUntil = -1, charmUntil = -1;
     public int patrolIndex;
@@ -125,7 +126,10 @@ public final class Npc extends Actor implements Interactable {
         this.homeJurisdiction = DevMap.jurisdiction(x, z);
         this.team = role == Role.BANDIT || role == Role.BRUTE ? 3 : role == Role.THIEF ? 4 : 2;
         this.hostileToPlayer = role == Role.BANDIT || role == Role.BRUTE;
+        skills.setLevel(Skill.AGILITY, defaultAgility(role));
     }
+
+    public static int defaultAgility(Role role) { return switch (role) { case GUARD -> 18; case BANDIT -> 16; case BRUTE -> 8; case THIEF -> 25; case WORKER, FARMER -> 6; default -> 5; }; }
 
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }

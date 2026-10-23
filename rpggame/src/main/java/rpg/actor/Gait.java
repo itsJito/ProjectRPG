@@ -16,7 +16,7 @@ public final class Gait {
     /** Where a walk has fully become a run (m/s): between them the stride blends. */
     public static final float WALK_TOP = 2.6f, RUN_FROM = 3.5f;
     /** Model pixels: knee bend at a walk, the hips' pendulum drop, and the extra crouch when sneaking. */
-    public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 8.6f;
+    public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 5.2f;
 
     /** 0 at a walk, 1 at a run and faster. */
     public static float runShare(float speed) { return Math.max(0, Math.min(1, (speed - WALK_TOP) / (RUN_FROM - WALK_TOP))); }

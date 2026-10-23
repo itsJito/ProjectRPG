@@ -33,7 +33,8 @@ public final class Law {
     public final List<String> reportsLog = new ArrayList<>();
     private final Map<Long, Double> haltedAt = new HashMap<>();
     private final Set<Long> resisting = new HashSet<>();
-    private final Map<Long, Double> assaultAt = new HashMap<>();
+    private record Assault(long offender, long victim) {}
+    private final Map<Assault, Double> assaultAt = new HashMap<>();
     /** When each offender was last arrested (game time): every grievance of the law's from before it is settled by the sentence. */
     private final Map<Long, Double> settledAt = new HashMap<>();
     public long crimes, witnessed, reports, rejectedReports, arrests;
@@ -73,7 +74,7 @@ public final class Law {
         var cell = rpg.world.Jails.forJurisdiction(sentenceJurisdiction);
         sentenceUntil = -1;
         openEmptyCell(sentenceJurisdiction);
-        if (cell != null) g.teleport(g.player, cell.releaseX(), DevMap.FLOOR, cell.releaseZ());
+        if (cell != null) g.player.poseReset = true;
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
         g.state.commit("SentenceServed", g.player.id, 0, sentenceJurisdiction, 0, "admission " + jailAdmissions);
         sentenceJurisdiction = "";
@@ -87,6 +88,7 @@ public final class Law {
         if (bounties.containsKey(jur)) bounties.get(jur).remove(a.id);
         resisting.remove(a.id); haltedAt.remove(a.id);
         Set<Actor> stoodDown = new HashSet<>();
+        stoodDown.add(a);
         for (Npc n : g.npcs) {
             for (Memory m : n.memories) if (m.crime() && m.subject == a.id && jur.equals(m.jurisdiction)) {
                 m.reported = true; m.settled = true; reportedCrimes.add(m.eventId);
@@ -166,18 +168,29 @@ public final class Law {
 
     private static String names(List<Npc> l) { StringBuilder b = new StringBuilder(); for (Npc n : l) b.append(b.length() > 0 ? ", " : "").append(n.name); return b.toString(); }
 
-    /** Every hit: striking a peaceful NPC is assault (once in a while per victim, not per swing). */
+    private boolean lawfulForce(Actor a, Actor v) {
+        if (a == null || v == null || a == v || !(a == g.player || a instanceof Npc)) return true;
+        if (a.cs.lastAttacker == v.id && g.time - a.cs.lastHurt < 15) return true;
+        if (v instanceof Npc n && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE)) return true;
+        if (a instanceof Npc officer && (officer.role == Npc.Role.GUARD || officer.role == Npc.Role.LAWMAN) && bounty(v.id, officer.homeJurisdiction) > 0) return true;
+        return a == g.player && g.bountyBoard.authorized(v.id);
+    }
+
+    /** Player and human NPC offenses use the same witness/report/bounty path. */
     public void onHit(Actor a, Actor v, long cause) {
-        if (a != g.player || !(v instanceof Npc n) || n.hostileToPlayer || n.fightTarget == a.id && bounty(a.id, n.homeJurisdiction) > 0) return;
-        Double last = assaultAt.get(n.id);
+        if (!(v == g.player || v instanceof Npc) || lawfulForce(a, v)) return;
+        Assault key = new Assault(a.id, v.id);
+        Double last = assaultAt.get(key);
         if (last != null && g.time - last < 10) return;
-        assaultAt.put(n.id, g.time);
-        crime(a, "ASSAULT", n.id, 0, null, cause);
+        assaultAt.put(key, g.time);
+        crime(a, "ASSAULT", v.id, 0, null, cause);
     }
 
     public void onKilled(Actor victim, Actor killer, long cause) {
-        if (killer == g.player && victim instanceof Npc n && !n.hostileToPlayer) crime(killer, "MURDER", n.id, 0, null, cause);
+        if ((victim == g.player || victim instanceof Npc) && !lawfulForce(killer, victim)) crime(killer, "MURDER", victim.id, 0, null, cause);
     }
+
+    public void closeCase(Actor offender, String jurisdiction) { settle(offender, jurisdiction); }
 
     // ------------------------------------------------------------------ reports and bounties
     /** A witness, in person, tells a lawman (GDD 3.5). Validated: a real witness, the right jurisdiction, close enough, alive. */
@@ -238,11 +251,13 @@ public final class Law {
         int b = bounty(a.id, jur);
         if (b <= 0) return Result.no("You have no bounty in " + jur + ".");
         if (!a.has(Items.COINS, b)) return Result.no("You need " + b + " coins to pay your bounty.");
+        ItemStack payment = new ItemStack(Items.COINS, b, to.id, false, a.id);
+        if (!to.canStore(payment)) return Result.no("The watch cannot receive the payment right now.");
         a.takeItems(Items.COINS, b);
-        to.store(new ItemStack(Items.COINS, b));
+        to.store(payment);
         settle(a, jur);
         g.state.commit(req, "BountyPaid", a.id, to.id, jur, 0, b + " coins to " + to.name);
-        if (a == g.player) { g.chat.add("You pay your bounty of " + b + " coins. You are no longer wanted in " + jur + ".", Chat.Kind.CRIME); g.sfx.ui("coins", 0.6f); g.honor.paidBounty(b); g.ai.rumors.deed("paid their bounty in full", to.id); }
+        if (a == g.player) { g.chat.add("You pay your bounty of " + b + " coins. You are no longer wanted in " + jur + ".", Chat.Kind.CRIME); if (g.sfx != null) g.sfx.ui("coins", 0.6f); g.honor.paidBounty(b); g.ai.rumors.deed("paid their bounty in full", to.id); }
         return Result.ok();
     }
 

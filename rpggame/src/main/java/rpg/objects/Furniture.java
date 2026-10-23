@@ -51,6 +51,21 @@ public final class Furniture extends WorldObject {
     @Override public boolean exists() { return placed && !removed; }
     @Override public float focusRadius() { return Math.max(0.6f, Math.max(width(), depth()) * 0.55f); }
 
+    /** A long counter occupies a low box, not a head-height sphere several metres wide. */
+    @Override public float focusEntry(float ox, float oy, float oz, float dx, float dy, float dz) {
+        float top = switch (kind) { case TABLE -> TABLE_TOP; case COUNTER -> COUNTER_TOP; case BED, SLAB -> 0.65f; default -> h; };
+        float enter = 0, exit = Float.POSITIVE_INFINITY;
+        for (int axis = 0; axis < 3; axis++) {
+            float o = axis == 0 ? ox : axis == 1 ? oy : oz, d = axis == 0 ? dx : axis == 1 ? dy : dz;
+            float lo = axis == 0 ? x0 : axis == 1 ? DevMap.FLOOR : z0, hi = axis == 0 ? x1 + 1 : axis == 1 ? DevMap.FLOOR + top : z1 + 1;
+            if (Math.abs(d) < 1e-6f) { if (o < lo || o > hi) return Float.POSITIVE_INFINITY; continue; }
+            float a = (lo - o) / d, b = (hi - o) / d;
+            enter = Math.max(enter, Math.min(a, b)); exit = Math.min(exit, Math.max(a, b));
+            if (enter > exit) return Float.POSITIVE_INFINITY;
+        }
+        return enter;
+    }
+
     /** Puts the collision cells in or takes them out (the model is drawn while it is placed). */
     public void place(Rpg g, boolean on) {
         placed = on;
@@ -82,7 +97,7 @@ public final class Furniture extends WorldObject {
         if (action.equals("sleep") && (kind == Kind.BED || kind == Kind.SLAB)) {
             why = sleepRefusal(g, a);
             if (why != null) return Result.no(why);
-            if (cellSlab() && a == g.player) { g.law.sleepThroughSentence(); return Result.ok(); }
+            if (cellSlab() && a == g.player) { if (g.ui != null) g.ui.fadeThen(g.law::sleepThroughSentence); else g.law.sleepThroughSentence(); return Result.ok(); }
             // sleep until six in the morning (at least an hour): time passes through the catch-up coordinator
             double hour = g.state.hourOfDay();
             double minutes = Math.max(60, ((6 - hour + 24) % 24) * 60);

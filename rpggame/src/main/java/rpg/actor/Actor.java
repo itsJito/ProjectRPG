@@ -44,6 +44,11 @@ public class Actor {
     public boolean sneaking;
     /** Actual native stance, including being unable to stand beneath a low ceiling. */
     public boolean crouched;
+    public long carryBody, carriedBy;
+    public double carrySince = -99, carryLowerAt = -99, throwAt = -99;
+    public Traversal.Motion traversal;
+    public double traverseAgain = -99;
+    public float reachX, reachY, reachZ;
     /** Dummies take hits and never die. */
     public boolean dummy;
     public int team;
@@ -129,8 +134,8 @@ public class Actor {
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }
-    public float eyeY() { return y + plan().eyeY() * Body.PX * (sneaking || crouched ? 0.5f : 1); }
-    public float chestY() { return y + (Body.LEGS + Body.TORSO * 0.6f) * Body.PX * (sneaking || crouched ? 0.5f : 1); }
+    public float eyeY() { return y + plan().eyeY() * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
+    public float chestY() { return y + (Body.LEGS + Body.TORSO * 0.6f) * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
 
     public float distTo(float px, float pz) { return (float) Math.hypot(px - x, pz - z); }
 

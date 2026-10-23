@@ -64,7 +64,7 @@ public final class AstrattoNative {
             CMD_SYDNEY_PROFILE = 44, CMD_SOFTBODY_CREATE = 45, CMD_SOFTBODY_IMPULSE = 46, CMD_VEHICLE_CREATE = 47, CMD_VEHICLE_INPUT = 48, CMD_VEHICLE_PLACE = 49,
             CMD_BODY_IMPULSE = 50, CMD_RAGDOLL_INTENT = 51, CMD_RAGDOLL_TRAITS = 52;
     public static final int EVT_LANDED = 32, EVT_RAGDOLL_STATE = 33, EVT_SETTLED = 34, EVT_VEHICLE_IMPACT = 35, EVT_GEAR = 36, EVT_BLOCK_HIT = 37, EVT_RAGDOLL_IMPACT = 38;
-    public static final int MOVER_FLY = 1, MOVER_CROUCH = 1 << 1, MOVER_AGENT = 1 << 2, MOVER_STANCE_ONLY = 1 << 3;
+    public static final int MOVER_FLY = 1, MOVER_CROUCH = 1 << 1, MOVER_AGENT = 1 << 2, MOVER_STANCE_ONLY = 1 << 3, MOVER_POSED = 1 << 4;
     public static final int RD_HEAD = 0, RD_NECK = 1, RD_PELVIS = 2, RD_L_SHOULDER = 3, RD_L_ELBOW = 4, RD_L_WRIST = 5, RD_R_SHOULDER = 6, RD_R_ELBOW = 7,
             RD_R_WRIST = 8, RD_L_HIP = 9, RD_L_KNEE = 10, RD_L_ANKLE = 11, RD_R_HIP = 12, RD_R_KNEE = 13, RD_R_ANKLE = 14, RD_PARTICLES = 15;
     public static final int SYDNEY_HUMAN = 0, SYDNEY_INFECTED = 1, SYDNEY_CRAWLER = 2, SYDNEY_GIANT = 3;
@@ -74,7 +74,7 @@ public final class AstrattoNative {
     public static final int SYDNEY_SEGMENTS = 13;
     public static final int RAGDOLL_ACTIVE = 1, RAGDOLL_STAND = 1 << 1;
     public static final int REGION_TORSO = 0, REGION_HEAD = 1, REGION_ARMS = 2, REGION_LEGS = 3;
-    public static final int CONTROL_DIE = 1, CONTROL_COLLAPSE = 2, CONTROL_STAY_DOWN = 3, CONTROL_RELEASE = 4, CONTROL_LIMBS = 5, CONTROL_WAKE = 6;
+    public static final int CONTROL_DIE = 1, CONTROL_COLLAPSE = 2, CONTROL_STAY_DOWN = 3, CONTROL_RELEASE = 4, CONTROL_LIMBS = 5, CONTROL_WAKE = 6, CONTROL_KINEMATIC = 7;
     public static final int STATE_STAND = 0, STATE_STEP = 1, STATE_FALL = 2, STATE_DOWN = 3, STATE_GETUP = 4, STATE_DEAD = 5;
     public static final int SYDNEY_STAND = 0, SYDNEY_STEP = 1, SYDNEY_FALL = 2, SYDNEY_DOWN = 3, SYDNEY_GETUP = 4, SYDNEY_DEAD = 5;
     public static final int OUTCOME_NONE = 0, OUTCOME_RECOVERED = 1, OUTCOME_CRAWL = 2, OUTCOME_STUCK = 3, OUTCOME_DEAD = 4;
@@ -88,7 +88,7 @@ public final class AstrattoNative {
     public static final int IN_FACT0 = 0, IN_TARGET_SEEN = 16, IN_TARGET_DISTANCE = 17, IN_SINCE_SEEN = 18, IN_SINCE_HEARD = 19, IN_TIME_IN_ACTION = 20,
             IN_RANDOM = 21, IN_GOAL_DISTANCE = 22, IN_HAS_TARGET = 23, IN_COUNT = 24;
     public static final int CURVE_LINEAR = 0, CURVE_INVERSE = 1, CURVE_QUADRATIC = 2, CURVE_LOGISTIC = 3, CURVE_STEP = 4;
-    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2;
+    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2, AGENT_EXTERNAL_TRAVERSAL = 1 << 3;
 
     // ---- audio (96-127)
     public static final int BUS_SFX = 0, BUS_MUSIC = 1, BUS_VOICE = 2, BUS_AMBIENCE = 3, BUS_UI = 4, BUSES = 5;

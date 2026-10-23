@@ -71,38 +71,15 @@ public final class Fixtures {
         @Override public String examine(Rpg g) { return "An altar: pray here to restore your Faith, or take up another spellbook."; }
     }
 
-    /** An agility obstacle crossed by interaction (a wall to climb): level-gated, XP on success, moves the climber. */
+    /** Discoverable course marker; traversal itself probes the same geometry anywhere in the world. */
     public static final class Climb extends WorldObject {
-        public final int level, xp;
-        public final float toX, toY, toZ, backX, backZ;
-        public Climb(long id, String name, float x, float y, float z, int level, int xp, float toX, float toY, float toZ, float backX, float backZ) {
-            super(id, "climb", name, x, y, z);
-            this.level = level; this.xp = xp; this.toX = toX; this.toY = toY; this.toZ = toZ; this.backX = backX; this.backZ = backZ;
-        }
-        @Override public float focusRadius() { return 1.2f; }
-        @Override public List<Option> options(Rpg g, Actor a) {
-            boolean ok = a.skills.level(Skill.AGILITY) >= level;
-            return List.of(Option.when(ok, "climb", "Climb over", 10, "You need Agility level " + level + ".", g.cfg.interactRange), Option.on("examine", "Examine", 0, 5));
-        }
+        public Climb(long id, String name, float x, float y, float z) { super(id, "climb", name, x, y, z); }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("examine", "Examine", 0, g.cfg.inspectRange)); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
-            String why = reach(g, a, g.cfg.interactRange);
-            if (why != null) return Result.no(why);
-            if (a.skills.level(Skill.AGILITY) < level) return Result.no("You need an Agility level of " + level + " to climb this.");
-            g.interact.begin(new Work(a, this, "climb", "Climbing", 1.1f, false, g.time, () -> {
-                if (a.skills.level(Skill.AGILITY) < level) return Result.no("You need an Agility level of " + level + ".");
-                // over to whichever side is not the climber's
-                boolean near = Math.hypot(a.x - backX, a.z - backZ) < Math.hypot(a.x - toX, a.z - toZ);
-                float tx = near ? toX : backX, tz = near ? toZ : backZ;
-                g.teleport(a, tx, toY, tz);
-                var ev = g.state.commit("ObstacleCrossed", a.id, id, jurisdiction(), 0, name);
-                g.prog.award(a, Skill.AGILITY, xp, name, ev.id());
-                if (a == g.player) g.agility.obstacle(g, 2);
-                return Result.ok();
-            }));
-            return Result.started();
+            if (!action.equals("examine")) return Result.no("Face a ledge and hold Sprint to traverse it (Agility 5).");
+            if (a == g.player) g.chat.say(examine(g)); return Result.ok();
         }
-        @Override public String examine(Rpg g) { return "A wall with handholds. Agility " + level + "."; }
+        @Override public String examine(Rpg g) { return "A practice ledge. Face it and hold Sprint. Agility 5 allows a two-block ledge; higher Agility extends reach."; }
     }
 
     /** The equipment cabinet: every tier's gear for equipment-requirement tests (test supply - it mints what it hands out). */
@@ -217,6 +194,21 @@ public final class Fixtures {
         @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  goods=" + goods.stacks(); }
         @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("goods", rpg.item.ItemIO.inventory(goods)); m.put("restockAt", restockAt); return m; }
         @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); rpg.item.ItemIO.inventory(goods, astratto.util.Json.list(m, "goods")); restockAt = astratto.util.Json.num(m, "restockAt", 0); }
+    }
+
+    /** A reusable board belongs to a jurisdiction, rather than a particular NPC or map coordinate. */
+    public static final class Board extends WorldObject {
+        private final String jurisdiction;
+        public Board(long id, float x, float y, float z, String jurisdiction) { super(id, "bounty_board", "Bounty board", x, y, z); this.jurisdiction = jurisdiction; }
+        @Override public float focusRadius() { return 0.75f; }
+        @Override public String examine(Rpg g) { return "Sworn warrants posted by the watch of " + jurisdiction + "."; }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("read", "Read warrants", 10, g.cfg.interactRange), Option.on("examine", "Examine", 0, g.cfg.inspectRange)); }
+        @Override public Result perform(Rpg g, Actor a, String action, long req) {
+            String why = reach(g, a, action.equals("examine") ? g.cfg.inspectRange : g.cfg.interactRange); if (why != null) return Result.no(why);
+            if (action.equals("examine")) { if (a == g.player) g.chat.say("Sworn warrants posted by the watch of " + jurisdiction + "."); return Result.ok(); }
+            if (!action.equals("read")) return Result.no("You cannot do that.");
+            if (a == g.player && g.ui != null) g.ui.dialog(g.bountyBoard.browse(jurisdiction)); return Result.ok();
+        }
     }
 
     /** The quest-state kiosk: the debug quest panel (flags, the test quest's state machine, the removable NPC). */

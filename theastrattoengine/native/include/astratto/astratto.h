@@ -453,7 +453,8 @@ enum {
     ASTRATTO_MOVER_FLY = 1u << 0,       /* no gravity (a spectator, a test probe) */
     ASTRATTO_MOVER_CROUCH = 1u << 1,    /* the body is shorter (input flag) */
     ASTRATTO_MOVER_AGENT = 1u << 2,     /* driven by an agent: passes ASTRATTO_BLOCK_NO_COLLIDE_AI blocks */
-    ASTRATTO_MOVER_STANCE_ONLY = 1u << 3 /* input changes stance/acceleration while preserving AI velocity, climbing and queued jumps */
+    ASTRATTO_MOVER_STANCE_ONLY = 1u << 3, /* input changes stance/acceleration while preserving AI velocity, climbing and queued jumps */
+    ASTRATTO_MOVER_POSED = 1u << 4     /* input: caller supplies collision-validated traversal positions until cleared */
 };
 typedef struct astratto_cmd_mover_create {
     astratto_record head;
@@ -472,7 +473,7 @@ typedef struct astratto_cmd_mover_input {
     float vy;
     float jump;                        /* 0, or the upward speed of a jump to start now if it is on the ground */
     float accel;                       /* how fast it reaches the wanted velocity on the ground, m/s^2 (0 = 60) */
-    uint32_t flags;                    /* ASTRATTO_MOVER_CROUCH | ASTRATTO_MOVER_STANCE_ONLY */
+    uint32_t flags;                    /* ASTRATTO_MOVER_CROUCH | ASTRATTO_MOVER_STANCE_ONLY | ASTRATTO_MOVER_POSED */
 } astratto_cmd_mover_input;
 
 typedef struct astratto_cmd_body_place {
@@ -544,7 +545,8 @@ enum {
     ASTRATTO_CONTROL_STAY_DOWN = 3,    /* value 1: it does not get up of its own accord; 0: it may again */
     ASTRATTO_CONTROL_RELEASE = 4,      /* Sydney stops driving it (the caller takes the body back into animation) */
     ASTRATTO_CONTROL_LIMBS = 5,        /* value: limbs that do not work (bits 0 left arm, 1 right arm, 2 left leg, 3 right leg, 4 head) */
-    ASTRATTO_CONTROL_WAKE = 6          /* a body at rest is simulated again */
+    ASTRATTO_CONTROL_WAKE = 6,         /* a body at rest is simulated again */
+    ASTRATTO_CONTROL_KINEMATIC = 7     /* value 1: caller poses a dead carried body; 0: resume dynamics */
 };
 typedef struct astratto_cmd_ragdoll_control {
     astratto_record head;
@@ -886,7 +888,7 @@ typedef struct astratto_cmd_policy_create {
     float think;                       /* seconds between decisions (0 = 0.2) */
 } astratto_cmd_policy_create;
 
-enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2 };
+enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3 };
 typedef struct astratto_cmd_agent_create {
     astratto_record head;
     astratto_handle handle;

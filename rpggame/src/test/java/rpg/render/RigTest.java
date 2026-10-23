@@ -16,7 +16,7 @@ class RigTest {
         for (int i = 0; i < pose.length; i++) assertArrayEquals(pose[i], rig.seg[i], 1e-5f);
     }
 
-    @Test void crouchFoldsTheBodyToHalfStandingHeightWithoutScalingTheBones() {
+    @Test void crouchBendsTheBodyToAnatomicalHeightWithoutScalingTheBones() {
         Actor a = standing(); a.sneaking = true;
         Rig rig = new Rig(); Rig.State state = new Rig.State();
         for (int frame = 0; frame < 120; frame++) rig.pose(a, state, 1f / 60, frame / 60f, false);
@@ -25,8 +25,8 @@ class RigTest {
         for (int x : new int[]{-4, 4}) for (int y : new int[]{0, 8}) for (int z : new int[]{-4, 4}) {
             highest = Math.max(highest, head[1] * x + head[5] * y + head[9] * z + head[13]);
         }
-        assertTrue(highest <= Body.HEIGHT_PX * 0.5f + 0.5f, "head top " + highest);
-        assertTrue(rig.pelvis[1] > 2 && rig.pelvis[1] < 5, "a crouch bends the legs instead of shrinking them");
+        assertTrue(highest <= Body.HEIGHT_PX * Body.CROUCH_HEIGHT + 0.5f, "head top " + highest);
+        assertTrue(rig.pelvis[1] > 5 && rig.pelvis[1] < 9, "a crouch bends the legs instead of shrinking them");
         assertEquals(1, Math.sqrt(head[0] * head[0] + head[1] * head[1] + head[2] * head[2]), 1e-5);
     }
 
@@ -43,6 +43,22 @@ class RigTest {
                 for (int axis = 0; axis < 3; axis++) { double d = shin[12 + axis] - shin[4 + axis] * Body.SHIN - hip[12 + axis]; distance += d * d; }
                 assertTrue(distance < 100, "crouch steps must retain knee flexion: " + Math.sqrt(distance));
             }
+        }
+    }
+
+    @Test void firstPersonBareGuardKeepsBothFistsInsideTheViewAndWithinArmReach() {
+        Actor a = standing(); a.cs.blocking = true;
+        Rig rig = new Rig(); rig.firstPerson = true; Rig.State st = new Rig.State();
+        for (int i = 0; i < 60; i++) rig.pose(a, st, 1f / 60, i / 60f, false);
+        for (int hand = 0; hand < 2; hand++) {
+            float ahead = rig.eye[2] - rig.hand[hand][2] - 0.8f;
+            float below = rig.eye[1] - rig.hand[hand][1];
+            assertTrue(ahead > 4 && below > 0 && below / ahead < 0.5f, "fists should frame the lower view, not disappear below it");
+            assertTrue(Math.abs(rig.hand[hand][0] - rig.eye[0]) / ahead < 0.8f);
+            float[] arm = rig.seg[(hand == 0 ? CharModel.Seg.R_ARM_UP : CharModel.Seg.L_ARM_UP).ordinal()];
+            double reach = 0;
+            for (int axis = 0; axis < 3; axis++) reach += Math.pow(rig.hand[hand][axis] - arm[12 + axis], 2);
+            assertTrue(Math.sqrt(reach) <= Body.UPPER_ARM + Body.FOREARM + 0.001f);
         }
     }
 

@@ -23,7 +23,6 @@ import rpg.interact.WorldObject;
 import rpg.item.ItemStack;
 import rpg.item.Items;
 import rpg.law.Law;
-import rpg.objects.Agility;
 import rpg.objects.Container;
 import rpg.objects.Objects;
 import rpg.quest.Quests;
@@ -71,7 +70,9 @@ public final class Rpg implements GameModule {
     public Economy econ;
     public Quests quests;
     public Progression prog;
-    public Agility agility;
+    public rpg.actor.Traversal traversal;
+    public rpg.actor.BodyCarry carrying;
+    public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
     public Fx fx;
     public Sfx sfx;
@@ -128,13 +129,15 @@ public final class Rpg implements GameModule {
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
         quests = new Quests(this);
-        agility = new Agility();
+        traversal = new rpg.actor.Traversal(this);
+        carrying = new rpg.actor.BodyCarry(this);
+        bountyBoard = new rpg.law.BountyBoard(this);
         invariants = new Invariants(this);
         controller = new PlayerController(this);
         // the player
         player.x = DevMap.SPAWN_X; player.z = DevMap.SPAWN_Z; player.y = DevMap.FLOOR;
         player.body = ctx.reserve(AstrattoNative.KIND_MOVER);
-        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, player.height * 0.5f);
+        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, player.height * rpg.actor.Body.CROUCH_HEIGHT);
         player.restore();
         starterKit();
         controller.snapTo((float) Math.PI);
@@ -203,12 +206,12 @@ public final class Rpg implements GameModule {
         prayers.update(dt);
         magic.update(dt);
         if (!aiDisabled()) { ai.update(dt); animals.update(dt); }
+        carrying.update();
         objects.update(dt);
         undertaker.update();
         spareWatch();
         glass.update();
         econ.update();
-        agility.update(this);
         prog.update();
         fx.update(dt);
         for (Actor d : dummies) { d.hp = d.maxHp(); d.cs.staggered = 0; }

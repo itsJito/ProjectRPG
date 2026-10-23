@@ -50,7 +50,7 @@ final class HitVolumes {
     static float ray(Rpg g, Actor actor, float ox, float oy, float oz, float dx, float dy, float dz, float limit, float pad) {
         float[] pose = pose(g, actor);
         if (pose == null || actor instanceof rpg.animal.Animal) {
-            float r = actor.radius + pad, height = actor.height * (actor.sneaking || actor.crouched ? 0.5f : 1);
+            float r = actor.radius + pad, height = actor.height * (actor.sneaking || actor.crouched ? rpg.actor.Body.CROUCH_HEIGHT : 1);
             return capsule(ox, oy, oz, dx, dy, dz, actor.x, actor.y + r, actor.z,
                     actor.x, actor.y + Math.max(r, height - r), actor.z, r, limit);
         }

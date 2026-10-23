@@ -439,15 +439,13 @@ public final class Acceptance {
         frames(10);
         need("Construction: a crate built into the world as blocks", g.objects.buildSpot.built.get("crate") && g.vox.block(76, DevMap.FLOOR, 25) == Blocks.CRATE);
         shot("06-construction");
-        // Agility: the course, physically checked in order
-        tp(117.5f, 8.5f, (float) Math.PI); frames(20);
-        tp(117.5f, 24.5f, (float) Math.PI); frames(20);
-        WorldObject wall = find(o -> o instanceof rpg.objects.Fixtures.Climb && o.name.equals("Climbing wall"));
-        tp(117.5f, 25.6f, (float) Math.PI); frames(10);
-        work(g.interact.request(g.player, wall, "climb"), 200, () -> false);
-        frames(10);
-        tp(117.5f, 45.5f, (float) Math.PI); frames(20);
-        need("Agility: an obstacle crossed and a lap completed", g.agility.laps >= 1 && g.player.skills.xp(Skill.AGILITY) > start[Skill.AGILITY.ordinal()]);
+        // Agility uses structural geometry, not fixed interaction endpoints.
+        g.player.skills.setLevel(Skill.AGILITY, 5);
+        tp(117.5f, 25.8f, (float) Math.PI); frames(10);
+        float ledgeY = g.player.y;
+        boolean traversed = g.traversal.begin(g.player, (float) Math.PI);
+        frames(90);
+        need("Agility: a geometry-derived ledge crossed", traversed && g.player.y > ledgeY + 0.8f && g.player.skills.xp(Skill.AGILITY) > start[Skill.AGILITY.ordinal()]);
         // Thieving: pickpocket (a seeded chance) until it succeeds
         Npc eda = npc(Ids.VILLAGER);
         for (int i = 0; i < 8 && g.player.skills.xp(Skill.THIEVING) == start[Skill.THIEVING.ordinal()]; i++) {

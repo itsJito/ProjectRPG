@@ -299,6 +299,7 @@ void AiService::plan(Engine& e, Agent& a, const VoxelWorld* w) {
 
 void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, PhysicsService* phys) {
     Mover* m = phys ? phys->mover(a.body) : nullptr;
+    if (m && m->posed) return;
     float wantX = 0, wantZ = 0, jump = 0;
     // Consume reached waypoints and steer toward the next one in the same frame.
     while (a.moving && w != nullptr && !a.route.empty() && a.routeAt * 3 < a.route.size()) {
@@ -336,7 +337,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             }
             a.yaw = std::atan2(-dx, -dz);
             // a ledge on the route that is not a stair is jumped
-            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
+            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
             // progress: if it has not got nearer for a second and a half it is stuck - search again; three times and it gives up
             a.progressTimer += dt;
             if (d < a.progressBest - 0.1f) { a.progressBest = d; a.progressTimer = 0; a.fails = 0; }

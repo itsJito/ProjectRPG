@@ -34,6 +34,13 @@ class CustodyTest {
         guard.hunt = new Hunt(g.player.id, "wanted", g.player.x, g.player.z, g.time, 60);
         return evidence;
     }
+    @Test void paymentAlsoLandsThePayersAlreadyFlyingArrowAndGrantsSmallHonor() {
+        charge(190); g.give(g.player, Items.COINS, 100); int before = g.honor.score;
+        var arrow = new rpg.combat.CombatSystem.Projectile(); arrow.owner = g.player; arrow.x = g.player.x; arrow.y = g.player.eyeY(); arrow.z = g.player.z; arrow.ammo = new rpg.item.ItemStack(Items.BRONZE_ARROWS, 1);
+        g.combat.projectiles.add(arrow);
+        assertTrue(g.law.payBounty(g.player, lawman, g.state.newRequestId()).committed());
+        assertTrue(g.combat.projectiles.isEmpty()); assertTrue(g.honor.score > before && g.honor.score <= before + 2);
+    }
     @Test void paymentCancelsWindupAndPursuitWithoutErasingTheMemoryOrOtherJurisdictions() {
         Memory evidence = charge(91);
         g.law.all().computeIfAbsent(DevMap.BETA, k -> new java.util.HashMap<>()).put(g.player.id, 70);

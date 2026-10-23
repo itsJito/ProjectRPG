@@ -207,6 +207,35 @@ void services_checks(const char* moduleDir) {
         check("and a released handle used again is refused, never reaching freed memory", ev.counted(ASTRATTO_EVT_ERROR) == 1);
     }
 
+    // ------------------------------------------------------------ physical character space and posed traversal
+    {
+        const astratto_handle a = reserve(e, ASTRATTO_KIND_MOVER), b = reserve(e, ASTRATTO_KIND_MOVER);
+        auto& first = c.add<astratto_cmd_mover_create>(ASTRATTO_CMD_MOVER_CREATE);
+        first.handle = a; first.x = 20; first.y = FLOOR; first.z = 15; first.radius = 0.3f; first.height = 1.8f;
+        auto& second = c.add<astratto_cmd_mover_create>(ASTRATTO_CMD_MOVER_CREATE);
+        second.handle = b; second.x = 23; second.y = FLOOR; second.z = 15; second.radius = 0.3f; second.height = 1.8f;
+        for (int i = 0; i < 120; i++) {
+            auto& ia = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); ia.handle = a; ia.vx = 2;
+            auto& ib = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); ib.handle = b; ib.vx = -2;
+            frame(e, c, 1.0f / 60);
+        }
+        auto io = snap(e, ASTRATTO_SNAPSHOT_BODIES);
+        const auto* sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        const auto* sb = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, b);
+        check("opposing character volumes stop without passing through each other", sa && sb && sb->x - sa->x > 0.59f);
+        auto& place = c.add<astratto_cmd_body_place>(ASTRATTO_CMD_MOVER_PLACE); place.handle = a; place.x = 20; place.y = FLOOR + 4; place.z = 15;
+        auto& pose = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); pose.handle = a; pose.flags = ASTRATTO_MOVER_POSED;
+        frame(e, c, 0.5f);
+        io = snap(e, ASTRATTO_SNAPSHOT_BODIES); sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        check("posed traversal owns position without hidden gravity drift", sa && std::fabs(sa->y - (FLOOR + 4)) < 0.001f);
+        c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT).handle = a;
+        frame(e, c, 0.25f);
+        io = snap(e, ASTRATTO_SNAPSHOT_BODIES); sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        check("clearing traversal ownership restores ordinary gravity", sa && sa->y < FLOOR + 3.8f);
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = a;
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = b; frame(e, c, 0);
+    }
+
     // ------------------------------------------------------------ Sydney: death is terminal even across controller release
     {
         for (int order = 0; order < 2; order++) {

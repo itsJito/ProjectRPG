@@ -25,7 +25,7 @@ import rpg.world.DevMap;
  * policy scores them (with its own sight and hearing in the mix) and walks the body along routes it searches itself.
  */
 public final class Brain {
-    public enum Goal { IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH }
+    public enum Goal { IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID }
 
     private final Rpg g;
     private final AiSystem ai;
@@ -133,6 +133,11 @@ public final class Brain {
             if (w.level >= Stealth.INVESTIGATING) s.add(new Score(Goal.INVESTIGATE, nightNow ? 0.8f : n.combatant() ? 0.66f : 0.46f, (heard ? "heard something at " : "glimpsed someone at ") + where + "; deciding what to do"));
             else s.add(new Score(Goal.LOOK, 0.56f, (heard ? "a sound from " : "a movement at ") + where));
         }
+        if (threat == null && !n.hostileToPlayer && hasFood(n) && n.hp > n.maxHp() * 0.7f) {
+            Actor injured = null; float nearest = 12;
+            for (Actor actor : g.actors()) if (actor != n && (actor == g.player || actor instanceof Npc) && (actor.team == n.team || actor == g.player && ai.rumors.opinion(n) >= 0 && !g.law.wantedAnywhere(actor.id)) && actor.hp < actor.maxHp() * 0.6f && actor.alive && n.distTo(actor) < nearest && ai.canSee(n, actor)) { injured = actor; nearest = n.distTo(actor); }
+            if (injured != null) { n.aidTarget = injured.id; s.add(new Score(Goal.AID, civilian ? 0.64f : 0.58f, "food to help " + injured.name + ", visibly wounded")); }
+        }
         // needs
         if (n.hunger > 0.45f) s.add(new Score(Goal.EAT, 0.25f + n.hunger * 0.6f, String.format("hunger %.0f%%", n.hunger * 100)));
         if (night && n.role != Npc.Role.GUARD && !n.combatant() && n.role != Npc.Role.THIEF) s.add(new Score(Goal.SLEEP, 0.7f, String.format("night (%02d:00)", (int) hour)));
@@ -164,10 +169,12 @@ public final class Brain {
         if (threat == null && g.undertaker != null) {
             rpg.objects.Container grave = graveFor(n);
             if (grave != null) {
-                if (n.role == Npc.Role.GUARD) s.add(new Score(Goal.COLLECT, 0.62f, String.format("a death in town: carrying the grave at (%.0f, %.0f) to the undertaker", grave.x, grave.z)));
+                if (n.role == Npc.Role.GUARD) s.add(new Score(Goal.COLLECT, 0.88f, String.format("a death in town: carrying the grave at (%.0f, %.0f) to the undertaker", grave.x, grave.z)));
                 else s.add(new Score(Goal.LOOT, n.role == Npc.Role.THIEF ? 0.74f : 0.6f, String.format("an unguarded grave at (%.0f, %.0f), full of someone's gear", grave.x, grave.z)));
             }
         }
+        if (g.carrying.busy(n)) s.add(new Score(Goal.COLLECT, 0.84f, "carrying a body to the undertaker"));
+        if (!ZonePolicy.routineAllowed(n, n.x, n.z) && threat == null && !g.carrying.busy(n)) s.add(new Score(Goal.RETURN, 0.57f, "leaving an unwelcome zone"));
         s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
         s.sort(Comparator.comparing(Score::value).reversed());
         // a little inertia: keep the current goal unless another beats it clearly
@@ -264,6 +271,24 @@ public final class Brain {
             case COLLECT -> collect(n);
             case FENCE -> fence(n);
             case LOOT -> loot(n);
+            case AID -> aid(n);
+        }
+    }
+
+    /** A helpful neighbor spends real food to aid someone they can see; threats interrupt the work. */
+    private void aid(Npc n) {
+        Actor target = g.actor(n.aidTarget);
+        if (target == null || !target.alive || target.hp >= target.maxHp() * 0.8f || !hasFood(n)) { n.nextThink = 0; ai.desire(n, AiSystem.A_IDLE); return; }
+        if (!goTo(n, target.x, target.z, false, n.radius + target.radius + 0.5f)) return;
+        n.wantYaw = (float) Math.atan2(-(target.x - n.x), -(target.z - n.z));
+        n.reachX = target.x; n.reachY = target.chestY(); n.reachZ = target.z;
+        if (g.time > n.busyUntil && g.time >= n.lootUntil) { n.lootStarted = g.time; n.lootUntil = g.time + 0.9; g.ai.say(n, "Here. Eat a little, and catch your breath."); }
+        if (g.time < n.lootStarted + 0.6 || n.lastLootAt >= n.lootStarted) return;
+        n.lastLootAt = g.time; n.busyUntil = g.time + 4;
+        for (ItemStack food : n.inv.stacks()) if (food.def.heal > 0) {
+            n.takeItems(food.def, 1); g.state.burn(food.def, 1);
+            float before = target.hp; target.hp = Math.min(target.maxHp(), target.hp + food.def.heal);
+            g.state.commit("AidGiven", n.id, target.id, DevMap.jurisdiction(n.x, n.z), 0, food.def.name + ": " + (target.hp - before) + " HP"); break;
         }
     }
 
@@ -303,11 +328,17 @@ public final class Brain {
         float bd = Float.MAX_VALUE;
         for (var object : g.objects.all()) {
             if (!(object instanceof rpg.objects.Container c) || !(c.kind.equals("grave") || c instanceof rpg.objects.Corpse)) continue;
-            if (c instanceof rpg.objects.Corpse corpse ? corpse.empty(g) : c.contents.isEmpty()) continue;
+            if (!guard && (c instanceof rpg.objects.Corpse corpse ? corpse.empty(g) : c.contents.isEmpty())) continue;
             float d = (float) Math.hypot(c.x - n.x, c.z - n.z);
             if (guard) {
-                if (!c.kind.equals("grave") || !c.secured || (c.heldBy != 0 && c.heldBy != n.id) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction)) continue;
-                if (c.heldBy == 0 && g.time - (c.expiresAt - rpg.law.Undertaker.GRAVE_SECONDS) < WORD_REACHES_WATCH) continue;
+                if ((c.heldBy != 0 && c.heldBy != n.id) || !c.kind.equals("grave") && !(c instanceof rpg.objects.Corpse) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction) && c.heldBy != n.id) continue;
+                if (c instanceof rpg.objects.Corpse corpse) {
+                    if (corpse.delivered || corpse.npc(g) == null) continue;
+                    if (c.heldBy == 0 && (d > 24 || !g.vox.sight(n.x, n.eyeY(), n.z, c.x, c.y + 0.3f, c.z))) continue;
+                } else {
+                    if (!c.secured || c.contents.isEmpty()) continue;
+                    if (c.heldBy == 0 && g.time - (c.expiresAt - rpg.law.Undertaker.GRAVE_SECONDS) < WORD_REACHES_WATCH) continue;
+                }
             } else {
                 if (c.secured || c.heldBy != 0 || n.graveSeen == -c.id) continue;
                 boolean known = n.graveSeen == c.id;
@@ -327,7 +358,8 @@ public final class Brain {
             if (goTo(n, c.x, c.z, false, 1.2f)) {
                 if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, "Poor soul. I'll see this to Morrow."); }
                 n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
-                if (g.time - n.arrivedAt > 2.5) {
+                if (g.time - n.arrivedAt > 0.5) {
+                    if (c instanceof rpg.objects.Corpse && g.carrying.begin(n, c).rejected()) { n.nextThink = g.time + 1; return; }
                     c.heldBy = n.id;
                     g.state.commit("GraveCollected", n.id, c.id, DevMap.jurisdiction(c.x, c.z), 0, "carried by " + n.name);
                     n.lastOutcome = "gathered up the grave; taking it to the undertaker";
@@ -335,8 +367,14 @@ public final class Brain {
             }
             return;
         }
-        if (goTo(n, DevMap.UNDERTAKER_POST[0] + 0.6f, DevMap.UNDERTAKER_POST[1] - 1.2f, false, 1.4f)) {
-            g.undertaker.toCustody(c, "a guard brought it in");
+        Npc undertaker = g.undertaker.who();
+        if (undertaker == null || !undertaker.alive) { g.carrying.drop(n, false); c.heldBy = 0; n.nextThink = g.time + 5; return; }
+        if (g.carrying.busy(n) && !g.carrying.ready(n)) { ai.desire(n, AiSystem.A_HOLD); return; }
+        if (goTo(n, undertaker.postX + 1.4f, undertaker.postZ - 1.5f, false, 1.1f)) {
+            if (c instanceof rpg.objects.Corpse corpse) {
+                g.carrying.drop(n, false); corpse.delivered = true;
+                g.state.commit("BodyDelivered", n.id, corpse.body, DevMap.jurisdiction(n.x, n.z), 0, undertaker.name);
+            } else g.undertaker.toCustody(c, "a guard brought it in");
             n.lastOutcome = "handed the grave to the undertaker";
             n.nextThink = 0;
         }
@@ -350,7 +388,8 @@ public final class Brain {
     private void loot(Npc n) {
         rpg.objects.Container c = graveFor(n);
         if (c == null) { n.graveSeen = 0; ai.desire(n, AiSystem.A_IDLE); n.nextThink = 0; return; }
-        if (!goTo(n, c.x, c.z, n.role != Npc.Role.THIEF, 1.0f)) return;
+        if (!goTo(n, c.x, c.z, n.role != Npc.Role.THIEF, 0.75f)) return;
+        n.reachX = c.x; n.reachY = c.y + 0.15f; n.reachZ = c.z;
         if (n.arrivedAt < n.goalSince) n.arrivedAt = g.time;
         n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
         if (g.time >= n.lootUntil) {
@@ -394,6 +433,7 @@ public final class Brain {
      * waypoints (each leg a short search for the engine); the navigation target the inspector shows is the current leg's.
      */
     boolean goTo(Npc n, float x, float z, boolean run, float within) {
+        if (!ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
         if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; return true; }
         if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z); n.legAt = 0; n.legsX = x; n.legsZ = z; }
         float tx = x, tz = z;
@@ -1011,7 +1051,7 @@ public final class Brain {
         Actor t = g.actor(n.fightTarget);
         if (t == null || !t.alive || (t == g.player && !g.player.alive) || ai.threatFor(n) != t) { n.fightTarget = 0; n.goal = Goal.IDLE; n.nextThink = 0; g.combat.setBlock(n, false); return; }
         float d = n.distTo(t);
-        if (n.hostileToPlayer && Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 26) { n.fightTarget = 0; n.goal = Goal.RETURN; n.lastOutcome = "gave up the chase (leash)"; return; }
+        if (n.hostileToPlayer && Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 26 && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12)) { n.fightTarget = 0; n.goal = Goal.RETURN; n.lastOutcome = "gave up the chase (leash)"; return; }
         // out of sight for a heartbeat: it heads for where it last saw them, not for where they really are
         boolean visible = ai.canSee(n, t);
         if (!visible) {

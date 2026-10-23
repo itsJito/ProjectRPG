@@ -26,7 +26,7 @@ import rpg.world.Voxels;
  * hand to the tip, swept along the move's arc in the world - is sampled several times a frame; only where it actually
  * passes through another body's capsule is there contact, and a wall in the way deflects it. Arrows and spells are
  * projectiles flying through the voxel world with the same contact test. Contact is never rolled: on contact, HP damage
- * (potential x (1 - mitigation)) and impact (against Stability, for stagger) resolve on separate channels. Guards,
+ * rolls uniformly up to the armor-adjusted maximum; impact resolves separately against Stability. Guards,
  * parries and dodges are timing and position, not chance. Combat XP is paid from the damage actually dealt.
  */
 public final class CombatSystem {
@@ -38,7 +38,14 @@ public final class CombatSystem {
     /** Confirmed player contacts only; HUD feedback never predicts a hit. */
     public double lastPlayerHit = -99, lastPlayerKill = -99;
 
-    public CombatSystem(Rpg g) { this.g = g; }
+    private final java.util.Random damageRandom;
+    public CombatSystem(Rpg g) { this.g = g; damageRandom = new java.util.Random(g.scripted ? 3 : System.nanoTime()); }
+
+    private int physicalMax(Actor a, Skill skill, float bonus) {
+        float prayer = skill == Skill.STRENGTH ? g.prayers.strength(a) : g.prayers.archery(a);
+        return CombatMath.maxHit(CombatMath.effectiveLevel(a.skills.level(skill), prayer), bonus);
+    }
+
 
     public static final class Projectile {
         public Actor owner;
@@ -63,6 +70,7 @@ public final class CombatSystem {
 
     /** Begins a melee move; false (and nothing spent) when the actor cannot. */
     public boolean attack(Actor a, boolean offHand, Move move) {
+        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         if (!a.alive || a.cs.busy() || a.cs.blocking) return false;
         if (a.gaseousT > 0) { if (a == g.player) g.chat.add("You can't strike while you are mist.", Chat.Kind.WARN); return false; }
         float cost = move == Move.HEAVY ? g.cfg.staminaHeavy : g.cfg.staminaLight;
@@ -123,13 +131,14 @@ public final class CombatSystem {
     }
 
     public void setBlock(Actor a, boolean on) {
-        boolean can = on && a.alive && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
+        boolean can = on && a.alive && !g.carrying.busy(a) && !g.traversal.busy(a) && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
         if (can && !a.cs.blocking) a.cs.blockStart = g.time;
         a.cs.blocking = can;
     }
 
     /** A dodge: a quick burst of movement with a moment of invulnerability. */
     public boolean dodge(Actor a, float dx, float dz) {
+        if (g.carrying.busy(a) || g.traversal.busy(a)) return false;
         if (!a.alive || a.cs.staggered > 0 || a.cs.dodgeT > 0 || a.cs.phase == Phase.ACTIVE) return false;
         if (a.stamina < g.cfg.staminaDodge) { if (a == g.player) g.chat.add("You're too tired to dodge.", Chat.Kind.WARN); return false; }
         float l = (float) Math.hypot(dx, dz);
@@ -148,6 +157,7 @@ public final class CombatSystem {
      * It flies as a projectile under gravity, strikes by the same contact rules, and lands where it stops, to be picked up.
      */
     public boolean throwOne(Actor a, float yaw, float pitch, float wind) {
+        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemStack held = a.eq.get(ItemDef.Slot.MAIN);
         if (held == null || held.def.family != Family.THROWN) return false;
         if (a.skills.level(Skill.ARCHERY) < held.def.reqLevel) { if (a == g.player) g.chat.add("You need Archery level " + held.def.reqLevel + " to throw those.", Chat.Kind.WARN); return false; }
@@ -159,7 +169,7 @@ public final class CombatSystem {
         boolean heavy = held.def.thrown.equals("javelin") || held.def.thrown.equals("tomahawk");
         Projectile p = launch(a, yaw, pitch, (heavy ? 17 : 22) + (heavy ? 12 : 14) * wind, heavy ? 9.8f : 7.5f);
         p.ammo = one; p.type = held.def.damageType; p.skill = Skill.ARCHERY;
-        p.potential = held.def.damage * CombatMath.archeryScaling(a.skills.level(Skill.ARCHERY)) * (0.6f + 0.4f * wind);
+        p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, held.def.damage / CombatMath.HP_SCALE) * (0.6f + 0.4f * wind));
         p.impact = held.def.impact * wind;
         a.cs.castCooldown = 0.32f * held.def.speed;
         shots++;
@@ -170,6 +180,7 @@ public final class CombatSystem {
 
     /** Looses a bolt from a loaded crossbow along an aim; the crossbow is loaded again over a second or so (Agility quickens it). */
     public boolean shootCrossbow(Actor a, float yaw, float pitch) {
+        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef xb = a.main();
         if (xb == null || xb.family != Family.CROSSBOW) return false;
         if (a.cs.reload > 0) return false;
@@ -181,7 +192,7 @@ public final class CombatSystem {
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
         Projectile p = launch(a, yaw, pitch, 58, 6f);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
-        p.potential = (xb.damage + ammo.def.damage) * CombatMath.archeryScaling(a.skills.level(Skill.ARCHERY));
+        p.potential = physicalMax(a, Skill.ARCHERY, (xb.damage + ammo.def.damage) / CombatMath.HP_SCALE);
         p.impact = xb.impact;
         a.cs.reload = 1.25f * (1 - Math.min(0.3f, a.skills.level(Skill.AGILITY) * 0.003f));
         shots++;
@@ -192,6 +203,7 @@ public final class CombatSystem {
 
     /** Looses an arrow from an equipped bow along an aim, drawn this far (0..1). */
     public boolean shoot(Actor a, float yaw, float pitch, float draw) {
+        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef bow = a.main();
         if (bow == null || bow.family != Family.BOW) return false;
         ItemStack ammo = a.eq.get(ItemDef.Slot.AMMO);
@@ -203,7 +215,7 @@ public final class CombatSystem {
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
         Projectile p = launch(a, yaw, pitch, 18 + 34 * draw, 9.8f);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
-        p.potential = (bow.damage + ammo.def.damage) * CombatMath.archeryScaling(a.skills.level(Skill.ARCHERY)) * draw;
+        p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, (bow.damage + ammo.def.damage) / CombatMath.HP_SCALE) * draw);
         p.impact = bow.impact * draw;
         shots++;
         if (g.sfx != null) g.sfx.play("bow", a.x, a.eyeY(), a.z, 0.7f);
@@ -225,6 +237,7 @@ public final class CombatSystem {
     }
 
     public boolean cast(Actor a, Spell s, float yaw, float pitch) {
+        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         String no = castRefusal(a, s);
         if (no != null) { if (a == g.player && !no.isEmpty()) g.chat.add(no, Chat.Kind.WARN); return false; }
         if (s == Spell.TELEGRAB) return telegrab(a, s, yaw, pitch);
@@ -242,10 +255,10 @@ public final class CombatSystem {
         if (s == Spell.FIRE_BLAST) a.eq.get(ItemDef.Slot.MAIN).charges--;
         a.mana -= s.cost;
         a.cs.castCooldown = 0.7f;
-        ItemDef staff = a.main() != null && a.main().family == Family.STAFF ? a.main() : a.off() != null && a.off().family == Family.WAND ? a.off() : null;
         Projectile p = launch(a, yaw, pitch, s.speed, 0);
         p.spell = s; p.type = DamageType.MAGIC; p.skill = Skill.MAGIC;
-        p.potential = Spells.groupBase(s, a.skills.level(Skill.MAGIC)) * CombatMath.HP_SCALE * CombatMath.magicScaling(a.skills.level(Skill.MAGIC)) * (staff == null ? 1f : 1f + staff.damage / CombatMath.HP_SCALE * 0.04f);
+        float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
+        p.potential = CombatMath.magicMax(s.base, magicBonus);
         p.impact = 12 + s.base * 0.6f;
         casts++;
         var ev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
@@ -445,7 +458,7 @@ public final class CombatSystem {
         float side = offHand ? -1 : 1;
         float hx = q[0] * side, hy = q[1], hz = q[2], dx = q[3] * side, dy = q[4], dz = q[5];
         // the aim's pitch tips the whole stroke about the shoulders' line
-        float p = a.pitch * 0.7f, cp = (float) Math.cos(p), sp = (float) Math.sin(p);
+        float p = a.pitch, cp = (float) Math.cos(p), sp = (float) Math.sin(p);
         float hy2 = hy * cp + hz * sp, hz2 = -hy * sp + hz * cp, dy2 = dy * cp + dz * sp, dz2 = -dy * sp + dz * cp;
         float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
         float l = (float) Math.sqrt(dx * dx + dy2 * dy2 + dz2 * dz2);
@@ -476,50 +489,53 @@ public final class CombatSystem {
 
     private void sweep(Actor a, float from, float to) {
         if (a instanceof rpg.animal.Animal an) { bite(an, from, to); return; }
-        Move m = a.cs.move;
-        float reach = reach(a);
-        int steps = 6;
-        for (int i = 1; i <= steps; i++) {
-            float s = from + (to - from) * i / steps;
-            // the blade meets a wall first: deflected
-            float[] tip = blade(a, m, s, 1, reach);
-            if (!g.vox.clear(tip[3], tip[4], tip[5], tip[0], tip[1], tip[2])) {
-                Voxels.Hit h = g.vox.ray(tip[3], tip[4], tip[5], tip[0] - tip[3], tip[1] - tip[4], tip[2] - tip[5], reach + 0.5f, false);
-                // a tool meeting what it works: an axe biting a tree (trunk or crown), a pickaxe striking the ore -
-                // once a swing; the head bites and stops in wood or stone (in leaves it carries on through)
-                if (h.hit && !a.cs.gathered && g.objects != null) {
-                    rpg.objects.Node nd = g.objects.nodeAt(h.bx, h.by, h.bz);
-                    if (nd != null && nd.strike(g, a, h.x, h.y, h.z)) {
-                        a.cs.gathered = true;
-                        boolean leafy = h.block == Blocks.LEAVES || h.block == Blocks.OAK_LEAVES || h.block == Blocks.WILLOW_LEAVES;
-                        if (!leafy) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return; }
-                    }
-                }
-                if (h.hit && h.block == Blocks.GLASS && g.glass != null) {
-                    // glass does not turn a blade: it breaks, and the blow carries on through
-                    float[] d0 = blade(a, m, Math.max(0, s - 0.1f), 1, reach);
-                    g.glass.shatter(h.bx, h.by, h.bz, h.x, h.y, h.z, tip[0] - d0[0], tip[1] - d0[1], tip[2] - d0[2], m == Move.HEAVY ? 1.4f : 1f, a);
-                    log(String.format("%s's %s broke the pane at (%d, %d, %d)", a.name, m, h.bx, h.by, h.bz));
-                } else if (h.hit && h.block != Blocks.LEAVES && h.block != Blocks.OAK_LEAVES && h.block != Blocks.WILLOW_LEAVES) {
-                    deflections++;
-                    if (g.fx != null) g.fx.sparks(h.x, h.y, h.z, 10);
-                    if (g.sfx != null) g.sfx.play("block", h.x, h.y, h.z, 0.5f);
-                    a.cs.hitstop = 0.08f;
-                    a.cs.phase = Phase.RECOVER; a.cs.t = 0;
-                    log(String.format("%s's %s deflected by block %d at (%d, %d, %d), s=%.2f", a.name, m, h.block, h.bx, h.by, h.bz, s));
-                    return;
-                }
+        Move m = a.cs.move; float reach = reach(a);
+        for (int i = 1; i <= 6; i++) {
+            float s = from + (to - from) * i / 6;
+            float[] tip = blade(a, m, s, 1, reach), grip = grip(a, m, s);
+            float dx = tip[0] - grip[0], dy = tip[1] - grip[1], dz = tip[2] - grip[2];
+            float length = Math.max(0.001f, (float) Math.sqrt(dx * dx + dy * dy + dz * dz)); dx /= length; dy /= length; dz /= length;
+            // A low stroke may enter the floor after hitting a small animal. Resolve the exposed blade before that wall.
+            Voxels.Hit wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false);
+            boolean hard = wall.hit && wall.block != Blocks.GLASS && wall.block != Blocks.LEAVES && wall.block != Blocks.OAK_LEAVES && wall.block != Blocks.WILLOW_LEAVES;
+            float limit = hard ? wall.dist : length;
+            if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2])) limit = 0;
+            if (limit > 0) for (Actor v : g.actors()) {
+                if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
+                float contact = HitVolumes.ray(g, v, grip[0], grip[1], grip[2], dx, dy, dz, limit, 0.06f);
+                if (!Float.isFinite(contact)) continue;
+                a.cs.struck.add(v.id); meleeContact(a, v, m, grip[0] + dx * contact, grip[1] + dy * contact, grip[2] + dz * contact);
+                if (a.cs.phase != Phase.ACTIVE) return;
             }
-            for (int k = 0; k <= 3; k++) {
-                float[] p = blade(a, m, s, k / 3f, reach);
-                for (Actor v : g.actors()) {
-                    if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
-                    if (!Float.isFinite(HitVolumes.ray(g, v, p[0], p[1], p[2], 0, 0, 1, 0, 0.06f))) continue;
-                    a.cs.struck.add(v.id);
-                    meleeContact(a, v, m, p[0], p[1], p[2]);
-                    if (a.cs.phase != Phase.ACTIVE) return;
-                }
+            if (wall.hit) strikeWorld(a, m, reach, s, tip, wall);
+            if (a.cs.phase != Phase.ACTIVE) return;
+        }
+    }
+
+    private void strikeWorld(Actor a, Move m, float reach, float s, float[] tip, Voxels.Hit h) {
+        // a tool meeting what it works: an axe biting a tree (trunk or crown), a pickaxe striking the ore -
+        // once a swing; the head bites and stops in wood or stone (in leaves it carries on through)
+        if (!a.cs.gathered && g.objects != null) {
+            rpg.objects.Node nd = g.objects.nodeAt(h.bx, h.by, h.bz);
+            if (nd != null && nd.strike(g, a, h.x, h.y, h.z)) {
+                a.cs.gathered = true;
+                boolean leafy = h.block == Blocks.LEAVES || h.block == Blocks.OAK_LEAVES || h.block == Blocks.WILLOW_LEAVES;
+                if (!leafy) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return; }
             }
+        }
+        if (h.block == Blocks.GLASS && g.glass != null) {
+            // glass does not turn a blade: it breaks, and the blow carries on through
+            float[] d0 = blade(a, m, Math.max(0, s - 0.1f), 1, reach);
+            g.glass.shatter(h.bx, h.by, h.bz, h.x, h.y, h.z, tip[0] - d0[0], tip[1] - d0[1], tip[2] - d0[2], m == Move.HEAVY ? 1.4f : 1f, a);
+            log(String.format("%s's %s broke the pane at (%d, %d, %d)", a.name, m, h.bx, h.by, h.bz));
+        } else if (h.block != Blocks.LEAVES && h.block != Blocks.OAK_LEAVES && h.block != Blocks.WILLOW_LEAVES) {
+            deflections++;
+            if (g.fx != null) g.fx.sparks(h.x, h.y, h.z, 10);
+            if (g.sfx != null) g.sfx.play("block", h.x, h.y, h.z, 0.5f);
+            a.cs.hitstop = 0.08f;
+            a.cs.phase = Phase.RECOVER; a.cs.t = 0;
+            log(String.format("%s's %s deflected by block %d at (%d, %d, %d), s=%.2f", a.name, m, h.block, h.bx, h.by, h.bz, s));
+            return;
         }
     }
 
@@ -546,7 +562,7 @@ public final class CombatSystem {
                 if (ddx * ddx + ddz * ddz > span * span || hy < v.y - 0.35f || hy > v.y + v.height + 0.45f) continue;
                 an.cs.struck.add(v.id);
                 boolean behind = behind(v, an);
-                float potential = sp.damage * CombatMath.HP_SCALE * an.scale() * CombatMath.strengthScaling(an.skills.level(Skill.STRENGTH), 0) * CombatMath.execution(v.cs.staggered > 0, behind);
+                float potential = physicalMax(an, Skill.STRENGTH, sp.damage * an.scale());
                 float impact = CombatMath.impact(sp.impact * an.scale(), an.skills.level(Skill.STRENGTH), 1);
                 resolve(an, v, potential, impact, sp.damageType, null, px, hy, pz, sp.weapon, behind);
                 if (an.cs.phase != Phase.ACTIVE) return;
@@ -560,13 +576,11 @@ public final class CombatSystem {
     private void meleeContact(Actor a, Actor v, Move m, float px, float py, float pz) {
         ItemDef w = a.cs.offHand ? a.off() : a.main();
         boolean weapon = w != null && m != Move.PUNCH && m != Move.BASH;
-        float base = weapon ? w.damage : (m == Move.BASH && w != null ? 2 + w.armor : 6) * CombatMath.HP_SCALE;
         float impactBase = weapon ? w.impact : m == Move.BASH ? 26 : 6;
         DamageType type = weapon ? w.damageType : DamageType.BLUNT;
         boolean behind = behind(v, a);
         // Strength makes the damage of a landed blow (with the weapon's Strength bonus); Attack does not (GDD 2.3)
-        float potential = base * CombatMath.strengthScaling(a.skills.level(Skill.STRENGTH), weapon ? w.strengthBonus : 0) * CombatMath.moveDamage(m) * CombatMath.execution(v.cs.staggered > 0, behind);
-        potential *= g.prayers.strength(a);
+        float potential = (float) Math.floor(physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0) * CombatMath.moveDamage(m));
         float impact = CombatMath.impact(impactBase, a.skills.level(Skill.STRENGTH), CombatMath.moveImpact(m));
         resolve(a, v, potential, impact, type, null, px, py, pz, String.valueOf(m), behind);
     }
@@ -578,7 +592,7 @@ public final class CombatSystem {
 
     /** Contact made: guard and parry, mitigation, HP damage, impact and stagger, feedback, XP, events. */
     public void resolve(Actor a, Actor v, float potential, float impact, DamageType type, Projectile proj, float px, float py, float pz, String how, boolean behind) {
-        if (a instanceof rpg.ai.Npc officer && (officer.role == rpg.ai.Npc.Role.GUARD || officer.role == rpg.ai.Npc.Role.LAWMAN) && g.law.inCustody(v)) return;
+        if (a instanceof rpg.ai.Npc && g.law.inCustody(v)) return;
         contacts++;
         if (v.cs.iframes > 0 || v.gaseousT > 0 && proj == null) {
             dodged++;
@@ -608,12 +622,13 @@ public final class CombatSystem {
             return;
         }
         float protection = CombatMath.protection(v.skills.level(Skill.DEFENSE), v.eq.armor());
-        float mit = CombatMath.mitigation(protection, type);
-        float dmg = CombatMath.finalDamage(potential, mit);
+        int maximum = CombatMath.armoredMax((int) Math.floor(Math.max(0, potential)), v.skills.level(Skill.DEFENSE), v.eq.armor());
+        float mit = potential <= 0 ? 0 : 1 - maximum / potential;
+        // Roll once per contact after a successful parry has already returned. Defenses may still reduce it to zero.
+        float dmg = CombatMath.roll(maximum, a == g.player, damageRandom);
         dmg *= g.prayers.ward(v);
         // an elemental spell on a creature with that weakness on record: double (GDD 2.5)
         if (proj != null && proj.spell != null && v instanceof rpg.animal.Animal wan && wan.species.weakness == proj.spell.element && proj.spell.element != Spells.Element.NONE) dmg *= 2;
-        if (proj != null && proj.skill == Skill.ARCHERY) dmg *= g.prayers.archery(a);
         // the overhead protections: the attack of their kind does no harm at all - a visible counter, not armour
         boolean magicHit = proj != null && proj.spell != null;
         boolean prayed = g.prayers.protects(v, melee, magicHit) && dmg > 0;
@@ -635,10 +650,8 @@ public final class CombatSystem {
             if (g.sfx != null) g.sfx.play(bare ? "hit" : "block", px, py, pz, 0.7f);
             if (g.fx != null && !bare) g.fx.sparks(px, py, pz, 12);
         }
-        // whole HP, rounded; a blow of a quarter point and more always draws at least one (a fox's bite on the HP scale
-        // is a third of a point: rounded away, no small animal could ever hurt anything)
-        int dealt = Math.round(dmg);
-        if (dealt == 0 && dmg >= 0.25f) dealt = 1;
+        // Do not impose a minimum after a performed guard or protection: a fully stopped hit can deal zero.
+        int dealt = Math.max(0, Math.round(dmg));
         if (!v.dummy) dealt = Math.min(dealt, (int) Math.ceil(v.hp));
         // the console's god (nothing hurts) and buddha (hurt, never below 1 HP)
         if (v == g.player && g.ui != null && g.ui.console.god) { dealt = 0; impact = 0; }
