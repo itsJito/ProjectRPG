@@ -50,7 +50,7 @@ final class Panels {
     // ------------------------------------------------------------------ the frame: tabs to every panel scene
     static final class Frame extends Panel {
         static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory_Icon_UI", "I"}, {Hud.Scene.CHARACTER, "Character", "Worn_Equipment_icon_UI", "C"},
-                {Hud.Scene.SKILLS, "Skills", "Skills_icon_UI", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "M"}};
+                {Hud.Scene.SKILLS, "Skills", "Skills_icon_UI", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
         Frame(Hud h) { super("frame", Hud.FW, Hud.FH); }
         @Override public void draw(Ui2D ui, float x, float y) {
             ui.rect(0, 0, hud.w, hud.h, 0x48000000);   // the world steps back behind a panel
@@ -69,7 +69,7 @@ final class Panels {
             ui.rect(x + 12, y + 41, pw - 24, 1, Style.EDGE);
             if (Style.button(ui, "x", x + pw - 34, y + 10, 24, 24, true)) hud.go(Hud.Scene.WORLD);
             ui.img("questionmark_UI", x + pw - 64, y + 12, 20, 0xA0FFFFFF);
-            if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
+            if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M map, B magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
         }
     }
 
@@ -140,7 +140,7 @@ final class Panels {
             Player p = g.player;
             ItemDef main = p.main();
             title(ui, p.name, x, y);
-            ui.text("Combat level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 24, 13, Style.DIM);
+            ui.text("Level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 24, 13, Style.DIM);
             ui.text("Combat & condition", x, y + 56, 13, Style.TEXT);
             float prot = CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor());
             String[][] rows = {

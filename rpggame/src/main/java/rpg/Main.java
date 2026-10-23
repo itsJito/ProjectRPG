@@ -268,7 +268,8 @@ public final class Main {
                 if (in.keyPressed(GLFW_KEY_C)) hud.toggle(Hud.Scene.CHARACTER);
                 if (in.keyPressed(GLFW_KEY_K)) hud.toggle(Hud.Scene.SKILLS);
                 if (in.keyPressed(GLFW_KEY_J)) hud.toggle(Hud.Scene.JOURNAL);
-                if (in.keyPressed(GLFW_KEY_M)) hud.toggle(Hud.Scene.MAGIC);
+                if (in.keyPressed(GLFW_KEY_M)) hud.toggle(Hud.Scene.MAP);
+                if (in.keyPressed(GLFW_KEY_B)) hud.toggle(Hud.Scene.MAGIC);
             }
             // E: a tap is the primary action, a hold opens every option
             if (!typing && in.keyPressed(GLFW_KEY_E)) { eHeld = g.time; eMenuOpened = false; }

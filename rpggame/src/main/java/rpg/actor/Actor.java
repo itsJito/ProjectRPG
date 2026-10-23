@@ -159,7 +159,7 @@ public class Actor {
         public boolean gathered;
         public double blockStart = -9;
         public float staggered, stabilityBonus, iframes, dodgeT, dodgeX, dodgeZ, hitstop;
-        public float charge, draw, castCooldown, regenDelay, flash, slowT;
+        public float charge, draw, aim, castCooldown, regenDelay, flash, slowT;
         /** (The old cast-once blessings' timers are gone: prayers are toggled; see combat.Prayers.) */
         /** A crossbow being loaded again (seconds left). */
         public float reload;
@@ -168,7 +168,7 @@ public class Actor {
         public long lastAttacker;
 
         public boolean busy() { return phase != Phase.IDLE || staggered > 0 || dodgeT > 0; }
-        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; gathered = false; }
+        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; aim = 0; gathered = false; }
         /** 0..1 through the whole move (for animation). */
         public float progress() {
             return switch (phase) {

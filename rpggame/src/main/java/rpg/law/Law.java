@@ -316,8 +316,8 @@ public final class Law {
                 n.fightTarget = 0; n.cs.lastAttacker = 0; n.cs.cancel(); n.cs.blocking = false; n.cs.draw = 0;
                 g.combat.projectiles.removeIf(pr -> pr.owner == n);
             }
-            if (fighting || pursuing || n.goal == rpg.ai.Brain.Goal.WATCH) {
-                n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = 0; n.hasGoalPos = false;
+            if (fighting || pursuing || n.goal == rpg.ai.Brain.Goal.WATCH && (n.watchTarget == id || n.watchTarget == 0)) {
+                n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = 0; n.hasGoalPos = false; n.watchTarget = 0;
                 if (n.loaded && n.alive) g.ai.desire(n, rpg.ai.AiSystem.A_IDLE);
             }
         }

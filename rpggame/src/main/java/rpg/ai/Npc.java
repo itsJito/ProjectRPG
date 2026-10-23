@@ -52,6 +52,9 @@ public final class Npc extends Actor implements Interactable {
     public boolean hideSet;
     /** A guard keeping an eye on a player he has heard bad things about, until (then a while before he does again). */
     public double watchUntil = -999;
+    public long watchTarget;
+    CombatTactics.Plan tactic;
+    double nextTactic;
     public double lastLootAt;
     public int lootTaken;
     public final List<Memory> memories = new ArrayList<>();
@@ -99,7 +102,7 @@ public final class Npc extends Actor implements Interactable {
     /** Its velocity smoothed over a few physics steps: where it is heading, as a body turns to it (not step to step). */
     float svx, svz;
     /** Placed somewhere new (a teleport): the motion it had is not carried there. */
-    public void resetMotion() { svx = svz = 0; vx = vz = 0; wantYaw = Float.NaN; }
+    public void resetMotion() { svx = svz = 0; vx = vz = 0; wantYaw = Float.NaN; tactic = null; nextTactic = 0; }
     /** The search it is on (a foe lost from sight, a body found), or null; and until when it stays watchful after giving one up. */
     public Hunt hunt;
     public double vigilantUntil = -1;
@@ -265,7 +268,7 @@ public final class Npc extends Actor implements Interactable {
     }
 
     @Override public String examine(Rpg g) {
-        return name + ", " + title.toLowerCase() + ". Combat level " + skills.combatLevel() + (crimeKnown(g.player.id) != null ? ". They eye you with suspicion." : ".");
+        return name + ", " + title.toLowerCase() + ". Level " + skills.combatLevel() + (crimeKnown(g.player.id) != null ? ". They eye you with suspicion." : ".");
     }
 
     @Override public String inspect(Rpg g) {

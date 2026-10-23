@@ -136,4 +136,40 @@ class CombatFlowTest {
         assertEquals(9, g.player.eq.get(ItemDef.Slot.AMMO).amount);
         assertEquals(1, g.combat.projectiles.size());
     }
+    @Test void meleeTimingCarriesUnusedFrameTimeAcrossPhaseBoundaries() {
+        var c = g.player.cs;
+        c.phase = Actor.Combat.Phase.WINDUP; c.move = Actor.Combat.Move.LIGHT_R;
+        c.windup = 0.12f; c.active = 0.1f; c.recover = 0.2f; c.t = 0; c.hitstop = 0;
+        g.combat.update(0.16f);
+        assertEquals(Actor.Combat.Phase.ACTIVE, c.phase);
+        assertEquals(0.04f, c.t, 1e-5f);
+        g.combat.update(0.08f);
+        assertEquals(Actor.Combat.Phase.RECOVER, c.phase);
+        assertEquals(0.02f, c.t, 1e-5f);
+        g.combat.update(0.19f);
+        assertEquals(Actor.Combat.Phase.IDLE, c.phase);
+    }
+
+    @Test void aShortImpactPauseOnlyConsumesItsOwnPartOfTheFrame() {
+        var c = g.player.cs;
+        c.phase = Actor.Combat.Phase.RECOVER; c.recover = 1; c.t = 0; c.hitstop = 0.01f;
+        g.combat.update(0.04f);
+        assertEquals(0.03f, c.t, 1e-5f);
+        assertEquals(0, c.hitstop, 1e-5f);
+    }
+
+    @Test void hitFeedbackRequiresActualDamageAndKillsAreDistinguished() {
+        assertEquals(-99, g.combat.lastPlayerHit);
+        Actor target = g.actor(Ids.BANDIT_1);
+        g.time = 10;
+        g.combat.resolve(g.player, target, 0, 0, ItemDef.DamageType.BLUNT, null, target.x, target.chestY(), target.z, "no damage", false);
+        assertEquals(-99, g.combat.lastPlayerHit);
+        hit(g.player, target);
+        assertEquals(g.time, g.combat.lastPlayerHit);
+        assertEquals(-99, g.combat.lastPlayerKill);
+        g.time = 11;
+        g.combat.resolve(g.player, target, target.maxHp() * 10, 0, ItemDef.DamageType.BLUNT, null, target.x, target.chestY(), target.z, "finishing hit", false);
+        assertFalse(target.alive);
+        assertEquals(g.time, g.combat.lastPlayerKill);
+    }
 }

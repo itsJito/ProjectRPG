@@ -35,6 +35,8 @@ public final class CombatSystem {
     /** Combat telemetry (GDD 4.2): the last contacts with every number that went into them. */
     public final ArrayDeque<String> telemetry = new ArrayDeque<>();
     public long contacts, blocked, parried, dodged, staggers, kills, deflections, shots, casts, blessings;
+    /** Confirmed player contacts only; HUD feedback never predicts a hit. */
+    public double lastPlayerHit = -99, lastPlayerKill = -99;
 
     public CombatSystem(Rpg g) { this.g = g; }
 
@@ -45,7 +47,7 @@ public final class CombatSystem {
         public Skill skill;
         public ItemStack ammo;
         public Spell spell;
-        public boolean done;
+        public boolean done, heardPass;
     }
 
     // ------------------------------------------------------------------ starting actions
@@ -76,7 +78,9 @@ public final class CombatSystem {
         // how often, never how hard (GDD 2.3); the active window, where the blow lands, is the weapon's own
         float k = w == null || move == Move.PUNCH || move == Move.BASH ? 1f : w.speed;
         float cadence = CombatMath.attackCadence(a.skills.level(Skill.ATTACK), w == null ? 0 : w.attackBonus) * (g.prayers == null ? 1 : g.prayers.tempo(a));
-        c.windup = tm[0] * k * cadence; c.active = tm[1] * k; c.recover = tm[2] * k * cadence;
+        c.windup = tm[0] * k * cadence * (move == Move.HEAVY ? 1 : 0.92f);
+        c.active = tm[1] * k;
+        c.recover = tm[2] * k * cadence * (move == Move.HEAVY ? 1 : 0.88f);
         if (a instanceof rpg.animal.Animal an) {
             // an animal's strike: a crouch and a lunge (a bear's swipe and a horse's kick are slower to come)
             float heavy = an.species.impact > 50 ? 1.35f : 1f;
@@ -181,7 +185,7 @@ public final class CombatSystem {
         p.impact = xb.impact;
         a.cs.reload = 1.25f * (1 - Math.min(0.3f, a.skills.level(Skill.AGILITY) * 0.003f));
         shots++;
-        if (g.sfx != null) g.sfx.play("bow", a.x, a.eyeY(), a.z, 0.9f, 0.7f, 30);
+        if (g.sfx != null) g.sfx.play("crossbow", a.x, a.eyeY(), a.z, 0.8f, 1, 30);
         g.state.commit("BoltLoosed", a.id, 0, null, 0, String.format("%s potential=%.1f", ammo.def.name, p.potential));
         return true;
     }
@@ -317,19 +321,30 @@ public final class CombatSystem {
         else a.manaAcc = 0;
         if (g.time - c.lastHurt > 8 && !a.dummy) a.hp = Math.min(a.maxHp(), a.hp + a.maxHp() * 0.004f * dt);
 
-        if (c.hitstop > 0) { c.hitstop -= dt; return; }
+        if (c.hitstop > 0) {
+            float held = Math.min(c.hitstop, dt);
+            c.hitstop -= held; dt -= held;
+            if (dt <= 0) return;
+        }
         if (c.phase == Phase.IDLE) return;
         c.t += dt;
-        switch (c.phase) {
-            case WINDUP -> { if (c.t >= c.windup) { c.phase = Phase.ACTIVE; c.t = 0; c.sweep = 0; if (g.sfx != null) g.sfx.play("swing", a.x, a.y + 1.3f, a.z, 0.5f); g.noise(a, a.x, a.y, a.z, 6, 0.3f); } }
-            case ACTIVE -> {
-                float to = Math.min(1, c.t / c.active);
-                sweep(a, c.sweep, to);
-                c.sweep = to;
-                if (c.phase == Phase.ACTIVE && c.t >= c.active) { c.phase = Phase.RECOVER; c.t = 0; }
-            }
-            case RECOVER -> { if (c.t >= c.recover) c.cancel(); }
-            default -> { }
+        // Carry elapsed time through boundaries. A slow frame must not add a frame of latency to every phase.
+        for (int transition = 0; transition < 3; transition++) {
+            if (c.phase == Phase.WINDUP) {
+                if (c.t < c.windup) return;
+                c.t -= c.windup; c.phase = Phase.ACTIVE; c.sweep = 0;
+                if (g.sfx != null) g.sfx.play("swing", a.x, a.y + 1.3f, a.z, 0.5f);
+                g.noise(a, a.x, a.y, a.z, 6, 0.3f);
+            } else if (c.phase == Phase.ACTIVE) {
+                float to = Math.min(1, c.t / Math.max(1e-5f, c.active));
+                sweep(a, c.sweep, to); c.sweep = to;
+                if (c.phase != Phase.ACTIVE || c.t < c.active) return;
+                c.t -= c.active; c.phase = Phase.RECOVER;
+                if (c.hitstop > 0) return;
+            } else if (c.phase == Phase.RECOVER) {
+                if (c.t >= c.recover) c.cancel();
+                return;
+            } else return;
         }
     }
 
@@ -647,7 +662,8 @@ public final class CombatSystem {
             v.cs.stabilityBonus += CombatMath.staggerResistance(stab);
             g.interact.cancel(v, "staggered");
         }
-        a.cs.hitstop = v.cs.hitstop = dealt > 0 ? 0.07f : 0.03f;
+        a.cs.hitstop = dealt > 0 ? 0.045f : 0.03f;
+        v.cs.hitstop = dealt > 0 ? 0.07f : 0.03f;
         if (v == g.player && g.fx != null) g.fx.shake = Math.min(1, g.fx.shake + 0.25f + dealt * 0.01f);
         if (a == g.player && g.fx != null) g.fx.shake = Math.min(1, g.fx.shake + 0.08f);
         if (g.fx != null) {
@@ -661,6 +677,7 @@ public final class CombatSystem {
         String detail = String.format("%s -> %s %s%s: potential %.1f, protection %.0f (%.0f%% mit %s)%s%s, dealt %d; impact %.1f vs stability %.1f%s; stamina %.0f",
                 a.name, v.name, how, behind ? " (from behind)" : "", potential, protection, mit * 100, type,
                 g.prayers.on(v, Prayer.WARD) ? ", ward" : "", guarding ? String.format(", guarded %.1f", blockedPart) : "", dealt, impact, stab, stagger ? " -> STAGGER" : "", v.stamina);
+        if (a == g.player && a != v && dealt > 0) lastPlayerHit = g.time;
         var ev = g.state.commit("ActorHit", a.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), 0, detail);
         log(detail);
         // GDD 2.2: real melee damage trains Attack and Strength; Defense follows harm endured or active defense.
@@ -713,6 +730,7 @@ public final class CombatSystem {
     }
 
     private void kill(Actor killer, Actor v, long cause) {
+        if (killer == g.player && v != g.player) lastPlayerKill = g.time;
         v.alive = false;
         v.hp = 0;
         v.cs.cancel();
@@ -735,6 +753,13 @@ public final class CombatSystem {
             if (p.spell != null && g.fx != null) {
                 float[] c = p.spell == Spell.FROST_LANCE ? new float[]{1.2f, 2.5f, 5} : p.spell == Spell.FIRE_BOLT ? new float[]{6, 2, 0.4f} : new float[]{3, 3, 5};
                 g.fx.trail(p.x, p.y, p.z, c[0], c[1], c[2]);
+            }
+            if (!p.done && !p.heardPass && p.ammo != null && p.owner != g.player) {
+                float dx = g.player.x - p.x, dy = g.player.eyeY() - p.y, dz = g.player.z - p.z;
+                if (dx * dx + dy * dy + dz * dz < 16 && g.vox.sight(p.x, p.y, p.z, g.player.x, g.player.eyeY(), g.player.z)) {
+                    p.heardPass = true;
+                    if (g.sfx != null) g.sfx.play("arrow.fly", p.x, p.y, p.z, 0.26f, 1.4f, 10);
+                }
             }
             if (p.done) it.remove();
         }
@@ -772,7 +797,7 @@ public final class CombatSystem {
             p.x = h.x - sx / len * 0.15f; p.y = h.y - sy / len * 0.15f; p.z = h.z - sz / len * 0.15f;
             if (p.spell != null) { if (g.fx != null) g.fx.sparks(p.x, p.y, p.z, 14); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
             if (h.block == Blocks.TARGET) { archeryTarget(p, h); return; }
-            if (g.sfx != null) g.sfx.play("thud", p.x, p.y, p.z, 0.4f);
+            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "wood.light" : "stone", p.x, p.y, p.z, 0.5f);
             dropArrow(p);
             return;
         }
@@ -793,7 +818,7 @@ public final class CombatSystem {
         g.prog.award(p.owner, Skill.ARCHERY, (4 + dist * 0.6f) * ring, "archery target", ev.id());
         if (p.owner == g.player) g.chat.say(String.format("You hit the target %s from %.0f m.", ring == 3 ? "dead centre" : ring == 2 ? "near the centre" : "on its edge", dist));
         if (g.fx != null) g.fx.text(ring == 3 ? "Bullseye!" : "Hit", h.x, h.y + 0.4f, h.z, 0xFFFFE070);
-        if (g.sfx != null) g.sfx.play("thud", h.x, h.y, h.z, 0.5f);
+        if (g.sfx != null) g.sfx.play("wood.light", h.x, h.y, h.z, 0.6f);
     }
 
     /** A spent arrow that missed lands where it stopped, to be picked up again. */

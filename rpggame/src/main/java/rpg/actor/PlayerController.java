@@ -49,7 +49,7 @@ public final class PlayerController {
     private Move queuedMelee;
     private ItemDef queuedWeapon;
     private double queuedUntil;
-    private static final float MELEE_BUFFER = 0.15f;
+    private static final float MELEE_BUFFER = 0.2f;
     private float stepClock;
     /** After a sprint is stopped short, a moment to recover; a quick turn in progress (seconds left) and its heading. */
     private float sprintRecover, quickTurn, quickYaw, quickCam, sprintTime;
@@ -90,9 +90,13 @@ public final class PlayerController {
         ItemDef main = p.main(), off = p.off();
         if (queuedMelee != null && (g.time > queuedUntil || main != queuedWeapon || in.offDown || in.dodge)) queuedMelee = null;
         boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
+        boolean crossbow = main != null && main.family == Family.CROSSBOW;
+        float aim = crossbow && in.offDown ? 1 : 0;
+        p.cs.aim += (aim - p.cs.aim) * (1 - (float) Math.exp(-16 * dt));
         // main hand
         if (in.mainDown) mainHeld += dt;
         if (bow) {
+            if (in.mainDown && !mainWas && g.sfx != null) g.sfx.play("bow.draw", p.x, p.eyeY(), p.z, 0.22f);
             if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.9f);
             if (!in.mainDown && mainWas && p.cs.draw > 0) { g.combat.shoot(p, aimYaw, aimPitch, p.cs.draw); p.cs.draw = 0; }
         } else if (staff) {
@@ -124,7 +128,7 @@ public final class PlayerController {
         if (!in.mainDown) mainHeld = 0;
         mainWas = in.mainDown;
         // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
-        boolean guardItem = off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff;
+        boolean guardItem = off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
         if (guardItem) g.combat.setBlock(p, in.offDown);
         else {
             g.combat.setBlock(p, false);
@@ -195,7 +199,7 @@ public final class PlayerController {
     /** Whether a weapon or spell is raised: that, not the first-person camera, is what rules out a sprint. */
     public boolean aiming(Player p) {
         Actor.Combat c = p.cs;
-        return c.blocking || c.draw > 0 || c.charge > 0 || c.phase != Actor.Combat.Phase.IDLE || c.castCooldown > 0.35f;
+        return c.aim > 0.1f || c.blocking || c.draw > 0 || c.charge > 0 || c.phase != Actor.Combat.Phase.IDLE || c.castCooldown > 0.35f;
     }
 
     private void move(Player p, float dt) {

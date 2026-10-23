@@ -34,11 +34,11 @@ import rpg.ui.Fragment.Placement;
  * has always used, the action bar bottom centre.
  */
 public final class Hud {
-    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC }
+    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC, MAP }
     public enum Win { NONE, CONTAINER, STATION, CABINET, SHOP, KIOSK, SKILL_GUIDE }
-    /** The old side-panel tab numbers (F1..F6 and the tests use them): each now opens a scene. The debug tab is gone: the developer console (`) took its place. */
-    public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5;
-    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC};
+    /** The old side-panel tab numbers (F1..F7 and the tests use them): each now opens a scene. The debug tab is gone: the developer console (`) took its place. */
+    public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5, TAB_MAP = 6;
+    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC, Scene.MAP};
     /** The scene frame's size (panel scenes draw inside it). */
     static final float FW = 900, FH = 520, FRAME_Y = -24;
 
@@ -127,13 +127,14 @@ public final class Hud {
         group("skills", "skills", inFrame("skills", 16, 52), "guide", inFrame("guide", 452, 52));
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
+        group("map", "worldmap", inFrame("worldmap", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM, 0, 120), "pause", Placement.at(Anchor.CENTER, 0, 0));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
         scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
-        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC}) {
+        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.MAP}) {
             String content = s.name().toLowerCase();
             scenes.put(s, new ArrayList<>(List.of("world", "vitals", "frame", content, "talk", "inspect", "addons", "top")));
         }

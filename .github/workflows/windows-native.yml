@@ -1,13 +1,15 @@
-name: Windows native build
+name: Windows build and tests
 
 on:
   push:
     paths:
-      - 'theastrattoengine/native/**'
+      - 'theastrattoengine/**'
+      - 'rpggame/**'
       - '.github/workflows/windows-native.yml'
   pull_request:
     paths:
-      - 'theastrattoengine/native/**'
+      - 'theastrattoengine/**'
+      - 'rpggame/**'
       - '.github/workflows/windows-native.yml'
   workflow_dispatch:
 
@@ -23,3 +25,11 @@ jobs:
         working-directory: theastrattoengine
         shell: cmd
         run: native\build.bat
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build game and run Java regressions
+        working-directory: rpggame
+        shell: cmd
+        run: gradlew.bat build --no-daemon --console=plain --max-workers=2

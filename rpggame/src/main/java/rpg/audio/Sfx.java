@@ -130,7 +130,12 @@ public final class Sfx {
         // ---- synthesized: what has no recording
         make("crackle", crackle());
         make("splash", noiseBurst(0.35f, 0.4f));
-        make("bow", twang());
+        for (int variant = 0; variant < 3; variant++) {
+            make("bow", BowAudio.release(RATE, false, 730 + variant));
+            make("crossbow", BowAudio.release(RATE, true, 830 + variant));
+        }
+        bank("bow.draw", "foley/creak", 3, ".ogg", 1);
+        bank("arrow.fly", "swish/swish-", 3, ".wav", 1);
         make("zap", sweep(1400, 200, 0.25f));
         make("click", tone(1400, 0.03f, 0.3f));
         make("fail", tone(160, 0.18f, 0.4f));
@@ -403,12 +408,6 @@ public final class Sfx {
             int at = k * 3000;
             for (int i = 0; at + i < w.length; i++) { double t = i / (double) RATE; w[at + i] += (float) (Math.sin(2 * Math.PI * (2600 + k * 300) * t) * Math.exp(-t * 30) * 0.25); }
         }
-        return w;
-    }
-
-    private float[] twang() {
-        float[] w = buf(0.3f);
-        for (int i = 0; i < w.length; i++) { double t = i / (double) RATE; w[i] = (float) (Math.sin(2 * Math.PI * (220 - t * 200) * t) * Math.exp(-t * 14) * 0.6); }
         return w;
     }
 

@@ -95,7 +95,7 @@ public final class Console {
         cmd("status", "Who and where you are, the time, the session.", a -> {
             print(String.format("%s at (%.1f, %.1f, %.1f) in %s, %s, day %d %s", g.player.name, g.player.x, g.player.y, g.player.z, DevMap.jurisdiction(g.player.x, g.player.z),
                     g.player.alive ? String.format("%.0f/%.0f HP", g.player.hp, g.player.maxHp()) : "dead", (int) (g.state.minutes / 1440) + 1, g.state.clockText()), TEXT);
-            print(String.format("Honor %+d (%s); combat level %d; %d events this session", g.honor.score, g.honor.rankName(), g.player.skills.combatLevel(), g.state.all().size()), DIM);
+            print(String.format("Honor %+d (%s); level %d; %d events this session", g.honor.score, g.honor.rankName(), g.player.skills.combatLevel(), g.state.all().size()), DIM);
         });
         cmd("quit", "Leaves the game.", a -> hud.quit());
         cmd("title", "Back to the title screen.", a -> hud.toTitle());

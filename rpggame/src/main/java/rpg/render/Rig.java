@@ -40,7 +40,8 @@ public final class Rig {
         int corrective = -1;
         // the hips' height (a spring), their side shift, the lean
         float hipH = -1, hipV, sway, accLean, roll, lastVx, lastVz, lastX, lastZ;
-        float headYaw;
+        float headYaw, bowRaise;
+        final float[] armSwing = new float[2];
         /** The body's velocity as the eye reads it: the mover's own flickers from one physics step to the next, and a
          *  figure driven by it raw twitches - its steps aim at a target that jumps, its lean at a spike of acceleration. */
         float svx, svz;
@@ -343,25 +344,28 @@ public final class Rig {
         }
         // ---- the arms
         ItemDef main = a.main(), off = a.off();
-        boolean bow = main != null && (main.family == Family.BOW || main.family == Family.CROSSBOW);
+        boolean bow = main != null && main.family == Family.BOW;
+        boolean crossbow = main != null && main.family == Family.CROSSBOW;
+        st.bowRaise += ((bow && c.draw > 0 ? 1 : 0) - st.bowRaise) * (1 - (float) Math.exp(-18 * dt));
         float[] aim = {(float) Math.sin(st.headYaw) * -(float) Math.cos(a.pitch), (float) Math.sin(a.pitch), -(float) Math.cos(a.pitch) * (float) Math.cos(st.headYaw)};
-        boolean handBow = main != null && main.family == Family.BOW;
-        float[] viewBow = firstPerson && handBow ? view(aim, 1f, -1, 3.5f, 10f) : null;
+        float[] viewBow = firstPerson && bow ? view(aim, 1f, -1, 3.5f, 10f) : null;
         float swingAmp = (0.62f + 0.38f * runF) * st.amp;
         for (int h = 0; h < 2; h++) {
-            int k = handBow ? 1 - h : h;
+            int k = bow ? 1 - h : h;
             int side = k == 0 ? 1 : -1;
             boolean isMain = k == 0;
             // The bow is in the support hand; the main hand draws its string. Crossbows keep their trigger grip.
             ItemDef holds = main != null && main.family == Family.BOW ? (isMain ? null : main) : isMain ? main : off;
             float[] shoulder = point(tm, side * b.shoulderX(), b.shoulderY() - b.hipY(), 0);
             float[] target;
-            float[] dir = torsoDir(0.05f * side, 0.55f, 1f);   // where a held weapon points at rest: carried ahead, point up
+            float[] dir = torsoDir(0.05f * side, 0.85f, -0.55f);   // where a held weapon points at rest: carried ahead, point up
             armActive[k] = false;
             boolean attacking = mv != null && c.phase != Phase.IDLE && c.offHand != isMain;
             boolean shieldSide = c.blocking && (isMain ? off == null : off != null && off.family == Family.SHIELD);
             // the arm swings with the opposite leg; a running arm is bent at the elbow
-            float opp = clamp(-(footFwd[1 - k] - footFwd[k]) / Math.max(1, legLen * 0.7f), -1, 1);
+            float desiredSwing = (float) Math.tanh((footFwd[1 - k] - footFwd[k]) / Math.max(1, legLen * 0.6f));
+            st.armSwing[k] += (desiredSwing - st.armSwing[k]) * (1 - (float) Math.exp(-18 * dt));
+            float opp = st.armSwing[k];
             float theta = swingAmp * opp;
             // the free arm as a runner carries it (the old target pushed the hand straight out ahead at chest height, the
             // arm nearly straight - every running stride read as a jab): the upper arm swings from the shoulder, further
@@ -401,6 +405,16 @@ public final class Rig {
                 float[] dl2 = toFigureDir(a, gr[3], gr[4], gr[5]);
                 target = lerp(rest, hl, strikeW);
                 dir = norm(lerp(dir, dl2, strikeW));
+            } else if (crossbow && (isMain || off == null)) {
+                float raise = firstPerson ? 0.35f + c.aim * 0.65f : c.aim;
+                if (isMain) {
+                    target = lerp(rest, firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : torsoPoint(shoulder, -b.shoulderX() * 0.75f, -2, -3.2f), raise);
+                    dir = norm(lerp(dir, aim, raise));
+                } else {
+                    target = add(add(hand[0], itemDir[0], 2.5f), torsoRight, -0.8f);
+                    target = add(target, torsoUp, -0.6f);
+                }
+                armActive[k] = true;
             } else if (isMain && c.charge > 0 && !bow) {
                 armActive[k] = true;
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
@@ -417,16 +431,16 @@ public final class Rig {
                 armActive[k] = true;
                 target = lerp(rest, torsoPoint(shoulder, side * 1.2f, 2.6f, 3.4f), Math.min(1, c.draw * 1.6f));
                 dir = norm(lerp(dir, aim, c.draw));
-            } else if (bow && !isMain && (c.draw > 0 || c.blocking)) {
+            } else if (bow && !isMain && (st.bowRaise > 0.001f || c.blocking)) {
                 // the bow held out to the aim only while it is drawn (carried at rest, the bow hand swings like any other:
                 // held out the whole time, every running stride looked like a punch)
                 armActive[k] = true;
-                target = viewBow != null ? viewBow : add(shoulder, aim, 8.6f);
+                target = lerp(rest, viewBow != null ? viewBow : add(shoulder, aim, 8.6f), st.bowRaise);
                 dir = new float[]{0, 1, 0};
-            } else if (bow && isMain && c.draw > 0) {
+            } else if (bow && isMain && st.bowRaise > 0.001f) {
                 armActive[k] = true;
-                float[] bowHand = handBow ? hand[1] : add(point(tm, -b.shoulderX(), b.shoulderY() - b.hipY(), 0), aim, 8.6f);
-                target = add(add(bowHand, aim, -(1.5f + c.draw * 6.5f)), new float[]{0, 1, 0}, 0.6f * c.draw);
+                float[] bowHand = hand[1];
+                target = lerp(rest, add(add(bowHand, aim, -(1.5f + c.draw * 6.5f)), new float[]{0, 1, 0}, 0.6f * c.draw), st.bowRaise);
                 dir = aim;
             } else if (holds != null && (holds.family == Family.STAFF || holds.family == Family.WAND) && c.castCooldown > 0.35f) {
                 armActive[k] = true;

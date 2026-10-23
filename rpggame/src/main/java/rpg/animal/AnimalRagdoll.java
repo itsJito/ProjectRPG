@@ -26,7 +26,7 @@ public final class AnimalRagdoll {
     public final List<Piece> pieces = new ArrayList<>();
     final List<Long> joints = new ArrayList<>();
     /** Knocked down (and to be handed back) rather than dead; when it came down. */
-    public final boolean knockdown;
+    public boolean knockdown;
     public final double since;
 
     private AnimalRagdoll(boolean knockdown, double since) { this.knockdown = knockdown; this.since = since; }

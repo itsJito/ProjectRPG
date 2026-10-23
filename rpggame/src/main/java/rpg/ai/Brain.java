@@ -29,8 +29,9 @@ public final class Brain {
 
     private final Rpg g;
     private final AiSystem ai;
+    private final CombatTactics tactics;
 
-    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; }
+    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; this.tactics = new CombatTactics(g); }
 
     record Score(Goal goal, float value, String reason) {}
 
@@ -78,8 +79,18 @@ public final class Brain {
             boolean violent = bad != null && !bad.settled && (bad.kind.equals("MURDER") || bad.kind.equals("ASSAULT")) && bad.confidence >= 0.45f;
             if (violent && n.distTo(g.player) < 16 && ai.canSee(n, g.player) && (g.time < n.watchUntil || g.time > n.watchUntil + 120)) {
                 if (g.time > n.watchUntil) n.watchUntil = g.time + 25;
+                n.watchTarget = g.player.id;
                 if (n.role != Npc.Role.LAWMAN || Math.hypot(g.player.x - n.postX, g.player.z - n.postZ) < 12)
                     s.add(new Score(Goal.WATCH, 0.62f, "heard " + g.player.name + " is dangerous (" + bad.kind.toLowerCase() + ", " + bad.source + "); keeping an eye on them"));
+            }
+        }
+        if (threat == null && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN)) {
+            Actor bloody = null; float distance = 12;
+            for (Actor a : g.actors()) if (a != n && a.alive && !a.dummy && (a == g.player || a instanceof Npc person && person.loaded) && a.bloodied >= 0.25f
+                    && n.distTo(a) < distance && ai.canSee(n, a)) { bloody = a; distance = n.distTo(a); }
+            if (bloody != null) {
+                n.watchTarget = bloody.id;
+                s.add(new Score(Goal.WATCH, 0.68f, "visible blood on " + bloody.name + "; checking what happened, no charge"));
             }
         }
         if (threat != null) {
@@ -164,9 +175,10 @@ public final class Brain {
             n.goalSince = g.time;
             n.hasGoalPos = false;
             n.legs = null;
+            n.tactic = null;
             g.interact.cancel(n, "changed goal");
-            if (best.goal == Goal.FIGHT && threat != null) n.fightTarget = threat.id;
         }
+        if (best.goal == Goal.FIGHT && threat != null) n.fightTarget = threat.id;
         n.goalReason = best.reason;
     }
 
@@ -227,12 +239,15 @@ public final class Brain {
             }
             case HIDE -> hide(n);
             case WATCH -> {
-                // shadowing them at a few paces, eyes on them; a word of warning first
-                Actor p = g.player;
+                Actor p = g.actor(n.watchTarget);
+                if (p == null || !p.alive || !ai.canSee(n, p)) { ai.desire(n, AiSystem.A_HOLD); n.nextThink = 0; break; }
                 n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
                 if (n.distTo(p) > 5) goTo(n, p.x, p.z, false, 4.5f); else ai.desire(n, AiSystem.A_HOLD);
-                if (g.time - n.goalSince < 0.5 && n.speech == null) g.ai.say(n, "I've heard about you. Don't try anything.");
-                n.lastOutcome = "watching " + p.name;
+                if (n.speech == null && g.time - n.lastDialogAt > 8) {
+                    g.ai.say(n, p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?" : "I've heard about you. Don't try anything.");
+                    n.lastDialogAt = g.time;
+                }
+                n.lastOutcome = "watching " + p.name + (p.bloodied >= 0.25f ? "; visible blood, asking questions" : "");
             }
             case WARN -> warn(n);
             case FIGHT -> fight(n, dt);
@@ -970,7 +985,9 @@ public final class Brain {
         float d = n.distTo(t);
         if (n.hostileToPlayer && Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 26) { n.fightTarget = 0; n.goal = Goal.RETURN; n.lastOutcome = "gave up the chase (leash)"; return; }
         // out of sight for a heartbeat: it heads for where it last saw them, not for where they really are
-        if (!ai.canSee(n, t)) {
+        boolean visible = ai.canSee(n, t);
+        if (!visible) {
+            if (n.tactic != null && tactics.move(n, t, false)) return;
             float[] lk = ai.lastKnown(n, t);
             if (lk != null) {
                 g.combat.setBlock(n, false);
@@ -979,6 +996,7 @@ public final class Brain {
                 n.lastOutcome = "after them - where they were last seen";
                 return;
             }
+            g.combat.setBlock(n, false); ai.desire(n, AiSystem.A_HOLD); return;
         }
         n.wantYaw = (float) Math.atan2(-(t.x - n.x), -(t.z - n.z));
         boolean facing = Math.abs(Actor.wrap(n.wantYaw - n.yaw)) < 0.45f;   // a blow is thrown only at what the body faces
@@ -994,8 +1012,9 @@ public final class Brain {
             n.lastOutcome = "ordering the player to halt";
             return;
         }
+        if (d > 3.5f && tactics.move(n, t, true)) return;
         ItemDef main = n.main();
-        boolean archer = main != null && main.family == ItemDef.Family.BOW;
+        boolean archer = main != null && (main.family == ItemDef.Family.BOW || main.family == ItemDef.Family.CROSSBOW);
         float reach = main == null || archer ? 0.6f : main.reach;
         boolean hasGuard = n.off() != null && n.off().family == ItemDef.Family.SHIELD || main != null && main.guard > 0 && !archer;
         // what the opponent is doing, as an eye would read it
@@ -1009,7 +1028,10 @@ public final class Brain {
             else if (n.cs.draw > 0 || (!n.cs.busy() && g.vox.sight(n.x, n.eyeY(), n.z, t.x, t.chestY(), t.z))) {
                 choice = "draw and shoot";
                 ai.desire(n, AiSystem.A_HOLD);
-                n.cs.draw = Math.min(1, n.cs.draw + dt / 1.1f);
+                if (main.family == ItemDef.Family.CROSSBOW) {
+                    if (n.cs.reload <= 0) g.combat.shootCrossbow(n, n.yaw, n.pitch + d * 0.001f);
+                    n.cs.aim = 1;
+                } else n.cs.draw = Math.min(1, n.cs.draw + dt / 1.1f);
                 if (n.cs.draw >= 1) { g.combat.shoot(n, n.yaw, n.pitch + d * 0.004f, 1); n.cs.draw = 0; }
             } else { choice = "find a line of sight"; goTo(n, t.x, t.z, false, 6); }
         } else if (n.hp < n.maxHp() * 0.45f && hasFood(n) && d > 3.5f && !n.cs.busy()) {

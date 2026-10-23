@@ -54,6 +54,7 @@ final class Gallery {
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
+        if ("field-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { fieldPolishShots(); menuShots(); return 0; }
         if ("polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { polishShots(); return 0; }
         // A short review of the three locomotion loops, without the unrelated twitch/work/combat galleries.
         if ("locomotion".equals(System.getenv("RPG_GALLERY_ONLY"))) { locomotionShots(tag); return 0; }
@@ -359,6 +360,62 @@ final class Gallery {
         }
     }
 
+    /** Current polish review through the real UI, item and dismemberment render paths. */
+    private void fieldPolishShots() {
+        place(64.5f, 62.5f, 0); frames(10);
+        hud.go(Hud.Scene.MAP);
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "world-map.png"));
+        hud.closeAll();
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        if (hud.alphaOf("honor") > 0.001f) throw new IllegalStateException("Honor is visible without a change");
+        for (int delta : new int[]{5, -5}) {
+            g.honor.event("Review", g.player.id, delta, null, false, delta > 0 ? "a good deed" : "a harmful deed");
+            for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, delta > 0 ? "honor-gain.png" : "honor-loss.png"));
+        }
+        for (String id : new String[]{"bronze_axe", "oak_shortbow", "bronze_crossbow"}) {
+            var item = rpg.item.Items.get(id);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(item, 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.get(item.family == rpg.item.ItemDef.Family.CROSSBOW ? "bronze_bolts" : "bronze_arrows"), 10));
+            for (int frame = 0; frame < 2; frame++) {
+                g.player.firstPerson = frame == 1;
+                g.player.cs.draw = item.family == rpg.item.ItemDef.Family.BOW ? 0.9f : 0;
+                g.player.cs.aim = 1;
+                g.controller.update(0);
+                for (int i = 0; i < 20; i++) {
+                    if (frame == 0) draw(quarter(g.player, 2.8f), 1f / 60);
+                    else { g.controller.update(0); Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false); }
+                }
+                Main.shot(gfx, win.width, win.height, new File(shots, id + (frame == 0 ? "-third.png" : "-aim.png")));
+            }
+        }
+        g.player.cs.cancel(); g.player.firstPerson = false;
+        g.controller.update(0);
+        g.combat.lastPlayerHit = g.time;
+        for (int i = 0; i < 3; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "hitmarker-white.png"));
+        g.combat.lastPlayerKill = g.time;
+        for (int i = 0; i < 3; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "hitmarker-kill.png"));
+        var npc = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        g.ai.reload(npc); g.teleport(npc, 66.5f, DevMap.FLOOR, 62.5f);
+        g.gore.sever(npc, rpg.combat.Gore.Part.HEAD, 0, 0, g.player);
+        g.ai.unload(npc);
+        game.tick(1f / 60);
+        var limb = g.gore.limbs.get(g.gore.limbs.size() - 1);
+        var rigid = g.lastRigids.body(limb.body);
+        if (rigid != null) {
+            float[] matrix = new float[16]; rigid.matrix(matrix);
+            float x = matrix[12], y = matrix[13], z = matrix[14];
+            for (int i = 0; i < 3; i++) draw(new float[]{x + 0.45f, y + 0.05f, z - 0.8f, x, y, z}, 1f / 60);
+            Main.shot(gfx, win.width, win.height, new File(shots, "head-eyes-closed.png"));
+            for (int i = 0; i < 3; i++) draw(new float[]{x + 0.2f, y - 0.5f, z - 0.4f, x, y - 0.05f, z}, 1f / 60);
+            Main.shot(gfx, win.width, win.height, new File(shots, "head-cut-surface.png"));
+        }
+    }
+
     private void menuShots() {
         java.nio.file.Path root0 = Profiles.root;
         Profiles.root = java.nio.file.Path.of("build", "gallery-profiles");
@@ -384,6 +441,17 @@ final class Gallery {
                 gfx.frame(win.width, win.height);
             }
             Main.shot(gfx, win.width, win.height, new File(shots, "title-" + (k == 0 ? "empty" : "profiles") + ".png"));
+            if (k == 1) for (int action = 0; action < 2; action++) {
+                for (int i = 0; i < 3; i++) {
+                    gfx.title(stage, t.selected.look, win.width, win.height, 1f / 60, g.time);
+                    ui.begin(gfx.cmd);
+                    ui.mx = action == 0 ? 350 : 180; ui.my = action == 0 ? 542 : 320; ui.click = i == 0;
+                    t.draw(ui, win.width, win.height, 1f / 60, false, false);
+                    ui.end(); gfx.frame(win.width, win.height);
+                }
+                Main.shot(gfx, win.width, win.height, new File(shots, action == 0 ? "profile-delete-confirm.png" : "profile-deleted.png"));
+                ui.click = false;
+            }
         }
         for (int s = 1; s <= Profiles.MAX; s++) Profiles.delete(s);
         Profiles.root = root0;

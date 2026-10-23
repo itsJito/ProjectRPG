@@ -375,13 +375,38 @@ public final class Gfx implements AutoCloseable {
         if (d == null) return;
         float[] ref = flatToFace ? fwd(yaw) : right(yaw);
         m.frame(grip, dir, ref);
-        if (d.family == Family.ARROW) {
+        if (d.family == Family.ARROW || d.family == Family.BOLT) {
             // a nocked arrow is one arrow, not the bundle the inventory holds
-            int mesh = mesh("w:" + d.family + ":" + d.reach, () -> Meshes.weapon(d.family, d.reach));
-            put(mesh, d.color, 1, 0.5f, 0.3f);
+            int mesh = mesh("arrow:" + d.color + ":" + d.family, () -> Meshes.arrow(d.color, d.family == Family.BOLT));
+            put(mesh, 0xFFFFFF, 1, 0.6f, 0.1f);
             return;
         }
         drawItem(d, 0);
+    }
+
+    /** Held bows share the inventory geometry; the string joins the limb tips to the actual drawing hand. */
+    private void heldBow(ItemDef d, float[] grip, float[] dir, float yaw, float draw, float[] drawingHand) {
+        int[] meshes = itemMeshes.computeIfAbsent(d.id + ":limbs", key -> {
+            float[][] vertices = VoxMesh.build(HiResItems.bow(d, false));
+            return new int[]{upload(vertices[0]), upload(vertices[1])};
+        });
+        m.frame(grip, dir, fwd(yaw + (float) Math.PI));
+        float[] top = bowPoint(7, 38, 0), bottom = bowPoint(7, -38, 0);
+        float[] nock = draw > 0 ? drawingHand : bowPoint(7, 0, 0);
+        put(meshes[0], 0, 1, 1, 1, 0, 1, 0.3f, 0.9f);
+        put(meshes[1], 0, 1, 1, 1, 0, 1, 0.82f, 0);
+        bowString(top, nock); bowString(bottom, nock);
+    }
+    private float[] bowPoint(float x, float y, float z) {
+        x *= ItemModels.VOX; y *= ItemModels.VOX; z *= ItemModels.VOX;
+        return new float[]{m.m[0] * x + m.m[4] * y + m.m[8] * z + m.m[12],
+                m.m[1] * x + m.m[5] * y + m.m[9] * z + m.m[13], m.m[2] * x + m.m[6] * y + m.m[10] * z + m.m[14]};
+    }
+    private void bowString(float[] a, float[] b) {
+        float[] delta = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+        float length = (float) Math.sqrt(delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]);
+        m.frame(new float[]{(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2}, delta, new float[]{1, 0, 0}).scale(0.003f, length, 0.003f);
+        put(box, 0xE8E0C8, 1, 0.85f, 0);
     }
 
     /** An item's own voxel meshes (metal, then the rest), made once. */
@@ -492,8 +517,10 @@ public final class Gfx implements AutoCloseable {
         if (!animalLost[which.ordinal()]) { part(p, vs, jx, jy, jz, rx, ry, rz); return; }
         var vm = p.vox();
         float w = Math.max(1.2f, Math.min(vm.sx, vm.sz) * 0.9f) * vs;
-        m.set(body).translate(jx * vs, jy * vs, jz * vs).scale(w, Math.max(0.03f, vs * 0.8f), w);
-        put(box, 0x6E0E0E, 1, 0.55f, 0);
+        m.set(body).translate(jx * vs, jy * vs, jz * vs);
+        if (which == rpg.combat.Gore.Part.HEAD || which == rpg.combat.Gore.Part.TAIL) m.rotateX((float) Math.PI / 2);
+        m.scale(w, 1, w);
+        put(mesh("wound", Meshes::wound), 0xFFFFFF, 1, 0.55f, 0);
     }
 
     /** An animal whose body physics holds: each figure part drawn on its rigid body (false: none there yet - draw it posed). */
@@ -507,8 +534,9 @@ public final class Gfx implements AutoCloseable {
             if (r == null) continue;
             r.matrix(m16);
             System.arraycopy(m16, 0, body.m, 0, 16);
-            var vm = p.model().vox();
-            part(p.model(), vs, -(vm.sx / 2f - p.model().gx()), -(vm.sy / 2f - p.model().gy()), -(vm.sz / 2f - p.model().gz()), 0, 0, 0);
+            var model = !a.alive && p.part() == rpg.combat.Gore.Part.HEAD ? AnimalModels.of(a.species, a.variant).headClosed : p.model();
+            var vm = model.vox();
+            part(model, vs, -(vm.sx / 2f - model.gx()), -(vm.sy / 2f - model.gy()), -(vm.sz / 2f - model.gz()), 0, 0, 0);
             any = true;
         }
         return any;
@@ -536,6 +564,7 @@ public final class Gfx implements AutoCloseable {
         if (a.ragdoll != null && ragdollAnimal(a, vs)) return;
         boolean dead = !a.alive;
         float speed = dead ? 0 : (float) Math.hypot(a.vx, a.vz);
+        if (dead) { a.amp = 0; a.flap = 0; }
         // the gait: one cycle per two strides, its swing growing with speed
         float legM = Math.max(2, f.legH) * vs;
         a.gait += speed / (legM * 2.4f) * (float) Math.PI * 2 * dt * (f.bird ? 1.6f : 1);
@@ -550,14 +579,16 @@ public final class Gfx implements AutoCloseable {
         float yawWant = 0;
         if (a.faceThreat) yawWant = Math.max(-0.9f, Math.min(0.9f, Actor.wrap((float) Math.atan2(-(a.threatX - a.x), -(a.threatZ - a.z)) - a.yaw)));
         else if (!a.headDown && speed < 0.1f) yawWant = 0.35f * (float) Math.sin(time * 0.31 + a.id * 1.7);
-        a.headPitch += (headWant - a.headPitch) * Math.min(1, dt * 5);
-        a.headYaw += (yawWant - a.headYaw) * Math.min(1, dt * 4);
+        if (!dead) {
+            a.headPitch += (headWant - a.headPitch) * Math.min(1, dt * 5);
+            a.headYaw += (yawWant - a.headYaw) * Math.min(1, dt * 4);
+        }
         // a strike: crouch in the wind-up, lunge through the active window
         float lunge = 0, crouch = 0;
         if (a.cs.phase == Actor.Combat.Phase.WINDUP) crouch = Math.min(1, a.cs.t / Math.max(0.05f, a.cs.windup));
         else if (a.cs.phase == Actor.Combat.Phase.ACTIVE) lunge = (float) Math.sin(Math.PI * Math.min(1, a.cs.t / Math.max(0.05f, a.cs.active)));
         else if (a.cs.phase == Actor.Combat.Phase.RECOVER) lunge = Math.max(0, 1 - a.cs.t / Math.max(0.05f, a.cs.recover)) * 0.4f;
-        float rear = a.rearing ? 0.5f + 0.5f * (float) Math.sin(Math.min(1, (float) (time - a.goalSince)) * Math.PI / 2) : 0;
+        float rear = !dead && a.rearing ? 0.5f + 0.5f * (float) Math.sin(Math.min(1, (float) (time - a.goalSince)) * Math.PI / 2) : 0;
         // the body's frame
         float bob = f.hopper ? Math.max(0, (float) Math.sin(ph)) * 3.2f * Math.min(1, amp * 2.5f) : Math.abs((float) Math.sin(ph)) * 0.6f * amp;
         // a straight leg swung through an arc is shorter at its ends: the body rides down to keep the feet on the ground
@@ -594,8 +625,8 @@ public final class Gfx implements AutoCloseable {
             limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, -beat);
             // the head bobs with each step (a chicken's peck-walk) and dips to feed
             float bobZ = sp == Species.CHICKEN ? (float) Math.sin(ph * 2) * 0.9f * Math.min(1, amp * 3) : 0;
-            float peck = a.headDown ? 0.4f * Math.max(0, (float) Math.sin(time * 6 + a.id)) : 0;
-            limb(rpg.combat.Gore.Part.HEAD, f.head, vs, f.neck[0], f.neck[1] - lie * 1.2f, f.neck[2] + bobZ, a.headPitch - peck, a.headYaw, 0);
+            float peck = !dead && a.headDown ? 0.4f * Math.max(0, (float) Math.sin(time * 6 + a.id)) : 0;
+            limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1] - lie * 1.2f, f.neck[2] + bobZ, a.headPitch - peck, a.headYaw, 0);
         } else {
             float swing = 0.95f * amp;   // amp is already capped (0.42 walk, 0.62 run)
             float fl, fr, bl, br;
@@ -619,7 +650,7 @@ public final class Gfx implements AutoCloseable {
             limb(rpg.combat.Gore.Part.LEG_L, f.legBack, vs, -f.legB[0], f.legB[1], f.legB[2], bl, 0, 0);
             limb(rpg.combat.Gore.Part.LEG_R, f.legBack, vs, f.legB[0], f.legB[1], f.legB[2], br, 0, 0);
             float headP = a.headPitch + (rear > 0 ? -0.4f * rear : 0) - lie * (dead ? 0.1f : 0.25f) + (float) Math.sin(ph * 2) * 0.05f * amp;
-            limb(rpg.combat.Gore.Part.HEAD, f.head, vs, f.neck[0], f.neck[1], f.neck[2], headP, a.headYaw, 0);
+            limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1], f.neck[2], headP, a.headYaw, 0);
             // the tail: a dog's wag, a cow's switch, a cat's slow curl, a fox's brush streaming when it runs
             float wag = 0, droop = 0.35f;
             switch (sp) {
@@ -630,7 +661,7 @@ public final class Gfx implements AutoCloseable {
                 case PIG -> { wag = 0.4f * (float) Math.sin(time * 5 + a.id); droop = 0; }
                 default -> { }
             }
-            limb(rpg.combat.Gore.Part.TAIL, f.tail, vs, f.tailAt[0], f.tailAt[1], f.tailAt[2], droop * (1 - lie * 0.5f), wag, 0);
+            limb(rpg.combat.Gore.Part.TAIL, f.tail, vs, f.tailAt[0], f.tailAt[1], f.tailAt[2], droop * (1 - lie * 0.5f), dead ? 0 : wag, 0);
         }
         if (!dead && lie < 0.5f) cmd.shadowBody(a.x, a.y, a.z, a.radius, a.height * (1 - lie * 0.5f));
     }
@@ -744,10 +775,15 @@ public final class Gfx implements AutoCloseable {
                 // a shield on the forearm: carried face-out at the side; raised in guard (or seen through the eyes) its face
                 // turned to the front, where the blows come from
                 if (holds.family == Family.SHIELD) held(holds, add(grip, worldDir(new float[]{0, 0, -1}), 0.08f), new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
-                else if (holds.family == Family.BOW) held(holds, grip, dir, yaw + (float) Math.PI, true);   // string toward the archer
+                else if (holds.family == Family.BOW) heldBow(holds, grip, dir, yaw, a.cs.draw, world(rig.hand[0]));
                 else held(holds, grip, dir, yaw, !firstPerson);   // show the broad face through the eyes; carry edge-forward in third person
             }
-            if (k == 0 && bow && main.family == Family.BOW && a.cs.draw > 0) held(rpg.item.Items.BRONZE_ARROWS, grip, dir, yaw, false);
+            ItemDef ammo = a.eq.def(Slot.AMMO);
+            if (k == 0 && ammo != null) {
+                if (bow && a.cs.draw > 0 && ammo.family == Family.ARROW) held(ammo, grip, dir, yaw, false);
+                else if (main != null && main.family == Family.CROSSBOW && a.cs.reload <= 0 && ammo.family == Family.BOLT)
+                    held(ammo, add(grip, dir, 0.1f), dir, yaw, false);
+            }
             // a ring on the right hand: a glint of gold (and its stone) at the knuckles
             ItemDef ring = k == 0 ? a.eq.def(Slot.RING) : null;
             if (ring != null && a.eq.def(Slot.HANDS) == null) {
@@ -784,8 +820,8 @@ public final class Gfx implements AutoCloseable {
 
     /** The wound where a part was: a raw, dark cap at the joint (the current matrix is the lost segment's). */
     private void stump() {
-        m.scale(2.2f, 0.7f, 2.2f).translate(0, -0.3f, 0);
-        put(box, 0x6E0E0E, 1, 0.55f, 0);
+        m.scale(3.6f, 0.7f, 3.6f);
+        put(mesh("wound", Meshes::wound), 0xFFFFFF, 1, 0.55f, 0);
     }
 
     /** The game's wounds (set by the scene each frame; null in the creator). */
@@ -802,7 +838,7 @@ public final class Gfx implements AutoCloseable {
                 // an animal's part: its own figure part, its middle where the rigid body is, and the cut end dark
                 var af = AnimalModels.of(l.species, l.variant);
                 ItemModels.Model md = switch (l.part) {
-                    case HEAD -> af.head; case TAIL -> af.tail;
+                    case HEAD -> af.headClosed; case TAIL -> af.tail;
                     case ARM_R, ARM_L -> af.bird ? af.wing : af.legFront;
                     default -> af.bird ? af.legFront : af.legBack;
                 };
@@ -812,10 +848,15 @@ public final class Gfx implements AutoCloseable {
                 float vs = AnimalModels.PX * l.scale;
                 var vm = md.vox();
                 part(md, vs, -(vm.sx / 2f - md.gx()), -(vm.sy / 2f - md.gy()), -(vm.sz / 2f - md.gz()), 0, 0, 0);
+                m.set(body).translate((md.gx() - vm.sx / 2f) * vs, (md.gy() - vm.sy / 2f) * vs, (md.gz() - vm.sz / 2f) * vs);
+                if (l.part == rpg.combat.Gore.Part.HEAD || l.part == rpg.combat.Gore.Part.TAIL) m.rotateX((float) Math.PI / 2);
+                m.scale(Math.min(0.3f, vm.sx * vs * 0.75f), 1, Math.min(0.3f, Math.min(vm.sx, vm.sz) * vs * 0.75f));
+                put(mesh("wound", Meshes::wound), 0xFFFFFF, 1, 0.55f, 0);
                 continue;
             }
             Actor owner = g.actor(l.owner);
-            int[][] fig = figure(owner != null ? owner : new Actor(0, "", 0), l.look);
+            if (owner == null) owner = new Actor(0, "", 0);
+            int[][] fig = figure(owner, l.look);
             r.matrix(m16);
             float px = Body.PX;
             Seg[] segs = segsOf(l.part);
@@ -825,6 +866,10 @@ public final class Gfx implements AutoCloseable {
                 m.set(root).translate(0, -l.length / 2, 0).scale(px, px, px);
                 put(fig[0][Seg.HEAD.ordinal()], 0, 0.9f, 0.9f, 0.9f, 0, 1, 0.85f, 0);
                 put(fig[1][Seg.HEAD.ordinal()], 0, 0.9f, 0.9f, 0.9f, 0, 1, 0.85f, 0);
+                headBase.set(m);
+                headFace(owner, l.look, Body.of(l.look), true, false);
+                m.set(root).translate(0, -l.length / 2 - 0.004f, 0).scale(0.24f, 1, 0.24f);
+                put(mesh("wound", Meshes::wound), 0xFFFFFF, 1, 0.55f, 0);
                 continue;
             }
             // a limb hangs down from its top joint: upper segment from the box's top, the lower one where it ends
@@ -837,8 +882,8 @@ public final class Gfx implements AutoCloseable {
             put(fig[0][segs[1].ordinal()], 0, 0.9f, 0.9f, 0.9f, 0, 1, 0.85f, 0);
             put(fig[1][segs[1].ordinal()], 0, 0.9f, 0.9f, 0.9f, 0, 1, 0.85f, 0);
             // the cut end
-            m.set(root).translate(0, l.length / 2, 0).scale(0.12f, 0.03f, 0.12f);
-            put(box, 0x6E0E0E, 1, 0.55f, 0);
+            m.set(root).translate(0, l.length / 2 + 0.004f, 0).scale(0.22f, 1, 0.22f);
+            put(mesh("wound", Meshes::wound), 0xFFFFFF, 1, 0.55f, 0);
         }
     }
 
@@ -893,10 +938,16 @@ public final class Gfx implements AutoCloseable {
      * Shared by the living figure and the dead body, so a corpse keeps its hair and lies with its eyes closed.
      */
     private void headUnits(Actor a, Appearance look, Body b, boolean shut, boolean shadowOnly) {
+        headFace(a, look, b, shut, shadowOnly);
+        if (a.eq.def(Slot.HEAD) == null)
+            unit(torsoBase, b.neckY() - b.hipY(), b, mesh("hairhang:" + look.female + ":" + look.hair, () -> Meshes.hairHang(look.female, look.hair)), Appearance.hairColor(look.hairColor), false);
+    }
+
+    /** Head-attached details also follow a severed head, whose eyes stay closed. */
+    private void headFace(Actor a, Appearance look, Body b, boolean shut, boolean shadowOnly) {
         int hairRgb = Appearance.hairColor(look.hairColor);
         if (a.eq.def(Slot.HEAD) == null) {
             unit(headBase, b.head[1] / 2f, b, mesh("hair:" + look.female + ":" + look.hair, () -> Meshes.hair(look.female, look.hair)), hairRgb, shadowOnly);
-            unit(torsoBase, b.neckY() - b.hipY(), b, mesh("hairhang:" + look.female + ":" + look.hair, () -> Meshes.hairHang(look.female, look.hair)), hairRgb, false);
         }
         if (!look.female && look.beard > 0) unit(headBase, b.head[1] / 2f, b, mesh("beard:" + look.beard, () -> Meshes.beard(look.beard)), Appearance.hairColor(look.beardColor), shadowOnly);
         if (shut && !shadowOnly) {
@@ -1277,6 +1328,11 @@ public final class Gfx implements AutoCloseable {
             float[] col = p.spell == Spells.Spell.FIRE_BOLT ? new float[]{1, 0.45f, 0.1f} : p.spell == Spells.Spell.FROST_LANCE ? new float[]{0.4f, 0.8f, 1} : new float[]{0.8f, 0.8f, 1};
             m.identity().translate(p.x, p.y, p.z).scale(0.18f, 0.18f, 0.18f);
             put(box, AstrattoNative.MODEL_NO_SHADOW, col[0], col[1], col[2], 4f, 1, 0.3f, 0);
+            return;
+        }
+        if (p.ammo != null && (p.ammo.def.family == Family.ARROW || p.ammo.def.family == Family.BOLT)) {
+            float length = p.ammo.def.family == Family.BOLT ? 0.45f : 0.85f;
+            held(p.ammo.def, new float[]{p.x - d[0] * length, p.y - d[1] * length, p.z - d[2] * length}, d, 0, false);
             return;
         }
         limb(new float[]{p.x - d[0] * 0.7f, p.y - d[1] * 0.7f, p.z - d[2] * 0.7f}, new float[]{p.x, p.y, p.z}, 0.025f, 0.025f, 0, 0xB08050, 1, 0.8f, 0);

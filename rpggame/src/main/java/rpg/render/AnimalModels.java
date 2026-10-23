@@ -23,7 +23,7 @@ public final class AnimalModels {
 
     /** A built figure: its parts and where they join the body (voxels, from the body's centre). */
     public static final class Figure {
-        public ItemModels.Model body, head, tail, legFront, legBack, wing;
+        public ItemModels.Model body, head, headClosed, tail, legFront, legBack, wing;
         /** Body size (W across, H tall, L long) and where its centre stands above the ground. */
         public float bw, bh, bl, bodyY;
         public float legH, legW;
@@ -106,6 +106,7 @@ public final class AnimalModels {
         f.legB = new float[]{inX, -bh / 2f + 2, bl / 2f - legW / 2f - 1.5f};
         // the head, on its neck
         f.head = head(s, v, hw, hh, hl, snout, coat);
+        f.headClosed = closeEyes(f.head, (s == Species.HORSE ? 9 : 1) + hh - Math.max(2, hh / 3), snout + 2, 2, hw + 1);
         f.neck = s == Species.HORSE ? new float[]{0, bh / 2f + 1, -bl / 2f + 2} : new float[]{0, bh / 2f - hh * 0.35f + (s == Species.PIG ? -1 : 1), -bl / 2f + 1};
         f.tail = tail(s, coat);
         f.tailAt = new float[]{0, bh / 2f - (s == Species.PIG ? 2 : 1.5f), bl / 2f - 0.5f};
@@ -261,6 +262,7 @@ public final class AnimalModels {
         h.set(0, 2, 2, c(0x141010)); h.set(3, 2, 2, c(0x141010));
         for (int y = 4; y < 10; y++) { h.set(0, y, 3, y > 5 ? c(0xD8B0A0) : c(0x9A7A5C)); h.set(3, y, 3, y > 5 ? c(0xD8B0A0) : c(0x9A7A5C)); h.set(0, y, 4, c(0x8A6A4E)); h.set(3, y, 4, c(0x8A6A4E)); }
         f.head = new ItemModels.Model(h, 2, 1, 4.5f);
+        f.headClosed = closeEyes(f.head, 2, 2, 0, 3);
         f.neck = new float[]{0, 2, -3};
         VoxModel t = new VoxModel(2, 2, 2); t.box(0, 0, 0, 1, 1, 1, c(0xF4F0E8));
         f.tail = new ItemModels.Model(t, 1, 1, 0.5f);
@@ -318,6 +320,7 @@ public final class AnimalModels {
             h.set(1, 2, sk0, c(0xD02A28)); h.set(1, 1, sk0, c(0xC02424));                                              // the wattle
         }
         f.head = new ItemModels.Model(h, 1.5f, 0.5f, sk1 + 0.5f);
+        f.headClosed = closeEyes(f.head, 4, sk0 + 1, 0, 2);
         f.neck = new float[]{0, 2, -bl / 2f + 1.2f};
         // wings: a flat panel each side, pivoting at the shoulder
         VoxModel w = new VoxModel(1, 4, bl - 2);
@@ -328,6 +331,17 @@ public final class AnimalModels {
         f.tail = null;
         f.tailAt = new float[]{0, 0, 0};
         return f;
+    }
+
+    private static ItemModels.Model closeEyes(ItemModels.Model head, int eyeY, int eyeZ, int... eyeX) {
+        VoxModel original = head.vox(), closed = new VoxModel(original.sx, original.sy, original.sz);
+        for (int x = 0; x < original.sx; x++) for (int y = 0; y < original.sy; y++) for (int z = 0; z < original.sz; z++) closed.set(x, y, z, original.get(x, y, z));
+        for (int x : eyeX) {
+            int coat = original.get(x, eyeY, eyeZ + 1);
+            if (coat == 0) coat = original.get(x, eyeY + 1, eyeZ);
+            closed.set(x, eyeY, eyeZ, c(Tex.shade(coat & 0xFFFFFF, 0.85f)));
+        }
+        return new ItemModels.Model(closed, head.gx(), head.gy(), head.gz());
     }
 
     // ------------------------------------------------------------------ coats

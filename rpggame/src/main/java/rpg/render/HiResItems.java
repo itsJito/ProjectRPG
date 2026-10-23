@@ -18,7 +18,9 @@ import rpg.item.Tier;
  */
 final class HiResItems {
     /** Continuous tapered limbs at 64 voxels/metre, shared by held, dropped and inventory bows. */
-    static ItemModels.Model bow(ItemDef d) {
+    static ItemModels.Model bow(ItemDef d) { return bow(d, true); }
+
+    static ItemModels.Model bow(ItemDef d, boolean string) {
         VoxModel m = new VoxModel(14, 82, 7);
         int wood = mat(d.color);
         for (int y = 0; y <= 80; y++) {
@@ -31,7 +33,7 @@ final class HiResItems {
                 m.set(x, y, 3, c);
             }
         }
-        for (int y = 2; y <= 78; y++) m.set(10, y, 3, mat(0xE8E0C8));
+        if (string) for (int y = 2; y <= 78; y++) m.set(10, y, 3, mat(0xE8E0C8));
         return new ItemModels.Model(m, 3.5f, 40.5f, 3.5f);
     }
 

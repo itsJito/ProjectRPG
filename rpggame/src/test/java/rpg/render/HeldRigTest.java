@@ -50,4 +50,13 @@ class HeldRigTest {
             if (draw > 0) assertTrue(rig.hand[0][2] > rig.hand[1][2], "string hand draws back from the bow hand");
         }
     }
+    @Test void thirdPersonAxesAreCarriedUpAndAheadAndCrossbowsHaveTwoHandSupport() {
+        Actor a = actor("bronze_axe"); Rig rig = new Rig(); Rig.State state = new Rig.State();
+        rig.pose(a, state, 1f / 60, 0, false);
+        assertTrue(rig.itemDir[0][1] > 0 && rig.itemDir[0][2] < 0, "the haft must point up and forward");
+        a = actor("bronze_crossbow"); a.cs.aim = 1;
+        rig.pose(a, new Rig.State(), 1f / 60, 0, false);
+        assertTrue(rig.hand[1][2] < rig.hand[0][2], "the support hand must be ahead of the trigger grip");
+        assertTrue(rig.itemDir[0][2] < -0.99f);
+    }
 }

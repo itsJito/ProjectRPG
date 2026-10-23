@@ -7,6 +7,7 @@ import java.util.List;
 import org.lwjgl.system.MemoryUtil;
 import rpg.Chat;
 import rpg.Rpg;
+import rpg.item.ItemDef;
 import rpg.actor.Actor;
 import rpg.actor.Player;
 import rpg.ai.Brain;
@@ -45,9 +46,10 @@ final class HudFragments {
         hud.add(new SneakMeter(hud));
         hud.add(new XpDrops(hud));
         hud.add(new Minimap(hud));
+        hud.add(new WorldMap(hud));
         hud.add(new Area(hud)).wake("area", "world", "scene").linger(5);
         hud.add(new Wanted(hud)).wake("law").linger(8);
-        hud.add(new HonorToast(hud)).wake("honor").linger(6);
+        hud.add(new HonorToast(hud)).wake("honor");
         hud.add(new Target(hud)).wake("combat").linger(5);
         hud.add(new LevelUp(hud));
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
@@ -125,7 +127,8 @@ final class HudFragments {
     static final class HonorToast extends Fragment {
         private float shown = 0;
         private boolean init;
-        HonorToast(Hud h) { super("honor"); }
+        HonorToast(Hud h) { super("honor"); fadeIn = 0.2f; fadeOut = 0.4f; linger = 6 - fadeOut; }
+        @Override protected boolean active() { return false; }
         @Override public float width() { return 380; }
         @Override public float height() { return 74; }
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -181,7 +184,7 @@ final class HudFragments {
         float a2 = ease((t - 1.9f) / 1.2f);
         Actor k = d.killer != 0 ? g.actor(d.killer) : null;
         String by = d.killerName == null ? "Your wounds were the end of you." : "Slain by " + d.killerName
-                + (k != null && !(k instanceof rpg.animal.Animal) ? ", combat level " + k.skills.combatLevel() : "") + ".";
+                + (k != null && !(k instanceof rpg.animal.Animal) ? ", level " + k.skills.combatLevel() : "") + ".";
         ui.centeredFade(by, cx, cy + ts * 1.25f + 16, 19, Style.fade(0xFFCFC6B6, a2));
         // what becomes of their things
         float a3 = ease((t - 3.0f) / 1.2f);
@@ -433,8 +436,28 @@ final class HudFragments {
             float cx = hud.w / 2f, cy = hud.h / 2f;
             Player p = g.player;
             if (hud.scene == Hud.Scene.WORLD) {
-                ui.rect(cx - 1, cy - 1, 2, 2, 0xD0FFFFFF);
-                ui.ring(cx, cy, 6, 1.2f, 0x50FFFFFF);
+                ItemDef held = p.main();
+                boolean ranged = held != null && (held.family == ItemDef.Family.BOW || held.family == ItemDef.Family.CROSSBOW);
+                float gap = ranged ? 6 + 10 * (1 - p.cs.draw) : 4;
+                int aimColor = p.cs.reload > 0 ? Style.DIM : 0xD0FFFFFF;
+                ui.rect(cx - 1, cy - 1, 2, 2, aimColor);
+                if (ranged) {
+                    if (held.family == ItemDef.Family.CROSSBOW && p.cs.reload <= 0) gap = 6;
+                    ui.line(cx - gap - 5, cy, cx - gap, cy, 1.5f, aimColor);
+                    ui.line(cx + gap, cy, cx + gap + 5, cy, 1.5f, aimColor);
+                    ui.line(cx, cy - gap - 5, cx, cy - gap, 1.5f, aimColor);
+                    ui.line(cx, cy + gap, cx, cy + gap + 5, 1.5f, aimColor);
+                    if (p.cs.reload > 0) ui.flatCentered("Reloading", cx, cy + 29, 11, Style.DIM);
+                } else ui.ring(cx, cy, 6, 1.2f, 0x50FFFFFF);
+                double hitAge = g.time - g.combat.lastPlayerHit, killAge = g.time - g.combat.lastPlayerKill;
+                if (hitAge >= 0 && hitAge < 0.22 || killAge >= 0 && killAge < 0.3) {
+                    boolean kill = killAge >= 0 && killAge < 0.3;
+                    float fade = (float) (1 - (kill ? killAge / 0.3 : hitAge / 0.22));
+                    int color = Style.fade(kill ? 0xFFFF3434 : 0xFFFFFFFF, fade);
+                    for (int sx : new int[]{-1, 1}) for (int sy : new int[]{-1, 1})
+                        ui.line(cx + sx * 7, cy + sy * 7, cx + sx * 12, cy + sy * 12, 2, color);
+                    if (hitAge >= 0 && hitAge < 0.06) ui.rect(0, 0, hud.w, hud.h, Style.fade(0x0CFFF0D0, (float) (1 - hitAge / 0.06)));
+                }
             }
             if (p.cs.charge > 0.05f) Style.bar(ui, cx - 16, cy + 14, 32, 2, p.cs.charge, p.cs.charge >= 0.7f ? Style.ACCENT : Style.TEXT);
             if (p.cs.draw > 0) ui.ring(cx, cy, 16 - p.cs.draw * 8, 1.5f, p.cs.draw >= 1 ? Style.GOOD : 0xA0FFFFFF);
@@ -533,6 +556,47 @@ final class HudFragments {
             }
             ui.img("XP_Icon", x, y - 2, 16, 0xC0FFFFFF);
             ui.text(String.format("%,d", hud.g.player.skills.totalXp()), x + 22, y - 1, 12, Style.DIM);
+        }
+    }
+
+    /** The full playable area, sharing the minimap's edited-column texture and landmark data. */
+    static final class WorldMap extends Fragment {
+        WorldMap(Hud h) { super("worldmap"); }
+        @Override public float width() { return Hud.FW - 32; }
+        @Override public float height() { return Hud.FH - 68; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Rpg g = hud.g;
+            Minimap map = (Minimap) hud.fragment("minimap");
+            if (map.tex == 0 || g.mapDirty) map.build();
+            if (g.time - map.markersAt > 2) map.markers();
+            float size = height() - 30, left = x + 8, top = y + 22, side = left + size + 28;
+            ui.text("WORLD MAP", left, y, 14, Style.ACCENT);
+            ui.quad(map.tex, new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
+                    new float[]{0, 0, 1, 0, 1, 1, 0, 1}, 0xFFFFFFFF, 0);
+            ui.border(left, top, size, size, 1, Style.EDGE_HI);
+            for (Object[] marker : map.markers) {
+                float mx = left + (float) marker[1] / DevMap.SX * size, my = top + (float) marker[2] / DevMap.SZ * size;
+                ui.img((String) marker[0], mx - 7, my - 7, 14, 0xFFFFFFFF);
+            }
+            // Local people only: a world map is not remote knowledge of hidden actors.
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z))
+                ui.disc(left + n.x / DevMap.SX * size, top + n.z / DevMap.SZ * size, 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
+            for (var grave : g.undertaker.graves()) skull(ui, left + grave.x / DevMap.SX * size, top + grave.z / DevMap.SZ * size, 12, Style.TEXT);
+            if (hud.flag != null) ui.disc(left + hud.flag[0] / DevMap.SX * size, top + hud.flag[1] / DevMap.SZ * size, 4, Style.BAD);
+            float px = left + g.player.x / DevMap.SX * size, py = top + g.player.z / DevMap.SZ * size;
+            float yaw = g.controller.camYaw;
+            ui.disc(px, py, 4, Style.ACCENT);
+            ui.line(px, py, px - (float) Math.sin(yaw) * 10, py - (float) Math.cos(yaw) * 10, 2, Style.ACCENT);
+            ui.text("NORTH", side, top, 14, Style.TEXT);
+            ui.text(DevMap.SX + " x " + DevMap.SZ + " m playable area", side, top + 30, 13, Style.DIM);
+            ui.text("You", side + 20, top + 78, 13, Style.TEXT); ui.disc(side + 5, top + 85, 4, Style.ACCENT);
+            ui.text("Nearby people", side + 20, top + 110, 13, Style.TEXT); ui.disc(side + 5, top + 117, 3, Style.NPC);
+            ui.text("Nearby hostiles", side + 20, top + 142, 13, Style.TEXT); ui.disc(side + 5, top + 149, 3, Style.NPC_HOSTILE);
+            ui.text("Your grave", side + 20, top + 174, 13, Style.TEXT); skull(ui, side + 5, top + 181, 12, Style.TEXT);
+            ui.text("Click to mark a destination", side, top + 242, 13, Style.DIM);
+            ui.text("M or Esc to return", side, top + 268, 13, Style.DIM);
+            if (live && ui.clicked(left, top, size, size))
+                hud.flag = new float[]{Math.max(0, Math.min(DevMap.SX - 1, (ui.mx - left) / size * DevMap.SX)), Math.max(0, Math.min(DevMap.SZ - 1, (ui.my - top) / size * DevMap.SZ))};
         }
     }
 
@@ -1008,7 +1072,7 @@ final class HudFragments {
             }
             var p = hud.g.player;
             ui.text(p.name, right, y + 48, Math.min(24, rw / Math.max(1, ui.width(p.name, 1))), Style.ACCENT);
-            ui.text("Combat level " + p.skills.combatLevel() + "   Total " + p.skills.totalLevel(), right, y + 88, 13, Style.TEXT);
+            ui.text("Level " + p.skills.combatLevel() + "   Total " + p.skills.totalLevel(), right, y + 88, 13, Style.TEXT);
             ui.text(hud.g.state.clockText(), right, y + 114, 13, Style.DIM);
             ui.text("Honor  " + hud.g.honor.rankName(), right, y + 164, 13, Style.TEXT);
             honorBar(ui, right, y + 196, rw, hud.g.honor.score, hud.g.honor.score);

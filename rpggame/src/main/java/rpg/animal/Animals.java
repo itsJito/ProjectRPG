@@ -625,6 +625,8 @@ public final class Animals {
 
     // ------------------------------------------------------------------ death and carcasses
     public void onKilled(Animal a, Actor killer, long cause) {
+        a.cs.cancel(); a.amp = a.flap = 0;
+        a.rearing = a.headDown = a.faceThreat = false;
         a.diedAt = g.state.minutes;
         a.killer = killer == null ? 0 : killer.id;
         deaths++;
@@ -637,7 +639,7 @@ public final class Animals {
             float mass = a.species.w * a.species.w * a.species.h * 420 * a.scale() * a.scale() * a.scale();
             float j = Math.min(3.5f, 0.6f + a.blowImpact * 0.02f) * mass;
             // (knocked down and then killed: that body goes on falling, now for good)
-            if (a.ragdoll != null && a.ragdoll.knockdown) dropRagdoll(a);
+            if (a.ragdoll != null) a.ragdoll.knockdown = false;
             if (a.ragdoll == null) makeRagdoll(a, a.blowX * j, j * 0.3f, a.blowZ * j, false);
         }
         a.lastEvent = how;
