@@ -75,7 +75,6 @@ public final class Gfx implements AutoCloseable {
         Thread t = new Thread(run, "figure-builder"); t.setDaemon(true); t.setPriority(Thread.NORM_PRIORITY - 1); return t;
     });
     private static final int MAX_FIGURES = 48;
-    private final Map<Long, Float> doorSwing = new HashMap<>();
     private final List<float[]> lamps = new ArrayList<>();
     private double clock;
     public NativeRenderer.Stats last;
@@ -720,7 +719,6 @@ public final class Gfx implements AutoCloseable {
             // hair and facial hair: the head-unit meshes, on the head (8 pixels a side, its middle 4 up from the neck);
             // long hair hangs from the neck down the back and over the shoulders, on the torso
             float[] hm = rig.seg[Seg.HEAD.ordinal()];
-            int hairRgb = Appearance.hairColor(look.hairColor);
             boolean headless = gone[Seg.HEAD.ordinal()];
             if (!headless) {
                 System.arraycopy(hm, 0, seg.m, 0, 16); headBase.set(root).mul(seg);
@@ -928,26 +926,16 @@ public final class Gfx implements AutoCloseable {
         put(mesh, shadowOnly ? AstrattoNative.MODEL_SHADOW_ONLY : 0, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, 0, 1, 0.9f, 0);
     }
 
-    /**
-     * Whether a person's eyes are shut this frame: asleep in bed, or the blink - every three to six seconds (each
-     * person on their own rhythm, now and then a double blink), the lids down for about a tenth of a second.
-     */
     /** The review's switch: every figure drawn with its eyes shut (RPG_FIGURE_SHUT in the figures gallery). */
     public static boolean reviewShut;
 
+    /** Sleeping eyes, or a 0.1-second blink on each person's own three-to-six-second rhythm. */
     private boolean eyesShut(Actor a, boolean asleep) {
         if (asleep || reviewShut) return true;
         long h = a.id * 0x9E3779B97F4A7C15L;
         double period = 3.0 + ((h >>> 40) & 1023) / 1023.0 * 3.0;
         double phase = (clock + ((h >>> 20) & 1023) / 1023.0 * period) % period;
         return phase < 0.11 || (((h >>> 12) & 3) == 0 && phase > 0.24 && phase < 0.34);
-    }
-
-    private void headPart(float[] headLocal, Body b, int mesh, int rgb, boolean shadowOnly) {
-        if (mesh == 0) return;
-        System.arraycopy(headLocal, 0, seg.m, 0, 16);
-        m.set(root).mul(seg).translate(0, b.head[1] / 2f, 0).scale(b.head[0], b.head[1], b.head[2]);
-        put(mesh, shadowOnly ? AstrattoNative.MODEL_SHADOW_ONLY : 0, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, 0, 1, 0.9f, 0);
     }
 
     /** A worn necklace on the torso (pixels): a chain in a V from either side of the neck to the pendant on the breastbone. */
@@ -970,14 +958,6 @@ public final class Gfx implements AutoCloseable {
         m.set(root).mul(seg).translate(0, top - drop - ps * 0.45f, front - 0.08f).scale(ps, ps * (amulet ? 1f : 1.2f), 0.35f);
         put(box, d.gemColor != 0 && !amulet ? d.gemColor : chain, 1, 0.25f, d.gemColor != 0 && !amulet ? 0.1f : 0.85f);
         if (amulet && d.gemColor != 0) { m.set(root).mul(seg).translate(0, top - drop - ps * 0.45f, front - 0.27f).scale(0.5f, 0.5f, 0.1f); put(box, d.gemColor, 1, 0.2f, 0.1f); }
-    }
-
-    /** Head-unit geometry hung from the top of the neck on the torso (long hair). */
-    private void neckPart(float[] torsoLocal, Body b, int mesh, int rgb, boolean shadowOnly) {
-        if (mesh == 0) return;
-        System.arraycopy(torsoLocal, 0, seg.m, 0, 16);
-        m.set(root).mul(seg).translate(0, b.neckY() - b.hipY(), 0).scale(b.head[0], b.head[1], b.head[2]);
-        put(mesh, shadowOnly ? AstrattoNative.MODEL_SHADOW_ONLY : 0, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, 0, 1, 0.9f, 0);
     }
 
     /**

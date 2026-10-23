@@ -9,11 +9,9 @@ public final class Config {
     public float xpRate = 10f;
     /** Interaction: commit range, inspect range, the assist cone (cosine). */
     public float interactRange = 3f, inspectRange = 5f, assistCos = 0.97f;
-    /** Movement. */
-    /** Movement: a walk of long strides (the default), a run (Shift held) and a sprint (Shift tapped twice and held, on stamina). */
     /** Gaits (gamefixes overhaul): a walk a little brisker than before, a jog (Caps Lock), the sprint on Shift, and sneaking at the old walking pace. */
     public float sneakSpeed = 1.45f;
-    public float walkSpeed = 1.85f, jogSpeed = 4.6f, runSpeed = 7.4f, jumpSpeed = 7.4f, dodgeSpeed = 9.5f, dodgeTime = 0.28f;
+    public float walkSpeed = 2.1f, jogSpeed = 4.6f, runSpeed = 7.8f, jumpSpeed = 7.4f, dodgeSpeed = 9.5f, dodgeTime = 0.28f;
     /** Stamina costs and regeneration. */
     public float staminaLight = 8, staminaHeavy = 18, staminaDodge = 20, staminaSprint = 9, staminaRegen = 22, staminaBlockPerDamage = 0.5f;
     /** Combat XP per HP of final damage: the chosen style's skill, and Health's share; Defense per HP blocked. */

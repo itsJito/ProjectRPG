@@ -5,6 +5,9 @@ import rpg.actor.Actor.Combat.Move;
 import rpg.actor.Actor.Combat.Phase;
 import rpg.actor.Body;
 import rpg.actor.Gait;
+import static rpg.actor.Gait.PENDULUM;
+import static rpg.actor.Gait.SNEAK_CROUCH;
+import static rpg.actor.Gait.WALK_BEND;
 import rpg.combat.CombatSystem;
 import rpg.item.ItemDef;
 import rpg.item.ItemDef.Family;
@@ -27,16 +30,13 @@ public final class Rig {
     /** Per-figure animation memory. */
     public static final class State {
         boolean init;
-        float phase, spd, amp, land, airT, turn;
+        float phase, spd, amp, land, airT;
         float dx, dz = -1;
         boolean wasGrounded = true;
-        double clock;
         // feet, in the world: where each stands (or is swinging to), the swing's start and how far through it is
         final float[][] foot = new float[2][3], from = new float[2][3], to = new float[2][3];
         final boolean[] stance = {true, true};
         final float[] swing = new float[2], swingTime = new float[2];
-        /** A foot lifted ahead of its turn (left behind by the body): it swings on its own clock, not the stride's. */
-        final boolean[] early = new boolean[2];
         int corrective = -1;
         // the hips' height (a spring), their side shift, the lean
         float hipH = -1, hipV, sway, accLean, roll, lastVx, lastVz, lastX, lastZ;
@@ -63,12 +63,6 @@ public final class Rig {
     public float debugA, debugB;
 
     private static final float L_ARM1 = Body.UPPER_ARM, L_ARM2 = Body.FOREARM, L_LEG1 = Body.THIGH, L_LEG2 = Body.SHIN;
-    /** How far creeping lowers the hips (pixels): about a third of the leg, knees well bent, the body still upright enough to walk. */
-    static final float SNEAK_CROUCH = 2.3f;
-    /** How far (texels) the hips settle on bent knees at a full walk, so the legs can take strides. */
-    static final float WALK_BEND = 0.9f;
-    /** How far (pixels) the hips may ride down between the feet at the ends of a stride: the inverted pendulum's drop. */
-    static final float PENDULUM = 0.6f;
     /** A combat state with nothing going on (a sleeper's). */
     private static final Actor.Combat REST = new Actor.Combat();
     private static final boolean DEBUG = System.getenv("RPG_RIG_DEBUG") != null;
@@ -82,7 +76,6 @@ public final class Rig {
     public void pose(Actor a, State st, float dt, double time, boolean still) {
         Body b = a.plan();
         Actor.Combat c = still ? REST : a.cs;
-        st.clock = time;
         dt = Math.max(1e-4f, Math.min(dt, 0.1f));
         float yaw = a.yaw;
         float rx = (float) Math.cos(yaw), rz = (float) -Math.sin(yaw), bx = (float) Math.sin(yaw), bz = (float) Math.cos(yaw);
@@ -123,24 +116,16 @@ public final class Rig {
         boolean walking = st.walking;
         float ampT = walking ? Math.min(1, st.spd / 1.2f) : 0;
         st.amp += (ampT - st.amp) * Math.min(1, dt * 5);
-        float cadence = Gait.cadence(Math.max(st.spd, 0.8f));
-        float beta = Gait.stance(st.spd);
-        // a stance never asks more of a leg than it comfortably reaches at the hips' height: crouched (creeping), or for
-        // a short-legged body, the same speed is walked in shorter steps taken more often - otherwise the planted foot
-        // is left behind until the leg is straight and the hips sink
+        float cadence = Gait.cadence(Math.max(st.spd, 0.8f), a.sneaking);
+        float beta = Gait.stance(st.spd, a.sneaking);
         // a walk is taken on softly bent knees, the hips settled a little: that is what lets a leg reach into a stride
         // instead of patting along on straight legs
         float strideBend = WALK_BEND * Math.min(1, st.amp * 1.4f);
-        {
-            // the reach a planted leg has: from mid-stance at the hips' height down to the ends of the stride, where the
-            // hips ride a little lower between the feet (the pendulum) - that, not bent knees, is what makes a stride long
-            float hipWant = b.hipY() - 0.35f - strideBend - PENDULUM - (a.sneaking ? SNEAK_CROUCH : 0);
-            float half = (float) Math.sqrt(Math.max(0, (legLen - 0.15f) * (legLen - 0.15f) - hipWant * hipWant)) * 0.95f;
-            float span = Math.max(0.12f, 2 * half * Body.PX);
-            reachHalf = half;
-            cadence = Math.max(cadence, st.spd * beta / span);
-        }
-        float runF = clamp01((st.spd - Gait.WALK_TOP) / 1.9f);
+        // Reach is planned for the bent stance the body is approaching. Running shortens contact instead of
+        // privately accelerating the rig's cycle, which used to disagree with the footstep/noise clock.
+        reachHalf = Gait.halfReach(a.sneaking);
+        // Feet, torso and arms must reach the running gait together.
+        float runF = Gait.runShare(st.spd);
         float hipFloor = b.hipY() - 0.35f - strideBend - PENDULUM * 1.15f;
         float sprintF = clamp01((st.spd - 5.2f) / 1.8f);
         // acceleration, for the lean: the body leans into a start and back against a stop (it has weight)
@@ -186,14 +171,14 @@ public final class Rig {
                 float ph = (st.phase + (k == 0 ? 0 : 0.5f)) % 1f;
                 boolean inStance = ph < beta || !walking && st.stance[k];
                 if (!walking && !st.stance[k]) inStance = false;   // a step under way finishes even as the body stops
-                if (st.stance[k] && !inStance) { liftOff(st, k, swingTime); st.early[k] = walking && ph < beta; }
+                if (st.stance[k] && !inStance) liftOff(st, k, swingTime);
                 if (!st.stance[k]) {
-                    boolean own = !walking || st.early[k];
+                    boolean own = !walking;
                     float t = own ? st.swing[k] + dt / Math.max(0.12f, st.swingTime[k]) : (ph - beta) / (1 - beta);
                     if (!own && t < st.swing[k] - 0.5f) t = 1;   // the cycle wrapped: the step is done
                     stepTarget(a, st, k, hipX, Math.max(0, 1 - t) * st.swingTime[k], stanceTime, vx, vz);
                     capStep(a, st, k, hipX, reachHalf * (1.25f + 0.9f * runF), vx * Math.max(0, 1 - t) * st.swingTime[k], vz * Math.max(0, 1 - t) * st.swingTime[k]);
-                    if (t >= 1 || !own && ph < beta) { plant(a, st, k); st.early[k] = false; }
+                    if (t >= 1 || !own && ph < beta) plant(a, st, k);
                     else st.swing[k] = t;
                 }
             }
@@ -304,11 +289,13 @@ public final class Rig {
         want -= st.land * 2.6f + crouch + runF * 0.6f;
         if (!grounded) want = b.hipY();
         if (st.hipH < 0) st.hipH = want;
-        // a critically damped spring (stiff enough to follow a step, soft enough never to jerk)
+        // Exact critically damped response for this frame's target. Explicit Euler integration
+        // becomes unstable at long render frames (w0 * dt > ~0.8), throwing the hips upward.
         float w0 = 26f;
-        float acc = w0 * w0 * (want - st.hipH) - 2 * w0 * st.hipV;
-        st.hipV += acc * dt;
-        st.hipH += st.hipV * dt;
+        float offset = st.hipH - want, j = st.hipV + w0 * offset;
+        float decay = (float) Math.exp(-w0 * dt);
+        st.hipH = want + (offset + j * dt) * decay;
+        st.hipV = (st.hipV - w0 * j * dt) * decay;
         pelvis[0] = st.sway; pelvis[1] = st.hipH; pelvis[2] = 0;
         debugA = want; debugB = (st.stance[0] ? 1 : 0) + (st.stance[1] ? 2 : 0) + (walking ? 4 : 0) + st.land * 10;
 

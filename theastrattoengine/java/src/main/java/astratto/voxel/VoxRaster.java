@@ -43,7 +43,6 @@ public final class VoxRaster {
         float scale = ext / Math.max(0.05f, fill); // model units per pixel
         float dist = m.sx + m.sy + m.sz;
         float cr = (float) Math.cos(-roll), sr = (float) Math.sin(-roll);
-        float[] L = norm(0.45f, 0.8f, 0.35f);
         for (int py = 0; py < h; py++) for (int px = 0; px < w; px++) {
             float a0 = (px + 0.5f - w / 2f) * scale, b0 = -(py + 0.5f - h / 2f) * scale;
             float a = a0 * cr - b0 * sr, b = a0 * sr + b0 * cr;
@@ -77,7 +76,6 @@ public final class VoxRaster {
         return new int[]{x0, y0, z0, x1, y1, z1};
     }
 
-    private static float[] norm(float x, float y, float z) { float l = (float) Math.sqrt(x * x + y * y + z * z); return new float[]{x / l, y / l, z / l}; }
 
     /** Amanatides-Woo DDA through the model grid. Returns shaded colour or 0. */
     private static int cast(VoxModel m, float ox, float oy, float oz, float dx, float dy, float dz, float maxT, float[] depth, int di) {

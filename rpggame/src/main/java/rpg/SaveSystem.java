@@ -177,7 +177,7 @@ public final class SaveSystem {
             n.arrestedUntil = Json.num(m, "arrested", -1); n.patrolIndex = Json.integer(m, "patrol", 0);
             n.memories.clear();
             List<Object> mem = Json.list(m, "memories");
-            if (mem != null) for (Object x : mem) n.memories.add(Memory.load((Map<String, Object>) x));
+            if (mem != null) for (Object x : mem) n.remember(Memory.load((Map<String, Object>) x), 24);
             n.goal = Brain.Goal.IDLE; n.nextThink = 0; n.fightTarget = 0; n.cs.lastAttacker = 0; n.hasGoalPos = false; n.speech = null;
             n.alive = alive;
             n.loaded = loaded;

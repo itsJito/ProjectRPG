@@ -26,15 +26,15 @@ public final class PlayerController {
     /** What the player wants this frame. */
     public static final class Intent {
         public float forward, strafe, lookYaw, lookPitch;
-        /** sprint: the sprint key held (Shift: a true sprint, gamefixes); sprintTap: it was just pressed; jogToggle: the jog key (Caps Lock) was just pressed. */
+        /** sprint: the sprint key held (Shift: a true sprint); jogToggle: Caps Lock was just pressed. */
         /** Space held (noclip's up). */
         public boolean jumpHeld;
         public boolean jogToggle;
-        public boolean sprint, sprintTap, sneak, jump, dodge, mainDown, offDown, cast, interact, interactHeld, toggleCamera;
+        public boolean sprint, sneak, jump, dodge, mainDown, offDown, cast, interact, interactHeld, toggleCamera;
         /** The back key was just pressed (two taps of it close together turn the player about). */
         public boolean backTap;
         public int bless = -1;
-        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = backTap = sprintTap = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
+        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = backTap = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
     }
 
     private final Rpg g;
@@ -297,7 +297,7 @@ public final class PlayerController {
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
-            stepClock += dt * Gait.steps(speed);
+            stepClock += dt * Gait.steps(speed, p.sneaking);
             if (stepClock >= 1) {
                 stepClock -= 1;
                 if (g.sfx != null) g.sfx.footstep(p, p.sprinting ? 1f : 0.3f + 0.5f * Math.min(1, speed / g.cfg.runSpeed));

@@ -31,6 +31,8 @@ public final class Stealth {
     public static final float CURIOUS = 0.2f, INVESTIGATING = 0.5f, ALERT = 1f, CLEAR = 0.45f, MAX = 1.25f;
     /** How far eyes reach (metres) and how close a body is sensed whatever the cone. */
     public static final float RANGE = 24, CLOSE = 2.2f, CLOSE_CREEPING = 1.2f;
+    /** Speech and other noises share the same coarse wall attenuation. */
+    public static final float WALL_MUFFLE = 0.55f;
 
     /** One NPC's awareness of one actor: how much, where it last placed them, and when. */
     public static final class Aware {
@@ -221,7 +223,7 @@ public final class Stealth {
             float nightK = night && !asleep ? 1.35f : 1;
             boolean bustle = !night && loudness < 0.5f && !source.sneaking && !DevMap.WILDS.equals(DevMap.jurisdiction(n.x, n.z));
             float reach = radius * (asleep ? 0.5f : 1) * nightK;
-            if (d < reach && d > 2.5f && !g.vox.clear(n.x, n.eyeY(), n.z, x, y + 1f, z)) reach *= 0.55f;    // through a wall
+            if (d < reach && d > 2.5f && !g.vox.clear(n.x, n.eyeY(), n.z, x, y + 1f, z)) reach *= WALL_MUFFLE;
             if (d >= reach) continue;
             Aware w = n.aware.computeIfAbsent(source.id, k -> new Aware());
             float loud = 1 - d / reach;

@@ -61,7 +61,6 @@ public final class AiSystem {
     }
 
     private void roster() {
-        int f = DevMap.FLOOR;
         Npc ada = npc(Ids.MERCHANT_A, "Ada", Npc.Role.MERCHANT, "Merchant (Store A)", 91.5f, 55.0f, 101);
         ada.homeX = 91.5f; ada.homeZ = 89.5f;
         give(ada, Items.COINS, 600); give(ada, Items.BREAD, 2);
@@ -238,7 +237,7 @@ public final class AiSystem {
     private void footsteps(Npc n, float dt) {
         float speed = (float) Math.hypot(n.vx, n.vz);
         if (!n.grounded || speed < rpg.actor.Gait.STILL || g.sfx == null || n.distTo(g.player) > 16) { n.stepClock = 0.5f; return; }
-        n.stepClock += dt * rpg.actor.Gait.steps(speed);
+        n.stepClock += dt * rpg.actor.Gait.steps(speed, n.sneaking);
         if (n.stepClock >= 1) { n.stepClock -= 1; g.sfx.footstep(n, Math.min(1, speed / 5f)); }
     }
 
@@ -531,18 +530,11 @@ public final class AiSystem {
         return best;
     }
 
-    /** Passes on what one knows (crimes, as rumor) to another, through this actual meeting. */
+    /** Passes news through the same hearing, evidence and feedback rules as street gossip. */
     public int share(Npc from, Npc to) {
         int n = 0;
         for (Memory m : new ArrayList<>(from.memories)) {
-            if (!m.crime() || m.subject == to.id) continue;
-            boolean known = false;
-            for (Memory k : to.memories) if (k.eventId == m.eventId && k.kind.equals(m.kind)) { known = true; break; }
-            if (known) continue;
-            to.remember(m.rumorFrom(from.name, g.state.minutes), 24);
-            g.state.commit("RumorShared", from.id, to.id, DevMap.jurisdiction(to.x, to.z), m.eventId, m.kind + " by " + g.nameOf(m.subject));
-            n++;
-            shared++;
+            if (rumors.tell(from, to, m, false)) n++;
         }
         return n;
     }

@@ -118,13 +118,9 @@ public final class Sfx {
         calls("animal.fox", "animal/fox_death1.ogg", 2, 0.1f, 0.8f);
         pitch.put("animal.lion", 0.58f); pitch.put("animal.wolf.growl", 0.62f); pitch.put("animal.rabbit.hurt", 1.7f); pitch.put("animal.dog.hurt", 1.25f); pitch.put("animal.fox", 1.15f);
         // ---- recorded: voices (death cries only; hurt is the first moment of one)
-        for (String f : new String[]{"HumanMaleMain_Death_1", "HumanMaleMain_Death_2", "HumanMaleMain_Death_3", "HumanMaleMain_Death_4", "HumanMaleMain_Death_5", "HumanMaleMainDeath6"}) {
-            one("death.male", "voice/" + f + ".ogg", 0);
-            one("hurt.male", "voice/" + f + ".ogg", 0.32f);
-        }
-        for (String f : new String[]{"HumanFeamleMain_Death1", "HumanFemaleMain_Death_2", "HumanFemaleMain_Death_3", "HumanFemaleMain_Death_4", "HumanFemaleMain_Death_5", "HumanFemaleMain_Death_6"}) {
-            one("death.female", "voice/" + f + ".ogg", 0);
-            one("hurt.female", "voice/" + f + ".ogg", 0.32f);
+        for (HumanVoice voice : HumanVoice.values()) for (String recording : voice.recordings) {
+            one(voice.deathBank, recording, 0);
+            one(voice.hurtBank, recording, 0.32f);
         }
         // ---- recorded: the interface (the game's own)
         for (String f : new String[]{"AchievementMenuClose", "AchievementMenuOpen", "ContainerOpen", "FishReelIn", "FishingHooked", "LevelUp", "LogoutProfileButton",
@@ -279,7 +275,7 @@ public final class Sfx {
     /** A person dying: one of the recorded death cries for their sex, from the head, pitched a little for each throat. */
     public void deathCry(Actor a) {
         float pitch = 0.95f + (float) ((a.id * 0x9E3779B97F4A7C15L >>> 40) % 1000) / 1000f * 0.1f;
-        voice(a.look.female ? "death.female" : "death.male", a.x, a.eyeY(), a.z, 1f, pitch);
+        voice(HumanVoice.of(a).deathBank, a.x, a.eyeY(), a.z, 1f, pitch);
     }
 
     /** A person hurt by a real blow: the opening of a death cry, cut short (only when not already crying out). */
@@ -287,7 +283,7 @@ public final class Sfx {
         if (now - a.lastCry < 0.9) return;
         a.lastCry = now;
         float pitch = 0.95f + (float) ((a.id * 0x9E3779B97F4A7C15L >>> 40) % 1000) / 1000f * 0.1f;
-        voice(a.look.female ? "hurt.female" : "hurt.male", a.x, a.eyeY(), a.z, 0.75f, pitch * 1.04f);
+        voice(HumanVoice.of(a).hurtBank, a.x, a.eyeY(), a.z, 0.75f, pitch * 1.04f);
     }
 
     /** An interface sound. */

@@ -53,6 +53,8 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        // A short review of the three locomotion loops, without the unrelated twitch/work/combat galleries.
+        if ("locomotion".equals(System.getenv("RPG_GALLERY_ONLY"))) { locomotionShots(tag); return 0; }
         // RPG_GALLERY_ONLY=animals: just the animal sheets (a quick look while working on them)
         if ("animals".equals(System.getenv("RPG_GALLERY_ONLY"))) { if (!female) animalSheets(); return 0; }
         // RPG_GALLERY_ONLY=motion: the locomotion and blows only, each also measured for twitching under uneven frames
@@ -62,6 +64,8 @@ final class Gallery {
         if ("creator".equals(System.getenv("RPG_GALLERY_ONLY"))) { creatorShots(); return 0; }
         // RPG_GALLERY_ONLY=death: the player cut down in town, the death watched through, then the grave on the map
         if ("death".equals(System.getenv("RPG_GALLERY_ONLY"))) { deathShots(); return 0; }
+        if ("npc-deaths".equals(System.getenv("RPG_GALLERY_ONLY"))) { npcDeathShots(); return 0; }
+        if ("rumors".equals(System.getenv("RPG_GALLERY_ONLY"))) { rumorShots(); return 0; }
         // RPG_GALLERY_ONLY=moods: townsfolk in the square showing what they feel and are doing, over their heads
         if ("moods".equals(System.getenv("RPG_GALLERY_ONLY"))) { moodShots(); return 0; }
         // RPG_GALLERY_ONLY=animalfall: a wolf killed by a blow and a bear knocked off its feet, filmed as they fall
@@ -151,6 +155,25 @@ final class Gallery {
         }
         g.controller.in.sneak = false;
         return 0;
+    }
+
+    /** Walk, jog and sprint at steady speed, each a 1.2-second loop filmed on threes. */
+    private void locomotionShots(String tag) {
+        for (String gait : new String[]{"walk", "jog", "sprint"}) {
+            g.controller.in.forward = 0;
+            g.controller.in.sprint = false;
+            g.controller.jogging = false;
+            place(54.5f, 64.5f, (float) -Math.PI / 2);
+            frames(30);
+            g.player.stamina = g.player.maxStamina();
+            g.controller.jogging = gait.equals("jog");
+            // The north-side view passes through the altar as the runner crosses the square.
+            // Keep the entire sequence on the clear south side instead of flipping cameras mid-cycle.
+            film(tag + "-locomotion-" + gait, 72, i -> {
+                g.controller.in.forward = 1;
+                g.controller.in.sprint = gait.equals("sprint");
+            }, a -> side(a, -4.6f), 60);
+        }
     }
 
     /**
@@ -359,6 +382,35 @@ final class Gallery {
         }
     }
 
+    /** Still reviews of actual first-hand and relayed dialogue; the source account is the fixture. */
+    private void rumorShots() {
+        long[] ids = {Ids.VILLAGER, Ids.WORKER, Ids.CARTER};
+        for (int i = 0; i < ids.length; i++) {
+            var n = (rpg.ai.Npc) g.actor(ids[i]);
+            g.ai.reload(n); g.teleport(n, 99.5f + i * 3, DevMap.FLOOR, 73.5f);
+            n.nextThink = Double.MAX_VALUE; n.goal = rpg.ai.Brain.Goal.IDLE;
+            n.yaw = n.wantYaw = (i == 0 ? -1 : 1) * (float) Math.PI / 2;
+        }
+        place(102.5f, 81.5f, 0); g.controller.camPitch = -0.12f;
+        for (int i = 0; i < 20; i++) { game.tick(1 / 60f); Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false); }
+        var eda = (rpg.ai.Npc) g.actor(ids[0]);
+        var dag = (rpg.ai.Npc) g.actor(ids[1]);
+        var account = new rpg.ai.Memory("MURDER", g.player.id, Ids.BANDIT_1, DevMap.ALPHA,
+                g.state.minutes, 1, "witnessed", 0, 0, "gallery witness account");
+        account.reported = true; eda.remember(account, 24); eda.knowsPlayer = true;
+        for (int step = 0; step < 2; step++) {
+            var from = (rpg.ai.Npc) g.actor(ids[step]);
+            var to = (rpg.ai.Npc) g.actor(ids[step + 1]);
+            for (long id : ids) ((rpg.ai.Npc) g.actor(id)).speech = null;
+            if (step == 1) dag.yaw = -(float) Math.PI / 2;
+            if (!g.ai.rumors.tell(from, to, from.memories.get(from.memories.size() - 1), false))
+                throw new IllegalStateException("review account did not reach its listener");
+            // Hold simulation still while the interface settles, so the two stages can be read separately.
+            for (int i = 0; i < 15; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, step == 0 ? "rumor-witness.png" : "rumor-relay.png"));
+        }
+    }
+
     private void moodShots() {
         rpg.ui.Hud hud = new rpg.ui.Hud(g, gfx);
         g.ui = hud;
@@ -493,6 +545,44 @@ final class Gallery {
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-cut.png"));
         for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-after.png"));
+    }
+
+    /** Actual killing blows, both from animation and during a physical reaction, filmed on threes. */
+    private void npcDeathShots() {
+        var bandit = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        for (boolean reacting : new boolean[]{false, true}) {
+            g.reactions.cancel(bandit);
+            g.ai.revive(bandit, true);
+            g.teleport(bandit, 102.5f, DevMap.FLOOR, 74.5f);
+            bandit.yaw = 0; bandit.hostileToPlayer = false; bandit.nextThink = Double.MAX_VALUE;
+            place(102.5f, 80f, 0);
+            float[] cam = {106.8f, DevMap.FLOOR + 1.5f, 74f, 102.5f, DevMap.FLOOR + 0.7f, 74.5f};
+            for (int i = 0; i < 20; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            if (reacting) {
+                g.reactions.struck(bandit, 0, 0.1f, 1, 160, 60, bandit.x, bandit.y + 1.3f, bandit.z);
+                for (int i = 0; i < 24; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            }
+            g.combat.resolve(g.player, bandit, bandit.maxHp() * 3, 0, rpg.item.ItemDef.DamageType.BLUNT,
+                    null, bandit.x, bandit.y + 1, bandit.z, "death review", false);
+            List<BufferedImage> tiles = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            for (int f = 0; f < 72; f++) {
+                game.tick(1 / 60f);
+                var rd = g.lastBodies.ragdoll(bandit.ragdoll);
+                if (rd == null) throw new IllegalStateException("death review lost its ragdoll");
+                cam[0] = rd.comX + 4.3f; cam[2] = rd.comZ - 0.5f;
+                cam[3] = rd.comX; cam[5] = rd.comZ;
+                draw(cam, 1 / 60f);
+                if (f % 3 == 0) {
+                    tiles.add(capture(cam));
+                    labels.add(String.format("f%d %.2fs state %d/%d", f + 1, f / 60f, rd.state, rd.outcome));
+                }
+            }
+            // Observe the same body at rest without rendering hundreds of redundant intermediate frames.
+            for (int f = 0; f < 600; f++) game.tick(1 / 60f);
+            tiles.add(capture(cam)); labels.add("after 11.2s");
+            sheet(reacting ? "npc-death-reacting" : "npc-death-standing", tiles, labels, 8);
+        }
     }
 
     /**

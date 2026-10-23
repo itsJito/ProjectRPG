@@ -23,10 +23,12 @@ struct Cmds {
     std::vector<uint8_t> bytes;
     template <typename T> T& add(uint32_t type) {
         const size_t at = bytes.size();
-        bytes.resize(at + sizeof(T));
+        // Return naturally aligned C records; the wire format itself only promises four-byte alignment.
+        const size_t size = (sizeof(T) + 7) & ~size_t(7);
+        bytes.resize(at + size);
         T* rec = reinterpret_cast<T*>(bytes.data() + at);
         std::memset(rec, 0, sizeof(T));
-        rec->head.type = type; rec->head.bytes = sizeof(T);
+        rec->head.type = type; rec->head.bytes = static_cast<uint32_t>(size);
         return *rec;
     }
     void bare(uint32_t type) { astratto_record r{type, sizeof(astratto_record)}; raw(&r, sizeof r); }
@@ -203,6 +205,48 @@ void services_checks(const char* moduleDir) {
         astratto_cmd_mover_input& in = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); in.handle = a;
         Events ev = frame(e, c, 0);
         check("and a released handle used again is refused, never reaching freed memory", ev.counted(ASTRATTO_EVT_ERROR) == 1);
+    }
+
+    // ------------------------------------------------------------ Sydney: death is terminal even across controller release
+    {
+        for (int order = 0; order < 2; order++) {
+            const astratto_handle h = reserve(e, ASTRATTO_KIND_RAGDOLL);
+            auto& r = c.add<astratto_cmd_ragdoll_create>(ASTRATTO_CMD_RAGDOLL_CREATE);
+            r.handle = h; r.scale = 1; r.profile = ASTRATTO_SYDNEY_HUMAN;
+            r.flags = ASTRATTO_RAGDOLL_ACTIVE | ASTRATTO_RAGDOLL_STAND;
+            r.x = 35.5f + order * 4; r.y = FLOOR; r.z = 20.5f;
+            frame(e, c, 0.25f);
+            const uint32_t controls[] = {order == 0 ? ASTRATTO_CONTROL_RELEASE : ASTRATTO_CONTROL_DIE,
+                                         order == 0 ? ASTRATTO_CONTROL_DIE : ASTRATTO_CONTROL_RELEASE};
+            for (uint32_t control : controls) {
+                auto& cmd = c.add<astratto_cmd_ragdoll_control>(ASTRATTO_CMD_RAGDOLL_CONTROL);
+                cmd.handle = h; cmd.control = control;
+            }
+            frame(e, c, 0);
+            auto io = snap(e, ASTRATTO_SNAPSHOT_BODIES);
+            const auto* s = findSnap<astratto_snap_ragdoll>(io, ASTRATTO_SNAP_RAGDOLL, h);
+            bool terminal = s && s->state == ASTRATTO_SYDNEY_DEAD && s->outcome == ASTRATTO_OUTCOME_DEAD && !s->active;
+            check(order == 0 ? "death after controller release still records a terminal dead body"
+                             : "controller release during dying finishes death instead of freezing its transition", terminal);
+            // Queued living intentions and later impacts may move the corpse, but may never restore balance control.
+            auto& intent = c.add<astratto_cmd_ragdoll_intent>(ASTRATTO_CMD_RAGDOLL_INTENT);
+            intent.handle = h; intent.intent = ASTRATTO_INTENT_WALK; intent.x = 1; intent.time = 4;
+            auto& hit = c.add<astratto_cmd_ragdoll_hit>(ASTRATTO_CMD_RAGDOLL_HIT);
+            hit.handle = h; hit.particle = ASTRATTO_RD_NECK; hit.dx = 1; hit.impulse = 80; hit.force = 200;
+            for (int tick = 0; tick < 180; tick++) {
+                if (tick % 30 == 0) {
+                    auto& die = c.add<astratto_cmd_ragdoll_control>(ASTRATTO_CMD_RAGDOLL_CONTROL);
+                    die.handle = h; die.control = ASTRATTO_CONTROL_DIE;
+                }
+                frame(e, c, 1.0f / 60);
+                io = snap(e, ASTRATTO_SNAPSHOT_BODIES);
+                s = findSnap<astratto_snap_ragdoll>(io, ASTRATTO_SNAP_RAGDOLL, h);
+                terminal &= s && s->state == ASTRATTO_SYDNEY_DEAD && s->outcome == ASTRATTO_OUTCOME_DEAD && !s->active;
+            }
+            check("a released dead body stays terminal through repeated DIE, walking intent and a hit", terminal);
+            c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = h;
+            frame(e, c, 0);
+        }
     }
 
     // ------------------------------------------------------------ Sydney: a ragdoll stands, is struck, falls, gets up or dies
@@ -390,7 +434,6 @@ void services_checks(const char* moduleDir) {
     enum { IDLE = 10, CHASE = 11, GOTO = 12 };
     {
         // idle unless the target is seen (then approach to 2 m) or fact 0 is set (then go to the goal)
-        std::vector<uint8_t> rec;
         astratto_cmd_policy_create pc{};
         astratto_action acts[3]{};
         astratto_consideration cons[2]{};
@@ -399,9 +442,11 @@ void services_checks(const char* moduleDir) {
         acts[2] = astratto_action{GOTO, ASTRATTO_ACT_MOVE_TO_GOAL, 0.9f, 0, 3.0f, 1, 1};
         cons[0] = astratto_consideration{ASTRATTO_IN_TARGET_SEEN, ASTRATTO_CURVE_STEP, 0, 1, 1, 0};
         cons[1] = astratto_consideration{ASTRATTO_IN_FACT0, ASTRATTO_CURVE_STEP, 0, 1, 1, 0};
-        pc.head.type = ASTRATTO_CMD_POLICY_CREATE; pc.head.bytes = sizeof pc + sizeof acts + sizeof cons;
+        const size_t policyBytes = sizeof pc + sizeof acts + sizeof cons;
+        pc.head.type = ASTRATTO_CMD_POLICY_CREATE; pc.head.bytes = static_cast<uint32_t>((policyBytes + 7) & ~size_t(7));
         pc.handle = policy; pc.actions = 3; pc.considerations = 2; pc.inertia = 0.1f; pc.think = 0.1f;
         c.raw(&pc, sizeof pc); c.raw(acts, sizeof acts); c.raw(cons, sizeof cons);
+        c.bytes.resize(c.bytes.size() + pc.head.bytes - policyBytes, 0);
         astratto_cmd_mover_create& mb = c.add<astratto_cmd_mover_create>(ASTRATTO_CMD_MOVER_CREATE);
         mb.handle = body; mb.x = 31.5f; mb.y = FLOOR; mb.z = 50.5f; mb.radius = 0.3f; mb.height = 1.8f; mb.step = 0.6f; mb.flags = ASTRATTO_MOVER_AGENT;
         astratto_cmd_agent_create& ac = c.add<astratto_cmd_agent_create>(ASTRATTO_CMD_AGENT_CREATE);

@@ -85,7 +85,6 @@ public final class Decals {
     private astratto.bridge.NativeRenderer nat;
     private int natTex;
     private float[] natDyn = new float[0];
-    private final float[] scratch = new float[VF * 6];
     private float[] buildBuf = new float[VF * 6 * 256];
     private int buildN;
     // ---- dynamic ring: per decal 6 vertices + {born, life}

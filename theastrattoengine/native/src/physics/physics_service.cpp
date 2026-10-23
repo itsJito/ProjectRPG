@@ -186,10 +186,13 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             if (!r) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
             SydneyCharacter* s = r->body->driver ? r->sydney.get() : nullptr;
             switch (c.control) {
-                case ASTRATTO_CONTROL_DIE: if (s) s->die(); break;
+                case ASTRATTO_CONTROL_DIE: if (r->sydney) r->sydney->die(); break;
                 case ASTRATTO_CONTROL_COLLAPSE: if (s) s->collapse(); break;
                 case ASTRATTO_CONTROL_STAY_DOWN: if (s) s->stayDown = c.value != 0; break;
-                case ASTRATTO_CONTROL_RELEASE: r->body->driver = nullptr; r->body->live = false; break;
+                case ASTRATTO_CONTROL_RELEASE:
+                    if (r->sydney) r->sydney->release();
+                    else { r->body->driver = nullptr; r->body->live = false; }
+                    break;
                 case ASTRATTO_CONTROL_LIMBS: if (r->sydney) r->sydney->setBody(c.value); break;
                 case ASTRATTO_CONTROL_WAKE: r->body->wake(); break;
                 default: return ASTRATTO_ERR_ARGUMENT;

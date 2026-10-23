@@ -534,14 +534,14 @@ public final class Acceptance {
         tp(DevMap.TARGET_X + 12.5f, 57f, (float) Math.PI / 2);
         frames(10);
         aimAt(DevMap.TARGET_X + 0.5f, DevMap.FLOOR + 1.0f, 57f);
-        g.controller.in.mainDown = true; frames(60, true); g.controller.in.mainDown = false; frames(60);
+        g.controller.in.mainDown = true; frames(60); g.controller.in.mainDown = false; frames(60);
         need("arrows are consumed as ammunition", g.player.eq.get(ItemDef.Slot.AMMO).amount == arrows - 1);
         need("Archery XP from the archery target", g.player.skills.xp(Skill.ARCHERY) > arch);
         tp(dummy.x, dummy.z + 7f, 0);
         frames(10);
         aimAt(dummy.x, dummy.y + 1.2f, dummy.z);
         long c0 = g.combat.contacts;
-        g.controller.in.mainDown = true; frames(60, true); g.controller.in.mainDown = false; frames(40);
+        g.controller.in.mainDown = true; frames(60); g.controller.in.mainDown = false; frames(40);
         need("an arrow physically hits the dummy", g.combat.contacts > c0);
         // magic
         long mag = g.player.skills.xp(Skill.MAGIC);
@@ -563,7 +563,7 @@ public final class Acceptance {
         g.teleport(bandit, 21.5f, DevMap.FLOOR, 81.5f);
         tp(21.5f, 78.5f, (float) Math.PI);
         frames(5);
-        long blocked = g.combat.blocked + g.combat.parried, banditHits = 0;
+        long blocked = g.combat.blocked + g.combat.parried;
         float hp0 = g.player.hp;
         boolean sawFight = false;
         for (int i = 0; i < 1500 && bandit.alive && g.player.alive; i++) {
@@ -649,7 +649,6 @@ public final class Acceptance {
         need("NPCs gain no XP for their work (Dag stays Woodcutting 12)", dag.skills.level(Skill.WOODCUTTING) == 12);
         boolean scores = g.npcs.stream().allMatch(n -> !n.alive || !n.scores.isEmpty() && !n.goalReason.isEmpty());
         need("every agent exposes scores and reasons for its goal", scores);
-        long rumors = g.state.all().stream().filter(e -> e.type().equals("RumorShared") || e.type().equals("Talked")).count();
         long chats = g.state.all().stream().filter(e -> e.type().equals("NpcGoal") && e.payload().contains("SOCIALIZE")).count();
         need("NPCs socialise with each other (" + chats + " times)", chats > 0);
         // perception with occlusion: a wall blocks sight
@@ -662,7 +661,6 @@ public final class Acceptance {
         need("agents hear noises (engine ears)", g.ai.heardEvents > heard);
         // unload / reload: the worker abstracted, its work resolved by the same rules
         int logsA = dag.count(Items.LOGS) + g.econ.shopA.stock.count(Items.LOGS);
-        long wcBefore = dag.skills.xp(Skill.WOODCUTTING);
         g.ai.unload(dag);
         frames(5);
         g.advanceTime(60, "abstract test");
@@ -941,6 +939,8 @@ public final class Acceptance {
         boolean loaded = new SaveSystem(g).load(file);
         double minutesLoaded = g.state.minutes;
         long revisionLoaded = g.state.revision;
+        // Compare the restored snapshot before resumed minds can learn additional facts.
+        int memoriesLoaded = g.npcs.stream().mapToInt(n -> n.memories.size()).sum();
         frames(30);
         need("loaded", loaded);
         need("door state survives save/load", d.open && g.vox.block(54, DevMap.FLOOR, 22) == Blocks.AIR);
@@ -948,7 +948,6 @@ public final class Acceptance {
         need("the clock and revision come back", Math.abs(minutesLoaded - minutes) < 0.01 && revisionLoaded >= revision);
         Npc kit = npc(Ids.CONTACT);
         need("the dead NPC stays dead and the quest stays failed with its reason", !kit.alive && g.quests.courier == Quests.State.FAILED && g.quests.failReason != null);
-        int memoriesLoaded = g.npcs.stream().mapToInt(n -> n.memories.size()).sum();
         need("NPC memories survive (" + memoriesSaved + " saved, " + memoriesLoaded + " loaded)", memoriesSaved > 0 && memoriesLoaded == memoriesSaved
                 && npc(Ids.LAWMAN_A).memories.stream().anyMatch(m -> m.detail.equals("persistence check")));
         var f = g.invariants.check();
@@ -1303,11 +1302,14 @@ public final class Acceptance {
         // sprinting in first person
         tp(64.5f, 62.5f, (float) Math.PI);
         g.player.firstPerson = true;
+        // Earlier sections may have eaten or cast: sprint is intentionally blocked until the hands are free.
+        idle();
+        for (int i = 0; i < 120 && g.controller.aiming(g.player); i++) frames(1);
+        need("the sprint check starts with free hands", !g.controller.aiming(g.player) && !g.player.cs.busy());
         g.player.stamina = g.player.maxStamina();
-        // the run key tapped twice and held: a sprint
-        g.controller.in.forward = 1; g.controller.in.sprint = true; g.controller.in.sprintTap = true; frames(1);
-        g.controller.in.sprint = false; frames(1);
-        g.controller.in.sprint = true; g.controller.in.sprintTap = true; frames(1);
+        // Shift held once is a sprint; no old double-tap input is required.
+        g.controller.in.forward = 1; g.controller.in.sprint = true; frames(1);
+        need("holding Shift starts a sprint without a double tap", g.player.sprinting);
         frames(45);
         float speed = (float) Math.hypot(g.player.vx, g.player.vz);
         float walkMax = g.cfg.walkSpeed * g.player.burden();   // (the gear kit above is heavy: every gait is slowed alike)
@@ -1647,9 +1649,7 @@ public final class Acceptance {
         var town = g.undertaker.graves().isEmpty() ? null : g.undertaker.graves().get(g.undertaker.graves().size() - 1);
         need("a death inside the walls leaves a secured grave", town != null && town.secured);
         if (town != null) {
-            town.expiresAt = g.time + 600; town.expiresAt -= 0;
             // (word reaches the watch after two minutes: skipped here)
-            double made = town.expiresAt - rpg.law.Undertaker.GRAVE_SECONDS;
             town.expiresAt = g.time + rpg.law.Undertaker.GRAVE_SECONDS - 130;
             Npc cole = npc(Ids.GUARD);
             cole.hunt = null; cole.fightTarget = 0; cole.nextThink = 0; cole.investigation = null; cole.aware.clear();
@@ -1821,8 +1821,6 @@ public final class Acceptance {
             for (int i = 0; i < 3600 && cow.dueAt < 0; i++) { frames(1); cow.hunger = Math.min(cow.hunger, 0.3f); cow.thirst = Math.min(cow.thirst, 0.4f); }
             if (cow.dueAt < 0) System.out.println("      cow: " + zoo.breedRefusal(cow) + "; " + cow.goal + " (" + cow.reason + "); Mara " + keeper.goal + " / " + keeper.lastOutcome + " at " + String.format("(%.1f, %.1f)", keeper.x, keeper.z) + ", trough " + g.objects.trough.contents.count(Items.ANIMAL_FEED) + ", chest " + g.objects.farmChest.contents.count(Items.ANIMAL_FEED));
             need("an owned cow with a bull near, fed and calm, conceives (" + (why == null ? cow.reason : why) + ")", cow.dueAt > 0);
-            long births = zoo.births;
-            int farmBefore = zoo.count(zoo.farm);
             g.advanceTime(cow.species.gestation + 5, "pregnancy");
             frames(90);
             rpg.animal.Animal calf = null;
@@ -1877,8 +1875,6 @@ public final class Acceptance {
         for (var a : zoo.all()) if (a.alive && a.species == rpg.animal.Species.CHICKEN && a.female && !a.baby) { a.lastEgg = -1e9; a.hunger = 0; }
         frames(90);
         long laid = zoo.eggsLaid;
-        int boxEggs0 = 0; for (var bx : g.objects.nestBoxes) boxEggs0 += bx.contents.count(Items.EGG);
-        final int boxes0 = boxEggs0;
         Npc mara = npc(Ids.FARMER);
         mara.hunger = 0; mara.social = 0; mara.nextThink = 0;
         long sales = g.state.all().stream().filter(e -> e.type().equals("Trade") && e.payload().contains("x Egg") || e.type().equals("EggsCollected")).count();
@@ -2070,14 +2066,13 @@ public final class Acceptance {
         System.out.println("== " + name);
     }
 
-    void frames(int n) { frames(n, false); }
-    void frames(int n, boolean holdMain) {
+    void frames(int n) {
         for (int i = 0; i < n; i++) {
             boolean mainDown = g.controller.in.mainDown, offDown = g.controller.in.offDown;
             float fwd = g.controller.in.forward;
             if (!game.tick(1 / 60f)) need("the engine accepted every frame", false);
             Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
-            g.controller.in.mainDown = mainDown || holdMain && false ? mainDown : mainDown;
+            g.controller.in.mainDown = mainDown;
             g.controller.in.offDown = offDown;
             g.controller.in.forward = fwd;
         }
@@ -2115,7 +2110,6 @@ public final class Acceptance {
         g.player.stamina = g.player.maxStamina();
         g.player.cs.combo = 0;
         long c = g.combat.contacts;
-        int before = hitCount();
         swing(false);
         frames(10);
         if (g.combat.contacts == c) return -1;
@@ -2123,8 +2117,6 @@ public final class Acceptance {
         int i = last.indexOf("dealt ");
         return i < 0 ? -1 : Integer.parseInt(last.substring(i + 6, last.indexOf(';', i)));
     }
-
-    int hitCount() { return (int) g.combat.contacts; }
 
     /** Waits on timed work (or anything else) until a condition, or the frame budget runs out. */
     void work(Result started, int maxFrames, BooleanSupplier done) {

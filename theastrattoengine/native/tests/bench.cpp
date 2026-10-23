@@ -34,10 +34,12 @@ struct Cmds {
     std::vector<uint8_t> bytes;
     template <typename T> T& add(uint32_t type) {
         const size_t at = bytes.size();
-        bytes.resize(at + sizeof(T));
+        // Return naturally aligned C records; the wire format itself only promises four-byte alignment.
+        const size_t size = (sizeof(T) + 7) & ~size_t(7);
+        bytes.resize(at + size);
         T* rec = reinterpret_cast<T*>(bytes.data() + at);
         std::memset(rec, 0, sizeof(T));
-        rec->head.type = type; rec->head.bytes = sizeof(T);
+        rec->head.type = type; rec->head.bytes = static_cast<uint32_t>(size);
         return *rec;
     }
 };

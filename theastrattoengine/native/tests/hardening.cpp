@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -28,10 +29,12 @@ struct Cmds {
     std::vector<uint8_t> bytes;
     template <typename T> T& add(uint32_t type) {
         const size_t at = bytes.size();
-        bytes.resize(at + sizeof(T));
+        // Return naturally aligned C records; the wire format itself only promises four-byte alignment.
+        const size_t size = (sizeof(T) + 7) & ~size_t(7);
+        bytes.resize(at + size);
         T* rec = reinterpret_cast<T*>(bytes.data() + at);
         std::memset(rec, 0, sizeof(T));
-        rec->head.type = type; rec->head.bytes = sizeof(T);
+        rec->head.type = type; rec->head.bytes = static_cast<uint32_t>(size);
         return *rec;
     }
 };
@@ -161,6 +164,32 @@ void largeSearches() {
     check("hardening: 64 unbounded route searches over rough ground with doors, stairs, pools and ladders are all answered, on four workers",
           f.status == ASTRATTO_OK && answered == 64);
     std::printf("       %d of them searched to the node cap\n", maxed);
+    // Public callers can supply arbitrary float bit patterns; reject them before integer grid math.
+    const float invalid[] = {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(),
+                             -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::max(),
+                             -std::numeric_limits<float>::max()};
+    for (int axis = 0; axis < 6; axis++) for (float value : invalid) {
+        auto& p = c.add<astratto_cmd_path_request>(ASTRATTO_CMD_PATH_REQUEST);
+        p.sx = p.sz = p.tx = p.tz = 10; p.sy = p.ty = 8;
+        p.flags = ASTRATTO_PATH_GOAL_Y; p.max_expand = 64;
+        switch (axis) {
+            case 0: p.sx = value; break;
+            case 1: p.sy = value; break;
+            case 2: p.sz = value; break;
+            case 3: p.tx = value; break;
+            case 4: p.ty = value; break;
+            default: p.tz = value; break;
+        }
+    }
+    const Frame rejected = frame(e, c, 0);
+    int empty = 0;
+    eachEvent(rejected, ASTRATTO_EVT_PATH_RESULT, [&](const uint8_t* p, uint32_t) {
+        astratto_evt_path_result ev;
+        std::memcpy(&ev, p, sizeof ev);
+        if (ev.status == ASTRATTO_PATH_NONE && ev.expansions == 0 && ev.cell_count == 0) empty++;
+    });
+    check("hardening: nonfinite and extreme path coordinates are refused on every axis before searching",
+          rejected.status == ASTRATTO_OK && empty == 30);
     astratto_destroy(e);
 }
 

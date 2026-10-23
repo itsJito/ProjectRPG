@@ -100,7 +100,6 @@ public final class Animals {
     }
 
     private void habitats() {
-        float f = DevMap.FLOOR;
         float[][] wildWater = edge(DevMap.WILD_POND_X0, DevMap.WILD_POND_Z0, DevMap.WILD_POND_X1, DevMap.WILD_POND_Z1);
         float[][] wildRest = {{(DevMap.DEN_X0 + DevMap.DEN_X1) / 2f + 1, (DevMap.DEN_Z0 + DevMap.DEN_Z1) / 2f + 0.5f}, {12.5f, 20.5f}, {33.5f, 28f}, {20.5f, 32f}, {36.5f, 16f}};
         wild = new Habitat("wild_wood", "the wild wood", DevMap.WILD_X0 + 1, DevMap.WILD_Z0 + 1, DevMap.WILD_X1 - 1, DevMap.WILD_Z1 - 1, 0, wildWater, wildRest)
