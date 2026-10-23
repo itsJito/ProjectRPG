@@ -36,7 +36,7 @@ import rpg.ui.Fragment.Placement;
 public final class Hud {
     public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC, MAP }
     public enum Win { NONE, CONTAINER, STATION, CABINET, SHOP, KIOSK, SKILL_GUIDE }
-    /** The old side-panel tab numbers (F1..F7 and the tests use them): each now opens a scene. The debug tab is gone: the developer console (`) took its place. */
+    /** Legacy side-panel indices, retained for tests and the remaining F-key shortcuts: each opens a scene. The debug tab is gone: the developer console (`) took its place. */
     public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5, TAB_MAP = 6;
     static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC, Scene.MAP};
     /** The scene frame's size (panel scenes draw inside it). */

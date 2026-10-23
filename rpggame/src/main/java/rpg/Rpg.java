@@ -159,7 +159,7 @@ public final class Rpg implements GameModule {
         }
         invariants.baseline();
         state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on the devmap");
-        chat.add("Welcome to the RPGGAME devmap. Press F1-F7 for the side panel tabs, Tab to free the mouse, V to switch camera.", Chat.Kind.GAME);
+        chat.add("Welcome to the RPGGAME devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
     private void starterKit() {

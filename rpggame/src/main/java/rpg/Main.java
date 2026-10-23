@@ -28,7 +28,7 @@ import static org.lwjgl.glfw.GLFW.*;
  * </pre>
  * Controls: WASD walk, Shift run (tap twice and hold: sprint), Space jump, Q dodge, mouse look; LMB main hand (tap light, hold heavy, draw a
  * bow), RMB off hand (guard, or the off-hand item); R cast; 1-3 blessings; E interact (hold for every option); V camera;
- * Tab frees the mouse for the interface; F1-F7 side-panel tabs; F8-F11 developer inspectors; Esc menus.
+ * Tab frees the mouse for the interface; F1-F4/F7 panels; F5/F6 save/load; F8-F11 developer inspectors; Esc menus.
  */
 public final class Main {
     public static void main(String[] args) {
