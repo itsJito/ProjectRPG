@@ -64,6 +64,11 @@ References consulted, with game-specific implementation rather than imported gam
 
 Linux game/engine builds pass with 76 game tests and 22 engine tests (including software-OpenGL rendering). Both strict and sanitizer native runs pass 110 checks. Scoped PMD unused-local/private-field/private-method rules report no findings for game and engine main/test source sets. Address/UndefinedBehavior sanitizers report no failures. Windows CI builds the matching engine/game pair with MSVC warnings treated as errors. Its hosted runner explicitly skips the GPU test; Linux exercises that test with a real software OpenGL context. The full historical graphical acceptance tour is not claimed as re-run.
 
+Exact production source `6eeb653ba8f89f118708db7ff970a891363f37e0` passed [Windows CI run 40007050599](https://github.com/itsJito/ProjectRPG/actions/runs/40007050599) in 3m 30s: engine build/native verification and game build/regressions. Windows GPU rendering remains explicitly skipped on that hosted runner. Linux rendering and all 22 engine tests passed without skips.
+
+The installed distribution also launched successfully into its menu in a timed smoke check. Warm-cache cloud phase logs were: native services 0.01s, devmap 0.01s, renderer/UI 0.38s, first rendered frame 0.39s. These are individual phase measurements on software OpenGL, not a Windows cold-start benchmark. `installDist` completed in 5s with already-built runtime inputs; the launch task graph did not include `verifyNative`.
+
+
 The real renderer supplied reference stills and animation frames 1, 4, 7, 10, etc. Review caught and corrected excessive crouch lean, trailing-leg extension, a patterned paper texture, insufficient shield-hand clearance, and a looting fixture without a visible corpse. Both build and movement regressions caught and corrected stance input overwriting AI movement. Numerical art scores would be subjective; these captures provide reviewable evidence rather than a promised 10/10 rating.
 
 ![Chatbox and resource HUD](session-review/chatbox.jpg)
