@@ -32,9 +32,9 @@ The new regressions first reproduced animal-body replacement, the always-visible
 
 Linux verification passes all **58 game tests and 22 engine Java tests**, both Gradle builds and the unused-code audits. Native sources are unchanged in this pass; the expanded Windows workflow rebuilds them under MSVC and runs the existing native self-test before Java checks.
 
-The pushed implementation at `e03cb79` also passed [Windows run 39928232138](https://github.com/itsJito/ProjectRPG/actions/runs/39928232138): MSVC native compilation/self-test and the Java game build/regressions completed successfully. This is a Windows build check, not a Windows rendering or listening session. A final small regression also checks that leaving combat lowers an NPC's crossbow and that both body builds counter-swing their arms.
+The pushed implementation at `74879c5` passed [Windows run 39929137513](https://github.com/itsJito/ProjectRPG/actions/runs/39929137513): MSVC native compilation/self-test and the Java game build/regressions completed successfully. This is a Windows build check, not a Windows rendering or listening session. A final small regression also checks that leaving combat lowers an NPC's crossbow and that both body builds counter-swing their arms.
 
-The real renderer captures confirm the full map, Honor gain/loss, forward axe carry, bow/crossbow ammunition, white/red markers, closed severed-head eyes, the underside cut surface, and a visible cursor during confirmation and after deleting a fixture profile. No runtime assets, third-party libraries or duplicate pathfinder were added.
+The real renderer captures confirm the full map, Honor gain/loss, forward axe carry, bow/crossbow ammunition, white/red markers, closed severed-head eyes, the underside cut surface, and a visible cursor during confirmation and after deleting a fixture profile. The walk, jog and sprint contact sheets were also reviewed, with 24 sampled frames per gait. Counter-swing regressions cover both body builds. No additional asset downloads, third-party libraries or duplicate pathfinder were added.
 
 Run from `rpggame` with JDK 21 and the native toolchain:
 
