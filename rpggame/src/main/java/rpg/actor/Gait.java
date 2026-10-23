@@ -14,7 +14,7 @@ public final class Gait {
     /** Below this ground speed (m/s) a figure is standing, not walking. */
     public static final float STILL = 0.25f;
     /** Where a walk has fully become a run (m/s): between them the stride blends. */
-    public static final float WALK_TOP = 2.3f, RUN_FROM = 3.2f;
+    public static final float WALK_TOP = 2.6f, RUN_FROM = 3.5f;
     /** Model pixels: knee bend at a walk, the hips' pendulum drop, and the extra crouch when sneaking. */
     public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 2.3f;
 

@@ -45,6 +45,11 @@ public final class PlayerController {
     public float aimYaw, aimPitch;
     private boolean mainWas, offWas;
     private float mainHeld;
+    /** One near-ready melee release, retained briefly so a recovery frame does not swallow the click. */
+    private Move queuedMelee;
+    private ItemDef queuedWeapon;
+    private double queuedUntil;
+    private static final float MELEE_BUFFER = 0.15f;
     private float stepClock;
     /** After a sprint is stopped short, a moment to recover; a quick turn in progress (seconds left) and its heading. */
     private float sprintRecover, quickTurn, quickYaw, quickCam, sprintTime;
@@ -67,6 +72,7 @@ public final class PlayerController {
         if (in.toggleCamera) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
         placeCamera(p);
         if (!p.alive) {
+            queuedMelee = null;
             if (g.death.active) { g.death.camera(this); g.game.commands().listener(cx, cy, cz, (float) Math.atan2(-fx, -fz)); }
             g.game.commands().moverInput(p.body, 0, 0, 0, 0, 0, 0); in.clearEdges(); return;
         }
@@ -82,6 +88,7 @@ public final class PlayerController {
 
     private void hands(Player p, float dt) {
         ItemDef main = p.main(), off = p.off();
+        if (queuedMelee != null && (g.time > queuedUntil || main != queuedWeapon || in.offDown || in.dodge)) queuedMelee = null;
         boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
         // main hand
         if (in.mainDown) mainHeld += dt;
@@ -102,7 +109,17 @@ public final class PlayerController {
             if (in.mainDown && !mainWas) castLine(p);
         } else {
             p.cs.charge = in.mainDown && !p.cs.busy() ? Math.min(1, mainHeld / 0.45f) : 0;
-            if (!in.mainDown && mainWas) g.combat.attack(p, false, mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false));
+            if (!in.mainDown && mainWas && !in.offDown) {
+                Move move = mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false);
+                queuedMelee = null;
+                if (!g.combat.attack(p, false, move) && p.cs.phase == Actor.Combat.Phase.RECOVER) {
+                    queuedMelee = move; queuedWeapon = main; queuedUntil = g.time + MELEE_BUFFER;
+                }
+            }
+            if (queuedMelee != null && !in.mainDown && p.cs.phase == Actor.Combat.Phase.IDLE) {
+                Move move = queuedMelee; queuedMelee = null;
+                g.combat.attack(p, false, move);
+            }
         }
         if (!in.mainDown) mainHeld = 0;
         mainWas = in.mainDown;
@@ -353,5 +370,8 @@ public final class PlayerController {
         g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
     }
 
-    public void snapTo(float yaw) { camYaw = yaw; g.player.yaw = yaw; g.player.aimYaw = yaw; }
+    /** Menus and respawns must not turn an old held button into a new attack on release. */
+    public void cancelHandInput() { queuedMelee = null; mainWas = offWas = false; mainHeld = 0; }
+
+    public void snapTo(float yaw) { camYaw = yaw; g.player.yaw = yaw; g.player.aimYaw = yaw; cancelHandInput(); }
 }

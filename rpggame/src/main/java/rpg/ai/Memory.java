@@ -18,6 +18,8 @@ public final class Memory {
     public float confidence;
     public final String source;        // "witnessed", "rumor from <name>", "personal"
     public boolean reported;
+    /** Legal closure does not erase the remembered act or personal grudge. */
+    public boolean settled;
     public final long eventId;
     public final int value;
     public final String detail;
@@ -45,13 +47,14 @@ public final class Memory {
         m.witness = witness != 0 ? witness : witnessed() ? teller.id : 0;
         m.relays = relays + 1;
         m.reported = true;   // a rumor is not evidence: it is never reported
+        m.settled = settled;
         return m;
     }
 
     public String line(java.util.function.LongFunction<String> names) {
         return String.format("%s %s%s (%s, %.0f%%, day %d %02d:%02d)%s", kind, names.apply(subject), victim != 0 ? " vs " + names.apply(victim) : "",
                 source + (witness != 0 ? "; witness " + names.apply(witness) + ", " + relays + " retelling(s)" : ""),
-                confidence * 100, (int) (minutes / 1440) + 1, (int) (minutes % 1440) / 60, (int) (minutes % 60), crime() && witnessed() ? (reported ? " [reported]" : " [unreported]") : "");
+                confidence * 100, (int) (minutes / 1440) + 1, (int) (minutes % 1440) / 60, (int) (minutes % 60), settled ? " [case closed]" : crime() && witnessed() ? (reported ? " [reported]" : " [unreported]") : "");
     }
 
     public Map<String, Object> save() {
@@ -59,6 +62,7 @@ public final class Memory {
         m.put("kind", kind); m.put("subject", subject); m.put("victim", victim); m.put("jur", jurisdiction); m.put("min", minutes); m.put("conf", (double) confidence);
         m.put("source", source); m.put("reported", reported); m.put("event", eventId); m.put("value", value); m.put("detail", detail);
         m.put("witness", witness); m.put("relays", relays);
+        m.put("settled", settled);
         return m;
     }
 
@@ -67,6 +71,7 @@ public final class Memory {
                 astratto.util.Json.str(m, "jur", null), astratto.util.Json.num(m, "min", 0), (float) astratto.util.Json.num(m, "conf", 1),
                 astratto.util.Json.str(m, "source", "witnessed"), astratto.util.Json.lng(m, "event", 0), astratto.util.Json.integer(m, "value", 0), astratto.util.Json.str(m, "detail", ""));
         r.reported = astratto.util.Json.bool(m, "reported", false);
+        r.settled = astratto.util.Json.bool(m, "settled", false);
         r.witness = astratto.util.Json.lng(m, "witness", 0);
         r.relays = astratto.util.Json.integer(m, "relays", r.source.startsWith("rumor from ") ? 1 : 0);
         return r;

@@ -370,32 +370,17 @@ public final class Gfx implements AutoCloseable {
         cmd.model(mesh, flags, m16, r, g, b, 1, emissive, light, rough, metal);
     }
 
-    /** A box in an oriented frame: centre, axes, sizes. */
-    private void frameBox(float[] c, float[] x, float[] y, float[] z, float sx, float sy, float sz, int mesh, int rgb, float shade, float rough, float metal) {
-        float[] mm = m.m;
-        mm[0] = x[0] * sx; mm[1] = x[1] * sx; mm[2] = x[2] * sx; mm[3] = 0;
-        mm[4] = y[0] * sy; mm[5] = y[1] * sy; mm[6] = y[2] * sy; mm[7] = 0;
-        mm[8] = z[0] * sz; mm[9] = z[1] * sz; mm[10] = z[2] * sz; mm[11] = 0;
-        mm[12] = c[0]; mm[13] = c[1]; mm[14] = c[2]; mm[15] = 1;
-        put(mesh, rgb, shade, rough, metal);
-    }
-
     /** A held item: its own mesh, from the grip along a direction, flat across the body's right (or facing forward). */
     private void held(ItemDef d, float[] grip, float[] dir, float yaw, boolean flatToFace) {
         if (d == null) return;
-        float[] y = norm(dir);
         float[] ref = flatToFace ? fwd(yaw) : right(yaw);
-        float dot = ref[0] * y[0] + ref[1] * y[1] + ref[2] * y[2];
-        float[] x = norm(new float[]{ref[0] - y[0] * dot, ref[1] - y[1] * dot, ref[2] - y[2] * dot});
-        if (Float.isNaN(x[0])) x = right(yaw);
-        float[] z = cross(x, y);
+        m.frame(grip, dir, ref);
         if (d.family == Family.ARROW) {
             // a nocked arrow is one arrow, not the bundle the inventory holds
             int mesh = mesh("w:" + d.family + ":" + d.reach, () -> Meshes.weapon(d.family, d.reach));
-            frameBox(grip, x, y, z, 1, 1, 1, mesh, d.color, 1, 0.5f, 0.3f);
+            put(mesh, d.color, 1, 0.5f, 0.3f);
             return;
         }
-        frameBox(grip, x, y, z, 1, 1, 1, 0, 0, 1, 0, 0);
         drawItem(d, 0);
     }
 
@@ -749,9 +734,9 @@ public final class Gfx implements AutoCloseable {
         }
         // what the hands hold
         ItemDef main = a.main(), off = a.off();
-        boolean bow = main != null && (main.family == Family.BOW || main.family == Family.CROSSBOW);
+        boolean bow = main != null && main.family == Family.BOW;
         for (int k = 0; k < 2; k++) {
-            ItemDef holds = k == 0 ? main : off;
+            ItemDef holds = bow ? (k == 1 ? main : null) : k == 0 ? main : off;
             if (gone[(k == 0 ? Seg.R_ARM_LO : Seg.L_ARM_LO).ordinal()]) continue;
             float[] grip = world(rig.hand[k]), dir = worldDir(rig.itemDir[k]);
             float yaw = a.yaw;
@@ -759,8 +744,8 @@ public final class Gfx implements AutoCloseable {
                 // a shield on the forearm: carried face-out at the side; raised in guard (or seen through the eyes) its face
                 // turned to the front, where the blows come from
                 if (holds.family == Family.SHIELD) held(holds, add(grip, worldDir(new float[]{0, 0, -1}), 0.08f), new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
-                else if (holds.family == Family.BOW || holds.family == Family.CROSSBOW) held(holds, grip, worldDir(rig.itemDir[k]), yaw, true);
-                else held(holds, grip, dir, yaw, true);   // edge forward, flat to the side, as a blade is carried
+                else if (holds.family == Family.BOW) held(holds, grip, dir, yaw + (float) Math.PI, true);   // string toward the archer
+                else held(holds, grip, dir, yaw, !firstPerson);   // show the broad face through the eyes; carry edge-forward in third person
             }
             if (k == 0 && bow && main.family == Family.BOW && a.cs.draw > 0) held(rpg.item.Items.BRONZE_ARROWS, grip, dir, yaw, false);
             // a ring on the right hand: a glint of gold (and its stone) at the knuckles
@@ -1155,8 +1140,9 @@ public final class Gfx implements AutoCloseable {
         // weapon is taken from it
         {
             ItemDef main = n.main(), off = n.off();
+            boolean bow = main != null && main.family == Family.BOW;
             for (int k = 0; k < 2; k++) {
-                ItemDef holds = k == 0 ? main : off;
+                ItemDef holds = bow ? (k == 1 ? main : null) : k == 0 ? main : off;
                 if (holds == null || gone[(k == 0 ? Seg.R_ARM_LO : Seg.L_ARM_LO).ordinal()]) continue;
                 int el = k == 0 ? AstrattoNative.RD_R_ELBOW : AstrattoNative.RD_L_ELBOW, wr = el + 1;
                 float[] grip = {rd.p[wr * 3], rd.p[wr * 3 + 1], rd.p[wr * 3 + 2]};

@@ -14,6 +14,31 @@ public final class Mat4 {
 
     public Mat4 set(Mat4 o) { System.arraycopy(o.m, 0, m, 0, 16); return this; }
 
+    /** Model frame: local +Y follows axis; +X is the projected reference. Parallel references use a safe axis. */
+    public Mat4 frame(float[] origin, float[] axis, float[] reference) {
+        float yx = axis[0], yy = axis[1], yz = axis[2];
+        float l = (float) Math.sqrt(yx * yx + yy * yy + yz * yz);
+        if (!(l > 1e-6f) || !Float.isFinite(l)) { yx = 0; yy = 1; yz = 0; }
+        else { yx /= l; yy /= l; yz /= l; }
+        float dot = reference[0] * yx + reference[1] * yy + reference[2] * yz;
+        float xx = reference[0] - dot * yx, xy = reference[1] - dot * yy, xz = reference[2] - dot * yz;
+        l = (float) Math.sqrt(xx * xx + xy * xy + xz * xz);
+        if (!(l > 1e-4f) || !Float.isFinite(l)) {
+            // The least aligned coordinate axis always has a substantial perpendicular component.
+            float ax = Math.abs(yx), ay = Math.abs(yy), az = Math.abs(yz);
+            float rx = ax <= ay && ax <= az ? 1 : 0, ry = rx == 0 && ay <= az ? 1 : 0, rz = rx == 0 && ry == 0 ? 1 : 0;
+            dot = rx * yx + ry * yy + rz * yz;
+            xx = rx - dot * yx; xy = ry - dot * yy; xz = rz - dot * yz;
+            l = (float) Math.sqrt(xx * xx + xy * xy + xz * xz);
+        }
+        xx /= l; xy /= l; xz /= l;
+        m[0] = xx; m[1] = xy; m[2] = xz; m[3] = 0;
+        m[4] = yx; m[5] = yy; m[6] = yz; m[7] = 0;
+        m[8] = xy * yz - xz * yy; m[9] = xz * yx - xx * yz; m[10] = xx * yy - xy * yx; m[11] = 0;
+        m[12] = origin[0]; m[13] = origin[1]; m[14] = origin[2]; m[15] = 1;
+        return this;
+    }
+
     public Mat4 perspective(float fovyRad, float aspect, float near, float far) {
         java.util.Arrays.fill(m, 0f);
         float f = (float) (1.0 / Math.tan(fovyRad / 2));

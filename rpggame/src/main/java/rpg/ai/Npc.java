@@ -127,7 +127,7 @@ public final class Npc extends Actor implements Interactable {
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
         Memory best = null;
-        for (Memory m : memories) if (m.crime() && m.subject == culprit && (best == null || m.confidence > best.confidence)) best = m;
+        for (Memory m : memories) if (m.crime() && m.subject == culprit && (best == null || best.settled && !m.settled || best.settled == m.settled && m.confidence > best.confidence)) best = m;
         return best;
     }
 
@@ -135,6 +135,7 @@ public final class Npc extends Actor implements Interactable {
         for (int i = memories.size() - 1; i >= 0; i--) {
             Memory old = memories.get(i);
             if (!old.sameIncident(m)) continue;
+            m.settled |= old.settled; old.settled = m.settled;
             if (old.witnessed() && m.witnessed()) { m.reported |= old.reported; old.reported = m.reported; }
             if (old.witnessed() && !m.witnessed() || old.witnessed() == m.witnessed() && old.confidence >= m.confidence) m = old;
             memories.remove(i);
@@ -143,7 +144,7 @@ public final class Npc extends Actor implements Interactable {
         while (memories.size() > cap) {
             // forget the oldest that is not an unreported witnessed crime
             int drop = 0;
-            for (int i = 0; i < memories.size(); i++) if (!(memories.get(i).crime() && memories.get(i).witnessed() && !memories.get(i).reported)) { drop = i; break; }
+            for (int i = 0; i < memories.size(); i++) if (!(memories.get(i).crime() && !memories.get(i).settled && memories.get(i).witnessed() && !memories.get(i).reported)) { drop = i; break; }
             memories.remove(drop);
         }
     }

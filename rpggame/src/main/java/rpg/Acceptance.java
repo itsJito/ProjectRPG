@@ -483,20 +483,13 @@ public final class Acceptance {
         need("a swing out of reach makes no contact", g.combat.contacts == contacts);
         tp(dummy.x, dummy.z + 1.2f, 0);
         frames(10);
-        g.player.style = 0;
         long att = g.player.skills.xp(Skill.ATTACK), hp = g.player.skills.xp(Skill.HEALTH);
+        long str = g.player.skills.xp(Skill.STRENGTH), def = g.player.skills.xp(Skill.DEFENSE);
         int d1 = swingDamage(dummy), d2 = swingDamage(dummy);
         need("collision-based melee hits the dummy (" + d1 + ", " + d2 + ")", d1 > 0 && d2 > 0);
         need("damage is deterministic: same stats, same move, same damage", d1 == d2);
-        need("combat XP from real hits: Attack (style) and Health share", g.player.skills.xp(Skill.ATTACK) > att && g.player.skills.xp(Skill.HEALTH) > hp);
-        g.player.style = 1;
-        long str = g.player.skills.xp(Skill.STRENGTH);
-        swingDamage(dummy);
-        g.player.style = 2;
-        long def = g.player.skills.xp(Skill.DEFENSE);
-        swingDamage(dummy);
-        need("Strength and Defense styles train their skills", g.player.skills.xp(Skill.STRENGTH) > str && g.player.skills.xp(Skill.DEFENSE) > def);
-        g.player.style = 0;
+        need("real melee trains Attack, Strength and Health", g.player.skills.xp(Skill.ATTACK) > att && g.player.skills.xp(Skill.STRENGTH) > str && g.player.skills.xp(Skill.HEALTH) > hp);
+        need("striking a passive dummy does not train Defense", g.player.skills.xp(Skill.DEFENSE) == def);
         tp(armored.x, armored.z + 1.2f, 0);
         frames(10);
         int dA = swingDamage(armored);
@@ -1280,6 +1273,10 @@ public final class Acceptance {
         need("the inventory pauses the game (and so does any menu)", hud.paused());
         hud.toggle(rpg.ui.Hud.Scene.INVENTORY);
         need("closed, the world runs again", !hud.paused());
+        hud.dialog(Main.menu(win, g));
+        need("Escape menu uses the full pause presentation and stops the world", hud.dialog.pauseMenu && hud.paused());
+        hud.choose(0);
+        need("Resume closes the pause presentation", hud.dialog == null && !hud.paused());
     }
 
     // ------------------------------------------------------------------ stealth
@@ -1696,14 +1693,22 @@ public final class Acceptance {
         var stolen = new rpg.item.ItemStack(rpg.item.Items.get("gold_ring"), 1);
         stolen.markStolen(Ids.MERCHANT_A);
         g.state.mint(stolen.def, 1);
-        g.player.store(stolen);
-        int slot = g.player.inv.first(stolen.def);
+        if (!g.player.store(stolen)) throw new IllegalStateException("no room for the fence test's stolen ring");
+        rpg.item.Inventory saleGrid = null;
+        int slot = -1;
+        for (var grid : g.player.grids()) for (int i = 0; i < grid.size(); i++) {
+            var candidate = grid.get(i);
+            if (candidate != null && candidate.sameKind(stolen)) { saleGrid = grid; slot = i; break; }
+        }
+        g.teleport(g.player, gus.x + 1, DevMap.FLOOR, gus.z);
+        frames(3);
+        var refused = g.econ.sell(g.player, saleGrid, g.econ.shopB, slot, 1, g.state.newRequestId());
         g.teleport(g.player, silas.x + 1, DevMap.FLOOR, silas.z);
         for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && n.distTo(silas) < 20) g.teleport(n, n.postX != 0 ? n.postX : 100, DevMap.FLOOR, n.postZ != 0 ? n.postZ : 70);
         frames(3);
-        var refused = g.econ.sell(g.player, g.econ.shopB, slot, 1, g.state.newRequestId());
-        var sold = g.econ.sell(g.player, g.econ.fence, slot, 1, g.state.newRequestId());
-        need("a shop won't buy a stolen ring (" + refused.reason() + "); the fence will (" + sold.status() + ")", refused.rejected() && !sold.rejected() && g.econ.fence.stock.count(stolen.def) >= 1);
+        var sold = g.econ.sell(g.player, saleGrid, g.econ.fence, slot, 1, g.state.newRequestId());
+        need("a shop won't buy a stolen ring (" + refused.reason() + "); the fence will (" + sold.status() + ")", refused.rejected() && refused.reason().contains("stolen") && !sold.rejected()
+                && g.econ.fence.stock.stacks().stream().anyMatch(it -> it.def == stolen.def && it.stolen));
         need("the jewellery slots: a ring and a necklace can be worn", rpg.item.Items.get("ruby_ring").slot == rpg.item.ItemDef.Slot.RING && rpg.item.Items.get("emerald_amulet").slot == rpg.item.ItemDef.Slot.NECK);
     }
 

@@ -68,7 +68,7 @@ public final class Rumors {
     /** Whether they dread the player: they know of a killing or an attack by them, and think the worse of them for it. */
     public boolean afraid(Npc n) {
         if (n.combatant() || n.role == Npc.Role.FENCE) return false;
-        for (Memory m : n.memories) if (m.subject == g.player.id && (m.kind.equals("MURDER") || m.kind.equals("ASSAULT") && m.victim == n.id)) return opinion(n) < -0.3f;
+        for (Memory m : n.memories) if (!m.settled && m.subject == g.player.id && (m.kind.equals("MURDER") || m.kind.equals("ASSAULT") && m.victim == n.id)) return opinion(n) < -0.3f;
         return false;
     }
 

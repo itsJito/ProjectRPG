@@ -116,7 +116,8 @@ public final class Law {
     /** A witness, in person, tells a lawman (GDD 3.5). Validated: a real witness, the right jurisdiction, close enough, alive. */
     public Result report(Npc witness, Memory m, Npc lawman) {
         String why = null;
-        if (!m.witnessed()) why = "a rumor is not evidence";
+        if (m.settled) why = "the case was closed by the offender's death";
+        else if (!m.witnessed()) why = "a rumor is not evidence";
         else if (m.reported) why = "already reported";
         else if (!lawman.alive || !witness.alive) why = "someone is dead";
         else if (!lawman.homeJurisdiction.equals(m.jurisdiction)) why = lawman.name + " has no authority in " + m.jurisdiction;
@@ -296,6 +297,32 @@ public final class Law {
     }
 
     public void clear() { reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); }
+
+    /** Death settles justice everywhere; personal memories, Honor and other people's fights remain. */
+    public void playerRespawned() {
+        long id = g.player.id;
+        for (var charges : bounties.values()) charges.remove(id);
+        resisting.remove(id); haltedAt.remove(id); assaultAt.clear();
+        settledAt.put(id, g.time);
+        for (Npc n : g.npcs) {
+            for (Memory m : n.memories) if (m.crime() && m.subject == id) { m.settled = true; m.reported = true; }
+            boolean fighting = n.fightTarget == id || n.cs.lastAttacker == id;
+            boolean pursuing = n.hunt != null && n.hunt.target == id || n.fearOf == id || n.investigation != null && n.investigation.subject == id;
+            if (n.hunt != null && n.hunt.target == id) n.hunt = null;
+            if (n.investigation != null && n.investigation.subject == id) n.investigation = null;
+            if (n.fearOf == id) { n.fearOf = 0; n.hideSet = false; }
+            n.aware.remove(id);
+            if (fighting) {
+                n.fightTarget = 0; n.cs.lastAttacker = 0; n.cs.cancel(); n.cs.blocking = false; n.cs.draw = 0;
+                g.combat.projectiles.removeIf(pr -> pr.owner == n);
+            }
+            if (fighting || pursuing || n.goal == rpg.ai.Brain.Goal.WATCH) {
+                n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = 0; n.hasGoalPos = false;
+                if (n.loaded && n.alive) g.ai.desire(n, rpg.ai.AiSystem.A_IDLE);
+            }
+        }
+        g.state.commit("JusticeSettledByDeath", id, 0, null, 0, "charges closed; personal memories retained");
+    }
 
     public static boolean lawman(Npc n) { return n.id == Ids.LAWMAN_A || n.id == Ids.LAWMAN_B; }
 }

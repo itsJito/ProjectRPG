@@ -300,7 +300,8 @@ void AiService::plan(Engine& e, Agent& a, const VoxelWorld* w) {
 void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, PhysicsService* phys) {
     Mover* m = phys ? phys->mover(a.body) : nullptr;
     float wantX = 0, wantZ = 0, jump = 0;
-    if (a.moving && w != nullptr && !a.route.empty() && a.routeAt * 3 < a.route.size()) {
+    // Consume reached waypoints and steer toward the next one in the same frame.
+    while (a.moving && w != nullptr && !a.route.empty() && a.routeAt * 3 < a.route.size()) {
         const bool doors = (a.flags & ASTRATTO_AGENT_DOORS) != 0;
         const float radius = m ? m->radius : 0.3f;
         // cut corners: the furthest of the next few cells it can walk to in a straight line is the one it heads for
@@ -346,6 +347,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
                     astratto_evt_agent ev{}; ev.handle = a.self; e.emit(ev, ASTRATTO_EVT_AGENT_STUCK);
                 } else a.wantPath = true;
             }
+            break;
         }
     }
     // face what it is after when it can see it and is not running from it

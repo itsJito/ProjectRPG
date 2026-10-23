@@ -256,8 +256,14 @@ public final class Main {
                 if (hud.dialog != null || hud.menuOpen()) hud.choose(k);
                 else hud.hotkey(k);
             }
+            if (hud.dialog != null && hud.dialog.pauseMenu) {
+                Dialog d = hud.dialog;
+                if (in.keyPressed(GLFW_KEY_UP)) d.focusedChoice = (d.focusedChoice + d.choices.size() - 1) % d.choices.size();
+                if (in.keyPressed(GLFW_KEY_DOWN)) d.focusedChoice = (d.focusedChoice + 1) % d.choices.size();
+                if (in.keyPressed(GLFW_KEY_ENTER) || in.keyPressed(GLFW_KEY_KP_ENTER)) hud.choose(d.focusedChoice);
+            }
             // the scenes: inventory, character, skills, journal, magic
-            if (!typing) {
+            if (!typing && !(hud.dialog != null && hud.dialog.pauseMenu)) {
                 if (in.keyPressed(GLFW_KEY_I)) hud.toggle(Hud.Scene.INVENTORY);
                 if (in.keyPressed(GLFW_KEY_C)) hud.toggle(Hud.Scene.CHARACTER);
                 if (in.keyPressed(GLFW_KEY_K)) hud.toggle(Hud.Scene.SKILLS);
@@ -289,6 +295,7 @@ public final class Main {
             // they are; only the interface, its sounds and the music go on
             boolean paused = hud.paused();
             if (paused != wasPaused) {
+                if (paused) g.controller.cancelHandInput();
                 game.commands().audioPause(paused ? 1 << astratto.bridge.AstrattoNative.BUS_SFX | 1 << astratto.bridge.AstrattoNative.BUS_VOICE | 1 << astratto.bridge.AstrattoNative.BUS_AMBIENCE : 0);
                 music.paused(paused);
                 wasPaused = paused;
@@ -309,13 +316,15 @@ public final class Main {
         }
     }
 
-    private static Dialog menu(Window win, Rpg g) {
-        return new Dialog("Game menu", g.profile == null ? "The devmap." : g.profile.name + " - the game is saved when you leave it, too.")
+    static Dialog menu(Window win, Rpg g) {
+        Dialog d = new Dialog("Game paused", g.player.name)
                 .choice("Resume", () -> { })
                 .choice("Save game", () -> { if (new SaveSystem(g).save(g.savePath())) g.chat.add("Game saved.", Chat.Kind.DEBUG); })
                 .choice("Load last save", () -> { if (new SaveSystem(g).load(g.savePath())) g.chat.add("Game loaded.", Chat.Kind.DEBUG); })
                 .choice("Quit to title", () -> { if (g.sfx != null) g.sfx.ui("LogoutProfileButton", 0.6f); g.ui.toTitle(); })
                 .choice("Quit game", () -> { if (g.sfx != null) g.sfx.ui("LogoutProfileButton", 0.6f); win.requestClose(); });
+        d.pauseMenu = true;
+        return d;
     }
 
     private static boolean shotNext;

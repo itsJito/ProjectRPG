@@ -75,7 +75,7 @@ public final class Brain {
         // a guard who has heard the player is violent - but has no warrant (a rumor is not a report) - keeps an eye on them
         if (threat == null && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && g.player.alive && g.law.bounty(g.player.id, n.homeJurisdiction) <= 0) {
             Memory bad = n.crimeKnown(g.player.id);
-            boolean violent = bad != null && (bad.kind.equals("MURDER") || bad.kind.equals("ASSAULT")) && bad.confidence >= 0.45f;
+            boolean violent = bad != null && !bad.settled && (bad.kind.equals("MURDER") || bad.kind.equals("ASSAULT")) && bad.confidence >= 0.45f;
             if (violent && n.distTo(g.player) < 16 && ai.canSee(n, g.player) && (g.time < n.watchUntil || g.time > n.watchUntil + 120)) {
                 if (g.time > n.watchUntil) n.watchUntil = g.time + 25;
                 if (n.role != Npc.Role.LAWMAN || Math.hypot(g.player.x - n.postX, g.player.z - n.postZ) < 12)
@@ -153,8 +153,8 @@ public final class Brain {
         s.sort(Comparator.comparing(Score::value).reversed());
         // a little inertia: keep the current goal unless another beats it clearly
         Score best = s.get(0);
-        // (danger is never put off: a fight or a flight beats any goal it outscores, inertia or not)
-        boolean urgent = best.goal == Goal.FIGHT || best.goal == Goal.FLEE;
+        // Safety decisions interrupt routine goals as soon as they outscore them.
+        boolean urgent = best.goal == Goal.FIGHT || best.goal == Goal.FLEE || best.goal == Goal.INVESTIGATE;
         if (!urgent) for (Score c : s) if (c.goal == n.goal && c.value >= best.value - 0.06f) { best = c; break; }
         n.scores.clear();
         for (int i = 0; i < Math.min(6, s.size()); i++) n.scores.add(String.format("%.2f %s - %s", s.get(i).value, s.get(i).goal, s.get(i).reason));
@@ -179,7 +179,7 @@ public final class Brain {
     }
 
     private Memory unreportedCrime(Npc n) {
-        for (Memory m : n.memories) if (m.crime() && m.witnessed() && !m.reported && m.subject != n.id) return m;
+        for (Memory m : n.memories) if (m.crime() && !m.settled && m.witnessed() && !m.reported && m.subject != n.id) return m;
         return null;
     }
 

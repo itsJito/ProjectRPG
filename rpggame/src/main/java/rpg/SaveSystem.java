@@ -121,7 +121,7 @@ public final class SaveSystem {
         m.put("eq", ItemIO.equipment(a.eq));
         List<Object> look = new ArrayList<>(); for (int v : a.look.toArray()) look.add(v);
         m.put("look", look);
-        if (a instanceof rpg.actor.Player p) { m.put("style", p.style); m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
+        if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
         m.put("manaAcc", (double) a.manaAcc);
         if (g.prayers != null) m.put("prayers", g.prayers.save(a));
         return m;
@@ -156,7 +156,6 @@ public final class SaveSystem {
         // the player
         Map<String, Object> pm = Json.obj(root, "player");
         applyActor(g.player, pm);
-        g.player.style = Json.integer(pm, "style", 0);
         try { g.player.spell = rpg.combat.Spells.Spell.valueOf(Json.str(pm, "spell", "SPARK")); } catch (IllegalArgumentException e) { g.player.spell = rpg.combat.Spells.Spell.SPARK; }
         try { g.player.book = rpg.combat.Spells.Book.valueOf(Json.str(pm, "book", "STANDARD")); } catch (IllegalArgumentException e) { g.player.book = rpg.combat.Spells.Book.STANDARD; }
         g.player.firstPerson = Json.bool(pm, "fp", false);

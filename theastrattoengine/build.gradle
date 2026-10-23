@@ -77,6 +77,8 @@ tasks.register('buildNative', Exec) {
     description = 'Builds the Astratto native core for this platform into native/bin/<platform> and runs its self-test.'
     workingDir = projectDir
     inputs.dir('native/src'); inputs.dir('native/include'); inputs.dir('native/tests'); inputs.dir('native/modules')
+    inputs.files('native/CMakeLists.txt', 'native/build.bat')
+    inputs.property('nativePlatform', astrattoPlatform)
     outputs.dir("native/bin/$astrattoPlatform")
     if (isWindows) {
         commandLine 'cmd', '/c', file('native/build.bat').absolutePath
@@ -87,6 +89,8 @@ tasks.register('buildNative', Exec) {
 
 // shaders, resources and the native library go into the jar, under astratto/
 def engineResources = tasks.register('engineResources', Sync) {
+    // Native sources must be checked even when a prebuilt library already exists.
+    dependsOn tasks.named('buildNative')
     from('shaders') { into 'astratto/shaders' }
     from('resources') { into 'astratto/resources' }
     // (not the module the native self-test loads: it is for that test alone)
@@ -97,11 +101,6 @@ def engineResources = tasks.register('engineResources', Sync) {
 }
 tasks.named('processResources') { dependsOn engineResources }
 tasks.named('sourcesJar') { dependsOn engineResources }
-
-// a fresh checkout has no native library yet: the jar is not built without one
-tasks.named('engineResources') {
-    if (!file("native/bin/$astrattoPlatform").exists()) dependsOn 'buildNative'
-}
 
 tasks.named('test') {
     useJUnitPlatform()

@@ -76,7 +76,7 @@ public final class Rig {
     public void pose(Actor a, State st, float dt, double time, boolean still) {
         Body b = a.plan();
         Actor.Combat c = still ? REST : a.cs;
-        dt = Math.max(1e-4f, Math.min(dt, 0.1f));
+        dt = Math.max(0, Math.min(dt, 0.1f));
         float yaw = a.yaw;
         float rx = (float) Math.cos(yaw), rz = (float) -Math.sin(yaw), bx = (float) Math.sin(yaw), bz = (float) Math.cos(yaw);
         float rvx = still ? 0 : a.vx, rvz = still ? 0 : a.vz;
@@ -129,7 +129,7 @@ public final class Rig {
         float hipFloor = b.hipY() - 0.35f - strideBend - PENDULUM * 1.15f;
         float sprintF = clamp01((st.spd - 5.2f) / 1.8f);
         // acceleration, for the lean: the body leans into a start and back against a stop (it has weight)
-        float ax = (vx - st.lastVx) / dt, az = (vz - st.lastVz) / dt;
+        float ax = dt > 0 ? (vx - st.lastVx) / dt : 0, az = dt > 0 ? (vz - st.lastVz) / dt : 0;
         st.lastVx = vx; st.lastVz = vz;
         float accFwd = -(ax * bx + az * bz);                 // + forward
         float accSide = ax * rx + az * rz;
@@ -345,11 +345,15 @@ public final class Rig {
         ItemDef main = a.main(), off = a.off();
         boolean bow = main != null && (main.family == Family.BOW || main.family == Family.CROSSBOW);
         float[] aim = {(float) Math.sin(st.headYaw) * -(float) Math.cos(a.pitch), (float) Math.sin(a.pitch), -(float) Math.cos(a.pitch) * (float) Math.cos(st.headYaw)};
+        boolean handBow = main != null && main.family == Family.BOW;
+        float[] viewBow = firstPerson && handBow ? view(aim, 1f, -1, 3.5f, 10f) : null;
         float swingAmp = (0.62f + 0.38f * runF) * st.amp;
-        for (int k = 0; k < 2; k++) {
+        for (int h = 0; h < 2; h++) {
+            int k = handBow ? 1 - h : h;
             int side = k == 0 ? 1 : -1;
             boolean isMain = k == 0;
-            ItemDef holds = isMain ? main : off;
+            // The bow is in the support hand; the main hand draws its string. Crossbows keep their trigger grip.
+            ItemDef holds = main != null && main.family == Family.BOW ? (isMain ? null : main) : isMain ? main : off;
             float[] shoulder = point(tm, side * b.shoulderX(), b.shoulderY() - b.hipY(), 0);
             float[] target;
             float[] dir = torsoDir(0.05f * side, 0.55f, 1f);   // where a held weapon points at rest: carried ahead, point up
@@ -380,11 +384,15 @@ public final class Rig {
             // through the eyes: what the hands hold is carried up and out in front, low in the view (the shield at the left,
             // the weapon at the right), swaying with the stride
             if (holds != null && holds.family == Family.STAFF) { rest = torsoPoint(shoulder, side * 0.6f, -6.6f, -3.6f); dir = new float[]{0, 1, 0}; }
+            if (holds != null && holds.family == Family.BOW) {
+                dir = new float[]{0, 1, 0};
+                if (viewBow != null) rest = viewBow;
+            }
             if (firstPerson && holds != null && holds.family != Family.BOW && holds.family != Family.STAFF)
             {
                 rest = view(aim, holds.family == Family.SHIELD ? 4.6f : 4.0f, side, 4.2f + 0.2f * (float) Math.cos(theta * 2), 9.2f);
                 // the blade carried up and forward into the view, not back over the shoulder
-                if (holds.family != Family.SHIELD) dir = norm(new float[]{aim[0] * 0.9f + torsoRight[0] * 0.3f, 0.8f, aim[2] * 0.9f + torsoRight[2] * 0.3f});
+                if (holds.family != Family.SHIELD) dir = holds.family == Family.CROSSBOW ? aim : norm(viewDirection(aim, side * 0.3f, 0.8f, 0.9f));
             }
             if (attacking) {
                 armActive[k] = true;
@@ -413,11 +421,11 @@ public final class Rig {
                 // the bow held out to the aim only while it is drawn (carried at rest, the bow hand swings like any other:
                 // held out the whole time, every running stride looked like a punch)
                 armActive[k] = true;
-                target = add(shoulder, aim, 8.6f);
+                target = viewBow != null ? viewBow : add(shoulder, aim, 8.6f);
                 dir = new float[]{0, 1, 0};
             } else if (bow && isMain && c.draw > 0) {
                 armActive[k] = true;
-                float[] bowHand = add(point(tm, -b.shoulderX(), b.shoulderY() - b.hipY(), 0), aim, 8.6f);
+                float[] bowHand = handBow ? hand[1] : add(point(tm, -b.shoulderX(), b.shoulderY() - b.hipY(), 0), aim, 8.6f);
                 target = add(add(bowHand, aim, -(1.5f + c.draw * 6.5f)), new float[]{0, 1, 0}, 0.6f * c.draw);
                 dir = aim;
             } else if (holds != null && (holds.family == Family.STAFF || holds.family == Family.WAND) && c.castCooldown > 0.35f) {
@@ -446,12 +454,18 @@ public final class Rig {
      * hand's side, and down from the eyes - where a held weapon or shield sits low in the frame, whatever the pitch.
      */
     private float[] view(float[] aim, float out, int side, float down, float ahead) {
+        float[] offset = viewDirection(aim, out * side, -down, ahead);
+        return new float[]{eye[0] + offset[0], eye[1] + offset[1], eye[2] + offset[2]};
+    }
+
+    /** Offset in the camera's right/up/forward frame, shared by hand placement and item orientation. */
+    private float[] viewDirection(float[] aim, float right, float up, float forward) {
         float[] f = norm(aim);
         float[] r = norm(new float[]{-f[2], 0, f[0]});
         if (dot(r, torsoRight) < 0) r = new float[]{-r[0], -r[1], -r[2]};
         float[] u = cross(r, f);
         if (u[1] < 0) u = new float[]{-u[0], -u[1], -u[2]};
-        return new float[]{eye[0] + f[0] * ahead + r[0] * out * side - u[0] * down, eye[1] + f[1] * ahead + r[1] * out * side - u[1] * down, eye[2] + f[2] * ahead + r[2] * out * side - u[2] * down};
+        return new float[]{f[0] * forward + r[0] * right + u[0] * up, f[1] * forward + r[1] * right + u[1] * up, f[2] * forward + r[2] * right + u[2] * up};
     }
 
     /** A foot leaves the ground: its swing starts from where it stood. */

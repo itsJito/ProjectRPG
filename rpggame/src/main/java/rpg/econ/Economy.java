@@ -123,13 +123,13 @@ public final class Economy {
             // someone who has turned on him
             for (Npc law : g.npcs) if (law.alive && (law.role == Npc.Role.GUARD || law.role == Npc.Role.LAWMAN) && law.distTo(merchant) < 16 && g.ai.canSee(law, merchant))
                 return merchant.name + ": \"Not with " + law.name + " watching. Come back when it's quiet.\"";
-            Memory hurt = merchant.crimeKnown(a.id);
-            if (hurt != null && (hurt.kind.equals("ASSAULT") || hurt.kind.equals("MURDER")) && hurt.victim == merchant.id) return merchant.name + " wants nothing to do with you.";
+            for (Memory hurt : merchant.memories) if (hurt.subject == a.id && hurt.victim == merchant.id &&
+                    (hurt.kind.equals("ASSAULT") || hurt.kind.equals("MURDER"))) return merchant.name + " wants nothing to do with you.";
             return null;
         }
         if (g.law.bounty(a.id, s.jurisdiction) > 0) return merchant.name + " won't trade with someone wanted in " + s.jurisdiction + ".";
-        Memory m = merchant.crimeKnown(a.id);
-        if (m != null && m.confidence >= 0.4f) return merchant.name + " won't trade with you: \"" + (m.witnessed() ? "I saw what you did." : "I've heard what you did.") + "\"";
+        for (Memory m : merchant.memories) if (m.crime() && m.subject == a.id && m.confidence >= 0.4f && (!m.settled || m.victim == merchant.id))
+            return merchant.name + " won't trade with you: \"" + (m.witnessed() ? "I saw what you did." : "I've heard what you did.") + "\"";
         return null;
     }
 

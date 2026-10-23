@@ -17,6 +17,24 @@ import rpg.item.Tier;
  * hand closes (for a two-hander, the upper hand).
  */
 final class HiResItems {
+    /** Continuous tapered limbs at 64 voxels/metre, shared by held, dropped and inventory bows. */
+    static ItemModels.Model bow(ItemDef d) {
+        VoxModel m = new VoxModel(14, 82, 7);
+        int wood = mat(d.color);
+        for (int y = 0; y <= 80; y++) {
+            float u = (y - 40) / 40f, centre = 3 + 7 * u * u;
+            float radius = 1.2f + 0.4f * (1 - Math.abs(u));
+            for (int x = 0; x < 14; x++) {
+                if (Math.abs(x - centre) > radius) continue;
+                int c = Math.abs(y - 40) <= 5 ? mat(y % 3 == 0 ? 0x3A261A : 0x604028)
+                        : Math.abs(u) > 0.95f ? mat(0x483420) : (y / 5 + x * 3) % 7 == 0 ? sh(wood, 0.83f) : wood;
+                m.set(x, y, 3, c);
+            }
+        }
+        for (int y = 2; y <= 78; y++) m.set(10, y, 3, mat(0xE8E0C8));
+        return new ItemModels.Model(m, 3.5f, 40.5f, 3.5f);
+    }
+
     private HiResItems() { }
 
     /** A tier's fittings: blade metal (true reflectance), grip wrap, guard and pommel metal, the style number, a gem colour (0: none). */

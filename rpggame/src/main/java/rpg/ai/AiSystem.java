@@ -47,8 +47,8 @@ public final class AiSystem {
         policy = g.game.reserve(KIND_POLICY);
         List<CommandBuffer.Action> acts = new ArrayList<>();
         acts.add(new CommandBuffer.Action(A_IDLE, ACT_IDLE).base(1).consider(IN_FACT0 + A_IDLE, CURVE_LINEAR, 0, 1, 1));
-        acts.add(new CommandBuffer.Action(A_WANDER, ACT_WANDER).base(1).range(6).speed(1.65f).consider(IN_FACT0 + A_WANDER, CURVE_LINEAR, 0, 1, 1));
-        acts.add(new CommandBuffer.Action(A_GOTO, ACT_MOVE_TO_GOAL).base(1).speed(2.0f).consider(IN_FACT0 + A_GOTO, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_WANDER, ACT_WANDER).base(1).range(6).speed(g.cfg.walkSpeed * 0.8f).consider(IN_FACT0 + A_WANDER, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_GOTO, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.walkSpeed).consider(IN_FACT0 + A_GOTO, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_RUN, ACT_MOVE_TO_GOAL).base(1).speed(4.8f).consider(IN_FACT0 + A_RUN, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_APPROACH, ACT_APPROACH).base(1).range(1.6f).speed(4.2f).consider(IN_FACT0 + A_APPROACH, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_FLEE, ACT_FLEE).base(1).range(16).speed(6.2f).consider(IN_FACT0 + A_FLEE, CURVE_LINEAR, 0, 1, 1));
@@ -356,7 +356,7 @@ public final class AiSystem {
         if (!n.combatant()) {
             for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.goal == Brain.Goal.FIGHT && o.hostileToPlayer && n.distTo(o) < 8 && canSee(n, o)) return o;
             Memory m = n.crimeKnown(p.id);
-            if (n.role == Npc.Role.VILLAGER && m != null && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
+            if (n.role == Npc.Role.VILLAGER && m != null && !m.settled && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
         }
         return null;
     }

@@ -8,9 +8,9 @@ import rpg.item.ItemDef.DamageType;
  * stats, the move and how it was executed.
  *
  * <pre>
- * potential melee damage = weapon base x Attack scaling x move modifier x execution
- * protection             = one combined Defense-and-armor rating, with diminishing returns
- * final HP damage        = potential x (1 - mitigation)
+ * potential melee damage = weapon base x Strength scaling x move modifier x execution
+ * protection             = Defense-and-armor rating for active defense
+ * final HP damage        = potential after performed defenses (armor only passively lessens magic)
  * impact                 = weapon impact x Strength force x move impact
  * stagger when impact exceeds effective Stability; then Stability resistance rises and recovers
  * </pre>
@@ -32,8 +32,6 @@ public final class CombatMath {
     public static float attackCadence(int attack, float attackBonus) { return 1f - Math.min(0.32f, (attack - 1) * 0.0025f + attackBonus * 0.004f); }
     /** Strength ("how hard can I hit?"): the damage of a landed blow, with the weapon's Strength bonus (a flat item bonus, scaled). */
     public static float strengthScaling(int strength, float strengthBonus) { return (1f + (strength - 1) * 0.022f) * (1f + strengthBonus * 0.025f); }
-    /** Kept for creatures' natural weapons (their Attack and Strength are one bite): Strength's scaling, no bonus. */
-    public static float attackScaling(int strength) { return strengthScaling(strength, 0); }
     public static float archeryScaling(int archery) { return 1f + (archery - 1) * 0.02f; }
     public static float magicScaling(int magic) { return 1f + (magic - 1) * 0.022f; }
     public static float strengthForce(int strength) { return 1f + (strength - 1) * 0.015f; }

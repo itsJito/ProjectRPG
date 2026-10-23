@@ -53,6 +53,7 @@ final class HudFragments {
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
         hud.add(new WorkBar(hud));
         hud.add(new DialogueCard(hud));
+        hud.add(new PauseCard(hud));
         hud.add(new MenuFrag(hud));
         hud.add(new Inspector(hud, "ai", 440, () -> hud.aiInspector, "AI inspector", HudFragments::aiLines));
         hud.add(new Inspector(hud, "state", 480, () -> hud.stateInspector, "World state inspector", HudFragments::stateLines));
@@ -944,7 +945,7 @@ final class HudFragments {
     // ------------------------------------------------------------------ dialogue: the NPC's words are in the bubble over their head; the answers here
     static final class DialogueCard extends Fragment {
         DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.1f; fadeOut = 0.2f; }
-        @Override protected boolean active() { return hud.dialog != null; }
+        @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu; }
         @Override public float width() { return 520; }
         @Override public float height() {
             Dialog d = hud.dialog;
@@ -972,6 +973,52 @@ final class HudFragments {
                 if (ui.clicked(ox, oy, colW, 20)) { hud.choose(i); return; }
             }
             if (n == 0) { ui.text("Click to continue", x + 12, ty, 12, Style.DIM); if (ui.clicked(x, y, cw, ch)) hud.dialog = null; }
+        }
+    }
+
+    /** A full pause presentation using the same actions and input routing as an ordinary dialogue. */
+    static final class PauseCard extends Fragment {
+        private float lastMouseX = Float.NaN, lastMouseY = Float.NaN;
+        PauseCard(Hud h) { super("pause"); fadeIn = 0.12f; fadeOut = 0.12f; }
+        @Override protected boolean active() { return hud.dialog != null && hud.dialog.pauseMenu; }
+        @Override public float width() { return Math.min(900, Math.max(560, hud.w - 48)); }
+        @Override public float height() { return 520; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Dialog d = hud.dialog;
+            if (d == null || !d.pauseMenu) return;
+            float w = width(), split = w * 0.48f, right = x + split + 32, rw = w - split - 64;
+            ui.rect(0, 0, hud.w, hud.h, 0xA0000000);
+            Style.card(ui, x, y, w, height());
+            ui.rect(x, y, w, 3, Style.ACCENT);
+            ui.text("GAME PAUSED", x + 32, y + 30, 28, Style.TEXT);
+            ui.text("Esc to resume", x + 34, y + 70, 12, Style.DIM);
+            ui.rect(x + split, y + 32, 1, 440, Style.EDGE);
+            boolean moved = ui.mx != lastMouseX || ui.my != lastMouseY;
+            lastMouseX = ui.mx; lastMouseY = ui.my;
+            for (int i = 0; i < d.choices.size(); i++) {
+                float bx = x + 32, by = y + 114 + i * 62, bw = split - 64;
+                boolean hover = live && ui.hover(bx, by, bw, 48);
+                if (hover && moved) d.focusedChoice = i;
+                boolean selected = d.focusedChoice == i;
+                ui.rect(bx, by, bw, 48, selected ? 0x28E8C878 : hover ? 0x20FFFFFF : 0x10FFFFFF);
+                ui.border(bx, by, bw, 48, 1, selected || hover ? Style.ACCENT : Style.EDGE);
+                ui.text(Integer.toString(i + 1), bx + 18, by + 16, 12, selected ? Style.ACCENT : Style.DIM);
+                ui.text(d.choices.get(i).label(), bx + 52, by + 13, 16, Style.TEXT);
+                if (live && ui.clicked(bx, by, bw, 48)) { hud.choose(i); return; }
+            }
+            var p = hud.g.player;
+            ui.text(p.name, right, y + 48, Math.min(24, rw / Math.max(1, ui.width(p.name, 1))), Style.ACCENT);
+            ui.text("Combat level " + p.skills.combatLevel() + "   Total " + p.skills.totalLevel(), right, y + 88, 13, Style.TEXT);
+            ui.text(hud.g.state.clockText(), right, y + 114, 13, Style.DIM);
+            ui.text("Honor  " + hud.g.honor.rankName(), right, y + 164, 13, Style.TEXT);
+            honorBar(ui, right, y + 196, rw, hud.g.honor.score, hud.g.honor.score);
+            ui.text(rpg.item.Currency.full(p.count(rpg.item.Items.COINS)), right, y + 230, 14, Style.ACCENT);
+            var item = p.eq.get(rpg.item.ItemDef.Slot.MAIN);
+            if (item != null) {
+                hud.itemIcon(ui, item, right + (rw - 112) / 2, y + 274, 112, 112, 1);
+                ui.centered(item.def.name, right + rw / 2, y + 404, 14, Style.TEXT);
+            }
+            ui.text("Up/Down select  -  Enter confirm  -  1-5 choose", x + 34, y + 474, 11, Style.DIM);
         }
     }
 

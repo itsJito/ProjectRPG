@@ -50,6 +50,7 @@ public final class ItemModels {
             case AXE: return HiResItems.axe(d, t);
             case MACE: return HiResItems.mace(d, t);
             case PICKAXE: return HiResItems.pickaxe(d, t);
+            case BOW: return HiResItems.bow(d);
             case SHIELD: return HiResItems.shield(d, t);
             case LONGSWORD: return HiResItems.longsword(d, t);
             case SCIMITAR: return HiResItems.scimitar(d, t);
@@ -146,7 +147,6 @@ public final class ItemModels {
             case MACE: return mace(d, t);
             case PICKAXE: return pickaxe(d, t);
             case SHIELD: return shield(d, t);
-            case BOW: return bow(d);
             case ARROW: return arrows(d);
             case STAFF: return staff(d);
             case WAND: return wand(d);
@@ -372,19 +372,6 @@ public final class ItemModels {
         m.box(7, 12, 2, 9, 14, 2, L.pommel());
         if (L.style() == 11) m.set(8, 13, 2, mat(0x40C0F0));
         return new Model(m, 8.5f, 12.5f, 0.5f);
-    }
-
-    private static Model bow(ItemDef d) {
-        int c = mat(d.color);
-        VoxModel m = new VoxModel(7, 39, 3);
-        for (int y = 0; y < 39; y++) {
-            float u = (y - 19) / 19f;
-            int x = Math.round(5 - 4 * (1 - u * u));
-            m.set(x, y, 1, Math.abs(y - 19) <= 2 ? mat(0x4A3020) : c);
-        }
-        for (int y = 1; y < 38; y++) m.set(5, y, 1, mat(0xE8E0C8));   // the string
-        for (int y = 17; y <= 21; y++) m.set(1, y, 1, mat(0x4A3020));
-        return new Model(m, 1.5f, 19.5f, 1.5f);
     }
 
     private static Model arrows(ItemDef d) {

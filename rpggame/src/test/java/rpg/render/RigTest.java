@@ -7,6 +7,15 @@ import rpg.actor.Body;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RigTest {
+    @Test void pausedRenderingDoesNotAdvanceTheWalkingPose() {
+        Actor a = standing(); a.vz = -2.45f;
+        Rig rig = new Rig(); Rig.State state = new Rig.State();
+        for (int i = 0; i < 90; i++) { a.z += a.vz / 60; rig.pose(a, state, 1f / 60, i / 60f, false); }
+        float[][] pose = java.util.Arrays.stream(rig.seg).map(float[]::clone).toArray(float[][]::new);
+        for (int i = 0; i < 600; i++) rig.pose(a, state, 0, 89 / 60f, false);
+        for (int i = 0; i < pose.length; i++) assertArrayEquals(pose[i], rig.seg[i], 1e-5f);
+    }
+
     private static Actor standing() {
         Actor actor = new Actor(1, "Test", 1);
         actor.grounded = true;

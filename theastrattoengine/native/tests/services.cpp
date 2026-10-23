@@ -491,6 +491,50 @@ void services_checks(const char* moduleDir) {
         check("a noise in its hearing comes back as heard", ev.counted(ASTRATTO_EVT_AGENT_HEARD) >= 1);
     }
 
+    // An agent without a mover isolates the route follower from acceleration and contacts.
+    // Crossing intermediate waypoints must not insert stationary frames into an otherwise valid walk.
+    {
+        Cmds edits;
+        auto& platform = edits.add<astratto_edit_fill>(ASTRATTO_EDIT_FILL);
+        platform.x0 = 49; platform.x1 = 59; platform.y0 = platform.y1 = FLOOR; platform.z0 = 4; platform.z1 = 12;
+        platform.block = STONE | ASTRATTO_SET_RAW;
+        astratto_world_edit(e, world, edits.bytes.data(), static_cast<uint32_t>(edits.bytes.size()));
+        astratto_handle walker = reserve(e, ASTRATTO_KIND_AGENT);
+        astratto_cmd_agent_create& ac = c.add<astratto_cmd_agent_create>(ASTRATTO_CMD_AGENT_CREATE);
+        ac.handle = walker; ac.policy = policy; ac.x = 43.5f; ac.y = FLOOR; ac.z = 8.5f; ac.eye = 1.6f; ac.seed = 17;
+        astratto_cmd_agent_goal& goal = c.add<astratto_cmd_agent_goal>(ASTRATTO_CMD_AGENT_GOAL);
+        goal.handle = walker; goal.x = 56.5f; goal.y = FLOOR + 1; goal.z = 8.5f;
+        astratto_cmd_agent_fact& fact = c.add<astratto_cmd_agent_fact>(ASTRATTO_CMD_AGENT_FACT);
+        fact.handle = walker; fact.index = 0; fact.value = 1;
+        frame(e, c, 0);
+        float previousX = 43.5f, previousZ = 8.5f;
+        int walkingFrames = 0, pauses = 0;
+        bool arrived = false;
+        for (int i = 0; i < 900 && !arrived; i++) {
+            Events ev = frame(e, c, 1.0f / 30);
+            ev.each(ASTRATTO_EVT_AGENT_ARRIVED, [&](const uint8_t* p, uint32_t) {
+                astratto_evt_agent event; std::memcpy(&event, p, sizeof event);
+                if (event.handle == walker) arrived = true;
+            });
+            auto state = snap(e, ASTRATTO_SNAPSHOT_AGENTS);
+            const auto* agentState = findSnap<astratto_snap_agent>(state, ASTRATTO_SNAP_AGENT, walker);
+            if (agentState) {
+                const float dx = agentState->x - previousX, dz = agentState->z - previousZ;
+                if (i > 3 && agentState->moving && agentState->route_cells > 1) {
+                    walkingFrames++;
+                    if (dx * dx + dz * dz < 1e-10f) pauses++;
+                }
+                previousX = agentState->x; previousZ = agentState->z;
+            }
+        }
+        if (!arrived || pauses != 0) std::printf("      waypoint continuity: arrived %d, walking %d, pauses %d\n", arrived, walkingFrames, pauses);
+        check("route following reaches a raised goal without stationary intermediate waypoint frames", arrived && walkingFrames > 20 && pauses == 0);
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = walker;
+        frame(e, c, 0);
+        platform.block = AIR | ASTRATTO_SET_RAW;
+        astratto_world_edit(e, world, edits.bytes.data(), static_cast<uint32_t>(edits.bytes.size()));
+    }
+
     // ------------------------------------------------------------ audio: the mixer, rendered on request
     {
         const int rate = 44100, n = rate / 2;

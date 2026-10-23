@@ -19,7 +19,9 @@ public final class Dialogue {
 
     public Dialog talk(Npc n) {
         Memory known = n.crimeKnown(g.player.id);
-        String greet = known == null ? greeting(n) : known.witnessed()
+        String greet = known == null ? greeting(n) : known.settled
+                ? "Your debt to the law is settled. I still remember what happened."
+                : known.witnessed()
                 ? "I saw you - " + known.kind.toLowerCase() + ". Keep your distance."
                 : "I've heard about you (" + known.kind.toLowerCase() + ", " + known.source + "). I'm watching you.";
         Dialog d = new Dialog(n.name + " - " + n.title, greet);

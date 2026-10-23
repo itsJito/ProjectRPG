@@ -53,6 +53,8 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
+        if ("polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { polishShots(); return 0; }
         // A short review of the three locomotion loops, without the unrelated twitch/work/combat galleries.
         if ("locomotion".equals(System.getenv("RPG_GALLERY_ONLY"))) { locomotionShots(tag); return 0; }
         // RPG_GALLERY_ONLY=animals: just the animal sheets (a quick look while working on them)
@@ -159,6 +161,8 @@ final class Gallery {
 
     /** Walk, jog and sprint at steady speed, each a 1.2-second loop filmed on threes. */
     private void locomotionShots(String tag) {
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, null);
+        g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
         for (String gait : new String[]{"walk", "jog", "sprint"}) {
             g.controller.in.forward = 0;
             g.controller.in.sprint = false;
@@ -317,6 +321,44 @@ final class Gallery {
     }
 
     /** The title screen (empty, and with three profiles) and the console open over the world. */
+    private void pauseShot() {
+        hud.dialog(Main.menu(win, g));
+        for (int i = 0; i < 24; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false, true);
+        Main.shot(gfx, win.width, win.height, new File(shots, "pause.png"));
+        hud.closeAll();
+    }
+
+    /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void polishShots() {
+        place(64.5f, 62.5f, (float) Math.PI);
+        frames(20);
+        hud.go(Hud.Scene.CHARACTER);
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "character.png"));
+        hud.closeAll();
+        g.player.firstPerson = true;
+        for (String id : new String[]{"iron_sword", "bronze_axe", "oak_shortbow", "bronze_crossbow"}) {
+            var item = rpg.item.Items.get(id);
+            if (item == null) throw new IllegalArgumentException("review item missing: " + id);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(item, 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            for (float pitch : new float[]{-0.7f, 0, 0.7f}) {
+                g.controller.camPitch = pitch;
+                frames(20);
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+                Main.shot(gfx, win.width, win.height, new File(shots, id + "-" + pitch + ".png"));
+            }
+            if (item.family == rpg.item.ItemDef.Family.BOW) {
+                g.controller.camPitch = 0;
+                g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.BRONZE_ARROWS, 10));
+                g.controller.in.mainDown = true; frames(45);
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+                Main.shot(gfx, win.width, win.height, new File(shots, "bow-drawn.png"));
+                g.controller.in.mainDown = false; frames(1);
+            }
+        }
+    }
+
     private void menuShots() {
         java.nio.file.Path root0 = Profiles.root;
         Profiles.root = java.nio.file.Path.of("build", "gallery-profiles");

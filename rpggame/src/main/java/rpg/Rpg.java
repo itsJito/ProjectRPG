@@ -438,7 +438,7 @@ public final class Rpg implements GameModule {
         if (gore != null) gore.healed(player);
         teleport(player, DevMap.GRAVEYARD_SPAWN[0], DevMap.FLOOR, DevMap.GRAVEYARD_SPAWN[1]);
         controller.snapTo(0);
-        for (Npc n : npcs) if (n.fightTarget == player.id) { n.fightTarget = 0; n.cs.lastAttacker = 0; }
+        law.playerRespawned();
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");
         chat.say("You wake among the graves, with nothing but the clothes you were born to.");
     }

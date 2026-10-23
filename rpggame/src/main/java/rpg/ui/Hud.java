@@ -128,7 +128,7 @@ public final class Hud {
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
-        group("talk", "dialogue", Placement.at(Anchor.BOTTOM, 0, 120));
+        group("talk", "dialogue", Placement.at(Anchor.BOTTOM, 0, 120), "pause", Placement.at(Anchor.CENTER, 0, 0));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
@@ -243,6 +243,7 @@ public final class Hud {
         for (String gid : scenes.get(scene)) for (Slot s : groups.getOrDefault(gid, List.of())) if (fragments.containsKey(s.fragment()) && on.add(s.fragment())) at.put(s.fragment(), s.at());
         // dead, the interface steps aside for the death itself (the rest fades out where it was)
         if (!g.player.alive) on.retainAll(java.util.Set.of("death", "console"));
+        else if (dialog != null && dialog.pauseMenu) on.retainAll(java.util.Set.of("pause", "console"));
         boolean click = ui.click, rclick = ui.rclick;
         // fading out first (underneath, deaf to the mouse)
         for (Fragment f : fragments.values()) {

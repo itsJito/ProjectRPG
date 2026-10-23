@@ -80,7 +80,7 @@ public final class CombatSystem {
         if (a instanceof rpg.animal.Animal an) {
             // an animal's strike: a crouch and a lunge (a bear's swipe and a horse's kick are slower to come)
             float heavy = an.species.impact > 50 ? 1.35f : 1f;
-            c.windup = 0.32f * heavy; c.active = 0.14f * heavy; c.recover = 0.42f * heavy;
+            c.windup = 0.32f * heavy * cadence; c.active = 0.14f * heavy; c.recover = 0.42f * heavy * cadence;
         }
         c.lastAttack = g.time;
         g.interact.cancel(a, "attacking");
@@ -309,7 +309,7 @@ public final class CombatSystem {
         c.slowT = Math.max(0, c.slowT - dt);
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
         if (c.staggered > 0) { c.staggered -= dt; c.blocking = false; }
-        // resources: stamina (not while guarding or just after spending), Faith points and mana regenerate naturally
+        // Resources: stamina recovers outside guard/recovery; mana regenerates, while Faith requires restoration.
         c.regenDelay -= dt;
         if (c.regenDelay <= 0 && !c.blocking) a.stamina = Math.min(a.maxStamina(), a.stamina + g.cfg.staminaRegen * (1 + a.skills.level(Skill.AGILITY) * 0.006f) * dt);
         // Faith does not refill by itself (GDD 2.5); Mana regains a point a minute, the part-minute kept
@@ -531,7 +531,7 @@ public final class CombatSystem {
                 if (ddx * ddx + ddz * ddz > span * span || hy < v.y - 0.35f || hy > v.y + v.height + 0.45f) continue;
                 an.cs.struck.add(v.id);
                 boolean behind = behind(v, an);
-                float potential = sp.damage * CombatMath.HP_SCALE * an.scale() * CombatMath.attackScaling(an.skills.level(Skill.ATTACK)) * CombatMath.execution(v.cs.staggered > 0, behind);
+                float potential = sp.damage * CombatMath.HP_SCALE * an.scale() * CombatMath.strengthScaling(an.skills.level(Skill.STRENGTH), 0) * CombatMath.execution(v.cs.staggered > 0, behind);
                 float impact = CombatMath.impact(sp.impact * an.scale(), an.skills.level(Skill.STRENGTH), 1);
                 resolve(an, v, potential, impact, sp.damageType, null, px, hy, pz, sp.weapon, behind);
                 if (an.cs.phase != Phase.ACTIVE) return;
@@ -663,13 +663,14 @@ public final class CombatSystem {
                 g.prayers.on(v, Prayer.WARD) ? ", ward" : "", guarding ? String.format(", guarded %.1f", blockedPart) : "", dealt, impact, stab, stagger ? " -> STAGGER" : "", v.stamina);
         var ev = g.state.commit("ActorHit", a.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), 0, detail);
         log(detail);
-        // XP from the damage actually dealt (and Defense from the damage guarded)
+        // GDD 2.2: real melee damage trains Attack and Strength; Defense follows harm endured or active defense.
         if (dealt > 0 && a != v) {
-            Skill primary = proj != null ? proj.skill : styleSkill(a);
-            if (primary == null) {
-                for (Skill s : new Skill[]{Skill.ATTACK, Skill.STRENGTH, Skill.DEFENSE}) g.prog.award(a, s, dealt * g.cfg.xpPerDamage / 3, "melee damage (shared)", ev.id());
-            } else g.prog.award(a, primary, dealt * g.cfg.xpPerDamage * (primary == Skill.MAGIC ? 0.5f : 1f), "damage dealt", ev.id());
+            if (proj == null) {
+                g.prog.award(a, Skill.ATTACK, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
+                g.prog.award(a, Skill.STRENGTH, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
+            } else g.prog.award(a, proj.skill, dealt * g.cfg.xpPerDamage * (proj.skill == Skill.MAGIC ? 0.5f : 1f), "damage dealt", ev.id());
             g.prog.award(a, Skill.HEALTH, dealt * g.cfg.healthXpPerDamage, "damage dealt (Health share)", ev.id());
+            g.prog.award(v, Skill.DEFENSE, dealt * g.cfg.defenseXpPerDamage, "hostile damage suffered", ev.id());
         }
         if (blockedPart > 0) g.prog.award(v, Skill.DEFENSE, blockedPart * g.cfg.defenseXpPerBlocked, "damage guarded", ev.id());
         if (g.law != null) g.law.onHit(a, v, ev.id());
@@ -691,11 +692,6 @@ public final class CombatSystem {
             if (g.law != null && g.law.arrestInsteadOfKill(a, v)) v.hp = Math.max(1, v.hp);
             else kill(a, v, ev.id());
         }
-    }
-
-    /** The skill a melee hit trains, by the attacker's chosen style (null: shared). */
-    private static Skill styleSkill(Actor a) {
-        return switch (a instanceof rpg.actor.Player p ? p.style : 3) { case 0 -> Skill.ATTACK; case 1 -> Skill.STRENGTH; case 2 -> Skill.DEFENSE; default -> null; };
     }
 
     /** Kills outright, with no blow struck (the console's kill, a fall into the void): nobody is to blame. */
