@@ -52,7 +52,14 @@ public final class Npc extends Actor implements Interactable {
     public boolean hideSet;
     /** A guard keeping an eye on a player he has heard bad things about, until (then a while before he does again). */
     public double watchUntil = -999;
-    public double lastLootAt;
+    public long watchTarget;
+    CombatTactics.Plan tactic;
+    double nextTactic;
+    public double lastLootAt, lootStarted = -99, lootUntil = -99;
+    public boolean asleep() {
+        return alive && !reacting && goal == Brain.Goal.SLEEP && !cs.busy()
+                && Math.hypot(x - homeX, z - homeZ) <= 1.2 && Math.hypot(vx, vz) < 0.12;
+    }
     public int lootTaken;
     public final List<Memory> memories = new ArrayList<>();
     // the mind's current state, for the inspector
@@ -60,7 +67,7 @@ public final class Npc extends Actor implements Interactable {
     public String goalReason = "", lastOutcome = "", nativeAction = "-", perceived = "";
     public final List<String> scores = new ArrayList<>();
     public double nextThink, goalSince;
-    public float gx, gz;
+    public float gx, gy, gz;
     /** A long trip's waypoints (indices into the map's travel graph), the next one, and the trip's end. */
     public int[] legs;
     public int legAt;
@@ -68,10 +75,12 @@ public final class Npc extends Actor implements Interactable {
     public boolean hasGoalPos, seesTarget;
     public int routeCells;
     public boolean stuck;
-    public long fightTarget, socialPartner;
+    public long fightTarget, socialPartner, aidTarget;
+    public int conversations;
     /** Under the player's Friends (they will not report the player) and Charm Person (they will not fight the player), until these times. */
     public double friendUntil = -1, charmUntil = -1;
     public int patrolIndex;
+    public String arrestJurisdiction = "";
     public double busyUntil, arrestedUntil = -1, diedAt = -1, lastDialogAt = -99, chatUntil = -1;
     public long ragdoll;
     /** The body to search, once dead (0: none). */
@@ -99,7 +108,7 @@ public final class Npc extends Actor implements Interactable {
     /** Its velocity smoothed over a few physics steps: where it is heading, as a body turns to it (not step to step). */
     float svx, svz;
     /** Placed somewhere new (a teleport): the motion it had is not carried there. */
-    public void resetMotion() { svx = svz = 0; vx = vz = 0; wantYaw = Float.NaN; }
+    public void resetMotion() { svx = svz = 0; vx = vz = 0; wantYaw = Float.NaN; tactic = null; nextTactic = 0; }
     /** The search it is on (a foe lost from sight, a body found), or null; and until when it stays watchful after giving one up. */
     public Hunt hunt;
     public double vigilantUntil = -1;
@@ -117,7 +126,10 @@ public final class Npc extends Actor implements Interactable {
         this.homeJurisdiction = DevMap.jurisdiction(x, z);
         this.team = role == Role.BANDIT || role == Role.BRUTE ? 3 : role == Role.THIEF ? 4 : 2;
         this.hostileToPlayer = role == Role.BANDIT || role == Role.BRUTE;
+        skills.setLevel(Skill.AGILITY, defaultAgility(role));
     }
+
+    public static int defaultAgility(Role role) { return switch (role) { case GUARD -> 18; case BANDIT -> 16; case BRUTE -> 8; case THIEF -> 25; case WORKER, FARMER -> 6; default -> 5; }; }
 
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }
@@ -127,7 +139,7 @@ public final class Npc extends Actor implements Interactable {
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
         Memory best = null;
-        for (Memory m : memories) if (m.crime() && m.subject == culprit && (best == null || m.confidence > best.confidence)) best = m;
+        for (Memory m : memories) if (m.crime() && m.subject == culprit && (best == null || best.settled && !m.settled || best.settled == m.settled && m.confidence > best.confidence)) best = m;
         return best;
     }
 
@@ -135,6 +147,7 @@ public final class Npc extends Actor implements Interactable {
         for (int i = memories.size() - 1; i >= 0; i--) {
             Memory old = memories.get(i);
             if (!old.sameIncident(m)) continue;
+            m.settled |= old.settled; old.settled = m.settled;
             if (old.witnessed() && m.witnessed()) { m.reported |= old.reported; old.reported = m.reported; }
             if (old.witnessed() && !m.witnessed() || old.witnessed() == m.witnessed() && old.confidence >= m.confidence) m = old;
             memories.remove(i);
@@ -143,7 +156,7 @@ public final class Npc extends Actor implements Interactable {
         while (memories.size() > cap) {
             // forget the oldest that is not an unreported witnessed crime
             int drop = 0;
-            for (int i = 0; i < memories.size(); i++) if (!(memories.get(i).crime() && memories.get(i).witnessed() && !memories.get(i).reported)) { drop = i; break; }
+            for (int i = 0; i < memories.size(); i++) if (!(memories.get(i).crime() && !memories.get(i).settled && memories.get(i).witnessed() && !memories.get(i).reported)) { drop = i; break; }
             memories.remove(drop);
         }
     }
@@ -264,7 +277,7 @@ public final class Npc extends Actor implements Interactable {
     }
 
     @Override public String examine(Rpg g) {
-        return name + ", " + title.toLowerCase() + ". Combat level " + skills.combatLevel() + (crimeKnown(g.player.id) != null ? ". They eye you with suspicion." : ".");
+        return name + ", " + title.toLowerCase() + ". Level " + skills.combatLevel() + (crimeKnown(g.player.id) != null ? ". They eye you with suspicion." : ".");
     }
 
     @Override public String inspect(Rpg g) {

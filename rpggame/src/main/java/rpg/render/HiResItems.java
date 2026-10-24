@@ -17,6 +17,26 @@ import rpg.item.Tier;
  * hand closes (for a two-hander, the upper hand).
  */
 final class HiResItems {
+    /** Continuous tapered limbs at 64 voxels/metre, shared by held, dropped and inventory bows. */
+    static ItemModels.Model bow(ItemDef d) { return bow(d, true); }
+
+    static ItemModels.Model bow(ItemDef d, boolean string) {
+        VoxModel m = new VoxModel(14, 82, 7);
+        int wood = mat(d.color);
+        for (int y = 0; y <= 80; y++) {
+            float u = (y - 40) / 40f, centre = 3 + 7 * u * u;
+            float radius = 1.2f + 0.4f * (1 - Math.abs(u));
+            for (int x = 0; x < 14; x++) {
+                if (Math.abs(x - centre) > radius) continue;
+                int c = Math.abs(y - 40) <= 5 ? mat(y % 3 == 0 ? 0x3A261A : 0x604028)
+                        : Math.abs(u) > 0.95f ? mat(0x483420) : (y / 5 + x * 3) % 7 == 0 ? sh(wood, 0.83f) : wood;
+                m.set(x, y, 3, c);
+            }
+        }
+        if (string) for (int y = 2; y <= 78; y++) m.set(10, y, 3, mat(0xE8E0C8));
+        return new ItemModels.Model(m, 3.5f, 40.5f, 3.5f);
+    }
+
     private HiResItems() { }
 
     /** A tier's fittings: blade metal (true reflectance), grip wrap, guard and pommel metal, the style number, a gem colour (0: none). */
@@ -243,11 +263,17 @@ final class HiResItems {
      * A shield: the wooden one a round targe of planks, iron-rimmed; the metal tiers a heater of boards faced with their
      * metal, rimmed, a domed boss in the middle and the tier's charge painted across it (a chevron, a bend, a cross).
      */
+    private static void shieldGrip(VoxModel model, int x, int y) {
+        int leather = mat(0x493021);
+        for (int z = 4; z <= 12; z++) { model.set(x, y - 5, z, leather); model.set(x, y + 5, z, leather); }
+        for (int yy = y - 5; yy <= y + 5; yy++) model.set(x, yy, 12, leather);
+    }
+
     static ItemModels.Model shield(ItemDef d, Tier t) {
         Kit k = kit(t);
         if (t == null) {
             int r = 22, n = r * 2 + 1;
-            VoxModel m = new VoxModel(n, n, 6);
+            VoxModel m = new VoxModel(n, n, 16);
             for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) {
                 float dx = x - r, dy = y - r, rr = (float) Math.sqrt(dx * dx + dy * dy);
                 if (rr > r + 0.4f) continue;
@@ -261,10 +287,11 @@ final class HiResItems {
                 if (b <= 20) { m.set(x, y, 1, metal(0x9C9CA2)); if (b <= 9) m.set(x, y, 0, metal(0xB0B0B6)); }
                 if (Math.abs(dx) <= 0.5f && Math.abs(dy) < r - 3 && Math.abs(dy) > 4 || Math.abs(dy) <= 0.5f && Math.abs(dx) < r - 3 && Math.abs(dx) > 4) m.set(x, y, 1, metal(0x7A7A80));   // iron bands
             }
-            return new ItemModels.Model(m, r, r, 4);
+            shieldGrip(m, r, r);
+            return new ItemModels.Model(m, r, r, 12);
         }
         int w = 40, h = 52, cxw = w / 2;
-        VoxModel m = new VoxModel(w + 1, h + 1, 6);
+        VoxModel m = new VoxModel(w + 1, h + 1, 16);
         int face = k.blade(), rim = k.guard(), charge = switch (k.style()) { case 10 -> mat(0xE8C040); case 11 -> mat(0x6A3AA0); case 3 -> mat(0x8A1A1A); case 6 -> mat(0xE8E8F0); default -> mat(0x7A1E1E); };
         for (int x = 0; x <= w; x++) for (int y = 0; y <= h; y++) {
             // the heater's outline: straight sides for the top two thirds, curving in to a point at the foot
@@ -290,7 +317,8 @@ final class HiResItems {
             if ((x == 3 || x == w - 3) && y % 8 == 4 && v > 0.4f) m.set(x, y, 1, k.pommel());              // rivets
         }
         if (k.gem() != 0) m.set(cxw, Math.round(h * 0.62f), 0, k.gem());
-        return new ItemModels.Model(m, cxw, h * 0.55f, 4);
+        shieldGrip(m, cxw, Math.round(h * 0.55f));
+        return new ItemModels.Model(m, cxw, h * 0.55f, 12);
     }
 
 

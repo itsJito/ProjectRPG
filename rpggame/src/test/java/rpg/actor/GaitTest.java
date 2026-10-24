@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class GaitTest {
     @Test
     void walkingKeepsDoubleSupportAndRunningHasFlight() {
-        assertTrue(Gait.stance(2.1f, false) > 0.5f);
+        float walk = new rpg.Config().walkSpeed;
+        assertEquals(0, Gait.runShare(walk), "the configured walk must remain a walk");
+        assertTrue(Gait.stance(walk, false) > 0.5f);
         assertTrue(Gait.stance(1.45f, true) > 0.5f);
         assertTrue(Gait.stance(4.6f, false) < 0.5f);
         assertTrue(Gait.stance(7.8f, false) < Gait.stance(4.6f, false));
@@ -16,7 +18,7 @@ class GaitTest {
     @Test
     void plantedLegCanReachAcrossEachStanceWithoutSpeedingUpTheSprint() {
         for (boolean sneaking : new boolean[]{false, true}) {
-            for (float speed : new float[]{0.8f, 1.45f, 2.1f, 2.3f, 3.2f, 4.6f, 7.8f}) {
+            for (float speed : new float[]{0.8f, 1.45f, 2.1f, 2.45f, 2.6f, 3.5f, 4.6f, 7.8f, 8.2f}) {
                 float cadence = Gait.cadence(speed, sneaking);
                 if (speed >= 1.45f) assertTrue(cadence >= 1f / 1.5f && cadence <= 2,
                         "locomotion cycles should take 0.5–1.5 seconds");

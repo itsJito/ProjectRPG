@@ -7,6 +7,7 @@ import java.util.List;
 import org.lwjgl.system.MemoryUtil;
 import rpg.Chat;
 import rpg.Rpg;
+import rpg.item.ItemDef;
 import rpg.actor.Actor;
 import rpg.actor.Player;
 import rpg.ai.Brain;
@@ -41,18 +42,21 @@ final class HudFragments {
         hud.add(new Overlays(hud));
         hud.add(new Prompt(hud));
         hud.add(Fragment.of("death", 0, 0, () -> !g.player.alive, (ui, x, y) -> deathScreen(hud, ui)));
-        hud.add(new Vitals(hud)).wake("combat").linger(6);
+        hud.add(new Vitals(hud));
+        hud.add(new Sentence(hud));
         hud.add(new SneakMeter(hud));
         hud.add(new XpDrops(hud));
         hud.add(new Minimap(hud));
+        hud.add(new WorldMap(hud));
         hud.add(new Area(hud)).wake("area", "world", "scene").linger(5);
         hud.add(new Wanted(hud)).wake("law").linger(8);
-        hud.add(new HonorToast(hud)).wake("honor").linger(6);
+        hud.add(new HonorToast(hud)).wake("honor");
         hud.add(new Target(hud)).wake("combat").linger(5);
         hud.add(new LevelUp(hud));
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
         hud.add(new WorkBar(hud));
         hud.add(new DialogueCard(hud));
+        hud.add(new PauseCard(hud));
         hud.add(new MenuFrag(hud));
         hud.add(new Inspector(hud, "ai", 440, () -> hud.aiInspector, "AI inspector", HudFragments::aiLines));
         hud.add(new Inspector(hud, "state", 480, () -> hud.stateInspector, "World state inspector", HudFragments::stateLines));
@@ -124,7 +128,8 @@ final class HudFragments {
     static final class HonorToast extends Fragment {
         private float shown = 0;
         private boolean init;
-        HonorToast(Hud h) { super("honor"); }
+        HonorToast(Hud h) { super("honor"); fadeIn = 0.2f; fadeOut = 0.4f; linger = 6 - fadeOut; }
+        @Override protected boolean active() { return false; }
         @Override public float width() { return 380; }
         @Override public float height() { return 74; }
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -180,7 +185,7 @@ final class HudFragments {
         float a2 = ease((t - 1.9f) / 1.2f);
         Actor k = d.killer != 0 ? g.actor(d.killer) : null;
         String by = d.killerName == null ? "Your wounds were the end of you." : "Slain by " + d.killerName
-                + (k != null && !(k instanceof rpg.animal.Animal) ? ", combat level " + k.skills.combatLevel() : "") + ".";
+                + (k != null && !(k instanceof rpg.animal.Animal) ? ", level " + k.skills.combatLevel() : "") + ".";
         ui.centeredFade(by, cx, cy + ts * 1.25f + 16, 19, Style.fade(0xFFCFC6B6, a2));
         // what becomes of their things
         float a3 = ease((t - 3.0f) / 1.2f);
@@ -260,7 +265,7 @@ final class HudFragments {
                 float d = n.distTo(g.player);
                 if (d > 26 || !gfx.project(n.x, n.y + n.height + 0.35f, n.z, p2)) continue;
                 boolean focus = g.interact.focus == n;
-                String says = talk != null && talk.npc == n.id ? talk.text : n.speech;
+                String says = talk != null && talk.npc == n.id ? talk.text : hud.settings.values.subtitles ? n.speech : null;
                 float top = p2[1] - 16;
                 if (d <= 18) {
                     if (focus || d < 7) {
@@ -432,8 +437,28 @@ final class HudFragments {
             float cx = hud.w / 2f, cy = hud.h / 2f;
             Player p = g.player;
             if (hud.scene == Hud.Scene.WORLD) {
-                ui.rect(cx - 1, cy - 1, 2, 2, 0xD0FFFFFF);
-                ui.ring(cx, cy, 6, 1.2f, 0x50FFFFFF);
+                ItemDef held = p.main();
+                boolean ranged = held != null && (held.family == ItemDef.Family.BOW || held.family == ItemDef.Family.CROSSBOW);
+                float gap = ranged ? 6 + 10 * (1 - p.cs.draw) : 4;
+                int aimColor = p.cs.reload > 0 ? Style.DIM : 0xD0FFFFFF;
+                ui.rect(cx - 1, cy - 1, 2, 2, aimColor);
+                if (ranged) {
+                    if (held.family == ItemDef.Family.CROSSBOW && p.cs.reload <= 0) gap = 6;
+                    ui.line(cx - gap - 5, cy, cx - gap, cy, 1.5f, aimColor);
+                    ui.line(cx + gap, cy, cx + gap + 5, cy, 1.5f, aimColor);
+                    ui.line(cx, cy - gap - 5, cx, cy - gap, 1.5f, aimColor);
+                    ui.line(cx, cy + gap, cx, cy + gap + 5, 1.5f, aimColor);
+                    if (p.cs.reload > 0) ui.flatCentered("Reloading", cx, cy + 29, 11, Style.DIM);
+                } else ui.ring(cx, cy, 6, 1.2f, 0x50FFFFFF);
+                double hitAge = g.time - g.combat.lastPlayerHit, killAge = g.time - g.combat.lastPlayerKill;
+                if (hitAge >= 0 && hitAge < 0.22 || killAge >= 0 && killAge < 0.3) {
+                    boolean kill = killAge >= 0 && killAge < 0.3;
+                    float fade = (float) (1 - (kill ? killAge / 0.3 : hitAge / 0.22));
+                    int color = Style.fade(kill ? 0xFFFF3434 : 0xFFFFFFFF, fade);
+                    for (int sx : new int[]{-1, 1}) for (int sy : new int[]{-1, 1})
+                        ui.line(cx + sx * 7, cy + sy * 7, cx + sx * 12, cy + sy * 12, 2, color);
+                    if (hitAge >= 0 && hitAge < 0.06) ui.rect(0, 0, hud.w, hud.h, Style.fade(0x0CFFF0D0, (float) (1 - hitAge / 0.06)));
+                }
             }
             if (p.cs.charge > 0.05f) Style.bar(ui, cx - 16, cy + 14, 32, 2, p.cs.charge, p.cs.charge >= 0.7f ? Style.ACCENT : Style.TEXT);
             if (p.cs.draw > 0) ui.ring(cx, cy, 16 - p.cs.draw * 8, 1.5f, p.cs.draw >= 1 ? Style.GOOD : 0xA0FFFFFF);
@@ -468,26 +493,59 @@ final class HudFragments {
         }
     }
 
-    // ------------------------------------------------------------------ vitals: shown when something is less than full or in a fight
+    // ------------------------------------------------------------------ vitals: compact, independently timed resource rows
     static final class Vitals extends Fragment {
-        Vitals(Hud h) { super("vitals"); }
+        private final float[] previous = {Float.NaN, Float.NaN, Float.NaN, Float.NaN};
+        private final double[] until = new double[4];
+        private final float[] opacity = new float[4];
+        Vitals(Hud h) { super("vitals"); fadeOut = 0.25f; }
         @Override protected boolean active() {
             Player p = hud.g.player;
-            return hud.scene != Hud.Scene.WORLD || p.hp < p.maxHp() - 0.5f || p.stamina < p.maxStamina() - 0.5f || p.faith < p.maxFaith() - 0.5f || p.mana < p.maxMana() - 0.5f || p.sprinting;
+            float[] values = {p.hp, p.stamina, p.mana, p.faith};
+            boolean combat = hud.g.time - p.cs.lastHurt < 6 || p.cs.busy() || p.cs.blocking;
+            boolean shown = false;
+            for (int i = 0; i < 4; i++) {
+                if (Float.isNaN(previous[i]) || Math.abs(values[i] - previous[i]) > 0.05f) until[i] = hud.g.time + 6;
+                previous[i] = values[i];
+                if (combat) until[i] = hud.g.time + 2;
+                opacity[i] = Math.min(1, Math.max(0, (float) (until[i] - hud.g.time) / 0.4f));
+                shown |= opacity[i] > 0;
+            }
+            return p.alive && shown;
         }
-        @Override public float width() { return 476; }
-        @Override public float height() { return 16; }
+        @Override public float width() { return 236; }
+        @Override public float height() { return 116; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Player p = hud.g.player;
-            float bw = (476 - 3 * 8) / 4f;
-            Object[][] v = {{"Health_Icon", p.hp, p.maxHp(), Style.HP}, {"Agility_Icon", p.stamina, p.maxStamina(), Style.STAMINA},
-                    {"Faith_Icon", p.faith, p.maxFaith(), Style.FAITH}, {"Magic_Icon", p.mana, p.maxMana(), Style.MANA}};
+            String[] names = {"Health", "Stamina", "Magic", "Faith"};
+            String[] icons = {"Health_Icon", "Agility_Icon", "Magic_Icon", "Faith_Icon"};
+            float[] values = {p.hp, p.stamina, p.mana, p.faith};
+            float[] max = {p.maxHp(), p.maxStamina(), p.maxMana(), p.maxFaith()};
+            int[] colors = {Style.HP, Style.STAMINA, Style.MANA, Style.FAITH};
             for (int i = 0; i < 4; i++) {
-                float bx = x + i * (bw + 8), val = (float) v[i][1], max = (float) v[i][2];
-                ui.img((String) v[i][0], bx, y, 14, 0xE0FFFFFF);
-                Style.bar(ui, bx + 18, y + 5, bw - 18, 5, max <= 0 ? 0 : val / max, (int) v[i][3]);
-                if (ui.hover(bx, y - 4, bw, 22)) hud.tooltip(String.format("%s %.0f / %.0f", new String[]{"Health", "Stamina", "Faith", "Mana"}[i], val, max));
+                float yy = y + i * 28, a = opacity[i];
+                if (a <= 0) continue;
+                ui.rect(x, yy, 236, 24, Style.fade(0xD51D2023, a));
+                ui.img(icons[i], x + 5, yy + 4, 16, Style.fade(0xFFFFFFFF, a));
+                ui.text(names[i], x + 27, yy + 2, 11, Style.fade(Style.TEXT, a));
+                String amount = String.format("%.0f / %.0f", values[i], max[i]);
+                ui.text(amount, x + 226 - ui.width(amount, 10), yy + 2, 10, Style.fade(Style.TEXT, a));
+                ui.rect(x + 27, yy + 17, 198, 3, Style.fade(0xFF090C0E, a));
+                ui.rect(x + 27, yy + 17, 198 * Math.max(0, Math.min(1, max[i] <= 0 ? 0 : values[i] / max[i])), 3, Style.fade(colors[i], a));
             }
+        }
+    }
+
+    static final class Sentence extends Fragment {
+        Sentence(Hud h) { super("sentence"); }
+        @Override protected boolean active() { return hud.g.law.inCustody(hud.g.player); }
+        @Override public float width() { return 360; }
+        @Override public float height() { return 70; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Style.card(ui, x, y, width(), height());
+            ui.text("IN CUSTODY  /  " + hud.g.law.sentenceJurisdiction(), x + 12, y + 9, 13, Style.ACCENT);
+            ui.text(String.format("Sentence remaining: %.0f minutes   |   Admission %d", Math.ceil(hud.g.law.sentenceRemaining()), hud.g.law.jailAdmissions()), x + 12, y + 30, 12, Style.TEXT);
+            ui.text("Sleep on the cell slab to serve the remaining time.", x + 12, y + 49, 12, Style.DIM);
         }
     }
 
@@ -532,6 +590,52 @@ final class HudFragments {
             }
             ui.img("XP_Icon", x, y - 2, 16, 0xC0FFFFFF);
             ui.text(String.format("%,d", hud.g.player.skills.totalXp()), x + 22, y - 1, 12, Style.DIM);
+        }
+    }
+
+    /** The full playable area, sharing the minimap's edited-column texture and landmark data. */
+    static final class WorldMap extends Fragment {
+        WorldMap(Hud h) { super("worldmap"); }
+        @Override public float width() { return Hud.FW - 32; }
+        @Override public float height() { return Hud.FH - 68; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Rpg g = hud.g;
+            Minimap map = (Minimap) hud.fragment("minimap");
+            if (map.tex == 0 || g.mapDirty) map.build();
+            if (g.time - map.markersAt > 2) map.markers();
+            float size = height() - 30, left = x + 8, top = y + 22, side = left + size + 28;
+            ui.text("WORLD MAP", left, y, 14, Style.ACCENT);
+            ui.quad(map.tex, new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
+                    new float[]{0, 0, 1, 0, 1, 1, 0, 1}, 0xFFFFFFFF, 0);
+            ui.border(left, top, size, size, 1, Style.EDGE_HI);
+            for (Object[] marker : map.markers) {
+                float mx = left + (float) marker[1] / DevMap.SX * size, my = top + (float) marker[2] / DevMap.SZ * size;
+                ui.img((String) marker[0], mx - 7, my - 7, 14, 0xFFFFFFFF);
+            }
+            // Local people only: a world map is not remote knowledge of hidden actors.
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z))
+                ui.disc(left + n.x / DevMap.SX * size, top + n.z / DevMap.SZ * size, 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
+            for (var grave : g.undertaker.graves()) skull(ui, left + grave.x / DevMap.SX * size, top + grave.z / DevMap.SZ * size, 12, Style.TEXT);
+            for (var contract : g.bountyBoard.carried()) {
+                float mx = left + contract.x() / DevMap.SX * size, my = top + contract.z() / DevMap.SZ * size;
+                ui.disc(mx, my, 7, 0x70402010); ui.border(mx - 5, my - 5, 10, 10, 2, 0xFFFFC05A);
+            }
+            if (hud.flag != null) ui.disc(left + hud.flag[0] / DevMap.SX * size, top + hud.flag[1] / DevMap.SZ * size, 4, Style.BAD);
+            float px = left + g.player.x / DevMap.SX * size, py = top + g.player.z / DevMap.SZ * size;
+            float yaw = g.controller.camYaw;
+            ui.disc(px, py, 4, Style.ACCENT);
+            ui.line(px, py, px - (float) Math.sin(yaw) * 10, py - (float) Math.cos(yaw) * 10, 2, Style.ACCENT);
+            ui.text("NORTH", side, top, 14, Style.TEXT);
+            ui.text(DevMap.SX + " x " + DevMap.SZ + " m playable area", side, top + 30, 13, Style.DIM);
+            ui.text("You", side + 20, top + 78, 13, Style.TEXT); ui.disc(side + 5, top + 85, 4, Style.ACCENT);
+            ui.text("Nearby people", side + 20, top + 110, 13, Style.TEXT); ui.disc(side + 5, top + 117, 3, Style.NPC);
+            ui.text("Nearby hostiles", side + 20, top + 142, 13, Style.TEXT); ui.disc(side + 5, top + 149, 3, Style.NPC_HOSTILE);
+            ui.text("Your grave", side + 20, top + 174, 13, Style.TEXT); skull(ui, side + 5, top + 181, 12, Style.TEXT);
+            ui.text("Gold square: warrant last sighting", side, top + 211, 12, Style.ACCENT);
+            ui.text("Click to mark a destination", side, top + 242, 13, Style.DIM);
+            ui.text("M or Esc to return", side, top + 268, 13, Style.DIM);
+            if (live && ui.clicked(left, top, size, size))
+                hud.flag = new float[]{Math.max(0, Math.min(DevMap.SX - 1, (ui.mx - left) / size * DevMap.SX)), Math.max(0, Math.min(DevMap.SZ - 1, (ui.my - top) / size * DevMap.SZ))};
         }
     }
 
@@ -778,7 +882,7 @@ final class HudFragments {
         private boolean spotted;
         private float searchLeft = -1, searchTotal = 1;
         private double builtAt = -1;
-        Wanted(Hud h) { super("wanted"); }
+        Wanted(Hud h) { super("wanted"); h.events.listen((type, detail) -> { if (type.equals("law")) builtAt = -1; }); }
         @Override protected boolean active() { refresh(); return !rows.isEmpty() || heat > 0 || searchLeft > 0 || spotted; }
         @Override public float width() { return W; }
         @Override public float height() { return 46 + (searchLeft > 0 ? 12 : 0) + rows.size() * 20 + (rows.isEmpty() ? 0 : 6); }
@@ -914,10 +1018,11 @@ final class HudFragments {
     static final class ChatLog extends Fragment {
         private int filter;
         ChatLog(Hud h) { super("chat"); fadeOut = 1.2f; }
-        @Override protected boolean active() { return hud.dialog != null || hud.hovering(this); }
+        @Override protected boolean active() { return hud.dialog == null && hud.hovering(this); }
         @Override public float width() { return Math.min(460, hud.w - 560); }
         @Override public float height() { return 150; }
         @Override public void draw(Ui2D ui, float x, float y) {
+            if (hud.dialog != null && !hud.dialog.pauseMenu) return;
             float cw = width(), ch = 150;
             boolean hv = ui.hover(x, y, cw, ch);
             if (hv) woken(hud.now);
@@ -941,37 +1046,105 @@ final class HudFragments {
         }
     }
 
-    // ------------------------------------------------------------------ dialogue: the NPC's words are in the bubble over their head; the answers here
+    // ------------------------------------------------------------------ Chatbox: speech replaces the Worldbox during a conversation
     static final class DialogueCard extends Fragment {
-        DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.1f; fadeOut = 0.2f; }
-        @Override protected boolean active() { return hud.dialog != null; }
-        @Override public float width() { return 520; }
+        private Dialog measured;
+        private float measuredWidth;
+        private List<String> textLines = List.of();
+        private List<String> lines(Dialog d) {
+            float width = width() - (hud.g.actor(d.npc) instanceof Npc ? 144 : 34);
+            if (d != measured || width != measuredWidth) { measured = d; measuredWidth = width; textLines = wrap(hud.ui, d.text, 13, width); }
+            return textLines;
+        }
+        DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.12f; fadeOut = 0.15f; }
+        @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu; }
+        @Override public float width() { return Math.min(660, hud.w - 32); }
         @Override public float height() {
             Dialog d = hud.dialog;
-            if (d == null) return 60;
-            int n = Math.max(1, d.choices.size());
-            int cols = n > 6 ? 3 : 1;
-            return 36 + (d.npc == 0 ? 50 : 0) + ((n + cols - 1) / cols) * 20;
+            return d == null || hud.ui == null ? 190 : Math.min(hud.h - 100, Math.max(190, 70 + Math.min(6, lines(d).size()) * 16 + Math.max(1, Math.min(8, d.choices.size())) * 23));
         }
         @Override public void draw(Ui2D ui, float x, float y) {
             Dialog d = hud.dialog;
-            if (d == null) return;
-            float cw = 520, ch = height();
-            Style.card(ui, x, y, cw, ch);
-            ui.text(d.speaker, x + 12, y + 8, 14, Style.ACCENT);
-            float ty = y + 30;
-            if (d.npc == 0) { List<String> ls = wrap(ui, d.text, 13, cw - 24); for (int i = 0; i < Math.min(3, ls.size()); i++) ui.text(ls.get(i), x + 12, ty + i * 16, 13, Style.TEXT); ty += 50; }
-            int n = d.choices.size();
-            int cols = n > 6 ? 3 : 1, rows = (n + cols - 1) / cols;
-            float colW = (cw - 20) / cols;
-            for (int i = 0; i < n; i++) {
-                float ox = x + 10 + (i / rows) * colW, oy = ty + (i % rows) * 20;
-                boolean hv = ui.hover(ox, oy, colW, 20);
-                if (hv) ui.rect(ox, oy, colW - 4, 20, 0x18FFFFFF);
-                ui.text((i < 9 ? (i + 1) + "  " : "") + d.choices.get(i).label(), ox + 4, oy + 2, 13, hv ? Style.TEXT : Style.DIM);
-                if (ui.clicked(ox, oy, colW, 20)) { hud.choose(i); return; }
+            if (d == null || d.pauseMenu) return;
+            float cw = width(), ch = height();
+            ui.rectTex(ui.parchment, x, y, cw, ch, 0, 0, cw / 128, ch / 128, 0xFFFFFFFF);
+            ui.border(x, y, cw, ch, 1, 0xFF85714D);
+            ui.border(x + 4, y + 4, cw - 8, ch - 8, 1, 0x665F5136);
+            float nameX = x + (cw - ui.width(d.speaker, 16)) / 2;
+            ui.text(d.speaker, nameX, y + 13, 16, 0xFFFFD15E);
+            ui.text(d.speaker, nameX + 0.45f, y + 13, 16, 0xFFFFD15E);
+            boolean portrait = hud.g.actor(d.npc) instanceof Npc;
+            float tx = x + (portrait ? 126 : 16), textWidth = cw - (tx - x) - 18;
+            if (portrait) {
+                ui.rect(x + 15, y + 44, 96, 126, 0x40302015);
+                ui.flush();
+                hud.gfx.portrait((Npc) hud.g.actor(d.npc), x + 15, y + 40, 96, 126, hud.now, ui.alpha);
             }
-            if (n == 0) { ui.text("Click to continue", x + 12, ty, 12, Style.DIM); if (ui.clicked(x, y, cw, ch)) hud.dialog = null; }
+            List<String> lines = lines(d);
+            int rows = Math.min(6, lines.size());
+            if (live && ui.hover(tx, y + 40, textWidth, Math.max(32, rows * 16))) d.textOffset = Math.max(0, Math.min(Math.max(0, lines.size() - rows), d.textOffset - (int) ui.scroll));
+            for (int i = 0; i < rows; i++) ui.text(lines.get(i + d.textOffset), tx, y + 43 + i * 16, 13, 0xFFF0E5CD);
+            float top = y + 48 + Math.max(2, rows) * 16;
+            int count = d.choices.size();
+            int visible = Math.min(8, count);
+            if (live && ui.hover(tx, top, textWidth, ch - (top - y))) d.choiceOffset = Math.max(0, Math.min(Math.max(0, count - visible), d.choiceOffset - (int) ui.scroll));
+            for (int i = d.choiceOffset; i < d.choiceOffset + visible; i++) {
+                float yy = top + (i - d.choiceOffset) * 23;
+                boolean hover = live && ui.hover(tx - 4, yy, textWidth + 4, 22);
+                if (hover) ui.rect(tx - 4, yy, textWidth + 4, 22, 0x308E7447);
+                String label = (i - d.choiceOffset + 1) + "  " + d.choices.get(i).label();
+                float size = Math.min(12, textWidth / Math.max(1, ui.width(label, 1)));
+                ui.text(label, tx, yy + 3, size, hover ? 0xFFFFD15E : 0xFFD7C7A4);
+                if (live && ui.clicked(tx - 4, yy, textWidth + 4, 22)) { hud.choose(i); return; }
+            }
+            if (count > visible) ui.text("Scroll for more replies", tx, y + ch - 18, 10, Style.DIM);
+            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.closeDialog(); }
+        }
+    }
+
+    /** A full pause presentation using the same actions and input routing as an ordinary dialogue. */
+    static final class PauseCard extends Fragment {
+        private float lastMouseX = Float.NaN, lastMouseY = Float.NaN;
+        PauseCard(Hud h) { super("pause"); fadeIn = 0.12f; fadeOut = 0.12f; }
+        @Override protected boolean active() { return hud.dialog != null && hud.dialog.pauseMenu; }
+        @Override public float width() { return Math.min(900, Math.max(560, hud.w - 48)); }
+        @Override public float height() { return 520; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Dialog d = hud.dialog;
+            if (d == null || !d.pauseMenu) return;
+            float w = width(), split = w * 0.48f, right = x + split + 32, rw = w - split - 64;
+            ui.rect(0, 0, hud.w, hud.h, 0xA0000000);
+            Style.card(ui, x, y, w, height());
+            ui.rect(x, y, w, 3, Style.ACCENT);
+            ui.text("GAME PAUSED", x + 32, y + 30, 28, Style.TEXT);
+            ui.text("Esc to resume", x + 34, y + 70, 12, Style.DIM);
+            ui.rect(x + split, y + 32, 1, 440, Style.EDGE);
+            boolean moved = ui.mx != lastMouseX || ui.my != lastMouseY;
+            lastMouseX = ui.mx; lastMouseY = ui.my;
+            for (int i = 0; i < d.choices.size(); i++) {
+                float bx = x + 32, by = y + 114 + i * 62, bw = split - 64;
+                boolean hover = live && ui.hover(bx, by, bw, 48);
+                if (hover && moved) d.focusedChoice = i;
+                boolean selected = d.focusedChoice == i;
+                ui.rect(bx, by, bw, 48, selected ? 0x28E8C878 : hover ? 0x20FFFFFF : 0x10FFFFFF);
+                ui.border(bx, by, bw, 48, 1, selected || hover ? Style.ACCENT : Style.EDGE);
+                ui.text(Integer.toString(i + 1), bx + 18, by + 16, 12, selected ? Style.ACCENT : Style.DIM);
+                ui.text(d.choices.get(i).label(), bx + 52, by + 13, 16, Style.TEXT);
+                if (live && ui.clicked(bx, by, bw, 48)) { hud.choose(i); return; }
+            }
+            var p = hud.g.player;
+            ui.text(p.name, right, y + 48, Math.min(24, rw / Math.max(1, ui.width(p.name, 1))), Style.ACCENT);
+            ui.text("Level " + p.skills.combatLevel() + "   Total " + p.skills.totalLevel(), right, y + 88, 13, Style.TEXT);
+            ui.text(hud.g.state.clockText(), right, y + 114, 13, Style.DIM);
+            ui.text("Honor  " + hud.g.honor.rankName(), right, y + 164, 13, Style.TEXT);
+            honorBar(ui, right, y + 196, rw, hud.g.honor.score, hud.g.honor.score);
+            ui.text(rpg.item.Currency.full(p.count(rpg.item.Items.COINS)), right, y + 230, 14, Style.ACCENT);
+            var item = p.eq.get(rpg.item.ItemDef.Slot.MAIN);
+            if (item != null) {
+                hud.itemIcon(ui, item, right + (rw - 112) / 2, y + 274, 112, 112, 1);
+                ui.centered(item.def.name, right + rw / 2, y + 404, 14, Style.TEXT);
+            }
+            ui.text("Up/Down select  -  Enter confirm  -  1-5 choose", x + 34, y + 474, 11, Style.DIM);
         }
     }
 

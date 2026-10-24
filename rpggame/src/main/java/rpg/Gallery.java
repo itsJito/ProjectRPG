@@ -20,6 +20,7 @@ import rpg.render.Gfx;
 import rpg.ui.Hud;
 import rpg.ui.Ui2D;
 import rpg.world.DevMap;
+import rpg.world.Blocks;
 
 /**
  * The developer's review of figures, animation and objects (./gradlew gallery): every motion is filmed from a fixed
@@ -53,6 +54,11 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("system-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { systemPolishShots(); return 0; }
+        if ("session-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { sessionPolishShots(); return 0; }
+        if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
+        if ("field-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { fieldPolishShots(); menuShots(); return 0; }
+        if ("polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { polishShots(); return 0; }
         // A short review of the three locomotion loops, without the unrelated twitch/work/combat galleries.
         if ("locomotion".equals(System.getenv("RPG_GALLERY_ONLY"))) { locomotionShots(tag); return 0; }
         // RPG_GALLERY_ONLY=animals: just the animal sheets (a quick look while working on them)
@@ -159,6 +165,8 @@ final class Gallery {
 
     /** Walk, jog and sprint at steady speed, each a 1.2-second loop filmed on threes. */
     private void locomotionShots(String tag) {
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, null);
+        g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
         for (String gait : new String[]{"walk", "jog", "sprint"}) {
             g.controller.in.forward = 0;
             g.controller.in.sprint = false;
@@ -181,16 +189,20 @@ final class Gallery {
      * cut, centred on the actor, into a contact sheet. warm: frames run first, unfilmed, to reach a steady state.
      */
     private void film(String name, int n, IntConsumer drive, java.util.function.Function<Actor, float[]> camera, int warm) {
+        film(name, n, drive, camera, warm, g.player);
+    }
+
+    private void film(String name, int n, IntConsumer drive, java.util.function.Function<Actor, float[]> camera, int warm, Actor focus) {
         for (int i = 0; i < warm; i++) { drive.accept(-1); step(); }
         List<BufferedImage> tiles = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             drive.accept(i);
-            step();
+            game.tick(1f / 60);
+            draw(camera.apply(focus), 1f / 60);
             if (i % 3 == 0) {
-                float[] cam = camera.apply(g.player);
-                tiles.add(capture(cam));
-                labels.add(String.format("f%d  %.3fs  %.1fm/s", i + 1, i / 60f, Math.hypot(g.player.vx, g.player.vz)));
+                tiles.add(captureFrame());
+                labels.add(String.format("f%d  %.3fs  %.1fm/s", i + 1, i / 60f, Math.hypot(focus.vx, focus.vz)));
             }
         }
         sheet(name, tiles, labels, 8);
@@ -317,6 +329,253 @@ final class Gallery {
     }
 
     /** The title screen (empty, and with three profiles) and the console open over the world. */
+    private void pauseShot() {
+        hud.dialog(Main.menu(win, g));
+        for (int i = 0; i < 24; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false, true);
+        Main.shot(gfx, win.width, win.height, new File(shots, "pause.png"));
+        hud.closeAll();
+    }
+
+    /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void systemPolishShots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        if ("extras".equals(only)) systemExtrasShots();
+        if ("guard".equals(only) || "extras".equals(only)) {
+            place(64.5f, 62.5f, 0); g.player.eq.clear(); g.player.firstPerson = true;
+            g.controller.in.offDown = true; frames(30); reviewUi("bare-guard-firstperson"); return;
+        }
+        if (only == null || only.equals("ui")) {
+            place(64.5f, 62.5f, 0); frames(10);
+            hud.settings.show(); reviewUi("settings-display");
+            // Actual tab buttons, hit by the same UI mouse path used during play.
+            for (int tab = 1; tab < 4; tab++) {
+                ui.mx = win.width / 2f - 460 + 28 + tab * 216 + 80; ui.my = (win.height - 650) / 2f + 100; ui.click = true;
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, true); ui.click = false;
+                reviewUi("settings-" + new String[]{"display", "audio", "controls", "accessibility"}[tab]);
+            }
+            hud.settings.escape();
+            var cole = (rpg.ai.Npc) g.actor(Ids.GUARD); g.teleport(cole, g.player.x + 3, g.player.y, g.player.z);
+            hud.dialog(new rpg.ui.Dialog(cole.name, "Ask your question. The watch keeps its own accounts.").choice("Tell me more.", () -> hud.dialog(new rpg.ui.Dialog(cole.name, "Once a bounty is paid, the case is closed. People may remember the quarrel, but the watch will leave you be."))));
+            hud.dialog.npc = cole.id; hud.choose(0); reviewUi("chatbox-followup");
+            for (int frame = 0; frame < 39; frame++) { Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false); if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "followup-f" + (frame + 1) + ".png")); }
+            hud.closeAll();
+            g.player.hp *= 0.6f; g.law.all().computeIfAbsent(DevMap.ALPHA, k -> new java.util.HashMap<>()).put(g.player.id, 150); g.state.commit("BountyChanged", cole.id, g.player.id, DevMap.ALPHA, 0, "review warrant"); reviewUi("wanted-layout"); g.law.all().clear();
+            g.player.firstPerson = true; g.player.eq.clear(); g.controller.in.offDown = true; frames(12); reviewUi("bare-guard-firstperson");
+            g.controller.in.offDown = false; g.player.firstPerson = false; hud.closeAll();
+        }
+        if (only == null || only.equals("menus")) menuLatencyShots();
+        if (only == null || only.equals("motion")) motionPolishShots();
+        if (only == null || only.equals("traversal")) {
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 5); g.player.restore(); g.player.eq.clear();
+            for (int x = 60; x <= 69; x++) for (int z = 55; z <= 65; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 6; y++) g.setBlock(x, y, z, Blocks.AIR);
+            for (int x = 63; x <= 65; x++) for (int y = 0; y < 2; y++) g.setBlock(x, DevMap.FLOOR + y, 59, Blocks.BRICK);
+            place(64.5f, 60.8f, 0); frames(4);
+            film("ledge-traversal", 72, i -> { if (i == 0 && !g.traversal.begin(g.player, 0)) throw new IllegalStateException("No review ledge"); }, a -> new float[]{68, DevMap.FLOOR + 2.2f, 62.5f, 64.5f, DevMap.FLOOR + 1.5f, 59.7f}, 0);
+        }
+        if (only == null || only.equals("carry")) {
+            var dead = (rpg.ai.Npc) g.actor(Ids.BANDIT_1); g.ai.spawnBody(dead); g.teleport(dead, 64.5f, DevMap.FLOOR, 61);
+            place(60.5f, 58.5f, 0); gfx.preload(java.util.List.of(dead));
+            dead.alive = false; dead.hp = 0; g.onKilled(dead, g.player, 0); frames(100);
+            var corpse = (rpg.objects.Corpse) g.objects.get(dead.corpse);
+            place(corpse.x, corpse.z + 1.2f, 0); frames(3);
+            if (g.carrying.begin(g.player, corpse).rejected()) throw new IllegalStateException("Cannot pick up review body");
+            film("body-pickup", 48, i -> {}, a -> quarter(a, -3.2f), 0);
+            film("body-carry", 36, i -> g.controller.in.forward = 1, a -> quarter(a, -3.2f), 0);
+            g.controller.in.forward = 0;
+            film("body-throw", 48, i -> g.controller.in.mainDown = i < 24, a -> side(a, -3.5f), 0);
+        }
+        if (only == null || only.equals("loot")) lootPolishShots();
+        if (only == null || only.equals("jail")) {
+            g.law.arrest(g.player, DevMap.ALPHA, (rpg.ai.Npc) g.actor(Ids.GUARD)); frames(3); reviewUi("jail-before-sleep");
+            hud.fadeThen(g.law::sleepThroughSentence);
+            for (int frame = 0; frame < 75; frame++) { Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, true); if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "jail-wake-f" + (frame + 1) + ".png")); game.pump(); }
+            reviewUi("jail-awake-inside");
+        }
+    }
+
+    private void systemExtrasShots() {
+        var thief = (rpg.ai.Npc) g.actor(Ids.THIEF);
+        var witness = (rpg.ai.Npc) g.actor(Ids.GUARD);
+        var issuer = (rpg.ai.Npc) g.actor(Ids.LAWMAN_A);
+        g.teleport(witness, issuer.x + 1, issuer.y, issuer.z);
+        var known = new rpg.ai.Stealth.Aware(); known.x = 85; known.z = 70; known.seenAt = g.time;
+        witness.aware.put(thief.id, known);
+        var evidence = new rpg.ai.Memory("THEFT", thief.id, witness.id, DevMap.ALPHA, g.state.minutes, 1, "witnessed", 900009, 100, "stolen goods");
+        witness.remember(evidence, 24);
+        if (g.law.report(witness, evidence, issuer).rejected()) throw new IllegalStateException("Review report rejected");
+        hud.dialog(g.bountyBoard.browse(DevMap.ALPHA)); reviewUi("bounty-board-chatbox"); hud.closeAll();
+        if (g.bountyBoard.accept(thief, DevMap.ALPHA).rejected()) throw new IllegalStateException("Review warrant rejected");
+        hud.go(Hud.Scene.INVENTORY); reviewUi("bounty-scroll-inventory");
+        hud.go(Hud.Scene.MAP); reviewUi("bounty-last-known-map"); hud.closeAll();
+        var cat = g.animals.display(rpg.animal.Species.CAT, false, false, 0, 64.5f, 62.5f, 0);
+        cat.goal = rpg.animal.Animal.Goal.GROOM;
+        g.teleport(g.player, 60, DevMap.FLOOR, 60);
+        film("cat-grooming", 54, i -> {}, a -> new float[]{a.x + 1.4f, a.y + 0.7f, a.z - 1.4f, a.x, a.y + 0.35f, a.z}, 0, cat);
+    }
+
+    private void menuLatencyShots() {
+        place(64.5f, 62.5f, 0); g.player.restore(); g.player.inv.clear();
+        for (String id : new String[]{"bronze_axe", "iron_pickaxe", "shortbow", "iron_arrows", "trout", "logs", "leather_body", "steel_shield"}) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(id), 1));
+        for (Hud.Scene scene : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.SKILLS, Hud.Scene.CHARACTER}) {
+            hud.go(scene); double first = 0, worst = 0;
+            for (int frame = 0; frame < 24; frame++) {
+                var c = g.controller; gfx.camera(c.cx, c.cy, c.cz, c.fx, c.fy, c.fz, win.width, win.height, 0); gfx.scene(g, false, 0, g.state.hourOfDay());
+                ui.begin(gfx.cmd); long started = System.nanoTime(); hud.draw(ui, win.width, win.height, true, 1f / 60); ui.end();
+                double millis = (System.nanoTime() - started) / 1e6; if (frame == 0) first = millis; worst = Math.max(worst, millis);
+                gfx.frame(win.width, win.height);
+            }
+            System.out.printf(java.util.Locale.ROOT, "[menu-cpu] %s first %.2f ms / worst of 24 %.2f ms%n", scene, first, worst);
+            Main.shot(gfx, win.width, win.height, new File(shots, "menu-" + scene.name().toLowerCase(java.util.Locale.ROOT) + ".png"));
+        }
+        hud.closeAll();
+    }
+
+    private void motionPolishShots() {
+        place(64.5f, 62.5f, 0);
+        g.player.restore();
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, null); g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+        film("crouch-transition", 54, i -> g.controller.in.sneak = true, a -> side(a, -3.2f), 0);
+        film("crouch-walk", 54, i -> { g.controller.in.sneak = true; g.controller.in.forward = 1; }, a -> side(a, -3.2f), 12);
+        g.controller.in.sneak = false; g.controller.in.forward = 0;
+        film("bare-guard", 36, i -> g.controller.in.offDown = true, a -> quarter(a, 2.8f), 0);
+        g.controller.in.offDown = false;
+    }
+
+    private void lootPolishShots() {
+        var thief = (rpg.ai.Npc) g.actor(Ids.THIEF);
+        var dead = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        g.ai.spawnBody(dead); g.teleport(dead, 64.5f, DevMap.FLOOR, 61.7f);
+        g.teleport(g.player, 60.5f, DevMap.FLOOR, 56.5f);
+        gfx.preload(java.util.List.of(thief, dead));
+        dead.alive = false; dead.hp = 0; g.onKilled(dead, g.player, 0);
+        frames(90);
+        g.ai.spawnBody(thief); g.teleport(thief, 64.5f, DevMap.FLOOR, 62.5f);
+        thief.goal = rpg.ai.Brain.Goal.LOOT; thief.goalSince = g.time; thief.nextThink = Double.MAX_VALUE;
+        thief.lootStarted = g.time; thief.lootUntil = g.time + 0.9; thief.wantYaw = 0;
+        film("corpse-looting", 54, i -> {}, a -> side(a, -3.2f), 0, thief);
+        g.ai.unload(thief);
+    }
+
+    private void sessionPolishShots() {
+        if ("loot".equals(System.getenv("RPG_REVIEW_ONLY"))) { lootPolishShots(); return; }
+        if ("motion".equals(System.getenv("RPG_REVIEW_ONLY"))) { motionPolishShots(); return; }
+        place(64.5f, 62.5f, 0); frames(12);
+        g.player.skills.setLevel(rpg.skill.Skill.MAGIC, 25); g.player.skills.setLevel(rpg.skill.Skill.FAITH, 25); g.player.restore();
+        g.player.hp *= 0.7f; g.player.stamina *= 0.6f; g.player.mana *= 0.45f; g.player.faith *= 0.8f;
+        reviewUi("dynamic-vitals");
+        var cole = (rpg.ai.Npc) g.actor(Ids.GUARD);
+        g.teleport(cole, g.player.x + 3, DevMap.FLOOR, g.player.z);
+        var dialog = new rpg.ui.Dialog(cole.name, "The streets are quiet again. A paid bounty settles the law, but people remember what they saw. Keep your hands clean, traveller.");
+        dialog.npc = cole.id;
+        dialog.choice("Tell me about this town.", () -> {});
+        dialog.choice("How does the law work here?", () -> {});
+        dialog.choice("Goodbye.", () -> {});
+        hud.dialog(dialog); reviewUi("chatbox");
+        for (int frame = 0; frame < 39; frame++) {
+            Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            if (frame % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, "talk-f" + (frame + 1) + ".png"));
+        }
+        hud.closeAll();
+        if ("ui".equals(System.getenv("RPG_REVIEW_ONLY"))) return;
+        motionPolishShots();
+        lootPolishShots();
+        g.law.arrest(g.player, DevMap.ALPHA, cole); frames(4); reviewUi("jail-sentence");
+        view(118.4f, DevMap.FLOOR + 1.7f, 59.8f, 117, DevMap.FLOOR + 0.8f, 54, "jail-cell");
+        g.law.sleepThroughSentence();
+        gearShots();
+    }
+
+    private void reviewUi(String name) {
+        for (int i = 0; i < 12; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, name + ".png"));
+    }
+
+    private void polishShots() {
+        place(64.5f, 62.5f, (float) Math.PI);
+        frames(20);
+        hud.go(Hud.Scene.CHARACTER);
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "character.png"));
+        hud.closeAll();
+        g.player.firstPerson = true;
+        for (String id : new String[]{"iron_sword", "bronze_axe", "oak_shortbow", "bronze_crossbow"}) {
+            var item = rpg.item.Items.get(id);
+            if (item == null) throw new IllegalArgumentException("review item missing: " + id);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(item, 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            for (float pitch : new float[]{-0.7f, 0, 0.7f}) {
+                g.controller.camPitch = pitch;
+                frames(20);
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+                Main.shot(gfx, win.width, win.height, new File(shots, id + "-" + pitch + ".png"));
+            }
+            if (item.family == rpg.item.ItemDef.Family.BOW) {
+                g.controller.camPitch = 0;
+                g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.BRONZE_ARROWS, 10));
+                g.controller.in.mainDown = true; frames(45);
+                Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1 / 60f, false);
+                Main.shot(gfx, win.width, win.height, new File(shots, "bow-drawn.png"));
+                g.controller.in.mainDown = false; frames(1);
+            }
+        }
+    }
+
+    /** Current polish review through the real UI, item and dismemberment render paths. */
+    private void fieldPolishShots() {
+        place(64.5f, 62.5f, 0); frames(10);
+        hud.go(Hud.Scene.MAP);
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "world-map.png"));
+        hud.closeAll();
+        for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        if (hud.alphaOf("honor") > 0.001f) throw new IllegalStateException("Honor is visible without a change");
+        for (int delta : new int[]{5, -5}) {
+            g.honor.event("Review", g.player.id, delta, null, false, delta > 0 ? "a good deed" : "a harmful deed");
+            for (int i = 0; i < 20; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, delta > 0 ? "honor-gain.png" : "honor-loss.png"));
+        }
+        for (String id : new String[]{"bronze_axe", "oak_shortbow", "bronze_crossbow"}) {
+            var item = rpg.item.Items.get(id);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(item, 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.get(item.family == rpg.item.ItemDef.Family.CROSSBOW ? "bronze_bolts" : "bronze_arrows"), 10));
+            for (int frame = 0; frame < 2; frame++) {
+                g.player.firstPerson = frame == 1;
+                g.player.cs.draw = item.family == rpg.item.ItemDef.Family.BOW ? 0.9f : 0;
+                g.player.cs.aim = 1;
+                g.controller.update(0);
+                for (int i = 0; i < 20; i++) {
+                    if (frame == 0) draw(quarter(g.player, 2.8f), 1f / 60);
+                    else { g.controller.update(0); Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false); }
+                }
+                Main.shot(gfx, win.width, win.height, new File(shots, id + (frame == 0 ? "-third.png" : "-aim.png")));
+            }
+        }
+        g.player.cs.cancel(); g.player.firstPerson = false;
+        g.controller.update(0);
+        g.combat.lastPlayerHit = g.time;
+        for (int i = 0; i < 3; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "hitmarker-white.png"));
+        g.combat.lastPlayerKill = g.time;
+        for (int i = 0; i < 3; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+        Main.shot(gfx, win.width, win.height, new File(shots, "hitmarker-kill.png"));
+        var npc = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        g.ai.reload(npc); g.teleport(npc, 66.5f, DevMap.FLOOR, 62.5f);
+        g.gore.sever(npc, rpg.combat.Gore.Part.HEAD, 0, 0, g.player);
+        g.ai.unload(npc);
+        game.tick(1f / 60);
+        var limb = g.gore.limbs.get(g.gore.limbs.size() - 1);
+        var rigid = g.lastRigids.body(limb.body);
+        if (rigid != null) {
+            float[] matrix = new float[16]; rigid.matrix(matrix);
+            float x = matrix[12], y = matrix[13], z = matrix[14];
+            for (int i = 0; i < 3; i++) draw(new float[]{x + 0.45f, y + 0.05f, z - 0.8f, x, y, z}, 1f / 60);
+            Main.shot(gfx, win.width, win.height, new File(shots, "head-eyes-closed.png"));
+            for (int i = 0; i < 3; i++) draw(new float[]{x + 0.2f, y - 0.5f, z - 0.4f, x, y - 0.05f, z}, 1f / 60);
+            Main.shot(gfx, win.width, win.height, new File(shots, "head-cut-surface.png"));
+        }
+    }
+
     private void menuShots() {
         java.nio.file.Path root0 = Profiles.root;
         Profiles.root = java.nio.file.Path.of("build", "gallery-profiles");
@@ -342,6 +601,17 @@ final class Gallery {
                 gfx.frame(win.width, win.height);
             }
             Main.shot(gfx, win.width, win.height, new File(shots, "title-" + (k == 0 ? "empty" : "profiles") + ".png"));
+            if (k == 1) for (int action = 0; action < 2; action++) {
+                for (int i = 0; i < 3; i++) {
+                    gfx.title(stage, t.selected.look, win.width, win.height, 1f / 60, g.time);
+                    ui.begin(gfx.cmd);
+                    ui.mx = action == 0 ? 350 : 180; ui.my = action == 0 ? 542 : 320; ui.click = i == 0;
+                    t.draw(ui, win.width, win.height, 1f / 60, false, false);
+                    ui.end(); gfx.frame(win.width, win.height);
+                }
+                Main.shot(gfx, win.width, win.height, new File(shots, action == 0 ? "profile-delete-confirm.png" : "profile-deleted.png"));
+                ui.click = false;
+            }
         }
         for (int s = 1; s <= Profiles.MAX; s++) Profiles.delete(s);
         Profiles.root = root0;
@@ -729,6 +999,10 @@ final class Gallery {
     /** The middle of the screen, as the camera sees the actor (the frame is drawn twice on a still camera). */
     private BufferedImage capture(float[] cam) {
         for (int i = 0; i < 2; i++) draw(cam, 0);
+        return captureFrame();
+    }
+
+    private BufferedImage captureFrame() {
         int w = win.width, h = win.height;
         ByteBuffer px = gfx.pixels(w, h);
         int size = Math.min(w, h) / 2, x0 = (w - size) / 2, y0 = (h - size) / 2;

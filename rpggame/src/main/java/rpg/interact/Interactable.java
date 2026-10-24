@@ -24,6 +24,17 @@ public interface Interactable {
      */
     default float[] focusColumn() { return ZERO; }
     float[] ZERO = {0};
+    /** Closest entry along a unit camera ray; props may override with their actual bounds. */
+    default float focusEntry(float ox, float oy, float oz, float dx, float dy, float dz) {
+        float best = Float.POSITIVE_INFINITY, r = focusRadius();
+        for (float up : focusColumn()) {
+            float x = ax() - ox, y = ay() + up - oy, z = az() - oz, along = x * dx + y * dy + z * dz;
+            float off2 = x * x + y * y + z * z - along * along;
+            if (off2 > r * r || along < 0) continue;
+            best = Math.min(best, Math.max(0, along - (float) Math.sqrt(Math.max(0, r * r - off2))));
+        }
+        return best;
+    }
     /** Whether it is still there (a removed item or a dead NPC is not). */
     boolean exists();
     /** The options in this context, best first; never hides a crucial state behind a silent button. */

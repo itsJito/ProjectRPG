@@ -93,6 +93,17 @@ public final class RenderCommands {
         for (int i = 0; i < count * 36; i++) buf.putFloat(vertices[i]);
     }
 
+    /** A small 3D viewport, ordered among UI batches; reuses existing GPU meshes without CPU readback. */
+    public void portrait(float x, float y, float w, float h, int[] meshes, float[][] matrices, int[] colors, int count, float alpha) {
+        if (count < 0 || count > 32 || count > meshes.length || count > matrices.length || count > colors.length) throw new IllegalArgumentException("portrait count");
+        head(AstrattoNative.RCMD_PORTRAIT, 32 + count * 84).buf.putInt(count).putInt(0).putFloat(x).putFloat(y).putFloat(w).putFloat(h);
+        for (int i = 0; i < count; i++) {
+            buf.putInt(meshes[i]); put16(matrices[i]);
+            int rgb = colors[i];
+            buf.putFloat(((rgb >> 16) & 255) / 255f).putFloat(((rgb >> 8) & 255) / 255f).putFloat((rgb & 255) / 255f).putFloat(alpha);
+        }
+    }
+
     /** One axis-aligned 2D rectangle, coloured (and textured when texture is not 0). */
     public void rect(int texture, float x, float y, float w, float h, float u0, float v0, float u1, float v1, float r, float g, float b, float a, int mode) {
         head(AstrattoNative.RCMD_QUADS, 16 + 144).buf.putInt(texture).putInt(1);

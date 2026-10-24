@@ -23,7 +23,6 @@ import rpg.interact.WorldObject;
 import rpg.item.ItemStack;
 import rpg.item.Items;
 import rpg.law.Law;
-import rpg.objects.Agility;
 import rpg.objects.Container;
 import rpg.objects.Objects;
 import rpg.quest.Quests;
@@ -71,7 +70,9 @@ public final class Rpg implements GameModule {
     public Economy econ;
     public Quests quests;
     public Progression prog;
-    public Agility agility;
+    public rpg.actor.Traversal traversal;
+    public rpg.actor.BodyCarry carrying;
+    public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
     public Fx fx;
     public Sfx sfx;
@@ -128,13 +129,15 @@ public final class Rpg implements GameModule {
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
         quests = new Quests(this);
-        agility = new Agility();
+        traversal = new rpg.actor.Traversal(this);
+        carrying = new rpg.actor.BodyCarry(this);
+        bountyBoard = new rpg.law.BountyBoard(this);
         invariants = new Invariants(this);
         controller = new PlayerController(this);
         // the player
         player.x = DevMap.SPAWN_X; player.z = DevMap.SPAWN_Z; player.y = DevMap.FLOOR;
         player.body = ctx.reserve(AstrattoNative.KIND_MOVER);
-        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, 1.2f);
+        ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, player.height * rpg.actor.Body.CROUCH_HEIGHT);
         player.restore();
         starterKit();
         controller.snapTo((float) Math.PI);
@@ -156,7 +159,7 @@ public final class Rpg implements GameModule {
         }
         invariants.baseline();
         state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on the devmap");
-        chat.add("Welcome to the RPGGAME devmap. Press F1-F7 for the side panel tabs, Tab to free the mouse, V to switch camera.", Chat.Kind.GAME);
+        chat.add("Welcome to the RPGGAME devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
     private void starterKit() {
@@ -195,6 +198,7 @@ public final class Rpg implements GameModule {
         state.minutes += dt * cfg.minutesPerSecond;
         chat.now = time; fx.now = time;
         death.update();
+        law.update();
         controller.update(dt);
         interact.update(dt);
         combat.update(dt);
@@ -202,12 +206,12 @@ public final class Rpg implements GameModule {
         prayers.update(dt);
         magic.update(dt);
         if (!aiDisabled()) { ai.update(dt); animals.update(dt); }
+        carrying.update();
         objects.update(dt);
         undertaker.update();
         spareWatch();
         glass.update();
         econ.update();
-        agility.update(this);
         prog.update();
         fx.update(dt);
         for (Actor d : dummies) { d.hp = d.maxHp(); d.cs.staggered = 0; }
@@ -221,7 +225,7 @@ public final class Rpg implements GameModule {
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
         if (m != null && !(ui != null && ui.console.noclip)) {
             player.walked += (float) Math.hypot(m.x - player.x, m.z - player.z);
-            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded;
+            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched;
         }
         ai.afterFrame(lastBodies, ctx.agents());
         reactions.afterFrame(lastBodies);
@@ -438,7 +442,7 @@ public final class Rpg implements GameModule {
         if (gore != null) gore.healed(player);
         teleport(player, DevMap.GRAVEYARD_SPAWN[0], DevMap.FLOOR, DevMap.GRAVEYARD_SPAWN[1]);
         controller.snapTo(0);
-        for (Npc n : npcs) if (n.fightTarget == player.id) { n.fightTarget = 0; n.cs.lastAttacker = 0; }
+        law.playerRespawned();
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");
         chat.say("You wake among the graves, with nothing but the clothes you were born to.");
     }

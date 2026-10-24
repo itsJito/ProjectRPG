@@ -32,6 +32,7 @@ final class Bench {
 
     private static final Stop[] TOUR = {
             new Stop("street, morning (people)", 9f, 64.5f, 76f, 70f, 58f, false),
+            new Stop("farm, livestock", 12f, 110f, 108f, 118f, 115f, false),
             new Stop("grove, noon (leaves)", 12f, 90f, 26f, 96.5f, 18.5f, false),
             new Stop("pond, evening (reflections)", 17.5f, 88f, 45f, 96f, 34f, false),
             new Stop("campfire, night (smoke, lamps)", 21f, 87.5f, 26.5f, 91.5f, 21.5f, false),
@@ -82,17 +83,20 @@ final class Bench {
         g.ui = hud;
         gfx.findLamps(g.vox);
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
-        g.cfg.targetFps = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_TARGET", "144"));
+        g.cfg.targetFps = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_TARGET", "30"));
+        g.cfg.quality = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_QUALITY", Integer.toString(g.cfg.quality)));
         System.out.printf("bench: %d x %d, %d frames a stop, %s%n", win.width, win.height, frames, Runtime.version());
         List<double[]> all = new ArrayList<>();
         for (Stop s : TOUR) {
+            String only = System.getenv("RPG_BENCH_ONLY");
+            if (only != null && !s.name.contains(only)) continue;
             g.teleport(g.player, s.x, DevMap.FLOOR, s.z);
             g.controller.snapTo((float) Math.atan2(-(s.tx - s.x), -(s.tz - s.z)));
             g.controller.camPitch = -0.08f;
             double now = g.state.hourOfDay();
             g.advanceTime(((s.hour - now) % 24 + 24) % 24 * 60, "bench");
             // settle: meshing, probes and exposure catch up (a real arrival would have streamed them on the way)
-            for (int i = 0; i < 180; i++) frame(g, hud, s, null);
+            for (int i = 0; i < Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_SETTLE", "180")); i++) frame(g, hud, s, null);
             // RPG_BENCH_SHOTS=<dir>: a full-size picture of each stop, settled (to compare render scales and passes)
             String shots = System.getenv("RPG_BENCH_SHOTS");
             if (shots != null) Main.shot(gfx, win.width, win.height, new java.io.File(shots, "bench-" + s.name.replaceAll("[^a-z]+", "-") + ".png"));

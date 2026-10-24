@@ -50,7 +50,7 @@ final class Panels {
     // ------------------------------------------------------------------ the frame: tabs to every panel scene
     static final class Frame extends Panel {
         static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory_Icon_UI", "I"}, {Hud.Scene.CHARACTER, "Character", "Worn_Equipment_icon_UI", "C"},
-                {Hud.Scene.SKILLS, "Skills", "Skills_icon_UI", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "M"}};
+                {Hud.Scene.SKILLS, "Skills", "Skills_icon_UI", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
         Frame(Hud h) { super("frame", Hud.FW, Hud.FH); }
         @Override public void draw(Ui2D ui, float x, float y) {
             ui.rect(0, 0, hud.w, hud.h, 0x48000000);   // the world steps back behind a panel
@@ -69,7 +69,7 @@ final class Panels {
             ui.rect(x + 12, y + 41, pw - 24, 1, Style.EDGE);
             if (Style.button(ui, "x", x + pw - 34, y + 10, 24, 24, true)) hud.go(Hud.Scene.WORLD);
             ui.img("questionmark_UI", x + pw - 64, y + 12, 20, 0xA0FFFFFF);
-            if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
+            if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M map, B magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
         }
     }
 
@@ -140,37 +140,35 @@ final class Panels {
             Player p = g.player;
             ItemDef main = p.main();
             title(ui, p.name, x, y);
-            ui.text("Combat level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 24, 13, Style.DIM);
-            ui.text("Fighting style", x, y + 56, 13, Style.TEXT);
-            for (int i = 0; i < 4; i++) {
-                float bx = x + i * 160, by = y + 76;
-                boolean on = p.style == i;
-                if (Style.tab(ui, Player.STYLES[i], bx, by, 156, 34, on) && live) { p.style = i; g.state.commit("StyleChanged", p.id, 0, null, 0, Player.STYLES[i]); hud.sound("UIbutton1", 0.4f); }
-            }
+            ui.text("Level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 24, 13, Style.DIM);
+            ui.text("Combat & condition", x, y + 56, 13, Style.TEXT);
             float prot = CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor());
             String[][] rows = {
                     {"Health", String.format("%.0f / %.0f", p.hp, p.maxHp())}, {"Stamina", String.format("%.0f / %.0f", p.stamina, p.maxStamina())},
                     {"Faith", String.format("%.0f / %.0f", p.faith, p.maxFaith())}, {"Mana", String.format("%.0f / %.0f", p.mana, p.maxMana())},
-                    {"Attack scaling", String.format("x%.2f", CombatMath.attackScaling(p.skills.level(Skill.ATTACK)))},
-                    {"Force", String.format("x%.2f", CombatMath.strengthForce(p.skills.level(Skill.STRENGTH)))},
-                    {"Protection", String.format("%.0f (%.0f%% slash mitigation)", prot, CombatMath.mitigation(prot, ItemDef.DamageType.SLASH) * 100)},
+                    {"Attack tempo", String.format("x%.2f", 1f / CombatMath.attackCadence(p.skills.level(Skill.ATTACK), main == null ? 0 : main.attackBonus))},
+                    {"Impact force", String.format("x%.2f", CombatMath.strengthForce(p.skills.level(Skill.STRENGTH)))},
+                    {"Protection", String.format("%.0f rating / %d max hit absorbed", prot, CombatMath.armoredMax(1000, p.skills.level(Skill.DEFENSE), p.eq.armor()) == 1000 ? 0 : 1000 - CombatMath.armoredMax(1000, p.skills.level(Skill.DEFENSE), p.eq.armor()))},
                     {"Stability", String.format("%.0f%s", CombatMath.stability(p.skills.level(Skill.DEFENSE), p.skills.level(Skill.STRENGTH), p.eq.armor(), p.cs.stabilityBonus), p.cs.stabilityBonus > 0 ? " (resisting)" : "")},
-                    {"Weapon", main != null && main.damage > 0 ? String.format("%s: %.1f dmg, %.0f impact, %.1f m, %s", main.name, main.damage, main.impact, main.reach, main.damageType) : "Fists: 0.6 dmg, 6 impact"},
+                    {"Weapon", main != null && main.damage > 0 ? main.name : "Fists"},
+                    {"Damage", main != null && main.damage > 0 ? String.format("%.1f HP / %s", main.damage, main.damageType) : "0.6 HP / BLUNT"},
+                    {"Reach / impact", main != null && main.damage > 0 ? String.format("%.1f m / %.0f", main.reach, main.impact) : "0.7 m / 6"},
                     {"Load", String.format("%.1f kg (%.0f%% speed)", p.carried(), p.burden() * 100)},
                     {"Gold", Currency.full(p.count(Items.COINS))}};
             // Honor (GDD 3.5): the bar with its face, the rank, and what it is worth at the counter
             var hn = g.honor;
-            ui.text("Honor", x + 360, y + 128, 13, Style.DIM);
-            ui.text(hn.rankName() + "  " + (hn.score > 0 ? "+" : "") + hn.score, x + 430, y + 128, 13, Style.TEXT);
-            HudFragments.honorBar(ui, x + 368, y + 158, 270, hn.score, hn.score);
-            ui.text(hn.discount() > 0 ? String.format("Merchants who know you: %.0f%% off", hn.discount() * 100) : "No Honor discount (from +33)", x + 360, y + 180, 11, Style.FAINT);
+            ui.text("Honor", x + 360, y + 56, 13, Style.DIM);
+            ui.text(hn.rankName() + "  " + (hn.score > 0 ? "+" : "") + hn.score, x + 430, y + 56, 13, Style.TEXT);
+            HudFragments.honorBar(ui, x + 368, y + 88, 270, hn.score, hn.score);
+            ui.text(hn.discount() > 0 ? String.format("Merchants who know you: %.0f%% off", hn.discount() * 100) : "No Honor discount (from +33)", x + 360, y + 112, 11, Style.FAINT);
             for (int i = 0; i < rows.length; i++) {
-                float ry = y + 128 + i * 21;
+                float ry = y + 84 + i * 21;
                 ui.text(rows[i][0], x, ry, 13, Style.DIM);
                 ui.text(rows[i][1], x + 140, ry, 13, i == rows.length - 1 ? Currency.color(p.count(Items.COINS)) : Style.TEXT);
             }
             String[] help = {"LMB tap: light swing    LMB hold: heavy", "RMB: guard (shield or weapon), or the off hand", "Guard just before a hit to parry", "Q dodge    R cast    1-0 the action bar", "V first / third person    E interact (hold for all options)"};
-            for (int i = 0; i < help.length; i++) ui.text(help[i], x + 360, y + 128 + i * 20, 12, Style.FAINT);
+            ui.text("Controls", x + 360, y + 168, 13, Style.TEXT);
+            for (int i = 0; i < help.length; i++) ui.text(help[i], x + 360, y + 194 + i * 20, 12, Style.FAINT);
         }
     }
 

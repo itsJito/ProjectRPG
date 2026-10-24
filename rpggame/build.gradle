@@ -41,7 +41,7 @@ test {
     useJUnitPlatform()
     environment 'ASTRATTO_JAVA_FALLBACK', '0'
     jvmArgs '--enable-native-access=ALL-UNNAMED'
-    testLogging { events 'failed'; exceptionFormat 'full' }
+    testLogging { events 'failed'; exceptionFormat = 'full' }
 }
 
 tasks.register('acceptance', JavaExec) {

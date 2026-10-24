@@ -67,7 +67,7 @@ public final class Sfx {
         bank("generic", "foley/impactGeneric_light_00", 5);
         bank("glass.light", "foley/impactGlass_light_00", 5);
         bank("glass", "foley/impactGlass_medium_00", 5);
-        bank("glass.break", "foley/impactGlass_heavy_00", 5);
+        one("glass.break", "glass/break.ogg", 0);
         bank("mine", "foley/impactMining_00", 5);
         bank("chop", "foley/chop", 1, ".ogg", -1);
         bank("door", "foley/doorOpen_", 2, ".ogg", 1);
@@ -130,7 +130,14 @@ public final class Sfx {
         // ---- synthesized: what has no recording
         make("crackle", crackle());
         make("splash", noiseBurst(0.35f, 0.4f));
-        make("bow", twang());
+        // Recorded bow releases from Wildfire Games (0 A.D.), three variations at their original 44.1 kHz.
+        one("bow", "archery/release.ogg", 0);
+        one("bow", "archery/release2.ogg", 0);
+        one("bow", "archery/release3.ogg", 0);
+        one("crossbow", "archery/release.ogg", 0);
+        one("arrow.impact", "archery/impact.ogg", 0);
+        bank("bow.draw", "foley/creak", 3, ".ogg", 1);
+        bank("arrow.fly", "swish/swish-", 3, ".wav", 1);
         make("zap", sweep(1400, 200, 0.25f));
         make("click", tone(1400, 0.03f, 0.3f));
         make("fail", tone(160, 0.18f, 0.4f));
@@ -403,12 +410,6 @@ public final class Sfx {
             int at = k * 3000;
             for (int i = 0; at + i < w.length; i++) { double t = i / (double) RATE; w[at + i] += (float) (Math.sin(2 * Math.PI * (2600 + k * 300) * t) * Math.exp(-t * 30) * 0.25); }
         }
-        return w;
-    }
-
-    private float[] twang() {
-        float[] w = buf(0.3f);
-        for (int i = 0; i < w.length; i++) { double t = i / (double) RATE; w[i] = (float) (Math.sin(2 * Math.PI * (220 - t * 200) * t) * Math.exp(-t * 14) * 0.6); }
         return w;
     }
 

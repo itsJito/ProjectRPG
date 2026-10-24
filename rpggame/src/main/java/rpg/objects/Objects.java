@@ -21,6 +21,7 @@ public final class Objects {
     private final List<WorldObject> list = new ArrayList<>();
     private long nextFixture = Ids.FIXTURES;
     public Door shedDoor, storeDoor, farmGate;
+    private final List<Door> jailDoors = new ArrayList<>();
     /** The farm's fixtures (GDD 3.9): the trough, the nest boxes, the farmer's chest of feed and eggs. */
     public Container trough, farmChest;
     public final List<Container> nestBoxes = new ArrayList<>();
@@ -78,8 +79,8 @@ public final class Objects {
         for (int[] p : DevMap.FLAXES) node(Node.Kind.PATCH, "flax", "Flax", Skill.HARVESTING, 5, Items.FLAX, 8, 1.8f, 4, g.cfg.patchRespawn, Blocks.FLAX_PATCH, p, 0, 0);
         for (int[] p : DevMap.BERRIES) node(Node.Kind.PATCH, "berry_bush", "Redberry bush", Skill.HARVESTING, 10, Items.BERRIES, 18, 2.4f, 3, g.cfg.patchRespawn, Blocks.BERRY_BUSH, p, 0, 0);
         // agility: the course wall and the town-wall shortcut
-        add(new Fixtures.Climb(fid(), "Climbing wall", 117.5f, f + 1.4f, DevMap.AG_WALL_Z + 0.5f, 1, 18, 117.5f, f, DevMap.AG_WALL_Z + 2.5f, 117.5f, DevMap.AG_WALL_Z - 1.5f));
-        add(new Fixtures.Climb(fid(), "Wall shortcut", DevMap.SHORTCUT[0] + 0.5f, f + 1.4f, DevMap.SHORTCUT[1] + 0.5f, 10, 12, DevMap.SHORTCUT[0] + 0.5f, f, DevMap.SHORTCUT[1] + 2.5f, DevMap.SHORTCUT[0] + 0.5f, DevMap.SHORTCUT[1] - 1.5f));
+        add(new Fixtures.Climb(fid(), "Climbing wall", 117.5f, f + 1.4f, DevMap.AG_WALL_Z + 0.5f));
+        add(new Fixtures.Climb(fid(), "Wall shortcut", DevMap.SHORTCUT[0] + 0.5f, f + 1.4f, DevMap.SHORTCUT[1] + 0.5f));
         // the combat lane's cabinet, the debug terminal, the stall, the kiosk
         add(new Fixtures.Cabinet(fid(), DevMap.CABINET[0] + 0.5f, f + 1f, DevMap.CABINET[1] - 0.2f));
         add(new Fixtures.Terminal(fid(), DevMap.DEBUG_TERMINAL[0] + 0.5f, f + 1.4f, DevMap.DEBUG_TERMINAL[1] + 0.5f));
@@ -124,13 +125,30 @@ public final class Objects {
         }
         custody = add(new Container(fid(), "custody", "The undertaker's chest", "chest", DevMap.CUSTODY_CHEST[0], f + 0.4f, DevMap.CUSTODY_CHEST[1], 100, Ids.UNDERTAKER));
         custody.locked = true; custody.lockLevel = 60;
+        for (var cell : rpg.world.Jails.CELLS) {
+            Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
+            door.spawn(g); jailDoors.add(door);
+            var p = cell.slab();
+            Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
+            slab.name = "Cell slab"; furniture.add(slab);
+        }
+        for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction()));
     }
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */
     public Container custody;
 
     /** Every door, for the frame's physics read-back and the NPCs' door manners. */
-    public Door[] doors() { return farmGate == null ? new Door[]{shedDoor, storeDoor} : new Door[]{shedDoor, storeDoor, farmGate}; }
+    public Door[] doors() {
+        List<Door> doors = new ArrayList<>(); doors.add(shedDoor); doors.add(storeDoor);
+        if (farmGate != null) doors.add(farmGate);
+        doors.addAll(jailDoors);
+        return doors.toArray(Door[]::new);
+    }
+    public Door jailDoor(String jurisdiction) {
+        for (Door door : jailDoors) if (door.name.equals(jurisdiction + " cell door")) return door;
+        return null;
+    }
 
     /** The tree or rock a block belongs to (the trunk or crown, the ore), or null. */
     public Node nodeAt(int bx, int by, int bz) {

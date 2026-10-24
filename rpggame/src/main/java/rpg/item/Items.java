@@ -53,6 +53,7 @@ public final class Items {
 
     // ------------------------------------------------------------------ resources and tools
     public static final ItemDef COINS = stack("coins", "Gold coins", 1, 0xE8C040, "Gold coins (G): the currency of the realm.");
+    public static final ItemDef BOUNTY_SCROLL = def("bounty_scroll", "Bounty scroll", 0, 0xC6AC76, "A signed warrant. The map shows the last position known to the watch, not a live tracking spell.");
     public static final ItemDef LOGS = def("logs", "Logs", 4, 0x8A6034, "Logs cut from a tree.");
     public static final ItemDef OAK_LOGS = def("oak_logs", "Oak logs", 10, 0x9C7444, "Logs cut from an oak.");
     public static final ItemDef WILLOW_LOGS = def("willow_logs", "Willow logs", 16, 0x7A7040, "Logs cut from a willow.");
@@ -214,6 +215,7 @@ public final class Items {
         sack.family = Family.BAG; sack.bagW = 5; sack.bagH = 4;
         jewellery();
         shapes();
+        BOUNTY_SCROLL.gw = 1; BOUNTY_SCROLL.gh = 2;
     }
 
     /**
@@ -351,6 +353,7 @@ public final class Items {
 
     private static ItemDef staff(String id, String name, int req, int value, int color, Family f) {
         ItemDef d = def(id, name, value, color, f == Family.WAND ? "Casts the selected spell from the off hand." : "Casts the selected spell.");
+        d.magicDamageBonusPct = f == Family.STAFF ? 16 : 8;
         d.slot = f == Family.WAND ? Slot.OFF : Slot.MAIN; d.family = f; d.reqSkill = Skill.MAGIC; d.reqLevel = req; d.damage = (f == Family.STAFF ? 4 : 2) * rpg.combat.CombatMath.HP_SCALE; d.impact = 10; d.reach = 1.3f; d.speed = 1.1f; d.damageType = DamageType.BLUNT;
         if (id.equals("fire_staff")) { d.damage = 8 * rpg.combat.CombatMath.HP_SCALE; d.maxCharges = 30; d.examine = "The Fire staff: it casts Fire Blast, a charge at a time (recharge it with coal)."; }
         return d;

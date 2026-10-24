@@ -439,15 +439,13 @@ public final class Acceptance {
         frames(10);
         need("Construction: a crate built into the world as blocks", g.objects.buildSpot.built.get("crate") && g.vox.block(76, DevMap.FLOOR, 25) == Blocks.CRATE);
         shot("06-construction");
-        // Agility: the course, physically checked in order
-        tp(117.5f, 8.5f, (float) Math.PI); frames(20);
-        tp(117.5f, 24.5f, (float) Math.PI); frames(20);
-        WorldObject wall = find(o -> o instanceof rpg.objects.Fixtures.Climb && o.name.equals("Climbing wall"));
-        tp(117.5f, 25.6f, (float) Math.PI); frames(10);
-        work(g.interact.request(g.player, wall, "climb"), 200, () -> false);
-        frames(10);
-        tp(117.5f, 45.5f, (float) Math.PI); frames(20);
-        need("Agility: an obstacle crossed and a lap completed", g.agility.laps >= 1 && g.player.skills.xp(Skill.AGILITY) > start[Skill.AGILITY.ordinal()]);
+        // Agility uses structural geometry, not fixed interaction endpoints.
+        g.player.skills.setLevel(Skill.AGILITY, 5);
+        tp(117.5f, 25.8f, (float) Math.PI); frames(10);
+        float ledgeY = g.player.y;
+        boolean traversed = g.traversal.begin(g.player, (float) Math.PI);
+        frames(90);
+        need("Agility: a geometry-derived ledge crossed", traversed && g.player.y > ledgeY + 0.8f && g.player.skills.xp(Skill.AGILITY) > start[Skill.AGILITY.ordinal()]);
         // Thieving: pickpocket (a seeded chance) until it succeeds
         Npc eda = npc(Ids.VILLAGER);
         for (int i = 0; i < 8 && g.player.skills.xp(Skill.THIEVING) == start[Skill.THIEVING.ordinal()]; i++) {
@@ -483,20 +481,13 @@ public final class Acceptance {
         need("a swing out of reach makes no contact", g.combat.contacts == contacts);
         tp(dummy.x, dummy.z + 1.2f, 0);
         frames(10);
-        g.player.style = 0;
         long att = g.player.skills.xp(Skill.ATTACK), hp = g.player.skills.xp(Skill.HEALTH);
+        long str = g.player.skills.xp(Skill.STRENGTH), def = g.player.skills.xp(Skill.DEFENSE);
         int d1 = swingDamage(dummy), d2 = swingDamage(dummy);
         need("collision-based melee hits the dummy (" + d1 + ", " + d2 + ")", d1 > 0 && d2 > 0);
         need("damage is deterministic: same stats, same move, same damage", d1 == d2);
-        need("combat XP from real hits: Attack (style) and Health share", g.player.skills.xp(Skill.ATTACK) > att && g.player.skills.xp(Skill.HEALTH) > hp);
-        g.player.style = 1;
-        long str = g.player.skills.xp(Skill.STRENGTH);
-        swingDamage(dummy);
-        g.player.style = 2;
-        long def = g.player.skills.xp(Skill.DEFENSE);
-        swingDamage(dummy);
-        need("Strength and Defense styles train their skills", g.player.skills.xp(Skill.STRENGTH) > str && g.player.skills.xp(Skill.DEFENSE) > def);
-        g.player.style = 0;
+        need("real melee trains Attack, Strength and Health", g.player.skills.xp(Skill.ATTACK) > att && g.player.skills.xp(Skill.STRENGTH) > str && g.player.skills.xp(Skill.HEALTH) > hp);
+        need("striking a passive dummy does not train Defense", g.player.skills.xp(Skill.DEFENSE) == def);
         tp(armored.x, armored.z + 1.2f, 0);
         frames(10);
         int dA = swingDamage(armored);
@@ -783,6 +774,10 @@ public final class Acceptance {
         need("after the arrest no lawman strikes the player (" + hitsAfter + " hits) and none still fights them", hitsAfter == 0 && standDown);
         need("the sentence cleared the bounty and the crimes known of it are settled", g.law.bounty(g.player.id, DevMap.ALPHA) == 0
                 && g.npcs.stream().allMatch(n -> n.memories.stream().noneMatch(x -> x.crime() && x.subject == g.player.id && DevMap.ALPHA.equals(x.jurisdiction) && x.witnessed() && !x.reported)));
+        need("the player is held in a physical cell with time remaining", g.law.inCustody(g.player) && g.objects.jailDoor(DevMap.ALPHA).locked);
+        var slab = g.objects.furniture.stream().filter(f -> f.cellSlab() && f.x > 100).findFirst().orElseThrow();
+        g.teleport(g.player, slab.x - 1, DevMap.FLOOR, slab.z);
+        need("sleeping on the slab serves the sentence", slab.perform(g, g.player, "sleep", g.state.newRequestId()).committed() && !g.law.inCustody(g.player));
         // the other way an arrest happens: the player resists and is beaten down - the blow that would kill arrests instead,
         // and every blow traded before it is settled by the sentence (no guard swings on afterwards)
         var ev2 = g.state.commit("CrimeCommitted", g.player.id, Ids.MERCHANT_A, DevMap.ALPHA, 0, "THEFT value=40 (resist scenario)");
@@ -1057,7 +1052,7 @@ public final class Acceptance {
         int stains0 = gore.stainCount;
         float rx = (float) Math.cos(bandit.yaw), rz = (float) -Math.sin(bandit.yaw);
         float ax = bandit.x + rx * bandit.radius, ay = bandit.y + bandit.height * 0.66f, az = bandit.z + rz * bandit.radius;
-        need("a contact at the right shoulder's height and side is the right arm (" + rpg.combat.Gore.partAt(bandit, ax, ay, az) + ")", rpg.combat.Gore.partAt(bandit, ax, ay, az) == rpg.combat.Gore.Part.ARM_R);
+        need("a contact at the right shoulder's height and side is the right arm (" + g.gore.partAt(bandit, ax, ay, az) + ")", g.gore.partAt(bandit, ax, ay, az) == rpg.combat.Gore.Part.ARM_R);
         g.combat.resolve(g.player, bandit, bandit.maxHp() * 3, 0, rpg.item.ItemDef.DamageType.SLASH, null, ax, ay, az, "test cut", false);
         frames(30);
         need("the killing cut takes the arm off: a limb of its own in the world (" + gore.limbs.size() + " limb(s))", !bandit.alive && gore.lost(bandit, rpg.combat.Gore.Part.ARM_R) && !gore.limbs.isEmpty()
@@ -1252,7 +1247,7 @@ public final class Acceptance {
         float ax = (float) Math.cos(an.yaw), az = (float) -Math.sin(an.yaw), bx = (float) Math.sin(an.yaw), bz = (float) Math.cos(an.yaw);
         float hx = fig.legB[0] * vs, hz = fig.legB[2] * vs, hy = (fig.bodyY + fig.legB[1] - fig.legH * 0.5f) * vs;
         float px = an.x + ax * hx + bx * hz, pz = an.z + az * hx + bz * hz, py = an.y + hy;
-        var part = rpg.combat.Gore.partAt(an, px, py, pz);
+        var part = g.gore.partAt(an, px, py, pz);
         need("a blow below the barrel at the back right is the sheep's right hind leg (" + part + ")", part == rpg.combat.Gore.Part.LEG_R);
         int l0 = gore.limbs.size();
         for (int k = 0; k < 2; k++) gore.onHit(g.player, an, Math.round(an.maxHp() * 0.3f), an.maxHp() * 0.3f, ItemDef.DamageType.SLASH, px, py, pz, 1, 0, false);
@@ -1280,6 +1275,10 @@ public final class Acceptance {
         need("the inventory pauses the game (and so does any menu)", hud.paused());
         hud.toggle(rpg.ui.Hud.Scene.INVENTORY);
         need("closed, the world runs again", !hud.paused());
+        hud.dialog(Main.menu(win, g));
+        need("Escape menu uses the full pause presentation and stops the world", hud.dialog.pauseMenu && hud.paused());
+        hud.choose(0);
+        need("Resume closes the pause presentation", hud.dialog == null && !hud.paused());
     }
 
     // ------------------------------------------------------------------ stealth
@@ -1696,14 +1695,22 @@ public final class Acceptance {
         var stolen = new rpg.item.ItemStack(rpg.item.Items.get("gold_ring"), 1);
         stolen.markStolen(Ids.MERCHANT_A);
         g.state.mint(stolen.def, 1);
-        g.player.store(stolen);
-        int slot = g.player.inv.first(stolen.def);
+        if (!g.player.store(stolen)) throw new IllegalStateException("no room for the fence test's stolen ring");
+        rpg.item.Inventory saleGrid = null;
+        int slot = -1;
+        for (var grid : g.player.grids()) for (int i = 0; i < grid.size(); i++) {
+            var candidate = grid.get(i);
+            if (candidate != null && candidate.sameKind(stolen)) { saleGrid = grid; slot = i; break; }
+        }
+        g.teleport(g.player, gus.x + 1, DevMap.FLOOR, gus.z);
+        frames(3);
+        var refused = g.econ.sell(g.player, saleGrid, g.econ.shopB, slot, 1, g.state.newRequestId());
         g.teleport(g.player, silas.x + 1, DevMap.FLOOR, silas.z);
         for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && n.distTo(silas) < 20) g.teleport(n, n.postX != 0 ? n.postX : 100, DevMap.FLOOR, n.postZ != 0 ? n.postZ : 70);
         frames(3);
-        var refused = g.econ.sell(g.player, g.econ.shopB, slot, 1, g.state.newRequestId());
-        var sold = g.econ.sell(g.player, g.econ.fence, slot, 1, g.state.newRequestId());
-        need("a shop won't buy a stolen ring (" + refused.reason() + "); the fence will (" + sold.status() + ")", refused.rejected() && !sold.rejected() && g.econ.fence.stock.count(stolen.def) >= 1);
+        var sold = g.econ.sell(g.player, saleGrid, g.econ.fence, slot, 1, g.state.newRequestId());
+        need("a shop won't buy a stolen ring (" + refused.reason() + "); the fence will (" + sold.status() + ")", refused.rejected() && refused.reason().contains("stolen") && !sold.rejected()
+                && g.econ.fence.stock.stacks().stream().anyMatch(it -> it.def == stolen.def && it.stolen));
         need("the jewellery slots: a ring and a necklace can be worn", rpg.item.Items.get("ruby_ring").slot == rpg.item.ItemDef.Slot.RING && rpg.item.Items.get("emerald_amulet").slot == rpg.item.ItemDef.Slot.NECK);
     }
 

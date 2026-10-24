@@ -34,11 +34,11 @@ import rpg.ui.Fragment.Placement;
  * has always used, the action bar bottom centre.
  */
 public final class Hud {
-    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC }
+    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC, MAP }
     public enum Win { NONE, CONTAINER, STATION, CABINET, SHOP, KIOSK, SKILL_GUIDE }
-    /** The old side-panel tab numbers (F1..F6 and the tests use them): each now opens a scene. The debug tab is gone: the developer console (`) took its place. */
-    public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5;
-    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC};
+    /** Legacy side-panel indices, retained for tests and the remaining F-key shortcuts: each opens a scene. The debug tab is gone: the developer console (`) took its place. */
+    public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5, TAB_MAP = 6;
+    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC, Scene.MAP};
     /** The scene frame's size (panel scenes draw inside it). */
     static final float FW = 900, FH = 520, FRAME_Y = -24;
 
@@ -52,6 +52,7 @@ public final class Hud {
     Economy.Shop shop;
     Skill guide = Skill.ATTACK;
     public Dialog dialog;
+    public final SettingsPanel settings;
     Menu menu;
     public boolean aiInspector, stateInspector, telemetry, xpDashboard;
     int inspectIndex;
@@ -97,6 +98,7 @@ public final class Hud {
         addons.loadAll(java.nio.file.Path.of("addons"));
         console = new Console(g, this);
         console.autoexec();
+        settings = new SettingsPanel(this);
     }
 
     // ------------------------------------------------------------------ registry and layout
@@ -116,9 +118,9 @@ public final class Hud {
 
     private void layout() {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
-        group("vitals", "vitals", Placement.at(Anchor.BOTTOM, 0, 66), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
+        group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
-                "wanted", Placement.at(Anchor.TOP_LEFT, 16, 16), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 110),
+                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 110),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
         group("frame", "frame", Placement.at(Anchor.CENTER, 0, FRAME_Y));
         group("inventory", "equipment", inFrame("equipment", 16, 52), "grids", inFrame("grids", 232, 52), "iteminfo", inFrame("iteminfo", 620, 52),
@@ -127,13 +129,14 @@ public final class Hud {
         group("skills", "skills", inFrame("skills", 16, 52), "guide", inFrame("guide", 452, 52));
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
+        group("map", "worldmap", inFrame("worldmap", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
-        group("talk", "dialogue", Placement.at(Anchor.BOTTOM, 0, 120));
+        group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 12), "pause", Placement.at(Anchor.CENTER, 0, 0));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
         scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
-        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC}) {
+        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.MAP}) {
             String content = s.name().toLowerCase();
             scenes.put(s, new ArrayList<>(List.of("world", "vitals", "frame", content, "talk", "inspect", "addons", "top")));
         }
@@ -148,20 +151,23 @@ public final class Hud {
     public void openTab(int t) { go(TAB_SCENES[Math.max(0, Math.min(TAB_SCENES.length - 1, t))]); }
     public void dialog(Dialog d) {
         dialog = d; menu = null;
-        if (d != null && d.npc != 0) g.chat.add(d.speaker + ": " + d.text, rpg.Chat.Kind.DIALOGUE);
     }
+    private float transition = -1;
+    private Runnable atBlack;
+    public void fadeThen(Runnable action) { if (transition >= 0) return; transition = 0; atBlack = action; closeAll(); }
+    public void close() { icons.close(); }
     public void closeDialog() { dialog = null; }
     public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
-    public boolean captures() { return g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
+    public boolean captures() { return transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
     /**
      * Whether the world stands still (gamefixes: pausing pauses the entire game): any menu - a panel scene (inventory,
      * character, skills, journal, magic), a window (a chest, a shop, a station), a dialogue or the game menu, the hold-E
      * menu. Only the interface and the music carry on.
      */
-    public boolean paused() { return console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null; }
+    public boolean paused() { return transition >= 0 || settings.open || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null; }
     /** Whether typed keys belong to the interface (the inventory's filter box has the focus). */
-    public boolean typing() { return console.isOpen() || scene == Scene.INVENTORY && inventory.filterFocus; }
+    public boolean typing() { return settings.open || console.isOpen() || scene == Scene.INVENTORY && inventory.filterFocus; }
 
     /** The scene state machine: a scene swaps fragment groups in and out (each fades on its own). */
     public void go(Scene s) {
@@ -182,6 +188,8 @@ public final class Hud {
     public void openTabKey(int t) { if (t >= 0 && t < TAB_SCENES.length) toggle(TAB_SCENES[t]); }
 
     public boolean escape() {
+        if (transition >= 0) return true;
+        if (settings.escape()) return true;
         if (console.isOpen()) { console.close(); return true; }
         if (inventory.dragging()) { inventory.cancelDrag(); return true; }
         if (menu != null) { menu = null; return true; }
@@ -206,7 +214,9 @@ public final class Hud {
 
     /** A numbered choice on whatever is open (dialogue options, menu items) from the keyboard. */
     public void choose(int n) {
-        if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog; dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run(); return; }
+        if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog; dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
+            if (dialog != null && dialog.npc == 0 && !dialog.pauseMenu && d.npc != 0) dialog.npc = d.npc;
+            return; }
         if (menu != null && n < menu.items.size()) { MenuItem it = menu.items.get(n); menu = null; if (it.enabled()) { sound("UI_select", 0.4f); it.action().run(); } else if (it.reason() != null) g.chat.warn(it.reason()); }
     }
 
@@ -235,14 +245,17 @@ public final class Hud {
         if (win == Win.CONTAINER && (container == null || container.removed || container.dist(g.player) > 4)) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
         if (win == Win.STATION && (station == null || station.removed || station.dist(g.player) > 4)) win = Win.NONE;
         if (win == Win.SHOP && (shop == null || g.econ.merchant(shop) == null || g.econ.merchant(shop).distTo(g.player) > 5)) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
+        icons.pump();
         events.poll();
         addons.frame();
         // the fragments of the scene's groups, in order; the rest fade out where they last were
         java.util.Set<String> on = new java.util.LinkedHashSet<>();
         Map<String, Placement> at = new java.util.HashMap<>();
         for (String gid : scenes.get(scene)) for (Slot s : groups.getOrDefault(gid, List.of())) if (fragments.containsKey(s.fragment()) && on.add(s.fragment())) at.put(s.fragment(), s.at());
+        if (settings.open) on.clear();
         // dead, the interface steps aside for the death itself (the rest fades out where it was)
         if (!g.player.alive) on.retainAll(java.util.Set.of("death", "console"));
+        else if (dialog != null && dialog.pauseMenu) on.retainAll(java.util.Set.of("pause", "console"));
         boolean click = ui.click, rclick = ui.rclick;
         // fading out first (underneath, deaf to the mouse)
         for (Fragment f : fragments.values()) {
@@ -269,6 +282,14 @@ public final class Hud {
         ui.alpha = 1;
         inventory.drawDragged(ui);
         flushTooltip(ui);
+        if (settings.open) settings.draw(ui, w, h);
+        if (transition >= 0) {
+            transition += dt;
+            if (transition >= 0.45f && atBlack != null) { Runnable action = atBlack; atBlack = null; action.run(); }
+            float opacity = transition < 0.45f ? transition / 0.45f : transition < 0.65f ? 1 : Math.max(0, 1 - (transition - 0.65f) / 0.5f);
+            ui.rect(0, 0, w, h, Style.fade(0xFF000000, opacity));
+            if (transition >= 1.15f) transition = -1;
+        }
         if (cursorFree || captures()) cursor(ui);
         if (ui.click && !ui.consumed && menu != null) menu = null;
         if (ui.click && !ui.consumed && scene == Scene.INVENTORY) inventory.filterFocus = false;
@@ -383,6 +404,7 @@ public final class Hud {
         ui.rect(x, y, iw, ih, Style.fade(s.stolen ? 0x40D06A5E : 0x18FFFFFF, dim));
         if (s.stolen) ui.border(x, y, iw, ih, 1, Style.fade(Style.BAD, dim));
         ItemIcons.Icon ic = icons.of(d);
+        if (ic == null) { ui.flatCentered(d.name.substring(0, 1), x + iw / 2, y + ih / 2 - 7, 14, Style.fade(Style.DIM, dim)); return; }
         float aw = turned ? ic.h() : ic.w(), ah = turned ? ic.w() : ic.h();
         float sc = Math.min((iw - 2) / aw, (ih - 2) / ah), dw = aw * sc, dh = ah * sc;
         float dx = x + (iw - dw) / 2, dy = y + (ih - dh) / 2;

@@ -33,3 +33,24 @@ animal/coyotes_pack.ogg
 
 animal/fox_death*.ogg
     The game's own recordings (supplied with the project's assets).
+
+archery/release.ogg, release2.ogg, release3.ogg
+    Wildfire Games, recorded bow releases from 0 A.D. (bow_attack_01.ogg through bow_attack_03.ogg).
+    Creative Commons Attribution-ShareAlike 3.0 (royalty-free; attribution and share-alike apply to these audio files).
+    Original author: Wildfire Games, https://www.wildfiregames.com/
+    Files downloaded unchanged from https://github.com/0ad/0ad/tree/master/binaries/data/mods/public/audio/attack/weapon
+    License/provenance: https://github.com/0ad/0ad/blob/master/binaries/data/mods/public/audio/LICENSE.txt
+    https://creativecommons.org/licenses/by-sa/3.0/ ; full text in archery/CC-BY-SA-3.0.txt.
+
+archery/impact.ogg
+    Iwan "qubodup" Gabovitch, "Wood wobbling rattling" (recording), CC0 / public domain.
+    https://opengameart.org/content/wood-wobbling-rattling
+    Downloaded unchanged from https://github.com/flareteam/flare-game/blob/master/mods/fantasycore/soundfx/powers/arrow_wall.ogg
+
+glass/break.ogg
+    cmusounddesign, glass breaking recording. Creative Commons Attribution 3.0 (CC BY 3.0).
+    Original recording: https://www.freesound.org/people/cmusounddesign/sounds/71947/
+    Downloaded unchanged as default_break_glass.1.ogg from Minetest Game:
+    https://github.com/minetest/minetest_game/blob/master/mods/default/sounds/default_break_glass.1.ogg
+    Per-file credits: https://github.com/minetest/minetest_game/blob/master/mods/default/README.md#sounds
+    https://creativecommons.org/licenses/by/3.0/ (attribution required; royalty-free).

@@ -59,6 +59,21 @@ public final class Meshes {
 
     public static float[] unitBox() { float[] v = new float[360]; box(v, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1); return v; }
 
+    /** Shared cut surface: mottled muscle, a dark torn rim and a small exposed bone core. */
+    public static Boxes wound() {
+        Boxes b = new Boxes();
+        for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            float dx = (x - 7.5f) / 8, dz = (z - 7.5f) / 8, r = dx * dx + dz * dz;
+            int grain = (x * 31 + z * 17 + x * z * 7) & 15;
+            if (r > 0.85f + grain * 0.01f) continue;
+            int color = r < 0.045f ? (grain < 7 ? 0xD9C9AA : 0xA99A80)
+                    : r > 0.65f ? (grain < 8 ? 0x400A0B : 0x71151A)
+                    : grain < 5 ? 0xB84948 : grain < 10 ? 0x8D252A : 0xD36C62;
+            b.rgb((x - 7.5f) / 16, (grain % 3) * 0.008f, (z - 7.5f) / 16, 1f / 16, 0.035f, 1f / 16, color);
+        }
+        return b;
+    }
+
     // ------------------------------------------------------------------ hair and faces (head space: the head is 1 x 1 x 1, centred; -z is the face)
     /** One of the twenty hairstyles of a sex (GDD 2.1), the part on the head: see {@link HairMeshes}. */
     /**
@@ -87,35 +102,14 @@ public final class Meshes {
     /** Facial hair (GDD 2.1: twenty presets, 0 clean-shaven; stubble is painted). */
     public static Boxes beard(int index) { return HairMeshes.beard(index); }
 
-    /** The face: eyes and a nose (dark and light shades on the skin tint). */
-    public static Boxes face() {
+    /** One arrow or bolt, with its nock at the origin and its tip along +y. */
+    public static Boxes arrow(int tip, boolean bolt) {
         Boxes b = new Boxes();
-        b.add(-0.2f, 0.08f, -0.505f, 0.14f, 0.08f, 0.02f, 0.12f);
-        b.add(0.2f, 0.08f, -0.505f, 0.14f, 0.08f, 0.02f, 0.12f);
-        b.add(0, -0.08f, -0.53f, 0.12f, 0.18f, 0.08f, 0.88f);
-        b.add(0, -0.3f, -0.505f, 0.26f, 0.04f, 0.02f, 0.55f);
-        return b;
-    }
-
-    // ------------------------------------------------------------------ held things (weapon space: the grip at the origin, +y along the blade)
-    public static Boxes weapon(rpg.item.ItemDef.Family f, float reach) {
-        Boxes b = new Boxes();
-        switch (f) {
-            case SWORD -> { b.add(0, 0.05f, 0, 0.05f, 0.18f, 0.05f, 0.35f); b.add(0, 0.16f, 0, 0.26f, 0.04f, 0.06f, 0.6f); b.add(0, 0.18f + reach * 0.4f, 0, 0.07f, reach * 0.8f, 0.018f, 1f); }
-            case DAGGER -> { b.add(0, 0.04f, 0, 0.045f, 0.14f, 0.045f, 0.35f); b.add(0, 0.12f, 0, 0.16f, 0.03f, 0.05f, 0.6f); b.add(0, 0.13f + reach * 0.22f, 0, 0.05f, reach * 0.42f, 0.015f, 1f); }
-            case AXE, PICKAXE -> {
-                b.add(0, reach * 0.4f, 0, 0.05f, reach * 0.85f, 0.05f, 0.45f);
-                if (f == rpg.item.ItemDef.Family.AXE) b.add(0.12f, reach * 0.75f, 0, 0.2f, 0.24f, 0.03f, 1f);
-                else b.add(0, reach * 0.78f, 0, 0.5f, 0.07f, 0.06f, 1f);
-            }
-            case MACE -> { b.add(0, reach * 0.38f, 0, 0.05f, reach * 0.8f, 0.05f, 0.45f); b.add(0, reach * 0.8f, 0, 0.17f, 0.2f, 0.17f, 1f); }
-            case STAFF -> { b.add(0, 0.35f, 0, 0.05f, 1.6f, 0.05f, 0.5f); b.add(0, 1.18f, 0, 0.12f, 0.12f, 0.12f, 1f); }
-            case WAND -> { b.add(0, 0.15f, 0, 0.03f, 0.38f, 0.03f, 0.6f); b.add(0, 0.34f, 0, 0.05f, 0.05f, 0.05f, 1f); }
-            case BOW -> { b.add(0, 0, 0.04f, 0.04f, 0.5f, 0.04f, 0.6f); b.add(0, 0.42f, 0.1f, 0.035f, 0.4f, 0.035f, 0.6f); b.add(0, -0.42f, 0.1f, 0.035f, 0.4f, 0.035f, 0.6f); b.add(0, 0, 0.2f, 0.008f, 1.18f, 0.008f, 1.6f); }
-            case SHIELD -> b.add(0, 0, 0, 0.5f, 0.62f, 0.07f, 1f);
-            case SYMBOL -> { b.add(0, 0.1f, 0, 0.04f, 0.28f, 0.04f, 1f); b.add(0, 0.16f, 0, 0.18f, 0.04f, 0.04f, 1f); }
-            default -> b.add(0, 0.1f, 0, 0.12f, 0.2f, 0.12f, 1f);
-        }
+        float length = bolt ? 0.45f : 0.85f;
+        b.rgb(0, length / 2, 0, 0.012f, length, 0.012f, 0xB89A65);
+        b.rgb(0, length, 0, 0.025f, 0.055f, 0.025f, tip);
+        b.rgb(0, 0.07f, 0, 0.065f, 0.12f, 0.004f, 0xE5DED0);
+        b.rgb(0, 0.07f, 0, 0.004f, 0.12f, 0.065f, 0xD0C8B5);
         return b;
     }
 }

@@ -1,7 +1,7 @@
 // The Astratto Engine: a Java library (java/) over a native core (native/, C++17), with its shaders (shaders/) and
 // resources (resources/) bundled into the jar. Nothing here names a game; a game depends on this build.
 //
-//   ./gradlew buildNative     builds the native core for this platform and runs its own self-test
+//   ./gradlew buildNative     builds the native core for this platform (check runs its self-test)
 //   ./gradlew build           the jar (native library, shaders and resources inside), tests, API docs
 //   ./gradlew test            boundary, interoperability and integration tests (native required, no Java fallbacks)
 plugins {
@@ -74,23 +74,46 @@ tasks.withType(Javadoc).configureEach {
 // Windows: native/build.bat (Visual C++, found with vswhere; no CMake needed). Elsewhere, or wherever CMake is on PATH: CMake.
 tasks.register('buildNative', Exec) {
     group = 'build'
-    description = 'Builds the Astratto native core for this platform into native/bin/<platform> and runs its self-test.'
+    description = 'Incrementally builds the game runtime library; check separately verifies the native self-test.'
     workingDir = projectDir
-    inputs.dir('native/src'); inputs.dir('native/include'); inputs.dir('native/tests'); inputs.dir('native/modules')
-    outputs.dir("native/bin/$astrattoPlatform")
+    inputs.dir('native/src'); inputs.dir('native/include')
+    inputs.files('native/CMakeLists.txt', 'native/build.bat')
+    inputs.property('nativePlatform', astrattoPlatform)
+    outputs.file("native/bin/$astrattoPlatform/" + (isWindows ? 'astratto.dll' : isMac ? 'libastratto.dylib' : 'libastratto.so'))
     if (isWindows) {
-        commandLine 'cmd', '/c', file('native/build.bat').absolutePath
+        commandLine 'cmd', '/c', file('native/build.bat').absolutePath, 'game'
     } else {
-        commandLine 'sh', '-c', "cmake -S native -B native/build-$astrattoPlatform -DCMAKE_BUILD_TYPE=Release -DASTRATTO_PLATFORM=$astrattoPlatform && cmake --build native/build-$astrattoPlatform --config Release && native/bin/$astrattoPlatform/astratto_selftest"
+        commandLine 'sh', '-c', "cmake -S native -B native/build-$astrattoPlatform -DCMAKE_BUILD_TYPE=Release -DASTRATTO_PLATFORM=$astrattoPlatform && cmake --build native/build-$astrattoPlatform --config Release --target astratto"
     }
 }
 
+// Verification is deliberately outside the interactive launch dependency graph.
+tasks.register('verifyNative', Exec) {
+    group = 'verification'
+    description = 'Builds and runs the native self-test (including its dynamically loaded test module).'
+    dependsOn tasks.named('buildNative')
+    workingDir = projectDir
+    inputs.dir('native/src'); inputs.dir('native/include'); inputs.dir('native/tests'); inputs.dir('native/modules')
+    inputs.files('native/CMakeLists.txt', 'native/build.bat')
+    outputs.file(layout.buildDirectory.file('native-verified.txt'))
+    if (isWindows) commandLine 'cmd', '/c', file('native/build.bat').absolutePath
+    else commandLine 'sh', '-c', "cmake --build native/build-$astrattoPlatform --config Release && native/bin/$astrattoPlatform/astratto_selftest"
+    doLast {
+        def stamp = layout.buildDirectory.file('native-verified.txt').get().asFile
+        stamp.parentFile.mkdirs()
+        stamp.text = 'Native self-test passed\n'
+    }
+}
+tasks.named('check') { dependsOn tasks.named('verifyNative') }
+
 // shaders, resources and the native library go into the jar, under astratto/
 def engineResources = tasks.register('engineResources', Sync) {
+    // Native sources must be checked even when a prebuilt library already exists.
+    dependsOn tasks.named('buildNative')
     from('shaders') { into 'astratto/shaders' }
     from('resources') { into 'astratto/resources' }
-    // (not the module the native self-test loads: it is for that test alone)
-    from("native/bin/$astrattoPlatform") { into "astratto/natives/$astrattoPlatform"; include '*.dll', '*.so', '*.dylib'; exclude '*astratto_test_module*' }
+    // Runtime jars carry the engine library; test and example gameplay modules belong to verification.
+    from("native/bin/$astrattoPlatform") { into "astratto/natives/$astrattoPlatform"; include '*.dll', '*.so', '*.dylib'; exclude '*astratto_test_module*', '*astratto_example_module*' }
     from('NOTICE.md') { into 'astratto' }
     from('LICENSE.md') { into 'astratto' }
     into layout.buildDirectory.dir('generated/engine-resources')
@@ -98,12 +121,8 @@ def engineResources = tasks.register('engineResources', Sync) {
 tasks.named('processResources') { dependsOn engineResources }
 tasks.named('sourcesJar') { dependsOn engineResources }
 
-// a fresh checkout has no native library yet: the jar is not built without one
-tasks.named('engineResources') {
-    if (!file("native/bin/$astrattoPlatform").exists()) dependsOn 'buildNative'
-}
-
 tasks.named('test') {
+    dependsOn tasks.named('verifyNative')
     useJUnitPlatform()
     // the acceptance rule: everything the engine provides is native, with no Java fallback to hide behind
     environment 'ASTRATTO_JAVA_FALLBACK', '0'

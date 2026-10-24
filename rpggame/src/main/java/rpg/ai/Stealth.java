@@ -40,6 +40,9 @@ public final class Stealth {
         public double seenAt = -99, heardAt = -99, at = -99, changedAt = -99;
         /** When it was looked into and settled (an investigation that found the spot, and them or nobody, there). */
         public double settledAt = -99;
+        /** Blood warrants a bounded conversation, not a permanent warrant or an endlessly renewed watch. */
+        public double bloodQuestionUntil = -99, bloodQuestionAgain = -99;
+        public float bloodSeen;
         public Level shown = Level.UNAWARE;
         public Level level() { return of(level); }
     }
@@ -89,7 +92,7 @@ public final class Stealth {
     // ------------------------------------------------------------------ sight
     /** How sharp an NPC's eyes are right now: a guard's are trained, a sleeper's are closed. */
     public float acuity(Npc n) {
-        if (n.goal == Brain.Goal.SLEEP && Math.hypot(n.x - n.homeX, n.z - n.homeZ) < 1.5) return 0.12f;
+        if (n.asleep()) return 0.12f;
         float base = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN ? 1.2f : n.combatant() ? 1.1f : 1f;
         // searching, or still on edge after a search, the eyes are keener
         if (n.hunt != null || g.time < n.vigilantUntil) base *= 1.25f;
@@ -113,7 +116,7 @@ public final class Stealth {
         float cone = 1;
         // someone right beside you is sensed whichever way you face - unless they creep
         float close = a.sneaking ? CLOSE_CREEPING : CLOSE;
-        if (d > close) {
+        if (d > 0.05f) {
             float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
             float cos = (fx * dx + fz * dz) / d;
             // close in, the edge of the eye (90 degrees each side); far out, only what is ahead (about 50 degrees)
@@ -122,9 +125,9 @@ public final class Stealth {
             if (cos < edge + 0.25f) cone = 0.5f;   // the corner of the eye: half as noticed
         }
         float ey = n.eyeY();
-        boolean low = a.sneaking;
-        float h = (a.eyeY() - a.y) * (low ? 0.62f : 1);
-        float[] at = {h, a.chestY() - a.y - (low ? 0.35f : 0), 0.45f}, weight = {0.4f, 0.4f, 0.2f};
+        boolean low = a.sneaking || a.crouched;
+        float h = a.eyeY() - a.y;
+        float[] at = {h, a.chestY() - a.y, 0.45f}, weight = {0.4f, 0.4f, 0.2f};
         float seen = 0;
         for (int i = 0; i < 3; i++) {
             rays++;
@@ -219,7 +222,7 @@ public final class Stealth {
         for (Npc n : g.npcs) {
             if (n == source || !n.alive || !n.loaded) continue;
             float d = (float) Math.sqrt((n.x - x) * (n.x - x) + (n.eyeY() - y) * (n.eyeY() - y) + (n.z - z) * (n.z - z));
-            boolean asleep = n.goal == Brain.Goal.SLEEP && Math.hypot(n.x - n.homeX, n.z - n.homeZ) < 1.5;   // in bed, not on the way to it
+            boolean asleep = n.asleep();   // in bed, not on the way to it
             float nightK = night && !asleep ? 1.35f : 1;
             boolean bustle = !night && loudness < 0.5f && !source.sneaking && !DevMap.WILDS.equals(DevMap.jurisdiction(n.x, n.z));
             float reach = radius * (asleep ? 0.5f : 1) * nightK;

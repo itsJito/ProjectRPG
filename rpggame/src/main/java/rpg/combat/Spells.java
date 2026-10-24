@@ -65,17 +65,6 @@ public final class Spells {
         return null;
     }
 
-    /**
-     * The group ceiling (GDD 2.5): an eligible elemental attack's base damage is that of the highest spell of its element
-     * the caster has unlocked, so a lower spell of the group is never left obsolete.
-     */
-    public static float groupBase(Spell s, int magicLevel) {
-        if (s.element == Element.NONE || s.utility) return s.base;
-        float best = s.base;
-        for (Spell o : Spell.values()) if (o.element == s.element && !o.utility && o.level <= magicLevel) best = Math.max(best, o.base);
-        return best;
-    }
-
     /** The prayer categories: at most one active in each of OVERHEAD and STRENGTH; the others combine. */
     public enum Category { OVERHEAD, STRENGTH, ARCHERY, GUARD, RESTORE, HOLY }
 

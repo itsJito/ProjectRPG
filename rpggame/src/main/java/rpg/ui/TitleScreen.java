@@ -47,7 +47,7 @@ public final class TitleScreen {
         ui.text("A world that remembers.", x + 2, y + 76, 15, Style.fade(Style.DIM, fade));
         y += 128;
 
-        if (confirmDelete != null) { confirm(ui, x, y, enter, escape); return; }
+        if (confirmDelete != null) { confirm(ui, x, y, enter, escape); footer(ui, w, h); return; }
         if (profiles.isEmpty()) {
             ui.text("Welcome. There are no profiles yet.", x, y, 15, Style.TEXT);
             ui.text("Create your first character to begin.", x, y + 24, 13, Style.DIM);
@@ -64,7 +64,7 @@ public final class TitleScreen {
             ui.border(x, y, 420, 74, on ? 2 : 1, on ? Style.ACCENT : Style.EDGE);
             if (on) ui.rect(x, y, 4, 74, Style.ACCENT);
             ui.text(p.name, x + 18, y + 10, 19, on ? Style.TEXT : Style.DIM);
-            ui.text("Combat level " + p.combatLevel + "   Total level " + p.totalLevel, x + 18, y + 38, 12, Style.DIM);
+            ui.text("Level " + p.combatLevel + "   Total level " + p.totalLevel, x + 18, y + 38, 12, Style.DIM);
             ui.text((p.hasSave() ? "Played " + Profiles.duration(p.playSeconds) + "   last " + ago(p.lastPlayed) : "New - not yet played"), x + 18, y + 54, 11, Style.FAINT);
             ui.text("Slot " + p.slot, x + 420 - 54, y + 10, 11, Style.FAINT);
             if (ui.clicked(x, y, 420, 74)) { if (on && ui.doubleClick) { choice = Choice.CONTINUE; click("UI_select"); } else { selected = p; click("UIbutton1"); } }

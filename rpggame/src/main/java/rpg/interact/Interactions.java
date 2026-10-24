@@ -27,7 +27,8 @@ public final class Interactions {
 
     /** Every interactable: world objects and living NPCs. */
     public List<Interactable> all() {
-        List<Interactable> l = new ArrayList<>(g.objects.all());
+        List<Interactable> l = new ArrayList<>();
+        for (var object : g.objects.all()) if (object.exists()) l.add(object);
         for (var n : g.npcs) if (n.alive && n.loaded) l.add(n);
         if (g.animals != null) for (var a : g.animals.all()) if (a.exists()) l.add(a);
         return l;
@@ -116,18 +117,8 @@ public final class Interactions {
             if (t == a) continue;
             float r = t.focusRadius();
             if (Math.hypot(t.ax() - a.x, t.az() - a.z) > g.cfg.inspectRange + r) continue;
-            // each sphere of its focus column: the first the ray enters before the wall
-            for (float up : t.focusColumn()) {
-                float rx = t.ax() - ox, ry = t.ay() + up - oy, rz = t.az() - oz;
-                float along = rx * dx + ry * dy + rz * dz;
-                if (along < 0 || along > maxRange) continue;
-                float px = rx - dx * along, py = ry - dy * along, pz = rz - dz * along;
-                float off2 = px * px + py * py + pz * pz;
-                if (off2 > r * r) continue;
-                float tEnter = along - (float) Math.sqrt(r * r - off2);
-                if (tEnter > wall + 0.35f) continue;
-                if (tEnter < bestT) { bestT = tEnter; best = t; }
-            }
+            float entry = t.focusEntry(ox, oy, oz, dx, dy, dz);
+            if (entry <= wall + 0.35f && entry <= maxRange && entry < bestT) { bestT = entry; best = t; }
         }
         // the assist: the nearest eligible anchor in a small cone, if it can be seen
         if (best == null) {

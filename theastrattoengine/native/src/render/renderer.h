@@ -131,9 +131,10 @@ private:
         bool reset = false, prepare = false;
     };
     struct Model { uint32_t mesh; uint32_t flags; float m[16]; float par[8]; };
-    struct Quads { uint32_t texture; std::vector<float> v; };
+    struct Portrait { float x, y, w, h; std::vector<astratto_portrait_part> parts; };
+    struct Quads { uint32_t texture = 0; int portrait = -1; std::vector<float> v; };
     struct Grading { float death = 0, hurt = 0, infection = 0, flash = 0, bile = 0; };
-    struct ModelMesh { gl::GLuint vao = 0, vbo = 0; uint32_t count = 0; bool translucent = false; };
+    struct ModelMesh { gl::GLuint vao = 0, vbo = 0; uint32_t count = 0; bool translucent = false; float center[3] = {}, extent[3] = {}; };
     struct Texture { gl::GLuint id = 0; gl::GLenum target = 0; uint32_t layers = 1; };
 
     bool parse(const uint8_t* cmds, uint32_t bytes);
@@ -175,6 +176,8 @@ private:
     void forwardPass(VoxelWorld* w);
     void resolve(int windowW, int windowH);
     void quadsPass(int windowW, int windowH);
+    void portraitPass(const Portrait& portrait, int windowH);
+    bool visibleModel(const Model& model, const Frustum& frustum) const;
     void fullscreen();
 
     gl::Api g_;
@@ -186,7 +189,7 @@ private:
     gl::GLuint leafTex_ = 0;                // 2.5: the baked leaf cards (64 x 64 x 16, RG: cut, midrib)
     void bakeLeaves();
     Program gWorld_, gModel_, sWorld_, sModel_, lighting_, cull_, gtao_, aoBlur_, ssr_, vol_, fogApply_, fWorld_, fModel_, particle_, taa_,
-            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, probeCs_, lens_;
+            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_;
 
     // targets
     int rw_ = 0, rh_ = 0, winW_ = 0, winH_ = 0;
@@ -223,6 +226,7 @@ private:
     std::vector<Model> models_;
     std::vector<float> particles_;       // 12 floats a particle
     std::vector<Quads> quads_;
+    std::vector<Portrait> portraits_;
     astratto_handle worldHandle_ = ASTRATTO_NO_HANDLE, pendingWorld_ = ASTRATTO_NO_HANDLE;
     uint32_t meshFlags_ = 0;
     bool hasCamera_ = false, hasClear_ = false;

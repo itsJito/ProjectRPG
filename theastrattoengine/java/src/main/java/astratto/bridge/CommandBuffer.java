@@ -139,7 +139,7 @@ public final class CommandBuffer {
     public void moverCreate(long handle, float x, float y, float z, float radius, float height, float step, int flags, float crouchHeight) {
         head(AstrattoNative.CMD_MOVER_CREATE, 48).h(handle).f(x).f(y).f(z).f(radius).f(height).f(step).i(flags).f(crouchHeight);
     }
-    /** How a mover wants to move this frame: velocity along the ground (and up, flying or climbing), a jump, how fast it gets there. */
+    /** How a mover wants to move this frame: velocity along the ground (and up, flying or climbing), a jump, how fast it gets there. MOVER_STANCE_ONLY preserves movement while updating stance. */
     public void moverInput(long handle, float vx, float vz, float vy, float jump, float accel, int flags) {
         head(AstrattoNative.CMD_MOVER_INPUT, 40).h(handle).f(vx).f(vz).f(vy).f(jump).f(accel).i(flags);
     }

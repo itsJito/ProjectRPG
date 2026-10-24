@@ -45,6 +45,11 @@ public final class PlayerController {
     public float aimYaw, aimPitch;
     private boolean mainWas, offWas;
     private float mainHeld;
+    /** One near-ready melee release, retained briefly so a recovery frame does not swallow the click. */
+    private Move queuedMelee;
+    private ItemDef queuedWeapon;
+    private double queuedUntil;
+    private static final float MELEE_BUFFER = 0.2f;
     private float stepClock;
     /** After a sprint is stopped short, a moment to recover; a quick turn in progress (seconds left) and its heading. */
     private float sprintRecover, quickTurn, quickYaw, quickCam, sprintTime;
@@ -67,6 +72,7 @@ public final class PlayerController {
         if (in.toggleCamera) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
         placeCamera(p);
         if (!p.alive) {
+            queuedMelee = null;
             if (g.death.active) { g.death.camera(this); g.game.commands().listener(cx, cy, cz, (float) Math.atan2(-fx, -fz)); }
             g.game.commands().moverInput(p.body, 0, 0, 0, 0, 0, 0); in.clearEdges(); return;
         }
@@ -81,11 +87,26 @@ public final class PlayerController {
     }
 
     private void hands(Player p, float dt) {
+        if (g.traversal.busy(p)) { queuedMelee = null; mainWas = offWas = false; mainHeld = 0; return; }
+        if (g.carrying.busy(p)) {
+            queuedMelee = null; p.cs.blocking = false; p.cs.draw = p.cs.charge = 0;
+            if (in.mainDown) mainHeld += dt;
+            if (in.mainDown && mainHeld > 0.12f && g.carrying.ready(p)) p.cs.charge = Math.min(1, (mainHeld - 0.12f) / 0.23f);
+            if (!in.mainDown && mainWas && g.carrying.ready(p)) { if (mainHeld >= 0.35f) g.carrying.drop(p, true); else g.carrying.putDown(p); }
+            mainWas = in.mainDown; offWas = in.offDown;
+            if (!in.mainDown) mainHeld = 0;
+            return;
+        }
         ItemDef main = p.main(), off = p.off();
+        if (queuedMelee != null && (g.time > queuedUntil || main != queuedWeapon || in.offDown || in.dodge)) queuedMelee = null;
         boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
+        boolean crossbow = main != null && main.family == Family.CROSSBOW;
+        float aim = crossbow && in.offDown ? 1 : 0;
+        p.cs.aim += (aim - p.cs.aim) * (1 - (float) Math.exp(-16 * dt));
         // main hand
         if (in.mainDown) mainHeld += dt;
         if (bow) {
+            if (in.mainDown && !mainWas && g.sfx != null) g.sfx.play("bow.draw", p.x, p.eyeY(), p.z, 0.22f);
             if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.9f);
             if (!in.mainDown && mainWas && p.cs.draw > 0) { g.combat.shoot(p, aimYaw, aimPitch, p.cs.draw); p.cs.draw = 0; }
         } else if (staff) {
@@ -102,12 +123,22 @@ public final class PlayerController {
             if (in.mainDown && !mainWas) castLine(p);
         } else {
             p.cs.charge = in.mainDown && !p.cs.busy() ? Math.min(1, mainHeld / 0.45f) : 0;
-            if (!in.mainDown && mainWas) g.combat.attack(p, false, mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false));
+            if (!in.mainDown && mainWas && !in.offDown) {
+                Move move = mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false);
+                queuedMelee = null;
+                if (!g.combat.attack(p, false, move) && p.cs.phase == Actor.Combat.Phase.RECOVER) {
+                    queuedMelee = move; queuedWeapon = main; queuedUntil = g.time + MELEE_BUFFER;
+                }
+            }
+            if (queuedMelee != null && !in.mainDown && p.cs.phase == Actor.Combat.Phase.IDLE) {
+                Move move = queuedMelee; queuedMelee = null;
+                g.combat.attack(p, false, move);
+            }
         }
         if (!in.mainDown) mainHeld = 0;
         mainWas = in.mainDown;
         // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
-        boolean guardItem = off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff;
+        boolean guardItem = main == null && off == null || off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
         if (guardItem) g.combat.setBlock(p, in.offDown);
         else {
             g.combat.setBlock(p, false);
@@ -178,11 +209,13 @@ public final class PlayerController {
     /** Whether a weapon or spell is raised: that, not the first-person camera, is what rules out a sprint. */
     public boolean aiming(Player p) {
         Actor.Combat c = p.cs;
-        return c.blocking || c.draw > 0 || c.charge > 0 || c.phase != Actor.Combat.Phase.IDLE || c.castCooldown > 0.35f;
+        return c.aim > 0.1f || c.blocking || c.draw > 0 || c.charge > 0 || c.phase != Actor.Combat.Phase.IDLE || c.castCooldown > 0.35f;
     }
 
     private void move(Player p, float dt) {
         if (g.ui != null && g.ui.console.noclip) { fly(p, dt); return; }
+        if (!g.traversal.busy(p) && in.sprint && in.forward > 0.1f && !in.sneak) g.traversal.begin(p, camYaw);
+        if (g.traversal.update(p, dt)) return;
         float fwd = in.forward, side = in.strafe;
         float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
         float dx = fx * fwd + rx * side, dz = fz * fwd + rz * side, l = (float) Math.hypot(dx, dz);
@@ -236,7 +269,7 @@ public final class PlayerController {
         if (!p.running) max *= aiming(p) ? 0.75f : along < -0.3f ? 0.8f : 1f;
         else if (p.firstPerson) max *= along > 0.7f ? 1f : along > -0.3f ? 0.82f : 0.66f;
         if (sprintRecover > 0) max *= 0.5f;
-        if (p.sneaking) max = Math.min(max, g.cfg.sneakSpeed);
+        if (p.sneaking || p.crouched) max = Math.min(max, g.cfg.sneakSpeed);
         // committed actions: their start-up and recovery hold the body back
         switch (c.phase) {
             case WINDUP -> max *= 0.45f;
@@ -251,6 +284,7 @@ public final class PlayerController {
         // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
         float burden = p.burden();
         max *= burden;
+        if (g.carrying.busy(p)) max *= g.carrying.ready(p) ? 0.55f : 0;
         // a badly hurt leg limps (Gore)
         if (g.gore != null) max *= g.gore.legs(p);
         if (c.staggered > 0) max = 0;
@@ -258,8 +292,8 @@ public final class PlayerController {
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)
-        float accel = p.sprinting ? (sprintTime < 0.6f ? 7f : 9f) : p.running ? 8.5f : 7f;
-        float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 17f : 18f;
+        float accel = p.sprinting ? (sprintTime < 0.6f ? 7f : 9f) : p.running ? 12f : 14f;
+        float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 26f : 32f;
         if (c.staggered > 0) decel = 22f;
         accel *= 0.55f + 0.45f * burden;
         if (!p.grounded) { accel *= 0.15f; decel *= 0.15f; }
@@ -267,9 +301,9 @@ public final class PlayerController {
         if (speedNow > 0.5f && moving && !strafe) {
             // carried round an arc: the heading turns at a rate that falls as speed rises
             float cur = (float) Math.atan2(bvx, bvz), wantAng = (float) Math.atan2(dx, dz), diff = Actor.wrap(wantAng - cur);
-            float rate = p.sprinting ? 2.6f : p.running ? 5f : 8.5f;
+            float rate = p.sprinting ? 4.5f : p.running ? 9f : 14f;
             float ns;
-            if (Math.abs(diff) > 2.3f && speedNow > 2f) ns = approach(speedNow, 0, decel * dt);    // reversing at speed: it brakes first
+            if (Math.abs(diff) > 2.3f && speedNow > g.cfg.walkSpeed + 0.2f) ns = approach(speedNow, 0, decel * dt);    // reversing at speed: it brakes first
             else {
                 cur += Math.max(-rate * dt, Math.min(rate * dt, diff));
                 // a sharp turn is paid for in speed (the feet dig in round it), not slid round at full pace
@@ -293,7 +327,7 @@ public final class PlayerController {
         boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
         boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
         if (jump) { jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
-        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, 0);
+        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
@@ -319,8 +353,8 @@ public final class PlayerController {
             return;
         }
         if (strafing(p)) p.turnToward(p.aimYaw, c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
-        else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 3.5f : 9f, dt);
-        else if (Math.abs(Actor.wrap(p.aimYaw - p.yaw)) > 1.6f) p.turnToward(p.aimYaw, 4f, dt);
+        else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 7f : 14f, dt);
+        // Standing in third person, looking moves the head; the feet turn with movement or an action.
     }
 
     private static float approach(float v, float to, float step) { return Math.abs(to - v) <= step ? to : v + Math.signum(to - v) * step; }
@@ -353,5 +387,8 @@ public final class PlayerController {
         g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
     }
 
-    public void snapTo(float yaw) { camYaw = yaw; g.player.yaw = yaw; g.player.aimYaw = yaw; }
+    /** Menus and respawns must not turn an old held button into a new attack on release. */
+    public void cancelHandInput() { queuedMelee = null; mainWas = offWas = false; mainHeld = 0; }
+
+    public void snapTo(float yaw) { camYaw = yaw; g.player.yaw = yaw; g.player.aimYaw = yaw; cancelHandInput(); }
 }

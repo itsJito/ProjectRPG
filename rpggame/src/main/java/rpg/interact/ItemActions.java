@@ -41,6 +41,7 @@ public final class ItemActions {
         ItemStack s = grid.get(slot);
         if (s == null) return o;
         ItemDef d = s.def;
+        if (s.contract != null) o.add(Option.on("read_warrant", "Read warrant", 10, 0));
         if (d.heal > 0) o.add(Option.on("eat", "Eat", 10, 0));
         if (d.restoresFaith > 0) o.add(Option.on("drink", "Drink", 10, 0));
         if (d.maxCharges > 0) o.add(Option.when(a.has(Items.COAL, 1) && s.charges < d.maxCharges, "recharge", "Recharge (coal)", 6, s.charges >= d.maxCharges ? "It is fully charged." : "You need coal.", 0));
@@ -117,6 +118,11 @@ public final class ItemActions {
                     return Result.ok();
                 }));
                 yield Result.started();
+            }
+            case "read_warrant" -> {
+                if (s.contract == null) yield Result.no("There is no signed warrant on this scroll.");
+                if (a == g.player) g.ui.dialog(new rpg.ui.Dialog("Signed warrant", "Wanted: " + g.nameOf(s.contract.target()) + ". Reward: " + s.contract.reward() + " gold from " + s.contract.jurisdiction() + ". Return this scroll after bringing them down. The map records the watch's last sighting."));
+                yield Result.ok();
             }
             case "rub" -> { if (a == g.player) g.ui.dialog(g.dialogue.lamp(grid, slot)); yield Result.ok(); }
             case "light" -> light(a, grid, slot, d);

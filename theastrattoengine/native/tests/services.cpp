@@ -207,6 +207,35 @@ void services_checks(const char* moduleDir) {
         check("and a released handle used again is refused, never reaching freed memory", ev.counted(ASTRATTO_EVT_ERROR) == 1);
     }
 
+    // ------------------------------------------------------------ physical character space and posed traversal
+    {
+        const astratto_handle a = reserve(e, ASTRATTO_KIND_MOVER), b = reserve(e, ASTRATTO_KIND_MOVER);
+        auto& first = c.add<astratto_cmd_mover_create>(ASTRATTO_CMD_MOVER_CREATE);
+        first.handle = a; first.x = 20; first.y = FLOOR; first.z = 15; first.radius = 0.3f; first.height = 1.8f;
+        auto& second = c.add<astratto_cmd_mover_create>(ASTRATTO_CMD_MOVER_CREATE);
+        second.handle = b; second.x = 23; second.y = FLOOR; second.z = 15; second.radius = 0.3f; second.height = 1.8f;
+        for (int i = 0; i < 120; i++) {
+            auto& ia = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); ia.handle = a; ia.vx = 2;
+            auto& ib = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); ib.handle = b; ib.vx = -2;
+            frame(e, c, 1.0f / 60);
+        }
+        auto io = snap(e, ASTRATTO_SNAPSHOT_BODIES);
+        const auto* sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        const auto* sb = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, b);
+        check("opposing character volumes stop without passing through each other", sa && sb && sb->x - sa->x > 0.59f);
+        auto& place = c.add<astratto_cmd_body_place>(ASTRATTO_CMD_MOVER_PLACE); place.handle = a; place.x = 20; place.y = FLOOR + 4; place.z = 15;
+        auto& pose = c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT); pose.handle = a; pose.flags = ASTRATTO_MOVER_POSED;
+        frame(e, c, 0.5f);
+        io = snap(e, ASTRATTO_SNAPSHOT_BODIES); sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        check("posed traversal owns position without hidden gravity drift", sa && std::fabs(sa->y - (FLOOR + 4)) < 0.001f);
+        c.add<astratto_cmd_mover_input>(ASTRATTO_CMD_MOVER_INPUT).handle = a;
+        frame(e, c, 0.25f);
+        io = snap(e, ASTRATTO_SNAPSHOT_BODIES); sa = findSnap<astratto_snap_mover>(io, ASTRATTO_SNAP_MOVER, a);
+        check("clearing traversal ownership restores ordinary gravity", sa && sa->y < FLOOR + 3.8f);
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = a;
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = b; frame(e, c, 0);
+    }
+
     // ------------------------------------------------------------ Sydney: death is terminal even across controller release
     {
         for (int order = 0; order < 2; order++) {
@@ -216,8 +245,8 @@ void services_checks(const char* moduleDir) {
             r.flags = ASTRATTO_RAGDOLL_ACTIVE | ASTRATTO_RAGDOLL_STAND;
             r.x = 35.5f + order * 4; r.y = FLOOR; r.z = 20.5f;
             frame(e, c, 0.25f);
-            const uint32_t controls[] = {order == 0 ? ASTRATTO_CONTROL_RELEASE : ASTRATTO_CONTROL_DIE,
-                                         order == 0 ? ASTRATTO_CONTROL_DIE : ASTRATTO_CONTROL_RELEASE};
+            const uint32_t controls[] = {static_cast<uint32_t>(order == 0 ? ASTRATTO_CONTROL_RELEASE : ASTRATTO_CONTROL_DIE),
+                                         static_cast<uint32_t>(order == 0 ? ASTRATTO_CONTROL_DIE : ASTRATTO_CONTROL_RELEASE)};
             for (uint32_t control : controls) {
                 auto& cmd = c.add<astratto_cmd_ragdoll_control>(ASTRATTO_CMD_RAGDOLL_CONTROL);
                 cmd.handle = h; cmd.control = control;
@@ -489,6 +518,50 @@ void services_checks(const char* moduleDir) {
         n.x = sb ? sb->x + 3 : 0; n.y = FLOOR; n.z = sb ? sb->z : 0; n.radius = 20; n.loudness = 1; n.team = 0;
         Events ev = frame(e, c, 1.0f / 30);
         check("a noise in its hearing comes back as heard", ev.counted(ASTRATTO_EVT_AGENT_HEARD) >= 1);
+    }
+
+    // An agent without a mover isolates the route follower from acceleration and contacts.
+    // Crossing intermediate waypoints must not insert stationary frames into an otherwise valid walk.
+    {
+        Cmds edits;
+        auto& platform = edits.add<astratto_edit_fill>(ASTRATTO_EDIT_FILL);
+        platform.x0 = 49; platform.x1 = 59; platform.y0 = platform.y1 = FLOOR; platform.z0 = 4; platform.z1 = 12;
+        platform.block = STONE | ASTRATTO_SET_RAW;
+        astratto_world_edit(e, world, edits.bytes.data(), static_cast<uint32_t>(edits.bytes.size()));
+        astratto_handle walker = reserve(e, ASTRATTO_KIND_AGENT);
+        astratto_cmd_agent_create& ac = c.add<astratto_cmd_agent_create>(ASTRATTO_CMD_AGENT_CREATE);
+        ac.handle = walker; ac.policy = policy; ac.x = 43.5f; ac.y = FLOOR; ac.z = 8.5f; ac.eye = 1.6f; ac.seed = 17;
+        astratto_cmd_agent_goal& goal = c.add<astratto_cmd_agent_goal>(ASTRATTO_CMD_AGENT_GOAL);
+        goal.handle = walker; goal.x = 56.5f; goal.y = FLOOR + 1; goal.z = 8.5f;
+        astratto_cmd_agent_fact& fact = c.add<astratto_cmd_agent_fact>(ASTRATTO_CMD_AGENT_FACT);
+        fact.handle = walker; fact.index = 0; fact.value = 1;
+        frame(e, c, 0);
+        float previousX = 43.5f, previousZ = 8.5f;
+        int walkingFrames = 0, pauses = 0;
+        bool arrived = false;
+        for (int i = 0; i < 900 && !arrived; i++) {
+            Events ev = frame(e, c, 1.0f / 30);
+            ev.each(ASTRATTO_EVT_AGENT_ARRIVED, [&](const uint8_t* p, uint32_t) {
+                astratto_evt_agent event; std::memcpy(&event, p, sizeof event);
+                if (event.handle == walker) arrived = true;
+            });
+            auto state = snap(e, ASTRATTO_SNAPSHOT_AGENTS);
+            const auto* agentState = findSnap<astratto_snap_agent>(state, ASTRATTO_SNAP_AGENT, walker);
+            if (agentState) {
+                const float dx = agentState->x - previousX, dz = agentState->z - previousZ;
+                if (i > 3 && agentState->moving && agentState->route_cells > 1) {
+                    walkingFrames++;
+                    if (dx * dx + dz * dz < 1e-10f) pauses++;
+                }
+                previousX = agentState->x; previousZ = agentState->z;
+            }
+        }
+        if (!arrived || pauses != 0) std::printf("      waypoint continuity: arrived %d, walking %d, pauses %d\n", arrived, walkingFrames, pauses);
+        check("route following reaches a raised goal without stationary intermediate waypoint frames", arrived && walkingFrames > 20 && pauses == 0);
+        c.add<astratto_cmd_handle>(ASTRATTO_CMD_RELEASE).handle = walker;
+        frame(e, c, 0);
+        platform.block = AIR | ASTRATTO_SET_RAW;
+        astratto_world_edit(e, world, edits.bytes.data(), static_cast<uint32_t>(edits.bytes.size()));
     }
 
     // ------------------------------------------------------------ audio: the mixer, rendered on request

@@ -16,7 +16,7 @@ import rpg.render.ItemModels;
  * the shape of its grid footprint: a long sword lies along its one-by-four cells, logs along their three-by-one. Made
  * once per item, when first shown.
  */
-public final class ItemIcons {
+public final class ItemIcons implements AutoCloseable {
     /** Pixels per grid cell in the icon image (drawn smaller, so it stays crisp). */
     static final int CELL = 40;
     record Icon(int texture, int w, int h) {}
@@ -24,15 +24,39 @@ public final class ItemIcons {
     private final NativeRenderer r;
     private final Map<String, Icon> icons = new HashMap<>();
 
+    private final java.util.concurrent.ExecutorService worker = java.util.concurrent.Executors.newSingleThreadExecutor(task -> {
+        Thread thread = new Thread(task, "item-icons"); thread.setDaemon(true); thread.setPriority(Thread.MIN_PRIORITY); return thread;
+    });
+    private final Map<String, java.util.concurrent.Future<int[]>> pending = new java.util.LinkedHashMap<>();
+
     ItemIcons(NativeRenderer r) { this.r = r; }
 
     Icon of(ItemDef d) {
-        return icons.computeIfAbsent(d.id, k -> make(d));
+        Icon ready = icons.get(d.id);
+        if (ready == null) pending.computeIfAbsent(d.id, k -> worker.submit(() -> raster(d, CELL)));
+        return ready;
     }
 
-    private Icon make(ItemDef d) {
+    /** Upload at most one completed icon per frame; OpenGL stays exclusively on the render thread. */
+    void pump() {
+        var iterator = pending.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (!entry.getValue().isDone()) continue;
+            try {
+                ItemDef def = rpg.item.Items.get(entry.getKey());
+                icons.put(entry.getKey(), upload(def, entry.getValue().get()));
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            catch (java.util.concurrent.ExecutionException e) { throw new IllegalStateException("Cannot render item icon " + entry.getKey(), e.getCause()); }
+            iterator.remove();
+            break;
+        }
+    }
+
+    @Override public void close() { worker.shutdownNow(); pending.clear(); }
+
+    private Icon upload(ItemDef d, int[] px) {
         int w = Math.max(1, d.gw) * CELL, h = Math.max(1, d.gh) * CELL;
-        int[] px = raster(d, CELL);
         ByteBuffer b = MemoryUtil.memAlloc(w * h * 4);
         for (int p : px) {
             int a = p >>> 24;

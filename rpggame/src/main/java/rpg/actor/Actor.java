@@ -42,6 +42,13 @@ public class Actor {
     public boolean poseReset;
     /** Creeping: low and slow, harder to see and to hear (stealth). */
     public boolean sneaking;
+    /** Actual native stance, including being unable to stand beneath a low ceiling. */
+    public boolean crouched;
+    public long carryBody, carriedBy;
+    public double carrySince = -99, carryLowerAt = -99, throwAt = -99;
+    public Traversal.Motion traversal;
+    public double traverseAgain = -99;
+    public float reachX, reachY, reachZ;
     /** Dummies take hits and never die. */
     public boolean dummy;
     public int team;
@@ -127,8 +134,8 @@ public class Actor {
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }
-    public float eyeY() { return y + plan().eyeY() * Body.PX; }
-    public float chestY() { return y + (Body.LEGS + Body.TORSO * 0.6f) * Body.PX; }
+    public float eyeY() { return y + plan().eyeY() * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
+    public float chestY() { return y + (Body.LEGS + Body.TORSO * 0.6f) * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
 
     public float distTo(float px, float pz) { return (float) Math.hypot(px - x, pz - z); }
 
@@ -159,7 +166,7 @@ public class Actor {
         public boolean gathered;
         public double blockStart = -9;
         public float staggered, stabilityBonus, iframes, dodgeT, dodgeX, dodgeZ, hitstop;
-        public float charge, draw, castCooldown, regenDelay, flash, slowT;
+        public float charge, draw, aim, castCooldown, regenDelay, flash, slowT;
         /** (The old cast-once blessings' timers are gone: prayers are toggled; see combat.Prayers.) */
         /** A crossbow being loaded again (seconds left). */
         public float reload;
@@ -168,7 +175,7 @@ public class Actor {
         public long lastAttacker;
 
         public boolean busy() { return phase != Phase.IDLE || staggered > 0 || dodgeT > 0; }
-        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; gathered = false; }
+        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; aim = 0; gathered = false; }
         /** 0..1 through the whole move (for animation). */
         public float progress() {
             return switch (phase) {

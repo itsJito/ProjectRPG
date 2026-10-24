@@ -34,8 +34,8 @@ public final class Progression {
 
     /** Awards exactly this XP, unscaled (lamps, debug grants). requestId 0: not deduplicated. */
     public Skills.Award awardRaw(Actor a, Skill s, long xp, String why, long cause, long requestId) {
-        // only the player gains XP and levels (gamefixes): NPCs and animals keep the levels they were made with
-        if (xp <= 0 || a == null || a instanceof rpg.ai.Npc || a instanceof rpg.animal.Animal) return null;
+        // Only this session's player progresses; NPCs, animals and training dummies retain their configured skills.
+        if (xp <= 0 || a == null || a != g.player) return null;
         if (requestId != 0 && g.state.alreadyCommitted(requestId)) return null;
         Skills.Award w = a.skills.award(s, xp);
         awards++;

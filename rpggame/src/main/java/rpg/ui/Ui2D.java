@@ -26,6 +26,7 @@ public final class Ui2D {
     private float[] v = new float[36 * 512];
     private int n, tex;
     public int font, icons;
+    public final int parchment;
     private STBTTBakedChar.Buffer chars;
     private final float[] advance = new float[COUNT];
     public float mx, my;
@@ -40,6 +41,18 @@ public final class Ui2D {
         bakeFont(r);
         icons = Icons.texture(r);
         atlas = new Atlas(r);
+        ByteBuffer paper = MemoryUtil.memAlloc(128 * 128 * 4);
+        try {
+            for (int y = 0; y < 128; y++) for (int x = 0; x < 128; x++) {
+                int hash = x * 374761393 + y * 668265263;
+                hash = (hash ^ (hash >>> 13)) * 1274126177; hash ^= hash >>> 16;
+                int grain = (hash >>> 27) - 16;
+                float fiber = (float) (Math.sin(x * 0.13 + Math.sin(y * 0.03)) + Math.sin(y * 0.19 + Math.cos(x * 0.06)));
+                int shade = 47 + grain / 5 + (int) fiber;
+                paper.put((byte) (shade + 13)).put((byte) (shade + 5)).put((byte) (shade - 6)).put((byte) 255);
+            }
+            paper.flip(); parchment = r.texture(AstrattoNative.TEX_2D, 128, 128, 1, AstrattoNative.TEX_REPEAT, paper);
+        } finally { MemoryUtil.memFree(paper); }
     }
 
     private void bakeFont(NativeRenderer r) {
@@ -65,7 +78,7 @@ public final class Ui2D {
     public void begin(RenderCommands c) { cmd = c; n = 0; tex = -1; }
     public void end() { flush(); }
 
-    private void flush() {
+    public void flush() {
         if (n > 0 && cmd != null) cmd.quads(tex, v, n);
         n = 0;
     }

@@ -15,6 +15,7 @@ public final class Body {
     /** One model pixel in metres. */
     public static final float PX = 1.8f / 32f;
     /** Every human is 32 pixels (1.8 blocks) tall: head 8, torso 12, legs 12. */
+    public static final float CROUCH_HEIGHT = 0.76f;
     public static final int HEAD = 8, TORSO = 12, LEGS = 12, HEIGHT_PX = HEAD + TORSO + LEGS;
     /** The skin texture's size (texels), and texels per model pixel. */
     public static final int SKIN = 128, TEXELS = 2;

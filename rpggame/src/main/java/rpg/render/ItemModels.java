@@ -2,7 +2,7 @@ package rpg.render;
 
 import astratto.render.Tex;
 import astratto.voxel.VoxModel;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import rpg.item.ItemDef;
 import rpg.item.ItemDef.Family;
@@ -31,9 +31,9 @@ public final class ItemModels {
     /** A model and where the hand holds it (voxel coordinates; for things not held, the middle of the base). */
     public record Model(VoxModel vox, float gx, float gy, float gz) {}
 
-    private static final Map<String, Model> CACHE = new HashMap<>();
+    private static final Map<String, Model> CACHE = new ConcurrentHashMap<>();
 
-    public static synchronized Model of(ItemDef d) {
+    public static Model of(ItemDef d) {
         return CACHE.computeIfAbsent(d.id, k -> fine(d));
     }
 
@@ -50,6 +50,7 @@ public final class ItemModels {
             case AXE: return HiResItems.axe(d, t);
             case MACE: return HiResItems.mace(d, t);
             case PICKAXE: return HiResItems.pickaxe(d, t);
+            case BOW: return HiResItems.bow(d);
             case SHIELD: return HiResItems.shield(d, t);
             case LONGSWORD: return HiResItems.longsword(d, t);
             case SCIMITAR: return HiResItems.scimitar(d, t);
@@ -146,7 +147,6 @@ public final class ItemModels {
             case MACE: return mace(d, t);
             case PICKAXE: return pickaxe(d, t);
             case SHIELD: return shield(d, t);
-            case BOW: return bow(d);
             case ARROW: return arrows(d);
             case STAFF: return staff(d);
             case WAND: return wand(d);
@@ -189,6 +189,7 @@ public final class ItemModels {
             case "fishing_rod" -> rod();
             case "lockpick" -> lockpick();
             case "sealed_letter" -> letter();
+            case "bounty_scroll" -> warrant();
             case "xp_lamp" -> lamp();
             case "chancery_key" -> key();
             default -> lump(d);
@@ -372,19 +373,6 @@ public final class ItemModels {
         m.box(7, 12, 2, 9, 14, 2, L.pommel());
         if (L.style() == 11) m.set(8, 13, 2, mat(0x40C0F0));
         return new Model(m, 8.5f, 12.5f, 0.5f);
-    }
-
-    private static Model bow(ItemDef d) {
-        int c = mat(d.color);
-        VoxModel m = new VoxModel(7, 39, 3);
-        for (int y = 0; y < 39; y++) {
-            float u = (y - 19) / 19f;
-            int x = Math.round(5 - 4 * (1 - u * u));
-            m.set(x, y, 1, Math.abs(y - 19) <= 2 ? mat(0x4A3020) : c);
-        }
-        for (int y = 1; y < 38; y++) m.set(5, y, 1, mat(0xE8E0C8));   // the string
-        for (int y = 17; y <= 21; y++) m.set(1, y, 1, mat(0x4A3020));
-        return new Model(m, 1.5f, 19.5f, 1.5f);
     }
 
     private static Model arrows(ItemDef d) {
@@ -855,6 +843,15 @@ public final class ItemModels {
         for (int y = 0; y < 11; y++) { m.set(2, y, 0, metal(0x909098)); m.set(4, y + 1, 0, metal(0x80808A)); }
         m.set(1, 10, 0, metal(0x909098)); m.set(5, 11, 0, metal(0x80808A)); m.set(3, 0, 1, mat(0x5A3A20));
         return new Model(m, 3.5f, 0.5f, 1f);
+    }
+
+    private static Model warrant() {
+        VoxModel m = new VoxModel(9, 20, 5);
+        m.box(1, 2, 2, 7, 17, 2, mat(0xC6AC76));
+        for (int y : new int[]{2, 17}) for (int x = 0; x < 9; x++) for (int dy = -2; dy <= 2; dy++) for (int z = 0; z < 5; z++) if (dy * dy + (z - 2) * (z - 2) <= 5) m.set(x, y + dy, z, mat(0xB39968));
+        for (int y = 6; y <= 13; y += 2) m.box(2, y, 3, y == 12 ? 4 : 6, y, 3, mat(0x64503A));
+        m.box(3, 4, 3, 5, 6, 4, mat(0x8E3528));
+        return new Model(m, 4.5f, 0, 2.5f);
     }
 
     private static Model letter() {

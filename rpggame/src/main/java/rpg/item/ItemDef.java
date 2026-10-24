@@ -27,6 +27,7 @@ public final class ItemDef {
     public float damage, impact, reach = 1.2f, speed = 1f, armor, guard;
     /** Weapon bonuses (GDD 2.4): Strength's (damage of landed hits; the Sword family's is the tier's locked baseline) and Attack's (cadence). */
     public float strengthBonus, attackBonus;
+    public float magicDamageBonusPct;
     /** Faith bonus (GDD 2.5: each point lengthens a prayer's drain interval by 3.33%); Faith restored when drunk; charges a stack is made with. */
     public int faithBonus, restoresFaith, maxCharges;
     public DamageType damageType = DamageType.NONE;

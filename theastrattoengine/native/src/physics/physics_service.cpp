@@ -117,11 +117,14 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
             Mover* m = movers_.get(c.handle);
             if (!m) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
-            m->wishX = c.vx; m->wishZ = c.vz; m->wishY = c.vy;
-            if (c.jump > 0) { m->jump = c.jump; m->jumpLeft = 0.2f; }
+            if (!(c.flags & ASTRATTO_MOVER_STANCE_ONLY)) {
+                m->posed = (c.flags & ASTRATTO_MOVER_POSED) != 0;
+                m->wishX = c.vx; m->wishZ = c.vz; m->wishY = c.vy;
+                if (c.jump > 0) { m->jump = c.jump; m->jumpLeft = 0.2f; }
+                m->climb = c.vy != 0;
+            }
             if (c.accel > 0) m->accel = c.accel;
-            m->crouch = (c.flags & ASTRATTO_MOVER_CROUCH) != 0;
-            m->climb = c.vy != 0;
+            m->wantsCrouch = (c.flags & ASTRATTO_MOVER_CROUCH) != 0;
             return ASTRATTO_OK;
         }
         case ASTRATTO_CMD_MOVER_PLACE: {
@@ -151,7 +154,7 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             RagdollBody* r = ragdolls_.get(c.handle);
             if (!r) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
             r->body->fromPose(c.p, c.vx, c.vy, c.vz);
-            r->body->unbury(e.active());
+            if (!r->kinematic) r->body->unbury(e.active());
             if (r->sydney) r->sydney->primed = false;          // the pose it now holds is what its muscles hold
             return ASTRATTO_OK;
         }
@@ -195,6 +198,7 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
                     break;
                 case ASTRATTO_CONTROL_LIMBS: if (r->sydney) r->sydney->setBody(c.value); break;
                 case ASTRATTO_CONTROL_WAKE: r->body->wake(); break;
+                case ASTRATTO_CONTROL_KINEMATIC: r->kinematic = c.value != 0; if (!r->kinematic) r->body->wake(); break;
                 default: return ASTRATTO_ERR_ARGUMENT;
             }
             return ASTRATTO_OK;
@@ -348,13 +352,51 @@ void PhysicsService::step(Engine& e, float dt) {
     pool.parallelFor(order_.size(), [&](size_t i, unsigned) { int n = 0; landed_[i] = movers_.get(order_[i])->update(w, dt, gravity_, &n); steps += static_cast<uint64_t>(n); });
     for (size_t i = 0; i < order_.size(); i++) if (landed_[i] > 2.0f) { astratto_evt_body ev{}; ev.handle = order_[i]; ev.value = landed_[i]; e.emit(ev, ASTRATTO_EVT_LANDED); }
 
+    // Dynamic character volumes: sweep-and-prune broad phase, then conservative horizontal separation.
+    // World movement is parallel; pair resolution is ordered so workers never race on shared movers.
+    float widest = 0;
+    for (astratto_handle h : order_) widest = std::max(widest, movers_.get(h)->radius);
+    for (int pass = 0; pass < 3; ++pass) {
+        std::sort(order_.begin(), order_.end(), [&](astratto_handle a, astratto_handle b) {
+            const float ax = movers_.get(a)->x, bx = movers_.get(b)->x;
+            return ax < bx || (ax == bx && a < b);
+        });
+        for (size_t i = 0; i < order_.size(); ++i) {
+            Mover& a = *movers_.get(order_[i]);
+            if ((a.flags & ASTRATTO_MOVER_FLY) != 0) continue;
+            for (size_t j = i + 1; j < order_.size(); ++j) {
+                Mover& b = *movers_.get(order_[j]);
+                if (b.x - a.x > a.radius + widest) break;
+                if ((b.flags & ASTRATTO_MOVER_FLY) != 0 || a.y >= b.y + b.h() || b.y >= a.y + a.h()) continue;
+                float dx = b.x - a.x, dz = b.z - a.z;
+                const float radius = a.radius + b.radius, d2 = dx * dx + dz * dz;
+                if (d2 >= radius * radius) continue;
+                const float d = std::sqrt(d2);
+                if (d < 0.0001f) { dx = 1; dz = 0; } else { dx /= d; dz /= d; }
+                const float overlap = radius - d + 0.001f;
+                const bool afree = Mover::bodyFree(w, a.x - dx * overlap * 0.5f, a.y, a.z - dz * overlap * 0.5f, a.radius, a.h());
+                const bool bfree = Mover::bodyFree(w, b.x + dx * overlap * 0.5f, b.y, b.z + dz * overlap * 0.5f, b.radius, b.h());
+                auto displace = [&](Mover& m, float amount) {
+                    const float ox = dx * amount, oz = dz * amount;
+                    if (!Mover::bodyFree(w, m.x + ox, m.y, m.z + oz, m.radius, m.h())) return;
+                    m.x += ox; m.px += ox; m.z += oz; m.pz += oz;
+                };
+                if (afree && bfree) { displace(a, -overlap * 0.5f); displace(b, overlap * 0.5f); }
+                else if (afree) displace(a, -overlap);
+                else if (bfree) displace(b, overlap);
+                const float closing = (a.vx - b.vx) * dx + (a.vz - b.vz) * dz;
+                if (closing > 0) { a.vx -= dx * closing * 0.5f; a.vz -= dz * closing * 0.5f; b.vx += dx * closing * 0.5f; b.vz += dz * closing * 0.5f; }
+            }
+        }
+    }
+
     // ragdolls and soft bodies
     order_.clear();
     ragdolls_.each([&](astratto_handle h, const RagdollBody&) { order_.push_back(h); });
-    pool.parallelFor(order_.size(), [&](size_t i, unsigned) { steps += static_cast<uint64_t>(ragdolls_.get(order_[i])->body->update(w, dt)); });
+    pool.parallelFor(order_.size(), [&](size_t i, unsigned) { RagdollBody* r = ragdolls_.get(order_[i]); if (!r->kinematic) steps += static_cast<uint64_t>(r->body->update(w, dt)); });
     for (astratto_handle h : order_) {
         RagdollBody* r = ragdolls_.get(h);
-        if (r->sydney) {
+        if (r->sydney && !r->kinematic) {
             const int st = r->sydney->state, oc = r->sydney->outcome;
             if (st != r->lastState || oc != r->lastOutcome) {
                 astratto_evt_ragdoll_state ev{};

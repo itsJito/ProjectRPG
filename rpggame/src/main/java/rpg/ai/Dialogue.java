@@ -2,7 +2,6 @@ package rpg.ai;
 
 import rpg.Ids;
 import rpg.Rpg;
-import rpg.interact.Result;
 import rpg.item.ItemStack;
 import rpg.item.Items;
 import rpg.quest.Quests;
@@ -18,8 +17,11 @@ public final class Dialogue {
     public Dialogue(Rpg g) { this.g = g; }
 
     public Dialog talk(Npc n) {
+        n.conversations++;
         Memory known = n.crimeKnown(g.player.id);
-        String greet = known == null ? greeting(n) : known.witnessed()
+        String greet = known == null ? greeting(n) : known.settled
+                ? "Your debt to the law is settled. I still remember what happened."
+                : known.witnessed()
                 ? "I saw you - " + known.kind.toLowerCase() + ". Keep your distance."
                 : "I've heard about you (" + known.kind.toLowerCase() + ", " + known.source + "). I'm watching you.";
         Dialog d = new Dialog(n.name + " - " + n.title, greet);
@@ -76,20 +78,26 @@ public final class Dialogue {
         }
     }
 
-    private String greeting(Npc n) {
+    private String pick(Npc n, String... lines) { return lines[Math.floorMod(n.conversations + (int) n.id + (int) (g.state.minutes / 1440), lines.length)]; }
+
+    public String greeting(Npc n) {
+        if (n.hunger > 0.75f) return "Forgive me. I haven't eaten, and I have little patience left.";
+        if (n.fatigue > 0.85f) return "I've been on my feet too long. What do you need?";
         return switch (n.role) {
-            case MERCHANT -> "Welcome! Have a look at what's in stock.";
-            case LAWMAN -> "This is the chancery of " + n.homeJurisdiction + ". Report crimes here, pay bounties here.";
-            case GUARD -> "Move along. I'm on patrol.";
-            case WORKER -> "Can't stop - these logs won't sell themselves to Store A.";
-            case VILLAGER -> "Hello there.";
-            case THIEF -> "Who's asking?";
-            case CARTER -> g.econ.active() == null ? "No cargo today." : "I'm hauling for Store A, bound for Store B.";
-            case QUEST_GIVER -> "I'm the test-quest giver.";
-            case CONTACT -> "Yes? I'm expecting a delivery.";
-            case FENCE -> "Keep your voice down. What have you got?";
-            case UNDERTAKER -> g.undertaker.held() > 0 ? "Ah. You again. I have your things - what's left of them." : "Quiet here. The quiet ones are the best customers.";
-            default -> "...";
+            case MERCHANT -> pick(n, "Have a look. Tell me what you need, and we'll see about a fair price.", "Good day. Buying, or selling?", "Mind the counter. I've just put the stock in order.");
+            case LAWMAN -> pick(n, "If you have a charge to lay, give me names and what you saw.", "Bounties and sworn reports are handled here. Speak plainly.", "The watch keeps records. What business brings you in?");
+            case GUARD -> pick(n, "Keep the road clear, please.", "Quiet so far. Help me keep it that way.", "If there's trouble, tell me what happened before you draw steel.");
+            case WORKER -> pick(n, "There's work enough for two days, and only one pair of hands.", "Mind where you stand. I don't want to catch you with the axe.", "A clean cut saves work at the sawbench.");
+            case VILLAGER -> pick(n, "Good day. Have you come far?", "If you're staying, keep out of other people's business.", "A little peace and a full cupboard. That's all I ask.");
+            case THIEF -> pick(n, "Do I know you? No? Best keep it that way.", "I was just passing through. Same as you, I reckon.", "Don't stare. It makes honest people nervous.");
+            case CARTER -> g.econ.active() == null ? pick(n, "No load today. The beasts could use the rest.", "Waiting on a load. Waiting is the greater part of hauling.") : pick(n, "Keep clear of the load. It doesn't stop quickly.", "A full cart and a sound road. I'll settle for one of the two.");
+            case QUEST_GIVER -> pick(n, "I could use a reliable pair of hands.", "Have you time for a little paid work?", "There you are. I have a delivery to arrange.");
+            case CONTACT -> pick(n, "Were you looking for me?", "If you've brought a letter, let's have it.", "I've been expecting word. Is that why you're here?");
+            case FENCE -> pick(n, "Keep your voice down. What have you got?", "Names cost extra. Best leave them out.", "Show me the goods. We'll discuss the price quietly.");
+            case UNDERTAKER -> g.undertaker.held() > 0 ? "I have your belongings. Take your time; they're safe here." : pick(n, "Mind your step among the stones.", "Every name here belonged to someone. Remember that.", "If you need to make arrangements, I'll hear you out.");
+            case FARMER -> pick(n, "Shut the gate behind you. They take any chance to wander.", "The stock eats before I do, most mornings.", "Hands away from the feed unless you're helping.");
+            case BANDIT -> pick(n, "That's close enough. Keep your hands where I can see them.", "You're on the wrong road, friend.", "Looking for trouble, or merely lost?");
+            case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");
         };
     }
 
@@ -97,7 +105,7 @@ public final class Dialogue {
         StringBuilder b = new StringBuilder();
         for (Memory m : n.memories) if (m.crime()) b.append(g.nameOf(m.subject)).append(": ").append(m.kind.toLowerCase()).append(" (").append(m.source).append("). ");
         if (b.length() == 0) b.append("Nothing worth repeating. ");
-        b.append("Goal now: ").append(n.goal.toString().toLowerCase().replace('_', ' ')).append(".");
+        b.append(switch (n.goal) { case WORK -> "I've my own work to see to."; case SLEEP -> "I should be getting some rest."; case REPORT_CRIME -> "I have business with the watch."; case COLLECT -> "There's a body that needs seeing to."; case AID -> "Someone nearby could use a hand."; default -> "Keep your ears open. News travels with the people who carry it."; });
         return b.toString();
     }
 
@@ -124,5 +132,4 @@ public final class Dialogue {
         return d;
     }
 
-    Result none() { return Result.ok(); }
 }

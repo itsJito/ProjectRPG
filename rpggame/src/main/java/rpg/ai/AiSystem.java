@@ -47,8 +47,8 @@ public final class AiSystem {
         policy = g.game.reserve(KIND_POLICY);
         List<CommandBuffer.Action> acts = new ArrayList<>();
         acts.add(new CommandBuffer.Action(A_IDLE, ACT_IDLE).base(1).consider(IN_FACT0 + A_IDLE, CURVE_LINEAR, 0, 1, 1));
-        acts.add(new CommandBuffer.Action(A_WANDER, ACT_WANDER).base(1).range(6).speed(1.65f).consider(IN_FACT0 + A_WANDER, CURVE_LINEAR, 0, 1, 1));
-        acts.add(new CommandBuffer.Action(A_GOTO, ACT_MOVE_TO_GOAL).base(1).speed(2.0f).consider(IN_FACT0 + A_GOTO, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_WANDER, ACT_WANDER).base(1).range(6).speed(g.cfg.walkSpeed * 0.8f).consider(IN_FACT0 + A_WANDER, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_GOTO, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.walkSpeed).consider(IN_FACT0 + A_GOTO, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_RUN, ACT_MOVE_TO_GOAL).base(1).speed(4.8f).consider(IN_FACT0 + A_RUN, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_APPROACH, ACT_APPROACH).base(1).range(1.6f).speed(4.2f).consider(IN_FACT0 + A_APPROACH, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_FLEE, ACT_FLEE).base(1).range(16).speed(6.2f).consider(IN_FACT0 + A_FLEE, CURVE_LINEAR, 0, 1, 1));
@@ -65,6 +65,7 @@ public final class AiSystem {
         ada.homeX = 91.5f; ada.homeZ = 89.5f;
         give(ada, Items.COINS, 600); give(ada, Items.BREAD, 2);
         Npc bram = npc(Ids.LAWMAN_A, "Bram", Npc.Role.LAWMAN, "Lawman (JUR-ALPHA)", DevMap.LAWMAN_A[0], 55.0f, 102);
+        give(bram, Items.COINS, 2500); // finite watch treasury, replenished by actual fines
         bram.homeX = 110.5f; bram.homeZ = 54.5f;
         levels(bram, 40, 40, 40, 40); wear(bram, "steel_sword", "steel_shield", "steel_body");
         Npc cole = npc(Ids.GUARD, "Cole", Npc.Role.GUARD, "Guard (JUR-ALPHA)", 98.5f, 66.5f, 103);
@@ -80,6 +81,7 @@ public final class AiSystem {
         Npc gus = npc(Ids.MERCHANT_B, "Gus", Npc.Role.MERCHANT, "Merchant (Store B)", 17.5f, 109.5f, 107);
         give(gus, Items.COINS, 600);
         Npc hale = npc(Ids.LAWMAN_B, "Hale", Npc.Role.LAWMAN, "Lawman (JUR-BETA)", DevMap.LAWMAN_B[0], 120.0f, 108);
+        give(hale, Items.COINS, 2500);
         levels(hale, 40, 40, 40, 40); wear(hale, "steel_sword", "steel_shield", "steel_body");
         Npc ivo = npc(Ids.CARTER, "Ivo", Npc.Role.CARTER, "Carter", 89.5f, 64.5f, 109);
         ivo.homeX = 89.5f; ivo.homeZ = 90.5f; give(ivo, Items.COINS, 30);
@@ -147,8 +149,8 @@ public final class AiSystem {
         CommandBuffer c = g.game.commands();
         n.body = g.game.reserve(KIND_MOVER);
         n.agent = g.game.reserve(KIND_AGENT);
-        c.moverCreate(n.body, n.x, DevMap.FLOOR + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, 1.2f);
-        c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, AGENT_DOORS, (int) n.id * 7919);
+        c.moverCreate(n.body, n.x, DevMap.FLOOR + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * rpg.actor.Body.CROUCH_HEIGHT);
+        c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, AGENT_DOORS | AGENT_EXTERNAL_TRAVERSAL | (n.skills.level(Skill.AGILITY) >= 5 ? AGENT_MANTLE : 0), (int) n.id * 7919);
         c.agentTarget(n.agent, g.player == null ? 0 : g.player.body, 0, 0, 0);
         c.moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, 0);   // a person gathers speed and sheds it (the walk has weight): no instant starts
         java.util.Arrays.fill(n.facts, -1);
@@ -181,9 +183,11 @@ public final class AiSystem {
     }
 
     public void combatGoal(Npc n, float x, float z) {
-        if (!n.hasGoalPos || Math.hypot(n.gx - x, n.gz - z) > 0.35) {
-            n.gx = x; n.gz = z; n.hasGoalPos = true;
-            g.game.commands().agentGoal(n.agent, x, DevMap.FLOOR, z);
+        Actor target = g.actor(n.fightTarget);
+        float y = target == null ? n.y : target.y;
+        if (!n.hasGoalPos || Math.hypot(n.gx - x, n.gz - z) > 0.35 || Math.abs(n.gy - y) > 0.4f) {
+            n.gx = x; n.gy = y; n.gz = z; n.hasGoalPos = true;
+            g.game.commands().agentGoal(n.agent, x, y, z);
         }
         desire(n, A_COMBAT);
     }
@@ -200,9 +204,17 @@ public final class AiSystem {
             if (!n.alive) { respawnCheck(n); continue; }
             if (!n.loaded) continue;
             stealth.update(n, dt);
+            if (g.traversal.update(n, dt)) continue;
             if (n.reacting) continue;           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
+            Actor elevated = n.goal == Brain.Goal.FIGHT ? g.actor(n.fightTarget) : null;
+            if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, dt)) continue;
             brain.act(n, dt);
+            if (n.stuck && (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.RETURN) && n.hasGoalPos) {
+                float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
+                if (g.traversal.begin(n, heading) && g.traversal.update(n, dt)) continue;
+            }
+            g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking ? MOVER_CROUCH : 0));
             face(n, dt);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
             footsteps(n, dt);
@@ -248,7 +260,10 @@ public final class AiSystem {
             if (!n.alive && n.ragdoll != 0) {
                 Snapshots.Ragdoll rd = bodies.ragdoll(n.ragdoll);
                 if (rd != null) {
-                    if (n.corpse != 0 && g.objects.get(n.corpse) instanceof rpg.objects.Corpse c) { c.x = rd.comX; c.z = rd.comZ; c.y = DevMap.FLOOR + 0.2f; }
+                    n.x = rd.comX; n.z = rd.comZ;
+                    float low = rd.p[1]; for (int k = 1; k < RD_PARTICLES; k++) low = Math.min(low, rd.p[k * 3 + 1]);
+                    n.y = Math.max(0, low - 0.1f);
+                    if (n.corpse != 0 && g.objects.get(n.corpse) instanceof rpg.objects.Corpse c) { c.x = rd.comX; c.z = rd.comZ; c.y = n.y + 0.2f; }
                     // the dead stay dead (gamefixes): a body of the dead that Sydney reports as anything but dying or done -
                     // standing, stepping, getting up - is told again, at once, that it is dead
                     if (rd.state != SYDNEY_DEAD && rd.outcome != OUTCOME_DEAD) { g.game.commands().ragdollControl(n.ragdoll, CONTROL_DIE, 1); deathsReasserted++; }
@@ -257,7 +272,7 @@ public final class AiSystem {
             }
             if (!n.alive || !n.loaded) continue;
             Snapshots.Mover m = bodies.mover(n.body);
-            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; }
+            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
             Snapshots.Agent a = agents.agent(n.agent);
             if (a != null) {
                 n.agentYaw = a.yaw;
@@ -317,7 +332,9 @@ public final class AiSystem {
         if (n.charmUntil > g.time && n.hostileToPlayer) return null;
         if (n.fightTarget != 0) {
             Actor t = g.actor(n.fightTarget);
-            boolean stood = law && (g.law.inCustody(t) || t != null && g.law.settled(t.id, n.goalSince) && g.law.bounty(t.id, n.homeJurisdiction) <= 0 && !(n.cs.lastAttacker == t.id && !g.law.settled(t.id, n.cs.lastHurt)));
+            boolean unwelcome = t != null && !ZonePolicy.routineAllowed(n, t.x, t.z) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12);
+            if (unwelcome && n.hunt != null && n.hunt.target == t.id) n.hunt = null;
+            boolean stood = unwelcome || g.law.inCustody(t) || law && (t != null && g.law.settled(t.id, n.goalSince) && g.law.bounty(t.id, n.homeJurisdiction) <= 0 && !(n.cs.lastAttacker == t.id && !g.law.settled(t.id, n.cs.lastHurt)));
             if (t != null && t.alive && n.distTo(t) < 30 && !(t == g.player && t.hp <= 0) && !stood) {
                 if (placed(n, t)) return t;
                 lose(n, t, "lost sight of " + t.name);
@@ -328,35 +345,35 @@ public final class AiSystem {
         if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 12) {
             Actor t = g.actor(n.cs.lastAttacker);
             // a blow struck before the striker's arrest is answered by the sentence, not by the guard
-            if (t != null && t.alive && !(law && (g.law.settled(t.id, n.cs.lastHurt) || g.law.inCustody(t)))) {
+            if (t != null && t.alive && !g.law.inCustody(t) && !(law && g.law.settled(t.id, n.cs.lastHurt))) {
                 if (placed(n, t) || g.time - n.cs.lastHurt < 0.6) return t;    // a blow just taken: its striker is right there
                 if (n.combatant()) lose(n, t, "struck by someone unseen");
             }
         }
         // searching for whoever did it (a body, blood): someone in sight with blood on them, close to it, is a suspect
         if (n.hunt != null && n.hunt.target == 0 && g.gore != null) for (Actor a : g.actors()) {
-            if (a == n || !a.alive || a.dummy || a instanceof rpg.animal.Animal || a.bloodied < 0.25f || !canSee(n, a)) continue;
+            if (a == n || !a.alive || a.dummy || law && g.law.inCustody(a) || a instanceof rpg.animal.Animal || a.bloodied < 0.25f || !canSee(n, a)) continue;
             if (g.gore.suspect(n, a)) { n.hunt = null; n.fightTarget = a.id; return a; }
         }
         // a foe being searched for, found again
         if (n.hunt != null && n.hunt.target != 0) {
             Actor t = g.actor(n.hunt.target);
-            if (t != null && t.alive && canSee(n, t)) { callOut(n, t); return t; }
+            if (t != null && t.alive && !g.law.inCustody(t) && ZonePolicy.routineAllowed(n, t.x, t.z) && !(law && (g.law.settled(t.id, n.hunt.startedAt) && g.law.bounty(t.id, n.homeJurisdiction) <= 0)) && canSee(n, t)) { callOut(n, t); return t; }
         }
-        if (n.hostileToPlayer && p.alive && n.distTo(p) < n.aggroRange && canSee(n, p)) return p;
+        if (n.hostileToPlayer && !g.law.inCustody(p) && ZonePolicy.routineAllowed(n, p.x, p.z) && p.alive && n.distTo(p) < n.aggroRange && canSee(n, p)) return p;
         // a dangerous animal close by: guards deal with it, everyone else gets away from it
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all())
             if (an.alive && an.loaded && an.dangerous() && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) {
             for (Actor a : g.actors()) {
                 if (a == n || !a.alive || a.dummy) continue;
-                if (g.law.bounty(a.id, n.homeJurisdiction) > 0 && !g.law.inCustody(a) && n.distTo(a) < (n.role == Npc.Role.LAWMAN ? 6 : 24) && canSee(n, a) && g.law.mayEngage(n, a)) return a;
+                if (g.law.bounty(a.id, n.homeJurisdiction) > 0 && ZonePolicy.routineAllowed(n, a.x, a.z) && !g.law.inCustody(a) && n.distTo(a) < (n.role == Npc.Role.LAWMAN ? 6 : 24) && canSee(n, a)) return a;
             }
         }
         if (!n.combatant()) {
             for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.goal == Brain.Goal.FIGHT && o.hostileToPlayer && n.distTo(o) < 8 && canSee(n, o)) return o;
             Memory m = n.crimeKnown(p.id);
-            if (n.role == Npc.Role.VILLAGER && m != null && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
+            if (n.role == Npc.Role.VILLAGER && m != null && !m.settled && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
         }
         return null;
     }
@@ -541,7 +558,7 @@ public final class AiSystem {
 
     public String smallTalk(Npc n, Npc p) {
         for (Memory m : n.memories) if (m.crime() && m.subject != p.id) return "Did you hear? " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!";
-        return switch ((int) (n.id + p.id) % 4) { case 0 -> "Fine weather."; case 1 -> "Busy day at the store."; case 2 -> "Seen any bandits?"; default -> "Morning."; };
+        return g.dialogue.greeting(n);
     }
 
     public void say(Npc n, String text) { n.speech = text; n.speechUntil = g.time + 3.5; }
@@ -655,7 +672,7 @@ public final class AiSystem {
     /** Hostile test NPCs come back after a while (fixtures); townsfolk do not - their deaths are permanent. */
     private void respawnCheck(Npc n) {
         if (n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE) return;
-        if (n.diedAt < 0 || g.time - n.diedAt < 60) return;
+        if (n.carriedBy != 0 || n.diedAt < 0 || g.time - n.diedAt < 60) return;
         revive(n, true);
     }
 

@@ -21,7 +21,7 @@ import rpg.world.DevMap;
 public final class Furniture extends WorldObject {
     public enum Kind {
         TABLE("Table", Blocks.TABLE), COUNTER("Counter", Blocks.TABLE), CRATE("Crate", Blocks.CRATE), BOOKCASE("Bookcase", Blocks.BOOKCASE),
-        BED("Bed", Blocks.BED), TARGET("Archery target", Blocks.TARGET), HEADSTONE("Headstone", Blocks.HEADSTONE);
+        BED("Bed", Blocks.BED), TARGET("Archery target", Blocks.TARGET), HEADSTONE("Headstone", Blocks.HEADSTONE), SLAB("Cell slab", Blocks.BED);
         public final String title;
         public final int block;
         Kind(String title, int block) { this.title = title; this.block = block; }
@@ -51,6 +51,21 @@ public final class Furniture extends WorldObject {
     @Override public boolean exists() { return placed && !removed; }
     @Override public float focusRadius() { return Math.max(0.6f, Math.max(width(), depth()) * 0.55f); }
 
+    /** A long counter occupies a low box, not a head-height sphere several metres wide. */
+    @Override public float focusEntry(float ox, float oy, float oz, float dx, float dy, float dz) {
+        float top = switch (kind) { case TABLE -> TABLE_TOP; case COUNTER -> COUNTER_TOP; case BED, SLAB -> 0.65f; default -> h; };
+        float enter = 0, exit = Float.POSITIVE_INFINITY;
+        for (int axis = 0; axis < 3; axis++) {
+            float o = axis == 0 ? ox : axis == 1 ? oy : oz, d = axis == 0 ? dx : axis == 1 ? dy : dz;
+            float lo = axis == 0 ? x0 : axis == 1 ? DevMap.FLOOR : z0, hi = axis == 0 ? x1 + 1 : axis == 1 ? DevMap.FLOOR + top : z1 + 1;
+            if (Math.abs(d) < 1e-6f) { if (o < lo || o > hi) return Float.POSITIVE_INFINITY; continue; }
+            float a = (lo - o) / d, b = (hi - o) / d;
+            enter = Math.max(enter, Math.min(a, b)); exit = Math.min(exit, Math.max(a, b));
+            if (enter > exit) return Float.POSITIVE_INFINITY;
+        }
+        return enter;
+    }
+
     /** Puts the collision cells in or takes them out (the model is drawn while it is placed). */
     public void place(Rpg g, boolean on) {
         placed = on;
@@ -59,13 +74,16 @@ public final class Furniture extends WorldObject {
 
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
-        if (kind == Kind.BED) o.add(Option.when(sleepRefusal(g, a) == null, "sleep", "Sleep", 10, sleepRefusal(g, a), g.cfg.interactRange));
+        if (kind == Kind.BED || kind == Kind.SLAB) o.add(Option.when(sleepRefusal(g, a) == null, "sleep", "Sleep", 10, sleepRefusal(g, a), g.cfg.interactRange));
         o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
+    public boolean cellSlab() { return kind == Kind.SLAB; }
+
     /** Null when the actor may sleep here now, else why not. */
     public String sleepRefusal(Rpg g, Actor a) {
+        if (cellSlab()) return a == g.player && g.law.inCustody(a) ? null : "This slab is reserved for prisoners.";
         if (owner != 0 && owner != a.id) return "This is " + g.nameOf(owner) + "'s bed.";
         for (Npc n : g.npcs) if (n.alive && n.loaded && (n.hostileToPlayer || n.fightTarget == a.id) && n.distTo(a) < 14) return "You can't sleep with enemies nearby.";
         if (a.cs.busy()) return "You're busy.";
@@ -76,9 +94,10 @@ public final class Furniture extends WorldObject {
         if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
-        if (action.equals("sleep") && kind == Kind.BED) {
+        if (action.equals("sleep") && (kind == Kind.BED || kind == Kind.SLAB)) {
             why = sleepRefusal(g, a);
             if (why != null) return Result.no(why);
+            if (cellSlab() && a == g.player) { if (g.ui != null) g.ui.fadeThen(g.law::sleepThroughSentence); else g.law.sleepThroughSentence(); return Result.ok(); }
             // sleep until six in the morning (at least an hour): time passes through the catch-up coordinator
             double hour = g.state.hourOfDay();
             double minutes = Math.max(60, ((6 - hour + 24) % 24) * 60);
@@ -97,6 +116,7 @@ public final class Furniture extends WorldObject {
             case COUNTER -> "A shop counter.";
             case CRATE -> "A wooden crate.";
             case BOOKCASE -> "Shelves of books.";
+            case SLAB -> "A cold stone sleeping slab. Prisoners can sleep here to serve their sentence.";
             case BED -> owner == 0 ? "A bed. Anyone may sleep here." : "A bed belonging to " + g.nameOf(owner) + ".";
             case TARGET -> "An archery target. Shoot it for Archery XP; the farther the shot, the more it pays.";
             case HEADSTONE -> HEADSTONE_LINES[(int) Math.floorMod(id * 7919L, (long) HEADSTONE_LINES.length)];

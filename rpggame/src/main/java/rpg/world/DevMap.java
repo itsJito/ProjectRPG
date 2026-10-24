@@ -57,7 +57,6 @@ public final class DevMap {
     public static final float[][] FISH_SPOTS = {{89.5f, 30.5f}, {101.5f, 37.5f}, {95.5f, 39.5f}};
     public static final int[][] HERBS = {{66, 33}, {68, 33}}, FLAXES = {{71, 33}, {73, 33}}, BERRIES = {{76, 33}, {78, 33}};
     // agility course: start, log beam over a pit, climbing wall, stepping stones, finish
-    public static final float[][] AGILITY_CHECKPOINTS = {{117.5f, 8.5f}, {117.5f, 24.5f}, {117.5f, 30.5f}, {117.5f, 45.5f}};
     public static final int AG_WALL_Z = 27;
     public static final int[] SHORTCUT = {118, 46};
     // NPC/social yard (Alpha)
@@ -207,6 +206,13 @@ public final class DevMap {
             wilds();
             farm();
             graveyard();
+            for (Jails.Cell cell : Jails.CELLS) {
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), BRICK);
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.frontZ(), FENCE);
+                fill(cell.gateX(), FLOOR, cell.frontZ(), cell.gateX(), FLOOR + DOOR_HEIGHT - 1, cell.frontZ(), LOCKED_DOOR);
+                Piece slab = cell.slab();
+                fill(slab.x0(), FLOOR, slab.z0(), slab.x1(), FLOOR, slab.z1(), BED);
+            }
             // furniture: the collision cells of the pieces (the game draws them)
             for (Piece p : concat(FURNITURE, GRAVEYARD_PIECES)) {
                 int id = switch (p.kind) { case "CRATE" -> CRATE; case "BOOKCASE" -> BOOKCASE; case "BED" -> BED; case "TARGET" -> TARGET; case "HEADSTONE" -> HEADSTONE; default -> TABLE; };
@@ -291,8 +297,8 @@ public final class DevMap {
             fill(113, 2, 12, 121, 2, 22, SAND);
             fill(113, 3, 12, 121, 3, 22, WATER);
             fill(117, FLOOR - 1, 12, 117, FLOOR - 1, 22, LOG);
-            // a climbing wall (the Climb interaction is the way over)
-            fill(113, FLOOR, AG_WALL_Z, 121, FLOOR + 2, AG_WALL_Z, BRICK);
+            // A two-block practice ledge: the same geometry-derived traversal used throughout the world.
+            fill(113, FLOOR, AG_WALL_Z, 121, FLOOR + 1, AG_WALL_Z, BRICK);
             fill(112, FLOOR, AG_WALL_Z - 1, 112, FLOOR + 2, AG_WALL_Z + 1, BRICK);
             fill(122, FLOOR, AG_WALL_Z - 1, 122, FLOOR + 2, AG_WALL_Z + 1, BRICK);
             // stepping stones over water

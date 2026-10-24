@@ -188,10 +188,13 @@ public final class Animals {
         a.bornAt = g.state.minutes - (baby ? s.mature * 0.3f : s.mature * 2);
         a.matureAt = baby ? a.bornAt + s.mature : a.bornAt;
         a.variant = (int) (a.id * 2654435761L >>> 7) & 7;
+        a.careAgain = g.time + 15 + a.id % 30;
         a.hunger = 0.1f + (a.id % 5) * 0.06f; a.thirst = (a.id % 7) * 0.05f; a.fatigue = (a.id % 3) * 0.1f;
         a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
         a.yaw = (float) ((a.id * 1.7) % (2 * Math.PI));
         if (s.domestic && a.owned()) a.trust.put(a.owner, 1f);
+        a.nextThink = g.time + Math.floorMod(a.id * 73, 200) / 1000.0;
+        nextSense.put(a.id, g.time + Math.floorMod(a.id * 97, 200) / 1000.0);
         animals.add(a);
         spawnBody(a);
         return a;
@@ -625,6 +628,8 @@ public final class Animals {
 
     // ------------------------------------------------------------------ death and carcasses
     public void onKilled(Animal a, Actor killer, long cause) {
+        a.cs.cancel(); a.amp = a.flap = 0;
+        a.rearing = a.headDown = a.faceThreat = false;
         a.diedAt = g.state.minutes;
         a.killer = killer == null ? 0 : killer.id;
         deaths++;
@@ -637,7 +642,7 @@ public final class Animals {
             float mass = a.species.w * a.species.w * a.species.h * 420 * a.scale() * a.scale() * a.scale();
             float j = Math.min(3.5f, 0.6f + a.blowImpact * 0.02f) * mass;
             // (knocked down and then killed: that body goes on falling, now for good)
-            if (a.ragdoll != null && a.ragdoll.knockdown) dropRagdoll(a);
+            if (a.ragdoll != null) a.ragdoll.knockdown = false;
             if (a.ragdoll == null) makeRagdoll(a, a.blowX * j, j * 0.3f, a.blowZ * j, false);
         }
         a.lastEvent = how;
@@ -670,13 +675,14 @@ public final class Animals {
 
     // ------------------------------------------------------------------ the tiers: near animals in full, far wild ones as cohort counts
     private void tiers() {
+        int spawned = 0;
         float px = g.player.x, pz = g.player.z;
         for (Animal a : new ArrayList<>(animals)) {
             if (!a.alive || a.home == null || a.home.owner != 0 || a.species.domestic && a.owned()) continue;
             if (a.distTo(px, pz) < 84 || a.baby || youngNear(a, 40) || a.dueAt > 0 || a.hp < a.maxHp() || clutchOf(a) != null || a.goal == Goal.HUNT || a.goal == Goal.DEFEND) continue;
             if (g.vox.sight(px, g.player.eyeY(), pz, a.x, a.y + a.height * 0.5f, a.z)) continue;   // never vanishes in plain view
             despawnBody(a);
-            animals.remove(a);
+            animals.remove(a); nextSense.remove(a.id);
             a.home.cohort.computeIfAbsent(a.species, k -> new int[4])[Habitat.slot(a.baby, a.female)]++;
             a.home.count("into the cohort", 1);
             dematerialized++;
@@ -695,6 +701,7 @@ public final class Animals {
                         a.range = e.getKey().predator() || e.getKey() == Species.BROWN_BEAR ? 16 : 11;
                         h.count("out of the cohort", 1);
                         materialized++;
+                        if (++spawned >= 3) { tierAt = g.time + 0.1; return; }
                     }
                 }
             }
@@ -915,6 +922,9 @@ public final class Animals {
     }
 
     private String petLine(Animal a) {
+        if (a.baby) return "The " + a.kind().toLowerCase() + " fidgets under your hand, then looks for its mother.";
+        if (a.hunger > 0.65f) return "The " + a.kind().toLowerCase() + " noses about your hands for food.";
+        if (a.goal == Goal.REST) return "The " + a.kind().toLowerCase() + " stirs, then settles again.";
         return switch (a.species) {
             case DOG -> a.trustOf(g.player.id) > 0.5f ? "The dog leans into your hand, tail going." : "The dog sniffs your hand, then lets you scratch its ears.";
             case CAT -> a.trustOf(g.player.id) > 0.4f ? "The cat purrs and pushes its head against you." : "The cat tolerates it - just about.";
@@ -922,7 +932,14 @@ public final class Animals {
             case COW -> "The cow keeps chewing, unbothered.";
             case SHEEP -> "The sheep's fleece is thick and warm.";
             case PIG -> "The pig grunts happily.";
-            default -> "You stroke the " + a.kind().toLowerCase() + ".";
+            case CHICKEN -> "The hen settles her feathers beneath your palm, watching your fingers.";
+            case DUCK -> "The duck mutters softly and gives its tail a brisk shake.";
+            case RABBIT -> "The rabbit's nose works quickly; its ears turn toward the nearest sound.";
+            case FOX -> "The fox leans away, then returns to sniff your sleeve.";
+            case COYOTE -> "The coyote watches your other hand, wary even now.";
+            case WOLF -> "The wolf holds still, ears tilted back, testing your scent.";
+            case MOUNTAIN_LION -> "The cat follows your hand with its eyes. You keep the touch brief.";
+            case BROWN_BEAR -> "The bear huffs and shifts its weight. You give it room.";
         };
     }
 

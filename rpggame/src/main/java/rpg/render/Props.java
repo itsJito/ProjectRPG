@@ -26,10 +26,20 @@ public final class Props {
             case COUNTER -> new Layer[]{wood(counter(w, d))};
             case CRATE -> new Layer[]{wood(crate())};
             case BOOKCASE -> new Layer[]{wood(bookcase(h, seed))};
+            case SLAB -> new Layer[]{stone(cellSlab(w, d))};
             case BED -> new Layer[]{wood(bedFrame()), new Layer(bedding(seed), 0.95f, 0, 0)};
             case TARGET -> new Layer[]{wood(targetStand(w)), new Layer(targetFace(), 0.95f, 0, 0)};
             case HEADSTONE -> new Layer[]{stone(headstone(seed)), new Layer(graveMound(seed), 0.97f, 0, 0)};
         };
+    }
+
+    private static Meshes.Boxes cellSlab(float w, float d) {
+        Meshes.Boxes boxes = new Meshes.Boxes();
+        boxes.rgb(0, 0.43f, 0, w - 0.08f, 0.24f, d - 0.08f, 0x75766D);
+        for (float end : new float[]{-0.65f, 0.65f}) boxes.rgb(0, 0.16f, end, w - 0.24f, 0.32f, 0.24f, 0x5C5F59);
+        // A few worn courses break the slab's silhouette without per-frame or per-voxel geometry work.
+        for (int i = 0; i < 5; i++) boxes.rgb(0, 0.554f, (i - 2) * 0.35f, w - 0.14f, 0.008f, 0.32f, i % 2 == 0 ? 0x818177 : 0x777B70);
+        return boxes;
     }
 
     /**
