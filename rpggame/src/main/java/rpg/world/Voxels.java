@@ -15,7 +15,7 @@ public final class Voxels {
         this.v = view;
         for (int i = 1; i < Blocks.COUNT; i++) { solid[i] = true; opaque[i] = true; }
         solid[Blocks.WATER] = false; opaque[Blocks.WATER] = false;
-        opaque[Blocks.GLASS] = false;
+        opaque[Blocks.GLASS] = false; opaque[Blocks.ICE] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.FENCE, Blocks.BERRY_BUSH}) opaque[i] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.BERRY_BUSH}) leafy[i] = true;
         // objects stand on invisible cells: low furniture is seen over, tall pieces (a bookcase, the furnace's stack) still hide

@@ -59,7 +59,7 @@ enum : GLenum {
     FRAMEBUFFER = 0x8D40, READ_FRAMEBUFFER = 0x8CA8, FRAMEBUFFER_COMPLETE = 0x8CD5,
     COLOR_ATTACHMENT0 = 0x8CE0, COLOR_ATTACHMENT1 = 0x8CE1, COLOR_ATTACHMENT2 = 0x8CE2, DEPTH_ATTACHMENT = 0x8D00,
     READ_WRITE = 0x88BA,
-    SHADER_IMAGE_ACCESS_BARRIER_BIT = 0x00000020, TEXTURE_FETCH_BARRIER_BIT = 0x00000008, SHADER_STORAGE_BARRIER_BIT = 0x00002000,
+    VERTEX_ATTRIB_ARRAY_BARRIER_BIT = 0x00000001, SHADER_IMAGE_ACCESS_BARRIER_BIT = 0x00000020, TEXTURE_FETCH_BARRIER_BIT = 0x00000008, SHADER_STORAGE_BARRIER_BIT = 0x00002000,
     MAJOR_VERSION = 0x821B, MINOR_VERSION = 0x821C, VERSION = 0x1F02, RENDERER = 0x1F01,
     NEAREST_MIPMAP_NEAREST = 0x2700, NEAREST_MIPMAP_LINEAR = 0x2702, TEXTURE_MAX_LEVEL = 0x813D,
     TEXTURE_MAX_ANISOTROPY = 0x84FE, MAX_TEXTURE_MAX_ANISOTROPY = 0x84FF,
@@ -99,6 +99,7 @@ enum : GLenum {
     X(void, GetFloatv, (GLenum p, GLfloat* v)) \
     X(void, TexImage2D, (GLenum target, GLint level, GLint ifmt, GLsizei w, GLsizei h, GLint border, GLenum fmt, GLenum type, const void* p)) \
     X(void, TexImage3D, (GLenum target, GLint level, GLint ifmt, GLsizei w, GLsizei h, GLsizei d, GLint border, GLenum fmt, GLenum type, const void* p)) \
+    X(void, TexSubImage2D, (GLenum target, GLint level, GLint x, GLint y, GLsizei w, GLsizei h, GLenum fmt, GLenum type, const void* p)) \
     X(void, TexSubImage3D, (GLenum target, GLint level, GLint x, GLint y, GLint z, GLsizei w, GLsizei h, GLsizei d, GLenum fmt, GLenum type, const void* p)) \
     X(void, TexStorage2D, (GLenum target, GLsizei levels, GLenum ifmt, GLsizei w, GLsizei h)) \
     X(void, TexStorage3D, (GLenum target, GLsizei levels, GLenum ifmt, GLsizei w, GLsizei h, GLsizei d)) \

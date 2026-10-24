@@ -41,7 +41,7 @@ public final class SaveSystem {
         // an arrow or bolt in flight when the game is saved comes down where it is (a save keeps no flights): its ammunition
         // is on the ground in the save, as it would be a moment later, instead of gone from the world
         g.carrying.dropAll();
-        for (Actor actor : g.actors()) g.traversal.cancel(actor);
+        for (Actor actor : g.actors()) { g.traversal.cancel(actor); if(!(actor instanceof rpg.animal.Animal))g.reactions.cancel(actor); }
         g.combat.landAll();
         Map<String, Object> root = new HashMap<>();
         root.put("schema", SCHEMA);
@@ -98,6 +98,8 @@ public final class SaveSystem {
         root.put("law", g.law.save());
         root.put("undertaker", g.undertaker.save());
         root.put("honor", g.honor.save());
+        root.put("chemistry", g.chemistry.save());
+        root.put("timeSystem",g.timeSystem.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
         root.put("xpRate", (double) g.cfg.xpRate);
@@ -125,18 +127,33 @@ public final class SaveSystem {
         m.put("look", look);
         if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
         m.put("manaAcc", (double) a.manaAcc);
+        m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
+        if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
         if (g.prayers != null) m.put("prayers", g.prayers.save(a));
         return m;
+    }
+
+    /** Migrate structured legal keys without touching player names, dialogue or arbitrary item text. */
+    @SuppressWarnings("unchecked")
+    private static void migrateJurisdictions(Object value) {
+        if (value instanceof Map<?, ?> raw) {
+            Map<String, Object> map = (Map<String, Object>) raw;
+            if (map.containsKey("JUR-ALPHA")) map.put(DevMap.ALPHA, map.remove("JUR-ALPHA"));
+            for (String key : List.of("jur", "arrestJur", "jurisdiction")) if ("JUR-ALPHA".equals(map.get(key))) map.put(key, DevMap.ALPHA);
+            for (Object child : map.values()) migrateJurisdictions(child);
+        } else if (value instanceof List<?> list) for (Object child : list) migrateJurisdictions(child);
     }
 
     @SuppressWarnings("unchecked")
     public boolean load(Path file) {
         g.carrying.dropAll();
-        for (Actor actor : g.actors()) g.traversal.cancel(actor);
+        for (Actor actor : g.actors()) { g.falling.reset(actor);g.traversal.cancel(actor); if(!(actor instanceof rpg.animal.Animal))g.reactions.cancel(actor); }
         Map<String, Object> root;
         try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
+        g.chemistry.beforeLoad();
+        migrateJurisdictions(root);
         g.interact.work.clear();
         g.combat.projectiles.clear();
         if (g.ui != null) g.ui.closeAll();
@@ -167,14 +184,24 @@ public final class SaveSystem {
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
         g.player.diedAt = -1;
         g.teleport(g.player, g.player.x, g.player.y, g.player.z);
+        for(Npc old:new ArrayList<>(g.npcs))if(old.summonOwner!=0)g.magic.dismiss(old);
+        var savedNpcIds=new java.util.HashSet<Long>();
+        for(Object record:Json.list(root,"npcs"))savedNpcIds.add(Json.lng((Map<String,Object>)record,"id",-1));
+        var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         // NPCs: life and death, bodies, minds, memories
         for (Object o : Json.list(root, "npcs")) {
             Map<String, Object> m = (Map<String, Object>) o;
             Actor a = g.actor(Json.lng(m, "id", -1));
+            if(a==null && Json.lng(m,"summonOwner",0)!=0) {
+                Npc ally=new Npc(Json.lng(m,"id",-1),Json.str(m,"name","Bound revenant"),Npc.Role.HUNTER,"Conjured ally",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
+                Actor owner=g.actor(Json.lng(m,"summonOwner",0)); ally.team=owner==null?0:owner.team;
+                ally.loaded=false; g.npcs.add(ally); a=ally;
+            }
             if (!(a instanceof Npc n)) continue;
             boolean alive = Json.bool(m, "alive", true), loaded = Json.bool(m, "loaded", true);
             if (n.alive && n.loaded) g.ai.despawnBody(n);
             if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
+            n.corpse=0;
             applyActor(n, m);
             if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
@@ -194,6 +221,7 @@ public final class SaveSystem {
                 if (pose != null && pose.size() == astratto.bridge.AstrattoNative.RD_PARTICLES * 3) {
                     float[] p = new float[pose.size()];
                     for (int i = 0; i < p.length; i++) p[i] = ((Number) pose.get(i)).floatValue();
+                    n.posePts=p; n.poseAt=g.time;
                     g.game.commands().ragdollPose(n.ragdoll, 0, 0, 0, p);
                 }
                 g.game.commands().ragdollControl(n.ragdoll, astratto.bridge.AstrattoNative.CONTROL_DIE, 1);
@@ -213,9 +241,9 @@ public final class SaveSystem {
                 case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0)));
                 case "Container", "Corpse" -> {
                     long body = Json.lng(m, "body", 0);
-                    Container ct = body != 0 && g.actor(body) != null
+                    Container ct = body != 0 && g.actor(body) instanceof Npc deadActor && !deadActor.alive
                             ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body).name, body, x, y, z, Json.lng(m, "owner", 0)))
-                            : g.objects.add(new Container(id, Json.str(m, "def", "grave"), Json.str(m, "name", "Grave"), Json.str(m, "ckind", "grave"), x, y, z, 28, Json.lng(m, "owner", 0)));
+                            : g.objects.add(new Container(id, Json.str(m, "def", "grave"), Json.str(m, "name", "Grave"), Json.str(m, "ckind", "grave"), x, y, z, Json.integer(m, "gridCells", 28), Json.lng(m, "owner", 0)));
                     if (ct instanceof rpg.objects.Corpse cp && g.actor(body) instanceof rpg.ai.Npc dead) dead.corpse = cp.id;
                     ct.ownerOnly = Json.bool(m, "ownerOnly", false);
                     if (ct.kind.equals("grave")) {
@@ -229,13 +257,17 @@ public final class SaveSystem {
                 default -> { }
             }
         }
+        for (Npc dead : g.npcs) if (!dead.alive && dead.corpse == 0 && dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
         g.econ.load(Json.obj(root, "econ"));
         g.animals.load(Json.obj(root, "animals"));
         g.law.load(Json.obj(root, "law"));
         g.undertaker.load(Json.obj(root, "undertaker"));
         g.honor.load(Json.obj(root, "honor"));
+        g.chemistry.load(Json.list(root, "chemistry"));
+        g.timeSystem.load(Json.obj(root,"timeSystem"));
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
+        for(Npc resident:addedResidents)g.invariants.rebase(resident);
         g.ai.syncAbstractClock();
         g.mapDirty = true;
         g.mapColumns.clear();   // (a load redraws the whole map)
@@ -253,11 +285,14 @@ public final class SaveSystem {
         ItemIO.equipment(a.eq, Json.list(m, "eq"));
         List<Object> look = Json.list(m, "look");
         // (a townsperson's look is theirs from the roster: an old save's rolled look could give a man a woman's body and cry)
-        if (look != null && !(a instanceof rpg.ai.Npc)) { int[] l = new int[look.size()]; for (int i = 0; i < l.length; i++) l[i] = ((Number) look.get(i)).intValue(); a.look = Appearance.fromArray(l); }
+        if (look != null && (!(a instanceof rpg.ai.Npc) || Json.lng(m,"summonOwner",0)!=0)) { int[] l = new int[look.size()]; for (int i = 0; i < l.length; i++) l[i] = ((Number) look.get(i)).intValue(); a.look = Appearance.fromArray(l); }
         a.hp = (float) Json.num(m, "hp", a.maxHp()); a.stamina = (float) Json.num(m, "stamina", a.maxStamina());
         a.faith = (float) Json.num(m, "faith", a.maxFaith()); a.mana = (float) Json.num(m, "mana", a.maxMana());
         a.cs.cancel(); a.cs.staggered = 0;
         a.manaAcc = (float) Json.num(m, "manaAcc", 0);
+        a.eatenMinutes=(float)Json.num(m,"eatenMinutes",0);
+        a.morphT=(float)Json.num(m,"morphT",0); a.chronoT=(float)Json.num(m,"chronoT",0); a.summonOwner=Json.lng(m,"summonOwner",0); a.summonUntil=g.time+Json.num(m,"summonLeft",0);
+        if(a instanceof Npc npc)npc.spellBook=rpg.combat.Spells.Book.valueOf(Json.str(m,"spellBook",npc.spellBook.name()));
         if (g.prayers != null) g.prayers.load(a, Json.obj(m, "prayers"));
     }
 }

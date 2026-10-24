@@ -37,7 +37,18 @@ public final class Ui2D {
     public Atlas atlas;
     public double scroll;
 
+    public final int engineLogo;
+    private static int image(NativeRenderer renderer, String path) {
+        try (var stream = Ui2D.class.getResourceAsStream(path)) {
+            if (stream == null) throw new IllegalStateException("Missing branding asset " + path);
+            var image = javax.imageio.ImageIO.read(stream); java.nio.ByteBuffer rgba = org.lwjgl.system.MemoryUtil.memAlloc(image.getWidth()*image.getHeight()*4);
+            try { for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++) { int c=image.getRGB(x,y);rgba.put((byte)(c>>16)).put((byte)(c>>8)).put((byte)c).put((byte)(c>>>24)); } rgba.flip();return renderer.texture(astratto.bridge.AstrattoNative.TEX_2D,image.getWidth(),image.getHeight(),1,0,rgba); }
+            finally { org.lwjgl.system.MemoryUtil.memFree(rgba); }
+        } catch (java.io.IOException e) { throw new IllegalStateException("Could not load " + path,e); }
+    }
+
     public Ui2D(NativeRenderer r) {
+        engineLogo = image(r, "/astratto/astrattoenginelogo.png");
         bakeFont(r);
         icons = Icons.texture(r);
         atlas = new Atlas(r);

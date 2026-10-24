@@ -21,9 +21,10 @@ import rpg.world.DevMap;
  * interactable: Talk, Trade, Pickpocket, Pay bounty, Examine, each enabled or disabled with its reason.
  */
 public final class Npc extends Actor implements Interactable {
-    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE }
+    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR }
 
     public final Role role;
+    public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.STANDARD;
     public final String title;
     public final String homeJurisdiction;
     /** Engine handles: the agent and its mind. */
@@ -82,16 +83,13 @@ public final class Npc extends Actor implements Interactable {
     public int patrolIndex;
     public String arrestJurisdiction = "";
     public double busyUntil, arrestedUntil = -1, diedAt = -1, lastDialogAt = -99, chatUntil = -1;
-    public long ragdoll;
     /** The body to search, once dead (0: none). */
     public long corpse;
+    public double collectAgain = -99, leaveUntil = -99;
     /** When it reached the spot it went to look into (the investigation's clock). */
     public double arrivedAt = -99;
     /** The weapon knocked from the hand in a fall, where it lies (picked up again on getting up, if within reach). */
-    public rpg.objects.GroundItem dropped;
     /** Alive and in Sydney's hands (struck off balance): the mind waits, the body is simulated (see combat.Reactions). */
-    public boolean reacting, wentDown;
-    public double reactSince;
     /** Progress to the next footfall (1 = a foot comes down). */
     public float stepClock;
     public int pickpocketLevel = 1;
@@ -134,7 +132,7 @@ public final class Npc extends Actor implements Interactable {
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }
 
-    public boolean combatant() { return role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
+    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.SCHOLAR || role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
 
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
@@ -178,11 +176,15 @@ public final class Npc extends Actor implements Interactable {
         return null;
     }
 
+    public boolean canTalk(Rpg g) {
+        return alive && loaded && !hostileToPlayer && fightTarget == 0 && goal != Brain.Goal.FIGHT && goal != Brain.Goal.FLEE && goal != Brain.Goal.HIDE
+                && cs.staggered <= 0 && g.time - cs.lastHurt >= 3 && arrestedUntil < g.state.minutes;
+    }
+
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
-        boolean fighting = hostileToPlayer || goal == Brain.Goal.FIGHT && fightTarget == a.id;
-        o.add(Option.when(!fighting && arrestedUntil < g.state.minutes, "talk", "Talk-to", 10, fighting ? "They're attacking you!" : "They're in custody.", r));
+        if (canTalk(g)) o.add(Option.on("talk", "Talk-to", 10, r));
         if (role == Role.MERCHANT || role == Role.FENCE) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
@@ -209,7 +211,7 @@ public final class Npc extends Actor implements Interactable {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
-                if (hostileToPlayer || goal == Brain.Goal.FIGHT && fightTarget == a.id) return Result.no(name + " is attacking you!");
+                if (!canTalk(g)) return Result.no(name + " cannot stop to talk now.");
                 if (a == g.player) { g.ui.dialog(g.dialogue.talk(this)); knowsPlayer = true; }
                 g.state.commit(req, "Talked", a.id, id, DevMap.jurisdiction(x, z), 0, name);
                 lastDialogAt = g.time;

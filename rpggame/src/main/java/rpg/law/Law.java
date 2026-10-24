@@ -178,6 +178,8 @@ public final class Law {
 
     /** Player and human NPC offenses use the same witness/report/bounty path. */
     public void onHit(Actor a, Actor v, long cause) {
+        if(a.summonOwner!=0) { Actor owner=g.actor(a.summonOwner); if(owner==null)return; a=owner; }
+        if(v.summonOwner!=0)return;
         if (!(v == g.player || v instanceof Npc) || lawfulForce(a, v)) return;
         Assault key = new Assault(a.id, v.id);
         Double last = assaultAt.get(key);
@@ -187,6 +189,8 @@ public final class Law {
     }
 
     public void onKilled(Actor victim, Actor killer, long cause) {
+        if(victim.summonOwner!=0)return;
+        if(killer!=null && killer.summonOwner!=0)killer=g.actor(killer.summonOwner);
         if ((victim == g.player || victim instanceof Npc) && !lawfulForce(killer, victim)) crime(killer, "MURDER", victim.id, 0, null, cause);
     }
 
@@ -269,6 +273,32 @@ public final class Law {
     /** Whether someone is in custody right now: the law does not strike a prisoner. */
     public boolean inCustody(Actor a) { return a == g.player ? sentenceRemaining() > 0 : a instanceof Npc n && n.arrestedUntil > g.state.minutes; }
 
+    /** Only what this officer actually knows informs the challenge; hearsay remains weaker than sight. */
+    public float certainty(Npc guard, Actor offender) {
+        float confidence = 0.25f;
+        for (var memory : guard.memories) if (memory.subject == offender.id && memory.crime() && !memory.settled
+                && guard.homeJurisdiction.equals(memory.jurisdiction))
+            confidence = Math.max(confidence, memory.confidence * (memory.witnessed() ? 1 : 0.65f));
+        return Math.min(1, confidence);
+    }
+
+    public Result denyCharge(Actor offender, Npc guard, long request) {
+        if (g.state.alreadyCommitted(request) || bounty(offender.id, guard.homeJurisdiction) <= 0) return Result.no("There is no open charge to dispute.");
+        float evidence = certainty(guard, offender);
+        float chance = Math.max(0.02f, Math.min(0.75f, (1 - evidence) * 0.7f + offender.skills.level(rpg.skill.Skill.THIEVING) * 0.001f));
+        double roll = Math.floorMod(request * 6364136223846793005L + guard.id * 1442695040888963407L, 10000) / 10000.0;
+        g.state.commit(request, "ChargeDisputed", offender.id, guard.id, guard.homeJurisdiction, 0, "evidence " + evidence);
+        if (roll < chance) {
+            settle(offender, guard.homeJurisdiction);
+            g.ai.say(guard, "That account doesn't hold together. You're free to go.");
+            g.chat.say("The charge is dismissed. People still remember what they saw.");
+        } else {
+            g.ai.say(guard, evidence > 0.85f ? "I saw you myself. You're coming with me." : "Your story doesn't match the testimony. Come quietly.");
+            arrest(offender, guard.homeJurisdiction, guard);
+        }
+        return Result.ok();
+    }
+
     /** The guard catches up with the wanted player: Halt! Pay, come quietly, or resist. */
     public void halt(Npc guard, Actor p) {
         Double at = haltedAt.get(p.id);
@@ -279,9 +309,11 @@ public final class Law {
         haltedAt.put(p.id, g.time);
         int b = bounty(p.id, guard.homeJurisdiction);
         g.ai.say(guard, "Halt!");
-        Dialog d = new Dialog(guard.name, "Halt! You're wanted in " + guard.homeJurisdiction + " - a bounty of " + b + " coins. Pay it now, or come quietly.");
+        float evidence = certainty(guard, p);
+        Dialog d = new Dialog(guard.name, (evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ") + "You are wanted in " + guard.homeJurisdiction + " for " + b + " coins. Pay, explain yourself, or come quietly.");
         d.npc = guard.id;
         d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
+        d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
         d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, guard.homeJurisdiction, guard); });
         d.choice("Never! (resist arrest)", () -> { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, guard.id, guard.homeJurisdiction, 0, ""); });
         if (p == g.player) g.ui.dialog(d);

@@ -58,7 +58,6 @@ public final class Animal extends Actor implements Interactable {
     float rx, rz;
     boolean routed;
     /** Carcass: how long scavengers have eaten at it (game minutes). */
-    public float eatenMinutes;
     /** When each person last petted it (a bond grows from a pattern, not from clicking). */
     public final Map<Long, Double> pettedAt = new HashMap<>();
     /** Where it heads (when it has somewhere to be). */
@@ -89,6 +88,8 @@ public final class Animal extends Actor implements Interactable {
     public boolean puppet;
     /** Its body in physics' hands (dead, or knocked off its feet), or null; and the last blow it took (direction, how hard). */
     public AnimalRagdoll ragdoll;
+    /** Parked dead-body transforms retain the exact visible pose outside the physics budget. */
+    public final java.util.Map<rpg.combat.Gore.Part,astratto.bridge.Snapshots.Rigid> restPose = new java.util.EnumMap<>(rpg.combat.Gore.Part.class);
     public float blowX, blowZ, blowImpact;
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {
@@ -145,9 +146,9 @@ public final class Animal extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         if (carcass()) {
-            o.add(Option.when(carriedBy == 0 && a.carryBody == 0, "carry", "Carry carcass", 5, "That body is already being carried.", 2.2f));
             boolean blade = Animals.blade(a) != null;
             o.add(Option.when(blade && !butchered, "butcher", "Butcher", 10, butchered ? "Nothing left to take." : "You need a knife or a blade.", r));
+            o.add(Option.when(carriedBy == 0 && a.carryBody == 0 && rpg.actor.BodyCarry.lightEnough(this), "carry", "Carry carcass", 5, rpg.actor.BodyCarry.lightEnough(this) ? "That body is already being carried." : "That body is too heavy to lift.", 2.2f));
         } else {
             boolean calm = goal != Goal.FLEE && goal != Goal.DEFEND && goal != Goal.WARN && goal != Goal.HUNT;
             boolean pettable = calm && (species.domestic || trustOf(a.id) > 0.3f) && species != Species.BROWN_BEAR;

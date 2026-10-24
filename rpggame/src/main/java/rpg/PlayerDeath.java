@@ -50,10 +50,12 @@ public final class PlayerDeath {
         camSet = false;
         bearingAt = -9;
         bearing = 0.45f;
-        ragdoll = g.game.reserve(KIND_RAGDOLL);
+        boolean existing = g.reactions.died(p);
+        ragdoll = existing ? p.ragdoll : g.game.reserve(KIND_RAGDOLL);
+        p.ragdoll = 0;
         boolean posed = p.posePts != null && g.time - p.poseAt < 0.5;
-        g.game.commands().ragdollCreate(ragdoll, 1, SYDNEY_HUMAN, RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), p.x, p.y, p.z, p.yaw, 0, 0, 0);
-        if (posed) g.game.commands().ragdollPose(ragdoll, p.vx, 0, p.vz, p.posePts);
+        if (!existing) g.game.commands().ragdollCreate(ragdoll, 1, SYDNEY_HUMAN, RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), p.x, p.y, p.z, p.yaw, 0, 0, 0);
+        if (!existing && posed) g.game.commands().ragdollPose(ragdoll, p.vx, 0, p.vz, p.posePts);
         g.game.commands().ragdollControl(ragdoll, CONTROL_DIE, 1);
         if (by != null && by != p) {
             float dx = p.x - by.x, dz = p.z - by.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
@@ -159,7 +161,7 @@ public final class PlayerDeath {
         active = false;
         g.respawn();
         if (grave != null) g.chat.add(secured
-                ? "Your belongings lie in a grave where you fell. Inside the walls nobody may touch it: a guard will carry it to the undertaker if you don't reach it first."
+                ? "Your belongings are Guard-secured where you fell. The watch will bury the remains and Morrow will safeguard your complete claim. Speak to him to recover it."
                 : "Your belongings lie in a grave where you fell, outside the walls. Anyone who finds it may help themselves: hurry. It stands ten minutes.", rpg.Chat.Kind.WARN);
         if (exit && g.ui != null) g.ui.toTitle();
     }

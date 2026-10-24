@@ -28,11 +28,11 @@ class UndertakerFlowTest {
             grave.secured = true; grave.expiresAt = g.time + Undertaker.GRAVE_SECONDS - 130;
             grave.contents.add(new ItemStack(Items.BREAD, 1));
             boolean carried = false;
-            for (int i = 0; i < 3600 && !grave.removed; i++) {
+            for (int i = 0; i < 3600 && !grave.buried; i++) {
                 assertTrue(game.tick(1f / 60));
                 carried |= grave.heldBy == guard.id;
             }
-            assertTrue(carried && grave.removed && g.undertaker.held() > 0,
+            assertTrue(carried && grave.buried && !grave.removed && g.undertaker.held() > 0,
                     () -> guard.goal + " " + guard.goalReason + " at " + guard.x + "," + guard.z + " held=" + grave.heldBy + " " + guard.lastOutcome);
             assertEquals(g.player.id, grave.owner);
         }

@@ -103,7 +103,7 @@ public final class ItemActions {
                 g.state.burn(d, 1);
                 g.state.commit(req, "FishReleased", a.id, 0, null, 0, d.name);
                 if (a == g.player) { g.chat.say("You slip the " + d.name.toLowerCase().replace("raw ", "") + " back into the water. It darts away."); g.honor.released(); }
-                if (g.fx != null) g.fx.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
                 yield Result.ok();
             }
             case "bury" -> {

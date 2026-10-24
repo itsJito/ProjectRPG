@@ -9,6 +9,7 @@
 #include "perception/sight.h"
 #include "impulsis/impulsis_service.h"
 #include "physics/physics_service.h"
+#include "chemistry/chemistry_service.h"
 #include "world/raycast.h"
 
 namespace astratto {
@@ -38,6 +39,7 @@ Engine::Engine(const astratto_config& cfg) : config_(cfg), pool_(extraThreads(cf
     addService(std::unique_ptr<Service>(new ModuleHost()));
     addService(std::unique_ptr<Service>(new PhysicsService()));
     addService(std::unique_ptr<Service>(new ImpulsisService()));
+    addService(std::unique_ptr<Service>(new ChemistryService()));
     addService(std::unique_ptr<Service>(new AiService()));
     addService(std::unique_ptr<Service>(new AudioService(cfg)));
 }

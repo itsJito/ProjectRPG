@@ -43,7 +43,7 @@ public final class AnimalRagdoll {
         if (f == null || f.body == null) return null;
         float vs = AnimalModels.PX * a.scale();
         AnimalRagdoll r = new AnimalRagdoll(knockdown, g.time);
-        float standY = f.bodyY, lyingY = f.bird ? f.bh * 0.45f : f.bh * 0.5f;
+        float standY = f.bodyY, lyingY = !a.alive ? f.bw * 0.5f : f.bird ? f.bh * 0.45f : f.bh * 0.5f;
         float oy = a.y + (standY + (lyingY - standY) * a.lieT) * vs;
         float cs = (float) Math.cos(a.yaw), sn = (float) Math.sin(a.yaw);
         float qw = (float) Math.cos(a.yaw / 2), qy = (float) Math.sin(a.yaw / 2);
@@ -72,11 +72,14 @@ public final class AnimalRagdoll {
             long b = piece(g, r, a, md, gp, j[0], j[1], j[2], vs, oy, cs, sn, qw, qy, mass * (float) p[3]);
             if (b == 0) continue;
             // the joint where the part meets the trunk, bending as far as that joint can
-            float wx = a.x + (cs * j[0] + sn * j[2]) * vs, wy = oy + j[1] * vs, wz = a.z + (-sn * j[0] + cs * j[2]) * vs;
+            float roll=!a.alive?1.45f*a.lieT:0,cr=(float)Math.cos(roll),sr=(float)Math.sin(roll);
+            float localX=j[0]*cr-j[1]*sr,localY=j[0]*sr+j[1]*cr;
+            float wx = a.x + (cs * localX + sn * j[2]) * vs, wy = oy + localY * vs, wz = a.z + (-sn * localX + cs * j[2]) * vs;
             float[] ax = (float[]) p[4];
-            float axx = cs * ax[0] + sn * ax[2], axz = -sn * ax[0] + cs * ax[2];
+            float localAx=ax[0]*cr-ax[1]*sr,localAy=ax[0]*sr+ax[1]*cr;
+            float axx = cs * localAx + sn * ax[2], axz = -sn * localAx + cs * ax[2];
             long jh = g.game.reserve(KIND_JOINT);
-            g.game.commands().jointCreate(jh, trunk, b, JOINT_CONE_TWIST, JOINT_LIMITED, wx, wy, wz, axx, ax[1], axz, (float) p[5], (float) p[6], 0, mass * 0.002f, 0);
+            g.game.commands().jointCreate(jh, trunk, b, JOINT_CONE_TWIST, JOINT_LIMITED, wx, wy, wz, axx, localAy, axz, (float) p[5], (float) p[6], 0, mass * 0.002f, 0);
             r.joints.add(jh);
         }
         // the blow, and the way it was going - landed high on the trunk, so the body topples rather than slides; a dead
@@ -101,11 +104,14 @@ public final class AnimalRagdoll {
         var vm = md.vox();
         // the part's middle in the figure (voxels): its joint, plus the mesh's middle from its pivot
         float cx = jx + (vm.sx / 2f - md.gx()), cy = jy + (vm.sy / 2f - md.gy()), cz = jz + (vm.sz / 2f - md.gz());
+        float roll=!a.alive?1.45f*a.lieT:0,cr=(float)Math.cos(roll),sr=(float)Math.sin(roll);
+        float localX=cx*cr-cy*sr;cy=cx*sr+cy*cr;cx=localX;
+        float halfCos=(float)Math.cos(roll/2),halfSin=(float)Math.sin(roll/2);
         float x = a.x + (cs * cx + sn * cz) * vs, y = oy + cy * vs, z = a.z + (-sn * cx + cs * cz) * vs;
         float hx = Math.max(0.02f, vm.sx * vs / 2), hy = Math.max(0.02f, vm.sy * vs / 2), hz = Math.max(0.02f, vm.sz * vs / 2);
         long b = g.game.reserve(KIND_RIGID);
         // (knocked down, the animal's own mover is still there: the pieces must not be shoved by it)
-        g.game.commands().rigidCreate(b, SHAPE_BOX, RIGID_DEBRIS | (r.knockdown ? RIGID_NO_MOVERS : 0), hx, hy, hz, Math.max(0.05f, mass), x, y, z, qw, 0, qy, 0,
+        g.game.commands().rigidCreate(b, SHAPE_BOX, RIGID_DEBRIS | (r.knockdown ? RIGID_NO_MOVERS : 0), hx, hy, hz, Math.max(0.05f, mass), x, y, z, qw*halfCos, qy*halfSin, qy*halfCos, qw*halfSin,
                 a.vx, 0, a.vz, 0, 0, 0, 0.8f, 0.02f, 0, null);
         r.pieces.add(new Piece(b, md, gp));
         return b;

@@ -282,6 +282,7 @@ public final class Items {
                 {"egg", 1, 1, 0.06f}, {"milk", 2, 2, 2f}, {"feather", 1, 1, 0.005f}, {"animal_feed", 2, 2, 5f}};
         for (Object[] r : table) { ItemDef d = find((String) r[0]); if (d == null) continue; d.gw = (int) r[1]; d.gh = (int) r[2]; d.weight = (float) r[3]; }
         for (ItemDef d : BY_ID.values()) {
+            d.conductive = d.tier != null && d.tier != Tier.LEATHER && d.tier != Tier.GRANITE || d.family == Family.JEWEL || d.family == Family.SYMBOL;
             if (d.tier == null && !d.id.startsWith("cape_")) continue;
             float metal = d.tier != null && d.tier.metal() ? 1f + d.tier.power * 0.08f : 0.5f;
             switch (d.family) {

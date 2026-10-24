@@ -52,7 +52,7 @@ final class HudFragments {
         hud.add(new Wanted(hud)).wake("law").linger(8);
         hud.add(new HonorToast(hud)).wake("honor");
         hud.add(new Target(hud)).wake("combat").linger(5);
-        hud.add(new LevelUp(hud));
+        hud.add(new Milestone(hud));
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
         hud.add(new WorkBar(hud));
         hud.add(new DialogueCard(hud));
@@ -437,6 +437,7 @@ final class HudFragments {
             float cx = hud.w / 2f, cy = hud.h / 2f;
             Player p = g.player;
             if (hud.scene == Hud.Scene.WORLD) {
+                hud.gfx.drawThrowGuide(ui);
                 ItemDef held = p.main();
                 boolean ranged = held != null && (held.family == ItemDef.Family.BOW || held.family == ItemDef.Family.CROSSBOW);
                 float gap = ranged ? 6 + 10 * (1 - p.cs.draw) : 4;
@@ -705,7 +706,7 @@ final class HudFragments {
                 if (icon != null) markers.add(new Object[]{icon, o.x, o.z});
             }
             for (Npc n : g.npcs) {
-                String icon = switch (n.role) { case MERCHANT -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
+                String icon = switch (n.role) { case MERCHANT, FENCE -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
                 if (icon != null) markers.add(new Object[]{icon, n.postX, n.postZ});
             }
             markers.add(new Object[]{"Water_source_map_icon", DevMap.WELL[0] + 0.5f, DevMap.WELL[1] + 0.5f});
@@ -996,21 +997,49 @@ final class HudFragments {
         }
     }
 
-    static final class LevelUp extends Fragment {
-        LevelUp(Hud h) { super("levelup"); fadeIn = 0.25f; fadeOut = 0.8f; }
-        @Override protected boolean active() { return hud.g.prog.celebrating != null && hud.g.time - hud.g.prog.celebratedAt < 4; }
-        @Override public float width() { return 320; }
-        @Override public float height() { return 92 + Math.min(4, hud.g.prog.revealed.size()) * 17; }
-        @Override public void draw(Ui2D ui, float x, float y) {
-            var a = hud.g.prog.celebrating;
-            if (a == null) return;
-            ui.img(Atlas.skill(a.skill()), x + 160 - 22, y, 44, 0xFFFFFFFF);
-            ui.flatCentered("Level up", x + 160, y + 48, 20, Style.ACCENT);
-            ui.flatCentered(a.skill().title + " " + a.toLevel(), x + 160, y + 72, 14, Style.TEXT);
-            // what this level revealed
-            var rev = hud.g.prog.revealed;
-            for (int i = 0; i < Math.min(4, rev.size()); i++)
-                ui.flatCentered((i == 3 && rev.size() > 4 ? "and " + (rev.size() - 3) + " more (see the skill guide)" : "Unlocked: " + rev.get(i)), x + 160, y + 94 + i * 17, 12, Style.GOOD);
+    /** One bounded queue prevents simultaneous quest rewards and skill levels from painting over each other. */
+    static final class Milestone extends Fragment {
+        private record Notice(String title,String detail,String icon,int color,List<String> unlocks) {}
+        private final java.util.ArrayDeque<Notice> pending=new java.util.ArrayDeque<>();
+        private Notice current;
+        private double since=-99;
+        Milestone(Hud h) {
+            super("levelup");fadeIn=0.25f;fadeOut=0.5f;
+            h.events.listen((type,detail)-> {
+                Notice notice=null;
+                String title=switch(type) { case "event:QuestStarted"->"Quest accepted";case "event:QuestCompleted"->"Quest complete";case "event:QuestFailed"->"Quest failed";default->null; };
+                if(title!=null)notice=new Notice(title,detail.startsWith("QT-COURIER")?"Courier":detail,"Quest_map_icon",type.endsWith("Failed")?Style.BAD:Style.ACCENT,List.of());
+                else if(type.equals("event:LevelUp")) {
+                    try {
+                        String[] fields=detail.split(" ",2),levels=fields[1].split("->",2);
+                        Skill skill=Skill.valueOf(fields[0]);int from=Integer.parseInt(levels[0]),to=Integer.parseInt(levels[1]);
+                        List<String> unlocked=new ArrayList<>();
+                        for(String line:SkillGuide.unlocks(skill)) {
+                            int space=line.indexOf(' '),need=Integer.parseInt(line.substring(0,space));
+                            if(need>from && need<=to && unlocked.size()<2)unlocked.add(line.substring(space+1));
+                        }
+                        notice=new Notice("Level up",skill.title+"  "+to,Atlas.skill(skill),Style.ACCENT,unlocked);
+                    } catch(IllegalArgumentException|IndexOutOfBoundsException ignored) { return; }
+                }
+                if(notice==null)return;
+                if(pending.size()==6)pending.removeFirst();pending.addLast(notice);
+            });
+        }
+        @Override protected boolean active() {
+            if((current==null || hud.now-since>4.2) && !pending.isEmpty()) { current=pending.removeFirst();since=hud.now; }
+            return current!=null && hud.now-since<3.5;
+        }
+        @Override public float width(){return 360;}
+        @Override public float height(){return 108+(current==null?0:current.unlocks.size()*17);}
+        @Override public void draw(Ui2D ui,float x,float y) {
+            if(current==null)return;
+            y+=hud.fragment("honor").alpha*88-(1-alpha)*12;
+            ui.rect(x,y,360,height(),0xF814171C);ui.border(x,y,360,height(),1,0x70D8B46A);
+            ui.rect(x+60,y,240,2,current.color);
+            ui.img(current.icon,x+160,y+10,40,0xFFFFFFFF);
+            ui.flatCentered(current.title,x+180,y+56,20,current.color);
+            ui.flatCentered(current.detail,x+180,y+82,14,Style.TEXT);
+            for(int i=0;i<current.unlocks.size();i++)ui.flatCentered("Unlocked: "+current.unlocks.get(i),x+180,y+106+i*17,11,Style.GOOD);
         }
     }
 

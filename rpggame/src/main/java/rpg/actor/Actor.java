@@ -10,8 +10,8 @@ import rpg.skill.Skill;
 import rpg.skill.Skills;
 
 /**
- * Anyone who can act and be hurt: the player and every NPC share this record (GDD 3.3: tiered parity - NPCs train the
- * same skills on the same table, carry real inventories and equipment, and fight with the same combat rules). The
+ * Anyone who can act and be hurt: the player and every NPC share this record (GDD 3.3: tiered parity - NPCs have fixed profiles on the
+ * same skill table, carry real inventories and equipment, and fight with the same combat rules). The
  * engine owns the body (a mover); this is the rules' side of it.
  */
 public class Actor {
@@ -30,6 +30,8 @@ public class Actor {
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
+    public float eatenMinutes;
+    public double nextSplash;
     /** Blood on the body itself, splash by splash where it landed (painted onto the figure). */
     public final Blood blood = new Blood();
     /** When this body last cried out (hurt cries are not repeated faster than a breath). */
@@ -40,6 +42,11 @@ public class Actor {
     public double poseAt = -1;
     /** The figure's animation memory is to be started afresh (the body was handed back from Sydney somewhere else). */
     public boolean poseReset;
+    /** Human physical reaction body; animal articulation has its own typed body record. */
+    public long ragdoll;
+    public boolean reacting, wentDown;
+    public double reactSince;
+    public rpg.objects.GroundItem dropped;
     /** Creeping: low and slow, harder to see and to hear (stealth). */
     public boolean sneaking;
     /** Actual native stance, including being unable to stand beneath a low ceiling. */
@@ -129,7 +136,10 @@ public class Actor {
     /** Time toward the next point of Mana (seconds of play), kept across saves so no partial minute is lost or doubled. */
     public float manaAcc;
     /** The spells on this body: mist (Gaseous Form), surer hands (Enhance Ability), a stranger's face (Disguise Self), seconds left. */
-    public float gaseousT, enhanceT, disguiseT;
+    public float gaseousT, enhanceT, disguiseT, morphT, chronoT;
+    public long summonOwner;
+    public double summonUntil;
+    public float actionRate() { return chronoT > 0 ? 0.45f : 1; }
     public void restore() { hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }

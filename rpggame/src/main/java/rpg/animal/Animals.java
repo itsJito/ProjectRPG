@@ -247,13 +247,33 @@ public final class Animals {
     private void makeRagdoll(Animal a, float jx, float jy, float jz, boolean knockdown) {
         int live = 0;
         Animal oldest = null;
-        for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
-        if (live >= MAX_RAGDOLLS && oldest != null) dropRagdoll(oldest);
+        for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && o.carriedBy==0 && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
+        if (live >= MAX_RAGDOLLS) { if(oldest==null)return;dropRagdoll(oldest); }
         a.ragdoll = AnimalRagdoll.create(g, a, jx, jy, jz, knockdown);
         if (a.ragdoll != null) ragdolls++;
     }
 
-    void dropRagdoll(Animal a) { if (a.ragdoll != null) { a.ragdoll.release(g); a.ragdoll = null; } }
+    void dropRagdoll(Animal a) {
+        if(a.ragdoll==null)return;
+        if(!a.alive && !a.butchered)captureRest(a);else a.restPose.clear();
+        a.ragdoll.release(g);a.ragdoll=null;
+    }
+    private void captureRest(Animal a) {
+        if(a.ragdoll==null)return;
+        for(var piece:a.ragdoll.pieces) { var body=g.lastRigids.body(piece.body());if(body!=null)a.restPose.put(piece.part(),body); }
+    }
+    /** Re-enter physics only when needed; visible settled bodies remain interactable after load or budget eviction. */
+    public boolean ensurePhysical(Animal a) {
+        if(a.alive || a.butchered || !a.loaded)return false;
+        if(a.ragdoll!=null)return true;
+        makeRagdoll(a,0,0,0,false);
+        if(a.ragdoll==null)return false;
+        for(var piece:a.ragdoll.pieces) {
+            var rest=a.restPose.get(piece.part());if(rest==null)continue;
+            g.game.commands().rigidPlace(piece.body(),rest.x,rest.y,rest.z,rest.qw,rest.qx,rest.qy,rest.qz,0,0,0,0,0,0);
+        }
+        return true;
+    }
 
     /**
      * Each tick for a body in physics' hands: the animal is where its trunk is; a knocked-down one is handed back to its
@@ -323,9 +343,12 @@ public final class Animals {
     }
 
     /** A carcass worth eating within reach (one not picked clean). */
-    Animal carcassNear(Animal a, float r) {
-        Animal best = null;
-        for (Animal c : animals) if (c.carcass() && !c.butchered && c.loaded && c.distTo(a) < r && c.species != a.species && (best == null || c.distTo(a) < best.distTo(a))) best = c;
+    Actor carcassNear(Animal a, float radius) {
+        Actor best=null; float distance=radius;
+        for(Animal corpse:animals) if(corpse.carcass() && !corpse.butchered && corpse.loaded && corpse.carriedBy==0 && corpse.species!=a.species && corpse.distTo(a)<distance) { best=corpse; distance=corpse.distTo(a); }
+        for(rpg.ai.Npc corpse:g.npcs) if(!corpse.alive && corpse.corpse!=0 && corpse.ragdoll!=0 && corpse.carriedBy==0 && corpse.summonOwner==0 && corpse.distTo(a)<distance
+                && g.objects.get(corpse.corpse) instanceof rpg.objects.Corpse object && !object.removed) { best=corpse; distance=corpse.distTo(a); }
+        if(best!=null && !g.vox.sight(a.x,a.eyeY(),a.z,best.x,best.y+0.25f,best.z))return null;
         return best;
     }
 
@@ -481,6 +504,7 @@ public final class Animals {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
             if (!a.loaded) continue;
+            g.game.commands().agentRate(a.agent,a.actionRate()*(a.cs.slowT>0?0.6f:1));
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
             if (a.puppet) { face(a, dt); continue; }
             double due = nextSense.getOrDefault(a.id, 0.0);
@@ -668,9 +692,33 @@ public final class Animals {
     }
 
     /** A scavenger or predator eats at a carcass: its meat goes, and with it what a butcher could take. */
-    void eat(Animal c, float dm) {
-        c.eatenMinutes += dm;
-        if (c.eatenMinutes > 30 + c.species.meat * 12) { c.butchered = true; c.lastEvent = "eaten"; }
+    void eat(Animal feeder,Actor corpse,float dm) {
+        float total=corpse instanceof Animal animal?30+animal.species.meat*12:90;
+        corpse.eatenMinutes+=dm;
+        if(g.time-feeder.lastBite>1.2) {
+            feeder.lastBite=g.time;
+            g.gore.pool(corpse.x,corpse.z,0.2f,corpse.id,0);
+            var wound=g.gore.of(corpse);
+            var parts=new rpg.combat.Gore.Part[]{rpg.combat.Gore.Part.ARM_L,rpg.combat.Gore.Part.LEG_R,rpg.combat.Gore.Part.ARM_R,rpg.combat.Gore.Part.LEG_L,rpg.combat.Gore.Part.HEAD};
+            int eaten=(int)(corpse.eatenMinutes/total*parts.length);
+            for(int i=0;i<Math.min(eaten,parts.length);i++)if(!wound.lost(parts[i])) {
+                if(corpse instanceof Animal animal)g.gore.severAnimal(animal,parts[i],0,0,feeder);
+                else g.gore.sever(corpse,parts[i],0,0,feeder);
+                break;
+            }
+            if(g.sfx!=null)g.sfx.play("soft.heavy",corpse.x,corpse.y,corpse.z,0.25f);
+        }
+        if(corpse.eatenMinutes<total)return;
+        if(corpse instanceof Animal animal) { animal.butchered=true; animal.lastEvent="eaten"; dropRagdoll(animal); }
+        else if(corpse instanceof rpg.ai.Npc dead && g.objects.get(dead.corpse) instanceof rpg.objects.Corpse body) {
+            // Flesh can be consumed; possessions cannot disappear with it.
+            var items=new ArrayList<>(body.contents.stacks()); items.addAll(dead.eq.stacks());
+            for(ItemStack item:items)g.objects.drop(item,dead.x,dead.y+0.1f,dead.z);
+            body.contents.clear(); dead.eq.clear(); body.removed=true; dead.corpse=0;
+            if(dead.ragdoll!=0)g.game.commands().release(dead.ragdoll); dead.ragdoll=0;
+        }
+        for(var limb:new ArrayList<>(g.gore.limbs))if(limb.owner==corpse.id) { g.game.commands().release(limb.body);g.gore.limbs.remove(limb); }
+        feeder.nextThink=0;
     }
 
     // ------------------------------------------------------------------ the tiers: near animals in full, far wild ones as cohort counts
@@ -758,6 +806,11 @@ public final class Animals {
             if (a.puppet) continue;
             Map<String, Object> m = new java.util.LinkedHashMap<>();
             m.put("id", a.id); m.put("sp", a.species.name()); m.put("baby", a.baby); m.put("female", a.female); m.put("alive", a.alive);
+            if(!a.alive)captureRest(a);
+            java.util.List<Object> rest=new ArrayList<>();
+            for(var entry:a.restPose.entrySet()) { var b=entry.getValue();rest.add(java.util.Map.of("part",entry.getKey().name(),"x",b.x,"y",b.y,"z",b.z,"qw",b.qw,"qx",b.qx,"qy",b.qy,"qz",b.qz)); }
+            m.put("restPose",rest);
+            m.put("y",(double)a.y);
             m.put("x", (double) a.x); m.put("z", (double) a.z); m.put("yaw", (double) a.yaw); m.put("hp", (double) a.hp);
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
             m.put("home", a.home == null ? "" : a.home.id); m.put("hx", (double) a.homeX); m.put("hz", (double) a.homeZ); m.put("range", (double) a.range);
@@ -817,7 +870,15 @@ public final class Animals {
             if (tr != null) for (var e : tr.entrySet()) a.trust.put(Long.parseLong(e.getKey()), ((Number) e.getValue()).floatValue());
             a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
             a.hp = a.alive ? (float) astratto.util.Json.num(m, "hp", a.maxHp()) : 0;
-            a.y = DevMap.FLOOR;
+            a.y = (float)astratto.util.Json.num(m,"y",DevMap.FLOOR);
+            if(!a.alive)a.lieT=1;
+            var poses=astratto.util.Json.list(m,"restPose");
+            if(poses!=null)for(Object entry:poses)if(entry instanceof Map<?,?> raw) {
+                @SuppressWarnings("unchecked") Map<String,Object> pose=(Map<String,Object>)raw;
+                var b=new Snapshots.Rigid();b.x=(float)astratto.util.Json.num(pose,"x",a.x);b.y=(float)astratto.util.Json.num(pose,"y",a.y);b.z=(float)astratto.util.Json.num(pose,"z",a.z);
+                b.qw=(float)astratto.util.Json.num(pose,"qw",1);b.qx=(float)astratto.util.Json.num(pose,"qx",0);b.qy=(float)astratto.util.Json.num(pose,"qy",0);b.qz=(float)astratto.util.Json.num(pose,"qz",0);
+                a.restPose.put(rpg.combat.Gore.Part.valueOf(astratto.util.Json.str(pose,"part","TORSO")),b);
+            }
             animals.add(a);
             if (a.alive) spawnBody(a); else a.loaded = true;
         }

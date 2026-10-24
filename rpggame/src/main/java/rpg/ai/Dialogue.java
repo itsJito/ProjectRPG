@@ -56,6 +56,16 @@ public final class Dialogue {
                         + "back to it quick: anyone may help themselves. Either way, after ten minutes I fetch what's left. " + rpg.law.Undertaker.FEE + " coins to have it back, "
                         + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. I'll take it out of your own purse if that's all you have.")));
             }
+            case BEGGAR -> d.choice("Offer a loaf of bread.", () -> {
+                if (!g.player.has(Items.BREAD, 1) || !n.canStore(new ItemStack(Items.BREAD, 1))) { g.chat.warn("You need a loaf to spare."); return; }
+                for (ItemStack loaf : g.player.takeItems(Items.BREAD, 1)) n.store(loaf);
+                n.hunger = Math.max(0, n.hunger - 0.25f); g.ai.say(n, "Bless you. A warm meal at last.");
+                g.state.commit("FoodGiven", g.player.id, n.id, n.homeJurisdiction, 0, "bread");
+            });
+            case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "Food restores the body. I share what I carry with the wounded, but my supplies are finite. The shops will buy herbs and berries.")));
+            case PRIEST -> d.choice("Who tends the dead?", () -> g.ui.dialog(new Dialog(n.name, "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.")));
+            case SCHOLAR -> d.choice("Where can I sell questionable goods?", () -> g.ui.dialog(new Dialog(n.name, "Silas keeps a quiet nook behind Store B, in JUR-BETA. He buys stolen goods, at a price. I would keep that conversation away from the watch.")));
+            case HUNTER -> d.choice("Any advice for the wilderness?", () -> g.ui.dialog(new Dialog(n.name, "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.")));
             case THIEF -> d.choice("Got anything for me?", () -> g.ui.dialog(new Dialog(n.name, "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.")));
             default -> { }
         }
@@ -97,6 +107,11 @@ public final class Dialogue {
             case UNDERTAKER -> g.undertaker.held() > 0 ? "I have your belongings. Take your time; they're safe here." : pick(n, "Mind your step among the stones.", "Every name here belonged to someone. Remember that.", "If you need to make arrangements, I'll hear you out.");
             case FARMER -> pick(n, "Shut the gate behind you. They take any chance to wander.", "The stock eats before I do, most mornings.", "Hands away from the feed unless you're helping.");
             case BANDIT -> pick(n, "That's close enough. Keep your hands where I can see them.", "You're on the wrong road, friend.", "Looking for trouble, or merely lost?");
+            case BEGGAR -> pick(n, "A loaf to spare? I'll remember the kindness.", "The cold finds you quicker without a roof.");
+            case HEALER -> pick(n, "Let me see that wound. Have you eaten?", "I can share what I have. There isn't much.");
+            case PRIEST -> pick(n, "We keep their names, even when their stories are lost.", "Walk gently among the stones.");
+            case HUNTER -> pick(n, "The wind carries your scent farther than your footsteps.", "Never stand between a mother and her young.");
+            case SCHOLAR -> pick(n, "A story is only as sound as its witness.", "I collect accounts, not certainties. What have you seen?");
             case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");
         };
     }

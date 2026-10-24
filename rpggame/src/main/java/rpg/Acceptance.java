@@ -209,7 +209,7 @@ public final class Acceptance {
         long ups = g.prog.levelUps;
         g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(3) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
         frames(20);
-        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && g.prog.celebrating != null && g.chat.contains("Cooking level is now 3"));
+        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelup").alpha > 0 && g.chat.contains("Cooking level is now 3"));
         shot("03-level-up");
     }
 
@@ -685,7 +685,7 @@ public final class Acceptance {
         tp(70.5f, 30.5f, 0);    // walk away; the witness goes to the law on her own
         boolean reported = false;
         for (int i = 0; i < 4800 && !reported; i++) { frames(1); reported = g.law.bounty(g.player.id, DevMap.ALPHA) > before; }
-        need("the witness travelled to the lawman and reported: JUR-ALPHA bounty " + g.law.bounty(g.player.id, DevMap.ALPHA), reported);
+        need("the witness travelled to the lawman and reported: DevCity bounty " + g.law.bounty(g.player.id, DevMap.ALPHA), reported);
         need("the bounty is half the stolen value, in Alpha only", g.law.bounty(g.player.id, DevMap.ALPHA) == before + Math.max(1, Math.round(Items.BREAD.value * 0.5f)) && g.law.bounty(g.player.id, DevMap.BETA) == 0);
         // whoever saw it and reported it walked to the lawman to do so (the report is made in person)
         Npc reporter = null;
@@ -742,7 +742,7 @@ public final class Acceptance {
         g.teleport(eda, bram.x + 1.2f, DevMap.FLOOR, bram.z + 1.2f);
         frames(2);
         Result rep = g.law.report(eda, m, bram);
-        need("wanted in JUR-ALPHA (bounty " + g.law.bounty(g.player.id, DevMap.ALPHA) + ")", rep.committed() && g.law.bounty(g.player.id, DevMap.ALPHA) > 0);
+        need("wanted in DevCity (bounty " + g.law.bounty(g.player.id, DevMap.ALPHA) + ")", rep.committed() && g.law.bounty(g.player.id, DevMap.ALPHA) > 0);
         // the guard comes to arrest; the player strikes him first
         tp(cole.x + 2.0f, cole.z, (float) Math.PI / 2);
         for (int i = 0; i < 240 && cole.goal != Brain.Goal.FIGHT; i++) frames(1);
@@ -1626,15 +1626,17 @@ public final class Acceptance {
         var grave = graves.isEmpty() ? null : graves.get(graves.size() - 1);
         if (grave == null) return;
         need("a grave outside the walls is exposed, with ten minutes to stand", !grave.secured && Math.abs(g.undertaker.left(grave) - 600) < 10);
-        // the ten minutes run out: what is left goes to the undertaker, for a fee with the outside surcharge
+        // Expiry schedules a real journey; it never teleports the possessions into a service chest.
         grave.expiresAt = g.time;
         frames(3);
-        need("when the time is up the grave goes to the undertaker (" + g.undertaker.claims.size() + " claim, " + g.undertaker.held() + " held, fee " + g.undertaker.fee() + ")",
-                grave.removed && g.undertaker.held() > 0 && g.undertaker.fee() == rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE);
+        need("an expired outside grave waits for actual collection", !grave.buried && g.undertaker.held()==0);
+        for(int i=0;i<120*60 && !grave.buried;i++)frames(1);
+        need("the undertaker physically collects and buries the expired grave (" + g.undertaker.claims.size() + " claim, " + g.undertaker.held() + " held, fee " + g.undertaker.fee() + ")",
+                grave.buried && g.undertaker.held() > 0 && g.undertaker.fee() == rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE);
         Npc morrow = npc(Ids.UNDERTAKER);
         g.teleport(p, morrow.x + 1, DevMap.FLOOR, morrow.z);
         frames(3);
-        int before = p.count(rpg.item.Items.COINS) + g.objects.custody.contents.count(rpg.item.Items.COINS);
+        int before = p.count(rpg.item.Items.COINS) + grave.contents.count(rpg.item.Items.COINS);
         g.give(p, rpg.item.Items.COINS, 60);
         var r = g.undertaker.redeem(p, morrow);
         need("the undertaker hands it all back for his fee (" + r.status() + ", ring back: " + p.has(rpg.item.Items.get("gold_ring"), 1) + ")",
@@ -1654,8 +1656,8 @@ public final class Acceptance {
             cole.hunt = null; cole.fightTarget = 0; cole.nextThink = 0; cole.investigation = null; cole.aware.clear();
             g.teleport(cole, town.x + 6, DevMap.FLOOR, town.z);
             boolean carried2 = false;
-            for (int i = 0; i < 60 * 60 && !town.removed; i++) { frames(1); carried2 |= town.heldBy == cole.id; if (i % 60 == 0) { cole.investigation = null; cole.aware.clear(); } }
-            need("a guard gathers it up and carries it to the undertaker (" + carried2 + ", " + cole.lastOutcome + ")", carried2 && town.removed && g.undertaker.held() > 0);
+            for (int i = 0; i < 60 * 60 && !town.buried; i++) { frames(1); carried2 |= town.heldBy == cole.id; if (i % 60 == 0) { cole.investigation = null; cole.aware.clear(); } }
+            need("a guard gathers it up and carries it to the undertaker (" + carried2 + ", " + cole.lastOutcome + ")", carried2 && town.buried && g.undertaker.held() > 0);
             g.give(p, rpg.item.Items.COINS, 30);
             g.teleport(p, morrow.x + 1, DevMap.FLOOR, morrow.z);
             frames(3);

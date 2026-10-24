@@ -114,14 +114,6 @@ public final class Fx {
         add(2, x + s() * 0.12f, y, z + s() * 0.12f, s() * 0.1f, -0.4f, s() * 0.1f, 0.045f, 0.32f, 0.015f, 0.015f, 1, 0.5f, 14, 0.2f);
     }
 
-    public void flame(float x, float y, float z, float scale) {
-        add(0, x + s() * 0.15f * scale, y, z + s() * 0.15f * scale, 0, 0.9f, 0, 0.32f * scale, 1, 1, 1, 0.95f, 0.65f + rnd.nextFloat() * 0.3f, -0.5f, 0.6f);
-        if (rnd.nextFloat() < 0.15f) add(1, x, y + 0.5f * scale, z, s() * 0.2f, 0.7f, s() * 0.2f, 0.35f * scale, 0.32f, 0.32f, 0.34f, 0.35f, 2.2f, -0.1f, 0.3f);
-    }
-
-    public void splash(float x, float y, float z) {
-        for (int i = 0; i < 6; i++) add(2, x + s() * 0.4f, y, z + s() * 0.4f, s() * 0.6f, 1.2f + rnd.nextFloat(), s() * 0.6f, 0.05f, 0.8f, 1, 1.3f, 0.8f, 0.6f, 9, 0.5f);
-    }
 
     public void ring(float x, float y, float z, float size, float r, float g, float b) { add(4, x, y + 0.05f, z, 0, 0, 0, size, r, g, b, 1, 0.7f, 0, 0); }
 

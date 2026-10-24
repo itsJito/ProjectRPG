@@ -276,18 +276,23 @@ public final class Gore {
     /** Stains where a spray lands: rays from the wound along the blow and down, stopping at the first face. */
     /** (whose blood, and who drew it: evidence keeps both, so an outlaw's blood is known as one) */
     private void spatter(float px, float py, float pz, float dx, float dz, float amount, long source, long culprit) {
-        int rays = 2 + Math.min(9, (int) (amount * 18));
+        int rays = 4 + Math.min(10, (int) (amount * 20));
         for (int i = 0; i < rays; i++) {
-            float sx = dx + (rnd.nextFloat() - 0.5f) * 0.9f, sz = dz + (rnd.nextFloat() - 0.5f) * 0.9f, sy = -0.15f - rnd.nextFloat() * 0.9f;
-            Voxels.Hit h = g.vox.ray(px, py, pz, sx, sy, sz, 3.4f, true);
+            float sx = dx + (rnd.nextFloat() - 0.5f) * 0.9f, sz = dz + (rnd.nextFloat() - 0.5f) * 0.9f, sy = (rnd.nextFloat() - 0.55f) * 1.3f;
+            Voxels.Hit h = g.vox.ray(px, py, pz, sx, sy, sz, 4.2f, true);
             if (!h.hit || h.block == Blocks.WATER) continue;
             float size = 0.22f + rnd.nextFloat() * 0.34f + Math.min(0.45f, amount);
-            stain(h.x, h.y, h.z, h.nx, h.ny, h.nz, size);
+            surfaceStain(h.x,h.y,h.z,h.nx,h.ny,h.nz,size);
+            for(int drop=0;drop<2;drop++) {
+                float u=(rnd.nextFloat()-0.5f)*0.7f,v=(rnd.nextFloat()-0.5f)*0.7f;
+                float x=h.x+(h.nx==0?u:0),y=h.y+(h.ny==0?v:0),z=h.z+(h.nx!=0?u:h.ny!=0?v:0);
+                surfaceStain(x,y,z,h.nx,h.ny,h.nz,size*(0.12f+rnd.nextFloat()*0.15f));
+            }
             if (h.ny > 0) evidence(Kind.BLOOD, h.x, h.y, h.z, size * 0.6f, source, culprit);
             else if (amount > 0.12f) {
                 // on a wall it runs: a streak of smaller stains below the splash, the heavier the blow the longer
                 int run = 2 + (int) Math.min(5, amount * 12);
-                for (int k = 1; k <= run; k++) stain(h.x + h.nx * 0.002f, h.y - k * size * 0.32f, h.z + h.nz * 0.002f, h.nx, h.ny, h.nz, size * (0.55f - k * 0.05f));
+                for (int k = 1; k <= run; k++) surfaceStain(h.x + h.nx * 0.002f, h.y - k * size * 0.32f, h.z + h.nz * 0.002f, h.nx, h.ny, h.nz, size * (0.55f - k * 0.05f));
             }
         }
     }
@@ -308,8 +313,9 @@ public final class Gore {
     /** Blood on the floor under someone (a drip, a wound, the pool round a body). */
     public void pool(float x, float z, float size, long source, long culprit) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-        int top = DevMap.FLOOR - 1;
-        for (int y = DevMap.FLOOR + 2; y >= 1; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
+        Actor owner=g.actor(source);int from=(int)Math.floor(owner==null?DevMap.FLOOR+2:owner.y+owner.height);
+        int top = 0;
+        for (int y = Math.min(DevMap.SY-1,from); y >= 0; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
         if (g.vox.block(bx, top + 1, bz) == Blocks.WATER) return;   // into water: it washes away
         float y = top + 1;
         stain(x + (rnd.nextFloat() - 0.5f) * 0.2f, y, z + (rnd.nextFloat() - 0.5f) * 0.2f, 0, 1, 0, size);
@@ -318,10 +324,15 @@ public final class Gore {
         evidence(Kind.BLOOD, x, y, z, size, source, culprit);
     }
 
+    private void surfaceStain(float x,float y,float z,float nx,float ny,float nz,float size) {
+        if(!g.vox.solid((int)Math.floor(x-nx*0.03f),(int)Math.floor(y-ny*0.03f),(int)Math.floor(z-nz*0.03f)))return;
+        stain(x,y,z,nx,ny,nz,size);
+    }
+
     private void stain(float x, float y, float z, float nx, float ny, float nz, float size) {
         stains.add(new Stain(x, y, z, nx, ny, nz, size, rnd.nextFloat() * 6.28f));
         stainCount++;
-        if (stains.size() > 400) stains.remove(0);
+        if (stains.size() > 512) stains.remove(0);
     }
 
     private Evidence evidence(Kind k, float x, float y, float z, float size, long source, long culprit) {

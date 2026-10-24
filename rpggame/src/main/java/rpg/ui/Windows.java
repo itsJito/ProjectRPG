@@ -61,7 +61,7 @@ final class Windows {
             boolean theft = c.isTheft(g.player);
             ui.text(c.name, x, y, Style.TITLE, Style.ACCENT);
             ui.text(theft ? "Owned by " + g.nameOf(c.owner) + ": taking is theft" : c.owner == g.player.id ? "Yours" : "Free to take", x, y + 20, 11, theft ? Style.BAD : Style.DIM);
-            float cs = Math.min(26, 268f / c.contents.w);
+            float cs = Math.min(Math.min(26, 268f / c.contents.w), (wh - 120) / c.contents.h);
             hud.inventory.drawGrid(ui, c.contents, x, y + 40, cs, InventoryPanel.Source.CONTAINER);
             float by = y + 40 + c.contents.h * cs + 10;
             // a body: what they still wear, as it is on them - a piece taken comes off the body

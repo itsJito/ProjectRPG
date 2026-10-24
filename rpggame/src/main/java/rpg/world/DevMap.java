@@ -20,7 +20,7 @@ public final class DevMap {
     public static final int DOOR_HEIGHT = 2;
 
     /** The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). */
-    public static final String ALPHA = "JUR-ALPHA", BETA = "JUR-BETA", WILDS = "WILDS";
+    public static final String ALPHA = "DevCity", BETA = "JUR-BETA", WILDS = "WILDS";
 
     public static String jurisdiction(double x, double z) {
         if (x >= 82 && z >= 46) return ALPHA;
@@ -164,7 +164,7 @@ public final class DevMap {
             {"DEBUG / CONTROL ZONE", 64.5f, 62.5f}, {"MOVEMENT / COMBAT LANE", 30.5f, 44.5f}, {"HOSTILE PEN", 21.5f, 69.5f},
             {"ARCHERY RANGE", 14.5f, 59.5f}, {"INTERACTION SHED", 55.5f, 24f}, {"WORKSTATIONS", 68.5f, 28.5f}, {"BUILD SPOT", 77.5f, 29.5f},
             {"MINING ROCKS", 54.5f, 38.5f}, {"TREE GROVE", 96.5f, 18.5f}, {"FISHING POND", 96.5f, 42f}, {"PATCHES", 72.5f, 36.5f},
-            {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (JUR-ALPHA)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
+            {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
             {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (JUR-BETA)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
             {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}};
 

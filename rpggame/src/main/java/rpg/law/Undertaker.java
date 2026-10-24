@@ -20,9 +20,9 @@ import rpg.world.DevMap;
  * carried and wore in one grave where the body lay - made when they come back, not before (the death screen shows the
  * body). The death site is classified once: inside a town's boundary the grave is the city's to secure (no one may loot
  * it, and a guard comes to carry it to the undertaker); outside, it lies exposed, and anyone who finds it may help
- * themselves. Either way the player may reclaim it in person while it stands. A grave stands ten minutes: then what is
- * left of it goes to the undertaker's chest, as it does when a guard brings it in, and the undertaker releases it for a
- * fee (more for a recovery from outside the walls). Every item moves exactly once: grave -> custody -> player.
+ * themselves. The player may reclaim an exposed grave while it stands. After ten minutes the undertaker travels to collect it;
+ * secured town graves wait for the watch. Burial retains the originals in a named gravestone, released for a fee
+ * (more for recovery outside the walls). Every item moves exactly once: grave -> memorial -> player.
  */
 public final class Undertaker {
     /** How long a grave stands (seconds of play) before what is left goes to the undertaker. */
@@ -36,6 +36,7 @@ public final class Undertaker {
         public final boolean outside;
         public final String from;
         public int fee;
+        public long holder;
         Claim(long id, boolean outside, String from, int fee) { this.id = id; this.outside = outside; this.from = from; this.fee = fee; }
     }
 
@@ -47,7 +48,7 @@ public final class Undertaker {
     /** The player's standing graves (not yet collected), oldest first. */
     public List<Container> graves() {
         List<Container> l = new ArrayList<>();
-        for (var o : g.objects.all()) if (o instanceof Container c && !c.removed && c.kind.equals("grave") && c.owner == g.player.id) l.add(c);
+        for (var o : g.objects.all()) if (o instanceof Container c && !c.removed && c.kind.equals("grave") && !c.buried && c.owner == g.player.id) l.add(c);
         return l;
     }
 
@@ -59,12 +60,13 @@ public final class Undertaker {
             if (c.heldBy != 0) {
                 // carried by a guard: the bundle is where the guard is
                 Actor guard = g.actor(c.heldBy);
-                if (guard == null || !guard.alive) { c.heldBy = 0; continue; }
+                if (guard == null || !guard.alive || guard instanceof Npc worker && worker.goal!=rpg.ai.Brain.Goal.COLLECT) { c.heldBy = 0; continue; }
                 c.x = guard.x; c.z = guard.z;
                 continue;
             }
             if (c.contents.isEmpty()) { c.removed = true; g.state.commit("GraveEmptied", g.player.id, c.id, DevMap.jurisdiction(c.x, c.z), 0, c.name); continue; }
-            if (g.time >= c.expiresAt) toCustody(c, "its time ran out");
+            // City claims wait safely for the watch. Exposed claims schedule a real undertaker journey.
+            if(!c.secured && g.time>=c.expiresAt && g.actor(Ids.UNDERTAKER) instanceof Npc collector && collector.alive)collector.nextThink=0;
         }
     }
 
@@ -73,6 +75,13 @@ public final class Undertaker {
      * if the grave lay outside the walls). The grave is gone.
      */
     public void toCustody(Container grave, String how) {
+        if (claims.stream().anyMatch(claim->claim.id==grave.id))return;
+        if (grave.buried) {
+            Claim claim = new Claim(grave.id, !grave.secured, "the graveyard", FEE + (grave.secured ? 0 : OUTSIDE_SURCHARGE));
+            claim.holder = grave.id; claims.add(claim); grave.heldBy = 0;
+            g.state.commit("GraveToUndertaker", 0, grave.id, DevMap.jurisdiction(grave.x, grave.z), 0, "originals secured in the gravestone");
+            return;
+        }
         Container chest = g.objects.custody;
         int moved = 0;
         for (int i = 0; i < grave.contents.size(); i++) {
@@ -98,7 +107,7 @@ public final class Undertaker {
     /** The player's goods in the undertaker's keeping. */
     public int held() {
         int n = 0;
-        for (ItemStack s : g.objects.custody.contents.stacks()) if (s.owner == 0 || s.owner == g.player.id) n++;
+        for (Container holder : holders()) for (ItemStack s : holder.contents.stacks()) if(recoverable(holder,s))n++;
         return n;
     }
 
@@ -106,27 +115,45 @@ public final class Undertaker {
      * Redeems every claim: the fee paid from the coins the player carries, or - what the undertaker accepts - from the
      * coins held in their own claim; then everything held is theirs again (what will not fit is set at their feet).
      */
+    private List<Container> holders() {
+        List<Container> result = new ArrayList<>();
+        if(claims.stream().anyMatch(c->c.holder==0))result.add(g.objects.custody);
+        for (Claim claim : claims) if (claim.holder != 0 && g.objects.get(claim.holder) instanceof Container c && !result.contains(c)) result.add(c);
+        return result;
+    }
+
+    private boolean recoverable(Container holder,ItemStack item) {
+        // Old saves share the evidence chest. New memorial claims hold their exact originals, even stolen gear.
+        return item!=null && item.amount>0 && (holder!=g.objects.custody || item.owner==0 || item.owner==g.player.id);
+    }
+
     public Result redeem(Actor a, Npc undertaker) {
         if (claims.isEmpty() || held() == 0) return Result.no("The undertaker holds nothing of yours.");
         int fee = fee();
-        Container chest = g.objects.custody;
-        int carried = a.count(Items.COINS), inClaim = chest.contents.count(Items.COINS);
+        List<Container> holders = holders();
+        int carried = a.count(Items.COINS), inClaim = 0;
+        for (Container holder : holders) for(ItemStack item:holder.contents.stacks())if(item.def==Items.COINS && recoverable(holder,item))inClaim+=item.amount;
         if (carried + inClaim < fee) return Result.no("The undertaker wants " + fee + " coins, and you have " + (carried + inClaim) + " all told.");
+        if(!undertaker.canStore(new ItemStack(Items.COINS,fee,undertaker.id,false,undertaker.id)))return Result.no("The undertaker has no room to receive payment.");
         long req = g.state.newRequestId();
-        int fromPurse = Math.min(fee, carried), fromClaim = fee - fromPurse;
+        int fromPurse = Math.min(fee, carried), fromClaim = fee - fromPurse; boolean paidFromClaim = fromClaim > 0;
         if (fromPurse > 0) for (ItemStack s : a.takeItems(Items.COINS, fromPurse)) undertaker.store(new ItemStack(s.def, s.amount, undertaker.id, false, undertaker.id));
-        if (fromClaim > 0) for (ItemStack s : chest.contents.remove(Items.COINS, fromClaim)) undertaker.store(new ItemStack(s.def, s.amount, undertaker.id, false, undertaker.id));
+        if (fromClaim > 0) for (Container holder : holders) for(int i=0;i<holder.contents.size() && fromClaim>0;i++) {
+            ItemStack item=holder.contents.get(i);if(!recoverable(holder,item) || item.def!=Items.COINS)continue;
+            int take=Math.min(fromClaim,item.amount);ItemStack paid=holder.contents.take(i,take);
+            undertaker.store(new ItemStack(paid.def,paid.amount,undertaker.id,false,undertaker.id));fromClaim-=take;
+        }
         int back = 0;
-        for (int i = 0; i < chest.contents.size(); i++) {
+        for (Container chest : holders) for (int i = 0; i < chest.contents.size(); i++) {
             ItemStack s = chest.contents.get(i);
-            if (s == null || !(s.owner == 0 || s.owner == a.id)) continue;
+            if (!recoverable(chest,s)) continue;
             chest.contents.set(i, null);
             if (!a.store(s)) g.objects.drop(s, a.x, a.y + 0.05f, a.z);
             back += s.amount;
         }
         g.state.commit(req, "ClaimRedeemed", a.id, undertaker.id, DevMap.jurisdiction(undertaker.x, undertaker.z), 0, fee + " coins for " + back + " item(s)");
         claims.clear();
-        if (a == g.player) g.chat.say(undertaker.name + " hands back your belongings for " + fee + " coins" + (fromClaim > 0 ? " (taken from your own purse in his keeping)." : "."));
+        if (a == g.player) g.chat.say(undertaker.name + " hands back your belongings for " + fee + " coins" + (paidFromClaim ? " (taken from your own purse in his keeping)." : "."));
         return Result.ok();
     }
 
@@ -134,7 +161,7 @@ public final class Undertaker {
     public Map<String, Object> save() {
         Map<String, Object> m = new HashMap<>();
         List<Object> l = new ArrayList<>();
-        for (Claim c : claims) { Map<String, Object> x = new HashMap<>(); x.put("id", c.id); x.put("outside", c.outside); x.put("from", c.from); x.put("fee", c.fee); l.add(x); }
+        for (Claim c : claims) { Map<String, Object> x = new HashMap<>(); x.put("id", c.id); x.put("outside", c.outside); x.put("from", c.from); x.put("fee", c.fee); x.put("holder", c.holder); l.add(x); }
         m.put("claims", l);
         return m;
     }
@@ -146,7 +173,7 @@ public final class Undertaker {
         if (l == null) return;
         for (Object o : l) {
             @SuppressWarnings("unchecked") Map<String, Object> x = (Map<String, Object>) o;
-            claims.add(new Claim(Json.lng(x, "id", 0), Json.bool(x, "outside", false), Json.str(x, "from", "?"), (int) Json.lng(x, "fee", FEE)));
+            Claim claim = new Claim(Json.lng(x, "id", 0), Json.bool(x, "outside", false), Json.str(x, "from", "?"), (int) Json.lng(x, "fee", FEE)); claim.holder = Json.lng(x, "holder", 0); claims.add(claim);
         }
     }
 

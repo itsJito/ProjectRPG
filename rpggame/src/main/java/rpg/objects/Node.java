@@ -218,7 +218,7 @@ public final class Node extends WorldObject {
         var ev = g.state.commit(req, "ResourceGathered", a.id, id, jurisdiction(), 0, product.name + " (" + stock + " left)");
         g.prog.award(a, skill, xp, "gathered " + product.name, ev.id());
         if (g.sfx != null) g.sfx.play(kind == Kind.FISH ? "splash" : "pickup", x, y, z, 0.7f);
-        if (kind == Kind.FISH && g.fx != null) g.fx.splash(x, y + 0.3f, z);
+        if (kind == Kind.FISH && g.fx != null) g.chemistry.splash(x, y + 0.3f, z);
         if (kind == Kind.FISH && a == g.player && g.sfx != null) g.sfx.ui("FishReelIn", 0.55f);
         if (a == g.player) g.chat.say(kind == Kind.FISH ? "You catch " + (product == Items.RAW_SHRIMP ? "some shrimp" : "a " + product.name.toLowerCase().replace("raw ", "")) + "." : "You get some " + product.name.toLowerCase() + ".");
         if (stockMax > 0 && stock <= 0) deplete(g, ev.id());

@@ -185,7 +185,7 @@ private:
     std::unordered_map<std::string, std::string> sources_;
 
     // programs
-    Program leafBake_;
+    Program leafBake_, chemistryParticles_, waterWaves_;
     gl::GLuint leafTex_ = 0;                // 2.5: the baked leaf cards (64 x 64 x 16, RG: cut, midrib)
     void bakeLeaves();
     Program gWorld_, gModel_, sWorld_, sModel_, lighting_, cull_, gtao_, aoBlur_, ssr_, vol_, fogApply_, fWorld_, fModel_, particle_, taa_,
@@ -224,6 +224,20 @@ private:
     float bodies_[MAX_BODIES * 5] = {};
     int bodyCount_ = 0;
     std::vector<Model> models_;
+    std::vector<float> emitters_;
+    gl::GLuint chemistryVao_ = 0, chemistryVbo_ = 0, chemistryState_ = 0, chemistrySources_ = 0;
+    bool chemistryAlive_ = false;
+    float chemistryQuiet_ = 99;
+    void advanceChemicalParticles();
+    void advanceWater(VoxelWorld*);
+    gl::GLuint water_[2] = {}, waterMask_ = 0;
+    int waterIndex_ = 0;
+    bool hasWater_ = false;
+    float waterAccumulator_ = 0, waterClock_ = 0;
+    std::vector<uint32_t> waterVersions_;
+    std::vector<float> waterMaskData_;
+    int waterCells_ = 0;
+    std::vector<float> ripples_;
     std::vector<float> particles_;       // 12 floats a particle
     std::vector<Quads> quads_;
     std::vector<Portrait> portraits_;
@@ -274,7 +288,7 @@ private:
     gl::GLuint ebo_ = 0;
     static constexpr int MAX_QUADS = 1 << 20;
     gl::GLuint voxTex_ = 0, paletteTex_ = 0;
-    uint32_t opaqueMask_[8] = {};
+    uint32_t opaqueMask_[8] = {}, particleCollision_[8] = {};
     bool voxFilled_ = false;
     std::vector<uint8_t> column_;
     std::vector<uint64_t> order_;

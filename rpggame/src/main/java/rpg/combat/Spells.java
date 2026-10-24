@@ -25,13 +25,13 @@ public final class Spells {
     }
 
     /** The elements (GDD 2.5): the Standard four; Ice and Blood for the Ancients. */
-    public enum Element { NONE, FIRE, WATER, EARTH, AIR, ICE, BLOOD }
+    public enum Element { NONE, FIRE, WATER, EARTH, AIR, ICE, BLOOD, ELECTRIC }
 
     public enum Spell {
         //            title                   book            level cost base  speed xp  utility element
         SPARK("Spark", Book.STANDARD, 1, 1, 10, 32, 5, false, Element.AIR, "A crackling bolt of air."),
         FIRE_BOLT("Fire bolt", Book.STANDARD, 10, 3, 22, 30, 11, false, Element.FIRE, "A bolt of flame."),
-        FIRE_BLAST("Fire Blast", Book.STANDARD, 20, 5, 34, 34, 18, false, Element.NONE, "The Fire staff's own blast: it spends a charge of the staff as well as Mana."),
+        FIRE_BLAST("Fire Blast", Book.STANDARD, 20, 5, 34, 34, 18, false, Element.FIRE, "The Fire staff's explosive blast: it spends a charge of the staff as well as Mana."),
         FROST_LANCE("Frost lance", Book.ANCIENTS, 10, 4, 26, 38, 16, false, Element.ICE, "A spear of ice that slows what it strikes."),
         SPEAK_WITH_ANIMALS("Speak With Animals", Book.LUNAR, 1, 1, 0, 0, 4, true, Element.NONE, "Hear what an animal is thinking; it takes to you a little."),
         SPIRITUAL_STEP("Spiritual Step", Book.LUNAR, 10, 3, 0, 0, 8, true, Element.NONE, "Step through the air to where you look, up to six metres."),
@@ -42,6 +42,13 @@ public final class Spells {
         MINOR_ILLUSION("Minor Illusion", Book.ARCANE, 1, 1, 0, 0, 4, true, Element.NONE, "A sound where you look - footsteps, a clatter - that draws those who hear it."),
         DARKNESS("Darkness", Book.ARCANE, 10, 4, 0, 0, 10, true, Element.NONE, "A globe of magical darkness where you look, for twenty seconds."),
         DISGUISE_SELF("Disguise Self", Book.ARCANE, 30, 8, 0, 0, 22, true, Element.NONE, "For a minute you wear a stranger's face: what witnesses see, they cannot put a name to."),
+        VOLTCHAIN("Voltchain", Book.STANDARD, 30, 7, 24, 36, 24, false, Element.ELECTRIC, "An electric bolt that shocks touching wet or conductive targets."),
+        FORCEWAVE("Forcewave", Book.STANDARD, 40, 8, 0, 0, 28, true, Element.AIR, "A short concussive cone that interrupts and pushes enemies back."),
+        VITALMEND("Vitalmend", Book.LUNAR, 60, 12, 0, 0, 38, true, Element.NONE, "Restores health and closes bleeding wounds on yourself or a visible ally."),
+        MORPHBEAST("Morphbeast", Book.ARCANE, 20, 6, 0, 0, 16, true, Element.NONE, "Turns a living target into a harmless sheep for eight seconds; identity and belongings remain."),
+        CHRONOSLOW("Chronoslow", Book.ARCANE, 40, 8, 0, 0, 28, true, Element.NONE, "Slows hostile movement and combat actions in a small visible area for six seconds."),
+        NECROCALL("Necrocall", Book.ANCIENTS, 30, 9, 0, 0, 24, true, Element.BLOOD, "Calls one temporary unarmed undead ally. At most two can serve one caster."),
+        SPELLDAGGERS("Spelldaggers", Book.ANCIENTS, 40, 10, 12, 28, 28, false, Element.NONE, "Conjures three spectral blades that steer gently toward a visible foe."),
         CHARM_PERSON("Charm Person", Book.ARCANE, 50, 10, 0, 0, 32, true, Element.NONE, "The person you look at is charmed for half a minute: they will not lift a hand against you.");
 
         public final String title, effect;

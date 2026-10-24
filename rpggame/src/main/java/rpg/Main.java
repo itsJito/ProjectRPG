@@ -104,12 +104,28 @@ public final class Main {
         return again;
     }
 
+    private static boolean brandShown;
+    private static void splash(Window win, Game game, Gfx gfx, Ui2D ui, Gfx.Preview stage) {
+        double elapsed = 0;long started=System.nanoTime(),last=started;
+        while (!win.shouldClose() && elapsed < 5.4) {
+            win.poll();float dt=frameDt(last);last=System.nanoTime();elapsed=(last-started)/1e9;game.tick(dt);
+            gfx.title(stage, null, win.width, win.height, dt, game.time());
+            ui.begin(gfx.cmd); ui.rect(0,0,win.width,win.height,0xFF07090C);
+            float alpha = (float)Math.max(0,Math.min(1,Math.min(elapsed/0.7,(5.4-elapsed)/0.7))); float size = Math.min(300,win.height*0.42f);
+            ui.rectTex(ui.engineLogo,(win.width-size)/2,(win.height-size)/2-25,size,size,0,0,1,1,rpg.ui.Style.fade(0xFFFFFFFF,alpha));
+            ui.centered("ASTRATTO ENGINE",win.width/2f,win.height/2f+size/2,18,rpg.ui.Style.fade(0xFFD8B46A,alpha));
+            ui.end(); gfx.frame(win.width,win.height); win.swap(); win.input.endFrame();
+        }
+        System.out.printf("[Load] engine intro %.2fs%n",(System.nanoTime()-started)/1e9);
+    }
+
     // ------------------------------------------------------------------ play
     /** Plays from the title screen; true to come back to it (Quit to title), false to leave the game. */
     private static boolean play(Window win, Game game, Gfx gfx, Ui2D ui, long world) {
         Input in = win.input;
         Gfx.Preview preview = new Gfx.Preview();
-        preview.world = world; preview.x = 98.5f; preview.y = DevMap.FLOOR; preview.z = 77.5f;
+        long dungeon = rpg.world.TitleStage.build(game.engine());
+        preview.world = dungeon; preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
         long last = System.nanoTime();
         win.setCursorLocked(false);
         rpg.audio.Music music = new rpg.audio.Music(game);
@@ -118,7 +134,13 @@ public final class Main {
         TitleScreen title = new TitleScreen(VERSION);
         title.sound = n -> rpg.audio.Sfx.shared(game).ui(n, 0.5f);
         Gfx.Preview stage = new Gfx.Preview();
-        stage.world = world; stage.x = 100.5f; stage.y = DevMap.FLOOR; stage.z = 79.5f;
+        stage.world = dungeon; stage.dungeon = true; stage.x = 8.5f; stage.y = DevMap.FLOOR; stage.z = 8.5f;
+        rpg.ui.SettingsPanel menuSettings = new rpg.ui.SettingsPanel(Preferences.load(java.nio.file.Path.of("saves", "preferences.json")), p -> {
+            gfx.menuPreferences = p; p.mix(game.commands()); win.setFullscreen(p.fullscreen); win.setVsync(p.vsync);
+        }, true);
+        title.settings = menuSettings::show;
+        if (!brandShown) { brandShown = true; splash(win, game, gfx, ui, stage); }
+
         Profiles.Profile profile = null;
         boolean fresh = false;
         while (!win.shouldClose()) {
@@ -132,7 +154,10 @@ public final class Main {
             game.tick(dt);
             gfx.title(stage, title.selected == null ? null : title.selected.look, win.width, win.height, dt, game.time());
             ui.begin(gfx.cmd);
-            title.draw(ui, win.width, win.height, dt, in.keyPressed(GLFW_KEY_ENTER), in.keyPressed(GLFW_KEY_ESCAPE));
+            if (menuSettings.open) {
+                boolean capture = menuSettings.capturingKey(); menuSettings.keyInput(in); if (capture) ui.click = ui.rclick = false;
+                menuSettings.draw(ui, win.width, win.height); if (!capture && in.keyPressed(GLFW_KEY_ESCAPE)) menuSettings.escape();
+            } else title.draw(ui, win.width, win.height, dt, in.keyPressed(GLFW_KEY_ENTER), in.keyPressed(GLFW_KEY_ESCAPE));
             ui.end();
             gfx.frame(win.width, win.height);
             win.swap();
@@ -290,10 +315,7 @@ public final class Main {
             // E: a tap is the primary action, a hold opens every option
             if (!typing && preferences.pressed(in, Preferences.Action.INTERACT)) { eHeld = g.time; eMenuOpened = false; }
             if (eHeld >= 0 && preferences.down(in, Preferences.Action.INTERACT) && !eMenuOpened && g.time - eHeld > 0.3) {
-                if (g.carrying.target(g.interact.focus) != null) {
-                    var pickup = g.carrying.begin(g.player, g.interact.focus);
-                    if (pickup.rejected()) g.chat.warn(pickup.reason());
-                } else hud.openInteractMenu();
+                hud.openInteractMenu();
                 eMenuOpened = true;
             }
             if (preferences.released(in, Preferences.Action.INTERACT)) { if (!eMenuOpened && !hud.captures()) it.interact = true; eHeld = -1; }
@@ -352,7 +374,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.2";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {
@@ -406,5 +428,5 @@ public final class Main {
         } catch (java.io.IOException e) { System.err.println("could not save " + out + ": " + e); }
     }
 
-    static Appearance defaultLook() { Appearance a = new Appearance(); a.hair = 7; a.hairColor = 2; a.beard = 3; a.top = 4; a.topColor = 15; a.bottom = 0; a.bottomColor = 2; a.shoes = 5; return a; }
+    static Appearance defaultLook() { return Appearance.henric(); }
 }

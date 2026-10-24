@@ -45,6 +45,18 @@ public final class CommandBuffer {
     public CommandBuffer raw(ByteBuffer record) { room(record.remaining()); buf.put(record); records++; return this; }
 
     // ------------------------------------------------------------------ the world, and questions about it (1-31)
+    public void chemMaterial(int block, int tags, int burnt, float fuel) { head(AstrattoNative.CMD_CHEM_MATERIAL, 24).i(block).i(tags).i(burnt).f(fuel); }
+    public void chemSensor(long id, long owner, float x, float y, float z, float radius, int tags, int state, float fuel, float wet, float heat, boolean restore) {
+        head(AstrattoNative.CMD_CHEM_SENSOR, 64).h(id).h(owner).f(x).f(y).f(z).f(radius).i(tags).i(state).f(fuel).f(wet).f(heat).i(restore ? 1 : 0);
+    }
+    public void chemEmit(long owner, int element, float x, float y, float z, float radius, float power, float life) {
+        head(AstrattoNative.CMD_CHEM_EMIT, 48).h(owner).i(element).f(x).f(y).f(z).f(radius).f(power).f(life).i(0);
+    }
+    public void chemRemove(long id) { head(AstrattoNative.CMD_CHEM_REMOVE, 16).h(id); }
+    public void chemWind(float x, float z) { head(AstrattoNative.CMD_CHEM_WIND, 16).f(x).f(z); }
+    public void chemWeather(float rain) { head(AstrattoNative.CMD_CHEM_WEATHER,16).f(rain).f(0); }
+    public void chemReset() { head(AstrattoNative.CMD_CHEM_RESET, 8); }
+
     public void blockSet(int x, int y, int z, int block) { head(AstrattoNative.CMD_BLOCK_SET, 24).i(x).i(y).i(z).i(block); }
     /** A cell set and nothing more: no relighting, no re-meshing, no nav version (generators). */
     public void blockSetRaw(int x, int y, int z, int block) { blockSet(x, y, z, (block & 0xFF) | AstrattoNative.SET_RAW); }
@@ -248,6 +260,7 @@ public final class CommandBuffer {
     public void agentCreate(long handle, long policy, long body, float x, float y, float z, float eye, float viewRange, float viewCos, float hearRange, int team, int flags, int seed) {
         head(AstrattoNative.CMD_AGENT_CREATE, 72).h(handle).h(policy).h(body).f(x).f(y).f(z).f(eye).f(viewRange).f(viewCos).f(hearRange).i(team).i(flags).i(seed);
     }
+    public void agentRate(long handle, float scale) { head(AstrattoNative.CMD_AGENT_RATE, 24).h(handle).i(0).f(scale); }
     public void agentFact(long handle, int index, float value) { head(AstrattoNative.CMD_AGENT_FACT, 24).h(handle).i(index).f(value); }
     /** What an agent is after: a body or agent (target), or with target 0, a place. */
     public void agentTarget(long handle, long target, float x, float y, float z) { head(AstrattoNative.CMD_AGENT_TARGET, 40).h(handle).h(target).f(x).f(y).f(z).i(0); }

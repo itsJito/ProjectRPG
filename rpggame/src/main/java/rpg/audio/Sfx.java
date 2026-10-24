@@ -26,8 +26,7 @@ import rpg.world.Blocks;
  *   <li>sfx/, swish/ - blades, swings, spells, creatures, stones and wood</li>
  *   <li>devmapambience.ogg - the devmap's ambience, looped</li>
  * </ul>
- * See sounds/CREDITS.txt for where the downloaded ones came from (all CC0). Sounds with no recording (a spell's
- * crackle, a fire, the blessing chord) are still synthesized here.
+ * See sounds/CREDITS.txt for recording sources and individual licenses. All sounds use recorded assets; missing assets are logged without synthetic replacements.
  */
 public final class Sfx {
     private static final int RATE = 44100;
@@ -84,8 +83,6 @@ public final class Sfx {
         bank("book", "foley/bookFlip", 3, ".ogg", 1);
         bank("stone", "sfx/stones_0", 4, ".ogg", 1);
         bank("thud", "foley/impactGeneric_light_00", 5);
-        bank("cast", "sfx/spell_0", 2, ".ogg", 1);
-        bank("fire", "sfx/spell_fire_0", 7, ".ogg", 1);
         bank("gem", "sfx/item_gem_0", 4, ".ogg", 1);
         bank("growl", "sfx/creature_misc_0", 8, ".ogg", 1);
         bank("creature.hurt", "sfx/creature_hurt_0", 2, ".ogg", 1);
@@ -127,9 +124,9 @@ public final class Sfx {
                 "LootCoinSmall", "MenuScreenOpen", "NewProfileButton", "QuestActivate", "QuestActivate2", "QuestComplete", "QuestFailed", "QuestMenuOpen",
                 "SpellBookCloseA", "UI_Trading_ItemSelect", "UI_hover", "UI_select", "UI_windowclose", "UIbutton1", "UIbutton2"})
             one("ui." + f, "ui/" + f + ".ogg", 0);
-        // ---- synthesized: what has no recording
-        make("crackle", crackle());
-        make("splash", noiseBurst(0.35f, 0.4f));
+        one("thunder","elements/thunder.ogg",6);
+        one("crackle", "elements/fire.ogg", 2);
+        for (int i = 1; i <= 3; i++) one("splash", "elements/water" + i + ".ogg", 0);
         // Recorded bow releases from Wildfire Games (0 A.D.), three variations at their original 44.1 kHz.
         one("bow", "archery/release.ogg", 0);
         one("bow", "archery/release2.ogg", 0);
@@ -138,16 +135,9 @@ public final class Sfx {
         one("arrow.impact", "archery/impact.ogg", 0);
         bank("bow.draw", "foley/creak", 3, ".ogg", 1);
         bank("arrow.fly", "swish/swish-", 3, ".wav", 1);
-        make("zap", sweep(1400, 200, 0.25f));
-        make("click", tone(1400, 0.03f, 0.3f));
-        make("fail", tone(160, 0.18f, 0.4f));
-        make("eat", noiseBurst(0.22f, 0.3f));
-        make("bless", jingleBless());
-        make("splat", noiseBurst(0.12f, 0.6f));
-        // synthesized stand-ins, only where a recording failed to load
-        fallback("swing", swing()); fallback("hit", hit(0.9f)); fallback("heavyhit", hit(1.6f)); fallback("block", clang(620, 0.35f));
-        fallback("parry", clang(1180, 0.6f)); fallback("door", knock(110, 0.3f)); fallback("coins", coins()); fallback("thud", knock(240, 0.12f));
-        fallback("step.stone", noiseBurst(0.08f, 0.5f)); fallback("cast", sweep(300, 1200, 0.4f)); fallback("ui.LevelUp", jingleWave());
+        alias("zap", "metal.light"); alias("click", "ui.UIbutton1"); alias("fail", "ui.UIbutton2");
+        alias("eat", "cloth"); alias("bless", "ui.LevelUp"); alias("splat", "splash");
+        alias("cast", "swing"); alias("fire", "crackle"); alias("body.fall", "soft.heavy");
         if (System.getenv("RPG_SFX_REPORT") != null) {
             java.util.TreeMap<String, Integer> t = new java.util.TreeMap<>();
             for (var e : banks.entrySet()) if (e.getKey().startsWith("animal.")) t.put(e.getKey(), e.getValue().size());
@@ -246,7 +236,7 @@ public final class Sfx {
         if (h != 0) banks.computeIfAbsent(name, k -> new ArrayList<>()).add(h);
     }
 
-    private void fallback(String name, float[] wave) { if (!banks.containsKey(name)) make(name, wave); }
+    private void alias(String name, String recorded) { var bank = banks.get(recorded); if (bank != null) banks.put(name, bank); }
 
     public boolean has(String name) { return banks.containsKey(name); }
 
@@ -338,114 +328,4 @@ public final class Sfx {
         };
     }
 
-    // ------------------------------------------------------------------ synthesis (only for what has no recording)
-    private float[] buf(float seconds) { return new float[(int) (RATE * seconds)]; }
-
-    private float[] tone(float hz, float seconds, float amp) {
-        float[] w = buf(seconds);
-        for (int i = 0; i < w.length; i++) { double t = i / (double) RATE; w[i] = (float) (amp * Math.sin(2 * Math.PI * hz * t) * Math.exp(-t * 18 / seconds / 4)); }
-        return w;
-    }
-
-    private float[] swing() {
-        float[] w = buf(0.28f);
-        float lp = 0;
-        for (int i = 0; i < w.length; i++) {
-            double t = i / (double) w.length;
-            float n = rnd.nextFloat() * 2 - 1;
-            float a = (float) (0.15 + 0.6 * t);
-            lp += (n - lp) * a;
-            w[i] = (float) (lp * Math.sin(Math.PI * t) * 0.7);
-        }
-        return w;
-    }
-
-    private float[] hit(float weight) {
-        float[] w = buf(0.25f);
-        for (int i = 0; i < w.length; i++) {
-            double t = i / (double) RATE;
-            w[i] = (float) ((0.8 * Math.sin(2 * Math.PI * (90 / weight) * t) + 0.5 * (rnd.nextFloat() * 2 - 1) * Math.exp(-t * 60)) * Math.exp(-t * 18) * 0.9);
-        }
-        return w;
-    }
-
-    private float[] clang(float hz, float seconds) {
-        float[] w = buf(seconds);
-        for (int i = 0; i < w.length; i++) {
-            double t = i / (double) RATE, e = Math.exp(-t * 10 / seconds);
-            w[i] = (float) ((0.5 * Math.sin(2 * Math.PI * hz * t) + 0.3 * Math.sin(2 * Math.PI * hz * 2.76 * t) + 0.2 * Math.sin(2 * Math.PI * hz * 5.4 * t)) * e * 0.6
-                    + (rnd.nextFloat() * 2 - 1) * Math.exp(-t * 200) * 0.4);
-        }
-        return w;
-    }
-
-    private float[] knock(float hz, float seconds) {
-        float[] w = buf(seconds);
-        for (int i = 0; i < w.length; i++) {
-            double t = i / (double) RATE;
-            w[i] = (float) ((Math.sin(2 * Math.PI * hz * t) * 0.7 + (rnd.nextFloat() * 2 - 1) * 0.5 * Math.exp(-t * 90)) * Math.exp(-t * 30) * 0.9);
-        }
-        return w;
-    }
-
-    private float[] noiseBurst(float seconds, float amp) {
-        float[] w = buf(seconds);
-        float lp = 0;
-        for (int i = 0; i < w.length; i++) { double t = i / (double) w.length; lp += ((rnd.nextFloat() * 2 - 1) - lp) * 0.3f; w[i] = (float) (lp * amp * Math.pow(1 - t, 2)); }
-        return w;
-    }
-
-    private float[] crackle() {
-        float[] w = buf(1.2f);
-        for (int k = 0; k < 18; k++) {
-            int at = rnd.nextInt(w.length - 800);
-            for (int i = 0; i < 600; i++) w[at + i] += (float) ((rnd.nextFloat() * 2 - 1) * Math.exp(-i / 80.0) * 0.5);
-        }
-        return w;
-    }
-
-    private float[] coins() {
-        float[] w = buf(0.4f);
-        for (int k = 0; k < 4; k++) {
-            int at = k * 3000;
-            for (int i = 0; at + i < w.length; i++) { double t = i / (double) RATE; w[at + i] += (float) (Math.sin(2 * Math.PI * (2600 + k * 300) * t) * Math.exp(-t * 30) * 0.25); }
-        }
-        return w;
-    }
-
-    private float[] sweep(float from, float to, float seconds) {
-        float[] w = buf(seconds);
-        double ph = 0;
-        for (int i = 0; i < w.length; i++) {
-            double t = i / (double) w.length;
-            ph += 2 * Math.PI * (from + (to - from) * t) / RATE;
-            w[i] = (float) ((Math.sin(ph) * 0.4 + Math.sin(ph * 2.01) * 0.15) * Math.sin(Math.PI * t));
-        }
-        return w;
-    }
-
-    private float[] jingleWave() {
-        float[] notes = {523.25f, 659.25f, 783.99f, 1046.5f};
-        float[] w = buf(1.9f);
-        for (int k = 0; k < notes.length; k++) {
-            int at = (int) (k * 0.13f * RATE);
-            float len = k == notes.length - 1 ? 1.4f : 0.9f;
-            for (int i = 0; i < len * RATE && at + i < w.length; i++) {
-                double t = i / (double) RATE;
-                double v = Math.sin(2 * Math.PI * notes[k] * t) + 0.35 * Math.sin(2 * Math.PI * notes[k] * 2 * t) + 0.12 * Math.sin(2 * Math.PI * notes[k] * 3 * t);
-                w[at + i] += (float) (v * Math.exp(-t * 2.6) * Math.min(1, t * 200) * 0.18);
-            }
-        }
-        return w;
-    }
-
-    private float[] jingleBless() {
-        float[] notes = {392, 587.33f, 783.99f};
-        float[] w = buf(1.2f);
-        for (int k = 0; k < notes.length; k++) for (int i = 0; i < w.length; i++) {
-            double t = i / (double) RATE;
-            w[i] += (float) (Math.sin(2 * Math.PI * notes[k] * t) * Math.exp(-t * 2.5) * Math.min(1, t * 20) * 0.12);
-        }
-        return w;
-    }
 }

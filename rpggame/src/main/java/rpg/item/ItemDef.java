@@ -21,6 +21,7 @@ public final class ItemDef {
     public Slot slot;
     public Family family = Family.NONE;
     public Tier tier;
+    public boolean conductive;
     public Skill reqSkill;
     public int reqLevel;
     /** Weapon: base damage, impact, reach (m), swing time scale; armor: protection and guard; arrows: damage bonus. */

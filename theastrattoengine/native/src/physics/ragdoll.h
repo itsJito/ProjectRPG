@@ -70,6 +70,7 @@ public:
     float age = 0, quiet = 0;
     bool settled = false, live = false;
     SydneyCharacter* driver = nullptr;
+    bool held = false; // supported trunk, passive articulated limbs
 
     // the fifteen points, as last stepped and blended to the frame (world)
     float x[rd::N] = {}, y[rd::N] = {}, z[rd::N] = {};

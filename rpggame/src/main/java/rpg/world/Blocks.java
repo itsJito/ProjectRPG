@@ -24,7 +24,7 @@ public final class Blocks {
             COAL_ROCK = 17, SPENT_ROCK = 18, WATER = 19, SAND = 20, COBBLE = 21, ROOF = 22, DOOR = 23, LOCKED_DOOR = 24,
             FURNACE = 25, ANVIL = 26, RANGE = 27, CRAFT_TABLE = 28, SAWBENCH = 29, TARGET = 30, FENCE = 31, STUMP = 32,
             HERB_PATCH = 33, FLAX_PATCH = 34, BERRY_BUSH = 35, CRATE = 36, BOOKCASE = 37, MARK_RED = 38, MARK_BLUE = 39,
-            MARK_YELLOW = 40, DEBUG_FLOOR = 41, PLASTER = 42, BEAM = 43, BARE_PATCH = 44, MARK_GREEN = 45, TABLE = 46, BED = 47, HEADSTONE = 48, COUNT = 49;
+            MARK_YELLOW = 40, DEBUG_FLOOR = 41, PLASTER = 42, BEAM = 43, BARE_PATCH = 44, MARK_GREEN = 45, TABLE = 46, BED = 47, HEADSTONE = 48, CHARRED = 49, ICE = 50, COUNT = 51;
 
     /** The cells of objects drawn by the game rather than meshed. */
     public static boolean objectCell(int id) {
@@ -32,7 +32,7 @@ public final class Blocks {
     }
     /** Full structural cells form the traversal graph; glass, gates, plants and thin props never do. */
     public static boolean traversable(int id) {
-        return switch (id) { case GRASS, DIRT, STONE, BRICK, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SAND, COBBLE, ROOF, CRATE, PLASTER, BEAM -> true; default -> false; };
+        return switch (id) { case GRASS, DIRT, STONE, BRICK, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SAND, COBBLE, ROOF, CRATE, PLASTER, BEAM, CHARRED -> true; default -> false; };
     }
     /** Plants drawn as crossed planes that bodies walk through. */
     public static boolean plant(int id) { return id == HERB_PATCH || id == FLAX_PATCH; }
@@ -59,7 +59,7 @@ public final class Blocks {
         f(STUMP, L_RINGS, L_BARK, L_RINGS); f(HERB_PATCH, L_HERB); f(FLAX_PATCH, L_FLAX); f(BERRY_BUSH, L_BERRY);
         f(CRATE, L_CRATE); f(BOOKCASE, L_PLANKS, L_BOOKS, L_PLANKS); f(MARK_RED, L_RED); f(MARK_BLUE, L_BLUE); f(MARK_YELLOW, L_YELLOW);
         f(DEBUG_FLOOR, L_DEBUG); f(PLASTER, L_PLASTER); f(BEAM, L_BEAM); f(BARE_PATCH, L_BARE, L_DIRT, L_DIRT); f(MARK_GREEN, L_GREEN);
-        f(TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(BED, L_PLANKS); f(HEADSTONE, L_STONE);
+        f(TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(BED, L_PLANKS); f(HEADSTONE, L_STONE); f(CHARRED, L_COAL); f(ICE,L_WATER);
     }
     private static void f(int id, int top, int side, int bottom) { FACES[id] = new int[]{top, side, bottom}; }
     private static void f(int id, int all) { f(id, all, all, all); }
@@ -87,6 +87,7 @@ public final class Blocks {
             d[leaves].material = AstrattoNative.MATERIAL_FOLIAGE;
         }
         d[WATER] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_LIQUID | AstrattoNative.BLOCK_SKY_DIM | AstrattoNative.BLOCK_LIGHT_PASS | AstrattoNative.BLOCK_HAZARD);
+        d[ICE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_LIGHT_PASS);
         d[FENCE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT);
         // a shut door's cells: not solid (the leaf itself, a rigid body on its hinge, is what stops a body), but a door to
         // routes (only those who open doors pass) and opaque to eyes and light
@@ -107,6 +108,7 @@ public final class Blocks {
         r[AIR] = new NativeMesher.BlockDef();
         for (int i = 1; i < COUNT; i++) r[i] = def(FACES[i], cube);
         r[GLASS] = def(FACES[GLASS], AstrattoNative.RB_SOLID | AstrattoNative.RB_TRANSLUCENT);
+        r[ICE] = def(FACES[ICE],AstrattoNative.RB_SOLID|AstrattoNative.RB_TRANSLUCENT);
         r[WATER] = def(FACES[WATER], AstrattoNative.RB_LIQUID | AstrattoNative.RB_TRANSLUCENT);
         r[LAMP] = def(FACES[LAMP], cube | AstrattoNative.RB_EMISSIVE);
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);

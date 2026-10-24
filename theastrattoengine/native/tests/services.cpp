@@ -660,6 +660,46 @@ void services_checks(const char* moduleDir) {
         check("after its last write is drained, the stream's voice ends", streamEnded);
     }
 
+    // ------------------------------------------------------------ element-mediated chemistry
+    {
+        c.bare(ASTRATTO_CMD_CHEM_RESET); frame(e,c,0);
+        auto sensor = [&](uint64_t id, float x, uint32_t tags) {
+            auto& q=c.add<astratto_cmd_chem_sensor>(ASTRATTO_CMD_CHEM_SENSOR);
+            q.id=id; q.x=x; q.y=8; q.z=20; q.radius=0.4f; q.tags=tags; q.fuel=3;
+        };
+        auto element = [&](uint32_t type, float x, float power) {
+            auto& q=c.add<astratto_cmd_chem_emit>(ASTRATTO_CMD_CHEM_EMIT);
+            q.owner=901; q.element=type; q.x=x; q.y=8; q.z=20; q.radius=0.5f; q.power=power; q.life=0.025f;
+        };
+        auto state = [&](uint64_t id) {
+            auto io=snap(e,ASTRATTO_SNAPSHOT_CHEMISTRY); uint64_t pos=0;
+            while(pos+sizeof(astratto_record)<=io.bytes) {
+                astratto_record h{}; std::memcpy(&h,static_cast<const uint8_t*>(io.data)+pos,sizeof h);
+                if(h.bytes<sizeof h || h.bytes>io.bytes-pos)break;
+                if(h.type==ASTRATTO_SNAP_CHEM_SENSOR && h.bytes>=sizeof(astratto_snap_chem_sensor)) {
+                    astratto_snap_chem_sensor rec{}; std::memcpy(&rec,static_cast<const uint8_t*>(io.data)+pos,sizeof rec);
+                    if(rec.id==id)return rec;
+                }
+                pos+=h.bytes;
+            }
+            return astratto_snap_chem_sensor{};
+        };
+        sensor(70001,20,1|4); sensor(70002,22,2); sensor(70003,23,2); frame(e,c,0);
+        element(1,20,3); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
+        check("a short fire pulse reaches a flammable receiver before expiry and retains attribution", (state(70001).state&2)!=0 && state(70001).owner==901);
+        element(2,20,3); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
+        check("water wets and extinguishes an actual burning receiver", (state(70001).state&1)!=0 && (state(70001).state&2)==0);
+        element(3,20,1); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
+        check("ice freezes a wet freezable receiver", (state(70001).state&4)!=0);
+        element(5,22,2); for(int i=0;i<28;i++)frame(e,c,1.0f/60);
+        check("electricity propagates through touching conductive receivers through queued element volumes", (state(70002).state&8)!=0 && (state(70003).state&8)!=0);
+        for(int i=0;i<120;i++)frame(e,c,1.0f/60);
+        check("one electric wave cannot perpetually recharge itself", (state(70002).state&8)==0 && (state(70003).state&8)==0);
+        auto& remove=c.add<astratto_cmd_handle>(ASTRATTO_CMD_CHEM_REMOVE); remove.handle=70001; frame(e,c,0);
+        check("removed chemical receivers leave no stale active snapshot", state(70001).id==0);
+        c.bare(ASTRATTO_CMD_CHEM_RESET); frame(e,c,0);
+    }
+
     // ------------------------------------------------------------ a C++ gameplay module
     if (moduleDir) {
         std::string path = std::string(moduleDir) +

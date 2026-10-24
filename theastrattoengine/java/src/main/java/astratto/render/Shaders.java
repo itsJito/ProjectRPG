@@ -23,7 +23,7 @@ public final class Shaders {
     /** Every program the engine's renderers use, by file name. */
     public static final String[] PROGRAMS = {
             "world.vert", "world_gbuffer.frag", "world_shadow.frag", "model.vert", "model_gbuffer.frag", "model_shadow.frag", "fullscreen.vert",
-            "lighting.frag", "light_cull.comp", "probes.comp", "gtao.frag", "ao_blur.frag", "ssr.frag", "volumetric.frag", "fog_apply.frag",
+            "lighting.frag", "light_cull.comp", "chemistry_particles.comp", "water_waves.comp", "probes.comp", "gtao.frag", "ao_blur.frag", "ssr.frag", "volumetric.frag", "fog_apply.frag",
             "world_forward.frag", "model_forward.frag", "particle.vert", "particle.frag", "taa.frag", "bloom_down.frag", "bloom_up.frag",
             "luminance.frag", "exposure.frag", "tonemap.frag", "copy.frag", "ui2d.vert", "ui2d.frag", "portrait.frag", "model_simple.vert", "model_simple.frag",
             "decal.vert", "decal.frag", "foliage.vert", "foliage_gbuffer.frag", "foliage_shadow.frag", "props.vert", "props_gbuffer.frag",

@@ -122,6 +122,14 @@ int AiService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32_t by
             a->policy = c.policy; a->current = -1; a->thinkTimer = 0;
             return ASTRATTO_OK;
         }
+        case ASTRATTO_CMD_AGENT_RATE: {
+            astratto_cmd_agent_fact c;
+            if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
+            if (!std::isfinite(c.value) || c.value < 0 || c.value > 2) return ASTRATTO_ERR_ARGUMENT;
+            Agent* a = agents_.get(c.handle);
+            if (!a) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
+            a->rate = c.value; return ASTRATTO_OK;
+        }
         case ASTRATTO_CMD_AGENT_FORCE: {
             astratto_cmd_agent_force c;
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
@@ -329,7 +337,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
         } else {
             dx /= std::max(d, 1e-4f); dz /= std::max(d, 1e-4f);
             const float slow = last ? std::min(1.0f, d / 0.8f + 0.25f) : 1.0f;
-            wantX = dx * a.speed * slow; wantZ = dz * a.speed * slow;
+            wantX = dx * a.speed * slow * a.rate; wantZ = dz * a.speed * slow * a.rate;
             // a body with weight slows for a sharp turn rather than swinging wide round the cell it has to reach
             if (m) {
                 const float vl = std::sqrt(m->vx * m->vx + m->vz * m->vz);
@@ -356,6 +364,10 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
     if (a.sees && p && a.current >= 0 && p->actions[static_cast<size_t>(a.current)].kind != ASTRATTO_ACT_FLEE && (!a.moving || p->actions[static_cast<size_t>(a.current)].kind == ASTRATTO_ACT_HOLD))
         a.yaw = std::atan2(-(a.targetX - a.x), -(a.targetZ - a.z));
     if (m) {
+        if (m->crouch) {
+            const float speed = std::sqrt(wantX * wantX + wantZ * wantZ);
+            if (speed > 1.35f) { wantX *= 1.35f / speed; wantZ *= 1.35f / speed; }
+        }
         m->wishX = wantX; m->wishZ = wantZ;
         if (jump > 0) { m->jump = jump; m->jumpLeft = 0.2f; }
     } else if (a.moving && (wantX != 0 || wantZ != 0)) {

@@ -10,6 +10,7 @@ import rpg.item.Recipes;
  */
 public final class Fire extends Station {
     public double outAt;
+    private double emitAt;
 
     public Fire(long id, float x, float y, float z, double outAt, long owner) {
         super(id, "fire", "Fire", Recipes.Station.RANGE, x, y, z);
@@ -25,7 +26,7 @@ public final class Fire extends Station {
             if (g.fx != null) g.fx.puff(x, y, z);
             return;
         }
-        if (g.fx != null) for (int i = 0; i < 2; i++) g.fx.flame(x, y + 0.05f, z, 1f);
+        if (g.time >= emitAt) { emitAt = g.time + 0.5; g.chemistry.emit(g.actor(owner), astratto.bridge.AstrattoNative.CHEM_FIRE, x, y + 0.3f, z, 1, 1, 0.6f); }
     }
 
     @Override public String examine(Rpg g) { return "A fire. It will burn for about " + Math.max(0, (int) (outAt - g.state.minutes)) + " more minutes."; }

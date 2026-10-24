@@ -21,6 +21,12 @@ public final class Appearance {
     public static final int[] SKIN = {0xF6D9C4, 0xF1C9A5, 0xE8B58E, 0xDDA27A, 0xD09068, 0xC07E58, 0xAD6B47, 0x98593A, 0x82492F, 0x6C3B26, 0x56301F, 0x412519};
     /** H01-H10: the ten natural hair colours (GDD 2.1 reference swatches). */
     public static final int[] HAIR = {0x201A19, 0x39271F, 0x68452E, 0x9B7451, 0x79402D, 0x8D3723, 0xBE6030, 0xCE9464, 0xAA9167, 0xE4C78F};
+    /** The sole authored creator starting point; randomisation remains optional. */
+    public static Appearance henric() {
+        Appearance a = new Appearance(); a.female = false; a.bodyType = 0; a.skin = 0; a.hair = 0; a.hairColor = a.beardColor = 1;
+        a.beard = 9; a.top = 8; a.topColor = 5; a.bottom = 1; a.bottomColor = 16; a.shoes = 10; a.shoesColor = 23; return a;
+    }
+
     public static final String[] HAIR_NAMES = {"Black", "Dark Brown", "Medium Brown", "Light Brown", "Chestnut", "Auburn", "Natural Red", "Strawberry Blonde", "Dark Blonde", "Light Blonde"};
     /** C01-C24: the twenty-four starting-clothes colours (GDD 2.1 reference swatches). */
     public static final int[] PALETTE = {0xD12C36, 0xF08424, 0xEAD43A, 0x9ACF34, 0x278B49, 0x707837, 0x1A827B, 0x35BEDA, 0x3570D6, 0x283B7B, 0x793DAF, 0xB69EE3,

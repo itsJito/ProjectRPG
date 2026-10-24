@@ -8,7 +8,7 @@ uniform vec3 uCam, uFogCol, uAmbient;
 uniform float uDensity;
 // 2.4: the lit scene behind the glass and water (before them), its depth, and how to read a point back from it - for
 // reflections in water of what is really there
-uniform sampler2D uSceneColor, uSceneDepth;
+uniform sampler2D uSceneColor, uSceneDepth,uWaves,uWaterNoise;
 uniform mat4 uPV, uInvPV;
 uniform int uWaterSSR;
 layout(location=0) out vec4 oColor;
@@ -49,11 +49,12 @@ void main() {
     vec3 V = normalize(uCam - vWorld);
     if (dot(N, V) < 0.0) N = -N;
     if (liquid && N.y > 0.5) {
-        // 2.4: the water's surface moves: three crossing wave trains, small and slow, bend its normal
-        vec2 w = vWorld.xz;
-        vec2 g = vec2(cos(w.x * 1.7 + uTime * 1.3) * 0.5 + cos(w.x * 0.9 - w.y * 1.3 + uTime * 0.8) * 0.35 + cos(w.x * 3.1 + w.y * 2.2 - uTime * 2.1) * 0.15,
-                      sin(w.y * 1.9 + uTime * 1.1) * 0.5 + cos(w.y * 1.1 + w.x * 0.7 - uTime * 0.9) * 0.35 + sin(w.y * 2.9 - w.x * 1.8 + uTime * 1.9) * 0.15);
-        N = normalize(vec3(g.x * 0.06, 1.0, g.y * 0.06));
+        vec2 uv=vWorld.xz/vec2(WORLD_X,WORLD_Z),pixel=vec2(1.0/256.0);
+        vec2 slope=vec2(texture(uWaves,uv+vec2(pixel.x,0)).r-texture(uWaves,uv-vec2(pixel.x,0)).r,
+                        texture(uWaves,uv+vec2(0,pixel.y)).r-texture(uWaves,uv-vec2(0,pixel.y)).r);
+        vec2 first=texture(uWaterNoise,vWorld.xz*0.09+vec2(uTime*0.018,uTime*0.011)).rg*2.0-1.0;
+        vec2 second=texture(uWaterNoise,vWorld.xz*0.17+vec2(-uTime*0.013,uTime*0.021)).gb*2.0-1.0;
+        N=normalize(vec3(slope.x*1.5+(first.x+second.x)*0.035,1.0,slope.y*1.5+(first.y+second.y)*0.035));
     }
     vec3 uvw = (vWorld + N) / (vec3(WORLD_X, WORLD_Y, WORLD_Z));
     vec4 r = texture(uProbeR, uvw), g = texture(uProbeG, uvw), b = texture(uProbeB, uvw);
@@ -65,6 +66,15 @@ void main() {
     vec3 refl = mix(irr, skyColor(R), smoothstep(0.3, 0.9, sky) * smoothstep(-0.1, 0.2, R.y));
     if (liquid && uWaterSSR != 0) { vec4 sr = sceneReflection(vWorld + N * 0.02, R); refl = mix(refl, sr.rgb, sr.a); }
     float a = max(tex.a, liquid ? 0.62 : 0.0);
+    if(liquid) {
+        vec4 clip=uPV*vec4(vWorld,1);vec2 screen=clip.xy/clip.w*0.5+0.5;
+        vec2 distorted=clamp(screen+N.xz*0.025,vec2(0.002),vec2(0.998));
+        float behind=texture(uSceneDepth,distorted).r;
+        if(behind>clip.z/clip.w*0.5+0.5+0.0001) {
+            vec3 refracted=texture(uSceneColor,distorted).rgb;
+            col=mix(col,refracted*vec3(0.76,0.88,0.94),0.55);
+        }
+    }
     col = mix(col, refl, fres);
     a = clamp(a + fres * 0.6, 0.0, 1.0);
     oColor = vec4(airFog(col, vWorld, uCam, uDensity, uAmbient * uFogCol), a);

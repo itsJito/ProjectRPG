@@ -54,6 +54,8 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("release-systems".equals(System.getenv("RPG_GALLERY_ONLY"))) { releaseSystemsShots(); return 0; }
+        if ("release-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { releasePolishShots(); return 0; }
         if ("system-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { systemPolishShots(); return 0; }
         if ("session-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { sessionPolishShots(); return 0; }
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
@@ -337,6 +339,76 @@ final class Gallery {
     }
 
     /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void releasePolishShots() {
+        var preview = new Gfx.Preview();
+        preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
+        var title = new rpg.ui.TitleScreen("0.1.2");
+        for (int i = 0; i < 30; i++) { gfx.title(preview, Main.defaultLook(), win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1f / 60, false, false); ui.end(); gfx.frame(win.width, win.height); }
+        Main.shot(gfx, win.width, win.height, new File(shots, "title.png"));
+        var creator = new rpg.ui.Creator();
+        for (int i = 0; i < 15; i++) { gfx.creator(preview, creator.look, 0, win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); creator.draw(ui, win.width, win.height, java.util.List.of(), false, false); ui.end(); gfx.frame(win.width, win.height); }
+        Main.shot(gfx, win.width, win.height, new File(shots, "creator.png"));
+        if ("stage".equals(System.getenv("RPG_REVIEW_ONLY"))) return;
+        place(61.5f, 62.5f, 0);
+        var horse = g.animals.display(rpg.animal.Species.HORSE, false, false, 0, 64.5f, 62.5f, 0);
+        frames(20);
+        film("horse-idle", 54, i -> {}, a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 0, horse);
+        film("horse-walk", 54, i -> g.animals.puppetTo(horse, horse.x, horse.z - 4, false), a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 18, horse);
+    }
+
+    /** Release review through the same HUD, articulated bodies and GPU passes used during play. */
+    private void releaseSystemsShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        if(only==null || only.equals("ui")) {
+            place(64.5f,62.5f,0);frames(8);
+            g.honor.changedAt=g.time;g.honor.lastDelta=3;g.honor.lastWhy="Helped a neighbor";g.state.commit("HonorChanged",g.player.id,0,null,0,"Helped a neighbor");
+            g.state.commit("QuestStarted",g.player.id,0,null,0,"Courier");
+            g.state.commit("LevelUp",g.player.id,0,null,0,"AGILITY 4->5");frames(24);reviewUi("quest-and-honor");
+            for(int i=0;i<270;i++) { game.tick(1f/60); if(i%6==0)draw(null,0.1f); }
+            reviewUi("level-notice");
+            var cole=(rpg.ai.Npc)g.actor(Ids.GUARD);g.teleport(cole,g.player.x+2,g.player.y,g.player.z);cole.nextThink=Double.MAX_VALUE;
+            cole.goal=rpg.ai.Brain.Goal.WATCH;
+            var dialog=new rpg.ui.Dialog(cole.name,"Keep your eyes open. If you see trouble, come and find the watch.").choice("I'll keep watch.",hud::closeAll);dialog.npc=cole.id;hud.dialog(dialog);
+            for(int i=0;i<36;i++) { game.tick(1f/60);draw(null,1f/60);if(i%3==0)Main.shot(gfx,win.width,win.height,new File(shots,"chatbox-f"+(i+1)+".png")); }
+            hud.closeAll();
+            var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
+            var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+            for(int i=0;i<8;i++) { gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height); }
+            Main.shot(gfx,win.width,win.height,new File(shots,"title-settings.png"));settings.escape();
+        }
+        if(only==null || only.equals("water") || only.equals("final")) {
+            place(96.5f,43f,0);g.state.minutes=720;game.tick(0);
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.RAIN);g.timeSystem.weather.snap();
+            g.chemistry.splash(96,4,35);
+            float[] cam={97,7,44,96,3.8f,34};
+            for(int i=0;i<90;i++) { game.tick(1f/60);draw(cam,1f/60);if(i==30 || i==75)Main.shot(gfx,win.width,win.height,new File(shots,"water-rain-f"+(i+1)+".png")); }
+            g.objects.add(new rpg.objects.Fire(g.state.newEntityId(),91.5f,DevMap.FLOOR,21.5f,g.state.minutes+1000,g.player.id));
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+            cam=new float[]{90,6,26,91.5f,5,21.5f};
+            for(int i=0;i<60;i++) { game.tick(1f/60);draw(cam,1f/60); }
+            Main.shot(gfx,win.width,win.height,new File(shots,"chemical-fire.png"));
+        }
+        if(only==null || only.equals("carry") || only.equals("final")) {
+            var dead=(rpg.ai.Npc)g.actor(Ids.BANDIT_1);g.ai.spawnBody(dead);g.teleport(dead,64.5f,DevMap.FLOOR,70);
+            place(60.5f,73.5f,0);gfx.preload(java.util.List.of(dead));dead.alive=false;dead.hp=0;g.onKilled(dead,g.player,0);frames(60);
+            var corpse=(rpg.objects.Corpse)g.objects.get(dead.corpse);place(corpse.x,corpse.z+1.2f,0);frames(3);
+            if(g.carrying.begin(g.player,corpse).rejected())throw new IllegalStateException("Cannot pick up review body");
+            film("body-pickup",48,i->{},a->quarter(a,-3.2f),0);
+            g.controller.camPitch=0.25f;
+            for(int i=0;i<27;i++) { g.controller.in.mainDown=true;step(); }
+            if(g.player.cs.charge<=0 || !g.carrying.ready(g.player))throw new IllegalStateException("Body throw preview has no charged carry");
+            reviewUi("body-throw-guide");
+            film("body-throw",60,i->g.controller.in.mainDown=i<3,a->side(a,-4),0);
+        }
+        if(only==null || only.equals("gore") || only.equals("final"))goreShots();
+        if("final".equals(only) || "gear".equals(only)) {
+            place(64.5f,66.5f,0);g.player.firstPerson=true;
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF,new rpg.item.ItemStack(rpg.item.Items.get("iron_shield"),1));
+            g.controller.in.offDown=false;frames(8);reviewUi("shield-rest-firstperson");
+            g.controller.in.offDown=true;frames(18);reviewUi("shield-firstperson");
+        }
+    }
+
     private void systemPolishShots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         if ("extras".equals(only)) systemExtrasShots();
@@ -802,9 +874,10 @@ final class Gallery {
     /** A killing cut on a bandit in the square: the severed arm, the body, the blood on the ground. */
     private void goreShots() {
         var bandit = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        if(!bandit.alive)g.ai.revive(bandit,true);
         g.ai.reload(bandit);
         g.teleport(bandit, 102.5f, DevMap.FLOOR, 74.5f);
-        bandit.yaw = 0; bandit.hostileToPlayer = false;
+        bandit.yaw = 0; bandit.hostileToPlayer = false;bandit.nextThink=Double.MAX_VALUE;
         place(102.5f, 77f, 0);
         frames(5);
         float rx = (float) Math.cos(bandit.yaw), rz = (float) -Math.sin(bandit.yaw);
@@ -813,7 +886,7 @@ final class Gallery {
         float[] cam = {104.5f, DevMap.FLOOR + 2.4f, 78.5f, 102.5f, DevMap.FLOOR + 0.3f, 74.5f};
         for (int i = 0; i < 20; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-cut.png"));
-        for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+        for (int i = 0; i < 120; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-after.png"));
     }
 

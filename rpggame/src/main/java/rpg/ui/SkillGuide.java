@@ -30,7 +30,7 @@ public final class SkillGuide {
             case FISHING -> { l.add(new Object[]{1, "Fish shrimp"}); l.add(new Object[]{20, "Fish trout"}); }
             case HARVESTING -> { l.add(new Object[]{1, "Pick guam leaves"}); l.add(new Object[]{5, "Pick flax"}); l.add(new Object[]{10, "Pick redberries"}); }
             case FIREMAKING -> { l.add(new Object[]{1, "Light logs"}); l.add(new Object[]{15, "Light oak logs"}); l.add(new Object[]{30, "Light willow logs"}); }
-            case AGILITY -> { l.add(new Object[]{1, "Sprint stamina efficiency; traversal starts at 5"}); l.add(new Object[]{10, "Town-wall shortcut"}); }
+            case AGILITY -> { l.add(new Object[]{1, "Sprint stamina efficiency"}); l.add(new Object[]{5, "Catch reachable two-block ledges"}); l.add(new Object[]{10, "Town-wall shortcut"}); }
             case THIEVING -> { l.add(new Object[]{1, "Pickpocket townsfolk"}); l.add(new Object[]{5, "Steal from the market stall"}); l.add(new Object[]{10, "Pick the store-room lock"}); l.add(new Object[]{20, "Pick the store chest's lock"}); }
             case HEALTH -> l.add(new Object[]{1, "Maximum Health equals your Health level"});
             case ATTACK -> l.add(new Object[]{1, "Faster melee handling and recovery; no damage bonus"});

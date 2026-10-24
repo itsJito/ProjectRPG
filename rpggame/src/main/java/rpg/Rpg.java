@@ -55,6 +55,8 @@ public final class Rpg implements GameModule {
     public ItemActions items;
     public CombatSystem combat;
     public rpg.combat.Reactions reactions;
+    public rpg.combat.Falling falling;
+    public rpg.skill.MovementPractice movementPractice;
     public rpg.combat.Gore gore;
     public rpg.combat.Prayers prayers;
     public rpg.combat.Magic magic;
@@ -65,6 +67,7 @@ public final class Rpg implements GameModule {
     /** The player's death as it plays out (gamefixes), and the graves and undertaker that follow it (GDD 3.12). */
     public final PlayerDeath death = new PlayerDeath(this);
     public rpg.law.Undertaker undertaker;
+    public rpg.law.Graveyards graveyards;
     /** The player's Honor (GDD 3.5). */
     public rpg.law.Honor honor;
     public Economy econ;
@@ -74,6 +77,8 @@ public final class Rpg implements GameModule {
     public rpg.actor.BodyCarry carrying;
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
+    public rpg.world.Chemistry chemistry;
+    public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     public Fx fx;
     public Sfx sfx;
     /** The score (set by the window's loop; null in automated runs). */
@@ -119,6 +124,8 @@ public final class Rpg implements GameModule {
         items = new ItemActions(this);
         combat = new CombatSystem(this);
         reactions = new rpg.combat.Reactions(this);
+        falling = new rpg.combat.Falling(this);
+        movementPractice = new rpg.skill.MovementPractice(this);
         gore = new rpg.combat.Gore(this);
         prayers = new rpg.combat.Prayers(this);
         magic = new rpg.combat.Magic(this);
@@ -126,11 +133,24 @@ public final class Rpg implements GameModule {
         dialogue = new Dialogue(this);
         law = new Law(this);
         undertaker = new rpg.law.Undertaker(this);
+        graveyards = new rpg.law.Graveyards(this);
+        graveyards.plots.add(new rpg.law.Graveyards.Plot("DevCity graveyard", DevMap.ALPHA, 113, DevMap.FLOOR, 89, 8, 4));
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
         quests = new Quests(this);
         traversal = new rpg.actor.Traversal(this);
         carrying = new rpg.actor.BodyCarry(this);
+        chemistry = new rpg.world.Chemistry(this);
+        timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,DevMap.SX+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
+        timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
+        timeSystem.weather.listener = new astratto.weather.Weather.Listener() {
+            @Override public void thunder(float distance,float gain) { if(sfx!=null && sfx.has("thunder"))sfx.ui("thunder",gain*0.7f); }
+            @Override public void strike(float x,float y,float z) {
+                for(var receiver:chemistry.active)if((receiver.tags()&astratto.bridge.AstrattoNative.CHEM_CONDUCTIVE)!=0 && (receiver.state()&astratto.bridge.AstrattoNative.CHEM_WET)!=0
+                        && Math.hypot(receiver.x()-x,receiver.z()-z)<18) { x=receiver.x();y=receiver.y();z=receiver.z();break; }
+                chemistry.emit(null,astratto.bridge.AstrattoNative.CHEM_ELECTRIC,x,y,z,2,5,0.25f);
+            }
+        };
         bountyBoard = new rpg.law.BountyBoard(this);
         invariants = new Invariants(this);
         controller = new PlayerController(this);
@@ -196,6 +216,9 @@ public final class Rpg implements GameModule {
         lastDt = dt;
         state.tick++;
         state.minutes += dt * cfg.minutesPerSecond;
+        timeSystem.update(state.minutes,dt,player.x,player.eyeY(),player.z);
+        game.commands().chemWind(timeSystem.weather.windX,timeSystem.weather.windZ);
+        game.commands().chemWeather(timeSystem.weather.rain);
         chat.now = time; fx.now = time;
         death.update();
         law.update();
@@ -207,6 +230,7 @@ public final class Rpg implements GameModule {
         magic.update(dt);
         if (!aiDisabled()) { ai.update(dt); animals.update(dt); }
         carrying.update();
+        chemistry.update();
         objects.update(dt);
         undertaker.update();
         spareWatch();
@@ -223,11 +247,14 @@ public final class Rpg implements GameModule {
         lastRigids = ctx.rigids();
         Snapshots.Mover m = lastBodies.mover(player.body);
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
-        if (m != null && !(ui != null && ui.console.noclip)) {
-            player.walked += (float) Math.hypot(m.x - player.x, m.z - player.z);
+        if (m != null && !player.reacting && !(ui != null && ui.console.noclip)) {
+            float traveled = (float) Math.hypot(m.x - player.x, m.z - player.z);
+            player.walked += traveled;
             player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched;
+            movementPractice.moved(traveled);
         }
         ai.afterFrame(lastBodies, ctx.agents());
+        falling.afterFrame(lastBodies, (float) lastDt);
         reactions.afterFrame(lastBodies);
         animals.afterFrame(lastBodies, ctx.agents());
     }
@@ -236,7 +263,7 @@ public final class Rpg implements GameModule {
 
     /** A body Sydney holds struck the ground: a thud (louder the harder), and a hard fall on the head hurts. */
     @Override public void ragdollImpact(long ragdoll, int point, float speed, float impulse, float x, float y, float z, int block) {
-        if (sfx != null && speed > 2.6f) sfx.play("thud", x, y, z, Math.min(1f, 0.25f + speed / 9f));
+        if (sfx != null && speed > 2.6f) sfx.play("body.fall", x, y, z, Math.min(1f, 0.25f + speed / 9f));
         if (speed < 6.5f) return;
         for (Npc n : npcs) if (n.ragdoll == ragdoll && n.alive && n.reacting && point == astratto.bridge.AstrattoNative.RD_HEAD) n.hp = Math.max(1, n.hp - (speed - 6.5f) * 3 * rpg.combat.CombatMath.HP_SCALE);
     }
@@ -360,6 +387,9 @@ public final class Rpg implements GameModule {
     }
 
     public void teleport(Actor a, float x, float y, float z) {
+        if (falling != null) falling.reset(a);
+        if (a == player && movementPractice != null) movementPractice.reset();
+        if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);
         if (a.body != 0) game.commands().moverPlace(a.body, x, y + 0.05f, z, 0, 0, 0);
         a.x = x; a.y = y; a.z = z;
         if (a instanceof Npc n) { if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
@@ -368,6 +398,7 @@ public final class Rpg implements GameModule {
 
     // ------------------------------------------------------------------ death and time
     public void onKilled(Actor v, Actor killer, long cause) {
+        falling.reset(v);v.morphT=v.chronoT=0;
         if (prayers != null) prayers.clear(v);
         law.onKilled(v, killer, cause);
         if (v instanceof Npc n) ai.onKilled(n, killer);
@@ -386,15 +417,15 @@ public final class Rpg implements GameModule {
 
     /**
      * A grave where the body lay (GDD 3.12): everything carried and worn, packed into one container that stands for ten
-     * minutes. Secured (inside the walls), nobody but the player and the guard who carries it in may touch it; exposed
+     * minutes. Secured (inside the walls), only the guard who carries it in may touch it; exposed
      * (outside), anyone who finds it may. What will not fit lies on the ground beside it, never lost. Null if there was
      * nothing to keep.
      */
     public Container makeGrave(float x, float z, long killer, boolean secured) {
         int honorAtDeath = honor.score;
         if (player.inv.isEmpty() && player.eq.stacks().isEmpty()) return null;
-        Container grave = objects.add(new Container(state.newEntityId(), "grave", player.name + "'s grave", "grave", x, DevMap.FLOOR + 0.3f, z, 28, player.id));
-        grave.ownerOnly = true;
+        Container grave = objects.add(new Container(state.newEntityId(), "grave", player.name + "'s grave", "grave", x, DevMap.FLOOR + 0.3f, z, 320, player.id));
+        grave.ownerOnly = secured;
         grave.secured = secured;
         grave.killer = killer;
         grave.expiresAt = time + rpg.law.Undertaker.GRAVE_SECONDS;

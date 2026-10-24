@@ -302,6 +302,7 @@ public final class NativeEngine implements AutoCloseable {
 
     public Snapshots.Stats stats() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_STATS); return b == null ? new Snapshots.Stats() : Snapshots.Stats.read(b); }
     public Snapshots.AudioStats audioStats() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_AUDIO); return b == null ? new Snapshots.AudioStats() : Snapshots.AudioStats.read(b); }
+    public java.util.List<Snapshots.Chemical> chemistry() { return Snapshots.chemistry(snapshot(AstrattoNative.SNAPSHOT_CHEMISTRY)); }
     public Snapshots.Bodies bodies() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_BODIES); return b == null ? new Snapshots.Bodies() : Snapshots.Bodies.read(b, b.capacity()); }
     /** 2.2: every Impulsis rigid body and joint, as the last frame left them. */
     public Snapshots.Rigids rigids() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_RIGIDS); return b == null ? new Snapshots.Rigids() : Snapshots.Rigids.read(b, b.capacity()); }

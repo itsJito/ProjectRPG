@@ -114,7 +114,7 @@ final class AnimalMind {
             float d = a.distTo(threat);
             boolean hurt = a.cs.lastAttacker == threat.id && g.time - a.cs.lastHurt < 15;
             boolean young = sys.youngNear(a, 9) && sp.defends || sp == Species.BROWN_BEAR && sys.youngNear(a, 12);
-            boolean stands = !a.baby && (sp.flight <= 0 || young || hurt && sys.couldWin(a, threat));
+            boolean stands = !a.baby && (sp == Species.HORSE ? hurt && sys.couldWin(a, threat) : sp.flight <= 0 || young || hurt && sys.couldWin(a, threat));
             if (a.baby && mother != null) s.add(new Score(Goal.FLEE, 0.97f, mother.id, "frightened by " + threat.name + "; running to its mother"));
             else if (stands) {
                 if (hurt || d < Math.max(1.6f, sp.wary * 0.3f) || young && d < sp.wary * 0.6f) s.add(new Score(Goal.DEFEND, 0.96f, threat.id, (young ? "protecting its young from " : hurt ? "fighting back against " : "cornered by ") + threat.name));
@@ -127,9 +127,9 @@ final class AnimalMind {
         if (a.thirst > 0.7f) s.add(new Score(Goal.DRINK, 0.55f + a.thirst * 0.3f, 0, String.format("thirsty (%.0f%%)", a.thirst * 100)));
         if (a.hunger > 0.6f && !a.baby) {
             boolean meat = sp.diet == Species.Diet.HUNTER || sp.diet == Species.Diet.OMNIVORE || sp.diet == Species.Diet.SCAVENGER;
-            Animal carcass = meat ? sys.carcassNear(a, 30) : null;
+            Actor carcass = meat ? sys.carcassNear(a, 30) : null;
             Animal prey = sp.prey.isEmpty() ? null : sys.preyFor(a);
-            if (carcass != null) s.add(new Score(Goal.FEED, 0.5f + a.hunger * 0.35f, carcass.id, "hungry; feeding on a " + carcass.kind().toLowerCase() + " carcass"));
+            if (carcass != null) s.add(new Score(Goal.FEED, 0.5f + a.hunger * 0.35f, carcass.id, "hungry; feeding on a " + carcass.name.toLowerCase() + " carcass"));
             else if (prey != null) s.add(new Score(Goal.HUNT, 0.5f + a.hunger * 0.35f, prey.id, "hungry; hunting a " + prey.kind().toLowerCase() + String.format(" %.0f m off", a.distTo(prey))));
             else if (sp.diet != Species.Diet.HUNTER) s.add(new Score(Goal.GRAZE, 0.45f + a.hunger * 0.3f, 0, String.format("hungry (%.0f%%); %s", a.hunger * 100, sys.troughFor(a) != null ? "to the trough" : "foraging")));
         }
@@ -224,11 +224,11 @@ final class AnimalMind {
             }
             case DEFEND, HUNT -> engage(a, o, dt);
             case FEED -> {
-                if (!(o instanceof Animal c) || !c.carcass() || c.butchered) { a.nextThink = 0; sys.desire(a, A_HOLD); break; }
-                if (sys.goTo(a, c.x, c.z, false, a.radius + 0.6f)) {
+                if (o == null || o.alive || o.carriedBy!=0 || o instanceof Animal animal && (!animal.carcass() || animal.butchered) || o instanceof Npc npc && npc.corpse==0) { a.nextThink = 0; sys.desire(a, A_HOLD); break; }
+                if (sys.goTo(a, o.x, o.z, false, a.radius + 0.6f)) {
                     a.headDown = true;
                     a.hunger = Math.max(0, a.hunger - dm / 12f);
-                    sys.eat(c, dm);
+                    sys.eat(a,o,dm);
                 }
             }
             case GRAZE -> graze(a, dm);

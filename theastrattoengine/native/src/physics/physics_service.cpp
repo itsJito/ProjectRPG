@@ -154,7 +154,7 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             RagdollBody* r = ragdolls_.get(c.handle);
             if (!r) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
             r->body->fromPose(c.p, c.vx, c.vy, c.vz);
-            if (!r->kinematic) r->body->unbury(e.active());
+            if (!r->kinematic && !r->body->held) r->body->unbury(e.active());
             if (r->sydney) r->sydney->primed = false;          // the pose it now holds is what its muscles hold
             return ASTRATTO_OK;
         }
@@ -198,7 +198,10 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
                     break;
                 case ASTRATTO_CONTROL_LIMBS: if (r->sydney) r->sydney->setBody(c.value); break;
                 case ASTRATTO_CONTROL_WAKE: r->body->wake(); break;
-                case ASTRATTO_CONTROL_KINEMATIC: r->kinematic = c.value != 0; if (!r->kinematic) r->body->wake(); break;
+                case ASTRATTO_CONTROL_KINEMATIC:
+                    r->kinematic = c.value == 1; r->body->held = c.value == 2;
+                    if (!r->body->held) for (int p = 0; p < syd::PARTS; ++p) { auto& b = r->body->body(p); b.flags &= ~static_cast<uint32_t>(ASTRATTO_RIGID_KINEMATIC); b.update(); }
+                    r->body->wake(); break;
                 default: return ASTRATTO_ERR_ARGUMENT;
             }
             return ASTRATTO_OK;

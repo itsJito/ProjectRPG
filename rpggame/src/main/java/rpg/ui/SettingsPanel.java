@@ -5,14 +5,24 @@ import static org.lwjgl.glfw.GLFW.*;
 
 /** Four short, stable settings pages. Changes apply immediately; Escape cancels a binding or returns to play. */
 public final class SettingsPanel {
-    private final Hud hud;
+    private final java.util.function.Consumer<Preferences> applier;
+    private final boolean persistent;
+    private Runnable beforeShow = () -> {};
     public Preferences values;
     public boolean open;
     private int tab;
     private Preferences.Action binding;
     private static final java.nio.file.Path PATH = java.nio.file.Path.of("saves", "preferences.json");
     public Runnable displayChanged = () -> {};
-    public SettingsPanel(Hud hud) { this.hud = hud; values = hud.g.scripted ? new Preferences() : Preferences.load(PATH); apply(); }
+    public SettingsPanel(Hud hud) {
+        this(hud.g.scripted ? new Preferences() : Preferences.load(PATH), p -> {
+            p.apply(hud.g.cfg); p.mix(hud.g.game.commands()); hud.gfx.fovDeg = p.fov; hud.console.core.set("sensitivity", String.valueOf(p.sensitivity));
+        }, !hud.g.scripted);
+        beforeShow = hud::closeAll;
+    }
+    public SettingsPanel(Preferences initial, java.util.function.Consumer<Preferences> apply, boolean persistent) {
+        values = initial; applier = apply; this.persistent = persistent; apply();
+    }
     public boolean capturingKey() { return binding != null; }
     public void keyInput(astratto.platform.Input input) {
         if (binding == null) return;
@@ -20,10 +30,10 @@ public final class SettingsPanel {
         for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; button++) if (input.mousePressed(button) && values.bind(binding, astratto.platform.Input.MOUSE_OFFSET + button)) { binding = null; changed(); return; }
         for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) if (input.keyPressed(key) && values.bind(binding, key)) { binding = null; changed(); return; }
     }
-    public void show() { hud.closeAll(); open = true; }
+    public void show() { beforeShow.run(); open = true; }
     public boolean escape() { if (!open) return false; binding = null; open = false; changed(); return true; }
-    private void apply() { values.apply(hud.g.cfg); values.mix(hud.g.game.commands()); hud.gfx.fovDeg = values.fov; hud.console.core.set("sensitivity", String.valueOf(values.sensitivity)); }
-    private void changed() { apply(); displayChanged.run(); if (!hud.g.scripted) values.save(PATH); }
+    private void apply() { applier.accept(values); }
+    private void changed() { apply(); displayChanged.run(); if (persistent) values.save(PATH); }
 
     public void draw(Ui2D ui, int width, int height) {
         float w = Math.min(920, width - 40), h = Math.min(650, height - 40), x = (width - w) / 2, y = (height - h) / 2;

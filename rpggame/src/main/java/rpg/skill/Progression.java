@@ -17,11 +17,6 @@ public final class Progression {
     /** Recent XP drops for the HUD: skill, amount, when. */
     public record Drop(Skill skill, long amount, double at) {}
     public final ArrayDeque<Drop> drops = new ArrayDeque<>();
-    /** The level-up being celebrated (null none), and when it began. */
-    public Skills.Award celebrating;
-    /** What the level just reached revealed (gamefixes: what a skill gives is kept hidden until the level is reached). */
-    public final List<String> revealed = new ArrayList<>();
-    public double celebratedAt = -99;
     /** Awards made, for the acceptance checks. */
     public long awards, levelUps;
 
@@ -62,14 +57,12 @@ public final class Progression {
         if (s == Skill.FAITH) g.player.faith = Math.min(g.player.maxFaith(), g.player.faith + (w.toLevel() - w.fromLevel()));
         if (s == Skill.MAGIC) g.player.mana = Math.min(g.player.maxMana(), g.player.mana + (w.toLevel() - w.fromLevel()));
         // what the new level opens up, announced now that it is earned (the guide showed only "???" until this moment)
-        revealed.clear();
+        List<String> revealed=new ArrayList<>();
         for (String line : rpg.ui.SkillGuide.unlocks(s)) {
             int need = Integer.parseInt(line.substring(0, line.indexOf(' ')));
             if (need > w.fromLevel() && need <= w.toLevel()) revealed.add(line.substring(line.indexOf(' ') + 1));
         }
         for (String r : revealed) g.chat.add("New at " + s.title + " level " + w.toLevel() + ": " + r + ".", rpg.Chat.Kind.LEVEL);
-        celebrating = w;
-        celebratedAt = g.time;
         if (g.sfx != null) g.sfx.jingle();
         if (g.fx != null) g.fx.fireworks(g.player.x, g.player.y + 2.2f, g.player.z);
     }
@@ -78,6 +71,5 @@ public final class Progression {
 
     public void update() {
         while (!drops.isEmpty() && g.time - drops.peekFirst().at() > 2.4) drops.removeFirst();
-        if (celebrating != null && g.time - celebratedAt > 4.5) celebrating = null;
     }
 }

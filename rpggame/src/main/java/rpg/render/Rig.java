@@ -240,7 +240,7 @@ public final class Rig {
         st.crouchBlend += ((a.sneaking || a.crouched ? 1 : 0) - st.crouchBlend) * (1 - (float) Math.exp(-16 * dt));
         crouch += SNEAK_CROUCH * st.crouchBlend;
         extraLean += 0.65f * st.crouchBlend;
-        float looting = a instanceof rpg.ai.Npc npc && (npc.goal == rpg.ai.Brain.Goal.LOOT || npc.goal == rpg.ai.Brain.Goal.AID) && time < npc.lootUntil
+        float looting = a instanceof rpg.ai.Npc npc && (npc.goal == rpg.ai.Brain.Goal.LOOT || npc.goal == rpg.ai.Brain.Goal.AID || npc.goal == rpg.ai.Brain.Goal.WORK && npc.role == rpg.ai.Npc.Role.HUNTER) && time < npc.lootUntil
                 ? Math.max(0, Math.min(1, Math.min((float) (time - npc.lootStarted) / 0.25f, (float) (npc.lootUntil - time) / 0.2f))) : 0;
         if (a.traversal != null) extraLean += 0.38f * (float) Math.sin(Math.PI * a.traversal.progress);
         float carryLift = a.carryBody == 0 ? 0 : Math.max(0, Math.min(1, (float) (time - a.carrySince) / 0.65f));
@@ -258,7 +258,7 @@ public final class Rig {
             extraTwist += CombatSystem.twist(mv, c.offHand, strike) * strikeW;
             extraLean += CombatSystem.lean(mv, strike) * strikeW;
             crouch += (mv == Move.HEAVY ? 1.1f : 0.5f) * strikeW;
-        } else if (c.charge > 0) {
+        } else if (c.charge > 0 && a.carryBody == 0) {
             extraTwist += CombatSystem.twist(Move.HEAVY, false, -0.3f * c.charge) * c.charge;
             extraLean += CombatSystem.lean(Move.HEAVY, -0.3f * c.charge) * c.charge;
             crouch += 0.8f * c.charge;
@@ -418,7 +418,7 @@ public final class Rig {
             }
             if (firstPerson && holds != null && holds.family != Family.BOW && holds.family != Family.STAFF)
             {
-                rest = view(aim, holds.family == Family.SHIELD ? 4.6f : 4.0f, side, 4.2f + 0.2f * (float) Math.cos(theta * 2), 9.2f);
+                rest = holds.family == Family.SHIELD ? view(aim,6.0f,side,12.0f,11.0f) : view(aim,4.0f,side,4.2f+0.2f*(float)Math.cos(theta*2),9.2f);
                 // the blade carried up and forward into the view, not back over the shoulder
                 if (holds.family != Family.SHIELD) dir = holds.family == Family.CROSSBOW ? aim : norm(viewDirection(aim, side * 0.3f, 0.8f, 0.9f));
             }
@@ -437,7 +437,7 @@ public final class Rig {
                     target = add(add(hand[0], itemDir[0], 2.5f), torsoRight, -0.8f);
                     target = add(target, torsoUp, -0.6f);
                 }
-            } else if (isMain && c.charge > 0 && !bow) {
+            } else if (isMain && c.charge > 0 && !bow && a.carryBody == 0) {
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
                 target = lerp(rest, toFigure(a, gr[0], gr[1], gr[2]), c.charge);
                 dir = norm(lerp(dir, toFigureDir(a, gr[3], gr[4], gr[5]), c.charge));
@@ -449,11 +449,11 @@ public final class Rig {
                 target = lerp(rest, contact, weight); dir = new float[]{0, 0, -1};
             } else if (time - a.throwAt >= 0 && time - a.throwAt < 0.45) {
                 float t = (float) (time - a.throwAt) / 0.45f, swing = (float) Math.sin(Math.PI * t);
-                target = lerp(rest, new float[]{side * 5.2f, b.height / Body.PX * 0.56f + 3 * swing, -10.5f - 5 * swing}, 1 - t);
+                target = lerp(rest, new float[]{side * 5.2f, b.height / Body.PX * 0.52f + 2 * swing, -7.0f - 3 * swing}, 1 - t);
                 dir = new float[]{0, 0, -1};
             } else if (a.carryBody != 0) {
                 float[] pickup = toFigure(a, a.reachX, a.reachY, a.reachZ);
-                float[] carry = new float[]{side * 5.2f, b.height / Body.PX * 0.56f * (1 - carryLower) + 6.3f * carryLower, -10.5f};
+                float[] carry = new float[]{side * 5.2f, b.height / Body.PX * 0.52f * (1 - carryLower) + 6.3f * carryLower, -7.0f};
                 target = lerp(pickup, carry, carryLift); dir = new float[]{0, 1, 0};
             } else if (looting > 0.001f) {
                 target = lerp(rest, toFigure(a, a.reachX + (float) Math.cos(a.yaw) * side * 0.12f, a.reachY, a.reachZ - (float) Math.sin(a.yaw) * side * 0.12f), looting);
@@ -461,7 +461,7 @@ public final class Rig {
             } else if (shieldSide) {
                 // the guard: the shield (or the blade) brought across in front of the chest and up to the chin, where it
                 // covers the body from a blow - and where the eyes, behind it, can still see over it
-                target = bareGuard ? (firstPerson ? view(aim, 3.5f, side, 1.5f, 6.5f) : torsoPoint(shoulder, -side * 0.6f, 1.5f, -3.3f)) : firstPerson ? view(aim, 2.2f, side, 3.0f, 8.4f) : torsoPoint(shoulder, -side * 2.2f, -1.2f, -6.6f);
+                target = bareGuard ? (firstPerson ? view(aim, 3.5f, side, 1.5f, 6.5f) : torsoPoint(shoulder, -side * 0.6f, 1.5f, -3.3f)) : firstPerson ? view(aim,6.0f,side,9.5f,11.0f) : torsoPoint(shoulder, -side * 2.2f, -1.2f, -6.6f);
                 if (bareGuard) target = lerp(rest, target, st.guardRaise);
                 dir = holds != null && holds.family == Family.SHIELD ? new float[]{0, 1, 0} : norm(torsoDir(1f * -side, 0.35f, -0.4f));
             } else if (isMain && holds != null && holds.family == Family.THROWN && c.draw > 0) {

@@ -64,11 +64,11 @@ public final class AiSystem {
         Npc ada = npc(Ids.MERCHANT_A, "Ada", Npc.Role.MERCHANT, "Merchant (Store A)", 91.5f, 55.0f, 101);
         ada.homeX = 91.5f; ada.homeZ = 89.5f;
         give(ada, Items.COINS, 600); give(ada, Items.BREAD, 2);
-        Npc bram = npc(Ids.LAWMAN_A, "Bram", Npc.Role.LAWMAN, "Lawman (JUR-ALPHA)", DevMap.LAWMAN_A[0], 55.0f, 102);
+        Npc bram = npc(Ids.LAWMAN_A, "Bram", Npc.Role.LAWMAN, "Lawman (DevCity)", DevMap.LAWMAN_A[0], 55.0f, 102);
         give(bram, Items.COINS, 2500); // finite watch treasury, replenished by actual fines
         bram.homeX = 110.5f; bram.homeZ = 54.5f;
         levels(bram, 40, 40, 40, 40); wear(bram, "steel_sword", "steel_shield", "steel_body");
-        Npc cole = npc(Ids.GUARD, "Cole", Npc.Role.GUARD, "Guard (JUR-ALPHA)", 98.5f, 66.5f, 103);
+        Npc cole = npc(Ids.GUARD, "Cole", Npc.Role.GUARD, "Guard (DevCity)", 98.5f, 66.5f, 103);
         levels(cole, 30, 30, 30, 30); wear(cole, "iron_sword", "iron_shield", "iron_body", "iron_helm", "iron_legs"); give(cole, Items.TROUT, 3);
         Npc dag = npc(Ids.WORKER, "Dag", Npc.Role.WORKER, "Woodcutter", 89.5f, 21.5f, 104);
         dag.homeX = 90.5f; dag.homeZ = 90.5f;
@@ -91,7 +91,7 @@ public final class AiSystem {
         mara.homeX = 117.5f; mara.homeZ = 119.5f; mara.postX = 104.5f; mara.postZ = 107.5f;
         give(mara, Items.COINS, 30);
         // the undertaker keeps the graveyard and what the guards bring in from the dead (GDD 3.12)
-        Npc morrow = npc(Ids.UNDERTAKER, "Morrow", Npc.Role.UNDERTAKER, "Undertaker (JUR-ALPHA)", DevMap.UNDERTAKER_POST[0], DevMap.UNDERTAKER_POST[1], 113);
+        Npc morrow = npc(Ids.UNDERTAKER, "Morrow", Npc.Role.UNDERTAKER, "Undertaker (DevCity)", DevMap.UNDERTAKER_POST[0], DevMap.UNDERTAKER_POST[1], 113);
         morrow.postX = DevMap.UNDERTAKER_POST[0]; morrow.postZ = DevMap.UNDERTAKER_POST[1];
         give(morrow, Items.COINS, 40);
         // the fence keeps a nook behind Store B (GDD 3.3): buys what is stolen, sells it on quietly
@@ -101,6 +101,7 @@ public final class AiSystem {
         silas.skills.setLevel(Skill.THIEVING, 40);
         silas.pickpocketLevel = 30;
         for (Npc n : new Npc[]{ada, gus, jun, kit, eda, ivo, mara, morrow}) n.pickpocketLevel = 1;
+        for(long id:ADDED_ROSTER)addReleaseNpc(id);
         int[][] bs = DevMap.BANDIT_SPAWNS;
         Npc b1 = npc(Ids.BANDIT_1, "Bandit", Npc.Role.BANDIT, "Hostile test NPC (melee)", bs[0][0] + 0.5f, bs[0][1] + 0.5f, 120);
         levels(b1, 12, 12, 10, 14); wear(b1, "bronze_sword", "wooden_shield", "leather_body", "leather_helm"); give(b1, Items.SHRIMP, 2); give(b1, Items.COINS, 15);
@@ -115,8 +116,61 @@ public final class AiSystem {
         for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
     }
 
+    private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR);
+    private Npc addReleaseNpc(long id) {
+        switch((int)id) {
+            case (int)Ids.BOBWIN -> {
+                Npc bobwin = npc(Ids.BOBWIN, "Bobwin", Npc.Role.GUARD, "City watch", 105.5f, 77.5f, 140);
+                levels(bobwin, 28, 30, 32, 32); wear(bobwin, "iron_sword", "iron_shield", "iron_body"); give(bobwin, Items.TROUT, 3);
+                return bobwin;
+            }
+            case (int)Ids.BEGGAR -> {
+                Npc oswin = npc(Ids.BEGGAR, "Oswin", Npc.Role.BEGGAR, "Vagrant", 100.5f, 85.5f, 141);
+                give(oswin, Items.BREAD, 1);
+                return oswin;
+            }
+            case (int)Ids.HEALER -> {
+                Npc maud = npc(Ids.HEALER, "Maud", Npc.Role.HEALER, "Herbalist", 108.5f, 82.5f, 142);
+                give(maud, Items.TROUT, 8); give(maud, Items.COINS, 30); maud.skills.setLevel(Skill.MAGIC, 60); maud.spellBook = rpg.combat.Spells.Book.LUNAR;
+                return maud;
+            }
+            case (int)Ids.PRIEST -> {
+                Npc alric = npc(Ids.PRIEST, "Alric", Npc.Role.PRIEST, "Graveyard chaplain", 110.5f, 88.5f, 143);
+                alric.skills.setLevel(Skill.FAITH, 35); give(alric, Items.BREAD, 3);
+                return alric;
+            }
+            case (int)Ids.HUNTER -> {
+                Npc godric = npc(Ids.HUNTER, "Godric", Npc.Role.HUNTER, "Woodsman", 70.5f, 80.5f, 144);
+                levels(godric,12,12,10,18);godric.skills.setLevel(Skill.HARVESTING,25);godric.skills.setLevel(Skill.ARCHERY,18);
+                give(godric,Items.BREAD,2);give(godric,Items.KNIFE,1);wear(godric,"shortbow",null,"leather_body");
+                godric.eq.set(ItemDef.Slot.AMMO,new ItemStack(Items.BRONZE_ARROWS,20));g.state.mint(Items.BRONZE_ARROWS,20);
+                return godric;
+            }
+            case (int)Ids.SCHOLAR -> {
+                Npc isolde = npc(Ids.SCHOLAR, "Isolde", Npc.Role.SCHOLAR, "Travelling scholar", 103.5f, 58.5f, 145);
+                isolde.skills.setLevel(Skill.MAGIC, 40); isolde.spellBook = rpg.combat.Spells.Book.ARCANE; give(isolde, Items.COINS, 60); give(isolde, Items.BREAD, 2);
+                return isolde;
+            }
+            default -> throw new IllegalArgumentException("Not an authored release NPC: "+id);
+        }
+    }
+
+    /** Older profiles acquire new authored residents and their initial stock exactly once per saved timeline. */
+    public List<Npc> restoreMissingRoster(java.util.Set<Long> saved) {
+        List<Npc> added=new ArrayList<>();
+        for(long id:ADDED_ROSTER)if(!saved.contains(id)) {
+            if(g.actor(id) instanceof Npc old) {
+                if(old.body!=0)despawnBody(old);
+                if(old.ragdoll!=0)g.game.commands().release(old.ragdoll);
+                g.npcs.remove(old);
+            }
+            Npc n=addReleaseNpc(id);n.restore();n.poseReset=true;n.social=(n.id%7)/10f;n.hunger=(n.id%5)/10f;spawnBody(n);added.add(n);
+        }
+        return added;
+    }
+
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
-    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Bandit archer", "Wren");
+    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
@@ -149,7 +203,7 @@ public final class AiSystem {
         CommandBuffer c = g.game.commands();
         n.body = g.game.reserve(KIND_MOVER);
         n.agent = g.game.reserve(KIND_AGENT);
-        c.moverCreate(n.body, n.x, DevMap.FLOOR + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * rpg.actor.Body.CROUCH_HEIGHT);
+        c.moverCreate(n.body, n.x, n.y + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * rpg.actor.Body.CROUCH_HEIGHT);
         c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, AGENT_DOORS | AGENT_EXTERNAL_TRAVERSAL | (n.skills.level(Skill.AGILITY) >= 5 ? AGENT_MANTLE : 0), (int) n.id * 7919);
         c.agentTarget(n.agent, g.player == null ? 0 : g.player.body, 0, 0, 0);
         c.moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, 0);   // a person gathers speed and sheds it (the walk has weight): no instant starts
@@ -203,6 +257,14 @@ public final class AiSystem {
         for (Npc n : g.npcs) {
             if (!n.alive) { respawnCheck(n); continue; }
             if (!n.loaded) continue;
+            g.game.commands().agentRate(n.agent, n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1));
+            if (n.morphT > 0) {
+                n.cs.cancel(); n.cs.blocking = false; n.sneaking = true;
+                g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_CROUCH | MOVER_STANCE_ONLY);
+                Actor attacker = g.actor(n.cs.lastAttacker);
+                if (attacker != null && attacker.alive) { target(n, attacker.body); desire(n, A_FLEE); } else desire(n, A_HOLD);
+                continue;
+            }
             stealth.update(n, dt);
             if (g.traversal.update(n, dt)) continue;
             if (n.reacting) continue;           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
@@ -214,7 +276,7 @@ public final class AiSystem {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
                 if (g.traversal.begin(n, heading) && g.traversal.update(n, dt)) continue;
             }
-            g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking ? MOVER_CROUCH : 0));
+            g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking && n.goal != Brain.Goal.COLLECT ? MOVER_CROUCH : 0));
             face(n, dt);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
             footsteps(n, dt);
@@ -260,6 +322,8 @@ public final class AiSystem {
             if (!n.alive && n.ragdoll != 0) {
                 Snapshots.Ragdoll rd = bodies.ragdoll(n.ragdoll);
                 if (rd != null) {
+                    if(n.posePts==null || n.posePts.length!=rd.p.length)n.posePts=new float[rd.p.length];
+                    System.arraycopy(rd.p,0,n.posePts,0,rd.p.length); n.poseAt=g.time;
                     n.x = rd.comX; n.z = rd.comZ;
                     float low = rd.p[1]; for (int k = 1; k < RD_PARTICLES; k++) low = Math.min(low, rd.p[k * 3 + 1]);
                     n.y = Math.max(0, low - 0.1f);
@@ -324,6 +388,17 @@ public final class AiSystem {
 
     /** Who this NPC must deal with now (fight or flee), or null. */
     public Actor threatFor(Npc n) {
+        if (n.summonOwner != 0) {
+            Actor owner = g.actor(n.summonOwner);
+            if (owner == null || !owner.alive || g.law.inCustody(owner)) return null;
+            Actor target = owner instanceof Npc npc ? g.actor(npc.fightTarget) : g.time-owner.cs.lastHurt<15?g.actor(owner.cs.lastAttacker):null;
+            if (target == null || !target.alive || target == owner || target.summonOwner == owner.id || target.team == owner.team) {
+                target = null;
+                for (Actor candidate : g.actors()) if (candidate.alive && candidate != owner && candidate != n && candidate.cs.lastAttacker == owner.id && g.time-candidate.cs.lastHurt<15 && !g.law.inCustody(candidate) && candidate.team != owner.team && n.distTo(candidate) < 16 && canSee(n,candidate)) { target = candidate; break; }
+            }
+            return target != null && n.distTo(target) < 20 && canSee(n,target) ? target : null;
+        }
+
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
         // nobody knows where a foe is unless their senses say so: in sight (or out of it for a heartbeat, behind a post)
         // it is still the fight; lost for longer, all that is left is where they were last placed - a search (Hunt)
@@ -576,7 +651,7 @@ public final class AiSystem {
     public float bravery(Npc n) {
         float base = switch (n.role) {
             case GUARD -> 0.9f; case LAWMAN -> 0.85f; case BANDIT, BRUTE -> 0.95f; case UNDERTAKER -> 0.7f; case WORKER, FARMER -> 0.6f;
-            case CARTER -> 0.55f; case THIEF -> 0.5f; case FENCE -> 0.45f; case VILLAGER -> 0.4f; case QUEST_GIVER -> 0.35f; case CONTACT -> 0.3f; case MERCHANT -> 0.3f;
+            case CARTER -> 0.55f; case THIEF -> 0.5f; case FENCE -> 0.45f; case VILLAGER, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR -> 0.4f; case QUEST_GIVER -> 0.35f; case CONTACT -> 0.3f; case MERCHANT -> 0.3f;
         };
         return Math.max(0, Math.min(1, base + ((n.id * 2654435761L >>> 20) % 21 - 10) / 100f));
     }
@@ -631,13 +706,25 @@ public final class AiSystem {
     }
 
     // ------------------------------------------------------------------ death, respawn, unloading
+    public boolean ensureCorpsePhysical(Npc dead) {
+        if(dead.alive || dead.corpse==0 || !(g.objects.get(dead.corpse) instanceof rpg.objects.Corpse corpse) || corpse.removed)return false;
+        if(dead.ragdoll!=0 && g.lastBodies.ragdoll(dead.ragdoll)==null && g.time-dead.reactSince>0.5)dead.ragdoll=0;
+        if(dead.ragdoll!=0)return true;
+        dead.ragdoll=g.game.reserve(KIND_RAGDOLL);dead.reactSince=g.time;
+        g.game.commands().ragdollCreate(dead.ragdoll,1,SYDNEY_HUMAN,RAGDOLL_ACTIVE,dead.x,dead.y,dead.z,dead.yaw,0,0,0);
+        if(dead.posePts!=null)g.game.commands().ragdollPose(dead.ragdoll,0,0,0,dead.posePts);
+        g.game.commands().ragdollControl(dead.ragdoll,CONTROL_DIE,1);
+        if(g.gore!=null)g.gore.limbsToBody(dead);return true;
+    }
+
     public void onKilled(Npc n, Actor killer) {
-        n.diedAt = g.time;
+        if (n.summonOwner != 0) { g.magic.dismiss(n); return; }
+        n.diedAt = g.time; n.reactSince=g.time;
         n.goal = Brain.Goal.IDLE;
         n.fightTarget = 0;
         // the body falls as a ragdoll; the mind and the mover are let go. A body already reeling in Sydney's hands is the
         // same body, going limp; otherwise one is made in the pose the figure was last drawn in, moving as it was
-        float dx = n.x - killer.x, dz = n.z - killer.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
+        float dx = killer == null ? 0 : n.x - killer.x, dz = killer == null ? 0 : n.z - killer.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
         if (g.reactions == null || !g.reactions.died(n)) {
             n.ragdoll = g.game.reserve(KIND_RAGDOLL);
             boolean posed = n.posePts != null && g.time - n.poseAt < 0.5;

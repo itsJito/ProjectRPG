@@ -32,6 +32,7 @@ import rpg.world.Voxels;
 public final class CombatSystem {
     private final Rpg g;
     public final List<Projectile> projectiles = new ArrayList<>();
+    private final List<Actor> projectileTargets = new ArrayList<>();
     /** Combat telemetry (GDD 4.2): the last contacts with every number that went into them. */
     public final ArrayDeque<String> telemetry = new ArrayDeque<>();
     public long contacts, blocked, parried, dodged, staggers, kills, deflections, shots, casts, blessings;
@@ -47,7 +48,9 @@ public final class CombatSystem {
     }
 
 
+    private long projectileSerial;
     public static final class Projectile {
+        public long id;
         public Actor owner;
         public float x, y, z, vx, vy, vz, gravity, life, potential, impact;
         public DamageType type;
@@ -55,6 +58,7 @@ public final class CombatSystem {
         public ItemStack ammo;
         public Spell spell;
         public boolean done, heardPass;
+        public long target;
     }
 
     // ------------------------------------------------------------------ starting actions
@@ -70,7 +74,7 @@ public final class CombatSystem {
 
     /** Begins a melee move; false (and nothing spent) when the actor cannot. */
     public boolean attack(Actor a, boolean offHand, Move move) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         if (!a.alive || a.cs.busy() || a.cs.blocking) return false;
         if (a.gaseousT > 0) { if (a == g.player) g.chat.add("You can't strike while you are mist.", Chat.Kind.WARN); return false; }
         float cost = move == Move.HEAVY ? g.cfg.staminaHeavy : g.cfg.staminaLight;
@@ -131,7 +135,7 @@ public final class CombatSystem {
     }
 
     public void setBlock(Actor a, boolean on) {
-        boolean can = on && a.alive && !g.carrying.busy(a) && !g.traversal.busy(a) && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
+        boolean can = on && a.alive && a.morphT<=0 && !a.reacting && !g.carrying.busy(a) && !g.traversal.busy(a) && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
         if (can && !a.cs.blocking) a.cs.blockStart = g.time;
         a.cs.blocking = can;
     }
@@ -139,7 +143,7 @@ public final class CombatSystem {
     /** A dodge: a quick burst of movement with a moment of invulnerability. */
     public boolean dodge(Actor a, float dx, float dz) {
         if (g.carrying.busy(a) || g.traversal.busy(a)) return false;
-        if (!a.alive || a.cs.staggered > 0 || a.cs.dodgeT > 0 || a.cs.phase == Phase.ACTIVE) return false;
+        if (!a.alive || a.morphT>0 || a.reacting || a.cs.staggered > 0 || a.cs.dodgeT > 0 || a.cs.phase == Phase.ACTIVE) return false;
         if (a.stamina < g.cfg.staminaDodge) { if (a == g.player) g.chat.add("You're too tired to dodge.", Chat.Kind.WARN); return false; }
         float l = (float) Math.hypot(dx, dz);
         if (l < 1e-3f) { dx = (float) Math.sin(a.yaw); dz = (float) Math.cos(a.yaw); l = 1; }
@@ -157,7 +161,7 @@ public final class CombatSystem {
      * It flies as a projectile under gravity, strikes by the same contact rules, and lands where it stops, to be picked up.
      */
     public boolean throwOne(Actor a, float yaw, float pitch, float wind) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemStack held = a.eq.get(ItemDef.Slot.MAIN);
         if (held == null || held.def.family != Family.THROWN) return false;
         if (a.skills.level(Skill.ARCHERY) < held.def.reqLevel) { if (a == g.player) g.chat.add("You need Archery level " + held.def.reqLevel + " to throw those.", Chat.Kind.WARN); return false; }
@@ -168,6 +172,7 @@ public final class CombatSystem {
         if (held.amount <= 0) a.eq.set(ItemDef.Slot.MAIN, null);
         boolean heavy = held.def.thrown.equals("javelin") || held.def.thrown.equals("tomahawk");
         Projectile p = launch(a, yaw, pitch, (heavy ? 17 : 22) + (heavy ? 12 : 14) * wind, heavy ? 9.8f : 7.5f);
+        p.life=8;
         p.ammo = one; p.type = held.def.damageType; p.skill = Skill.ARCHERY;
         p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, held.def.damage / CombatMath.HP_SCALE) * (0.6f + 0.4f * wind));
         p.impact = held.def.impact * wind;
@@ -180,7 +185,7 @@ public final class CombatSystem {
 
     /** Looses a bolt from a loaded crossbow along an aim; the crossbow is loaded again over a second or so (Agility quickens it). */
     public boolean shootCrossbow(Actor a, float yaw, float pitch) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef xb = a.main();
         if (xb == null || xb.family != Family.CROSSBOW) return false;
         if (a.cs.reload > 0) return false;
@@ -203,7 +208,7 @@ public final class CombatSystem {
 
     /** Looses an arrow from an equipped bow along an aim, drawn this far (0..1). */
     public boolean shoot(Actor a, float yaw, float pitch, float draw) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef bow = a.main();
         if (bow == null || bow.family != Family.BOW) return false;
         ItemStack ammo = a.eq.get(ItemDef.Slot.AMMO);
@@ -226,18 +231,19 @@ public final class CombatSystem {
     public String castRefusal(Actor a, Spell s) {
         if (a.skills.level(Skill.MAGIC) < s.level) return "You need Magic level " + s.level + " to cast " + s.title + ".";
         if (a instanceof rpg.actor.Player p && p.book != s.book) return s.title + " is in the " + s.book.title + " spellbook; yours is " + p.book.title + ". Change it at an altar.";
+        if (a instanceof rpg.ai.Npc npc && npc.spellBook != s.book) return "That spellbook is not prepared.";
         if (s == Spell.FIRE_BLAST) {
             ItemStack staff = a.eq.get(ItemDef.Slot.MAIN);
             if (staff == null || !staff.def.id.equals("fire_staff")) return "Fire Blast needs the Fire staff in your hand.";
             if (staff.charges <= 0) return "The Fire staff has no charges left. Recharge it with coal.";
         }
         if (a.mana < s.cost) return "You don't have enough mana.";
-        if (a.cs.castCooldown > 0 || a.cs.busy()) return "";
+        if (!a.alive || a.morphT > 0 || a.reacting || a.cs.castCooldown > 0 || a.cs.busy()) return "";
         return null;
     }
 
     public boolean cast(Actor a, Spell s, float yaw, float pitch) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         String no = castRefusal(a, s);
         if (no != null) { if (a == g.player && !no.isEmpty()) g.chat.add(no, Chat.Kind.WARN); return false; }
         if (s == Spell.TELEGRAB) return telegrab(a, s, yaw, pitch);
@@ -249,7 +255,7 @@ public final class CombatSystem {
             var uev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
             g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, uev.id());
             if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
-            if (g.fx != null) g.fx.ring(a.x, a.y, a.z, 1.0f, 2f, 2f, 3.5f);
+            g.chemistry.visual(2,a.x,a.chestY(),a.z,0.4f,60,0.2f,0.7f,1.0f,2f,3.5f);
             return true;
         }
         if (s == Spell.FIRE_BLAST) a.eq.get(ItemDef.Slot.MAIN).charges--;
@@ -260,6 +266,13 @@ public final class CombatSystem {
         float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
         p.potential = CombatMath.magicMax(s.base, magicBonus);
         p.impact = 12 + s.base * 0.6f;
+        if (s == Spell.SPELLDAGGERS) {
+            Actor target = g.magic.target(a,yaw,pitch,24); p.target = target == null ? 0 : target.id;
+            for (float offset : new float[]{-0.11f,0.11f}) {
+                Projectile blade=launch(a,yaw+offset,pitch,s.speed,0);
+                blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target;
+            }
+        }
         casts++;
         var ev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
         g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, ev.id());
@@ -299,7 +312,7 @@ public final class CombatSystem {
     }
 
     private Projectile launch(Actor a, float yaw, float pitch, float speed, float gravity) {
-        Projectile p = new Projectile();
+        Projectile p = new Projectile(); p.id = ++projectileSerial;
         float dx = (float) (-Math.sin(yaw) * Math.cos(pitch)), dy = (float) Math.sin(pitch), dz = (float) (-Math.cos(yaw) * Math.cos(pitch));
         p.owner = a;
         p.x = a.x + dx * 0.5f; p.y = a.eyeY() - 0.1f + dy * 0.5f; p.z = a.z + dz * 0.5f;
@@ -321,7 +334,7 @@ public final class CombatSystem {
         c.flash = Math.max(0, c.flash - dt * 3);
         c.iframes = Math.max(0, c.iframes - dt);
         c.dodgeT = Math.max(0, c.dodgeT - dt);
-        c.castCooldown = Math.max(0, c.castCooldown - dt);
+        c.castCooldown = Math.max(0, c.castCooldown - dt * a.actionRate());
         if (c.reload > 0) { c.reload = Math.max(0, c.reload - dt); if (c.reload == 0 && a == g.player && g.sfx != null) g.sfx.play("lock", a.x, a.eyeY(), a.z, 0.4f); }
         c.slowT = Math.max(0, c.slowT - dt);
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
@@ -340,7 +353,7 @@ public final class CombatSystem {
             if (dt <= 0) return;
         }
         if (c.phase == Phase.IDLE) return;
-        c.t += dt;
+        c.t += dt * a.actionRate();
         // Carry elapsed time through boundaries. A slow frame must not add a frame of latency to every phase.
         for (int transition = 0; transition < 3; transition++) {
             if (c.phase == Phase.WINDUP) {
@@ -581,6 +594,8 @@ public final class CombatSystem {
         boolean behind = behind(v, a);
         // Strength makes the damage of a landed blow (with the weapon's Strength bonus); Attack does not (GDD 2.3)
         float potential = (float) Math.floor(physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0) * CombatMath.moveDamage(m));
+        if (m == Move.HEAVY && (a.sneaking || a.crouched) && v instanceof rpg.ai.Npc target && !g.ai.canSee(target, a)
+                && (target.aware.get(a.id) == null || target.aware.get(a.id).level < rpg.ai.Stealth.ALERT)) potential = (float)Math.floor(potential * 1.5f);
         float impact = CombatMath.impact(impactBase, a.skills.level(Skill.STRENGTH), CombatMath.moveImpact(m));
         resolve(a, v, potential, impact, type, null, px, py, pz, String.valueOf(m), behind);
     }
@@ -600,7 +615,7 @@ public final class CombatSystem {
             log(String.format("%s -> %s %s: DODGED (i-frames)", a.name, v.name, how));
             return;
         }
-        boolean melee = proj == null;
+        boolean melee = proj == null && type != DamageType.MAGIC;
         ItemDef guardItem = v.off() != null && v.off().family == Family.SHIELD ? v.off() : melee && v.main() != null && v.main().guard > 0 ? v.main() : null;
         float fx = (float) -Math.sin(v.yaw), fz = (float) -Math.cos(v.yaw), tx = a.x - v.x, tz = a.z - v.z, tl = Math.max(1e-3f, (float) Math.hypot(tx, tz));
         boolean facing = (fx * tx + fz * tz) / tl > 0.35f;
@@ -630,7 +645,7 @@ public final class CombatSystem {
         // an elemental spell on a creature with that weakness on record: double (GDD 2.5)
         if (proj != null && proj.spell != null && v instanceof rpg.animal.Animal wan && wan.species.weakness == proj.spell.element && proj.spell.element != Spells.Element.NONE) dmg *= 2;
         // the overhead protections: the attack of their kind does no harm at all - a visible counter, not armour
-        boolean magicHit = proj != null && proj.spell != null;
+        boolean magicHit = type == DamageType.MAGIC;
         boolean prayed = g.prayers.protects(v, melee, magicHit) && dmg > 0;
         if (prayed) { if (g.fx != null) g.fx.text("Protected", v.x, v.y + v.height + 0.5f, v.z, 0xFFE8F0FF); g.prayers.prevented(v, dmg, 0); dmg = 0; impact *= 0.3f; }
         float blockedPart = 0;
@@ -690,11 +705,14 @@ public final class CombatSystem {
         var ev = g.state.commit("ActorHit", a.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), 0, detail);
         log(detail);
         // GDD 2.2: real melee damage trains Attack and Strength; Defense follows harm endured or active defense.
-        if (dealt > 0 && a != v) {
-            if (proj == null) {
+        if (dealt > 0 && a != v && v.summonOwner == 0) {
+            if (melee) {
                 g.prog.award(a, Skill.ATTACK, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
                 g.prog.award(a, Skill.STRENGTH, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
-            } else g.prog.award(a, proj.skill, dealt * g.cfg.xpPerDamage * (proj.skill == Skill.MAGIC ? 0.5f : 1f), "damage dealt", ev.id());
+            } else {
+                Skill skill=type==DamageType.MAGIC?Skill.MAGIC:proj.skill;
+                g.prog.award(a,skill,dealt*g.cfg.xpPerDamage*(skill==Skill.MAGIC?0.5f:1f),"damage dealt",ev.id());
+            }
             g.prog.award(a, Skill.HEALTH, dealt * g.cfg.healthXpPerDamage, "damage dealt (Health share)", ev.id());
             g.prog.award(v, Skill.DEFENSE, dealt * g.cfg.defenseXpPerDamage, "hostile damage suffered", ev.id());
         }
@@ -738,13 +756,23 @@ public final class CombatSystem {
         kill(killer == null ? v : killer, v, ev.id());
     }
 
+    /** Environmental harm commits once without an attack roll, fabricated attacker or combat XP. */
+    public void environmentalDamage(Actor victim, int amount, String reason) {
+        if (!victim.alive || amount <= 0 || victim.dummy || g.law.inCustody(victim)) return;
+        if (victim == g.player && g.ui != null && g.ui.console.god) return;
+        int damage = Math.min(amount, (int) Math.ceil(victim.hp)); victim.hp -= damage; victim.cs.lastHurt = g.time; victim.cs.flash = 1;
+        var event = g.state.commit("EnvironmentalDamage", 0, victim.id, rpg.world.DevMap.jurisdiction(victim.x, victim.z), 0, reason + ": " + damage);
+        if (g.fx != null) g.fx.text(String.valueOf(damage), victim.x, victim.y + victim.height, victim.z, 0xFFFF7050);
+        if (victim.hp <= 0) kill(null, victim, event.id());
+    }
+
     private void kill(Actor killer, Actor v, long cause) {
         if (killer == g.player && v != g.player) lastPlayerKill = g.time;
         v.alive = false;
         v.hp = 0;
         v.cs.cancel();
         kills++;
-        var ev = g.state.commit("ActorKilled", killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), cause, v.name + " killed by " + killer.name);
+        var ev = g.state.commit("ActorKilled", killer == null ? 0 : killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), cause, v.name + " killed by " + (killer == null ? "the environment" : killer.name));
         // a person's last cry, on the voice bus, from their own throat's bank (there was never a plain "death" bank, so no
         // human - the player included - made a sound when they died); a creature's cry is its species' (Animals)
         if (g.sfx != null && !(v instanceof rpg.animal.Animal)) g.sfx.deathCry(v);
@@ -753,16 +781,16 @@ public final class CombatSystem {
 
     // ------------------------------------------------------------------ projectiles
     private void updateProjectiles(float dt) {
+        if(projectiles.isEmpty())return;
+        projectileTargets.clear();projectileTargets.addAll(g.actors());
+        for(var dead:g.npcs)if(!dead.alive && dead.loaded && dead.ragdoll!=0 && dead.corpse!=0)projectileTargets.add(dead);
         for (Iterator<Projectile> it = projectiles.iterator(); it.hasNext(); ) {
             Projectile p = it.next();
             p.life -= dt;
             if (p.life <= 0 || p.done) { if (!p.done) dropArrow(p); it.remove(); continue; }
             int sub = 4;
             for (int i = 0; i < sub && !p.done; i++) step(p, dt / sub);
-            if (p.spell != null && g.fx != null) {
-                float[] c = p.spell == Spell.FROST_LANCE ? new float[]{1.2f, 2.5f, 5} : p.spell == Spell.FIRE_BOLT ? new float[]{6, 2, 0.4f} : new float[]{3, 3, 5};
-                g.fx.trail(p.x, p.y, p.z, c[0], c[1], c[2]);
-            }
+
             if (!p.done && !p.heardPass && p.ammo != null && p.owner != g.player) {
                 float dx = g.player.x - p.x, dy = g.player.eyeY() - p.y, dz = g.player.z - p.z;
                 if (dx * dx + dy * dy + dz * dz < 16 && g.vox.sight(p.x, p.y, p.z, g.player.x, g.player.eyeY(), g.player.z)) {
@@ -774,7 +802,33 @@ public final class CombatSystem {
         }
     }
 
+    private void spellImpact(Projectile p,float x,float y,float z,Actor primary) {
+        int element=switch(p.spell) {
+            case FIRE_BOLT,FIRE_BLAST -> astratto.bridge.AstrattoNative.CHEM_FIRE;
+            case FROST_LANCE -> astratto.bridge.AstrattoNative.CHEM_ICE;
+            case SPARK -> astratto.bridge.AstrattoNative.CHEM_WIND;
+            case VOLTCHAIN -> astratto.bridge.AstrattoNative.CHEM_ELECTRIC;
+            default -> 0;
+        };
+        if(element!=0)g.chemistry.emit(p.owner,element,x,y,z,p.spell==Spell.FIRE_BLAST?3:1.2f,3,p.spell==Spell.FIRE_BLAST?1.2f:0.3f);
+        boolean fire=p.spell.element==Spells.Element.FIRE;
+        g.chemistry.visual(fire?0:2,x,y,z,fire?0.35f:0.15f,120,0.25f,0.7f,fire?5:1,fire?1.6f:2,fire?0.2f:5);
+        if(p.spell==Spell.FIRE_BLAST) for(Actor other:g.actors()) {
+            if(other==primary || other==p.owner || !other.alive || other.dummy || other.distTo(x,z)>3 || !g.vox.sight(x,y,z,other.x,other.chestY(),other.z))continue;
+            float falloff=1-other.distTo(x,z)/4;
+            resolve(p.owner,other,p.potential*falloff,p.impact*falloff,DamageType.MAGIC,p,other.x,other.chestY(),other.z,p.spell.title,false);
+        }
+    }
+
     private void step(Projectile p, float dt) {
+        if (p.target!=0) {
+            Actor target=g.actor(p.target);
+            if(target!=null && target.alive && g.vox.sight(p.x,p.y,p.z,target.x,target.chestY(),target.z)) {
+                float x=target.x-p.x,y=target.chestY()-p.y,z=target.z-p.z,len=(float)Math.sqrt(x*x+y*y+z*z);
+                float blend=Math.min(1,dt*3), speed=p.spell.speed;
+                if(len>0.1f) { p.vx+=(x/len*speed-p.vx)*blend;p.vy+=(y/len*speed-p.vy)*blend;p.vz+=(z/len*speed-p.vz)*blend; }
+            } else p.target=0;
+        }
         p.vy -= p.gravity * dt;
         float nx = p.x + p.vx * dt, ny = p.y + p.vy * dt, nz = p.z + p.vz * dt;
         float sx = nx - p.x, sy = ny - p.y, sz = nz - p.z, len = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
@@ -784,7 +838,7 @@ public final class CombatSystem {
         Actor struck = null;
         float nearest = Float.POSITIVE_INFINITY;
         float inv = 1 / Math.max(1e-6f, len);
-        for (Actor v : g.actors()) {
+        for (Actor v : projectileTargets) {
             boolean body = v instanceof rpg.ai.Npc npc && npc.ragdoll != 0 && !npc.alive;
             if (v == p.owner || !v.alive && !body || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
             if (v.alive && v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v)) continue;
@@ -797,8 +851,10 @@ public final class CombatSystem {
             if (p.ammo != null) g.state.burn(p.ammo.def, 1);
             if (struck.alive) {
                 if (p.spell == Spell.FROST_LANCE) struck.cs.slowT = 3;
+                if (p.spell == Spell.VOLTCHAIN)struck.cs.staggered=Math.max(struck.cs.staggered,0.4f);
                 resolve(p.owner, struck, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
             } else if (g.sfx != null) g.sfx.play("hit", qx, qy, qz, 0.4f);
+            if(p.spell!=null) spellImpact(p,qx,qy,qz,struck);
             return;
         }
         if (h.hit && h.block == Blocks.GLASS && g.glass != null) {
@@ -811,7 +867,7 @@ public final class CombatSystem {
         if (h.hit) {
             p.done = true;
             p.x = h.x - sx / len * 0.15f; p.y = h.y - sy / len * 0.15f; p.z = h.z - sz / len * 0.15f;
-            if (p.spell != null) { if (g.fx != null) g.fx.sparks(p.x, p.y, p.z, 14); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
+            if (p.spell != null) { spellImpact(p,p.x,p.y,p.z,null); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
             if (h.block == Blocks.TARGET) { archeryTarget(p, h); return; }
             if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.5f);
             dropArrow(p);

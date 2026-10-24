@@ -83,7 +83,7 @@ final class InventoryPanel extends Fragment {
     @Override public void draw(Ui2D ui, float x, float y) {
         Rpg g = hud.g;
         Player p = g.player;
-        if (hovered != null && hovered != lastHovered && hud.now - hoverSoundAt > 0.08) { hud.sound("UI_hover", 0.18f); hoverSoundAt = hud.now; }
+        if (hovered != null && (lastHovered == null || hovered.def != lastHovered.def) && hud.now - hoverSoundAt > 0.15) { hud.sound("UI_hover", 0.18f); hoverSoundAt = hud.now; }
         lastHovered = hovered;
         hovered = null;
         // tabs

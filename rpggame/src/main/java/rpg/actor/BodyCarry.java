@@ -24,17 +24,33 @@ public final class BodyCarry {
         float[] local, start;
         List<Piece> pieces = new ArrayList<>();
     }
+    private record Pending(Actor carrier,Interactable focus,double until,double hurtAt) {}
+    private final Map<Long,Pending> pending = new HashMap<>();
     private final Rpg g;
     private final Map<Long, Hold> holds = new HashMap<>();
     public BodyCarry(Rpg g) { this.g = g; }
-    public boolean busy(Actor a) { return a != null && holds.containsKey(a.id); }
+    public boolean busy(Actor a) { return a != null && (holds.containsKey(a.id)||pending.containsKey(a.id)); }
     public boolean ready(Actor a) { Hold h = holds.get(a.id); return h != null && h.lowerAt < 0 && g.time - h.since >= 0.65; }
     public void putDown(Actor a) { Hold h = holds.get(a.id); if (h != null && h.lowerAt < 0) { h.lowerAt = g.time; a.carryLowerAt = g.time; } }
     public Actor target(Interactable focus) { return focus instanceof Corpse c ? c.npc(g) : focus instanceof Animal a && !a.alive && !a.butchered ? a : null; }
+    public static boolean lightEnough(Actor body) {
+        if (!(body instanceof Animal a)) return true;
+        float mass = switch (a.species) { case HORSE -> 450; case BROWN_BEAR -> 280; case COW -> 550; case PIG -> 120; case SHEEP -> 65; case MOUNTAIN_LION -> 75; default -> 30; };
+        return mass * a.scale() * a.scale() * a.scale() <= 60;
+    }
     public Result begin(Actor carrier, Interactable focus) {
         Actor dead = target(focus);
-        if (dead == null || dead.alive || dead.carriedBy != 0 || busy(carrier) || !carrier.alive || carrier.cs.busy()) return Result.no("That body cannot be carried now.");
+        if (dead != null && !lightEnough(dead)) return Result.no("That body is too heavy to lift.");
+        if (dead == null || dead.alive || dead.carriedBy != 0 || holds.containsKey(carrier.id) || !carrier.alive || carrier.cs.busy()) return Result.no("That body cannot be carried now.");
         if (Math.hypot(focus.ax() - carrier.x, focus.az() - carrier.z) > 2.2f || !g.vox.sight(carrier.x, carrier.eyeY(), carrier.z, focus.ax(), focus.ay() + 0.1f, focus.az())) return Result.no("Move closer to the body.");
+        if(dead instanceof Animal animal && animal.ragdoll==null && !g.animals.ensurePhysical(animal))return Result.no("Wait for a body to settle before lifting another.");
+        if(dead instanceof Npc npc && !g.ai.ensureCorpsePhysical(npc))return Result.no("That body has already been moved.");
+        boolean waiting=dead instanceof Animal animal && (animal.ragdoll==null || g.lastRigids.body(animal.ragdoll.trunk().body())==null)
+                || dead instanceof Npc npc && g.lastBodies.ragdoll(npc.ragdoll)==null;
+        if(waiting) {
+            pending.putIfAbsent(carrier.id,new Pending(carrier,focus,g.time+1.5,carrier.cs.lastHurt));carrier.cs.cancel();return Result.started();
+        }
+        pending.remove(carrier.id);
         Hold h = new Hold(); h.carrier = carrier; h.body = dead; h.corpse = focus instanceof Corpse c ? c : null; h.since = g.time; h.hurtAt = carrier.cs.lastHurt;
         h.yaw = carrier.yaw;
         if (dead instanceof Npc npc) {
@@ -53,7 +69,7 @@ public final class BodyCarry {
                 float x = pose.p[i] - h.sx, y = pose.p[i + 1] - h.sy, z = pose.p[i + 2] - h.sz;
                 h.local[i] = x * ux + y * uy + z * uz; h.local[i + 1] = x * rx + y * ry + z * rz; h.local[i + 2] = x * fx + y * fy + z * fz;
             }
-            g.game.commands().ragdollControl(npc.ragdoll, CONTROL_KINEMATIC, 1);
+            g.game.commands().ragdollControl(npc.ragdoll, CONTROL_KINEMATIC, 2);
         } else if (dead instanceof Animal animal && animal.ragdoll != null) {
             var trunk = g.lastRigids.body(animal.ragdoll.trunk().body());
             if (trunk == null) return Result.no("Wait for the body to settle.");
@@ -62,7 +78,7 @@ public final class BodyCarry {
                 var body = g.lastRigids.body(part.body());
                 if (body == null) continue;
                 h.pieces.add(new Piece(body.handle, body.x - h.sx, body.y - h.sy, body.z - h.sz, body.qw, body.qx, body.qy, body.qz));
-                g.game.commands().rigidSet(body.handle, RIGID_KINEMATIC | RIGID_DEBRIS | RIGID_NO_MOVERS, 0.8f, 0.02f, 0, 0, 0, 0);
+                g.game.commands().rigidSet(body.handle, (part == animal.ragdoll.trunk() ? RIGID_KINEMATIC : 0) | RIGID_DEBRIS | RIGID_NO_MOVERS, 0.8f, 0.02f, 0, 0, 0, 0);
             }
         } else return Result.no("That body is no longer here.");
         carrier.reachX = focus.ax(); carrier.reachY = focus.ay(); carrier.reachZ = focus.az();
@@ -74,6 +90,10 @@ public final class BodyCarry {
         return Result.started();
     }
     public void update() {
+        for(Pending request:new ArrayList<>(pending.values())) {
+            if(g.time>request.until || !request.carrier.alive || !request.focus.exists() || request.carrier.cs.lastHurt>request.hurtAt) { pending.remove(request.carrier.id);continue; }
+            Result result=begin(request.carrier,request.focus);if(result.rejected())pending.remove(request.carrier.id);
+        }
         for (Hold h : new ArrayList<>(holds.values())) {
             Actor a = h.carrier;
             if (!a.alive || a instanceof Npc n && (n.goal == rpg.ai.Brain.Goal.FIGHT || n.goal == rpg.ai.Brain.Goal.FLEE || !n.loaded) || h.body.alive || a.cs.lastHurt > h.hurtAt || h.body instanceof Animal animal && animal.butchered) { drop(a, false); continue; }
@@ -96,6 +116,7 @@ public final class BodyCarry {
             } else {
                 float angle = a.yaw - h.yaw, cos = (float) Math.cos(angle), sin = (float) Math.sin(angle), qw = (float) Math.cos(angle / 2), qy = (float) Math.sin(angle / 2);
                 for (Piece p : h.pieces) {
+                    if (h.body instanceof Animal animal && p.handle != animal.ragdoll.trunk().body()) continue;
                     float x = cx + cos * p.x + sin * p.z, y = cy + p.y, z = cz - sin * p.x + cos * p.z;
                     if (!g.vox.clear(cx, cy, cz, x, y, z)) { drop(a, false); break; }
                     g.game.commands().rigidPlace(p.handle, (1 - t) * (h.sx + p.x) + t * x, (1 - t) * (h.sy + p.y) + t * y, (1 - t) * (h.sz + p.z) + t * z,
@@ -105,12 +126,15 @@ public final class BodyCarry {
         }
     }
     public void drop(Actor a, boolean throwing) {
+        pending.remove(a.id);
         Hold h = holds.remove(a.id); if (h == null) return;
         a.carryBody = 0; a.carryLowerAt = -99; if (throwing) { a.throwAt = g.time; a.cs.castCooldown = Math.max(0.45f, a.cs.castCooldown); }
         h.body.carriedBy = 0;
+        if (a instanceof Npc n) n.collectAgain = g.time + 4;
         if (h.corpse != null) h.corpse.heldBy = 0;
-        float speed = throwing ? 3 + a.skills.level(rpg.skill.Skill.STRENGTH) * 0.025f : 0;
-        float vx = a.vx - (float) Math.sin(a.aimYaw) * speed, vz = a.vz - (float) Math.cos(a.aimYaw) * speed, vy = throwing ? 2f : 0;
+        float speed = throwing ? launchSpeed(a) : 0;
+        float cp = (float) Math.cos(a.pitch);
+        float vx = a.vx - (float) Math.sin(a.aimYaw) * cp * speed, vz = a.vz - (float) Math.cos(a.aimYaw) * cp * speed, vy = throwing ? (float) Math.sin(a.pitch) * speed + 2 : 0;
         if (h.body instanceof Npc npc) {
             g.game.commands().ragdollControl(npc.ragdoll, CONTROL_KINEMATIC, 0);
             g.game.commands().ragdollCarry(npc.ragdoll, vx, vy, vz, 1);
@@ -121,5 +145,6 @@ public final class BodyCarry {
         }
         g.state.commit(throwing ? "BodyThrown" : "BodyPutDown", a.id, h.body.id, rpg.world.DevMap.jurisdiction(a.x, a.z), 0, h.body.name);
     }
-    public void dropAll() { for (Hold h : new ArrayList<>(holds.values())) drop(h.carrier, false); }
+    public static float launchSpeed(Actor a) { return 7 + a.skills.level(rpg.skill.Skill.STRENGTH) * 0.04f; }
+    public void dropAll() { pending.clear(); for (Hold h : new ArrayList<>(holds.values())) drop(h.carrier, false); }
 }

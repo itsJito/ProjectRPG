@@ -19,6 +19,7 @@ public final class TitleScreen {
     private Profile confirmDelete;
     private float fade;
     public java.util.function.Consumer<String> sound;
+    public Runnable settings = () -> {};
     private String version = "";
 
     public TitleScreen(String version) { this.version = version; refresh(); }
@@ -105,6 +106,9 @@ public final class TitleScreen {
     }
 
     private void footer(Ui2D ui, int w, int h) {
+        if (Style.button(ui,"Settings",w-244,h-66,150,34,true)) settings.run();
+        ui.rectTex(ui.engineLogo,w-78,h-80,58,58,0,0,1,1,0xC0FFFFFF);
+
         ui.text("Version " + version + "   -   Astratto Engine", 16, h - 24, 11, Style.FAINT);
         ui.text("Esc: quit   Enter: continue", w - 190, h - 24, 11, Style.FAINT);
         cursor(ui);
