@@ -39,7 +39,7 @@ jobs:
         working-directory: rpggame
         shell: pwsh
         run: |
-          $buildOutput = & .\gradlew.bat classes --no-daemon --console=plain --max-workers=2 2>&1
+          $buildOutput = & .\gradlew.bat :theastrattoengine:jar classes --no-daemon --console=plain --max-workers=2 2>&1
           $buildOutput | ForEach-Object { Write-Output $_ }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (($buildOutput -join "`n") -notmatch ':theastrattoengine:buildNative UP-TO-DATE') {

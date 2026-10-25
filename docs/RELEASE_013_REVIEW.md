@@ -14,7 +14,7 @@ Occupational decisions use committed task networks, suitable resources, recipe p
 
 ## Rendering and launch
 
-Windows uses incremental Ninja when available, including the Visual Studio bundled tools. Without Ninja, the bounded parallel compiler replaces serial NMake. Worker count is capped at two or four to limit memory pressure. Normal launch builds only the runtime; verification tools remain in `check`. Windows CI also verifies that a subsequent unchanged `classes` invocation leaves `buildNative` up to date.
+Windows uses incremental Ninja when available, including the Visual Studio bundled tools. Without Ninja, the bounded parallel compiler replaces serial NMake. Worker count is capped at two or four to limit memory pressure. Normal launch builds only the runtime; verification tools remain in `check`. Windows CI also verifies that a subsequent unchanged engine-runtime-JAR/`classes` invocation leaves `buildNative` up to date.
 
 Body flames retain full 64-bit emitter identity and follow emitter translation on the GPU. Smoke remains in world space. The bounded 4,096-particle state uses aligned vec4 storage; cached source indices avoid repeated searches unless emitter ordering changes. SSBO and vertex-attribute barriers separate compute writes from subsequent simulation and drawing.
 
