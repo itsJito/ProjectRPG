@@ -135,6 +135,20 @@ class MaintenanceTest {
         assertEquals(false,g.objects.get(fire.id).save().get("attributed"));
     }
 
+    @Test void aPocketStackChangedDuringTheLiftTransfersOnlyWhatRemains() {
+        Npc person=(Npc)g.actor(Ids.VILLAGER);g.ai.reload(person);g.teleport(person,62,DevMap.FLOOR,70.5f);person.nextThink=Double.MAX_VALUE;person.goal=Brain.Goal.IDLE;
+        g.player.skills.setLevel(Skill.THIEVING,100);person.inv.clear();person.inv.add(new ItemStack(Items.IRON_ARROWS,11,person.id,false,person.id));g.player.inv.clear();game.tick(0);
+        assertFalse(g.interact.request(g.player,person.pockets(),"take:0").rejected());
+        ItemStack spent=person.inv.take(0,8);assertNotNull(spent);g.objects.drop(spent,person.x,DevMap.FLOOR+0.05f,person.z);
+        frames(70);int attempts=0;
+        while(g.player.count(Items.IRON_ARROWS)==0 && attempts++<20) {
+            g.player.cs.staggered=0;person.fightTarget=0;person.cs.cancel();
+            assertFalse(g.interact.request(g.player,person.pockets(),"take:0").rejected());frames(70);
+        }
+        assertEquals(3,g.player.count(Items.IRON_ARROWS));assertEquals(0,person.count(Items.IRON_ARROWS));
+        assertEquals(8,g.objects.all().stream().filter(o->o instanceof GroundItem item && item.stack.def==Items.IRON_ARROWS).mapToInt(o->((GroundItem)o).stack.amount).sum());
+    }
+
     @Test void selectedPocketTheftConservesTheItemAndMarksTheActualTransferredStack() {
         Npc person=(Npc)g.actor(Ids.VILLAGER);g.ai.reload(person);g.teleport(person,62,DevMap.FLOOR,70.5f);person.nextThink=Double.MAX_VALUE;person.goal=Brain.Goal.IDLE;
         g.player.skills.setLevel(Skill.THIEVING,100);person.inv.clear();person.inv.add(new ItemStack(Items.IRON_ARROWS,11,person.id,false,person.id));g.player.inv.clear();game.tick(0);

@@ -146,3 +146,12 @@ RPGGAME — Maintenance and bug-fix follow-up
 
 **THINGS TO BE REMOVED:**
 - [Removed] Duplicate voxel door panels, one-sided open hinge limits, oversized foot-correction thresholds and stale occupational plans after interruption.
+
+
+RPGGAME — Pocket transfer conservation follow-up
+
+**BUGS TO BE FIXED:**
+- [Fixed] A pickpocket attempt re-reads the live stack at completion, so an NPC spending or using part of that stack during the lift cannot duplicate the original quantity.
+
+**THINGS TO NOTE**
+- The changing-stack check verifies actual spent items plus the stolen remainder equal the original stack. The receiving inventory, stolen provenance and interruption rules remain shared with the maintenance fixes above.

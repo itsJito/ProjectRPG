@@ -450,3 +450,19 @@ A maintenance pass on moving through town, working routines and the feedback tha
 ## Known Issues
 - The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still requires measurement on that hardware. Cloud software rendering verifies the changed visuals, not that performance target.
 - Local body shadows and foliage contact use bounded nearby proxies; distant foliage remains inexpensive scenery.
+
+---
+
+# Patch Notes Version 0.1.6: Safe Pocket Transfers
+
+A final conservation fix for pockets whose contents change while the player's hand is still moving.
+
+## Fixed Bugs
+- Fixed a pickpocket lift using the quantity from the start of the attempt if the NPC spent or used part of that same stack before the lift completed. Only the actual remaining items now transfer.
+
+## Technical Changes
+- The commit re-reads quantity, charges and provenance from the live source stack before checking capacity and transferring it.
+- Added a changing-stack regression that verifies the NPC's spent items and the player's stolen remainder still total the original quantity.
+
+## Known Issues
+- The hardware-validation and bounded rendering limits described in Version 0.1.5 still apply.

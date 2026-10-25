@@ -267,12 +267,13 @@ public final class Npc extends Actor implements Interactable {
             int slot=Integer.parseInt(action.substring(5));ItemStack selected=contents.get(slot);
             if(selected==null)return Result.no("That item has moved.");
             if(thief.skills.level(Skill.THIEVING)<person.pickpocketLevel)return Result.no("Your Thieving level is too low.");
-            ItemStack stolen = selected.copyWhole(); stolen.markStolen(person.id);
-            if(!thief.canStore(stolen))return Result.no("You need room for that item.");
+            ItemStack preview = selected.copyWhole(); preview.markStolen(person.id);
+            if(!thief.canStore(preview))return Result.no("You need room for that item.");
             String why=person.dist(g,thief,1.6f);if(why!=null)return Result.no(why);
             g.interact.begin(new Work(thief,person,"pickpocket","Lifting "+selected.def.name,1.1f,false,g.time,()->{
                 if(contents.get(slot)!=selected)return Result.no("The item has moved.");
                 String range=person.dist(g,thief,1.6f);if(range!=null)return Result.no(range);
+                ItemStack stolen=selected.copyWhole();stolen.markStolen(person.id);
                 if(!thief.canStore(stolen))return Result.no("You no longer have room.");
                 long attempt=g.state.newRequestId();double chance=Math.min(0.92,0.55+(thief.skills.level(Skill.THIEVING)-person.pickpocketLevel)*0.03);
                 boolean success=g.roll(attempt,person.id)<chance;

@@ -66,3 +66,9 @@ The target remains i5-3570 / GTX 660 / 8 GB, 1080p at **30 FPS**. The cloud uses
 
 - [Box2D revolute-joint definition](https://github.com/erincatto/box2d/blob/main/include/box2d/types.h): signed lower/upper angular limits, motor velocity and bounded torque. The game continues to use its own Impulsis joints.
 - [Khronos glUniform reference](https://github.com/KhronosGroup/OpenGL-Refpages/blob/main/gl4/glUniform.xml): matching vector component types for GLSL uniform arrays. Foliage contact uniforms use vec4 uploads, without CPU particle or foliage readback.
+
+## 0.1.6 changing-stack follow-up
+
+The final review found a deferred-transfer race: the source entry could retain its identity while its quantity changed during the lift. The initial capacity preview is now separate from the commit-time stack copy. Quantity, charges and provenance are read from the actual remaining stack before capacity validation, source removal and success publication.
+
+All **12 focused maintenance regressions passed**, including a live eleven-arrow stack reduced by eight during the attempt: the eight spent arrows remain in the world and exactly three transfer to the player. The complete game suite now contains **160 tests**; the engine and native sources are unchanged from the verified maintenance commit. Patch notes and gamefixes were appended again, preserving the published 0.1.5 notes.
