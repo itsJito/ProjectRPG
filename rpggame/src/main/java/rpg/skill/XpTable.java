@@ -1,38 +1,24 @@
 package rpg.skill;
 
-/**
- * The one cumulative XP schedule every skill uses, players and NPCs alike (GDD 2.2): 6,000,000 XP at level 100, the
- * curve steepening after level 60. The thresholds are computed once from the GDD formula and stored as integers; the
- * stored table is the runtime authority - nothing else computes a level.
- *
- * <pre>
- * weight(i) = 1.04^(min(i, 59) - 1) * 1.05^(max(0, i - 59))        for transitions i = 1..99
- * XP(level) = round(6_000_000 * sum(weight(1..level-1)) / sum(weight(1..99)))
- * </pre>
+/** The standard cumulative schedule shared by all eighteen skills. Existing saves retain their raw XP.
+ * NPCs use this table to express fixed profiles; only the player earns experience.
  */
 public final class XpTable {
     private XpTable() {}
 
     public static final int MAX_LEVEL = 100;
-    public static final long MAX_XP = 6_000_000L;
+    public static final long MAX_XP = 14_391_160L;
     /** THRESHOLD[level] = the cumulative XP at which that level is reached (index 0 unused). */
     private static final long[] THRESHOLD = build();
 
     private static long[] build() {
-        double[] w = new double[MAX_LEVEL];
-        double total = 0;
-        for (int i = 1; i <= 99; i++) {
-            w[i] = Math.pow(1.04, Math.min(i, 59) - 1) * Math.pow(1.05, Math.max(0, i - 59));
-            total += w[i];
-        }
         long[] t = new long[MAX_LEVEL + 1];
-        double sum = 0;
-        t[1] = 0;
+        long points = 0;
         for (int level = 2; level <= MAX_LEVEL; level++) {
-            sum += w[level - 1];
-            t[level] = Math.round(MAX_XP * sum / total);
+            int previous = level - 1;
+            points += (long) Math.floor(previous + 300 * Math.pow(2, previous / 7.0));
+            t[level] = points / 4;
         }
-        t[MAX_LEVEL] = MAX_XP;
         return t;
     }
 

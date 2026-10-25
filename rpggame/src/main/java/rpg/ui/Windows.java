@@ -83,7 +83,7 @@ final class Windows {
                 }
                 by += 16 + ((worn.size() + 5) / 6) * (ws + 4) + 8;
             }
-            if (Style.button(ui, "Take all", x, by, 100, 26, live && !(c instanceof rpg.objects.Corpse cp2 ? cp2.empty(g) : c.contents.isEmpty()))) g.interact.request(g.player, c, "takeall");
+            if (!c.kind.equals("pockets") && Style.button(ui, "Take all", x, by, 100, 26, live && !(c instanceof rpg.objects.Corpse cp2 ? cp2.empty(g) : c.contents.isEmpty()))) g.interact.request(g.player, c, "takeall");
             ui.text(String.format("%.1f kg inside", c.contents.weight()), x + 112, by + 6, 12, Style.FAINT);
         }
     }

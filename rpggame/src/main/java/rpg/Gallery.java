@@ -39,6 +39,8 @@ final class Gallery {
     private Rpg g;
     private Hud hud;
     private static final int TILE = 300;
+    private int reviewMesh;
+    private final astratto.math.Mat4 reviewTransform=new astratto.math.Mat4();
 
     Gallery(Window win, Game game, Gfx gfx, Ui2D ui, String shots) { this.win = win; this.game = game; this.gfx = gfx; this.ui = ui; this.shots = shots == null ? "shots" : shots; }
 
@@ -54,6 +56,7 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
         if ("release-systems".equals(System.getenv("RPG_GALLERY_ONLY"))) { releaseSystemsShots(); return 0; }
         if ("release-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { releasePolishShots(); return 0; }
         if ("system-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { systemPolishShots(); return 0; }
@@ -354,6 +357,111 @@ final class Gallery {
         frames(20);
         film("horse-idle", 54, i -> {}, a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 0, horse);
         film("horse-walk", 54, i -> g.animals.puppetTo(horse, horse.x, horse.z - 4, false), a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 18, horse);
+    }
+
+    private void ultimateShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        for(var animal:g.animals.all())if(!animal.puppet){animal.loaded=false;g.animals.despawnBody(animal);}
+        if("surfaces".equals(only)){ultimateSurfaces();return;}
+        if("foliage".equals(only)){ultimateFoliage();return;}
+        if("fire".equals(only)){ultimateFire();return;}
+        if("hud".equals(only)){ultimateHud();return;}
+        if ("motion".equals(only)) {
+            place(110.5f,106.5f,0);
+            var rabbit=g.animals.display(rpg.animal.Species.RABBIT,false,false,0,40.5f,34.5f,0);
+            frames(12);
+            film("rabbit-hop",72,i->g.animals.puppetTo(rabbit,rabbit.x,rabbit.z-4,true),a->new float[]{a.x+2.3f,a.y+0.7f,a.z-2.3f,a.x,a.y+0.3f,a.z},12,rabbit);
+            var horse=g.animals.display(rpg.animal.Species.HORSE,false,false,0,40.5f,34.5f,0);
+            frames(12);
+            film("horse-attack",72,i->{if(i==3)g.combat.attack(horse,false,Actor.Combat.Move.BITE);},a->new float[]{a.x+3.6f,a.y+1.8f,a.z-3.6f,a.x,a.y+1.1f,a.z},0,horse);
+            return;
+        }
+        var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
+        var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+        // Reproduce the consumed click that opened Settings, then exercise next frame's input path.
+        ui.consumed=true;Main.mouse(ui,new astratto.platform.Input());ui.mx=1000;ui.my=232;ui.click=true;
+        gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height);
+        if(settings.values.vsync)throw new IllegalStateException("Title settings failed to accept the next frame's click");
+        ui.click=false;
+        for(int i=0;i<4;i++){gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height);}
+        Main.shot(gfx,win.width,win.height,new File(shots,"settings-clicked-vsync-off.png"));settings.escape();
+    }
+
+    private void ultimateSurfaces() {
+        place(40.5f,34.5f,(float)Math.PI);g.player.eq.clear();frames(12);
+        List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
+        tiles.add(capture(front(g.player,1.8f)));labels.add("Human: intact");
+        g.player.hp=g.player.maxHp()*0.3f;
+        g.player.injuries.cut(g.player,g.player.x,g.player.y+1.1f,g.player.z+g.player.radius,7);
+        for(int i=0;i<180;i++){frames(1);if(gfx.figureReady(g.player))break;}
+        tiles.add(capture(front(g.player,1.8f)));labels.add("Human: recessed cut");
+        g.player.restore();frames(10);tiles.add(capture(front(g.player,1.8f)));labels.add("Human: healed");
+        g.player.charred=0.8f;tiles.add(capture(front(g.player,1.8f)));labels.add("Human: charred cloth/skin");g.player.charred=0;
+        place(110.5f,106.5f,0);
+        var horse=g.animals.display(rpg.animal.Species.HORSE,false,false,0,40.5f,34.5f,0);frames(8);
+        float[] cam={horse.x+2.6f,horse.y+1.5f,horse.z-2.6f,horse.x,horse.y+0.9f,horse.z};
+        tiles.add(capture(cam));labels.add("Horse: intact");horse.hp=horse.maxHp()*0.2f;
+        horse.injuries.cut(horse,horse.x+horse.radius,horse.y+horse.height*0.6f,horse.z,8);frames(80);
+        tiles.add(capture(cam));labels.add("Horse: carved surface");horse.restore();frames(12);
+        tiles.add(capture(cam));labels.add("Horse: healed");horse.charred=0.8f;
+        tiles.add(capture(cam));labels.add("Horse: charred");g.animals.remove(horse);
+        sheet("injuries-and-char",tiles,labels,4);
+        tiles.clear();labels.clear();
+        long[] residents={Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER};
+        for(long id:residents){var n=(rpg.ai.Npc)g.actor(id);g.ai.reload(n);g.teleport(n,40.5f,DevMap.FLOOR,34.5f);n.yaw=(float)Math.PI;n.nextThink=Double.MAX_VALUE;frames(8);tiles.add(capture(front(n,2.7f)));labels.add(n.name+": "+n.profession.title);g.ai.unload(n);}
+        sheet("five-new-residents",tiles,labels,5);
+        var net=g.objects.add(new rpg.objects.FishingNet(g.state.newEntityId(),g.player.id,0,89.5f,DevMap.FLOOR-0.1f,30.5f,g.state.minutes+4));
+        view(91,DevMap.FLOOR+1,29,89.5f,DevMap.FLOOR,30.5f,"deployed-net");net.removed=true;
+        var trap=g.objects.add(new rpg.objects.Trap(g.state.newEntityId(),g.player.id,40.5f,DevMap.FLOOR,34.5f));trap.contents.add(new rpg.item.ItemStack(rpg.item.Items.SNARE,1));
+        view(41.3f,DevMap.FLOOR+0.6f,33.5f,40.5f,DevMap.FLOOR+0.08f,34.5f,"deployed-snare");trap.removed=true;
+        var stone=g.objects.all().stream().filter(object->object instanceof rpg.objects.Container c && c.kind.equals("memorial")).map(object->(rpg.objects.Container)object).findFirst().orElseThrow();
+        view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"unfilled-gravestone");stone.buried=true;
+        view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"filled-gravestone");
+    }
+    private void ultimateFoliage() {
+        place(110.5f,106.5f,0);frames(8);
+        List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
+        for(var kind:rpg.world.Foliage.Kind.values()) {
+            boolean wall=kind==rpg.world.Foliage.Kind.IVY || kind==rpg.world.Foliage.Kind.MOSS;
+            if(wall)for(int height=0;height<2;height++)g.setBlock(40,DevMap.FLOOR+height,35,Blocks.STONE);
+            var boxes=rpg.render.FoliageModels.model(kind,37);reviewMesh=gfx.renderer().mesh(boxes.vertices(),boxes.count());
+            reviewTransform.identity().translate(40.5f,DevMap.FLOOR,34.5f);
+            float[] cam={41.8f,DevMap.FLOOR+1.25f,32.9f,40.5f,DevMap.FLOOR+0.5f,34.5f};
+            tiles.add(capture(cam));labels.add(kind.name().replace('_',' '));
+            gfx.renderer().release(astratto.bridge.AstrattoNative.RES_MESH,reviewMesh);reviewMesh=0;
+            if(wall)for(int height=0;height<2;height++)g.setBlock(40,DevMap.FLOOR+height,35,Blocks.AIR);
+        }
+        sheet("ten-foliage-models",tiles,labels,5);
+        place(40.5f,34.5f,0);frames(120);
+        var plant=g.foliage.chunks.values().stream().flatMap(chunk->chunk.plants.stream()).filter(patch->!patch.removed && (patch.kind==rpg.world.Foliage.Kind.TALL_GRASS || patch.kind==rpg.world.Foliage.Kind.CLOVER) && patch.x>30 && patch.x<54 && patch.z>28 && patch.z<50).findFirst().orElseThrow();
+        float[] camera={plant.x+2.2f,DevMap.FLOOR+1.3f,plant.z-2.2f,plant.x,DevMap.FLOOR+0.2f,plant.z};
+        g.teleport(g.player,110.5f,DevMap.FLOOR,106.5f);frames(2);view(camera[0],camera[1],camera[2],camera[3],camera[4],camera[5],"procedural-foliage");
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.RAIN);g.timeSystem.weather.snap();
+        for(int frame=0;frame<90;frame++){game.tick(1f/60);draw(camera,1f/60);}
+        System.out.println("[weather] rain="+g.timeSystem.weather.rain+" wetness="+g.timeSystem.weather.wetness);
+        view(camera[0],camera[1],camera[2],camera[3],camera[4],camera[5],"wet-grass-and-rain");
+    }
+    private void ultimateFire() {
+        place(50.5f,70.5f,0);g.player.skills.setLevel(rpg.skill.Skill.HEALTH,100);g.player.restore();
+        var guard=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(guard);g.teleport(guard,60.5f,DevMap.FLOOR,70.5f);guard.skills.setLevel(rpg.skill.Skill.HEALTH,100);guard.restore();guard.nextThink=Double.MAX_VALUE;frames(10);
+        guard.goal=rpg.ai.Brain.Goal.RETURN;
+        g.chemistry.emit(null,astratto.bridge.AstrattoNative.CHEM_FIRE,guard.x,guard.chestY(),guard.z,0.6f,4,0.2f);
+        film("attached-fire",72,i->{},a->quarter(a,3.3f),0,guard);guard.goal=rpg.ai.Brain.Goal.IDLE;frames(120);
+        film("stop-drop-roll",144,i->{},a->new float[]{a.x+2.5f,DevMap.FLOOR+1.6f,a.z-2.5f,a.x,DevMap.FLOOR+0.3f,a.z},0,guard);
+        film("ground-roll",144,i->{},a->new float[]{a.x+2.5f,DevMap.FLOOR+1.6f,a.z-2.5f,a.x,DevMap.FLOOR+0.3f,a.z},0,guard);
+        frames(100);view(guard.x+2.5f,DevMap.FLOOR+1.7f,guard.z-2.5f,guard.x,DevMap.FLOOR+0.6f,guard.z,"smothered-fire");
+    }
+    private void ultimateHud() {
+        place(60.5f,70.5f,(float)Math.PI);frames(10);
+        g.chat.say("A long Worldbox report: belongings held by the Undertaker exclude stolen goods. Confiscated property returns to its rightful owner. Your remaining possessions are protected. This message should wrap cleanly across multiple lines without losing its last words.");
+        reviewUi("worldbox-long-text");
+        var cole=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(cole);g.teleport(cole,60.5f,DevMap.FLOOR,72);cole.nextThink=Double.MAX_VALUE;
+        hud.dialog(g.dialogue.talk(cole));reviewUi("chatbox-root");
+        hud.choose(0);reviewUi("chatbox-response");hud.continueDialog();reviewUi("chatbox-return-options");hud.closeAll();g.ai.unload(cole);
+        g.player.firstPerson=true;g.controller.camPitch=-1.35f;g.controller.jogging=false;
+        film("firstperson-down-sprint",48,i->{g.controller.in.forward=1;g.controller.in.sprint=true;g.controller.camPitch=-1.35f;},a->null,12);
+        g.controller.in.forward=0;g.controller.in.sprint=false;
     }
 
     /** Release review through the same HUD, articulated bodies and GPU passes used during play. */
@@ -1226,6 +1334,7 @@ final class Gallery {
         float dx = cam[3] - cam[0], dy = cam[4] - cam[1], dz = cam[5] - cam[2], l = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         gfx.camera(cam[0], cam[1], cam[2], dx / l, dy / l, dz / l, win.width, win.height, dt);
         gfx.scene(g, false, dt, g.state.hourOfDay());
+        if(reviewMesh!=0)gfx.cmd.model(reviewMesh,astratto.bridge.AstrattoNative.MODEL_FOLIAGE,reviewTransform.m,1,1,1,1,0,1,0.95f,0);
         ui.begin(gfx.cmd);
         ui.end();
         gfx.frame(win.width, win.height);

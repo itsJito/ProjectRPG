@@ -23,31 +23,35 @@ class RecoveryRegressionTest {
         g.player.inv.clear();g.player.eq.clear();
     }
     @AfterEach void close(){game.close();}
-    @Test void burialPreservesAProtectedFullClaimIncludingStolenProvenanceAcrossLoad(@TempDir Path dir) {
-        for(int i=0;i<39;i++)assertTrue(g.player.inv.add(new ItemStack(Items.get("gold_ring"),1,900+i,true,990+i)));
-        var pack=new ItemStack(Items.BACKPACK,1,700,true,1400);assertTrue(pack.inner.add(new ItemStack(Items.BREAD,3,701,true,1401)));
-        g.player.eq.set(ItemDef.Slot.BACK,pack);g.player.eq.set(ItemDef.Slot.BODY,new ItemStack(Items.get("iron_body"),1,702,true,1402));
+    @Test void cityDeathSecuresCleanOriginalsWithoutASiteGraveAndNeverReturnsStolenGoods(@TempDir Path dir) {
+        for(int i=0;i<38;i++)assertTrue(g.player.inv.add(new ItemStack(Items.get("gold_ring"),1,g.player.id,false,990+i)));
+        assertTrue(g.player.inv.add(new ItemStack(Items.get("gold_ring"),1,900,true,1390)));
+        var pack=new ItemStack(Items.BACKPACK,1,g.player.id,false,1400);
+        assertTrue(pack.inner.add(new ItemStack(Items.BREAD,3,701,true,1401)));
+        assertTrue(pack.inner.add(new ItemStack(Items.BREAD,2,g.player.id,false,1403)));
+        g.player.eq.set(ItemDef.Slot.BACK,pack);g.player.eq.set(ItemDef.Slot.BODY,new ItemStack(Items.get("iron_body"),1,g.player.id,false,1402));
         assertTrue(g.player.inv.add(new ItemStack(Items.COINS,100)));
         var possessions=new java.util.ArrayList<>(g.player.inv.stacks());possessions.addAll(g.player.eq.stacks());
-        var original=possessions.stream().map(s->s.origin).filter(id->id!=0).sorted().toList();
-        Container grave=g.makeGrave(114,90,0,true);assertNotNull(grave);assertEquals((long)original.size(),grave.contents.stacks().stream().filter(s->s.origin!=0).count());
-        g.teleport(g.player,grave.x,DevMap.FLOOR,grave.z);game.tick(0);
-        assertTrue(grave.perform(g,g.player,"open",g.state.newRequestId()).rejected());
-        assertTrue(grave.take(g,g.player,grave.contents.first(Items.COINS),1,g.state.newRequestId()).rejected());
-        Npc guard=(Npc)g.actor(Ids.GUARD);g.ai.reload(guard);g.teleport(guard,113,DevMap.FLOOR,89);game.tick(0);
-        assertTrue(g.graveyards.bury(grave,guard,g.graveyards.nearest(guard)));g.undertaker.toCustody(grave,"duplicate callback");
-        assertEquals(1,g.undertaker.claims.size());int fee=g.undertaker.fee();
+        var original=possessions.stream().filter(item->!item.stolen).map(item->item.origin).filter(id->id!=0).sorted().toList();
+        Container claim=g.makeGrave(100,74,0,true);assertNotNull(claim);
+        assertEquals("claim",claim.kind);assertTrue(g.undertaker.graves().isEmpty());assertEquals(1,g.undertaker.claims.size());
+        assertEquals(original.size(),claim.contents.stacks().stream().filter(item->item.origin!=0).count());
+        g.teleport(g.player,claim.x,DevMap.FLOOR,claim.z);game.tick(0);
+        assertTrue(claim.perform(g,g.player,"open",g.state.newRequestId()).rejected());
+        assertTrue(claim.take(g,g.player,claim.contents.first(Items.COINS),1,g.state.newRequestId()).rejected());
+        int fee=g.undertaker.fee();
         assertTrue(g.objects.custody.contents.add(new ItemStack(Items.get("gold_ring"),1,9911,true,8811)));
         var saves=new SaveSystem(g);var file=dir.resolve("claim.json");assertTrue(saves.save(file));assertTrue(saves.load(file));game.tick(0);
         assertEquals(fee,g.undertaker.fee());assertTrue(g.undertaker.redeem(g.player,(Npc)g.actor(Ids.UNDERTAKER)).committed());
-        var recovered=g.player.inv.stacks().stream().filter(s->s.origin!=0).toList();
-        // A full pack is returned as original loose items, never silently destroyed.
-        var loose=g.objects.all().stream().filter(o->o instanceof rpg.objects.GroundItem item && item.stack.origin!=0).map(o->((rpg.objects.GroundItem)o).stack).toList();
-        var origins=new java.util.ArrayList<Long>();for(var s:recovered) {origins.add(s.origin);assertTrue(s.stolen);}for(var s:loose) {origins.add(s.origin);assertTrue(s.stolen);}
-        assertEquals(original,origins.stream().sorted().toList());
-        var all=new java.util.ArrayList<>(recovered);all.addAll(loose);var recoveredPack=all.stream().filter(s->s.origin==1400).findFirst().orElseThrow();
-        assertEquals(3,recoveredPack.inner.count(Items.BREAD));assertEquals(1401,recoveredPack.inner.stacks().getFirst().origin);assertEquals(100-fee,g.player.count(Items.COINS));assertEquals(0,g.undertaker.held());
-        assertTrue(g.objects.custody.contents.stacks().stream().anyMatch(s->s.origin==8811),"unrelated evidence is not a death claim");
+        var recovered=new java.util.ArrayList<>(g.player.inv.stacks().stream().filter(item->item.origin!=0).toList());
+        for(var object:g.objects.all())if(object instanceof rpg.objects.GroundItem item && original.contains(item.stack.origin))recovered.add(item.stack);
+        assertEquals(original,recovered.stream().map(item->item.origin).sorted().toList());
+        assertTrue(recovered.stream().noneMatch(item->item.stolen));
+        var recoveredPack=recovered.stream().filter(item->item.origin==1400).findFirst().orElseThrow();
+        assertEquals(2,recoveredPack.inner.count(Items.BREAD));assertEquals(1403,recoveredPack.inner.stacks().getFirst().origin);
+        assertEquals(100-fee,g.player.count(Items.COINS));assertEquals(0,g.undertaker.held());
+        assertTrue(g.objects.custody.contents.stacks().stream().anyMatch(item->item.origin==8811),"unrelated evidence is not a death claim");
+        assertTrue(g.objects.custody.contents.stacks().stream().anyMatch(item->item.origin==1390 && !item.stolen),"confiscated originals remain in evidence");
     }
     @Test void exposedExpiryWaitsForAnActualUndertakerJourneyInsteadOfTeleportingItems() {
         g.graveyards.plots.clear();g.graveyards.plots.add(new Graveyards.Plot("journey",DevMap.WILDS,38.5f,DevMap.FLOOR,87.5f,3,2));

@@ -73,6 +73,7 @@ int AiService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32_t by
         case ASTRATTO_CMD_AGENT_CREATE: {
             astratto_cmd_agent_create c;
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
+            if ((c.flags & ASTRATTO_AGENT_DOMAIN_MASK) == ASTRATTO_AGENT_DOMAIN_MASK) return ASTRATTO_ERR_ARGUMENT;
             if (!agents_.valid(c.handle)) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
             std::unique_ptr<Agent> a(new Agent());
             a->self = c.handle; a->policy = c.policy; a->body = c.body;

@@ -3,7 +3,7 @@ rem Astratto Engine - builds the native core (astratto.dll), its self-test, its 
 rem module with the Visual C++ compiler. No CMake needed: CMakeLists.txt beside this file does the same for anyone who
 rem has it, and for other platforms.
 rem   build.bat          build everything, then run the self-test
-rem   build.bat game     incrementally build only the runtime DLL (CMake when available)
+rem   build.bat game     build only the runtime DLL (incremental Ninja, bounded parallel cl fallback)
 rem   build.bat notest   build only
 rem   build.bat asan     build everything with AddressSanitizer into bin\windows-x64-asan, then run the self-test there
 rem   build.bat checked  build everything with the debug runtime - every container access bounds-checked, the heap
@@ -15,6 +15,9 @@ set OUT=%HERE%bin\windows-x64
 set OBJ=%HERE%obj
 set EXTRA=/O2 /DNDEBUG /MT
 set NOPDB=/PDB:none
+rem Bound compiler concurrency on the minimum 8 GB machines: /MP without a limit can exhaust RAM and page for minutes.
+set "JOBS=2"
+if defined NUMBER_OF_PROCESSORS if %NUMBER_OF_PROCESSORS% GEQ 4 set "JOBS=4"
 if /i "%1"=="asan" (
   set OUT=%HERE%bin\windows-x64-asan
   set OBJ=%HERE%obj\asan
@@ -46,6 +49,7 @@ if errorlevel 1 exit /b 2
 
 :compile
 if /i "%1"=="game" (
+  if not defined VSROOT set "VSROOT=%VSINSTALLDIR%"
   set "CMAKE=cmake"
   where cmake >nul 2>nul
   if errorlevel 1 (
@@ -53,10 +57,21 @@ if /i "%1"=="game" (
   )
   "!CMAKE!" --version >nul 2>nul
   if not errorlevel 1 (
-    "!CMAKE!" -S "%HERE%." -B "%HERE%build-windows-x64-game" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DASTRATTO_PLATFORM=windows-x64 -DASTRATTO_WERROR=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
-    if errorlevel 1 exit /b 1
-    "!CMAKE!" --build "%HERE%build-windows-x64-game" --target astratto
-    exit /b !errorlevel!
+    set "NINJA=ninja"
+    where ninja >nul 2>nul
+    if errorlevel 1 set "NINJA=!VSROOT!\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
+    "!NINJA!" --version >nul 2>nul
+    if not errorlevel 1 (
+      set "BUILDDIR=%HERE%build-windows-x64-ninja"
+      echo astratto: incremental runtime build ^(Ninja, up to !JOBS! workers^)
+      "!CMAKE!" -S "%HERE%." -B "!BUILDDIR!" -G Ninja -DCMAKE_MAKE_PROGRAM="!NINJA!" -DCMAKE_BUILD_TYPE=Release -DASTRATTO_PLATFORM=windows-x64 -DASTRATTO_WERROR=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+      if errorlevel 1 exit /b 1
+      "!CMAKE!" --build "!BUILDDIR!" --target astratto --parallel !JOBS!
+      exit /b !errorlevel!
+    )
+    rem NMake serializes translation units. Without Ninja use the bounded parallel compiler below instead.
+    echo astratto: Ninja unavailable; using the parallel Visual C++ runtime build
+
   )
 )
 if /i "%1"=="asan" if not exist "%VCToolsInstallDir%lib\x64\clang_rt.asan_dynamic-x86_64.lib" (
@@ -66,7 +81,7 @@ if /i "%1"=="asan" if not exist "%VCToolsInstallDir%lib\x64\clang_rt.asan_dynami
 if not exist "%OUT%" mkdir "%OUT%"
 for %%d in (lib test module testmodule bench lab) do if not exist "%OBJ%\%%d" mkdir "%OBJ%\%%d"
 
-set FLAGS=/nologo /std:c++17 %EXTRA% /EHsc /W4 /WX /wd4324 /fp:precise /utf-8 /MP /Fd"%OBJ%\vc.pdb" /I"%HERE%include" /I"%HERE%src"
+set FLAGS=/nologo /std:c++17 %EXTRA% /EHsc /W4 /WX /wd4324 /fp:precise /utf-8 /MP%JOBS% /Fd"%OBJ%\vc.pdb" /I"%HERE%include" /I"%HERE%src"
 rem   build.bat lab      the Sydney lab only (tests\sydney_lab.cpp, built from Sydney's and Impulsis's own sources)
 set LABEXE=astratto_sydney_lab.exe
 if not "%2"=="" set LABEXE=%2

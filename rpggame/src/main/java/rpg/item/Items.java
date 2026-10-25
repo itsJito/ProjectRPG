@@ -49,6 +49,10 @@ public final class Items {
         d.damage = 0.2f; d.impact = 4; d.damageType = DamageType.BLUNT;
         return d;
     }
+    private static ItemDef garment(String id, String name, Slot slot) {
+        ItemDef item=def(id,name,25,0xA89476,"A fitted linen garment."); item.slot=slot;item.family=Family.ARMOR;
+        item.reqSkill=Skill.DEFENSE;item.reqLevel=1;item.armor=0.5f;return item;
+    }
     private static ItemDef food(String id, String name, int value, int heal, int color) { ItemDef d = def(id, name, value, color, "Restores " + heal + " HP."); d.heal = heal; return d; }
 
     // ------------------------------------------------------------------ resources and tools
@@ -59,6 +63,11 @@ public final class Items {
     public static final ItemDef WILLOW_LOGS = def("willow_logs", "Willow logs", 16, 0x7A7040, "Logs cut from a willow.");
     public static final ItemDef COPPER_ORE = def("copper_ore", "Copper ore", 5, 0xC07040, "Ore with copper in it.");
     public static final ItemDef TIN_ORE = def("tin_ore", "Tin ore", 5, 0xA8A8A0, "Ore with tin in it.");
+    public static final ItemDef STONE_BLOCK = def("stone_block", "Quarry stone block", 9, 0x92928A, "Usable masonry cut from a supported quarry face.");
+    public static final ItemDef CLAY = def("clay", "Clay", 5, 0x9C7258, "Workable clay from a dry bank.");
+    public static final ItemDef CLOTH = def("cloth_roll", "Linen cloth", 12, 0xB6A78C, "Woven flax for a tailor's patterns.");
+    public static final ItemDef CLOTH_HOOD = garment("cloth_hood", "Linen hood", Slot.HEAD);
+    public static final ItemDef CLOTH_TUNIC = garment("cloth_tunic", "Linen tunic", Slot.BODY);
     public static final ItemDef IRON_ORE = def("iron_ore", "Iron ore", 17, 0x7A5A48, "Ore with iron in it.");
     public static final ItemDef COAL = def("coal", "Coal", 22, 0x222226, "Fuel for smelting steel.");
     public static final ItemDef BRONZE_BAR = def("bronze_bar", "Bronze bar", 12, 0xB0703A, "A bar of bronze.");
@@ -93,6 +102,7 @@ public final class Items {
     public static final ItemDef ARROW_SHAFT = stack("arrow_shaft", "Arrow shaft", 1, 0xA88050, "Needs a head.");
     public static final ItemDef TINDERBOX = def("tinderbox", "Tinderbox", 2, 0x806040, "Lights fires.");
     public static final ItemDef HAMMER = def("hammer", "Hammer", 4, 0x707070, "For smithing and building.");
+    public static final ItemDef SNARE = def("snare", "Rabbit snare", 12, 0x8D7852, "A reusable snare for real wildlife crossings.");
     public static final ItemDef KNIFE = def("knife", "Knife", 3, 0xB0B0B8, "For crafting.");
     public static final ItemDef FISHING_ROD = tool("fishing_rod", "Fishing rod", 5, 0x806040, "Wield it and cast at a fishing spot for trout.", Skill.FISHING);
     public static final ItemDef FISHING_NET = tool("small_fishing_net", "Small fishing net", 5, 0xB8A878, "Wield it and cast it at a fishing spot for shrimp.", Skill.FISHING);
@@ -109,7 +119,7 @@ public final class Items {
     public static final ItemDef BRONZE_ARROWS = arrows("bronze_arrows", "Bronze arrows", 1, 4, 1, 0xB0703A);
     public static final ItemDef IRON_ARROWS = arrows("iron_arrows", "Iron arrows", 15, 9, 3, 0x6E6E72);
     public static final ItemDef STAFF = staff("apprentice_staff", "Apprentice staff", 1, 40, 0x7A5A9A, Family.STAFF);
-    public static final ItemDef FIRE_STAFF = staff("fire_staff", "Fire staff", 20, 400, 0xC04020, Family.STAFF);
+    public static final ItemDef FIRE_STAFF = staff("fire_staff", "Fire staff", 10, 400, 0xC04020, Family.STAFF);
     public static final ItemDef WAND = staff("wand", "Oak wand", 1, 30, 0x9A7A50, Family.WAND);
     public static final ItemDef HOLY_SYMBOL = holy("holy_symbol", "Holy symbol", 1, 60);
     public static final ItemDef BLESSED_SYMBOL = holy("blessed_symbol", "Blessed symbol", 30, 600);

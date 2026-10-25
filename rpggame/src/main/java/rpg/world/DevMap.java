@@ -20,7 +20,7 @@ public final class DevMap {
     public static final int DOOR_HEIGHT = 2;
 
     /** The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). */
-    public static final String ALPHA = "DevCity", BETA = "JUR-BETA", WILDS = "WILDS";
+    public static final String ALPHA = "DevCity", BETA = "DevTown", WILDS = "WILDS";
 
     public static String jurisdiction(double x, double z) {
         if (x >= 82 && z >= 46) return ALPHA;
@@ -85,7 +85,7 @@ public final class DevMap {
     /** The den: a rock shelter in the wood's corner (the bear's and the lion's lie-up). */
     public static final int DEN_X0 = 5, DEN_Z0 = 4, DEN_X1 = 10, DEN_Z1 = 8;
     public static final int FARM_X0 = 86, FARM_Z0 = 102, FARM_X1 = 122, FARM_Z1 = 124;
-    /** The paddock's gate (a door in the fence) and the shelter (an open-fronted barn: roof, back and sides). */
+    /** The paddock's gate (a door in the fence) and the shelter (a closed barn with a two-leaf entrance). */
     public static final int[][] FARM_GATE = {{100, 102}, {101, 102}};
     public static final int BARN_X0 = 110, BARN_Z0 = 116, BARN_X1 = 121, BARN_Z1 = 123;
     public static final int DUCK_POND_X0 = 89, DUCK_POND_Z0 = 115, DUCK_POND_X1 = 95, DUCK_POND_Z1 = 120;
@@ -165,7 +165,7 @@ public final class DevMap {
             {"ARCHERY RANGE", 14.5f, 59.5f}, {"INTERACTION SHED", 55.5f, 24f}, {"WORKSTATIONS", 68.5f, 28.5f}, {"BUILD SPOT", 77.5f, 29.5f},
             {"MINING ROCKS", 54.5f, 38.5f}, {"TREE GROVE", 96.5f, 18.5f}, {"FISHING POND", 96.5f, 42f}, {"PATCHES", 72.5f, 36.5f},
             {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
-            {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (JUR-BETA)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
+            {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
             {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}};
 
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
@@ -249,6 +249,7 @@ public final class DevMap {
         }
 
         void skillLab() {
+            fill(ALTAR[0], FLOOR, ALTAR[1], ALTAR[0], FLOOR, ALTAR[1], TABLE);
             // the interaction shed: plank walls on beams, a door, a locked store room, a roof
             int x0 = SHED_X0, z0 = SHED_Z0, x1 = SHED_X1, z1 = SHED_Z1, top = FLOOR + 3;
             ground(x0, z0, x1, z1, PLANKS);
@@ -384,14 +385,16 @@ public final class DevMap {
             ground(DEN_X0 + 1, DEN_Z0 + 1, DEN_X1, DEN_Z1, DIRT);
         }
 
-        /** The farm: a fenced paddock with a gate, an open barn with nest boxes, a duck pond, a trough. */
+        /** The farm: a fenced paddock with a gate, a barn with nest boxes, a duck pond, a trough. */
         void farm() {
             ground(FARM_X0 + 1, FARM_Z0 + 1, FARM_X1 - 1, FARM_Z1 - 1, GRASS);
             walls(FARM_X0, FARM_Z0, FARM_X1, FARM_Z1, FLOOR, FLOOR, FENCE);
             for (int[] d : FARM_GATE) fill(d[0], FLOOR, d[1], d[0], FLOOR + DOOR_HEIGHT - 1, d[1], DOOR);
             ground(FARM_GATE[0][0], 97, FARM_GATE[1][0], FARM_Z0 - 1, COBBLE);
-            // the barn: back and side walls of planks on beams, a roof, open to the north
+            // Barn entrance is two blocks wide; animal and human movers share its physical door.
             int top = FLOOR + 3;
+            fill(BARN_X0, FLOOR, BARN_Z0, BARN_X1, top, BARN_Z0, PLANKS);
+            fill((BARN_X0+BARN_X1)/2,FLOOR,BARN_Z0,(BARN_X0+BARN_X1)/2+1,FLOOR+1,BARN_Z0,AIR);
             fill(BARN_X0, FLOOR, BARN_Z1, BARN_X1, top, BARN_Z1, PLANKS);
             fill(BARN_X0, FLOOR, BARN_Z0, BARN_X0, top, BARN_Z1, PLANKS);
             fill(BARN_X1, FLOOR, BARN_Z0, BARN_X1, top, BARN_Z1, PLANKS);

@@ -120,8 +120,8 @@ public final class CharModel {
         int[] r = s.face(p, f);
         int cols = r[2];
         if (cols <= 0 || rows <= 0) return;
-        int[] grid = new int[cols * rows];
-        for (int j = 0; j < rows; j++) for (int i = 0; i < cols; i++) grid[j * cols + i] = s.get(p, f, i, rowOffset + j);
+        int[] grid = new int[cols * rows];float[] depth=new float[grid.length];
+        for (int j = 0; j < rows; j++) for (int i = 0; i < cols; i++) {grid[j * cols + i] = s.get(p, f, i, rowOffset + j);depth[j*cols+i]=s.depth(p,f,i,rowOffset+j);}
         float[] u = {(tr[0] - tl[0]) / cols, (tr[1] - tl[1]) / cols, (tr[2] - tl[2]) / cols};
         float[] v = {(bl[0] - tl[0]) / rows, (bl[1] - tl[1]) / rows, (bl[2] - tl[2]) / rows};
         boolean[] used = new boolean[grid.length];
@@ -129,19 +129,39 @@ public final class CharModel {
             int k = j * cols + i, col = grid[k];
             if (used[k] || (col >>> 24) == 0) continue;
             int w = 1;
-            while (i + w < cols && !used[k + w] && grid[k + w] == col) w++;
+            while (i + w < cols && !used[k + w] && grid[k + w] == col && depth[k+w]==depth[k]) w++;
             int h = 1;
             grow:
             while (j + h < rows) {
-                for (int x = 0; x < w; x++) { int kk = (j + h) * cols + i + x; if (used[kk] || grid[kk] != col) break grow; }
+                for (int x = 0; x < w; x++) { int kk = (j + h) * cols + i + x; if (used[kk] || grid[kk] != col || depth[kk]!=depth[k]) break grow; }
                 h++;
             }
             for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) used[(j + y) * cols + i + x] = true;
-            float[] a = {tl[0] + u[0] * i + v[0] * j, tl[1] + u[1] * i + v[1] * j, tl[2] + u[2] * i + v[2] * j};
+            float[] a = {tl[0] + u[0] * i + v[0] * j-nx*depth[k], tl[1] + u[1] * i + v[1] * j-ny*depth[k], tl[2] + u[2] * i + v[2] * j-nz*depth[k]};
             float[] b = {a[0] + u[0] * w, a[1] + u[1] * w, a[2] + u[2] * w};
             float[] d = {a[0] + v[0] * h, a[1] + v[1] * h, a[2] + v[2] * h};
             q.quad(a, b, d, col, nx, ny, nz);
         }
+        // Connect the recessed texels to their neighbors: actual stepped voxel grooves with closed walls.
+        float ul=(float)Math.sqrt(u[0]*u[0]+u[1]*u[1]+u[2]*u[2]),vl=(float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+        for(int j=0;j<rows;j++)for(int i=0;i<cols;i++) {
+            int cell=j*cols+i;if(depth[cell]<=0 || (grid[cell]>>>24)==0)continue;
+            for(int side=0;side<4;side++) {
+                int ni=i+(side==0?-1:side==1?1:0),nj=j+(side==2?-1:side==3?1:0);
+                float neighbor=ni<0 || ni>=cols || nj<0 || nj>=rows?0:depth[nj*cols+ni];
+                if(neighbor>=depth[cell])continue;
+                float x=i+(side==1?1:0),y=j+(side==3?1:0);
+                float[] a=surface(tl,u,v,x,y,nx,ny,nz,neighbor);
+                float[] b=surface(tl,u,v,x+(side>=2?1:0),y+(side<2?1:0),nx,ny,nz,neighbor);
+                float[] d=surface(tl,u,v,x,y,nx,ny,nz,depth[cell]);
+                float sign=side==0 || side==2?1:-1;
+                float[] tangent=side<2?u:v;float length=side<2?ul:vl;
+                q.quad(a,b,d,0xFF5B1B15,tangent[0]/length*sign,tangent[1]/length*sign,tangent[2]/length*sign);
+            }
+        }
+    }
+    private static float[] surface(float[] origin,float[] u,float[] v,float x,float y,float nx,float ny,float nz,float depth) {
+        return new float[]{origin[0]+u[0]*x+v[0]*y-nx*depth,origin[1]+u[1]*x+v[1]*y-ny*depth,origin[2]+u[2]*x+v[2]*y-nz*depth};
     }
 
     /** A growing vertex list. */

@@ -101,6 +101,15 @@ public final class Undertaker {
         g.state.commit("GraveToUndertaker", grave.heldBy, grave.id, DevMap.jurisdiction(grave.x, grave.z), 0, moved + " item(s), " + how);
     }
 
+    public void secureClaim(Container holder) {
+        if (claims.stream().anyMatch(claim -> claim.id == holder.id)) return;
+        int seized = Property.confiscate(g, holder.contents);
+        if (holder.contents.isEmpty()) { holder.removed=true; return; }
+        Claim claim = new Claim(holder.id, false, "inside the walls", FEE);
+        claim.holder = holder.id; claims.add(claim); holder.ownerOnly = true; holder.locked = true;
+        g.state.commit("DeathClaimSecured", g.player.id, holder.id, DevMap.ALPHA, 0, "stolen units confiscated: " + seized);
+    }
+
     /** What redeeming every claim costs now. */
     public int fee() { int f = 0; for (Claim c : claims) f += c.fee; return f; }
 
@@ -123,14 +132,15 @@ public final class Undertaker {
     }
 
     private boolean recoverable(Container holder,ItemStack item) {
-        // Old saves share the evidence chest. New memorial claims hold their exact originals, even stolen gear.
-        return item!=null && item.amount>0 && (holder!=g.objects.custody || item.owner==0 || item.owner==g.player.id);
+        // Old saves share the evidence chest. Stolen property is never part of a redeemable claim.
+        return item!=null && item.amount>0 && !item.stolen && (holder!=g.objects.custody || item.owner==0 || item.owner==g.player.id);
     }
 
     public Result redeem(Actor a, Npc undertaker) {
         if (claims.isEmpty() || held() == 0) return Result.no("The undertaker holds nothing of yours.");
-        int fee = fee();
         List<Container> holders = holders();
+        for (Container holder : holders) if (holder != g.objects.custody) Property.confiscate(g, holder.contents);
+        int fee = fee();
         int carried = a.count(Items.COINS), inClaim = 0;
         for (Container holder : holders) for(ItemStack item:holder.contents.stacks())if(item.def==Items.COINS && recoverable(holder,item))inClaim+=item.amount;
         if (carried + inClaim < fee) return Result.no("The undertaker wants " + fee + " coins, and you have " + (carried + inClaim) + " all told.");
@@ -152,6 +162,7 @@ public final class Undertaker {
             back += s.amount;
         }
         g.state.commit(req, "ClaimRedeemed", a.id, undertaker.id, DevMap.jurisdiction(undertaker.x, undertaker.z), 0, fee + " coins for " + back + " item(s)");
+        for (Container holder : holders) if (holder.kind.equals("claim") && holder.contents.isEmpty()) holder.removed = true;
         claims.clear();
         if (a == g.player) g.chat.say(undertaker.name + " hands back your belongings for " + fee + " coins" + (paidFromClaim ? " (taken from your own purse in his keeping)." : "."));
         return Result.ok();

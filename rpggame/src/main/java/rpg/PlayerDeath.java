@@ -161,7 +161,7 @@ public final class PlayerDeath {
         active = false;
         g.respawn();
         if (grave != null) g.chat.add(secured
-                ? "Your belongings are Guard-secured where you fell. The watch will bury the remains and Morrow will safeguard your complete claim. Speak to him to recover it."
+                ? "Morrow holds your belongings at the Undertaker’s chest. Stolen goods are confiscated and will not be returned. Speak to him to recover the rest."
                 : "Your belongings lie in a grave where you fell, outside the walls. Anyone who finds it may help themselves: hurry. It stands ten minutes.", rpg.Chat.Kind.WARN);
         if (exit && g.ui != null) g.ui.toTitle();
     }

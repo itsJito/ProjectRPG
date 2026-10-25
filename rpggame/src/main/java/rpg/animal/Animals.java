@@ -208,12 +208,13 @@ public final class Animals {
         a.fit();
         c.moverCreate(a.body, a.x, DevMap.FLOOR + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
-        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, 0, (int) a.id * 7919);
+        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags, (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
         java.util.Arrays.fill(a.facts, -1);
         a.targetBody = -1;
         a.loaded = true;
         desire(a, AnimalMind.A_HOLD);
+        if(g.chemistry!=null)g.chemistry.register(a);
     }
 
     /** An animal for a picture: placed, facing, its mind off (the gallery's catalog and gait films). */
@@ -284,7 +285,10 @@ public final class Animals {
         float[] t = r.trunkAt(g);
         if (t == null) return;
         a.x = t[0]; a.z = t[2];
-        if (!r.knockdown) return;
+        if (!r.knockdown) {
+            if (a.carriedBy == 0 && g.time-r.since > 1.5 && r.asleep(g)) dropRagdoll(a);
+            return;
+        }
         if (g.time - r.since < 1.2 || (!r.asleep(g) && g.time - r.since < 2.6)) return;
         // facing the way the trunk faces (its forward is -z in its own frame)
         float qw = t[3], qx = t[4], qy = t[5], qz = t[6];
@@ -506,6 +510,8 @@ public final class Animals {
             if (!a.loaded) continue;
             g.game.commands().agentRate(a.agent,a.actionRate()*(a.cs.slowT>0?0.6f:1));
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
+            if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
+            a.trappedBy=0;
             if (a.puppet) { face(a, dt); continue; }
             double due = nextSense.getOrDefault(a.id, 0.0);
             if (g.time >= due) { mind.sense(a, (float) Math.min(0.5, g.time - due + 0.2)); nextSense.put(a.id, g.time + 0.2); }
@@ -810,6 +816,7 @@ public final class Animals {
             java.util.List<Object> rest=new ArrayList<>();
             for(var entry:a.restPose.entrySet()) { var b=entry.getValue();rest.add(java.util.Map.of("part",entry.getKey().name(),"x",b.x,"y",b.y,"z",b.z,"qw",b.qw,"qx",b.qx,"qy",b.qy,"qz",b.qz)); }
             m.put("restPose",rest);
+            m.put("charred",a.charred);m.put("injuries",a.injuries.save());
             m.put("y",(double)a.y);
             m.put("x", (double) a.x); m.put("z", (double) a.z); m.put("yaw", (double) a.yaw); m.put("hp", (double) a.hp);
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
@@ -871,6 +878,7 @@ public final class Animals {
             a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
             a.hp = a.alive ? (float) astratto.util.Json.num(m, "hp", a.maxHp()) : 0;
             a.y = (float)astratto.util.Json.num(m,"y",DevMap.FLOOR);
+            a.charred=(float)astratto.util.Json.num(m,"charred",0);a.injuries.load(astratto.util.Json.list(m,"injuries"));
             if(!a.alive)a.lieT=1;
             var poses=astratto.util.Json.list(m,"restPose");
             if(poses!=null)for(Object entry:poses)if(entry instanceof Map<?,?> raw) {

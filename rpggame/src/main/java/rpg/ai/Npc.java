@@ -21,11 +21,17 @@ import rpg.world.DevMap;
  * interactable: Talk, Trade, Pickpocket, Pay bounty, Examine, each enabled or disabled with its reason.
  */
 public final class Npc extends Actor implements Interactable {
-    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR }
+    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT }
 
     public final Role role;
     public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.STANDARD;
-    public final String title;
+    public String title;
+    public Profession profession;
+    astratto.ai.TaskNetwork<Npc> job;
+    public long dutyTarget;
+    public int dutyPhase;
+    public float dutyX, dutyZ;
+    public double dutyUntil;
     public final String homeJurisdiction;
     /** Engine handles: the agent and its mind. */
     public long agent;
@@ -132,7 +138,7 @@ public final class Npc extends Actor implements Interactable {
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }
 
-    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.SCHOLAR || role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
+    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.KNIGHT || role == Role.SCHOLAR || role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
 
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
@@ -199,7 +205,8 @@ public final class Npc extends Actor implements Interactable {
         }
         if (!hostileToPlayer) {
             boolean lvl = a.skills.level(Skill.THIEVING) >= pickpocketLevel, room = a.canStore(new ItemStack(Items.COINS, 1));
-            o.add(Option.when(lvl && room, "pickpocket", "Pickpocket", 3, !lvl ? "You need Thieving level " + pickpocketLevel + "." : "Your inventory is too full.", 1.6f));
+            o.add(Option.when(lvl, "pickpocket", "Inspect pockets", 3, "You need Thieving level " + pickpocketLevel + ".", 1.6f));
+            o.add(Option.when(lvl && room,"pickpocket-direct","Quick pickpocket",2,!lvl?"Your Thieving level is too low.":"Your inventory is too full.",1.6f));
         }
         o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
@@ -234,15 +241,54 @@ public final class Npc extends Actor implements Interactable {
                 if (why != null) return Result.no(why);
                 return g.law.payBounty(a, this, req);
             }
-            case "pickpocket" -> {
+            case "pickpocket", "pickpocket-direct" -> {
                 String why = dist(g, a, 1.6f);
                 if (why != null) return Result.no(why);
                 if (a.skills.level(Skill.THIEVING) < pickpocketLevel) return Result.no("You need Thieving level " + pickpocketLevel + " to pickpocket " + name + ".");
+                if(a==g.player && action.equals("pickpocket")) { if(g.ui!=null)g.ui.openContainer(pockets()); return Result.ok(); }
                 g.interact.begin(new Work(a, this, "pickpocket", "Pickpocketing", 1.1f, false, g.time, () -> pickpocket(g, a)));
                 return Result.started();
             }
             default -> { return Result.no("You can't do that."); }
         }
+    }
+
+    public rpg.objects.Container pockets() { return new Pocket(this); }
+
+    private static final class Pocket extends rpg.objects.Container {
+        private final Npc person;
+        Pocket(Npc person) { super(person.id,person.name+"'s pockets","pockets",person.x,person.y,person.z,person.id,person.inv);this.person=person; }
+        @Override public boolean exists(){return person.alive && person.loaded;}
+        @Override public float dist(Actor actor){x=person.x;y=person.y;z=person.z;return super.dist(actor);}
+        @Override public Result perform(Rpg g,Actor thief,String action,long request) {
+            if(!person.alive)return Result.no("They are no longer alive.");
+            if(action.equals("takeall"))return Result.no("Select one item to attempt a theft.");
+            if(!action.startsWith("take:"))return Result.no("Choose an item to attempt a theft.");
+            int slot=Integer.parseInt(action.substring(5));ItemStack selected=contents.get(slot);
+            if(selected==null)return Result.no("That item has moved.");
+            if(thief.skills.level(Skill.THIEVING)<person.pickpocketLevel)return Result.no("Your Thieving level is too low.");
+            if(!thief.canStore(selected))return Result.no("You need room for that item.");
+            String why=person.dist(g,thief,1.6f);if(why!=null)return Result.no(why);
+            g.interact.begin(new Work(thief,person,"pickpocket","Lifting "+selected.def.name,1.1f,false,g.time,()->{
+                if(contents.get(slot)!=selected)return Result.no("The item has moved.");
+                String range=person.dist(g,thief,1.6f);if(range!=null)return Result.no(range);
+                if(!thief.canStore(selected))return Result.no("You no longer have room.");
+                long attempt=g.state.newRequestId();double chance=Math.min(0.92,0.55+(thief.skills.level(Skill.THIEVING)-person.pickpocketLevel)*0.03);
+                boolean success=g.roll(attempt,person.id)<chance;
+                var event=g.state.commit(attempt,success?"Pickpocketed":"PickpocketFailed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+selected.def.id);
+                if(!success) {
+                    if(thief.eq.def(rpg.item.ItemDef.Slot.NECK)==Items.get("dodgy_necklace") && g.roll(attempt+1,person.id)<0.25)return Result.ok();
+                    g.ai.notice(person,thief,"caught pickpocketing");thief.cs.staggered=0.8f;
+                    person.remember(new Memory("THEFT",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),g.state.minutes,1,"witnessed",event.id(),selected.value(),"caught lifting an item"),24);
+                    g.law.theft(thief,person.id,selected,null,event.id());return Result.ok();
+                }
+                contents.set(slot,null);selected.markStolen(person.id);thief.store(selected);
+                g.law.theft(thief,person.id,selected,null,event.id());g.prog.award(thief,Skill.THIEVING,8+person.pickpocketLevel*1.5,"pickpocket",event.id());
+                return Result.ok();
+            }));
+            return Result.started();
+        }
+        @Override public Result take(Rpg g,Actor a,int slot,int count,long request){return perform(g,a,"take:"+slot,request);}
     }
 
     /** A conditional skill check (GDD 3.2): the roll is seeded by the request and stored with the event. */

@@ -16,7 +16,7 @@ void main() {
     vec2 lq = (kind == 5 || kind == 7) ? vec2(q.x * iParams.w, q.y) : q;
     vec2 rq = vec2(lq.x * cr - lq.y * sr, lq.x * sr + lq.y * cr);
     // flames are taller than they are wide and stay upright
-    vec3 up = kind == 0 ? vec3(0.0, 1.35, 0.0) : uUp;
+    vec3 up = kind == 0 ? vec3(0.0, 1.35, 0.0) : kind == 7 ? vec3(0.0, 1.0, 0.0) : uUp;
     vec3 p = iPosSize.xyz + (uRight * rq.x + up * rq.y) * iPosSize.w;
     // a ring lies on the ground whichever way the camera looks at it
     if (kind == 4) p = iPosSize.xyz + vec3(q.x, 0.0, q.y) * iPosSize.w;

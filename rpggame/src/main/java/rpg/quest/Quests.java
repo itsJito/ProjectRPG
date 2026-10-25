@@ -49,7 +49,7 @@ public final class Quests {
         g.player.store(new ItemStack(Items.SEALED_LETTER, 1));
         g.state.mint(Items.SEALED_LETTER, 1);
         courier = State.ACTIVE;
-        journal.add(stamp() + "Courier: Jun gave me a sealed letter for Kit, who lives east of Store B in JUR-BETA.");
+        journal.add(stamp() + "Courier: Jun gave me a sealed letter for Kit, who lives east of Store B in DevTown.");
         g.state.commit("QuestStarted", g.player.id, Ids.QUEST_GIVER, null, 0, "QT-COURIER stage 1: deliver the letter");
         g.chat.add("Quest started: Courier.", Chat.Kind.LEVEL);
     }

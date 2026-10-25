@@ -157,6 +157,10 @@ public final class Hud {
     public void fadeThen(Runnable action) { if (transition >= 0) return; transition = 0; atBlack = action; closeAll(); }
     public void close() { icons.close(); }
     public void closeDialog() { dialog = null; }
+    public void continueDialog() {
+        long speaker = dialog == null ? 0 : dialog.npc;
+        dialog = g.actor(speaker) instanceof rpg.ai.Npc n && n.alive ? g.dialogue.talk(n) : null;
+    }
     public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
     public boolean captures() { return transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
@@ -216,6 +220,8 @@ public final class Hud {
     public void choose(int n) {
         if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog; dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
             if (dialog != null && dialog.npc == 0 && !dialog.pauseMenu && d.npc != 0) dialog.npc = d.npc;
+            if(dialog==null && !d.choices.get(n).closes() && !d.pauseMenu && d.npc!=0 && win==Win.NONE && scene==Scene.WORLD && !g.law.inCustody(g.player)
+                    && g.actor(d.npc) instanceof rpg.ai.Npc speaker && speaker.alive && speaker.loaded && speaker.distTo(g.player)<4)dialog=g.dialogue.talk(speaker);
             return; }
         if (menu != null && n < menu.items.size()) { MenuItem it = menu.items.get(n); menu = null; if (it.enabled()) { sound("UI_select", 0.4f); it.action().run(); } else if (it.reason() != null) g.chat.warn(it.reason()); }
     }

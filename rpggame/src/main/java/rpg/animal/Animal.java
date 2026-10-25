@@ -25,6 +25,9 @@ public final class Animal extends Actor implements Interactable {
     public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM }
 
     public final Species species;
+    public long trappedBy;
+    astratto.ai.TaskNetwork<Animal> needs;
+    float needStep;
     public boolean baby, female;
     /** Game minutes: born at, grown at (babies). */
     public double bornAt, matureAt;
@@ -94,6 +97,7 @@ public final class Animal extends Actor implements Interactable {
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {
         super(id, s.label(baby), 0);
+        this.domain=astratto.ai.AgentDomain.ANIMAL;
         this.species = s; this.baby = baby; this.female = female;
         this.x = x; this.z = z; this.y = DevMap.FLOOR;
         this.homeX = x; this.homeZ = z;

@@ -416,7 +416,16 @@ final class HudFragments {
         List<String> lines = new ArrayList<>();
         for (String para : text.split("\n")) {
             StringBuilder line = new StringBuilder();
-            for (String word : para.split(" ")) {
+            for (String original : para.split(" ")) {
+                String word=original;
+                if(ui.width(word,size)>maxW) {
+                    if(line.length()>0){lines.add(line.toString());line.setLength(0);}
+                    while(ui.width(word,size)>maxW && word.length()>1) {
+                        int split=word.length()-1;
+                        while(split>1 && ui.width(word.substring(0,split),size)>maxW)split--;
+                        lines.add(word.substring(0,split));word=word.substring(split);
+                    }
+                }
                 String t = line.length() == 0 ? word : line + " " + word;
                 if (ui.width(t, size) > maxW && line.length() > 0) { lines.add(line.toString()); line = new StringBuilder(word); }
                 else { line.setLength(0); line.append(t); }
@@ -1045,7 +1054,10 @@ final class HudFragments {
 
     // ------------------------------------------------------------------ chat: fades out when nothing new is said
     static final class ChatLog extends Fragment {
-        private int filter;
+        private int filter, scroll, cachedTotal=-1, cachedFilter=-1;
+        private float cachedWidth;
+        private record Wrapped(String text, Chat.Kind kind) {}
+        private final List<Wrapped> wrapped=new ArrayList<>();
         ChatLog(Hud h) { super("chat"); fadeOut = 1.2f; }
         @Override protected boolean active() { return hud.dialog == null && hud.hovering(this); }
         @Override public float width() { return Math.min(460, hud.w - 560); }
@@ -1058,20 +1070,23 @@ final class HudFragments {
             ui.rect(x, y, cw, ch, hv ? 0x90141518 : 0x50141518);
             String[] filters = {"All", "Game", "Crime", "Debug"};
             if (hv) for (int i = 0; i < filters.length; i++) if (Style.tab(ui, filters[i], x + i * 58, y + ch - 20, 58, 20, filter == i)) { filter = i; hud.sound("UIbutton1", 0.4f); }
-            List<Chat.Line> lines = new ArrayList<>();
-            for (Chat.Line l : hud.g.chat.last(60)) {
-                boolean keep = switch (filter) { case 1 -> l.kind() == Chat.Kind.GAME || l.kind() == Chat.Kind.LEVEL || l.kind() == Chat.Kind.WARN || l.kind() == Chat.Kind.DIALOGUE; case 2 -> l.kind() == Chat.Kind.CRIME; case 3 -> l.kind() == Chat.Kind.DEBUG; default -> true; };
-                if (keep) lines.add(l);
+            if(cachedTotal!=hud.g.chat.total() || cachedFilter!=filter || cachedWidth!=cw) {
+                if(cachedTotal!=hud.g.chat.total())scroll=0;
+                cachedTotal=hud.g.chat.total();cachedFilter=filter;cachedWidth=cw;wrapped.clear();
+                for(Chat.Line line:hud.g.chat.last(100)) {
+                    boolean keep=switch(filter) {case 1->line.kind()==Chat.Kind.GAME || line.kind()==Chat.Kind.LEVEL || line.kind()==Chat.Kind.WARN || line.kind()==Chat.Kind.DIALOGUE;case 2->line.kind()==Chat.Kind.CRIME;case 3->line.kind()==Chat.Kind.DEBUG;default->true;};
+                    if(keep)for(String text:wrap(ui,line.text(),13,cw-18))wrapped.add(new Wrapped(text,line.kind()));
+                }
             }
-            float ly = y + ch - (hv ? 40 : 22);
-            for (int i = lines.size() - 1; i >= 0 && ly > y + 2; i--) {
-                Chat.Line l = lines.get(i);
-                int c = switch (l.kind()) { case WARN -> Style.BAD; case LEVEL -> Style.ACCENT; case CRIME -> 0xFFC48AD8; case DEBUG -> Style.GOOD; case DIALOGUE -> Style.INFO; default -> Style.TEXT; };
-                String t = l.text();
-                while (ui.width(t, 13) > cw - 14 && t.length() > 10) t = t.substring(0, t.length() - 4) + "...";
-                ui.shadow(t, x + 7, ly, 13, c);
-                ly -= 17;
+            int visible=hv?6:7;
+            if(hv && ui.scroll!=0) { scroll=Math.max(0,Math.min(Math.max(0,wrapped.size()-visible),scroll+(int)ui.scroll*2));ui.consumed=true; }
+            float ly=y+ch-(hv?40:22);
+            for(int i=wrapped.size()-1-scroll;i>=0 && ly>y+4;i--) {
+                Wrapped line=wrapped.get(i);
+                int color=switch(line.kind) {case WARN->Style.BAD;case LEVEL->Style.ACCENT;case CRIME->0xFFC48AD8;case DEBUG->Style.GOOD;case DIALOGUE->Style.INFO;default->Style.TEXT;};
+                ui.shadow(line.text,x+7,ly,13,color);ly-=17;
             }
+            if(hv && scroll>0)ui.text("Scroll for newer messages",x+cw-164,y+ch-18,10,Style.DIM);
         }
     }
 
@@ -1127,7 +1142,7 @@ final class HudFragments {
                 if (live && ui.clicked(tx - 4, yy, textWidth + 4, 22)) { hud.choose(i); return; }
             }
             if (count > visible) ui.text("Scroll for more replies", tx, y + ch - 18, 10, Style.DIM);
-            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.closeDialog(); }
+            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.continueDialog(); }
         }
     }
 

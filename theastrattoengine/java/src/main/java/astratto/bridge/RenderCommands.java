@@ -47,6 +47,7 @@ public final class RenderCommands {
     /** A quality preset ({@code QUALITY_*}), the passes that are on ({@code PASS_*}) and the render scale; kept until changed. */
     /** A GPU emitter, with recorded simulation state supplied by the caller, never CPU particle readback. */
     public void ripple(float x,float z,float radius,float strength) { head(AstrattoNative.RCMD_RIPPLE,24); buf.putFloat(x).putFloat(z).putFloat(radius).putFloat(strength); }
+    /** Kind EMITTER_ATTACHED_FIRE retains the emitter translation for the life of each flame. */
     public void emitter(long id, int kind, float x, float y, float z, float size, float rate, float spread, float life, float r, float g, float b, float vx, float vy, float vz) {
         head(AstrattoNative.RCMD_EMITTER,80); buf.putLong(id);
         buf.putFloat(x).putFloat(y).putFloat(z).putFloat(size);

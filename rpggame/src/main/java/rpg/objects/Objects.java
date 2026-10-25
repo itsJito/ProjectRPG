@@ -120,6 +120,10 @@ public final class Objects {
         altar = add(new Fixtures.Altar(fid(), DevMap.ALTAR[0] + 0.5f, f + 0.9f, DevMap.ALTAR[1] + 0.5f));
         // the graveyard (after the altar, so every older id holds): its furniture, and the undertaker's custody chest
         for (DevMap.Piece p : DevMap.GRAVEYARD_PIECES) {
+            if (p.kind().equals("HEADSTONE")) {
+                Container stone = add(new Container(fid(), "headstone", "Gravestone", "memorial", p.x0()+0.5f, f, p.z0()+0.5f, 320, 0));
+                stone.burialPlot = "DevCity graveyard"; continue;
+            }
             Furniture fu = add(new Furniture(fid(), Furniture.Kind.valueOf(p.kind()), p.x0(), p.z0(), p.x1(), p.z1(), p.h(), p.facing(), p.owner(), true));
             furniture.add(fu);
         }
@@ -133,6 +137,20 @@ public final class Objects {
             slab.name = "Cell slab"; furniture.add(slab);
         }
         for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction()));
+        node(Node.Kind.ROCK,"quarry_face","Supported quarry face",Skill.MINING,1,Items.STONE_BLOCK,15,3,3,g.cfg.rockRespawn,Blocks.STONE,new int[]{96,19},0,0);
+        node(Node.Kind.ROCK,"clay_bank","Clay bank",Skill.MINING,1,Items.CLAY,12,2.2f,3,g.cfg.rockRespawn,Blocks.DIRT,new int[]{97,19},0,0);
+        node(Node.Kind.ROCK,"gem_deposit","Uncertain gem deposit",Skill.MINING,30,Items.get("uncut_sapphire"),45,4,1,g.cfg.rockRespawn,Blocks.COPPER_ROCK,new int[]{98,19},0,0);
+        for (Node node : nodes) if (node.def.equals("quarry_face") || node.def.equals("clay_bank") || node.def.equals("gem_deposit")) node.setBlocks(g,true);
+        int[][][] entrances={
+            {{90,DevMap.SHOP_A_Z1},{91,DevMap.SHOP_A_Z1}},{{113,DevMap.CH_A_Z1},{114,DevMap.CH_A_Z1}},
+            {{89,DevMap.HOUSE1_Z0},{90,DevMap.HOUSE1_Z0}},{{103,DevMap.HOUSE2_Z0},{104,DevMap.HOUSE2_Z0}},
+            {{DevMap.SHOP_B_X1,108},{DevMap.SHOP_B_X1,109}},{{35,DevMap.CH_B_Z0},{36,DevMap.CH_B_Z0}},
+            {{48,DevMap.CONTACT_Z0},{49,DevMap.CONTACT_Z0}},{{DevMap.UNDERTAKER_X0,96},{DevMap.UNDERTAKER_X0,97}}
+        };
+        long[] owners={Ids.MERCHANT_A,Ids.LAWMAN_A,Ids.MERCHANT_A,Ids.VILLAGER,Ids.MERCHANT_B,Ids.LAWMAN_B,Ids.CONTACT,Ids.UNDERTAKER};
+        for(int i=0;i<entrances.length;i++)add(new Door(fid(),"Building door",entrances[i],false,null,1,owners[i])).spawn(g);
+        int barn=(DevMap.BARN_X0+DevMap.BARN_X1)/2;
+        add(new Door(fid(),"Barn door",new int[][]{{barn,DevMap.BARN_Z0},{barn+1,DevMap.BARN_Z0}},false,null,1,Ids.FARMER)).spawn(g);
     }
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */
@@ -176,6 +194,7 @@ public final class Objects {
 
     public void update(float dt) {
         for (Node n : nodes) n.update(g);
+        for(var object:all())if(object instanceof FishingNet net)net.update(g);
         stall.update(g);
         for (WorldObject o : new ArrayList<>(list)) if (o instanceof Fire fire) fire.update(g, dt);
         list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && gi.id >= Ids.DYNAMIC)));

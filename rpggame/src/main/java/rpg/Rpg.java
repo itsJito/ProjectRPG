@@ -78,6 +78,9 @@ public final class Rpg implements GameModule {
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
     public rpg.world.Chemistry chemistry;
+    public rpg.ai.Traps traps;
+    public rpg.world.Foliage foliage;
+    public rpg.world.WaterContacts waterContacts;
     public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     public Fx fx;
     public Sfx sfx;
@@ -141,6 +144,9 @@ public final class Rpg implements GameModule {
         traversal = new rpg.actor.Traversal(this);
         carrying = new rpg.actor.BodyCarry(this);
         chemistry = new rpg.world.Chemistry(this);
+        traps = new rpg.ai.Traps(this);
+        foliage = new rpg.world.Foliage(this);
+        waterContacts = new rpg.world.WaterContacts(this);
         timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,DevMap.SX+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
         timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
         timeSystem.weather.listener = new astratto.weather.Weather.Listener() {
@@ -231,6 +237,8 @@ public final class Rpg implements GameModule {
         if (!aiDisabled()) { ai.update(dt); animals.update(dt); }
         carrying.update();
         chemistry.update();
+        traps.update();
+        foliage.update();
         objects.update(dt);
         undertaker.update();
         spareWatch();
@@ -257,6 +265,8 @@ public final class Rpg implements GameModule {
         falling.afterFrame(lastBodies, (float) lastDt);
         reactions.afterFrame(lastBodies);
         animals.afterFrame(lastBodies, ctx.agents());
+        controller.syncCamera();
+        waterContacts.update();
     }
 
     @Override public void path(int request, int[] cells, int expansions) { controller.onPath(request, cells); }
@@ -392,6 +402,7 @@ public final class Rpg implements GameModule {
         if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);
         if (a.body != 0) game.commands().moverPlace(a.body, x, y + 0.05f, z, 0, 0, 0);
         a.x = x; a.y = y; a.z = z;
+        if(chemistry!=null)chemistry.register(a);
         if (a instanceof Npc n) { if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
         interact.cancel(a, "moved");
     }
@@ -424,14 +435,14 @@ public final class Rpg implements GameModule {
     public Container makeGrave(float x, float z, long killer, boolean secured) {
         int honorAtDeath = honor.score;
         if (player.inv.isEmpty() && player.eq.stacks().isEmpty()) return null;
-        Container grave = objects.add(new Container(state.newEntityId(), "grave", player.name + "'s grave", "grave", x, DevMap.FLOOR + 0.3f, z, 320, player.id));
+        Container grave = objects.add(new Container(state.newEntityId(), secured ? "death_claim" : "grave", player.name + "'s belongings", secured ? "claim" : "grave", secured ? DevMap.CUSTODY_CHEST[0] : x, DevMap.FLOOR + 0.3f, secured ? DevMap.CUSTODY_CHEST[1] : z, 320, player.id));
         grave.ownerOnly = secured;
         grave.secured = secured;
         grave.killer = killer;
         grave.expiresAt = time + rpg.law.Undertaker.GRAVE_SECONDS;
         // the memorial is the Honor of the moment of death (GDD 3.5): it keeps that inscription whatever comes after
         grave.honor = honorAtDeath;
-        grave.name = player.name + "'s grave";
+        grave.name = player.name + (secured?"'s belongings":"'s grave");
         for (int i = 0; i < player.inv.size(); i++) {
             ItemStack s = player.inv.get(i);
             if (s == null) continue;
@@ -445,6 +456,7 @@ public final class Rpg implements GameModule {
             if (!grave.contents.add(s)) objects.drop(s, x - 0.5f, DevMap.FLOOR + 0.05f, z + 0.3f);
         }
         state.commit("GraveCreated", player.id, grave.id, DevMap.jurisdiction(x, z), 0, (secured ? "secured; " : "exposed; ") + grave.contents.stacks());
+        if (secured) undertaker.secureClaim(grave);
         return grave;
     }
 
@@ -468,6 +480,7 @@ public final class Rpg implements GameModule {
         player.alive = true;
         player.diedAt = -1;
         player.restore();
+        chemistry.cleanse(player);
         player.cs.cancel();
         player.cs.lastAttacker = 0;
         if (gore != null) gore.healed(player);

@@ -22,6 +22,7 @@ import rpg.skill.Skill;
  */
 public class Container extends WorldObject {
     public final Inventory contents;
+    public final Map<String, Integer> custodySlots = new java.util.HashMap<>();
     public boolean locked;
     public int lockLevel;
     public final String kind;
@@ -40,14 +41,19 @@ public class Container extends WorldObject {
         super(id, def, name, x, y, z);
         this.kind = kind; this.owner = owner;
         // a chest is a 10 x 10 grid, a grave or a corpse 10 x 4 like a person's own, a cart's crate 10 x 6
-        int[] dims = switch (kind) { case "chest" -> new int[]{10, 10}; case "corpse" -> new int[]{10, 4}; case "grave" -> size>40?new int[]{16,Math.max(1,(size+15)/16)}:new int[]{10,4}; case "cargo" -> new int[]{10, 6}; case "memorial" -> new int[]{16, Math.max(1,(size+15)/16)}; default -> new int[]{10, Math.max(1, (size + 9) / 10)}; };
+        int[] dims = switch (kind) { case "chest" -> new int[]{10, 10}; case "corpse" -> new int[]{10, 4}; case "grave" -> size>40?new int[]{16,Math.max(1,(size+15)/16)}:new int[]{10,4}; case "cargo" -> new int[]{10, 6}; case "memorial", "claim", "escrow" -> new int[]{16, Math.max(1,(size+15)/16)}; default -> new int[]{10, Math.max(1, (size + 9) / 10)}; };
         this.contents = new Inventory(dims[0], dims[1]);
         // A death record holds the complete possessions, including filled worn bags.
-        this.contents.container = !kind.equals("grave") && !kind.equals("corpse") && !kind.equals("memorial");
+        this.contents.container = !kind.equals("grave") && !kind.equals("corpse") && !kind.equals("memorial") && !kind.equals("claim") && !kind.equals("escrow");
+    }
+
+    /** A transient view over an actor's live inventory; never registered or serialized as a second owner. */
+    protected Container(long id,String name,String kind,float x,float y,float z,long owner,Inventory contents) {
+        super(id,kind,name,x,y,z);this.kind=kind;this.owner=owner;this.contents=contents;
     }
 
     @Override public float focusRadius() { return 0.7f; }
-    @Override public String label() { return name + (locked ? " (locked)" : ""); }
+    @Override public String label() { return name + ((kind.equals("memorial") || kind.equals("grave") && buried) ? buried ? " (Filled)" : " (Unfilled)" : locked ? " (locked)" : ""); }
 
     /** A grave's inscription, chosen by the Honor its owner died with (GDD 3.5 memorial). */
     public String epitaph(Rpg g) {
@@ -64,6 +70,11 @@ public class Container extends WorldObject {
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
+        if (kind.equals("claim") || kind.equals("escrow")) return o;
+        if (kind.equals("memorial") && !buried) {
+            o.add(Option.when(g.carrying.busy(a), "bury", "Bury carried body", 10, "Carry a body to this unfilled grave first.", r));
+            o.add(Option.on("examine", "Examine", 0, r)); return o;
+        }
         String open = kind.equals("grave") ? "Search grave" : kind.equals("cargo") ? "Search cargo" : "Open";
         if(kind.equals("grave") && (secured||buried)) { o.add(Option.off("open",open,10,"Speak to the undertaker about this protected claim.",r));o.add(Option.on("examine","Examine",0,g.cfg.inspectRange));return o; }
         if (locked) {
@@ -79,6 +90,9 @@ public class Container extends WorldObject {
         if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
+        if (kind.equals("claim") || kind.equals("escrow")) return Result.no("These belongings are held in custody.");
+        if (action.equals("bury")) return g.graveyards.buryCarried(a, this) ? Result.ok() : Result.no("This stone must be unfilled and you must carry a body beside it.");
+        if (kind.equals("memorial") && !buried) return Result.no("This grave is unfilled.");
         if (action.equals("open")) {
             if ((buried||secured) && kind.equals("grave")) return Result.no("Speak to the undertaker to reclaim these belongings.");
             if (locked) return Result.no("It's locked.");
@@ -161,10 +175,12 @@ public class Container extends WorldObject {
 
     protected void onTaken(Rpg g) { }
 
-    @Override public String examine(Rpg g) { if (buried) return name + "." + (kind.equals("grave") ? " Your original belongings are protected here; speak to the undertaker." : " The departed's possessions rest inside."); return kind.equals("grave") ? String.format("%s What you were carrying when you died. %s %d:%02d before the undertaker takes what is left.", epitaph(g),
+    @Override public String examine(Rpg g) { if (kind.equals("memorial") && !buried) return "Unfilled gravestone. A carried body may be buried here; its belongings remain in this stone."; if (buried) return name + "." + (kind.equals("grave") ? " Your original belongings are protected here; speak to the undertaker." : " The departed's possessions rest inside."); return kind.equals("grave") ? String.format("%s What you were carrying when you died. %s %d:%02d before the undertaker takes what is left.", epitaph(g),
             secured ? "Inside the walls: nobody may touch it." : "Outside the walls: anyone may.", (int) Math.max(0, expiresAt - g.time) / 60, (int) Math.max(0, expiresAt - g.time) % 60) : owner == 0 ? "A container." : "It belongs to " + g.nameOf(owner) + "."; }
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  locked=" + locked + " contents=" + contents.stacks(); }
 
-    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("locked", locked); m.put("buried", buried); m.put("burialPlot", burialPlot); m.put("gridCells", contents.size()); m.put("items", ItemIO.inventory(contents)); return m; }
-    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); buried = astratto.util.Json.bool(m, "buried", false); burialPlot = astratto.util.Json.str(m, "burialPlot", ""); locked = astratto.util.Json.bool(m, "locked", locked); ItemIO.inventory(contents, astratto.util.Json.list(m, "items")); }
+    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("locked", locked); m.put("buried", buried); m.put("burialPlot", burialPlot); m.put("gridCells", contents.size()); m.put("items", ItemIO.inventory(contents)); if (!custodySlots.isEmpty()) m.put("custodySlots", custodySlots); return m; }
+    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); buried = astratto.util.Json.bool(m, "buried", false); burialPlot = astratto.util.Json.str(m, "burialPlot", ""); locked = astratto.util.Json.bool(m, "locked", locked); ItemIO.inventory(contents, astratto.util.Json.list(m, "items")); custodySlots.clear();
+        var slots = astratto.util.Json.obj(m, "custodySlots"); if (slots != null) for (var entry : slots.entrySet()) if (entry.getValue() instanceof Number value) custodySlots.put(entry.getKey(), value.intValue());
+    }
 }

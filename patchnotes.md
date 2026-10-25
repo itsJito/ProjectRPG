@@ -337,3 +337,58 @@ Everything in the world got a little heavier this update. Doors swing on real hi
 - Animals are mostly silent for now; only the fox has a voice.
 - Pickaxe icons lie on their side in the inventory.
 - Carried weight only slows you, not NPCs, for now.
+
+---
+
+# Patch Notes Version 0.1.3: A Working Town
+
+Five new residents bring real working trades to the devmap. Crime, custody and recovery now keep closer track of actual belongings, while fire, foliage and injuries share the same physical world.
+
+## New Features
+- **Five new townspeople:** Elowen the Lake Net Fisherman, Oren the Ore Miner, Tamsin the Blacksmith, Sir Alden the Escort Knight and Fenna the Predator Hunter.
+- **All 25 occupational profiles** across Fisherman, Miner, Craftsman, Knight and Hunter are available to compatible agents. Only five new residents are spawned. Workers need appropriate fixed skills, actual tools, materials and suitable sites; NPC work never grants XP.
+- **Deployed fishing nets and snares.** Nets retain their tool and actual catch across saves. Snares catch rabbits that physically cross them, and trappers return to the same captured animal or carcass.
+- **Ten kinds of dynamic foliage:** ferns, tall grass, clover, reeds, brambles, wildflowers, ivy, moss, mushrooms and saplings. Soil, shade, walls and nearby water determine where they grow; cutting and burning persist until valid regrowth.
+- **Voxel injuries and charring.** Human cuts recess the surface; animal cuts carve private copies of their model parts. Healing restores the original surface. Fire darkens characters, equipment and world props.
+- **Physical water feedback.** Moving people, ragdolls and rigid items disturb water with bounded splashes and ripples.
+- **Unfilled and Filled cemetery stones.** Burial removes the body and preserves its actual possessions in the named stone. Player recovery protections still apply.
+
+## Changes
+- **All 18 skills use the standard XP curve:** level 100 requires 14,391,160 XP. Existing saves retain raw XP; their levels and progress are recalculated. New characters still start at Health 10, now at 1,154 XP, and level 1 in other skills.
+- **Jail takes the bounty plus 3% tax**, rounded up, from affordable carried currency. An unpaid shortfall extends the sentence. All remaining clean possessions, including equipment and filled bags, stay in private escrow until release; stolen goods are confiscated. NPC prisoners use the same rules.
+- **City deaths go directly to Undertaker custody**, without a death-site gravestone. Wilderness graves remain exposed containers. Undertaker recovery excludes stolen goods and explains that rule before payment.
+- **Guards, raiders and escorts coordinate local tactics** with distinct anchor, flanking and support orders, while threatened fighters can seek cover.
+- **Enemy searches follow remembered locations and visible evidence**, with bounded patience. Civilians choose hiding places from nearby cover rather than a fixed home destination.
+- **Burning NPCs stop, drop and roll through Sydney** after three seconds of sustained fire. Ground contact can smother the flames; a separate nearby fire can still ignite them again.
+- **Body flames follow their emitter on the GPU.** Smoke can drift freely. Rain streaks remain upright, clouds advect with accumulated wind, and wet grass stays diffuse instead of reflecting like metal.
+- **Chatboxes return to the main conversation choices** after a response; Goodbye exits. Long Worldbox messages wrap and can be scrolled.
+- **Roof trespassing starts with a witnessed warning**, then a small, rate-limited bounty if ignored. DevTown replaces JUR-BETA in displayed names and structured legal saves.
+- **Pickpocketing opens the actual pocket inventory.** Looking is free; choosing an item starts the theft attempt and its detection risk.
+- The Fire staff requires Magic 10. Player Morphbeast lasts less time than the NPC effect. Fresh leather swords have a pre-armor maximum hit of at least 2.
+- Every enclosed devmap building, including the barn, now has a physical door.
+
+## Fixed Bugs
+- Fixed title-screen Settings ignoring clicks after the opening click, and moved profile deletion off the render thread.
+- Fixed Godric holding an empty bow instead of switching to a real melee weapon and answering a new attacker.
+- Fixed the first-person camera using the previous frame's world-space head location, including downward sprint clipping and movement stutter.
+- Fixed guards selecting other guards as enemies, and searches accumulating yaw until NPCs spun around.
+- Fixed blood evidence interrupting an already committed body collection. Undertakers can collect and bury normal city corpses.
+- Fixed corpse and burial interactions retaining stale physical bodies without their corresponding inventory.
+- Fixed recovered stolen goods being returned to the player, and jail equipment losing its original slots across save/load.
+- Fixed healing and respawning restoring stale burning receivers. Respawning also removes the player's detached limbs.
+- Fixed necklaces disappearing inside armor, and ensured positive fall and environmental damage use the hurt-voice path.
+- Fixed prone-target melee aim using standing chest height, and witnessed beast attacks being mistaken for witnessed human murder.
+- Fixed horses' attack poses, rabbits' excessive hopping cadence and dead animals' residual leg motion.
+- Fixed arrival state leaving stale movement goals, and gave occupational work resumable, committed tasks.
+
+## Technical Changes
+- Windows runtime builds use incremental Ninja when available, with two or four workers. The fallback compiler uses bounded parallel compilation instead of serial NMake. Verification executables stay outside the interactive launch dependency graph.
+- The engine supplies shared behavior-tree and hierarchical-task-network control nodes driving existing native agents. Human, Animal and reserved Monster domains are separate; no monster content was added.
+- Foliage uses shared model banks and cached chunk meshes, with distance/frustum culling, at most one dirty chunk upload per frame and no tiny foliage shadow passes.
+- Attached flame state stays on the GPU, retains full emitter identity and reuses source slots without CPU particle readback.
+- Added regression coverage for XP boundaries, fixed NPC progression, property conservation, custody reloads, professions, trap persistence, voxel healing, fire recovery and rigid-body water contact.
+- [Visual review and verification details](docs/RELEASE_013_REVIEW.md) include captured animation frames and the hardware-validation limits.
+
+## Known Issues
+- The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still needs measurement on that hardware. Software-rendered cloud screenshots are visual checks, not a hardware performance result.
+- River, coastal and offshore professions require corresponding authored water resources and safe travel access. The devmap contains lake fishing; this update does not add an ocean or a ship.

@@ -593,7 +593,9 @@ public final class CombatSystem {
         DamageType type = weapon ? w.damageType : DamageType.BLUNT;
         boolean behind = behind(v, a);
         // Strength makes the damage of a landed blow (with the weapon's Strength bonus); Attack does not (GDD 2.3)
-        float potential = (float) Math.floor(physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0) * CombatMath.moveDamage(m));
+        float maximum = physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0);
+        if (weapon) maximum = Math.max(2, maximum);
+        float potential = (float) Math.floor(maximum * CombatMath.moveDamage(m));
         if (m == Move.HEAVY && (a.sneaking || a.crouched) && v instanceof rpg.ai.Npc target && !g.ai.canSee(target, a)
                 && (target.aware.get(a.id) == null || target.aware.get(a.id).level < rpg.ai.Stealth.ALERT)) potential = (float)Math.floor(potential * 1.5f);
         float impact = CombatMath.impact(impactBase, a.skills.level(Skill.STRENGTH), CombatMath.moveImpact(m));
@@ -672,6 +674,7 @@ public final class CombatSystem {
         if (v == g.player && g.ui != null && g.ui.console.god) { dealt = 0; impact = 0; }
         if (v == g.player && g.ui != null && g.ui.console.immortal) dealt = Math.min(dealt, Math.max(0, (int) Math.ceil(v.hp) - 1));
         v.hp -= dealt;
+        if(dealt>0 && (type==DamageType.SLASH || type==DamageType.PIERCE))v.injuries.cut(v,px,py,pz,dealt);
         v.cs.lastHurt = g.time;
         v.cs.lastAttacker = a.id;
         v.cs.flash = 1;
@@ -697,7 +700,7 @@ public final class CombatSystem {
         }
         if (g.sfx != null && dealt > 0) g.sfx.play(potential > 30 * CombatMath.HP_SCALE ? "heavyhit" : "hit", px, py, pz, 0.8f);
         if (a == g.player && v instanceof rpg.ai.Npc sp && sp.spareSince > 0) sp.spareSince = -1;
-        if (g.sfx != null && dealt > 0 && v.hp > 0 && !v.dummy && !(v instanceof rpg.animal.Animal) && dealt >= v.maxHp() * 0.08f) g.sfx.hurtCry(v, g.time);
+        if (g.sfx != null && dealt > 0 && v.hp > 0 && !v.dummy && !(v instanceof rpg.animal.Animal)) g.sfx.hurtCry(v, g.time);
         String detail = String.format("%s -> %s %s%s: potential %.1f, protection %.0f (%.0f%% mit %s)%s%s, dealt %d; impact %.1f vs stability %.1f%s; stamina %.0f",
                 a.name, v.name, how, behind ? " (from behind)" : "", potential, protection, mit * 100, type,
                 g.prayers.on(v, Prayer.WARD) ? ", ward" : "", guarding ? String.format(", guarded %.1f", blockedPart) : "", dealt, impact, stab, stagger ? " -> STAGGER" : "", v.stamina);
@@ -763,6 +766,7 @@ public final class CombatSystem {
         int damage = Math.min(amount, (int) Math.ceil(victim.hp)); victim.hp -= damage; victim.cs.lastHurt = g.time; victim.cs.flash = 1;
         var event = g.state.commit("EnvironmentalDamage", 0, victim.id, rpg.world.DevMap.jurisdiction(victim.x, victim.z), 0, reason + ": " + damage);
         if (g.fx != null) g.fx.text(String.valueOf(damage), victim.x, victim.y + victim.height, victim.z, 0xFFFF7050);
+        if (g.sfx != null && victim.hp > 0 && !(victim instanceof rpg.animal.Animal)) g.sfx.hurtCry(victim, g.time);
         if (victim.hp <= 0) kill(null, victim, event.id());
     }
 

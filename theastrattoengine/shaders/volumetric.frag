@@ -16,7 +16,7 @@ uniform sampler3D uProbeR, uProbeG, uProbeB;
 uniform int uSmokeN;
 uniform vec4 uSmoke[96];
 uniform float uTime,uCloudCover;
-uniform vec2 uCloudWind;
+uniform vec2 uCloudOffset;
 float hash31(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float vnoise(vec3 p) {
     vec3 i = floor(p), f = fract(p);
@@ -154,7 +154,7 @@ void main() {
             for(int i=0;i<10;i++) {
                 if(i>=count)break;
                 vec3 p=uCam+dir*(nearCloud+(float(i)+0.5)*stride);
-                vec3 uv=(p-vec3(uCloudWind.x*uTime*0.08,0,uCloudWind.y*uTime*0.08))*0.024;
+                vec3 uv=(p-vec3(uCloudOffset.x,0,uCloudOffset.y))*0.024;
                 float shape=vnoise(uv)*0.7+vnoise(uv*2.2)*0.3;
                 float edge=smoothstep(78.0,84.0,p.y)*(1.0-smoothstep(98.0,106.0,p.y));
                 float amount=max(0.0,shape-(0.7-uCloudCover*0.38))*edge;

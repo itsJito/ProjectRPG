@@ -77,6 +77,9 @@ public final class ItemModels {
         if (d.id.equals("chisel")) return HiResItems.chisel();
         Model coarse = switch (d.id) {
             case "small_fishing_net" -> net();
+            case "snare" -> snare();
+            case "cloth_roll" -> clothRoll();
+            case "stone_block" -> quarryBlock();
             case "crab_cage" -> cage();
             case "raw_crab", "crab" -> crab(d);
             default -> build(d);
@@ -90,6 +93,35 @@ public final class ItemModels {
             if (l < 150) v.col[i] = (METAL << 24) | (Tex.shade(c, Math.min(2.2f, 150f / Math.max(20, l))) & 0xFFFFFF);
         }
         return m;
+    }
+
+    private static Model snare() {
+        VoxModel vox=new VoxModel(15,16,3);
+        for(int x=0;x<15;x++)for(int y=0;y<15;y++) {
+            float distance=(float)Math.hypot(x-7,y-7);
+            if(distance>5.5f && distance<6.7f)vox.set(x,y,1,mat(0xAB9769));
+        }
+        vox.box(6,0,1,7,4,1,mat(0x8C7750));vox.box(1,2,0,2,15,1,mat(0x785537));
+        return new Model(vox,7.5f,0.5f,1.5f);
+    }
+    private static Model clothRoll() {
+        VoxModel vox=new VoxModel(14,10,10);
+        for(int x=0;x<14;x++)for(int y=0;y<10;y++)for(int z=0;z<10;z++) {
+            float radius=(float)Math.hypot(y-4.5f,z-4.5f);if(radius>4.5f)continue;
+            int color=x==0 || x==13?((int)(radius*2)%2==0?0xC9BCA0:0x968B73):(x+y+z)%4==0?0xB9AD91:0xC5B99D;
+            if(x==4 || x==9)color=0x7E745B;
+            vox.set(x,y,z,mat(color));
+        }
+        return new Model(vox,7,0.5f,5);
+    }
+    private static Model quarryBlock() {
+        VoxModel vox=new VoxModel(14,10,10);
+        for(int x=0;x<14;x++)for(int y=0;y<10;y++)for(int z=0;z<10;z++) {
+            if((x==0 || x==13) && (y==0 || y==9) && (z==0 || z==9))continue;
+            int grain=Math.floorMod(x*31+y*17+z*13,9);
+            vox.set(x,y,z,mat(grain<2?0x757A7D:grain>6?0x9A9C97:0x888C88));
+        }
+        return new Model(vox,7,0.5f,5);
     }
 
     /** A small hand net: a hoop on a short handle, the mesh across it. (1/32 m, doubled.) */

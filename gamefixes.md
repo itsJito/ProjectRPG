@@ -47,3 +47,64 @@ NPC's can not gain skill levels or combat levels; only the player.
 - Escape/Pause menu needs to be overhauled to be genuinely impressive and to take up more screen space.
 
 **THINGS TO BE REMOVED:**
+
+
+RPGGAME ultimate doc — Version 0.1.3 implementation update
+
+**IMPLEMENTATION GUIDE**
+- Keep the existing request and update history intact. Visual review uses real engine frames; changed animal and fire motions are sampled on threes. Build, persistence and dead-code checks accompany the review. Subjective quality scores and minimum-hardware FPS are not substitutes for measured evidence.
+
+**THINGS TO NOTE**
+- All 25 Fisherman, Miner, Craftsman, Knight and Hunter subtype profiles are implemented, with only five new NPCs spawned: Elowen, Oren, Tamsin, Sir Alden and Fenna.
+- Existing saves preserve raw XP. All eighteen skills use the standard cumulative curve, reaching 14,391,160 XP at level 100. Only the player earns XP; humans and animals retain fixed profiles.
+- Prisoners who cannot afford the bounty plus 3% tax pay the affordable portion and serve extra time for the shortfall. Player and NPC possessions use the same escrow and confiscation rules.
+
+**BUGS TO BE FIXED:**
+- [Fixed] Windows native builds prefer incremental Ninja with bounded parallel compilation; the fallback avoids serial NMake and uncapped compiler processes.
+- [Fixed] Settings accepts subsequent clicks; profile deletion runs away from the render thread.
+- [Fixed] Empty ranged weapons no longer prevent retaliation. Godric has actual backup equipment and can change targets when attacked.
+- [Fixed] First-person head positioning uses current actor motion and collision checks, including downward sprint views.
+- [Fixed] City death transfers lawful originals directly to Undertaker custody without creating a wilderness gravestone.
+- [Fixed] Positive fall and environmental damage use hurt sounds.
+- [Fixed] Searches use remembered locations, bounded patience, visible blood trails and a stable look direction instead of accumulated spinning.
+- [Fixed] Necklaces render outside armor; Fire staff requires Magic 10.
+- [Fixed] Flames follow posed bodies; healing and respawning clear stale fire. Respawn removes detached player limbs.
+- [Fixed] Cloud movement accumulates wind rather than jumping with gust direction. The spellbook altar retains physical collision.
+- [Fixed] Arrival clears stale navigation goals; occupational tasks retain their current work target.
+- [Fixed] Worldbox text wraps without truncating oversized words and supports scrolling.
+- [Fixed] Civilians derive hiding places from local cover and reconsider when found.
+- [Fixed] Human and animal surface injuries alter geometry and heal back to the original model.
+- [Fixed] Melee aim follows ragdolled opponents' actual center instead of striking above them.
+- [Fixed] Guards reject friendly guard targets; vandalism produces role-sensitive reactions.
+- [Fixed] Horses rear into attacks; rabbit hopping has a bounded cadence; dead animals settle without animated legs.
+- [Fixed] Fresh blood does not cancel committed corpse carrying. Undertakers collect and bury city NPC bodies.
+- [Fixed] Cemetery stones accept one body only while Unfilled, then retain the departed's original items as Filled containers.
+- [Fixed] A witnessed animal attack is remembered as a beast attack rather than attributed human murder.
+- [Fixed] Fresh leather swords have a maximum pre-armor hit of at least 2.
+
+**THINGS TO BE CHANGED**
+- [Implemented] Chatbox responses return to conversation options; Goodbye exits.
+- [Implemented] Jail confiscates stolen goods, charges bounty plus 3% tax, holds all other belongings and restores them on release, including saved equipment slots and filled bags.
+- [Implemented] Human NPCs burning for three seconds collapse into Sydney and physically roll against solid ground to smother the flames.
+- [Implemented] Fire chars actor and prop materials. Physics impact aliases use the existing recorded Foley bank.
+- [Implemented] Seen roof trespass receives a warning before a small, rate-limited charge. Elevated combat uses the shared targeting and traversal systems.
+- [Implemented] Rain streaks remain upright; material-specific wet roughness keeps grass diffuse and preserves metal response.
+- [Implemented] Devmap building entrances, including the barn, have physical doors. Structured legal saves migrate JUR-BETA to DevTown.
+- [Implemented] Inspecting pockets shows the actual inventory before any theft roll. Detection is rolled only when attempting to lift an item.
+- [Implemented] Player Morphbeast duration is shorter than the shared NPC effect.
+
+**THINGS TO BE ADDED:**
+- [Implemented] Ten reusable foliage models, deterministic surface-qualified growth, cutting, chemistry destruction, saved depletion and valid regrowth.
+- [Implemented] Physical water crossings and wakes from movers, ragdolls and rigid items, with bounded splash/ripple events.
+- [Implemented] Separate Human, Animal and reserved Monster agent domains; no new monsters.
+- [Implemented] Shared resumable behavior-tree and hierarchical-task-network support used by human work and animal needs.
+- [Implemented] Local Watch, raid and escort coordination with distinct anchor, flank and support behavior.
+- [Implemented] All five requested occupational families and their 25 concrete subtype profiles, persistent lake nets and snares, real resource/recipe transactions and fixed NPC skills.
+
+**THINGS TO BE OVERHAULED:**
+- [Implemented] Recovery and prison custody conserve actual item ownership, quantities and nested contents across save/load.
+- [Implemented] Fire attachment remains on the GPU; foliage shares chunk meshes and a bounded upload budget.
+
+**THINGS TO BE REMOVED:**
+- [Removed] Serial NMake runtime fallback, accumulated search yaw and stale head-camera coordinates.
+- [Removed] Automatic stolen-goods recovery and duplicate corpse representations after burial.

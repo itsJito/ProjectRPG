@@ -234,6 +234,7 @@ private:
     int waterIndex_ = 0;
     bool hasWater_ = false;
     float waterAccumulator_ = 0, waterClock_ = 0;
+    float cloudClock_ = -1, cloudX_ = 0, cloudZ_ = 0;
     std::vector<uint32_t> waterVersions_;
     std::vector<float> waterMaskData_;
     int waterCells_ = 0;

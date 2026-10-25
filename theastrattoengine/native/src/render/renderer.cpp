@@ -261,12 +261,12 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
     for(GLuint texture:{water_[0],water_[1],waterMask_})g_.ClearTexImage(texture,0,RGBA,FLOAT,nullptr);
     // Chemical motion stays on the GPU; the CPU uploads only a bounded set of emitters.
     g_.GenVertexArrays(1, &chemistryVao_); g_.GenBuffers(1, &chemistryVbo_); g_.GenBuffers(1, &chemistryState_); g_.GenBuffers(1, &chemistrySources_);
-    std::vector<float> empty(4096 * 12, 0);
+    std::vector<float> empty(4096 * 16, 0);
     g_.BindVertexArray(chemistryVao_); g_.BindBuffer(ARRAY_BUFFER, chemistryVbo_);
-    g_.BufferData(ARRAY_BUFFER, static_cast<GLsizeiptr>(empty.size() * sizeof(float)), empty.data(), DYNAMIC_COPY);
+    g_.BufferData(ARRAY_BUFFER, static_cast<GLsizeiptr>(4096*48), empty.data(), DYNAMIC_COPY);
     for (GLuint i = 0; i < 3; ++i) { g_.VertexAttribPointer(i,4,FLOAT,FALSE_,48,reinterpret_cast<const void*>(static_cast<uintptr_t>(i*16))); g_.EnableVertexAttribArray(i); g_.VertexAttribDivisor(i,1); }
-    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistryState_); g_.BufferData(SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(4096*32), empty.data(), DYNAMIC_COPY);
-    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistrySources_); g_.BufferData(SHADER_STORAGE_BUFFER, 64*64, nullptr, STREAM_DRAW);
+    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistryState_); g_.BufferData(SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(4096*64), empty.data(), DYNAMIC_COPY);
+    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistrySources_); g_.BufferData(SHADER_STORAGE_BUFFER, 64*80, nullptr, STREAM_DRAW);
     g_.GenVertexArrays(1, &quadVao_);
     g_.GenBuffers(1, &quadVbo_);
     g_.GenBuffers(1, &quadEbo_);
@@ -1026,7 +1026,12 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 bool valid = true;
                 for (int i = 0; i < 4; ++i) valid = valid && std::isfinite(c.position[i]) && std::isfinite(c.color[i]) && std::isfinite(c.motion[i]) && std::isfinite(c.params[i]);
                 if (!valid || c.position[3] < 0 || c.position[3] > 3 || c.motion[3] <= 0 || c.motion[3] > 8 || c.params[0] < 0 || c.params[0] > 200) { error_ = "invalid element emitter"; return false; }
-                if (emitters_.size() < 64*16) { emitters_.insert(emitters_.end(),c.position,c.position+4); emitters_.insert(emitters_.end(),c.color,c.color+4); emitters_.insert(emitters_.end(),c.motion,c.motion+4); emitters_.insert(emitters_.end(),c.params,c.params+4); }
+                if (emitters_.size() < 64*20) {
+                    emitters_.insert(emitters_.end(),c.position,c.position+4); emitters_.insert(emitters_.end(),c.color,c.color+4);
+                    emitters_.insert(emitters_.end(),c.motion,c.motion+4); emitters_.insert(emitters_.end(),c.params,c.params+4);
+                    // Four exact 16-bit float words retain the full source ID without NaN encodings or hash collisions.
+                    for (unsigned shift=0;shift<64;shift+=16) emitters_.push_back(static_cast<float>((c.id>>shift)&65535u));
+                }
                 break;
             }
             case ASTRATTO_RCMD_PARTICLES: {
@@ -1468,6 +1473,7 @@ bool Renderer::visibleModel(const Model& model, const Frustum& frustum) const {
 }
 
 void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
+    s.f3("uFoliage",foliage_.wind_x,foliage_.wind_z,env_.time);
     float csky = 1, cblk = 0;
     if (viewmodel && w) {
         const int ix = static_cast<int>(std::floor(cam_.x)), iy = static_cast<int>(std::floor(cam_.y)), iz = static_cast<int>(std::floor(cam_.z));
@@ -1483,6 +1489,7 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
             sky = static_cast<float>(w->sky(ix, iy, iz)) / 15.0f; blk = static_cast<float>(w->blockLight(ix, iy, iz)) / 15.0f;
         }
         s.mat4("uModel", m.m);
+        s.f1("uSway",(m.flags & ASTRATTO_MODEL_FOLIAGE) != 0 ? 1.0f : 0.0f);
         s.f4("uTint", m.par[0], m.par[1], m.par[2], m.par[3]);
         s.f1("uEmissive", m.par[4]);
         s.f1("uFlag", m.par[4] > 0.5f ? 2.0f : (viewmodel ? 1.0f : 0.0f));
@@ -1617,6 +1624,10 @@ void Renderer::lightingPass() {
 }
 
 void Renderer::fogPass() {
+    const float cloudDt = cloudClock_ < 0 ? 0.0f : std::clamp(env_.time - cloudClock_, 0.0f, 0.25f);
+    cloudClock_ = env_.time;
+    cloudX_ += foliage_.wind_x * cloudDt * 0.08f;
+    cloudZ_ += foliage_.wind_z * cloudDt * 0.08f;
     const float density = env_.fogDensity * 0.62f;
     if (q_.volumetrics) {
         g_.BindFramebuffer(FRAMEBUFFER, fogFbo_);
@@ -1642,7 +1653,7 @@ void Renderer::fogPass() {
         vol_.f1("uMaxDist", 140.0f);
         vol_.f1("uTime", env_.time);
         vol_.f1("uCloudCover", std::max(0.0f,env_.overcast));
-        vol_.f2("uCloudWind",foliage_.wind_x,foliage_.wind_z);
+        vol_.f2("uCloudOffset",cloudX_,cloudZ_);
         // the smoke volumes as three vec4 each: (x y z radius) (density r g b) (glow rise swirl seed)
         const int smokeN = static_cast<int>(smoke_.size() / 12);
         vol_.i1("uSmokeN", smokeN);
@@ -1723,13 +1734,13 @@ void Renderer::advanceChemicalParticles() {
     if (chemistryQuiet_ > 8) chemistryAlive_ = false;
     if (emitters_.empty() && !chemistryAlive_) return;
     if (cam_.reset) {
-        std::vector<float> zero(4096*12,0);
+        std::vector<float> zero(4096*16,0);
         g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistryVbo_);g_.BufferSubData(SHADER_STORAGE_BUFFER,0,4096*48,zero.data());
-        g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistryState_);g_.BufferSubData(SHADER_STORAGE_BUFFER,0,4096*32,zero.data());
+        g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistryState_);g_.BufferSubData(SHADER_STORAGE_BUFFER,0,4096*64,zero.data());
     }
     const int count = presetLevel_ <= 0 ? 1024 : presetLevel_ == 1 ? 2048 : 4096;
     chemistryParticles_.use();
-    chemistryParticles_.i1("uCount",count); chemistryParticles_.i1("uEmitters",static_cast<int>(emitters_.size()/16));
+    chemistryParticles_.i1("uCount",count); chemistryParticles_.i1("uEmitters",static_cast<int>(emitters_.size()/20));
     chemistryParticles_.tex("uVox",0,TEXTURE_3D,voxTex_);
     chemistryParticles_.uiv("uCollision",particleCollision_,8);
     chemistryParticles_.f1("uDt",cam_.dt); chemistryParticles_.f1("uTime",env_.time); chemistryParticles_.f2("uWind",foliage_.wind_x,foliage_.wind_z);

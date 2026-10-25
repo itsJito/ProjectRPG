@@ -40,7 +40,7 @@ public final class SaveSystem {
         if (g.death.active) g.death.proceed(false);
         // an arrow or bolt in flight when the game is saved comes down where it is (a save keeps no flights): its ammunition
         // is on the ground in the save, as it would be a moment later, instead of gone from the world
-        g.carrying.dropAll();
+        g.carrying.dropAll();g.waterContacts.reset();
         for (Actor actor : g.actors()) { g.traversal.cancel(actor); if(!(actor instanceof rpg.animal.Animal))g.reactions.cancel(actor); }
         g.combat.landAll();
         Map<String, Object> root = new HashMap<>();
@@ -69,6 +69,7 @@ public final class SaveSystem {
         for (Npc n : g.npcs) {
             Map<String, Object> m = actor(n);
             m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
+            if (n.profession != null) m.put("profession",n.profession.name()); m.put("dutyTarget",n.dutyTarget); m.put("dutyPhase",n.dutyPhase); m.put("dutyX",n.dutyX); m.put("dutyZ",n.dutyZ); m.put("dutyLeft",Math.max(0,n.dutyUntil-g.time));
             m.put("arrested", n.arrestedUntil); m.put("arrestJur", n.arrestJurisdiction); m.put("patrol", n.patrolIndex);
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
             m.put("memories", mem);
@@ -80,6 +81,7 @@ public final class SaveSystem {
         root.put("npcs", npcs);
         List<Object> objs = new ArrayList<>();
         for (WorldObject o : g.objects.everything()) {
+            if(o instanceof rpg.world.Foliage.Patch)continue;
             if (o.def.equals("cargo")) continue;   // the economy saves its crates
             if (o.id >= Ids.DYNAMIC && o.removed) continue;
             Map<String, Object> m = o.save();
@@ -98,7 +100,7 @@ public final class SaveSystem {
         root.put("law", g.law.save());
         root.put("undertaker", g.undertaker.save());
         root.put("honor", g.honor.save());
-        root.put("chemistry", g.chemistry.save());
+        root.put("chemistry", g.chemistry.save());root.put("foliage",g.foliage.save());
         root.put("timeSystem",g.timeSystem.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
@@ -127,7 +129,7 @@ public final class SaveSystem {
         m.put("look", look);
         if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
         m.put("manaAcc", (double) a.manaAcc);
-        m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
+        m.put("injuries",a.injuries.save()); m.put("charred",a.charred); m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
         if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
         if (g.prayers != null) m.put("prayers", g.prayers.save(a));
         return m;
@@ -139,7 +141,11 @@ public final class SaveSystem {
         if (value instanceof Map<?, ?> raw) {
             Map<String, Object> map = (Map<String, Object>) raw;
             if (map.containsKey("JUR-ALPHA")) map.put(DevMap.ALPHA, map.remove("JUR-ALPHA"));
-            for (String key : List.of("jur", "arrestJur", "jurisdiction")) if ("JUR-ALPHA".equals(map.get(key))) map.put(key, DevMap.ALPHA);
+            if (map.containsKey("JUR-BETA")) map.put(DevMap.BETA, map.remove("JUR-BETA"));
+            for (String key : List.of("jur", "arrestJur", "jurisdiction")) {
+                if ("JUR-ALPHA".equals(map.get(key))) map.put(key, DevMap.ALPHA);
+                if ("JUR-BETA".equals(map.get(key))) map.put(key, DevMap.BETA);
+            }
             for (Object child : map.values()) migrateJurisdictions(child);
         } else if (value instanceof List<?> list) for (Object child : list) migrateJurisdictions(child);
     }
@@ -203,6 +209,9 @@ public final class SaveSystem {
             if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
             n.corpse=0;
             applyActor(n, m);
+            if(m.containsKey("profession")) try { rpg.ai.Profession.valueOf(Json.str(m,"profession","")).assign(n); } catch(IllegalArgumentException invalid) { g.chat.warn("Ignored incompatible saved occupation for "+n.name); }
+            g.ai.brain.resetJob(n);
+            n.dutyPhase=Json.integer(m,"dutyPhase",0); n.dutyTarget=Json.lng(m,"dutyTarget",0); n.dutyX=(float)Json.num(m,"dutyX",n.postX); n.dutyZ=(float)Json.num(m,"dutyZ",n.postZ); n.dutyUntil=g.time+Json.num(m,"dutyLeft",0);
             if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
             n.arrestedUntil = Json.num(m, "arrested", -1); n.arrestJurisdiction = Json.str(m, "arrestJur", DevMap.jurisdiction(n.x, n.z)); n.patrolIndex = Json.integer(m, "patrol", 0);
@@ -239,6 +248,12 @@ public final class SaveSystem {
             switch (kind) {
                 case "GroundItem" -> { var s = ItemIO.stack(m.get("stack")); if (s != null) g.objects.add(new GroundItem(id, s, x, y, z)); }
                 case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0)));
+                case "FishingNet" -> {
+                    var net=g.objects.add(new rpg.objects.FishingNet(id,Json.lng(m,"owner",0),Json.lng(m,"source",0),x,y,z,Json.num(m,"nextCatch",g.state.minutes+4)));net.load(g,m);
+                }
+                case "Trap" -> {
+                    var trap=g.objects.add(new rpg.objects.Trap(id,Json.lng(m,"owner",0),x,y,z));trap.load(g,m);
+                }
                 case "Container", "Corpse" -> {
                     long body = Json.lng(m, "body", 0);
                     Container ct = body != 0 && g.actor(body) instanceof Npc deadActor && !deadActor.alive
@@ -263,7 +278,7 @@ public final class SaveSystem {
         g.law.load(Json.obj(root, "law"));
         g.undertaker.load(Json.obj(root, "undertaker"));
         g.honor.load(Json.obj(root, "honor"));
-        g.chemistry.load(Json.list(root, "chemistry"));
+        g.chemistry.load(Json.list(root, "chemistry"));g.foliage.load(Json.obj(root,"foliage"));g.traps.afterLoad();
         g.timeSystem.load(Json.obj(root,"timeSystem"));
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
@@ -290,6 +305,7 @@ public final class SaveSystem {
         a.faith = (float) Json.num(m, "faith", a.maxFaith()); a.mana = (float) Json.num(m, "mana", a.maxMana());
         a.cs.cancel(); a.cs.staggered = 0;
         a.manaAcc = (float) Json.num(m, "manaAcc", 0);
+        a.injuries.load(Json.list(m,"injuries"));a.charred=(float)Json.num(m,"charred",0);a.burnSince=-1;a.rollContact=0;
         a.eatenMinutes=(float)Json.num(m,"eatenMinutes",0);
         a.morphT=(float)Json.num(m,"morphT",0); a.chronoT=(float)Json.num(m,"chronoT",0); a.summonOwner=Json.lng(m,"summonOwner",0); a.summonUntil=g.time+Json.num(m,"summonLeft",0);
         if(a instanceof Npc npc)npc.spellBook=rpg.combat.Spells.Book.valueOf(Json.str(m,"spellBook",npc.spellBook.name()));

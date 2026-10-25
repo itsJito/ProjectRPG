@@ -16,6 +16,7 @@ import rpg.skill.Skills;
  */
 public class Actor {
     public final long id;
+    public astratto.ai.AgentDomain domain = astratto.ai.AgentDomain.HUMAN;
     public String name;
     public final Skills skills = new Skills();
     public final Inventory inv;
@@ -31,9 +32,11 @@ public class Actor {
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
     public float eatenMinutes;
-    public double nextSplash;
+    public float charred;
+    public double burnSince=-1, lastRoll=-99, rollContact;
     /** Blood on the body itself, splash by splash where it landed (painted onto the figure). */
     public final Blood blood = new Blood();
+    public final Injuries injuries = new Injuries();
     /** When this body last cried out (hurt cries are not repeated faster than a breath). */
     public double lastCry = -99;
     public boolean alive = true;
@@ -140,7 +143,7 @@ public class Actor {
     public long summonOwner;
     public double summonUntil;
     public float actionRate() { return chronoT > 0 ? 0.45f : 1; }
-    public void restore() { hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
+    public void restore() { injuries.clear(); hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }

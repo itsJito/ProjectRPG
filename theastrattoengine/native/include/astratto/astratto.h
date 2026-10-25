@@ -890,6 +890,8 @@ typedef struct astratto_cmd_policy_create {
 } astratto_cmd_policy_create;
 
 enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3 };
+/* Domain bits are orthogonal to movement flags and faction teams. Monster reserves a controller domain only. */
+enum { ASTRATTO_AGENT_DOMAIN_HUMAN = 0, ASTRATTO_AGENT_DOMAIN_ANIMAL = 1u << 16, ASTRATTO_AGENT_DOMAIN_MONSTER = 2u << 16, ASTRATTO_AGENT_DOMAIN_MASK = 3u << 16 };
 typedef struct astratto_cmd_agent_create {
     astratto_record head;
     astratto_handle handle;
@@ -1387,7 +1389,7 @@ typedef struct astratto_rcmd_light {
     uint32_t flags;
     float dx, dy, dz, cos_outer;
 } astratto_rcmd_light;
-enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16 };
+enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32 };
 typedef struct astratto_rcmd_model {
     astratto_record head;
     uint32_t mesh, flags;               /* ASTRATTO_MODEL_* */

@@ -98,7 +98,7 @@ public final class Magic {
             }
             case MORPHBEAST -> {
                 if (aimed == null || !aimed.alive || aimed.dummy || aimed.reacting || aimed.carryBody != 0 || aimed.summonOwner != 0) return no(a,"Aim at a living target with room to transform.");
-                aimed.morphT = 8; aimed.cs.cancel(); aimed.cs.blocking = false;
+                aimed.morphT = aimed == g.player ? 2.5f : 8; aimed.cs.cancel(); aimed.cs.blocking = false;
                 g.interact.cancel(aimed,"transformed"); g.traversal.cancel(aimed);
                 hostileEffect(a,aimed); form(aimed);
                 return true;
@@ -182,7 +182,7 @@ public final class Magic {
     }
     public Animal form(Actor actor) {
         Animal sheep=forms.computeIfAbsent(actor.id,id->new Animal(id,rpg.animal.Species.SHEEP,false,actor.look.female,actor.x,actor.z));
-        sheep.x=actor.x; sheep.y=actor.y; sheep.z=actor.z; sheep.yaw=actor.yaw; sheep.vx=actor.vx; sheep.vz=actor.vz; sheep.grounded=actor.grounded; sheep.alive=actor.alive;
+        sheep.x=actor.x; sheep.y=actor.y; sheep.z=actor.z; sheep.yaw=actor.yaw; sheep.vx=actor.vx; sheep.vz=actor.vz; sheep.grounded=actor.grounded; sheep.alive=actor.alive; sheep.charred=actor.charred;
         return sheep;
     }
     public void dismiss(Npc ally) {

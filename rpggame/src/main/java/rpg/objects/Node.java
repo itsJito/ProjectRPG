@@ -48,6 +48,8 @@ public final class Node extends WorldObject {
     private final int leaves, height;
     /** A fishing spot's tool (net, rod, cage); null elsewhere. */
     public ItemDef needs;
+    public enum Waters { RIVER, COAST, OFFSHORE, SHORE, LAKE }
+    public Waters waters = Waters.LAKE;
     /** How far through felling the tree or breaking out the ore the blows so far have gone (strikes landed), and when the last landed. */
     public float struck;
     public double lastStruck = -99;
@@ -223,6 +225,18 @@ public final class Node extends WorldObject {
         if (a == g.player) g.chat.say(kind == Kind.FISH ? "You catch " + (product == Items.RAW_SHRIMP ? "some shrimp" : "a " + product.name.toLowerCase().replace("raw ", "")) + "." : "You get some " + product.name.toLowerCase() + ".");
         if (stockMax > 0 && stock <= 0) deplete(g, ev.id());
         return Result.ok();
+    }
+
+    /** The same resource source, harvested by an actual deployed matching tool rather than an actor's hand. */
+    public boolean catchInNet(Rpg g,FishingNet net) {
+        if(kind!=Kind.FISH || waters!=Waters.LAKE || needs!=Items.FISHING_NET || !net.contents.has(needs,1) || depleted())return false;
+        Actor fisher=g.actor(net.owner);if(fisher==null || fisher.skills.level(skill)<level)return false;
+        ItemStack catchItem=new ItemStack(product,1,net.owner,false,id);
+        if(!net.contents.canAdd(catchItem))return false;
+        net.contents.add(catchItem);g.state.mint(product,1);
+        var event=g.state.commit("ResourceGathered",net.owner,id,jurisdiction(),0,product.name+" caught in deployed net "+net.id);
+        if(stockMax>0 && --stock<=0)deplete(g,event.id());
+        return true;
     }
 
     private void deplete(Rpg g, long cause) {

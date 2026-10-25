@@ -113,7 +113,7 @@ public final class Acceptance {
         preview.world = game.world(); preview.x = 64.5f; preview.y = DevMap.FLOOR; preview.z = 66.5f;
         // every row cycles through exactly the GDD's counts (3.18: sex, body, skin, 20 hair per sex, 10 natural hair
         // colours, 20 facial hair, 20 tops / legs / shoes, 24 garment colours) and wraps
-        int[] want = {2, 3, 12, 20, 10, 20, 20, 24, 20, 24, 20, 24};
+        int[] want = {2, 3, 12, 20, 10, 20, 10, 20, 24, 20, 24, 20, 24};
         var rows = c.rows();
         boolean counts = rows.size() == want.length;
         for (int i = 0; counts && i < rows.size(); i++) counts = rows.get(i).count() == want[i];
@@ -129,10 +129,11 @@ public final class Acceptance {
         java.util.Set<String> outfits = new java.util.HashSet<>();
         for (int i = 0; i < 20; i++) { outfits.add("t" + rpg.render.Outfit.TOPS[i]); outfits.add("l" + rpg.render.Outfit.LEGS[i]); outfits.add("s" + rpg.render.Outfit.SHOES[i]); }
         need("20 distinct tops, 20 legs and 20 shoes (" + outfits.size() + " of 60)", outfits.size() == 60);
+        int startingHair=c.look.hair;
         for (int i = 0; i < 20; i++) c.step(rows.get(3), 1);
-        need("hairstyle row wraps after 20", c.look.hair == 1);
+        need("hairstyle row wraps after 20", c.look.hair == startingHair);
         c.step(rows.get(0), 1);
-        need("choosing female removes facial hair and its row", c.look.female && c.look.beard == 0 && c.rows().size() == want.length - 1);
+        need("choosing female removes facial hair and its row", c.look.female && c.look.beard == 0 && c.rows().size() == want.length - 2);
         c.step(c.rows().get(0), 1);
         c.look.hair = 12; c.look.beard = 4; c.look.top = 7; c.look.topColor = 15; c.look.skin = 6; c.look.hairColor = 1;
         for (int i = 0; i < 90; i++) {
@@ -178,28 +179,23 @@ public final class Acceptance {
         boolean allOne = true;
         for (Skill s : Skill.ALL) allOne &= g.player.skills.level(s) == (s == Skill.HEALTH ? 10 : 1);
         need("a new character starts with every skill at 1 but Health at 10, and 10 HP (" + g.player.maxHp() + ")", allOne && g.player.maxHp() == 10);
-        need("XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000",
-                XpTable.xpFor(10) == 43_446 && XpTable.xpFor(50) == 598_694 && XpTable.xpFor(60) == 935_503 && XpTable.xpFor(80) == 2_321_784 && XpTable.xpFor(90) == 3_720_933 && XpTable.xpFor(100) == 6_000_000);
+        need("XP table: L10 1,154, L50 101,333, L60 273,742, L80 1,986,068, L90 5,346,332, L100 14,391,160",
+                XpTable.xpFor(10) == 1_154 && XpTable.xpFor(50) == 101_333 && XpTable.xpFor(60) == 273_742 && XpTable.xpFor(80) == 1_986_068 && XpTable.xpFor(90) == 5_346_332 && XpTable.xpFor(100) == 14_391_160);
         boolean mono = true;
         for (int l = 2; l <= 100; l++) mono &= XpTable.xpFor(l) > XpTable.xpFor(l - 1) && XpTable.levelFor(XpTable.xpFor(l)) == l && XpTable.levelFor(XpTable.xpFor(l) - 1) == l - 1;
         need("the stored table is strictly increasing and levelFor agrees at every boundary", mono);
-        // train a stand-in through every milestone on every skill, through the real award path (events, level-ups)
-        Actor t = new Actor(9999, "Trainee", 28);
-        boolean milestones = true;
-        long levelUps = 0;
-        for (Skill s : Skill.ALL) {
-            for (int target : new int[]{60, 80, 90, 100}) {
-                long need = XpTable.xpFor(target) - t.skills.xp(s);
-                var a = g.prog.awardRaw(t, s, need, "milestone test", 0, g.state.newRequestId());
-                milestones &= t.skills.level(s) == target && t.skills.xp(s) == XpTable.xpFor(target);
-                if (a != null && a.levelledUp()) levelUps++;
-                if (target < 100) milestones &= XpTable.levelFor(t.skills.xp(s) - 1) == target - 1;
+        // The detached skill model exercises the curve; gameplay awards must reject non-player actors.
+        var model=new rpg.skill.Skills();boolean milestones=true;
+        for(Skill skill:Skill.ALL) {
+            for(int target:new int[]{60,80,90,100}) {
+                model.award(skill,XpTable.xpFor(target)-model.xp(skill));
+                milestones &= model.level(skill)==target && model.xp(skill)==XpTable.xpFor(target);
             }
-            g.prog.awardRaw(t, s, 1_000_000, "over the cap", 0, 0);
-            milestones &= t.skills.xp(s) == XpTable.MAX_XP && t.skills.level(s) == 100;
+            model.award(skill,1_000_000);milestones &= model.xp(skill)==XpTable.MAX_XP;
         }
-        need("every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000", milestones);
-        need("level-ups were committed as events (" + levelUps + ")", levelUps == 18 * 4);
+        need("all eighteen skill models reach the standard milestones and cap at 14,391,160",milestones);
+        Actor fixed=new Actor(9999,"Fixed profile",28);long[] fixedXp=fixed.skills.raw();
+        need("gameplay XP cannot advance a non-player profile",g.prog.awardRaw(fixed,Skill.ATTACK,1000,"invalid recipient",0,0)==null && java.util.Arrays.equals(fixedXp,fixed.skills.raw()));
         long req = g.state.newRequestId();
         long before = g.player.skills.xp(Skill.COOKING);
         g.prog.awardRaw(g.player, Skill.COOKING, 500, "dedupe test", 0, req);
@@ -207,9 +203,10 @@ public final class Acceptance {
         need("a repeated request pays XP once", g.player.skills.xp(Skill.COOKING) == before + 500);
         // the player's own level-up: overlay, jingle, fireworks
         long ups = g.prog.levelUps;
-        g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(3) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
+        int nextCooking=g.player.skills.level(Skill.COOKING)+1;
+        g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(nextCooking) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
         frames(20);
-        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelup").alpha > 0 && g.chat.contains("Cooking level is now 3"));
+        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelup").alpha > 0 && g.chat.contains("Cooking level is now "+nextCooking));
         shot("03-level-up");
     }
 
@@ -1641,29 +1638,13 @@ public final class Acceptance {
         var r = g.undertaker.redeem(p, morrow);
         need("the undertaker hands it all back for his fee (" + r.status() + ", ring back: " + p.has(rpg.item.Items.get("gold_ring"), 1) + ")",
                 !r.rejected() && p.has(rpg.item.Items.get("gold_ring"), 1) && p.count(rpg.item.Items.COINS) == before + 60 - (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) && g.undertaker.held() == 0);
-        // inside the walls: secured, and a guard comes for it once word reaches the watch
-        g.give(p, rpg.item.Items.BREAD, 1);
-        tp(100.5f, 74.5f, 0);
-        p.alive = false; p.hp = 0;
-        g.onKilled(p, null, 0);
-        for (int i = 0; i < 60 * 6 && g.death.active; i++) frames(1);
-        var town = g.undertaker.graves().isEmpty() ? null : g.undertaker.graves().get(g.undertaker.graves().size() - 1);
-        need("a death inside the walls leaves a secured grave", town != null && town.secured);
-        if (town != null) {
-            // (word reaches the watch after two minutes: skipped here)
-            town.expiresAt = g.time + rpg.law.Undertaker.GRAVE_SECONDS - 130;
-            Npc cole = npc(Ids.GUARD);
-            cole.hunt = null; cole.fightTarget = 0; cole.nextThink = 0; cole.investigation = null; cole.aware.clear();
-            g.teleport(cole, town.x + 6, DevMap.FLOOR, town.z);
-            boolean carried2 = false;
-            for (int i = 0; i < 60 * 60 && !town.buried; i++) { frames(1); carried2 |= town.heldBy == cole.id; if (i % 60 == 0) { cole.investigation = null; cole.aware.clear(); } }
-            need("a guard gathers it up and carries it to the undertaker (" + carried2 + ", " + cole.lastOutcome + ")", carried2 && town.buried && g.undertaker.held() > 0);
-            g.give(p, rpg.item.Items.COINS, 30);
-            g.teleport(p, morrow.x + 1, DevMap.FLOOR, morrow.z);
-            frames(3);
-            g.undertaker.redeem(p, morrow);
-            need("redeemed for the town fee alone", g.undertaker.held() == 0);
-        }
+        // Town deaths bypass the death-site grave and create a private Undertaker claim immediately.
+        g.give(p,rpg.item.Items.BREAD,1);tp(100.5f,74.5f,0);p.alive=false;p.hp=0;g.onKilled(p,null,0);
+        for(int i=0;i<60*6 && g.death.active;i++)frames(1);
+        need("city death has no exposed death-site grave",g.undertaker.graves().isEmpty());
+        need("city belongings are immediately in Undertaker custody",g.undertaker.held()>0);
+        g.give(p,rpg.item.Items.COINS,30);g.teleport(p,morrow.x+1,DevMap.FLOOR,morrow.z);frames(3);
+        g.undertaker.redeem(p,morrow);need("redeemed for the town fee alone",g.undertaker.held()==0);
     }
 
     // ------------------------------------------------------------------ Honor, the fence, jewellery

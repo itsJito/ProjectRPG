@@ -3,11 +3,17 @@ layout(location=0) in vec3 aPos;
 layout(location=1) in vec4 aCol;
 layout(location=2) in vec3 aNormal;
 uniform mat4 uPV, uModel;
+uniform vec3 uFoliage;
+uniform float uSway;
 out vec4 vCol;
 out vec3 vWorld;
 out vec3 vN;
 void main() {
     vec4 w = uModel * vec4(aPos, 1.0);
+    if(uSway>0.5) {
+        float height=clamp(aPos.y,0.0,1.5),phase=dot(w.xz,vec2(0.71,1.13));
+        w.xz+=uFoliage.xy*height*height*(0.025+0.018*sin(uFoliage.z*1.9+phase));
+    }
     vWorld = w.xyz;
     vCol = aCol;
     // 1.0: normals go through the normal matrix (the inverse-transpose of the model matrix), not the model matrix: a

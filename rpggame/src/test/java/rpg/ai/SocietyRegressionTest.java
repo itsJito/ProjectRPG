@@ -46,7 +46,7 @@ class SocietyRegressionTest {
         for (int i = 0; i < 600 && !corpse.delivered; i++) game.tick(1f / 60);
         assertTrue(corpse.delivered, guard.goal + ": " + guard.lastOutcome + " / " + guard.goalReason);
         assertEquals(0, guard.carryBody); assertEquals(0, corpse.heldBy); assertNull(dead.eq.get(ItemDef.Slot.MAIN));
-        var memorial = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Container c && c.kind.equals("memorial")).map(o -> (rpg.objects.Container)o).findFirst().orElseThrow();
+        var memorial = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Container c && c.kind.equals("memorial") && c.buried && c.burialPlot.equals("test plot")).map(o -> (rpg.objects.Container)o).findFirst().orElseThrow();
         var recovered = memorial.contents.stacks().stream().filter(item -> item.origin == 929).findFirst().orElseThrow();
         assertEquals(original.def, recovered.def); assertEquals(original.owner, recovered.owner); assertEquals(original.stolen, recovered.stolen);
         assertEquals(0, dead.corpse); assertEquals(0, dead.ragdoll); assertTrue(corpse.removed);

@@ -80,7 +80,7 @@ public final class AiSystem {
         finn.skills.setLevel(Skill.THIEVING, 25); levels(finn, 10, 8, 8, 12); wear(finn, "bronze_dagger", null, "leather_body"); finn.pickpocketLevel = 15; give(finn, Items.COINS, 25);
         Npc gus = npc(Ids.MERCHANT_B, "Gus", Npc.Role.MERCHANT, "Merchant (Store B)", 17.5f, 109.5f, 107);
         give(gus, Items.COINS, 600);
-        Npc hale = npc(Ids.LAWMAN_B, "Hale", Npc.Role.LAWMAN, "Lawman (JUR-BETA)", DevMap.LAWMAN_B[0], 120.0f, 108);
+        Npc hale = npc(Ids.LAWMAN_B, "Hale", Npc.Role.LAWMAN, "Lawman (DevTown)", DevMap.LAWMAN_B[0], 120.0f, 108);
         give(hale, Items.COINS, 2500);
         levels(hale, 40, 40, 40, 40); wear(hale, "steel_sword", "steel_shield", "steel_body");
         Npc ivo = npc(Ids.CARTER, "Ivo", Npc.Role.CARTER, "Carter", 89.5f, 64.5f, 109);
@@ -95,7 +95,7 @@ public final class AiSystem {
         morrow.postX = DevMap.UNDERTAKER_POST[0]; morrow.postZ = DevMap.UNDERTAKER_POST[1];
         give(morrow, Items.COINS, 40);
         // the fence keeps a nook behind Store B (GDD 3.3): buys what is stolen, sells it on quietly
-        Npc silas = npc(Ids.FENCE, "Silas", Npc.Role.FENCE, "Fence (JUR-BETA)", DevMap.FENCE_POST[0], DevMap.FENCE_POST[1], 114);
+        Npc silas = npc(Ids.FENCE, "Silas", Npc.Role.FENCE, "Fence (DevTown)", DevMap.FENCE_POST[0], DevMap.FENCE_POST[1], 114);
         silas.postX = DevMap.FENCE_POST[0]; silas.postZ = DevMap.FENCE_POST[1];
         give(silas, Items.COINS, 900);
         silas.skills.setLevel(Skill.THIEVING, 40);
@@ -116,7 +116,7 @@ public final class AiSystem {
         for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
     }
 
-    private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR);
+    private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR,Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.BOBWIN -> {
@@ -142,7 +142,7 @@ public final class AiSystem {
             case (int)Ids.HUNTER -> {
                 Npc godric = npc(Ids.HUNTER, "Godric", Npc.Role.HUNTER, "Woodsman", 70.5f, 80.5f, 144);
                 levels(godric,12,12,10,18);godric.skills.setLevel(Skill.HARVESTING,25);godric.skills.setLevel(Skill.ARCHERY,18);
-                give(godric,Items.BREAD,2);give(godric,Items.KNIFE,1);wear(godric,"shortbow",null,"leather_body");
+                Profession.GAME_HUNTER.assign(godric);give(godric,Items.get("bronze_dagger"),1);give(godric,Items.BREAD,2);give(godric,Items.KNIFE,1);wear(godric,"shortbow",null,"leather_body");
                 godric.eq.set(ItemDef.Slot.AMMO,new ItemStack(Items.BRONZE_ARROWS,20));g.state.mint(Items.BRONZE_ARROWS,20);
                 return godric;
             }
@@ -150,6 +150,32 @@ public final class AiSystem {
                 Npc isolde = npc(Ids.SCHOLAR, "Isolde", Npc.Role.SCHOLAR, "Travelling scholar", 103.5f, 58.5f, 145);
                 isolde.skills.setLevel(Skill.MAGIC, 40); isolde.spellBook = rpg.combat.Spells.Book.ARCANE; give(isolde, Items.COINS, 60); give(isolde, Items.BREAD, 2);
                 return isolde;
+            }
+            case (int)Ids.FISHERMAN -> {
+                Npc elowen=npc(id,"Elowen",Npc.Role.FISHERMAN,"Lake Net Fisherman",93.5f,41.5f,146);
+                Profession.LAKE_NET_FISHERMAN.assign(elowen);elowen.skills.setLevel(Skill.FISHING,25);
+                give(elowen,Items.FISHING_NET,1);give(elowen,Items.BREAD,2);give(elowen,Items.COINS,40);return elowen;
+            }
+            case (int)Ids.MINER -> {
+                Npc oren=npc(id,"Oren",Npc.Role.MINER,"Ore Miner",92.5f,22.5f,147);
+                Profession.ORE_MINER.assign(oren);oren.skills.setLevel(Skill.MINING,30);
+                give(oren,Items.get("bronze_pickaxe"),1);give(oren,Items.BREAD,2);give(oren,Items.COINS,40);return oren;
+            }
+            case (int)Ids.CRAFTSMAN -> {
+                Npc tamsin=npc(id,"Tamsin",Npc.Role.CRAFTSMAN,"Blacksmith",81.5f,22.5f,148);
+                Profession.BLACKSMITH.assign(tamsin);tamsin.skills.setLevel(Skill.SMITHING,35);
+                give(tamsin,Items.HAMMER,1);give(tamsin,Items.BRONZE_BAR,8);give(tamsin,Items.BREAD,2);give(tamsin,Items.COINS,120);return tamsin;
+            }
+            case (int)Ids.KNIGHT -> {
+                Npc alden=npc(id,"Sir Alden",Npc.Role.KNIGHT,"Escort Knight",87.5f,64.5f,149);
+                Profession.ESCORT_KNIGHT.assign(alden);alden.dutyTarget=Ids.CARTER;alden.dutyX=alden.postX;alden.dutyZ=alden.postZ;
+                levels(alden,35,35,40,40);wear(alden,"steel_sword","steel_shield","steel_body");give(alden,Items.TROUT,3);return alden;
+            }
+            case (int)Ids.PREDATOR_HUNTER -> {
+                Npc fenna=npc(id,"Fenna",Npc.Role.HUNTER,"Predator Hunter",82.5f,91.5f,150);
+                Profession.PREDATOR_HUNTER.assign(fenna);levels(fenna,18,18,15,22);fenna.skills.setLevel(Skill.ARCHERY,25);
+                wear(fenna,"shortbow",null,"leather_body");give(fenna,Items.get("bronze_dagger"),1);give(fenna,Items.KNIFE,1);give(fenna,Items.BREAD,2);give(fenna,Items.SNARE,1);
+                fenna.eq.set(ItemDef.Slot.AMMO,new ItemStack(Items.BRONZE_ARROWS,30));g.state.mint(Items.BRONZE_ARROWS,30);return fenna;
             }
             default -> throw new IllegalArgumentException("Not an authored release NPC: "+id);
         }
@@ -170,13 +196,20 @@ public final class AiSystem {
     }
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
-    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren");
+    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
         // an ordinary grown man or woman: Health 10 (10 HP), as a new player has; fighters are given more below
         n.skills.setLevel(Skill.HEALTH, 10);
         n.look = Appearance.random(lookSeed, FEMALE_NAMES.contains(name));
+        if(id>=Ids.FISHERMAN && id<=Ids.PREDATOR_HUNTER) {
+            n.look.top=2;n.look.bottom=1;n.look.shoes=10;n.look.shoesColor=16;
+            n.look.topColor=switch(role){case FISHERMAN->6;case MINER->21;case CRAFTSMAN->16;case KNIGHT->9;default->5;};
+            n.look.bottomColor=role==Npc.Role.KNIGHT?9:23;
+            n.look.hair=role==Npc.Role.CRAFTSMAN?10:role==Npc.Role.FISHERMAN?15:6;
+            if(!n.look.female)n.look.beard=role==Npc.Role.MINER?5:0;
+        }
         n.fitBody();
         n.yaw = 0;
         g.npcs.add(n);
@@ -204,13 +237,14 @@ public final class AiSystem {
         n.body = g.game.reserve(KIND_MOVER);
         n.agent = g.game.reserve(KIND_AGENT);
         c.moverCreate(n.body, n.x, n.y + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * rpg.actor.Body.CROUCH_HEIGHT);
-        c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, AGENT_DOORS | AGENT_EXTERNAL_TRAVERSAL | (n.skills.level(Skill.AGILITY) >= 5 ? AGENT_MANTLE : 0), (int) n.id * 7919);
+        c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, n.domain.flags | AGENT_DOORS | AGENT_EXTERNAL_TRAVERSAL | (n.skills.level(Skill.AGILITY) >= 5 ? AGENT_MANTLE : 0), (int) n.id * 7919);
         c.agentTarget(n.agent, g.player == null ? 0 : g.player.body, 0, 0, 0);
         c.moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, 0);   // a person gathers speed and sheds it (the walk has weight): no instant starts
         java.util.Arrays.fill(n.facts, -1);
         n.targetBody = -1;
         n.loaded = true;
         desire(n, A_IDLE);
+        if(g.chemistry!=null)g.chemistry.register(n);
     }
 
     public void despawnBody(Npc n) {
@@ -405,6 +439,11 @@ public final class AiSystem {
         // charmed (Charm Person): no lifted hand against the player while it lasts
         if (n.charmUntil > g.time && n.fightTarget == g.player.id) { n.fightTarget = 0; n.cs.cancel(); }
         if (n.charmUntil > g.time && n.hostileToPlayer) return null;
+        if (n.fightTarget != 0 && alliedWatch(n, g.actor(n.fightTarget))) { n.fightTarget = 0; n.hunt = null; n.cs.cancel(); }
+        if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 0.6) {
+            Actor recent = g.actor(n.cs.lastAttacker);
+            if (recent != null && recent.alive && !alliedWatch(n, recent) && !g.law.inCustody(recent) && !(law && g.law.settled(recent.id, n.cs.lastHurt))) { n.fightTarget = recent.id; return recent; }
+        }
         if (n.fightTarget != 0) {
             Actor t = g.actor(n.fightTarget);
             boolean unwelcome = t != null && !ZonePolicy.routineAllowed(n, t.x, t.z) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12);
@@ -420,7 +459,7 @@ public final class AiSystem {
         if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 12) {
             Actor t = g.actor(n.cs.lastAttacker);
             // a blow struck before the striker's arrest is answered by the sentence, not by the guard
-            if (t != null && t.alive && !g.law.inCustody(t) && !(law && g.law.settled(t.id, n.cs.lastHurt))) {
+            if (t != null && t.alive && !alliedWatch(n, t) && !g.law.inCustody(t) && !(law && g.law.settled(t.id, n.cs.lastHurt))) {
                 if (placed(n, t) || g.time - n.cs.lastHurt < 0.6) return t;    // a blow just taken: its striker is right there
                 if (n.combatant()) lose(n, t, "struck by someone unseen");
             }
@@ -441,7 +480,7 @@ public final class AiSystem {
             if (an.alive && an.loaded && an.dangerous() && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) {
             for (Actor a : g.actors()) {
-                if (a == n || !a.alive || a.dummy) continue;
+                if (a == n || !a.alive || a.dummy || alliedWatch(n,a)) continue;
                 if (g.law.bounty(a.id, n.homeJurisdiction) > 0 && ZonePolicy.routineAllowed(n, a.x, a.z) && !g.law.inCustody(a) && n.distTo(a) < (n.role == Npc.Role.LAWMAN ? 6 : 24) && canSee(n, a)) return a;
             }
         }
@@ -568,16 +607,23 @@ public final class AiSystem {
         return out;
     }
 
+    public static boolean alliedWatch(Actor a, Actor b) {
+        return a instanceof Npc n && b instanceof Npc m && watch(n) && watch(m) && n.homeJurisdiction.equals(m.homeJurisdiction);
+    }
+    private static boolean watch(Npc n) { return n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN; }
+
     /** Whether a may strike v though they share a team (an NPC fighting its chosen opponent). */
     public boolean hostile(Actor a, Actor v) {
+        if (alliedWatch(a, v)) return false;
         if (a instanceof Npc n && n.charmUntil > g.time && v == g.player || v instanceof Npc m && m.charmUntil > g.time && a == g.player) return false;
         return a instanceof Npc n && n.fightTarget == v.id || v instanceof Npc m && m.fightTarget == a.id;
     }
 
     /** Someone struck: combatants turn on the attacker, everyone else remembers it. */
     public void onAttacked(Actor victim, Actor attacker) {
+        if (alliedWatch(victim, attacker)) return;
         if (victim instanceof Npc n && n.alive) {
-            if (n.combatant() && n.fightTarget == 0) { n.fightTarget = attacker.id; n.nextThink = 0; }
+            if (n.combatant()) { n.fightTarget = attacker.id; n.nextThink = 0; }
             if (!n.combatant()) n.nextThink = 0;
         }
     }
@@ -650,8 +696,8 @@ public final class AiSystem {
      */
     public float bravery(Npc n) {
         float base = switch (n.role) {
-            case GUARD -> 0.9f; case LAWMAN -> 0.85f; case BANDIT, BRUTE -> 0.95f; case UNDERTAKER -> 0.7f; case WORKER, FARMER -> 0.6f;
-            case CARTER -> 0.55f; case THIEF -> 0.5f; case FENCE -> 0.45f; case VILLAGER, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR -> 0.4f; case QUEST_GIVER -> 0.35f; case CONTACT -> 0.3f; case MERCHANT -> 0.3f;
+            case GUARD, KNIGHT -> 0.9f; case LAWMAN -> 0.85f; case BANDIT, BRUTE -> 0.95f; case UNDERTAKER -> 0.7f; case WORKER, FARMER, MINER, CRAFTSMAN -> 0.6f;
+            case CARTER -> 0.55f; case THIEF -> 0.5f; case FENCE -> 0.45f; case VILLAGER, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN -> 0.4f; case QUEST_GIVER -> 0.35f; case CONTACT -> 0.3f; case MERCHANT -> 0.3f;
         };
         return Math.max(0, Math.min(1, base + ((n.id * 2654435761L >>> 20) % 21 - 10) / 100f));
     }

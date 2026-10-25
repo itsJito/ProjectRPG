@@ -19,7 +19,7 @@ public final class Skills {
     public long xp(Skill s) { return xp[s.ordinal()]; }
     public int level(Skill s) { return XpTable.levelFor(xp[s.ordinal()]); }
 
-    /** Adds XP (capped at the level-100 total; the cap is the GDD's post-100 rule left open, here XP stops at 6M). */
+    /** Adds XP (capped at the level-100 total; the cap is the GDD's post-100 rule left open, here XP stops at 14,391,160). */
     public Award award(Skill s, long amount) {
         if (amount < 0) throw new IllegalArgumentException("negative XP");
         int i = s.ordinal();

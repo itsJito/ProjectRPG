@@ -186,8 +186,36 @@ final class AnimalMind {
     static float spacing(Animal a) { return a.species.group == Species.Group.PACK ? 7 : a.species.group == Species.Group.FAMILY ? 6 : 5 + a.species.w * 2; }
 
     // ------------------------------------------------------------------ acting
+    private boolean edible(Animal animal) {
+        Actor body=g.actor(animal.other);
+        return body!=null && !body.alive && body.carriedBy==0
+                && (body instanceof Animal carcass ? carcass.carcass() && !carcass.butchered : body instanceof Npc npc && npc.corpse!=0);
+    }
+    private astratto.ai.TaskNetwork<Animal> needsNetwork() {
+        return new astratto.ai.TaskNetwork<>(List.of(
+            new astratto.ai.TaskNetwork.Method<>("approach and feed", a->a.goal==Goal.FEED && edible(a), a->{
+                Actor food=g.actor(a.other);
+                return astratto.ai.Behavior.sequence(List.of(
+                    animal->sys.goTo(animal,food.x,food.z,false,animal.radius+0.6f)?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING,
+                    animal->{animal.headDown=true;animal.hunger=Math.max(0,animal.hunger-animal.needStep/12f);sys.eat(animal,food,animal.needStep);
+                        return animal.hunger<0.02f?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING;}
+                ));
+            }),
+            new astratto.ai.TaskNetwork.Method<>("approach a real bank and drink",a->a.goal==Goal.DRINK && sys.waterFor(a)!=null,a->{
+                float[] water=sys.waterFor(a);
+                return astratto.ai.Behavior.sequence(List.of(
+                    animal->sys.goTo(animal,water[0],water[1],false,1.1f)?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING,
+                    animal->{animal.headDown=true;animal.wantYaw=water.length>2?water[2]:Float.NaN;animal.thirst=Math.max(0,animal.thirst-animal.needStep/6f);
+                        if(animal.thirst<=0.02f){animal.nextThink=0;return astratto.ai.Behavior.Status.SUCCESS;}return astratto.ai.Behavior.Status.RUNNING;}
+                ));
+            })
+        ));
+    }
+
     void act(Animal a, float dt, float dm) {
         Species sp = a.species;
+        a.needStep=dm;
+        if(a.needs!=null && a.goal!=Goal.FEED && a.goal!=Goal.DRINK)a.needs.cancel();
         boolean resting = a.goal == Goal.REST && a.atRest;
         // needs, per game minute: hunger and thirst build; grazing, drinking and resting meet them
         float hungerRate = sp.diet == Species.Diet.HUNTER ? 1 / 520f : 1 / 380f;
@@ -223,20 +251,11 @@ final class AnimalMind {
                 else sys.goTo(a, a.x + (a.x - a.threatX) * 2, a.z + (a.z - a.threatZ) * 2, true, 1);
             }
             case DEFEND, HUNT -> engage(a, o, dt);
-            case FEED -> {
-                if (o == null || o.alive || o.carriedBy!=0 || o instanceof Animal animal && (!animal.carcass() || animal.butchered) || o instanceof Npc npc && npc.corpse==0) { a.nextThink = 0; sys.desire(a, A_HOLD); break; }
-                if (sys.goTo(a, o.x, o.z, false, a.radius + 0.6f)) {
-                    a.headDown = true;
-                    a.hunger = Math.max(0, a.hunger - dm / 12f);
-                    sys.eat(a,o,dm);
-                }
+            case FEED, DRINK -> {
+                if(a.needs==null)a.needs=needsNetwork();
+                if(a.needs.tick(a)==astratto.ai.Behavior.Status.FAILURE) {sys.desire(a,A_HOLD);a.nextThink=0;}
             }
             case GRAZE -> graze(a, dm);
-            case DRINK -> {
-                float[] w = sys.waterFor(a);
-                if (w == null) { a.thirst = 0; break; }
-                if (sys.goTo(a, w[0], w[1], false, 1.1f)) { a.headDown = true; a.wantYaw = w.length > 2 ? w[2] : Float.NaN; a.thirst = Math.max(0, a.thirst - dm / 6f); if (a.thirst <= 0.02f) a.nextThink = 0; }
-            }
             case REST -> {
                 float[] r = sys.restFor(a);
                 if (r == null || sys.goTo(a, r[0] + a.restOx, r[1] + a.restOz, false, 1.3f)) { sys.desire(a, A_HOLD); a.atRest = true; }

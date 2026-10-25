@@ -129,7 +129,8 @@ public final class Reactions {
             }
             boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND;
             boolean tooLong = g.time - n.reactSince > 14;
-            if (back || tooLong || rd.outcome == OUTCOME_STUCK) {
+            boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
+            if (!rolling && (back || tooLong || rd.outcome == OUTCOME_STUCK)) {
                 // handed back to the figure, standing where the feet are, facing the way the trunk faces - but never
                 // inside someone else (the body may have reeled into them): stepped out to arm's length
                 float sx = rd.standX, sz = rd.standZ;

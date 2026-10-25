@@ -63,10 +63,11 @@ void main() {
         if (uRain > 0.0 && N.y > 0.5 && sky > 0.8) {
             float puddle = smoothstep(0.42, 0.62, texture(uNoise, vWorld.xz / 23.0).r);
             float wet = uRain * mix(0.45, 1.0, puddle);
-            rough = mix(rough, 0.06, wet);
+            float wetFloor = lm.a < 0.99 ? lm.a : 0.06;
+            rough = mix(rough, min(rough, wetFloor), wet);
             col *= 1.0 - 0.35 * wet;
             // 1.0: while it is raining the puddles are struck: rings open on them (two layers of cells, out of step)
-            if (uWeather.y > 0.02 && puddle > 0.25) {
+            if (uWeather.y > 0.02 && puddle > 0.25 && lm.a < 0.65) {
                 vec2 rn = vec2(0.0);
                 for (int k = 0; k < 2; k++) {
                     vec2 rp = vWorld.xz * (k == 0 ? 1.7 : 2.6) + float(k) * 7.3;

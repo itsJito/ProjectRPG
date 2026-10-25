@@ -112,7 +112,7 @@ public final class AnimalRagdoll {
         long b = g.game.reserve(KIND_RIGID);
         // (knocked down, the animal's own mover is still there: the pieces must not be shoved by it)
         g.game.commands().rigidCreate(b, SHAPE_BOX, RIGID_DEBRIS | (r.knockdown ? RIGID_NO_MOVERS : 0), hx, hy, hz, Math.max(0.05f, mass), x, y, z, qw*halfCos, qy*halfSin, qy*halfCos, qw*halfSin,
-                a.vx, 0, a.vz, 0, 0, 0, 0.8f, 0.02f, 0, null);
+                a.vx, 0, a.vz, 0, 0, 0, 0.8f, 0.02f, 0.12f, a.alive ? 0.4f : 2.8f, 0, 0, 0, 0, null);
         r.pieces.add(new Piece(b, md, gp));
         return b;
     }

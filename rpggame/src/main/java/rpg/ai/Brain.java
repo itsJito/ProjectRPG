@@ -31,8 +31,9 @@ public final class Brain {
     private final Rpg g;
     private final AiSystem ai;
     private final CombatTactics tactics;
+    private final Jobs jobs;
 
-    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; this.tactics = new CombatTactics(g); }
+    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; this.tactics = new CombatTactics(g); this.jobs=new Jobs(g,this); }
 
     record Score(Goal goal, float value, String reason) {}
 
@@ -54,6 +55,8 @@ public final class Brain {
         // threats and duties of force
         Actor threat = ai.threatFor(n);
         ai.keepHunt(n);
+        Actor rooftop=g.law.roofTarget(n);
+        if(threat==null && rooftop!=null){n.watchTarget=rooftop.id;s.add(new Score(Goal.WATCH,0.72f,"ordering a trespasser down from a roof"));}
         // a foe lost from sight, or the culprit behind something found: search where they were last placed
         if (n.hunt != null && threat == null) {
             Hunt h = n.hunt;
@@ -153,7 +156,7 @@ public final class Brain {
         // duties
         switch (n.role) {
             case GUARD -> s.add(new Score(Goal.PATROL, 0.5f, "on patrol duty"));
-            case WORKER, VILLAGER, CARTER, MERCHANT, LAWMAN, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR -> {
+            case WORKER, VILLAGER, CARTER, MERCHANT, LAWMAN, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
                 boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
                 s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : "day's work: " + workText(n)));
@@ -205,6 +208,7 @@ public final class Brain {
     }
 
     private String workText(Npc n) {
+        if(n.profession!=null)return n.profession.title+" duties";
         return switch (n.role) {
             case HUNTER -> "hunt permitted small game, butcher it and sell the actual yield"; case HEALER -> "gather herbs and tend the wounded"; case BEGGAR -> "seek a meal and shelter"; case PRIEST -> "tend the graveyard"; case SCHOLAR -> "compare accounts with the townspeople";
             case WORKER -> "cut logs, sell them to Store A"; case VILLAGER -> "pick berries, sell them to Store A"; case CARTER -> "carry Store A's surplus to Store B";
@@ -275,9 +279,9 @@ public final class Brain {
                 Actor p = g.actor(n.watchTarget);
                 if (p == null || !p.alive || !ai.canSee(n, p)) { ai.desire(n, AiSystem.A_HOLD); n.nextThink = 0; break; }
                 n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
-                if (n.distTo(p) > 5) goTo(n, p.x, p.z, false, 4.5f); else ai.desire(n, AiSystem.A_HOLD);
+                if (n.distTo(p) > 5 && !g.law.onRoof(p)) goTo(n, p.x, p.z, false, 4.5f); else ai.desire(n, AiSystem.A_HOLD);
                 if (n.speech == null && g.time - n.lastDialogAt > 8) {
-                    g.ai.say(n, p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?" : "I've heard about you. Don't try anything.");
+                    g.ai.say(n, g.law.onRoof(p) ? "Get down from that roof, now." : p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?" : "I've heard about you. Don't try anything.");
                     n.lastDialogAt = g.time;
                 }
                 n.lastOutcome = "watching " + p.name + (p.bloodied >= 0.25f ? "; visible blood, asking questions" : "");
@@ -353,7 +357,11 @@ public final class Brain {
             if (!collector && (c instanceof rpg.objects.Corpse corpse ? corpse.empty(g) : c.contents.isEmpty())) continue;
             float d = (float) Math.hypot(c.x - n.x, c.z - n.z);
             if (undertaker) {
-                if(!c.kind.equals("grave") || c.secured || g.time<c.expiresAt || c.heldBy!=0 && c.heldBy!=n.id)continue;
+                if (c.heldBy != 0 && c.heldBy != n.id) continue;
+                if (c instanceof rpg.objects.Corpse corpse) {
+                    if (corpse.npc(g) == null || corpse.delivered || !DevMap.jurisdiction(c.x,c.z).equals(n.homeJurisdiction) && d > 5) continue;
+                    if (c.heldBy == 0 && (d > 24 || !g.vox.sight(n.x,n.eyeY(),n.z,c.x,c.y+0.3f,c.z))) continue;
+                } else if (!c.kind.equals("grave") || c.secured || g.time < c.expiresAt) continue;
             } else if (guard) {
                 if ((c.heldBy != 0 && c.heldBy != n.id) || !c.kind.equals("grave") && !(c instanceof rpg.objects.Corpse) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction) && c.heldBy != n.id) continue;
                 if (c instanceof rpg.objects.Corpse corpse) {
@@ -394,7 +402,9 @@ public final class Brain {
         var plot = g.graveyards.nearest(n);
         if (plot == null) { g.carrying.drop(n, false); c.heldBy = 0; n.nextThink = g.time + 5; return; }
         if (g.carrying.busy(n) && !g.carrying.ready(n)) { ai.desire(n, AiSystem.A_HOLD); return; }
-        if (goTo(n, plot.x(), plot.z(), false, 1.1f)) {
+        float[] graveSpot = g.graveyards.destination(plot);
+        if (graveSpot == null) { ai.desire(n, AiSystem.A_HOLD); return; }
+        if (goTo(n, graveSpot[0], graveSpot[1], false, 1.1f)) {
             if (!g.graveyards.bury(c, n, plot)) { g.carrying.drop(n, false); c.heldBy = 0; n.collectAgain = g.time + 15; }
             n.lastOutcome = "buried the dead and protected their belongings"; n.nextThink = 0;
         }
@@ -454,7 +464,7 @@ public final class Brain {
      */
     boolean goTo(Npc n, float x, float z, boolean run, float within) {
         if (!ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
-        if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; return true; }
+        if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
         if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z); n.legAt = 0; n.legsX = x; n.legsZ = z; }
         float tx = x, tz = z;
         while (n.legAt < n.legs.length) {
@@ -611,8 +621,8 @@ public final class Brain {
                     if (!v.hasSpot) { v.stage(Investigation.Stage.DONE, g.time); return; }
                 }
                 if (goTo(n, v.px, v.pz, false, 0.9f) || t > 14) {
-                    if (n.arrivedAt < v.stageAt) n.arrivedAt = g.time;
-                    n.wantYaw = n.yaw + (float) Math.sin((g.time - n.arrivedAt) * 2.4) * 1.2f;
+                    if (n.arrivedAt < v.stageAt) { n.arrivedAt = g.time; v.lookYaw=n.yaw; }
+                    n.wantYaw = v.lookYaw + (float) Math.sin((g.time - n.arrivedAt) * 2.4) * 0.65f;
                     if (g.time - n.arrivedAt > 1.4 || t > 14) { v.checked++; v.hasSpot = false; v.stage(v.checked >= (night ? 3 : 2) ? Investigation.Stage.DONE : Investigation.Stage.SEARCHING, g.time); }
                 }
             }
@@ -674,9 +684,6 @@ public final class Brain {
      * sight of the spot, with cover round it, some way off from it.
      */
     private float[] hideSpot(Npc n, float fx, float fz) {
-        double hour = g.state.hourOfDay();
-        boolean night = hour >= 21 || hour < 5.5;
-        if ((night || n.fearOf == g.player.id) && n.homeX != 0 && Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 40) return new float[]{n.homeX, n.homeZ};
         java.util.Random rnd = new java.util.Random(n.id * 977 + (long) g.time);
         float bestScore = -1e9f, bx = n.x, bz = n.z;
         for (int i = 0; i < 24; i++) {
@@ -774,6 +781,8 @@ public final class Brain {
     private void search(Npc n) {
         Hunt h = n.hunt;
         if (h == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = Math.min(n.nextThink, g.time + 0.2); return; }
+        if (g.gore != null) g.gore.followTrail(n);
+        if (n.stuck && g.time-h.startedAt>3) { h.reachedLkp=true;h.hasPoint=false; }
         if (!h.reachedLkp) {
             float lead = (float) Math.min(2.5, Math.hypot(h.vx, h.vz) * 0.7);
             float sp = (float) Math.hypot(h.vx, h.vz);
@@ -782,23 +791,21 @@ public final class Brain {
             if (Math.hypot(lx - n.x, lz - n.z) < 5) n.wantYaw = (float) Math.atan2(-(lx - n.x), -(lz - n.z));
             if (goTo(n, lx, lz, true, 1.3f)) {
                 h.reachedLkp = true;
-                h.lookUntil = g.time + 1.6;
+                h.lookYaw = n.yaw; h.lookUntil = g.time + 1.6;
                 n.lastOutcome = "reached the last known location; nobody there";
             }
             return;
         }
         if (g.time < h.lookUntil) {
             ai.desire(n, AiSystem.A_HOLD);
-            float base = h.hasPoint ? n.yaw : (float) Math.atan2(-h.vx, -h.vz);
-            n.wantYaw = n.yaw + (float) Math.sin((h.lookUntil - g.time) * 2.6) * 1.2f;
-            if (Float.isNaN(base)) n.wantYaw = n.yaw;
+            n.wantYaw = h.lookYaw + (float) Math.sin((h.lookUntil - g.time) * 2.1) * 0.65f;
             return;
         }
-        if (!h.hasPoint && !pickSearchSpot(n, h)) { h.lookUntil = g.time + 1.0; return; }
+        if (!h.hasPoint && !pickSearchSpot(n, h)) { h.lookYaw = n.yaw; h.lookUntil = g.time + 1.0; return; }
         if (goTo(n, h.px, h.pz, false, 0.9f)) {
             h.hasPoint = false;
             h.checked++;
-            h.lookUntil = g.time + 1.1 + (n.id % 3) * 0.3;
+            h.lookYaw = n.yaw; h.lookUntil = g.time + 1.1 + (n.id % 3) * 0.3;
             n.lastOutcome = "checked a spot (" + h.checked + "); nobody";
         }
     }
@@ -842,7 +849,10 @@ public final class Brain {
         return true;
     }
 
+    public void resetJob(Npc n) { if(n.job!=null)n.job.cancel();n.job=null; }
+
     private void work(Npc n,float dt) {
+        if(n.profession!=null && n.summonOwner==0) { jobs.tick(n,dt); return; }
         if(n.summonOwner!=0) {
             Actor owner=g.actor(n.summonOwner);if(owner==null)return;
             float side=(n.id%2==0?1:-1)*1.5f;
@@ -964,8 +974,12 @@ public final class Brain {
         }
     }
 
-    private void huntSmallGame(Npc hunter,float dt) {
+    void huntSmallGame(Npc hunter,float dt) {
         if(g.interact.of(hunter)!=null) { ai.desire(hunter,AiSystem.A_HOLD);return; }
+        if(hunter.main()==null || hunter.main().family!=ItemDef.Family.BOW) {
+            for(var grid:hunter.grids())for(ItemStack item:grid.stacks())if(item.def.family==ItemDef.Family.BOW) {g.items.equipFirst(hunter,item.def,ItemDef.Slot.MAIN,g.state.newRequestId());break;}
+            if(hunter.main()==null || hunter.main().family!=ItemDef.Family.BOW){gatherAndSell(hunter,Items.BERRIES,"berry_bush");return;}
+        }
         if(hunter.has(Items.RAW_MEAT,1)) { gatherAndSell(hunter,Items.RAW_MEAT,"no gathering node");return; }
         rpg.animal.Animal quarry=null;float nearest=20;
         for(var animal:g.animals.all()) {
@@ -1139,7 +1153,12 @@ public final class Brain {
         }
         n.wantYaw = (float) Math.atan2(-(t.x - n.x), -(t.z - n.z));
         boolean facing = Math.abs(Actor.wrap(n.wantYaw - n.yaw)) < 0.45f;   // a blow is thrown only at what the body faces
-        n.pitch = (float) Math.atan2(t.chestY() - n.chestY(), Math.max(0.3f, d));
+        float targetY = t.chestY();
+        if (t.reacting && t.ragdoll != 0) {
+            var body = g.lastBodies.ragdoll(t.ragdoll);
+            if (body != null) targetY = body.comY;
+        }
+        n.pitch = (float) Math.atan2(targetY - n.chestY(), Math.max(0.3f, d));
         ai.target(n, t.body);
         // the law talks before it fights: a wanted player is first told to halt, unless they resist or struck first
         if (t == g.player && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && g.law.bounty(t.id, n.homeJurisdiction) > 0
@@ -1153,6 +1172,14 @@ public final class Brain {
         }
         if (d > 3.5f && tactics.move(n, t, true)) return;
         ItemDef main = n.main();
+        if (main != null && (main.family == ItemDef.Family.BOW || main.family == ItemDef.Family.CROSSBOW) && n.eq.get(ItemDef.Slot.AMMO) == null) {
+            ItemStack weapon = n.eq.get(ItemDef.Slot.MAIN);
+            if (n.canStore(weapon)) { n.eq.set(ItemDef.Slot.MAIN, null); n.store(weapon); }
+            else { n.eq.set(ItemDef.Slot.MAIN, null); g.objects.drop(weapon, n.x, n.y + 0.1f, n.z); }
+            for (var grid : n.grids()) for (ItemStack spare : grid.stacks()) if (n.main() == null && spare.def.equippable() && spare.def.slot == ItemDef.Slot.MAIN && spare.def.reach > 0 && spare.def.family != ItemDef.Family.BOW && spare.def.family != ItemDef.Family.CROSSBOW)
+                g.items.equipFirst(n, spare.def, ItemDef.Slot.MAIN, g.state.newRequestId());
+            main = n.main(); n.cs.draw = 0; n.cs.aim = 0;
+        }
         boolean archer = main != null && (main.family == ItemDef.Family.BOW || main.family == ItemDef.Family.CROSSBOW);
         float reach = main == null || archer ? 0.6f : main.reach;
         boolean hasGuard = main == null && n.off() == null || n.off() != null && n.off().family == ItemDef.Family.SHIELD || main != null && main.guard > 0 && !archer;
@@ -1163,6 +1190,7 @@ public final class Brain {
         boolean opening = t.cs.phase == Actor.Combat.Phase.RECOVER || t.cs.staggered > 0;
         String choice;
         if (archer) {
+            n.pitch=(float)Math.atan2(targetY-n.eyeY(),Math.max(0.3f,d));
             if (d < 5) { choice = "back off to shooting range"; backOff(n, t, 9); }
             else if (n.cs.draw > 0 || (!n.cs.busy() && g.vox.sight(n.x, n.eyeY(), n.z, t.x, t.chestY(), t.z))) {
                 choice = "draw and shoot";

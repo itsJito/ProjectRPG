@@ -538,7 +538,11 @@ public final class Gore {
     private boolean bodyKnown(long id) { for (Evidence e : evidence) if (e.kind == Kind.BODY && e.source == id) return true; return false; }
 
     /** A body is revived (a bandit back at camp): its wounds and lost parts heal. */
-    public void healed(Actor a) { wounds.remove(a.id); a.blood.wash(); a.bloodied = 0; }
+    public void healed(Actor a) {
+        wounds.remove(a.id); a.blood.wash(); a.bloodied = 0;
+        limbs.removeIf(limb -> { if (limb.owner != a.id) return false; g.game.commands().release(limb.body); return true; });
+        evidence.removeIf(e -> e.source == a.id && e.kind == Kind.LIMB);
+    }
 
     // ------------------------------------------------------------------ finding it
     /**
@@ -546,7 +550,7 @@ public final class Gore {
      * clear line to it, and light enough to make it out (a body is easier to see than a stain); each thing once.
      */
     public void perceive(Npc n) {
-        if (!n.alive || !n.loaded || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE) return;
+        if (!n.alive || !n.loaded) return;
         Set<Long> seen = noticed.computeIfAbsent(n.id, k -> new HashSet<>());
         float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
         Evidence best = null;
@@ -564,6 +568,8 @@ public final class Gore {
         }
         if (best == null) return;
         found++;
+        if (g.carrying.busy(n) || n.goal == rpg.ai.Brain.Goal.COLLECT) return;
+        if (n.hunt != null && (n.hunt.source == best.source || n.hunt.target != 0)) return;
         react(n, best);
     }
 
@@ -578,8 +584,30 @@ public final class Gore {
         return lawHurt || v == g.player || v instanceof rpg.animal.Animal || v instanceof Npc o && o.hostileToPlayer && (o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE);
     }
 
+    /** Follow only a fresh visible stain belonging to the searched body/person; provenance never identifies its attacker. */
+    public void followTrail(Npc n) {
+        Hunt hunt=n.hunt;if(hunt==null)return;
+        long source=hunt.target!=0?hunt.target:hunt.source;if(source==0)return;
+        Evidence clue=null;
+        for(Evidence stain:evidence)if(stain.kind==Kind.BLOOD && stain.source==source && stain.id>hunt.lastTrail && g.time-stain.at<20
+                && Math.hypot(stain.x-n.x,stain.z-n.z)<8 && g.vox.sight(n.x,n.eyeY(),n.z,stain.x,stain.y+0.1f,stain.z)
+                && (clue==null || stain.id>clue.id))clue=stain;
+        if(clue!=null) { hunt.lastTrail=clue.id;hunt.clue(clue.x,clue.z,0,0,g.time);n.lastOutcome="following a visible blood trail"; }
+    }
+
     private void react(Npc n, Evidence e) {
         String jur = DevMap.jurisdiction(e.x, e.z);
+        for(var memory:n.memories) if(memory.kind.equals("BEAST_ATTACK") && memory.victim==e.source) {
+            g.ai.say(n,"An animal did this. Keep away from its trail.");
+            if(n.combatant() && n.hunt==null) { n.hunt=new Hunt(memory.subject,"witnessed a beast attack",e.x,e.z,g.time,40);n.nextThink=0; }
+            return;
+        }
+        if(n.role==Npc.Role.BANDIT || n.role==Npc.Role.BRUTE) {
+            if(g.actor(e.source) instanceof Npc victim && victim.team==n.team && n.hunt==null) {
+                n.hunt=new Hunt(0,"found a fallen ally",e.x,e.z,g.time,40);n.hunt.source=e.source;n.nextThink=0;g.ai.say(n,"Someone got one of ours. Spread out.");
+            }
+            return;
+        }
         String what = e.kind == Kind.BODY ? "a body" : e.kind == Kind.LIMB ? "a severed limb" : "blood";
         g.state.commit("EvidenceFound", n.id, e.source, jur, 0, what + String.format(" at (%.1f, %.1f)", e.x, e.z));
         // an outlaw's end is remarked on, not investigated
@@ -589,6 +617,7 @@ public final class Gore {
             // the law goes to look, and searches for whoever did it
             if (n.hunt == null || n.hunt.target == 0) {
                 Hunt h = new Hunt(0, "found " + what, e.x, e.z, g.time, e.kind == Kind.BLOOD ? 35 : 60);
+                h.source = e.source;
                 h.clueAt = g.time - (e.kind == Kind.BLOOD ? Math.min(20, g.time - e.at) : 0);
                 n.hunt = h;
                 n.nextThink = 0;

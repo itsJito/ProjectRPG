@@ -368,18 +368,23 @@ public final class PlayerController {
     private static float approach(float v, float to, float step) { return Math.abs(to - v) <= step ? to : v + Math.signum(to - v) * step; }
 
     /** First person at the eyes (as the head carries them through each step); third person behind the right shoulder, pulled in front of walls. Then the aim. */
-    private void placeCamera(Player p) {
+    private void placeCamera(Player p) { placeCamera(p,true); }
+    public void syncCamera() {
+        if(g.death.active)g.death.camera(this);else placeCamera(g.player,false);
+    }
+    private void placeCamera(Player p,boolean focus) {
         float cp = (float) Math.cos(camPitch), sp = (float) Math.sin(camPitch);
         fx = (float) -Math.sin(camYaw) * cp; fy = sp; fz = (float) -Math.cos(camYaw) * cp;
         float ex = p.x, ey = p.alive ? p.eyeY() : p.y + 0.5f, ez = p.z;
         if (p.firstPerson && !p.reacting && p.alive && p.headValid) {
             // the eyes where the rig last put them: the camera rides the head's bob and sway, not a fixed height
-            float vx = p.headX + fx * 0.04f - p.x, vz = p.headZ + fz * 0.04f - p.z;
-            float distance = (float) Math.hypot(vx, vz), limit = Math.max(0.02f, p.radius - 0.1f);
+            float turn = Actor.wrap(p.yaw - p.headYaw), co = (float) Math.cos(turn), si = (float) Math.sin(turn);
+            float vx = p.headX * co + p.headZ * si + fx * 0.04f, vz = -p.headX * si + p.headZ * co + fz * 0.04f;
+            float distance = (float) Math.hypot(vx, vz), limit = Math.max(0.42f, p.radius - 0.08f);
             float k = distance > limit ? limit / distance : 1;
-            cx = p.x + vx * k; cy = Math.max(p.y+0.15f,Math.min(p.headY,p.y+p.height*(p.crouched?rpg.actor.Body.CROUCH_HEIGHT:1)-0.12f)); cz = p.z + vz * k;
+            cx = p.x + vx * k; cy = Math.max(p.y+0.15f,Math.min(p.y+p.headY,p.y+p.height*(p.crouched?rpg.actor.Body.CROUCH_HEIGHT:1)-0.12f)); cz = p.z + vz * k;
             var wall = g.vox.ray(p.x, cy, p.z, distance > 0 ? vx / distance : 0, 0, distance > 0 ? vz / distance : -1, distance + 0.08f, false);
-            if (wall.hit && wall.dist < distance + 0.08f) { k = Math.max(0, wall.dist - 0.1f) / Math.max(0.001f, distance); cx = p.x + vx * k; cz = p.z + vz * k; }
+            if (wall.hit && wall.dist < distance + 0.08f) { k = Math.min(k, Math.max(0, wall.dist - 0.1f) / Math.max(0.001f, distance)); cx = p.x + vx * k; cz = p.z + vz * k; }
         } else if (p.firstPerson && !p.reacting) { cx = ex; cy = ey; cz = ez; }
         else {
             float rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
@@ -397,7 +402,7 @@ public final class PlayerController {
         if (Math.sqrt(ax * ax + ay * ay + az * az) < 1.5f) { ax = fx; ay = fy; az = fz; }
         aimYaw = (float) Math.atan2(-ax, -az);
         aimPitch = (float) Math.atan2(ay, Math.hypot(ax, az));
-        g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
+        if(focus)g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
     }
 
     /** Menus and respawns must not turn an old held button into a new attack on release. */

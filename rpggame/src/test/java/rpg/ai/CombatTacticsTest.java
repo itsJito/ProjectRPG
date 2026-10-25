@@ -83,7 +83,12 @@ class CombatTacticsTest {
         assertArrayEquals(skills, guard.skills.raw());
     }
     @Test void flankingNeedsAnAllyTheNpcCanActuallySee() {
-        Npc ally = (Npc) g.actor(Ids.BANDIT_1); g.ai.reload(ally);
+        Npc ally = (Npc) g.actor(Ids.BOBWIN); g.ai.reload(ally);
+        ally.skills.setLevel(rpg.skill.Skill.HEALTH,100);ally.restore();ally.eq.clear();
+        for(var slot:new ItemDef.Slot[]{ItemDef.Slot.BODY,ItemDef.Slot.LEGS,ItemDef.Slot.HEAD,ItemDef.Slot.OFF}) {
+            String piece=switch(slot){case BODY->"body";case LEGS->"legs";case HEAD->"helm";default->"shield";};
+            ally.eq.set(slot,new ItemStack(Items.get("steel_"+piece),1));
+        }
         ally.team = guard.team; ally.fightTarget = g.player.id;
         g.teleport(ally, 62.5f, DevMap.FLOOR, 61.5f);
         ally.spawnX = ally.x; ally.spawnZ = ally.z; ally.nextThink = Double.MAX_VALUE; ally.goal = Brain.Goal.IDLE;

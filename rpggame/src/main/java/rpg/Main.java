@@ -387,6 +387,7 @@ public final class Main {
     static float frameDt(long last) { return Math.min(0.05f, Math.max(1e-4f, (System.nanoTime() - last) / 1e9f)); }
 
     static void mouse(Ui2D ui, Input in) {
+        ui.consumed = false;
         ui.mx = (float) in.mouseX; ui.my = (float) in.mouseY;
         ui.click = in.mousePressed(GLFW_MOUSE_BUTTON_LEFT);
         ui.rclick = in.mousePressed(GLFW_MOUSE_BUTTON_RIGHT);

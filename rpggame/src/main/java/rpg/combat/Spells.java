@@ -45,7 +45,7 @@ public final class Spells {
         VOLTCHAIN("Voltchain", Book.STANDARD, 30, 7, 24, 36, 24, false, Element.ELECTRIC, "An electric bolt that shocks touching wet or conductive targets."),
         FORCEWAVE("Forcewave", Book.STANDARD, 40, 8, 0, 0, 28, true, Element.AIR, "A short concussive cone that interrupts and pushes enemies back."),
         VITALMEND("Vitalmend", Book.LUNAR, 60, 12, 0, 0, 38, true, Element.NONE, "Restores health and closes bleeding wounds on yourself or a visible ally."),
-        MORPHBEAST("Morphbeast", Book.ARCANE, 20, 6, 0, 0, 16, true, Element.NONE, "Turns a living target into a harmless sheep for eight seconds; identity and belongings remain."),
+        MORPHBEAST("Morphbeast", Book.ARCANE, 20, 6, 0, 0, 16, true, Element.NONE, "Turns a living target into a harmless sheep for eight seconds (players: 2.5 seconds); identity and belongings remain."),
         CHRONOSLOW("Chronoslow", Book.ARCANE, 40, 8, 0, 0, 28, true, Element.NONE, "Slows hostile movement and combat actions in a small visible area for six seconds."),
         NECROCALL("Necrocall", Book.ANCIENTS, 30, 9, 0, 0, 24, true, Element.BLOOD, "Calls one temporary unarmed undead ally. At most two can serve one caster."),
         SPELLDAGGERS("Spelldaggers", Book.ANCIENTS, 40, 10, 12, 28, 28, false, Element.NONE, "Conjures three spectral blades that steer gently toward a visible foe."),

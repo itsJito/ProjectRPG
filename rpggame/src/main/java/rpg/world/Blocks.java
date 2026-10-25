@@ -434,7 +434,7 @@ public final class Blocks {
     }
 
     /**
-     * Per texture layer: roughness, metalness, emission, 255. Each surface answers light as its material does: water and
+     * Per texture layer: roughness, metalness, emission, minimum wet roughness (255 keeps the engine default). Each surface answers light as its material does: water and
      * glass mirror-smooth, metal metallic (its reflection tinted by its own colour), worn and glazed stone and planed wood
      * with a soft sheen, earth, plaster and cloth-dull leaves and grass rough.
      */
@@ -454,6 +454,8 @@ public final class Blocks {
         for (Object[] t : table) { int l = (Integer) t[0]; m[l * 4] = (byte) rough((Float) t[1]); m[l * 4 + 1] = (byte) clamp((Float) t[2] * 255); }
         m[L_LAMP * 4 + 2] = (byte) 255;
         m[L_FURNACE * 4 + 2] = (byte) 120;
+        for (int l = 0; l < LAYERS; l++) m[l * 4 + 3] = (byte) rough((m[l * 4] & 255) / 255f * 0.55f);
+        for (int l : new int[]{L_GRASS, L_GRASS_SIDE, L_DIRT, L_SAND, L_BARE, L_LEAVES, L_OAK_LEAVES, L_WILLOW_LEAVES}) m[l * 4 + 3] = (byte) rough(0.8f);
         return m;
     }
 
