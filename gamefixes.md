@@ -108,3 +108,15 @@ RPGGAME ultimate doc — Version 0.1.3 implementation update
 **THINGS TO BE REMOVED:**
 - [Removed] Serial NMake runtime fallback, accumulated search yaw and stale head-camera coordinates.
 - [Removed] Automatic stolen-goods recovery and duplicate corpse representations after burial.
+
+
+RPGGAME ultimate doc — Crafting supply follow-up
+
+**BUGS TO BE FIXED:**
+- [Fixed] Craftsmen buy missing ingredients instead of repeatedly selecting gathering work for which they have no tool.
+- [Fixed] Blacksmiths and Armorers can refine actual ore into their own forge inputs.
+- [Fixed] Tailors retain woven cloth for garments, and Carpenters reserve planks for eligible unfinished joinery.
+- [Fixed] Finished equipment is delivered without requiring three large items to fit in the worker's inventory.
+
+**THINGS TO NOTE**
+- These transactions use real market stock, tools and materials. NPC skill XP remains unchanged. The roster remains five new residents with all 25 occupational profiles available.

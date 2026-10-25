@@ -392,3 +392,25 @@ Five new residents bring real working trades to the devmap. Crime, custody and r
 ## Known Issues
 - The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still needs measurement on that hardware. Software-rendered cloud screenshots are visual checks, not a hardware performance result.
 - River, coastal and offshore professions require corresponding authored water resources and safe travel access. The devmap contains lake fishing; this update does not add an ocean or a ship.
+
+---
+
+# Patch Notes Version 0.1.4: Working Supply Chains
+
+Craftsmen now keep the materials their work needs and use the market for supplies outside their own trade.
+
+## Changes
+- Blacksmiths and Armorers can smelt actual ore into bars for their forge work.
+- Finished crafted goods can be delivered one at a time, so large equipment does not require an impossible three-item batch.
+
+## Fixed Bugs
+- Fixed craftsmen repeatedly choosing gathering work without the necessary tool instead of buying available ingredients.
+- Fixed Tailors selling woven cloth before making garments.
+- Fixed Carpenters selling planks needed for unfinished, eligible joinery projects.
+
+## Technical Changes
+- Removed the unused cross-profession gathering selector.
+- Added actual-world checks for ingredient purchasing, ore consumption, garment production and owned furniture construction, while verifying that NPC XP stays fixed.
+
+## Known Issues
+- The hardware-validation and authored maritime-content limits described in Version 0.1.3 still apply.

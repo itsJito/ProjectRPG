@@ -83,8 +83,15 @@ final class Jobs {
         return best;
     }
     private ItemDef batch(Npc n) {
-        for(ItemStack item:n.inv.stacks()) if(n.count(item.def)>=3 && !item.stolen && product(n.profession,item.def))return item.def;
+        int minimum=n.profession.family==Npc.Role.CRAFTSMAN?1:3;
+        boolean joinery=n.profession==Profession.CARPENTER && joineryPending(n);
+        for(ItemStack item:n.inv.stacks())if(n.count(item.def)>=minimum && !item.stolen && product(n.profession,item.def)
+                && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery)return item.def;
         return null;
+    }
+    private boolean joineryPending(Npc n) {
+        for(var recipe:Recipes.ALL)if(recipe.furniture!=null && accepts(n,recipe) && station(recipe) instanceof rpg.objects.BuildSpot plot && !plot.built.getOrDefault(recipe.furniture,false))return true;
+        return false;
     }
     private boolean product(Profession p,ItemDef item) {
         return switch(p.family) {
@@ -123,8 +130,7 @@ final class Jobs {
         for(Node node:g.objects.nodes) {
             if(!safe(node,n))continue;
             boolean eligible=n.profession.family==Npc.Role.MINER && node.kind==Node.Kind.ROCK && mineral(n.profession,node.product)
-                    || n.profession.family==Npc.Role.FISHERMAN && fishing(n,node)
-                    || n.profession.family==Npc.Role.CRAFTSMAN && missingIngredient(n,node.product);
+                    || n.profession.family==Npc.Role.FISHERMAN && fishing(n,node);
             if(!eligible || n.skills.level(node.skill)<node.level)continue;
             float distance=n.distTo(node.x,node.z);
             if(n.profession==Profession.GEM_PROSPECTOR)distance-=Math.min(4,node.stock)*0.4f; // survey promising, undepleted deposits
@@ -156,7 +162,8 @@ final class Jobs {
         };
     }
     private boolean accepts(Npc n,Recipes.Recipe recipe) {
-        return n.profession.family==Npc.Role.CRAFTSMAN && (recipe.furniture!=null ? n.profession==Profession.CARPENTER : recipe.outputs.stream().anyMatch(out->recipeOutput(n.profession,out.item())))
+        boolean metalInput=(n.profession==Profession.BLACKSMITH || n.profession==Profession.ARMORER) && recipe.station==Recipes.Station.FURNACE && recipe.outputs.stream().anyMatch(out->out.item().id.endsWith("_bar"));
+        return n.profession.family==Npc.Role.CRAFTSMAN && (metalInput || (recipe.furniture!=null ? n.profession==Profession.CARPENTER : recipe.outputs.stream().anyMatch(out->recipeOutput(n.profession,out.item()))))
                 && n.skills.level(recipe.skill)>=recipe.level;
     }
     private Station station(Recipes.Recipe recipe) {
@@ -167,10 +174,6 @@ final class Jobs {
         Recipes.Recipe selected=null;
         for(var recipe:Recipes.ALL)if(accepts(n,recipe)) { Station station=station(recipe);if(station!=null && station.refusal(recipe,n)==null)selected=recipe; }
         return selected;
-    }
-    private boolean missingIngredient(Npc n,ItemDef item) {
-        for(var recipe:Recipes.ALL)if(accepts(n,recipe)) for(var input:recipe.inputs)if(input.item()==item && n.count(item)<input.amount())return true;
-        return false;
     }
     private ItemDef purchase(Npc n) {
         if(n.profession.family!=Npc.Role.CRAFTSMAN)return null;

@@ -12,6 +12,8 @@ Unfilled cemetery stones accept one actual carried body. Filled stones retain th
 
 Occupational decisions use committed task networks, suitable resources, recipe permissions, actual tools and finite inventories. Nets retain their tool and capped catch; snares bind the actual captured animal immediately on load and retain the carcass for butchering. Order Knights inspect and report assignments once; Household and Escort Knights have different protection duties. Watch, raiding and escort squads communicate local orders from perceived allies and foes. Monster is a reserved agent domain with no added content.
 
+The crafting supply follow-up (patch notes 0.1.4) keeps primary gathering outside Craftsman decision authority. Craftsmen buy missing inputs from actual stock; Blacksmiths and Armorers may smelt their own metal inputs. Tailors retain cloth for garments, and Carpenters reserve planks while an eligible joinery project remains unfinished. Finished goods may be delivered individually, avoiding impossible inventory batches. Four additional profession regressions exercise these actual transactions without NPC XP growth.
+
 ## Rendering and launch
 
 Windows uses incremental Ninja when available, including the Visual Studio bundled tools. Without Ninja, the bounded parallel compiler replaces serial NMake. Worker count is capped at two or four to limit memory pressure. Normal launch builds only the runtime; verification tools remain in `check`. Windows CI also verifies that a subsequent unchanged engine-runtime-JAR/`classes` invocation leaves `buildNative` up to date.
@@ -25,6 +27,7 @@ The first-person camera carries a local head offset through current actor motion
 ## Verification
 
 - Full Linux game build: **141 JUnit tests passed**. Coverage includes the Brute's actual approach/attack, empty-bow retaliation, friendly guard exclusion, shared searches, custody and burial conservation, raw-XP loading, real mining/smithing, persistent nets/snares, order reporting, physical water contact, voxel healing and fire recovery.
+- The profession follow-up adds four cases (seven profession tests total) for purchasing, smelting, retaining cloth and completing owned furniture; Windows CI runs the complete **145-test** game suite.
 - Standalone engine: **28 Java tests passed**, including actual OpenGL rendering and the behavior-tree/task-network/domain checks.
 - Native strict warnings as errors: **119 passed**. AddressSanitizer/UndefinedBehaviorSanitizer with leak checking: **119 passed**, no reported failures.
 - Game and engine PMD checks for unused local variables, private fields and private methods: **zero findings**. This is a scoped static check, not a claim that software can be proven free of every unreachable path.
