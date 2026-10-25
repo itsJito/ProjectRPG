@@ -281,13 +281,14 @@ public final class Gfx implements AutoCloseable {
         // lights: lamps by night, fires, the furnace, spells in flight
         if (daylight < 0.6f) for (float[] l : lamps) cmd.pointLight(l[0], l[1], l[2], 9, 5f, 4.2f, 2.8f, 0);
         for (WorldObject o : g.objects.all()) if (o instanceof Fire f) {
-            float fl = 0.85f + 0.15f * (float) Math.sin(g.time * 17 + f.id);
+            float fl = 0.97f + 0.03f * (float) Math.sin(g.time * 3 + f.id);
             cmd.pointLight(f.x, f.y + 0.6f, f.z, 7, 4.5f * fl, 2.2f * fl, 0.6f * fl, 0);
         }
         cmd.pointLight(DevMap.FURNACE_AT[0] + 0.5f, DevMap.FLOOR + 0.4f, DevMap.FURNACE_AT[1] + 1.0f, 4, 3f, 1.4f, 0.4f, 0);
         smoke(g);
         lens(g);
         for (CombatSystem.Projectile p : g.combat.projectiles) if (p.spell != null) cmd.pointLight(p.x, p.y, p.z, 4, p.spell == Spells.Spell.FIRE_BOLT ? 5f : 1.5f, 2.5f, p.spell == Spells.Spell.FIRE_BOLT ? 0.8f : 4.5f, 0);
+        chemicalLights(g, dt);
         int burning = 0;
         for (var chemical : g.chemistry.active) if ((chemical.state() & AstrattoNative.CHEM_BURNING) != 0 && Math.hypot(chemical.x() - camX, chemical.z() - camZ) < 35 && burning++ < 20) {
             Actor receiver = g.actor(chemical.id());
@@ -296,7 +297,6 @@ public final class Gfx implements AutoCloseable {
             // Flame particles follow the moving body emitter on the GPU; smoke drifts in world space.
             cmd.emitter(chemical.id(),receiver==null?0:AstrattoNative.EMITTER_ATTACHED_FIRE,x,y-0.15f,z,0.22f,48,0.1f,receiver == null ? 0.8f : 0.45f,5.2f,1.7f,0.3f,0,0.8f,0);
             cmd.emitter(chemical.id()+33,1,x,y+0.5f,z,0.18f,12,0.2f,1.7f,0.22f,0.2f,0.19f,0,0.9f,0);
-            if (burning < 7) cmd.pointLight(x,y+0.5f,z,3,3,1.2f,0.2f,0);
         }
         for (WorldObject object : g.objects.all()) if (object instanceof Fire fire) {
             cmd.emitter(fire.id,0,fire.x,fire.y+0.2f,fire.z,0.2f,28,0.15f,0.85f,5,1.8f,0.3f,0,0.8f,0);
@@ -307,18 +307,19 @@ public final class Gfx implements AutoCloseable {
         foliage(g);
         // characters
         Actor p = g.player;
+        shadowProxy(g,p);
         if (p.alive && p.morphT > 0) animal(g.magic.form(p),dt,g.time);
         else if (p.alive && p.reacting && p.ragdoll != 0) {
             var body = g.lastBodies.ragdoll(p.ragdoll); if (body != null) ragdoll(body, p);
         } else if (p.alive) {
             human(p, p.look, dt, firstPerson, null);
-            cmd.shadowBody(p.x, p.y, p.z, p.radius, p.height * (p.crouched ? rpg.actor.Body.CROUCH_HEIGHT : 1));
         } else if (g.death.ragdoll != 0) {
             // the player's own body, fallen (gamefixes: the death is watched), until it becomes the grave
             Snapshots.Ragdoll rd = g.lastBodies.ragdoll(g.death.ragdoll);
             if (rd != null) ragdoll(rd, p);
         }
         for (Npc n : g.npcs) {
+            if (n.loaded) shadowProxy(g,n);
             if (n.ragdoll != 0) {
                 // a body in Sydney's hands - reeling from a blow, or dead - is drawn as the engine has it
                 Snapshots.Ragdoll rd = g.lastBodies.ragdoll(n.ragdoll);
@@ -327,7 +328,6 @@ public final class Gfx implements AutoCloseable {
             if (n.alive && n.loaded) {
                 if (n.morphT > 0) animal(g.magic.form(n),dt,g.time);
                 else human(n, n.look, dt, false, sleeping(g, n));
-                if (n.distTo(camX, camZ) < 24 && !n.asleep()) cmd.shadowBody(n.x, n.y, n.z, n.radius, n.height * (n.crouched ? rpg.actor.Body.CROUCH_HEIGHT : 1));
             }
         }
         for (Actor d : g.dummies) dummy(d, g.time);
@@ -406,6 +406,57 @@ public final class Gfx implements AutoCloseable {
         mm[8] = z[0] * d; mm[9] = z[1] * d; mm[10] = z[2] * d; mm[11] = 0;
         mm[12] = (a[0] + b[0]) / 2; mm[13] = (a[1] + b[1]) / 2; mm[14] = (a[2] + b[2]) / 2; mm[15] = 1;
         put(box, rgb, shade, rough, metal);
+    }
+
+    private void shadowProxy(Rpg g, Actor actor) {
+        if (actor.distTo(camX,camZ)>24 || actor.morphT>0) return;
+        long handle=actor==g.player && g.death.active?g.death.ragdoll:actor.ragdoll;
+        var body=handle==0?null:g.lastBodies.ragdoll(handle);
+        if (body!=null) {
+            cmd.shadowBody(body.comX,body.comY-0.25f,body.comZ,actor.radius*1.5f,0.5f);
+        } else if (actor instanceof Npc npc && npc.asleep()) {
+            cmd.shadowBody(actor.x,actor.y+0.4f,actor.z,actor.radius*1.5f,0.5f);
+        } else if (actor.alive) cmd.shadowBody(actor.x,actor.y,actor.z,actor.radius,actor.height*(actor.crouched?Body.CROUCH_HEIGHT:1));
+    }
+
+    private static final class FlameLight { long id; float x,y,z,weight; boolean wanted; }
+    private final List<FlameLight> flameLights = new ArrayList<>();
+    private final List<Snapshots.Chemical> flameCandidates = new ArrayList<>(), flameNeighbors = new ArrayList<>();
+    private List<Snapshots.Chemical> flameState;
+    private Rpg flameOwner;
+    private double nextFlameSelection;
+    private float flameCamX, flameCamZ;
+    private void chemicalLights(Rpg g, float dt) {
+        if (flameOwner!=g) { flameLights.clear();flameState=null;flameOwner=g; }
+        // Chemistry changes at four Hz; camera travel can also require a new local selection.
+        if (flameState!=g.chemistry.active || g.time>=nextFlameSelection || Math.hypot(camX-flameCamX,camZ-flameCamZ)>2) {
+            flameState=g.chemistry.active;nextFlameSelection=g.time+0.25;flameCamX=camX;flameCamZ=camZ;
+            flameCandidates.clear();flameNeighbors.clear();
+            for (var state : flameState) if ((state.state() & AstrattoNative.CHEM_BURNING) != 0
+                    && Math.hypot(state.x()-camX,state.z()-camZ)<32) flameCandidates.add(state);
+            flameCandidates.sort(java.util.Comparator.<Snapshots.Chemical>comparingDouble(source ->
+                    Math.hypot(source.x()-camX,source.z()-camZ) - (flameLights.stream().anyMatch(light -> light.id==source.id()) ? 2 : 0)).thenComparingLong(source -> source.id()));
+            for (var light:flameLights)light.wanted=false;
+            // Keep six stable sources; adjacent burning cells share a source instead of stacking lights.
+            for (var source:flameCandidates) {
+                if (flameNeighbors.size()>=6)break;
+                boolean adjacent=false;
+                for (var other:flameNeighbors) if (Math.abs(source.x()-other.x())<2.5f && Math.abs(source.y()-other.y())<2.5f && Math.abs(source.z()-other.z())<2.5f) { adjacent=true;break; }
+                if(adjacent)continue;
+                flameNeighbors.add(source);
+                FlameLight light=flameLights.stream().filter(candidate -> candidate.id==source.id()).findFirst().orElse(null);
+                if(light==null && flameLights.size()<8) { light=new FlameLight();light.id=source.id();flameLights.add(light); }
+                if(light!=null) { light.wanted=true;light.x=source.x();light.y=source.y();light.z=source.z(); }
+            }
+        }
+        float blend=1-(float)Math.exp(-Math.min(dt,0.1f)*8);
+        for(var light:flameLights) {
+            Actor actor=light.wanted?g.actor(light.id):null;
+            if(actor!=null) { g.chemistry.center(actor,burnPosition);light.x=burnPosition[0];light.y=burnPosition[1];light.z=burnPosition[2]; }
+            light.weight+=((light.wanted?1:0)-light.weight)*blend;
+            if(light.weight>0.01f)cmd.pointLight(light.x,light.y+0.5f,light.z,3,3*light.weight,1.2f*light.weight,0.2f*light.weight,0);
+        }
+        flameLights.removeIf(light -> !light.wanted && light.weight<0.01f);
     }
 
     private record PlantMesh(int version,int mesh) {}

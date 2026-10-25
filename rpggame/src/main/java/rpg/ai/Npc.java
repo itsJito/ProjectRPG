@@ -267,25 +267,33 @@ public final class Npc extends Actor implements Interactable {
             int slot=Integer.parseInt(action.substring(5));ItemStack selected=contents.get(slot);
             if(selected==null)return Result.no("That item has moved.");
             if(thief.skills.level(Skill.THIEVING)<person.pickpocketLevel)return Result.no("Your Thieving level is too low.");
-            if(!thief.canStore(selected))return Result.no("You need room for that item.");
+            ItemStack stolen = selected.copyWhole(); stolen.markStolen(person.id);
+            if(!thief.canStore(stolen))return Result.no("You need room for that item.");
             String why=person.dist(g,thief,1.6f);if(why!=null)return Result.no(why);
             g.interact.begin(new Work(thief,person,"pickpocket","Lifting "+selected.def.name,1.1f,false,g.time,()->{
                 if(contents.get(slot)!=selected)return Result.no("The item has moved.");
                 String range=person.dist(g,thief,1.6f);if(range!=null)return Result.no(range);
-                if(!thief.canStore(selected))return Result.no("You no longer have room.");
+                if(!thief.canStore(stolen))return Result.no("You no longer have room.");
                 long attempt=g.state.newRequestId();double chance=Math.min(0.92,0.55+(thief.skills.level(Skill.THIEVING)-person.pickpocketLevel)*0.03);
                 boolean success=g.roll(attempt,person.id)<chance;
-                var event=g.state.commit(attempt,success?"Pickpocketed":"PickpocketFailed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+selected.def.id);
                 if(!success) {
+                    var event=g.state.commit(attempt,"PickpocketFailed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+selected.def.id);
                     if(thief.eq.def(rpg.item.ItemDef.Slot.NECK)==Items.get("dodgy_necklace") && g.roll(attempt+1,person.id)<0.25)return Result.ok();
                     g.ai.notice(person,thief,"caught pickpocketing");thief.cs.staggered=0.8f;
                     person.remember(new Memory("THEFT",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),g.state.minutes,1,"witnessed",event.id(),selected.value(),"caught lifting an item"),24);
                     g.law.theft(thief,person.id,selected,null,event.id());return Result.ok();
                 }
-                contents.set(slot,null);selected.markStolen(person.id);thief.store(selected);
-                g.law.theft(thief,person.id,selected,null,event.id());g.prog.award(thief,Skill.THIEVING,8+person.pickpocketLevel*1.5,"pickpocket",event.id());
+                if (!thief.store(stolen)) return Result.no("You no longer have room.");
+                contents.take(slot, selected.amount);
+                var event=g.state.commit(attempt,"Pickpocketed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+stolen.def.id);
+                if (thief == g.player) {
+                    g.chat.say("You lift " + stolen + " from " + person.name + ".");
+                    if (g.ui != null) { g.ui.openContainer(person.pockets()); g.ui.received(stolen.def); }
+                }
+                g.law.theft(thief,person.id,stolen,null,event.id());g.prog.award(thief,Skill.THIEVING,8+person.pickpocketLevel*1.5,"pickpocket",event.id());
                 return Result.ok();
             }));
+            if (thief == g.player && g.ui != null) g.ui.closeAll();
             return Result.started();
         }
         @Override public Result take(Rpg g,Actor a,int slot,int count,long request){return perform(g,a,"take:"+slot,request);}
@@ -315,13 +323,16 @@ public final class Npc extends Actor implements Interactable {
             }
             return Result.ok();
         }
-        var taken = inv.remove(Items.COINS, coins);
         ItemStack s = new ItemStack(Items.COINS, coins, id, true, id);
+        if (!a.canStore(s)) return Result.no("You need room for those coins.");
+        var taken = inv.remove(Items.COINS, coins);
+        if (taken == null) return Result.no("Those coins have moved.");
         a.store(s);
+        if (a == g.player && g.ui != null) g.ui.received(s.def);
         g.law.theft(a, id, s, null, ev.id());
         g.prog.award(a, Skill.THIEVING, 8 + pickpocketLevel * 1.5, "pickpocket", ev.id());
         if (a == g.player) g.chat.say("You pick " + name + "'s pocket.");
-        return taken == null ? Result.no("") : Result.ok();
+        return Result.ok();
     }
 
     @Override public String examine(Rpg g) {

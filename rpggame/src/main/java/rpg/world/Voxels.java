@@ -23,6 +23,10 @@ public final class Voxels {
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.plant(i)) { solid[i] = false; opaque[i] = false; }
     }
 
+    private java.util.List<rpg.objects.Door> doors = java.util.List.of();
+    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }
+    private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
+
     public int block(int x, int y, int z) { return v.block(x, y, z); }
     public boolean solid(int x, int y, int z) { return solid[v.block(x, y, z)]; }
     public boolean opaque(int x, int y, int z) { return opaque[v.block(x, y, z)]; }
@@ -50,15 +54,17 @@ public final class Voxels {
         int nx = 0, ny = 0, nz = 0;
         for (int i = 0; i < 512 && t <= max; i++) {
             int b = v.block(x, y, z);
-            if (b != 0 && (solid[b] || (stopAtWater && b == Blocks.WATER))) {
+            if (b != 0 && (!door(b) && solid[b] || stopAtWater && b == Blocks.WATER)) {
                 h.hit = true; h.dist = t; h.bx = x; h.by = y; h.bz = z; h.nx = nx; h.ny = ny; h.nz = nz; h.block = b;
                 h.x = ox + dx * t; h.y = oy + dy * t; h.z = oz + dz * t;
+                for (var panel : doors) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
                 return h;
             }
             if (tmx < tmy && tmx < tmz) { t = tmx; tmx += tdx; x += sx; nx = -sx; ny = 0; nz = 0; }
             else if (tmy < tmz) { t = tmy; tmy += tdy; y += sy; nx = 0; ny = -sy; nz = 0; }
             else { t = tmz; tmz += tdz; z += sz; nx = 0; ny = 0; nz = -sz; }
         }
+        for (var panel : doors) panel.ray(h, ox, oy, oz, dx, dy, dz, max);
         return h;
     }
 
@@ -76,9 +82,17 @@ public final class Voxels {
         int steps = (int) Math.ceil(d / 0.25f);
         for (int i = 1; i < steps; i++) {
             float t = i / (float) steps;
-            if (opaque((int) Math.floor(ax + dx * t), (int) Math.floor(ay + dy * t), (int) Math.floor(az + dz * t))) return false;
+            int block = block((int)Math.floor(ax+dx*t), (int)Math.floor(ay+dy*t), (int)Math.floor(az+dz*t));
+            if (!door(block) && opaque[block]) return false;
         }
-        return true;
+        return !panelBlocks(ax, ay, az, dx, dy, dz, d);
+    }
+
+    private boolean panelBlocks(float x,float y,float z,float dx,float dy,float dz,float length) {
+        if (length < 1e-5f) return false;
+        Hit hit = new Hit();
+        for (var panel : doors) panel.ray(hit, x,y,z,dx/length,dy/length,dz/length,length);
+        return hit.hit && hit.dist < length - 0.02f;
     }
 
     /** The y of the ground under a point (the top of the highest solid cell at or below y). */
@@ -97,10 +111,10 @@ public final class Voxels {
             if (x == lx && y == ly && z == lz) continue;
             lx = x; ly = y; lz = z;
             int b = v.block(x, y, z);
-            if (opaque[b]) return 0;
+            if (!door(b) && opaque[b]) return 0;
             if (leafy[b]) t *= 0.55f;
         }
-        return t;
+        return panelBlocks(ax,ay,az,dx,dy,dz,d) ? 0 : t;
     }
 
     /** The light in a cell, 0 .. 1 each: what the sky gives it (before the time of day) and what lamps and glowing blocks do. */

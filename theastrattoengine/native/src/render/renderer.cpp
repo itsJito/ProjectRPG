@@ -1469,7 +1469,7 @@ bool Renderer::visibleModel(const Model& model, const Frustum& frustum) const {
         }
     }
     // Enclosing the transformed box also handles nonuniform scales, reflections and shear conservatively.
-    return frustum.sphere(center[0], center[1], center[2], std::sqrt(extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]));
+    return frustum.sphere(center[0], center[1], center[2], std::sqrt(extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]) + ((model.flags & ASTRATTO_MODEL_FOLIAGE) ? 3.0f : 0.0f));
 }
 
 void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
@@ -1489,7 +1489,20 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
             sky = static_cast<float>(w->sky(ix, iy, iz)) / 15.0f; blk = static_cast<float>(w->blockLight(ix, iy, iz)) / 15.0f;
         }
         s.mat4("uModel", m.m);
-        s.f1("uSway",(m.flags & ASTRATTO_MODEL_FOLIAGE) != 0 ? 1.0f : 0.0f);
+        const bool foliage = (m.flags & ASTRATTO_MODEL_FOLIAGE) != 0;
+        s.f1("uSway", foliage ? 1.0f : 0.0f);
+        if (foliage) {
+            float benders[8 * 4] = {}; int count = 0;
+            const ModelMesh& mesh = meshes_[m.mesh];
+            const float cx = m.m[12] + mesh.center[0], cz = m.m[14] + mesh.center[2];
+            for (int i = 0; i < bodyCount_ && count < 8; i++) {
+                const float* body = bodies_ + i * 5;
+                if (std::abs(body[0]-cx)>mesh.extent[0]+1.2f || std::abs(body[2]-cz)>mesh.extent[2]+1.2f) continue;
+                std::copy(body, body+4, benders+count*4); ++count;
+            }
+            s.i1("uBendCount", count);
+            for (int i = 0; i < count; i++) { const std::string name = "uBenders[" + std::to_string(i) + "]"; const float* b = benders+i*4; s.f4(name.c_str(), b[0],b[1],b[2],b[3]); }
+        }
         s.f4("uTint", m.par[0], m.par[1], m.par[2], m.par[3]);
         s.f1("uEmissive", m.par[4]);
         s.f1("uFlag", m.par[4] > 0.5f ? 2.0f : (viewmodel ? 1.0f : 0.0f));
@@ -1595,7 +1608,7 @@ void Renderer::lightingPass() {
     s.tex("uShadowRaw", 13, TEXTURE_2D_ARRAY, shadowTex_);
     g_.BindSampler(13, rawShadowSampler_);
     s.f4("uCascadeDepth", cascadeDepth_[0], cascadeDepth_[1], cascadeDepth_[2], cascadeDepth_[3]);
-    s.f1("uFrame", static_cast<float>(frameNo_ & 1023));
+    s.f1("uFrame", q_.taa ? static_cast<float>(frameNo_ & 1023) : 0.0f);
     probeUniforms(s, 7);
     s.tex("uProbeVis", 10, TEXTURE_3D, probeVis_);
     s.tex("uVox", 11, TEXTURE_3D, voxTex_);

@@ -123,11 +123,11 @@ public final class SaveSystem {
         m.put("hp", a.hp); m.put("stamina", a.stamina); m.put("faith", a.faith); m.put("mana", a.mana);
         List<Object> xp = new ArrayList<>(); for (long v : a.skills.raw()) xp.add(v);
         m.put("xp", xp);
-        m.put("inv", ItemIO.inventory(a.inv));
+        m.put("inv", ItemIO.inventory(a.inv)); m.put("invW", a.inv.w);
         m.put("eq", ItemIO.equipment(a.eq));
         List<Object> look = new ArrayList<>(); for (int v : a.look.toArray()) look.add(v);
         m.put("look", look);
-        if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.firstPerson); m.put("book", p.book.name()); }
+        if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.morphCameraSaved ? p.morphFirstPerson : p.firstPerson); m.put("book", p.book.name()); }
         m.put("manaAcc", (double) a.manaAcc);
         m.put("injuries",a.injuries.save()); m.put("charred",a.charred); m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
         if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
@@ -185,7 +185,7 @@ public final class SaveSystem {
         applyActor(g.player, pm);
         try { g.player.spell = rpg.combat.Spells.Spell.valueOf(Json.str(pm, "spell", "SPARK")); } catch (IllegalArgumentException e) { g.player.spell = rpg.combat.Spells.Spell.SPARK; }
         try { g.player.book = rpg.combat.Spells.Book.valueOf(Json.str(pm, "book", "STANDARD")); } catch (IllegalArgumentException e) { g.player.book = rpg.combat.Spells.Book.STANDARD; }
-        g.player.firstPerson = Json.bool(pm, "fp", false);
+        g.player.firstPerson = Json.bool(pm, "fp", false); g.player.morphCameraSaved = false;
         g.player.alive = Json.bool(pm, "alive", true);
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
         g.player.diedAt = -1;
@@ -247,7 +247,7 @@ public final class SaveSystem {
             float x = (float) Json.num(m, "x", 0), y = (float) Json.num(m, "y", 0), z = (float) Json.num(m, "z", 0);
             switch (kind) {
                 case "GroundItem" -> { var s = ItemIO.stack(m.get("stack")); if (s != null) g.objects.add(new GroundItem(id, s, x, y, z)); }
-                case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0)));
+                case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0))).load(g,m);
                 case "FishingNet" -> {
                     var net=g.objects.add(new rpg.objects.FishingNet(id,Json.lng(m,"owner",0),Json.lng(m,"source",0),x,y,z,Json.num(m,"nextCatch",g.state.minutes+4)));net.load(g,m);
                 }
@@ -296,7 +296,9 @@ public final class SaveSystem {
         long[] v = new long[xp.size()];
         for (int i = 0; i < v.length; i++) v[i] = ((Number) xp.get(i)).longValue();
         a.skills.load(v);
-        ItemIO.inventory(a.inv, Json.list(m, "inv"));
+        var carried = Json.list(m, "inv");
+        if (Json.integer(m, "invW", 10) == 10) carried = ItemIO.transpose(carried);
+        ItemIO.inventory(a.inv, carried);
         ItemIO.equipment(a.eq, Json.list(m, "eq"));
         List<Object> look = Json.list(m, "look");
         // (a townsperson's look is theirs from the roster: an old save's rolled look could give a man a woman's body and cry)

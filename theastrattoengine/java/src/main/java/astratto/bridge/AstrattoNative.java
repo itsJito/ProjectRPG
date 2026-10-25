@@ -27,7 +27,7 @@ import org.lwjgl.system.SharedLibrary;
 public final class AstrattoNative {
     private AstrattoNative() {}
 
-    public static final int CMD_CHEM_MATERIAL = 192, CMD_CHEM_SENSOR = 193, CMD_CHEM_EMIT = 194, CMD_CHEM_REMOVE = 195, CMD_CHEM_WIND = 196, CMD_CHEM_RESET = 197, CMD_CHEM_WEATHER = 198, SNAPSHOT_CHEMISTRY = 6;
+    public static final int CMD_CHEM_MATERIAL = 192, CMD_CHEM_SENSOR = 193, CMD_CHEM_EMIT = 194, CMD_CHEM_REMOVE = 195, CMD_CHEM_WIND = 196, CMD_CHEM_RESET = 197, CMD_CHEM_WEATHER = 198, CMD_CHEM_DISOWN = 199, SNAPSHOT_CHEMISTRY = 6;
     public static final int CHEM_FLAMMABLE = 1, CHEM_CONDUCTIVE = 2, CHEM_FREEZABLE = 4, CHEM_WIND_SENSITIVE = 8;
     public static final int CHEM_FIRE = 1, CHEM_WATER = 2, CHEM_ICE = 3, CHEM_WIND = 4, CHEM_ELECTRIC = 5;
     public static final int CHEM_WET = 1, CHEM_BURNING = 2, CHEM_FROZEN = 4, CHEM_CHARGED = 8, CHEM_BURNT = 16;

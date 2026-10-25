@@ -194,7 +194,7 @@ public final class Rpg implements GameModule {
         give(player, Items.BREAD, 3);
         give(player, Items.COINS, 200);
         give(player, Items.TINDERBOX, 1);
-        // a belt pouch, worn: a small grid of its own beside the base 10 x 4
+        // a belt pouch, worn: a small grid of its own beside the base 4 x 10
         ItemStack pouch = new ItemStack(Items.POUCH, 1);
         player.eq.set(rpg.item.ItemDef.Slot.BELT, pouch);
         state.mint(Items.POUCH, 1);

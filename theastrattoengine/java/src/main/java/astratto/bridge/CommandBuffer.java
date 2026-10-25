@@ -52,6 +52,8 @@ public final class CommandBuffer {
     public void chemEmit(long owner, int element, float x, float y, float z, float radius, float power, float life) {
         head(AstrattoNative.CMD_CHEM_EMIT, 48).h(owner).i(element).f(x).f(y).f(z).f(radius).f(power).f(life).i(0);
     }
+    /** Clear attribution from existing sensors and queued/active volumes, preserving their physical effects. */
+    public void chemDisown(long owner) { head(AstrattoNative.CMD_CHEM_DISOWN, 16).h(owner); }
     public void chemRemove(long id) { head(AstrattoNative.CMD_CHEM_REMOVE, 16).h(id); }
     public void chemWind(float x, float z) { head(AstrattoNative.CMD_CHEM_WIND, 16).f(x).f(z); }
     public void chemWeather(float rain) { head(AstrattoNative.CMD_CHEM_WEATHER,16).f(rain).f(0); }

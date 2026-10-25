@@ -56,6 +56,7 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
         if ("release-systems".equals(System.getenv("RPG_GALLERY_ONLY"))) { releaseSystemsShots(); return 0; }
         if ("release-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { releasePolishShots(); return 0; }
@@ -357,6 +358,68 @@ final class Gallery {
         frames(20);
         film("horse-idle", 54, i -> {}, a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 0, horse);
         film("horse-walk", 54, i -> g.animals.puppetTo(horse, horse.x, horse.z - 4, false), a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 18, horse);
+    }
+
+    /** Scoped evidence for the maintenance fixes, using real game state and native rendering. */
+    private void maintenanceShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        for(var animal:g.animals.all()){animal.loaded=false;g.animals.despawnBody(animal);}
+        place(62.5f,70.5f,0);
+        if ("ui".equals(only)) {
+            g.player.inv.add(new rpg.item.ItemStack(rpg.item.Items.get("bronze_sword"),1));
+            g.player.inv.add(new rpg.item.ItemStack(rpg.item.Items.IRON_ARROWS,18));
+            g.player.eq.set(rpg.item.ItemDef.Slot.BACK,new rpg.item.ItemStack(rpg.item.Items.BACKPACK,1));
+            hud.go(Hud.Scene.INVENTORY);reviewUi("vertical-inventory");hud.closeAll();
+            var person=(rpg.ai.Npc)g.actor(Ids.VILLAGER);g.ai.reload(person);g.teleport(person,64,DevMap.FLOOR,70.5f);
+            person.goal=rpg.ai.Brain.Goal.IDLE;person.nextThink=Double.MAX_VALUE;g.player.skills.setLevel(rpg.skill.Skill.THIEVING,100);
+            person.inv.clear();person.inv.add(new rpg.item.ItemStack(rpg.item.Items.IRON_ARROWS,11,person.id,false,person.id));
+            frames(1);hud.openContainer(person.pockets());reviewUi("inspect-pockets");
+            int before=g.player.count(rpg.item.Items.IRON_ARROWS);
+            for(int attempt=0;attempt<12 && g.player.count(rpg.item.Items.IRON_ARROWS)==before;attempt++) {
+                g.player.cs.staggered=0;person.fightTarget=0;person.cs.cancel();
+                g.interact.request(g.player,person.pockets(),"take:0");
+                if(hud.paused())throw new IllegalStateException("Pocket work still paused");
+                for(int i=0;i<75 && g.player.count(rpg.item.Items.IRON_ARROWS)==before;i++)game.tick(1f/60);
+            }
+            if(g.player.count(rpg.item.Items.IRON_ARROWS)==before)throw new IllegalStateException("No pocket transfer occurred");
+            reviewUi("pocket-item-received");hud.closeAll();return;
+        }
+        if ("motion".equals(only)) {
+            film("turn-in-place",120,i->g.controller.snapTo((float)Math.PI*Math.min(1,Math.max(0,i)/90f)),a->new float[]{a.x+2.6f,a.y+1.2f,a.z-2.6f,a.x,a.y+0.8f,a.z},0);
+            var door=g.objects.doors().stream().filter(d->d.name.equals("Barn door")).findFirst().orElseThrow();
+            var farmer=(rpg.ai.Npc)g.actor(Ids.FARMER);g.ai.reload(farmer);g.teleport(farmer,door.x,DevMap.FLOOR,door.z-2.8f);
+            farmer.goal=rpg.ai.Brain.Goal.RETURN;farmer.nextThink=Double.MAX_VALUE;farmer.spawnX=door.x;farmer.spawnZ=door.z+3;
+            float[] cam={door.x+3.4f,DevMap.FLOOR+2.2f,door.z-5,door.x,DevMap.FLOOR+0.9f,door.z};
+            film("npc-opens-barn",120,i->{},a->cam,0,farmer);
+            film("door-push-both-directions",120,i->{
+                if(i==0)door.setOpen(g,true,null,0);
+                if(i==0 || i==60)for(long hinge:door.hinge)g.game.commands().jointMotor(hinge,i==0?3:-3,120);
+            },a->cam,0,farmer);return;
+        }
+        if ("foliage".equals(only)) {
+            var boxes=rpg.render.FoliageModels.model(rpg.world.Foliage.Kind.FERN,37);
+            reviewMesh=gfx.renderer().mesh(boxes.vertices(),boxes.count());reviewTransform.identity().translate(64.5f,DevMap.FLOOR,70.5f);
+            g.teleport(g.player,64.5f,DevMap.FLOOR,71.4f);frames(1);
+            float[] cam={66.3f,DevMap.FLOOR+1.35f,68.5f,64.5f,DevMap.FLOOR+0.28f,70.5f};
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-before-contact");
+            g.controller.snapTo(0);
+            film("foliage-contact",72,i->g.controller.in.forward=i<40?0.45f:0,a->cam,0);
+            g.controller.in.forward=0;g.teleport(g.player,67.5f,DevMap.FLOOR,70.5f);
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-released");return;
+        }
+        if ("shadows".equals(only)) {
+            var guard=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(guard);g.teleport(guard,65,DevMap.FLOOR,69.5f);
+            guard.goal=rpg.ai.Brain.Goal.IDLE;guard.nextThink=Double.MAX_VALUE;g.teleport(g.player,64,DevMap.FLOOR,69.5f);
+            float[] cam={69,DevMap.FLOOR+3.5f,64,64.5f,DevMap.FLOOR+0.5f,69.5f};
+            for(int i=0;i<24;i++){game.tick(1f/60);draw(cam,1f/60);}
+            Main.shot(gfx,win.width,win.height,new File(shots,"human-day-shadows.png"));
+            g.state.minutes=1320;
+            g.objects.add(new rpg.objects.Fire(g.state.newEntityId(),62.5f,DevMap.FLOOR,69.5f,g.state.minutes+30,0));
+            for(int i=0;i<24;i++){game.tick(1f/60);draw(cam,1f/60);}
+            Main.shot(gfx,win.width,win.height,new File(shots,"human-fire-shadows.png"));return;
+        }
+        throw new IllegalArgumentException("Use RPG_REVIEW_ONLY=ui, motion, foliage or shadows");
     }
 
     private void ultimateShots() {

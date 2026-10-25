@@ -15,7 +15,7 @@ import rpg.item.ItemStack;
 
 /**
  * The inventory panel (gamefixes: tabbed, filterable inventories over the spatial grids). Every grid the player carries
- * is drawn as it really is (the base 10 x 4, the backpack's, the pouch's), items at their footprints. Tabs and the name
+ * is drawn as it really is (the base 4 x 10, the backpack's, the pouch's), items at their footprints. Tabs and the name
  * filter dim what does not match rather than reflowing, because where things lie is part of the inventory.
  *
  * <p>Items are dragged: within a grid or between grids (R turns the item while it is held), onto an equipment slot to
@@ -52,6 +52,9 @@ final class InventoryPanel extends Fragment {
     private final List<Zone> zones = new ArrayList<>(), nextZones = new ArrayList<>();
     private double hoverSoundAt;
     private ItemStack lastHovered;
+    private ItemDef received;
+    private double receivedAt;
+    void received(ItemDef item) { received = item; receivedAt = hud.now; }
 
     InventoryPanel(Hud h) { super("grids"); this.hud = h; fadeIn = 0.12f; fadeOut = 0.12f; }
 
@@ -110,22 +113,32 @@ final class InventoryPanel extends Fragment {
         float gy = fy + 34;
         List<String> names = new ArrayList<>(List.of("Carried"));
         for (Slot sl : new Slot[]{Slot.BACK, Slot.BELT}) { ItemStack bag = p.eq.get(sl); if (bag != null && bag.inner != null) names.add(bag.def.name); }
-        label(ui, names.get(0), grids.get(0), x, gy);
+        label(ui, names.get(0), grids.get(0), x, gy, CS);
         drawGrid(ui, grids.get(0), x, gy + 18, CS, Source.PLAYER);
-        float by = gy + 18 + grids.get(0).h * CS + 10, bx = x;
+        float by = gy, bx = x + grids.get(0).w * CS + 16;
         for (int i = 1; i < grids.size(); i++) {
             Inventory inv = grids.get(i);
-            label(ui, names.get(i), inv, bx, by);
-            drawGrid(ui, inv, bx, by + 18, CS, Source.PLAYER);
-            bx += inv.w * CS + 12;
+            float cs = Math.min(CS, (width() - (bx-x)) / inv.w);
+            label(ui, names.get(i), inv, bx, by, cs);
+            drawGrid(ui, inv, bx, by + 18, cs, Source.PLAYER);
+            by += inv.h * cs + 30;
         }
-        if (grids.size() == 1) ui.text("Wear a backpack or a belt pouch for more room.", x, by + 4, 12, Style.FAINT);
+        if (received != null && hud.now-receivedAt < 1.8) {
+            ui.text("Received", bx, by + 4, 12, Style.GOOD);
+            ui.text(received.name, bx, by + 22, 12, Style.TEXT);
+            by += 50;
+        }
+        if (grids.size() == 1) {
+            ui.text("More room", bx, by, 12, Style.DIM);
+            ui.text("Wear a backpack", bx, by + 20, 12, Style.FAINT);
+            ui.text("or a belt pouch.", bx, by + 37, 12, Style.FAINT);
+        }
     }
 
-    private void label(Ui2D ui, String name, Inventory inv, float x, float y) {
+    private void label(Ui2D ui, String name, Inventory inv, float x, float y, float cs) {
         ui.text(name, x, y, 12, Style.DIM);
         String kg = String.format("%.1f kg", inv.weight());
-        ui.text(kg, x + inv.w * CS - ui.width(kg, 11), y + 1, 11, Style.FAINT);
+        ui.text(kg, x + inv.w * cs - ui.width(kg, 11), y + 1, 11, Style.FAINT);
     }
 
     /** One grid: its cells, its items at their footprints, the drop preview, and the mouse on it. */
@@ -144,6 +157,10 @@ final class InventoryPanel extends Fragment {
             boolean held = drag != null && drag.grid == inv && drag.slot == i;
             float dim = held ? 0.25f : any && !matches(s) ? 0.22f : 1f;
             hud.itemIcon(ui, s, ix + 1, iy + 1, iw - 2, ih - 2, dim, turned);
+            if (src == Source.PLAYER && s.def == received && hud.now - receivedAt < 1.8) {
+                float fade = (float)Math.clamp(1 - (hud.now-receivedAt)/1.8, 0, 1);
+                ui.border(ix, iy, iw, ih, 2, ((int)(fade*220)<<24) | 0x86B97E);
+            }
             if (!live || drag != null) continue;
             if (ui.hover(ix, iy, iw, ih)) {
                 hovered = s;

@@ -62,6 +62,23 @@ class RigTest {
         }
     }
 
+    @Test void turningInPlaceCompletesAlternatingCorrectionStepsInsteadOfFreezingOneFoot() {
+        Actor a=standing(); Rig rig=new Rig(); Rig.State state=new Rig.State();
+        rig.pose(a,state,1f/60,0,false);
+        float[] right=state.foot[0].clone(), left=state.foot[1].clone();
+        boolean rightLift=false,leftLift=false;
+        for(int frame=1;frame<=150;frame++) {
+            a.yaw=(float)Math.PI*Math.min(1,frame/90f);
+            rig.pose(a,state,1f/60,frame/60f,false);
+            rightLift|=!state.stance[0];leftLift|=!state.stance[1];
+            for(float[] segment:rig.seg)for(float value:segment)assertTrue(Float.isFinite(value));
+        }
+        assertTrue(rightLift&&leftLift,"both feet must step during a half turn");
+        assertTrue(state.stance[0]&&state.stance[1],"corrective steps finish after the turn stops");
+        assertTrue(Math.hypot(right[0]-state.foot[0][0],right[2]-state.foot[0][2])>0.1);
+        assertTrue(Math.hypot(left[0]-state.foot[1][0],left[2]-state.foot[1][2])>0.1);
+    }
+
     private static Actor standing() {
         Actor actor = new Actor(1, "Test", 1);
         actor.grounded = true;

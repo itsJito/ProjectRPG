@@ -26,7 +26,7 @@ import rpg.world.DevMap;
  * policy scores them (with its own sight and hearing in the mix) and walks the body along routes it searches itself.
  */
 public final class Brain {
-    public enum Goal { IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT }
+    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT }
 
     private final Rpg g;
     private final AiSystem ai;
@@ -40,6 +40,16 @@ public final class Brain {
     // ------------------------------------------------------------------ deciding
     public void think(Npc n) {
         n.nextThink = g.time + (n.goal == Goal.FIGHT ? 0.35 : 0.8) + (n.id % 5) * 0.03;
+        if (n.summonOwner != 0) {
+            Actor owner = g.actor(n.summonOwner), target = ai.threatFor(n);
+            Goal next = target == null ? Goal.FOLLOW : Goal.FIGHT;
+            if (next != n.goal) { n.hasGoalPos = false; n.legs = null; n.tactic = null; n.goalSince = g.time; g.interact.cancel(n, "bound duty changed"); }
+            n.goal = next; n.fightTarget = target == null ? 0 : target.id;
+            n.hunt = null; n.investigation = null; n.fearOf = 0;
+            n.goalReason = target == null ? "bound to follow " + (owner == null ? "the caster" : owner.name) : "defending the caster against " + target.name;
+            n.scores.clear(); n.scores.add("1.00 " + next + " - " + n.goalReason);
+            return;
+        }
         n.perceived = perceive(n);
         // blood, bodies and limbs in sight (Gore): each noticed once, and reacted to
         if (g.gore != null) g.gore.perceive(n);
@@ -201,6 +211,7 @@ public final class Brain {
             n.hasGoalPos = false;
             n.legs = null;
             n.tactic = null;
+            resetJob(n);
             g.interact.cancel(n, "changed goal");
         }
         if (best.goal == Goal.FIGHT && threat != null) n.fightTarget = threat.id;
@@ -240,7 +251,7 @@ public final class Brain {
         n.cs.aim = 0;   // a raised crossbow is requested again only while engaging a visible target
         n.hunger = Math.min(1, n.hunger + dt / 900f);
         n.social = Math.min(1, n.social + (n.combatant() ? 0 : dt / 300f));
-        n.fatigue = n.goal == Goal.SLEEP ? Math.max(0, n.fatigue - dt / 60f) : Math.min(1, n.fatigue + dt / 2400f);
+        n.fatigue = n.asleep() ? Math.max(0, n.fatigue - dt / 60f) : Math.min(1, n.fatigue + dt / 2400f);
         n.sneaking = n.goal == Goal.STEAL;   // a thief at work creeps
         if (n.cs.staggered > 0) { ai.desire(n, AiSystem.A_IDLE); return; }
         // a leg gone: it cannot walk off (it lies where it fell, calling out)
@@ -259,6 +270,7 @@ public final class Brain {
             case WANDER -> ai.desire(n, AiSystem.A_WANDER);
             case IDLE -> ai.desire(n, AiSystem.A_IDLE);
             case RETURN -> goTo(n, n.spawnX, n.spawnZ, false, 2f);
+            case FOLLOW -> followCaster(n);
             case WORK -> work(n,dt);
             case PATROL -> patrol(n);
             case EAT -> eat(n);
@@ -463,7 +475,7 @@ public final class Brain {
      * waypoints (each leg a short search for the engine); the navigation target the inspector shows is the current leg's.
      */
     boolean goTo(Npc n, float x, float z, boolean run, float within) {
-        if (!ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
+        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
         if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
         if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z); n.legAt = 0; n.legsX = x; n.legsZ = z; }
         float tx = x, tz = z;
@@ -851,16 +863,18 @@ public final class Brain {
 
     public void resetJob(Npc n) { if(n.job!=null)n.job.cancel();n.job=null; }
 
+    private void followCaster(Npc n) {
+        Actor owner = g.actor(n.summonOwner);
+        if (owner == null || !owner.alive) { ai.desire(n, AiSystem.A_HOLD); return; }
+        float side = (n.id % 2 == 0 ? 1 : -1) * 1.2f;
+        float x = owner.x + (float)Math.cos(owner.yaw) * side + (float)Math.sin(owner.yaw) * 1.8f;
+        float z = owner.z - (float)Math.sin(owner.yaw) * side + (float)Math.cos(owner.yaw) * 1.8f;
+        if (!Waypoints.clear(g.vox, owner.x, owner.z, x, z)) { x = owner.x; z = owner.z; }
+        if (goTo(n, x, z, n.distTo(owner) > 5, 1.1f)) n.wantYaw = owner.yaw;
+    }
+
     private void work(Npc n,float dt) {
         if(n.profession!=null && n.summonOwner==0) { jobs.tick(n,dt); return; }
-        if(n.summonOwner!=0) {
-            Actor owner=g.actor(n.summonOwner);if(owner==null)return;
-            float side=(n.id%2==0?1:-1)*1.5f;
-            if(goTo(n,owner.x+side,owner.z+1.5f,n.distTo(owner)>6,1.3f)) {
-                ai.desire(n,AiSystem.A_HOLD);n.wantYaw=owner.yaw;
-            }
-            return;
-        }
         switch (n.role) {
             case WORKER -> gatherAndSell(n, Items.LOGS, "tree");
             case VILLAGER -> gatherAndSell(n, Items.BERRIES, "berry_bush");

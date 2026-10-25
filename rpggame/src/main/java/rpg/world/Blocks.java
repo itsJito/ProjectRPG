@@ -114,9 +114,9 @@ public final class Blocks {
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
         r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT);
         r[DOOR] = def(FACES[DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
-        r[DOOR].shape = SHAPE_DOOR;
+        r[DOOR].shape = SHAPE_HIDDEN;
         r[LOCKED_DOOR] = def(FACES[LOCKED_DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
-        r[LOCKED_DOOR].shape = SHAPE_DOOR;
+        r[LOCKED_DOOR].shape = SHAPE_HIDDEN;
         for (int i = 0; i < COUNT; i++) if (objectCell(i)) { r[i] = def(FACES[i], AstrattoNative.RB_SOLID); r[i].shape = SHAPE_HIDDEN; }   // the game draws these
         for (int i = 0; i < COUNT; i++) if (plant(i)) r[i] = def(FACES[i], AstrattoNative.RB_CROSS | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         return r;
@@ -129,15 +129,13 @@ public final class Blocks {
     }
 
     /** Render shapes: 0 is the plain cube; object cells are never meshed; door cells are leaves the game hangs and swings. */
-    private static final int SHAPE_HIDDEN = 1, SHAPE_DOOR = 2;
+    private static final int SHAPE_HIDDEN = 1;
 
     public static NativeMesher.ShapeDef[] renderShapes() {
-        NativeMesher.ShapeDef cube = new NativeMesher.ShapeDef(), hidden = new NativeMesher.ShapeDef(), door = new NativeMesher.ShapeDef();
+        NativeMesher.ShapeDef cube = new NativeMesher.ShapeDef(), hidden = new NativeMesher.ShapeDef();
         hidden.invisible = true;
         hidden.boxes = new int[][]{{0, 0, 0, 16, 16, 16, 0}};
-        door.orient = AstrattoNative.ORIENT_DOOR;
-        door.boxes = new int[][]{{0, 0, 7, 16, 16, 9, 0}};
-        return new NativeMesher.ShapeDef[]{cube, hidden, door};
+        return new NativeMesher.ShapeDef[]{cube, hidden};
     }
 
     // ------------------------------------------------------------------ painting the texture array

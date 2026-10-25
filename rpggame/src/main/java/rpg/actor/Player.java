@@ -8,6 +8,7 @@ public final class Player extends Actor {
     /** The one spellbook open to the player (GDD 2.5), changed at an altar. */
     public Spells.Book book = Spells.Book.STANDARD;
     public boolean firstPerson;
+    public boolean morphCameraSaved, morphFirstPerson;
     public float camDist = 3.6f;
     public double diedAt = -1;
     public boolean sprinting;

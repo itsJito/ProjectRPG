@@ -163,6 +163,8 @@ public final class Hud {
     }
     public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
+    public void received(rpg.item.ItemDef item) { inventory.received(item); events.emit("inventory", "received " + item.id); }
+
     public boolean captures() { return transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
     /**
      * Whether the world stands still (gamefixes: pausing pauses the entire game): any menu - a panel scene (inventory,

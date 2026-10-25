@@ -399,7 +399,7 @@ public final class AiSystem {
         n.legs = null;   // plan the trip again from where it stands
         n.nextThink = 0;
         if (n.goal == Brain.Goal.PATROL) n.patrolIndex++;
-        if (n.goal == Brain.Goal.WORK) g.interact.cancel(n, "stuck");
+        if (n.goal == Brain.Goal.WORK) { brain.resetJob(n); g.interact.cancel(n, "stuck"); }
     }
 
     public double lastHeard(Npc n) { return heardAt.getOrDefault(n.id, -99.0); }
@@ -430,7 +430,9 @@ public final class AiSystem {
                 target = null;
                 for (Actor candidate : g.actors()) if (candidate.alive && candidate != owner && candidate != n && candidate.cs.lastAttacker == owner.id && g.time-candidate.cs.lastHurt<15 && !g.law.inCustody(candidate) && candidate.team != owner.team && n.distTo(candidate) < 16 && canSee(n,candidate)) { target = candidate; break; }
             }
-            return target != null && n.distTo(target) < 20 && canSee(n,target) ? target : null;
+            if (target == null && g.time-n.cs.lastHurt < 10) target = g.actor(n.cs.lastAttacker);
+            return target != null && target.alive && !g.magic.allied(n,target) && !g.law.inCustody(target)
+                    && owner.distTo(target) < 14 && n.distTo(owner) < 18 && n.distTo(target) < 20 && canSee(n,target) ? target : null;
         }
 
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;

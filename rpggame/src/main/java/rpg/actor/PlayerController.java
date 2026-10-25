@@ -69,7 +69,13 @@ public final class PlayerController {
         Player p = g.player;
         camYaw += in.lookYaw;
         camPitch = Math.max(-1.45f, Math.min(1.35f, camPitch + in.lookPitch));
-        if (in.toggleCamera) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
+        if (p.morphT > 0) {
+            if (!p.morphCameraSaved) { p.morphFirstPerson = p.firstPerson; p.morphCameraSaved = true; }
+            p.firstPerson = false; p.headValid = false;
+        } else if (p.morphCameraSaved) {
+            p.firstPerson = p.morphFirstPerson; p.morphCameraSaved = false; p.headValid = false;
+        }
+        if (in.toggleCamera && p.morphT <= 0) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
         placeCamera(p);
         if (!p.alive) {
             queuedMelee = null;

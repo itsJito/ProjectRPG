@@ -9,7 +9,7 @@ import java.util.List;
  * matters as well as its weight, and gear is arranged like a puzzle. An item may lie turned (its footprint rotated).
  * Stackable items of one kind (and one owner and provenance) merge into one stack in one place.
  *
- * <p>A character carries a base grid of 10 x 4; equipped containers (a backpack, a pouch) are grids of their own, not
+ * <p>A character carries a base grid of 4 x 10; equipped containers (a backpack, a pouch) are grids of their own, not
  * more cells in this one; world containers and corpses are grids too, and a container may be made of several
  * compartments (a shelf of small grids). A container item (a bag) holds a grid of its own and goes with it wherever it
  * goes; it may be put into another grid only when it is empty.

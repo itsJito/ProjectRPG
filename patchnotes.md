@@ -414,3 +414,39 @@ Craftsmen now keep the materials their work needs and use the market for supplie
 
 ## Known Issues
 - The hardware-validation and authored maritime-content limits described in Version 0.1.3 still apply.
+
+---
+
+# Patch Notes Version 0.1.5: Open Doors
+
+A maintenance pass on moving through town, working routines and the feedback that makes physical interactions readable.
+
+## Changes
+- **Foliage bends around nearby people and animals**, keeps its roots planted and returns as they move away. Shared chunk meshes stay on the GPU; brushing a plant does not create another physics body or upload its mesh again.
+- **Carried inventories are now four cells across and ten down**, for the player and human NPCs. Equipped bags remain beside the main grid. Existing ten-by-four save layouts are transposed with their item shapes, contents and ownership intact.
+- **Conjured allies have their own following duty.** They stay with their caster and defend nearby, without adopting a hunter's meals, sleep, work or corpse-looting routine. They return when an opponent moves outside their protection range.
+- Morphbeast forces the player into third person for the spell, then restores the previous camera preference.
+
+## Fixed Bugs
+- Fixed building doors being left out of the registry used for NPC opening and hinge updates. Human routes now recognize unlocked doors as passages they can open.
+- Fixed door hinges stopping on one side. Unlatched leaves can swing nearly flat in either direction, open away from the person using them and close from their actual current angle.
+- Fixed full-cell door blockers and duplicate voxel panels intercepting targeting and attacks through a visibly open doorway. Interaction, melee, arrows and sight now test the physical leaves.
+- Fixed turn-in-place foot corrections using an unreachable threshold and being mistaken for unfinished walking steps. Both feet can lift, reposition and settle.
+- Fixed wild-wood trees lacking gathering nodes. Their actual trunk height, wood type, yields, stumps and regrowth now use the existing gathering rules.
+- Fixed lingering fire, queued elemental effects and old missiles restarting a dead player's combat after respawn. Fire still burns; its old attack attribution ends. This also survives an immediate save and reload.
+- Fixed a selected pickpocket attempt waiting forever inside a paused inventory. The pocket view closes while the lift runs and reopens on success, showing the actual item and highlighting the receiving stack.
+- Fixed ordinary lamps and fires skipping human body shadows. Local occlusion includes nearby standing, sleeping and reacting humans within the existing bounded shadow budget.
+- Fixed thin model shadows being missed by the soft-shadow blocker search. Shadow sampling stays stable when temporal antialiasing is disabled.
+- Reduced rapid fire-light variation and replaced arbitrary first-sensor lighting with stable, grouped sources that fade in and out.
+- Fixed interrupted occupational plans surviving a change of goal or blocked route. Workers replan, and fatigue recovers only after actually reaching sleep.
+
+## Technical Changes
+- Added an engine command to retire attribution from active receivers and queued elemental volumes without extinguishing them.
+- Reused bounded actor proxies for foliage contact. Each chunk considers at most eight nearby proxies; chemical lighting retains six selected sources plus two fading slots and refreshes selection at chemistry cadence or after camera travel.
+- Removed the redundant voxel door render shape. Door ray tests use the native rigid pose rather than an assumed open angle.
+- Added regression coverage for actual NPC doorway travel, bidirectional hinges, doorway focus and arrow hits, wild-tree conservation, conjured following, morph camera recovery, theft, packed-inventory migration and fire attribution across death and reload.
+- [Maintenance review and captured evidence](docs/RELEASE_015_REVIEW.md) record the checks and their limits.
+
+## Known Issues
+- The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still requires measurement on that hardware. Cloud software rendering verifies the changed visuals, not that performance target.
+- Local body shadows and foliage contact use bounded nearby proxies; distant foliage remains inexpensive scenery.

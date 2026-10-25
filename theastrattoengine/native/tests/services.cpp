@@ -687,6 +687,12 @@ void services_checks(const char* moduleDir) {
         sensor(70001,20,1|4); sensor(70002,22,2); sensor(70003,23,2); frame(e,c,0);
         element(1,20,3); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
         check("a short fire pulse reaches a flammable receiver before expiry and retains attribution", (state(70001).state&2)!=0 && state(70001).owner==901);
+        element(1,20,3);
+        auto& disown=c.add<astratto_cmd_handle>(ASTRATTO_CMD_CHEM_DISOWN); disown.handle=901;
+        for(int i=0;i<8;i++)frame(e,c,1.0f/60);
+        check("disowning active and pending fire preserves burning but ends old attribution", (state(70001).state&2)!=0 && state(70001).owner==0);
+        element(1,20,3); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
+        check("new attacks after disowning can receive fresh attribution", state(70001).owner==901);
         element(2,20,3); for(int i=0;i<8;i++)frame(e,c,1.0f/60);
         check("water wets and extinguishes an actual burning receiver", (state(70001).state&1)!=0 && (state(70001).state&2)==0);
         element(3,20,1); for(int i=0;i<8;i++)frame(e,c,1.0f/60);

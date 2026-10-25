@@ -72,6 +72,10 @@ public final class Waypoints {
         return best >= 0 ? best : any;
     }
 
+    private static boolean blocked(Voxels vox, int x, int y, int z) {
+        return vox.solid(x,y,z) && vox.block(x,y,z) != rpg.world.Blocks.DOOR;
+    }
+
     /** Whether a body could walk straight along the line: nothing solid in the way, and ground underfoot all along (no pond, no pit). */
     static boolean clear(Voxels vox, float ax, float az, float bx, float bz) {
         if (vox == null) return true;
@@ -79,7 +83,7 @@ public final class Waypoints {
         int steps = Math.max(1, (int) Math.ceil(d / 0.5f));
         for (int i = 0; i <= steps; i++) {
             int x = (int) Math.floor(ax + (bx - ax) * i / steps), z = (int) Math.floor(az + (bz - az) * i / steps);
-            if (vox.solid(x, DevMap.FLOOR, z) || vox.solid(x, DevMap.FLOOR + 1, z) || !vox.solid(x, DevMap.FLOOR - 1, z)) return false;
+            if (blocked(vox, x, DevMap.FLOOR, z) || blocked(vox, x, DevMap.FLOOR + 1, z) || !vox.solid(x, DevMap.FLOOR - 1, z)) return false;
         }
         return true;
     }

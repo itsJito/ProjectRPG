@@ -58,6 +58,14 @@ int ChemistryService::command(Engine& e, uint32_t type, const uint8_t* data, uin
             if (c.element < FIRE || c.element > ELECTRIC || !std::isfinite(c.x + c.y + c.z + c.radius + c.power + c.life) || std::abs(c.x)>1048576 || std::abs(c.y)>1048576 || std::abs(c.z)>1048576 || c.radius <= 0 || c.radius > 6 || c.power <= 0 || c.power > 10 || c.life <= 0 || c.life > 30) return ASTRATTO_ERR_ARGUMENT;
             Volume v; v.owner = c.owner; v.type = c.element; v.x = c.x; v.y = c.y; v.z = c.z; v.radius = c.radius; v.power = c.power; v.life = c.life; emit(v); return ASTRATTO_OK;
         }
+        case ASTRATTO_CMD_CHEM_DISOWN: {
+            astratto_cmd_handle c; if (!readRecord(data, bytes, c)) return ASTRATTO_ERR_STREAM;
+            if (!c.handle) return ASTRATTO_ERR_ARGUMENT;
+            for (auto& entry : sensors_) if (entry.second.owner == c.handle) entry.second.owner = 0;
+            for (auto& volume : volumes_) if (volume.owner == c.handle) volume.owner = 0;
+            for (auto& volume : pending_) if (volume.owner == c.handle) volume.owner = 0;
+            return ASTRATTO_OK;
+        }
         case ASTRATTO_CMD_CHEM_REMOVE: {
             astratto_cmd_handle c; if (!readRecord(data, bytes, c)) return ASTRATTO_ERR_STREAM;
             auto found = sensors_.find(c.handle); if (found != sensors_.end()) { index(found->second, false); sensors_.erase(found); } return ASTRATTO_OK;
@@ -97,16 +105,20 @@ void ChemistryService::publish(Engine& e, Sensor& s, uint32_t previous) {
 }
 void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
     const float d2 = square(s.x - v.x) + square(s.y - v.y) + square(s.z - v.z); if (d2 > square(v.radius + s.radius) || (s.state & BURNT)) return;
-    const uint32_t previous = s.state; s.owner = v.owner;
+    const uint32_t previous = s.state;
     if (v.type == WATER) { s.wet = std::min(1.0f, s.wet + v.power * 0.35f); s.heat = std::max(0.0f, s.heat - v.power); s.state = (s.state | WET) & ~BURNING; }
     if (v.type == FIRE) {
         if (s.state & FROZEN) { s.state &= ~FROZEN; Volume water = v; water.serial = 0; water.type = WATER; water.x = s.x; water.y = s.y; water.z = s.z; water.radius = s.radius; water.power = 0.5f; water.life = 0.25f; emit(water); }
         s.heat = std::min(3.0f, s.heat + v.power * (1 - s.wet) * 0.3f);
-        if ((s.tags & FLAMMABLE) && s.fuel > 0 && s.wet < 0.15f && s.heat > 0.35f) s.state |= BURNING;
+        if ((s.tags & FLAMMABLE) && s.fuel > 0 && s.wet < 0.15f && s.heat > 0.35f) {
+            s.state |= BURNING;
+            // Passive wind/water and an older unowned flame must not erase a fresh attack's source.
+            if (v.owner != 0 || (previous & BURNING) == 0) s.owner = v.owner;
+        }
     }
     if (v.type == ICE && ((s.tags & FREEZABLE) || s.wet > 0.1f)) { s.heat = -1; s.state = (s.state | FROZEN) & ~BURNING; }
     if (v.type == ELECTRIC && ((s.tags & CONDUCTIVE) || s.wet > 0.15f) && s.shock != v.serial) {
-        s.shock = v.serial; s.chargedUntil = time_ + 0.65f; s.state |= CHARGED;
+        s.owner = v.owner; s.shock = v.serial; s.chargedUntil = time_ + 0.65f; s.state |= CHARGED;
         if (v.hops < 8) { Volume next = v; next.x = s.x; next.y = s.y; next.z = s.z; next.radius = s.radius + 0.7f; next.power *= 0.8f; next.life = 0.15f; next.hops++; emit(next); }
     }
     if (v.type == WIND && (s.tags & WIND_SENSITIVE)) s.heat = std::max(-1.0f, s.heat - v.power * 0.03f);

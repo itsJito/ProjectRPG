@@ -2368,3 +2368,13 @@ This is **development priority**, not a release schedule. All established system
 **Integration governance:** Required causal links, priority rules and eight complete scenarios are specified in §3.13. Resolve numeric tuning in each owning system; do not create local substitutes for original inventories, NPC knowledge, quests, animal populations, skill XP or corpse custody.
 
 **Governance:** Resolve an open rule in its system section; remove the corresponding item here. Do not create duplicate speculative systems or revive rejected light/mail/heavy classifications, class respecs, hard target lock-on, or unrestricted kingdom destruction.
+
+### Maintenance integration notes — Version 0.1.5
+
+- **Physical passage:** Human agents can open unlocked doors through the same registered physical leaves as the player. An unlatched leaf swings in both directions; targeting, sight and weapon contact use its actual rigid pose. A locked door remains an access restriction.
+- **World response:** Nearby foliage bends through bounded GPU contact proxies, without making every plant an independent rigid body. Humans retain dynamic sun shadows and bounded local body occlusion; only luminous equipment, fires and effects emit light.
+- **Bound summons:** Conjured allies use a caster-following and nearby-protection duty separate from natural allies' occupational, social and survival routines. They do not acquire NPC skill XP.
+- **Life boundaries:** Residual elemental harm can continue after its source dies, but the retired life's fire and missiles cannot reopen combat against the respawned player. Fresh attacks retain normal attribution and consequences. Saved residual effects preserve this distinction.
+- **Carried layout:** Player and human base inventories retain forty spatial cells, arranged four across and ten down. Old ten-by-four layouts transpose item positions and orientation while preserving nested belongings and provenance.
+- **Interaction feedback:** Inspecting pockets pauses like other inventory browsing; attempting a lift returns to the world for the interruptible action, then shows the transferred stack on success. A transformed player uses third person until the effect ends, preserving their camera preference.
+- **Routine recovery:** Interrupted or blocked occupational plans are cancelled before replanning. Rest requires actual sleep rather than travel toward a bed. The 2013 hardware acceptance target remains 1080p at 30 FPS, to be measured on the target machine.

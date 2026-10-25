@@ -20,6 +20,7 @@ public final class Objects {
     private final Rpg g;
     private final List<WorldObject> list = new ArrayList<>();
     private long nextFixture = Ids.FIXTURES;
+    private final List<Door> doors = new ArrayList<>();
     public Door shedDoor, storeDoor, farmGate;
     private final List<Door> jailDoors = new ArrayList<>();
     /** The farm's fixtures (GDD 3.9): the trough, the nest boxes, the farmer's chest of feed and eggs. */
@@ -37,7 +38,7 @@ public final class Objects {
     public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
     public List<WorldObject> everything() { return list; }
     public WorldObject get(long id) { for (WorldObject o : list) if (o.id == id) return o; return null; }
-    public <T extends WorldObject> T add(T o) { list.add(o); return o; }
+    public <T extends WorldObject> T add(T o) { list.add(o); if (o instanceof Door door) doors.add(door); return o; }
     private long fid() { return nextFixture++; }
 
     /** The authored fixtures, in a fixed order. */
@@ -151,18 +152,22 @@ public final class Objects {
         for(int i=0;i<entrances.length;i++)add(new Door(fid(),"Building door",entrances[i],false,null,1,owners[i])).spawn(g);
         int barn=(DevMap.BARN_X0+DevMap.BARN_X1)/2;
         add(new Door(fid(),"Barn door",new int[][]{{barn,DevMap.BARN_Z0},{barn+1,DevMap.BARN_Z0}},false,null,1,Ids.FARMER)).spawn(g);
+        // Append new nodes after all existing fixtures: old saves retain every established fixture identity.
+        for (int[] t : DevMap.WILD_TREES) {
+            boolean oak = (t[0] + t[1]) % 2 == 0;
+            node(Node.Kind.TREE, oak ? "oak" : "tree", oak ? "Oak tree" : "Tree", Skill.WOODCUTTING,
+                    oak ? 15 : 1, oak ? Items.OAK_LOGS : Items.LOGS, oak ? 37 : 25, oak ? 4 : 3.2f,
+                    oak ? 4 : 3, g.cfg.treeRespawn, oak ? Blocks.OAK_LOG : Blocks.LOG, t,
+                    oak ? Blocks.OAK_LEAVES : Blocks.LEAVES, 4 + (t[0] * 7 + t[1]) % 3);
+        }
+        g.vox.doors(doors);
     }
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */
     public Container custody;
 
     /** Every door, for the frame's physics read-back and the NPCs' door manners. */
-    public Door[] doors() {
-        List<Door> doors = new ArrayList<>(); doors.add(shedDoor); doors.add(storeDoor);
-        if (farmGate != null) doors.add(farmGate);
-        doors.addAll(jailDoors);
-        return doors.toArray(Door[]::new);
-    }
+    public List<Door> doors() { return java.util.Collections.unmodifiableList(doors); }
     public Door jailDoor(String jurisdiction) {
         for (Door door : jailDoors) if (door.name.equals(jurisdiction + " cell door")) return door;
         return null;
@@ -207,7 +212,7 @@ public final class Objects {
         for (Door d : doors()) {
             boolean near = false;
             rpg.ai.Npc by = null;
-            for (var n : g.npcs) if (n.alive && n.loaded && Math.hypot(n.x - d.x, n.z - d.z) < 2.6) { near = true; by = n; }
+            for (var n : g.npcs) if (n.alive && n.loaded && !n.asleep() && !n.reacting && !g.law.inCustody(n) && Math.hypot(n.x - d.x, n.z - d.z) < 2.6) { near = true; by = n; }
             if (!d.open && !d.locked && near) { d.setOpen(g, true, by, 0); d.autoOpened = true; d.autoCloseAt = g.time + 3; }
             if (d.open && d.autoOpened && !near && g.time > d.autoCloseAt && !d.blocked(g) && Math.hypot(g.player.x - d.x, g.player.z - d.z) > 2.2) {
                 d.setOpen(g, false, null, 0); d.autoOpened = false;

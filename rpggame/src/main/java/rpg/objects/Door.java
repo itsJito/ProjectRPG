@@ -40,13 +40,14 @@ public final class Door extends WorldObject {
     /** The leaves: their bodies and hinges, the turn that swings each one in (+1 or -1), and the angle each is at. */
     public long[] leaf = new long[0], hinge = new long[0];
     public float[] inward = new float[0], angle = new float[0];
-    /** A gate (no roof on either side) swings away from whoever opens it: the inward side, the line, and this opening's sense. */
-    private boolean gate;
+    /** The initial motor swings away from whoever opens it; an unlatched hinge then permits both directions. */
     private float inSide = 1, line, swingSign = 1;
     public final float[][] hingeAt;
     private boolean closing, cellsOpen;
     private double motorUntil;
-    public static final float LEAF_MASS = 28, SWING = 1.75f;
+    public static final float LEAF_MASS = 28, SWING = 3.05f;
+    private final float[][] leafPose = new float[2][16];
+    private float leafWidth = 1;
     public static final int MATERIAL_WOOD_DOOR = 2;
 
     public Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner) {
@@ -59,6 +60,10 @@ public final class Door extends WorldObject {
     private static float cz(int[][] c) { float s = 0; for (int[] p : c) s += p[1] + 0.5f; return s / c.length; }
 
     @Override public float focusRadius() { return 1.1f; }
+    @Override public float focusEntry(float ox,float oy,float oz,float dx,float dy,float dz) {
+        var hit=new rpg.world.Voxels.Hit(); ray(hit,ox,oy,oz,dx,dy,dz,12);
+        return hit.hit?hit.dist:Float.POSITIVE_INFINITY;
+    }
     @Override public String label() { return name + (locked ? " (locked)" : open ? " (open)" : ""); }
 
     // ------------------------------------------------------------------ the leaves in the physics world
@@ -80,9 +85,9 @@ public final class Door extends WorldObject {
             if (g.vox.solid(c0x - (ax ? 0 : k), up, c0z - (ax ? k : 0))) minus++;
         }
         float in = plus >= minus ? 1 : -1;
-        gate = plus == 0 && minus == 0;
         inSide = in; this.line = line;
         float leafW = cells.length >= 2 ? (maxA - minA + 1) / 2f : 1f;
+        leafWidth = leafW;
         float h = height - 0.04f, y = DevMap.FLOOR + 0.02f + h / 2;
         for (int i = 0; i < n; i++) {
             boolean first = i == 0;
@@ -102,12 +107,13 @@ public final class Door extends WorldObject {
             float half = leafW / 2 - 0.015f;
             g.game.commands().rigidCreate(leaf[i], AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT, half, h / 2, 0.06f, LEAF_MASS,
                     hx + ex * leafW / 2, y, hz + ez * leafW / 2, qw, 0, qy, 0, 0, 0, 0, 0, 0, 0, 0.5f, 0, 0.05f, 0.6f, 0, 0, 0, MATERIAL_WOOD_DOOR, null);
-            float lo = open ? Math.min(0, inward[i] * SWING) : 0, hi = open ? Math.max(0, inward[i] * SWING) : 0;
+            float lo = open ? -SWING : 0, hi = open ? SWING : 0;
             g.game.commands().jointCreate(hinge[i], leaf[i], 0, AstrattoNative.JOINT_HINGE, AstrattoNative.JOINT_LIMITED, hx, y, hz, 0, 1, 0, lo, hi, 0, 5, 0);
+            restPose(i, hx + ex * leafW / 2, y, hz + ez * leafW / 2, yaw);
         }
         cellsOpen = false;
         applyCells(g, false);
-        if (open) swing(g, 1, 1.6f);
+        if (open) swing(g, 1.6f);
     }
 
     /** Reads where each leaf has swung to, latches a closing door as it comes home, and says to the world whether the way is open. */
@@ -117,22 +123,55 @@ public final class Door extends WorldObject {
             Snapshots.Joint j = rigids.joint(hinge[i]);
             if (j != null) angle[i] = j.angle;
             most = Math.max(most, Math.abs(angle[i]));
+            var body = rigids.body(leaf[i]);
+            if (body != null) body.matrix(leafPose[i]);
+            if (closing) g.game.commands().jointMotor(hinge[i], Math.clamp(-angle[i] * 5, -2.4f, 2.4f), 90);
         }
-        if (motorUntil > 0 && g.time > motorUntil && !closing) { for (long h : hinge) g.game.commands().jointMotor(h, 0, 0); motorUntil = 0; friction(g); }
+        if (motorUntil > 0 && g.time > motorUntil && !closing) { friction(g); motorUntil = 0; }
         if (closing && most < 0.06f) { latch(g); closing = false; }
         boolean wayOpen = most > 0.35f;
         if (wayOpen != cellsOpen) applyCells(g, wayOpen);
     }
 
+    private void restPose(int i, float x, float y, float z, float yaw) {
+        var pose = new Snapshots.Rigid(); pose.x = x; pose.y = y; pose.z = z;
+        pose.qw = (float)Math.cos(yaw / 2); pose.qy = (float)Math.sin(yaw / 2);
+        pose.matrix(leafPose[i]); angle[i] = 0;
+    }
+
+    /** Segment/OBB intersection against the same rigid leaf pose used for drawing. No full-cell doorway collider. */
+    public void ray(rpg.world.Voxels.Hit hit, float ox, float oy, float oz, float dx, float dy, float dz, float max) {
+        if (Math.hypot(ox - x, oz - z) > max + leafWidth + 2) return;
+        for (int i = 0; i < leaf.length; i++) {
+            float[] m = leafPose[i]; float near = 0, far = hit.hit ? Math.min(max, hit.dist) : max;
+            float nx = 0, ny = 0, nz = 0; boolean miss = false;
+            for (int axis = 0; axis < 3; axis++) {
+                int k = axis * 4;
+                float origin = (ox-m[12])*m[k] + (oy-m[13])*m[k+1] + (oz-m[14])*m[k+2];
+                float direction = dx*m[k] + dy*m[k+1] + dz*m[k+2];
+                float half = axis == 0 ? leafWidth / 2 - 0.015f : axis == 1 ? (height-0.04f)/2 : 0.06f;
+                if (Math.abs(direction) < 1e-6f) { if (Math.abs(origin) > half) { miss = true; break; } continue; }
+                float a = (-half-origin)/direction, b = (half-origin)/direction, enter = Math.min(a,b);
+                if (enter > near) { near=enter; float sign=direction>0?-1:1; nx=m[k]*sign; ny=m[k+1]*sign; nz=m[k+2]*sign; }
+                far = Math.min(far, Math.max(a,b));
+                if (near > far) { miss=true; break; }
+            }
+            if (miss) continue;
+            hit.hit=true; hit.dist=near; hit.x=ox+dx*near; hit.y=oy+dy*near; hit.z=oz+dz*near;
+            hit.bx=(int)Math.floor(hit.x); hit.by=(int)Math.floor(hit.y); hit.bz=(int)Math.floor(hit.z);
+            hit.nx=Math.round(nx); hit.ny=Math.round(ny); hit.nz=Math.round(nz); hit.block=locked?Blocks.LOCKED_DOOR:Blocks.DOOR;
+        }
+    }
+
     private void friction(Rpg g) { for (long h : hinge) g.game.commands().jointMotor(h, 0, 0); }
 
-    /** Drives the leaves toward open (dir 1) or shut (dir -1) with the hinge's motor for a while. */
-    private void swing(Rpg g, int dir, float seconds) {
-        for (int i = 0; i < hinge.length; i++) g.game.commands().jointMotor(hinge[i], dir * inward[i] * swingSign * 2.4f, 90);
+    /** Gives the opening leaf an initial push; closing uses each leaf's current signed angle. */
+    private void swing(Rpg g, float seconds) {
+        for (int i = 0; i < hinge.length; i++) g.game.commands().jointMotor(hinge[i], inward[i] * swingSign * 2.4f, 90);
         motorUntil = g.time + seconds;
     }
 
-    private void unlatch(Rpg g) { for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, Math.min(0, inward[i] * swingSign * SWING), Math.max(0, inward[i] * swingSign * SWING)); }
+    private void unlatch(Rpg g) { for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, -SWING, SWING); }
 
     private void latch(Rpg g) {
         for (int i = 0; i < hinge.length; i++) { g.game.commands().jointLimits(hinge[i], true, 0, 0); g.game.commands().jointMotor(hinge[i], 0, 0); }
@@ -244,10 +283,9 @@ public final class Door extends WorldObject {
     public void setOpen(Rpg g, boolean o, Actor by, long req) {
         open = o;
         if (leaf.length == 0) spawn(g);
-        if (o && gate && by != null && !alongXSide(by)) swingSign = -1;
-        else if (o && gate && by != null) swingSign = 1;
-        if (o) { closing = false; unlatch(g); swing(g, 1, 0.7f); }
-        else { closing = true; swing(g, -1, 3f); }
+        if (o && by != null) swingSign = alongXSide(by) ? 1 : -1;
+        if (o) { closing = false; unlatch(g); swing(g, 0.7f); }
+        else { closing = true; motorUntil = 0; }
         g.state.commit(req, o ? "DoorOpened" : "DoorClosed", by == null ? 0 : by.id, id, jurisdiction(), 0, name);
         if (g.sfx != null) g.sfx.play(o ? "door" : "door.close", x, y, z, 0.6f);
     }
@@ -260,13 +298,14 @@ public final class Door extends WorldObject {
             boolean ax = alongX();
             float ex = ax ? (i == 0 ? 1 : -1) : 0, ez = ax ? 0 : (i == 0 ? 1 : -1);
             float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = cells.length >= 2 ? 1f : 1f;
+            restPose(i, hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2, yaw);
             g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
                     (float) Math.cos(yaw / 2), 0, (float) Math.sin(yaw / 2), 0, 0, 0, 0, 0, 0, 0);
         }
         latch(g);
         closing = false;
         applyCells(g, false);
-        if (open && !locked) { unlatch(g); swing(g, 1, 1.6f); }
+        if (open && !locked) { unlatch(g); swing(g, 1.6f); }
     }
 
     @Override public String examine(Rpg g) { return locked ? "A sturdy door with an iron lock." : open ? "A wooden door, standing open." : "A wooden door, latched shut."; }

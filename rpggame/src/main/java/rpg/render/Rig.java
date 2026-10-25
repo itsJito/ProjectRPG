@@ -162,7 +162,7 @@ public final class Rig {
             float back0 = z0 * -st.dz, back1 = z1 * -st.dz;
             st.phase = back1 > back0 + 0.3f ? (beta + 0.5f - 0.02f) % 1f : beta - 0.02f;
         }
-        if (walking || st.stance[0] != st.stance[1]) {
+        if (walking || st.corrective < 0 && st.stance[0] != st.stance[1]) {
             // the stride cycle: foot 0 (right) in stance for the first beta of it, foot 1 half a cycle later
             st.corrective = -1;
             st.phase = (st.phase + cadence * dt) % 1f;
@@ -191,7 +191,7 @@ public final class Rig {
                     float d = (float) Math.hypot(st.foot[k][0] - rest[0], st.foot[k][2] - rest[2]);
                     if (d > far) { far = d; worst = k; }
                 }
-                if (far > 3.6f * Body.PX * 4 / 3) {
+                if (far > 1.8f * Body.PX) {
                     st.corrective = worst;
                     liftOff(st, worst, 0.26f);
                 }

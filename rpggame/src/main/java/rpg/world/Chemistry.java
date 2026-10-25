@@ -18,6 +18,7 @@ import static astratto.bridge.AstrattoNative.*;
 /** Gameplay adapter for native chemical state. It registers moving receivers and applies actual attributed harm. */
 public final class Chemistry {
     private final Rpg g;
+    private final Map<Long,Long> retired = new HashMap<>();
     private final Set<Long> registered = new HashSet<>();
     private final Map<Long, Integer> states = new HashMap<>();
     private final Map<Long, Double> hurtAgain = new HashMap<>();
@@ -81,8 +82,17 @@ public final class Chemistry {
         g.game.commands().chemSensor(actor.id,0,receiverCenter[0],receiverCenter[1],receiverCenter[2],actor.radius,tags,0,10,0,0,false);
     }
     public int state(long id) { return states.getOrDefault(id, 0); }
-    public void emit(Actor owner, int element, float x, float y, float z, float radius, float strength, float life) { g.game.commands().chemEmit(owner == null ? 0 : owner.id, element, x, y, z, radius, strength, life); }
+    /** Death ends attribution for this life, not the fire itself. Reset after native command read-back. */
+    public void retire(Actor owner) {
+        retired.put(owner.id,g.game.engine().frameSequence()); g.game.commands().chemDisown(owner.id);
+        for (var object:g.objects.all()) if (object instanceof rpg.objects.Fire fire && fire.owner==owner.id) fire.retireAttribution();
+    }
+    public void emit(Actor owner, int element, float x, float y, float z, float radius, float strength, float life) { g.game.commands().chemEmit(owner == null || !owner.alive ? 0 : owner.id, element, x, y, z, radius, strength, life); }
+    private void acknowledgeRetirements() {
+        long frame=g.game.engine().frameSequence();retired.values().removeIf(queued -> queued<frame);
+    }
     public void update() {
+        acknowledgeRetirements();
         visuals.removeIf(v->g.time>v.until); ripples.removeIf(v->g.time>v.until);
         if (g.time < next) return; next = g.time + 0.25;
         var thaw=thawAt.entrySet().iterator();
@@ -175,17 +185,18 @@ public final class Chemistry {
             if ((bits & CHEM_CHARGED) != 0) { a.cs.cancel(); a.cs.staggered = Math.max(a.cs.staggered, 0.3f); }
             if ((bits & (CHEM_BURNING | CHEM_CHARGED)) != 0 && g.time >= hurtAgain.getOrDefault(a.id, -99.0)) {
                 hurtAgain.put(a.id, g.time + 0.75); Actor owner = g.actor(sensor.owner());
-                if (owner != null && owner != a) g.combat.resolve(owner, a, 2, 0, ItemDef.DamageType.MAGIC, null, a.x, a.chestY(), a.z, (bits & CHEM_CHARGED) != 0 ? "electric shock" : "burning", false);
+                if (owner != null && owner.alive && owner != a && !retired.containsKey(owner.id)) g.combat.resolve(owner, a, 2, 0, ItemDef.DamageType.MAGIC, null, a.x, a.chestY(), a.z, (bits & CHEM_CHARGED) != 0 ? "electric shock" : "burning", false);
                 else g.combat.environmentalDamage(a, 1, "burning");
             }
         }
     }
     public List<Map<String, Object>> save() {
+        acknowledgeRetirements();
         List<Map<String, Object>> out = new ArrayList<>();
         for (var s : g.game.engine().chemistry()) {
             if(cleansed.containsKey(s.id()))continue;
             var object=s.id()>=0?g.objects.get(s.id()):null;if(object!=null && object.removed)continue;
-            Map<String, Object> m = new HashMap<>(); m.put("id", s.id()); m.put("owner", s.owner()); m.put("x", s.x()); m.put("y", s.y()); m.put("z", s.z()); m.put("r", s.radius()); m.put("tags", s.tags()); m.put("state", s.state()); m.put("fuel", s.fuel()); m.put("wet", s.wet()); m.put("heat", s.heat()); out.add(m);
+            Map<String, Object> m = new HashMap<>(); m.put("id", s.id()); m.put("owner", retired.containsKey(s.owner()) ? 0L : s.owner()); m.put("x", s.x()); m.put("y", s.y()); m.put("z", s.z()); m.put("r", s.radius()); m.put("tags", s.tags()); m.put("state", s.state()); m.put("fuel", s.fuel()); m.put("wet", s.wet()); m.put("heat", s.heat()); out.add(m);
         }
         for(var entry:edits.entrySet()) {
             Edit edit=entry.getValue();Map<String,Object> m=new HashMap<>();m.put("edit",true);m.put("id",entry.getKey());m.put("x",edit.x);m.put("y",edit.y);m.put("z",edit.z);m.put("original",edit.original);m.put("block",edit.block);
@@ -194,7 +205,7 @@ public final class Chemistry {
         return out;
     }
     public void load(List<Object> records) {
-        g.game.commands().chemReset(); registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear(); next = g.time + 0.25; // Let queued reset/restore commands replace the old native snapshot first.
+        g.game.commands().chemReset(); retired.clear();registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear(); next = g.time + 0.25; // Let queued reset/restore commands replace the old native snapshot first.
         if(records==null)return;
         for (Object record : records) if (record instanceof Map<?, ?> raw) {
             @SuppressWarnings("unchecked") Map<String, Object> m = (Map<String, Object>) raw;

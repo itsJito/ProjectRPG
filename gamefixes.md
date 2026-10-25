@@ -120,3 +120,29 @@ RPGGAME ultimate doc — Crafting supply follow-up
 
 **THINGS TO NOTE**
 - These transactions use real market stock, tools and materials. NPC skill XP remains unchanged. The roster remains five new residents with all 25 occupational profiles available.
+
+
+RPGGAME — Maintenance and bug-fix follow-up
+
+**THINGS TO NOTE**
+- This pass focuses on polish and bug fixes. NPCs and animals retain fixed skills; only the player earns XP. The hardware target remains 1080p at 30 FPS on an i5-3570 / GTX 660 / 8 GB machine, pending a real hardware measurement.
+- Existing notes above are preserved. Verification and real engine captures are recorded in docs/RELEASE_015_REVIEW.md.
+
+**BUGS TO BE FIXED:**
+- [Fixed] Nearby foliage bends around player, NPC and animal body proxies, then returns when contact passes, without separate plant physics bodies.
+- [Fixed] All authored doors participate in NPC opening and native hinge read-back; human route checks allow unlocked doors.
+- [Fixed] Open door hinges permit nearly full travel in either direction, and closing uses the current signed angle.
+- [Fixed] Turn-in-place steps use a reachable correction threshold, finish their lift and alternate feet as needed.
+- [Fixed] Every authored wild tree has its matching gathering node, wood, height, stump, save state and regrowth.
+- [Fixed] Death retires existing elemental attribution, pending effects and missiles; residual fire does not reopen the player's combat after respawn or an immediate save/load.
+- [Fixed] Fire lighting groups adjacent sources, retains stable selections and fades changes. Soft-shadow sampling stays stable without temporal antialiasing.
+- [Fixed] Pickpocket work runs outside the paused pocket menu; successful transfers reopen the inventory and highlight the actual receiving stack. Capacity is checked after applying stolen provenance.
+- [Fixed] Ordinary lamps and fires use bounded local body shadows for nearby humans, including sleeping and reacting poses. Thin model shadows are included in the blocker search.
+- [Fixed] Open-door targeting, sight and weapon traces use the physical leaf pose, and an open door's focus volume no longer intercepts a person in the aperture.
+- [Fixed] Conjured allies follow a dedicated caster-protection duty rather than human occupational and social routines.
+- [Fixed] Player transformation forces third person temporarily and restores the previous preference afterward.
+- [Fixed] Human and player carried grids are four cells across and ten down; legacy layouts transpose without losing or repacking their belongings.
+- [Fixed] Blocked or interrupted work discards its unfinished plan before replanning. Walking home to bed does not count as already sleeping.
+
+**THINGS TO BE REMOVED:**
+- [Removed] Duplicate voxel door panels, one-sided open hinge limits, oversized foot-correction thresholds and stale occupational plans after interruption.

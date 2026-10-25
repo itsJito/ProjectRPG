@@ -66,8 +66,8 @@ public class Actor {
     /** The hitbox (a capsule): set from the body plan by {@link #fitBody}. */
     public float radius = Body.MALE.radius, height = Body.MALE.height;
 
-    /** Every person carries a base grid of 10 x 4 (gamefixes); worn containers add grids of their own (see {@link #grids}). */
-    public Actor(long id, String name, int invSize) { this.id = id; this.name = name; this.inv = new Inventory(10, 4); }
+    /** Every person carries a base grid of 4 x 10 (gamefixes); worn containers add grids of their own (see {@link #grids}). */
+    public Actor(long id, String name, int invSize) { this.id = id; this.name = name; this.inv = new Inventory(4, 10); }
 
     /** Every grid this actor carries: the base grid, then each worn container's (the backpack's, the pouch's). */
     public java.util.List<Inventory> grids() {

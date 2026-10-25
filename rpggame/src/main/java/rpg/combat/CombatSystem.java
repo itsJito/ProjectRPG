@@ -609,6 +609,7 @@ public final class CombatSystem {
 
     /** Contact made: guard and parry, mitigation, HP damage, impact and stagger, feedback, XP, events. */
     public void resolve(Actor a, Actor v, float potential, float impact, DamageType type, Projectile proj, float px, float py, float pz, String how, boolean behind) {
+        if (!a.alive) { environmentalDamage(v, Math.max(0, Math.round(potential)), how); return; }
         if (a instanceof rpg.ai.Npc && g.law.inCustody(v)) return;
         contacts++;
         if (v.cs.iframes > 0 || v.gaseousT > 0 && proj == null) {
@@ -773,6 +774,10 @@ public final class CombatSystem {
     private void kill(Actor killer, Actor v, long cause) {
         if (killer == g.player && v != g.player) lastPlayerKill = g.time;
         v.alive = false;
+        if (g.chemistry != null) g.chemistry.retire(v);
+        for (Projectile shot : projectiles) if (shot.owner == v && !shot.done) { dropArrow(shot); shot.done = true; }
+        if (g.gore != null) for (var wound : g.gore.wounds.values()) if (wound.by == v.id) wound.by = 0;
+        for (Actor other : g.actors()) if (other.cs.lastAttacker == v.id) other.cs.lastAttacker = 0;
         v.hp = 0;
         v.cs.cancel();
         kills++;

@@ -52,7 +52,7 @@ public final class UiEvents {
         return switch (e.type()) {
             case "ActorHit", "TargetHit", "Parry", "Dodge", "ArrowLoosed", "SpellCast", "PrayerRaised", "ActorKilled", "ArrestResisted" -> mine ? "combat" : null;
             case "CrimeCommitted", "CrimeWitnessed", "CrimeReported", "BountyChanged", "BountyPaid", "Arrested", "TestimonyAdded" -> mine ? "law" : null;
-            case "ItemTaken", "ItemDropped", "ItemDeposited", "Equipped", "Unequipped", "Ate", "ResourceGathered", "TestSupplyTaken" -> mine ? "inventory" : null;
+            case "Pickpocketed", "ItemTaken", "ItemDropped", "ItemDeposited", "Equipped", "Unequipped", "Ate", "ResourceGathered", "TestSupplyTaken" -> mine ? "inventory" : null;
             case "Trade" -> mine ? "coins" : null;
             case "HonorChanged" -> "honor";
             case "ContainerOpened" -> mine ? "container" : null;
