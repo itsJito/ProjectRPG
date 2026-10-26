@@ -1568,7 +1568,8 @@ public final class Gfx implements AutoCloseable {
         boolean[] gone = goneSegs(a);
         // the Holy Light's glow (gamefixes): the whole figure lit gold for a second as the beam rises and bursts
         float glow = 0;
-        if (a == sceneGame.player) {
+        // Title and creator previews render characters without an active gameplay scene.
+        if (sceneGame != null && a == sceneGame.player) {
             float lt = sceneGame.fx.light();
             if (lt >= 0 && lt < 1.3f) glow = lt < 0.2f ? lt / 0.2f : lt < 0.8f ? 1 : 1 - (lt - 0.8f) / 0.5f;
         }
