@@ -113,14 +113,14 @@ public final class Hud {
     /** A placement inside the scene frame: (fx, fy) from the frame's top-left corner. */
     Placement inFrame(String fragment, float fx, float fy) {
         Fragment f = fragments.get(fragment);
-        return Placement.at(Anchor.CENTER, -FW / 2 + fx + f.width() / 2, FRAME_Y - FH / 2 + fy + f.height() / 2);
+        return Placement.at(Anchor.CENTER, -frameWidth() / 2 + fx + f.width() / 2, FRAME_Y - FH / 2 + fy + f.height() / 2);
     }
 
     private void layout() {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
         group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
-                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
+                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "levelbanner", Placement.at(Anchor.TOP, 0, 96), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
         group("frame", "frame", Placement.at(Anchor.CENTER, 0, FRAME_Y));
         // what is not the player's own (a container, a body, a shop) stands apart, left of the frame (Windows.detach)
@@ -179,6 +179,7 @@ public final class Hud {
 
     /** The scene state machine: a scene swaps fragment groups in and out (each fades on its own). */
     public void go(Scene s) {
+        if (inventoryOnly() && s != Scene.INVENTORY && s != Scene.WORLD) return;
         if (s == scene) return;
         Scene from = scene;
         scene = s;
@@ -193,6 +194,8 @@ public final class Hud {
     }
     /** A scene key: opens it, or closes it when it is already open. */
     public void toggle(Scene s) { go(scene == s ? Scene.WORLD : s); }
+    public float frameWidth() { return inventoryOnly() ? 684 : FW; }
+    public boolean inventoryOnly() { return win == Win.CONTAINER && container != null; }
     public void openTabKey(int t) { if (t >= 0 && t < TAB_SCENES.length) toggle(TAB_SCENES[t]); }
 
     public boolean escape() {
@@ -222,7 +225,11 @@ public final class Hud {
 
     /** A numbered choice on whatever is open (dialogue options, menu items) from the keyboard. */
     public void choose(int n) {
-        if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog; dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
+        if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog;
+            if (g.actor(d.npc) instanceof rpg.ai.Npc speaker && (!speaker.canTalk(g) || d.employment != null && d.employment != speaker.employmentState())) {
+                dialog = speaker.canTalk(g) ? g.dialogue.talk(speaker) : null; return;
+            }
+            dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
             if (dialog != null && dialog.npc == 0 && !dialog.pauseMenu && d.npc != 0) dialog.npc = d.npc;
             if(dialog==null && !d.choices.get(n).closes() && !d.pauseMenu && d.npc!=0 && win==Win.NONE && scene==Scene.WORLD && !g.law.inCustody(g.player)
                     && g.actor(d.npc) instanceof rpg.ai.Npc speaker && speaker.alive && speaker.loaded && speaker.distTo(g.player)<4)dialog=g.dialogue.talk(speaker);
@@ -262,6 +269,12 @@ public final class Hud {
         java.util.Set<String> on = new java.util.LinkedHashSet<>();
         Map<String, Placement> at = new java.util.HashMap<>();
         for (String gid : scenes.get(scene)) for (Slot s : groups.getOrDefault(gid, List.of())) if (fragments.containsKey(s.fragment()) && on.add(s.fragment())) at.put(s.fragment(), s.at());
+        if (inventoryOnly()) {
+            on.remove("equipment"); on.remove("actionbar"); on.remove("dialogue"); on.remove("offer");
+            at.put("grids",inFrame("grids",16,52));
+            at.put("iteminfo",inFrame("iteminfo",404,52));
+            at.put("container",Placement.at(Anchor.CENTER,-frameWidth()/2-166,FRAME_Y));
+        }
         if (settings.open) on.clear();
         // dead, the interface steps aside for the death itself (the rest fades out where it was)
         if (!g.player.alive) on.retainAll(java.util.Set.of("death", "console"));

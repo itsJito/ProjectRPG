@@ -11,6 +11,7 @@ public final class Dialog {
     public final List<Choice> choices = new ArrayList<>();
     /** The NPC spoken to (0 none): the box closes if they die or the player walks off. */
     public long npc;
+    public rpg.ai.Npc.EmploymentState employment;
     /** The game menu uses the pause presentation while retaining ordinary numbered-choice handling. */
     public boolean pauseMenu;
     public int focusedChoice, choiceOffset, textOffset;

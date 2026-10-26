@@ -127,8 +127,9 @@ public final class Foliage {
             if(actor instanceof rpg.ai.Npc n && !n.loaded || actor instanceof rpg.animal.Animal a && !a.loaded)continue;
             float speed=(float)Math.hypot(actor.vx,actor.vz);
             if(speed<0.25f || g.time<trailAt.getOrDefault(actor.id,-1.0))continue;
-            Patch near=plantAt(actor.x,actor.z,actor.radius+0.35f);
-            if(near==null)continue;
+            // a grown plant, or a planted patch (herbs, flax, a berry bush): both bend and rustle as a body goes through
+            boolean patch=Blocks.plant(g.vox.block((int)Math.floor(actor.x),(int)Math.floor(actor.y+0.1f),(int)Math.floor(actor.z)));
+            if(!patch && plantAt(actor.x,actor.z,actor.radius+0.35f)==null)continue;
             trailAt.put(actor.id,g.time+0.2);
             if(trail.size()>=64)trail.removeFirst();
             trail.addLast(new Trail(actor.x,actor.y,actor.z,actor.radius+0.05f,g.time));

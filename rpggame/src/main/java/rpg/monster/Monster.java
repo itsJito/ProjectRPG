@@ -65,6 +65,8 @@ public final class Monster extends Npc {
     /** Running (its faster gait), and when it next makes a noise of its own. */
     public boolean running;
     public double nextVoice;
+    /** A gallery puppet: moved by hand, its mind left out. */
+    public boolean puppet;
 
     public Monster(long id, MonsterKind kind, int level, float x, float z) {
         super(id, kind.title, Role.MONSTER, kind.title + " (level " + level + ")", x, z);
@@ -105,8 +107,8 @@ public final class Monster extends Npc {
     @Override public float eyeY() { return y + height * (kind.form == MonsterKind.Form.HUMANOID ? 0.9f : 0.7f) + altitude; }
     @Override public float chestY() { return y + height * 0.55f + altitude; }
 
-    /** How big its figure is against a person's (its own skeleton's scale). */
-    public float figureScale() { return kind.scale(); }
+    /** How big its figure is against a person's (its own skeleton's scale): the humanoids' swings reach as far as their arms. */
+    @Override public float figureScale() { return kind.form == MonsterKind.Form.HUMANOID ? kind.scale() : 1; }
 
     public String label() { return (breed != null ? breed.title + " dragon" : kind.title) + "  (level " + level + ")"; }
 

@@ -423,6 +423,8 @@ public final class AiSystem {
         stuckEvents++;
         if (g.scripted) System.out.printf("      [stuck] %s %s at (%.2f, %.2f, %.2f) -> (%.1f, %.1f), %s, v (%.2f, %.2f) ground %s route %d facts %s%n", n.name, n.goal, n.x, n.y, n.z, n.gx, n.gz, n.nativeAction, n.vx, n.vz, n.grounded, n.routeCells, java.util.Arrays.toString(n.facts));
         n.lastOutcome = "route blocked while " + n.goal.toString().toLowerCase() + "; replanning";
+        // no way to the one they meant to talk with: someone else, or back to the day, rather than the same wall again
+        if (n.goal == Brain.Goal.SOCIALIZE && n.socialPartner != 0) { n.unreachable.put(n.socialPartner, g.time + 150); n.socialPartner = 0; }
         n.remember(new Memory("BLOCKED", 0, 0, DevMap.jurisdiction(n.gx, n.gz), g.state.minutes, 1, "personal", 0, 0, String.format("could not reach (%.0f, %.0f)", n.gx, n.gz)), 24);
         g.state.commit("NpcStuck", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, n.goal + String.format(" to (%.1f, %.1f)", n.gx, n.gz));
         n.hasGoalPos = false;
@@ -521,10 +523,15 @@ public final class AiSystem {
             if (t != null && t.alive && !g.law.inCustody(t) && ZonePolicy.routineAllowed(n, t.x, t.z) && !(law && (g.law.settled(t.id, n.hunt.startedAt) && g.law.bounty(t.id, n.homeJurisdiction) <= 0)) && canSee(n, t)) { callOut(n, t); return t; }
         }
         if (n.hostileToPlayer && !g.law.inCustody(p) && ZonePolicy.routineAllowed(n, p.x, p.z) && p.alive && n.distTo(p) < n.aggroRange && canSee(n, p)) return p;
-        // a monster close by that is out for blood: guards and fighters deal with it, everyone else gets away from it
-        if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all())
-            if (mo.alive && mo.loaded && (mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK || n.cs.lastAttacker == mo.id)
-                    && n.distTo(mo) < (n.combatant() ? 18 : 12) && canSee(n, mo)) return mo;
+        // monsters (gamefixes: every person dislikes them, as they do people): one out for blood is dealt with or fled
+        // from further off; any other in plain sight close by, a fighter goes for (in its own beat) and anyone else keeps
+        // away from - a bat at its roost and a ghost at its grave included
+        if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) {
+            if (!mo.alive || !mo.loaded || !canSee(n, mo)) continue;
+            boolean hunting = mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK || n.cs.lastAttacker == mo.id;
+            float reach = hunting ? (n.combatant() ? 18 : 12) : (n.combatant() ? 12 : 7);
+            if (n.distTo(mo) < reach && (hunting || !n.combatant() || ZonePolicy.routineAllowed(n, mo.x, mo.z))) return mo;
+        }
         // a dangerous animal close by: guards deal with it, everyone else gets away from it
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all())
             if (an.alive && an.loaded && an.dangerous() && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
@@ -533,7 +540,7 @@ public final class AiSystem {
                 if (a == n || !a.alive || a.dummy || alliedWatch(n,a)) continue;
                 // the watch goes after bounties above the pursuit line (or anyone who came to them); lawmen leave their
                 // post for it, and in a lockdown everyone watches further
-                float range = g.law.lockdown(n.homeJurisdiction) ? 34 : n.role == Npc.Role.LAWMAN ? 14 : 24;
+                float range = g.law.lockdown(n.homeJurisdiction) ? 34 : 24;
                 if (g.law.pursued(a.id, n.homeJurisdiction) && ZonePolicy.routineAllowed(n, a.x, a.z) && !g.law.inCustody(a) && n.distTo(a) < range && canSee(n, a)) return a;
             }
         }
@@ -573,7 +580,7 @@ public final class AiSystem {
             x = n.x + (t.x - n.x) * 0.6f; z = n.z + (t.z - n.z) * 0.6f;
         }
         double clue = w == null ? g.time : Math.max(w.seenAt, w.heardAt);
-        float patience = n.role == Npc.Role.GUARD ? 55 : n.role == Npc.Role.LAWMAN ? 25 : 22;
+        float patience = n.watch() ? 55 : 22;
         Hunt h = new Hunt(t.id, why, x, z, g.time, patience);
         h.clueAt = Math.min(g.time, clue);
         h.vx = t.vx; h.vz = t.vz;
@@ -585,8 +592,8 @@ public final class AiSystem {
         // the force searches together: guards close by who are free take up the same search
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) for (Npc o : g.npcs) {
             if (o == n || o == t || !o.alive || !o.loaded || o.hunt != null || o.goal == Brain.Goal.FIGHT) continue;
-            if (o.role != Npc.Role.GUARD || !o.homeJurisdiction.equals(n.homeJurisdiction) || o.distTo(n) > 35) continue;
-            Hunt j = new Hunt(t.id, n.name + " lost " + t.name, x, z, g.time, o.role == Npc.Role.GUARD ? 55 : 25);
+            if (!o.watch() || !o.homeJurisdiction.equals(n.homeJurisdiction) || o.distTo(n) > 35) continue;
+            Hunt j = new Hunt(t.id, n.name + " lost " + t.name, x, z, g.time, 55);
             j.clueAt = h.clueAt; j.vx = h.vx; j.vz = h.vz; j.joined = true;
             o.hunt = j;
             o.nextThink = 0;
@@ -625,8 +632,8 @@ public final class AiSystem {
             Stealth.Aware w = stealth.of(n, t);
             if (w != null && Math.max(w.seenAt, w.heardAt) > h.clueAt + 0.05) h.clue(w.x, w.z, w.seenAt >= w.heardAt ? t.vx : 0, w.seenAt >= w.heardAt ? t.vz : 0, Math.max(w.seenAt, w.heardAt));
         }
-        // a bandit does not chase far from its camp; a lawman does not leave his post for long
-        boolean leash = n.hostileToPlayer && Math.hypot(h.x - n.spawnX, h.z - n.spawnZ) > 26 || n.role == Npc.Role.LAWMAN && Math.hypot(h.x - n.postX, h.z - n.postZ) > 22;
+        // Outlaws keep to their camp; the watch shares one pursuit policy.
+        boolean leash = n.hostileToPlayer && Math.hypot(h.x - n.spawnX, h.z - n.spawnZ) > 26;
         if (h.expired(g.time) || leash) {
             n.hunt = null;
             n.vigilantUntil = g.time + 90;
@@ -702,8 +709,7 @@ public final class AiSystem {
         for (Npc o : g.npcs) {
             if (o == n || !o.alive || !o.loaded || !(o.role == Npc.Role.GUARD || o.role == Npc.Role.LAWMAN) || o.goal == Brain.Goal.FIGHT) continue;
             if (!o.homeJurisdiction.equals(jur) && !o.homeJurisdiction.equals(n.homeJurisdiction)) continue;
-            // (a guard is the one to fetch: the lawman keeps his chancery, and is fetched only when there is no guard)
-            float d = n.distTo(o) + (o.role == Npc.Role.LAWMAN ? 100 : 0);
+            float d = n.distTo(o);
             if (d < bd) { bd = d; best = o; }
         }
         return best;
@@ -715,6 +721,7 @@ public final class AiSystem {
         for (Npc o : g.npcs) {
             if (o == n || !o.alive || !o.loaded || o.combatant() || o.role == Npc.Role.THIEF && n.role != Npc.Role.THIEF) continue;
             if (o.goal == Brain.Goal.FIGHT || o.goal == Brain.Goal.FLEE || o.goal == Brain.Goal.SLEEP || o.goal == Brain.Goal.REPORT_CRIME) continue;
+            if (n.unreachable.getOrDefault(o.id, -1.0) > g.time) continue;
             float d = n.distTo(o);
             if (d < bd) { bd = d; best = o; }
         }
@@ -723,17 +730,14 @@ public final class AiSystem {
 
     /** Passes news through the same hearing, evidence and feedback rules as street gossip. */
     public int share(Npc from, Npc to) {
-        int n = 0;
+        int n = g.law.posses.tell(from, to) ? 1 : 0;
         for (Memory m : new ArrayList<>(from.memories)) {
             if (rumors.tell(from, to, m, false)) n++;
         }
         return n;
     }
 
-    public String smallTalk(Npc n, Npc p) {
-        for (Memory m : n.memories) if (m.crime() && m.subject != p.id) return "Did you hear? " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!";
-        return g.dialogue.greeting(n);
-    }
+    public String smallTalk(Npc n, Npc p) { return g.dialogue.smallTalk(n, p); }
 
     public void say(Npc n, String text) { n.speech = text; n.speechUntil = g.time + 3.5; }
 
@@ -853,6 +857,8 @@ public final class AiSystem {
             ItemStack w = n.eq.get(ItemDef.Slot.MAIN);
             if (w != null && n.role == Npc.Role.BANDIT) { g.objects.drop(w, n.x + 0.4f, DevMap.FLOOR + 0.05f, n.z); n.eq.set(ItemDef.Slot.MAIN, null); }
         }
+        // (a monster's remains are its kind's own - ashes, ectoplasm, a troll's big bones - rolled with its drops)
+        if (n instanceof rpg.monster.Monster) return;
         ItemDef bones = n.role == Npc.Role.BRUTE ? Items.BIG_BONES : Items.BONES;
         g.state.mint(bones, 1);
         g.objects.drop(new ItemStack(bones, 1), n.x, DevMap.FLOOR + 0.05f, n.z + 0.3f);

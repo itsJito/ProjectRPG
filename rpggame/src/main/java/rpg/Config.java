@@ -5,8 +5,24 @@ package rpg;
  * None of these is final balance; the GDD leaves them open.
  */
 public final class Config {
-    /** Multiplier on every XP reward (the console changes it): 1 keeps the action values on the shared curve (gamefixes: leveling was far too fast at 10). */
-    public float xpRate = 1f;
+    /**
+     * The XP rate on every award (gamefixes: levelling took too long at 1x, and 10x was far too quick). 2.5x on the
+     * OSRS-shaped curve, with each skill's own pace below on top of it.
+     */
+    public float xpRate = 2.5f;
+    /**
+     * How quickly each family of skill goes, against the rate (in the RS3 / WoW way: the skills whose actions are slow
+     * and few - agility's courses, a lock or a pocket, a burial - pay more for each; combat, which pays on every blow
+     * landed, a little less).
+     */
+    public static float skillPace(rpg.skill.Skill s) {
+        return switch (s) {
+            case AGILITY, THIEVING, FAITH -> 1.3f;
+            case ATTACK, STRENGTH, DEFENSE, HEALTH, ARCHERY, MAGIC -> 0.85f;
+            case SMITHING, CRAFTING, CONSTRUCTION, COOKING, FIREMAKING -> 1.1f;
+            default -> 1f;
+        };
+    }
     /** Interaction: commit range, inspect range, the assist cone (cosine). */
     public float interactRange = 3f, inspectRange = 5f, assistCos = 0.97f;
     /** Gaits: brisk walking, a jog (Caps Lock), sprint on Shift, and a deliberate sneak. */

@@ -290,10 +290,23 @@ public final class Gfx implements AutoCloseable {
             cmd.pointLight(f.x, f.y + 0.6f, f.z, 7, 4.5f * fl, 2.2f * fl, 0.6f * fl, 0);
         }
         cmd.pointLight(DevMap.FURNACE_AT[0] + 0.5f, DevMap.FLOOR + 0.4f, DevMap.FURNACE_AT[1] + 1.0f, 4, 3f, 1.4f, 0.4f, 0);
+        dungeonLights(g);
         smoke(g);
         lens(g);
         for (CombatSystem.Projectile p : g.combat.projectiles) if (p.spell != null) cmd.pointLight(p.x, p.y, p.z, 4, p.spell == Spells.Spell.FIRE_BOLT ? 5f : 1.5f, 2.5f, p.spell == Spells.Spell.FIRE_BOLT ? 0.8f : 4.5f, 0);
         chemicalLights(g, dt);
+        // the level-up's Holy Light: a warm gold light at the beam, brightest as it bursts
+        float lt = g.fx.light();
+        if (lt >= 0 && lt < Fx.LIGHT_TIME) {
+            float k = lt < Fx.LIGHT_RISE ? lt / Fx.LIGHT_RISE : Math.max(0, 1 - (lt - Fx.LIGHT_BURST) / (Fx.LIGHT_TIME - Fx.LIGHT_BURST));
+            k = Math.min(1, k) * (lt > Fx.LIGHT_BURST - 0.06f && lt < Fx.LIGHT_BURST + 0.25f ? 1.6f : 1);
+            cmd.pointLight(g.player.x, g.player.y + 1.6f, g.player.z, 10, 7.5f * k, 5.6f * k, 2.4f * k, 0);
+        }
+        for (Actor actor : g.actors()) if ((g.chemistry.state(actor.id) & AstrattoNative.CHEM_BURNING) != 0) {
+            g.chemistry.center(actor, burnPosition);
+            // A bounded real light at the flame, with occlusion, never a lingering source under the last body position.
+            cmd.pointLight(burnPosition[0],burnPosition[1]+0.15f,burnPosition[2],4,2.8f,1.2f,0.25f,AstrattoNative.LIGHT_SHADOW);
+        }
         int burning = 0;
         for (var chemical : g.chemistry.active) if ((chemical.state() & AstrattoNative.CHEM_BURNING) != 0 && Math.hypot(chemical.x() - camX, chemical.z() - camZ) < 35 && burning++ < 20) {
             Actor receiver = g.actor(chemical.id());
@@ -310,6 +323,7 @@ public final class Gfx implements AutoCloseable {
         for (var visual : g.chemistry.visuals) cmd.emitter(visual.id(),visual.kind(),visual.x(),visual.y(),visual.z(),visual.radius(),visual.rate(),0.08f,visual.life(),visual.r(),visual.green(),visual.b(),0,0.8f,0);
         for(var ripple:g.chemistry.ripples)cmd.ripple(ripple.x(),ripple.z(),ripple.radius(),ripple.strength());
         foliage(g);
+        fences(g);
         // characters
         Actor p = g.player;
         shadowProxy(g,p);
@@ -336,6 +350,9 @@ public final class Gfx implements AutoCloseable {
             }
         }
         for (Actor d : g.dummies) dummy(d, g.time);
+        holyLight(g);
+        // the monsters (gamefixes: they were simulated, heard and fought, but never drawn - the invisible imps and goblins)
+        if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) if ((mo.alive ? mo.loaded : mo.ragdoll != 0) && mo.distTo(camX, camZ) < 90) monster(mo, dt);
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.loaded && (an.alive || an.carcass() && !an.butchered) && an.distTo(camX, camZ) < 70) animal(an, dt, g.time);
         // objects
         for (WorldObject o : g.objects.all()) object(g, o, dt);
@@ -356,7 +373,7 @@ public final class Gfx implements AutoCloseable {
         throwGuide(g);
         // arrows and blades lodged in bodies, where they went in
         for (Actor a : g.actors()) for (CombatSystem.Stuck st : a.stuck) {
-            float[] w = st.world(a);
+            float[] w = st.world(g, a);
             float len = CombatSystem.ammoLength(st.stack().def);
             held(st.stack().def, new float[]{w[0] - w[3] * len, w[1] - w[4] * len, w[2] - w[5] * len}, new float[]{w[3], w[4], w[5]}, a.yaw, false);
         }
@@ -452,7 +469,7 @@ public final class Gfx implements AutoCloseable {
             flameState=g.chemistry.active;nextFlameSelection=g.time+0.25;flameCamX=camX;flameCamZ=camZ;
             flameCandidates.clear();flameNeighbors.clear();
             for (var state : flameState) if ((state.state() & AstrattoNative.CHEM_BURNING) != 0
-                    && Math.hypot(state.x()-camX,state.z()-camZ)<32) flameCandidates.add(state);
+                    && g.actor(state.id()) == null && Math.hypot(state.x()-camX,state.z()-camZ)<32) flameCandidates.add(state);
             flameCandidates.sort(java.util.Comparator.<Snapshots.Chemical>comparingDouble(source ->
                     Math.hypot(source.x()-camX,source.z()-camZ) - (flameLights.stream().anyMatch(light -> light.id==source.id()) ? 2 : 0)).thenComparingLong(source -> source.id()));
             for (var light:flameLights)light.wanted=false;
@@ -470,8 +487,6 @@ public final class Gfx implements AutoCloseable {
         }
         float blend=1-(float)Math.exp(-Math.min(dt,0.1f)*8);
         for(var light:flameLights) {
-            Actor actor=light.wanted?g.actor(light.id):null;
-            if(actor!=null) { g.chemistry.center(actor,burnPosition);light.x=burnPosition[0];light.y=burnPosition[1];light.z=burnPosition[2]; }
             light.weight+=((light.wanted?1:0)-light.weight)*blend;
             if(light.weight>0.01f)cmd.pointLight(light.x,light.y+0.5f,light.z,3,3*light.weight,1.2f*light.weight,0.2f*light.weight,0);
         }
@@ -502,6 +517,51 @@ public final class Gfx implements AutoCloseable {
         }
     }
 
+    // ------------------------------------------------------------------ fences (gamefixes: a model, not a block)
+    private record FenceMesh(long hash, int[] meshes, Props.Layer[] info) {}
+    private final Map<Integer, FenceMesh> fenceMeshes = new HashMap<>();
+    private final Map<Integer, Double> fenceChecked = new HashMap<>();
+    private int fenceWorld = -1;
+
+    /** What borders a fence cell, for its model: 3 fence, 2 a wall (anything solid to butt a rail against), 0 open. */
+    private static int fenceSide(Rpg g, int x, int y, int z) {
+        int b = g.vox.block(x, y, z);
+        if (b == rpg.world.Blocks.FENCE) return 3;
+        return g.vox.solid(x, y, z) && !rpg.world.Blocks.isLeaves(b) && !rpg.world.Blocks.glass(b) ? 2 : 0;
+    }
+
+    /** Each nearby column's fences: rebuilt when the fence cells in it change (each column checked about once a second). */
+    private void fences(Rpg g) {
+        if (fenceWorld != System.identityHashCode(g.vox)) {
+            for (var f : fenceMeshes.values()) for (int id : f.meshes()) if (id != 0) r.release(AstrattoNative.RES_MESH, id);
+            fenceMeshes.clear(); fenceChecked.clear(); fenceWorld = System.identityHashCode(g.vox);
+        }
+        int y0 = DevMap.FLOOR - 1, y1 = DevMap.FLOOR + 4, built = 0;
+        for (int cx = 0; cx * 16 < DevMap.SX; cx++) for (int cz = 0; cz * 16 < DevMap.SZ; cz++) {
+            if (Math.hypot(cx * 16 + 8 - camX, cz * 16 + 8 - camZ) > 80) continue;
+            int key = cx + cz * 64;
+            FenceMesh fm = fenceMeshes.get(key);
+            if ((fm == null || clock - fenceChecked.getOrDefault(key, -99.0) > 1) && built < 2) {
+                fenceChecked.put(key, clock);
+                long hash = 1469598103934665603L;
+                for (int x = cx * 16; x < cx * 16 + 16; x++) for (int z = cz * 16; z < cz * 16 + 16; z++) for (int y = y0; y <= y1; y++)
+                    if (g.vox.block(x, y, z) == rpg.world.Blocks.FENCE) hash = (hash ^ (x * 131071L + z * 8191L + y)) * 1099511628211L;
+                if (fm == null || fm.hash() != hash) {
+                    built++;
+                    if (fm != null) for (int id : fm.meshes()) if (id != 0) r.release(AstrattoNative.RES_MESH, id);
+                    Props.Layer[] ls = Props.fences(cx * 16, cz * 16, y0, y1, (x, y, z) -> fenceSide(g, x, y, z));
+                    int[] ids = new int[ls.length];
+                    for (int i = 0; i < ls.length; i++) { Meshes.Boxes b = ls[i].boxes(); ids[i] = b.count() == 0 ? 0 : r.mesh(b.vertices(), b.count()); }
+                    fm = new FenceMesh(hash, ids, ls);
+                    fenceMeshes.put(key, fm);
+                }
+            }
+            if (fm == null) continue;
+            m.identity().translate(cx * 16, y0, cz * 16);
+            for (int i = 0; i < fm.meshes().length; i++) if (fm.meshes()[i] != 0) put(fm.meshes()[i], 0, 1, 1, 1, fm.info()[i].emissive(), 1, fm.info()[i].rough(), fm.info()[i].metal());
+        }
+    }
+
     private void put(int mesh, int rgb, float shade, float rough, float metal) {
         put(mesh, 0, ((rgb >> 16) & 255) / 255f * shade, ((rgb >> 8) & 255) / 255f * shade, (rgb & 255) / 255f * shade, 0, 1, rough, metal);
     }
@@ -512,11 +572,15 @@ public final class Gfx implements AutoCloseable {
         cmd.model(mesh, flags, m16, r*charTint, g*charTint, b*charTint, 1, emissive, light, rough, metal);
     }
 
+    /** How much bigger than a person's grip what a hand holds is drawn (a troll's club is a troll's size). */
+    private float heldScale = 1;
+
     /** A held item: its own mesh, from the grip along a direction, flat across the body's right (or facing forward). */
     private void held(ItemDef d, float[] grip, float[] dir, float yaw, boolean flatToFace) {
         if (d == null) return;
         float[] ref = flatToFace ? fwd(yaw) : right(yaw);
         m.frame(grip, dir, ref);
+        if (heldScale != 1) m.scale(heldScale, heldScale, heldScale);
         if (d.family == Family.ARROW || d.family == Family.BOLT) {
             // a nocked arrow is one arrow, not the bundle the inventory holds
             int mesh = mesh("arrow:" + d.color + ":" + d.family, () -> Meshes.arrow(d.color, d.family == Family.BOLT));
@@ -870,6 +934,560 @@ public final class Gfx implements AutoCloseable {
         if (!dead && lie < 0.5f) cmd.shadowBody(a.x, a.y, a.z, a.radius, a.height * (1 - lie * 0.5f));
     }
 
+    // ------------------------------------------------------------------ dungeons: torchlight
+    /**
+     * The dungeon the eye is in, lit as it is lit (gamefixes): a torch in an iron sconce on every lamp-wall, its flame
+     * guttering and its warm light flickering with it; the braziers' fire bright and high, the fire pits glowing low.
+     * There is no daylight underground - away from these it is dark.
+     */
+    private void dungeonLights(Rpg g) {
+        var dl = rpg.world.DungeonLayout.at(camX, camZ);
+        if (dl == null) return;
+        int i = 0;
+        for (var s : dl.spots) {
+            i++;
+            float x = dl.worldX(s.x()) + 0.5f, z = dl.worldZ(s.z()) + 0.5f;
+            float fl = 0.86f + 0.1f * (float) Math.sin(clock * 9.1 + i * 1.7) + 0.05f * (float) Math.sin(clock * 23.3 + i);
+            long emit = 0x5000000000L + dl.id * 4096L + i;
+            switch (s.what()) {
+                case "lamp" -> {
+                    float dir = s.arg() == 1 ? 1 : -1;
+                    float tx = x + dir * 0.62f, ty = DevMap.FLOOR + 2.0f;
+                    m.identity().translate(tx, ty, z).rotateY(dir > 0 ? (float) (-Math.PI / 2) : (float) (Math.PI / 2));
+                    drawLayers("dungeon-torch", Props::torch);
+                    cmd.emitter(emit, 0, tx + dir * 0.06f, ty + 0.36f, z, 0.05f, 22, 0.06f, 0.42f, 5.5f, 1.8f, 0.35f, 0, 0.45f, 0);
+                    cmd.pointLight(tx + dir * 0.3f, ty + 0.45f, z, 12, 4.6f * fl, 2.4f * fl, 0.8f * fl, 0);
+                }
+                case "brazier" -> {
+                    cmd.emitter(emit, 0, x, DevMap.FLOOR + 1.3f, z, 0.25f, 46, 0.12f, 0.8f, 5.5f, 1.8f, 0.3f, 0, 0.9f, 0);
+                    cmd.pointLight(x, DevMap.FLOOR + 2.0f, z, 14, 6.5f * fl, 3.2f * fl, 1.0f * fl, 0);
+                }
+                case "embers" -> { if (i % 3 == 0) cmd.pointLight(x, DevMap.FLOOR + 0.6f, z, 5, 2.6f * fl, 0.9f * fl, 0.2f, 0); }
+                default -> { }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ the level-up's Holy Light
+    /**
+     * The beam (gamefixes): a thick column of gold-white light erupting from the ground under the feet and shooting
+     * up - a white-hot core inside a broader gold sheath, both turning slowly - a flash ring on the ground where it
+     * rose, and at its top, as it bursts, a bright crown that blows apart (the sparks are Fx's). It follows the body.
+     */
+    private void holyLight(Rpg g) {
+        float t = g.fx.light();
+        if (t < 0 || t > Fx.LIGHT_TIME) return;
+        Actor p = g.player;
+        g.fx.lightX = p.x; g.fx.lightY = p.y; g.fx.lightZ = p.z;
+        float rise = Math.min(1, t / Fx.LIGHT_RISE);
+        rise = 1 - (1 - rise) * (1 - rise) * (1 - rise);                  // it shoots up and slows near the top
+        float fade = t < Fx.LIGHT_BURST ? 1 : Math.max(0, 1 - (t - Fx.LIGHT_BURST) / 0.75f);
+        if (fade <= 0.001f) return;
+        float top = 9.5f * rise, spin = (float) (clock * 1.7);
+        // the column: its base swells as it erupts and thins as it fades
+        float swell = 1 + 0.35f * (float) Math.max(0, Math.sin(Math.min(1, t / 0.3f) * Math.PI));
+        for (int layer = 0; layer < 3; layer++) {
+            // (light enough that the body inside it still shows through, lit gold)
+            float w = (layer == 0 ? 0.16f : layer == 1 ? 0.5f : 0.95f) * swell * (0.6f + 0.4f * fade);
+            float r = layer == 0 ? 1.5f : layer == 1 ? 1.1f : 0.7f, gc = layer == 0 ? 1.4f : layer == 1 ? 0.82f : 0.48f, b = layer == 0 ? 1.1f : layer == 1 ? 0.28f : 0.1f;
+            float a = fade * (layer == 0 ? 0.55f : layer == 1 ? 0.22f : 0.1f);
+            m.identity().translate(p.x, p.y + top / 2, p.z).rotateY(spin * (layer == 1 ? -1 : 1) + layer * 0.4f).scale(w, top, w);
+            System.arraycopy(m.m, 0, m16, 0, 16);
+            cmd.model(box, AstrattoNative.MODEL_ADDITIVE | AstrattoNative.MODEL_NO_SHADOW, m16, r, gc, b, a, 0.6f, 0, 1, 0);
+        }
+        // the ring on the ground where it erupted, spreading and fading
+        float ringT = Math.min(1, t / 0.7f), ring = 0.4f + 1.6f * ringT;
+        for (int i = 0; i < 12; i++) {
+            // a spreading ring: twelve short arcs round the feet
+            float ang = i / 12f * 6.283f + spin * 0.3f;
+            m.identity().translate(p.x + (float) Math.cos(ang) * ring, p.y + 0.03f, p.z + (float) Math.sin(ang) * ring).rotateY(-ang).scale(0.06f, 0.02f, ring * 0.55f);
+            System.arraycopy(m.m, 0, m16, 0, 16);
+            cmd.model(box, AstrattoNative.MODEL_ADDITIVE | AstrattoNative.MODEL_NO_SHADOW, m16, 1.2f, 0.85f, 0.25f, (1 - ringT) * 0.35f, 0.5f, 0, 1, 0);
+        }
+        // the crown at the head of the beam: bright as it bursts, then blown apart
+        if (t > Fx.LIGHT_BURST - 0.15f && t < Fx.LIGHT_BURST + 0.35f) {
+            float bt = (t - (Fx.LIGHT_BURST - 0.15f)) / 0.5f, size = 0.4f + bt * 2.4f;
+            m.identity().translate(p.x, p.y + top, p.z).rotateY(spin).rotateX(0.6f).scale(size, size, size);
+            System.arraycopy(m.m, 0, m16, 0, 16);
+            cmd.model(box, AstrattoNative.MODEL_ADDITIVE | AstrattoNative.MODEL_NO_SHADOW, m16, 1.6f, 1.3f, 0.6f, (1 - bt) * 0.5f, 0.8f, 0, 1, 0);
+        }
+    }
+
+    // ------------------------------------------------------------------ monsters
+    /** A monster's gait and motion between frames: its step phase and stride, how far it is leaning, its wings' beat. */
+    private static final class MonsterPose { float phase, amp, flap, lean; }
+    private final java.util.Map<Long, MonsterPose> monsterPoses = new java.util.HashMap<>();
+    private final Mat4 mf = new Mat4(), mp = new Mat4(), mq = new Mat4(), ma = new Mat4(), mb = new Mat4(), mc = new Mat4();
+    private float mShade = 1, mAlpha = 1, mGlow = 0;
+
+    /** One of a monster's parts in a frame measured in its voxels (the frame carries the figure's scale). */
+    private void mpart(Mat4 frame, ItemModels.Model p) {
+        if (p == null) return;
+        float k = 1 / ItemModels.VOX;
+        m.set(frame).scale(k, k, k);
+        int mesh = partMesh(p)[1];
+        if (mesh == 0) return;
+        System.arraycopy(m.m, 0, m16, 0, 16);
+        float sh = mShade * charTint;
+        cmd.model(mesh, mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
+    }
+    private static float[] at(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformPoint(x, y, z, o); return o; }
+    private static float[] dirOf(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformDir(x, y, z, o); return norm(o); }
+
+    /**
+     * A frame for a part laid between two points in the world: its y axis from b toward a for a hanging limb (from a
+     * toward b for a part that stands up from a), x as near the reference as it can be, in voxels of vs metres.
+     */
+    private static Mat4 between(Mat4 out, float[] a, float[] b, float[] ref, float vs, boolean up) {
+        float[] y = norm(up ? new float[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]} : new float[]{a[0] - b[0], a[1] - b[1], a[2] - b[2]});
+        float d = ref[0] * y[0] + ref[1] * y[1] + ref[2] * y[2];
+        float[] x = norm(new float[]{ref[0] - y[0] * d, ref[1] - y[1] * d, ref[2] - y[2] * d});
+        float[] z = cross(x, y);
+        float[] mm = out.m;
+        mm[0] = x[0] * vs; mm[1] = x[1] * vs; mm[2] = x[2] * vs; mm[3] = 0;
+        mm[4] = y[0] * vs; mm[5] = y[1] * vs; mm[6] = y[2] * vs; mm[7] = 0;
+        mm[8] = z[0] * vs; mm[9] = z[1] * vs; mm[10] = z[2] * vs; mm[11] = 0;
+        mm[12] = a[0]; mm[13] = a[1]; mm[14] = a[2]; mm[15] = 1;
+        return out;
+    }
+
+    /** Two bones from a shoulder to a target, bending toward a pole: where the elbow goes. The target is pulled in to what the bones reach. */
+    private static float[] elbow(float[] s, float[] t, float a, float b, float[] pole) {
+        float dx = t[0] - s[0], dy = t[1] - s[1], dz = t[2] - s[2], d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        float reach = (a + b) * 0.995f;
+        if (d > reach) { float k = reach / d; t[0] = s[0] + dx * k; t[1] = s[1] + dy * k; t[2] = s[2] + dz * k; dx *= k; dy *= k; dz *= k; d = reach; }
+        d = Math.max(d, Math.abs(a - b) + 1e-3f);
+        float ux = dx / d, uy = dy / d, uz = dz / d;
+        float x = (a * a - b * b + d * d) / (2 * d), h = (float) Math.sqrt(Math.max(0, a * a - x * x));
+        float pd = pole[0] * ux + pole[1] * uy + pole[2] * uz;
+        float[] p = norm(new float[]{pole[0] - ux * pd, pole[1] - uy * pd, pole[2] - uz * pd});
+        return new float[]{s[0] + ux * x + p[0] * h, s[1] + uy * x + p[1] * h, s[2] + uz * x + p[2] * h};
+    }
+
+    /** A monster, posed from what it is doing (gamefixes: each its own walk, run and attack): the living by their kind, the dead as they fell. */
+    private void monster(rpg.monster.Monster mo, float dt) {
+        var f = MonsterModels.of(mo.kind, mo.breed);
+        float previous = charTint; charTint = 1 - mo.charred * 0.86f;
+        try {
+            boolean ghost = mo.kind == rpg.monster.MonsterKind.GHOST;
+            mShade = 1 + mo.cs.flash * 0.8f;
+            mAlpha = ghost ? 0.5f + 0.08f * (float) Math.sin(clock * 1.7 + mo.id) : 1;
+            mGlow = ghost ? 0.35f : 0;
+            MonsterPose st = monsterPoses.computeIfAbsent(mo.id, k -> new MonsterPose());
+            if (f.humanoid) {
+                if (!mo.alive) {
+                    var rd = sceneGame == null ? null : sceneGame.lastBodies.ragdoll(mo.ragdoll);
+                    if (rd != null) monsterRagdoll(mo, f, rd);
+                } else humanoidMonster(mo, f, st, dt);
+            } else switch (mo.kind) {
+                case BAT -> bat(mo, f, st, dt);
+                case GIANT_SPIDER -> spider(mo, f, st, dt);
+                default -> dragon(mo, f, st, dt);
+            }
+            if (mo.alive && !ghost) cmd.shadowBody(mo.x, mo.y, mo.z, Math.max(mo.radius, mo.kind.hw * 0.4f), mo.height);
+        } finally { charTint = previous; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; }
+    }
+
+    private static float smooth(float x) { return x * x * (3 - 2 * x); }
+
+    /** Where a swing is: -1..0 through the wind-up, 0..1 through the stroke, 1..2 through the recovery, 2 idle. */
+    private static float phaseU(Actor a) {
+        var c = a.cs;
+        return switch (c.phase) {
+            case WINDUP -> -1 + Math.min(1, c.t / Math.max(1e-3f, c.windup));
+            case ACTIVE -> Math.min(1, c.t / Math.max(1e-3f, c.active));
+            case RECOVER -> 1 + Math.min(1, c.t / Math.max(1e-3f, c.recover));
+            default -> 2;
+        };
+    }
+
+    private void humanoidMonster(rpg.monster.Monster mo, MonsterModels.Fig f, MonsterPose st, float dt) {
+        var k = mo.kind;
+        float vs = f.vs;
+        double t = clock + (mo.id % 97) * 0.37;
+        float speed = (float) Math.hypot(mo.vx, mo.vz);
+        boolean ghost = k == rpg.monster.MonsterKind.GHOST;
+        boolean airborne = k == rpg.monster.MonsterKind.IMP && mo.altitude > 0.35f;
+        boolean run = speed > k.walk * 1.35f;
+        // the stride: a step per leg's length (a zombie's shuffle is short; a werewolf lopes)
+        float legLen = (f.thigh + f.shin) * vs;
+        float stride = Math.max(0.15f, legLen * switch (k) { case ZOMBIE -> 0.85f; case GOBLIN, IMP -> 1.0f; case WEREWOLF -> run ? 1.9f : 1.3f; case TROLL -> 1.15f; default -> 1.3f; });
+        if (!ghost && !airborne && speed > 0.05f) st.phase += speed / stride * (float) Math.PI * dt;
+        float wantAmp = speed < 0.05f || airborne || ghost ? 0 : Math.min(run ? 0.95f : 0.55f, speed / Math.max(0.2f, k.walk) * 0.42f);
+        st.amp += (wantAmp - st.amp) * Math.min(1, dt * 8);
+        float ph = st.phase, amp = st.amp;
+        boolean dormant = mo.state == rpg.monster.Monster.State.DORMANT || mo.state == rpg.monster.Monster.State.REST;
+        // ---- each kind's carriage
+        float lean, kneeBase, thighBase, armFwd, spread, roll = 0, headX = 0, headZ = 0, elbowBase, swingArms = 0.6f;
+        switch (k) {
+            case GOBLIN -> { lean = 0.16f + amp * 0.14f; kneeBase = 0.5f; thighBase = 0.28f; armFwd = 0.3f; spread = 0.25f; elbowBase = 0.5f; headX = -0.05f; }
+            case ORC -> { lean = 0.08f + amp * 0.12f; kneeBase = 0.12f; thighBase = 0.04f; armFwd = 0.05f; spread = 0.22f; elbowBase = 0.25f; roll = 0.05f * (float) Math.sin(ph) * amp; }
+            case TROLL -> { lean = 0.42f + amp * 0.1f; kneeBase = 0.35f; thighBase = 0.2f; armFwd = 0.5f; spread = 0.16f; elbowBase = 0.25f; headX = 0.05f; roll = 0.09f * (float) Math.sin(ph) * Math.max(0.3f, amp); swingArms = 0.45f; }
+            case IMP -> { lean = airborne ? 0.35f + Math.min(0.5f, speed * 0.08f) : 0.12f; kneeBase = airborne ? 0.8f : 0.2f; thighBase = airborne ? 0.5f : 0.08f; armFwd = 0.25f; spread = 0.3f; elbowBase = 0.7f; headX = -0.1f; }
+            case GHOST -> { lean = 0.1f + Math.min(0.3f, speed * 0.1f); kneeBase = 0; thighBase = 0; armFwd = 0.3f; spread = 0.12f; elbowBase = 0.3f; headX = 0.15f; }
+            case ZOMBIE -> { lean = 0.18f; kneeBase = 0.18f; thighBase = 0.05f; armFwd = 1.35f; spread = 0.12f; elbowBase = 0.15f; headZ = 0.3f + 0.08f * (float) Math.sin(t * 0.7); headX = 0.15f; roll = 0.07f * (float) Math.sin(ph); swingArms = 0.15f; }
+            case SKELETON -> { lean = 0.02f; kneeBase = 0.08f; thighBase = 0.03f; armFwd = 0.08f; spread = 0.1f; elbowBase = 0.1f; headZ = 0.12f * (float) Math.sin(t * 0.45); swingArms = 0.85f; }
+            default -> { // the werewolf: hunched on its bent legs; running, down on all fours
+                lean = run ? 1.0f : 0.4f; kneeBase = 0; thighBase = 0; armFwd = run ? 1.2f : 0.3f; spread = 0.18f; elbowBase = 0.45f; headX = run ? -0.15f : 0.05f; }
+        }
+        if (dormant && !airborne) { lean += 0.2f; headX += 0.3f; armFwd *= 0.5f; }
+        // the attack: the stroke the combat system is sweeping (the same path its hit test follows)
+        float u = phaseU(mo);
+        boolean striking = mo.cs.phase != Actor.Combat.Phase.IDLE && mo.cs.move != null;
+        float lunge = 0, twist = 0;
+        if (striking) {
+            float uc = Math.max(-1, Math.min(1, u));
+            float s = u < 0 ? 0 : u <= 1 ? (float) Math.sin(u * Math.PI / 2) : Math.max(0, 2 - u);
+            lunge = s * (mo.cs.move == Actor.Combat.Move.HEAVY ? 0.25f : 0.12f);
+            twist = rpg.combat.CombatSystem.twist(mo.cs.move, mo.cs.offHand, uc);
+            lean += rpg.combat.CombatSystem.lean(mo.cs.move, uc) * 0.6f;
+        }
+        st.lean += (lean - st.lean) * Math.min(1, dt * 6);
+        lean = st.lean;
+        // skeletons move in jerks: their phase snaps between poses rather than flowing
+        float gp = k == rpg.monster.MonsterKind.SKELETON ? (float) (Math.floor(ph / 0.35f) * 0.35f + (ph % 0.35f) * 0.4f) : ph;
+        float breath = 0.03f * (float) Math.sin(t * (k == rpg.monster.MonsterKind.TROLL ? 1.2 : 2.1));
+        // ---- the legs: thigh, knee, foot for each side; the pelvis rides at the height that keeps the planted foot down
+        float[][] leg = new float[2][3];
+        float lowest = 0;
+        for (int side = 0; side < 2; side++) {
+            float lp = gp + (side == 0 ? 0 : (float) Math.PI);
+            float sw = (float) Math.sin(lp);
+            float thighA, knee, foot;
+            if (f.digitigrade) {
+                // a wolf's leg: the thigh forward, the long shin back to the hock, the foot down onto its toes
+                thighA = 0.55f + sw * amp * 0.9f;
+                knee = 1.5f + Math.max(0, (float) Math.sin(lp + 1.4f)) * amp * 1.1f;
+                foot = 0.95f - sw * amp * 0.3f;
+            } else {
+                boolean drag = k == rpg.monster.MonsterKind.ZOMBIE && side == 1;
+                thighA = thighBase + sw * amp * (drag ? 0.45f : 0.85f);
+                knee = Math.max(0, kneeBase + Math.max(0, (float) Math.sin(lp + 1.3f)) * amp * (run ? 1.6f : 1.05f) - (drag ? 0.1f : 0));
+                foot = -(thighA - knee) + (run ? Math.max(0, -sw) * 0.4f * amp : 0);
+            }
+            if (airborne) { thighA = thighBase + 0.15f * (float) Math.sin(t * 2 + side); knee = kneeBase + 0.2f * (float) Math.sin(t * 2.3 + side); foot = 0.5f; }
+            leg[side][0] = thighA; leg[side][1] = knee; leg[side][2] = foot;
+            float a2 = thighA - knee, a3 = a2 + foot;
+            float depth = f.thigh * (float) Math.cos(thighA) + f.shin * (float) Math.cos(a2) + (f.foot == null ? 0 : (f.digitigrade ? 2.6f : 1) * (float) Math.cos(a3));
+            lowest = Math.max(lowest, depth);
+        }
+        float pelvis = ghost ? f.hipY + 0.6f * (float) Math.sin(t * 1.3) : airborne ? f.hipY : lowest;
+        float bob = ghost || airborne ? 0 : Math.abs((float) Math.sin(gp)) * amp * (run ? 1.2f : 0.55f) * (k == rpg.monster.MonsterKind.TROLL ? 1.5f : 1);
+        mf.identity().translate(mo.x, mo.y, mo.z).rotateY(mo.yaw).scale(vs, vs, vs);
+        float castT = (float) (clock - mo.castAt), throwT = (float) (clock - mo.throwAt);
+        boolean casting = castT >= 0 && castT < 0.5f, throwing = throwT >= 0 && throwT < 0.6f;
+        mp.set(mf).translate(0, pelvis + bob, -lunge * 6).rotateY(twist).rotateX(-lean + breath).rotateZ(roll);
+        mq.set(mf).translate(0, pelvis + bob, -lunge * 6).rotateY(twist * 0.25f).rotateZ(roll * 0.5f);
+        mpart(mp, f.torso);
+        // the head: it looks ahead (or at its foe) against the lean
+        float look = mo.fightTarget != 0 ? 0 : 0.25f * (float) Math.sin(t * 0.3);
+        ma.set(mp).translate(f.neck[0], f.neck[1], f.neck[2]).rotateY(look - twist * 0.5f).rotateX(lean - breath - headX).rotateZ(headZ);
+        mpart(ma, f.head);
+        float[] headTop = at(ma, 0, 5, 0), neckW = at(ma, 0, 0, 0);
+        // ---- the arms
+        float[][] hands = new float[2][], shoulders = new float[2][], elbows = new float[2][];
+        float[] fwdW = dirOf(mf, 0, 0, -1), rightW = dirOf(mf, 1, 0, 0);
+        for (int side = 0; side < 2; side++) {
+            float sgn = side == 0 ? 1 : -1;
+            float lp = gp + (side == 0 ? (float) Math.PI : 0);
+            boolean main = side == 0 != mo.cs.offHand;
+            float pitch = armFwd + (float) Math.sin(lp) * amp * swingArms;
+            if (k == rpg.monster.MonsterKind.WEREWOLF && run) pitch = 1.25f + (float) Math.sin(lp) * amp * 0.9f;   // its arms reach and pull like forelegs
+            float el = elbowBase + (run ? 0.6f : 0.15f) * amp;
+            if (k == rpg.monster.MonsterKind.ZOMBIE) pitch += 0.12f * (float) Math.sin(t * 1.3 + side * 2);
+            if (ghost) { pitch += 0.15f * (float) Math.sin(t * 1.1 + side); if (mo.fightTarget != 0) { pitch = 1.3f; el = 0.1f; } }
+            if (main && casting) { pitch = 1.5f * Math.min(1, castT * 6); el = 0.1f; }
+            if (main && throwing) { pitch = throwT < 0.15f ? 2.6f : 2.6f - Math.min(1, (throwT - 0.15f) * 5) * 1.6f; el = throwT < 0.15f ? 1.2f : 0.2f; }
+            mb.set(mp).translate(sgn * f.shoulder[0], f.shoulder[1], f.shoulder[2]);
+            float[] sh = at(mb, 0, 0, 0);
+            shoulders[side] = sh;
+            mb.rotateZ(sgn * spread).rotateX(pitch + lean * 0.4f);
+            mc.set(mb).translate(0, -f.upperArm, 0).rotateX(el);
+            float[] carried = at(mc, 0, -f.foreArm, 0);
+            // how far into the stroke the hand is: eased in over the first part of the wind-up (the anticipation),
+            // on the stroke's path through it, and eased back to its carriage through the recovery
+            float into = !striking || !main ? 0 : u < 0 ? smooth(Math.min(1, (u + 1) / 0.55f)) : u <= 1 ? 1 : 1 - smooth(Math.min(1, u - 1));
+            if (into > 0) {
+                // the hand goes where the stroke's grip is: two bones solved from the shoulder to it, the elbow out and down
+                float[] g = rpg.combat.CombatSystem.grip(mo, mo.cs.move, Math.max(-1, Math.min(1, u)));
+                // a head wider than a person's (a goblin's, an imp's) keeps the stroke out to the side of it
+                float clear = Math.max(0, f.headHalf * vs - 4 * Body.PX * mo.figureScale());
+                float[] target = {g[0] + rightW[0] * sgn * clear, g[1], g[2] + rightW[2] * sgn * clear};
+                for (int i = 0; i < 3; i++) target[i] = carried[i] + (target[i] - carried[i]) * into;
+                float[] pole = {rightW[0] * sgn * 0.6f - fwdW[0] * 0.3f, -0.8f, rightW[2] * sgn * 0.6f - fwdW[2] * 0.3f};
+                float[] e = elbow(sh, target, f.upperArm * vs, f.foreArm * vs, pole);
+                mpart(between(mc, sh, e, rightW, vs, false), f.armUp);
+                mpart(between(mc, e, target, rightW, vs, false), f.armLo);
+                elbows[side] = e; hands[side] = target;
+                continue;
+            }
+            mpart(mb, f.armUp);
+            elbows[side] = at(mb, 0, -f.upperArm, 0);
+            mpart(mc, f.armLo);
+            hands[side] = carried;
+        }
+        // ---- the legs, or the robe
+        if (ghost) mpart(mq, f.robe);
+        else for (int side = 0; side < 2; side++) {
+            float sgn = side == 0 ? 1 : -1;
+            ma.set(mq).translate(sgn * f.hip[0], f.hip[1], f.hip[2]).rotateX(leg[side][0]);
+            mpart(ma, f.legUp);
+            mb.set(ma).translate(0, -f.thigh, 0).rotateX(-leg[side][1]);
+            mpart(mb, f.legLo);
+            mc.set(mb).translate(0, -f.shin, 0).rotateX(leg[side][2]);
+            mpart(mc, f.foot);
+        }
+        // tails and wings
+        if (f.tail != null) {
+            float sway = 0.35f * (float) Math.sin(t * (k == rpg.monster.MonsterKind.IMP ? 2.4 : 1.1)) + (float) Math.sin(gp) * amp * 0.3f;
+            float droop = k == rpg.monster.MonsterKind.WEREWOLF ? (run ? 0.1f : 0.7f) : airborne ? 0.4f : 0.9f + 0.15f * (float) Math.sin(t * 1.7);
+            ma.set(mq).translate(f.tailAt[0], f.tailAt[1], f.tailAt[2]).rotateY(sway).rotateX(droop);
+            mpart(ma, f.tail);
+        }
+        if (f.wing != null) {
+            st.flap += ((airborne ? 1 : 0.15f) - st.flap) * Math.min(1, dt * 5);
+            float beat = st.flap * (float) Math.sin(t * 26) * 0.85f;
+            for (int side = 0; side < 2; side++) {
+                ma.set(mp).translate((side == 0 ? 1 : -1) * f.wingAt[0], f.wingAt[1], f.wingAt[2]);
+                if (side == 1) ma.rotateY((float) Math.PI);
+                ma.rotateY(side == 0 ? -(0.55f + beat) : 0.55f + beat).rotateZ(-0.15f);
+                mpart(ma, f.wing);
+            }
+        }
+        // what it holds: its weapon in the hand, at its size
+        heldScale = Math.max(0.55f, Math.min(2.4f, vs / Body.PX));
+        ItemDef main = mo.main(), off = mo.off();
+        for (int side = 0; side < 2; side++) {
+            ItemDef holds = side == 0 ? main : off;
+            if (holds == null || holds.natural || hands[side] == null) continue;
+            float[] dir;
+            // carried point-forward from the fist, square to the forearm; in a stroke, turned onto the stroke's blade
+            float[] fore = norm(new float[]{hands[side][0] - elbows[side][0], hands[side][1] - elbows[side][1], hands[side][2] - elbows[side][2]});
+            dir = norm(new float[]{fwdW[0] * 0.9f - fore[0] * 0.45f, 0.35f - fore[1] * 0.45f, fwdW[2] * 0.9f - fore[2] * 0.45f});
+            float into = striking && side == 0 != mo.cs.offHand ? (u < 0 ? smooth(Math.min(1, (u + 1) / 0.55f)) : u <= 1 ? 1 : 1 - smooth(Math.min(1, u - 1))) : 0;
+            if (into > 0) {
+                float[] g = rpg.combat.CombatSystem.grip(mo, mo.cs.move, Math.max(-1, Math.min(1, u)));
+                dir = norm(new float[]{dir[0] + (g[3] - dir[0]) * into, dir[1] + (g[4] - dir[1]) * into, dir[2] + (g[5] - dir[2]) * into});
+            }
+            if (holds.family == Family.SHIELD) held(holds, hands[side], new float[]{0, 1, 0}, mo.yaw, true);
+            else if (holds.family == Family.BOW) heldBow(holds, hands[side], new float[]{0, 1, 0}, mo.yaw, mo.cs.draw, hands[1 - side]);
+            else held(holds, hands[side], dir, mo.yaw, false);
+        }
+        heldScale = 1;
+        // the pose its hit volumes and its wounds follow: the same fifteen points a person's rig keeps
+        monsterPosePoints(mo, mp, mq, f, neckW, headTop, shoulders, elbows, hands, leg);
+        mo.hand[0] = hands[0][0]; mo.hand[1] = hands[0][1]; mo.hand[2] = hands[0][2]; mo.handAt = clock;
+        // an imp's hand kindles as it casts
+        if (casting) { float[] h = hands[mo.cs.offHand ? 1 : 0]; cmd.emitter(mo.id ^ (1L << 52), 0, h[0], h[1], h[2], 0.04f, 30, 0.04f, 0.25f, 5, 1.6f, 0.3f, 0, 0.1f, 0); }
+    }
+
+    private void monsterPosePoints(rpg.monster.Monster mo, Mat4 torso, Mat4 hips, MonsterModels.Fig f, float[] neck, float[] head, float[][] shoulders, float[][] elbows, float[][] hands, float[][] leg) {
+        if (mo.posePts == null) mo.posePts = new float[AstrattoNative.RD_PARTICLES * 3];
+        float[] p = mo.posePts;
+        java.util.function.BiConsumer<Integer, float[]> put = (i, v) -> { p[i * 3] = v[0]; p[i * 3 + 1] = v[1]; p[i * 3 + 2] = v[2]; };
+        put.accept(AstrattoNative.RD_PELVIS, at(torso, 0, 0, 0));
+        put.accept(AstrattoNative.RD_NECK, neck);
+        put.accept(AstrattoNative.RD_HEAD, head);
+        for (int side = 0; side < 2; side++) {
+            // side 0 is the right
+            int sh = side == 0 ? AstrattoNative.RD_R_SHOULDER : AstrattoNative.RD_L_SHOULDER;
+            put.accept(sh, shoulders[side]); put.accept(sh + 1, elbows[side]); put.accept(sh + 2, hands[side]);
+            float sgn = side == 0 ? 1 : -1;
+            int hp = side == 0 ? AstrattoNative.RD_R_HIP : AstrattoNative.RD_L_HIP;
+            if (f.robe != null) {
+                // the ghost's robe: its "legs" are the robe's two halves, hanging to the hem
+                put.accept(hp, at(hips, sgn * 2, 0, 0)); put.accept(hp + 1, at(hips, sgn * 3, -8, 0)); put.accept(hp + 2, at(hips, sgn * 3.5f, -16, 0));
+                continue;
+            }
+            mc.set(hips).translate(sgn * f.hip[0], f.hip[1], f.hip[2]);
+            put.accept(hp, at(mc, 0, 0, 0));
+            mc.rotateX(leg[side][0]).translate(0, -f.thigh, 0);
+            put.accept(hp + 1, at(mc, 0, 0, 0));
+            mc.rotateX(-leg[side][1]).translate(0, -f.shin, 0);
+            put.accept(hp + 2, at(mc, 0, 0, 0));
+        }
+        mo.poseAt = clock; mo.poseX = mo.x; mo.poseY = mo.y; mo.poseZ = mo.z; mo.poseYaw = mo.yaw;
+    }
+
+    /** A dead humanoid monster: its own parts laid between the ragdoll's particles as Sydney has them. */
+    private void monsterRagdoll(rpg.monster.Monster mo, MonsterModels.Fig f, Snapshots.Ragdoll rd) {
+        int ls = AstrattoNative.RD_L_SHOULDER * 3, rs = AstrattoNative.RD_R_SHOULDER * 3;
+        float[] rr = norm(new float[]{rd.p[rs] - rd.p[ls], rd.p[rs + 1] - rd.p[ls + 1], rd.p[rs + 2] - rd.p[ls + 2]});
+        boolean[] gone = goneSegs(mo);
+        float vs = f.vs;
+        java.util.function.IntFunction<float[]> pt = i -> new float[]{rd.p[i * 3], rd.p[i * 3 + 1], rd.p[i * 3 + 2]};
+        float[] pelvis = pt.apply(AstrattoNative.RD_PELVIS), neck = pt.apply(AstrattoNative.RD_NECK);
+        if (!gone[Seg.TORSO.ordinal()]) mpart(between(mc, pelvis, neck, rr, vs, true), f.torso);
+        if (!gone[Seg.HEAD.ordinal()]) mpart(between(mc, neck, pt.apply(AstrattoNative.RD_HEAD), rr, vs, true), f.head);
+        int[][] arms = {{AstrattoNative.RD_R_SHOULDER, Seg.R_ARM_UP.ordinal()}, {AstrattoNative.RD_L_SHOULDER, Seg.L_ARM_UP.ordinal()}};
+        for (int[] arm : arms) {
+            if (gone[arm[1]]) continue;
+            mpart(between(mc, pt.apply(arm[0]), pt.apply(arm[0] + 1), rr, vs, false), f.armUp);
+            mpart(between(mc, pt.apply(arm[0] + 1), pt.apply(arm[0] + 2), rr, vs, false), f.armLo);
+        }
+        if (f.robe != null) mpart(between(mc, pelvis, neck, rr, vs, true), f.robe);
+        else {
+            int[][] legs = {{AstrattoNative.RD_R_HIP, Seg.R_LEG_UP.ordinal()}, {AstrattoNative.RD_L_HIP, Seg.L_LEG_UP.ordinal()}};
+            for (int[] lg : legs) {
+                if (gone[lg[1]]) continue;
+                mpart(between(mc, pt.apply(lg[0]), pt.apply(lg[0] + 1), rr, vs, false), f.legUp);
+                between(mc, pt.apply(lg[0] + 1), pt.apply(lg[0] + 2), rr, vs, false);
+                mpart(mc, f.legLo);
+                mc.translate(0, -f.shin, 0).rotateX(-0.6f);
+                mpart(mc, f.foot);
+            }
+        }
+        if (f.tail != null) { mc.set(between(mb, pelvis, neck, rr, vs, true)).translate(f.tailAt[0], f.tailAt[1], f.tailAt[2]).rotateX(0.2f); mpart(mc, f.tail); }
+        // what it held, still in the hand until someone takes it
+        ItemDef main = mo.main();
+        if (main != null && !main.natural && !gone[Seg.R_ARM_LO.ordinal()]) {
+            heldScale = Math.max(0.55f, Math.min(2.4f, vs / Body.PX));
+            float[] grip = pt.apply(AstrattoNative.RD_R_WRIST), el = pt.apply(AstrattoNative.RD_R_ELBOW);
+            held(main, grip, norm(new float[]{grip[0] - el[0], grip[1] - el[1], grip[2] - el[2]}), rd.yaw, false);
+            heldScale = 1;
+        }
+    }
+
+    // ---- the beasts
+    /** A bat: wings beating in flight (the inner panel from the arm, the outer folding at the wrist); folded and hanging head-down at its roost. */
+    private void bat(rpg.monster.Monster mo, MonsterModels.Fig f, MonsterPose st, float dt) {
+        float vs = f.vs;
+        boolean dead = !mo.alive;
+        float speed = (float) Math.hypot(mo.vx, mo.vz);
+        boolean roosting = !dead && (mo.state == rpg.monster.Monster.State.DORMANT || mo.state == rpg.monster.Monster.State.REST) && speed < 0.3f;
+        boolean diving = mo.windup != null && clock < mo.windupUntil;
+        st.phase += (roosting || dead ? 0 : diving ? 9 : 13 + speed * 0.6f) * dt;
+        float beat = (float) Math.sin(st.phase);
+        float cy = mo.y + mo.kind.hh * 0.5f + (roosting || dead ? 0 : beat * 0.05f);
+        mf.identity().translate(mo.x, dead ? mo.y + 0.08f : cy, mo.z).rotateY(mo.yaw);
+        if (roosting) mf.rotateZ((float) Math.PI);                         // hanging by its feet, head down
+        if (dead) mf.rotateX(-1.4f);                                       // on its back, wings splayed
+        else mf.rotateX(diving ? 0.5f : -0.15f - Math.min(0.3f, speed * 0.04f));
+        mf.scale(vs, vs, vs);
+        mpart(mf, f.body);
+        ma.set(mf).translate(f.headAt[0], f.headAt[1], f.headAt[2]).rotateX(diving ? 0.3f : 0);
+        mpart(ma, f.beastHead);
+        for (int side = 0; side < 2; side++) {
+            float inner = roosting ? -1.35f : dead ? 0.05f : 0.15f + beat * 0.95f;
+            float outer = roosting ? -2.6f : dead ? 0.2f : 0.25f + (float) Math.sin(st.phase - 0.9f) * 0.65f;
+            ma.set(mf).translate((side == 0 ? 1 : -1) * f.wingAt[0], f.wingAt[1], f.wingAt[2]);
+            if (side == 1) ma.rotateZ((float) Math.PI);
+            ma.rotateZ(side == 0 ? inner : -inner).rotateY(roosting ? 0.2f : 0.08f);
+            mpart(ma, f.wingIn);
+            mb.set(ma).translate(f.wingInLen, 0, 0).rotateZ(side == 0 ? outer : -outer).rotateY(0.2f);
+            mpart(mb, f.wingOut);
+        }
+        for (int side = 0; side < 2; side++) { ma.set(mf).translate((side == 0 ? 1 : -1) * 1.2f, -3, 1.5f).rotateX(roosting ? 3.1f : 0.6f); mpart(ma, f.legA); }
+    }
+
+    /** A giant spider: eight legs in an alternating gait (four planted, four lifting), rearing to bite; dead, on its back with its legs curled. */
+    private void spider(rpg.monster.Monster mo, MonsterModels.Fig f, MonsterPose st, float dt) {
+        float vs = f.vs;
+        double t = clock + mo.id * 0.53;
+        boolean dead = !mo.alive;
+        float speed = dead ? 0 : (float) Math.hypot(mo.vx, mo.vz);
+        if (speed > 0.05f) st.phase += speed / (f.legALen * vs * 0.9f) * (float) Math.PI * dt;
+        st.amp += ((speed < 0.05f ? 0 : Math.min(1, speed / Math.max(0.2f, mo.kind.walk))) - st.amp) * Math.min(1, dt * 8);
+        boolean rearing = !dead && mo.windup != null && clock < mo.windupUntil;
+        float rear = rearing ? 0.35f : 0;
+        float raise = 0.55f, down = 1.35f;
+        float bodyY = -(2 + f.legALen * (float) Math.sin(raise) - f.legBLen * (float) Math.sin(down)) + 0.6f;
+        float bob = Math.abs((float) Math.sin(st.phase * 2)) * st.amp * 0.4f + 0.15f * (float) Math.sin(t * 1.5);
+        mf.identity().translate(mo.x, dead ? mo.y + 0.25f : mo.y, mo.z).rotateY(mo.yaw).scale(vs, vs, vs).translate(0, dead ? 2 : bodyY + bob, 0);
+        if (dead) mf.rotateZ((float) Math.PI);
+        mf.rotateX(rear);
+        mpart(mf, f.beastHead);
+        ma.set(mf).translate(0, 1, 0.5f).rotateX(-0.3f + 0.05f * (float) Math.sin(t * 0.9) - rear * 0.5f);
+        mpart(ma, f.body);
+        for (int i = 0; i < 8; i++) {
+            int side = i < 4 ? 0 : 1, n = i % 4;
+            float sgn = side == 0 ? 1 : -1;
+            float spreadA = -0.8f + n * 0.53f;
+            // the alternating tetrapod: R0 L1 R2 L3 together, then the others
+            float off = ((n + side) % 2 == 0) ? 0 : (float) Math.PI;
+            float sw = (float) Math.sin(st.phase + off) * 0.32f * st.amp;
+            float lift = Math.max(0, (float) Math.cos(st.phase + off)) * 0.45f * st.amp;
+            float r0 = dead ? 0.9f : raise + lift + (rearing && n < 2 ? 0.6f : 0);
+            float r1 = dead ? 2.7f : down - raise + (n < 2 && rearing ? -0.4f : 0);
+            float[] root = f.legRoots[i];
+            ma.set(mf).translate(root[0], root[1], root[2]).rotateY(sgn * ((float) Math.PI / 2 - spreadA - sw)).rotateX(-r0);
+            mpart(ma, f.legA);
+            mb.set(ma).translate(0, 0, f.legALen).rotateX(r0 + r1);
+            mpart(mb, f.legB);
+        }
+    }
+
+    /**
+     * A dragon: on the ground a heavy four-legged walk under its folded wings; aloft its great wings beat, its legs
+     * tucked and its tail streaming; its jaws open for the breath and the bite. Dead, it lies on its side.
+     */
+    private void dragon(rpg.monster.Monster mo, MonsterModels.Fig f, MonsterPose st, float dt) {
+        float vs = f.vs;
+        double t = clock + mo.id * 0.3;
+        boolean dead = !mo.alive;
+        float speed = dead ? 0 : (float) Math.hypot(mo.vx, mo.vz);
+        boolean aloft = !dead && mo.altitude > 1.2f;
+        if (!aloft && speed > 0.05f) st.phase += speed / (f.legALen * vs * 2.2f) * (float) Math.PI * dt;
+        st.amp += ((aloft || speed < 0.05f ? 0 : Math.min(0.75f, speed / Math.max(0.3f, mo.kind.walk) * 0.5f)) - st.amp) * Math.min(1, dt * 6);
+        st.flap += ((aloft ? 1 : 0) - st.flap) * Math.min(1, dt * 3);
+        float ph = st.phase, amp = st.amp;
+        boolean breathing = !dead && mo.nextRanged > 0 && clock - (mo.nextRanged - 6) < 1.4;
+        boolean biting = !dead && mo.windup != null && clock < mo.windupUntil;
+        float standY = f.legALen + f.legBLen + 2.5f;
+        mf.identity().translate(mo.x, mo.y, mo.z).rotateY(mo.yaw).scale(vs, vs, vs);
+        if (dead) mf.translate(0, 6, 0).rotateZ(1.5f);
+        else mf.translate(0, standY + (aloft ? 0 : Math.abs((float) Math.sin(ph)) * amp * 0.8f), 0).rotateX(aloft ? -0.08f : 0.03f * (float) Math.sin(ph * 2) * amp);
+        mpart(mf, f.body);
+        // legs: the diagonal pairs of a walk; tucked aloft; out stiff in death
+        for (int i = 0; i < 4; i++) {
+            float[] r = f.legRoots[i];
+            boolean front = i < 2;
+            float off = i == 0 || i == 3 ? 0 : (float) Math.PI;
+            float sw = (float) Math.sin(ph + off) * amp;
+            float a1 = dead ? 0.5f : aloft ? (front ? 0.6f : -1.1f) : sw * 0.75f + (front ? 0.1f : -0.1f);
+            float a2 = dead ? 0.3f : aloft ? (front ? 1.2f : -0.6f) : Math.max(0, (float) Math.sin(ph + off + 1.3f)) * amp * 1.1f;
+            ma.set(mf).translate(r[0], r[1] - 4, r[2]).rotateX(a1);
+            mpart(ma, f.legA);
+            mb.set(ma).translate(0, -f.legALen, 0).rotateX(front ? -a2 : a2);
+            mpart(mb, f.legB);
+        }
+        // the neck, two links rising forward; the head and its jaw (a bite rears it back, then drives it in)
+        float wind = biting ? (float) Math.max(0, Math.min(1, 1 - (mo.windupUntil - clock) / 0.9)) : 0;
+        float neckLift = dead ? -0.1f : aloft ? 0.15f : 0.75f + 0.05f * (float) Math.sin(t * 0.8) + wind * 0.35f;
+        ma.set(mf).translate(0, 7, -12.5f).rotateY(dead ? 0.6f : 0.1f * (float) Math.sin(t * 0.37)).rotateX(neckLift);
+        for (int i = 0; i < 2; i++) {
+            mb.set(ma).rotateY((float) Math.PI);       // a link is a tail segment turned to face forward
+            mpart(mb, f.tailSeg);
+            ma.translate(0, 0, -f.tailLen).rotateX(i == 0 ? 0.12f : -(0.72f + (breathing ? 0.2f : 0) + wind * 0.3f));
+        }
+        mpart(ma, f.beastHead);
+        float jawOpen = breathing ? 0.55f : biting ? 0.15f + wind * 0.35f : dead ? 0.3f : 0.04f;
+        mb.set(ma).translate(f.jawAt[0], f.jawAt[1] - 4, -15 + f.jawAt[2]).rotateX(-jawOpen);
+        mpart(mb, f.jaw);
+        // the tail: five links, each turned a little further, swaying
+        ma.set(mf).translate(0, 5, 12.5f).rotateX(aloft ? -0.05f : 0.25f);
+        for (int i = 0; i < f.tailSegs; i++) {
+            float sc = 1 - i * 0.14f;
+            mb.set(ma).scale(sc, sc, 1);
+            mpart(mb, f.tailSeg);
+            ma.translate(0, 0, f.tailLen - 0.5f).rotateY(dead ? 0.15f : 0.18f * (float) Math.sin(t * 1.1 - i * 0.6)).rotateX(aloft ? 0.02f : 0.1f);
+        }
+        // the wings: beating aloft (the outer panel trailing the stroke), folded on the ground
+        for (int side = 0; side < 2; side++) {
+            float beat = (float) Math.sin(t * 3.2);
+            // folded: swept back along the flank, lifted a little, the outer panel doubled under; aloft: spread and beating
+            float inner = dead ? 0.1f : st.flap * (0.15f + beat * 0.7f) + (1 - st.flap) * (0.42f + 0.03f * (float) Math.sin(t * 0.9));
+            float outer = dead ? 0.6f : st.flap * (0.2f + (float) Math.sin(t * 3.2 - 0.8) * 0.45f) + (1 - st.flap) * -2.75f;
+            float sweep = dead ? 0.4f : st.flap * 0.1f + (1 - st.flap) * 1.3f;
+            ma.set(mf).translate((side == 0 ? 1 : -1) * f.wingAt[0], f.wingAt[1], f.wingAt[2]);
+            if (side == 1) ma.rotateZ((float) Math.PI);
+            ma.rotateY(-sweep).rotateZ(side == 0 ? inner : -inner);
+            mpart(ma, f.wingIn);
+            mb.set(ma).translate(f.wingInLen, 0, 0).rotateZ(side == 0 ? outer : -outer);
+            mpart(mb, f.wingOut);
+        }
+    }
+
     private static boolean metal(ItemDef d) { return d != null && d.tier != null && (d.tier.metal() || d.tier == Tier.CHAINMAIL); }
 
     /** The outer layer's material for a segment: whatever armor covers it. */
@@ -926,6 +1544,10 @@ public final class Gfx implements AutoCloseable {
         } else root.identity().translate(a.x, a.y, a.z).rotateY(a.yaw).scale(Body.PX, Body.PX, Body.PX);
         if (bed == null) keepPose(a, b);
         if (bed == null) { float[] hw = world(rig.hand[0]); a.hand[0] = hw[0]; a.hand[1] = hw[1]; a.hand[2] = hw[2]; a.handAt = clock; }
+        if (bed == null && sceneGame != null && clock-a.castAt >= 0 && clock-a.castAt < 0.45) {
+            float[] hand = a.hand;
+            cmd.emitter(a.id ^ (1L<<52),2,hand[0],hand[1],hand[2],0.035f,35,0.03f,0.18f,0.8f,1.5f,3,0,0.04f,0);
+        }
         // a rod's line: from its tip down to a float riding on the water at the spot, bobbing (and dipping as it bites)
         if (bed == null && Rig.fishing(a) == rpg.item.Items.FISHING_ROD && a.working.target instanceof rpg.objects.Node spot) {
             float[] tip = world(new float[]{rig.hand[0][0] + rig.itemDir[0][0] * 34, rig.hand[0][1] + rig.itemDir[0][1] * 34, rig.hand[0][2] + rig.itemDir[0][2] * 34});
@@ -944,6 +1566,12 @@ public final class Gfx implements AutoCloseable {
             pl.headX = e[0] - a.x; pl.headY = e[1] - a.y; pl.headZ = e[2] - a.z; pl.headYaw = a.yaw; pl.headValid = true;
         }
         boolean[] gone = goneSegs(a);
+        // the Holy Light's glow (gamefixes): the whole figure lit gold for a second as the beam rises and bursts
+        float glow = 0;
+        if (a == sceneGame.player) {
+            float lt = sceneGame.fx.light();
+            if (lt >= 0 && lt < 1.3f) glow = lt < 0.2f ? lt / 0.2f : lt < 0.8f ? 1 : 1 - (lt - 0.8f) / 0.5f;
+        }
         for (Seg s : Seg.values()) {
             int flags = firstPerson && s == Seg.HEAD ? AstrattoNative.MODEL_SHADOW_ONLY : 0;
             segMatrix(rig.seg[s.ordinal()]);
@@ -951,10 +1579,11 @@ public final class Gfx implements AutoCloseable {
             if (firstPerson && st.guardRaise > 0.001f && a.main() == null && a.off() == null &&
                     (s == Seg.R_ARM_UP || s == Seg.R_ARM_LO || s == Seg.L_ARM_UP || s == Seg.L_ARM_LO)) m.scale(1 - st.guardRaise * 0.22f, 1, 1 - st.guardRaise * 0.22f);
             if (gone[s.ordinal()]) { if (isRoot(s)) stump(); continue; }
-            put(fig[0][s.ordinal()], flags, shade, shade, shade, 0, 1, 0.85f, 0);
+            float gr = shade * (1 + 0.4f * glow), gg = shade * (1 + 0.18f * glow), gb = shade * (1 - 0.4f * glow), ge = 0.32f * glow;
+            put(fig[0][s.ordinal()], flags, gr, gg, gb, ge, 1, 0.85f, 0);
             ItemDef c = cover(a, s);
             boolean met = metal(c);
-            put(fig[1][s.ordinal()], flags, shade, shade, shade, 0, 1, met ? 0.42f : 0.85f, met ? 0.65f : 0);
+            put(fig[1][s.ordinal()], flags, gr, gg, gb, ge, 1, met ? 0.42f : 0.85f, met ? 0.65f : 0);
         }
         {
             // hair and facial hair: the head-unit meshes, on the head (8 pixels a side, its middle 4 up from the neck);
@@ -1463,6 +2092,7 @@ public final class Gfx implements AutoCloseable {
             putPose(a, hp + 2, new float[]{sn[12] - sn[4] * Body.SHIN, sn[13] - sn[5] * Body.SHIN, sn[14] - sn[6] * Body.SHIN});
         }
         a.poseAt = clock;
+        a.poseX=a.x; a.poseY=a.y; a.poseZ=a.z; a.poseYaw=a.yaw;
     }
 
     private void putPose(Actor a, int i, float[] figurePoint) { float[] w = world(figurePoint); a.posePts[i * 3] = w[0]; a.posePts[i * 3 + 1] = w[1]; a.posePts[i * 3 + 2] = w[2]; }
@@ -1543,6 +2173,23 @@ public final class Gfx implements AutoCloseable {
             drawItem(d, 0);
         } else if (o instanceof Fire f) {
             for (int i = 0; i < 3; i++) { m.identity().translate(f.x, f.y + 0.06f, f.z).rotateY(i * 1.05f).scale(0.6f, 0.1f, 0.1f); put(box, 0x5A3A20, 0.6f, 0.9f, 0); }
+        } else if (o instanceof rpg.dungeon.Dungeons.Door dd) {
+            // a dungeon's mouth in the wilds (its theme's stone round a black way down), or the way out inside
+            m.identity().translate(dd.x, DevMap.FLOOR, dd.z).rotateY(dd.inside ? (float) (Math.PI / 2) : 0);
+            int theme = dd.layout.theme.ordinal();
+            drawLayers(dd.inside ? "dungeon-exit" : "dungeon-entrance:" + theme, () -> dd.inside ? Props.dungeonExit() : Props.dungeonEntrance(theme));
+        } else if (o instanceof rpg.dungeon.Dungeons.Trap tr) {
+            // a trap shows once it has been found or sprung: its plate, and the spikes or the rock as it goes off
+            float since = (float) (clock - tr.sprungAt);
+            if (tr.found || tr.disarmed || since < 1.2f) {
+                m.identity().translate(tr.x, DevMap.FLOOR, tr.z);
+                drawLayers("dungeon-plate:" + tr.disarmed, () -> Props.trapPlate(tr.disarmed));
+                if (since >= 0 && since < 1.2f) {
+                    float up = since < 0.08f ? since / 0.08f : since < 0.9f ? 1 : 1 - (since - 0.9f) / 0.3f;
+                    if (tr.kind == 0) { m.identity().translate(tr.x, DevMap.FLOOR - 0.55f + 0.6f * up, tr.z); drawLayers("dungeon-spikes", Props::trapSpikes); }
+                    else { m.identity().translate(tr.x, DevMap.FLOOR + 2.6f - Math.min(1, since / 0.35f) * 2.45f, tr.z).rotateY(since * 3); drawLayers("dungeon-rocks", Props::trapRocks); }
+                }
+            }
         } else if (o instanceof BuildSpot) {
             // the plot itself is ground; its furniture draws itself
         } else if (o instanceof Station st) {
@@ -1653,8 +2300,8 @@ public final class Gfx implements AutoCloseable {
             if (r == null) continue;
             r.matrix(m16);
             System.arraycopy(m16, 0, m.m, 0, 16);
-            float leafW = d.cells.length >= 2 ? 1f : 1f, h = d.height - 0.04f;
-            m.translate(-leafW / 2, -h / 2 - 0.02f, 0);
+            float leafW = d.leafWidth, h = d.height - 0.04f;
+            m.translate(-leafW / 2, -h / 2 - 0.02f, 0).scale(leafW, 1, 1);
             drawLayers(key, () -> Props.doorLeaf(d.height, d.locked));
         }
     }

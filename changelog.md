@@ -4,6 +4,163 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 7: monsters, dungeons and the Holy Light (Version 0.1.7)
+
+Worked down the current `gamefixes.md` with `instructions.md` first and the GDD after. The working tree already held an
+unfinished, uncommitted pass on the previous list (banking, doors, arrows, posses; see `docs/requested-gameplay-fixes.md`);
+I built on it rather than reverting it. Visual work was judged from gallery captures (new modes below) and scored /20.
+
+### Bugs from the list
+- **Invisible imps and goblins (and every other monster).** The monster simulation (`rpg.monster`) was complete enough to
+  hunt, fight and kill, but `Gfx` never drew a monster: nothing in the render loop visited `g.monsters`. Added:
+  - `render/MonsterModels`: voxel part figures for all eleven kinds at the gamefixes' model sizes (each figure scales so
+    its standing height is the kind's model height). Humanoids (goblin, orc, troll, imp, ghost, zombie, skeleton,
+    werewolf) are torso / head / upper and lower arms and legs / feet with joints; the werewolf's legs are digitigrade,
+    the ghost has a robe for legs, the imp wings and a spade tail. Beasts: the bat (body, head, two-panel wings), the
+    giant spider (cephalothorax with eight eyes and fangs, banded abdomen, eight two-segment legs) and the dragon (body,
+    two-link neck, horned head with a jaw, five-link tail, four legs, two-panel wings) in all five breed colours.
+  - `Gfx.monster()`: per-kind carriage and gait - a goblin's crouch, an orc's swagger, a troll's hunch and sway with its
+    arms forward, a zombie's shamble with one dragging leg and arms out, a skeleton's jerky snapped phase, a werewolf
+    loping onto all fours at a run, an imp flying with dangling legs and beating wings, the ghost drifting
+    (translucent, faintly glowing). The pelvis height is solved from the legs so the planted foot stays on the ground.
+  - Attacks follow the combat system's own stroke: the striking arm is solved by two-bone IK to
+    `CombatSystem.grip()` (the same path the hit test sweeps), eased in through the first 55% of the wind-up and back
+    out through the recovery; weapons are drawn at the monster's scale (`heldScale`).
+  - Bats beat and fold their wings and hang head-down at the roost; spiders walk an alternating tetrapod gait and rear to
+    bite, and die on their backs with legs curled; dragons walk in diagonal pairs with wings folded along the flanks,
+    beat their wings aloft, open the jaw for breath and bite, and lie on their side in death.
+  - Dead humanoid monsters are drawn from their Sydney ragdoll's fifteen particles (`monsterRagdoll`), honouring lost
+    limbs (gore); living ones write the same fifteen points to `posePts` so hit volumes and wounds follow the drawn body.
+  - `HitVolumes`: articulated radii and the head box scale with `Actor.figureScale()`; the beasts use a capsule laid along
+    the body (and a second across a bat's wings) instead of the human-head fallback.
+  - `CombatSystem.shoulder/toWorld/blade` scale by `figureScale()`: a troll swung from human shoulder height with human
+    reach before; a goblin from above its own head.
+  - Scores after two review passes (`RPG_GALLERY_ONLY=monsters`): zombie 15, orc 14, skeleton 14, spider 14, troll 13,
+    werewolf 13 (14 running), imp 13, ghost 13, goblin 13, dragon 13, bat 12. These are short of the 16/20 target.
+- **Monsters made no sound.** `MonsterKind.sounds` asks for `creature_misc`, `creature_roar`, `creature_hurt`, `stones`...
+  but `Sfx` registered those recordings as `growl`/`roar`/`creature.hurt`. Registered under the names the kinds use.
+- **Guards fetching bodies first.** A guard's "carry the grave/body to the undertaker" scored 0.88 (0.89 once lifted) -
+  above searching for the killer (0.86), investigating (0.66-0.80), evicting (0.81) and reporting (0.78). Collection is now
+  0.58 for the watch (0.74 for the undertaker), 0.64 / 0.80 while carrying; a carrier whose goal changes sets the body
+  down. Monster remains are never collected (`Brain.graveFor`). Test: `InvestigationPriorityTest.aGuardHuntsTheKillerBeforeFetchingTheBody`.
+- **NPCs not sticking to routines.** `NpcRoutineTest` now records why off-routine goals were chosen. It showed a loop
+  that ate the whole morning: Finn (thief) treated every guard walking openly by day as a mystery (different team) and
+  hid; hiding is crouching, so Bram, Cole, Bobwin, Isolde and Sir Alden investigated him; he saw them coming and hid again.
+  `Stealth.unresolved`: by day a non-hostile townsperson walking openly is no mystery to anyone; someone known by sight
+  who was already looked into, with nothing known against them, is not a fresh mystery for five minutes. Guard search
+  time fell from ~200 to ~25-45 samples of 600. Mara's blocked social route (the baseline failure noted last pass) is
+  addressed too: a stuck SOCIALIZE trip marks that partner unreachable for 150 s (`Npc.unreachable`) and `partnerFor`
+  skips them (blocked samples 137 -> 36). The probe now also fails if anyone spends over a quarter of the morning investigating.
+- **Solid foliage.** Probed every foliage kind (`FoliagePassageTest`): the Foliage-system plants (thistle included) never
+  stopped a body; the solid "foliage" was the Redberry bush, a full solid leaf block. `Blocks.plant()` now includes
+  `BERRY_BUSH` (crossed planes, swaying, no collision), and `Foliage.trail()` makes planted patches (herbs, flax,
+  berries) bend and rustle as bodies pass, like the grown plants.
+- **Crash with many familiars.** Not reproduced: `SummonStressTest` (25 rounds of Necrocall in a fight, allies killed,
+  expired and dismissed, then save/load) and a rendered stress (`RPG_GALLERY_ONLY=summons`, 60 summons) both ran clean.
+  Fixed the dangling state I found in `Magic.dismiss`: a body still held when it leaves the world is released
+  (`BodyCarry.release`, and a hold whose ragdoll is gone drops instead of posing handle 0), the ally's chemistry receiver
+  is retired, any corpse object goes with it, and other NPCs' fight/aid/social targets on it are cleared.
+
+### Changes from the list
+- **Recorded sounds.** Downloaded and wired:
+  - "Medieval sound effects - Weapon Textures" (CC0, opengameart node 146862): 192 kHz multi-take recordings cut into
+    single takes, resampled to 44.1 kHz and peak-levelled (`slice.py` in the session's scratchpad). Longbow and recurve
+    releases and draws, crossbow shot, cocking and bolt-laying, arrows and bolts passing, katana/sabre/seax/dagger/axe
+    swings, blade draws and sheathes.
+  - 0 A.D. (Wildfire Games, CC BY-SA 3.0): sword clashes, flesh impacts and stabs, wooden and metal shield blocks,
+    javelin throws, arrows striking wood, stone, earth, metal and flesh.
+  - Minetest Game: the three recorded glass breaks (CC BY 3.0) and a glass tap (CC BY-SA 3.0); the Kenney glass impacts
+    are gone.
+  - `Sfx.swingOf/hitOf/blockOf/arrowOn` pick the recording for the weapon family, the damage type, the guard (wood or
+    metal shield, or steel on steel) and the surface struck; the crossbow no longer reuses the bow release, the bow draw
+    is a bow being drawn rather than a door creak, spellcasting no longer uses the sword swish. Equipping a blade draws
+    it, unequipping sheathes it; a crossbow is heard being cocked and loaded.
+  - `Sfx.trimLead()`: recordings opening with silence are cut to 5 ms before the sound. The bow releases already in the
+    game opened with 1.2 s of room tone, so every bow shot had sounded a second late.
+  - `sounds/CREDITS.txt` lists every new file with its source and licence; unused files (old releases, the Kenney glass
+    impacts, `drawKnife`, `blade_0*`, `item_gem_0*`) are deleted.
+- **Level-up Holy Light** (`Fx.holyLight`, `Gfx.holyLight`, `Rig` cheer, `HudFragments.LevelBanner`):
+  - A gold-white beam erupts from under the feet (three additive layers turning slowly, swelling at the base), shoots up
+    9.5 m in 0.38 s and bursts at 0.62 s into a sphere of sparks; a ring spreads on the ground; a warm point light peaks
+    at the burst; sparkles rain down round the body for about two seconds.
+  - The figure glows gold for a second.
+  - Out of combat only (not on the final blow, not with a hostile within 15 m, not while striking or just struck) both
+    arms are thrown up and pumped twice with a dip through the knees (1.15 s).
+  - A "LEVEL UP!" banner lands big and settles on a gilded ribbon with the skill and level; a combat level adds its own
+    crimson card a beat later ("CONGRATULATIONS!" / "Combat Level N", "MAXIMUM COMBAT LEVEL!" at 127). The small
+    milestone card no longer announces levels. A combat level up heals fully; a skill's does not. `CombatLevelUp` is committed.
+  - Reviewed frame by frame on threes (`RPG_GALLERY_ONLY=levelup`): first pass blew the beam out to a solid white block
+    that hid the character; second pass, about 16/20.
+- **Move All at the bank.** `Container` action `depositall` moves every carried stack (any grid) that fits into the vault;
+  worn and wielded items stay; what will not fit stays in the pack with a note. Button on vault windows. Tested in `BankTest`.
+- **Fences as models.** The FENCE block is no longer meshed as a cube (`SHAPE_HIDDEN`; collision unchanged). `Gfx.fences`
+  builds a model per 16 x 16 column (rebuilt when its fence cells change): a capped post per cell and split rails to
+  each neighbouring fence or wall. Fence stacked on fence (the jail fronts) is drawn as iron bars, and the cell over a
+  jail door joins them. ~17/20 for the farm fence.
+- **Water entries.** A body or object entering water now makes a splash scaled by how hard and heavy it landed
+  (`Fx.splash`): a crown of drops, a jet after a hard landing, spreading foam, a bigger ring of waves, and the splash
+  recording at a matching volume and pitch.
+- **XP.** `Config.xpRate` 2.5 (between the suggested 2 and 3) with `Config.skillPace`: Agility, Thieving and Faith x1.3,
+  the production skills x1.1, combat x0.85 (it is paid on every blow). A rate of exactly 1 keeps the raw curve.
+- **Dialogue** (`Dialogue.greeting/remark/smallTalk`): larger pools for every calling, trade lines for each profession
+  family, and a remark on the moment about two times in three - a body over the player's shoulder, their wounds, blood
+  on them, a drawn blade in the street, a lockdown, the nearest monster about (per kind), their reputation, a first
+  meeting or a regular, the weather, the hour - in the speaker's manner (the watch, a healer and the outlaws differ).
+  NPC-to-NPC small talk draws on crimes, monsters, weather, work and the day instead of repeating a greeting.
+
+### Added from the list
+- **Dungeon system.** `world/DungeonLayout` (plans, a pure function of a seed) and `dungeon/Dungeons` (runtime).
+  - Every dungeon is its own sealed map: the engine world is now 248 wide; beyond the overworld's border a sheer granite
+    cliff (grassed crags on top, unclimbable from the border wall) holds the dungeon region, carved in `DevMap.dungeons()`.
+    A real second engine world was considered and rejected: activating another world swaps physics, agents and
+    chemistry for every overworld body, and every game system assumes one world.
+  - Types: micro (28 x 28, 3-4 rooms, 3-wide corridors), macro (60 x 56, 8-11 rooms, two loops), elite (44 x 44,
+    5-7 rooms, 2.6x threat, a master in its deepest room), boss (40 x 52, authored). The procedural ones place rooms,
+    join them by Prim's spanning tree plus loops, and assign entry / den / treasure / hazard / boss by depth.
+  - The world's four: Goblin Warren (macro, goblins, orcs deeper, bats), Spider Hollow (micro, giant spiders, bats), Old
+    Catacombs (elite, skeletons, zombies, ghosts, levels 70+), Troll's Den (boss: antechamber, a turning approach, a high
+    pillared hall with braziers in its corners - fire stops a troll mending - and a level 130 troll before its hoard).
+  - Residents are lairs (`Monsters.addLair`), so a cleared dungeon recolonises after a game day rather than respawning.
+    Monsters are always abroad underground.
+  - Traps (`Dungeons.Trap`): spike plates and loose stones in corridors and before hoards. Found when the player comes
+    within 3.2 m with Thieving at least ten below its disarm level; sprung by any walker (spikes slow, rock staggers,
+    damage by level and threat, and a noise); re-arm after 8 s; disarmed with Thieving (chance by margin, XP), a slip
+    springs it. Hazards: fire pits (EMBERS) and sunken pools, carved in.
+  - Hoards: chests rolled once from the seed (coins, uncut gems, theme gear; the troll's heart in the boss's).
+  - Doors (`Dungeons.Door`): an entrance mound in the wilds per dungeon (themed: propped warren, webbed cave, dressed
+    crypt arch, split boulder) and a way out inside; allies within 12 m travel with the caster.
+  - Torchlight: no LAMP blocks underground; `Gfx.dungeonLights` draws a sconce and flame at each lamp spot with a
+    flickering warm light, bright braziers and glowing fire pits, for the dungeon the camera is in.
+  - Maps: the minimap and world map show the dungeon's own plan (floors, walls, corridors darker, fire, water) inside one.
+  - Saved: traps' found/disarmed state, visits; chests and residents through the usual object and monster saves; old
+    saves without dungeon residents get them on load. Tests: `DungeonTest` (all four kinds sealed, every room reachable,
+    carved to plan, residents and hoards; in and out through every door; a trap bites, is found and stays disarmed across a load).
+  - Review captures: `RPG_GALLERY_ONLY=dungeons`. Troll's hall ~15/20, crypt and hollow ~14, entrances ~12, cliff ~13.
+- **Monsters, the rest of the list.** Fighters now engage any monster in sight within 12 m in their beat (and civilians
+  keep 7 m away), not only one already engaging; a giant spider's web (one young spider, night only) joins the wild
+  lairs; monster corpses no longer also drop a person's bones; and the evidence remark over a dead monster is no longer "one less bandit".
+- **New items.** All were already present with the specified prices, sizes and matching models (checked on the item
+  sheet): ruby, emerald, sapphire, diamond, onyx, dragonstone (cut and uncut), amethyst and its cluster, dragonhide,
+  dragon bones, dragon egg, rare fossil. Nothing added.
+
+### Tooling
+- Gallery modes: `monsters` (stills, walk/run/attack on threes; `RPG_MONSTERS=GOBLIN,...` to limit), `levelup`,
+  `fences`, `splash`, `dungeons`, `summons`. `Gallery.sheet` now takes tiles of any size; `captureFull` grabs the whole
+  screen with the interface.
+- Tests: `FoliagePassageTest`, `SummonStressTest`, `DungeonTest`, additions to `BankTest`, `InvestigationPriorityTest`,
+  `NpcRoutineTest`.
+
+### Not done / open
+- Monster visuals score 12-15/20, below the 16 the instructions ask for; the beasts (bat, spider, dragon) are not
+  dismemberable (their hit volumes are capsules, not articulated).
+- The familiar crash was not reproduced (see above).
+- Monster behaviour still runs in `MonsterMind`'s own state machine; it shares the engine agents, the stealth senses and
+  the hostility rules with people and animals, but was not ported to the engine's `TaskNetwork` the animals use.
+
+TEST_RESULTS_PLACEHOLDER
+
+---
+
 ## Pass 6: the new gamefixes list (Version 0.1.6)
 
 Worked down the current `gamefixes.md` with `instructions.md` first and the GDD for the rest. Where I could, I measured before changing anything (headless probes for doors and NPC routines). I judged visuals from gallery captures (`RPG_GALLERY_ONLY=gamefixes-ui`, `gamefixes-blocks`, `gamefixes-aim`, `locomotion`); the captures are in `rpggame/build/review-gamefixes/`.

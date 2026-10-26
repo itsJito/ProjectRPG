@@ -77,6 +77,17 @@ public class Npc extends Actor implements Interactable {
         return alive && !reacting && goal == Brain.Goal.SLEEP && !cs.busy()
                 && Math.hypot(x - homeX, z - homeZ) <= 1.2 && Math.hypot(vx, vz) < 0.12;
     }
+    /** A confirmed identification, carried only by its eyewitness and people they actually tell. */
+    public record Sighting(long witness, float x, float z, float vx, float vz, double at) {}
+    public Sighting playerSighting;
+    public enum EmploymentState { FREE, WORKING }
+    public EmploymentState employmentState() {
+        return alive && loaded && !reacting && fightTarget == 0
+                && (goal == Brain.Goal.WORK || watch() && goal == Brain.Goal.PATROL)
+                ? EmploymentState.WORKING : EmploymentState.FREE;
+    }
+    public boolean working() { return employmentState() == EmploymentState.WORKING; }
+    public boolean watch() { return role == Role.GUARD || role == Role.LAWMAN; }
     public int lootTaken;
     public final List<Memory> memories = new ArrayList<>();
     // the mind's current state, for the inspector
@@ -93,6 +104,8 @@ public class Npc extends Actor implements Interactable {
     public int routeCells;
     public boolean stuck;
     public long fightTarget, socialPartner, aidTarget;
+    /** People they set out to talk with but could find no way to (a fence, a pen, a locked door between): until when they stop trying. */
+    public final java.util.Map<Long, Double> unreachable = new java.util.HashMap<>();
     public int conversations;
     /** Under the player's Friends (they will not report the player) and Charm Person (they will not fight the player), until these times. */
     public double friendUntil = -1, charmUntil = -1;
@@ -148,7 +161,7 @@ public class Npc extends Actor implements Interactable {
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }
 
-    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.KNIGHT || role == Role.SCHOLAR || role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
+    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.KNIGHT || role == Role.SCHOLAR || watch() || role == Role.BANDIT || role == Role.BRUTE; }
 
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
@@ -193,7 +206,7 @@ public class Npc extends Actor implements Interactable {
     }
 
     public boolean canTalk(Rpg g) {
-        return alive && loaded && !hostileToPlayer && fightTarget == 0 && goal != Brain.Goal.FIGHT && goal != Brain.Goal.FLEE && goal != Brain.Goal.HIDE
+        return alive && loaded && !asleep() && !reacting && !hostileToPlayer && fightTarget == 0 && goal != Brain.Goal.FIGHT && goal != Brain.Goal.FLEE && goal != Brain.Goal.HIDE
                 && cs.staggered <= 0 && g.time - cs.lastHurt >= 3 && arrestedUntil < g.state.minutes;
     }
 

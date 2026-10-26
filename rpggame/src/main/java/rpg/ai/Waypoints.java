@@ -38,6 +38,7 @@ public final class Waypoints {
     public static void doors(Voxels vox, List<rpg.objects.Door> doors) {
         base();
         List<float[]> pts = new ArrayList<>(Arrays.asList(DevMap.WAYPOINTS));
+        for (var dungeon : rpg.world.DungeonLayout.all()) pts.addAll(dungeon.waypoints());
         int first = pts.size();
         for (rpg.objects.Door d : doors) {
             float[] in = d.front(d.x + (d.alongXAxis() ? 0 : 2), d.z + (d.alongXAxis() ? 2 : 0)), out = d.front(d.x - (d.alongXAxis() ? 0 : 2), d.z - (d.alongXAxis() ? 2 : 0));

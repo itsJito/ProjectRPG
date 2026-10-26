@@ -167,7 +167,7 @@ public final class MonsterMind {
         Known top = strongest(m);
         Actor threat = top == null ? null : g.actor(top.id);
         float hpShare = m.hp / Math.max(1, m.maxHp());
-        boolean abroad = k.abroad(g.state.hourOfDay());
+        boolean abroad = k.abroad(g.state.hourOfDay()) || rpg.world.DungeonLayout.inDungeonRegion(m.x);   // no day nor night underground
         float fromLair = m.lair == 0 ? 0 : (float) Math.hypot(m.x - m.lairX, m.z - m.lairZ);
         // fear against aggression: the core of hostility as a state
         // in its resting hours a monster at its lair stays put unless something comes right up to it or hurts it

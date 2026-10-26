@@ -4,7 +4,7 @@ ui/, voice/, devmapambience.ogg
     The game's own recordings (supplied with the project's assets). The only recorded human voices the game uses are
     voice/ - the death cries, male and female; hurt sounds are the opening moment of the same recordings.
 
-foley/footstep_*, foley/impact*
+foley/footstep_*, foley/impact* (the glass impacts are no longer used)
     "Impact Sounds" 1.0 by Kenney (www.kenney.nl) - Creative Commons Zero (CC0), public domain.
 
 foley/ (beltHandle, book*, chop, cloth*, creak*, door*, drawKnife*, dropLeather, footstep00-09, handle*, knifeSlice*, metal*)
@@ -34,26 +34,33 @@ animal/coyotes_pack.ogg
 animal/fox_death*.ogg
     The game's own recordings (supplied with the project's assets).
 
-archery/release.ogg, release2.ogg, release3.ogg
-    Wildfire Games, recorded bow releases from 0 A.D. (bow_attack_01.ogg through bow_attack_03.ogg).
-    Creative Commons Attribution-ShareAlike 3.0 (royalty-free; attribution and share-alike apply to these audio files).
+archery/arrow_wood_*, arrow_stone_*, arrow_dirt_*, arrow_metal_*, arrow_flesh_* (arrow_0N)
+combat/swordhit_*, fleshimp_*, fleshstab_*, shield_wood_*, shield_metal_*, jav_attack_*
+    Wildfire Games, recorded weapon sounds from 0 A.D. (binaries/data/mods/public/audio/attack/weapon and attack/impact).
+    Creative Commons Attribution-ShareAlike 3.0 (attribution and share-alike apply to these audio files).
     Original author: Wildfire Games, https://www.wildfiregames.com/
-    Files downloaded unchanged from https://github.com/0ad/0ad/tree/master/binaries/data/mods/public/audio/attack/weapon
+    Downloaded unchanged from https://github.com/0ad/0ad/tree/master/binaries/data/mods/public/audio/attack
+    (arrow_flesh_0N.ogg is impact/arrow_0N.ogg renamed).
     License/provenance: https://github.com/0ad/0ad/blob/master/binaries/data/mods/public/audio/LICENSE.txt
     https://creativecommons.org/licenses/by-sa/3.0/ ; full text in archery/CC-BY-SA-3.0.txt.
 
-archery/impact.ogg
-    Iwan "qubodup" Gabovitch, "Wood wobbling rattling" (recording), CC0 / public domain.
-    https://opengameart.org/content/wood-wobbling-rattling
-    Downloaded unchanged from https://github.com/flareteam/flare-game/blob/master/mods/fantasycore/soundfx/powers/arrow_wall.ogg
+archery/crossbow_*, crossbow_cock_*, crossbow_load_*, longbow_shoot_*, recurve_shoot_*, bow_draw_*, recurve_draw_*, nock_*,
+arrow_pass_*, bolt_pass_*; combat/swing_*, draw_*, sheath_*
+    "Medieval sound effects - Weapon Textures" by Ben Jaszczak & Brian Nelson (opengameart.org/node/146862) - Creative
+    Commons Zero (CC0), public domain. The 192 kHz multi-take recordings were cut into single takes, resampled to
+    44.1 kHz and peak-levelled; nothing else was changed.
 
-glass/break.ogg
-    cmusounddesign, glass breaking recording. Creative Commons Attribution 3.0 (CC BY 3.0).
-    Original recording: https://www.freesound.org/people/cmusounddesign/sounds/71947/
-    Downloaded unchanged as default_break_glass.1.ogg from Minetest Game:
+glass/break_1.ogg, break_2.ogg, break_3.ogg
+    Glass breaking recordings by cmusounddesign (freesound 71947), Tomlija (freesound 97669) and lsprice (freesound 88808).
+    Creative Commons Attribution 3.0 (CC BY 3.0).
+    Downloaded unchanged as default_break_glass.1-3.ogg from Minetest Game:
     https://github.com/minetest/minetest_game/blob/master/mods/default/sounds/default_break_glass.1.ogg
     Per-file credits: https://github.com/minetest/minetest_game/blob/master/mods/default/README.md#sounds
     https://creativecommons.org/licenses/by/3.0/ (attribution required; royalty-free).
+
+glass/tap.ogg
+    Mito551, recorded glass footstep, CC BY-SA 3.0. Downloaded unchanged as default_glass_footstep.ogg from Minetest Game
+    (credits as above).
 
 
 elements/fire.ogg

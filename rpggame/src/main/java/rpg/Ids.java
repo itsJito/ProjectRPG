@@ -14,6 +14,8 @@ public final class Ids {
             BANDIT_1 = 520, BANDIT_2 = 521, BRUTE = 522, DUMMY_0 = 530, BOBWIN = 540, BEGGAR = 541, HEALER = 542, PRIEST = 543, HUNTER = 544, SCHOLAR = 545, FISHERMAN = 546, MINER = 547, CRAFTSMAN = 548, KNIGHT = 549, PREDATOR_HUNTER = 550, TELLER = 551;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
+    /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */
+    public static final long DUNGEONS = 600;
     /** Ids made in play start here. */
     public static final long DYNAMIC = 1000;
 }

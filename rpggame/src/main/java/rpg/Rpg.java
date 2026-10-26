@@ -73,6 +73,8 @@ public final class Rpg implements GameModule {
     public Economy econ;
     public rpg.econ.Bank bank;
     public rpg.monster.Monsters monsters;
+    /** The dungeons (gamefixes): their doors, traps, hoards and residents. */
+    public rpg.dungeon.Dungeons dungeons;
     public Quests quests;
     public Progression prog;
     public rpg.actor.Traversal traversal;
@@ -150,7 +152,7 @@ public final class Rpg implements GameModule {
         traps = new rpg.ai.Traps(this);
         foliage = new rpg.world.Foliage(this);
         waterContacts = new rpg.world.WaterContacts(this);
-        timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,DevMap.SX+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
+        timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
         timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
         timeSystem.weather.listener = new astratto.weather.Weather.Listener() {
             @Override public void thunder(float distance,float gain) { if(sfx!=null && sfx.has("thunder"))sfx.ui("thunder",gain*0.7f); }
@@ -177,6 +179,8 @@ public final class Rpg implements GameModule {
         animals.init();
         monsters = new rpg.monster.Monsters(this);
         monsters.init();
+        dungeons = new rpg.dungeon.Dungeons(this);
+        dungeons.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
         econ.init();
         for (int i = 0; i < DevMap.DUMMIES.length; i++) {
@@ -248,6 +252,7 @@ public final class Rpg implements GameModule {
         carrying.update();
         chemistry.update();
         traps.update();
+        dungeons.update();
         foliage.update();
         objects.update(dt);
         undertaker.update();
@@ -415,6 +420,7 @@ public final class Rpg implements GameModule {
         if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);
         if (a.body != 0) game.commands().moverPlace(a.body, x, y + 0.05f, z, 0, 0, 0);
         a.x = x; a.y = y; a.z = z;
+        a.poseReset=true; a.handAt=-99; a.throwPlan.solvedAt=-99;
         if(chemistry!=null)chemistry.register(a);
         if (a instanceof Npc n) { if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
         interact.cancel(a, "moved");

@@ -12,7 +12,8 @@ import rpg.world.DevMap;
 /**
  * Every NPC's morning (gamefixes: some NPCs failed their routines): five hours of the real devmap, with how long each
  * spends with its route blocked. Lawmen were routed into their own locked cells, a fisher stood in the pond, a healer
- * waited all day on berry bushes; none may spend more than a tenth of the morning blocked now.
+ * waited all day on berry bushes; none may spend more than a tenth of the morning blocked now, nor a quarter of it
+ * investigating something instead of getting on with the day.
  */
 class NpcRoutineTest {
     @Test void everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() {
@@ -23,7 +24,7 @@ class NpcRoutineTest {
             g.state.minutes = 6 * 60;
             g.teleport(g.player, 64.5f, DevMap.FLOOR, 66.5f);
             g.player.skills.setLevel(rpg.skill.Skill.HEALTH, 100); g.player.restore();
-            Map<Long, Integer> stuck = new HashMap<>(), blocked = new HashMap<>(), still = new HashMap<>();
+            Map<Long, Integer> stuck = new HashMap<>(), blocked = new HashMap<>(), still = new HashMap<>(), looking = new HashMap<>();
             Map<Long, Map<String, Integer>> outcomes = new HashMap<>();
             Map<Long, float[]> last = new HashMap<>();
             int frames = 60 * 60 * 5;
@@ -33,9 +34,14 @@ class NpcRoutineTest {
                 for (Npc n : g.npcs) {
                     if (!n.alive || !n.loaded) continue;
                     if (n.stuck) stuck.merge(n.id, 1, Integer::sum);
+                    if (n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.HIDE && n.investigation != null) looking.merge(n.id, 1, Integer::sum);
                     String o = n.lastOutcome == null ? "" : n.lastOutcome;
                     if (o.contains("blocked") || o.contains("replanning") || o.contains("no route") || o.contains("locked")) blocked.merge(n.id, 1, Integer::sum);
                     outcomes.computeIfAbsent(n.id, k -> new HashMap<>()).merge(n.goal + ": " + o.replaceAll("[0-9.]+", "#"), 1, Integer::sum);
+                    // why the off-routine goals were chosen (the probe's way of finding what pulls people from their day)
+                    if (n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.LOOK || n.goal == Brain.Goal.SEARCH || n.goal == Brain.Goal.HIDE || n.goal == Brain.Goal.FLEE)
+                        outcomes.get(n.id).merge("  why " + n.goal + ": " + (n.goalReason == null ? "" : n.goalReason.replaceAll("[0-9.]+", "#"))
+                                + (n.investigation == null ? "" : " [subject " + g.nameOf(n.investigation.subject) + "]"), 1, Integer::sum);
                     float[] p = last.get(n.id);
                     if (p != null && Math.hypot(p[0] - n.x, p[1] - n.z) < 0.05 && n.goal != Brain.Goal.IDLE && n.goal != Brain.Goal.SLEEP && n.goal != Brain.Goal.WORK && n.goal != Brain.Goal.SOCIALIZE && n.goal != Brain.Goal.EAT) still.merge(n.id, 1, Integer::sum);
                     last.put(n.id, new float[]{n.x, n.z});
@@ -45,11 +51,14 @@ class NpcRoutineTest {
             StringBuilder b = new StringBuilder("\n=== routine probe: " + samples + " samples ===\n");
             for (Npc n : g.npcs) {
                 b.append(String.format("%-12s %-10s stuck %4d blocked %4d still-on-errand %4d  at (%.1f,%.1f) goal %s%n", n.name, n.role, stuck.getOrDefault(n.id, 0), blocked.getOrDefault(n.id, 0), still.getOrDefault(n.id, 0), n.x, n.z, n.goal));
-                var top = outcomes.getOrDefault(n.id, Map.of()).entrySet().stream().sorted((a, c) -> c.getValue() - a.getValue()).limit(4).toList();
+                var top = outcomes.getOrDefault(n.id, Map.of()).entrySet().stream().sorted((a, c) -> c.getValue() - a.getValue()).limit(6).toList();
                 for (var e : top) b.append("      ").append(e.getValue()).append("  ").append(e.getKey(), 0, Math.min(110, e.getKey().length())).append('\n');
             }
             System.out.println(b);
             for (Npc n : g.npcs) if (n.alive && n.loaded) org.junit.jupiter.api.Assertions.assertTrue(blocked.getOrDefault(n.id, 0) < samples / 10, () -> n.name + " spent the morning blocked:" + b);
+            // (gamefixes: NPCs did not stick to their routines - a thief hid from every passing guard and the guards
+            // searched for the hiding thief all morning; an ordinary morning is not a quarter spent looking into things)
+            for (Npc n : g.npcs) if (n.alive && n.loaded) org.junit.jupiter.api.Assertions.assertTrue(looking.getOrDefault(n.id, 0) < samples / 4, () -> n.name + " spent the morning investigating:" + b);
         }
     }
 }

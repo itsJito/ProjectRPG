@@ -276,6 +276,13 @@ public final class Rig {
         float grabT = (float) (time - a.grabAt), grab = grabT < 0 || grabT > GRAB_TIME ? 0 : grabT < 0.22f ? ease(grabT / 0.22f) : grabT < 0.32f ? 1 : 1 - ease((grabT - 0.32f) / (GRAB_TIME - 0.32f));
         float grabLow = grab > 0 ? Math.max(0, Math.min(1, (a.y + a.height * 0.45f - a.grabY) / Math.max(0.1f, a.height * 0.45f))) : 0;
         crouch += 3.5f * grab * grabLow; extraLean += 0.6f * grab * grabLow;
+        // a level's cheer (gamefixes): both arms thrown up, pumped twice, a dip and a lift through the knees, then down
+        float cheerT = (float) (time - a.cheerAt);
+        float cheer = cheerT < 0 || cheerT > CHEER_TIME || c.phase != Phase.IDLE || c.blocking || c.draw > 0 ? 0
+                : cheerT < 0.16f ? ease(cheerT / 0.16f) : cheerT < CHEER_TIME - 0.28f ? 1 : 1 - ease((cheerT - (CHEER_TIME - 0.28f)) / 0.28f);
+        float pump = cheer > 0 ? (float) Math.max(0, Math.sin((cheerT - 0.16f) / (CHEER_TIME - 0.44f) * Math.PI * 2)) : 0;
+        crouch += cheer * (cheerT < 0.2f ? 1.6f * (float) Math.sin(cheerT / 0.2f * Math.PI) : 0) - cheer * 0.6f * pump;
+        extraLean -= 0.12f * cheer;
         // which hand: the right if it is free (an archer's is: the bow is in the left), else the left - free or not, it
         // still makes the motion
         ItemDef grabMain = a.main();
@@ -493,6 +500,11 @@ public final class Rig {
                 float[] pickup = toFigure(a, a.reachX, a.reachY, a.reachZ);
                 float[] carry = new float[]{side * 5.2f, b.height / Body.PX * 0.52f * (1 - carryLower) + 6.3f * carryLower, -7.0f};
                 target = lerp(pickup, carry, carryLift); dir = new float[]{0, 1, 0};
+            } else if (cheer > 0.001f && a.carryBody == 0) {
+                // both hands up over the head, a little apart, open to the sky - whatever they hold goes up with them
+                float[] up = torsoPoint(shoulder, side * (1.6f + 0.4f * pump), 9.2f + 1.0f * pump, -1.2f);
+                target = lerp(rest, up, cheer);
+                dir = norm(lerp(dir, new float[]{side * 0.2f, 1, -0.15f}, cheer));
             } else if (grab > 0.001f && k == grabHand && c.phase == Phase.IDLE && c.draw <= 0 && !c.blocking) {
                 float[] at = toFigure(a, a.grabX, a.grabY, a.grabZ);
                 // no further than the arm reaches from where the shoulder is: the hand closes on air if it is out of reach
@@ -528,8 +540,9 @@ public final class Rig {
                 float[] drawn = firstPerson ? add(add(bowHand, aim, -(1.5f + c.draw * 6.5f)), new float[]{0, 1, 0}, 0.6f * c.draw) : lerp(add(bowHand, aim, -1.5f), cheek, Math.min(1, c.draw * 1.15f));
                 target = lerp(rest, drawn, st.bowRaise);
                 dir = aim;
-            } else if (holds != null && (holds.family == Family.STAFF || holds.family == Family.WAND) && c.castCooldown > 0.35f) {
-                target = add(shoulder, aim, 8.6f);
+            } else if (isMain && time - a.castAt >= 0 && time - a.castAt < 0.7) {
+                float cast=(float)((time-a.castAt)/0.7),reach=(float)Math.sin(Math.PI*Math.min(1,cast*1.4f));
+                target = lerp(rest, firstPerson ? view(aim,7,side,4,5) : add(shoulder, aim, 8.6f), 0.45f+0.55f*reach);
                 dir = norm(add(aim, new float[]{0, 1, 0}, 0.6f));
             } else if (c.staggered > 0) {
                 target = torsoPoint(shoulder, side * 4f, -6f, -2.5f);
@@ -758,6 +771,8 @@ public final class Rig {
     static void rotX(float[] m, float a) { float c = (float) Math.cos(a), s = (float) Math.sin(a); for (int i = 0; i < 4; i++) { float y = m[4 + i], z = m[8 + i]; m[4 + i] = y * c + z * s; m[8 + i] = -y * s + z * c; } }
     static void rotY(float[] m, float a) { float c = (float) Math.cos(a), s = (float) Math.sin(a); for (int i = 0; i < 4; i++) { float x = m[i], z = m[8 + i]; m[i] = x * c - z * s; m[8 + i] = x * s + z * c; } }
     static void rotZ(float[] m, float a) { float c = (float) Math.cos(a), s = (float) Math.sin(a); for (int i = 0; i < 4; i++) { float x = m[i], y = m[4 + i]; m[i] = x * c + y * s; m[4 + i] = -x * s + y * c; } }
+    /** How long a level's cheer lasts (s). */
+    static final float CHEER_TIME = 1.15f;
     /** How long a grab takes, out and back (s). */
     static final float GRAB_TIME = 0.6f;
     private static float ease(float t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }

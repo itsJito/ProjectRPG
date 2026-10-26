@@ -22,9 +22,8 @@ import rpg.world.DevMap;
  * cross borders. Two ways they come:
  * <ul>
  *   <li>Tracking: once a kingdom's bounty passes {@code posseBounty}, a posse sets out after the offender every
- *   {@code posseMinutes} to ten more minutes of play, from wherever the kingdom's people last saw them.</li>
- *   <li>The border: someone fleeing a kingdom with {@code ambushBounty} or more may find hunters waiting just over the
- *   line, on the road they are taking.</li>
+ *   {@code posseMinutes} to ten more minutes of play, from a sighting actually communicated to the watch.</li>
+ *   <li>The border: a fresh communicated heading can lead to an ambush on the projected route out.</li>
  * </ul>
  * The posse scales with the bounty (1-29 G one hunter with a bow; 30-99 two with crossbows; 100-199 three; 200-399
  * four or five with swords and crossbows and one or two law dogs; 400-499 three or four; 500 and more five or six with
@@ -41,12 +40,6 @@ public final class Posses {
     private final Law law;
     private final Map<String, Double> nextTracking = new HashMap<>(), nextAmbush = new HashMap<>();
     private final Map<Long, Double> lostSince = new HashMap<>();
-    /** The quarry's scent: where they walked, a point every two seconds for the last two minutes. */
-    private final java.util.ArrayDeque<float[]> scent = new java.util.ArrayDeque<>();
-    private double scentAt;
-    /** How long word of a sighting takes to reach hunters in the field, how long a trail stays fresh, and how far a dog's nose finds it. */
-    static final double WORD_DELAY = 15, SCENT_LIFE = 120;
-    static final float NOSE = 12;
     private double check;
     private long seed = 0x5EEDL;
     public int formed;
@@ -85,56 +78,38 @@ public final class Posses {
                     else nextTracking.put(k, g.time + 20);
                 }
             } else nextTracking.remove(k);
-            // the border: fleeing the kingdom where the bounty is
-            if (b >= g.cfg.ambushBounty && p.alive && k.equals(DevMap.jurisdiction(p.x, p.z)) && g.time >= nextAmbush.getOrDefault(k, 0.0) && !active(k)) {
-                float speed = (float) Math.hypot(p.vx, p.vz);
-                if (speed > 1.2f) {
-                    float ax = p.x + p.vx / speed * 14, az = p.z + p.vz / speed * 14;
-                    if (!k.equals(DevMap.jurisdiction(ax, az))) {
-                        // "sometimes": half the times someone heads out, once every ten minutes at most
-                        nextAmbush.put(k, g.time + 600);
-                        if (unit() < 0.5f) form(k, b, true);
-                    }
+            // An ambush can be planned from a communicated heading, never the unseen player's current motion.
+            var known = briefing(k);
+            if (b >= g.cfg.ambushBounty && known != null && g.time - known.at() < 90
+                    && k.equals(DevMap.jurisdiction(known.x(), known.z())) && g.time >= nextAmbush.getOrDefault(k, 0.0) && !active(k)) {
+                float speed = (float) Math.hypot(known.vx(), known.vz());
+                if (speed > 1.2f && !k.equals(DevMap.jurisdiction(known.x() + known.vx() / speed * 14, known.z() + known.vz() / speed * 14))) {
+                    nextAmbush.put(k, g.time + 600);
+                    if (unit() < 0.5f) form(k, b, true);
                 }
             }
-        }
-        if (g.time >= scentAt && p.alive) {
-            scentAt = g.time + 2;
-            scent.addLast(new float[]{p.x, p.z, (float) g.time});
-            while (!scent.isEmpty() && g.time - scent.peekFirst()[2] > SCENT_LIFE) scent.removeFirst();
         }
         tend();
     }
 
-    /**
-     * The newest sighting of the player by anyone of the kingdom (its people, its watch, its hunters) made before a
-     * time: {x, z, when}, or null when nobody has seen them.
-     */
-    float[] lastSighting(String kingdom, double before) {
-        float[] best = null;
-        for (Npc witness : g.npcs) {
-            if (!witness.alive || !kingdom.equals(witness.homeJurisdiction)) continue;
-            var aware = witness.aware.get(g.player.id);
-            if (aware == null || aware.seenAt < 0 || aware.seenAt > before) continue;
-            if (best == null || aware.seenAt > best[2]) best = new float[]{aware.x, aware.z, (float) aware.seenAt};
-        }
-        return best;
+    /** Face-to-face communication retains the original eyewitness and observation time. */
+    public boolean tell(Npc from, Npc to) {
+        if (from == to || !from.alive || !to.alive || !from.loaded || !to.loaded || from.asleep() || to.asleep()
+                || from.distTo(to) > 6 || !g.vox.sight(from.x, from.eyeY(), from.z, to.x, to.eyeY(), to.z)) return false;
+        var sighting = from.playerSighting;
+        if (sighting == null || g.time - sighting.at() > 600 || to.playerSighting != null && to.playerSighting.at() >= sighting.at()) return false;
+        to.playerSighting = sighting;
+        g.state.commit("SightingShared", from.id, to.id, to.homeJurisdiction, 0,
+                "eyewitness " + sighting.witness() + " at (" + sighting.x() + ", " + sighting.z() + ")");
+        return true;
     }
 
-    /**
-     * What a hunter's dogs smell: the freshest point of the quarry's trail within a nose's reach of one of the dogs,
-     * followed on along the line as far as the nose reaches, as {x, z, when}; null with no dog near a fresh trail.
-     */
-    private float[] dogsScent(Npc hunter) {
-        float[] best = null;
-        for (Animal dog : g.animals.all()) {
-            if (!dog.alive || dog.owner != hunter.id) continue;
-            for (float[] pt : scent) if (Math.hypot(pt[0] - dog.x, pt[1] - dog.z) < NOSE && (best == null || pt[2] > best[2])) best = pt;
-        }
-        if (best == null) return null;
-        float[] at = best;
-        for (float[] pt : scent) if (pt[2] > at[2] && Math.hypot(pt[0] - at[0], pt[1] - at[1]) < NOSE) at = pt;
-        return at;
+    private Npc.Sighting briefing(String kingdom) {
+        Npc officer = g.ai.lawmanFor(kingdom);
+        if (officer == null) return null;
+        for (Npc neighbor : g.npcs) tell(neighbor, officer);
+        var known = officer.playerSighting;
+        return known != null && g.time - known.at() <= 600 ? known : null;
     }
 
     /** Sends a posse of the kingdom's hunters after the player. Returns false when nowhere suitable was found. */
@@ -142,9 +117,12 @@ public final class Posses {
         var p = g.player;
         // a tracking posse starts from what the kingdom knows: the newest sighting, or the watch's post when nobody has
         // seen the quarry since the crime (they do not know where the player is now)
-        float[] known = lastSighting(kingdom, g.time);
-        if (known == null) { Npc lawman = g.ai.lawmanFor(kingdom); if (lawman == null) return false; known = new float[]{lawman.postX, lawman.postZ, -99}; }
-        float[] at = ambush ? ambushPoint(p) : trackingPoint(p, known);
+        var report = briefing(kingdom);
+        Npc officer = g.ai.lawmanFor(kingdom);
+        if (officer == null) return false;
+        if (ambush && report == null) return false;
+        float[] known = report == null ? new float[]{officer.postX, officer.postZ, (float)g.time} : new float[]{report.x(), report.z(), (float)report.at()};
+        float[] at = ambush ? ambushPoint(report) : trackingPoint(p, known);
         if (at == null) return false;
         Makeup m = makeup(bounty);
         int level = Math.min(45, 12 + bounty / 40);
@@ -163,10 +141,11 @@ public final class Posses {
             else if (melee) wear(n, Items.get("iron_sword"));
             else { wear(n, Items.get("iron_crossbow")); wear(n, Items.get("iron_bolts"), 20); }
             wear(n, Items.get("stone_body"));
-            n.fitBody(); n.restore(); n.yaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
+            n.fitBody(); n.restore(); n.yaw = (float) Math.atan2(-(known[0] - n.x), -(known[1] - n.z));
             g.npcs.add(n); g.ai.spawnBody(n);
-            n.hunt = new Hunt(p.id, "a bounty of " + bounty + " G in " + kingdom, known[0], known[1], Math.max(known[2], g.time - 60), ambush ? 240 : 600);
-            if (ambush) { n.hunt.x = n.x; n.hunt.z = n.z; }
+            n.hunt = new Hunt(p.id, "a bounty of " + bounty + " G in " + kingdom, known[0], known[1], known[2], ambush ? 240 : 600);
+            n.playerSighting = report;
+            n.hunt.source = report == null ? 0 : report.witness();
             if (lead == null) lead = n;
         }
         for (int i = 0; i < m.dogs() && lead != null; i++) {
@@ -187,26 +166,29 @@ public final class Posses {
             if (!n.alive) continue;
             boolean wanted = law.bounty(p.id, n.homeJurisdiction) > 0 && p.alive && !law.inCustody(p);
             float d = n.distTo(p);
-            if (!wanted || d > 110) {
+            if (!wanted || n.hunt != null && n.hunt.expired(g.time)) {
                 double since = lostSince.computeIfAbsent(n.id, k -> g.time);
                 if (!wanted && (d > 30 || !g.ai.canSee(n, p)) || g.time - since > 90) { disband(n); continue; }
             } else lostSince.remove(n.id);
             if (!wanted) { n.hunt = null; n.fightTarget = 0; continue; }
             boolean sees = g.ai.canSee(n, p);
+            // Ask people actually met on the search. An isolated witness cannot update this hunter.
+            for (Npc neighbor : g.npcs) tell(neighbor, n);
+            var word = n.playerSighting;
             if (n.hunt == null) {
-                float[] known = lastSighting(n.homeJurisdiction, g.time);
-                if (known == null && !sees) continue;
-                n.hunt = sees ? new Hunt(p.id, "a bounty in " + n.homeJurisdiction, p.x, p.z, g.time, 600) : new Hunt(p.id, "a bounty in " + n.homeJurisdiction, known[0], known[1], known[2], 600);
+                if (word == null && !sees) continue;
+                n.hunt = sees ? new Hunt(p.id, "a bounty in " + n.homeJurisdiction, p.x, p.z, g.time, 600)
+                        : new Hunt(p.id, "sighting by " + g.nameOf(word.witness()), word.x(), word.z(), word.at(), 600);
             }
-            // their own eyes: the quarry is in sight
-            if (sees) { n.hunt.clue(p.x, p.z, p.vx, p.vz, g.time); if (d < 28) { n.fightTarget = p.id; n.nextThink = 0; } continue; }
-            // word from the kingdom: someone saw them more recently than this hunter's last clue (an ambusher waits for it)
-            boolean tracking = n.hunt.patience > 300;
-            float[] word = lastSighting(n.homeJurisdiction, g.time - WORD_DELAY);
-            if (tracking && word != null && word[2] > n.hunt.clueAt + 1) n.hunt.clue(word[0], word[1], 0, 0, word[2]);
-            // the dogs' noses: a fresh stretch of the trail near one of their dogs leads on along it
-            float[] trail = dogsScent(n);
-            if (trail != null && trail[2] > n.hunt.clueAt + 1) n.hunt.clue(trail[0], trail[1], 0, 0, trail[2]);
+            if (sees) {
+                n.playerSighting = new Npc.Sighting(n.id, p.x, p.z, p.vx, p.vz, g.time);
+                n.hunt.source = n.id; n.hunt.clue(p.x, p.z, p.vx, p.vz, g.time);
+                if (d < 28) { n.fightTarget = p.id; n.nextThink = 0; }
+            } else if (word != null && word.at() > n.hunt.clueAt) {
+                n.hunt.source = word.witness();
+                n.hunt.clue(word.x(), word.z(), word.vx(), word.vz(), word.at());
+            }
+
         }
     }
 
@@ -237,11 +219,11 @@ public final class Posses {
     }
 
     /** Just over the border ahead of a fleeing player, a little off their line. */
-    private float[] ambushPoint(rpg.actor.Actor p) {
-        float speed = (float) Math.max(0.01, Math.hypot(p.vx, p.vz)), dx = p.vx / speed, dz = p.vz / speed;
+    private float[] ambushPoint(Npc.Sighting p) {
+        float speed = (float) Math.max(0.01, Math.hypot(p.vx(), p.vz())), dx = p.vx() / speed, dz = p.vz() / speed;
         for (int tries = 0; tries < 24; tries++) {
             float ahead = 18 + unit() * 10, side = (unit() - 0.5f) * 10;
-            float x = p.x + dx * ahead - dz * side, z = p.z + dz * ahead + dx * side;
+            float x = p.x() + dx * ahead - dz * side, z = p.z() + dz * ahead + dx * side;
             if (open(x, z)) return new float[]{x, z};
         }
         return null;

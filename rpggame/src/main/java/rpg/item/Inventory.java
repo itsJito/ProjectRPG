@@ -21,13 +21,14 @@ import java.util.List;
 public final class Inventory {
     public static final int STACK_CAP = Integer.MAX_VALUE;
     /** The grid's size in cells. */
-    public final int w, h;
+    public final int w;
+    public int h;
     /** Whether this grid is itself a container's (a bag, a chest, a corpse): a container item that is not empty may not go in. */
     public boolean container;
-    private final ItemStack[] stacks;
-    private final int[] px, py;
-    private final boolean[] turned;
-    private final int[] cell;   // which entry covers each cell (-1: free)
+    private ItemStack[] stacks;
+    private int[] px, py;
+    private boolean[] turned;
+    private int[] cell;   // which entry covers each cell (-1: free)
 
     public Inventory(int w, int h) {
         this.w = Math.max(1, w); this.h = Math.max(1, h);
@@ -39,6 +40,18 @@ public final class Inventory {
 
     /** A grid of a number of cells (the old fixed-slot form): ten wide, as many rows as needed. */
     public Inventory(int cells) { this(Math.min(10, Math.max(1, cells)), Math.max(1, (cells + 9) / 10)); }
+
+    /** Append rows without moving items or invalidating their slot handles. */
+    public void growRows(int rows) {
+        if (rows <= h) return;
+        int old = cell.length, size = Math.multiplyExact(w, rows);
+        stacks = java.util.Arrays.copyOf(stacks, size);
+        px = java.util.Arrays.copyOf(px, size); py = java.util.Arrays.copyOf(py, size);
+        turned = java.util.Arrays.copyOf(turned, size);
+        cell = java.util.Arrays.copyOf(cell, size);
+        java.util.Arrays.fill(cell, old, size, -1);
+        h = rows;
+    }
 
     // ------------------------------------------------------------------ footprints
     public static int fw(ItemDef d, boolean turn) { return turn ? d.gh : d.gw; }

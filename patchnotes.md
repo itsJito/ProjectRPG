@@ -1,3 +1,78 @@
+# Patch Notes Version 0.1.7: Deep Trouble
+
+The monsters can finally be seen, and they have somewhere to live.
+
+## New Features
+
+### Gameplay
+- Added dungeons. Each one is its own sealed map, entered through a cave mouth in the wilds and left by its own way out
+- Added four dungeons: the Goblin Warren, the Spider Hollow, the Old Catacombs and the Troll's Den
+- Added micro-dungeons, dungeons, elite dungeons and boss dungeons. Elite dungeons are far more dangerous than their size suggests, and boss dungeons are built around a single fight
+- Added dungeon traps. Spike plates and loose stones can be spotted with a sharp eye and disarmed with Thieving, and anything that walks on one sets it off
+- Added dungeon hazards, such as fire pits and sunken pools
+- Added dungeon chests. What is taken from them stays taken
+- Added a dungeon's own map to the minimap and world map while you are inside it
+- Added a Holy Light when you level up. A beam of gold light erupts from the ground and bursts, sparkles fall around you, and you glow gold for a moment
+- Added a cheer when you level up outside of a fight
+- Added a LEVEL UP! banner, and a separate banner showing your new Combat Level when it rises
+- Added a Move All button to the bank vault
+
+### NPC's
+- Added a giant spider's web in the western wood. Its spider only comes out at night
+
+## Changes
+
+### Blocks
+- Changed fences from blocks to proper models, with posts and rails that join to the fences and walls beside them
+- Changed jail fronts to iron bars
+- Changed Redberry bushes so you can now walk through them, like any other plant
+
+### NPC's
+- Changed guards so they now hunt for a killer and look into crimes before fetching bodies to the undertaker
+- Changed guards and the undertaker so they no longer carry dead monsters to the graveyard
+- Changed townsfolk so they now react to any monster nearby, with fighters going after it and everyone else keeping their distance
+- Changed NPC dialogue to have far more variety, with remarks on your wounds, blood, a body on your shoulder, a drawn blade, the weather, the time of day, monsters nearby and your reputation
+- Changed NPC small talk so they now talk about the weather, their work, monsters and news instead of repeating greetings
+- Changed monsters so they are now always active underground
+
+### Gameplay
+- Changed leveling to be faster. Agility, Thieving and Faith now level a little faster than the rest, and combat skills a little slower
+- Changed sword, dagger, axe and spear swings to recorded sounds for each kind of weapon
+- Changed hits to recorded sounds for cuts, stabs and blunt blows
+- Changed blocks to sound like wood or metal depending on the shield, or steel on steel with a blade
+- Changed bows to new recorded releases and draws for longbows and recurves
+- Changed crossbows to their own recorded shot, cocking and loading sounds
+- Changed arrows to make a different sound when they strike wood, stone, earth, armour or flesh
+- Changed glass to recorded breaking and tapping sounds
+- Changed drawing and putting away a blade so it is now heard
+- Changed a combat level up so it now heals you fully. A skill level up does not
+- Changed splashes so jumping or falling into water now throws up a much bigger splash, with foam and waves
+- Changed monsters so big ones now swing and reach as far as their size suggests
+
+## Technical Changes
+- Changed the world to be wider, to make room for the dungeons beyond the cliffs at its edge
+- Removed unused sound files and stale sound banks
+
+## Fixed Bugs
+
+### NPC's
+- AE-1701 - Fixed bug where imps were invisible but could still attack and kill you
+- AE-1702 - Fixed bug where goblins were invisible but could still attack and kill you
+- AE-1703 - Fixed bug where every monster was invisible
+- AE-1704 - Fixed bug where monsters made no sounds
+- AE-1705 - Fixed bug where guards prioritized picking up bodies over chasing criminals
+- AE-1706 - Fixed bug where the thief hid from every passing guard, and the guards spent the morning searching for him instead of keeping to their routines
+- AE-1707 - Fixed bug where an NPC trying to talk to someone they could not reach kept trying all day
+- AE-1708 - Fixed bug where dead monsters left a pile of bones as well as their own remains
+
+### Gameplay
+- AE-1709 - Fixed bug where some foliage blocked movement
+- AE-1710 - Fixed bug where bow shots were heard about a second after the arrow was released
+- AE-1711 - Fixed bug where a conjured ally's body could be left behind in the world after its time ran out
+- AE-1712 - Fixed bug where a body being carried could break when it left the world
+
+---
+
 # Patch Notes Version 0.1.6: Stone Cold Bounty
 
 Kingdoms now keep their own books, doors behave like doors, and the world got a lot more to stand on.

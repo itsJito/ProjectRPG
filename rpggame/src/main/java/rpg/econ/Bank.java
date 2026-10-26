@@ -17,8 +17,8 @@ import rpg.world.DevMap;
 
 /**
  * The Bank of Gameworld, in DevTown (gamefixes): one teller at one counter, and an account for anyone who opens one -
- * the player or any NPC. An account is a set of vaults, each a grid the size of a person's own inventory (10 x 4): the
- * first account holds two (twice the inventory), and up to four more can be bought, each for more than the last. A vault
+ * the player or any NPC. An account owns one expandable vault. Its initial capacity is twice a person's inventory;
+ * four expansions each append another inventory of space. A vault
  * is a real container in the bank's strongroom, so what is in it is held exactly once, kept in saves and counted by
  * the item ledger like anything else. It is reached only across the counter, and only while the teller is there to
  * serve (the bank shuts when its teller sleeps, flees, or is dead).
@@ -29,9 +29,9 @@ import rpg.world.DevMap;
 public final class Bank {
     /** A vault's grid: a person's own inventory, 10 across, 4 down. */
     public static final int VAULT_W = 10, VAULT_H = 4;
-    /** The first account's vaults, and how many more may be bought. */
-    public static final int FIRST_VAULTS = 2, MORE_VAULTS = 4;
-    /** What each further vault costs (the first bought, the second ...). */
+    /** Initial inventory-sized capacity units, maximum expansions, and the account opening fee. */
+    public static final int FIRST_VAULTS = 2, MORE_VAULTS = 4, ACCOUNT_PRICE = 25;
+    /** Price of each capacity expansion. */
     public static final int[] VAULT_PRICE = {1000, 2000, 4000, 8000};
     /** NPC banking: coins above this go in, and below this some come out (when the account has them). */
     static final int KEEP_MAX = 400, KEEP_MIN = 25, DRAW = 120;
@@ -47,7 +47,7 @@ public final class Bank {
     /** Whether the bank is serving: the teller alive, at the counter, not asleep or running. */
     public boolean open() {
         Npc t = teller();
-        return t != null && t.alive && t.loaded && !t.asleep() && t.goal != rpg.ai.Brain.Goal.FLEE && t.goal != rpg.ai.Brain.Goal.HIDE
+        return t != null && t.alive && t.loaded && t.working()
                 && Math.hypot(t.x - DevMap.BANK_TELLER[0], t.z - DevMap.BANK_TELLER[1]) < 1.6;
     }
 
@@ -68,48 +68,79 @@ public final class Bank {
     }
     public boolean hasAccount(long owner) { return !vaults(owner).isEmpty(); }
 
-    /** Opens an account: its first vaults made in the strongroom. */
+    /** Opens an account with one vault, paid from accessible carried coins. */
     public Result openAccount(Actor a, long req) {
         if (hasAccount(a.id)) return Result.no("You already have an account here.");
         String why = refusal(a);
         if (why != null) return Result.no(why);
-        for (int i = 0; i < FIRST_VAULTS; i++) vault(a);
-        g.state.commit(req, "BankAccountOpened", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": " + FIRST_VAULTS + " vaults");
+        if (a.count(Items.COINS) < ACCOUNT_PRICE) return Result.no("You don't have enough gold to open an account with us.");
+        a.takeItems(Items.COINS, ACCOUNT_PRICE);
+        collectFee(ACCOUNT_PRICE);
+        vault(a);
+        g.state.commit(req, "BankAccountOpened", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": one vault, " + FIRST_VAULTS * VAULT_W * VAULT_H + " cells");
         return Result.ok();
     }
 
     /** The price of the next vault for an account, or -1 when it has all it may. */
     public int nextVaultPrice(long owner) {
-        int bought = vaults(owner).size() - FIRST_VAULTS;
+        var account = vaults(owner);
+        int bought = account.isEmpty() ? -1 : account.get(0).contents.h / VAULT_H - FIRST_VAULTS;
         return bought < 0 || bought >= MORE_VAULTS ? -1 : VAULT_PRICE[bought];
     }
 
-    /** Buys one more vault, paid in coins from the purse (or, failing that, from the account itself). */
+    /** Adds space to the existing vault, paid from the purse and then the account if needed. */
     public Result buyVault(Actor a, long req) {
         if (!hasAccount(a.id)) return Result.no("You need an account first.");
         String why = refusal(a);
         if (why != null) return Result.no(why);
         int price = nextVaultPrice(a.id);
-        if (price < 0) return Result.no("Your account already has every vault the bank will rent you.");
+        if (price < 0) return Result.no("Your vault is already at maximum capacity.");
         int purse = a.count(Items.COINS), held = coinsIn(a.id);
-        if (purse + held < price) return Result.no("That costs " + Currency.text(price) + " G.");
+        if (purse + held < price) return Result.no("You don't have enough gold for more bank space.");
         int fromPurse = Math.min(purse, price);
         if (fromPurse > 0) a.takeItems(Items.COINS, fromPurse);
         if (price > fromPurse) takeCoins(a.id, price - fromPurse);
-        // the fee is the bank's: into the teller's till (a real holder, so the coins still exist once)
-        Npc t = teller();
-        ItemStack fee = new ItemStack(Items.COINS, price);
-        if (t == null || !t.store(fee)) g.state.burn(Items.COINS, price);
-        vault(a);
-        g.state.commit(req, "BankVaultBought", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": vault " + vaults(a.id).size() + " for " + price + " G");
+        collectFee(price);
+        Container vault = vaults(a.id).get(0);
+        vault.contents.growRows(vault.contents.h + VAULT_H);
+        g.state.commit(req, "BankVaultBought", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": " + vault.contents.size() + " cells for " + price + " G");
         return Result.ok();
     }
 
     private Container vault(Actor a) {
-        int n = vaults(a.id).size() + 1;
-        Container c = new Container(g.state.newEntityId(), "bank_vault", "Bank vault " + n, "vault", DevMap.BANK_TELLER[0], DevMap.FLOOR - 6, DevMap.BANK_TELLER[1] + 1.5f, VAULT_W * VAULT_H, a.id);
+        Container c = new Container(g.state.newEntityId(), "bank_vault", "Bank vault", "vault", DevMap.BANK_TELLER[0], DevMap.FLOOR - 6, DevMap.BANK_TELLER[1] + 1.5f, FIRST_VAULTS * VAULT_W * VAULT_H, a.id);
         c.ownerOnly = true;
         return g.objects.add(c);
+    }
+
+    private void collectFee(int amount) {
+        Npc t = teller();
+        if (t == null || !t.store(new ItemStack(Items.COINS, amount))) g.state.burn(Items.COINS, amount);
+    }
+
+    /** Collapse pre-expansion saves into one holder, preserving every original item and its provenance. */
+    public void migrateAccounts() {
+        var owners = new java.util.HashSet<Long>();
+        for (var o : g.objects.all()) if (o instanceof Container c && c.kind.equals("vault")) owners.add(c.owner);
+        for (long owner : owners) {
+            var old = vaults(owner);
+            if (old.size() <= 1) continue;
+            Container main = old.get(0);
+            main.name = "Bank vault";
+            int rows = old.stream().mapToInt(c -> c.contents.h).sum();
+            int offset = main.contents.h;
+            main.contents.growRows(rows);
+            for (int i = 1; i < old.size(); i++) {
+                Container extra = old.get(i);
+                for (int slot=0;slot<extra.contents.size();slot++) {
+                    ItemStack item=extra.contents.get(slot); if(item==null)continue;
+                    if (!main.contents.putAt(item,extra.contents.x(slot),extra.contents.y(slot)+offset,extra.contents.turned(slot)))
+                        throw new IllegalStateException("Bank migration cannot fit " + item);
+                }
+                offset+=extra.contents.h;
+                extra.contents.clear(); extra.removed = true;
+            }
+        }
     }
 
     /** Coins held across an account's vaults. */
@@ -155,7 +186,8 @@ public final class Bank {
         int purse = n.count(Items.COINS);
         n.bankAgain = g.time + 900;
         if (purse > KEEP_MAX) {
-            if (!hasAccount(n.id)) openAccount(n, req);
+            if (!hasAccount(n.id) && openAccount(n, g.state.newRequestId()).rejected()) return null;
+            purse = n.count(Items.COINS);
             int deposit = purse - KEEP_MAX / 2, moved = 0;
             for (Container c : vaults(n.id)) {
                 if (moved >= deposit) break;
@@ -166,8 +198,10 @@ public final class Bank {
             g.state.commit(req, "BankDeposit", n.id, Ids.TELLER, DevMap.BETA, 0, n.name + " deposited " + moved + " G");
             return moved > 0 ? "deposited " + moved + " G" : null;
         }
-        int drawn = takeCoins(n.id, DRAW);
-        if (drawn > 0) n.store(new ItemStack(Items.COINS, drawn));
+        int amount=Math.min(DRAW,coinsIn(n.id));
+        if(amount<=0 || !n.canStore(new ItemStack(Items.COINS,amount)))return null;
+        int drawn = takeCoins(n.id, amount);
+        n.store(new ItemStack(Items.COINS, drawn));
         g.state.commit(req, "BankWithdrawal", n.id, Ids.TELLER, DevMap.BETA, 0, n.name + " withdrew " + drawn + " G");
         return drawn > 0 ? "withdrew " + drawn + " G" : null;
     }
@@ -176,29 +210,41 @@ public final class Bank {
 
     /** What the teller offers the player across the counter. */
     public void choices(Npc teller, Dialog d) {
+        if (!open() || !teller.working()) return;
         var p = g.player;
         if (!hasAccount(p.id)) {
-            d.choice("I'd like to open an account.", () -> {
+            d.choice("I'd like to open an account (25 G).", () -> {
                 Result r = openAccount(p, g.state.newRequestId());
-                if (r.rejected()) { g.chat.warn(r.reason()); return; }
-                g.ai.say(teller, "There. Two vaults in your name, each as big as what you carry. Your things are safe with us.");
+                if (r.rejected()) { reply(teller, r.reason()); return; }
+                g.ai.say(teller, "Your account is open. One vault, twice the space of your pack, in your name.");
                 openVault(p, vaults(p.id).get(0));
             });
         } else {
-            d.choice("I'd like to see my vaults.", () -> openVault(p, vaults(p.id).get(0)));
+            d.choice("I'd like to see my vault.", () -> openVault(p, vaults(p.id).get(0)));
             int price = nextVaultPrice(p.id);
-            if (price > 0) d.choice("I'd like another vault (" + Currency.text(price) + " G).", () -> {
+            if (price > 0) d.choice("I'd like more bank space (" + Currency.text(price) + " G).", () -> {
                 Result r = buyVault(p, g.state.newRequestId());
-                if (r.rejected()) g.chat.warn(r.reason()); else g.ai.say(teller, "Done. Vault " + vaults(p.id).size() + " is yours.");
+                reply(teller, r.rejected() ? r.reason() : "Done. The extra space is now part of your vault.");
             });
         }
-        d.choice("How does the bank work?", () -> g.ui.dialog(new Dialog(teller.name, "An account is two vaults, each as big as your own pack. You can rent up to four more: "
+        d.choice("How does the bank work?", () -> g.ui.dialog(new Dialog(teller.name, "An account costs 25 G and includes one vault with twice the space of your pack. You can buy four expansions to that same vault: "
                 + Currency.text(VAULT_PRICE[0]) + " G for the first, doubling each time. Anything you leave stays exactly where you left it. We open when I'm at this counter, and not before.")));
+    }
+
+    private void reply(Npc teller, String text) {
+        g.ai.say(teller, text);
+        if (g.ui != null) {
+            Dialog reply = new Dialog(teller.name, text); reply.npc=teller.id; reply.employment=teller.employmentState();
+            reply.choice("Back.", () -> g.ui.dialog(g.dialogue.talk(teller)));
+            reply.closeChoice("Goodbye.", () -> {});
+            g.ui.dialog(reply);
+        } else g.chat.warn(text);
     }
 
     private void openVault(Actor p, Container vault) {
         String why = vaultRefusal(p, vault);
         if (why != null) { g.chat.warn(why); return; }
+        g.ui.closeDialog();
         g.ui.openContainer(vault);
         g.state.commit(g.state.newRequestId(), "ContainerOpened", p.id, vault.id, DevMap.BETA, 0, vault.name);
     }

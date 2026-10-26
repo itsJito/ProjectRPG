@@ -56,7 +56,7 @@ public final class Monsters {
     /**
      * The wilds hold a few, and no more (gamefixes: monsters spawn in the wilderness, though not too much): a goblin camp in
      * the wood's north-east corner, a bat colony under the den's rock roof, a pair of imps nesting on the interaction
-     * shed's roof. Bigger and deadlier kinds keep to the dungeons.
+     * shed's roof, a young spider's web in the western wood. Bigger and deadlier kinds keep to the dungeons.
      */
     public void init() {
         Lair camp = addLair(MonsterKind.GOBLIN, "Goblin camp", DevMap.GOBLIN_CAMP[0], DevMap.GOBLIN_CAMP[1], 1, 8, 6);
@@ -65,6 +65,10 @@ public final class Monsters {
         for (int i = 0; i < 5; i++) spawn(MonsterKind.BAT, 1 + i % 4, roost.x - 1.6f + i * 0.8f, roost.z, roost);
         Lair nest = addLair(MonsterKind.IMP, "Imp nest", DevMap.IMP_NEST[0], DevMap.IMP_NEST[1], 1, 6, 3);
         for (int i = 0; i < 2; i++) spawn(MonsterKind.IMP, 2 + i * 2, nest.x + i, nest.z, nest);
+        // a young giant spider's web deep in the western wood: abroad by night only, and only ever one or two
+        float[] web = clearGround(DevMap.SPIDER_WEB[0], DevMap.SPIDER_WEB[1]);
+        Lair spiders = addLair(MonsterKind.GIANT_SPIDER, "Spider's web", web[0], web[1], 1, 12, 2);
+        spawn(MonsterKind.GIANT_SPIDER, 6, web[0], web[1], spiders);
     }
 
     public Lair addLair(MonsterKind kind, String name, float x, float z, int minLevel, int maxLevel, int cap) {
@@ -129,6 +133,21 @@ public final class Monsters {
         nextSense.put(m.id, g.time + Math.floorMod(m.id * 97, 250) / 1000.0);
     }
 
+    /** A monster for the gallery to pose: no lair, no mind - it goes where it is sent. */
+    public Monster display(MonsterKind kind, int level, float x, float z, float yaw) {
+        Monster m = spawn(kind, level, x, z, null);
+        m.puppet = true; m.yaw = m.wantYaw = yaw; m.state = State.IDLE;
+        return m;
+    }
+    /** Sends a puppet toward a point, walking or running (a flyer at the height it is given). */
+    public void puppetTo(Monster m, float x, float z, boolean run) { moveTo(m, x, z, run, 0.3f); }
+    /** Takes a monster out of the world altogether (a gallery puppet). */
+    public void remove(Monster m) {
+        despawnBody(m);
+        if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
+        monsters.remove(m);
+    }
+
     public void despawnBody(Monster m) {
         if (m.agent != 0) g.game.commands().release(m.agent);
         if (m.body != 0) g.game.commands().release(m.body);
@@ -175,6 +194,19 @@ public final class Monsters {
         return best;
     }
     double rnd(Monster m) { return g.roll(g.state.tick, m.id); }
+
+    /** The nearest cell to a point a big body can stand on (three cells clear round it), searching outward. */
+    float[] clearGround(float x, float z) {
+        for (int r = 0; r < 12; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+            int cx = (int) Math.floor(x) + dx, cz = (int) Math.floor(z) + dz;
+            boolean ok = true;
+            for (int ox = -1; ox <= 1 && ok; ox++) for (int oz = -1; oz <= 1 && ok; oz++)
+                ok = g.vox.solid(cx + ox, DevMap.FLOOR - 1, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR + 1, cz + oz) && g.vox.block(cx + ox, DevMap.FLOOR - 1, cz + oz) != Blocks.WATER;
+            if (ok) return new float[]{cx + 0.5f, cz + 0.5f};
+        }
+        return new float[]{x, z};
+    }
 
     /** The nearest open cell to a point (somewhere a body can stand), within a few cells. */
     float[] open(Monster m, float x, float z) {
@@ -256,6 +288,12 @@ public final class Monsters {
         for (Monster m : new ArrayList<>(monsters)) {
             if (!m.alive || !m.loaded || m.body == 0) continue;
             if (m.reacting) continue;
+            if (m.puppet) {
+                if (m.kind.flies()) fly(m, dt);
+                else g.game.commands().moverInput(m.body, 0, 0, 0, 0, 30, MOVER_STANCE_ONLY);
+                g.ai.faceAt(m, dt);
+                continue;
+            }
             g.ai.monsterSenses(m, dt);
             double due = nextSense.getOrDefault(m.id, 0.0);
             if (g.time >= due) { mind.sense(m, 0.25f); nextSense.put(m.id, g.time + 0.25); }

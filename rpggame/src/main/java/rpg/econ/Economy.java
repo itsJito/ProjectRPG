@@ -118,6 +118,8 @@ public final class Economy {
         Shop s = shopOf(merchant);
         if (s == null) return "They have nothing to trade.";
         if (!merchant.alive) return "They're dead.";
+        if (!merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
+            return merchant.name + " is off duty. Come back when they're working.";
         if (s == fence) {
             // a fence deals with the wanted and the known alike - but never under the eyes of the law, and never with
             // someone who has turned on him

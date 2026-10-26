@@ -16,7 +16,7 @@ class MonsterTest {
     private Rpg open(Game game) {
         game.activate(DevMap.build(game.engine()));
         Rpg g = game.add(new Rpg(game, "Monsters", new Appearance(), true));
-        g.player.skills.setLevel(Skill.HEALTH, 25); g.player.restore(); g.cfg.god = true;
+        g.player.skills.setLevel(Skill.HEALTH, 25); g.player.restore();
         return g;
     }
 

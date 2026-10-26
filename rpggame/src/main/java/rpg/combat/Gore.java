@@ -627,7 +627,13 @@ public final class Gore {
         String what = e.kind == Kind.BODY ? "a body" : e.kind == Kind.LIMB ? "a severed limb" : "blood";
         g.state.commit("EvidenceFound", n.id, e.source, jur, 0, what + String.format(" at (%.1f, %.1f)", e.x, e.z));
         // an outlaw's end is remarked on, not investigated
-        if (lawful(e)) { if (e.kind != Kind.BLOOD) g.ai.say(n, n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN ? "One less bandit on the road." : "Gods, is that a bandit?"); return; }
+        if (lawful(e)) {
+            if (e.kind != Kind.BLOOD) {
+                boolean beast = g.actor(e.source) instanceof rpg.monster.Monster;
+                g.ai.say(n, beast ? (n.combatant() ? "One less of those things." : "Ugh - what is that? Is it dead?") : n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN ? "One less bandit on the road." : "Gods, is that a bandit?");
+            }
+            return;
+        }
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
         if (law) {
             // the law goes to look, and searches for whoever did it

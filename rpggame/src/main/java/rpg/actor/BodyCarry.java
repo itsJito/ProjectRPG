@@ -101,7 +101,9 @@ public final class BodyCarry {
         }
         for (Hold h : new ArrayList<>(holds.values())) {
             Actor a = h.carrier;
-            if (!a.alive || a instanceof Npc n && (n.goal == rpg.ai.Brain.Goal.FIGHT || n.goal == rpg.ai.Brain.Goal.FLEE || !n.loaded) || h.body.alive || a.cs.lastHurt > h.hurtAt || h.body instanceof Animal animal && animal.butchered) { drop(a, false); continue; }
+            // a carrier with something more pressing (a fight, a search, a crime to report) sets the body down first
+            if (!a.alive || a instanceof Npc n && (n.goal != rpg.ai.Brain.Goal.COLLECT && g.time - h.since > 1 || !n.loaded) || h.body.alive || a.cs.lastHurt > h.hurtAt
+                    || h.body instanceof Animal animal && animal.butchered || h.body instanceof Npc gone && gone.ragdoll == 0) { drop(a, false); continue; }
             float t = Math.max(0, Math.min(1, (float) ((g.time - h.since) / 0.65))); t = t * t * (3 - 2 * t);
             float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
             float lower = h.lowerAt < 0 ? 0 : Math.min(1, (float) (g.time - h.lowerAt) / 0.45f);
@@ -164,6 +166,7 @@ public final class BodyCarry {
         // thrown along the path the guide showed (ThrowSolver), the thrower's feet held a moment for the heave
         if (throwing && g.time - a.throwPlan.solvedAt < 0.3) { vx = a.throwPlan.velocity[0]; vy = a.throwPlan.velocity[1]; vz = a.throwPlan.velocity[2]; a.throwFreezeUntil = g.time + 0.1; }
         if (h.body instanceof Npc npc) {
+            if (npc.ragdoll == 0) return;   // the body is already gone from the world
             g.game.commands().ragdollControl(npc.ragdoll, CONTROL_KINEMATIC, 0);
             g.game.commands().ragdollCarry(npc.ragdoll, vx, vy, vz, 1);
         } else for (Piece p : h.pieces) {
@@ -175,4 +178,9 @@ public final class BodyCarry {
     }
     public static float launchSpeed(Actor a) { return 7 + a.skills.level(rpg.skill.Skill.STRENGTH) * 0.04f; }
     public void dropAll() { pending.clear(); for (Hold h : new ArrayList<>(holds.values())) drop(h.carrier, false); }
+    /** A body leaving the world (a conjured ally's time run out): whoever holds it, or is about to lift it, lets go first. */
+    public void release(Actor body) {
+        pending.values().removeIf(p -> target(p.focus()) == body);
+        for (Hold h : new ArrayList<>(holds.values())) if (h.body == body) drop(h.carrier, false);
+    }
 }

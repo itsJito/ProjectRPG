@@ -191,6 +191,8 @@ public final class Stealth {
                 w.level = Math.min(MAX, w.level + e * 2.4f * step);
                 if (e >= CLEAR * 1.6f) w.level = Math.max(w.level, ALERT);
                 w.x = a.x; w.z = a.z; w.seenAt = g.time;
+                if (a == g.player && (e >= CLEAR || w.level >= ALERT))
+                    n.playerSighting = new Npc.Sighting(n.id, a.x, a.z, a.vx, a.vz, g.time);
             } else {
                 // out of sight it fades: slowly while it was sure, faster from a mere notion
                 double since = g.time - Math.max(w.seenAt, w.heardAt);
@@ -290,8 +292,16 @@ public final class Stealth {
             double hour = g.state.hourOfDay();
             boolean day = hour >= 6 && hour < 21;
             if (who != null && who.team == n.team && !who.sneaking && (w.seenAt >= w.heardAt || day)) continue;
-            // looked into lately: no mystery again for a while, unless they are creeping about now
+            // by day a townsman walking openly is a townsman, whatever their trade: a thief does not take every passing
+            // guard for the law closing in, nor a guard every passing thief for a prowler (gamefixes: NPCs left their
+            // routines all morning - the thief hid from each guard, crouched, and the guards came to see why, and so on)
+            boolean resident = who instanceof Npc person && !person.hostileToPlayer && !ZonePolicy.outlaw(person) && person.summonOwner == 0;
+            if (resident && !who.sneaking && day) continue;
+            // looked into lately: no mystery again for a while, unless they are creeping about now - and someone known by
+            // sight already found creeping about, with nothing known against them, is not a fresh mystery for minutes
             if (g.time - w.settledAt < 30 && (who == null || !who.sneaking)) continue;
+            boolean known = who instanceof Npc person && !person.hostileToPlayer && person.summonOwner == 0;
+            if (known && g.time - w.settledAt < 300 && n.crimeKnown(who.id) == null) continue;
             if (who instanceof rpg.animal.Animal an && !an.dangerous()) continue;
             if (best == null || w.level > best.getValue().level) best = e;
         }

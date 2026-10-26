@@ -245,7 +245,7 @@ public final class Animals {
         if (a.ragdoll != null) { a.cs.cancel(); g.state.commit("AnimalKnockedDown", 0, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind()); }
     }
 
-    private void makeRagdoll(Animal a, float jx, float jy, float jz, boolean knockdown) {
+    public void makeRagdoll(Animal a, float jx, float jy, float jz, boolean knockdown) {
         int live = 0;
         Animal oldest = null;
         for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && o.carriedBy==0 && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
@@ -289,7 +289,7 @@ public final class Animals {
             if (a.carriedBy == 0 && g.time-r.since > 1.5 && r.asleep(g)) dropRagdoll(a);
             return;
         }
-        if (g.time - r.since < 1.2 || (!r.asleep(g) && g.time - r.since < 2.6)) return;
+        if (g.time < a.shockUntil || g.time - r.since < 1.2 || (!r.asleep(g) && g.time - r.since < 2.6)) return;
         // facing the way the trunk faces (its forward is -z in its own frame)
         float qw = t[3], qx = t[4], qy = t[5], qz = t[6];
         float fx = -(2 * (qx * qz + qw * qy)), fz = -(1 - 2 * (qx * qx + qy * qy));

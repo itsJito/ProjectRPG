@@ -83,7 +83,7 @@ public final class Console {
         var("sensitivity", "1", "Mouse sensitivity multiplier.");
         var("volume", "1", "Master volume (0 - 1).");
         var("console_filter", "", "Show only console lines containing this text (empty: all).");
-        var("xp_rate", "1", "XP rate multiplier on every award.", c -> g.cfg.xpRate = Math.max(0, c.f()));
+        var("xp_rate", "2.5", "XP rate multiplier on every award (1: the raw curve, no per-skill pacing).", c -> g.cfg.xpRate = Math.max(0, c.f()));
         var("minimap", "1", "Show the minimap.");
         var("motion_blur", "0", "Camera motion blur (off by default).", c -> g.cfg.motionBlur = c.on());
         var("depth_of_field", "0", "Depth of field (off by default).", c -> g.cfg.depthOfField = c.on());

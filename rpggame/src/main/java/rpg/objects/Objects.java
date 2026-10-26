@@ -165,6 +165,7 @@ public final class Objects {
         furniture.add(add(new Furniture(fid(), Furniture.Kind.COUNTER, DevMap.BANK_X0 + 2, DevMap.BANK_COUNTER_Z, DevMap.BANK_X1 - 2, DevMap.BANK_COUNTER_Z, 1, 0, Ids.TELLER, true)));
         bankBed = add(new Furniture(fid(), Furniture.Kind.BED, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 4, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 3, 1, 0, Ids.TELLER, true));
         furniture.add(bankBed); bankBed.name = "Teller's cot";
+        for (Furniture furnishing : furniture) if (furnishing.owner == Ids.TELLER) furnishing.place(g, true);
         g.vox.doors(doors);
         rpg.ai.Waypoints.doors(g.vox, doors);
     }

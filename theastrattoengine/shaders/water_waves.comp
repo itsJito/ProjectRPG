@@ -21,10 +21,10 @@ void main() {
           +(heightAt(p+ivec2(0,1),h)+heightAt(p-ivec2(0,1),h)-2.0*h)/(cell.y*cell.y);
  // Wave speed is CFL bounded for the smallest world cell, even in tiny engine test worlds.
  float c=min(2.6,min(cell.x,cell.y)*0.45/uDt);
- v=(v+c*c*lap*uDt)*exp(-1.4*uDt);
+ v=(v+c*c*lap*uDt)*exp(-0.85*uDt);
  for(int i=0;i<min(uImpulses,32);i++) {
   vec4 impulse=uImpulse[i];float d=distance(world,impulse.xy)/max(impulse.z,0.2);
-  v+=exp(-d*d*3.0)*impulse.w*uDt;
+  v+=exp(-d*d*3.0)*impulse.w*uDt*2.5;
  }
  float drop=hash(vec2(p)+floor(uTime*120.0));
  if(drop<uRain*texelFetch(uMask,p,0).b*0.0015)v-=0.12;

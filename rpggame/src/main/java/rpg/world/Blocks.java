@@ -73,8 +73,8 @@ public final class Blocks {
                 SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, GRANITE, STONE_BRICKS, MARBLE, CLAY, MUD, SANDSTONE, RED_SANDSTONE, WHITE_CARPET, BLACK_CARPET,
                 BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE -> true; default -> false; };
     }
-    /** Plants drawn as crossed planes that bodies walk through. */
-    public static boolean plant(int id) { return id == HERB_PATCH || id == FLAX_PATCH; }
+    /** Plants drawn as crossed planes that bodies walk through (gamefixes: no foliage is ever solid - the berry bush neither). */
+    public static boolean plant(int id) { return id == HERB_PATCH || id == FLAX_PATCH || id == BERRY_BUSH; }
 
     // texture layers
     private static final int L_GRASS = 0, L_GRASS_SIDE = 1, L_DIRT = 2, L_STONE = 3, L_BRICK = 4, L_GLASS = 5, L_LAMP = 6, L_PLANKS = 7,
@@ -169,7 +169,7 @@ public final class Blocks {
         r[WATER] = def(FACES[WATER], AstrattoNative.RB_LIQUID | AstrattoNative.RB_TRANSLUCENT);
         r[LAMP] = def(FACES[LAMP], cube | AstrattoNative.RB_EMISSIVE);
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
-        r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT);
+        r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID); r[FENCE].shape = SHAPE_HIDDEN;   // the game draws fences as models (Props.fences)
         r[DOOR] = def(FACES[DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
         r[DOOR].shape = SHAPE_HIDDEN;
         r[LOCKED_DOOR] = def(FACES[LOCKED_DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);

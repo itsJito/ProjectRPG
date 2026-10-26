@@ -6,7 +6,8 @@ import rpg.Rpg;
 
 /**
  * Surface crossings and displaced-water wakes from authoritative mover, ragdoll and rigid-body snapshots (gamefixes:
- * water answers whatever is in it): a splash and spray on the way in; a wake that follows a body wading, ahead of it and
+ * water answers whatever is in it): on the way in a splash as big as the landing was hard - a crown of drops, a jet
+ * after a hard landing, spreading foam, a ring of waves and the sound of it; a wake that follows a body wading, at its contact point and
  * the closer together the faster it goes, with spray thrown up by a run; soft rings round someone standing still.
  */
 public final class WaterContacts {
@@ -46,10 +47,17 @@ public final class WaterContacts {
         if(budget>0 && (entered || wake)) {
             budget--;contact.last=g.time;splashes++;
             boolean still=speed<=0.4f;
-            float strength=entered?Math.min(5,0.6f+speed*0.15f+down*0.2f):still?0.35f:Math.min(4,0.5f+speed*0.45f);
-            // the wake is pushed up ahead of the body; a still body's rings are round it
-            float ax=still?x:x+vx*0.18f,az=still?z:z+vz*0.18f;
-            g.chemistry.disturb(ax,surface,az,still?0.45f:Math.max(0.25f,radius*2),strength,entered || speed>2.2f);
+            float strength=entered?Math.min(5,0.6f+speed*0.15f+down*0.2f):still?0.85f:Math.min(6,1.2f+speed*0.65f);
+            // Disturb the surface where the physical body touches it, including a still body.
+            float ax=x,az=z;
+            if(entered) {
+                // going in: as big as the landing was hard and the body heavy (a jump, a fall, a thrown body, a stone)
+                float energy=down*(0.7f+radius)+speed*0.3f;
+                g.chemistry.disturb(ax,surface,az,Math.max(0.6f,radius*1.5f+energy*0.12f),Math.min(10,strength+energy*0.5f),true);
+                if(g.fx!=null && energy>0.6f)g.fx.splash(ax,surface,az,energy,Math.max(0.15f,radius));
+                if(g.sfx!=null && energy>0.4f)g.sfx.play("splash",ax,surface,az,Math.min(1f,0.25f+energy*0.09f),Math.max(0.7f,1.15f-energy*0.04f-radius*0.2f),18+energy*3);
+            }
+            else g.chemistry.disturb(ax,surface,az,Math.max(0.5f,radius*1.5f),strength,speed>2.2f);
         }
         contact.wet=wet;
     }

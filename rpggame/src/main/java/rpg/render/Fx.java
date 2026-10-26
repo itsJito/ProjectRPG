@@ -35,6 +35,7 @@ public final class Fx {
             p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
         }
         floating.removeIf(f -> now - f.born() > 1.6);
+        lightUpdate(dt);
         shake = Math.max(0, shake - dt * 3f);
     }
 
@@ -64,17 +65,84 @@ public final class Fx {
 
     private float s() { return rnd.nextFloat() * 2 - 1; }
 
-    /** The level-up confetti (gamefixes: smaller and quicker): two quick pops of bright embers just over the head. */
-    public void fireworks(float x, float y, float z) {
-        float[][] cols = {{6, 2.2f, 0.6f}, {1.2f, 3.5f, 6}, {5, 5, 1.4f}, {5, 1, 4}};
-        for (int burst = 0; burst < 2; burst++) {
-            float bx = x + s() * 0.45f, by = y + 0.35f + burst * 0.3f, bz = z + s() * 0.45f;
-            float[] c = cols[(burst + rnd.nextInt(4)) % 4];
-            for (int i = 0; i < 34; i++) {
-                float th = rnd.nextFloat() * 6.283f, ph = (float) Math.acos(s()), sp = 1.6f + rnd.nextFloat() * 1.1f;
-                add(2, bx, by, bz, (float) (Math.sin(ph) * Math.cos(th)) * sp, (float) Math.cos(ph) * sp, (float) (Math.sin(ph) * Math.sin(th)) * sp,
-                        0.04f, c[0], c[1], c[2], 1, 0.45f + rnd.nextFloat() * 0.3f, 3.5f, 2.4f);
+    // ------------------------------------------------------------------ the level-up's Holy Light (gamefixes)
+    /** How long the whole Holy Light lasts (s): the beam's rise, its burst at the top, the sparkles' fall. */
+    public static final float LIGHT_TIME = 2.6f, LIGHT_RISE = 0.38f, LIGHT_BURST = 0.62f;
+    /** When the light began (-99: none), whether a combat level came with it, and where (the renderer keeps it at the feet). */
+    public double lightAt = -99;
+    public boolean lightCombat;
+    public float lightX, lightY, lightZ;
+    private boolean burst;
+    private float rain;
+
+    /**
+     * A thick beam of gold-white light erupts from the ground under the feet and shoots up; at its top it bursts, and
+     * sparkles rain down round the body for a moment after (the renderer draws the beam, the glow and the light).
+     */
+    public void holyLight(float x, float y, float z, boolean combat) {
+        lightAt = now; lightCombat = combat; lightX = x; lightY = y; lightZ = z; burst = false; rain = 0;
+        // the eruption at the feet: a ring of motes thrown out low and fast
+        for (int i = 0; i < 40; i++) {
+            float th = i / 40f * 6.283f, sp = 2.2f + rnd.nextFloat() * 1.4f;
+            add(2, x, y + 0.05f, z, (float) Math.cos(th) * sp, 0.6f + rnd.nextFloat() * 0.8f, (float) Math.sin(th) * sp, 0.05f, 6, 5, 2.4f, 1, 0.45f + rnd.nextFloat() * 0.2f, 2, 3.2f);
+        }
+    }
+    /** Seconds into the Holy Light (negative or past LIGHT_TIME: none showing). */
+    public float light() { return (float) (now - lightAt); }
+
+    private void lightUpdate(float dt) {
+        float t = light();
+        if (t < 0 || t > LIGHT_TIME) return;
+        float top = lightY + 9.5f;
+        if (!burst && t >= LIGHT_BURST) {
+            burst = true;
+            // the burst at the head of the beam: a sphere of bright gold sparks
+            for (int i = 0; i < 110; i++) {
+                float th = rnd.nextFloat() * 6.283f, ph = (float) Math.acos(s()), sp = 2.5f + rnd.nextFloat() * 3.5f;
+                add(2, lightX, top, lightZ, (float) (Math.sin(ph) * Math.cos(th)) * sp, (float) Math.cos(ph) * sp, (float) (Math.sin(ph) * Math.sin(th)) * sp,
+                        0.07f, 7, 6, 3, 1, 0.7f + rnd.nextFloat() * 0.5f, 2.2f, 1.8f);
             }
+        }
+        // the sparkles raining down round the body after the burst: slow, drifting, gold and white
+        if (t >= LIGHT_BURST * 0.8f && t < LIGHT_TIME - 0.5f) {
+            rain += dt * 90;
+            while (rain >= 1) {
+                rain--;
+                float a = rnd.nextFloat() * 6.283f, r = 0.3f + rnd.nextFloat() * 1.3f;
+                boolean white = rnd.nextFloat() < 0.35f;
+                add(2, lightX + (float) Math.cos(a) * r, lightY + 2.6f + rnd.nextFloat() * 1.4f, lightZ + (float) Math.sin(a) * r, s() * 0.15f, -0.6f - rnd.nextFloat() * 0.5f, s() * 0.15f,
+                        0.035f + rnd.nextFloat() * 0.025f, white ? 6 : 6.5f, white ? 6 : 4.6f, white ? 5.5f : 1.6f, 1, 1.4f + rnd.nextFloat() * 0.6f, 0.15f, 0.3f);
+            }
+        }
+    }
+
+    /**
+     * Something landing in water (gamefixes: bigger, livelier splashes): the harder and heavier, the bigger - a crown of
+     * drops thrown up and out round the hole it makes, a jet climbing out of the middle when it went in hard, and
+     * white foam left spreading on the surface.
+     */
+    public void splash(float x, float surface, float z, float energy, float radius) {
+        energy = Math.max(0.5f, Math.min(12, energy));
+        int crown = (int) (24 + energy * 14 + radius * 30);
+        float out = 1.2f + energy * 0.28f, up = 1.6f + energy * 0.55f;
+        for (int i = 0; i < crown; i++) {
+            float a = rnd.nextFloat() * 6.283f, r = radius * (0.6f + rnd.nextFloat() * 0.5f), sp = out * (0.6f + rnd.nextFloat() * 0.6f);
+            add(2, x + (float) Math.cos(a) * r, surface + 0.02f, z + (float) Math.sin(a) * r, (float) Math.cos(a) * sp, up * (0.55f + rnd.nextFloat() * 0.6f), (float) Math.sin(a) * sp,
+                    0.03f + rnd.nextFloat() * 0.035f, 0.85f, 0.95f, 1.1f, 0.9f, 0.6f + rnd.nextFloat() * 0.5f, 9.8f, 0.35f);
+        }
+        if (energy > 4.5f) {
+            // the jet: water closing over the hole and thrown straight back up
+            int jet = (int) (energy * 6);
+            for (int i = 0; i < jet; i++)
+                add(2, x + s() * 0.12f, surface + 0.05f, z + s() * 0.12f, s() * 0.35f, energy * (0.55f + rnd.nextFloat() * 0.35f), s() * 0.35f,
+                        0.045f + rnd.nextFloat() * 0.03f, 0.9f, 1.0f, 1.15f, 0.9f, 0.8f + rnd.nextFloat() * 0.4f, 9.8f, 0.2f);
+        }
+        // the foam: white, low, spreading and thinning on the surface
+        int foam = (int) (18 + energy * 6);
+        for (int i = 0; i < foam; i++) {
+            float a = rnd.nextFloat() * 6.283f, sp = 0.4f + rnd.nextFloat() * (0.5f + energy * 0.08f);
+            add(1, x + (float) Math.cos(a) * radius * 0.5f, surface + 0.04f, z + (float) Math.sin(a) * radius * 0.5f, (float) Math.cos(a) * sp, 0.02f, (float) Math.sin(a) * sp,
+                    0.09f + rnd.nextFloat() * 0.06f, 1.2f, 1.25f, 1.3f, 0.55f, 1.1f + rnd.nextFloat() * 0.8f, 0, 1.6f);
         }
     }
 

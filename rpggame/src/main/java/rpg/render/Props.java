@@ -19,6 +19,151 @@ public final class Props {
     private static Layer glow(Meshes.Boxes b, float e) { return new Layer(b, 0.9f, 0, e); }
     private static Layer stone(Meshes.Boxes b) { return new Layer(b, 0.92f, 0, 0); }
 
+    // ------------------------------------------------------------------ dungeons
+    /**
+     * A dungeon's mouth (gamefixes): a heap of its theme's rock with a black way down in it, the front at -z. A warren's
+     * is propped with crooked timbers, a cave's hung with old web, a crypt's a dressed arch with a lintel, the troll's
+     * hall a great split boulder; steps go down into the dark in every one.
+     */
+    public static Layer[] dungeonEntrance(int theme) {
+        Meshes.Boxes rock = new Meshes.Boxes(), wood = new Meshes.Boxes(), dark = new Meshes.Boxes();
+        int stone = switch (theme) { case 1 -> 0x6E5A44; case 2 -> 0x8A8A86; case 3 -> 0x6E7262; default -> 0x7A7A74; };
+        Random r = new Random(theme * 31L + 7);
+        // the mound round the mouth: a low hill of rock, broad at its foot, turf over its top and grass in its cracks
+        Meshes.Boxes turf = new Meshes.Boxes();
+        for (int i = 0; i < 40; i++) {
+            float a = (float) (Math.PI * (0.02 + 0.96 * r.nextFloat())), rad = 1.3f + r.nextFloat() * 0.9f;
+            float x = (float) Math.cos(a) * rad, z = 0.5f + (float) Math.sin(a) * rad * 0.8f, s = 0.55f + r.nextFloat() * 0.6f;
+            float lift = Math.max(0, 1.6f - rad * 0.55f) + r.nextFloat() * 0.35f;
+            rock.rgb(x, s / 2 + lift * 0.6f, z, s, s, s, shadeRgb(stone, 0.8f + r.nextFloat() * 0.3f));
+            if (r.nextFloat() < 0.45f) turf.rgb(x, s + lift * 0.6f + 0.04f, z, s * 0.9f, 0.08f, s * 0.9f, shadeRgb(0x5E8A34, 0.85f + r.nextFloat() * 0.25f));
+        }
+        rock.rgb(0, 1.6f, 0.7f, 2.6f, 0.6f, 1.6f, shadeRgb(stone, 0.9f));
+        turf.rgb(0, 1.93f, 0.7f, 2.5f, 0.08f, 1.5f, 0x5A8432);
+        for (int i = 0; i < 7; i++) turf.rgb(-1.1f + i * 0.36f, 2.05f, 0.2f + (i % 3) * 0.4f, 0.05f, 0.18f, 0.05f, 0x6E9A3E);
+        // the way down: black within, steps descending into it
+        dark.rgb(0, 0.7f, 0.25f, 1.3f, 1.4f, 0.9f, 0x050404);
+        for (int i = 0; i < 4; i++) rock.rgb(0, 0.04f + (3 - i) * 0.0f, -0.35f + i * 0.22f, 1.2f, 0.08f + (3 - i) * 0.06f, 0.22f, shadeRgb(stone, 0.7f - i * 0.1f));
+        switch (theme) {
+            case 1 -> { // the warren: crooked props and a lintel log
+                wood.rgb(-0.72f, 0.75f, -0.2f, 0.16f, 1.5f, 0.16f, 0x5A3E22); wood.rgb(0.7f, 0.72f, -0.2f, 0.16f, 1.45f, 0.16f, 0x4E361E);
+                wood.rgb(0, 1.48f, -0.2f, 1.7f, 0.18f, 0.18f, 0x5E4224);
+                wood.rgb(0.95f, 1.2f, -0.35f, 0.08f, 0.6f, 0.08f, 0x6A4A2A); wood.rgb(0.95f, 1.55f, -0.35f, 0.22f, 0.18f, 0.18f, 0xE6DEC8);   // a skull on a stake
+            }
+            case 2 -> { // the crypt: a dressed arch
+                for (int s = -1; s <= 1; s += 2) rock.rgb(s * 0.75f, 0.8f, -0.25f, 0.3f, 1.6f, 0.3f, 0xA8A8A0);
+                rock.rgb(0, 1.68f, -0.25f, 1.9f, 0.24f, 0.36f, 0xB4B4AC); rock.rgb(0, 1.86f, -0.25f, 0.5f, 0.14f, 0.3f, 0x9A9A92);
+            }
+            case 0 -> { // the cave: old web across the corners of the mouth
+                for (int i = 0; i < 6; i++) wood.rgb(-0.55f + i * 0.04f, 1.25f - i * 0.12f, -0.3f, 0.5f - i * 0.06f, 0.015f, 0.015f, 0xD8D8D0);
+                for (int i = 0; i < 5; i++) wood.rgb(0.5f - i * 0.04f, 1.2f - i * 0.12f, -0.3f, 0.45f - i * 0.06f, 0.015f, 0.015f, 0xD0D0C8);
+            }
+            default -> { // the hall: a boulder split by the passage
+                rock.rgb(-1.0f, 1.0f, 0.2f, 0.9f, 2.0f, 1.3f, shadeRgb(stone, 0.95f)); rock.rgb(1.0f, 1.1f, 0.2f, 0.9f, 2.2f, 1.3f, shadeRgb(stone, 0.88f));
+            }
+        }
+        return new Layer[]{stone(rock), wood(wood), new Layer(dark, 1, 0, 0), new Layer(turf, 0.95f, 0, 0)};
+    }
+
+    /** A wall torch in an iron sconce: the bracket against the wall (at +z), the shaft, the pitch-soaked head. */
+    public static Layer[] torch() {
+        Meshes.Boxes iron = new Meshes.Boxes(), wood = new Meshes.Boxes(), head = new Meshes.Boxes();
+        iron.rgb(0, 0, 0.05f, 0.16f, 0.22f, 0.04f, 0x2E2E32);
+        iron.rgb(0, 0.06f, -0.04f, 0.06f, 0.04f, 0.16f, 0x3A3A40);
+        iron.rgb(0, 0.1f, -0.1f, 0.1f, 0.03f, 0.1f, 0x3A3A40);
+        wood.rgb(0, 0.12f, -0.1f, 0.05f, 0.42f, 0.05f, 0x5A3E22);
+        head.rgb(0, 0.33f, -0.1f, 0.08f, 0.1f, 0.08f, 0x2A1A10);
+        head.rgb(0, 0.38f, -0.1f, 0.06f, 0.04f, 0.06f, 0xF0A030);
+        return new Layer[]{metal(iron), wood(wood), glow(head, 1.2f)};
+    }
+
+    /** The way out from inside a dungeon: worn steps up to a ladder, and the grey of daylight falling down the shaft. */
+    public static Layer[] dungeonExit() {
+        Meshes.Boxes rock = new Meshes.Boxes(), wood = new Meshes.Boxes(), light = new Meshes.Boxes();
+        for (int i = 0; i < 3; i++) rock.rgb(0, 0.08f + i * 0.16f, 0.2f - i * 0.25f, 1.1f, 0.16f + i * 0.16f, 0.26f, shadeRgb(0x7A7A74, 0.9f - i * 0.05f));
+        for (int s = -1; s <= 1; s += 2) wood.rgb(s * 0.32f, 2.2f, -0.55f, 0.07f, 3.4f, 0.07f, 0x6A4A2A);
+        for (int i = 0; i < 9; i++) wood.rgb(0, 0.9f + i * 0.34f, -0.55f, 0.6f, 0.05f, 0.05f, 0x7E5C3A);
+        light.rgb(0, 2.4f, -0.4f, 0.9f, 4.4f, 0.9f, 0xB0B8C0);
+        return new Layer[]{stone(rock), wood(wood), glow(light, 0.35f)};
+    }
+
+    /** A trap's plate, found: a square set in the floor (wedged, once disarmed). */
+    public static Layer[] trapPlate(boolean wedged) {
+        Meshes.Boxes b = new Meshes.Boxes();
+        b.rgb(0, 0.012f, 0, 0.62f, 0.025f, 0.62f, wedged ? 0x5A5A56 : 0x6E6A62);
+        b.rgb(0, 0.02f, 0, 0.5f, 0.02f, 0.5f, wedged ? 0x4A4A46 : 0x7E7A70);
+        if (wedged) b.rgb(0.2f, 0.04f, 0.2f, 0.16f, 0.05f, 0.06f, 0x6A4A2A);
+        return new Layer[]{stone(b)};
+    }
+    /** The spikes that come up through a sprung plate. */
+    public static Layer[] trapSpikes() {
+        Meshes.Boxes b = new Meshes.Boxes();
+        for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) if ((x + z) % 2 == 0) { b.rgb(x * 0.11f, 0.25f, z * 0.11f, 0.035f, 0.5f, 0.035f, 0x8A8C92); b.rgb(x * 0.11f, 0.52f, z * 0.11f, 0.02f, 0.06f, 0.02f, 0xB0B2B8); }
+        return new Layer[]{metal(b)};
+    }
+    /** The rock that falls from a cracked roof. */
+    public static Layer[] trapRocks() {
+        Meshes.Boxes b = new Meshes.Boxes();
+        Random r = new Random(11);
+        for (int i = 0; i < 5; i++) { float s = 0.18f + r.nextFloat() * 0.2f; b.rgb((r.nextFloat() - 0.5f) * 0.5f, r.nextFloat() * 0.3f, (r.nextFloat() - 0.5f) * 0.5f, s, s, s, shadeRgb(0x7A7A74, 0.8f + r.nextFloat() * 0.3f)); }
+        return new Layer[]{stone(b)};
+    }
+
+    /** What stands beside a fence cell: 3 more fence (or bars), 2 a wall it butts against, 0 nothing. */
+    public interface FenceSides { int at(int x, int y, int z); }
+
+    /**
+     * The fences of one 16 x 16 column of the world as a model (gamefixes: fences were plain blocks). A fence cell is a
+     * squared post with a cap, and split rails - two weathered boards - out to each neighbour that is fence or wall;
+     * a lone cell is a post. Fence stacked on fence (the jail fronts) is iron bars instead: square uprights a hand
+     * apart, banded top and bottom, joined to the bars beside them. Coordinates are from the column's corner.
+     */
+    public static Layer[] fences(int x0, int z0, int y0, int y1, FenceSides sides) {
+        Meshes.Boxes wood = new Meshes.Boxes(), iron = new Meshes.Boxes();
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int x = x0; x < x0 + 16; x++) for (int z = z0; z < z0 + 16; z++) for (int y = y0; y <= y1; y++) {
+            if (sides.at(x, y, z) != 3) continue;
+            float cx = x - x0 + 0.5f, cz = z - z0 + 0.5f, by = y - y0;
+            // bars where fence is stacked on fence - and the odd cell beside such bars (over a cell's door) joins them
+            boolean bars = stacked(sides, x, y, z) || stacked(sides, x + 1, y, z) || stacked(sides, x - 1, y, z) || stacked(sides, x, y, z + 1) || stacked(sides, x, y, z - 1);
+            long h = (x * 73856093L) ^ (z * 19349663L) ^ (y * 83492791L);
+            float k = 0.92f + (h >>> 8 & 15) / 15f * 0.16f;
+            if (bars) {
+                // iron bars: the uprights along whichever way the bars run, the bands at the cell's top and bottom
+                boolean alongX = sides.at(x + 1, y, z) == 3 || sides.at(x - 1, y, z) == 3 || !(sides.at(x, y, z + 1) == 3 || sides.at(x, y, z - 1) == 3);
+                for (int i = 0; i < 4; i++) {
+                    float o = -0.375f + i * 0.25f;
+                    iron.rgb(alongX ? cx + o : cx, by + 0.5f, alongX ? cz : cz + o, 0.055f, 1, 0.055f, shadeRgb(0x4A4C52, k));
+                }
+                boolean top = sides.at(x, y + 1, z) != 3, bottom = sides.at(x, y - 1, z) != 3 && sides.at(x, y - 1, z) != 2;
+                if (top) iron.rgb(cx, by + 0.94f, cz, alongX ? 1 : 0.09f, 0.08f, alongX ? 0.09f : 1, 0x3A3C42);
+                if (bottom) iron.rgb(cx, by + 0.06f, cz, alongX ? 1 : 0.09f, 0.08f, alongX ? 0.09f : 1, 0x3A3C42);
+                iron.rgb(cx, by + 0.5f, cz, alongX ? 1 : 0.07f, 0.05f, alongX ? 0.07f : 1, 0x44464C);
+                continue;
+            }
+            // the post, a little sunk at its foot; its cap
+            wood.rgb(cx, by + 0.5f, cz, 0.2f, 1.0f, 0.2f, shadeRgb(0x6A4A2E, k));
+            wood.rgb(cx, by + 1.02f, cz, 0.25f, 0.06f, 0.25f, shadeRgb(0x7E5C3A, k));
+            wood.rgb(cx, by + 0.04f, cz, 0.26f, 0.08f, 0.26f, shadeRgb(0x4A3420, k));
+            // rails toward every neighbour that is fence, or a wall to butt against
+            for (int[] d : dirs) {
+                if (sides.at(x + d[0], y, z + d[1]) == 0) continue;
+                for (int r = 0; r < 2; r++) {
+                    float ry = by + (r == 0 ? 0.36f : 0.76f), sag = (h >>> (12 + r * 3) & 3) * 0.008f;
+                    int board = shadeRgb(r == 0 ? 0x8C6640 : 0x96704A, k * (0.96f + r * 0.05f));
+                    float mx = cx + d[0] * 0.25f, mz = cz + d[1] * 0.25f;
+                    wood.rgb(mx, ry - sag, mz, d[0] != 0 ? 0.5f : 0.06f, 0.12f, d[1] != 0 ? 0.5f : 0.06f, board);
+                }
+            }
+        }
+        return new Layer[]{wood(wood), metal(iron)};
+    }
+    private static boolean stacked(FenceSides sides, int x, int y, int z) { return sides.at(x, y, z) == 3 && (sides.at(x, y + 1, z) == 3 || sides.at(x, y - 1, z) == 3); }
+    private static int shadeRgb(int rgb, float k) {
+        int r = Math.min(255, (int) (((rgb >> 16) & 255) * k)), g = Math.min(255, (int) (((rgb >> 8) & 255) * k)), b = Math.min(255, (int) ((rgb & 255) * k));
+        return r << 16 | g << 8 | b;
+    }
+
     /** Deployed fishing gear: floats, stakes and a submerged mesh, rather than a storage chest. */
     public static Layer[] fishingNet() {
         Meshes.Boxes frame=new Meshes.Boxes(),rope=new Meshes.Boxes();

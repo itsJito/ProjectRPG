@@ -664,7 +664,7 @@ void Space::integrate(float dt, float gravity) {
 void Space::sweepBullets(const VoxelWorld* w, float dt) {
     if (!w) return;
     for (Body& b : bodies_) {
-        if (!(b.flags & ASTRATTO_RIGID_BULLET) || !b.dynamic() || !b.awake) continue;
+        if (!(b.flags & ASTRATTO_RIGID_BULLET) || (b.flags & ASTRATTO_RIGID_NO_WORLD) || !b.dynamic() || !b.awake) continue;
         // a straight cell walk from the last pose to this one: the first solid cell stops it at its face
         const V3 from = b.prevP, to = b.p, d = to - from;
         const float dist = len(d);

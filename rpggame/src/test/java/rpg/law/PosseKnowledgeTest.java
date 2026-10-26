@@ -3,45 +3,39 @@ package rpg.law;
 import astratto.bridge.NativeEngine;
 import astratto.game.Game;
 import org.junit.jupiter.api.Test;
+import rpg.Ids;
 import rpg.Rpg;
+import rpg.SaveSystem;
 import rpg.actor.Appearance;
 import rpg.ai.Npc;
 import rpg.world.DevMap;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * gamefixes: bounty hunters have no knowledge of the player beyond what someone saw - they start from, and search,
- * the last area the kingdom knows of, and a later sighting moves them only once word of it could have reached them.
- */
 class PosseKnowledgeTest {
-    @Test void huntersSearchTheLastKnownAreaNotThePlayer() {
-        var config = new NativeEngine.Config(); config.deterministic = true;
-        try (Game game = Game.create(config)) {
+    @Test void sightingsNeedALocalWitnessConversationAndKeepTheirSourceAcrossSaves() throws Exception {
+        var config=new NativeEngine.Config(); config.deterministic=true;
+        try(Game game=Game.create(config)) {
             game.activate(DevMap.build(game.engine()));
-            Rpg g = game.add(new Rpg(game, "Posse knowledge", new Appearance(), true));
-            g.player.skills.setLevel(rpg.skill.Skill.HEALTH, 100); g.player.restore();
-            for (Npc n : g.npcs) { g.ai.unload(n); n.aware.clear(); }
-            // the player was last seen by a townsperson at the square, then slipped away to the far corner unseen
-            Npc witness = g.npcs.stream().filter(n -> n.homeJurisdiction.equals(DevMap.ALPHA)).findFirst().orElseThrow();
-            var seen = new rpg.ai.Stealth.Aware(); seen.x = 100; seen.z = 64; seen.seenAt = g.time; witness.aware.put(g.player.id, seen);
-            g.teleport(g.player, 24, DevMap.FLOOR, 24);
-            g.law.all().computeIfAbsent(DevMap.ALPHA, k -> new java.util.HashMap<>()).put(g.player.id, 1200);
-            assertTrue(g.law.posses.form(DevMap.ALPHA, 1200, false));
-            var hunters = g.law.posses.members();
-            assertFalse(hunters.isEmpty(), "a posse formed");
-            for (Npc h : hunters) assertTrue(Math.hypot(h.hunt.x - 100, h.hunt.z - 64) < 1, "the search starts at the last sighting, not at the player");
-            for (int f = 0; f < 60 * 30; f++) assertTrue(game.tick(1f / 60));
-            for (Npc h : hunters) if (h.alive && !g.ai.canSee(h, g.player))
-                assertTrue(Math.hypot(h.hunt.x - g.player.x, h.hunt.z - g.player.z) > 20, () -> "an unseen player stays unknown: " + h.name + " searching at " + h.hunt.x + "," + h.hunt.z);
-            // a new sighting reaches them, but only after word could have travelled
-            var later = new rpg.ai.Stealth.Aware(); later.x = 40; later.z = 30; later.seenAt = g.time; witness.aware.put(g.player.id, later);
-            for (int f = 0; f < 60 * 5; f++) assertTrue(game.tick(1f / 60));
-            for (Npc h : hunters) if (h.alive && !g.ai.canSee(h, g.player)) assertTrue(Math.hypot(h.hunt.x - 40, h.hunt.z - 30) > 1, "word does not arrive instantly");
-            for (int f = 0; f < 60 * 15; f++) assertTrue(game.tick(1f / 60));
-            boolean heard = false;
-            for (Npc h : hunters) if (h.alive && h.hunt != null && Math.hypot(h.hunt.x - 40, h.hunt.z - 30) < 6) heard = true;
-            assertTrue(heard, "word of the new sighting reached the hunters");
+            Rpg g=game.add(new Rpg(game,"Confirmed sightings",new Appearance(),true));
+            for(Npc n:g.npcs) {g.ai.unload(n);n.aware.clear();n.playerSighting=null;}
+            Npc witness=(Npc)g.actor(Ids.VILLAGER),officer=g.ai.lawmanFor(DevMap.ALPHA);
+            g.ai.reload(witness);g.ai.reload(officer);
+            g.teleport(witness,70.5f,DevMap.FLOOR,70.5f);g.teleport(officer,100.5f,DevMap.FLOOR,70.5f);
+            witness.playerSighting=new Npc.Sighting(witness.id,80,72,1,0,g.time);
+            assertFalse(g.law.posses.tell(witness,officer),"a remote NPC cannot transmit a sighting");
+            assertNull(officer.playerSighting);
+            g.teleport(officer,73.5f,DevMap.FLOOR,70.5f);
+            assertTrue(g.law.posses.tell(witness,officer));
+            assertEquals(witness.id,officer.playerSighting.witness());
+            g.teleport(g.player,24,DevMap.FLOOR,24);
+            g.law.all().computeIfAbsent(DevMap.ALPHA,k->new java.util.HashMap<>()).put(g.player.id,1200);
+            assertTrue(g.law.posses.form(DevMap.ALPHA,1200,false));
+            for(Npc hunter:g.law.posses.members()) {
+                assertEquals(80,hunter.hunt.x);assertEquals(72,hunter.hunt.z);assertEquals(witness.id,hunter.hunt.source);
+            }
+            var file=java.nio.file.Files.createTempFile("sighting",".json");
+            assertTrue(new SaveSystem(g).save(file));assertTrue(new SaveSystem(g).load(file));
+            assertEquals(witness.id,officer.playerSighting.witness());assertEquals(80,officer.playerSighting.x());
         }
     }
 }

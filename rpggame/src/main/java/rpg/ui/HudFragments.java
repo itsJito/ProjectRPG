@@ -54,6 +54,7 @@ final class HudFragments {
         hud.add(new BountyNotice(hud)).wake("bountynotice");
         hud.add(new Target(hud)).wake("combat").linger(5);
         hud.add(new Milestone(hud));
+        hud.add(new LevelBanner(hud));
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
         hud.add(new WorkBar(hud));
         hud.add(new DialogueCard(hud));
@@ -631,31 +632,43 @@ final class HudFragments {
             if (map.tex == 0 || g.mapDirty) map.build();
             if (g.time - map.markersAt > 2) map.markers();
             float size = height() - 30, left = x + 8, top = y + 22, side = left + size + 28;
-            ui.text(ui.heading, "World Map", left, y - 6, 22, Style.ACCENT);
+            // the map one is on: the world's, or a dungeon's own (gamefixes: every dungeon is a map of its own)
+            var dungeon = rpg.world.DungeonLayout.at(g.player.x, g.player.z);
+            float x0 = dungeon == null ? 0 : dungeon.ox, z0 = dungeon == null ? 0 : dungeon.oz;
+            float span = dungeon == null ? DevMap.SX : Math.max(dungeon.w, dungeon.d);
+            java.util.function.BiFunction<Float, Float, float[]> at = (wx, wz) -> new float[]{left + (wx - x0) / span * size, top + (wz - z0) / span * size};
+            ui.text(ui.heading, dungeon == null ? "World Map" : dungeon.name, left, y - 6, 22, Style.ACCENT);
             // the map as a chart pinned in a frame: a dark mount, the gold trim, the paper a little warm
             ui.rect(left - 6, top - 6, size + 12, size + 12, 0xFF0E0B08);
-            ui.quad(map.tex, new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
-                    new float[]{0, 0, 1, 0, 1, 1, 0, 1}, 0xFFF4E8D0, 0);
+            float u1 = dungeon == null ? 1 : span / dungeon.w * 1, v1 = dungeon == null ? 1 : span / dungeon.d;
+            ui.quad(map.texFor(dungeon), new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
+                    new float[]{0, 0, u1, 0, u1, v1, 0, v1}, 0xFFF4E8D0, 0);
             Style.trim(ui, left - 6, top - 6, size + 12, size + 12);
-            for (Object[] marker : map.markers) {
-                float mx = left + (float) marker[1] / DevMap.SX * size, my = top + (float) marker[2] / DevMap.SZ * size;
-                ui.img((String) marker[0], mx - 7, my - 7, 14, 0xFFFFFFFF);
+            if (dungeon == null) for (Object[] marker : map.markers) {
+                float[] m = at.apply((float) marker[1], (float) marker[2]);
+                ui.img((String) marker[0], m[0] - 7, m[1] - 7, 14, 0xFFFFFFFF);
             }
+            for (var door : g.dungeons.doors) if ((rpg.world.DungeonLayout.at(door.x, door.z) == dungeon)) { float[] m = at.apply(door.x, door.z); ui.img("Boss_Icon", m[0] - 8, m[1] - 8, 16, 0xFFFFFFFF); }
             // Local people only: a world map is not remote knowledge of hidden actors.
-            for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z))
-                ui.disc(left + n.x / DevMap.SX * size, top + n.z / DevMap.SZ * size, 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
-            for (var grave : g.undertaker.graves()) skull(ui, left + grave.x / DevMap.SX * size, top + grave.z / DevMap.SZ * size, 12, Style.TEXT);
-            for (var contract : g.bountyBoard.carried()) {
-                float mx = left + contract.x() / DevMap.SX * size, my = top + contract.z() / DevMap.SZ * size;
-                ui.disc(mx, my, 7, 0x70402010); ui.border(mx - 5, my - 5, 10, 10, 2, 0xFFFFC05A);
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z)) {
+                float[] m = at.apply(n.x, n.z); ui.disc(m[0], m[1], 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
             }
-            if (hud.flag != null) ui.disc(left + hud.flag[0] / DevMap.SX * size, top + hud.flag[1] / DevMap.SZ * size, 4, Style.BAD);
-            float px = left + g.player.x / DevMap.SX * size, py = top + g.player.z / DevMap.SZ * size;
+            for (var mo : g.monsters.all()) if (mo.alive && mo.loaded && mo.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, mo.x, mo.chestY(), mo.z)) {
+                float[] m = at.apply(mo.x, mo.z); ui.disc(m[0], m[1], 2, Style.NPC_HOSTILE);
+            }
+            for (var grave : g.undertaker.graves()) { float[] m = at.apply(grave.x, grave.z); skull(ui, m[0], m[1], 12, Style.TEXT); }
+            for (var contract : g.bountyBoard.carried()) {
+                float[] m = at.apply(contract.x(), contract.z());
+                ui.disc(m[0], m[1], 7, 0x70402010); ui.border(m[0] - 5, m[1] - 5, 10, 10, 2, 0xFFFFC05A);
+            }
+            if (hud.flag != null) { float[] m = at.apply(hud.flag[0], hud.flag[1]); ui.disc(m[0], m[1], 4, Style.BAD); }
+            float[] pm = at.apply(g.player.x, g.player.z);
+            float px = pm[0], py = pm[1];
             float yaw = g.controller.camYaw;
             ui.disc(px, py, 4, Style.ACCENT);
             ui.line(px, py, px - (float) Math.sin(yaw) * 10, py - (float) Math.cos(yaw) * 10, 2, Style.ACCENT);
             ui.text("NORTH", side, top, 14, Style.TEXT);
-            ui.text(DevMap.SX + " x " + DevMap.SZ + " m playable area", side, top + 30, 13, Style.DIM);
+            ui.text(dungeon == null ? DevMap.SX + " x " + DevMap.SZ + " m playable area" : dungeon.type.title + ", " + dungeon.threatWord() + " threat", side, top + 30, 13, Style.DIM);
             ui.text("You", side + 20, top + 78, 13, Style.TEXT); ui.disc(side + 5, top + 85, 4, Style.ACCENT);
             ui.text("Nearby people", side + 20, top + 110, 13, Style.TEXT); ui.disc(side + 5, top + 117, 3, Style.NPC);
             ui.text("Nearby hostiles", side + 20, top + 142, 13, Style.TEXT); ui.disc(side + 5, top + 149, 3, Style.NPC_HOSTILE);
@@ -664,7 +677,7 @@ final class HudFragments {
             ui.text("Click to mark a destination", side, top + 242, 13, Style.DIM);
             ui.text("M or Esc to return", side, top + 268, 13, Style.DIM);
             if (live && ui.clicked(left, top, size, size))
-                hud.flag = new float[]{Math.max(0, Math.min(DevMap.SX - 1, (ui.mx - left) / size * DevMap.SX)), Math.max(0, Math.min(DevMap.SZ - 1, (ui.my - top) / size * DevMap.SZ))};
+                hud.flag = new float[]{x0 + Math.max(0, Math.min(span - 1, (ui.mx - left) / size * span)), z0 + Math.max(0, Math.min(span - 1, (ui.my - top) / size * span))};
         }
     }
 
@@ -718,6 +731,35 @@ final class HudFragments {
             g.mapDirty = false;
         }
 
+        /** Each dungeon's own map (built once from its plan): floors, the walls round them, fire pits, pools, pillars. */
+        private final java.util.Map<Integer, Integer> dungeonTex = new java.util.HashMap<>();
+        int texFor(rpg.world.DungeonLayout l) {
+            if (l == null) return tex;
+            return dungeonTex.computeIfAbsent(l.id, k -> {
+                ByteBuffer img = MemoryUtil.memAlloc(l.w * l.d * 4);
+                try {
+                    int floor = switch (l.theme) { case WARREN -> 0x7A6448; case CAVE -> 0x6E6E6A; case CRYPT -> 0x8A8478; case HALL -> 0x70746A; };
+                    java.util.Map<Long, String> marks = new java.util.HashMap<>();
+                    for (var s : l.spots) marks.put((long) s.x() << 32 | s.z(), s.what());
+                    for (int z = 0; z < l.d; z++) for (int x = 0; x < l.w; x++) {
+                        boolean wall = false;
+                        if (!l.open[x][z]) for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) { int nx = x + dx, nz = z + dz; if (nx >= 0 && nz >= 0 && nx < l.w && nz < l.d && l.open[nx][nz]) wall = true; }
+                        String mark = marks.get((long) x << 32 | z);
+                        int c = l.open[x][z] ? floor : wall ? 0xC4C0B8 : 0x141210;
+                        // the corridors a shade darker than the rooms
+                        if (l.open[x][z] && l.height[x][z] == 3) c = ((c >> 16 & 255) * 85 / 100) << 16 | ((c >> 8 & 255) * 85 / 100) << 8 | (c & 255) * 85 / 100;
+                        if ("embers".equals(mark) || "brazier".equals(mark)) c = 0xD06A20;
+                        if ("pool".equals(mark)) c = 0x355E8C;
+                        if ("pillar".equals(mark) || "boulder".equals(mark)) c = 0xC4C0B8;
+                        int at = (z * l.w + x) * 4;
+                        img.put(at, (byte) (c >> 16)).put(at + 1, (byte) (c >> 8)).put(at + 2, (byte) c).put(at + 3, (byte) 255);
+                    }
+                    img.position(0).limit(l.w * l.d * 4);
+                    return hud.r.texture(AstrattoNative.TEX_2D, l.w, l.d, 1, AstrattoNative.TEX_NEAREST, img);
+                } finally { MemoryUtil.memFree(img); }
+            });
+        }
+
         /** The map's markers, from what is in the world (the provided map icons). */
         private void markers() {
             Rpg g = hud.g;
@@ -755,6 +797,10 @@ final class HudFragments {
             float yaw = g.controller.camYaw;
             float fx = (float) -Math.sin(yaw), fz = (float) -Math.cos(yaw), rx = (float) Math.cos(yaw), rz = (float) -Math.sin(yaw);
             Player p = g.player;
+            // the map one is on: the world's, or the dungeon's own
+            var dungeon = rpg.world.DungeonLayout.at(p.x, p.z);
+            int shown = texFor(dungeon);
+            float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? DevMap.SX : dungeon.w, mapD = dungeon == null ? DevMap.SZ : dungeon.d;
             ui.disc(cx, cy, R + 3, 0x90141518);
             int seg = 48;
             for (int i = 0; i < seg; i++) {
@@ -764,9 +810,9 @@ final class HudFragments {
                 for (int k = 0; k < 4; k++) {
                     float dx = (xy[k * 2] - cx) / SCALE, dy = (xy[k * 2 + 1] - cy) / SCALE;
                     float wx = p.x + rx * dx - fx * dy, wz = p.z + rz * dx - fz * dy;
-                    uv[k * 2] = wx / DevMap.SX; uv[k * 2 + 1] = wz / DevMap.SZ;
+                    uv[k * 2] = (wx - mapX0) / mapW; uv[k * 2 + 1] = (wz - mapZ0) / mapD;
                 }
-                ui.quad(tex, xy, uv, 0xE8FFFFFF, 0);
+                ui.quad(shown, xy, uv, 0xE8FFFFFF, 0);
             }
             ui.ring(cx, cy, R + 1, 1, Style.EDGE_HI);
             for (Object[] m : markers) if (toMap((float) m[1], (float) m[2], cx, cy)) ui.img((String) m[0], p2[0] - 7, p2[1] - 7, 14, 0xF0FFFFFF);
@@ -1038,18 +1084,6 @@ final class HudFragments {
                 Notice notice=null;
                 String title=switch(type) { case "event:QuestStarted"->"Quest accepted";case "event:QuestCompleted"->"Quest complete";case "event:QuestFailed"->"Quest failed";default->null; };
                 if(title!=null)notice=new Notice(title,detail.startsWith("QT-COURIER")?"Courier":detail,"Quest_map_icon",type.endsWith("Failed")?Style.BAD:Style.ACCENT,List.of());
-                else if(type.equals("event:LevelUp")) {
-                    try {
-                        String[] fields=detail.split(" ",2),levels=fields[1].split("->",2);
-                        Skill skill=Skill.valueOf(fields[0]);int from=Integer.parseInt(levels[0]),to=Integer.parseInt(levels[1]);
-                        List<String> unlocked=new ArrayList<>();
-                        for(String line:SkillGuide.unlocks(skill)) {
-                            int space=line.indexOf(' '),need=Integer.parseInt(line.substring(0,space));
-                            if(need>from && need<=to && unlocked.size()<2)unlocked.add(line.substring(space+1));
-                        }
-                        notice=new Notice("Level up",skill.title+"  "+to,Atlas.skill(skill),Style.ACCENT,unlocked);
-                    } catch(IllegalArgumentException|IndexOutOfBoundsException ignored) { return; }
-                }
                 if(notice==null)return;
                 if(pending.size()==6)pending.removeFirst();pending.addLast(notice);
             });
@@ -1069,6 +1103,68 @@ final class HudFragments {
             ui.flatCentered(ui.heading,current.title,x+180,y+54,24,current.color);
             ui.flatCentered(current.detail,x+180,y+82,14,Style.TEXT);
             for(int i=0;i<current.unlocks.size();i++)ui.flatCentered("Unlocked: "+current.unlocks.get(i),x+180,y+106+i*17,11,Style.GOOD);
+        }
+    }
+
+    /**
+     * The level-up banner (gamefixes): "LEVEL UP!" splashed across the top of the screen with the Holy Light - it lands
+     * big and settles, the skill and its new level under it - and, when a combat level came with it, a banner of its
+     * own after it, congratulating the player and showing the new Combat Level (the maximum gets its own words).
+     */
+    static final class LevelBanner extends Fragment {
+        LevelBanner(Hud h) { super("levelbanner"); fadeIn = 0.05f; fadeOut = 0.4f; }
+        static final float SHOW = 3.4f, COMBAT_AT = 0.75f;
+        @Override protected boolean active() { var b = hud.g.prog.banner; return b != null && hud.now - b.at() < SHOW; }
+        @Override public float width() { return 560; }
+        @Override public float height() { return 250; }
+        // (the banner sits over the action; nothing in it takes the mouse)
+        /** A landing: big, then settling to its size with a small overshoot. */
+        private static float pop(float t) {
+            if (t <= 0) return 0;
+            if (t < 0.14f) return 1.7f - 0.75f * (t / 0.14f);
+            if (t < 0.26f) return 0.95f + 0.05f * ((t - 0.14f) / 0.12f);
+            return 1;
+        }
+        private static int fade(int argb, float a) { return ((int) (((argb >>> 24) & 255) * Math.max(0, Math.min(1, a))) << 24) | (argb & 0xFFFFFF); }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            var b = hud.g.prog.banner;
+            if (b == null) return;
+            float t = (float) (hud.now - b.at()), out = Math.min(1, Math.max(0, (SHOW - t) / 0.45f));
+            float cx = x + 280;
+            // the ribbon: a dark band, gilded at its edges, widening out from the middle as the words land
+            float open = Math.min(1, t / 0.2f), rw = 520 * open;
+            ui.rect(cx - rw / 2, y + 18, rw, 108, fade(0xD8141008, out));
+            ui.rect(cx - rw / 2, y + 18, rw, 2, fade(0xFFE8C060, out)); ui.rect(cx - rw / 2, y + 124, rw, 2, fade(0xFFE8C060, out));
+            ui.rect(cx - rw / 2, y + 22, rw, 1, fade(0x80F8E8A0, out)); ui.rect(cx - rw / 2, y + 121, rw, 1, fade(0x80F8E8A0, out));
+            ui.rect(cx - rw * 0.3f, y + 93, rw * 0.6f, 1, fade(0x60E8C060, out));
+            float s = pop(t);
+            if (s > 0) {
+                float size = 58 * s;
+                String words = "LEVEL UP!";
+                float w = ui.width(ui.heading, words, size);
+                ui.text(ui.heading, words, cx - w / 2 + 3, y + 54 - size / 2 + 3, size, fade(0xC0000000, out));
+                ui.text(ui.heading, words, cx - w / 2, y + 54 - size / 2, size, fade(0xFFF6D46A, out));
+            }
+            String line = b.skill().title + "  level " + b.level();
+            ui.img(Atlas.skill(b.skill()), cx - ui.width(line, 17) / 2 - 28, y + 97, 22, fade(0xFFFFFFFF, out));
+            ui.flatCentered(line, cx, y + 100, 17, fade(0xFFF2E6C8, out));
+            if (b.combat() <= 0) return;
+            // the combat level's own banner, a beat later: crimson and gold, with crossed swords
+            float ct = t - COMBAT_AT;
+            if (ct <= 0) return;
+            float cs = pop(ct), by = y + 146, cw = 420 * Math.min(1, ct / 0.2f);
+            ui.rect(cx - cw / 2, by, cw, 92, fade(0xE0300C0C, out));
+            ui.border(cx - cw / 2, by, cw, 92, 2, fade(0xFFD8A040, out));
+            ui.rect(cx - cw / 2 + 6, by + 6, cw - 12, 1, fade(0x70F0C878, out));
+            if (cs > 0) {
+                String head = b.combatMax() ? "MAXIMUM COMBAT LEVEL!" : "CONGRATULATIONS!";
+                ui.flatCentered(ui.heading, head, cx, by + 10, 26 * cs, fade(0xFFF0C060, out));
+                String lvl = "Combat Level " + b.combat();
+                float lw = ui.width(ui.heading, lvl, 36 * cs);
+                ui.img("Sword_map_icon", cx - lw / 2 - 40, by + 46, 30, fade(0xFFFFFFFF, out));
+                ui.img("Sword_map_icon", cx + lw / 2 + 10, by + 46, 30, fade(0xFFFFFFFF, out));
+                ui.text(ui.heading, lvl, cx - lw / 2, by + 44, 36 * cs, fade(0xFFFFF0D0, out));
+            }
         }
     }
 

@@ -136,6 +136,25 @@ public class Container extends WorldObject {
             for (int i = 0; i < contents.size(); i++) if (contents.get(i) != null && which.test(contents.get(i))) { Result r = take(g, a, i, Integer.MAX_VALUE, g.state.newRequestId()); if (r.rejected()) return r; }
             return Result.ok();
         }
+        if (action.equals("depositall")) {
+            // everything carried into it (gamefixes: "Move All" at the bank) - what is worn stays worn; a bag that still
+            // holds things stays carried; anything that will not fit stays in the pack
+            if (kind.equals("cargo") || kind.equals("grave")) return Result.no("You can't put things in there.");
+            int moved = 0, left = 0;
+            for (var from : a.grids()) for (int slot = 0; slot < from.size(); slot++) {
+                ItemStack s = from.get(slot);
+                if (s == null) continue;
+                ItemStack moving = s.copyWhole();
+                if (!contents.accepts(moving) || !contents.canAdd(moving)) { left++; continue; }
+                from.take(slot, s.amount);
+                contents.add(moving);
+                moved++;
+                g.state.commit(g.state.newRequestId(), "ItemDeposited", a.id, id, jurisdiction(), 0, moving.toString());
+            }
+            if (moved == 0) return Result.no(left > 0 ? "There's no room for any of it." : "You aren't carrying anything.");
+            if (a == g.player) { if (g.sfx != null) g.sfx.ui("ContainerOpen", 0.4f); if (left > 0) g.chat.add(left + (left == 1 ? " thing" : " things") + " would not fit and stayed in your pack.", rpg.Chat.Kind.WARN); }
+            return Result.ok();
+        }
         if (action.startsWith("deposit:")) {
             // deposit:<slot> from the base grid, or deposit:<grid>:<slot>[:<x>:<y>:<turned>] from any carried grid to a place
             String[] f = action.substring(8).split(":");

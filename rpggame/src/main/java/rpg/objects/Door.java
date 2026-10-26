@@ -50,10 +50,9 @@ public final class Door extends WorldObject {
      * fully either way on its hinge, and never through the wall beside it).
      */
     public static final float LEAF_MASS = 28, SWING = 1.92f;
-    /** Bodies walking into a leaf swing it (the hinge driven away from them, as hard as they come on), until then. */
-    private final double[] pushedUntil = new double[2];
+    /** Leaf transforms shared by physical targeting and rendering. */
     private final float[][] leafPose = new float[2][16];
-    private float leafWidth = 1;
+    public float leafWidth = 1;
     public static final int MATERIAL_WOOD_DOOR = 2;
 
     public Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner) {
@@ -133,7 +132,6 @@ public final class Door extends WorldObject {
             var body = rigids.body(leaf[i]);
             if (body != null) body.matrix(leafPose[i]);
             if (closing) g.game.commands().jointMotor(hinge[i], Math.clamp(-angle[i] * 5, -2.4f, 2.4f), 90);
-            else if (open && !locked && motorUntil <= 0) shove(g, i);
         }
         if (motorUntil > 0 && g.time > motorUntil && !closing) { friction(g); motorUntil = 0; }
         if (closing && most < 0.06f) { latch(g); closing = false; if (relock) { relock = false; setLocked(g, true); } }
@@ -173,46 +171,13 @@ public final class Door extends WorldObject {
 
     private void friction(Rpg g) { for (long h : hinge) g.game.commands().jointMotor(h, 0, 0); }
 
-    /**
-     * Someone walking into an open leaf swings it away from them on its hinge, at their pace (the leaf is light on its
-     * hinge; a body does not have to wrestle it), whichever side they come from. Left alone it hangs where it was put.
-     */
-    private void shove(Rpg g, int i) {
-        float[] m = leafPose[i];
-        float cx = m[12], cz = m[14], ax = m[0], az = m[2];            // the leaf's centre and its long axis
-        float half = leafWidth / 2;
-        float drive = 0;
-        for (Actor a : g.actors()) {
-            if (!a.alive || a.dummy || Math.abs(a.x - cx) > 2 || Math.abs(a.z - cz) > 2) continue;
-            float rx = a.x - cx, rz = a.z - cz;
-            float along = rx * ax + rz * az, across = -rx * az + rz * ax;     // in the leaf's frame
-            if (Math.abs(along) > half + a.radius * 0.5f || Math.abs(across) > a.radius + 0.22f) continue;
-            float speed = (float) Math.hypot(a.vx, a.vz);
-            if (speed < 0.2f) continue;
-            // moving into the face it is on: the leaf turns the way they are going through (in or out), faster the further
-            // along it they push
-            float into = Math.abs(a.vx * -az + a.vz * ax);
-            if (into <= 0.05f) continue;
-            float lever = (along + half) / leafWidth;                          // 0 at the hinge, 1 at the free edge
-            float through = alongX() ? a.vz * inSide : a.vx * inSide;           // > 0: heading inside
-            if (Math.abs(through) < 0.05f) continue;
-            float turn = inward[i] * Math.signum(through) * Math.max(1.2f, speed * (0.8f + lever));
-            if (Math.abs(turn) > Math.abs(drive)) drive = turn;
-        }
-        if (drive != 0) { g.game.commands().jointMotor(hinge[i], drive, 120); pushedUntil[i] = g.time + 0.25; }
-        else if (pushedUntil[i] > 0 && g.time > pushedUntil[i]) { g.game.commands().jointMotor(hinge[i], 0, 0); pushedUntil[i] = 0; }
-    }
-
-    /** A blow or a body glancing off an open leaf: it swings on, away from the push. */
+    /** An actual weapon contact transfers momentum at its point of impact. Body contacts are solved by Impulsis. */
     public void knock(Rpg g, float hx, float hz, float dx, float dz) {
         if (!open || locked) return;
         for (int i = 0; i < leaf.length; i++) {
             float[] m = leafPose[i];
             if (Math.hypot(hx - m[12], hz - m[14]) > leafWidth) continue;
-            float through = alongX() ? dz * inSide : dx * inSide;
-            if (through == 0) continue;
-            g.game.commands().jointMotor(hinge[i], inward[i] * Math.signum(through) * 2.6f, 80);
-            pushedUntil[i] = g.time + 0.3;
+            g.game.commands().rigidImpulse(leaf[i], hx, m[13], hz, dx * 12, 0, dz * 12);
         }
     }
 
@@ -346,7 +311,7 @@ public final class Door extends WorldObject {
         open = o;
         if (leaf.length == 0) spawn(g);
         if (o && by != null) swingSign = alongXSide(by) ? 1 : -1;
-        if (o) { closing = false; unlatch(g); swing(g, 0.7f); }
+        if (o) { closing = false; unlatch(g); swing(g, 0.25f); }
         else { closing = true; motorUntil = 0; }
         g.state.commit(req, o ? "DoorOpened" : "DoorClosed", by == null ? 0 : by.id, id, jurisdiction(), 0, name);
         if (g.sfx != null) g.sfx.play(o ? "door" : "door.close", x, y, z, 0.6f);
@@ -359,7 +324,7 @@ public final class Door extends WorldObject {
             // back on the hinge at zero, then open again if it was
             boolean ax = alongX();
             float ex = ax ? (i == 0 ? 1 : -1) : 0, ez = ax ? 0 : (i == 0 ? 1 : -1);
-            float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = cells.length >= 2 ? 1f : 1f;
+            float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = leafWidth;
             restPose(i, hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2, yaw);
             g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
                     (float) Math.cos(yaw / 2), 0, (float) Math.sin(yaw / 2), 0, 0, 0, 0, 0, 0, 0);

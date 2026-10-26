@@ -33,7 +33,7 @@ public class Actor {
     public float bloodied;
     public float eatenMinutes;
     public float charred;
-    public double burnSince=-1, lastRoll=-99, rollContact;
+    public double burnSince=-1, lastRoll=-99, rollContact, shockUntil=-99, lastSpasm=-99, castAt=-99;
     /** Blood on the body itself, splash by splash where it landed (painted onto the figure). */
     public final Blood blood = new Blood();
     public final Injuries injuries = new Injuries();
@@ -43,6 +43,7 @@ public class Actor {
     /** The body's fifteen joint points (Sydney's, world) as last drawn, and when: what a physical reaction starts from. */
     public float[] posePts;
     public double poseAt = -1;
+    public float poseX=Float.NaN, poseY, poseZ, poseYaw;
     /** The figure's animation memory is to be started afresh (the body was handed back from Sydney somewhere else). */
     public boolean poseReset;
     /** Human physical reaction body; animal articulation has its own typed body record. */
@@ -63,6 +64,8 @@ public class Actor {
      * was. The figure's free hand reaches there and comes back while the rest of the body carries on.
      */
     public double grabAt = -99;
+    /** A level's cheer (both arms thrown up), when it began. */
+    public double cheerAt = -99;
     public float grabX, grabY, grabZ;
     public void grab(double now, float x, float y, float z) { grabAt = now; grabX = x; grabY = y; grabZ = z; }
     /** Arrows, bolts and thrown blades lodged in the body (gamefixes: each one a real item, where it struck). */
@@ -140,6 +143,8 @@ public class Actor {
 
     /** The body plan this actor's look gives it (part sizes, joints, hitbox). */
     public Body plan() { return Body.of(look); }
+    /** How big this figure is against a person's (1 for people; a goblin is smaller, a troll far bigger): its swings scale with it. */
+    public float figureScale() { return 1; }
     /** The scale of this body's Sydney skeleton (a person's is 1; a goblin's is smaller, a troll's far bigger), and its profile. */
     public float ragdollScale() { return 1; }
     public int sydneyProfile() { return astratto.bridge.AstrattoNative.SYDNEY_HUMAN; }

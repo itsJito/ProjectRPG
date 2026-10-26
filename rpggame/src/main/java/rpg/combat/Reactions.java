@@ -65,6 +65,32 @@ public final class Reactions {
         if (a.body != 0) g.game.commands().moverInput(a.body, 0, 0, 0, 0, 0, MOVER_POSED);
         if (a instanceof Npc npc) g.ai.desire(npc, rpg.ai.AiSystem.A_IDLE);
     }
+    /** Charge interrupts voluntary movement and drives opposing impulses through the existing articulated body. */
+    public void shocked(Actor a) {
+        if (!a.alive || a.dummy) return;
+        a.cs.cancel(); a.cs.blocking=false; a.shockUntil=g.time+0.8;
+        if (a instanceof rpg.animal.Animal animal) {
+            if (animal.ragdoll==null) g.animals.makeRagdoll(animal,0,1,0,true);
+            if (animal.ragdoll!=null && g.time-a.lastSpasm>0.12) {
+                var trunk=g.lastRigids.body(animal.ragdoll.trunk().body());
+                if(trunk!=null)g.game.commands().rigidImpulse(trunk.handle,trunk.x+animal.radius,trunk.y,trunk.z,0,(a.lastSpasm<g.time-0.2?1:-1)*2,0);
+                a.lastSpasm=g.time;
+            }
+            return;
+        }
+        falling(a,0);
+        if (a.ragdoll==0) return;
+        g.game.commands().ragdollControl(a.ragdoll,CONTROL_COLLAPSE,1);
+        g.game.commands().ragdollControl(a.ragdoll,CONTROL_STAY_DOWN,1);
+        if(g.time-a.lastSpasm>=0.12) {
+            a.lastSpasm=g.time;
+            float side=((int)(g.time*12)&1)==0?1:-1;
+            g.game.commands().ragdollHit(a.ragdoll,RD_L_SHOULDER,side,1,0,8,0);
+            g.game.commands().ragdollHit(a.ragdoll,RD_R_SHOULDER,-side,-1,0,8,0);
+            g.game.commands().ragdollHit(a.ragdoll,RD_L_KNEE,0,0,side,5,0);
+        }
+    }
+
     private static float footY(Snapshots.Ragdoll body) {
         return Math.min(body.p[RD_L_ANKLE * 3 + 1], body.p[RD_R_ANKLE * 3 + 1]);
     }
@@ -130,7 +156,9 @@ public final class Reactions {
             boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND;
             boolean tooLong = g.time - n.reactSince > 14;
             boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
-            if (!rolling && (back || tooLong || rd.outcome == OUTCOME_STUCK)) {
+            boolean shocked = g.time < n.shockUntil;
+            if (!rolling && !shocked) g.game.commands().ragdollControl(n.ragdoll, CONTROL_STAY_DOWN, 0);
+            if (!rolling && !shocked && (back || tooLong || rd.outcome == OUTCOME_STUCK)) {
                 // handed back to the figure, standing where the feet are, facing the way the trunk faces - but never
                 // inside someone else (the body may have reeled into them): stepped out to arm's length
                 float sx = rd.standX, sz = rd.standZ;

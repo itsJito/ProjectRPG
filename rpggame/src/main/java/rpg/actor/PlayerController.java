@@ -119,7 +119,7 @@ public final class PlayerController {
         // main hand
         if (in.mainDown) mainHeld += dt;
         if (bow) {
-            if (in.mainDown && !mainWas && g.sfx != null) g.sfx.play("bow.draw", p.x, p.eyeY(), p.z, 0.22f);
+            if (in.mainDown && !mainWas && g.sfx != null) g.sfx.play("bow.draw", p.x, p.eyeY(), p.z, 0.45f);
             if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.9f);
             if (!in.mainDown && mainWas && p.cs.draw > 0) { g.combat.shoot(p, aimYaw, aimPitch, p.cs.draw); p.cs.draw = 0; }
         } else if (staff) {

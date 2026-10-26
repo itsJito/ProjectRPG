@@ -24,7 +24,7 @@ public final class Progression {
 
     /** Awards scaled test XP; returns what was applied. cause: the event that earned it (0 none). */
     public Skills.Award award(Actor a, Skill s, double baseXp, String why, long cause) {
-        return awardRaw(a, s, Math.round(baseXp * g.cfg.xpRate), why, cause, 0);
+        return awardRaw(a, s, Math.round(baseXp * g.cfg.xpRate * (g.cfg.xpRate == 1 ? 1 : rpg.Config.skillPace(s))), why, cause, 0);
     }
 
     /** Awards exactly this XP, unscaled (lamps, debug grants). requestId 0: not deduplicated. */
@@ -68,7 +68,29 @@ public final class Progression {
         if (combatUp) g.chat.add("Your combat level is now " + combatNow + ".", rpg.Chat.Kind.LEVEL);
         if (g.sfx != null) g.sfx.jingle(w.toLevel() >= XpTable.MAX_LEVEL, combatUp, combatMax);
         if (g.music != null) g.music.duckFor(combatMax || w.toLevel() >= XpTable.MAX_LEVEL ? 8 : 4);
-        if (g.fx != null) g.fx.fireworks(g.player.x, g.player.y + 2.2f, g.player.z);
+        // the Holy Light (gamefixes): the beam, the glow and the rain of sparkles; and out of a fight, a cheer - never on
+        // the final blow, nor with other foes about
+        if (g.fx != null) g.fx.holyLight(g.player.x, g.player.y, g.player.z, combatUp);
+        if (!fighting()) g.player.cheerAt = g.time;
+        // a combat level heals the body whole; a skill's does not
+        if (combatUp) g.player.hp = g.player.maxHp();
+        banner = new Banner(s, w.toLevel(), combatUp ? combatNow : 0, combatMax, g.time);
+        if (combatUp) g.state.commit("CombatLevelUp", g.player.id, 0, null, 0, String.valueOf(combatNow));
+    }
+
+    /** The banner splashed across the screen for the latest level: the skill and its level, and the new combat level if one came with it. */
+    public record Banner(Skill skill, int level, int combat, boolean combatMax, double at) {}
+    public Banner banner;
+
+    /** In a fight: striking or struck just now, the last blow just landed, or a foe close at hand. */
+    private boolean fighting() {
+        var p = g.player;
+        if (p.cs.busy() || g.time - p.cs.lastHurt < 4 || g.combat != null && g.time - g.combat.lastPlayerKill < 2.5) return true;
+        for (Actor o : g.actors()) {
+            if (o == p || !o.alive || o.dummy || o.distTo(p) >= 15) continue;
+            if (g.ai.hostile(o, p) || o instanceof rpg.animal.Animal an && (an.goal == rpg.animal.Animal.Goal.DEFEND || an.goal == rpg.animal.Animal.Goal.HUNT) && (an.threat == p.id || an.other == p.id)) return true;
+        }
+        return false;
     }
 
     private static String article(Skill s) { return "AEIOU".indexOf(s.title.charAt(0)) >= 0 ? "an" : "a"; }

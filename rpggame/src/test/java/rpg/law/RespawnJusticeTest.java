@@ -111,15 +111,16 @@ class RespawnJusticeTest {
 
     @Test void shopkeepersDistinguishSettledGossipFromTheirOwnGrievance() {
         Npc merchant = (Npc) g.actor(Ids.MERCHANT_A);
+        merchant.goal=Brain.Goal.WORK;
         Memory gossip = crime(41, g.player.id, DevMap.ALPHA).rumorFrom(witness);
         merchant.remember(gossip, 24);
         assertNotNull(g.econ.tradeRefusal(merchant, g.player));
-        g.respawn();
+        g.respawn(); merchant.goal=Brain.Goal.WORK;
         assertNull(g.econ.tradeRefusal(merchant, g.player));
         Memory grievance = new Memory("ASSAULT", g.player.id, merchant.id, DevMap.ALPHA, g.state.minutes,
                 1, "witnessed", 42, 0, "attacked me");
         merchant.remember(grievance, 24);
-        g.respawn();
+        g.respawn(); merchant.goal=Brain.Goal.WORK;
         assertNotNull(g.econ.tradeRefusal(merchant, g.player));
         merchant.remember(new Memory("THEFT", g.player.id, witness.id, DevMap.ALPHA, g.state.minutes,
                 0.3f, "rumor from elsewhere", 43, 0, "new weak gossip"), 24);

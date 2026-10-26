@@ -52,7 +52,7 @@ final class Windows {
 
     /** Where a detached window stands: left of the inventory's frame, or at the screen's edge when that is too narrow. */
     static void detach(Win w) {
-        float room = (w.hud.w - Hud.FW) / 2f;
+        float room = (w.hud.w - w.hud.frameWidth()) / 2f;
         w.moved = room >= w.ww + 28 ? null : Fragment.Placement.at(Fragment.Anchor.LEFT, 12, Hud.FRAME_Y);
     }
 
@@ -67,18 +67,11 @@ final class Windows {
             boolean theft = c.isTheft(g.player);
             float top = card(ui, c.name, x, y), ix = x + 12, iw = ww - 24;
             ui.text(theft ? "Owned by " + g.nameOf(c.owner) + ": taking is theft" : c.owner == g.player.id ? "Yours" : "Free to take", ix, top, 11, theft ? Style.BAD : Style.DIM);
-            // a bank account: a tab for each vault (gamefixes: the Bank of Gameworld)
             if (c.kind.equals("vault")) {
-                var vaults = g.bank.vaults(c.owner);
-                float tw = Math.min(44, (iw - 4) / Math.max(1, vaults.size()));
-                for (int i = 0; i < vaults.size(); i++) {
-                    Container v = vaults.get(i);
-                    if (Style.tab(ui, String.valueOf(i + 1), ix + i * tw, top + 14, tw - 2, 20, v == c) && v != c && live) { hud.container = v; hud.sound("UIbutton1", 0.4f); }
-                }
-                top += 26;
-                ui.text(rpg.item.Currency.text(g.bank.coinsIn(c.owner)) + " G in the account", ix + iw - 150, top - 40, 11, Style.DIM);
+                ui.text(Currency.text(g.bank.coinsIn(c.owner)) + " G / " + c.contents.size() + " cells", ix, top + 15, 11, Style.DIM);
+                top += 20;
             }
-            float cs = Math.min(Math.min(30, iw / c.contents.w), (wh - 200) / c.contents.h);
+            float cs = Math.min(Math.min(30, iw / c.contents.w), (wh - (c.kind.equals("vault") ? 256 : 200)) / c.contents.h);
             hud.inventory.drawGrid(ui, c.contents, ix, top + 20, cs, InventoryPanel.Source.CONTAINER);
             float by = top + 20 + c.contents.h * cs + 10;
             x = ix;
@@ -108,6 +101,16 @@ final class Windows {
                 float bw = (iw - 8) / 2;
                 if (Style.button(ui, "Take All Equipment", ix, by, bw, 28, live && gear)) g.interact.request(g.player, c, "takeall:equipment");
                 if (Style.button(ui, "Take All Items", ix + bw + 8, by, bw, 28, live && rest)) g.interact.request(g.player, c, "takeall:items");
+                by += 36;
+            }
+            // the bank (gamefixes): everything carried into the vault in one go
+            if (c.kind.equals("vault")) {
+                boolean carrying = g.player.grids().stream().anyMatch(grid -> !grid.stacks().isEmpty());
+                if (Style.button(ui, "Move All", ix, by, iw, 28, live && carrying)) {
+                    var r = g.interact.request(g.player, c, "depositall");
+                    if (r.rejected()) g.chat.add(r.reason(), rpg.Chat.Kind.WARN);
+                }
+                if (ui.hover(ix, by, iw, 28)) hud.tooltip("Move everything in your inventory into the vault\n(what you wear stays on you)");
                 by += 36;
             }
             ui.text(String.format("%.1f kg inside", c.contents.weight()), ix, by + 2, 12, Style.FAINT);

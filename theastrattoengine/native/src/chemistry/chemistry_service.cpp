@@ -68,7 +68,11 @@ int ChemistryService::command(Engine& e, uint32_t type, const uint8_t* data, uin
         }
         case ASTRATTO_CMD_CHEM_REMOVE: {
             astratto_cmd_handle c; if (!readRecord(data, bytes, c)) return ASTRATTO_ERR_STREAM;
-            auto found = sensors_.find(c.handle); if (found != sensors_.end()) { index(found->second, false); sensors_.erase(found); } return ASTRATTO_OK;
+            auto found = sensors_.find(c.handle); if (found != sensors_.end()) { index(found->second, false); sensors_.erase(found); }
+            // A removed receiver cannot leave behind its own secondary flame volumes and reignite its replacement.
+            volumes_.erase(std::remove_if(volumes_.begin(), volumes_.end(), [&](const Volume& v){return v.source == c.handle;}), volumes_.end());
+            pending_.erase(std::remove_if(pending_.begin(), pending_.end(), [&](const Volume& v){return v.source == c.handle;}), pending_.end());
+            return ASTRATTO_OK;
         }
         case ASTRATTO_CMD_CHEM_WIND: {
             astratto_cmd_chem_wind c; if (!readRecord(data, bytes, c)) return ASTRATTO_ERR_STREAM;
@@ -160,7 +164,7 @@ void ChemistryService::step(Engine& e, float dt) {
         if(s.state&BURNING) {
             s.fuel=std::max(0.0f,s.fuel-h); if(s.wet>0.15f)s.state&=~BURNING;
             if(s.fuel<=0) { s.state=(s.state&~BURNING)|BURNT; if(s.cell&&e.active())e.setCell(e.activeHandle(),static_cast<int>(s.x),static_cast<int>(s.y),static_cast<int>(s.z),materials_[s.block].burnt); s.block = materials_[s.block].burnt; }
-            else if(time_>=s.emitAt) { s.emitAt=time_+0.45f; Volume fire; fire.owner=s.owner; fire.type=FIRE; fire.x=s.x+windX_*0.08f; fire.y=s.y+0.25f; fire.z=s.z+windZ_*0.08f; fire.radius=s.radius+0.8f; fire.power=0.65f; fire.life=0.25f; emit(fire); Volume up=fire; up.type=WIND; up.power=0.4f; emit(up); }
+            else if(time_>=s.emitAt) { s.emitAt=time_+0.45f; Volume fire; fire.source=s.id; fire.owner=s.owner; fire.type=FIRE; fire.x=s.x+windX_*0.08f; fire.y=s.y+0.25f; fire.z=s.z+windZ_*0.08f; fire.radius=s.radius+0.8f; fire.power=0.65f; fire.life=0.25f; emit(fire); Volume up=fire; up.type=WIND; up.power=0.4f; emit(up); }
         } else s.heat += (0-s.heat)*std::min(1.0f,h*0.15f);
         if((s.state&FROZEN)&&s.heat>-0.15f)s.state&=~FROZEN;
         publish(e,s,previous);

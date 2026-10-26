@@ -49,12 +49,24 @@ public final class Sfx {
         bank("step.wood", "foley/footstep_wood_00", 5);
         bank("step.cloth", "foley/footstep_carpet_00", 5);
         bank("step.snow", "foley/footstep_snow_00", 5);
+        // combat (gamefixes: recorded swings and impacts). Bare-handed swings keep the swish pack; weapons swing with
+        // the recorded blades and hafts of "Medieval sound effects - Weapon Textures" (CC0); flesh, steel and shields
+        // are struck with 0 A.D.'s recorded impacts (Wildfire Games, CC BY-SA 3.0)
         bank("swing", "swish/swish-", 13, ".wav", 1);
-        bank("blade", "sfx/blade_0", 3, ".ogg", 1);
+        for (String w : new String[]{"katana", "sabre", "seax"}) bank("swing.blade", "combat/swing_" + w + "_0", 6, ".ogg", 1);
+        bank("swing.dagger", "combat/swing_dagger_0", 6, ".ogg", 1);
+        bank("swing.heavy", "combat/swing_axe_0", 7, ".ogg", 1);
         bank("hit", "foley/impactPunch_medium_00", 5);
         bank("heavyhit", "foley/impactPunch_heavy_00", 5);
-        bank("block", "foley/impactMetal_medium_00", 5);
-        bank("parry", "foley/impactMetal_heavy_00", 5);
+        for (String f : new String[]{"fleshimp_10", "fleshimp_11", "fleshimp_12"}) one("hit.blunt", "combat/" + f + ".ogg", 0);
+        for (String f : new String[]{"fleshstab_01", "fleshstab_02", "fleshstab_03", "fleshimp_10", "fleshimp_11"}) one("hit.blade", "combat/" + f + ".ogg", 0);
+        for (String f : new String[]{"10", "11", "11b", "12", "12b", "13a", "14a", "15", "15a", "16", "17a", "18", "19a"}) one("block", "combat/swordhit_" + f + ".ogg", 0);
+        for (String f : new String[]{"10a", "12", "13b", "16a", "16b", "17", "19"}) one("parry", "combat/swordhit_" + f + ".ogg", 0);
+        numbered("shield.wood", "combat/shield_wood_", 15);
+        numbered("shield.metal", "combat/shield_metal_", 15);
+        bank("throw", "combat/jav_attack_0", 4, ".ogg", 1);
+        bank("draw", "combat/draw_katana_0", 4, ".ogg", 1); bank("draw", "combat/draw_sabre_0", 4, ".ogg", 1); bank("draw", "combat/draw_dagger_0", 3, ".ogg", 1);
+        bank("sheath", "combat/sheath_sabre_0", 4, ".ogg", 1); bank("sheath", "combat/sheath_seax_0", 3, ".ogg", 2);
         bank("plate", "foley/impactPlate_medium_00", 5);
         bank("wood.light", "foley/impactWood_light_00", 5);
         bank("wood", "foley/impactWood_medium_00", 5);
@@ -64,9 +76,9 @@ public final class Sfx {
         bank("soft", "foley/impactSoft_medium_00", 5);
         bank("soft.heavy", "foley/impactSoft_heavy_00", 5);
         bank("generic", "foley/impactGeneric_light_00", 5);
-        bank("glass.light", "foley/impactGlass_light_00", 5);
-        bank("glass", "foley/impactGlass_medium_00", 5);
-        one("glass.break", "glass/break.ogg", 0);
+        // glass: recorded panes breaking (Minetest Game, CC BY 3.0, see CREDITS) and a recorded tap on glass
+        one("glass.light", "glass/tap.ogg", 0);
+        for (int i = 1; i <= 3; i++) one("glass.break", "glass/break_" + i + ".ogg", 0);
         bank("mine", "foley/impactMining_00", 5);
         bank("chop", "foley/chop", 1, ".ogg", -1);
         bank("door", "foley/doorOpen_", 2, ".ogg", 1);
@@ -78,16 +90,18 @@ public final class Sfx {
         bank("pickup", "foley/handleSmallLeather", 1, ".ogg", -1);
         bank("pickup", "foley/handleSmallLeather2", 1, ".ogg", -1);
         bank("drop", "foley/dropLeather", 1, ".ogg", -1);
-        bank("draw", "foley/drawKnife", 3, ".ogg", 1);
         bank("lock", "sfx/lock_0", 3, ".ogg", 1);
         bank("book", "foley/bookFlip", 3, ".ogg", 1);
         bank("stone", "sfx/stones_0", 4, ".ogg", 1);
-        bank("thud", "foley/impactGeneric_light_00", 5);
-        bank("gem", "sfx/item_gem_0", 4, ".ogg", 1);
-        bank("growl", "sfx/creature_misc_0", 8, ".ogg", 1);
-        bank("creature.hurt", "sfx/creature_hurt_0", 2, ".ogg", 1);
-        bank("creature.die", "sfx/creature_die_0", 1, ".ogg", 1);
-        bank("roar", "sfx/creature_roar_0", 3, ".ogg", 1);
+        // the monsters' voices, under the names their kinds give them (MonsterKind.sounds): they were registered as
+        // "growl" and "roar" while every monster asked for "creature_misc" and "creature_roar" - and so made no sound
+        bank("creature_misc", "sfx/creature_misc_0", 8, ".ogg", 1);
+        bank("creature_monster", "sfx/creature_monster_0", 4, ".ogg", 1);
+        bank("creature_hurt", "sfx/creature_hurt_0", 2, ".ogg", 1);
+        bank("creature_die", "sfx/creature_die_0", 1, ".ogg", 1);
+        bank("creature_roar", "sfx/creature_roar_0", 3, ".ogg", 1);
+        bank("creature_slime", "sfx/creature_slime_0", 4, ".ogg", 1);
+        bank("stones", "sfx/stones_0", 4, ".ogg", 1);
         // ---- recorded: the animals (gamefixes: every species heard). Long field recordings are cut into their separate
         // calls by loudness (see calls()), so a pond of ducks or a pack's howling becomes a bank of single cries.
         bank("animal.cow", "animal/cow_", 4, ".ogg", 1); calls("animal.cow", "animal/cow_field.ogg", 4, 0.6f, 3.5f);
@@ -129,17 +143,23 @@ public final class Sfx {
         one("thunder","elements/thunder.ogg",6);
         one("crackle", "elements/fire.ogg", 2);
         for (int i = 1; i <= 3; i++) one("splash", "elements/water" + i + ".ogg", 0);
-        // Recorded bow releases from Wildfire Games (0 A.D.), three variations at their original 44.1 kHz.
-        one("bow", "archery/release.ogg", 0);
-        one("bow", "archery/release2.ogg", 0);
-        one("bow", "archery/release3.ogg", 0);
-        one("crossbow", "archery/release.ogg", 0);
-        one("arrow.impact", "archery/impact.ogg", 0);
-        bank("bow.draw", "foley/creak", 3, ".ogg", 1);
-        bank("arrow.fly", "swish/swish-", 3, ".wav", 1);
+        // archery (gamefixes: proper bow and crossbow sounds): the longbow's and the recurve's own releases and draws, a
+        // crossbow's shot and its cocking, arrows and bolts passing - all "Medieval sound effects - Weapon Textures" (CC0);
+        // arrows striking wood, stone, earth, flesh and armour are 0 A.D.'s (Wildfire Games, CC BY-SA 3.0)
+        bank("bow", "archery/longbow_shoot_0", 6, ".ogg", 1); bank("bow", "archery/recurve_shoot_0", 6, ".ogg", 1);
+        bank("crossbow", "archery/crossbow_0", 6, ".ogg", 1);
+        bank("crossbow.load", "archery/crossbow_cock_0", 3, ".ogg", 1); bank("crossbow.load", "archery/crossbow_load_0", 4, ".ogg", 1);
+        bank("bow.draw", "archery/bow_draw_0", 6, ".ogg", 1); bank("bow.draw", "archery/recurve_draw_0", 6, ".ogg", 1);
+        bank("bow.nock", "archery/nock_0", 4, ".ogg", 1);
+        bank("arrow.fly", "archery/arrow_pass_0", 4, ".ogg", 1); bank("arrow.fly", "archery/bolt_pass_0", 3, ".ogg", 1);
+        numbered("arrow.wood", "archery/arrow_wood_", 12);
+        numbered("arrow.stone", "archery/arrow_stone_", 12);
+        numbered("arrow.earth", "archery/arrow_dirt_", 12);
+        numbered("arrow.metal", "archery/arrow_metal_", 12);
+        bank("arrow.flesh", "archery/arrow_flesh_0", 6, ".ogg", 1);
         alias("zap", "metal.light"); alias("click", "ui.UIbutton1"); alias("fail", "ui.UIbutton2");
-        alias("eat", "cloth"); alias("bless", "ui.LevelUp"); alias("splat", "splash");
-        alias("cast", "swing"); alias("fire", "crackle"); alias("body.fall", "soft.heavy");
+        alias("eat", "cloth"); alias("bless", "ui.LevelUp");
+        bank("cast", "sfx/spell_0", 2, ".ogg", 1); alias("fire", "crackle"); alias("body.fall", "soft.heavy");
         if (System.getenv("RPG_SFX_REPORT") != null) {
             java.util.TreeMap<String, Integer> t = new java.util.TreeMap<>();
             for (var e : banks.entrySet()) if (e.getKey().startsWith("animal.")) t.put(e.getKey(), e.getValue().size());
@@ -154,6 +174,8 @@ public final class Sfx {
         for (int i = 0; i < n; i++) one(name, prefix + (i + first) + ext, 0);
     }
     private void bank(String name, String prefix, int n) { bank(name, prefix, n, ".ogg", 0); }
+    /** n variations numbered from 01 (prefix + 01 .. nn + .ogg). */
+    private void numbered(String name, String prefix, int n) { for (int i = 1; i <= n; i++) one(name, prefix + String.format("%02d", i) + ".ogg", 0); }
 
     /** One recording into a bank; maxSeconds > 0 keeps only its start (a hurt grunt from a death cry). */
     private void one(String name, String path, float maxSeconds) {
@@ -161,7 +183,7 @@ public final class Sfx {
             if (in == null) return;
             byte[] raw = in.readAllBytes();
             Codecs.Decoded d = Codecs.decode(raw, path, maxSeconds);
-            float[] w = d.mono();
+            float[] w = trimLead(d.mono());
             if (maxSeconds > 0) fade(w, 0.06f);
             long h = game.engine().createSound(w, 1, RATE);
             if (h != 0) { banks.computeIfAbsent(name, k -> new ArrayList<>()).add(h); loaded++; }
@@ -227,6 +249,25 @@ public final class Sfx {
     }
 
     private static float loudest(float[] env, int[] r) { float m = 0; for (int i = r[0]; i < r[1]; i++) m = Math.max(m, env[i]); return m; }
+
+    /**
+     * The silence a recording opens with, cut (keeping 5 ms before the sound): several recordings (the 0 A.D. bow
+     * releases among them) open with over a second of room tone, so the twang came a second after the arrow left.
+     */
+    static float[] trimLead(float[] w) {
+        float peak = 0;
+        for (float v : w) peak = Math.max(peak, Math.abs(v));
+        if (peak <= 1e-4f) return w;
+        float on = peak * 0.05f;
+        int i = 0;
+        while (i < w.length && Math.abs(w[i]) < on) i++;
+        int from = Math.max(0, i - RATE / 200);
+        if (from < RATE / 100) return w;
+        float[] out = java.util.Arrays.copyOfRange(w, from, w.length);
+        int f = Math.min(out.length, RATE / 200);
+        for (int k = 0; k < f; k++) out[k] *= k / (float) f;
+        return out;
+    }
 
     private static void fade(float[] w, float seconds) {
         int n = Math.min(w.length, (int) (seconds * RATE));
@@ -298,6 +339,36 @@ public final class Sfx {
     /** The level-up jingle: a skill's, a skill's hundredth (mastery), or - when the combat level rose too - combat's, or its maximum's. */
     public void jingle(boolean mastery, boolean combatUp, boolean combatMax) {
         ui(combatMax ? "ui.Max_Combat_levelup" : mastery ? "ui.Level_100_SkillMusic" : combatUp ? "ui.Combat_levelup" : "ui.Skill_levelup", 0.85f);
+    }
+
+    // ------------------------------------------------------------------ combat: which recording for which blow
+    /** The swing of a weapon through the air: a blade's ring, a dagger's flick, a haft's heavier rush; fists swish. */
+    public static String swingOf(rpg.item.ItemDef w) {
+        if (w == null || w.natural) return "swing";
+        return switch (w.family) {
+            case SWORD, SCIMITAR, LONGSWORD -> "swing.blade";
+            case DAGGER -> "swing.dagger";
+            case AXE, MACE, WARHAMMER, HALBERD, SPEAR, STAFF, PICKAXE, TOOL -> "swing.heavy";
+            default -> "swing";
+        };
+    }
+
+    /** A blow landing on a body: a cut or a stab sounds of flesh opening, a blunt one of a body struck; fists are punches. */
+    public static String hitOf(rpg.item.ItemDef.DamageType type, boolean bare, boolean heavy) {
+        if (bare) return heavy ? "heavyhit" : "hit";
+        return type == rpg.item.ItemDef.DamageType.BLUNT ? "hit.blunt" : "hit.blade";
+    }
+
+    /** A blow stopped by a guard: on a shield, wood or metal by what it is made of; on a blade, steel on steel. */
+    public static String blockOf(rpg.item.ItemDef guard) {
+        if (guard == null) return "block";
+        if (guard.family == rpg.item.ItemDef.Family.SHIELD) return guard.id.startsWith("wooden") || guard.id.startsWith("stone") ? "shield.wood" : "shield.metal";
+        return "block";
+    }
+
+    /** An arrow, bolt or thrown weapon striking the world: into wood, earth, or glancing off stone and metal. */
+    public static String arrowOn(int block) {
+        return switch (surface(block)) { case "wood" -> "arrow.wood"; case "earth", "grass", "cloth" -> "arrow.earth"; default -> "arrow.stone"; };
     }
 
     /** The devmap's ambience, looped on the ambience bus (once). */

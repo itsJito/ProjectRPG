@@ -95,11 +95,10 @@ public final class Brain {
             if (violent && n.distTo(g.player) < 16 && ai.canSee(n, g.player) && (g.time < n.watchUntil || g.time > n.watchUntil + 120)) {
                 if (g.time > n.watchUntil) n.watchUntil = g.time + 25;
                 n.watchTarget = g.player.id;
-                if (n.role != Npc.Role.LAWMAN || Math.hypot(g.player.x - n.postX, g.player.z - n.postZ) < 12)
-                    s.add(new Score(Goal.WATCH, 0.62f, "heard " + g.player.name + " is dangerous (" + bad.kind.toLowerCase() + ", " + bad.source + "); keeping an eye on them"));
+                s.add(new Score(Goal.WATCH, 0.62f, "heard " + g.player.name + " is dangerous (" + bad.kind.toLowerCase() + ", " + bad.source + "); keeping an eye on them"));
             }
         }
-        if (threat == null && n.role == Npc.Role.GUARD) {
+        if (threat == null && n.watch()) {
             // the watch drives out the outlaws of the wilds, and a thief only once it knows what they have done (a thief
             // who lives in the town is not ordered out of it for being one)
             for (Npc other : g.npcs) if (other.alive && other.loaded && ZonePolicy.outlaw(other) && (other.role != Npc.Role.THIEF || n.crimeKnown(other.id) != null)
@@ -169,8 +168,8 @@ public final class Brain {
         if (n.social > 0.55f && !n.combatant() && ai.partnerFor(n) != null) s.add(new Score(Goal.SOCIALIZE, 0.2f + n.social * 0.45f, String.format("lonely (%.0f%%), %s nearby", n.social * 100, ai.partnerFor(n).name)));
         // duties
         switch (n.role) {
-            case GUARD -> s.add(new Score(Goal.PATROL, 0.5f, "on patrol duty"));
-            case WORKER, VILLAGER, CARTER, MERCHANT, LAWMAN, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
+            case GUARD, LAWMAN -> s.add(new Score(Goal.PATROL, 0.5f, "on patrol duty"));
+            case WORKER, VILLAGER, CARTER, MERCHANT, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
                 boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
                 s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : "day's work: " + workText(n)));
@@ -193,11 +192,13 @@ public final class Brain {
         if (threat == null && g.undertaker != null) {
             rpg.objects.Container grave = graveFor(n);
             if (grave != null) {
-                if (n.role == Npc.Role.GUARD || n.role==Npc.Role.UNDERTAKER) s.add(new Score(Goal.COLLECT, 0.88f, String.format("a death in town: carrying the grave at (%.0f, %.0f) to the undertaker", grave.x, grave.z)));
+                // (the dead are a duty, but not before the living: a guard hunts the killer, looks into the scene and
+                // takes the reports first - gamefixes: guards fetched bodies while the culprit walked away)
+                if (n.watch() || n.role==Npc.Role.UNDERTAKER) s.add(new Score(Goal.COLLECT, n.role == Npc.Role.UNDERTAKER ? 0.74f : 0.58f, String.format("a death in town: carrying the grave at (%.0f, %.0f) to the undertaker", grave.x, grave.z)));
                 else s.add(new Score(Goal.LOOT, n.role == Npc.Role.THIEF ? 0.74f : 0.6f, String.format("an unguarded grave at (%.0f, %.0f), full of someone's gear", grave.x, grave.z)));
             }
         }
-        if (g.carrying.busy(n)) s.add(new Score(Goal.COLLECT, 0.89f, "carrying a body to the undertaker"));
+        if (g.carrying.busy(n)) s.add(new Score(Goal.COLLECT, n.role == Npc.Role.UNDERTAKER ? 0.8f : 0.64f, "carrying a body to the undertaker"));
         // money matters: a purse too heavy to carry about, or too light to work with, means an errand to the bank (by day)
         if (threat == null && !night && g.bank != null) { String why = g.bank.errand(n); if (why != null) s.add(new Score(Goal.BANK, 0.53f, why)); }
         if (!ZonePolicy.routineAllowed(n, n.x, n.z) && threat == null && !g.carrying.busy(n)) s.add(new Score(Goal.RETURN, 0.57f, "leaving an unwelcome zone"));
@@ -420,13 +421,15 @@ public final class Brain {
      * one he saw and has not finished with.
      */
     rpg.objects.Container graveFor(Npc n) {
-        boolean guard = n.role == Npc.Role.GUARD, undertaker=n.role==Npc.Role.UNDERTAKER, collector=guard||undertaker, crook = n.role == Npc.Role.THIEF || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
+        boolean guard = n.watch(), undertaker=n.role==Npc.Role.UNDERTAKER, collector=guard||undertaker, crook = n.role == Npc.Role.THIEF || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
         if (collector && g.graveyards.nearest(n)==null)return null;
         if (!collector && !crook || collector && g.time < n.collectAgain && !g.carrying.busy(n)) return null;
         rpg.objects.Container best = null;
         float bd = Float.MAX_VALUE;
         for (var object : g.objects.all()) {
             if (!(object instanceof rpg.objects.Container c) || c.buried || !(c.kind.equals("grave") || c instanceof rpg.objects.Corpse)) continue;
+            // a dead monster is carrion, not a townsman to be buried
+            if (c instanceof rpg.objects.Corpse remains && g.actor(remains.body) instanceof rpg.monster.Monster) continue;
             if (!collector && (c instanceof rpg.objects.Corpse corpse ? corpse.empty(g) : c.contents.isEmpty())) continue;
             float d = (float) Math.hypot(c.x - n.x, c.z - n.z);
             if (undertaker) {
@@ -575,8 +578,7 @@ public final class Brain {
         switch (n.role) {
             case THIEF, FENCE -> v.plan = Investigation.Plan.HIDE;                 // it might be the law: slip away
             case BANDIT, BRUTE -> v.plan = Investigation.Plan.CONFRONT;
-            case GUARD -> v.plan = Investigation.Plan.SEARCH;
-            case LAWMAN -> v.plan = Math.hypot(w.x - n.postX, w.z - n.postZ) > 18 && ai.guardFor(n) != null ? Investigation.Plan.FETCH_HELP : Investigation.Plan.CHECK;
+            case GUARD, LAWMAN -> v.plan = Investigation.Plan.SEARCH;
             default -> {
                 if (c >= 0.45f) v.plan = night || dark ? Investigation.Plan.PEEK : Investigation.Plan.CHECK;
                 else if (c >= 0.2f) v.plan = Investigation.Plan.CALL_OUT;
@@ -1082,6 +1084,11 @@ public final class Brain {
     }
 
     private void holdFacingPlayer(Npc n) {
+        if (n.id == Ids.TELLER) {
+            float[] customer = g.bank.customerSpot();
+            n.wantYaw = (float) Math.atan2(-(customer[0] - n.x), -(customer[1] - n.z));
+            ai.target(n, 0); ai.desire(n, AiSystem.A_IDLE); return;
+        }
         ai.target(n, g.player.body);
         ai.desire(n, Math.hypot(g.player.x - n.x, g.player.z - n.z) < 6 ? AiSystem.A_HOLD : AiSystem.A_IDLE);
     }

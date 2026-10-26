@@ -185,9 +185,25 @@ public final class Magic {
         sheep.x=actor.x; sheep.y=actor.y; sheep.z=actor.z; sheep.yaw=actor.yaw; sheep.vx=actor.vx; sheep.vz=actor.vz; sheep.grounded=actor.grounded; sheep.alive=actor.alive; sheep.charred=actor.charred;
         return sheep;
     }
+    /**
+     * A conjured ally's time is up (or its caster is gone): it leaves the world entirely - whoever was carrying its body
+     * lets go first, its corpse goes with it (anything it picked up falls where it lay), and nothing is left pointing at it.
+     */
     public void dismiss(Npc ally) {
         forms.remove(ally.id);g.falling.reset(ally);
-        g.carrying.drop(ally,false); g.reactions.cancel(ally); g.ai.despawnBody(ally);
+        g.carrying.drop(ally,false); g.carrying.release(ally); g.reactions.cancel(ally);
+        if (g.chemistry != null) g.chemistry.retire(ally);
+        if (ally.corpse != 0 && g.objects.get(ally.corpse) instanceof rpg.objects.Corpse body && !body.removed) {
+            for (var stack : body.contents.stacks()) g.objects.drop(stack, body.x, body.y, body.z);
+            body.contents.clear(); body.removed = true;
+        }
+        ally.corpse = 0;
+        for (Npc other : g.npcs) {
+            if (other.fightTarget == ally.id) other.fightTarget = 0;
+            if (other.aidTarget == ally.id) other.aidTarget = 0;
+            if (other.socialPartner == ally.id) other.socialPartner = 0;
+        }
+        g.ai.despawnBody(ally);
         if (ally.ragdoll!=0)g.game.commands().release(ally.ragdoll);
         ally.ragdoll=0; ally.alive=false; g.npcs.remove(ally); g.gore.wounds.remove(ally.id);
         for (var limb : new java.util.ArrayList<>(g.gore.limbs)) if(limb.owner==ally.id) { g.game.commands().release(limb.body);g.gore.limbs.remove(limb); }

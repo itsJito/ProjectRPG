@@ -22,7 +22,7 @@ private:
         uint32_t tags = 0, state = 0, block = 0, originalBlock = 0;
         bool cell = false, queued = false;
     };
-    struct Volume { uint64_t serial = 0, owner = 0; uint32_t type = 0, hops = 0; float x = 0, y = 0, z = 0, radius = 1, power = 1, life = 0.3f; };
+    struct Volume { uint64_t serial = 0, owner = 0, source = 0; uint32_t type = 0, hops = 0; float x = 0, y = 0, z = 0, radius = 1, power = 1, life = 0.3f; };
     std::array<Material, 256> materials_{};
     std::map<uint64_t, Sensor> sensors_;
     std::unordered_map<int64_t, std::vector<uint64_t>> buckets_;

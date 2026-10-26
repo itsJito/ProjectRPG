@@ -105,6 +105,10 @@ float bodyVisibility(vec3 a, vec3 b) {
         float axl = max(dot(ax, ax), 1e-6);
         float ta = clamp(dot(a - c0, ax) / axl, 0.0, 1.0);
         if (length(a - (c0 + ax * ta)) < r * 1.35) continue;
+        // A body-attached emitter (burning clothing, a held light) must not be occluded by its own source body.
+        // Otherwise every ray ends inside the capsule and a moving bright wedge appears on the ground.
+        float tb = clamp(dot(b - c0, ax) / axl, 0.0, 1.0);
+        if (length(b - (c0 + ax * tb)) < r * 1.35) continue;
         // closest approach of the two segments
         vec3 w0 = a - c0;
         float bb = dot(ab, ax), dd = dot(ab, w0), ee = dot(ax, w0), den = abl * axl - bb * bb;

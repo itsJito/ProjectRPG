@@ -59,13 +59,16 @@ final class Panels {
         static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory", "I"}, {Hud.Scene.CHARACTER, "Character", "Equipment", "C"},
                 {Hud.Scene.SKILLS, "Skills", "Skills_icon", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
         Frame(Hud h) { super("frame", Hud.FW, Hud.FH); }
+        @Override public float width() { return hud.frameWidth(); }
         @Override public void draw(Ui2D ui, float x, float y) {
+            float pw=width();
             ui.rect(0, 0, hud.w, hud.h, 0x60000000);   // the world steps back behind a panel
             Style.card(ui, x, y, pw, ph);
             // the tab strip: a darker band the tabs hang in, the open one joined to the page below it
             ui.rect(x + 4, y + 4, pw - 8, 40, 0x70000000);
             float tw = 124;
             for (int i = 0; i < TABS.length; i++) {
+                if (hud.inventoryOnly() && i > 0) continue;
                 Hud.Scene s = (Hud.Scene) TABS[i][0];
                 float tx = x + 10 + i * (tw + 4);
                 boolean on = hud.scene == s;

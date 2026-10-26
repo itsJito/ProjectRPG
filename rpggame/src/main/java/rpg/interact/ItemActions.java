@@ -261,7 +261,9 @@ public final class ItemActions {
         for (Slot c : clear) { ItemStack off = a.eq.get(c); if (off != null) { a.eq.set(c, null); a.store(off); } }
         a.eq.set(where, moving);
         g.state.commit(req, "Equipped", a.id, 0, null, 0, d.name + " -> " + where);
-        if (a == g.player) g.sfx.ui("click", 0.4f);
+        // a blade drawn rings from its scabbard; anything else is fitted with the usual click
+        boolean blade = d.family == ItemDef.Family.SWORD || d.family == ItemDef.Family.LONGSWORD || d.family == ItemDef.Family.SCIMITAR || d.family == ItemDef.Family.DAGGER;
+        if (g.sfx != null) { if (blade) g.sfx.play("draw", a.x, a.eyeY(), a.z, 0.45f, 1, 12); else if (a == g.player) g.sfx.ui("click", 0.4f); }
         return Result.ok();
     }
 
@@ -273,6 +275,9 @@ public final class ItemActions {
         a.eq.set(where, null);
         a.store(s);
         g.state.commit("Unequipped", a.id, 0, null, 0, s.def.name);
+        // a blade put away slides home into its scabbard
+        boolean blade = s.def.family == ItemDef.Family.SWORD || s.def.family == ItemDef.Family.LONGSWORD || s.def.family == ItemDef.Family.SCIMITAR || s.def.family == ItemDef.Family.DAGGER;
+        if (blade && g.sfx != null) g.sfx.play("sheath", a.x, a.eyeY(), a.z, 0.4f, 1, 10);
         return Result.ok();
     }
 

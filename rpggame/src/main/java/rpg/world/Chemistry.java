@@ -74,9 +74,12 @@ public final class Chemistry {
     }
     /** Reset this receiver immediately and on the native command stream; never carry fire into a new life. */
     public void cleanse(Actor actor) {
-        cleansed.put(actor.id,g.time+0.5);
+        cleansed.put(actor.id,g.time+0.8);
         g.game.commands().chemRemove(actor.id); registered.remove(actor.id); states.remove(actor.id); hurtAgain.remove(actor.id);
         active = active.stream().filter(sensor -> sensor.id() != actor.id).toList();
+        actor.shockUntil=-99; actor.lastSpasm=-99;
+        center(actor,receiverCenter);
+        g.game.commands().chemSensor(actor.id,0,receiverCenter[0],receiverCenter[1],receiverCenter[2],actor.radius,0,0,10,0,0,true);
         actor.cs.slowT = 0; actor.cs.staggered = 0; actor.burnSince=-1;actor.charred=0;actor.rollContact=0;
         if(actor.ragdoll!=0)g.game.commands().ragdollControl(actor.ragdoll,CONTROL_STAY_DOWN,0);
     }
@@ -90,8 +93,9 @@ public final class Chemistry {
     }
     public void register(Actor actor) {
         if(actor.dummy)return;
-        int tags=CHEM_FLAMMABLE|CHEM_FREEZABLE|(actor.eq.stacks().stream().anyMatch(item->item.def.conductive)?CHEM_CONDUCTIVE:0);
+        int tags=CHEM_FLAMMABLE|CHEM_FREEZABLE|CHEM_CONDUCTIVE;
         if(g.time<smothered.getOrDefault(actor.id,-1.0))tags &= ~CHEM_FLAMMABLE;
+        if(cleansed.containsKey(actor.id))tags=0;
         center(actor,receiverCenter);registered.add(actor.id);
         g.game.commands().chemSensor(actor.id,0,receiverCenter[0],receiverCenter[1],receiverCenter[2],actor.radius,tags,0,10,0,0,false);
     }
@@ -198,12 +202,12 @@ public final class Chemistry {
                 if(a.ragdoll!=0)g.game.commands().ragdollControl(a.ragdoll,CONTROL_STAY_DOWN,0);
             }
             if ((bits & CHEM_FROZEN) != 0) a.cs.slowT = Math.max(a.cs.slowT, 0.6f);
-            if ((bits & CHEM_CHARGED) != 0) { a.cs.cancel(); a.cs.staggered = Math.max(a.cs.staggered, 0.3f); }
+            if ((bits & CHEM_CHARGED) != 0) g.reactions.shocked(a);
             if ((bits & (CHEM_BURNING | CHEM_CHARGED)) != 0 && g.time >= hurtAgain.getOrDefault(a.id, -99.0)) {
                 hurtAgain.put(a.id, g.time + 0.75); Actor owner = g.actor(sensor.owner());
                 // (walking into someone's campfire is an accident, not an attack by whoever lit it)
                 if (owner != null && owner.alive && owner != a && !retired.containsKey(owner.id) && !hearth(a, owner)) g.combat.resolve(owner, a, 2, 0, ItemDef.DamageType.MAGIC, null, a.x, a.chestY(), a.z, (bits & CHEM_CHARGED) != 0 ? "electric shock" : "burning", false);
-                else g.combat.environmentalDamage(a, 1, "burning");
+                else g.combat.environmentalDamage(a, 1, (bits & CHEM_CHARGED) != 0 ? "electric shock" : "burning");
             }
         }
     }

@@ -71,6 +71,10 @@ public final class SaveSystem {
             m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
             if (n.profession != null) m.put("profession",n.profession.name()); m.put("dutyTarget",n.dutyTarget); m.put("dutyPhase",n.dutyPhase); m.put("dutyX",n.dutyX); m.put("dutyZ",n.dutyZ); m.put("dutyLeft",Math.max(0,n.dutyUntil-g.time));
             m.put("arrested", n.arrestedUntil); m.put("arrestJur", n.arrestJurisdiction); m.put("patrol", n.patrolIndex);
+            if (n.playerSighting != null) {
+                var sight = n.playerSighting;
+                m.put("playerSighting", Map.of("witness", sight.witness(), "x", sight.x(), "z", sight.z(), "vx", sight.vx(), "vz", sight.vz(), "age", g.time - sight.at()));
+            }
             if (n.posse) { m.put("posse", true); m.put("posseJur", n.homeJurisdiction); }
             if (n.standing != Npc.Standing.COMMON) m.put("standing", n.standing.name());
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
@@ -100,6 +104,7 @@ public final class SaveSystem {
         root.put("econ", g.econ.save());
         root.put("animals", g.animals.save());
         root.put("monsters", g.monsters.save(this::actor));
+        root.put("dungeons", g.dungeons.save());
         root.put("law", g.law.save());
         root.put("undertaker", g.undertaker.save());
         root.put("honor", g.honor.save());
@@ -215,6 +220,8 @@ public final class SaveSystem {
             if (n.alive && n.loaded) g.ai.despawnBody(n);
             if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
             n.corpse=0;
+            var sight = Json.obj(m, "playerSighting");
+            n.playerSighting = sight == null ? null : new Npc.Sighting(Json.lng(sight,"witness",0), (float)Json.num(sight,"x",0), (float)Json.num(sight,"z",0), (float)Json.num(sight,"vx",0), (float)Json.num(sight,"vz",0), g.time-Json.num(sight,"age",600));
             applyActor(n, m);
             if(m.containsKey("profession")) try { rpg.ai.Profession.valueOf(Json.str(m,"profession","")).assign(n); } catch(IllegalArgumentException invalid) { g.chat.warn("Ignored incompatible saved occupation for "+n.name); }
             g.ai.brain.resetJob(n);
@@ -280,9 +287,11 @@ public final class SaveSystem {
             }
         }
         for (Npc dead : g.npcs) if (!dead.alive && dead.corpse == 0 && dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
+        g.bank.migrateAccounts();
         g.econ.load(Json.obj(root, "econ"));
         g.animals.load(Json.obj(root, "animals"));
         g.monsters.load(Json.obj(root, "monsters"), this::applyActor);
+        g.dungeons.load(Json.obj(root, "dungeons"));
         g.law.load(Json.obj(root, "law"));
         g.undertaker.load(Json.obj(root, "undertaker"));
         g.honor.load(Json.obj(root, "honor"));

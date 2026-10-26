@@ -50,7 +50,7 @@ public final class CombatSystem {
 
     private long projectileSerial;
     public static final class Projectile {
-        public long id;
+        public long id, rigid;
         public Actor owner;
         public float x, y, z, vx, vy, vz, gravity, life, potential, impact;
         public DamageType type;
@@ -70,11 +70,12 @@ public final class CombatSystem {
      * An arrow, bolt or thrown blade lodged in a body: the item itself, where it went in and which way it points, in the
      * body's own frame (x to its right, y up from its feet, z to its front), and when (gamefixes: arrows are real objects).
      */
-    public record Stuck(ItemStack stack, float lx, float ly, float lz, float dx, float dy, float dz, double at) {
+    public record Stuck(ItemStack stack, float lx, float ly, float lz, float dx, float dy, float dz, double at, int anchorA, int anchorB) {
         /** The tip's point and the shaft's direction in the world, as the body stands now. */
-        public float[] world(Actor a) {
-            float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
-            return new float[]{a.x + rx * lx + fx * lz, a.y + ly, a.z + rz * lx + fz * lz, rx * dx + fx * dz, dy, rz * dx + fz * dz};
+        public float[] world(Rpg g, Actor a) {
+            float[] f = HitVolumes.attachmentFrame(g, a, anchorA, anchorB);
+            return new float[]{f[0]+f[3]*lx+f[6]*ly+f[9]*lz, f[1]+f[4]*lx+f[7]*ly+f[10]*lz, f[2]+f[5]*lx+f[8]*ly+f[11]*lz,
+                    f[3]*dx+f[6]*dy+f[9]*dz, f[4]*dx+f[7]*dy+f[10]*dz, f[5]*dx+f[8]*dy+f[11]*dz};
         }
     }
 
@@ -224,12 +225,15 @@ public final class CombatSystem {
      * Sends an arrow or a bolt from the drawing hand. The player's flies the arc the guide drew - from the hand to where the
      * reticle is (ThrowSolver) - so what is shown is what is flown; anyone else's leaves the hand along their own aim.
      */
-    private void fromHand(Projectile p, Actor a, float speed, float gravity) {
+    private void fromHand(Projectile p, Actor a, float speed, float gravity, float yaw, float pitch) {
         if (a == g.player) {
             ThrowSolver plan = a.throwPlan;
             float[] eye = g.time - plan.solvedAt < 0.3 ? plan.eye.clone() : new float[]{a.x, a.eyeY(), a.z};
             float[] hand = g.time - a.handAt < 0.25 ? a.hand : new float[]{a.x - (float) Math.sin(a.aimYaw) * 0.35f, a.eyeY() - 0.25f, a.z - (float) Math.cos(a.aimYaw) * 0.35f};
-            plan.solve(g, a, hand, eye, speed, gravity, true);
+            float previousYaw=a.aimYaw,previousPitch=a.pitch;
+            a.aimYaw=yaw;a.pitch=pitch;
+            try { plan.solve(g, a, hand, eye, speed, gravity, true); }
+            finally { a.aimYaw=previousYaw;a.pitch=previousPitch; }
             p.x = plan.start[0]; p.y = plan.start[1]; p.z = plan.start[2];
             p.vx = plan.velocity[0]; p.vy = plan.velocity[1]; p.vz = plan.velocity[2];
         } else if (g.time - a.handAt < 0.25) { p.x = a.hand[0]; p.y = a.hand[1]; p.z = a.hand[2]; }
@@ -268,7 +272,7 @@ public final class CombatSystem {
         p.impact = held.def.impact * wind;
         a.cs.castCooldown = 0.32f * held.def.speed;
         shots++;
-        if (g.sfx != null) g.sfx.play("swing", a.x, a.eyeY(), a.z, 0.5f);
+        if (g.sfx != null) g.sfx.play("throw", a.x, a.eyeY(), a.z, 0.6f);
         g.state.commit("Thrown", a.id, 0, null, 0, String.format("%s potential=%.1f", held.def.name, p.potential));
         return true;
     }
@@ -286,7 +290,7 @@ public final class CombatSystem {
         ammo.amount--;
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
         Projectile p = launch(a, yaw, pitch, BOLT_SPEED, BOLT_GRAVITY);
-        fromHand(p, a, BOLT_SPEED, BOLT_GRAVITY);
+        fromHand(p, a, BOLT_SPEED, BOLT_GRAVITY,yaw,pitch);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
         p.potential = physicalMax(a, Skill.ARCHERY, (xb.damage + ammo.def.damage) / CombatMath.HP_SCALE);
         p.impact = xb.impact;
@@ -310,7 +314,7 @@ public final class CombatSystem {
         ammo.amount--;
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
         Projectile p = launch(a, yaw, pitch, bowSpeed(draw), ARROW_GRAVITY);
-        fromHand(p, a, bowSpeed(draw), ARROW_GRAVITY);
+        fromHand(p, a, bowSpeed(draw), ARROW_GRAVITY,yaw,pitch);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
         p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, (bow.damage + ammo.def.damage) / CombatMath.HP_SCALE) * draw);
         p.impact = bow.impact * draw;
@@ -338,22 +342,26 @@ public final class CombatSystem {
         if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         String no = castRefusal(a, s);
         if (no != null) { if (a == g.player && !no.isEmpty()) g.chat.add(no, Chat.Kind.WARN); return false; }
-        if (s == Spell.TELEGRAB) return telegrab(a, s, yaw, pitch);
+        if (s == Spell.TELEGRAB) { boolean cast=telegrab(a,s,yaw,pitch); if(cast)a.castAt=g.time; return cast; }
         if (s.utility) {
             if (!g.magic.cast(a, s, yaw, pitch)) return false;
+            a.castAt=g.time;
             a.mana -= s.cost;
             a.cs.castCooldown = 0.7f;
             casts++;
             var uev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
             g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, uev.id());
             if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
-            g.chemistry.visual(2,a.x,a.chestY(),a.z,0.4f,60,0.2f,0.7f,1.0f,2f,3.5f);
+            float[] hand=castOrigin(a,yaw,pitch);
+            g.chemistry.visual(2,hand[0],hand[1],hand[2],0.12f,60,0.2f,0.4f,1.0f,2f,3.5f);
             return true;
         }
         if (s == Spell.FIRE_BLAST) a.eq.get(ItemDef.Slot.MAIN).charges--;
         a.mana -= s.cost;
         a.cs.castCooldown = 0.7f;
         Projectile p = launch(a, yaw, pitch, s.speed, 0);
+        spellFromHand(p, a, yaw, pitch);
+        a.castAt=g.time;
         p.spell = s; p.type = DamageType.MAGIC; p.skill = Skill.MAGIC;
         float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
         p.potential = CombatMath.magicMax(s.base, magicBonus);
@@ -362,7 +370,7 @@ public final class CombatSystem {
             Actor target = g.magic.target(a,yaw,pitch,24); p.target = target == null ? 0 : target.id;
             for (float offset : new float[]{-0.11f,0.11f}) {
                 Projectile blade=launch(a,yaw+offset,pitch,s.speed,0);
-                blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target;
+                spellFromHand(blade,a,yaw+offset,pitch); blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target;
             }
         }
         casts++;
@@ -370,6 +378,21 @@ public final class CombatSystem {
         g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, ev.id());
         if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
         return true;
+    }
+
+    private float[] castOrigin(Actor a,float yaw,float pitch) {
+        if(g.time-a.handAt<0.25)return a.hand.clone();
+        float cp=(float)Math.cos(pitch);
+        return new float[]{a.x+(float)Math.cos(yaw)*a.radius-(float)Math.sin(yaw)*cp*0.4f,
+                a.chestY()+0.1f,a.z-(float)Math.sin(yaw)*a.radius-(float)Math.cos(yaw)*cp*0.4f};
+    }
+
+    private void spellFromHand(Projectile p, Actor a, float yaw, float pitch) {
+        float dx=-(float)Math.sin(yaw)*(float)Math.cos(pitch),dy=(float)Math.sin(pitch),dz=-(float)Math.cos(yaw)*(float)Math.cos(pitch);
+        float tx=a.x+dx*24,ty=a.eyeY()+dy*24,tz=a.z+dz*24;
+        float[] hand=castOrigin(a,yaw,pitch);p.x=hand[0];p.y=hand[1];p.z=hand[2];
+        float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz),length=(float)Math.sqrt(Math.pow(tx-p.x,2)+Math.pow(ty-p.y,2)+Math.pow(tz-p.z,2));
+        p.vx=(tx-p.x)/length*speed;p.vy=(ty-p.y)/length*speed;p.vz=(tz-p.z)/length*speed;
     }
 
     /** Telekinetic grab: pulls the loose item under the aim into the caster's inventory (an owned one is still theft). */
@@ -427,7 +450,13 @@ public final class CombatSystem {
         c.iframes = Math.max(0, c.iframes - dt);
         c.dodgeT = Math.max(0, c.dodgeT - dt);
         c.castCooldown = Math.max(0, c.castCooldown - dt * a.actionRate());
-        if (c.reload > 0) { c.reload = Math.max(0, c.reload - dt); if (c.reload == 0 && a == g.player && g.sfx != null) g.sfx.play("lock", a.x, a.eyeY(), a.z, 0.4f); }
+        if (c.reload > 0) {
+            float was = c.reload;
+            c.reload = Math.max(0, c.reload - dt);
+            // the string drawn back to the nut midway, then the bolt laid in the groove (anyone's crossbow, heard nearby)
+            if (g.sfx != null && was > 0.6f && c.reload <= 0.6f) g.sfx.play("crossbow.load", a.x, a.eyeY(), a.z, 0.45f, 1, 14);
+            if (g.sfx != null && c.reload == 0) g.sfx.play("bow.nock", a.x, a.eyeY(), a.z, 0.3f, 1.1f, 10);
+        }
         c.slowT = Math.max(0, c.slowT - dt);
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
         if (c.staggered > 0) { c.staggered -= dt; c.blocking = false; }
@@ -451,7 +480,7 @@ public final class CombatSystem {
             if (c.phase == Phase.WINDUP) {
                 if (c.t < c.windup) return;
                 c.t -= c.windup; c.phase = Phase.ACTIVE; c.sweep = 0;
-                if (g.sfx != null) g.sfx.play("swing", a.x, a.y + 1.3f, a.z, 0.5f);
+                if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.swingOf(c.move == Move.BASH ? a.off() : a.main()), a.x, a.y + 1.3f, a.z, c.move == Move.HEAVY ? 0.65f : 0.5f, c.move == Move.HEAVY ? 0.88f : 0.95f + (float) g.roll(a.id, (long) (g.time * 10)) * 0.12f, 20);
                 g.noise(a, a.x, a.y, a.z, 6, 0.3f);
             } else if (c.phase == Phase.ACTIVE) {
                 float to = Math.min(1, c.t / Math.max(1e-5f, c.active));
@@ -554,14 +583,14 @@ public final class CombatSystem {
         float c = (float) Math.cos(twist), sn = (float) Math.sin(twist);
         float tx = lx * c + lz * sn, tz = -lx * sn + lz * c;
         float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), bx = (float) Math.sin(a.yaw), bz = (float) Math.cos(a.yaw);
-        float px = rpg.actor.Body.PX;
+        float px = rpg.actor.Body.PX * a.figureScale();
         return new float[]{a.x + (rx * tx + bx * tz) * px, a.y + (b.hipY() + ly) * px, a.z + (rz * tx + bz * tz) * px};
     }
 
     /** A path point (hand, blade) in the actor's frame to the world: mirrored for the off hand, tipped by the aim's pitch. */
     private static float[] toWorld(Actor a, float[] q, boolean offHand) {
-        float side = offHand ? -1 : 1;
-        float hx = q[0] * side, hy = q[1], hz = q[2], dx = q[3] * side, dy = q[4], dz = q[5];
+        float side = offHand ? -1 : 1, k = a.figureScale();
+        float hx = q[0] * side * k, hy = q[1] * k, hz = q[2] * k, dx = q[3] * side, dy = q[4], dz = q[5];
         // the aim's pitch tips the whole stroke about the shoulders' line
         float p = a.pitch, cp = (float) Math.cos(p), sp = (float) Math.sin(p);
         float hy2 = hy * cp + hz * sp, hz2 = -hy * sp + hz * cp, dy2 = dy * cp + dz * sp, dz2 = -dy * sp + dz * cp;
@@ -581,7 +610,7 @@ public final class CombatSystem {
     public static float[] blade(Actor a, Move m, float s, float u, float reach) {
         float[] sh = shoulder(a, a.cs.offHand, twist(m, a.cs.offHand, s), lean(m, s));
         float[] w = toWorld(a, path(m, key(s)), a.cs.offHand);
-        float dist = 0.06f + u * reach;
+        float dist = (0.06f + u * reach) * Math.max(1, a.figureScale());
         return new float[]{sh[0] + w[0] + w[3] * dist, sh[1] + w[1] + w[4] * dist, sh[2] + w[2] + w[5] * dist, sh[0], sh[1], sh[2]};
     }
 
@@ -740,7 +769,7 @@ public final class CombatSystem {
             a.cs.staggered = 0.9f;
             a.cs.hitstop = 0.1f;
             if (g.fx != null) { g.fx.sparks(px, py, pz, 24); g.fx.text("Parry!", v.x, v.y + v.height + 0.3f, v.z, 0xFFFFE070); }
-            if (g.sfx != null) g.sfx.play("parry", px, py, pz, 0.9f);
+            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.blockOf(guardItem).equals("block") ? "parry" : rpg.audio.Sfx.blockOf(guardItem), px, py, pz, 0.9f);
             var ev = g.state.commit("Parry", v.id, a.id, null, 0, how);
             g.prog.award(v, Skill.DEFENSE, 6, "parry", ev.id());
             log(String.format("%s -> %s %s: PARRIED within %.2fs; attacker staggered", a.name, v.name, how, g.time - v.cs.blockStart));
@@ -772,7 +801,7 @@ public final class CombatSystem {
             } else v.stamina -= cost;
             v.cs.regenDelay = 0.8f;
             blocked++;
-            if (g.sfx != null) g.sfx.play(bare ? "hit" : "block", px, py, pz, 0.7f);
+            if (g.sfx != null) g.sfx.play(bare ? "hit" : rpg.audio.Sfx.blockOf(guardItem), px, py, pz, 0.7f);
             if (g.fx != null && !bare) g.fx.sparks(px, py, pz, 12);
         }
         // Do not impose a minimum after a performed guard or protection: a fully stopped hit can deal zero.
@@ -806,7 +835,15 @@ public final class CombatSystem {
             g.fx.text(dealt > 0 ? String.valueOf(dealt) : guarding ? "Blocked" : "0", v.x, v.y + v.height + 0.2f, v.z, dealt > 0 ? (v == g.player ? 0xFFFF4040 : 0xFFFFFFFF) : 0xFF80C0FF);
             if (stagger) g.fx.text("Staggered", v.x, v.y + v.height + 0.6f, v.z, 0xFFFFC040);
         }
-        if (g.sfx != null && dealt > 0) g.sfx.play(potential > 30 * CombatMath.HP_SCALE ? "heavyhit" : "hit", px, py, pz, 0.8f);
+        if (g.sfx != null && dealt > 0) {
+            boolean heavy = potential > 30 * CombatMath.HP_SCALE;
+            ItemDef weapon = a.cs.offHand ? a.off() : a.main();
+            boolean fist = weapon == null || weapon.family == Family.SHIELD || weapon.natural && type == DamageType.BLUNT;
+            String key = proj != null && proj.ammo != null ? (v.eq.armor() > 20 ? "arrow.metal" : "arrow.flesh") : proj != null ? "hit" : rpg.audio.Sfx.hitOf(type, fist, heavy);
+            g.sfx.play(key, px, py, pz, heavy ? 0.9f : 0.75f);
+            // a heavy blow is felt as well as heard: the body's thump under the cut
+            if (heavy && !fist && proj == null) g.sfx.play("heavyhit", px, py, pz, 0.45f);
+        }
         if (a == g.player && v instanceof rpg.ai.Npc sp && sp.spareSince > 0) sp.spareSince = -1;
         if (g.sfx != null && dealt > 0 && v.hp > 0 && !v.dummy && !(v instanceof rpg.animal.Animal)) g.sfx.hurtCry(v, g.time);
         String detail = String.format("%s -> %s %s%s: potential %.1f, protection %.0f (%.0f%% mit %s)%s%s, dealt %d; impact %.1f vs stability %.1f%s; stamina %.0f",
@@ -904,9 +941,18 @@ public final class CombatSystem {
         for (Iterator<Projectile> it = projectiles.iterator(); it.hasNext(); ) {
             Projectile p = it.next();
             p.life -= dt;
-            if (p.life <= 0 || p.done) { if (!p.done) dropArrow(p); it.remove(); continue; }
-            int sub = 4;
-            for (int i = 0; i < sub && !p.done; i++) step(p, dt / sub);
+            if (p.life <= 0 || p.done) { if (!p.done) dropArrow(p); releasePhysical(p); it.remove(); continue; }
+            if (p.ammo != null && (p.ammo.def.family == Family.ARROW || p.ammo.def.family == Family.BOLT)) {
+                if (p.rigid == 0) physicalArrow(p);
+                var body = g.lastRigids.body(p.rigid);
+                if (body != null) {
+                    p.vx=body.vx; p.vy=body.vy; p.vz=body.vz;
+                    sweep(p, body.x, body.y, body.z, dt);
+                }
+            } else {
+                int sub = 4;
+                for (int i = 0; i < sub && !p.done; i++) step(p, dt / sub);
+            }
 
             if (!p.done && !p.heardPass && p.ammo != null && p.owner != g.player) {
                 float dx = g.player.x - p.x, dy = g.player.eyeY() - p.y, dz = g.player.z - p.z;
@@ -915,8 +961,21 @@ public final class CombatSystem {
                     if (g.sfx != null) g.sfx.play("arrow.fly", p.x, p.y, p.z, 0.26f, 1.4f, 10);
                 }
             }
-            if (p.done) it.remove();
+            if (p.done) { releasePhysical(p); it.remove(); }
         }
+    }
+
+    /** Impulsis owns flight. Gameplay sweeps consecutive native positions for exact world/posed-body contacts. */
+    private void physicalArrow(Projectile p) {
+        p.rigid = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+        int flags = astratto.bridge.AstrattoNative.RIGID_BULLET | astratto.bridge.AstrattoNative.RIGID_NO_SLEEP
+                | astratto.bridge.AstrattoNative.RIGID_NO_WORLD | astratto.bridge.AstrattoNative.RIGID_NO_MOVERS;
+        g.game.commands().rigidCreate(p.rigid, astratto.bridge.AstrattoNative.SHAPE_SPHERE, flags,
+                0.018f,0,0,0.025f,p.x,p.y,p.z,1,0,0,0,p.vx,p.vy,p.vz,0,0,0,0.2f,0,
+                0.00001f,0.00001f,p.gravity/22f,1<<29,1<<29,0,null);
+    }
+    private void releasePhysical(Projectile p) {
+        if (p.rigid != 0) { g.game.commands().release(p.rigid); p.rigid=0; }
     }
 
     private void spellImpact(Projectile p,float x,float y,float z,Actor primary) {
@@ -951,7 +1010,12 @@ public final class CombatSystem {
         }
         p.vy -= p.gravity * dt;
         float nx = p.x + p.vx * dt, ny = p.y + p.vy * dt, nz = p.z + p.vz * dt;
+        sweep(p, nx, ny, nz, dt);
+    }
+
+    private void sweep(Projectile p, float nx, float ny, float nz, float dt) {
         float sx = nx - p.x, sy = ny - p.y, sz = nz - p.z, len = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
+        if (len < 1e-7f) return;
         // bodies first along the segment, then walls
         p.angle += p.spin * dt;
         // an elemental spell meets the surface of water (gamefixes: ice freezes it, fire thaws ice, lightning runs through it)
@@ -977,7 +1041,7 @@ public final class CombatSystem {
                 if (p.spell == Spell.FROST_LANCE) struck.cs.slowT = 3;
                 if (p.spell == Spell.VOLTCHAIN)struck.cs.staggered=Math.max(struck.cs.staggered,0.4f);
                 resolve(p.owner, struck, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
-            } else if (g.sfx != null) g.sfx.play("hit", qx, qy, qz, 0.4f);
+            } else if (g.sfx != null) g.sfx.play(p.ammo != null ? "arrow.flesh" : "hit", qx, qy, qz, 0.4f);
             if(p.spell!=null) spellImpact(p,qx,qy,qz,struck);
             return;
         }
@@ -1002,12 +1066,12 @@ public final class CombatSystem {
                     float dn = p.vx * h.nx + p.vy * h.ny + p.vz * h.nz;
                     p.vx = (p.vx - 2 * dn * h.nx) * 0.3f; p.vy = (p.vy - 2 * dn * h.ny) * 0.3f; p.vz = (p.vz - 2 * dn * h.nz) * 0.3f;
                     p.spin *= 0.5f; p.bounces++; p.done = false;
-                    if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.4f);
+                    if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.arrowOn(h.block), p.x, p.y, p.z, 0.4f);
                     return;
                 }
             }
             if (h.block == Blocks.TARGET) { archeryTarget(p, h); lodgeInWorld(p, h, sx / len, sy / len, sz / len, true); return; }
-            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.5f);
+            if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.arrowOn(h.block), p.x, p.y, p.z, 0.5f);
             lodgeInWorld(p, h, sx / len, sy / len, sz / len, false);
             return;
         }
@@ -1046,6 +1110,7 @@ public final class CombatSystem {
 
     /** A shot that never struck anything (its flight cut short): it falls where it is, as a loose thing tumbling down. */
     private void dropArrow(Projectile p) {
+        releasePhysical(p);
         if (p.ammo == null) return;
         float l = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
         float[] dir = l < 1e-3f ? new float[]{0, -1, 0} : new float[]{p.vx / l, p.vy / l, p.vz / l};
@@ -1104,9 +1169,11 @@ public final class CombatSystem {
             g.objects.dropAmmo(one, x + dx * (bury - len / 2), y + dy * (bury - len / 2), z + dz * (bury - len / 2), new float[]{dx, dy, dz}, true, 0, 0, 0);
             return;
         }
-        float rx = (float) Math.cos(v.yaw), rz = (float) -Math.sin(v.yaw), fx = (float) -Math.sin(v.yaw), fz = (float) -Math.cos(v.yaw);
-        float ox = x + dx * bury - v.x, oy = y + dy * bury - v.y, oz = z + dz * bury - v.z;
-        v.stuck.add(new Stuck(one, ox * rx + oz * rz, oy, ox * fx + oz * fz, dx * rx + dz * rz, dy, dx * fx + dz * fz, g.time));
+        int[] anchors = HitVolumes.attachment(g, v, x, y, z);
+        float[] f = HitVolumes.attachmentFrame(g, v, anchors[0], anchors[1]);
+        float ox=x+dx*bury-f[0], oy=y+dy*bury-f[1], oz=z+dz*bury-f[2];
+        v.stuck.add(new Stuck(one, ox*f[3]+oy*f[4]+oz*f[5], ox*f[6]+oy*f[7]+oz*f[8], ox*f[9]+oy*f[10]+oz*f[11],
+                dx*f[3]+dy*f[4]+dz*f[5], dx*f[6]+dy*f[7]+dz*f[8], dx*f[9]+dy*f[10]+dz*f[11], g.time, anchors[0], anchors[1]));
     }
 
     /** Lodged things fall out of a body: all of them (it died, or is gone), or those that have worked loose by now. */
@@ -1115,7 +1182,7 @@ public final class CombatSystem {
             Stuck s = it.next();
             if (olderThan != Integer.MAX_VALUE && g.time - s.at() < olderThan) continue;
             it.remove();
-            float[] w = s.world(v);
+            float[] w = s.world(g, v);
             float len = ammoLength(s.stack().def);
             g.objects.dropAmmo(s.stack(), w[0] - w[3] * len / 2, Math.max(w[1] - w[4] * len / 2, v.y + 0.1f), w[2] - w[5] * len / 2, new float[]{w[3], w[4], w[5]}, false, v.vx, 0.5f, v.vz);
         }

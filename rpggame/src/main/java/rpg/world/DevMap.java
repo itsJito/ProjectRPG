@@ -23,6 +23,7 @@ public final class DevMap {
     public static final String ALPHA = "DevCity", BETA = "DevTown", WILDS = "WILDS";
 
     public static String jurisdiction(double x, double z) {
+        if (x >= SX) return WILDS;   // the dungeons are nobody's to police
         if (x >= 82 && z >= 46) return ALPHA;
         if (z >= 92 && x < 82) return BETA;
         return WILDS;
@@ -89,7 +90,7 @@ public final class DevMap {
     /** The den: a rock shelter in the wood's corner (the bear's and the lion's lie-up). */
     public static final int DEN_X0 = 5, DEN_Z0 = 4, DEN_X1 = 10, DEN_Z1 = 8;
     /** Monster lairs (gamefixes): the goblins' camp in the wood's north-east corner; the imps nest on the interaction shed's roof (the bats roost in the den). */
-    public static final float[] GOBLIN_CAMP = {38.5f, 10.5f}, IMP_NEST = {55.5f, 15.5f}, BAT_ROOST = {38.5f, 31.5f};
+    public static final float[] GOBLIN_CAMP = {38.5f, 10.5f}, IMP_NEST = {55.5f, 15.5f}, BAT_ROOST = {38.5f, 31.5f}, SPIDER_WEB = {14.5f, 40.5f};
     public static final int FARM_X0 = 86, FARM_Z0 = 102, FARM_X1 = 122, FARM_Z1 = 124;
     /** The paddock's gate (a door in the fence) and the shelter (a closed barn with a two-leaf entrance). */
     public static final int[][] FARM_GATE = {{100, 102}, {101, 102}};
@@ -179,7 +180,7 @@ public final class DevMap {
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
     public static long build(NativeEngine e) {
         if (!e.blockTable(Blocks.engineDefs())) throw new IllegalStateException("block table refused: " + e.lastError());
-        long world = e.createWorld(SX, SY, SZ, STONE, null, null, 0);
+        long world = e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, null, null, 0);
         if (world == 0) throw new IllegalStateException("world refused: " + e.lastError());
         CommandBuffer b = new CommandBuffer(1 << 16);
         new Builder(b).all();
@@ -213,6 +214,7 @@ public final class DevMap {
             roads();
             floors();
             wilds();
+            dungeons();
             farm();
             graveyard();
             for (Jails.Cell cell : Jails.CELLS) {
@@ -430,6 +432,65 @@ public final class DevMap {
             ground(WILD_POND_X0 - 1, WILD_POND_Z0, WILD_POND_X0 - 1, WILD_POND_Z1, CLAY);
             ground(WILD_POND_X1 + 1, WILD_POND_Z0, WILD_POND_X1 + 1, WILD_POND_Z1, MUD);
             goblinCamp();
+        }
+
+        /**
+         * The dungeons (gamefixes): beyond the overworld's edge the land rises in a sheer, grassed cliff of rock, and
+         * inside the rock each dungeon is carved from its plan (DungeonLayout) - floors and walls in its theme's stone,
+         * a roof over every room, lamps set in the walls, fire pits and sunken pools, pillars, braziers and fallen rock.
+         * Nothing joins them to the overworld or to each other: their entrances and exits are the only ways in and out.
+         */
+        void dungeons() {
+            int top = DungeonLayout.ROCK_TOP;
+            fill(SX, 0, 0, DungeonLayout.WORLD_X - 1, top - 2, SZ - 1, STONE);
+            fill(SX, top - 1, 0, DungeonLayout.WORLD_X - 1, top - 1, SZ - 1, GRASS);
+            fill(SX, FLOOR - 1, 0, SX, top - 2, SZ - 1, GRANITE);                     // the cliff's face, seen from the overworld
+            // the face stays sheer (nobody climbs it from the border wall); its skyline is broken by crags of rock rising
+            // in uneven steps above the top, grassed over, so it is not a ruler's line
+            for (int z = 0; z < SZ; z++) {
+                int n = (z / 3) * 374761393; n = (n ^ (n >>> 13)) * 1274126177; n ^= n >>> 16;
+                int depth = 2 + Math.floorMod(n, 6), rise = Math.floorMod(n >>> 5, 4);
+                for (int k = 0; k < depth; k++) {
+                    int h = top - 1 + Math.max(0, rise - Math.abs(k - depth / 2)) ;
+                    if (h <= top - 1) continue;
+                    fill(SX + 1 + k, top - 1, z, SX + 1 + k, h - 1, z, k % 3 == 0 ? GRANITE : STONE);
+                    set(SX + 1 + k, h, z, GRASS);
+                }
+            }
+            for (DungeonLayout l : DungeonLayout.all()) {
+                int floor = switch (l.theme) { case CAVE -> STONE; case WARREN -> DIRT; case CRYPT -> COBBLE; case HALL -> GRANITE; };
+                int wall = switch (l.theme) { case CAVE -> STONE; case WARREN -> MUD; case CRYPT -> STONE_BRICKS; case HALL -> GRANITE; };
+                int roof = switch (l.theme) { case CAVE, HALL -> STONE; case WARREN -> DIRT; case CRYPT -> STONE_BRICKS; };
+                // walls: the rock round every open cell faced in the theme's stone
+                for (int x = 0; x < l.w; x++) for (int z = 0; z < l.d; z++) {
+                    int wx = l.worldX(x), wz = l.worldZ(z);
+                    if (l.open[x][z]) {
+                        int h = l.height[x][z];
+                        set(wx, FLOOR - 1, wz, floor);
+                        fill(wx, FLOOR, wz, wx, FLOOR + h - 1, wz, AIR);
+                        set(wx, FLOOR + h, wz, roof);
+                        continue;
+                    }
+                    int near = 0;
+                    for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+                        int nx = x + dx, nz = z + dz;
+                        if (nx >= 0 && nz >= 0 && nx < l.w && nz < l.d && l.open[nx][nz]) near = Math.max(near, l.height[nx][nz]);
+                    }
+                    if (near > 0) fill(wx, FLOOR, wz, wx, FLOOR + near, wz, wall);
+                }
+                for (DungeonLayout.Spot s : l.spots) {
+                    int wx = l.worldX(s.x()), wz = l.worldZ(s.z());
+                    switch (s.what()) {
+                        case "lamp" -> { }   // a torch on the wall there (drawn and lit by the renderer: Gfx.dungeonLights)
+                        case "embers" -> set(wx, FLOOR, wz, EMBERS);
+                        case "pool" -> { set(wx, FLOOR - 1, wz, WATER); set(wx, FLOOR - 2, wz, WATER); }
+                        case "pillar" -> fill(wx, FLOOR, wz, wx + 1, FLOOR + 6, wz + 1, GRANITE);
+                        case "brazier" -> { set(wx, FLOOR, wz, COBBLE); set(wx, FLOOR + 1, wz, EMBERS); }
+                        case "boulder" -> set(wx, FLOOR, wz, GRANITE);
+                        default -> { }
+                    }
+                }
+            }
         }
 
         /**
