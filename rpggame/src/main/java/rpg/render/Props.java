@@ -19,6 +19,33 @@ public final class Props {
     private static Layer glow(Meshes.Boxes b, float e) { return new Layer(b, 0.9f, 0, e); }
     private static Layer stone(Meshes.Boxes b) { return new Layer(b, 0.92f, 0, 0); }
 
+    /** Deployed fishing gear: floats, stakes and a submerged mesh, rather than a storage chest. */
+    public static Layer[] fishingNet() {
+        Meshes.Boxes frame=new Meshes.Boxes(),rope=new Meshes.Boxes();
+        for(int side:new int[]{-1,1}) {
+            frame.rgb(side*0.52f,0.18f,0,0.055f,0.7f,0.055f,0x6B5034);
+            frame.rgb(side*0.4f,0.02f,0,0.11f,0.08f,0.1f,0xAD8D58);
+        }
+        for(int row=0;row<7;row++)rope.rgb(0,-row*0.07f,0,1,0.012f,0.012f,0x6C7355);
+        for(int col=0;col<11;col++)rope.rgb((col-5)*0.1f,-0.21f,0,0.012f,0.44f,0.012f,0x83856A);
+        rope.rgb(0,0.04f,0,1.04f,0.025f,0.025f,0xBAA87B);
+        return new Layer[]{wood(frame),new Layer(rope,0.94f,0,0)};
+    }
+
+    /** A grounded stake and a thin loop with a visible trigger and tether. */
+    public static Layer[] snare(boolean armed) {
+        Meshes.Boxes wood=new Meshes.Boxes(),cord=new Meshes.Boxes();
+        wood.rgb(-0.24f,0.1f,0,0.045f,0.2f,0.045f,0x785537);
+        wood.rgb(0.03f,0.03f,0,0.16f,0.045f,0.04f,0xB18A52);
+        for(int step=0;step<24;step++) {
+            double angle=step*Math.PI*2/24;
+            cord.rgb((float)Math.cos(angle)*0.18f,armed?0.09f:0.018f,(float)Math.sin(angle)*0.18f,
+                0.035f,0.014f,0.028f,0xAB9769);
+        }
+        cord.rgb(-0.14f,0.035f,0,0.22f,0.014f,0.014f,0x8A7957);
+        return new Layer[]{wood(wood),new Layer(cord,0.96f,0,0)};
+    }
+
     // ------------------------------------------------------------------ furniture
     public static Layer[] furniture(Furniture.Kind kind, float w, float d, int h, int seed) {
         return switch (kind) {

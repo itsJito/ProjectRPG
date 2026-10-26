@@ -51,11 +51,13 @@ final class HudFragments {
         hud.add(new Area(hud)).wake("area", "world", "scene").linger(5);
         hud.add(new Wanted(hud)).wake("law").linger(8);
         hud.add(new HonorToast(hud)).wake("honor");
+        hud.add(new BountyNotice(hud)).wake("bountynotice");
         hud.add(new Target(hud)).wake("combat").linger(5);
-        hud.add(new LevelUp(hud));
+        hud.add(new Milestone(hud));
         hud.add(new ChatLog(hud)).wake("chat").linger(9);
         hud.add(new WorkBar(hud));
         hud.add(new DialogueCard(hud));
+        hud.add(new OfferCard(hud));
         hud.add(new PauseCard(hud));
         hud.add(new MenuFrag(hud));
         hud.add(new Inspector(hud, "ai", 440, () -> hud.aiInspector, "AI inspector", HudFragments::aiLines));
@@ -145,6 +147,22 @@ final class HudFragments {
         }
     }
 
+    /** Crossing into a kingdom where you are wanted (gamefixes): a reminder of the bounty there, for a few seconds. */
+    static final class BountyNotice extends Fragment {
+        BountyNotice(Hud h) { super("bountynotice"); fadeIn = 0.25f; fadeOut = 0.6f; linger = 5; }
+        @Override protected boolean active() { return false; }
+        @Override public float width() { return hud.ui == null ? 360 : Math.max(320, hud.ui.width(hud.g.law.reminder, 14) + 64); }
+        @Override public float height() { return 58; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            float w = width();
+            Style.card(ui, x, y, w, 58);
+            ui.rect(x, y, w, 3, Style.BAD);
+            ui.img("Gravestone_map_icon", x + 14, y + 18, 22, 0xF0FFFFFF);
+            ui.text("WANTED", x + 46, y + 10, 12, Style.BAD);
+            ui.text(hud.g.law.reminder, x + 46, y + 28, 14, Style.TEXT);
+        }
+    }
+
     private static float ease(float t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
 
     /**
@@ -173,10 +191,10 @@ final class HudFragments {
         // the line: letters spaced wide, rising into place
         float a1 = ease((t - 0.7f) / 1.5f);
         String title = "Y O U   H A V E   F A L L E N";
-        float ts = Math.min(52, w / 22f);
+        float ts = Math.min(56, w / 20f);
         float rise = (1 - a1) * 14;
-        ui.text(title, cx - ui.width(title, ts) / 2 + 2, cy + rise + 2, ts, Style.fade(0xFF000000, a1 * 0.8f));
-        ui.text(title, cx - ui.width(title, ts) / 2, cy + rise, ts, Style.fade(0xFFE9E1D2, a1));
+        ui.text(ui.heading, title, cx - ui.width(ui.heading, title, ts) / 2 + 2, cy + rise + 2, ts, Style.fade(0xFF000000, a1 * 0.8f));
+        ui.text(ui.heading, title, cx - ui.width(ui.heading, title, ts) / 2, cy + rise, ts, Style.fade(0xFFE9E1D2, a1));
         // a red rule drawing out from the middle
         float rule = ease((t - 1.3f) / 1.2f) * Math.min(520, w * 0.4f);
         ui.rect(cx - rule / 2, cy + ts * 1.25f, rule, 2, Style.fade(0xFF9A1E1A, a1));
@@ -296,8 +314,8 @@ final class HudFragments {
                 if (number) {
                     boolean zero = f.text().equals("0");
                     ui.disc(p2[0], p2[1] + 8, 11, Style.fade(zero ? 0xFF2F5CA8 : 0xFFA82A22, a));
-                    ui.flatCentered(f.text(), p2[0], p2[1], 14, Style.fade(0xFFFFFFFF, a));
-                } else ui.centered(f.text(), p2[0], p2[1], 15, Style.fade(0xFF000000 | f.color(), a));
+                    ui.flatCentered(ui.combat, f.text(), p2[0], p2[1] - 2, 19, Style.fade(0xFFFFFFFF, a));
+                } else ui.centered(ui.combat, f.text(), p2[0], p2[1], 19, Style.fade(0xFF000000 | f.color(), a));
             }
             if (g.player.alive && g.time - g.player.cs.lastHurt < 6 && !g.player.firstPerson && gfx.project(g.player.x, g.player.y + 2.15f, g.player.z, p2))
                 bar(ui, p2[0], p2[1], g.player.hp / g.player.maxHp());
@@ -416,7 +434,16 @@ final class HudFragments {
         List<String> lines = new ArrayList<>();
         for (String para : text.split("\n")) {
             StringBuilder line = new StringBuilder();
-            for (String word : para.split(" ")) {
+            for (String original : para.split(" ")) {
+                String word=original;
+                if(ui.width(word,size)>maxW) {
+                    if(line.length()>0){lines.add(line.toString());line.setLength(0);}
+                    while(ui.width(word,size)>maxW && word.length()>1) {
+                        int split=word.length()-1;
+                        while(split>1 && ui.width(word.substring(0,split),size)>maxW)split--;
+                        lines.add(word.substring(0,split));word=word.substring(split);
+                    }
+                }
                 String t = line.length() == 0 ? word : line + " " + word;
                 if (ui.width(t, size) > maxW && line.length() > 0) { lines.add(line.toString()); line = new StringBuilder(word); }
                 else { line.setLength(0); line.append(t); }
@@ -604,10 +631,12 @@ final class HudFragments {
             if (map.tex == 0 || g.mapDirty) map.build();
             if (g.time - map.markersAt > 2) map.markers();
             float size = height() - 30, left = x + 8, top = y + 22, side = left + size + 28;
-            ui.text("WORLD MAP", left, y, 14, Style.ACCENT);
+            ui.text(ui.heading, "World Map", left, y - 6, 22, Style.ACCENT);
+            // the map as a chart pinned in a frame: a dark mount, the gold trim, the paper a little warm
+            ui.rect(left - 6, top - 6, size + 12, size + 12, 0xFF0E0B08);
             ui.quad(map.tex, new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
-                    new float[]{0, 0, 1, 0, 1, 1, 0, 1}, 0xFFFFFFFF, 0);
-            ui.border(left, top, size, size, 1, Style.EDGE_HI);
+                    new float[]{0, 0, 1, 0, 1, 1, 0, 1}, 0xFFF4E8D0, 0);
+            Style.trim(ui, left - 6, top - 6, size + 12, size + 12);
             for (Object[] marker : map.markers) {
                 float mx = left + (float) marker[1] / DevMap.SX * size, my = top + (float) marker[2] / DevMap.SZ * size;
                 ui.img((String) marker[0], mx - 7, my - 7, 14, 0xFFFFFFFF);
@@ -705,7 +734,7 @@ final class HudFragments {
                 if (icon != null) markers.add(new Object[]{icon, o.x, o.z});
             }
             for (Npc n : g.npcs) {
-                String icon = switch (n.role) { case MERCHANT -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
+                String icon = switch (n.role) { case MERCHANT, FENCE -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
                 if (icon != null) markers.add(new Object[]{icon, n.postX, n.postZ});
             }
             markers.add(new Object[]{"Water_source_map_icon", DevMap.WELL[0] + 0.5f, DevMap.WELL[1] + 0.5f});
@@ -900,7 +929,8 @@ final class HudFragments {
                 total += b;
                 rows.add(new Row("Gravestone_map_icon", j.getKey() + ": " + rpg.item.Currency.text(b) + " G bounty", Style.BAD, -1, 0));
             }
-            heat = total <= 0 ? 0 : total < 50 ? 1 : total < 150 ? 2 : total < 400 ? 3 : total < 800 ? 4 : 5;
+            // the gauge follows the law's own lines: pursued, hunters at the border, lockdown, posses
+            heat = total <= 0 ? 0 : total <= g.cfg.pursuitBounty ? 1 : total < g.cfg.ambushBounty ? 2 : total < g.cfg.lockdownBounty ? 3 : total <= g.cfg.posseBounty ? 4 : 5;
             int closing = 0, searchers = 0;
             searchLeft = -1;
             for (Npc n : g.npcs) {
@@ -996,83 +1026,138 @@ final class HudFragments {
         }
     }
 
-    static final class LevelUp extends Fragment {
-        LevelUp(Hud h) { super("levelup"); fadeIn = 0.25f; fadeOut = 0.8f; }
-        @Override protected boolean active() { return hud.g.prog.celebrating != null && hud.g.time - hud.g.prog.celebratedAt < 4; }
-        @Override public float width() { return 320; }
-        @Override public float height() { return 92 + Math.min(4, hud.g.prog.revealed.size()) * 17; }
-        @Override public void draw(Ui2D ui, float x, float y) {
-            var a = hud.g.prog.celebrating;
-            if (a == null) return;
-            ui.img(Atlas.skill(a.skill()), x + 160 - 22, y, 44, 0xFFFFFFFF);
-            ui.flatCentered("Level up", x + 160, y + 48, 20, Style.ACCENT);
-            ui.flatCentered(a.skill().title + " " + a.toLevel(), x + 160, y + 72, 14, Style.TEXT);
-            // what this level revealed
-            var rev = hud.g.prog.revealed;
-            for (int i = 0; i < Math.min(4, rev.size()); i++)
-                ui.flatCentered((i == 3 && rev.size() > 4 ? "and " + (rev.size() - 3) + " more (see the skill guide)" : "Unlocked: " + rev.get(i)), x + 160, y + 94 + i * 17, 12, Style.GOOD);
+    /** One bounded queue prevents simultaneous quest rewards and skill levels from painting over each other. */
+    static final class Milestone extends Fragment {
+        private record Notice(String title,String detail,String icon,int color,List<String> unlocks) {}
+        private final java.util.ArrayDeque<Notice> pending=new java.util.ArrayDeque<>();
+        private Notice current;
+        private double since=-99;
+        Milestone(Hud h) {
+            super("levelup");fadeIn=0.25f;fadeOut=0.5f;
+            h.events.listen((type,detail)-> {
+                Notice notice=null;
+                String title=switch(type) { case "event:QuestStarted"->"Quest accepted";case "event:QuestCompleted"->"Quest complete";case "event:QuestFailed"->"Quest failed";default->null; };
+                if(title!=null)notice=new Notice(title,detail.startsWith("QT-COURIER")?"Courier":detail,"Quest_map_icon",type.endsWith("Failed")?Style.BAD:Style.ACCENT,List.of());
+                else if(type.equals("event:LevelUp")) {
+                    try {
+                        String[] fields=detail.split(" ",2),levels=fields[1].split("->",2);
+                        Skill skill=Skill.valueOf(fields[0]);int from=Integer.parseInt(levels[0]),to=Integer.parseInt(levels[1]);
+                        List<String> unlocked=new ArrayList<>();
+                        for(String line:SkillGuide.unlocks(skill)) {
+                            int space=line.indexOf(' '),need=Integer.parseInt(line.substring(0,space));
+                            if(need>from && need<=to && unlocked.size()<2)unlocked.add(line.substring(space+1));
+                        }
+                        notice=new Notice("Level up",skill.title+"  "+to,Atlas.skill(skill),Style.ACCENT,unlocked);
+                    } catch(IllegalArgumentException|IndexOutOfBoundsException ignored) { return; }
+                }
+                if(notice==null)return;
+                if(pending.size()==6)pending.removeFirst();pending.addLast(notice);
+            });
+        }
+        @Override protected boolean active() {
+            if((current==null || hud.now-since>4.2) && !pending.isEmpty()) { current=pending.removeFirst();since=hud.now; }
+            return current!=null && hud.now-since<3.5;
+        }
+        @Override public float width(){return 360;}
+        @Override public float height(){return 108+(current==null?0:current.unlocks.size()*17);}
+        @Override public void draw(Ui2D ui,float x,float y) {
+            if(current==null)return;
+            y+=hud.fragment("honor").alpha*88-(1-alpha)*12;
+            ui.rect(x,y,360,height(),0xF814171C);ui.border(x,y,360,height(),1,0x70D8B46A);
+            ui.rect(x+60,y,240,2,current.color);
+            ui.img(current.icon,x+160,y+10,40,0xFFFFFFFF);
+            ui.flatCentered(ui.heading,current.title,x+180,y+54,24,current.color);
+            ui.flatCentered(current.detail,x+180,y+82,14,Style.TEXT);
+            for(int i=0;i<current.unlocks.size();i++)ui.flatCentered("Unlocked: "+current.unlocks.get(i),x+180,y+106+i*17,11,Style.GOOD);
         }
     }
 
     // ------------------------------------------------------------------ chat: fades out when nothing new is said
     static final class ChatLog extends Fragment {
-        private int filter;
+        private int filter, scroll, cachedTotal=-1, cachedFilter=-1;
+        private float cachedWidth;
+        private record Wrapped(String text, Chat.Kind kind) {}
+        private final List<Wrapped> wrapped=new ArrayList<>();
         ChatLog(Hud h) { super("chat"); fadeOut = 1.2f; }
         @Override protected boolean active() { return hud.dialog == null && hud.hovering(this); }
-        @Override public float width() { return Math.min(460, hud.w - 560); }
-        @Override public float height() { return 150; }
+        // gamefixes: every line wrapped to the box, and the box kept clear of the action bar - it ends 16 px short of
+        // the bar's left edge at any screen width (the bar is centred on the bottom edge), and stands seven lines tall
+        @Override public float width() {
+            float bar = ActionBar.SLOTS * ActionBar.S + (ActionBar.SLOTS - 1) * ActionBar.GAP;
+            return Math.max(280, Math.min(460, (hud.w - bar) / 2 - 12 - 16));
+        }
+        @Override public float height() { return 160; }
         @Override public void draw(Ui2D ui, float x, float y) {
             if (hud.dialog != null && !hud.dialog.pauseMenu) return;
-            float cw = width(), ch = 150;
+            Ui2D.Face was = ui.use(ui.chat);
+            try { log(ui, x, y); } finally { ui.use(was); }
+        }
+        private void log(Ui2D ui, float x, float y) {
+            float cw = width(), ch = height();
             boolean hv = ui.hover(x, y, cw, ch);
             if (hv) woken(hud.now);
             ui.rect(x, y, cw, ch, hv ? 0x90141518 : 0x50141518);
             String[] filters = {"All", "Game", "Crime", "Debug"};
             if (hv) for (int i = 0; i < filters.length; i++) if (Style.tab(ui, filters[i], x + i * 58, y + ch - 20, 58, 20, filter == i)) { filter = i; hud.sound("UIbutton1", 0.4f); }
-            List<Chat.Line> lines = new ArrayList<>();
-            for (Chat.Line l : hud.g.chat.last(60)) {
-                boolean keep = switch (filter) { case 1 -> l.kind() == Chat.Kind.GAME || l.kind() == Chat.Kind.LEVEL || l.kind() == Chat.Kind.WARN || l.kind() == Chat.Kind.DIALOGUE; case 2 -> l.kind() == Chat.Kind.CRIME; case 3 -> l.kind() == Chat.Kind.DEBUG; default -> true; };
-                if (keep) lines.add(l);
+            if(cachedTotal!=hud.g.chat.total() || cachedFilter!=filter || cachedWidth!=cw) {
+                if(cachedTotal!=hud.g.chat.total())scroll=0;
+                cachedTotal=hud.g.chat.total();cachedFilter=filter;cachedWidth=cw;wrapped.clear();
+                for(Chat.Line line:hud.g.chat.last(100)) {
+                    boolean keep=switch(filter) {case 1->line.kind()==Chat.Kind.GAME || line.kind()==Chat.Kind.LEVEL || line.kind()==Chat.Kind.WARN || line.kind()==Chat.Kind.DIALOGUE;case 2->line.kind()==Chat.Kind.CRIME;case 3->line.kind()==Chat.Kind.DEBUG;default->true;};
+                    if(keep)for(String text:wrap(ui,line.text(),14,cw-20))wrapped.add(new Wrapped(text,line.kind()));
+                }
             }
-            float ly = y + ch - (hv ? 40 : 22);
-            for (int i = lines.size() - 1; i >= 0 && ly > y + 2; i--) {
-                Chat.Line l = lines.get(i);
-                int c = switch (l.kind()) { case WARN -> Style.BAD; case LEVEL -> Style.ACCENT; case CRIME -> 0xFFC48AD8; case DEBUG -> Style.GOOD; case DIALOGUE -> Style.INFO; default -> Style.TEXT; };
-                String t = l.text();
-                while (ui.width(t, 13) > cw - 14 && t.length() > 10) t = t.substring(0, t.length() - 4) + "...";
-                ui.shadow(t, x + 7, ly, 13, c);
-                ly -= 17;
+            int visible=hv?6:7;
+            if(hv && ui.scroll!=0) { scroll=Math.max(0,Math.min(Math.max(0,wrapped.size()-visible),scroll+(int)ui.scroll*2));ui.consumed=true; }
+            float ly=y+ch-(hv?40:22);
+            for(int i=wrapped.size()-1-scroll;i>=0 && ly>y+4;i--) {
+                Wrapped line=wrapped.get(i);
+                int color=switch(line.kind) {case WARN->Style.BAD;case LEVEL->Style.ACCENT;case CRIME->0xFFC48AD8;case DEBUG->Style.GOOD;case DIALOGUE->Style.INFO;default->Style.TEXT;};
+                ui.shadow(line.text,x+8,ly,14,color);ly-=19;
             }
+            if(hv && scroll>0)ui.text("Scroll for newer messages",x+cw-164,y+ch-18,10,Style.DIM);
         }
     }
 
     // ------------------------------------------------------------------ Chatbox: speech replaces the Worldbox during a conversation
     static final class DialogueCard extends Fragment {
+        private static final int TEXT = 14, ROWS = 8, LINE = 18, CHOICE_LINE = 17;
         private Dialog measured;
         private float measuredWidth;
         private List<String> textLines = List.of();
+        /** Each reply, word-wrapped to the card (gamefixes: long replies wrap rather than shrink). */
+        private final List<List<String>> choiceLines = new ArrayList<>();
         private List<String> lines(Dialog d) {
             float width = width() - (hud.g.actor(d.npc) instanceof Npc ? 144 : 34);
-            if (d != measured || width != measuredWidth) { measured = d; measuredWidth = width; textLines = wrap(hud.ui, d.text, 13, width); }
+            if (d != measured || width != measuredWidth || choiceLines.size() != d.choices.size()) {
+                measured = d; measuredWidth = width; textLines = wrap(hud.ui, d.text, TEXT, width);
+                choiceLines.clear();
+                for (int i = 0; i < d.choices.size(); i++) choiceLines.add(wrap(hud.ui, d.choices.get(i).label(), 13, width - 30));
+            }
             return textLines;
         }
+        private float choiceHeight(int i) { return choiceLines.get(i).size() * CHOICE_LINE + 6; }
         DialogueCard(Hud h) { super("dialogue"); fadeIn = 0.12f; fadeOut = 0.15f; }
-        @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu; }
-        @Override public float width() { return Math.min(660, hud.w - 32); }
+        @Override protected boolean active() { return hud.dialog != null && !hud.dialog.pauseMenu && hud.dialog.offer == null; }
+        @Override public float width() { return Math.min(780, hud.w - 32); }
         @Override public float height() {
             Dialog d = hud.dialog;
-            return d == null || hud.ui == null ? 190 : Math.min(hud.h - 100, Math.max(190, 70 + Math.min(6, lines(d).size()) * 16 + Math.max(1, Math.min(8, d.choices.size())) * 23));
+            if (d == null || hud.ui == null) return 200;
+            int rows = Math.min(ROWS, lines(d).size());
+            float replies = 0;
+            for (int i = 0; i < Math.min(8, d.choices.size()); i++) replies += choiceHeight(i);
+            return Math.min(hud.h - 160, Math.max(200, 76 + rows * LINE + Math.max(24, replies)));
         }
         @Override public void draw(Ui2D ui, float x, float y) {
             Dialog d = hud.dialog;
-            if (d == null || d.pauseMenu) return;
+            if (d == null || d.pauseMenu || d.offer != null) return;
             float cw = width(), ch = height();
             ui.rectTex(ui.parchment, x, y, cw, ch, 0, 0, cw / 128, ch / 128, 0xFFFFFFFF);
             ui.border(x, y, cw, ch, 1, 0xFF85714D);
             ui.border(x + 4, y + 4, cw - 8, ch - 8, 1, 0x665F5136);
             float nameX = x + (cw - ui.width(d.speaker, 16)) / 2;
-            ui.text(d.speaker, nameX, y + 13, 16, 0xFFFFD15E);
-            ui.text(d.speaker, nameX + 0.45f, y + 13, 16, 0xFFFFD15E);
+            nameX = x + (cw - ui.width(ui.heading, d.speaker, 20)) / 2;
+            ui.text(ui.heading, d.speaker, nameX, y + 10, 20, 0xFFFFD15E);
             boolean portrait = hud.g.actor(d.npc) instanceof Npc;
             float tx = x + (portrait ? 126 : 16), textWidth = cw - (tx - x) - 18;
             if (portrait) {
@@ -1081,70 +1166,127 @@ final class HudFragments {
                 hud.gfx.portrait((Npc) hud.g.actor(d.npc), x + 15, y + 40, 96, 126, hud.now, ui.alpha);
             }
             List<String> lines = lines(d);
-            int rows = Math.min(6, lines.size());
-            if (live && ui.hover(tx, y + 40, textWidth, Math.max(32, rows * 16))) d.textOffset = Math.max(0, Math.min(Math.max(0, lines.size() - rows), d.textOffset - (int) ui.scroll));
-            for (int i = 0; i < rows; i++) ui.text(lines.get(i + d.textOffset), tx, y + 43 + i * 16, 13, 0xFFF0E5CD);
-            float top = y + 48 + Math.max(2, rows) * 16;
+            int rows = Math.min(ROWS, lines.size());
+            if (live && ui.hover(tx, y + 40, textWidth, Math.max(32, rows * LINE))) d.textOffset = Math.max(0, Math.min(Math.max(0, lines.size() - rows), d.textOffset - (int) ui.scroll));
+            for (int i = 0; i < rows; i++) ui.text(lines.get(i + d.textOffset), tx, y + 43 + i * LINE, TEXT, 0xFFF0E5CD);
+            float top = y + 50 + Math.max(2, rows) * LINE;
             int count = d.choices.size();
             int visible = Math.min(8, count);
             if (live && ui.hover(tx, top, textWidth, ch - (top - y))) d.choiceOffset = Math.max(0, Math.min(Math.max(0, count - visible), d.choiceOffset - (int) ui.scroll));
-            for (int i = d.choiceOffset; i < d.choiceOffset + visible; i++) {
-                float yy = top + (i - d.choiceOffset) * 23;
-                boolean hover = live && ui.hover(tx - 4, yy, textWidth + 4, 22);
-                if (hover) ui.rect(tx - 4, yy, textWidth + 4, 22, 0x308E7447);
-                String label = (i - d.choiceOffset + 1) + "  " + d.choices.get(i).label();
-                float size = Math.min(12, textWidth / Math.max(1, ui.width(label, 1)));
-                ui.text(label, tx, yy + 3, size, hover ? 0xFFFFD15E : 0xFFD7C7A4);
-                if (live && ui.clicked(tx - 4, yy, textWidth + 4, 22)) { hud.choose(i); return; }
+            float yy = top;
+            for (int i = d.choiceOffset; i < d.choiceOffset + visible && i < count; i++) {
+                float rh = choiceHeight(i);
+                if (yy + rh > y + ch - 6) break;
+                boolean hover = live && ui.hover(tx - 4, yy, textWidth + 4, rh - 2);
+                if (hover) ui.rect(tx - 4, yy, textWidth + 4, rh - 2, 0x308E7447);
+                List<String> label = choiceLines.get(i);
+                // the number is the key that picks it (counted from the first reply in view)
+                ui.text(Integer.toString(i - d.choiceOffset + 1), tx, yy + 3, 13, hover ? 0xFFFFD15E : 0xFFB8A27A);
+                for (int k = 0; k < label.size(); k++) ui.text(label.get(k), tx + 22, yy + 3 + k * CHOICE_LINE, 13, hover ? 0xFFFFD15E : 0xFFD7C7A4);
+                if (live && ui.clicked(tx - 4, yy, textWidth + 4, rh - 2)) { hud.choose(i); return; }
+                yy += rh;
             }
             if (count > visible) ui.text("Scroll for more replies", tx, y + ch - 18, 10, Style.DIM);
-            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.closeDialog(); }
+            if (count == 0) { ui.text("Click to continue", tx, top + 8, 12, 0xFFD7C7A4); if (live && ui.clicked(x, y, cw, ch)) hud.continueDialog(); }
         }
     }
 
-    /** A full pause presentation using the same actions and input routing as an ordinary dialogue. */
+    /**
+     * An NPC holding something out to the player (gamefixes): a small parchment card over the lower middle of the screen
+     * - who offers, the item itself on a lit plinth with its name and what it does, and Accept / Decline. The game runs
+     * on behind it (it is the dialogue's input: 1 or Enter accepts, 2 declines).
+     */
+    static final class OfferCard extends Fragment {
+        private static final float W = 400, H = 214;
+        OfferCard(Hud h) { super("offer"); fadeIn = 0.18f; fadeOut = 0.15f; }
+        @Override protected boolean active() { return hud.dialog != null && hud.dialog.offer != null; }
+        @Override public float width() { return W; }
+        @Override public float height() { return H; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Dialog d = hud.dialog;
+            if (d == null || d.offer == null) return;
+            float rise = (1 - alpha) * 14;
+            y += rise;
+            ui.rect(x + 4, y + 6, W, H, 0x50000000);                                                   // a soft drop shadow
+            ui.rectTex(ui.parchment, x, y, W, H, 0, 0, W / 128, H / 128, 0xFFFFFFFF);
+            ui.border(x, y, W, H, 1, Style.ACCENT);
+            ui.border(x + 4, y + 4, W - 8, H - 8, 1, 0x665F5136);
+            ui.flatCentered(ui.heading, d.speaker + " offers you", x + W / 2, y + 12, 20, 0xFFFFD15E);
+            // the item on a lit plinth
+            float px = x + 24, py = y + 46, ps = 84;
+            ui.rect(px, py, ps, ps, 0x40302015);
+            ui.border(px, py, ps, ps, 1, 0x80B89A5E);
+            for (int i = 0; i < 6; i++) ui.rect(px + 6 + i * 3, py + ps - 10 - i, ps - 12 - i * 6, 1, Style.fade(0xFFFFD15E, 0.05f * (6 - i)));
+            hud.itemIcon(ui, d.offer, px + 10, py + 8, ps - 20, ps - 20, 1);
+            float tx = px + ps + 18, tw = W - (tx - x) - 20;
+            ui.text(d.offer.def.name, tx, py + 4, Math.min(16, tw / Math.max(1, ui.width(d.offer.def.name, 1))), Style.TEXT);
+            Ui2D.Face was = ui.use(ui.lore);
+            List<String> about = wrap(ui, d.offer.def.examine == null ? "" : d.offer.def.examine, 13, tw);
+            for (int i = 0; i < Math.min(3, about.size()); i++) ui.text(about.get(i), tx, py + 28 + i * 15, 13, 0xFFD7C7A4);
+            ui.use(was);
+            if (d.offer.def.heal > 0 && (d.offer.def.examine == null || !d.offer.def.examine.startsWith("Restores"))) ui.text("Restores " + d.offer.def.heal + " HP", tx, py + 72, 11, Style.GOOD);
+            // the two answers
+            float by = y + H - 52, bw = (W - 60) / 2;
+            String[] keys = {"1", "2"};
+            for (int i = 0; i < Math.min(2, d.choices.size()); i++) {
+                float bx = x + 20 + i * (bw + 20);
+                boolean hover = live && ui.hover(bx, by, bw, 34);
+                boolean accept = i == 0;
+                ui.rect(bx, by, bw, 34, hover ? (accept ? 0xFF5E6A3A : 0xFF6A4A3A) : (accept ? 0xFF4A5530 : 0xFF4A3F33));
+                ui.border(bx, by, bw, 34, 1, hover ? Style.ACCENT : 0xFF1E1A15);
+                ui.rect(bx + 1, by + 1, bw - 2, 1, 0x40FFFFFF);
+                ui.text(keys[i], bx + 10, by + 11, 11, 0xFF9A8A6A);
+                ui.centered(d.choices.get(i).label(), bx + bw / 2, by + 9, 14, hover ? 0xFFFFD15E : 0xFFFF981F);
+                if (live && ui.clicked(bx, by, bw, 34)) { hud.choose(i); return; }
+            }
+        }
+    }
+
+    /**
+     * The pause menu (gamefixes: matched to the Settings screen): the same parchment card, gold heading and dim subtitle,
+     * one column of full-width buttons in the Settings style, and a quiet footer with who and when. It uses the same
+     * actions and input routing as an ordinary dialogue (numbers, arrows and Enter pick).
+     */
     static final class PauseCard extends Fragment {
+        private static final float W = 440, BUTTON = 40, GAP = 10;
         private float lastMouseX = Float.NaN, lastMouseY = Float.NaN;
         PauseCard(Hud h) { super("pause"); fadeIn = 0.12f; fadeOut = 0.12f; }
         @Override protected boolean active() { return hud.dialog != null && hud.dialog.pauseMenu; }
-        @Override public float width() { return Math.min(900, Math.max(560, hud.w - 48)); }
-        @Override public float height() { return 520; }
+        @Override public float width() { return W; }
+        @Override public float height() { Dialog d = hud.dialog; return 104 + (d == null ? 6 : d.choices.size()) * (BUTTON + GAP) + 64; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Dialog d = hud.dialog;
             if (d == null || !d.pauseMenu) return;
-            float w = width(), split = w * 0.48f, right = x + split + 32, rw = w - split - 64;
-            ui.rect(0, 0, hud.w, hud.h, 0xA0000000);
-            Style.card(ui, x, y, w, height());
-            ui.rect(x, y, w, 3, Style.ACCENT);
-            ui.text("GAME PAUSED", x + 32, y + 30, 28, Style.TEXT);
-            ui.text("Esc to resume", x + 34, y + 70, 12, Style.DIM);
-            ui.rect(x + split, y + 32, 1, 440, Style.EDGE);
+            float h = height();
+            ui.rect(0, 0, hud.w, hud.h, 0xB5101418);
+            ui.rectTex(ui.parchment, x, y, W, h, 0, 0, W / 128, h / 128, 0xFFFFFFFF);
+            ui.border(x, y, W, h, 1, Style.ACCENT);
+            ui.border(x + 4, y + 4, W - 8, h - 8, 1, 0x665F5136);
+            ui.text(ui.heading, "GAME PAUSED", x + 28, y + 18, 32, 0xFFFFD15E);
+            ui.text("Esc to resume", x + 28, y + 57, 13, Style.DIM);
+            ui.rect(x + 28, y + 86, W - 56, 1, 0x665F5136);
             boolean moved = ui.mx != lastMouseX || ui.my != lastMouseY;
             lastMouseX = ui.mx; lastMouseY = ui.my;
+            float bx = x + 28, bw = W - 56;
             for (int i = 0; i < d.choices.size(); i++) {
-                float bx = x + 32, by = y + 114 + i * 62, bw = split - 64;
-                boolean hover = live && ui.hover(bx, by, bw, 48);
+                float by = y + 104 + i * (BUTTON + GAP);
+                boolean hover = live && ui.hover(bx, by, bw, BUTTON);
                 if (hover && moved) d.focusedChoice = i;
                 boolean selected = d.focusedChoice == i;
-                ui.rect(bx, by, bw, 48, selected ? 0x28E8C878 : hover ? 0x20FFFFFF : 0x10FFFFFF);
-                ui.border(bx, by, bw, 48, 1, selected || hover ? Style.ACCENT : Style.EDGE);
-                ui.text(Integer.toString(i + 1), bx + 18, by + 16, 12, selected ? Style.ACCENT : Style.DIM);
-                ui.text(d.choices.get(i).label(), bx + 52, by + 13, 16, Style.TEXT);
-                if (live && ui.clicked(bx, by, bw, 48)) { hud.choose(i); return; }
+                ui.rect(bx, by, bw, BUTTON, selected ? 0xFF6A5A44 : 0xFF4A3F33);
+                ui.border(bx, by, bw, BUTTON, 1, selected ? Style.ACCENT : 0xFF1E1A15);
+                ui.rect(bx + 1, by + 1, bw - 2, 1, 0x40FFFFFF);
+                if (selected) ui.rect(bx + 1, by + 1, 3, BUTTON - 2, Style.ACCENT);
+                ui.text(Integer.toString(i + 1), bx + 16, by + 13, 12, selected ? 0xFFFFD15E : 0xFF9A8A6A);
+                ui.centered(d.choices.get(i).label(), bx + bw / 2, by + 12, 14, selected ? 0xFFFFD15E : 0xFFFF981F);
+                if (live && ui.clicked(bx, by, bw, BUTTON)) { hud.choose(i); return; }
             }
             var p = hud.g.player;
-            ui.text(p.name, right, y + 48, Math.min(24, rw / Math.max(1, ui.width(p.name, 1))), Style.ACCENT);
-            ui.text("Level " + p.skills.combatLevel() + "   Total " + p.skills.totalLevel(), right, y + 88, 13, Style.TEXT);
-            ui.text(hud.g.state.clockText(), right, y + 114, 13, Style.DIM);
-            ui.text("Honor  " + hud.g.honor.rankName(), right, y + 164, 13, Style.TEXT);
-            honorBar(ui, right, y + 196, rw, hud.g.honor.score, hud.g.honor.score);
-            ui.text(rpg.item.Currency.full(p.count(rpg.item.Items.COINS)), right, y + 230, 14, Style.ACCENT);
-            var item = p.eq.get(rpg.item.ItemDef.Slot.MAIN);
-            if (item != null) {
-                hud.itemIcon(ui, item, right + (rw - 112) / 2, y + 274, 112, 112, 1);
-                ui.centered(item.def.name, right + rw / 2, y + 404, 14, Style.TEXT);
-            }
-            ui.text("Up/Down select  -  Enter confirm  -  1-5 choose", x + 34, y + 474, 11, Style.DIM);
+            float fy = y + h - 46;
+            ui.rect(x + 28, fy - 8, W - 56, 1, 0x665F5136);
+            String who = p.name + "  -  Combat " + p.skills.combatLevel() + "  -  Total " + p.skills.totalLevel();
+            ui.text(who, x + 28, fy, Math.min(13, (W - 56) / Math.max(1, ui.width(who, 1))), Style.TEXT);
+            ui.text(hud.g.state.clockText() + "  -  " + DevMap.jurisdiction(p.x, p.z), x + 28, fy + 18, 11, Style.DIM);
         }
     }
 

@@ -24,6 +24,7 @@ public final class Skin {
 
     /** ARGB; alpha 0 is a hole (the outer layer is mostly holes). */
     public final int[] px = new int[N * N];
+    private float[] cuts;
     public final Body body;
 
     private Skin(Body body) { this.body = body; }
@@ -50,6 +51,27 @@ public final class Skin {
             default -> new int[]{u + 2 * dp + w, v + dp, w, h};
         };
         return new int[]{r[0] * T, r[1] * T, r[2] * T, r[3] * T};
+    }
+
+    public float depth(Part part,int face,int x,int y) {
+        if(cuts==null)return 0;int[] area=face(part,face);
+        return x<0 || y<0 || x>=area[2] || y>=area[3]?0:cuts[(area[1]+y)*N+area[0]+x];
+    }
+    public void injure(java.util.List<rpg.actor.Injuries.Cut> wounds,int severity) {
+        if(severity==0 || wounds.isEmpty())return;cuts=new float[N*N];
+        for(var wound:wounds)for(Part layer:BLOOD_PARTS[wound.part()]) {
+            int[] face=face(layer,wound.face());int w=face[2],h=face[3];
+            float cx=wound.u()*w,cy=wound.v()*h,angle=wound.seed()*2.39996f;
+            for(int y=0;y<h;y++)for(int x=0;x<w;x++) {
+                float dx=x+0.5f-cx,dy=y+0.5f-cy;
+                float across=Math.abs(dx*(float)Math.cos(angle)+dy*(float)Math.sin(angle));
+                float along=Math.abs(-dx*(float)Math.sin(angle)+dy*(float)Math.cos(angle));
+                if(across>0.7f || along>wound.radius())continue;
+                int index=(face[1]+y)*N+face[0]+x;if((px[index]>>>24)==0)continue;
+                cuts[index]=Math.max(cuts[index],Math.min(0.75f,0.15f+severity*0.075f));
+                px[index]=0xFF000000 | (mix(px[index],0xFF6B221C,0.8f)&0xFFFFFF);
+            }
+        }
     }
 
     public int get(Part p, int f, int i, int j) {

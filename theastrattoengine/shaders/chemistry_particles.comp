@@ -1,0 +1,72 @@
+#include "include/head.glsl"
+layout(local_size_x=64) in;
+struct Particle { vec4 posSize; vec4 color; vec4 params; };
+struct Motion { vec4 velocityLife; vec4 ageSeed; vec4 anchor; vec4 identity; };
+struct Emitter { vec4 posSize; vec4 color; vec4 velocityLife; vec4 params; vec4 identity; };
+layout(std430,binding=6) buffer Draw { Particle particles[]; };
+layout(std430,binding=7) buffer State { Motion motion[]; };
+layout(std430,binding=5) readonly buffer Sources { Emitter emitters[]; };
+uniform int uCount,uEmitters;
+uniform float uDt,uTime;
+uniform vec2 uWind;
+uniform usampler3D uVox;
+uniform uint uCollision[8];
+uint hash(uint v) { v ^= v>>16; v*=0x7feb352du; v^=v>>15; v*=0x846ca68bu; return v^(v>>16); }
+float random(inout uint v) { v=hash(v); return float(v&0xffffffu)/16777216.0; }
+void main() {
+ uint i=gl_GlobalInvocationID.x; if(i>=uint(uCount))return;
+ Motion m=motion[i]; Particle p=particles[i]; float dt=clamp(uDt,0.0,0.08);
+ m.ageSeed.x+=dt;
+ if(m.velocityLife.w<=0.0||m.ageSeed.x>=m.velocityLife.w) {
+  p.color=vec4(0); p.posSize=vec4(0); m.velocityLife.w=0;
+  if(uEmitters>0) {
+   uint source=i%uint(uEmitters), rank=i/uint(uEmitters); Emitter e=emitters[source];
+   if(float(rank)<e.params.x*e.velocityLife.w) {
+    uint seed=hash(i+uint(uTime*61.0)*131u+uint(e.params.w));
+    vec3 r=vec3(random(seed),random(seed),random(seed))*2.0-1.0;
+    p.posSize=vec4(e.posSize.xyz+r*e.params.z,e.posSize.w*(0.7+random(seed)*0.6)); p.color=e.color;
+    if(int(e.params.y+0.5)==7)p.posSize.y=e.posSize.y+abs(r.y)*1.5;
+    int rawKind=int(e.params.y+0.5),kind=rawKind==16?0:rawKind;
+    p.params=vec4(random(seed)*6.283185,float(kind),0,0.15+random(seed)*0.75);
+    if(kind==0)p.params.x=(random(seed)-0.5)*0.25;
+    if(int(e.params.y+0.5)==7){p.params.x=0.0;p.params.w=0.10+random(seed)*0.05;p.posSize.w*=2.4;}
+    m.velocityLife=vec4(e.velocityLife.xyz+r*(kind==0?0.5:1.4),e.velocityLife.w*(0.7+random(seed)*0.6));
+    m.ageSeed=vec4(-float(rank)/max(1.0,e.params.x),float(source),e.params.y,e.color.a);
+    m.anchor=vec4(e.posSize.xyz,0);m.identity=e.identity;
+   }
+  }
+ } else if(m.ageSeed.x>=0.0) {
+  float t=m.ageSeed.x/m.velocityLife.w; int rawKind=int(m.ageSeed.z+0.5),kind=rawKind==16?0:rawKind;
+  if(rawKind==16) {
+   // Usually O(1): retain the source slot, resolving by stable emitter ID only when ordering changes.
+   int source=int(m.ageSeed.y);
+   if(source<0||source>=uEmitters||any(notEqual(emitters[source].identity,m.identity))||int(emitters[source].params.y+0.5)!=16) {
+    source=-1;
+    for(int j=0;j<uEmitters;j++)if(all(equal(emitters[j].identity,m.identity))&&int(emitters[j].params.y+0.5)==16){source=j;break;}
+   }
+   if(source<0){p.color=vec4(0);m.velocityLife.w=0;m.ageSeed.w=0;}
+   else {p.posSize.xyz+=emitters[source].posSize.xyz-m.anchor.xyz;m.anchor.xyz=emitters[source].posSize.xyz;m.ageSeed.y=float(source);}
+  }
+  vec3 v=m.velocityLife.xyz;
+  if(kind==0||kind==1) {
+   vec3 curl=vec3(sin(p.posSize.y*3.1+uTime*1.7),cos(p.posSize.z*2.6+uTime),cos(p.posSize.x*3.1-uTime*1.3));
+   v+=vec3(uWind.x*0.2,kind==0?1.8:0.6,uWind.y*0.2)*dt+curl*dt*0.6;
+  } else if(kind==7||kind==8)v.y-=9.8*dt;
+  else v*=exp(-dt*1.5);
+  p.posSize.xyz+=v*dt; if(kind==1)p.posSize.w+=dt*0.15;
+  if(kind==7||kind==8) {
+   ivec3 cell=ivec3(floor(p.posSize.xyz)).yzx,dimensions=textureSize(uVox,0);
+   bool hit=cell.x<0;
+   if(all(greaterThanEqual(cell,ivec3(0)))&&all(lessThan(cell,dimensions))) {
+    uint id=texelFetch(uVox,cell,0).r;hit=(uCollision[int(id>>5)]&(1u<<(id&31u)))!=0u;
+   }
+   if(hit) {
+    if(kind==7) { p.posSize.y=ceil(p.posSize.y)+0.015;p.posSize.w=0.075;p.params.y=8;m.ageSeed=vec4(0,m.ageSeed.y,8,0.55);m.velocityLife=vec4(0,0.5,0,0.15);v=vec3(0,0.5,0); }
+    else { m.velocityLife.w=0;m.ageSeed.w=0; }
+   }
+  }
+  p.params.z=clamp(t,0.0,1.0); m.velocityLife.xyz=v;
+ }
+ p.color.a=m.ageSeed.x<0.0?0.0:m.ageSeed.w;
+ particles[i]=p; motion[i]=m;
+}

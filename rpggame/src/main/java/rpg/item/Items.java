@@ -49,6 +49,11 @@ public final class Items {
         d.damage = 0.2f; d.impact = 4; d.damageType = DamageType.BLUNT;
         return d;
     }
+    private static ItemDef garment(String id, String name, Slot slot) {
+        ItemDef item=def(id,name,25,0xA89476,"A fitted linen garment."); item.slot=slot;item.family=Family.ARMOR;
+        item.reqSkill=Skill.DEFENSE;item.reqLevel=1;item.armor=0.5f;return item;
+    }
+    private static ItemDef bones(String id, String name, int value, int color, String examine, int xp) { ItemDef d = def(id, name, value, color, examine); d.buryXp = xp; return d; }
     private static ItemDef food(String id, String name, int value, int heal, int color) { ItemDef d = def(id, name, value, color, "Restores " + heal + " HP."); d.heal = heal; return d; }
 
     // ------------------------------------------------------------------ resources and tools
@@ -59,6 +64,11 @@ public final class Items {
     public static final ItemDef WILLOW_LOGS = def("willow_logs", "Willow logs", 16, 0x7A7040, "Logs cut from a willow.");
     public static final ItemDef COPPER_ORE = def("copper_ore", "Copper ore", 5, 0xC07040, "Ore with copper in it.");
     public static final ItemDef TIN_ORE = def("tin_ore", "Tin ore", 5, 0xA8A8A0, "Ore with tin in it.");
+    public static final ItemDef STONE_BLOCK = def("stone_block", "Quarry stone block", 9, 0x92928A, "Usable masonry cut from a supported quarry face.");
+    public static final ItemDef CLAY = def("clay", "Clay", 5, 0x9C7258, "Workable clay from a dry bank.");
+    public static final ItemDef CLOTH = def("cloth_roll", "Linen cloth", 12, 0xB6A78C, "Woven flax for a tailor's patterns.");
+    public static final ItemDef CLOTH_HOOD = garment("cloth_hood", "Linen hood", Slot.HEAD);
+    public static final ItemDef CLOTH_TUNIC = garment("cloth_tunic", "Linen tunic", Slot.BODY);
     public static final ItemDef IRON_ORE = def("iron_ore", "Iron ore", 17, 0x7A5A48, "Ore with iron in it.");
     public static final ItemDef COAL = def("coal", "Coal", 22, 0x222226, "Fuel for smelting steel.");
     public static final ItemDef BRONZE_BAR = def("bronze_bar", "Bronze bar", 12, 0xB0703A, "A bar of bronze.");
@@ -88,11 +98,19 @@ public final class Items {
     public static final ItemDef MILK = def("milk", "Bucket of milk", 18, 0xF4F2EC, "Fresh cow's milk.");
     public static final ItemDef FEATHER = stack("feather", "Feather", 3, 0xF2F0EA, "Light and soft.");
     public static final ItemDef ANIMAL_FEED = def("animal_feed", "Animal feed", 15, 0xC8A858, "A sack of grain for livestock.");
-    public static final ItemDef BONES = def("bones", "Bones", 2, 0xE8E4D8, "Bury them for Faith.");
-    public static final ItemDef BIG_BONES = def("big_bones", "Big bones", 6, 0xF0ECE0, "Bury them for Faith.");
+    public static final ItemDef BONES = bones("bones", "Bones", 2, 0xE8E4D8, "Bury them for Faith.", 5);
+    public static final ItemDef BIG_BONES = bones("big_bones", "Big bones", 6, 0xF0ECE0, "Bury them for Faith.", 15);
+    public static final ItemDef DRAGON_BONES = bones("dragon_bones", "Dragon bones", 1553, 0xE6DCC0, "A great ivory bone, cracked with gold and charred at the ends. Bury it for Faith.", 72);
+    public static final ItemDef DRAGONHIDE = def("dragonhide", "Dragonhide", 2753, 0x1A1A1E, "A thick folded hide of big black scales edged in red, its backing a dark green.");
+    public static final ItemDef DRAGON_EGG = def("dragon_egg", "Dragon egg", 22493, 0x8A6A48, "A spotted egg, warm to the touch. Orange light glows through its cracks and it smokes a little.");
+    public static final ItemDef RARE_FOSSIL = def("rare_fossil", "Rare fossil", 750, 0xA89878, "A stone slab: a tiny raptor skeleton in amber, leaf marks pressed all around it.");
+    public static final ItemDef POT = def("pot", "Pot", 1, 0x9A5A3A, "An empty clay pot.");
+    public static final ItemDef BUCKET = def("bucket", "Bucket", 2, 0x9A7246, "An empty wooden bucket. Fill it at water, or milk a cow into it.");
+    public static final ItemDef BUCKET_OF_WATER = def("bucket_of_water", "Bucket of water", 6, 0x4A7AB0, "A bucket full of water. Empty it on a fire to put it out.");
     public static final ItemDef ARROW_SHAFT = stack("arrow_shaft", "Arrow shaft", 1, 0xA88050, "Needs a head.");
     public static final ItemDef TINDERBOX = def("tinderbox", "Tinderbox", 2, 0x806040, "Lights fires.");
     public static final ItemDef HAMMER = def("hammer", "Hammer", 4, 0x707070, "For smithing and building.");
+    public static final ItemDef SNARE = def("snare", "Rabbit snare", 12, 0x8D7852, "A reusable snare for real wildlife crossings.");
     public static final ItemDef KNIFE = def("knife", "Knife", 3, 0xB0B0B8, "For crafting.");
     public static final ItemDef FISHING_ROD = tool("fishing_rod", "Fishing rod", 5, 0x806040, "Wield it and cast at a fishing spot for trout.", Skill.FISHING);
     public static final ItemDef FISHING_NET = tool("small_fishing_net", "Small fishing net", 5, 0xB8A878, "Wield it and cast it at a fishing spot for shrimp.", Skill.FISHING);
@@ -109,7 +127,7 @@ public final class Items {
     public static final ItemDef BRONZE_ARROWS = arrows("bronze_arrows", "Bronze arrows", 1, 4, 1, 0xB0703A);
     public static final ItemDef IRON_ARROWS = arrows("iron_arrows", "Iron arrows", 15, 9, 3, 0x6E6E72);
     public static final ItemDef STAFF = staff("apprentice_staff", "Apprentice staff", 1, 40, 0x7A5A9A, Family.STAFF);
-    public static final ItemDef FIRE_STAFF = staff("fire_staff", "Fire staff", 20, 400, 0xC04020, Family.STAFF);
+    public static final ItemDef FIRE_STAFF = staff("fire_staff", "Fire staff", 10, 400, 0xC04020, Family.STAFF);
     public static final ItemDef WAND = staff("wand", "Oak wand", 1, 30, 0x9A7A50, Family.WAND);
     public static final ItemDef HOLY_SYMBOL = holy("holy_symbol", "Holy symbol", 1, 60);
     public static final ItemDef BLESSED_SYMBOL = holy("blessed_symbol", "Blessed symbol", 30, 600);
@@ -121,20 +139,17 @@ public final class Items {
     public static final ItemDef RESTORATIVE = drink("restorative_potion", "Restorative potion", 140, 20, 0x5AB8C8, "A restorative: it restores 20 Faith points.");
 
     // ------------------------------------------------------------------ tier equipment
-    public static final ItemDef WOODEN_SWORD;
     public static final List<ItemDef> TIER_GEAR = new ArrayList<>();
 
     static {
-        WOODEN_SWORD = def("wooden_sword", "Wooden sword", 5, 0x9A7040, "A practice sword.");
-        weapon(WOODEN_SWORD, Family.SWORD, null, 1, 6, 8, 1.15f, 1f, DamageType.SLASH);
         for (Tier t : Tier.values()) {
             String k = t.name().toLowerCase();
             int p = t.power;
-            armor(def(k + "_helm", t.title + " helm", 20 * p * p, t.color, t.title + " head armor."), Slot.HEAD, t, 1.5f * p + 1);
-            armor(def(k + "_body", t.title + " body", 50 * p * p, t.color, t.title + " body armor."), Slot.BODY, t, 4f * p + 2);
-            armor(def(k + "_legs", t.title + " legs", 35 * p * p, t.color, t.title + " leg armor."), Slot.LEGS, t, 2.5f * p + 1);
+            if (t.armour()) armor(def(k + "_helm", t.title + " helm", 20 * p * p, t.color, t.title + " head armor."), Slot.HEAD, t, 1.5f * p + 1);
+            if (t.armour()) armor(def(k + "_body", t.title + " body", 50 * p * p, t.color, t.title + " body armor."), Slot.BODY, t, 4f * p + 2);
+            if (t.armour()) armor(def(k + "_legs", t.title + " legs", 35 * p * p, t.color, t.title + " leg armor."), Slot.LEGS, t, 2.5f * p + 1);
             // every tier carries all thirteen melee families and the five ranged ones (GDD 2.4: tier labels are progression
-            // categories - a Leather spear is a hardened-wood one); Leather and Chainmail make no shields
+            // categories - a Stone spear is a knapped-stone one); Chainmail makes no shields
             // the heft: the heavy late metals are a hair slower in the hand
             float heft = 1f + Math.max(0, p - 6) * 0.006f;
             weapon(def(k + "_sword", t.title + " sword", 30 * p * p, t.color, "A " + t.title.toLowerCase() + " sword. Quick, one-handed."), Family.SWORD, t, t.requirement, 6 + 5 * p, 10 + 4 * p, 1.25f, heft, DamageType.SLASH);
@@ -182,13 +197,14 @@ public final class Items {
                 ar.tier = t;
             } else find(k + "_arrows").tier = t;
             if (t.ordinal() <= Tier.STEEL.ordinal()) {
-                // brutal arrows: blunt-headed, heavy-hitting, Leather to Steel only (GDD 2.4)
+                // brutal arrows: blunt-headed, heavy-hitting, Wooden to Steel only (GDD 2.4)
                 ItemDef br = arrows(k + "_brutal_arrows", t.title + " brutal arrows", t.requirement, 3 + 2.6f * p, Math.max(1, p * 2), t.color);
                 br.tier = t; br.damageType = DamageType.BLUNT; br.examine = "Heavy, blunt-headed arrows that knock the wind out of things.";
             }
-            if (!t.metal()) continue;
-            ItemDef sh = def(k + "_shield", t.title + " shield", 40 * p * p, t.color, "Raise it to block.");
-            sh.slot = Slot.OFF; sh.family = Family.SHIELD; sh.tier = t; sh.reqSkill = Skill.DEFENSE; sh.reqLevel = t.requirement; sh.armor = 2f * p + 1; sh.guard = 0.72f;
+            if (!t.shields()) continue;
+            ItemDef sh = def(k + "_shield", t.title + " shield", 40 * p * p, t.color, t == Tier.WOODEN ? "A plank shield." : "Raise it to block.");
+            sh.slot = Slot.OFF; sh.family = Family.SHIELD; sh.tier = t; sh.reqSkill = Skill.DEFENSE; sh.reqLevel = t.requirement;
+            sh.armor = t == Tier.WOODEN ? 2 : 2f * p + 1; sh.guard = t == Tier.WOODEN ? 0.6f : 0.72f;
             TIER_GEAR.add(sh);
         }
         // the brutal and the plain arrows of every tier are made above; the bronze and iron ones are the originals
@@ -197,8 +213,6 @@ public final class Items {
             if (d.family == Family.AXE && d.tier != null && !d.twoHand) { d.toolPower = d.tier.power; d.toolSkill = Skill.WOODCUTTING; d.reqSkill = Skill.WOODCUTTING; }
             if (d.family == Family.PICKAXE && d.tier != null) { d.toolPower = d.tier.power; d.toolSkill = Skill.MINING; d.reqSkill = Skill.MINING; }
         }
-        ItemDef shield = def("wooden_shield", "Wooden shield", 10, 0x8A6034, "A plank shield.");
-        shield.slot = Slot.OFF; shield.family = Family.SHIELD; shield.reqSkill = Skill.DEFENSE; shield.reqLevel = 1; shield.armor = 2; shield.guard = 0.6f;
         ItemDef boots = def("leather_boots", "Leather boots", 6, 0x6A4424, "Sturdy boots."); boots.slot = Slot.FEET; boots.family = Family.ARMOR; boots.armor = 1; boots.reqSkill = Skill.DEFENSE; boots.reqLevel = 1;
         ItemDef gloves = def("leather_gloves", "Leather gloves", 6, 0x7A5030, "Sturdy gloves."); gloves.slot = Slot.HANDS; gloves.family = Family.ARMOR; gloves.armor = 1; gloves.reqSkill = Skill.DEFENSE; gloves.reqLevel = 1;
         for (Skill s : Skill.ALL) {
@@ -215,6 +229,7 @@ public final class Items {
         sack.family = Family.BAG; sack.bagW = 5; sack.bagH = 4;
         jewellery();
         shapes();
+        monsterDrops();
         BOUNTY_SCROLL.gw = 1; BOUNTY_SCROLL.gh = 2;
     }
 
@@ -229,19 +244,30 @@ public final class Items {
         tool("necklace_mould", "Necklace mould", 85, 0x8A8680, "Gold poured into it makes a necklace.", Skill.CRAFTING);
         tool("amulet_mould", "Amulet mould", 85, 0x8A8680, "Gold poured into it makes an amulet.", Skill.CRAFTING);
         tool("chisel", "Chisel", 12, 0x9A9AA0, "For cutting gems.", Skill.CRAFTING);
-        Object[][] gems = {{"sapphire", "Sapphire", 0x2A55D8, 250}, {"emerald", "Emerald", 0x22A050, 500}, {"ruby", "Ruby", 0xC81830, 1000}, {"diamond", "Diamond", 0xE8F4FF, 2000}};
+        // the gems (gamefixes): id, name, colour, uncut and cut base prices, and what a cut one looks like up close;
+        // the first four are the ones set in jewellery
+        Object[][] gems = {{"sapphire", "Sapphire", 0x2A55D8, 360, 346, "An oval sapphire, royal blue below and sky blue at the top."},
+                {"emerald", "Emerald", 0x22A050, 624, 547, "A chunky green emerald with a shining table."},
+                {"ruby", "Ruby", 0xC81830, 1111, 970, "A crimson teardrop with a pink star glowing inside it."},
+                {"diamond", "Diamond", 0xE8F4FF, 3019, 6314, "A round white diamond with an icy blue heart."},
+                {"dragonstone", "Dragonstone", 0x9A2A6A, 7560, 7168, "A heart-shaped stone, purple-red, with a flame flickering inside."},
+                {"onyx", "Onyx", 0x141216, 53037, 53550, "A jet-black sphere. Turned to the light, it glows red deep inside."}};
         for (Object[] g : gems) {
             String id = (String) g[0], nm = (String) g[1];
-            int col = (int) g[2], val = (int) g[3];
-            def("uncut_" + id, "Uncut " + nm.toLowerCase(), (int) (val * 1.1f), col, "A rough " + nm.toLowerCase() + ". A chisel would bring out its colour.");
-            def(id, nm, val, col, "A cut " + nm.toLowerCase() + ".");
+            int col = (int) g[2];
+            def("uncut_" + id, "Uncut " + nm.toLowerCase(), (int) g[3], col, "A rough " + nm.toLowerCase() + ". A chisel would bring out its colour.");
+            def(id, nm, (int) g[4], col, (String) g[5]);
         }
+        // amethyst comes out of the rock as a cluster (1 x 2) and is chiselled down to the single crystal; both are priced alike
+        def("amethyst_cluster", "Amethyst cluster", 7819, 0x7A3AB0, "A jagged cluster of purple crystal, dark veins running through it. A chisel would free a clean crystal.");
+        def("amethyst", "Amethyst", 7819, 0x7A3AB0, "A jagged purple crystal with dark veins pulsing through it.");
+        gems = java.util.Arrays.copyOf(gems, 4);
         jewel("gold_ring", "Gold ring", Slot.RING, 210, 0xE8C048, 0, "A plain gold band.");
         jewel("gold_necklace", "Gold necklace", Slot.NECK, 290, 0xE8C048, 0, "A fine gold chain.");
         jewel("gold_amulet", "Gold amulet", Slot.NECK, 320, 0xE8C048, 0, "A gold amulet on a chain.");
         for (Object[] g : gems) {
             String id = (String) g[0], nm = (String) g[1];
-            int col = (int) g[2], val = (int) g[3];
+            int col = (int) g[2], val = (int) g[4];
             jewel(id + "_ring", nm + " ring", Slot.RING, 210 + val, 0xE8C048, col, "A gold ring set with a " + nm.toLowerCase() + ".");
             jewel(id + "_necklace", nm + " necklace", Slot.NECK, 290 + val, 0xE8C048, col, "A gold chain with a " + nm.toLowerCase() + " pendant.");
             jewel(id + "_amulet", nm + " amulet", Slot.NECK, 320 + val, 0xE8C048, col, "A gold amulet with a " + nm.toLowerCase() + " at its heart.");
@@ -254,6 +280,124 @@ public final class Items {
         ItemDef d = def(id, name, value, metal, examine);
         d.slot = slot; d.family = Family.JEWEL; d.gemColor = gem;
         return d;
+    }
+
+    /**
+     * What monsters leave behind (gamefixes: each species' drop table) and the natural weapons they fight with. The
+     * plain drops are each modelled after their kind (LootModels, by `look`); the gear among them is gear of a tier.
+     */
+    private static void monsterDrops() {
+        Object[][] loot = {
+                // id, name, value, colour, look, w, h, kg, examine
+                {"goblin_banner", "Goblin banner", 1400, 0x8A2A1E, "banner", 1, 4, 2.5f, "A ragged war banner on a spear shaft, daubed with a grinning face."},
+                {"war_paint", "War paint", 180, 0x8A1A14, "flask", 1, 1, 0.3f, "A clay pot of thick red-black paint. Orcs wear it into battle."},
+                {"bloodied_standard", "Bloodied standard", 3200, 0x6A1A12, "banner", 1, 5, 3f, "An orc clan's standard, stiff with old blood."},
+                {"clan_relic", "Clan relic", 14000, 0xC89040, "trinket", 1, 1, 0.4f, "A carved tusk bound in gold wire: an orc clan's oldest treasure."},
+                {"troll_fat", "Troll fat", 40, 0xD8C890, "gland", 1, 1, 0.6f, "A slab of rendered troll fat. It never quite goes off."},
+                {"troll_totem", "Troll totem", 2600, 0x6A5A42, "totem", 1, 3, 2f, "A gnawed thighbone hung with teeth and flint: a troll's prized possession."},
+                {"troll_heart", "Regenerative troll heart", 18000, 0x8A2A3A, "gland", 1, 1, 1.4f, "Still twitching, faintly. It mends itself where it is cut."},
+                {"ashes", "Ashes", 3, 0x5A5650, "ash", 1, 1, 0.1f, "What is left of an imp: a little grey ash, still warm."},
+                {"beads", "Beads", 25, 0xC86A3A, "beads", 1, 1, 0.05f, "A string of glass beads an imp found pretty."},
+                {"trinket", "Trinket", 40, 0xB8A060, "trinket", 1, 1, 0.1f, "Some small shiny thing an imp took a fancy to."},
+                {"imp_charm", "Imp charm", 320, 0xD84A2A, "trinket", 1, 1, 0.1f, "A tiny horned figure on a cord. It is warm to hold."},
+                {"magic_beads", "Magical beads", 1800, 0x9A4AD8, "beads", 1, 1, 0.1f, "A full set of beads that hum faintly together."},
+                {"imp_essence", "Imp familiar essence", 2400, 0xFF6A2A, "essence", 1, 1, 0.2f, "A flask of flickering red light: what binds an imp to a master."},
+                {"imp_contract", "Bound imp contract", 9500, 0xE8D8B0, "scroll", 1, 2, 0.1f, "A scorched contract signed in a tiny clawed hand."},
+                {"bat_wings", "Bat wings", 8, 0x3A3036, "wing", 2, 1, 0.1f, "A pair of leathery wings."},
+                {"small_fang", "Small fang", 12, 0xEDE6D4, "fang", 1, 1, 0.01f, "A needle-sharp little fang."},
+                {"guano", "Guano", 6, 0x6A6048, "ash", 1, 1, 0.3f, "Bat droppings. Farmers prize it; you may not."},
+                {"wing_membrane", "Wing membrane", 90, 0x5A4248, "wing", 2, 1, 0.1f, "A sheet of thin, strong wing membrane."},
+                {"giant_bat_eye", "Giant bat eye", 900, 0xD8A030, "eye", 1, 1, 0.2f, "A giant bat's eye, wide and amber."},
+                {"sonic_essence", "Sonic essence", 1500, 0x9AC8E8, "essence", 1, 1, 0.2f, "A vial that rings, very faintly, when shaken."},
+                {"vampiric_essence", "Vampiric bat essence", 7200, 0x8A0A1A, "essence", 1, 1, 0.2f, "Dark red and slow-moving. It seems to want something."},
+                {"ectoplasm", "Ectoplasm", 30, 0x9AE8B8, "gland", 1, 1, 0.2f, "Cold, faintly glowing slime left by a ghost."},
+                {"spirit_dust", "Spirit dust", 35, 0xC8D8E8, "dust", 1, 1, 0.05f, "A pinch of pale dust that drifts against the wind."},
+                {"spectral_residue", "Spectral residue", 60, 0xA8C8D8, "dust", 1, 1, 0.05f, "A cold film that clings to whatever it touches."},
+                {"soul_essence", "Minor soul essence", 400, 0xB8E8F8, "essence", 1, 1, 0.2f, "A faint light in a vial, turning slowly."},
+                {"ghostly_cloth", "Ghostly cloth", 350, 0xD8E4EC, "cloth", 2, 2, 0.2f, "Cloth so thin it is hard to see."},
+                {"spirit_trinket", "Spirit-bound trinket", 1600, 0x9AB8D8, "trinket", 1, 1, 0.1f, "A keepsake a ghost could not let go of."},
+                {"bound_ghost_essence", "Bound ghost essence", 8800, 0xE8F8FF, "essence", 1, 1, 0.2f, "A whole restless spirit, held in glass."},
+                {"haunt_artifact", "Haunt artifact", 15000, 0x6A7A9A, "trinket", 1, 1, 0.5f, "The object a haunting was bound to. It is never quite where you left it."},
+                {"rotting_remains", "Rotting remains", 1, 0x7A8A5A, "bone", 2, 1, 0.6f, "Best buried quickly."},
+                {"tattered_cloth", "Tattered cloth", 8, 0x6A5E4A, "cloth", 2, 2, 0.3f, "Rags from an old grave."},
+                {"soul_dust", "Soul dust", 45, 0x8A9AB0, "dust", 1, 1, 0.05f, "Grey dust that holds a little of what animated the dead."},
+                {"undead_relic", "Undead champion relic", 2800, 0x4A5A3A, "trinket", 1, 1, 0.4f, "A badge of rank from a champion long dead and not resting."},
+                {"phylactery_fragment", "Phylactery fragment", 16000, 0x3A6A4A, "plate", 1, 1, 0.3f, "A shard of a vessel that once held a soul."},
+                {"champion_scroll", "Skeleton champion scroll", 2200, 0xD8C8A0, "scroll", 1, 2, 0.1f, "Orders given to a skeleton champion, long ago."},
+                {"soulbound_artifact", "Soul-bound artifact", 17000, 0x5A6A8A, "trinket", 1, 1, 0.5f, "Something that bound a skeleton to its post. It still feels watched."},
+                {"wolf_bones", "Wolf bones", 10, 0xE4DCC8, "bone", 2, 1, 0.8f, "Bury them for Faith."},
+                {"wolf_pelt", "Wolf pelt", 140, 0x5A4A3A, "pelt", 2, 2, 1.6f, "A thick, coarse pelt."},
+                {"claw", "Claw", 30, 0x3A3028, "fang", 1, 1, 0.05f, "A curved black claw."},
+                {"fang", "Fang", 30, 0xEDE6D4, "fang", 1, 1, 0.05f, "A long fang."},
+                {"bloodied_cloth", "Bloodied cloth", 6, 0x7A2A22, "cloth", 2, 2, 0.3f, "Torn from someone who was not quick enough."},
+                {"silver_reagent", "Silver-sensitive reagent", 600, 0xC8CCD4, "dust", 1, 1, 0.1f, "A powder that blackens near silver."},
+                {"quality_pelt", "Quality pelt", 480, 0x6A5A46, "pelt", 2, 2, 1.6f, "A fine, unmarked pelt."},
+                {"werewolf_blood", "Werewolf blood", 3400, 0x6A0A12, "flask", 1, 1, 0.3f, "It does not clot. Ever."},
+                {"alpha_pelt", "Alpha pelt", 4200, 0x8A8A86, "pelt", 2, 2, 2f, "A pack leader's silver-grey pelt."},
+                {"cured_heart", "Cured werewolf heart", 15500, 0x8A3A3A, "gland", 1, 1, 0.8f, "The heart of a werewolf, its curse lifted."},
+                {"lunar_artifact", "Lunar artifact", 19000, 0xD8E0F0, "trinket", 1, 1, 0.3f, "A pale disc that brightens as the moon fills."},
+                {"fire_essence", "Fire essence", 900, 0xFF7A2A, "essence", 1, 1, 0.2f, "Captured dragonfire, never quite still."},
+                {"frost_essence", "Frost essence", 900, 0x9AD8FF, "essence", 1, 1, 0.2f, "Frost from a dragon's breath, frosting its glass."},
+                {"earth_essence", "Earth essence", 900, 0x8A6A3A, "essence", 1, 1, 0.2f, "A heavy, dark essence like wet clay."},
+                {"storm_essence", "Storm essence", 900, 0xF0E060, "essence", 1, 1, 0.2f, "Crackles against the glass."},
+                {"tide_essence", "Tide essence", 900, 0x2A6AC8, "essence", 1, 1, 0.2f, "It rises and falls in the vial on its own."},
+                {"draconic_visage", "Draconic visage", 52000, 0x6A6A70, "visage", 2, 2, 4f, "A dragon's horned face-plate. Smiths would give a great deal for it."},
+                {"dragon_soul", "Dragon soul essence", 45000, 0xFFB040, "essence", 1, 1, 0.3f, "The light of a dead dragon, still burning."},
+                {"dragon_artifact", "Legendary dragon artifact", 120000, 0xD8A030, "trinket", 1, 1, 1f, "An heirloom from a dragon's hoard, older than any kingdom."},
+                {"spider_silk", "Spider silk", 25, 0xF0EEE6, "silk", 1, 1, 0.05f, "Strong, sticky thread."},
+                {"carapace", "Carapace", 45, 0x3A2E26, "plate", 2, 2, 1f, "A curved piece of a giant spider's shell."},
+                {"venom_gland", "Venom gland", 60, 0x8AA040, "gland", 1, 1, 0.1f, "Handle with care."},
+                {"webbing", "Webbing", 70, 0xE8E6E0, "silk", 2, 2, 0.2f, "A bundle of web, rolled tight."},
+                {"giant_spider_eye", "Giant spider eye", 1100, 0x1A1A1E, "eye", 1, 1, 0.1f, "Black, glossy, and still somehow looking at you."},
+                {"venom_flask", "Venom flask", 1900, 0x9AC030, "flask", 1, 1, 0.3f, "Concentrated venom, stoppered with wax."},
+                {"queen_venom", "Queen's venom", 11000, 0x5A1A6A, "flask", 1, 1, 0.3f, "A brood queen's venom. A drop would fell a horse."}};
+        for (Object[] r : loot) {
+            ItemDef d = def((String) r[0], (String) r[1], (int) r[2], (int) r[3], (String) r[8]);
+            d.look = (String) r[4]; d.gw = (int) r[5]; d.gh = (int) r[6]; d.weight = (float) r[7];
+        }
+        get("wolf_bones").buryXp = 8;
+        get("rotting_remains").buryXp = 3;
+        // the gear among the drops: pieces of a tier, each with its own name
+        Object[][] gear = {
+                // id, name, tier, kind (as the tier's own: body, helm, spear ...), value, examine
+                {"goblin_mail", "Goblin mail", Tier.BRONZE, "body", 900, "Rings and scraps of plate laced together by goblin hands."},
+                {"orcish_platebody", "Orcish platebody", Tier.IRON, "body", 4200, "Heavy, crude, and very hard to get through."},
+                {"warlord_helm", "Warlord's helm", Tier.BLACK, "helm", 21000, "An orc warlord's horned war helm."},
+                {"forgotten_helm", "Forgotten helm", Tier.IRON, "helm", 700, "An old helm in a style nobody makes any more."},
+                {"commanders_helm", "Undead commander's helm", Tier.BLACK, "helm", 18000, "It still bears the marks of the battle that made its wearer."},
+                {"ancient_helm", "Ancient skeleton helm", Tier.WHITE, "helm", 16000, "Bleached bone-white steel from a forgotten kingdom."},
+                {"champions_spear", "Champion's spear", Tier.BLACK, "spear", 6000, "A goblin champion's spear, balanced better than it has any right to be."},
+                {"chieftains_axe", "Chieftain's axe", Tier.STEEL, "battleaxe", 9000, "An orc chieftain's axe. Notched by every challenge it answered."},
+                {"troll_club", "Troll club", Tier.GRANITE, "warhammer", 7000, "A tree trunk studded with flint. It takes both hands - yours, anyway."},
+                {"rusty_sword", "Rusty sword", Tier.IRON, "sword", 60, "It has seen better centuries."},
+                {"bone_club", "Bone club", Tier.WHITE, "mace", 2400, "A thighbone, enormous, bound with iron at the head."},
+                {"cursed_blade", "Cursed blade", Tier.BLACK, "sword", 3300, "Cold to hold, and it does not want to be put down."},
+                {"spectral_blade", "Spectral blade", Tier.WHITE, "longsword", 4000, "A blade you can almost see through."}};
+        for (Object[] r : gear) {
+            ItemDef base = tierItem((Tier) r[2], (String) r[3]);
+            ItemDef d = def((String) r[0], (String) r[1], (int) r[4], base.color, (String) r[5]);
+            d.slot = base.slot; d.family = base.family; d.tier = base.tier; d.reqSkill = base.reqSkill; d.reqLevel = base.reqLevel;
+            d.armor = base.armor; d.damage = base.damage; d.impact = base.impact; d.reach = base.reach; d.speed = base.speed; d.damageType = base.damageType;
+            d.strengthBonus = base.strengthBonus; d.attackBonus = base.attackBonus; d.guard = base.guard; d.twoHand = base.twoHand || r[0].equals("troll_club");
+            d.gw = base.gw; d.gh = base.gh; d.weight = base.weight;
+        }
+        // a rusty sword is a poor one; the cursed and spectral blades are a cut above their tier
+        get("rusty_sword").damage *= 0.75f; get("cursed_blade").strengthBonus += 3; get("spectral_blade").damageType = DamageType.MAGIC;
+        get("troll_club").impact *= 1.4f; get("troll_club").weight *= 1.8f;
+        ItemDef staff = def("shaman_staff", "Goblin high-shaman's staff", 12000, 0x5A7A2A, "Feathers, fetishes and a skull on a gnarled stave. It hums with stolen magic.");
+        staff.slot = Slot.MAIN; staff.family = Family.STAFF; staff.reqSkill = Skill.MAGIC; staff.reqLevel = 40; staff.damage = 7 * rpg.combat.CombatMath.HP_SCALE; staff.impact = 12; staff.reach = 1.3f; staff.speed = 1.1f;
+        staff.damageType = DamageType.BLUNT; staff.magicDamageBonusPct = 22; staff.gw = 1; staff.gh = 5; staff.weight = 1.8f;
+        ItemDef cloak = def("wing_cloak", "Wing cloak", 9000, 0x3A3036, "A cloak of stitched giant-bat wing. It whispers as you walk.");
+        cloak.slot = Slot.CAPE; cloak.family = Family.ARMOR; cloak.armor = 2; cloak.reqSkill = Skill.DEFENSE; cloak.reqLevel = 30; cloak.gw = 2; cloak.gh = 3; cloak.weight = 1f;
+        ItemDef robe = def("silk_robe", "Silk robe", 14000, 0xE8E4D8, "A robe of giant-spider silk: light as air, and nothing cuts it easily.");
+        robe.slot = Slot.BODY; robe.family = Family.ARMOR; robe.armor = 14; robe.reqSkill = Skill.DEFENSE; robe.reqLevel = 50; robe.gw = 3; robe.gh = 3; robe.weight = 1.2f; robe.look = "cloth";
+        // natural weapons: claws, fists, a ghost's touch - part of the monster
+        Object[][] natural = {{"natural_claws", "Claws", Family.CLAWS, DamageType.SLASH}, {"natural_fists", "Fists", Family.MACE, DamageType.BLUNT},
+                {"natural_touch", "Spectral touch", Family.CLAWS, DamageType.MAGIC}};
+        for (Object[] r : natural) {
+            ItemDef d = def((String) r[0], (String) r[1], 0, 0x404040, "Part of the creature.");
+            d.slot = Slot.MAIN; d.family = (Family) r[2]; d.damageType = (DamageType) r[3]; d.natural = true; d.reach = 0.6f; d.speed = r[2] == Family.CLAWS ? 0.65f : 1.1f;
+        }
     }
 
     public static final ItemDef BACKPACK = get("basic_backpack"), POUCH = get("leather_pouch"), SACK = get("sack");
@@ -276,12 +420,16 @@ public final class Items {
                 {"sealed_letter", 1, 1, 0.02f}, {"xp_lamp", 2, 1, 0.8f}, {"chancery_key", 1, 1, 0.1f},
                 {"shortbow", 1, 4, 0.9f}, {"oak_shortbow", 1, 4, 1f}, {"willow_shortbow", 1, 4, 1f}, {"bronze_arrows", 1, 3, 0.03f}, {"iron_arrows", 1, 3, 0.03f},
                 {"apprentice_staff", 1, 5, 1.6f}, {"fire_staff", 1, 5, 1.8f}, {"wand", 1, 2, 0.3f}, {"holy_symbol", 1, 1, 0.3f}, {"blessed_symbol", 1, 1, 0.3f},
-                {"wooden_sword", 1, 3, 0.9f}, {"wooden_shield", 2, 3, 3f}, {"leather_boots", 2, 2, 1.2f}, {"leather_gloves", 2, 1, 0.4f},
+                {"leather_boots", 2, 2, 1.2f}, {"leather_gloves", 2, 1, 0.4f},
                 {"basic_backpack", 3, 3, 1.4f}, {"leather_pouch", 2, 1, 0.3f}, {"sack", 2, 2, 0.4f},
                 {"raw_meat", 2, 1, 0.5f}, {"cooked_meat", 2, 1, 0.4f}, {"burnt_meat", 2, 1, 0.3f}, {"rawhide", 2, 2, 2.5f}, {"wool", 1, 1, 0.3f},
-                {"egg", 1, 1, 0.06f}, {"milk", 2, 2, 2f}, {"feather", 1, 1, 0.005f}, {"animal_feed", 2, 2, 5f}};
+                {"egg", 1, 1, 0.06f}, {"milk", 2, 2, 2f}, {"feather", 1, 1, 0.005f}, {"animal_feed", 2, 2, 5f},
+                {"pot", 2, 2, 0.6f}, {"bucket", 2, 2, 0.9f}, {"bucket_of_water", 2, 2, 2.4f},
+                {"dragon_bones", 1, 2, 3f}, {"dragonhide", 2, 2, 4f}, {"dragon_egg", 2, 2, 6f}, {"rare_fossil", 2, 3, 7f},
+                {"amethyst_cluster", 1, 2, 0.12f}, {"amethyst", 1, 1, 0.05f}};
         for (Object[] r : table) { ItemDef d = find((String) r[0]); if (d == null) continue; d.gw = (int) r[1]; d.gh = (int) r[2]; d.weight = (float) r[3]; }
         for (ItemDef d : BY_ID.values()) {
+            d.conductive = d.tier != null && d.tier != Tier.WOODEN && d.tier != Tier.STONE && d.tier != Tier.GRANITE || d.family == Family.JEWEL || d.family == Family.SYMBOL;
             if (d.tier == null && !d.id.startsWith("cape_")) continue;
             float metal = d.tier != null && d.tier.metal() ? 1f + d.tier.power * 0.08f : 0.5f;
             switch (d.family) {
@@ -313,6 +461,15 @@ public final class Items {
                 default -> { }
             }
         }
+    }
+
+    public static final ItemDef WOODEN_SWORD = get("wooden_sword");
+
+    /** Ids from saves made before Stone replaced Leather as a tier (gamefixes): a leather helm is a stone one now. */
+    public static ItemDef saved(String id) {
+        ItemDef d = find(id);
+        if (d == null && id.startsWith("leather_")) d = find("stone_" + id.substring(8));
+        return d;
     }
 
     public static ItemDef cape(Skill s) { return get("cape_" + s.name().toLowerCase()); }

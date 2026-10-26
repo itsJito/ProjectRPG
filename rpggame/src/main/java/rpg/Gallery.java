@@ -39,6 +39,8 @@ final class Gallery {
     private Rpg g;
     private Hud hud;
     private static final int TILE = 300;
+    private int reviewMesh;
+    private final astratto.math.Mat4 reviewTransform=new astratto.math.Mat4();
 
     Gallery(Window win, Game game, Gfx gfx, Ui2D ui, String shots) { this.win = win; this.game = game; this.gfx = gfx; this.ui = ui; this.shots = shots == null ? "shots" : shots; }
 
@@ -54,9 +56,26 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
+        if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
+        if ("release-systems".equals(System.getenv("RPG_GALLERY_ONLY"))) { releaseSystemsShots(); return 0; }
+        if ("release-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { releasePolishShots(); return 0; }
         if ("system-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { systemPolishShots(); return 0; }
         if ("session-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { sessionPolishShots(); return 0; }
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
+        // RPG_GALLERY_ONLY=gamefixes-ui / gamefixes-blocks: the menus and windows of this pass, and the new blocks where they stand
+        if ("gamefixes-ui".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesUi(); return 0; }
+        if ("gamefixes-blocks".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesBlocks(); return 0; }
+        if ("gamefixes-aim".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesAim(); return 0; }
+        if ("gamefixes-foliage".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesFoliage(); return 0; }
+        if ("gamefixes-doors".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesDoors(); return 0; }
+        if ("gamefixes-bricks".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesBricks(); return 0; }
+        if ("gamefixes-carcass".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesCarcass(); return 0; }
+        if ("gamefixes-fpdown".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesFirstPersonDown(); return 0; }
+        if ("gamefixes-arrows".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesArrows(); return 0; }
+        if ("gamefixes-bowpose".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesBowPose(); return 0; }
+        if ("gamefixes-grab".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesGrab(); return 0; }
+        if ("gamefixes-bank".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesBank(); return 0; }
         if ("field-polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { fieldPolishShots(); menuShots(); return 0; }
         if ("polish".equals(System.getenv("RPG_GALLERY_ONLY"))) { polishShots(); return 0; }
         // A short review of the three locomotion loops, without the unrelated twitch/work/combat galleries.
@@ -182,6 +201,15 @@ final class Gallery {
                 g.controller.in.sprint = gait.equals("sprint");
             }, a -> side(a, -4.6f), 60);
         }
+        // turning round on the spot: the double-tapped back key's quick turn, and a slower pivot of the view
+        g.controller.in.forward = 0; g.controller.in.sprint = false; g.controller.jogging = false;
+        place(54.5f, 64.5f, 0);
+        frames(40);
+        float[] fixed = {g.player.x + 3.3f, g.player.y + 1.5f, g.player.z + 2.6f, g.player.x, g.player.y + 0.85f, g.player.z};
+        film(tag + "-locomotion-turnaround", 54, i -> { g.controller.in.backTap = i == 0 || i == 5; }, a -> fixed, 0);
+        place(54.5f, 64.5f, 0);
+        frames(40);
+        film(tag + "-locomotion-pivot", 72, i -> { if (i >= 0 && i < 45) g.controller.snapTo(i * (float) Math.PI / 45); }, a -> fixed, 0);
     }
 
     /**
@@ -336,7 +364,530 @@ final class Gallery {
         hud.closeAll();
     }
 
+    /** Every menu and window of the gamefixes pass, in the real HUD over the real world. */
+    private void gamefixesUi() {
+        g.state.minutes = 13 * 60;
+        place(55.5f, 12.5f, (float) Math.PI);
+        frames(30);
+        for (Hud.Scene sc : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.CHARACTER, Hud.Scene.SKILLS, Hud.Scene.JOURNAL, Hud.Scene.MAGIC, Hud.Scene.MAP}) {
+            hud.go(sc);
+            reviewUi("ui-" + sc.name().toLowerCase());
+            hud.closeAll();
+        }
+        var chest = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Container c && c.kind.equals("chest")).map(o -> (rpg.objects.Container) o)
+                .min(java.util.Comparator.comparingDouble(c -> c.dist(g.player))).orElse(null);
+        if (chest != null) { place(chest.x + 1.2f, chest.z + 0.5f, 0); hud.openContainer(chest); reviewUi("ui-container"); hud.closeAll(); }
+        rpg.ai.Npc maud = (rpg.ai.Npc) g.actor(Ids.HEALER);
+        rpg.ui.Dialog offer = new rpg.ui.Dialog(maud.name, maud.name + " holds out some redberries.");
+        offer.npc = 0; offer.offer = new rpg.item.ItemStack(rpg.item.Items.BERRIES, 1);
+        offer.closeChoice("Accept", () -> { }); offer.closeChoice("Decline", () -> { });
+        hud.dialog(offer); reviewUi("ui-offer"); hud.closeAll();
+        rpg.ui.Dialog talk = new rpg.ui.Dialog("Bram - Lawman", "You are wanted in DevCity for 240 coins. Witnesses saw you take a loaf from the stall, and the merchant swears it was you. Pay, explain yourself, or come quietly - but make up your mind before the guards do it for you.");
+        talk.choice("Pay 240 coins.", () -> { }); talk.choice("You have the wrong person. I was at the shed all morning, ask anyone who was there - the woodcutter saw me. (lie; risk jail)", () -> { });
+        talk.choice("I'll come quietly.", () -> { }); talk.closeChoice("Never! (resist arrest)", () -> { });
+        hud.dialog(talk); reviewUi("ui-dialogue"); hud.closeAll();
+        for (int i = 0; i < 6; i++) g.chat.say("A long Worldbox report " + i + ": belongings held by the Undertaker exclude stolen goods, confiscated property returns to its rightful owner, and this line should wrap cleanly.");
+        reviewUi("ui-chat");
+        g.law.reminder = "DevCity: you are wanted for 240 G.";
+        hud.events.emit("bountynotice", "");
+        reviewUi("ui-bounty-notice");
+        pauseShot();
+    }
+
+    /** Third-person ranged aiming: the side-on stance with a bow, a crossbow and a throwing javelin, filmed as the draw comes up. */
+    private void gamefixesAim() {
+        g.state.minutes = 12 * 60;
+        g.player.firstPerson = false;
+        for (String[] kit : new String[][]{{"shortbow", "bronze_arrows"}, {"iron_crossbow", "iron_bolts"}, {"iron_javelin", null}}) {
+            place(54.5f, 64.5f, 0);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get(kit[0]), kit[1] == null ? 5 : 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, kit[1] == null ? null : new rpg.item.ItemStack(rpg.item.Items.get(kit[1]), 30));
+            g.player.skills.setLevel(rpg.skill.Skill.ARCHERY, 50);
+            frames(30);
+            float[] cam = {g.player.x + 3.0f, g.player.y + 1.6f, g.player.z + 1.2f, g.player.x, g.player.y + 1.0f, g.player.z - 0.4f};
+            film("aim-" + kit[0], 45, i -> g.controller.in.mainDown = true, a -> cam, 0);
+            g.controller.in.mainDown = false;
+            frames(30);
+        }
+        // the throw guide from over the shoulder, a javelin drawn back
+        place(64.5f, 70.5f, 0);
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("iron_javelin"), 5));
+        g.controller.camPitch = 0.12f;
+        frames(20);
+        for (int i = 0; i < 40; i++) { g.controller.in.mainDown = true; frames(1); }
+        reviewUi("aim-throw-guide");
+        g.controller.in.mainDown = false; frames(30);
+        // fishing at the pond: a rod, a net and a cage, each from the bank
+        g.player.skills.setLevel(rpg.skill.Skill.FISHING, 60);
+        for (rpg.item.ItemDef tool : new rpg.item.ItemDef[]{rpg.item.Items.FISHING_ROD, rpg.item.Items.FISHING_NET, rpg.item.Items.CRAB_CAGE}) {
+            var spot = g.objects.nodes.stream().filter(n -> n.kind == rpg.objects.Node.Kind.FISH && n.needs == tool).findFirst().orElse(null);
+            if (spot == null) continue;
+            float[] bank = g.ai.standSpot((rpg.ai.Npc) g.actor(Ids.FISHERMAN), spot);
+            place(bank[0], bank[1], (float) Math.atan2(-(spot.x - bank[0]), -(spot.z - bank[1])));
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(tool, 1));
+            frames(20);
+            float fl = (float) Math.max(0.1, Math.hypot(spot.x - bank[0], spot.z - bank[1])), fx = (spot.x - bank[0]) / fl, fz = (spot.z - bank[1]) / fl;
+            float[] cam = {g.player.x - fz * 3.4f - fx * 1.2f, g.player.y + 1.7f, g.player.z + fx * 3.4f - fz * 1.2f, g.player.x + fx * 1.2f, g.player.y + 0.8f, g.player.z + fz * 1.2f};
+            var r = g.interact.request(g.player, spot, "gather");
+            System.out.println("[fishing] " + tool.id + " -> " + r.status() + " " + r.reason());
+            film("fishing-" + tool.id, 90, i -> { }, a -> cam, 0);
+            g.interact.cancel(g.player, "review");
+            frames(10);
+        }
+    }
+
+    /** The new blocks where the devmap uses them, each from a fixed camera once the exposure has settled. */
+    private void gamefixesBlocks() {
+        g.state.minutes = 12 * 60;
+        place(64.5f, 68.5f, 0);
+        for (var n : g.npcs) g.ai.unload(n);
+        Object[][] views = {
+                {"block-barn-hay", new float[]{114.5f, 6.2f, 118.6f, 119.6f, 4.7f, 117.6f}},
+                {"block-chancery-carpet", new float[]{113.5f, 6.4f, 61.4f, 113.5f, 4.0f, 55f}},
+                {"block-house-rugs", new float[]{90f, 6.6f, 92.6f, 90f, 4.0f, 88.6f}},
+                {"block-limestone-blue-glass", new float[]{35.5f, 7.0f, 104f, 35.5f, 6.0f, 117f}},
+                {"block-store-metals", new float[]{59f, 6.0f, 18.5f, 61f, 4.6f, 21f}},
+                {"block-marble-dais", new float[]{62.6f, 6.4f, 65f, 60.5f, 4.0f, 62.5f}},
+                {"block-sandstone-cover", new float[]{30f, 6.0f, 46f, 31f, 5.0f, 55f}},
+                {"block-granite-den", new float[]{12f, 6.6f, 12.5f, 7.5f, 5.5f, 6f}},
+                {"block-pond-banks", new float[]{25f, 8.0f, 27f, 25f, 4.0f, 19.5f}},
+                {"block-duck-pond-mud", new float[]{92f, 7.5f, 112.5f, 92f, 4.0f, 117.5f}},
+                {"block-town-wall", new float[]{104f, 6.0f, 40f, 98f, 5.5f, 46.5f}},
+                {"block-kiosk-birch", new float[]{66.5f, 6.0f, 98.5f, 61f, 5.0f, 103f}},
+                {"block-undertaker-white-glass", new float[]{122f, 6.0f, 104f, 122f, 6.0f, 100f}}};
+        for (Object[] v : views) adapted((float[]) v[1], (String) v[0]);
+    }
+
     /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
+    private void releasePolishShots() {
+        var preview = new Gfx.Preview();
+        preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
+        var title = new rpg.ui.TitleScreen("0.1.2");
+        for (int i = 0; i < 30; i++) { gfx.title(preview, Main.defaultLook(), win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1f / 60, false, false); ui.end(); gfx.frame(win.width, win.height); }
+        Main.shot(gfx, win.width, win.height, new File(shots, "title.png"));
+        var creator = new rpg.ui.Creator();
+        for (int i = 0; i < 15; i++) { gfx.creator(preview, creator.look, 0, win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); creator.draw(ui, win.width, win.height, java.util.List.of(), false, false); ui.end(); gfx.frame(win.width, win.height); }
+        Main.shot(gfx, win.width, win.height, new File(shots, "creator.png"));
+        if ("stage".equals(System.getenv("RPG_REVIEW_ONLY"))) return;
+        place(61.5f, 62.5f, 0);
+        var horse = g.animals.display(rpg.animal.Species.HORSE, false, false, 0, 64.5f, 62.5f, 0);
+        frames(20);
+        film("horse-idle", 54, i -> {}, a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 0, horse);
+        film("horse-walk", 54, i -> g.animals.puppetTo(horse, horse.x, horse.z - 4, false), a -> new float[]{a.x + 3.6f, a.y + 1.8f, a.z - 3.6f, a.x, a.y + 1.1f, a.z}, 18, horse);
+    }
+
+    /** Scoped evidence for the maintenance fixes, using real game state and native rendering. */
+    private void maintenanceShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        for(var animal:g.animals.all()){animal.loaded=false;g.animals.despawnBody(animal);}
+        place(62.5f,70.5f,0);
+        if ("ui".equals(only)) {
+            g.player.inv.add(new rpg.item.ItemStack(rpg.item.Items.get("bronze_sword"),1));
+            g.player.inv.add(new rpg.item.ItemStack(rpg.item.Items.IRON_ARROWS,18));
+            g.player.eq.set(rpg.item.ItemDef.Slot.BACK,new rpg.item.ItemStack(rpg.item.Items.BACKPACK,1));
+            hud.go(Hud.Scene.INVENTORY);reviewUi("vertical-inventory");hud.closeAll();
+            var person=(rpg.ai.Npc)g.actor(Ids.VILLAGER);g.ai.reload(person);g.teleport(person,64,DevMap.FLOOR,70.5f);
+            person.goal=rpg.ai.Brain.Goal.IDLE;person.nextThink=Double.MAX_VALUE;g.player.skills.setLevel(rpg.skill.Skill.THIEVING,100);
+            person.inv.clear();person.inv.add(new rpg.item.ItemStack(rpg.item.Items.IRON_ARROWS,11,person.id,false,person.id));
+            frames(1);hud.openContainer(person.pockets());reviewUi("inspect-pockets");
+            int before=g.player.count(rpg.item.Items.IRON_ARROWS);
+            for(int attempt=0;attempt<12 && g.player.count(rpg.item.Items.IRON_ARROWS)==before;attempt++) {
+                g.player.cs.staggered=0;person.fightTarget=0;person.cs.cancel();
+                g.interact.request(g.player,person.pockets(),"take:0");
+                if(hud.paused())throw new IllegalStateException("Pocket work still paused");
+                for(int i=0;i<75 && g.player.count(rpg.item.Items.IRON_ARROWS)==before;i++)game.tick(1f/60);
+            }
+            if(g.player.count(rpg.item.Items.IRON_ARROWS)==before)throw new IllegalStateException("No pocket transfer occurred");
+            reviewUi("pocket-item-received");hud.closeAll();return;
+        }
+        if ("motion".equals(only)) {
+            film("turn-in-place",120,i->g.controller.snapTo((float)Math.PI*Math.min(1,Math.max(0,i)/90f)),a->new float[]{a.x+2.6f,a.y+1.2f,a.z-2.6f,a.x,a.y+0.8f,a.z},0);
+            var door=g.objects.doors().stream().filter(d->d.name.equals("Barn door")).findFirst().orElseThrow();
+            var farmer=(rpg.ai.Npc)g.actor(Ids.FARMER);g.ai.reload(farmer);g.teleport(farmer,door.x,DevMap.FLOOR,door.z-2.8f);
+            farmer.goal=rpg.ai.Brain.Goal.RETURN;farmer.nextThink=Double.MAX_VALUE;farmer.spawnX=door.x;farmer.spawnZ=door.z+3;
+            float[] cam={door.x+3.4f,DevMap.FLOOR+2.2f,door.z-5,door.x,DevMap.FLOOR+0.9f,door.z};
+            film("npc-opens-barn",120,i->{},a->cam,0,farmer);
+            film("door-push-both-directions",120,i->{
+                if(i==0)door.setOpen(g,true,null,0);
+                if(i==0 || i==60)for(long hinge:door.hinge)g.game.commands().jointMotor(hinge,i==0?3:-3,120);
+            },a->cam,0,farmer);return;
+        }
+        if ("foliage".equals(only)) {
+            var boxes=rpg.render.FoliageModels.model(rpg.world.Foliage.Kind.FERN,37);
+            reviewMesh=gfx.renderer().mesh(boxes.vertices(),boxes.count());reviewTransform.identity().translate(64.5f,DevMap.FLOOR,70.5f);
+            g.teleport(g.player,64.5f,DevMap.FLOOR,71.4f);frames(1);
+            float[] cam={66.3f,DevMap.FLOOR+1.35f,68.5f,64.5f,DevMap.FLOOR+0.28f,70.5f};
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-before-contact");
+            g.controller.snapTo(0);
+            film("foliage-contact",72,i->g.controller.in.forward=i<40?0.45f:0,a->cam,0);
+            g.controller.in.forward=0;g.teleport(g.player,67.5f,DevMap.FLOOR,70.5f);
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-released");return;
+        }
+        if ("shadows".equals(only)) {
+            var guard=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(guard);g.teleport(guard,65,DevMap.FLOOR,69.5f);
+            guard.goal=rpg.ai.Brain.Goal.IDLE;guard.nextThink=Double.MAX_VALUE;g.teleport(g.player,64,DevMap.FLOOR,69.5f);
+            float[] cam={69,DevMap.FLOOR+3.5f,64,64.5f,DevMap.FLOOR+0.5f,69.5f};
+            for(int i=0;i<24;i++){game.tick(1f/60);draw(cam,1f/60);}
+            Main.shot(gfx,win.width,win.height,new File(shots,"human-day-shadows.png"));
+            g.state.minutes=1320;
+            g.objects.add(new rpg.objects.Fire(g.state.newEntityId(),62.5f,DevMap.FLOOR,69.5f,g.state.minutes+30,0));
+            for(int i=0;i<24;i++){game.tick(1f/60);draw(cam,1f/60);}
+            Main.shot(gfx,win.width,win.height,new File(shots,"human-fire-shadows.png"));return;
+        }
+        throw new IllegalArgumentException("Use RPG_REVIEW_ONLY=ui, motion, foliage or shadows");
+    }
+
+    private void ultimateShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        for(var animal:g.animals.all())if(!animal.puppet){animal.loaded=false;g.animals.despawnBody(animal);}
+        if("surfaces".equals(only)){ultimateSurfaces();return;}
+        if("foliage".equals(only)){ultimateFoliage();return;}
+        if("fire".equals(only)){ultimateFire();return;}
+        if("hud".equals(only)){ultimateHud();return;}
+        if ("motion".equals(only)) {
+            place(110.5f,106.5f,0);
+            var rabbit=g.animals.display(rpg.animal.Species.RABBIT,false,false,0,40.5f,34.5f,0);
+            frames(12);
+            film("rabbit-hop",72,i->g.animals.puppetTo(rabbit,rabbit.x,rabbit.z-4,true),a->new float[]{a.x+2.3f,a.y+0.7f,a.z-2.3f,a.x,a.y+0.3f,a.z},12,rabbit);
+            var horse=g.animals.display(rpg.animal.Species.HORSE,false,false,0,40.5f,34.5f,0);
+            frames(12);
+            film("horse-attack",72,i->{if(i==3)g.combat.attack(horse,false,Actor.Combat.Move.BITE);},a->new float[]{a.x+3.6f,a.y+1.8f,a.z-3.6f,a.x,a.y+1.1f,a.z},0,horse);
+            return;
+        }
+        var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
+        var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+        // Reproduce the consumed click that opened Settings, then exercise next frame's input path.
+        ui.consumed=true;Main.mouse(ui,new astratto.platform.Input());ui.mx=1000;ui.my=232;ui.click=true;
+        gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height);
+        if(settings.values.vsync)throw new IllegalStateException("Title settings failed to accept the next frame's click");
+        ui.click=false;
+        for(int i=0;i<4;i++){gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height);}
+        Main.shot(gfx,win.width,win.height,new File(shots,"settings-clicked-vsync-off.png"));settings.escape();
+    }
+
+    private void ultimateSurfaces() {
+        place(40.5f,34.5f,(float)Math.PI);g.player.eq.clear();frames(12);
+        List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
+        tiles.add(capture(front(g.player,1.8f)));labels.add("Human: intact");
+        g.player.hp=g.player.maxHp()*0.3f;
+        g.player.injuries.cut(g.player,g.player.x,g.player.y+1.1f,g.player.z+g.player.radius,7);
+        for(int i=0;i<180;i++){frames(1);if(gfx.figureReady(g.player))break;}
+        tiles.add(capture(front(g.player,1.8f)));labels.add("Human: recessed cut");
+        g.player.restore();frames(10);tiles.add(capture(front(g.player,1.8f)));labels.add("Human: healed");
+        g.player.charred=0.8f;tiles.add(capture(front(g.player,1.8f)));labels.add("Human: charred cloth/skin");g.player.charred=0;
+        place(110.5f,106.5f,0);
+        var horse=g.animals.display(rpg.animal.Species.HORSE,false,false,0,40.5f,34.5f,0);frames(8);
+        float[] cam={horse.x+2.6f,horse.y+1.5f,horse.z-2.6f,horse.x,horse.y+0.9f,horse.z};
+        tiles.add(capture(cam));labels.add("Horse: intact");horse.hp=horse.maxHp()*0.2f;
+        horse.injuries.cut(horse,horse.x+horse.radius,horse.y+horse.height*0.6f,horse.z,8);frames(80);
+        tiles.add(capture(cam));labels.add("Horse: carved surface");horse.restore();frames(12);
+        tiles.add(capture(cam));labels.add("Horse: healed");horse.charred=0.8f;
+        tiles.add(capture(cam));labels.add("Horse: charred");g.animals.remove(horse);
+        sheet("injuries-and-char",tiles,labels,4);
+        tiles.clear();labels.clear();
+        long[] residents={Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER};
+        for(long id:residents){var n=(rpg.ai.Npc)g.actor(id);g.ai.reload(n);g.teleport(n,40.5f,DevMap.FLOOR,34.5f);n.yaw=(float)Math.PI;n.nextThink=Double.MAX_VALUE;frames(8);tiles.add(capture(front(n,2.7f)));labels.add(n.name+": "+n.profession.title);g.ai.unload(n);}
+        sheet("five-new-residents",tiles,labels,5);
+        var net=g.objects.add(new rpg.objects.FishingNet(g.state.newEntityId(),g.player.id,0,89.5f,DevMap.FLOOR-0.1f,30.5f,g.state.minutes+4));
+        view(91,DevMap.FLOOR+1,29,89.5f,DevMap.FLOOR,30.5f,"deployed-net");net.removed=true;
+        var trap=g.objects.add(new rpg.objects.Trap(g.state.newEntityId(),g.player.id,40.5f,DevMap.FLOOR,34.5f));trap.contents.add(new rpg.item.ItemStack(rpg.item.Items.SNARE,1));
+        view(41.3f,DevMap.FLOOR+0.6f,33.5f,40.5f,DevMap.FLOOR+0.08f,34.5f,"deployed-snare");trap.removed=true;
+        var stone=g.objects.all().stream().filter(object->object instanceof rpg.objects.Container c && c.kind.equals("memorial")).map(object->(rpg.objects.Container)object).findFirst().orElseThrow();
+        view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"unfilled-gravestone");stone.buried=true;
+        view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"filled-gravestone");
+    }
+    /** The Bank of Gameworld: from the road, inside at the counter, and a vault open beside the inventory. */
+    private void gamefixesBank() {
+        g.state.minutes = 11 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        var teller = (rpg.ai.Npc) g.actor(Ids.TELLER);
+        g.ai.reload(teller);
+        g.teleport(teller, DevMap.BANK_TELLER[0], DevMap.FLOOR, DevMap.BANK_TELLER[1]);
+        place(72f, 99.5f, 0); frames(60);
+        view(76f, DevMap.FLOOR + 3.2f, 96.5f, 71.5f, DevMap.FLOOR + 2f, 104f, "bank-outside");
+        float[] at = g.bank.customerSpot();
+        place(at[0], at[1], (float) Math.PI);
+        for (int i = 0; i < 120; i++) { teller.goal = rpg.ai.Brain.Goal.WORK; teller.nextThink = g.time + 1; frames(1); }
+        view(at[0] - 2.5f, DevMap.FLOOR + 2.4f, DevMap.BANK_Z0 + 1.5f, at[0], DevMap.FLOOR + 1.2f, DevMap.BANK_TELLER[1], "bank-inside");
+        g.bank.openAccount(g.player, 1);
+        g.give(g.player, rpg.item.Items.COINS, 3000); g.bank.buyVault(g.player, 2);
+        var v = g.bank.vaults(g.player.id).get(0);
+        v.contents.add(new rpg.item.ItemStack(rpg.item.Items.get("ruby"), 1)); g.state.mint(rpg.item.Items.get("ruby"), 1);
+        v.contents.add(new rpg.item.ItemStack(rpg.item.Items.COINS, 500)); g.state.mint(rpg.item.Items.COINS, 500);
+        g.ui.openContainer(v); frames(10);
+        reviewUi("bank-vault-window");
+    }
+
+    /** Picking things up: bare-handed, with a sword and shield (no hand free), and on the move. */
+    private void gamefixesGrab() {
+        g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        g.player.firstPerson = false;
+        String[][] kits = {{null, null}, {"wooden_sword", "wooden_shield"}};
+        for (String[] kit : kits) for (boolean walking : new boolean[]{false, true}) {
+            place(64.5f, 64.5f, 0);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, kit[0] == null ? null : new rpg.item.ItemStack(rpg.item.Items.get(kit[0]), 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, kit[1] == null ? null : new rpg.item.ItemStack(rpg.item.Items.get(kit[1]), 1));
+            frames(20);
+            var item = g.objects.drop(new rpg.item.ItemStack(rpg.item.Items.BREAD, 1), g.player.x + 0.35f, DevMap.FLOOR + 0.05f, g.player.z - 0.7f);
+            g.state.mint(rpg.item.Items.BREAD, 1);
+            final var it2 = item;
+            film("grab-" + (kit[0] == null ? "bare" : "sword-shield") + (walking ? "-walking" : ""), 42, i -> { g.controller.in.forward = walking ? 1 : 0; if (i == 3) it2.takeBy(g, g.player, 0, "hand"); }, a -> quarter(a, 2.6f), 0);
+            g.controller.in.forward = 0; frames(20);
+        }
+    }
+
+    /** A bow drawn in third person, seen from the front, the bow side, behind and the draw side: no arm through the body. */
+    private void gamefixesBowPose() {
+        g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        g.player.firstPerson = false;
+        String[] kits = {"shortbow", "iron_crossbow"};
+        for (String kit : kits) {
+            place(64.5f, 64.5f, 0);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get(kit), 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.get(kit.equals("shortbow") ? "wooden_arrows" : "iron_bolts"), 20));
+            g.controller.camPitch = 0; frames(20);
+            List<BufferedImage> tiles = new ArrayList<>(); List<String> labels = new ArrayList<>();
+            for (int i = 0; i < 70; i++) { if (kit.equals("shortbow")) g.controller.in.mainDown = true; else g.controller.in.offDown = true; frames(1); }
+            Actor p = g.player;
+            float[][] around = {{0, -3.2f}, {-3.2f, 0}, {0, 3.2f}, {3.2f, 0}, {-2.2f, -2.2f}, {2.2f, 2.2f}};
+            String[] names = {"front", "left", "back", "right", "front-left", "back-right"};
+            for (int i = 0; i < around.length; i++) {
+                float[] cam = {p.x + around[i][0], p.y + 1.5f, p.z + around[i][1], p.x, p.y + 1.2f, p.z};
+                g.controller.in.mainDown = kit.equals("shortbow"); g.controller.in.offDown = !kit.equals("shortbow");
+                tiles.add(capture(cam)); labels.add(kit + " " + names[i]);
+            }
+            sheet("bowpose-" + kit, tiles, labels, 3);
+            g.controller.in.mainDown = false; g.controller.in.offDown = false; frames(30);
+        }
+    }
+
+    /** Points the camera so its centre ray passes through a world point (a few frames for the camera to settle). */
+    private void aimAt(float x, float y, float z) {
+        for (int k = 0; k < 6; k++) {
+            float dx = x - g.controller.cx, dy = y - g.controller.cy, dz = z - g.controller.cz;
+            g.controller.camYaw = (float) Math.atan2(-dx, -dz);
+            g.controller.camPitch = (float) Math.atan2(dy, Math.hypot(dx, dz));
+            frames(2);
+        }
+    }
+
+    /** Draws and looses at a point: the guide while drawn, then the arrow's flight. */
+    private void loose(String name, float x, float y, float z) {
+        aimAt(x, y, z);
+        for (int i = 0; i < 50; i++) { g.controller.in.mainDown = true; if (i == 20) aimAt(x, y, z); frames(1); }
+        reviewUi(name + "-drawn");
+        g.controller.in.mainDown = false; frames(90);
+    }
+
+    /** Arrows (gamefixes): the arc while drawn; one into the ground, one into a target, one off the brick wall, one into a dummy. */
+    private void gamefixesArrows() {
+        g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        place(24.5f, 59.5f, (float) (Math.PI / 2));
+        g.player.firstPerson = false; g.player.skills.setLevel(rpg.skill.Skill.ARCHERY, 40);
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.SHORTBOW, 1));
+        g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.get("wooden_arrows"), 20));
+        Actor dummy = g.dummies.get(0); g.teleport(dummy, 16.5f, DevMap.FLOOR, 62.5f);
+        frames(30);
+        loose("arrow-ground", 18.5f, DevMap.FLOOR, 57.5f);
+        loose("arrow-target", 7.6f, DevMap.FLOOR + 1.1f, 56.9f);
+        loose("arrow-wall", 6.2f, DevMap.FLOOR + 2.4f, 59.5f);
+        loose("arrow-dummy", dummy.x, DevMap.FLOOR + 1.2f, dummy.z);
+        frames(200);
+        int lying = 0;
+        for (var o : g.objects.all()) if (o instanceof rpg.objects.GroundItem gi && !gi.removed && gi.dir != null) { lying++; System.out.printf("[arrows] %s at (%.2f, %.2f, %.2f) dir (%.2f, %.2f, %.2f) lodged %s%n", gi.stack.def.name, gi.x, gi.y, gi.z, gi.dir[0], gi.dir[1], gi.dir[2], gi.lodged); }
+        System.out.println("[arrows] lying " + lying + ", in the dummy " + dummy.stuck.size() + ", quiver " + (g.player.eq.get(rpg.item.ItemDef.Slot.AMMO) == null ? 0 : g.player.eq.get(rpg.item.ItemDef.Slot.AMMO).amount));
+        view(20.5f, DevMap.FLOOR + 2.2f, 54.5f, 12, DevMap.FLOOR + 0.8f, 59.5f, "arrows-where-they-lie");
+        view(10.5f, DevMap.FLOOR + 1.6f, 58.5f, 7, DevMap.FLOOR + 1.0f, 57f, "arrows-target-close");
+        view(dummy.x + 1.6f, DevMap.FLOOR + 1.5f, dummy.z - 1.2f, dummy.x, DevMap.FLOOR + 1.1f, dummy.z, "arrows-dummy-close");
+    }
+
+    /** First person, looking straight down: standing and crouched, still and walking. */
+    private void gamefixesFirstPersonDown() {
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        place(64.5f,62.5f,0);g.player.firstPerson=true;frames(20);
+        for(boolean crouch:new boolean[]{false,true})for(float pitch:new float[]{-1.0f,-1.25f,-1.45f}) {
+            g.controller.in.sneak=crouch;g.controller.camPitch=pitch;frames(40);
+            reviewUi("fp-down-"+(crouch?"crouched":"standing")+"-"+(int)(-pitch*100));
+        }
+        g.controller.in.sneak=true;g.controller.camPitch=-1.45f;g.controller.in.forward=1;frames(20);reviewUi("fp-down-crouched-walking");
+        g.controller.in.forward=0;g.controller.in.sneak=false;
+    }
+
+    /** A dead dog picked up and walked off with: whole, then with a leg cut off before it was lifted. */
+    private void gamefixesCarcass() {
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        for(int round=0;round<2;round++) {
+            var dog=g.animals.all().stream().filter(a->(a.species==rpg.animal.Species.DOG || a.species==rpg.animal.Species.FOX) && a.alive && a.adult()).findFirst().orElseThrow();
+            g.teleport(g.player,64.5f,DevMap.FLOOR,62.5f);g.controller.snapTo(0);
+            dog.puppet=true;g.teleport(dog,64.5f,DevMap.FLOOR,61.4f);frames(10);
+            g.combat.bleedOutNow(dog);frames(90);
+            if(round==1){g.gore.severAnimal(dog,rpg.combat.Gore.Part.LEG_R,1,0,g.player);frames(60);}
+            if(g.carrying.begin(g.player,dog).rejected()){frames(30);g.carrying.begin(g.player,dog);}
+            frames(50);
+            String tag=round==0?"whole":"severed-leg";
+            film("carcass-carry-"+tag,72,i->g.controller.in.forward=i<48?1:0,a->quarter(a,-3.0f),0);
+            g.controller.in.forward=0;
+            film("carcass-held-"+tag,30,i->{},a->quarter(a,2.6f),0);
+            g.carrying.drop(g.player,false);frames(60);
+        }
+    }
+
+    /** The archery range's brick wall from 34 m, the eye drifting a few centimetres a frame: shots, and how much the wall changes between them. */
+    private void gamefixesBricks() {
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        place(44,58,0);frames(60);
+        java.awt.image.BufferedImage last=null;double total=0;
+        for(int i=0;i<8;i++) {
+            float ex=40+i*0.03f;
+            view(ex,DevMap.FLOOR+1.7f,58.3f,6,DevMap.FLOOR+1.5f,58.5f,"bricks-far-"+i);
+            try {
+                var img=javax.imageio.ImageIO.read(new File(shots,"bricks-far-"+i+".png"));
+                if(last!=null){double d=0;int n=0;int w=img.getWidth(),h=img.getHeight();
+                    for(int y=h/3;y<h*2/3;y+=2)for(int x=w/3;x<w*2/3;x+=2){int a=img.getRGB(x,y),b=last.getRGB(x,y);d+=Math.abs(((a>>16)&255)-((b>>16)&255))+Math.abs(((a>>8)&255)-((b>>8)&255))+Math.abs((a&255)-(b&255));n++;}
+                    total+=d/n;System.out.printf("[bricks] frame %d change %.2f%n",i,d/n);}
+                last=img;
+            } catch(java.io.IOException e){throw new RuntimeException(e);}
+        }
+        System.out.printf("[bricks] mean change %.2f%n",total/7);
+    }
+
+    /** The undertaker's hut door at the graveyard: shut, opened by the player from outside, walked through, from inside. */
+    private void gamefixesDoors() {
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        rpg.objects.Door door=null;
+        for(var d:g.objects.doors())for(int[] c:d.cells)if(c[0]==DevMap.UNDERTAKER_X0 && c[1]==96)door=d;
+        float dx=door.x,dz=door.z;
+        float[] out={dx-4.5f,DevMap.FLOOR+2.2f,dz-2.5f,dx,DevMap.FLOOR+1,dz}, in={dx+3.6f,DevMap.FLOOR+1.8f,dz+1.6f,dx,DevMap.FLOOR+1,dz};
+        g.teleport(g.player,dx-1.6f,DevMap.FLOOR,dz);g.controller.snapTo((float)(-Math.PI/2));frames(30);
+        view(out[0],out[1],out[2],out[3],out[4],out[5],"door-undertaker-shut-outside");
+        view(in[0],in[1],in[2],in[3],in[4],in[5],"door-undertaker-shut-inside");
+        var r=door.perform(g,g.player,"open",0);System.out.println("[door] open -> "+r);
+        final var d0=door;
+        film("door-undertaker-open",60,i->{},a->out,0);
+        System.out.println("[door] angles "+java.util.Arrays.toString(d0.angle)+" open "+d0.open);
+        film("door-undertaker-walk-in",150,i->{g.controller.in.forward=i<120?1:0;},a->in,0);
+        g.controller.in.forward=0;
+        System.out.println("[door] player at "+g.player.x+","+g.player.z+" angles "+java.util.Arrays.toString(d0.angle));
+        view(in[0],in[1],in[2],in[3],in[4],in[5],"door-undertaker-inside-after");
+    }
+
+    /** A real field plant before anyone touches it, with the player standing in it (examining it), and after they step out. */
+    private void gamefixesFoliage() {
+        g.state.minutes=600;g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+        place(40.5f,34.5f,0);frames(120);
+        for(var kind:new rpg.world.Foliage.Kind[]{rpg.world.Foliage.Kind.TALL_GRASS,rpg.world.Foliage.Kind.FERN,rpg.world.Foliage.Kind.SHRUB}) {
+            var plant=g.foliage.chunks.values().stream().flatMap(chunk->chunk.plants.stream()).filter(patch->!patch.removed && patch.kind==kind).findFirst().orElse(null);
+            if(plant==null){System.out.println("[foliage] no "+kind);continue;}
+            float[] cam={plant.x+1.6f,DevMap.FLOOR+1.2f,plant.z-1.6f,plant.x,DevMap.FLOOR+0.3f,plant.z};
+            g.teleport(g.player,plant.x+4,DevMap.FLOOR,plant.z+4);frames(30);
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-"+kind+"-untouched");
+            g.teleport(g.player,plant.x+0.05f,DevMap.FLOOR,plant.z+0.05f);g.interact.focus=plant;frames(40);
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-"+kind+"-standing-in");
+            g.teleport(g.player,plant.x+4,DevMap.FLOOR,plant.z+4);g.interact.focus=null;frames(200);
+            view(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5],"foliage-"+kind+"-recovered");
+        }
+    }
+
+    private void ultimateFoliage() {
+        place(110.5f,106.5f,0);frames(8);
+        List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
+        for(var kind:rpg.world.Foliage.Kind.values()) {
+            boolean wall=kind==rpg.world.Foliage.Kind.IVY || kind==rpg.world.Foliage.Kind.MOSS;
+            if(wall)for(int height=0;height<2;height++)g.setBlock(40,DevMap.FLOOR+height,35,Blocks.STONE);
+            var boxes=rpg.render.FoliageModels.model(kind,37);reviewMesh=gfx.renderer().mesh(boxes.vertices(),boxes.count());
+            reviewTransform.identity().translate(40.5f,DevMap.FLOOR,34.5f);
+            float[] cam={41.8f,DevMap.FLOOR+1.25f,32.9f,40.5f,DevMap.FLOOR+0.5f,34.5f};
+            tiles.add(capture(cam));labels.add(kind.name().replace('_',' '));
+            gfx.renderer().release(astratto.bridge.AstrattoNative.RES_MESH,reviewMesh);reviewMesh=0;
+            if(wall)for(int height=0;height<2;height++)g.setBlock(40,DevMap.FLOOR+height,35,Blocks.AIR);
+        }
+        sheet("ten-foliage-models",tiles,labels,5);
+        place(40.5f,34.5f,0);frames(120);
+        var plant=g.foliage.chunks.values().stream().flatMap(chunk->chunk.plants.stream()).filter(patch->!patch.removed && (patch.kind==rpg.world.Foliage.Kind.TALL_GRASS || patch.kind==rpg.world.Foliage.Kind.CLOVER) && patch.x>30 && patch.x<54 && patch.z>28 && patch.z<50).findFirst().orElseThrow();
+        float[] camera={plant.x+2.2f,DevMap.FLOOR+1.3f,plant.z-2.2f,plant.x,DevMap.FLOOR+0.2f,plant.z};
+        g.teleport(g.player,110.5f,DevMap.FLOOR,106.5f);frames(2);view(camera[0],camera[1],camera[2],camera[3],camera[4],camera[5],"procedural-foliage");
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.RAIN);g.timeSystem.weather.snap();
+        for(int frame=0;frame<90;frame++){game.tick(1f/60);draw(camera,1f/60);}
+        System.out.println("[weather] rain="+g.timeSystem.weather.rain+" wetness="+g.timeSystem.weather.wetness);
+        view(camera[0],camera[1],camera[2],camera[3],camera[4],camera[5],"wet-grass-and-rain");
+    }
+    private void ultimateFire() {
+        place(50.5f,70.5f,0);g.player.skills.setLevel(rpg.skill.Skill.HEALTH,100);g.player.restore();
+        var guard=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(guard);g.teleport(guard,60.5f,DevMap.FLOOR,70.5f);guard.skills.setLevel(rpg.skill.Skill.HEALTH,100);guard.restore();guard.nextThink=Double.MAX_VALUE;frames(10);
+        guard.goal=rpg.ai.Brain.Goal.RETURN;
+        g.chemistry.emit(null,astratto.bridge.AstrattoNative.CHEM_FIRE,guard.x,guard.chestY(),guard.z,0.6f,4,0.2f);
+        film("attached-fire",72,i->{},a->quarter(a,3.3f),0,guard);guard.goal=rpg.ai.Brain.Goal.IDLE;frames(120);
+        film("stop-drop-roll",144,i->{},a->new float[]{a.x+2.5f,DevMap.FLOOR+1.6f,a.z-2.5f,a.x,DevMap.FLOOR+0.3f,a.z},0,guard);
+        film("ground-roll",144,i->{},a->new float[]{a.x+2.5f,DevMap.FLOOR+1.6f,a.z-2.5f,a.x,DevMap.FLOOR+0.3f,a.z},0,guard);
+        frames(100);view(guard.x+2.5f,DevMap.FLOOR+1.7f,guard.z-2.5f,guard.x,DevMap.FLOOR+0.6f,guard.z,"smothered-fire");
+    }
+    private void ultimateHud() {
+        place(60.5f,70.5f,(float)Math.PI);frames(10);
+        g.chat.say("A long Worldbox report: belongings held by the Undertaker exclude stolen goods. Confiscated property returns to its rightful owner. Your remaining possessions are protected. This message should wrap cleanly across multiple lines without losing its last words.");
+        reviewUi("worldbox-long-text");
+        var cole=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(cole);g.teleport(cole,60.5f,DevMap.FLOOR,72);cole.nextThink=Double.MAX_VALUE;
+        hud.dialog(g.dialogue.talk(cole));reviewUi("chatbox-root");
+        hud.choose(0);reviewUi("chatbox-response");hud.continueDialog();reviewUi("chatbox-return-options");hud.closeAll();g.ai.unload(cole);
+        g.player.firstPerson=true;g.controller.camPitch=-1.35f;g.controller.jogging=false;
+        film("firstperson-down-sprint",48,i->{g.controller.in.forward=1;g.controller.in.sprint=true;g.controller.camPitch=-1.35f;},a->null,12);
+        g.controller.in.forward=0;g.controller.in.sprint=false;
+    }
+
+    /** Release review through the same HUD, articulated bodies and GPU passes used during play. */
+    private void releaseSystemsShots() {
+        String only=System.getenv("RPG_REVIEW_ONLY");
+        if(only==null || only.equals("ui")) {
+            place(64.5f,62.5f,0);frames(8);
+            g.honor.changedAt=g.time;g.honor.lastDelta=3;g.honor.lastWhy="Helped a neighbor";g.state.commit("HonorChanged",g.player.id,0,null,0,"Helped a neighbor");
+            g.state.commit("QuestStarted",g.player.id,0,null,0,"Courier");
+            g.state.commit("LevelUp",g.player.id,0,null,0,"AGILITY 4->5");frames(24);reviewUi("quest-and-honor");
+            for(int i=0;i<270;i++) { game.tick(1f/60); if(i%6==0)draw(null,0.1f); }
+            reviewUi("level-notice");
+            var cole=(rpg.ai.Npc)g.actor(Ids.GUARD);g.teleport(cole,g.player.x+2,g.player.y,g.player.z);cole.nextThink=Double.MAX_VALUE;
+            cole.goal=rpg.ai.Brain.Goal.WATCH;
+            var dialog=new rpg.ui.Dialog(cole.name,"Keep your eyes open. If you see trouble, come and find the watch.").choice("I'll keep watch.",hud::closeAll);dialog.npc=cole.id;hud.dialog(dialog);
+            for(int i=0;i<36;i++) { game.tick(1f/60);draw(null,1f/60);if(i%3==0)Main.shot(gfx,win.width,win.height,new File(shots,"chatbox-f"+(i+1)+".png")); }
+            hud.closeAll();
+            var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
+            var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+            for(int i=0;i<8;i++) { gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height); }
+            Main.shot(gfx,win.width,win.height,new File(shots,"title-settings.png"));settings.escape();
+        }
+        if(only==null || only.equals("water") || only.equals("final")) {
+            place(96.5f,43f,0);g.state.minutes=720;game.tick(0);
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.RAIN);g.timeSystem.weather.snap();
+            g.chemistry.splash(96,4,35);
+            float[] cam={97,7,44,96,3.8f,34};
+            for(int i=0;i<90;i++) { game.tick(1f/60);draw(cam,1f/60);if(i==30 || i==75)Main.shot(gfx,win.width,win.height,new File(shots,"water-rain-f"+(i+1)+".png")); }
+            g.objects.add(new rpg.objects.Fire(g.state.newEntityId(),91.5f,DevMap.FLOOR,21.5f,g.state.minutes+1000,g.player.id));
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR);g.timeSystem.weather.snap();
+            cam=new float[]{90,6,26,91.5f,5,21.5f};
+            for(int i=0;i<60;i++) { game.tick(1f/60);draw(cam,1f/60); }
+            Main.shot(gfx,win.width,win.height,new File(shots,"chemical-fire.png"));
+        }
+        if(only==null || only.equals("carry") || only.equals("final")) {
+            var dead=(rpg.ai.Npc)g.actor(Ids.BANDIT_1);g.ai.spawnBody(dead);g.teleport(dead,64.5f,DevMap.FLOOR,70);
+            place(60.5f,73.5f,0);gfx.preload(java.util.List.of(dead));dead.alive=false;dead.hp=0;g.onKilled(dead,g.player,0);frames(60);
+            var corpse=(rpg.objects.Corpse)g.objects.get(dead.corpse);place(corpse.x,corpse.z+1.2f,0);frames(3);
+            if(g.carrying.begin(g.player,corpse).rejected())throw new IllegalStateException("Cannot pick up review body");
+            film("body-pickup",48,i->{},a->quarter(a,-3.2f),0);
+            g.controller.camPitch=0.25f;
+            for(int i=0;i<27;i++) { g.controller.in.mainDown=true;step(); }
+            if(g.player.cs.charge<=0 || !g.carrying.ready(g.player))throw new IllegalStateException("Body throw preview has no charged carry");
+            reviewUi("body-throw-guide");
+            film("body-throw",60,i->g.controller.in.mainDown=i<3,a->side(a,-4),0);
+        }
+        if(only==null || only.equals("gore") || only.equals("final"))goreShots();
+        if("final".equals(only) || "gear".equals(only)) {
+            place(64.5f,66.5f,0);g.player.firstPerson=true;
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF,new rpg.item.ItemStack(rpg.item.Items.get("iron_shield"),1));
+            g.controller.in.offDown=false;frames(8);reviewUi("shield-rest-firstperson");
+            g.controller.in.offDown=true;frames(18);reviewUi("shield-firstperson");
+        }
+    }
+
     private void systemPolishShots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         if ("extras".equals(only)) systemExtrasShots();
@@ -415,7 +966,7 @@ final class Gallery {
 
     private void menuLatencyShots() {
         place(64.5f, 62.5f, 0); g.player.restore(); g.player.inv.clear();
-        for (String id : new String[]{"bronze_axe", "iron_pickaxe", "shortbow", "iron_arrows", "trout", "logs", "leather_body", "steel_shield"}) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(id), 1));
+        for (String id : new String[]{"bronze_axe", "iron_pickaxe", "shortbow", "iron_arrows", "trout", "logs", "stone_body", "steel_shield"}) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(id), 1));
         for (Hud.Scene scene : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.SKILLS, Hud.Scene.CHARACTER}) {
             hud.go(scene); double first = 0, worst = 0;
             for (int frame = 0; frame < 24; frame++) {
@@ -802,9 +1353,10 @@ final class Gallery {
     /** A killing cut on a bandit in the square: the severed arm, the body, the blood on the ground. */
     private void goreShots() {
         var bandit = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        if(!bandit.alive)g.ai.revive(bandit,true);
         g.ai.reload(bandit);
         g.teleport(bandit, 102.5f, DevMap.FLOOR, 74.5f);
-        bandit.yaw = 0; bandit.hostileToPlayer = false;
+        bandit.yaw = 0; bandit.hostileToPlayer = false;bandit.nextThink=Double.MAX_VALUE;
         place(102.5f, 77f, 0);
         frames(5);
         float rx = (float) Math.cos(bandit.yaw), rz = (float) -Math.sin(bandit.yaw);
@@ -813,7 +1365,7 @@ final class Gallery {
         float[] cam = {104.5f, DevMap.FLOOR + 2.4f, 78.5f, 102.5f, DevMap.FLOOR + 0.3f, 74.5f};
         for (int i = 0; i < 20; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-cut.png"));
-        for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+        for (int i = 0; i < 120; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
         Main.shot(gfx, win.width, win.height, new File(shots, "gore-after.png"));
     }
 
@@ -1070,8 +1622,12 @@ final class Gallery {
     private void itemSheet() {
         List<BufferedImage> tiles = new java.util.ArrayList<>();
         List<String> labels = new java.util.ArrayList<>();
+        // RPG_ITEMS=id,id,...: only those, drawn larger (a close look at new models)
+        String only = System.getenv("RPG_ITEMS");
+        java.util.Set<String> pick = only == null ? null : java.util.Set.of(only.split(","));
         for (rpg.item.ItemDef d : rpg.item.Items.all()) {
-            int cell = 36, w = Math.max(1, d.gw) * cell, h = Math.max(1, d.gh) * cell;
+            if (pick != null && !pick.contains(d.id)) continue;
+            int cell = pick != null ? 96 : 36, w = Math.max(1, d.gw) * cell, h = Math.max(1, d.gh) * cell;
             int[] px = rpg.ui.ItemIcons.raster(d, cell);
             BufferedImage icon = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             icon.setRGB(0, 0, w, h, px, 0, w);
@@ -1153,6 +1709,7 @@ final class Gallery {
         float dx = cam[3] - cam[0], dy = cam[4] - cam[1], dz = cam[5] - cam[2], l = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         gfx.camera(cam[0], cam[1], cam[2], dx / l, dy / l, dz / l, win.width, win.height, dt);
         gfx.scene(g, false, dt, g.state.hourOfDay());
+        if(reviewMesh!=0)gfx.cmd.model(reviewMesh,astratto.bridge.AstrattoNative.MODEL_FOLIAGE,reviewTransform.m,1,1,1,1,0,1,0.95f,0);
         ui.begin(gfx.cmd);
         ui.end();
         gfx.frame(win.width, win.height);

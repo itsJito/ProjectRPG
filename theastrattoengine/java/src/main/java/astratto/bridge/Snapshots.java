@@ -56,6 +56,18 @@ public final class Snapshots {
         }
     }
 
+    public record Chemical(long id, long owner, float x, float y, float z, float radius, int tags, int state, float fuel, float wet, float heat, int block, int originalBlock) {}
+    public static List<Chemical> chemistry(ByteBuffer b) {
+        List<Chemical> result = new ArrayList<>();
+        if (b == null) return result;
+        for (int at = 0; at + 8 <= b.capacity();) {
+            int length = b.getInt(at + 4); if (length < 8 || length > b.capacity() - at) break;
+            if (b.getInt(at) == 192 && length >= 64) result.add(new Chemical(b.getLong(at + 8), b.getLong(at + 16), b.getFloat(at + 24), b.getFloat(at + 28), b.getFloat(at + 32), b.getFloat(at + 36), b.getInt(at + 40), b.getInt(at + 44), b.getFloat(at + 48), b.getFloat(at + 52), b.getFloat(at + 56), b.getInt(at + 60), length >= 72 ? b.getInt(at + 64) : b.getInt(at + 60)));
+            at += length;
+        }
+        return result;
+    }
+
     public static final class Mover {
         public long handle;
         public float x, y, z, vx, vy, vz;

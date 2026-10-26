@@ -17,6 +17,16 @@ import rpg.item.ItemStack;
  */
 public final class GroundItem extends WorldObject {
     public ItemStack stack;
+    /**
+     * A single arrow, bolt or thrown blade lies exactly as it came to rest (gamefixes): its middle at x, y, z and its
+     * point along dir (null: an ordinary item, set down on its base). While it is still moving it is a rigid body in the
+     * physics world (rigid), whose pose is read back each frame until it settles.
+     */
+    public float[] dir;
+    public long rigid;
+    public double rigidSince;
+    /** Lodged in something (a wall, a tree, the ground, a target): it stays put until taken. */
+    public boolean lodged;
 
     public GroundItem(long id, ItemStack stack, float x, float y, float z) {
         super(id, "ground", stack.def.name, x, y, z);
@@ -51,7 +61,9 @@ public final class GroundItem extends WorldObject {
         if (theft) moving.markStolen(stack.owner);
         if (!a.canStore(moving)) return Result.no("You don't have enough inventory space to hold that.");
         a.store(moving);
+        a.grab(g.time, x, y, z);
         removed = true;
+        if (rigid != 0) { g.game.commands().release(rigid); rigid = 0; }
         var ev = g.state.commit(req, "ItemTaken", a.id, id, jurisdiction(), 0, moving + " from the ground by " + how);
         if (theft) g.law.theft(a, stack.owner, moving, this, ev.id());
         if (a == g.player && g.sfx != null) g.sfx.ui("pickup", 0.5f);
@@ -61,5 +73,15 @@ public final class GroundItem extends WorldObject {
     @Override public String examine(Rpg g) { return stack.def.examine; }
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  stack=" + stack + " item owner=" + g.nameOf(stack.owner) + " stolen=" + stack.stolen; }
 
-    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("stack", ItemIO.stack(stack)); m.put("x", x); m.put("y", y); m.put("z", z); return m; }
+    @Override public Map<String, Object> save() {
+        Map<String, Object> m = super.save(); m.put("stack", ItemIO.stack(stack)); m.put("x", x); m.put("y", y); m.put("z", z);
+        if (dir != null) { m.put("dx", dir[0]); m.put("dy", dir[1]); m.put("dz", dir[2]); m.put("lodged", lodged); }
+        return m;
+    }
+
+    /** A saved arrow's pose (an ordinary item has none). */
+    public void restorePose(Map<String, Object> saved) {
+        if (saved.containsKey("dx")) dir = new float[]{(float) astratto.util.Json.num(saved, "dx", 0), (float) astratto.util.Json.num(saved, "dy", 0), (float) astratto.util.Json.num(saved, "dz", 1)};
+        lodged = astratto.util.Json.bool(saved, "lodged", false);
+    }
 }

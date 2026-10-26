@@ -17,6 +17,7 @@ public abstract class WorldObject implements Interactable {
     public float x, y, z;
     public long owner;
     public boolean removed;
+    public float charred;
 
     protected WorldObject(long id, String def, String name, float x, float y, float z) {
         this.id = id; this.def = def; this.name = name; this.x = x; this.y = y; this.z = z;
@@ -47,8 +48,8 @@ public abstract class WorldObject implements Interactable {
     }
 
     /** Mutable state for saving (the definition and position are rebuilt by the fixtures). */
-    public Map<String, Object> save() { Map<String, Object> m = new HashMap<>(); m.put("removed", removed); m.put("owner", owner); return m; }
-    public void load(Rpg g, Map<String, Object> m) { removed = astratto.util.Json.bool(m, "removed", false); owner = astratto.util.Json.lng(m, "owner", owner); }
+    public Map<String, Object> save() { Map<String, Object> m = new HashMap<>(); m.put("removed", removed); m.put("owner", owner);m.put("charred",charred); return m; }
+    public void load(Rpg g, Map<String, Object> m) { removed = astratto.util.Json.bool(m, "removed", false); owner = astratto.util.Json.lng(m, "owner", owner);charred=(float)astratto.util.Json.num(m,"charred",0); }
 
     @Override public String inspect(Rpg g) { return String.format("%s #%d def=%s at (%.1f, %.1f, %.1f) owner=%s %s", name, id, def, x, y, z, g.nameOf(owner), jurisdiction()); }
 }

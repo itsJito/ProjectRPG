@@ -168,8 +168,13 @@ public final class Music {
                 if (p.stream.decoded() && p.age > p.stream.buffered() + 0.5) { p.stream.close(); stingers.remove(i); }
             }
         }
-        if (stingers.isEmpty()) duckTarget = 1f;
+        duckUntil = Math.max(0, duckUntil - dt);
+        if (stingers.isEmpty()) duckTarget = duckUntil > 0 ? 0.3f : 1f;
     }
+
+    /** A jingle played as a sound (a level, a death): the score dips under it for that long. */
+    public void duckFor(float seconds) { duckUntil = Math.max(duckUntil, seconds); duckTarget = 0.3f; }
+    private float duckUntil;
 
     /** The pause menu turns the score down a little; leaving it brings it back. */
     public void paused(boolean on) { gain = on ? 0.45f : 0.7f; }

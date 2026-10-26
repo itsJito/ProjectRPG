@@ -11,6 +11,8 @@ package rpg.ai;
 public final class Hunt {
     /** Who is sought (0: someone unknown - the culprit behind a body or blood found), and why. */
     public long target;
+    public long source, lastTrail;
+    public float lookYaw;
     public String why;
     /** The last known location: where the last clue put them, and when; where the search is centred. */
     public float x, z;

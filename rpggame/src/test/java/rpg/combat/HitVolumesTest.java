@@ -27,6 +27,11 @@ class HitVolumesTest {
             assertTrue(Float.isFinite(HitVolumes.ray(g, npc, x, y, z - 2, 0, 0, 1, 4, 0.03f)));
             assertEquals(Gore.Part.HEAD, HitVolumes.part(g, npc, actual[head], y, z));
             assertTrue(Float.isInfinite(HitVolumes.ray(g, npc, npc.x, npc.y + 1.7f, npc.z - 2, 0, 0, 1, 4, 0.03f)));
+            npc.alive=false;npc.loaded=true;npc.hp=0;
+            var corpse=g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(),npc.name,npc.id,npc.x,npc.y,npc.z,npc.id));npc.corpse=corpse.id;
+            var shot=new CombatSystem.Projectile();shot.owner=g.player;shot.x=x;shot.y=y;shot.z=z-0.6f;shot.vz=30;shot.life=1;
+            g.combat.projectiles.add(shot);g.combat.update(0.05f);
+            assertTrue(shot.done,"a live projectile must collide with a dead body's actual head");
             g.gore.of(npc).severed[Gore.Part.HEAD.ordinal()] = true;
             assertTrue(Float.isInfinite(HitVolumes.ray(g, npc, x, y, z - 2, 0, 0, 1, 4, 0.03f)), "a removed head leaves no ghost hitbox");
         }

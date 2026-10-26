@@ -62,7 +62,7 @@ public final class Economy {
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
-        stock(shopA, Items.get("leather_axe"), 2, 2); stock(shopA, Items.get("leather_pickaxe"), 2, 2); stock(shopA, Items.FISHING_NET, 2, 2); stock(shopA, Items.CRAB_CAGE, 1, 1);
+        stock(shopA, Items.get("wooden_axe"), 2, 2); stock(shopA, Items.get("wooden_pickaxe"), 2, 2); stock(shopA, Items.get("stone_axe"), 1, 1); stock(shopA, Items.get("stone_pickaxe"), 1, 1); stock(shopA, Items.FISHING_NET, 2, 2); stock(shopA, Items.CRAB_CAGE, 1, 1);
         stock(shopA, Items.RELIGIOUS_WINE, 6, 6); stock(shopB, Items.RESTORATIVE, 3, 3);
         stock(shopA, Items.get("bronze_axe"), 2, 2); stock(shopA, Items.get("bronze_pickaxe"), 2, 2); stock(shopA, Items.BRONZE_ARROWS, 200, 200);
         stock(shopB, Items.LOGS, 0, 12); stock(shopB, Items.BREAD, 4, 10); stock(shopB, Items.get("iron_sword"), 1, 1); stock(shopB, Items.get("iron_shield"), 1, 1);
@@ -127,6 +127,7 @@ public final class Economy {
                     (hurt.kind.equals("ASSAULT") || hurt.kind.equals("MURDER"))) return merchant.name + " wants nothing to do with you.";
             return null;
         }
+        if (g.law.lockdown(s.jurisdiction)) return "The shops of " + s.jurisdiction + " are shut: the town is in lockdown.";
         if (g.law.bounty(a.id, s.jurisdiction) > 0) return merchant.name + " won't trade with someone wanted in " + s.jurisdiction + ".";
         for (Memory m : merchant.memories) if (m.crime() && m.subject == a.id && m.confidence >= 0.4f && (!m.settled || m.victim == merchant.id))
             return merchant.name + " won't trade with you: \"" + (m.witnessed() ? "I saw what you did." : "I've heard what you did.") + "\"";

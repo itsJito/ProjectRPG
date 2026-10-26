@@ -18,7 +18,9 @@ public final class TitleScreen {
     private List<Profile> profiles;
     private Profile confirmDelete;
     private float fade;
+    private java.util.concurrent.CompletableFuture<Void> deletion;
     public java.util.function.Consumer<String> sound;
+    public Runnable settings = () -> {};
     private String version = "";
 
     public TitleScreen(String version) { this.version = version; refresh(); }
@@ -37,6 +39,9 @@ public final class TitleScreen {
 
     public void draw(Ui2D ui, int w, int h, float dt, boolean enter, boolean escape) {
         ui.consumed = false;
+        if (deletion != null && deletion.isDone()) {
+            deletion.join(); deletion = null; confirmDelete = null; refresh();
+        }
         fade = Math.min(1, fade + dt * 0.8f);
         // shade over the left of the picture, and a vignette top and bottom, so the title and the cards read
         for (int i = 0; i < 40; i++) ui.rect(0, 0, 360 + i * 10, h, Style.fade(0x06000000, fade));
@@ -83,16 +88,18 @@ public final class TitleScreen {
     }
 
     private void confirm(Ui2D ui, float x, float y, boolean enter, boolean escape) {
+        if (deletion != null) {
+            Style.card(ui, x, y, 420, 100); ui.text("Deleting profile...", x + 20, y + 30, 19, Style.TEXT); return;
+        }
         Style.card(ui, x, y, 420, 170);
         ui.text("Delete " + confirmDelete.name + "?", x + 20, y + 18, 19, Style.TEXT);
         ui.text("The character and their save are gone for good.", x + 20, y + 52, 13, Style.DIM);
         ui.text("This can't be undone.", x + 20, y + 72, 13, Style.BAD);
         if (Style.button(ui, "Delete for good", x + 20, y + 110, 180, 38, true)) {
-            Profiles.delete(confirmDelete.slot);
+            int slot = confirmDelete.slot;
             if (selected == confirmDelete) selected = null;
-            confirmDelete = null;
+            deletion = java.util.concurrent.CompletableFuture.runAsync(() -> Profiles.delete(slot));
             click("LogoutProfileButton");
-            refresh();
         } else if (Style.button(ui, "Keep", x + 220, y + 110, 180, 38, true) || escape) { confirmDelete = null; click("UIbutton1"); }
     }
 
@@ -105,6 +112,9 @@ public final class TitleScreen {
     }
 
     private void footer(Ui2D ui, int w, int h) {
+        if (Style.button(ui,"Settings",w-244,h-66,150,34,true)) settings.run();
+        ui.rectTex(ui.engineLogo,w-78,h-80,58,58,0,0,1,1,0xC0FFFFFF);
+
         ui.text("Version " + version + "   -   Astratto Engine", 16, h - 24, 11, Style.FAINT);
         ui.text("Esc: quit   Enter: continue", w - 190, h - 24, 11, Style.FAINT);
         cursor(ui);

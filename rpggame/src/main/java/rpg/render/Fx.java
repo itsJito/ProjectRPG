@@ -64,16 +64,16 @@ public final class Fx {
 
     private float s() { return rnd.nextFloat() * 2 - 1; }
 
-    /** The level-up fireworks: three bursts of bright embers round a point. */
+    /** The level-up confetti (gamefixes: smaller and quicker): two quick pops of bright embers just over the head. */
     public void fireworks(float x, float y, float z) {
         float[][] cols = {{6, 2.2f, 0.6f}, {1.2f, 3.5f, 6}, {5, 5, 1.4f}, {5, 1, 4}};
-        for (int burst = 0; burst < 3; burst++) {
-            float bx = x + s() * 1.4f, by = y + 1.2f + burst * 0.6f, bz = z + s() * 1.4f;
+        for (int burst = 0; burst < 2; burst++) {
+            float bx = x + s() * 0.45f, by = y + 0.35f + burst * 0.3f, bz = z + s() * 0.45f;
             float[] c = cols[(burst + rnd.nextInt(4)) % 4];
-            for (int i = 0; i < 70; i++) {
-                float th = rnd.nextFloat() * 6.283f, ph = (float) Math.acos(s()), sp = 3.5f + rnd.nextFloat() * 2.5f;
+            for (int i = 0; i < 34; i++) {
+                float th = rnd.nextFloat() * 6.283f, ph = (float) Math.acos(s()), sp = 1.6f + rnd.nextFloat() * 1.1f;
                 add(2, bx, by, bz, (float) (Math.sin(ph) * Math.cos(th)) * sp, (float) Math.cos(ph) * sp, (float) (Math.sin(ph) * Math.sin(th)) * sp,
-                        0.09f, c[0], c[1], c[2], 1, 1.2f + rnd.nextFloat() * 0.8f, 3.5f, 1.6f);
+                        0.04f, c[0], c[1], c[2], 1, 0.45f + rnd.nextFloat() * 0.3f, 3.5f, 2.4f);
             }
         }
     }
@@ -114,14 +114,6 @@ public final class Fx {
         add(2, x + s() * 0.12f, y, z + s() * 0.12f, s() * 0.1f, -0.4f, s() * 0.1f, 0.045f, 0.32f, 0.015f, 0.015f, 1, 0.5f, 14, 0.2f);
     }
 
-    public void flame(float x, float y, float z, float scale) {
-        add(0, x + s() * 0.15f * scale, y, z + s() * 0.15f * scale, 0, 0.9f, 0, 0.32f * scale, 1, 1, 1, 0.95f, 0.65f + rnd.nextFloat() * 0.3f, -0.5f, 0.6f);
-        if (rnd.nextFloat() < 0.15f) add(1, x, y + 0.5f * scale, z, s() * 0.2f, 0.7f, s() * 0.2f, 0.35f * scale, 0.32f, 0.32f, 0.34f, 0.35f, 2.2f, -0.1f, 0.3f);
-    }
-
-    public void splash(float x, float y, float z) {
-        for (int i = 0; i < 6; i++) add(2, x + s() * 0.4f, y, z + s() * 0.4f, s() * 0.6f, 1.2f + rnd.nextFloat(), s() * 0.6f, 0.05f, 0.8f, 1, 1.3f, 0.8f, 0.6f, 9, 0.5f);
-    }
 
     public void ring(float x, float y, float z, float size, float r, float g, float b) { add(4, x, y + 0.05f, z, 0, 0, 0, size, r, g, b, 1, 0.7f, 0, 0); }
 

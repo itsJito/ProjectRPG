@@ -55,6 +55,8 @@ public final class Rpg implements GameModule {
     public ItemActions items;
     public CombatSystem combat;
     public rpg.combat.Reactions reactions;
+    public rpg.combat.Falling falling;
+    public rpg.skill.MovementPractice movementPractice;
     public rpg.combat.Gore gore;
     public rpg.combat.Prayers prayers;
     public rpg.combat.Magic magic;
@@ -65,15 +67,23 @@ public final class Rpg implements GameModule {
     /** The player's death as it plays out (gamefixes), and the graves and undertaker that follow it (GDD 3.12). */
     public final PlayerDeath death = new PlayerDeath(this);
     public rpg.law.Undertaker undertaker;
+    public rpg.law.Graveyards graveyards;
     /** The player's Honor (GDD 3.5). */
     public rpg.law.Honor honor;
     public Economy econ;
+    public rpg.econ.Bank bank;
+    public rpg.monster.Monsters monsters;
     public Quests quests;
     public Progression prog;
     public rpg.actor.Traversal traversal;
     public rpg.actor.BodyCarry carrying;
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
+    public rpg.world.Chemistry chemistry;
+    public rpg.ai.Traps traps;
+    public rpg.world.Foliage foliage;
+    public rpg.world.WaterContacts waterContacts;
+    public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     public Fx fx;
     public Sfx sfx;
     /** The score (set by the window's loop; null in automated runs). */
@@ -119,6 +129,8 @@ public final class Rpg implements GameModule {
         items = new ItemActions(this);
         combat = new CombatSystem(this);
         reactions = new rpg.combat.Reactions(this);
+        falling = new rpg.combat.Falling(this);
+        movementPractice = new rpg.skill.MovementPractice(this);
         gore = new rpg.combat.Gore(this);
         prayers = new rpg.combat.Prayers(this);
         magic = new rpg.combat.Magic(this);
@@ -126,11 +138,28 @@ public final class Rpg implements GameModule {
         dialogue = new Dialogue(this);
         law = new Law(this);
         undertaker = new rpg.law.Undertaker(this);
+        graveyards = new rpg.law.Graveyards(this);
+        graveyards.plots.add(new rpg.law.Graveyards.Plot("DevCity graveyard", DevMap.ALPHA, 113, DevMap.FLOOR, 89, 8, 4));
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
+        bank = new rpg.econ.Bank(this);
         quests = new Quests(this);
         traversal = new rpg.actor.Traversal(this);
         carrying = new rpg.actor.BodyCarry(this);
+        chemistry = new rpg.world.Chemistry(this);
+        traps = new rpg.ai.Traps(this);
+        foliage = new rpg.world.Foliage(this);
+        waterContacts = new rpg.world.WaterContacts(this);
+        timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,DevMap.SX+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
+        timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
+        timeSystem.weather.listener = new astratto.weather.Weather.Listener() {
+            @Override public void thunder(float distance,float gain) { if(sfx!=null && sfx.has("thunder"))sfx.ui("thunder",gain*0.7f); }
+            @Override public void strike(float x,float y,float z) {
+                for(var receiver:chemistry.active)if((receiver.tags()&astratto.bridge.AstrattoNative.CHEM_CONDUCTIVE)!=0 && (receiver.state()&astratto.bridge.AstrattoNative.CHEM_WET)!=0
+                        && Math.hypot(receiver.x()-x,receiver.z()-z)<18) { x=receiver.x();y=receiver.y();z=receiver.z();break; }
+                chemistry.emit(null,astratto.bridge.AstrattoNative.CHEM_ELECTRIC,x,y,z,2,5,0.25f);
+            }
+        };
         bountyBoard = new rpg.law.BountyBoard(this);
         invariants = new Invariants(this);
         controller = new PlayerController(this);
@@ -146,6 +175,8 @@ public final class Rpg implements GameModule {
         ai.init();
         animals = new rpg.animal.Animals(this);
         animals.init();
+        monsters = new rpg.monster.Monsters(this);
+        monsters.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
         econ.init();
         for (int i = 0; i < DevMap.DUMMIES.length; i++) {
@@ -162,19 +193,24 @@ public final class Rpg implements GameModule {
         chat.add("Welcome to the RPGGAME devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
+    /** What a new character carries (gamefixes): wooden arms and a shortbow worn, the gathering tools and a little food packed, no coins. */
     private void starterKit() {
         give(player, Items.WOODEN_SWORD, 1);
-        give(player, Items.get("leather_body"), 1);
-        give(player, Items.BREAD, 3);
-        give(player, Items.COINS, 200);
+        give(player, Items.get("wooden_shield"), 1);
+        give(player, Items.get("wooden_arrows"), 25);
+        give(player, Items.SHORTBOW, 1);
+        give(player, Items.get("stone_axe"), 1);
+        give(player, Items.get("stone_pickaxe"), 1);
         give(player, Items.TINDERBOX, 1);
-        // a belt pouch, worn: a small grid of its own beside the base 10 x 4
-        ItemStack pouch = new ItemStack(Items.POUCH, 1);
-        player.eq.set(rpg.item.ItemDef.Slot.BELT, pouch);
-        state.mint(Items.POUCH, 1);
+        give(player, Items.FISHING_NET, 1);
+        give(player, Items.POT, 1);
+        give(player, Items.BUCKET, 1);
+        give(player, Items.BREAD, 1);
+        give(player, Items.SHRIMP, 1);
         var r = items.equipFirst(player, Items.WOODEN_SWORD, rpg.item.ItemDef.Slot.MAIN, 0);
-        var r2 = items.equipFirst(player, Items.get("leather_body"), rpg.item.ItemDef.Slot.BODY, 0);
-        if (r.rejected() || r2.rejected()) chat.warn("Starter gear could not be equipped.");
+        var r2 = items.equipFirst(player, Items.get("wooden_shield"), rpg.item.ItemDef.Slot.OFF, 0);
+        var r3 = items.equipFirst(player, Items.get("wooden_arrows"), rpg.item.ItemDef.Slot.AMMO, 0);
+        if (r.rejected() || r2.rejected() || r3.rejected()) chat.warn("Starter gear could not be equipped.");
     }
 
     /**
@@ -196,6 +232,9 @@ public final class Rpg implements GameModule {
         lastDt = dt;
         state.tick++;
         state.minutes += dt * cfg.minutesPerSecond;
+        timeSystem.update(state.minutes,dt,player.x,player.eyeY(),player.z);
+        game.commands().chemWind(timeSystem.weather.windX,timeSystem.weather.windZ);
+        game.commands().chemWeather(timeSystem.weather.rain);
         chat.now = time; fx.now = time;
         death.update();
         law.update();
@@ -205,8 +244,11 @@ public final class Rpg implements GameModule {
         gore.update(dt);
         prayers.update(dt);
         magic.update(dt);
-        if (!aiDisabled()) { ai.update(dt); animals.update(dt); }
+        if (!aiDisabled()) { ai.update(dt); animals.update(dt); monsters.update(dt); }
         carrying.update();
+        chemistry.update();
+        traps.update();
+        foliage.update();
         objects.update(dt);
         undertaker.update();
         spareWatch();
@@ -223,20 +265,26 @@ public final class Rpg implements GameModule {
         lastRigids = ctx.rigids();
         Snapshots.Mover m = lastBodies.mover(player.body);
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
-        if (m != null && !(ui != null && ui.console.noclip)) {
-            player.walked += (float) Math.hypot(m.x - player.x, m.z - player.z);
+        if (m != null && !player.reacting && !(ui != null && ui.console.noclip)) {
+            float traveled = (float) Math.hypot(m.x - player.x, m.z - player.z);
+            player.walked += traveled;
             player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched;
+            movementPractice.moved(traveled);
         }
         ai.afterFrame(lastBodies, ctx.agents());
+        falling.afterFrame(lastBodies, (float) lastDt);
         reactions.afterFrame(lastBodies);
         animals.afterFrame(lastBodies, ctx.agents());
+        monsters.afterFrame(lastBodies);
+        controller.syncCamera();
+        waterContacts.update();
     }
 
     @Override public void path(int request, int[] cells, int expansions) { controller.onPath(request, cells); }
 
     /** A body Sydney holds struck the ground: a thud (louder the harder), and a hard fall on the head hurts. */
     @Override public void ragdollImpact(long ragdoll, int point, float speed, float impulse, float x, float y, float z, int block) {
-        if (sfx != null && speed > 2.6f) sfx.play("thud", x, y, z, Math.min(1f, 0.25f + speed / 9f));
+        if (sfx != null && speed > 2.6f) sfx.play("body.fall", x, y, z, Math.min(1f, 0.25f + speed / 9f));
         if (speed < 6.5f) return;
         for (Npc n : npcs) if (n.ragdoll == ragdoll && n.alive && n.reacting && point == astratto.bridge.AstrattoNative.RD_HEAD) n.hp = Math.max(1, n.hp - (speed - 6.5f) * 3 * rpg.combat.CombatMath.HP_SCALE);
     }
@@ -251,7 +299,7 @@ public final class Rpg implements GameModule {
         if (ma == rpg.objects.Glass.MATERIAL_GLASS) glass.clink(x, y, z, speed);
         else if (ma == rpg.objects.Door.MATERIAL_WOOD_DOOR && speed > 1.2f && sfx != null) sfx.play(speed > 3 ? "wood" : "wood.light", x, y, z, Math.min(0.7f, speed * 0.12f));
         else if (sfx != null && speed > 1.5f) sfx.play(speed > 4 ? "wood" : "generic", x, y, z, Math.min(0.6f, speed * 0.1f));
-        if (b == 0 && mover == 0 && mb == rpg.world.Blocks.GLASS && speed > 4.5f && ma != rpg.objects.Glass.MATERIAL_GLASS) {
+        if (b == 0 && mover == 0 && rpg.world.Blocks.glass(mb) && speed > 4.5f && ma != rpg.objects.Glass.MATERIAL_GLASS) {
             int bx = (int) Math.floor(x - nx * 0.06f), by = (int) Math.floor(y - ny * 0.06f), bz = (int) Math.floor(z - nz * 0.06f);
             glass.shatter(bx, by, bz, x, y, z, -nx, -ny, -nz, speed / 6f, null);
         }
@@ -295,6 +343,7 @@ public final class Rpg implements GameModule {
         for (Npc n : npcs) if (n.alive && n.loaded) l.add(n);
         l.addAll(dummies);
         if (animals != null) for (rpg.animal.Animal a : animals.all()) if (a.alive && a.loaded) l.add(a);
+        if (monsters != null) for (rpg.monster.Monster m : monsters.all()) if (m.alive && m.loaded) l.add(m);
         return l;
     }
 
@@ -302,6 +351,7 @@ public final class Rpg implements GameModule {
         if (id == player.id) return player;
         for (Npc n : npcs) if (n.id == id) return n;
         for (Actor d : dummies) if (d.id == id) return d;
+        if (monsters != null) { Actor m = monsters.byId(id); if (m != null) return m; }
         if (animals != null) return animals.byId(id);
         return null;
     }
@@ -360,16 +410,22 @@ public final class Rpg implements GameModule {
     }
 
     public void teleport(Actor a, float x, float y, float z) {
+        if (falling != null) falling.reset(a);
+        if (a == player && movementPractice != null) movementPractice.reset();
+        if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);
         if (a.body != 0) game.commands().moverPlace(a.body, x, y + 0.05f, z, 0, 0, 0);
         a.x = x; a.y = y; a.z = z;
+        if(chemistry!=null)chemistry.register(a);
         if (a instanceof Npc n) { if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
         interact.cancel(a, "moved");
     }
 
     // ------------------------------------------------------------------ death and time
     public void onKilled(Actor v, Actor killer, long cause) {
+        falling.reset(v);v.morphT=v.chronoT=0;
         if (prayers != null) prayers.clear(v);
         law.onKilled(v, killer, cause);
+        if (v instanceof rpg.monster.Monster mo) monsters.onKilled(mo, killer);
         if (v instanceof Npc n) ai.onKilled(n, killer);
         if (v instanceof rpg.animal.Animal an) animals.onKilled(an, killer, cause);
         if (v == player) {
@@ -386,21 +442,21 @@ public final class Rpg implements GameModule {
 
     /**
      * A grave where the body lay (GDD 3.12): everything carried and worn, packed into one container that stands for ten
-     * minutes. Secured (inside the walls), nobody but the player and the guard who carries it in may touch it; exposed
+     * minutes. Secured (inside the walls), only the guard who carries it in may touch it; exposed
      * (outside), anyone who finds it may. What will not fit lies on the ground beside it, never lost. Null if there was
      * nothing to keep.
      */
     public Container makeGrave(float x, float z, long killer, boolean secured) {
         int honorAtDeath = honor.score;
         if (player.inv.isEmpty() && player.eq.stacks().isEmpty()) return null;
-        Container grave = objects.add(new Container(state.newEntityId(), "grave", player.name + "'s grave", "grave", x, DevMap.FLOOR + 0.3f, z, 28, player.id));
-        grave.ownerOnly = true;
+        Container grave = objects.add(new Container(state.newEntityId(), secured ? "death_claim" : "grave", player.name + "'s belongings", secured ? "claim" : "grave", secured ? DevMap.CUSTODY_CHEST[0] : x, DevMap.FLOOR + 0.3f, secured ? DevMap.CUSTODY_CHEST[1] : z, 320, player.id));
+        grave.ownerOnly = secured;
         grave.secured = secured;
         grave.killer = killer;
         grave.expiresAt = time + rpg.law.Undertaker.GRAVE_SECONDS;
         // the memorial is the Honor of the moment of death (GDD 3.5): it keeps that inscription whatever comes after
         grave.honor = honorAtDeath;
-        grave.name = player.name + "'s grave";
+        grave.name = player.name + (secured?"'s belongings":"'s grave");
         for (int i = 0; i < player.inv.size(); i++) {
             ItemStack s = player.inv.get(i);
             if (s == null) continue;
@@ -414,6 +470,7 @@ public final class Rpg implements GameModule {
             if (!grave.contents.add(s)) objects.drop(s, x - 0.5f, DevMap.FLOOR + 0.05f, z + 0.3f);
         }
         state.commit("GraveCreated", player.id, grave.id, DevMap.jurisdiction(x, z), 0, (secured ? "secured; " : "exposed; ") + grave.contents.stacks());
+        if (secured) undertaker.secureClaim(grave);
         return grave;
     }
 
@@ -437,6 +494,7 @@ public final class Rpg implements GameModule {
         player.alive = true;
         player.diedAt = -1;
         player.restore();
+        chemistry.cleanse(player);
         player.cs.cancel();
         player.cs.lastAttacker = 0;
         if (gore != null) gore.healed(player);

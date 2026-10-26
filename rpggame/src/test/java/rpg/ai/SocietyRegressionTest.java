@@ -20,6 +20,7 @@ class SocietyRegressionTest {
         g.state.minutes = 600; g.teleport(g.player, 101.4f, DevMap.FLOOR, 70.5f); game.tick(0);
     }
     @AfterEach void close() { game.close(); }
+    private static int meals(Npc n) { int k = 0; for (var grid : n.grids()) for (var s : grid.stacks()) if (s.def.heal > 0) k += s.amount; return k; }
     private Npc load(long id, float x, float z) { Npc n = (Npc) g.actor(id); g.ai.reload(n); g.teleport(n, x, DevMap.FLOOR, z); n.nextThink = Double.MAX_VALUE; game.tick(0); return n; }
     @Test void anAttackedBanditDefendsItselfInsideACityDespiteItsCampLeash() {
         Npc bandit = load(Ids.BANDIT_1, 99.8f, 70.5f); bandit.yaw = (float) -Math.PI / 2;
@@ -29,23 +30,30 @@ class SocietyRegressionTest {
         assertTrue(g.combat.contacts > 0, bandit.lastOutcome);
     }
     @Test void woundedNeighborsReceiveRealFoodWithoutGainingNpcExperience() {
-        Npc helper = load(Ids.GUARD, 100.5f, 70.5f); helper.yaw = helper.wantYaw = (float) -Math.PI / 2; helper.aware.clear();
-        long[] levels = helper.skills.raw().clone(); int food = helper.count(Items.TROUT); g.player.hp = 2;
+        // (a wounded player is offered the food instead, to accept or not: the neighbour here is a townswoman)
+        Npc helper = load(Ids.GUARD, 100.5f, 70.5f), hurt = load(Ids.VILLAGER, 102.5f, 70.5f); helper.yaw = helper.wantYaw = (float) -Math.PI / 2; helper.aware.clear();
+        g.teleport(g.player, 90.5f, DevMap.FLOOR, 60.5f);
+        long[] levels = helper.skills.raw().clone(); int food = meals(helper); hurt.hp = 2;
         g.ai.brain.think(helper); assertEquals(Brain.Goal.AID, helper.goal);
-        for (int i = 0; i < 48; i++) game.tick(1f / 60);
-        assertTrue(g.player.hp > 2); assertEquals(food - 1, helper.count(Items.TROUT)); assertArrayEquals(levels, helper.skills.raw());
+        for (int i = 0; i < 150 && meals(helper) == food; i++) game.tick(1f / 60);
+        assertTrue(hurt.hp > 2); assertEquals(food - 1, meals(helper)); assertArrayEquals(levels, helper.skills.raw());
     }
     @Test void guardsPhysicallyDeliverAnActualCorpseWithItsOriginalGear() {
-        Npc guard = load(Ids.GUARD, 102, 70.5f), dead = load(Ids.VILLAGER, 100.5f, 70.5f), undertaker = load(Ids.UNDERTAKER, 104, 74);
-        g.teleport(g.player, 96.5f, DevMap.FLOOR, 76.5f); undertaker.postX = 104; undertaker.postZ = 74;
-        ItemStack original = new ItemStack(Items.get("bronze_sword"), 1); dead.eq.set(ItemDef.Slot.MAIN, original);
+        Npc guard = load(Ids.GUARD, 102, 70.5f), dead = load(Ids.VILLAGER, 100.5f, 70.5f);
+        g.teleport(g.player, 96.5f, DevMap.FLOOR, 76.5f); g.graveyards.plots.clear();
+        g.graveyards.plots.add(new rpg.law.Graveyards.Plot("test plot", DevMap.ALPHA, 104, DevMap.FLOOR, 74, 2, 2));
+        ItemStack original = new ItemStack(Items.get("bronze_sword"), 1, dead.id, true, 929); dead.eq.set(ItemDef.Slot.MAIN, original);
         dead.alive = false; dead.hp = 0; g.ai.onKilled(dead, g.player);
         for (int i = 0; i < 90; i++) game.tick(1f / 60);
         Corpse corpse = (Corpse) g.objects.get(dead.corpse); guard.yaw = (float) Math.PI / 2; guard.nextThink = 0;
         for (int i = 0; i < 600 && !corpse.delivered; i++) game.tick(1f / 60);
         assertTrue(corpse.delivered, guard.goal + ": " + guard.lastOutcome + " / " + guard.goalReason);
-        assertEquals(0, guard.carryBody); assertEquals(0, corpse.heldBy); assertSame(original, dead.eq.get(ItemDef.Slot.MAIN));
-        assertTrue(Math.hypot(corpse.x - undertaker.x, corpse.z - undertaker.z) < 4);
+        assertEquals(0, guard.carryBody); assertEquals(0, corpse.heldBy); assertNull(dead.eq.get(ItemDef.Slot.MAIN));
+        var memorial = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Container c && c.kind.equals("memorial") && c.buried && c.burialPlot.equals("test plot")).map(o -> (rpg.objects.Container)o).findFirst().orElseThrow();
+        var recovered = memorial.contents.stacks().stream().filter(item -> item.origin == 929).findFirst().orElseThrow();
+        assertEquals(original.def, recovered.def); assertEquals(original.owner, recovered.owner); assertEquals(original.stolen, recovered.stolen);
+        assertEquals(0, dead.corpse); assertEquals(0, dead.ragdoll); assertTrue(corpse.removed);
+        assertEquals("test plot", memorial.burialPlot);
     }
     @Test void aRealNpcTheftIsWitnessedAndReportedThroughTheSameLawPipeline() {
         var stall = g.objects.stall;

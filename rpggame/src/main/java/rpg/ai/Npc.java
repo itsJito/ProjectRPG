@@ -20,12 +20,27 @@ import rpg.world.DevMap;
  * needs, a role, memories, a current goal and the reasons it was chosen - walked by an engine agent. It is also
  * interactable: Talk, Trade, Pickpocket, Pay bounty, Examine, each enabled or disabled with its reason.
  */
-public final class Npc extends Actor implements Interactable {
-    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE }
+public class Npc extends Actor implements Interactable {
+    public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC, MONSTER }
 
     public final Role role;
-    public final String title;
-    public final String homeJurisdiction;
+    /** Not before then does the bank see them again (an errand done, or the bank found shut). */
+    public double bankAgain;
+    /** Rank by birth, which weighs on a murder's bounty (gamefixes): commoner 400 G, noble 600 G, royal 1,000 G. */
+    public enum Standing { COMMON, NOBLE, ROYAL }
+    public Standing standing = Standing.COMMON;
+    /** A bounty hunter of a posse (law/Posses): hunted or killed, they add nothing to a bounty. */
+    public boolean posse;
+    public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.STANDARD;
+    public String title;
+    public Profession profession;
+    astratto.ai.TaskNetwork<Npc> job;
+    public long dutyTarget;
+    public int dutyPhase;
+    public float dutyX, dutyZ;
+    public double dutyUntil;
+    /** The kingdom whose law this person answers to (a posse's hunters come from the kingdom of the bounty). */
+    public String homeJurisdiction;
     /** Engine handles: the agent and its mind. */
     public long agent;
     /** Loaded: simulated in detail with a body; unloaded: resolved abstractly from the same state. */
@@ -56,6 +71,8 @@ public final class Npc extends Actor implements Interactable {
     CombatTactics.Plan tactic;
     double nextTactic;
     public double lastLootAt, lootStarted = -99, lootUntil = -99;
+    /** When this NPC may next hold something out to the player (an offer is not pressed again straight after an answer). */
+    public double offerAgain = -99;
     public boolean asleep() {
         return alive && !reacting && goal == Brain.Goal.SLEEP && !cs.busy()
                 && Math.hypot(x - homeX, z - homeZ) <= 1.2 && Math.hypot(vx, vz) < 0.12;
@@ -82,16 +99,13 @@ public final class Npc extends Actor implements Interactable {
     public int patrolIndex;
     public String arrestJurisdiction = "";
     public double busyUntil, arrestedUntil = -1, diedAt = -1, lastDialogAt = -99, chatUntil = -1;
-    public long ragdoll;
     /** The body to search, once dead (0: none). */
     public long corpse;
+    public double collectAgain = -99, leaveUntil = -99;
     /** When it reached the spot it went to look into (the investigation's clock). */
     public double arrivedAt = -99;
     /** The weapon knocked from the hand in a fall, where it lies (picked up again on getting up, if within reach). */
-    public rpg.objects.GroundItem dropped;
     /** Alive and in Sydney's hands (struck off balance): the mind waits, the body is simulated (see combat.Reactions). */
-    public boolean reacting, wentDown;
-    public double reactSince;
     /** Progress to the next footfall (1 = a foot comes down). */
     public float stepClock;
     public int pickpocketLevel = 1;
@@ -134,7 +148,7 @@ public final class Npc extends Actor implements Interactable {
     /** A line said aloud, over its head until a time. */
     public void say(String text, double until) { speech = text; speechUntil = until; }
 
-    public boolean combatant() { return role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
+    public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.KNIGHT || role == Role.SCHOLAR || role == Role.GUARD || role == Role.BANDIT || role == Role.BRUTE; }
 
     /** What this NPC believes about an actor's crimes (witnessed or heard), strongest first. */
     public Memory crimeKnown(long culprit) {
@@ -178,11 +192,15 @@ public final class Npc extends Actor implements Interactable {
         return null;
     }
 
+    public boolean canTalk(Rpg g) {
+        return alive && loaded && !hostileToPlayer && fightTarget == 0 && goal != Brain.Goal.FIGHT && goal != Brain.Goal.FLEE && goal != Brain.Goal.HIDE
+                && cs.staggered <= 0 && g.time - cs.lastHurt >= 3 && arrestedUntil < g.state.minutes;
+    }
+
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
-        boolean fighting = hostileToPlayer || goal == Brain.Goal.FIGHT && fightTarget == a.id;
-        o.add(Option.when(!fighting && arrestedUntil < g.state.minutes, "talk", "Talk-to", 10, fighting ? "They're attacking you!" : "They're in custody.", r));
+        if (canTalk(g)) o.add(Option.on("talk", "Talk-to", 10, r));
         if (role == Role.MERCHANT || role == Role.FENCE) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
@@ -197,7 +215,8 @@ public final class Npc extends Actor implements Interactable {
         }
         if (!hostileToPlayer) {
             boolean lvl = a.skills.level(Skill.THIEVING) >= pickpocketLevel, room = a.canStore(new ItemStack(Items.COINS, 1));
-            o.add(Option.when(lvl && room, "pickpocket", "Pickpocket", 3, !lvl ? "You need Thieving level " + pickpocketLevel + "." : "Your inventory is too full.", 1.6f));
+            o.add(Option.when(lvl, "pickpocket", "Inspect pockets", 3, "You need Thieving level " + pickpocketLevel + ".", 1.6f));
+            o.add(Option.when(lvl && room,"pickpocket-direct","Quick pickpocket",2,!lvl?"Your Thieving level is too low.":"Your inventory is too full.",1.6f));
         }
         o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
@@ -209,7 +228,13 @@ public final class Npc extends Actor implements Interactable {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
-                if (hostileToPlayer || goal == Brain.Goal.FIGHT && fightTarget == a.id) return Result.no(name + " is attacking you!");
+                if (!canTalk(g)) return Result.no(name + " cannot stop to talk now.");
+                // a wanted player who walks up to the watch is dealt with, however small the bounty (gamefixes)
+                if (a == g.player && (role == Role.GUARD || role == Role.LAWMAN) && g.law.bounty(a.id, homeJurisdiction) > 0) {
+                    g.law.confront(this, a);
+                    g.state.commit(req, "Talked", a.id, id, DevMap.jurisdiction(x, z), 0, name + " (wanted)");
+                    return Result.ok();
+                }
                 if (a == g.player) { g.ui.dialog(g.dialogue.talk(this)); knowsPlayer = true; }
                 g.state.commit(req, "Talked", a.id, id, DevMap.jurisdiction(x, z), 0, name);
                 lastDialogAt = g.time;
@@ -232,15 +257,62 @@ public final class Npc extends Actor implements Interactable {
                 if (why != null) return Result.no(why);
                 return g.law.payBounty(a, this, req);
             }
-            case "pickpocket" -> {
+            case "pickpocket", "pickpocket-direct" -> {
                 String why = dist(g, a, 1.6f);
                 if (why != null) return Result.no(why);
                 if (a.skills.level(Skill.THIEVING) < pickpocketLevel) return Result.no("You need Thieving level " + pickpocketLevel + " to pickpocket " + name + ".");
+                if(a==g.player && action.equals("pickpocket")) { if(g.ui!=null)g.ui.openContainer(pockets()); return Result.ok(); }
                 g.interact.begin(new Work(a, this, "pickpocket", "Pickpocketing", 1.1f, false, g.time, () -> pickpocket(g, a)));
                 return Result.started();
             }
             default -> { return Result.no("You can't do that."); }
         }
+    }
+
+    public rpg.objects.Container pockets() { return new Pocket(this); }
+
+    private static final class Pocket extends rpg.objects.Container {
+        private final Npc person;
+        Pocket(Npc person) { super(person.id,person.name+"'s pockets","pockets",person.x,person.y,person.z,person.id,person.inv);this.person=person; }
+        @Override public boolean exists(){return person.alive && person.loaded;}
+        @Override public float dist(Actor actor){x=person.x;y=person.y;z=person.z;return super.dist(actor);}
+        @Override public Result perform(Rpg g,Actor thief,String action,long request) {
+            if(!person.alive)return Result.no("They are no longer alive.");
+            if(action.equals("takeall"))return Result.no("Select one item to attempt a theft.");
+            if(!action.startsWith("take:"))return Result.no("Choose an item to attempt a theft.");
+            int slot=Integer.parseInt(action.substring(5));ItemStack selected=contents.get(slot);
+            if(selected==null)return Result.no("That item has moved.");
+            if(thief.skills.level(Skill.THIEVING)<person.pickpocketLevel)return Result.no("Your Thieving level is too low.");
+            ItemStack stolen = selected.copyWhole(); stolen.markStolen(person.id);
+            if(!thief.canStore(stolen))return Result.no("You need room for that item.");
+            String why=person.dist(g,thief,1.6f);if(why!=null)return Result.no(why);
+            g.interact.begin(new Work(thief,person,"pickpocket","Lifting "+selected.def.name,1.1f,false,g.time,()->{
+                if(contents.get(slot)!=selected)return Result.no("The item has moved.");
+                String range=person.dist(g,thief,1.6f);if(range!=null)return Result.no(range);
+                if(!thief.canStore(stolen))return Result.no("You no longer have room.");
+                long attempt=g.state.newRequestId();double chance=Math.min(0.92,0.55+(thief.skills.level(Skill.THIEVING)-person.pickpocketLevel)*0.03);
+                boolean success=g.roll(attempt,person.id)<chance;
+                if(!success) {
+                    var event=g.state.commit(attempt,"PickpocketFailed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+selected.def.id);
+                    if(thief.eq.def(rpg.item.ItemDef.Slot.NECK)==Items.get("dodgy_necklace") && g.roll(attempt+1,person.id)<0.25)return Result.ok();
+                    g.ai.notice(person,thief,"caught pickpocketing");thief.cs.staggered=0.8f;
+                    person.remember(new Memory("THEFT",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),g.state.minutes,1,"witnessed",event.id(),selected.value(),"caught lifting an item"),24);
+                    g.law.theft(thief,person.id,selected,null,event.id());return Result.ok();
+                }
+                if (!thief.store(stolen)) return Result.no("You no longer have room.");
+                contents.take(slot, selected.amount);
+                var event=g.state.commit(attempt,"Pickpocketed",thief.id,person.id,DevMap.jurisdiction(person.x,person.z),0,"selected "+stolen.def.id);
+                if (thief == g.player) {
+                    g.chat.say("You lift " + stolen + " from " + person.name + ".");
+                    if (g.ui != null) { g.ui.openContainer(person.pockets()); g.ui.received(stolen.def); }
+                }
+                g.law.theft(thief,person.id,stolen,null,event.id());g.prog.award(thief,Skill.THIEVING,8+person.pickpocketLevel*1.5,"pickpocket",event.id());
+                return Result.ok();
+            }));
+            if (thief == g.player && g.ui != null) g.ui.closeAll();
+            return Result.started();
+        }
+        @Override public Result take(Rpg g,Actor a,int slot,int count,long request){return perform(g,a,"take:"+slot,request);}
     }
 
     /** A conditional skill check (GDD 3.2): the roll is seeded by the request and stored with the event. */
@@ -267,13 +339,16 @@ public final class Npc extends Actor implements Interactable {
             }
             return Result.ok();
         }
-        var taken = inv.remove(Items.COINS, coins);
         ItemStack s = new ItemStack(Items.COINS, coins, id, true, id);
+        if (!a.canStore(s)) return Result.no("You need room for those coins.");
+        var taken = inv.remove(Items.COINS, coins);
+        if (taken == null) return Result.no("Those coins have moved.");
         a.store(s);
+        if (a == g.player && g.ui != null) g.ui.received(s.def);
         g.law.theft(a, id, s, null, ev.id());
         g.prog.award(a, Skill.THIEVING, 8 + pickpocketLevel * 1.5, "pickpocket", ev.id());
         if (a == g.player) g.chat.say("You pick " + name + "'s pocket.");
-        return taken == null ? Result.no("") : Result.ok();
+        return Result.ok();
     }
 
     @Override public String examine(Rpg g) {

@@ -33,7 +33,7 @@ public final class Memory {
     }
 
     public boolean witnessed() { return source.equals("witnessed"); }
-    public boolean crime() { return switch (kind) { case "THEFT", "ASSAULT", "MURDER", "LOCKPICKING", "VANDALISM", "LIVESTOCK" -> true; default -> false; }; }
+    public boolean crime() { return switch (kind) { case "THEFT", "ASSAULT", "MURDER", "LOCKPICKING", "VANDALISM", "LIVESTOCK", "TRESPASS", "ARSON", "DISORDERLY" -> true; default -> false; }; }
 
     /** Stable incident identity; old saves/deeds without event ids keep their original time and details. */
     public boolean sameIncident(Memory other) {

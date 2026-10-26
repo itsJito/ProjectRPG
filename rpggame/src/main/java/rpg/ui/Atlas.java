@@ -26,6 +26,9 @@ public final class Atlas {
             "Faith_Icon", "Firemaking_Icon", "Fishing_Icon", "Harvesting_Icon", "Health_Icon", "Magic_Icon", "Mining_Icon",
             "Smithing_Icon", "Strength_Icon", "Thieving_Icon", "Woodcutting_Icon", "Boss_Icon", "XP_Icon",
             "Inventory_Icon_UI", "Skills_icon_UI", "Worn_Equipment_icon_UI", "questionmark_UI",
+            // the menu redesign's (gamefixes): the tab icons and the equipment slots' stone plates
+            "Inventory", "Equipment", "Skills_icon", "Head_slot", "Cape_slot", "Neck_slot", "Ammo_slot", "Weapon_slot", "Body_slot",
+            "Shield_slot", "Legs_slot", "Hands_slot", "Feet_slot", "Ring_slot",
             "Agility_training_map_icon", "Bank_map_icon", "BowArrow_map_icon", "Casino_map_icon", "Clothes_shop_map_icon",
             "Cookery_shop_map_icon", "Cookingrange_map_icon", "Crafting_shop_map_icon", "Estate_map_icon", "Farming_shop_map_icon",
             "Fishing_shop_map_icon", "Fishing_spot_map_icon", "Food_shop_map_icon", "Fur_trader_map_icon", "Gem_shop_map_icon",

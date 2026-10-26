@@ -30,9 +30,10 @@ public final class Profiles {
         public long created, lastPlayed;
         public double playSeconds;
         public int combatLevel = 3, totalLevel = 27;
+        private boolean saved;
         Profile(int slot) { this.slot = slot; }
         public Path save() { return dir(slot).resolve("save.json"); }
-        public boolean hasSave() { return Files.isRegularFile(save()); }
+        public boolean hasSave() { return saved; }
     }
 
     static Path dir(int slot) { return root.resolve(String.valueOf(slot)); }
@@ -49,7 +50,7 @@ public final class Profiles {
         if (!Files.isRegularFile(f)) return null;
         try {
             Map<String, Object> m = Json.parseObject(Files.readString(f, StandardCharsets.UTF_8));
-            Profile p = new Profile(slot);
+            Profile p = new Profile(slot);p.saved=Files.isRegularFile(p.save());
             p.name = Json.str(m, "name", "Adventurer");
             List<Object> look = Json.list(m, "look");
             int[] l = new int[look == null ? 0 : look.size()];
@@ -100,7 +101,7 @@ public final class Profiles {
 
     /** After a save: the time played and the levels, for the title screen's cards. */
     public static void played(Profile p, Rpg g, double seconds) {
-        p.lastPlayed = System.currentTimeMillis();
+        p.saved=true; p.lastPlayed = System.currentTimeMillis();
         p.playSeconds += seconds;
         p.combatLevel = g.player.skills.combatLevel();
         p.totalLevel = g.player.skills.totalLevel();

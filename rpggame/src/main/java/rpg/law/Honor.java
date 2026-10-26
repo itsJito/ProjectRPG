@@ -45,6 +45,8 @@ public final class Honor {
     }
     public static String rankName(int score) { return NAMES[rank(score) - 1]; }
     public int rank() { return rank(score); }
+    /** High Honor (Honorable and above): a reported crime's bounty is halved (gamefixes). */
+    public boolean high() { return score >= 33; }
     public String rankName() { return rankName(score); }
 
     /** The Honor purchase discount (GDD 3.5): the highest threshold crossed only - 5% at +33, 10% at +55, 15% at +77, 20% at +89. */
@@ -97,7 +99,9 @@ public final class Honor {
             }
             case "LIVESTOCK" -> event("LIVESTOCK", victim, -8, "victim" + victim, false, "killed a farm animal");
             case "VANDALISM" -> event("VANDALISM", victim, -2, null, false, "vandalism");
-            case "Lockpicking" -> event("BREAK_IN", victim, -2, "lock" + victim, true, "picked someone's lock");
+            case "LOCKPICKING" -> event("BREAK_IN", victim, -2, "lock" + victim, true, "picked someone's lock");
+            case "ARSON" -> event("ARSON", victim, -10, null, false, "set a fire in town");
+            case "DISORDERLY" -> event("DISORDERLY", victim, -1, null, true, "caused a disturbance");
             default -> { }
         }
     }

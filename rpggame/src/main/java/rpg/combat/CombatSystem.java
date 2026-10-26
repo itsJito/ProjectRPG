@@ -32,6 +32,7 @@ import rpg.world.Voxels;
 public final class CombatSystem {
     private final Rpg g;
     public final List<Projectile> projectiles = new ArrayList<>();
+    private final List<Actor> projectileTargets = new ArrayList<>();
     /** Combat telemetry (GDD 4.2): the last contacts with every number that went into them. */
     public final ArrayDeque<String> telemetry = new ArrayDeque<>();
     public long contacts, blocked, parried, dodged, staggers, kills, deflections, shots, casts, blessings;
@@ -47,7 +48,9 @@ public final class CombatSystem {
     }
 
 
+    private long projectileSerial;
     public static final class Projectile {
+        public long id;
         public Actor owner;
         public float x, y, z, vx, vy, vz, gravity, life, potential, impact;
         public DamageType type;
@@ -55,7 +58,43 @@ public final class CombatSystem {
         public ItemStack ammo;
         public Spell spell;
         public boolean done, heardPass;
+        /** A thrown thing's tumble (rad/s, set at the release) and how far it has turned; how many times it has bounced. */
+        public float spin, angle;
+        public int bounces;
+        public long target;
+        /** What a monster hurled that is no item: "boulder" or "web" (null for everything else). */
+        public String what;
     }
+
+    /**
+     * An arrow, bolt or thrown blade lodged in a body: the item itself, where it went in and which way it points, in the
+     * body's own frame (x to its right, y up from its feet, z to its front), and when (gamefixes: arrows are real objects).
+     */
+    public record Stuck(ItemStack stack, float lx, float ly, float lz, float dx, float dy, float dz, double at) {
+        /** The tip's point and the shaft's direction in the world, as the body stands now. */
+        public float[] world(Actor a) {
+            float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
+            return new float[]{a.x + rx * lx + fx * lz, a.y + ly, a.z + rz * lx + fz * lz, rx * dx + fx * dz, dy, rz * dx + fz * dz};
+        }
+    }
+
+    /** How long a piece of ammunition is, tail to point (m). */
+    public static float ammoLength(ItemDef d) {
+        if (d.family == Family.BOLT) return 0.45f;
+        if (d.family == Family.THROWN) return switch (d.thrown) { case "javelin" -> 1.8f; case "tomahawk" -> 0.42f; case "knife" -> 0.3f; default -> 0.22f; };
+        return 0.85f;
+    }
+
+    /** The turn (w, x, y, z) that takes +y onto a unit direction. */
+    public static float[] alongY(float[] d) {
+        float w = 1 + d[1];
+        if (w < 1e-4f) return new float[]{0, 1, 0, 0};
+        float x = d[2], z = -d[0], l = (float) Math.sqrt(w * w + x * x + z * z);
+        return new float[]{w / l, x / l, 0, z / l};
+    }
+
+    /** What lodges where it strikes: pointed things (arrows, bolts, darts, knives, javelins) and a tomahawk's blade. */
+    private static boolean lodges(ItemDef d) { return d.family == Family.ARROW && !d.id.contains("brutal") || d.family == Family.BOLT || d.family == Family.THROWN; }
 
     // ------------------------------------------------------------------ starting actions
     public static Move lightMove(Actor a, boolean offHand) {
@@ -70,7 +109,7 @@ public final class CombatSystem {
 
     /** Begins a melee move; false (and nothing spent) when the actor cannot. */
     public boolean attack(Actor a, boolean offHand, Move move) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         if (!a.alive || a.cs.busy() || a.cs.blocking) return false;
         if (a.gaseousT > 0) { if (a == g.player) g.chat.add("You can't strike while you are mist.", Chat.Kind.WARN); return false; }
         float cost = move == Move.HEAVY ? g.cfg.staminaHeavy : g.cfg.staminaLight;
@@ -131,7 +170,7 @@ public final class CombatSystem {
     }
 
     public void setBlock(Actor a, boolean on) {
-        boolean can = on && a.alive && !g.carrying.busy(a) && !g.traversal.busy(a) && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
+        boolean can = on && a.alive && a.morphT<=0 && !a.reacting && !g.carrying.busy(a) && !g.traversal.busy(a) && a.cs.phase == Phase.IDLE && a.cs.staggered <= 0 && a.cs.dodgeT <= 0;
         if (can && !a.cs.blocking) a.cs.blockStart = g.time;
         a.cs.blocking = can;
     }
@@ -139,7 +178,7 @@ public final class CombatSystem {
     /** A dodge: a quick burst of movement with a moment of invulnerability. */
     public boolean dodge(Actor a, float dx, float dz) {
         if (g.carrying.busy(a) || g.traversal.busy(a)) return false;
-        if (!a.alive || a.cs.staggered > 0 || a.cs.dodgeT > 0 || a.cs.phase == Phase.ACTIVE) return false;
+        if (!a.alive || a.morphT>0 || a.reacting || a.cs.staggered > 0 || a.cs.dodgeT > 0 || a.cs.phase == Phase.ACTIVE) return false;
         if (a.stamina < g.cfg.staminaDodge) { if (a == g.player) g.chat.add("You're too tired to dodge.", Chat.Kind.WARN); return false; }
         float l = (float) Math.hypot(dx, dz);
         if (l < 1e-3f) { dx = (float) Math.sin(a.yaw); dz = (float) Math.cos(a.yaw); l = 1; }
@@ -156,18 +195,74 @@ public final class CombatSystem {
      * Throws one of the stack in the hand (a dart, a knife, a tomahawk, a javelin) along an aim, wound up this far (0..1).
      * It flies as a projectile under gravity, strikes by the same contact rules, and lands where it stops, to be picked up.
      */
+    /**
+     * The throw an actor is aiming now (a carried body charged to throw, or a throwing weapon wound up): the plan is
+     * solved from the hand to where the eye looks (only re-solved when the aim moved). False when nothing is aimed.
+     */
+    public static boolean aimThrow(Rpg g, Actor a, float[] eye) {
+        float speed, gravity;
+        if (g.carrying.ready(a) && a.cs.charge > 0) { speed = rpg.actor.BodyCarry.launchSpeed(a); gravity = ThrowSolver.gravityFor(null); }
+        else if (a.main() != null && a.main().family == Family.THROWN && a.cs.draw > 0) {
+            boolean heavy = a.main().thrown.equals("javelin") || a.main().thrown.equals("tomahawk");
+            speed = (heavy ? 17 : 22) + (heavy ? 12 : 14) * Math.max(0.4f, a.cs.draw); gravity = ThrowSolver.gravityFor(a.main().thrown);
+        }
+        // a bow being drawn, a crossbow raised to the eye (gamefixes: they show the arc too, with the reticle)
+        else if (a.main() != null && a.main().family == Family.BOW && a.cs.draw > 0 && a.eq.get(ItemDef.Slot.AMMO) != null) { speed = bowSpeed(a.cs.draw); gravity = ARROW_GRAVITY; }
+        else if (a.main() != null && a.main().family == Family.CROSSBOW && a.cs.aim > 0.5f && a.cs.reload <= 0 && a.eq.get(ItemDef.Slot.AMMO) != null) { speed = BOLT_SPEED; gravity = BOLT_GRAVITY; }
+        else return false;
+        float[] hand = g.time - a.handAt < 0.25 ? a.hand : new float[]{a.x - (float) Math.sin(a.aimYaw) * 0.35f, a.eyeY() - 0.25f, a.z - (float) Math.cos(a.aimYaw) * 0.35f};
+        a.throwPlan.solve(g, a, hand, eye, speed, gravity, false);
+        return true;
+    }
+
+    /** How long an arrow stays in a living body before it works loose and falls (s). */
+    static final double LODGED_FOR = 45;
+    static final float ARROW_GRAVITY = 9.8f, BOLT_SPEED = 58, BOLT_GRAVITY = 6f;
+    static float bowSpeed(float draw) { return 18 + 34 * Math.max(0.35f, Math.min(1, draw)); }
+
+    /**
+     * Sends an arrow or a bolt from the drawing hand. The player's flies the arc the guide drew - from the hand to where the
+     * reticle is (ThrowSolver) - so what is shown is what is flown; anyone else's leaves the hand along their own aim.
+     */
+    private void fromHand(Projectile p, Actor a, float speed, float gravity) {
+        if (a == g.player) {
+            ThrowSolver plan = a.throwPlan;
+            float[] eye = g.time - plan.solvedAt < 0.3 ? plan.eye.clone() : new float[]{a.x, a.eyeY(), a.z};
+            float[] hand = g.time - a.handAt < 0.25 ? a.hand : new float[]{a.x - (float) Math.sin(a.aimYaw) * 0.35f, a.eyeY() - 0.25f, a.z - (float) Math.cos(a.aimYaw) * 0.35f};
+            plan.solve(g, a, hand, eye, speed, gravity, true);
+            p.x = plan.start[0]; p.y = plan.start[1]; p.z = plan.start[2];
+            p.vx = plan.velocity[0]; p.vy = plan.velocity[1]; p.vz = plan.velocity[2];
+        } else if (g.time - a.handAt < 0.25) { p.x = a.hand[0]; p.y = a.hand[1]; p.z = a.hand[2]; }
+    }
+
+    /** The plan a release flies: the guide's own if it is current, else solved now from the actor's eye. */
+    private ThrowSolver release(Actor a) {
+        ThrowSolver plan = a.throwPlan;
+        float[] eye = g.time - plan.solvedAt < 0.3 ? plan.eye.clone() : new float[]{a.x, a.eyeY(), a.z};
+        aimThrow(g, a, eye);
+        return plan;
+    }
+
     public boolean throwOne(Actor a, float yaw, float pitch, float wind) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemStack held = a.eq.get(ItemDef.Slot.MAIN);
         if (held == null || held.def.family != Family.THROWN) return false;
         if (a.skills.level(Skill.ARCHERY) < held.def.reqLevel) { if (a == g.player) g.chat.add("You need Archery level " + held.def.reqLevel + " to throw those.", Chat.Kind.WARN); return false; }
         if (a.cs.castCooldown > 0) return false;
         wind = Math.max(0.4f, Math.min(1, wind));
+        a.cs.draw = wind;
+        ThrowSolver plan = release(a);
         ItemStack one = held.copy(1);
         held.amount--;
         if (held.amount <= 0) a.eq.set(ItemDef.Slot.MAIN, null);
         boolean heavy = held.def.thrown.equals("javelin") || held.def.thrown.equals("tomahawk");
-        Projectile p = launch(a, yaw, pitch, (heavy ? 17 : 22) + (heavy ? 12 : 14) * wind, heavy ? 9.8f : 7.5f);
+        Projectile p = launch(a, yaw, pitch, (heavy ? 17 : 22) + (heavy ? 12 : 14) * wind, plan.gravity);
+        // the guide's path, exactly: from the hand, at the solved velocity, tumbling; the thrower's feet held a moment
+        p.x = plan.start[0]; p.y = plan.start[1]; p.z = plan.start[2];
+        p.vx = plan.velocity[0]; p.vy = plan.velocity[1]; p.vz = plan.velocity[2];
+        p.spin = (float) (g.roll(p.id, a.id) * 2 - 1) * 12;
+        a.throwFreezeUntil = g.time + 0.1;
+        p.life=8;
         p.ammo = one; p.type = held.def.damageType; p.skill = Skill.ARCHERY;
         p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, held.def.damage / CombatMath.HP_SCALE) * (0.6f + 0.4f * wind));
         p.impact = held.def.impact * wind;
@@ -180,7 +275,7 @@ public final class CombatSystem {
 
     /** Looses a bolt from a loaded crossbow along an aim; the crossbow is loaded again over a second or so (Agility quickens it). */
     public boolean shootCrossbow(Actor a, float yaw, float pitch) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef xb = a.main();
         if (xb == null || xb.family != Family.CROSSBOW) return false;
         if (a.cs.reload > 0) return false;
@@ -190,7 +285,8 @@ public final class CombatSystem {
         ItemStack one = ammo.copy(1);
         ammo.amount--;
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
-        Projectile p = launch(a, yaw, pitch, 58, 6f);
+        Projectile p = launch(a, yaw, pitch, BOLT_SPEED, BOLT_GRAVITY);
+        fromHand(p, a, BOLT_SPEED, BOLT_GRAVITY);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
         p.potential = physicalMax(a, Skill.ARCHERY, (xb.damage + ammo.def.damage) / CombatMath.HP_SCALE);
         p.impact = xb.impact;
@@ -203,7 +299,7 @@ public final class CombatSystem {
 
     /** Looses an arrow from an equipped bow along an aim, drawn this far (0..1). */
     public boolean shoot(Actor a, float yaw, float pitch, float draw) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         ItemDef bow = a.main();
         if (bow == null || bow.family != Family.BOW) return false;
         ItemStack ammo = a.eq.get(ItemDef.Slot.AMMO);
@@ -213,7 +309,8 @@ public final class CombatSystem {
         ItemStack one = ammo.copy(1);
         ammo.amount--;
         if (ammo.amount <= 0) a.eq.set(ItemDef.Slot.AMMO, null);
-        Projectile p = launch(a, yaw, pitch, 18 + 34 * draw, 9.8f);
+        Projectile p = launch(a, yaw, pitch, bowSpeed(draw), ARROW_GRAVITY);
+        fromHand(p, a, bowSpeed(draw), ARROW_GRAVITY);
         p.ammo = one; p.type = DamageType.PIERCE; p.skill = Skill.ARCHERY;
         p.potential = (float) Math.floor(physicalMax(a, Skill.ARCHERY, (bow.damage + ammo.def.damage) / CombatMath.HP_SCALE) * draw);
         p.impact = bow.impact * draw;
@@ -226,18 +323,19 @@ public final class CombatSystem {
     public String castRefusal(Actor a, Spell s) {
         if (a.skills.level(Skill.MAGIC) < s.level) return "You need Magic level " + s.level + " to cast " + s.title + ".";
         if (a instanceof rpg.actor.Player p && p.book != s.book) return s.title + " is in the " + s.book.title + " spellbook; yours is " + p.book.title + ". Change it at an altar.";
+        if (a instanceof rpg.ai.Npc npc && npc.spellBook != s.book) return "That spellbook is not prepared.";
         if (s == Spell.FIRE_BLAST) {
             ItemStack staff = a.eq.get(ItemDef.Slot.MAIN);
             if (staff == null || !staff.def.id.equals("fire_staff")) return "Fire Blast needs the Fire staff in your hand.";
             if (staff.charges <= 0) return "The Fire staff has no charges left. Recharge it with coal.";
         }
         if (a.mana < s.cost) return "You don't have enough mana.";
-        if (a.cs.castCooldown > 0 || a.cs.busy()) return "";
+        if (!a.alive || a.morphT > 0 || a.reacting || a.cs.castCooldown > 0 || a.cs.busy()) return "";
         return null;
     }
 
     public boolean cast(Actor a, Spell s, float yaw, float pitch) {
-        if (g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
+        if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         String no = castRefusal(a, s);
         if (no != null) { if (a == g.player && !no.isEmpty()) g.chat.add(no, Chat.Kind.WARN); return false; }
         if (s == Spell.TELEGRAB) return telegrab(a, s, yaw, pitch);
@@ -249,7 +347,7 @@ public final class CombatSystem {
             var uev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
             g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, uev.id());
             if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
-            if (g.fx != null) g.fx.ring(a.x, a.y, a.z, 1.0f, 2f, 2f, 3.5f);
+            g.chemistry.visual(2,a.x,a.chestY(),a.z,0.4f,60,0.2f,0.7f,1.0f,2f,3.5f);
             return true;
         }
         if (s == Spell.FIRE_BLAST) a.eq.get(ItemDef.Slot.MAIN).charges--;
@@ -260,6 +358,13 @@ public final class CombatSystem {
         float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
         p.potential = CombatMath.magicMax(s.base, magicBonus);
         p.impact = 12 + s.base * 0.6f;
+        if (s == Spell.SPELLDAGGERS) {
+            Actor target = g.magic.target(a,yaw,pitch,24); p.target = target == null ? 0 : target.id;
+            for (float offset : new float[]{-0.11f,0.11f}) {
+                Projectile blade=launch(a,yaw+offset,pitch,s.speed,0);
+                blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target;
+            }
+        }
         casts++;
         var ev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
         g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, ev.id());
@@ -299,7 +404,7 @@ public final class CombatSystem {
     }
 
     private Projectile launch(Actor a, float yaw, float pitch, float speed, float gravity) {
-        Projectile p = new Projectile();
+        Projectile p = new Projectile(); p.id = ++projectileSerial;
         float dx = (float) (-Math.sin(yaw) * Math.cos(pitch)), dy = (float) Math.sin(pitch), dz = (float) (-Math.cos(yaw) * Math.cos(pitch));
         p.owner = a;
         p.x = a.x + dx * 0.5f; p.y = a.eyeY() - 0.1f + dy * 0.5f; p.z = a.z + dz * 0.5f;
@@ -311,7 +416,7 @@ public final class CombatSystem {
 
     // ------------------------------------------------------------------ the frame
     public void update(float dt) {
-        for (Actor a : g.actors()) tick(a, dt);
+        for (Actor a : g.actors()) { tick(a, dt); if (!a.stuck.isEmpty()) shedLodged(a, LODGED_FOR); }
         updateProjectiles(dt);
     }
 
@@ -321,7 +426,7 @@ public final class CombatSystem {
         c.flash = Math.max(0, c.flash - dt * 3);
         c.iframes = Math.max(0, c.iframes - dt);
         c.dodgeT = Math.max(0, c.dodgeT - dt);
-        c.castCooldown = Math.max(0, c.castCooldown - dt);
+        c.castCooldown = Math.max(0, c.castCooldown - dt * a.actionRate());
         if (c.reload > 0) { c.reload = Math.max(0, c.reload - dt); if (c.reload == 0 && a == g.player && g.sfx != null) g.sfx.play("lock", a.x, a.eyeY(), a.z, 0.4f); }
         c.slowT = Math.max(0, c.slowT - dt);
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
@@ -340,7 +445,7 @@ public final class CombatSystem {
             if (dt <= 0) return;
         }
         if (c.phase == Phase.IDLE) return;
-        c.t += dt;
+        c.t += dt * a.actionRate();
         // Carry elapsed time through boundaries. A slow frame must not add a frame of latency to every phase.
         for (int transition = 0; transition < 3; transition++) {
             if (c.phase == Phase.WINDUP) {
@@ -496,10 +601,15 @@ public final class CombatSystem {
             float dx = tip[0] - grip[0], dy = tip[1] - grip[1], dz = tip[2] - grip[2];
             float length = Math.max(0.001f, (float) Math.sqrt(dx * dx + dy * dy + dz * dz)); dx /= length; dy /= length; dz /= length;
             // A low stroke may enter the floor after hitting a small animal. Resolve the exposed blade before that wall.
+            // (an open door's leaf is no wall: the blade knocks it aside and carries on to whoever stands in the doorway)
             Voxels.Hit wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false);
-            boolean hard = wall.hit && wall.block != Blocks.GLASS && wall.block != Blocks.LEAVES && wall.block != Blocks.OAK_LEAVES && wall.block != Blocks.WILLOW_LEAVES;
+            if (wall.hit && wall.door != null && wall.door.open && !wall.door.locked) {
+                wall.door.knock(g, wall.x, wall.z, dx, dz);
+                wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false, false);
+            }
+            boolean hard = wall.hit && !Blocks.glass(wall.block) && !Blocks.isLeaves(wall.block);
             float limit = hard ? wall.dist : length;
-            if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2])) limit = 0;
+            if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2], false)) limit = 0;
             if (limit > 0) for (Actor v : g.actors()) {
                 if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
                 float contact = HitVolumes.ray(g, v, grip[0], grip[1], grip[2], dx, dy, dz, limit, 0.06f);
@@ -523,11 +633,20 @@ public final class CombatSystem {
                 if (!leafy) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return; }
             }
         }
-        if (h.block == Blocks.GLASS && g.glass != null) {
+        if (Blocks.glass(h.block) && g.glass != null) {
             // glass does not turn a blade: it breaks, and the blow carries on through
             float[] d0 = blade(a, m, Math.max(0, s - 0.1f), 1, reach);
             g.glass.shatter(h.bx, h.by, h.bz, h.x, h.y, h.z, tip[0] - d0[0], tip[1] - d0[1], tip[2] - d0[2], m == Move.HEAVY ? 1.4f : 1f, a);
             log(String.format("%s's %s broke the pane at (%d, %d, %d)", a.name, m, h.bx, h.by, h.bz));
+        } else if (h.ny > 0 && m != Move.HEAVY && m != Move.THRUST && !Blocks.isLeaves(h.block)) {
+            // a cut swung low at something small at the feet (a cat, a hen) meets the ground at a glancing angle: it
+            // scrapes and skims on along it rather than stopping dead, so it still crosses what it was aimed at
+            // (gamefixes: the forehand reached the floor just short of a cat below the attacker and ended there)
+            if (!a.cs.grazed) {
+                a.cs.grazed = true;
+                if (g.fx != null) g.fx.puff(h.x, h.y, h.z);
+                if (g.sfx != null) g.sfx.play("block", h.x, h.y, h.z, 0.25f);
+            }
         } else if (h.block != Blocks.LEAVES && h.block != Blocks.OAK_LEAVES && h.block != Blocks.WILLOW_LEAVES) {
             deflections++;
             if (g.fx != null) g.fx.sparks(h.x, h.y, h.z, 10);
@@ -580,7 +699,11 @@ public final class CombatSystem {
         DamageType type = weapon ? w.damageType : DamageType.BLUNT;
         boolean behind = behind(v, a);
         // Strength makes the damage of a landed blow (with the weapon's Strength bonus); Attack does not (GDD 2.3)
-        float potential = (float) Math.floor(physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0) * CombatMath.moveDamage(m));
+        float maximum = physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0);
+        if (weapon) maximum = Math.max(2, maximum);
+        float potential = (float) Math.floor(maximum * CombatMath.moveDamage(m));
+        if (m == Move.HEAVY && (a.sneaking || a.crouched) && v instanceof rpg.ai.Npc target && !g.ai.canSee(target, a)
+                && (target.aware.get(a.id) == null || target.aware.get(a.id).level < rpg.ai.Stealth.ALERT)) potential = (float)Math.floor(potential * 1.5f);
         float impact = CombatMath.impact(impactBase, a.skills.level(Skill.STRENGTH), CombatMath.moveImpact(m));
         resolve(a, v, potential, impact, type, null, px, py, pz, String.valueOf(m), behind);
     }
@@ -592,6 +715,7 @@ public final class CombatSystem {
 
     /** Contact made: guard and parry, mitigation, HP damage, impact and stagger, feedback, XP, events. */
     public void resolve(Actor a, Actor v, float potential, float impact, DamageType type, Projectile proj, float px, float py, float pz, String how, boolean behind) {
+        if (!a.alive) { environmentalDamage(v, Math.max(0, Math.round(potential)), how); return; }
         if (a instanceof rpg.ai.Npc && g.law.inCustody(v)) return;
         contacts++;
         if (v.cs.iframes > 0 || v.gaseousT > 0 && proj == null) {
@@ -600,7 +724,7 @@ public final class CombatSystem {
             log(String.format("%s -> %s %s: DODGED (i-frames)", a.name, v.name, how));
             return;
         }
-        boolean melee = proj == null;
+        boolean melee = proj == null && type != DamageType.MAGIC;
         ItemDef guardItem = v.off() != null && v.off().family == Family.SHIELD ? v.off() : melee && v.main() != null && v.main().guard > 0 ? v.main() : null;
         float fx = (float) -Math.sin(v.yaw), fz = (float) -Math.cos(v.yaw), tx = a.x - v.x, tz = a.z - v.z, tl = Math.max(1e-3f, (float) Math.hypot(tx, tz));
         boolean facing = (fx * tx + fz * tz) / tl > 0.35f;
@@ -609,6 +733,7 @@ public final class CombatSystem {
         g.noise(a, v.x, v.y, v.z, g.cfg.combatNoise, 0.8f);
         g.ai.onAttacked(v, a);
         if (v instanceof rpg.animal.Animal an && g.animals != null) g.animals.onHurt(an, a);
+        if (v instanceof rpg.monster.Monster mo && g.monsters != null) g.monsters.onHurt(mo, a, potential);
         if (guarding && !bare && melee && g.time - v.cs.blockStart <= CombatMath.parryWindow(g.cfg.parryWindow, v.skills.level(Skill.DEFENSE))) {
             parried++;
             a.cs.cancel();
@@ -630,7 +755,7 @@ public final class CombatSystem {
         // an elemental spell on a creature with that weakness on record: double (GDD 2.5)
         if (proj != null && proj.spell != null && v instanceof rpg.animal.Animal wan && wan.species.weakness == proj.spell.element && proj.spell.element != Spells.Element.NONE) dmg *= 2;
         // the overhead protections: the attack of their kind does no harm at all - a visible counter, not armour
-        boolean magicHit = proj != null && proj.spell != null;
+        boolean magicHit = type == DamageType.MAGIC;
         boolean prayed = g.prayers.protects(v, melee, magicHit) && dmg > 0;
         if (prayed) { if (g.fx != null) g.fx.text("Protected", v.x, v.y + v.height + 0.5f, v.z, 0xFFE8F0FF); g.prayers.prevented(v, dmg, 0); dmg = 0; impact *= 0.3f; }
         float blockedPart = 0;
@@ -657,6 +782,7 @@ public final class CombatSystem {
         if (v == g.player && g.ui != null && g.ui.console.god) { dealt = 0; impact = 0; }
         if (v == g.player && g.ui != null && g.ui.console.immortal) dealt = Math.min(dealt, Math.max(0, (int) Math.ceil(v.hp) - 1));
         v.hp -= dealt;
+        if(dealt>0 && (type==DamageType.SLASH || type==DamageType.PIERCE))v.injuries.cut(v,px,py,pz,dealt);
         v.cs.lastHurt = g.time;
         v.cs.lastAttacker = a.id;
         v.cs.flash = 1;
@@ -682,7 +808,7 @@ public final class CombatSystem {
         }
         if (g.sfx != null && dealt > 0) g.sfx.play(potential > 30 * CombatMath.HP_SCALE ? "heavyhit" : "hit", px, py, pz, 0.8f);
         if (a == g.player && v instanceof rpg.ai.Npc sp && sp.spareSince > 0) sp.spareSince = -1;
-        if (g.sfx != null && dealt > 0 && v.hp > 0 && !v.dummy && !(v instanceof rpg.animal.Animal) && dealt >= v.maxHp() * 0.08f) g.sfx.hurtCry(v, g.time);
+        if (g.sfx != null && dealt > 0 && v.hp > 0 && !v.dummy && !(v instanceof rpg.animal.Animal)) g.sfx.hurtCry(v, g.time);
         String detail = String.format("%s -> %s %s%s: potential %.1f, protection %.0f (%.0f%% mit %s)%s%s, dealt %d; impact %.1f vs stability %.1f%s; stamina %.0f",
                 a.name, v.name, how, behind ? " (from behind)" : "", potential, protection, mit * 100, type,
                 g.prayers.on(v, Prayer.WARD) ? ", ward" : "", guarding ? String.format(", guarded %.1f", blockedPart) : "", dealt, impact, stab, stagger ? " -> STAGGER" : "", v.stamina);
@@ -690,11 +816,14 @@ public final class CombatSystem {
         var ev = g.state.commit("ActorHit", a.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), 0, detail);
         log(detail);
         // GDD 2.2: real melee damage trains Attack and Strength; Defense follows harm endured or active defense.
-        if (dealt > 0 && a != v) {
-            if (proj == null) {
+        if (dealt > 0 && a != v && v.summonOwner == 0) {
+            if (melee) {
                 g.prog.award(a, Skill.ATTACK, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
                 g.prog.award(a, Skill.STRENGTH, dealt * g.cfg.xpPerDamage * 0.5f, "melee damage", ev.id());
-            } else g.prog.award(a, proj.skill, dealt * g.cfg.xpPerDamage * (proj.skill == Skill.MAGIC ? 0.5f : 1f), "damage dealt", ev.id());
+            } else {
+                Skill skill=type==DamageType.MAGIC?Skill.MAGIC:proj.skill;
+                g.prog.award(a,skill,dealt*g.cfg.xpPerDamage*(skill==Skill.MAGIC?0.5f:1f),"damage dealt",ev.id());
+            }
             g.prog.award(a, Skill.HEALTH, dealt * g.cfg.healthXpPerDamage, "damage dealt (Health share)", ev.id());
             g.prog.award(v, Skill.DEFENSE, dealt * g.cfg.defenseXpPerDamage, "hostile damage suffered", ev.id());
         }
@@ -738,13 +867,29 @@ public final class CombatSystem {
         kill(killer == null ? v : killer, v, ev.id());
     }
 
+    /** Environmental harm commits once without an attack roll, fabricated attacker or combat XP. */
+    public void environmentalDamage(Actor victim, int amount, String reason) {
+        if (!victim.alive || amount <= 0 || victim.dummy || g.law.inCustody(victim)) return;
+        if (victim == g.player && g.ui != null && g.ui.console.god) return;
+        int damage = Math.min(amount, (int) Math.ceil(victim.hp)); victim.hp -= damage; victim.cs.lastHurt = g.time; victim.cs.flash = 1;
+        var event = g.state.commit("EnvironmentalDamage", 0, victim.id, rpg.world.DevMap.jurisdiction(victim.x, victim.z), 0, reason + ": " + damage);
+        if (g.fx != null) g.fx.text(String.valueOf(damage), victim.x, victim.y + victim.height, victim.z, 0xFFFF7050);
+        if (g.sfx != null && victim.hp > 0 && !(victim instanceof rpg.animal.Animal)) g.sfx.hurtCry(victim, g.time);
+        if (victim.hp <= 0) kill(null, victim, event.id());
+    }
+
     private void kill(Actor killer, Actor v, long cause) {
         if (killer == g.player && v != g.player) lastPlayerKill = g.time;
         v.alive = false;
+        shedLodged(v, Integer.MAX_VALUE);
+        if (g.chemistry != null) g.chemistry.retire(v);
+        for (Projectile shot : projectiles) if (shot.owner == v && !shot.done) { dropArrow(shot); shot.done = true; }
+        if (g.gore != null) for (var wound : g.gore.wounds.values()) if (wound.by == v.id) wound.by = 0;
+        for (Actor other : g.actors()) if (other.cs.lastAttacker == v.id) other.cs.lastAttacker = 0;
         v.hp = 0;
         v.cs.cancel();
         kills++;
-        var ev = g.state.commit("ActorKilled", killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), cause, v.name + " killed by " + killer.name);
+        var ev = g.state.commit("ActorKilled", killer == null ? 0 : killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), cause, v.name + " killed by " + (killer == null ? "the environment" : killer.name));
         // a person's last cry, on the voice bus, from their own throat's bank (there was never a plain "death" bank, so no
         // human - the player included - made a sound when they died); a creature's cry is its species' (Animals)
         if (g.sfx != null && !(v instanceof rpg.animal.Animal)) g.sfx.deathCry(v);
@@ -753,16 +898,16 @@ public final class CombatSystem {
 
     // ------------------------------------------------------------------ projectiles
     private void updateProjectiles(float dt) {
+        if(projectiles.isEmpty())return;
+        projectileTargets.clear();projectileTargets.addAll(g.actors());
+        for(var dead:g.npcs)if(!dead.alive && dead.loaded && dead.ragdoll!=0 && dead.corpse!=0)projectileTargets.add(dead);
         for (Iterator<Projectile> it = projectiles.iterator(); it.hasNext(); ) {
             Projectile p = it.next();
             p.life -= dt;
             if (p.life <= 0 || p.done) { if (!p.done) dropArrow(p); it.remove(); continue; }
             int sub = 4;
             for (int i = 0; i < sub && !p.done; i++) step(p, dt / sub);
-            if (p.spell != null && g.fx != null) {
-                float[] c = p.spell == Spell.FROST_LANCE ? new float[]{1.2f, 2.5f, 5} : p.spell == Spell.FIRE_BOLT ? new float[]{6, 2, 0.4f} : new float[]{3, 3, 5};
-                g.fx.trail(p.x, p.y, p.z, c[0], c[1], c[2]);
-            }
+
             if (!p.done && !p.heardPass && p.ammo != null && p.owner != g.player) {
                 float dx = g.player.x - p.x, dy = g.player.eyeY() - p.y, dz = g.player.z - p.z;
                 if (dx * dx + dy * dy + dz * dz < 16 && g.vox.sight(p.x, p.y, p.z, g.player.x, g.player.eyeY(), g.player.z)) {
@@ -774,17 +919,49 @@ public final class CombatSystem {
         }
     }
 
+    private void spellImpact(Projectile p,float x,float y,float z,Actor primary) {
+        int element=switch(p.spell) {
+            case FIRE_BOLT,FIRE_BLAST -> astratto.bridge.AstrattoNative.CHEM_FIRE;
+            case FROST_LANCE -> astratto.bridge.AstrattoNative.CHEM_ICE;
+            case SPARK -> astratto.bridge.AstrattoNative.CHEM_WIND;
+            case VOLTCHAIN -> astratto.bridge.AstrattoNative.CHEM_ELECTRIC;
+            default -> 0;
+        };
+        // on water the element spreads through the surface: frost skins it over, lightning runs out across it
+        boolean onWater=g.vox.block((int)Math.floor(x),(int)Math.floor(y-0.6f),(int)Math.floor(z))==Blocks.WATER || g.vox.block((int)Math.floor(x),(int)Math.floor(y),(int)Math.floor(z))==Blocks.WATER;
+        float radius=p.spell==Spell.FIRE_BLAST?3:onWater && element==astratto.bridge.AstrattoNative.CHEM_ICE?2.4f:onWater && element==astratto.bridge.AstrattoNative.CHEM_ELECTRIC?1.8f:1.2f;
+        if(element!=0)g.chemistry.emit(p.owner,element,x,onWater?(float)Math.floor(y-0.6f)+0.5f:y,z,radius,3,p.spell==Spell.FIRE_BLAST?1.2f:onWater?0.6f:0.3f);
+        boolean fire=p.spell.element==Spells.Element.FIRE;
+        g.chemistry.visual(fire?0:2,x,y,z,fire?0.35f:0.15f,120,0.25f,0.7f,fire?5:1,fire?1.6f:2,fire?0.2f:5);
+        if(p.spell==Spell.FIRE_BLAST) for(Actor other:g.actors()) {
+            if(other==primary || other==p.owner || !other.alive || other.dummy || other.distTo(x,z)>3 || !g.vox.sight(x,y,z,other.x,other.chestY(),other.z))continue;
+            float falloff=1-other.distTo(x,z)/4;
+            resolve(p.owner,other,p.potential*falloff,p.impact*falloff,DamageType.MAGIC,p,other.x,other.chestY(),other.z,p.spell.title,false);
+        }
+    }
+
     private void step(Projectile p, float dt) {
+        if (p.target!=0) {
+            Actor target=g.actor(p.target);
+            if(target!=null && target.alive && g.vox.sight(p.x,p.y,p.z,target.x,target.chestY(),target.z)) {
+                float x=target.x-p.x,y=target.chestY()-p.y,z=target.z-p.z,len=(float)Math.sqrt(x*x+y*y+z*z);
+                float blend=Math.min(1,dt*3), speed=p.spell.speed;
+                if(len>0.1f) { p.vx+=(x/len*speed-p.vx)*blend;p.vy+=(y/len*speed-p.vy)*blend;p.vz+=(z/len*speed-p.vz)*blend; }
+            } else p.target=0;
+        }
         p.vy -= p.gravity * dt;
         float nx = p.x + p.vx * dt, ny = p.y + p.vy * dt, nz = p.z + p.vz * dt;
         float sx = nx - p.x, sy = ny - p.y, sz = nz - p.z, len = (float) Math.sqrt(sx * sx + sy * sy + sz * sz);
         // bodies first along the segment, then walls
-        Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, false);
+        p.angle += p.spin * dt;
+        // an elemental spell meets the surface of water (gamefixes: ice freezes it, fire thaws ice, lightning runs through it)
+        boolean elemental = p.spell != null && (p.spell.element == Spells.Element.ICE || p.spell.element == Spells.Element.FIRE || p.spell.element == Spells.Element.ELECTRIC || p.spell.element == Spells.Element.WATER);
+        Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, elemental);
         float wall = h.hit ? h.dist : len;
         Actor struck = null;
         float nearest = Float.POSITIVE_INFINITY;
         float inv = 1 / Math.max(1e-6f, len);
-        for (Actor v : g.actors()) {
+        for (Actor v : projectileTargets) {
             boolean body = v instanceof rpg.ai.Npc npc && npc.ragdoll != 0 && !npc.alive;
             if (v == p.owner || !v.alive && !body || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
             if (v.alive && v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v)) continue;
@@ -794,14 +971,17 @@ public final class CombatSystem {
         if (struck != null) {
             float qx = p.x + sx * inv * nearest, qy = p.y + sy * inv * nearest, qz = p.z + sz * inv * nearest;
             p.done = true;
-            if (p.ammo != null) g.state.burn(p.ammo.def, 1);
+            if (p.ammo != null) lodgeInBody(p, struck, qx, qy, qz, sx * inv, sy * inv, sz * inv);
             if (struck.alive) {
+                if ("web".equals(p.what)) { struck.cs.slowT = Math.max(struck.cs.slowT, 4); if (g.fx != null) g.fx.puff(qx, qy, qz); return; }
                 if (p.spell == Spell.FROST_LANCE) struck.cs.slowT = 3;
+                if (p.spell == Spell.VOLTCHAIN)struck.cs.staggered=Math.max(struck.cs.staggered,0.4f);
                 resolve(p.owner, struck, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
             } else if (g.sfx != null) g.sfx.play("hit", qx, qy, qz, 0.4f);
+            if(p.spell!=null) spellImpact(p,qx,qy,qz,struck);
             return;
         }
-        if (h.hit && h.block == Blocks.GLASS && g.glass != null) {
+        if (h.hit && Blocks.glass(h.block) && g.glass != null) {
             // through the pane: it shatters, and the arrow or the bolt flies on, slowed
             g.glass.shatter(h.bx, h.by, h.bz, h.x, h.y, h.z, sx, sy, sz, p.spell != null ? 1.6f : 0.9f, p.owner);
             p.vx *= 0.7f; p.vy *= 0.7f; p.vz *= 0.7f;
@@ -811,10 +991,24 @@ public final class CombatSystem {
         if (h.hit) {
             p.done = true;
             p.x = h.x - sx / len * 0.15f; p.y = h.y - sy / len * 0.15f; p.z = h.z - sz / len * 0.15f;
-            if (p.spell != null) { if (g.fx != null) g.fx.sparks(p.x, p.y, p.z, 14); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
-            if (h.block == Blocks.TARGET) { archeryTarget(p, h); return; }
+            if (p.spell != null) {
+                if (h.block == Blocks.WATER) { p.x = h.x; p.y = h.y + 0.5f; p.z = h.z; if (g.chemistry != null) g.chemistry.splash(h.x, h.y + 1f, h.z); }
+                spellImpact(p,p.x,p.y,p.z,null); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return;
+            }
+            // a thrown thing glances off what it strikes (restitution 0.3) and comes to rest after a bounce or two
+            if (p.ammo != null && p.ammo.def.family == Family.THROWN && p.bounces < 2 && !bites(p, h, sx / len, sy / len, sz / len, false)) {
+                float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+                if (speed > 3.5f) {
+                    float dn = p.vx * h.nx + p.vy * h.ny + p.vz * h.nz;
+                    p.vx = (p.vx - 2 * dn * h.nx) * 0.3f; p.vy = (p.vy - 2 * dn * h.ny) * 0.3f; p.vz = (p.vz - 2 * dn * h.nz) * 0.3f;
+                    p.spin *= 0.5f; p.bounces++; p.done = false;
+                    if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.4f);
+                    return;
+                }
+            }
+            if (h.block == Blocks.TARGET) { archeryTarget(p, h); lodgeInWorld(p, h, sx / len, sy / len, sz / len, true); return; }
             if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.surface(h.block).equals("wood") ? "arrow.impact" : "stone", p.x, p.y, p.z, 0.5f);
-            dropArrow(p);
+            lodgeInWorld(p, h, sx / len, sy / len, sz / len, false);
             return;
         }
         p.x = nx; p.y = ny; p.z = nz;
@@ -822,7 +1016,6 @@ public final class CombatSystem {
 
     /** An arrow in the archery target: Archery XP growing with the distance shot from (the arrow stays in the target). */
     private void archeryTarget(Projectile p, Voxels.Hit h) {
-        if (p.ammo != null) g.state.burn(p.ammo.def, 1);
         float dist = (float) Math.hypot(p.owner.x - h.x, p.owner.z - h.z);
         // how far from the bull: measured in the face of the target the arrow struck (its middle, not the cell's)
         rpg.objects.Furniture t = g.objects.furnitureAt(h.bx, h.by, h.bz);
@@ -851,11 +1044,107 @@ public final class CombatSystem {
         projectiles.clear();
     }
 
+    /** A shot that never struck anything (its flight cut short): it falls where it is, as a loose thing tumbling down. */
     private void dropArrow(Projectile p) {
         if (p.ammo == null) return;
-        float y = g.vox.groundY(p.x, p.y, p.z);
-        g.objects.drop(p.ammo, p.x, Math.max(y + 0.05f, Math.min(p.y, y + 0.3f)), p.z);
+        float l = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+        float[] dir = l < 1e-3f ? new float[]{0, -1, 0} : new float[]{p.vx / l, p.vy / l, p.vz / l};
+        g.objects.dropAmmo(p.ammo, p.x, Math.max(p.y, g.vox.groundY(p.x, p.y, p.z) + 0.08f), p.z, dir, false, p.vx * 0.2f, p.vy * 0.2f, p.vz * 0.2f);
         p.ammo = null;
+    }
+
+    /**
+     * A shot meets the world (gamefixes: arrows are real objects, each lying exactly where it ended up). Driven in hard
+     * enough and square enough to soft stuff - wood, earth, straw, a target - it lodges there, its point buried a little,
+     * and stays until taken. Off stone, or at a glancing angle, or spent, it skips off: a loose rigid body that tumbles and
+     * settles. Now and then one breaks on stone.
+     */
+    private void lodgeInWorld(Projectile p, Voxels.Hit h, float dx, float dy, float dz, boolean target) {
+        if (p.ammo == null) return;
+        boolean bite = bites(p, h, dx, dy, dz, target);
+        ItemStack one = p.ammo; p.ammo = null;
+        float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+        String surface = rpg.audio.Sfx.surface(h.block);
+        boolean soft = target || !surface.equals("stone");
+        float len = ammoLength(one.def);
+        if (bite) {
+            float bury = Math.min(0.22f, 0.05f + speed * 0.003f) * (surface.equals("wood") ? 0.8f : 1f) * Math.min(len, 0.85f) / 0.85f;
+            float tipX = h.x + dx * bury, tipY = h.y + dy * bury, tipZ = h.z + dz * bury;
+            g.objects.dropAmmo(one, tipX - dx * len / 2, tipY - dy * len / 2, tipZ - dz * len / 2, new float[]{dx, dy, dz}, true, 0, 0, 0);
+            return;
+        }
+        if (!soft && one.def.family != Family.THROWN && speed > 20 && g.roll(p.id, h.bx * 31 + h.bz) < 0.2f) {
+            g.state.burn(one.def, 1);
+            if (g.fx != null) g.fx.sparks(h.x, h.y, h.z, 4);
+            return;
+        }
+        // skipping off: the bounce takes a little of the speed and the spin of it
+        float dn = p.vx * h.nx + p.vy * h.ny + p.vz * h.nz;
+        float bx = (p.vx - 2 * dn * h.nx) * 0.12f, by = (p.vy - 2 * dn * h.ny) * 0.12f + 0.6f, bz = (p.vz - 2 * dn * h.nz) * 0.12f;
+        g.objects.dropAmmo(one, h.x + h.nx * 0.06f, h.y + h.ny * 0.06f + 0.02f, h.z + h.nz * 0.06f, new float[]{dx, dy, dz}, false, bx, by, bz);
+    }
+
+    /** Whether a shot drives into what it struck: a point (or a tomahawk's edge into wood), into something soft, hard and square enough. */
+    private static boolean bites(Projectile p, Voxels.Hit h, float dx, float dy, float dz, boolean target) {
+        if (p.ammo == null || !lodges(p.ammo.def)) return false;
+        String surface = rpg.audio.Sfx.surface(h.block);
+        if (p.ammo.def.family == Family.THROWN && p.ammo.def.thrown.equals("tomahawk") && !surface.equals("wood")) return false;
+        float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz), square = -(dx * h.nx + dy * h.ny + dz * h.nz);
+        // earth and turf take a point even at a low angle; wood wants it squarer
+        float needs = surface.equals("earth") || surface.equals("grass") ? 0.1f : 0.3f;
+        return (target || !surface.equals("stone")) && speed > 9 && square > needs;
+    }
+
+    /** A shot lodges in whatever body it struck (a living one carries it; a corpse holds it where it went in). One in five breaks. */
+    private void lodgeInBody(Projectile p, Actor v, float x, float y, float z, float dx, float dy, float dz) {
+        ItemStack one = p.ammo; p.ammo = null;
+        if (!lodges(one.def) || g.roll(p.id, v.id) < 0.2f) { g.state.burn(one.def, 1); return; }
+        float len = ammoLength(one.def), bury = Math.min(0.12f, len * 0.15f);
+        if (!v.alive) {
+            g.objects.dropAmmo(one, x + dx * (bury - len / 2), y + dy * (bury - len / 2), z + dz * (bury - len / 2), new float[]{dx, dy, dz}, true, 0, 0, 0);
+            return;
+        }
+        float rx = (float) Math.cos(v.yaw), rz = (float) -Math.sin(v.yaw), fx = (float) -Math.sin(v.yaw), fz = (float) -Math.cos(v.yaw);
+        float ox = x + dx * bury - v.x, oy = y + dy * bury - v.y, oz = z + dz * bury - v.z;
+        v.stuck.add(new Stuck(one, ox * rx + oz * rz, oy, ox * fx + oz * fz, dx * rx + dz * rz, dy, dx * fx + dz * fz, g.time));
+    }
+
+    /** Lodged things fall out of a body: all of them (it died, or is gone), or those that have worked loose by now. */
+    public void shedLodged(Actor v, double olderThan) {
+        for (java.util.Iterator<Stuck> it = v.stuck.iterator(); it.hasNext(); ) {
+            Stuck s = it.next();
+            if (olderThan != Integer.MAX_VALUE && g.time - s.at() < olderThan) continue;
+            it.remove();
+            float[] w = s.world(v);
+            float len = ammoLength(s.stack().def);
+            g.objects.dropAmmo(s.stack(), w[0] - w[3] * len / 2, Math.max(w[1] - w[4] * len / 2, v.y + 0.1f), w[2] - w[5] * len / 2, new float[]{w[3], w[4], w[5]}, false, v.vx, 0.5f, v.vz);
+        }
+    }
+
+    /** A creature's own blow (a bite, a claw, a tail, a breath): the same contact, guarding and damage rules a weapon meets. */
+    public void creatureBlow(Actor a, Actor v, float damage, float impact, DamageType type, String what) {
+        float potential = type == DamageType.MAGIC ? damage * CombatMath.HP_SCALE : physicalMax(a, Skill.STRENGTH, damage);
+        resolve(a, v, potential, CombatMath.impact(impact, a.skills.level(Skill.STRENGTH), 1), type, null, v.x, v.chestY(), v.z, what, behind(v, a));
+    }
+
+    /**
+     * Something hurled at a point (a monster's throw, a troll's boulder, a spider's web): it flies the arc a throw flies,
+     * from the hand, and strikes by the same contact rules. A thrown weapon lands, to be picked up; a boulder or a web is
+     * spent where it strikes.
+     */
+    public Projectile hurl(Actor a, ItemStack one, String what, float tx, float ty, float tz, float speed, float gravity, float potential, float impact, DamageType type) {
+        float hx = g.time - a.handAt < 0.25 ? a.hand[0] : a.x, hy = g.time - a.handAt < 0.25 ? a.hand[1] : a.eyeY() - 0.2f, hz = g.time - a.handAt < 0.25 ? a.hand[2] : a.z;
+        float dx = tx - hx, dy = ty - hy, dz = tz - hz, d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        float t = Math.max(0.15f, d / speed);
+        Projectile p = new Projectile(); p.id = ++projectileSerial; p.owner = a;
+        p.x = hx; p.y = hy; p.z = hz; p.vx = dx / t; p.vy = (dy + 0.5f * gravity * t * t) / t; p.vz = dz / t; p.gravity = gravity; p.life = 6;
+        p.ammo = one; p.what = what; p.type = type; p.skill = Skill.ARCHERY;
+        p.potential = Math.max(1, potential * CombatMath.HP_SCALE); p.impact = impact;
+        p.spin = what != null && what.equals("boulder") ? 4 : 10;
+        projectiles.add(p);
+        g.noise(a, a.x, a.y, a.z, 8, 0.3f);
+        if (g.sfx != null) g.sfx.play("swing", a.x, a.eyeY(), a.z, 0.5f);
+        return p;
     }
 
     public void log(String line) {

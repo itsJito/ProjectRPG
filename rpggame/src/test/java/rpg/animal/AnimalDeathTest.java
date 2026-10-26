@@ -29,4 +29,22 @@ class AnimalDeathTest {
             assertEquals(0, a.body);
         }
     }
+    @Test void aVisibleParkedCarcassCanBeCarriedAfterSavingAndLoading(@org.junit.jupiter.api.io.TempDir java.nio.file.Path folder) {
+        var config=new NativeEngine.Config();config.deterministic=true;
+        try(Game game=Game.create(config)) {
+            game.activate(DevMap.build(game.engine()));Rpg g=game.add(new Rpg(game,"Parked body",new Appearance(),true));
+            for(var npc:g.npcs)g.ai.unload(npc);
+            Animal body=g.animals.release(Species.RABBIT,false,false,61.5f,64.5f);g.combat.bleedOutNow(body);
+            for(int i=0;i<180;i++)game.tick(1f/60);
+            g.animals.dropRagdoll(body);assertNull(body.ragdoll);assertFalse(body.restPose.isEmpty());
+            long id=body.id;var saves=new rpg.SaveSystem(g);var file=folder.resolve("carcass.json");
+            assertTrue(saves.save(file));assertTrue(saves.load(file));game.tick(0);
+            body=g.animals.byId(id);assertTrue(body.exists());assertFalse(body.restPose.isEmpty());
+            g.teleport(g.player,body.x,DevMap.FLOOR,body.z+1.5f);g.controller.snapTo(0);game.tick(0);
+            var response=g.carrying.begin(g.player,body);assertFalse(response.rejected(),response.reason());
+            for(int i=0;i<15;i++)game.tick(1f/60);
+            assertEquals(id,g.player.carryBody,"a parked but visible body must regain physics and complete its pickup");
+            assertNotNull(body.ragdoll);assertEquals(g.player.id,body.carriedBy);
+        }
+    }
 }

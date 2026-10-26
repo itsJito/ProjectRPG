@@ -51,8 +51,9 @@ public final class UiEvents {
         boolean mine = e.actor() == me || e.subject() == me;
         return switch (e.type()) {
             case "ActorHit", "TargetHit", "Parry", "Dodge", "ArrowLoosed", "SpellCast", "PrayerRaised", "ActorKilled", "ArrestResisted" -> mine ? "combat" : null;
-            case "CrimeCommitted", "CrimeWitnessed", "CrimeReported", "BountyChanged", "BountyPaid", "Arrested", "TestimonyAdded" -> mine ? "law" : null;
-            case "ItemTaken", "ItemDropped", "ItemDeposited", "Equipped", "Unequipped", "Ate", "ResourceGathered", "TestSupplyTaken" -> mine ? "inventory" : null;
+            case "CrimeCommitted", "CrimeWitnessed", "CrimeReported", "BountyChanged", "BountyPaid", "Arrested", "TestimonyAdded", "PosseFormed" -> mine ? "law" : null;
+            case "BountyReminder" -> mine ? "bountynotice" : null;
+            case "Pickpocketed", "ItemTaken", "ItemDropped", "ItemDeposited", "Equipped", "Unequipped", "Ate", "ResourceGathered", "TestSupplyTaken" -> mine ? "inventory" : null;
             case "Trade" -> mine ? "coins" : null;
             case "HonorChanged" -> "honor";
             case "ContainerOpened" -> mine ? "container" : null;

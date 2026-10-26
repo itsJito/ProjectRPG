@@ -49,7 +49,7 @@ final class HiResItems {
     static Kit kit(Tier t) {
         if (t == null) return new Kit(mat(0xA27A4C), mat(0xB88C58), mat(0x5A3A22), mat(0x4A2E1A), mat(0x6A4A2A), mat(0x5A3A20), 0, 0);
         return switch (t) {
-            case LEATHER -> new Kit(mat(0xC8B48A), mat(0xE0D0A8), mat(0x5A3A22), mat(0x7A5634), mat(0x6A4A2A), mat(0x8A6A44), 0, 0);
+            case STONE -> new Kit(mat(0x8E8C86), mat(0xB6B4AC), mat(0x5A3A22), mat(0x7A5634), mat(0x6A6862), mat(0x7A7872), 0, 0);
             case CHAINMAIL -> new Kit(metal(0x9A9EA4), metal(0xC0C4C8), mat(0x3A2A1C), mat(0x5A4430), metal(0x70747A), metal(0x80848A), 2, 0);
             case BRONZE -> new Kit(metal(0xC88B4A), metal(0xE0A868), mat(0x5A3A22), mat(0x7A5634), metal(0xA86A32), metal(0xB0743A), 1, 0);
             case IRON -> new Kit(metal(0xA6A8AE), metal(0xC8CACE), mat(0x3A2A1C), mat(0x5A4430), metal(0x7A7A80), metal(0x86868C), 2, 0);
@@ -323,9 +323,9 @@ final class HiResItems {
 
 
     // ------------------------------------------------------------------ armour
-    /** What an armour tier is made of: boiled leather, riveted mail, or plate in its metal. */
+    /** What an armour piece is made of: boiled leather (untiered), riveted mail, or plates of its tier's stuff. */
     enum Stuff { LEATHER, MAIL, PLATE }
-    static Stuff stuff(Tier t) { return t == null || t == Tier.LEATHER ? Stuff.LEATHER : t == Tier.CHAINMAIL ? Stuff.MAIL : Stuff.PLATE; }
+    static Stuff stuff(Tier t) { return t == null ? Stuff.LEATHER : t == Tier.CHAINMAIL ? Stuff.MAIL : Stuff.PLATE; }
 
     /** The surface of a piece of armour at a voxel: leather with seams and stitches; mail's rings; plate with a sheen and rivets along its edges. */
     static int skin(Tier t, Kit k, int x, int y, int z, boolean edge) {

@@ -21,8 +21,8 @@ import rpg.objects.Station;
 import rpg.world.DevMap;
 
 /**
- * The windows things in the world open: a container's grid and a shop's counter (beside the inventory, in its scene),
- * a station's recipes, the test cabinet and the quest kiosk (over the world).
+ * The windows things in the world open: a container's grid and a shop's counter (gamefixes: free-standing windows of
+ * their own beside the inventory, never part of it), a station's recipes, the test cabinet and the quest kiosk.
  */
 final class Windows {
     private Windows() { }
@@ -43,27 +43,45 @@ final class Windows {
         /** A free-standing window's card, title and close button; returns the content's top. */
         float card(Ui2D ui, String title, float x, float y) {
             Style.card(ui, x, y, ww, wh);
-            ui.text(title, x + 12, y + 9, Style.TITLE, Style.ACCENT);
+            ui.text(ui.heading, title, x + 12, y + 6, 20, Style.ACCENT);
             if (Style.button(ui, "x", x + ww - 32, y + 7, 24, 22, live)) { hud.win = Hud.Win.NONE; hud.sound("UI_windowclose", 0.4f); }
             ui.rect(x + 12, y + 36, ww - 24, 1, Style.EDGE);
             return y + 46;
         }
     }
 
-    // ------------------------------------------------------------------ a container: its own grid, beside the inventory
+    /** Where a detached window stands: left of the inventory's frame, or at the screen's edge when that is too narrow. */
+    static void detach(Win w) {
+        float room = (w.hud.w - Hud.FW) / 2f;
+        w.moved = room >= w.ww + 28 ? null : Fragment.Placement.at(Fragment.Anchor.LEFT, 12, Hud.FRAME_Y);
+    }
+
+    // ------------------------------------------------------------------ a container: a window of its own, beside the inventory
     static final class ContainerWin extends Win {
-        ContainerWin(Hud h) { super("container", 268, 440); }
-        @Override protected boolean active() { return hud.win == Hud.Win.CONTAINER && hud.container != null; }
+        ContainerWin(Hud h) { super("container", 300, 500); }
+        @Override protected boolean active() { detach(this); return hud.win == Hud.Win.CONTAINER && hud.container != null; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Container c = hud.container;
             if (c == null) return;
             Rpg g = hud.g;
             boolean theft = c.isTheft(g.player);
-            ui.text(c.name, x, y, Style.TITLE, Style.ACCENT);
-            ui.text(theft ? "Owned by " + g.nameOf(c.owner) + ": taking is theft" : c.owner == g.player.id ? "Yours" : "Free to take", x, y + 20, 11, theft ? Style.BAD : Style.DIM);
-            float cs = Math.min(26, 268f / c.contents.w);
-            hud.inventory.drawGrid(ui, c.contents, x, y + 40, cs, InventoryPanel.Source.CONTAINER);
-            float by = y + 40 + c.contents.h * cs + 10;
+            float top = card(ui, c.name, x, y), ix = x + 12, iw = ww - 24;
+            ui.text(theft ? "Owned by " + g.nameOf(c.owner) + ": taking is theft" : c.owner == g.player.id ? "Yours" : "Free to take", ix, top, 11, theft ? Style.BAD : Style.DIM);
+            // a bank account: a tab for each vault (gamefixes: the Bank of Gameworld)
+            if (c.kind.equals("vault")) {
+                var vaults = g.bank.vaults(c.owner);
+                float tw = Math.min(44, (iw - 4) / Math.max(1, vaults.size()));
+                for (int i = 0; i < vaults.size(); i++) {
+                    Container v = vaults.get(i);
+                    if (Style.tab(ui, String.valueOf(i + 1), ix + i * tw, top + 14, tw - 2, 20, v == c) && v != c && live) { hud.container = v; hud.sound("UIbutton1", 0.4f); }
+                }
+                top += 26;
+                ui.text(rpg.item.Currency.text(g.bank.coinsIn(c.owner)) + " G in the account", ix + iw - 150, top - 40, 11, Style.DIM);
+            }
+            float cs = Math.min(Math.min(30, iw / c.contents.w), (wh - 200) / c.contents.h);
+            hud.inventory.drawGrid(ui, c.contents, ix, top + 20, cs, InventoryPanel.Source.CONTAINER);
+            float by = top + 20 + c.contents.h * cs + 10;
+            x = ix;
             // a body: what they still wear, as it is on them - a piece taken comes off the body
             if (c instanceof rpg.objects.Corpse cp) {
                 var worn = cp.worn(g);
@@ -83,21 +101,30 @@ final class Windows {
                 }
                 by += 16 + ((worn.size() + 5) / 6) * (ws + 4) + 8;
             }
-            if (Style.button(ui, "Take all", x, by, 100, 26, live && !(c instanceof rpg.objects.Corpse cp2 ? cp2.empty(g) : c.contents.isEmpty()))) g.interact.request(g.player, c, "takeall");
-            ui.text(String.format("%.1f kg inside", c.contents.weight()), x + 112, by + 6, 12, Style.FAINT);
+            // two take-alls (gamefixes): the gear (anything worn or wielded, and what is still on a body) and the rest
+            if (!c.kind.equals("pockets")) {
+                boolean gear = c instanceof rpg.objects.Corpse cp2 && !cp2.worn(g).isEmpty() || c.contents.stacks().stream().anyMatch(s -> s.def.equippable());
+                boolean rest = c.contents.stacks().stream().anyMatch(s -> !s.def.equippable());
+                float bw = (iw - 8) / 2;
+                if (Style.button(ui, "Take All Equipment", ix, by, bw, 28, live && gear)) g.interact.request(g.player, c, "takeall:equipment");
+                if (Style.button(ui, "Take All Items", ix + bw + 8, by, bw, 28, live && rest)) g.interact.request(g.player, c, "takeall:items");
+                by += 36;
+            }
+            ui.text(String.format("%.1f kg inside", c.contents.weight()), ix, by + 2, 12, Style.FAINT);
         }
     }
 
-    // ------------------------------------------------------------------ a shop's counter
+    // ------------------------------------------------------------------ a shop's counter: a window of its own
     static final class ShopWin extends Win {
-        ShopWin(Hud h) { super("shop", 268, 440); }
-        @Override protected boolean active() { return hud.win == Hud.Win.SHOP && hud.shop != null; }
+        ShopWin(Hud h) { super("shop", 300, 500); }
+        @Override protected boolean active() { detach(this); return hud.win == Hud.Win.SHOP && hud.shop != null; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Rpg g = hud.g;
             Economy.Shop s = hud.shop;
             if (s == null) return;
             Npc m = g.econ.merchant(s);
-            ui.text(s.name, x, y, Style.TITLE, Style.ACCENT);
+            float top = card(ui, s.name, x, y);
+            x += 12; y = top - 42;
             int purse = m == null ? 0 : m.count(Items.COINS);
             ui.text((m == null ? "" : m.name + "'s purse: ") + Currency.text(purse) + " G", x, y + 20, 11, Style.DIM);
             // one tile per kind in stock (the storeroom is behind the counter)
@@ -123,8 +150,9 @@ final class Windows {
                 }
                 if (ui.clicked(cx, cy, tw, th)) { Result r = g.econ.buy(g.player, s, d, 1, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); }
             }
-            ui.text("Prices follow stock. Drag your goods here to sell them.", x, y + wh - 18, 11, Style.FAINT);
-            hud.inventory.zone(x, y, ww, wh, d -> { if (d.source == InventoryPanel.Source.PLAYER) { Result r = g.econ.sell(g.player, d.grid, s, d.slot, d.stack.amount, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); } });
+            ui.text("Prices follow stock. Drag your goods here", x, y + wh - 32, 11, Style.FAINT);
+            ui.text("to sell them.", x, y + wh - 18, 11, Style.FAINT);
+            hud.inventory.zone(x - 12, y, ww, wh, d -> { if (d.source == InventoryPanel.Source.PLAYER) { Result r = g.econ.sell(g.player, d.grid, s, d.slot, d.stack.amount, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); } });
         }
     }
 

@@ -67,6 +67,7 @@ public final class Interactions {
         Work old = work.get(w.actor.id);
         if (old != null && old != w) interrupt(old, "started something else");
         work.put(w.actor.id, w);
+        w.actor.working = w;
     }
 
     public Work of(Actor a) { return a == null ? null : work.get(a.id); }
@@ -75,6 +76,7 @@ public final class Interactions {
 
     private void interrupt(Work w, String why) {
         work.remove(w.actor.id);
+        if (w.actor.working == w) w.actor.working = null;
         interrupted++;
         g.state.commit("WorkInterrupted", w.actor.id, w.target.id(), null, 0, w.action + " (" + why + ") after " + w.commits + " commits");
     }
@@ -98,7 +100,7 @@ public final class Interactions {
             if (r.committed()) committed++; else rejected++;
             if (r.rejected() && a == g.player && r.reason() != null) g.chat.add(r.reason(), Chat.Kind.WARN);
             if (r.committed() && w.repeat) w.t = 0;
-            else work.remove(a.id);
+            else { work.remove(a.id); if (a.working == w) a.working = null; }
         }
     }
 
@@ -110,6 +112,9 @@ public final class Interactions {
         float maxRange = g.cfg.inspectRange + (float) Math.hypot(a.x - ox, a.z - oz) + 1;
         var hit = g.vox.ray(ox, oy, oz, dx, dy, dz, maxRange, true);
         float wall = hit.hit ? hit.dist : maxRange;
+        // someone standing in a doorway is not hidden by the open leaf swung beside them (gamefixes)
+        var past = hit.hit && hit.door != null && hit.door.open ? g.vox.ray(ox, oy, oz, dx, dy, dz, maxRange, true, false) : hit;
+        float wallForActors = past.hit ? past.dist : maxRange;
         Interactable best = null;
         float bestT = Float.MAX_VALUE;
         // the ray: the nearest focus volume it passes through before the wall it strikes
@@ -118,7 +123,8 @@ public final class Interactions {
             float r = t.focusRadius();
             if (Math.hypot(t.ax() - a.x, t.az() - a.z) > g.cfg.inspectRange + r) continue;
             float entry = t.focusEntry(ox, oy, oz, dx, dy, dz);
-            if (entry <= wall + 0.35f && entry <= maxRange && entry < bestT) { bestT = entry; best = t; }
+            float limit = t instanceof Actor ? wallForActors : wall;
+            if (entry <= limit + 0.35f && entry <= maxRange && entry < bestT) { bestT = entry; best = t; }
         }
         // the assist: the nearest eligible anchor in a small cone, if it can be seen
         if (best == null) {

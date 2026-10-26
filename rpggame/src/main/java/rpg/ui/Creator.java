@@ -17,12 +17,13 @@ import rpg.actor.Appearance;
  * hair is chosen. Back and Next walk the tabs; Finish names the character and starts.
  */
 public final class Creator {
-    public final Appearance look = new Appearance();
-    public final StringBuilder name = new StringBuilder("Adventurer");
+    public final Appearance look = Appearance.henric();
+    public final StringBuilder name = new StringBuilder("Henric");
     public boolean done;
     /** Backed out of (Esc): no profile is made. */
     public boolean cancelled;
     public float turn;
+    public boolean autoRotate = true;
     private boolean dragging;
     private float lastMx;
     /** Whether the player is turning the figure by hand (the slow turn waits meanwhile). */
@@ -77,7 +78,7 @@ public final class Creator {
      * the face is what is seen up close. Held still while dragged.
      */
     public void spin(float dt) {
-        if (dragging) return;
+        if (dragging || !autoRotate) return;
         if (tab == 1) {
             float tau = (float) (2 * Math.PI), off = (float) (turn - Math.rint(turn / tau) * tau);
             turn -= off * Math.min(1, dt * 3);
@@ -170,6 +171,7 @@ public final class Creator {
 
         // the figure's own controls, under it
         float cx = 478 + (w - 478) / 2f;
+        if (Style.button(ui, autoRotate ? "Pause rotation" : "Resume rotation", cx - 80, h - 94, 160, 30, true)) autoRotate = !autoRotate;
         ui.rect(cx - 170, h - 54, 340, 38, 0x70101214);
         if (Style.button(ui, "<", cx - 164, h - 50, 34, 30, true)) turn -= 0.5f;
         if (Style.button(ui, ">", cx + 130, h - 50, 34, 30, true)) turn += 0.5f;
@@ -275,28 +277,7 @@ public final class Creator {
         return y + perCol * rh + 14;
     }
 
-    private static final String[] PRESETS = {"Farmhand", "Soldier", "Scholar", "Wanderer", "Noble", "Smith"};
-    private static final long[] PRESET_SEEDS = {11, 23, 37, 41, 53, 67};
-
     private float bodyTab(Ui2D ui, float x, float y, float w) {
-        // whole looks to start from (the later steps change them as you like); the sex is kept
-        y = heading(ui, "Start from", x, y, w);
-        float bw = (w - 5 * 6) / 6;
-        for (int i = 0; i < PRESETS.length; i++) {
-            float bx = x + i * (bw + 6);
-            boolean hov = ui.hover(bx, y, bw, 30);
-            ui.rect(bx, y, bw, 30, hov ? HOVER_BG : ROW_BG);
-            ui.border(bx, y, bw, 30, 1, 0x22FFFFFF);
-            ui.flatCentered(PRESETS[i], bx + bw / 2, y + 8, 11, hov ? Style.TEXT : Style.DIM);
-            if (ui.clicked(bx, y, bw, 30)) {
-                Appearance a = Appearance.random(PRESET_SEEDS[i] * 7919);
-                boolean fem = look.female;
-                look.bodyType = a.bodyType; look.skin = a.skin; look.hair = a.hair; look.hairColor = a.hairColor; look.beard = fem ? 0 : a.beard; look.beardColor = a.beardColor;
-                look.top = a.top; look.topColor = a.topColor; look.bottom = a.bottom; look.bottomColor = a.bottomColor; look.shoes = a.shoes; look.shoesColor = a.shoesColor;
-                click();
-            }
-        }
-        y += 46;
         y = heading(ui, "Sex", x, y, w);
         y = cards(ui, new String[]{"Male", "Female"}, look.female ? 1 : 0, v -> { look.female = v == 1; if (look.female) look.beard = 0; }, x, y, w, 56);
         y = heading(ui, "Build", x, y, w);

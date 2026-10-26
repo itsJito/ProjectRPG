@@ -115,11 +115,15 @@ public final class Json {
         }
     }
 
-    private Double num() {
+    private Number num() {
         int st = i;
         while (i < s.length() && "+-0123456789.eE".indexOf(s.charAt(i)) >= 0) i++;
         if (st == i) throw err("Bad value");
-        return Double.parseDouble(s.substring(st, i));
+        String token=s.substring(st,i);
+        if(token.indexOf('.')<0 && token.indexOf('e')<0 && token.indexOf('E')<0) {
+            try { return Long.parseLong(token); } catch(NumberFormatException ignored) { /* Outside the signed integer range. */ }
+        }
+        return Double.parseDouble(token);
     }
 
     // ------------------------------------------------------------------ writer
@@ -136,6 +140,7 @@ public final class Json {
         if (v == null) b.append("null");
         else if (v instanceof String) quote(b, (String) v);
         else if (v instanceof Boolean) b.append(v);
+        else if (v instanceof Byte || v instanceof Short || v instanceof Integer || v instanceof Long) b.append(v);
         else if (v instanceof Number) {
             double x = ((Number) v).doubleValue();
             if (x == Math.rint(x) && Math.abs(x) < 1e15) b.append((long) x);

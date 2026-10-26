@@ -45,6 +45,17 @@ public final class RenderCommands {
     }
 
     /** A quality preset ({@code QUALITY_*}), the passes that are on ({@code PASS_*}) and the render scale; kept until changed. */
+    /** A GPU emitter, with recorded simulation state supplied by the caller, never CPU particle readback. */
+    public void ripple(float x,float z,float radius,float strength) { head(AstrattoNative.RCMD_RIPPLE,24); buf.putFloat(x).putFloat(z).putFloat(radius).putFloat(strength); }
+    /** Kind EMITTER_ATTACHED_FIRE retains the emitter translation for the life of each flame. */
+    public void emitter(long id, int kind, float x, float y, float z, float size, float rate, float spread, float life, float r, float g, float b, float vx, float vy, float vz) {
+        head(AstrattoNative.RCMD_EMITTER,80); buf.putLong(id);
+        buf.putFloat(x).putFloat(y).putFloat(z).putFloat(size);
+        buf.putFloat(r).putFloat(g).putFloat(b).putFloat(0.85f);
+        buf.putFloat(vx).putFloat(vy).putFloat(vz).putFloat(life);
+        buf.putFloat(rate).putFloat(kind).putFloat(spread).putFloat((float)(id & 65535));
+    }
+
     public void quality(int preset, int passes, float renderScale) { head(AstrattoNative.RCMD_QUALITY, 24).buf.putInt(preset).putInt(passes).putFloat(renderScale).putInt(0); }
 
     /** 2.4: the lens, for {@code PASS_MOTION_BLUR} and {@code PASS_DEPTH_OF_FIELD}: the share of the frame the shutter is open,

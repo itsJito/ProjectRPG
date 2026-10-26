@@ -204,7 +204,14 @@ void Ragdoll::fromPose(const float* pt, float vx, float vy, float vz) {
         const V3 at = pos[d.parent] + rotate(rot[d.parent], (d.at - PART[d.parent].c) * s);
         pos[d.child] = at - rotate(rot[d.child], (d.at - PART[d.child].c) * s);
     }
-    place(pos, rot, V3(vx, vy, vz));
+    if (held) {
+        // Only the supported pelvis and chest follow the hands; every limb stays in the constraint solver.
+        for (int p : {PELVIS, TORSO}) {
+            Body& b = body(p); b.flags |= ASTRATTO_RIGID_KINEMATIC;
+            b.prevP = b.p; b.prevQ = b.q; b.p = pos[p]; b.q = rot[p]; b.v = V3(vx, vy, vz); b.w = V3(); b.update();
+        }
+        wake(); publish(1);
+    } else place(pos, rot, V3(vx, vy, vz));
 }
 
 void Ragdoll::standAt(float wx, float wy, float wz, float yaw) {
@@ -338,7 +345,7 @@ int Ragdoll::update(const VoxelWorld* w, float dt) {
         bool asleep = true;
         for (int p = 0; p < PARTS; p++) { const Body& b = body(p); moved = std::max(moved, len(b.v)); if (b.awake) asleep = false; }
         quiet = moved < 0.22f ? quiet + h : 0;
-        if (!live && (asleep || age >= rd::ACTIVE_TIME * 3 || (quiet > 0.9f && age > 0.6f))) {
+        if (!live && !held && (asleep || age >= rd::ACTIVE_TIME * 3 || (quiet > 0.9f && age > 0.6f))) {
             settled = true;
             for (int p = 0; p < PARTS; p++) { Body& b = body(p); b.v = V3(); b.w = V3(); b.awake = false; b.prevP = b.p; b.prevQ = b.q; }
         }

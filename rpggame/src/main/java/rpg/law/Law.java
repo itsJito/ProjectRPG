@@ -22,9 +22,13 @@ import rpg.world.DevMap;
 /**
  * Crime and law (GDD 3.5, 3.8 invariant 3). A crime is committed as an event; only NPCs that actually see it at that
  * moment gain evidence; nothing changes in law until a witness travels to a lawman of the jurisdiction where it
- * happened and reports it - then, and only then, that jurisdiction's bounty rises (theft: half the stolen value; the
- * ceiling applies). Stop the witness and there is no bounty, though the theft still happened. Bounties are separate per
- * jurisdiction; being wanted blocks trade there and sets the guards on you.
+ * happened and reports it - then, and only then, that jurisdiction's bounty rises. Stop the witness and there is no
+ * bounty, though the theft still happened.
+ *
+ * Each kingdom keeps its own books (gamefixes): a bounty in one does not follow you over the border, and every report
+ * adds to that kingdom's total by the crime's severity (see {@link #charge}), halved for high Honor, with no ceiling.
+ * The watch goes after a bounty above 21 G, or any bounty of someone who walks up to them; at the lockdown bounty the
+ * town shuts its shops and the watch attacks on sight; bounty hunters (Posses) do the rest.
  */
 public final class Law {
     private final Rpg g;
@@ -41,16 +45,51 @@ public final class Law {
     private double sentenceUntil = -1;
     private String sentenceJurisdiction = "";
     private int jailAdmissions;
+    private record RoofKey(long actor,String jurisdiction) {}
+    private static final class RoofWarning { long guard; double at,lastSeen,nextCharge; }
+    private final Map<RoofKey,RoofWarning> roofWarnings=new HashMap<>();
+    private double roofCheck;
+    public boolean onRoof(Actor actor) {
+        return actor!=null && actor.alive && actor.grounded && g.vox.block((int)Math.floor(actor.x),(int)Math.floor(actor.y-0.08f),(int)Math.floor(actor.z))==rpg.world.Blocks.ROOF;
+    }
+    public Actor roofTarget(Npc guard) {
+        for(var entry:roofWarnings.entrySet())if(entry.getValue().guard==guard.id && g.time-entry.getValue().lastSeen<1 && g.time<entry.getValue().at+8) {
+            Actor actor=g.actor(entry.getKey().actor);if(onRoof(actor))return actor;
+        }
+        return null;
+    }
+    private void roofs() {
+        if(g.time<roofCheck)return;roofCheck=g.time+0.5;
+        roofWarnings.entrySet().removeIf(entry->g.time-entry.getValue().lastSeen>20);
+        for(Actor actor:g.actors())if(actor.domain==astratto.ai.AgentDomain.HUMAN && onRoof(actor) && !inCustody(actor)) {
+            String jur=DevMap.jurisdiction(actor.x,actor.z);if(DevMap.WILDS.equals(jur))continue;
+            Npc observer=null;float nearest=25;
+            for(Npc guard:g.npcs)if(guard.alive && guard.loaded && (guard.role==Npc.Role.GUARD || guard.role==Npc.Role.LAWMAN) && guard.homeJurisdiction.equals(jur) && guard.distTo(actor)<nearest && g.ai.canSee(guard,actor)) {observer=guard;nearest=guard.distTo(actor);}
+            if(observer==null)continue;
+            RoofKey key=new RoofKey(actor.id,jur);RoofWarning warning=roofWarnings.get(key);
+            if(warning==null) {
+                warning=new RoofWarning();warning.at=g.time;warning.guard=observer.id;warning.nextCharge=g.time+8;roofWarnings.put(key,warning);
+                g.ai.say(observer,"Get down from that roof. This is your warning!");observer.nextThink=0;
+                g.state.commit("RoofWarning",observer.id,actor.id,jur,0,"eight seconds to leave the roof");
+            }
+            warning.lastSeen=g.time;
+            if(g.time>=warning.nextCharge) {warning.nextCharge=g.time+30;crime(actor,"TRESPASS",0,5,null,0);}
+        }
+    }
     public int jailAdmissions() { return jailAdmissions; }
     public double sentenceRemaining() { return Math.max(0, sentenceUntil - g.state.minutes); }
     public String sentenceJurisdiction() { return sentenceJurisdiction; }
 
     /** Clock-driven custody; sleeping on a cell slab uses the same release path. */
     public void update() {
+        roofs();
+        borders();
+        posses.update();
         if (sentenceUntil >= 0 && g.state.minutes >= sentenceUntil) releasePlayer();
         for (Npc npc : g.npcs) if (npc.arrestedUntil >= 0 && (!npc.alive || g.state.minutes >= npc.arrestedUntil)) {
             String jurisdiction = npc.arrestJurisdiction.isEmpty() ? DevMap.jurisdiction(npc.x, npc.z) : npc.arrestJurisdiction;
             npc.arrestedUntil = -1; npc.arrestJurisdiction = "";
+            returnPossessions(npc);
             var cell = rpg.world.Jails.forJurisdiction(jurisdiction);
             if (npc.alive && cell != null) {
                 g.teleport(npc, cell.releaseX(), DevMap.FLOOR, cell.releaseZ());
@@ -73,6 +112,7 @@ public final class Law {
     private void releasePlayer() {
         var cell = rpg.world.Jails.forJurisdiction(sentenceJurisdiction);
         sentenceUntil = -1;
+        returnPossessions(g.player);
         openEmptyCell(sentenceJurisdiction);
         if (cell != null) g.player.poseReset = true;
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
@@ -86,6 +126,7 @@ public final class Law {
         a.cs.cancel(); a.cs.blocking = false; a.cs.draw = 0;
         if (a == g.player) g.controller.cancelHandInput();
         if (bounties.containsKey(jur)) bounties.get(jur).remove(a.id);
+        confronted.remove(new Key(a.id, jur));
         resisting.remove(a.id); haltedAt.remove(a.id);
         Set<Actor> stoodDown = new HashSet<>();
         stoodDown.add(a);
@@ -109,7 +150,70 @@ public final class Law {
     /** Crime events already reported: a second witness of the same crime adds testimony, not a second bounty. */
     private final Set<Long> reportedCrimes = new HashSet<>();
 
-    public Law(Rpg g) { this.g = g; }
+    public Law(Rpg g) { this.g = g; this.posses = new Posses(g, this); }
+    public final Posses posses;
+    /** Offenders who have walked up to the watch of a kingdom while wanted there: that watch acts on any bounty. */
+    private record Key(long offender, String jurisdiction) {}
+    private final Set<Key> confronted = new HashSet<>();
+    /** The kingdom the player was last in, for the reminder on crossing into one where they are wanted. */
+    private String lastKingdom = "";
+    public String reminder = "";
+
+    /** Whether the watch of a kingdom goes after an offender: a bounty above the pursuit line, or any once they came to the watch. */
+    public boolean pursued(long offender, String jurisdiction) {
+        int b = bounty(offender, jurisdiction);
+        return b > g.cfg.pursuitBounty || b > 0 && confronted.contains(new Key(offender, jurisdiction));
+    }
+    /** A town in lockdown (gamefixes): the player is in it with a bounty this high - shops shut, the watch attacks on sight. */
+    public boolean lockdown(String jurisdiction) {
+        return !DevMap.WILDS.equals(jurisdiction) && jurisdiction.equals(DevMap.jurisdiction(g.player.x, g.player.z)) && bounty(g.player.id, jurisdiction) >= g.cfg.lockdownBounty;
+    }
+    /** The wanted player speaks to the watch: whatever the bounty, the officer acts on it now. */
+    public void confront(Npc officer, Actor offender) {
+        confronted.add(new Key(offender.id, officer.homeJurisdiction));
+        haltedAt.remove(offender.id);
+        officer.fightTarget = offender.id; officer.goal = rpg.ai.Brain.Goal.FIGHT; officer.nextThink = 0;
+        halt(officer, offender);
+    }
+
+    /**
+     * What a reported crime adds to the kingdom's bounty (gamefixes schedule): disorderly conduct 5, vandalism 10, animal
+     * slaughter 30, horse slaughter 50, trespassing 50, arson 200, murder 400 (a guard or lawman 500, a noble 600, a royal
+     * 1,000 - carried in the memory's value); theft half the value; assault and lockpicking their configured charges.
+     */
+    int charge(Memory m) {
+        return switch (m.kind) {
+            case "THEFT" -> Math.max(1, Math.round(m.value * g.cfg.theftBountyShare));
+            case "DISORDERLY" -> 5;
+            case "VANDALISM" -> 10;
+            case "LIVESTOCK" -> m.value >= 50 ? 50 : 30;
+            case "TRESPASS" -> 50;
+            case "ARSON" -> 200;
+            case "ASSAULT" -> g.cfg.assaultBounty;
+            case "MURDER" -> Math.max(400, m.value);
+            default -> 20;
+        };
+    }
+    /** The bounty a murder carries, by who was killed. */
+    private static int murderCharge(Actor victim) {
+        if (victim instanceof Npc n) {
+            if (n.standing == Npc.Standing.ROYAL) return 1000;
+            if (n.standing == Npc.Standing.NOBLE) return 600;
+            if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) return 500;
+        }
+        return 400;
+    }
+
+    /** Crossing into a kingdom where the player is wanted brings up a reminder of the amount. */
+    private void borders() {
+        String here = DevMap.jurisdiction(g.player.x, g.player.z);
+        if (here.equals(lastKingdom)) return;
+        lastKingdom = here;
+        int b = DevMap.WILDS.equals(here) ? 0 : bounty(g.player.id, here);
+        if (b <= 0 || !g.player.alive) return;
+        reminder = here + (lockdown(here) ? " is in lockdown. " : ": ") + "you are wanted for " + rpg.item.Currency.text(b) + " G.";
+        g.state.commit("BountyReminder", g.player.id, 0, here, 0, reminder);
+    }
 
     public int bounty(long offender, String jurisdiction) {
         Map<Long, Integer> m = bounties.get(jurisdiction);
@@ -127,7 +231,7 @@ public final class Law {
     private boolean innocent(long victim) {
         Actor v = g.actor(victim);
         if (v == null) return victim != 0;
-        if (v instanceof Npc n && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.hostileToPlayer)) return false;
+        if (v instanceof Npc n && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.role == Npc.Role.MONSTER || n.hostileToPlayer)) return false;
         if (v instanceof rpg.animal.Animal an && !an.species.domestic) return false;
         if (g.player.cs.lastAttacker == victim && g.time - g.player.cs.lastHurt < 15) return false;   // self-defence
         return true;
@@ -135,6 +239,7 @@ public final class Law {
 
     /** A crime happens: committed as a fact; whoever sees it now remembers it. Returns how many saw it. */
     public int crime(Actor culprit, String kind, long victim, int value, WorldObject where, long cause) {
+        if (g.actor(victim) instanceof rpg.monster.Monster || culprit instanceof rpg.monster.Monster) return 0;
         if (g.scripted) System.out.printf("      [crime] %s by %s against %s at (%.1f, %.1f), t %.1f%n", kind, culprit.name, g.nameOf(victim), culprit.x, culprit.z, g.time);
         crimes++;
         // Honor (GDD 3.5): the act weighs on the player's conscience whether or not anyone saw it - against innocents only
@@ -154,7 +259,13 @@ public final class Law {
             w.remember(new Memory(kind, who, victim, jur, g.state.minutes, 1f, "witnessed", ev.id(), value, kind.toLowerCase() + " at " + (where == null ? "?" : where.name) + (who == 0 ? " (by a stranger)" : "")), 24);
             g.state.commit("CrimeWitnessed", w.id, culprit.id, jur, ev.id(), kind + " seen by " + w.name);
             witnessed++;
-            g.ai.say(w, kind.equals("THEFT") ? "Thief!" : kind.equals("MURDER") ? "Murder!" : "Guards!");
+            String protest=kind.equals("VANDALISM") ? switch(w.role) {
+                case GUARD,LAWMAN,KNIGHT -> "Stop damaging that property! The watch will hear of this.";
+                case MERCHANT,CRAFTSMAN,WORKER,MINER -> "That took work to make! You'll pay for the damage.";
+                case THIEF,BANDIT,BRUTE -> "Keep that noise away from me.";
+                default -> "Leave that alone! Someone fetch the watch.";
+            } : kind.equals("THEFT") ? "Thief!" : kind.equals("MURDER") ? "Murder!" : "Guards!";
+            w.wantYaw=(float)Math.atan2(-(culprit.x-w.x),-(culprit.z-w.z)); g.ai.say(w,protest);
             w.nextThink = 0;
             // violence is shouted to everyone in earshot at once (word of mouth, not a broadcast)
             g.ai.rumors.alarm(w, w.memories.get(w.memories.size() - 1));
@@ -169,25 +280,39 @@ public final class Law {
     private static String names(List<Npc> l) { StringBuilder b = new StringBuilder(); for (Npc n : l) b.append(b.length() > 0 ? ", " : "").append(n.name); return b.toString(); }
 
     private boolean lawfulForce(Actor a, Actor v) {
+        if (rpg.ai.AiSystem.alliedWatch(a,v))return true;
         if (a == null || v == null || a == v || !(a == g.player || a instanceof Npc)) return true;
         if (a.cs.lastAttacker == v.id && g.time - a.cs.lastHurt < 15) return true;
-        if (v instanceof Npc n && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE)) return true;
+        if (v instanceof Npc n && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.posse)) return true;
         if (a instanceof Npc officer && (officer.role == Npc.Role.GUARD || officer.role == Npc.Role.LAWMAN) && bounty(v.id, officer.homeJurisdiction) > 0) return true;
         return a == g.player && g.bountyBoard.authorized(v.id);
     }
 
     /** Player and human NPC offenses use the same witness/report/bounty path. */
     public void onHit(Actor a, Actor v, long cause) {
+        if(a.summonOwner!=0) { Actor owner=g.actor(a.summonOwner); if(owner==null)return; a=owner; }
+        if(v.summonOwner!=0)return;
         if (!(v == g.player || v instanceof Npc) || lawfulForce(a, v)) return;
         Assault key = new Assault(a.id, v.id);
         Double last = assaultAt.get(key);
         if (last != null && g.time - last < 10) return;
         assaultAt.put(key, g.time);
-        crime(a, "ASSAULT", v.id, 0, null, cause);
+        // a bare-handed brawl is disorderly conduct; a weapon makes it assault
+        crime(a, a.main() == null ? "DISORDERLY" : "ASSAULT", v.id, 0, null, cause);
     }
 
     public void onKilled(Actor victim, Actor killer, long cause) {
-        if ((victim == g.player || victim instanceof Npc) && !lawfulForce(killer, victim)) crime(killer, "MURDER", victim.id, 0, null, cause);
+        if(victim.summonOwner!=0)return;
+        if(victim instanceof rpg.monster.Monster)return;   // killing a monster is never a crime (gamefixes)
+        if(killer!=null && killer.summonOwner!=0)killer=g.actor(killer.summonOwner);
+        if(killer!=null && killer.domain!=astratto.ai.AgentDomain.HUMAN && (victim==g.player || victim instanceof Npc)) {
+            for(Npc observer:g.ai.witnesses(killer)) if(observer.distTo(victim)<25 && g.vox.sight(observer.x,observer.eyeY(),observer.z,victim.x,victim.chestY(),victim.z)) {
+                observer.remember(new Memory("BEAST_ATTACK",killer.id,victim.id,DevMap.jurisdiction(victim.x,victim.z),g.state.minutes,1,"witnessed",cause,0,"saw a creature kill "+victim.name),24);
+                g.ai.say(observer,"That beast killed "+victim.name+"!"); observer.fearOf=killer.id;observer.fearX=killer.x;observer.fearZ=killer.z;observer.fearSeenAt=g.time;
+            }
+            return;
+        }
+        if ((victim == g.player || victim instanceof Npc) && !lawfulForce(killer, victim)) crime(killer, "MURDER", victim.id, murderCharge(victim), null, cause);
     }
 
     public void closeCase(Actor offender, String jurisdiction) { settle(offender, jurisdiction); }
@@ -222,16 +347,10 @@ public final class Law {
             g.state.commit("TestimonyAdded", witness.id, m.subject, m.jurisdiction, m.eventId, m.kind + " already reported; " + witness.name + " confirms it");
             return Result.ok("already reported");
         }
-        int add = switch (m.kind) {
-            case "THEFT" -> Math.max(1, Math.round(m.value * g.cfg.theftBountyShare));
-            case "LIVESTOCK" -> Math.max(10, m.value);
-            case "VANDALISM" -> Math.max(5, m.value * 2);
-            case "ASSAULT" -> g.cfg.assaultBounty;
-            case "MURDER" -> g.cfg.murderBounty;
-            default -> 20;
-        };
+        int add = charge(m);
+        if (m.subject == g.player.id && g.honor != null && g.honor.high()) add = Math.max(1, add / 2);
         int before = bounty(m.subject, m.jurisdiction);
-        int after = Math.min(g.cfg.bountyCap, before + add);
+        int after = before + add;
         bounties.computeIfAbsent(m.jurisdiction, k -> new HashMap<>()).put(m.subject, after);
         m.reported = true;
         reports++;
@@ -269,6 +388,32 @@ public final class Law {
     /** Whether someone is in custody right now: the law does not strike a prisoner. */
     public boolean inCustody(Actor a) { return a == g.player ? sentenceRemaining() > 0 : a instanceof Npc n && n.arrestedUntil > g.state.minutes; }
 
+    /** Only what this officer actually knows informs the challenge; hearsay remains weaker than sight. */
+    public float certainty(Npc guard, Actor offender) {
+        float confidence = 0.25f;
+        for (var memory : guard.memories) if (memory.subject == offender.id && memory.crime() && !memory.settled
+                && guard.homeJurisdiction.equals(memory.jurisdiction))
+            confidence = Math.max(confidence, memory.confidence * (memory.witnessed() ? 1 : 0.65f));
+        return Math.min(1, confidence);
+    }
+
+    public Result denyCharge(Actor offender, Npc guard, long request) {
+        if (g.state.alreadyCommitted(request) || bounty(offender.id, guard.homeJurisdiction) <= 0) return Result.no("There is no open charge to dispute.");
+        float evidence = certainty(guard, offender);
+        float chance = Math.max(0.02f, Math.min(0.75f, (1 - evidence) * 0.7f + offender.skills.level(rpg.skill.Skill.THIEVING) * 0.001f));
+        double roll = Math.floorMod(request * 6364136223846793005L + guard.id * 1442695040888963407L, 10000) / 10000.0;
+        g.state.commit(request, "ChargeDisputed", offender.id, guard.id, guard.homeJurisdiction, 0, "evidence " + evidence);
+        if (roll < chance) {
+            settle(offender, guard.homeJurisdiction);
+            g.ai.say(guard, "That account doesn't hold together. You're free to go.");
+            g.chat.say("The charge is dismissed. People still remember what they saw.");
+        } else {
+            g.ai.say(guard, evidence > 0.85f ? "I saw you myself. You're coming with me." : "Your story doesn't match the testimony. Come quietly.");
+            arrest(offender, guard.homeJurisdiction, guard);
+        }
+        return Result.ok();
+    }
+
     /** The guard catches up with the wanted player: Halt! Pay, come quietly, or resist. */
     public void halt(Npc guard, Actor p) {
         Double at = haltedAt.get(p.id);
@@ -277,13 +422,16 @@ public final class Law {
             return;
         }
         haltedAt.put(p.id, g.time);
+        confronted.add(new Key(p.id, guard.homeJurisdiction));   // told to halt, the matter is between them now
         int b = bounty(p.id, guard.homeJurisdiction);
         g.ai.say(guard, "Halt!");
-        Dialog d = new Dialog(guard.name, "Halt! You're wanted in " + guard.homeJurisdiction + " - a bounty of " + b + " coins. Pay it now, or come quietly.");
+        float evidence = certainty(guard, p);
+        Dialog d = new Dialog(guard.name, (evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ") + "You are wanted in " + guard.homeJurisdiction + " for " + b + " coins. Pay, explain yourself, or come quietly.");
         d.npc = guard.id;
         d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
+        d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
         d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, guard.homeJurisdiction, guard); });
-        d.choice("Never! (resist arrest)", () -> { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, guard.id, guard.homeJurisdiction, 0, ""); });
+        d.closeChoice("Never! (resist arrest)", () -> { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, guard.id, guard.homeJurisdiction, 0, ""); });
         if (p == g.player) g.ui.dialog(d);
     }
 
@@ -297,22 +445,34 @@ public final class Law {
 
     /** Arrest: the bounty is settled by the sentence, stolen goods are confiscated back to their owners, the offender is held. */
     public void arrest(Actor a, String jur, Npc by) {
+        if(inCustody(a))return;
         arrests++;
         int b = bounty(a.id, jur);
         List<Npc> witnesses = g.ai.witnesses(a); // identify witnesses before the prisoner is moved into the cell
         settle(a, jur);
-        int returned = 0;
-        for (int i = 0; i < a.inv.size(); i++) {
-            ItemStack s = a.inv.get(i);
-            if (s == null || !s.stolen) continue;
-            a.inv.set(i, null);
-            Actor owner = g.actor(s.owner);
-            ItemStack back = s.copy(s.amount);
-            back.stolen = false;
-            if (owner != null && owner.store(back)) returned += s.amount;
-            else g.state.burn(s.def, s.amount);
+        var escrow = new rpg.objects.Container(g.state.newEntityId(), "jail_escrow", a.name + "'s held possessions", "escrow", a.x, -32, a.z, 320, a.id);
+        escrow.locked = true;
+        // Preflight before moving any originals. Filled bags remain their own containers.
+        var originals = new ArrayList<>(a.inv.stacks()); originals.addAll(a.eq.stacks());
+        if (!escrow.contents.canAddAll(originals)) throw new IllegalStateException("prison escrow capacity");
+        for (var slot : rpg.item.ItemDef.Slot.values()) {
+            var item = a.eq.get(slot); if (item == null) continue;
+            int[] place=escrow.contents.findSpace(item.def,-1);
+            if(place==null || !escrow.contents.putAt(item,place[0],place[1],place[2]!=0))throw new IllegalStateException("prison gear layout");
+            a.eq.set(slot, null);
+            escrow.custodySlots.put(slot.name(), place[1]*escrow.contents.w+place[0]);
         }
+        for (var item : new ArrayList<>(a.inv.stacks())) escrow.contents.add(item);
+        a.inv.clear(); g.objects.add(escrow);
+        int returned = Property.confiscate(g, escrow.contents);
         Npc lawman = g.ai.lawmanFor(jur);
+        int bill=b+(int)((b*3L+99)/100), paid=Math.min(bill,Property.coins(escrow.contents));
+        for(ItemStack coin:Property.takeCoins(escrow.contents,paid)) {
+            coin.owner=lawman==null?0:lawman.id;coin.stolen=false;
+            if(lawman==null || !lawman.store(coin))g.objects.drop(coin,by==null?a.x:by.x,DevMap.FLOOR+0.1f,by==null?a.z:by.z);
+        }
+        double duration=Math.min(180,30+b/10)+Math.ceil((bill-paid)/10.0);
+        g.state.commit("PrisonFinePaid",a.id,lawman==null?0:lawman.id,jur,0,"bounty+3%="+bill+" paid="+paid+" shortfall served="+(bill-paid));
         var cell = rpg.world.Jails.forJurisdiction(jur);
         float cx = cell != null ? cell.x() : lawman != null ? lawman.postX - 2 : a.x;
         float cz = cell != null ? cell.z() : lawman != null ? lawman.postZ + 3 : a.z;
@@ -327,19 +487,36 @@ public final class Law {
         if (door != null) { door.open = false; door.setLocked(g, true); door.apply(g); }
         if (a == g.player) {
             if (g.ui != null) g.ui.closeDialog();
-            sentenceUntil = g.state.minutes + Math.min(180, 30 + b / 10);
+            sentenceUntil = g.state.minutes + duration;
             sentenceJurisdiction = jur;
             jailAdmissions++;
             var incident = g.state.commit("JailAdmission", a.id, by == null ? 0 : by.id, jur, 0, "admission " + jailAdmissions);
             if (by != null && !witnesses.contains(by)) witnesses.add(by);
             for (Npc witness : witnesses) witness.remember(new Memory("IMPRISONED", a.id, 0, jur, g.state.minutes, 1, "witnessed", incident.id(), jailAdmissions, "was taken to jail"), 24);
-            g.chat.add("You are held in " + jur + ". Sleep on the cell slab to serve the remaining sentence. Your bounty is cleared.", Chat.Kind.CRIME);
+            g.chat.add("You are held in " + jur + ". Your possessions are held until release; stolen goods are confiscated. Bounty plus 3% tax: " + bill + " coins (paid " + paid + "). Any shortfall adds sentence time. Sleep on the cell slab to serve it.", Chat.Kind.CRIME);
         } else if (a instanceof Npc n) {
-            n.arrestedUntil = g.state.minutes + Math.min(180, 30 + b / 10);
+            n.arrestedUntil = g.state.minutes + duration;
             n.arrestJurisdiction = jur;
             n.goal = rpg.ai.Brain.Goal.HELD;
             n.fightTarget = 0;
             n.cs.lastAttacker = 0;
+        }
+    }
+
+    private void returnPossessions(Actor actor) {
+        for (var object : g.objects.all()) if (object instanceof rpg.objects.Container held && held.kind.equals("escrow") && held.owner == actor.id) {
+            for (var entry : held.custodySlots.entrySet()) {
+                rpg.item.ItemDef.Slot slot;
+                try { slot = rpg.item.ItemDef.Slot.valueOf(entry.getKey()); } catch (IllegalArgumentException ignored) { continue; }
+                int cell=entry.getValue();
+                int index=held.contents.at(cell%held.contents.w,cell/held.contents.w);
+                ItemStack item = held.contents.get(index);
+                if (item != null && actor.eq.get(slot) == null) { held.contents.set(index, null); actor.eq.set(slot, item); }
+            }
+            for (var item : new ArrayList<>(held.contents.stacks())) {
+                if (!actor.store(item)) g.objects.drop(item, actor.x, actor.y+0.1f, actor.z);
+            }
+            held.contents.clear(); held.removed = true;
         }
     }
 
@@ -375,15 +552,17 @@ public final class Law {
         }
     }
 
-    public void clear() { reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; }
+    public void clear() { confronted.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; }
 
     /** Death settles justice everywhere; personal memories, Honor and other people's fights remain. */
     public void playerRespawned() {
+        roofWarnings.keySet().removeIf(key->key.actor==g.player.id);
         String heldIn = sentenceJurisdiction;
         sentenceUntil = -1; sentenceJurisdiction = "";
         if (!heldIn.isEmpty()) openEmptyCell(heldIn);
         long id = g.player.id;
         for (var charges : bounties.values()) charges.remove(id);
+        confronted.removeIf(k -> k.offender() == id);
         resisting.remove(id); haltedAt.remove(id); assaultAt.clear();
         settledAt.put(id, g.time);
         for (Npc n : g.npcs) {

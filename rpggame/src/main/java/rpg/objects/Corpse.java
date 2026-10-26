@@ -57,10 +57,14 @@ public final class Corpse extends Container {
         if (heldBy != 0) return Result.no("Put the body down before searching it.");
         if (action.startsWith("takeworn:")) return takeWorn(g, a, ItemDef.Slot.valueOf(action.substring(9)), req);
         if (action.startsWith("takeall")) {
-            // what they carried, then what they wore
-            Result r = contents.isEmpty() ? Result.ok() : super.perform(g, a, action, req);
+            // what they carried, then what they wore (the items take-all leaves what is on the body)
+            var which = takeAllFilter(action);
+            boolean carried = contents.stacks().stream().anyMatch(which);
+            boolean wornToo = !action.endsWith(":items") && !worn(g).isEmpty();
+            if (!carried && !wornToo) return Result.no(action.endsWith(":items") ? "They carry no items." : "There's nothing on them.");
+            Result r = carried ? super.perform(g, a, action, req) : Result.ok();
             if (r.rejected()) return r;
-            for (ItemDef.Slot s : worn(g)) { Result w = takeWorn(g, a, s, g.state.newRequestId()); if (w.rejected()) return w; }
+            if (wornToo) for (ItemDef.Slot s : worn(g)) { Result w = takeWorn(g, a, s, g.state.newRequestId()); if (w.rejected()) return w; }
             return Result.ok();
         }
         return super.perform(g, a, action, req);

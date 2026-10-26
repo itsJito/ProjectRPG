@@ -15,13 +15,19 @@ public final class Voxels {
         this.v = view;
         for (int i = 1; i < Blocks.COUNT; i++) { solid[i] = true; opaque[i] = true; }
         solid[Blocks.WATER] = false; opaque[Blocks.WATER] = false;
-        opaque[Blocks.GLASS] = false;
+        solid[Blocks.EMBERS] = false; opaque[Blocks.EMBERS] = false;
+        for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.glass(i)) opaque[i] = false;
+        opaque[Blocks.ICE] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.FENCE, Blocks.BERRY_BUSH}) opaque[i] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.BERRY_BUSH}) leafy[i] = true;
         // objects stand on invisible cells: low furniture is seen over, tall pieces (a bookcase, the furnace's stack) still hide
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.objectCell(i)) opaque[i] = i == Blocks.BOOKCASE || i == Blocks.FURNACE;
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.plant(i)) { solid[i] = false; opaque[i] = false; }
     }
+
+    private java.util.List<rpg.objects.Door> doors = java.util.List.of();
+    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }
+    private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
 
     public int block(int x, int y, int z) { return v.block(x, y, z); }
     public boolean solid(int x, int y, int z) { return solid[v.block(x, y, z)]; }
@@ -32,10 +38,15 @@ public final class Voxels {
         public float dist, x, y, z;
         public int bx, by, bz, nx, ny, nz, block;
         public boolean hit;
+        /** The door whose swinging leaf was struck (null: a cell). */
+        public rpg.objects.Door door;
     }
 
     /** Casts a ray (direction need not be unit) up to max metres; solidOnly false also stops at liquids. */
-    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater) {
+    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater) { return ray(ox, oy, oz, dx, dy, dz, max, stopAtWater, true); }
+
+    /** The same, optionally past open doors' leaves (an open leaf swings out of the way of a blade or a reaching hand; a shut one is still a door). */
+    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater, boolean leaves) {
         Hit h = new Hit();
         float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 1e-6f) return h;
@@ -50,23 +61,27 @@ public final class Voxels {
         int nx = 0, ny = 0, nz = 0;
         for (int i = 0; i < 512 && t <= max; i++) {
             int b = v.block(x, y, z);
-            if (b != 0 && (solid[b] || (stopAtWater && b == Blocks.WATER))) {
+            if (b != 0 && (!door(b) && solid[b] || stopAtWater && b == Blocks.WATER)) {
                 h.hit = true; h.dist = t; h.bx = x; h.by = y; h.bz = z; h.nx = nx; h.ny = ny; h.nz = nz; h.block = b;
                 h.x = ox + dx * t; h.y = oy + dy * t; h.z = oz + dz * t;
+                for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
                 return h;
             }
             if (tmx < tmy && tmx < tmz) { t = tmx; tmx += tdx; x += sx; nx = -sx; ny = 0; nz = 0; }
             else if (tmy < tmz) { t = tmy; tmy += tdy; y += sy; nx = 0; ny = -sy; nz = 0; }
             else { t = tmz; tmz += tdz; z += sz; nx = 0; ny = 0; nz = -sz; }
         }
+        for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, max);
         return h;
     }
 
     /** Whether a segment crosses no solid cell (contact through walls is impossible). */
-    public boolean clear(float ax, float ay, float az, float bx, float by, float bz) {
+    public boolean clear(float ax, float ay, float az, float bx, float by, float bz) { return clear(ax, ay, az, bx, by, bz, true); }
+    /** The same, optionally past open door leaves (a swung leaf does not shield what stands beside it from a blade). */
+    public boolean clear(float ax, float ay, float az, float bx, float by, float bz, boolean leaves) {
         float dx = bx - ax, dy = by - ay, dz = bz - az, d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (d < 1e-4f) return !solid((int) Math.floor(ax), (int) Math.floor(ay), (int) Math.floor(az));
-        Hit h = ray(ax, ay, az, dx, dy, dz, d, false);
+        Hit h = ray(ax, ay, az, dx, dy, dz, d, false, leaves);
         return !h.hit || h.dist >= d;
     }
 
@@ -76,9 +91,17 @@ public final class Voxels {
         int steps = (int) Math.ceil(d / 0.25f);
         for (int i = 1; i < steps; i++) {
             float t = i / (float) steps;
-            if (opaque((int) Math.floor(ax + dx * t), (int) Math.floor(ay + dy * t), (int) Math.floor(az + dz * t))) return false;
+            int block = block((int)Math.floor(ax+dx*t), (int)Math.floor(ay+dy*t), (int)Math.floor(az+dz*t));
+            if (!door(block) && opaque[block]) return false;
         }
-        return true;
+        return !panelBlocks(ax, ay, az, dx, dy, dz, d);
+    }
+
+    private boolean panelBlocks(float x,float y,float z,float dx,float dy,float dz,float length) {
+        if (length < 1e-5f) return false;
+        Hit hit = new Hit();
+        for (var panel : doors) panel.ray(hit, x,y,z,dx/length,dy/length,dz/length,length);
+        return hit.hit && hit.dist < length - 0.02f;
     }
 
     /** The y of the ground under a point (the top of the highest solid cell at or below y). */
@@ -97,10 +120,10 @@ public final class Voxels {
             if (x == lx && y == ly && z == lz) continue;
             lx = x; ly = y; lz = z;
             int b = v.block(x, y, z);
-            if (opaque[b]) return 0;
+            if (!door(b) && opaque[b]) return 0;
             if (leafy[b]) t *= 0.55f;
         }
-        return t;
+        return panelBlocks(ax,ay,az,dx,dy,dz,d) ? 0 : t;
     }
 
     /** The light in a cell, 0 .. 1 each: what the sky gives it (before the time of day) and what lamps and glowing blocks do. */

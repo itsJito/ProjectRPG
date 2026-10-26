@@ -20,6 +20,7 @@ public final class Objects {
     private final Rpg g;
     private final List<WorldObject> list = new ArrayList<>();
     private long nextFixture = Ids.FIXTURES;
+    private final List<Door> doors = new ArrayList<>();
     public Door shedDoor, storeDoor, farmGate;
     private final List<Door> jailDoors = new ArrayList<>();
     /** The farm's fixtures (GDD 3.9): the trough, the nest boxes, the farmer's chest of feed and eggs. */
@@ -37,7 +38,7 @@ public final class Objects {
     public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
     public List<WorldObject> everything() { return list; }
     public WorldObject get(long id) { for (WorldObject o : list) if (o.id == id) return o; return null; }
-    public <T extends WorldObject> T add(T o) { list.add(o); return o; }
+    public <T extends WorldObject> T add(T o) { list.add(o); if (o instanceof Door door) doors.add(door); return o; }
     private long fid() { return nextFixture++; }
 
     /** The authored fixtures, in a fixed order. */
@@ -120,6 +121,10 @@ public final class Objects {
         altar = add(new Fixtures.Altar(fid(), DevMap.ALTAR[0] + 0.5f, f + 0.9f, DevMap.ALTAR[1] + 0.5f));
         // the graveyard (after the altar, so every older id holds): its furniture, and the undertaker's custody chest
         for (DevMap.Piece p : DevMap.GRAVEYARD_PIECES) {
+            if (p.kind().equals("HEADSTONE")) {
+                Container stone = add(new Container(fid(), "headstone", "Gravestone", "memorial", p.x0()+0.5f, f, p.z0()+0.5f, 320, 0));
+                stone.burialPlot = "DevCity graveyard"; continue;
+            }
             Furniture fu = add(new Furniture(fid(), Furniture.Kind.valueOf(p.kind()), p.x0(), p.z0(), p.x1(), p.z1(), p.h(), p.facing(), p.owner(), true));
             furniture.add(fu);
         }
@@ -133,18 +138,45 @@ public final class Objects {
             slab.name = "Cell slab"; furniture.add(slab);
         }
         for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction()));
+        node(Node.Kind.ROCK,"quarry_face","Supported quarry face",Skill.MINING,1,Items.STONE_BLOCK,15,3,3,g.cfg.rockRespawn,Blocks.STONE,new int[]{96,19},0,0);
+        node(Node.Kind.ROCK,"clay_bank","Clay bank",Skill.MINING,1,Items.CLAY,12,2.2f,3,g.cfg.rockRespawn,Blocks.DIRT,new int[]{97,19},0,0);
+        node(Node.Kind.ROCK,"gem_deposit","Uncertain gem deposit",Skill.MINING,30,Items.get("uncut_sapphire"),45,4,1,g.cfg.rockRespawn,Blocks.COPPER_ROCK,new int[]{98,19},0,0);
+        for (Node node : nodes) if (node.def.equals("quarry_face") || node.def.equals("clay_bank") || node.def.equals("gem_deposit")) node.setBlocks(g,true);
+        int[][][] entrances={
+            {{90,DevMap.SHOP_A_Z1},{91,DevMap.SHOP_A_Z1}},{{113,DevMap.CH_A_Z1},{114,DevMap.CH_A_Z1}},
+            {{89,DevMap.HOUSE1_Z0},{90,DevMap.HOUSE1_Z0}},{{103,DevMap.HOUSE2_Z0},{104,DevMap.HOUSE2_Z0}},
+            {{DevMap.SHOP_B_X1,108},{DevMap.SHOP_B_X1,109}},{{35,DevMap.CH_B_Z0},{36,DevMap.CH_B_Z0}},
+            {{48,DevMap.CONTACT_Z0},{49,DevMap.CONTACT_Z0}},{{DevMap.UNDERTAKER_X0,96},{DevMap.UNDERTAKER_X0,97}}
+        };
+        long[] owners={Ids.MERCHANT_A,Ids.LAWMAN_A,Ids.MERCHANT_A,Ids.VILLAGER,Ids.MERCHANT_B,Ids.LAWMAN_B,Ids.CONTACT,Ids.UNDERTAKER};
+        for(int i=0;i<entrances.length;i++)add(new Door(fid(),"Building door",entrances[i],false,null,1,owners[i])).spawn(g);
+        int barn=(DevMap.BARN_X0+DevMap.BARN_X1)/2;
+        add(new Door(fid(),"Barn door",new int[][]{{barn,DevMap.BARN_Z0},{barn+1,DevMap.BARN_Z0}},false,null,1,Ids.FARMER)).spawn(g);
+        // Append new nodes after all existing fixtures: old saves retain every established fixture identity.
+        for (int[] t : DevMap.WILD_TREES) {
+            boolean oak = (t[0] + t[1]) % 2 == 0;
+            node(Node.Kind.TREE, oak ? "oak" : "tree", oak ? "Oak tree" : "Tree", Skill.WOODCUTTING,
+                    oak ? 15 : 1, oak ? Items.OAK_LOGS : Items.LOGS, oak ? 37 : 25, oak ? 4 : 3.2f,
+                    oak ? 4 : 3, g.cfg.treeRespawn, oak ? Blocks.OAK_LOG : Blocks.LOG, t,
+                    oak ? Blocks.OAK_LEAVES : Blocks.LEAVES, 4 + (t[0] * 7 + t[1]) % 3);
+        }
+        // the bank (after every older fixture, so their ids hold): its door, the counter across the hall, the teller's cot
+        add(new Door(fid(), "Bank door", DevMap.BANK_DOOR, false, null, 1, Ids.TELLER)).spawn(g);
+        furniture.add(add(new Furniture(fid(), Furniture.Kind.COUNTER, DevMap.BANK_X0 + 2, DevMap.BANK_COUNTER_Z, DevMap.BANK_X1 - 2, DevMap.BANK_COUNTER_Z, 1, 0, Ids.TELLER, true)));
+        bankBed = add(new Furniture(fid(), Furniture.Kind.BED, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 4, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 3, 1, 0, Ids.TELLER, true));
+        furniture.add(bankBed); bankBed.name = "Teller's cot";
+        g.vox.doors(doors);
+        rpg.ai.Waypoints.doors(g.vox, doors);
     }
+
+    /** Where the bank's teller sleeps (in the back of the hall). */
+    public Furniture bankBed;
 
     /** The undertaker's chest: what the guards bring in from the dead, held until it is redeemed (GDD 3.12). */
     public Container custody;
 
     /** Every door, for the frame's physics read-back and the NPCs' door manners. */
-    public Door[] doors() {
-        List<Door> doors = new ArrayList<>(); doors.add(shedDoor); doors.add(storeDoor);
-        if (farmGate != null) doors.add(farmGate);
-        doors.addAll(jailDoors);
-        return doors.toArray(Door[]::new);
-    }
+    public List<Door> doors() { return java.util.Collections.unmodifiableList(doors); }
     public Door jailDoor(String jurisdiction) {
         for (Door door : jailDoors) if (door.name.equals(jurisdiction + " cell door")) return door;
         return null;
@@ -174,13 +206,53 @@ public final class Objects {
         return add(new GroundItem(g.state.newEntityId(), s, x, y, z));
     }
 
+    /**
+     * One arrow, bolt or thrown blade where it ended up: lodged (held fast where it struck, point along dir), or loose -
+     * a thin rigid body in the physics world, thrown on with a velocity, that tumbles and settles where it will.
+     */
+    public GroundItem dropAmmo(ItemStack one, float x, float y, float z, float[] dir, boolean lodged, float vx, float vy, float vz) {
+        GroundItem gi = drop(one, x, y, z);
+        float l = (float) Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+        gi.dir = l < 1e-5f ? new float[]{0, 0, 1} : new float[]{dir[0] / l, dir[1] / l, dir[2] / l};
+        gi.lodged = lodged;
+        if (!lodged) {
+            float[] q = rpg.combat.CombatSystem.alongY(gi.dir);
+            float half = rpg.combat.CombatSystem.ammoLength(one.def) / 2;
+            gi.rigid = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+            gi.rigidSince = g.time;
+            g.game.commands().rigidCreate(gi.rigid, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_DEBRIS | astratto.bridge.AstrattoNative.RIGID_NO_MOVERS,
+                    0.02f, half, 0.02f, one.def.family == rpg.item.ItemDef.Family.THROWN ? Math.max(0.1f, one.def.weight) : 0.05f, x, y, z, q[0], q[1], q[2], q[3],
+                    vx, vy, vz, (float) (Math.random() - 0.5) * 6, (float) (Math.random() - 0.5) * 2, (float) (Math.random() - 0.5) * 6, 0.95f, 0.1f, 0, null);
+        }
+        return gi;
+    }
+
+    /** Loose ammunition follows its rigid body until it settles (or a few seconds pass), then lies still where it came to rest. */
+    private void settleAmmo() {
+        for (WorldObject o : list) {
+            if (!(o instanceof GroundItem gi) || gi.rigid == 0 || gi.removed) continue;
+            var body = g.lastRigids.body(gi.rigid);
+            if (body == null) { if (g.time - gi.rigidSince > 1) { gi.rigid = 0; } continue; }
+            gi.x = body.x; gi.y = body.y; gi.z = body.z;
+            float qw = body.qw, qx = body.qx, qy = body.qy, qz = body.qz;
+            // the body's long axis (its +y) in the world
+            gi.dir = new float[]{2 * (qx * qy - qw * qz), 1 - 2 * (qx * qx + qz * qz), 2 * (qy * qz + qw * qx)};
+            if (body.asleep || g.time - gi.rigidSince > 8 || gi.y < DevMap.FLOOR - 8) {
+                g.game.commands().release(gi.rigid); gi.rigid = 0;
+                if (gi.y < DevMap.FLOOR - 8) gi.y = g.vox.groundY(gi.x, DevMap.FLOOR + 2, gi.z) + 0.03f;
+            }
+        }
+    }
+
     public void update(float dt) {
         for (Node n : nodes) n.update(g);
+        for(var object:all())if(object instanceof FishingNet net)net.update(g);
         stall.update(g);
         for (WorldObject o : new ArrayList<>(list)) if (o instanceof Fire fire) fire.update(g, dt);
         list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && gi.id >= Ids.DYNAMIC)));
         doorsForNpcs();
         for (Door d : doors()) d.update(g, g.lastRigids);
+        settleAmmo();
     }
 
     /** NPCs open unlocked doors on their way through and close them behind them. */
@@ -188,8 +260,20 @@ public final class Objects {
         for (Door d : doors()) {
             boolean near = false;
             rpg.ai.Npc by = null;
-            for (var n : g.npcs) if (n.alive && n.loaded && Math.hypot(n.x - d.x, n.z - d.z) < 2.6) { near = true; by = n; }
+            for (var n : g.npcs) if (n.alive && n.loaded && !n.asleep() && !n.reacting && !g.law.inCustody(n) && Math.hypot(n.x - d.x, n.z - d.z) < 2.6) { near = true; by = n; }
             if (!d.open && !d.locked && near) { d.setOpen(g, true, by, 0); d.autoOpened = true; d.autoCloseAt = g.time + 3; }
+            // a locked door its owner (or whoever carries its key) is on their way through: unlocked, opened, and locked
+            // again behind them once it is shut (gamefixes: people open their own doors)
+            if (!d.open && d.locked) for (var n : g.npcs) {
+                if (!n.alive || !n.loaded || n.asleep() || n.reacting || g.law.inCustody(n) || Math.hypot(n.x - d.x, n.z - d.z) > 2.4) continue;
+                boolean keyHolder = d.owner == n.id || d.key != null && n.has(d.key, 1);
+                // where they are bound (the trip's end, not the leg to the door's front) lies through it
+                float bx = n.legs != null ? n.legsX : n.gx, bz = n.legs != null ? n.legsZ : n.gz;
+                if (!keyHolder || !n.hasGoalPos || d.side(n.x, n.z) == d.side(bx, bz)) continue;
+                d.setLocked(g, false); d.setOpen(g, true, n, 0); d.autoOpened = true; d.relock = true; d.autoCloseAt = g.time + 3;
+                g.state.commit("DoorUnlocked", n.id, d.id, d.jurisdiction(), 0, d.name + " (passing through)");
+                break;
+            }
             if (d.open && d.autoOpened && !near && g.time > d.autoCloseAt && !d.blocked(g) && Math.hypot(g.player.x - d.x, g.player.z - d.z) > 2.2) {
                 d.setOpen(g, false, null, 0); d.autoOpened = false;
             }

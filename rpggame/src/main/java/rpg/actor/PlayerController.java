@@ -69,12 +69,24 @@ public final class PlayerController {
         Player p = g.player;
         camYaw += in.lookYaw;
         camPitch = Math.max(-1.45f, Math.min(1.35f, camPitch + in.lookPitch));
-        if (in.toggleCamera) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
+        if (p.morphT > 0) {
+            if (!p.morphCameraSaved) { p.morphFirstPerson = p.firstPerson; p.morphCameraSaved = true; }
+            p.firstPerson = false; p.headValid = false;
+        } else if (p.morphCameraSaved) {
+            p.firstPerson = p.morphFirstPerson; p.morphCameraSaved = false; p.headValid = false;
+        }
+        if (in.toggleCamera && p.morphT <= 0) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
         placeCamera(p);
         if (!p.alive) {
             queuedMelee = null;
             if (g.death.active) { g.death.camera(this); g.game.commands().listener(cx, cy, cz, (float) Math.atan2(-fx, -fz)); }
             g.game.commands().moverInput(p.body, 0, 0, 0, 0, 0, 0); in.clearEdges(); return;
+        }
+        if (p.reacting) {
+            queuedMelee = null; p.cs.cancel();
+            g.game.commands().moverInput(p.body, 0, 0, 0, 0, 0, astratto.bridge.AstrattoNative.MOVER_POSED);
+            // Keep the camera clear of the tumbling head and retain free look while recovering.
+            g.game.commands().listener(cx, cy, cz, camYaw); in.clearEdges(); return;
         }
         p.aimYaw = aimYaw;
         p.pitch = aimPitch;
@@ -87,6 +99,7 @@ public final class PlayerController {
     }
 
     private void hands(Player p, float dt) {
+        if (p.morphT > 0) { queuedMelee = null; p.cs.cancel(); mainWas = offWas = false; return; }
         if (g.traversal.busy(p)) { queuedMelee = null; mainWas = offWas = false; mainHeld = 0; return; }
         if (g.carrying.busy(p)) {
             queuedMelee = null; p.cs.blocking = false; p.cs.draw = p.cs.charge = 0;
@@ -229,6 +242,7 @@ public final class PlayerController {
                 if (route[routeAt * 3 + 1] > p.y + 0.6f && p.grounded) in.jump = true;
             }
         }
+        if (g.time < p.throwFreezeUntil) { dx = 0; dz = 0; l = 0; }   // the feet stay put through a release
         if (l > 1) { dx /= l; dz /= l; l = 1; }
         Actor.Combat c = p.cs;
         boolean strafe = strafing(p);
@@ -283,12 +297,13 @@ public final class PlayerController {
         if (c.slowT > 0) max *= 0.6f;
         // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
         float burden = p.burden();
-        max *= burden;
+        max *= burden * p.actionRate();
+        if (p.morphT > 0) { max = Math.min(max, 2); p.sneaking = true; }
         if (g.carrying.busy(p)) max *= g.carrying.ready(p) ? 0.55f : 0;
         // a badly hurt leg limps (Gore)
         if (g.gore != null) max *= g.gore.legs(p);
         if (c.staggered > 0) max = 0;
-        if (p.sprinting) { p.stamina = Math.max(0, p.stamina - g.cfg.staminaSprint * (1 - agility * 0.004f) / burden * dt); c.regenDelay = 0.6f; }
+        if (p.sprinting) { float previousStamina = p.stamina; p.stamina = Math.max(0, p.stamina - g.cfg.staminaSprint * (1 - agility * 0.004f) / burden * dt); c.regenDelay = 0.6f; g.movementPractice.sprintCost(previousStamina - p.stamina); }
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)
@@ -326,7 +341,7 @@ public final class PlayerController {
         if (p.grounded) lastGrounded = g.time;
         boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
         boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
-        if (jump) { jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
+        if (jump) { g.movementPractice.jumped(); jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
         g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
@@ -360,14 +375,28 @@ public final class PlayerController {
     private static float approach(float v, float to, float step) { return Math.abs(to - v) <= step ? to : v + Math.signum(to - v) * step; }
 
     /** First person at the eyes (as the head carries them through each step); third person behind the right shoulder, pulled in front of walls. Then the aim. */
-    private void placeCamera(Player p) {
+    private void placeCamera(Player p) { placeCamera(p,true); }
+    public void syncCamera() {
+        if(g.death.active)g.death.camera(this);else placeCamera(g.player,false);
+    }
+    private void placeCamera(Player p,boolean focus) {
         float cp = (float) Math.cos(camPitch), sp = (float) Math.sin(camPitch);
         fx = (float) -Math.sin(camYaw) * cp; fy = sp; fz = (float) -Math.cos(camYaw) * cp;
         float ex = p.x, ey = p.alive ? p.eyeY() : p.y + 0.5f, ez = p.z;
-        if (p.firstPerson && p.alive && p.headValid) {
+        if (p.firstPerson && !p.reacting && p.alive && p.headValid) {
             // the eyes where the rig last put them: the camera rides the head's bob and sway, not a fixed height
-            cx = p.headX + fx * 0.06f; cy = p.headY; cz = p.headZ + fz * 0.06f;
-        } else if (p.firstPerson) { cx = ex; cy = ey; cz = ez; }
+            float turn = Actor.wrap(p.yaw - p.headYaw), co = (float) Math.cos(turn), si = (float) Math.sin(turn);
+            // looking down, the head tips forward on the neck and the eyes go out over the chest (more when crouched,
+            // where the body is folded under them): without it the camera sank into the torso (gamefixes)
+            float down = Math.max(0, -sp), ahead = 0.04f + down * down * (p.crouched ? 0.42f : 0.26f);
+            float hx = (float) -Math.sin(camYaw), hz = (float) -Math.cos(camYaw);
+            float vx = p.headX * co + p.headZ * si + hx * ahead, vz = -p.headX * si + p.headZ * co + hz * ahead;
+            float distance = (float) Math.hypot(vx, vz), limit = Math.max(0.42f + down * 0.2f, p.radius - 0.08f);
+            float k = distance > limit ? limit / distance : 1;
+            cx = p.x + vx * k; cy = Math.max(p.y+0.15f,Math.min(p.y+p.headY,p.y+p.height*(p.crouched?rpg.actor.Body.CROUCH_HEIGHT:1)-0.12f)); cz = p.z + vz * k;
+            var wall = g.vox.ray(p.x, cy, p.z, distance > 0 ? vx / distance : 0, 0, distance > 0 ? vz / distance : -1, distance + 0.08f, false);
+            if (wall.hit && wall.dist < distance + 0.08f) { k = Math.min(k, Math.max(0, wall.dist - 0.1f) / Math.max(0.001f, distance)); cx = p.x + vx * k; cz = p.z + vz * k; }
+        } else if (p.firstPerson && !p.reacting) { cx = ex; cy = ey; cz = ez; }
         else {
             float rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
             float px = ex + rx * 0.55f, py = ey + 0.15f, pz = ez + rz * 0.55f;
@@ -384,7 +413,7 @@ public final class PlayerController {
         if (Math.sqrt(ax * ax + ay * ay + az * az) < 1.5f) { ax = fx; ay = fy; az = fz; }
         aimYaw = (float) Math.atan2(-ax, -az);
         aimPitch = (float) Math.atan2(ay, Math.hypot(ax, az));
-        g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
+        if(focus)g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
     }
 
     /** Menus and respawns must not turn an old held button into a new attack on release. */

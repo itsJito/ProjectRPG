@@ -120,18 +120,20 @@ public final class Hud {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
         group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
-                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 110),
+                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
         group("frame", "frame", Placement.at(Anchor.CENTER, 0, FRAME_Y));
+        // what is not the player's own (a container, a body, a shop) stands apart, left of the frame (Windows.detach)
+        float apart = -FW / 2 - 16 - 150;
         group("inventory", "equipment", inFrame("equipment", 16, 52), "grids", inFrame("grids", 232, 52), "iteminfo", inFrame("iteminfo", 620, 52),
-                "container", inFrame("container", 620, 52), "shop", inFrame("shop", 620, 52));
+                "container", Placement.at(Anchor.CENTER, apart, FRAME_Y), "shop", Placement.at(Anchor.CENTER, apart, FRAME_Y));
         group("character", "equipment", inFrame("equipment", 16, 52), "stats", inFrame("stats", 232, 52));
         group("skills", "skills", inFrame("skills", 16, 52), "guide", inFrame("guide", 452, 52));
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
-        group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 12), "pause", Placement.at(Anchor.CENTER, 0, 0));
+        group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
@@ -157,8 +159,14 @@ public final class Hud {
     public void fadeThen(Runnable action) { if (transition >= 0) return; transition = 0; atBlack = action; closeAll(); }
     public void close() { icons.close(); }
     public void closeDialog() { dialog = null; }
+    public void continueDialog() {
+        long speaker = dialog == null ? 0 : dialog.npc;
+        dialog = g.actor(speaker) instanceof rpg.ai.Npc n && n.alive ? g.dialogue.talk(n) : null;
+    }
     public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
+    public void received(rpg.item.ItemDef item) { inventory.received(item); events.emit("inventory", "received " + item.id); }
+
     public boolean captures() { return transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
     /**
      * Whether the world stands still (gamefixes: pausing pauses the entire game): any menu - a panel scene (inventory,
@@ -216,6 +224,8 @@ public final class Hud {
     public void choose(int n) {
         if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog; dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
             if (dialog != null && dialog.npc == 0 && !dialog.pauseMenu && d.npc != 0) dialog.npc = d.npc;
+            if(dialog==null && !d.choices.get(n).closes() && !d.pauseMenu && d.npc!=0 && win==Win.NONE && scene==Scene.WORLD && !g.law.inCustody(g.player)
+                    && g.actor(d.npc) instanceof rpg.ai.Npc speaker && speaker.alive && speaker.loaded && speaker.distTo(g.player)<4)dialog=g.dialogue.talk(speaker);
             return; }
         if (menu != null && n < menu.items.size()) { MenuItem it = menu.items.get(n); menu = null; if (it.enabled()) { sound("UI_select", 0.4f); it.action().run(); } else if (it.reason() != null) g.chat.warn(it.reason()); }
     }
@@ -242,7 +252,7 @@ public final class Hud {
             var a = g.actor(dialog.npc);
             if (a == null || !a.alive || a.distTo(g.player) > 6) dialog = null;
         }
-        if (win == Win.CONTAINER && (container == null || container.removed || container.dist(g.player) > 4)) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
+        if (win == Win.CONTAINER && (container == null || container.removed || (container.kind.equals("vault") ? g.bank.vaultRefusal(g.player, container) != null : container.dist(g.player) > 4))) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
         if (win == Win.STATION && (station == null || station.removed || station.dist(g.player) > 4)) win = Win.NONE;
         if (win == Win.SHOP && (shop == null || g.econ.merchant(shop) == null || g.econ.merchant(shop).distTo(g.player) > 5)) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
         icons.pump();

@@ -34,7 +34,7 @@ public final class Investigation {
     public boolean hasSpot;
     public long helper;
     /** Where they are hiding. */
-    public float hx, hz;
+    public float hx, hz, lookYaw;
     /** How many times the noise has come back since the plan was made. */
     public int repeats;
 

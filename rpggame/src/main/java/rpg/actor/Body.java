@@ -55,7 +55,7 @@ public final class Body {
     }
 
     public static Body of(Appearance look) {
-        if (look == null) return MALE;
+        if (look == null || look.monster != null) return MALE;   // a monster's skeleton is a person's (its figure is scaled and shaped on it)
         return ALL[(look.female ? 3 : 0) + Math.floorMod(look.bodyType, 3)];
     }
 

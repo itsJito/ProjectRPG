@@ -49,7 +49,7 @@ public final class Quests {
         g.player.store(new ItemStack(Items.SEALED_LETTER, 1));
         g.state.mint(Items.SEALED_LETTER, 1);
         courier = State.ACTIVE;
-        journal.add(stamp() + "Courier: Jun gave me a sealed letter for Kit, who lives east of Store B in JUR-BETA.");
+        journal.add(stamp() + "Courier: Jun gave me a sealed letter for Kit, who lives east of Store B in DevTown.");
         g.state.commit("QuestStarted", g.player.id, Ids.QUEST_GIVER, null, 0, "QT-COURIER stage 1: deliver the letter");
         g.chat.add("Quest started: Courier.", Chat.Kind.LEVEL);
     }
@@ -68,7 +68,7 @@ public final class Quests {
         journal.add(stamp() + "Courier: I delivered the letter to Kit. Reward: an experience lamp and 150 coins.");
         g.state.commit("QuestCompleted", g.player.id, Ids.CONTACT, null, 0, "QT-COURIER");
         g.chat.add("Quest complete: Courier!", Chat.Kind.LEVEL);
-        g.sfx.jingle();
+        g.sfx.ui("ui.LevelUp", 0.85f);
     }
 
     /** Debug: back to the fixture's start (explicitly a scenario reset, not an in-world rescue). */

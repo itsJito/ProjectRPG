@@ -7,7 +7,7 @@ import rpg.world.DevMap;
 
 /** Short movement commitments, chosen from visible threats, visible allies and actual incoming fire. */
 final class CombatTactics {
-    enum Kind { COVER, FLANK }
+    enum Kind { COVER, FLANK, ANCHOR, SUPPORT }
     static final class Plan {
         Kind kind;
         long target;
@@ -15,7 +15,8 @@ final class CombatTactics {
         double until;
     }
     private final Rpg g;
-    CombatTactics(Rpg g) { this.g = g; }
+    private final Squads squads;
+    CombatTactics(Rpg g) { this.g = g; squads=new Squads(g); }
 
     boolean move(Npc n, Actor foe, boolean visible) {
         Plan plan = n.tactic;
@@ -29,8 +30,14 @@ final class CombatTactics {
             int allies = allies(n, foe);
             boolean fire = incoming(n) || n.cs.lastAttacker == foe.id && g.time - n.cs.lastHurt < 2 && ranged(foe);
             if (fire && (allies == 0 || n.hp < n.maxHp() * 0.65f || n.cs.reload > 0)) plan = cover(n, foe);
-            if (plan == null && allies > 0 && n.stamina > 30 && n.distTo(foe) > 5) plan = flank(n, foe);
-            if (plan != null) { n.tactic = plan; n.say(plan.kind == Kind.COVER ? "Taking cover!" : "Go! I'll go around!", g.time + 2); }
+            if (plan == null && allies > 0 && n.stamina > 25) {
+                var order=squads.order(n,foe);
+                if(order!=null && standable(order.x(),order.z()) && !occupied(n,order.x(),order.z())) {
+                    Kind kind=switch(order.duty()){case ANCHOR->Kind.ANCHOR;case SUPPORT->Kind.SUPPORT;default->Kind.FLANK;};
+                    plan=plan(kind,foe,order.x(),order.z(),Math.max(0.2,order.until()-g.time));
+                }
+            }
+            if (plan != null) { n.tactic = plan; n.say(switch(plan.kind){case COVER->"Taking cover!";case ANCHOR->"Holding the front!";case SUPPORT->"Covering from behind!";case FLANK->"Going around!";}, g.time + 2); }
         }
         if (plan == null) return false;
         n.wantYaw = (float) Math.atan2(-(plan.sourceX - n.x), -(plan.sourceZ - n.z));
@@ -38,21 +45,23 @@ final class CombatTactics {
         n.cs.draw = 0;
         boolean arrived = Math.hypot(n.x - plan.x, n.z - plan.z) < 0.85;
         if (arrived && plan.kind == Kind.FLANK) { n.tactic = null; n.nextTactic = g.time + 2.5; return false; }
+        if (arrived && plan.kind==Kind.SUPPORT && Squads.ranged(n))return false;
+        if (arrived && plan.kind==Kind.ANCHOR && n.distTo(foe)<3.6f)return false;
         if (arrived) {
             g.ai.desire(n, AiSystem.A_HOLD);
-            n.lastOutcome = "in cover; waiting for an opening";
+            n.lastOutcome = plan.kind==Kind.COVER?"in cover; waiting for an opening":plan.kind==Kind.SUPPORT?"holding support position":"holding the assigned line";
             // A short stay then a fresh decision: never track a hidden foe through cover.
             plan.until = Math.min(plan.until, g.time + 0.65);
         } else {
             g.ai.combatGoal(n, plan.x, plan.z);
-            n.lastOutcome = plan.kind == Kind.COVER ? "moving into cover from incoming fire" : "flanking with visible allies";
+            n.lastOutcome = switch(plan.kind){case COVER->"moving into cover from incoming fire";case FLANK->"flanking with visible allies";case ANCHOR->"taking the front of the formation";case SUPPORT->"moving behind the front line";};
         }
         return true;
     }
 
     int allies(Npc n, Actor foe) {
         int count = 0;
-        for (Npc other : g.npcs) if (other != n && other.loaded && other.alive && other.team == n.team && other.combatant()
+        for (Npc other : g.npcs) if (other != n && other.loaded && other.alive && Squads.allied(n,other) && other.combatant()
                 && other.fightTarget == foe.id && n.distTo(other) < 12 && g.ai.canSee(n, other)) count++;
         return count;
     }
@@ -80,22 +89,6 @@ final class CombatTactics {
             if (!standable(x, z) || !covered(foe.x, foe.eyeY(), foe.z, x, n.eyeY(), z) || occupied(n, x, z)) continue;
             float value = (float) Math.hypot(x - n.x, z - n.z) + 0.1f * Math.abs((float) Math.hypot(x - foe.x, z - foe.z) - 9);
             if (value < score) { score = value; best = plan(Kind.COVER, foe, x, z, 3.5); }
-        }
-        return best;
-    }
-
-    private Plan flank(Npc n, Actor foe) {
-        double angle = Math.atan2(n.z - foe.z, n.x - foe.x);
-        float radius = Math.min(8, Math.max(3, n.distTo(foe) * 0.65f));
-        Plan best = null; float score = Float.MAX_VALUE;
-        for (int side : new int[]{-1, 1}) {
-            float x = foe.x + (float) Math.cos(angle + side * 0.85) * radius;
-            float z = foe.z + (float) Math.sin(angle + side * 0.85) * radius;
-            if (!standable(x, z) || occupied(n, x, z)) continue;
-            float value = (float) Math.hypot(n.x - x, n.z - z);
-            for (Npc ally : g.npcs) if (ally != n && ally.alive && ally.loaded && ally.team == n.team && g.ai.canSee(n, ally))
-                value += 5 / Math.max(1, Math.hypot(ally.x - x, ally.z - z));
-            if (value < score) { score = value; best = plan(Kind.FLANK, foe, x, z, 2.5); }
         }
         return best;
     }

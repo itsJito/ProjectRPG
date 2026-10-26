@@ -8,6 +8,7 @@ public final class Player extends Actor {
     /** The one spellbook open to the player (GDD 2.5), changed at an altar. */
     public Spells.Book book = Spells.Book.STANDARD;
     public boolean firstPerson;
+    public boolean morphCameraSaved, morphFirstPerson;
     public float camDist = 3.6f;
     public double diedAt = -1;
     public boolean sprinting;
@@ -15,7 +16,7 @@ public final class Player extends Actor {
     public boolean running;
     public float walked;
     /** Where the posed figure's eyes were last drawn (the first-person camera rides them). */
-    public float headX, headY, headZ;
+    public float headX, headY, headZ, headYaw;
     public boolean headValid;
 
     public Player(long id, String name) { super(id, name, 28); team = 1; }

@@ -52,15 +52,26 @@ public final class Dialogue {
             case UNDERTAKER -> {
                 int held = g.undertaker.held();
                 if (held > 0) d.choice("I've come for my belongings (" + g.undertaker.fee() + " coins).", () -> g.interact.request(g.player, n, "reclaim"));
-                d.choice("How does this work?", () -> g.ui.dialog(new Dialog(n.name, "Die inside the walls and the guard brings me what you had - all of it, every coin. Die out in the wild and you'd best get "
+                d.choice("How does this work?", () -> g.ui.dialog(new Dialog(n.name, "Die inside the walls and your lawful belongings come straight into my keeping. Stolen goods are confiscated, never reclaimed. Die out in the wild and you'd best get "
                         + "back to it quick: anyone may help themselves. Either way, after ten minutes I fetch what's left. " + rpg.law.Undertaker.FEE + " coins to have it back, "
                         + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. I'll take it out of your own purse if that's all you have.")));
             }
+            case BEGGAR -> d.choice("Offer a loaf of bread.", () -> {
+                if (!g.player.has(Items.BREAD, 1) || !n.canStore(new ItemStack(Items.BREAD, 1))) { g.chat.warn("You need a loaf to spare."); return; }
+                for (ItemStack loaf : g.player.takeItems(Items.BREAD, 1)) n.store(loaf);
+                n.hunger = Math.max(0, n.hunger - 0.25f); g.ai.say(n, "Bless you. A warm meal at last.");
+                g.state.commit("FoodGiven", g.player.id, n.id, n.homeJurisdiction, 0, "bread");
+            });
+            case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "Food restores the body. I share what I carry with the wounded, but my supplies are finite. The shops will buy herbs and berries.")));
+            case PRIEST -> d.choice("Who tends the dead?", () -> g.ui.dialog(new Dialog(n.name, "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.")));
+            case SCHOLAR -> d.choice("Where can I sell questionable goods?", () -> g.ui.dialog(new Dialog(n.name, "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.")));
+            case HUNTER -> d.choice("Any advice for the wilderness?", () -> g.ui.dialog(new Dialog(n.name, "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.")));
+            case CIVIC -> { if (n.id == Ids.TELLER) g.bank.choices(n, d); }
             case THIEF -> d.choice("Got anything for me?", () -> g.ui.dialog(new Dialog(n.name, "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.")));
             default -> { }
         }
         d.choice("What do you know?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
-        d.choice("Goodbye.", () -> { });
+        d.closeChoice("Goodbye.", () -> { });
         return d;
     }
 
@@ -68,7 +79,7 @@ public final class Dialogue {
         switch (g.quests.courier) {
             case NOT_STARTED -> {
                 Npc kit = (Npc) g.actor(Ids.CONTACT);
-                if (kit != null && kit.alive) d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "Take this sealed letter to Kit - east of Store B, in JUR-BETA. Don't open it.")
+                if (kit != null && kit.alive) d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "Take this sealed letter to Kit - east of Store B, in DevTown. Don't open it.")
                         .choice("I'll do it.", g.quests::start).choice("Not now.", () -> { })));
                 else d.choice("Do you have a job for me?", () -> g.ui.dialog(new Dialog(n.name, "I did... but Kit is dead. There's no one left to take it to.")));
             }
@@ -83,7 +94,7 @@ public final class Dialogue {
     public String greeting(Npc n) {
         if (n.hunger > 0.75f) return "Forgive me. I haven't eaten, and I have little patience left.";
         if (n.fatigue > 0.85f) return "I've been on my feet too long. What do you need?";
-        return switch (n.role) {
+        return n.profession != null ? "I work as a " + n.profession.title.toLowerCase(java.util.Locale.ROOT) + ". My tools and supplies determine what I can do today." : switch (n.role) {
             case MERCHANT -> pick(n, "Have a look. Tell me what you need, and we'll see about a fair price.", "Good day. Buying, or selling?", "Mind the counter. I've just put the stock in order.");
             case LAWMAN -> pick(n, "If you have a charge to lay, give me names and what you saw.", "Bounties and sworn reports are handled here. Speak plainly.", "The watch keeps records. What business brings you in?");
             case GUARD -> pick(n, "Keep the road clear, please.", "Quiet so far. Help me keep it that way.", "If there's trouble, tell me what happened before you draw steel.");
@@ -97,7 +108,16 @@ public final class Dialogue {
             case UNDERTAKER -> g.undertaker.held() > 0 ? "I have your belongings. Take your time; they're safe here." : pick(n, "Mind your step among the stones.", "Every name here belonged to someone. Remember that.", "If you need to make arrangements, I'll hear you out.");
             case FARMER -> pick(n, "Shut the gate behind you. They take any chance to wander.", "The stock eats before I do, most mornings.", "Hands away from the feed unless you're helping.");
             case BANDIT -> pick(n, "That's close enough. Keep your hands where I can see them.", "You're on the wrong road, friend.", "Looking for trouble, or merely lost?");
+            case BEGGAR -> pick(n, "A loaf to spare? I'll remember the kindness.", "The cold finds you quicker without a roof.");
+            case HEALER -> pick(n, "Let me see that wound. Have you eaten?", "I can share what I have. There isn't much.");
+            case PRIEST -> pick(n, "We keep their names, even when their stories are lost.", "Walk gently among the stones.");
+            case HUNTER -> pick(n, "The wind carries your scent farther than your footsteps.", "Never stand between a mother and her young.");
+            case FISHERMAN, MINER, CRAFTSMAN, KNIGHT -> "There is work to be done.";
+            case CIVIC -> g.bank.open() ? pick(n, "Welcome to the Bank of Gameworld. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
+                    : "We're closed just now. Come back when I'm at the counter.";
+            case SCHOLAR -> pick(n, "A story is only as sound as its witness.", "I collect accounts, not certainties. What have you seen?");
             case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");
+            case MONSTER -> "...";
         };
     }
 

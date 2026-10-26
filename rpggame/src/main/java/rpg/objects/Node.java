@@ -48,6 +48,8 @@ public final class Node extends WorldObject {
     private final int leaves, height;
     /** A fishing spot's tool (net, rod, cage); null elsewhere. */
     public ItemDef needs;
+    public enum Waters { RIVER, COAST, OFFSHORE, SHORE, LAKE }
+    public Waters waters = Waters.LAKE;
     /** How far through felling the tree or breaking out the ore the blows so far have gone (strikes landed), and when the last landed. */
     public float struck;
     public double lastStruck = -99;
@@ -91,7 +93,7 @@ public final class Node extends WorldObject {
         return a.skills.level(skill) >= toolLevel(held) ? held : null;
     }
 
-    /** The gathering level a tool asks: its tier's one requirement (GDD 2.4), on the gathering skill (a Leather hatchet from 1). */
+    /** The gathering level a tool asks: its tier's one requirement (GDD 2.4), on the gathering skill (Wooden and Stone from 1, Bronze from 5). */
     public static int toolLevel(ItemDef d) { return d.tier == null ? 1 : d.tier.requirement; }
 
     /** Why the actor cannot work this node with what they hold (null: they can). */
@@ -182,6 +184,7 @@ public final class Node extends WorldObject {
             struck = 0;
             ItemStack got = new ItemStack(product, 1);
             g.state.mint(product, 1);
+            a.grab(g.time, a.x - (float) Math.sin(a.yaw) * 0.6f, a.y + 0.2f, a.z - (float) Math.cos(a.yaw) * 0.6f);
             if (!a.store(got)) { g.objects.drop(got, a.x, a.y + 0.05f, a.z); if (a == g.player) g.chat.warn("No room for the " + product.name.toLowerCase() + ": it drops at your feet."); }
             stock--;
             var got2 = g.state.commit(g.state.newRequestId(), "ResourceGathered", a.id, id, jurisdiction(), 0, product.name + " (" + stock + " left)");
@@ -214,15 +217,28 @@ public final class Node extends WorldObject {
         ItemStack got = new ItemStack(product, 1);
         g.state.mint(product, 1);
         a.store(got);
+        if (kind == Kind.PATCH) a.grab(g.time, x, y + 0.3f, z);
         if (stockMax > 0) stock--;
         var ev = g.state.commit(req, "ResourceGathered", a.id, id, jurisdiction(), 0, product.name + " (" + stock + " left)");
         g.prog.award(a, skill, xp, "gathered " + product.name, ev.id());
         if (g.sfx != null) g.sfx.play(kind == Kind.FISH ? "splash" : "pickup", x, y, z, 0.7f);
-        if (kind == Kind.FISH && g.fx != null) g.fx.splash(x, y + 0.3f, z);
+        if (kind == Kind.FISH && g.fx != null) g.chemistry.splash(x, y + 0.3f, z);
         if (kind == Kind.FISH && a == g.player && g.sfx != null) g.sfx.ui("FishReelIn", 0.55f);
         if (a == g.player) g.chat.say(kind == Kind.FISH ? "You catch " + (product == Items.RAW_SHRIMP ? "some shrimp" : "a " + product.name.toLowerCase().replace("raw ", "")) + "." : "You get some " + product.name.toLowerCase() + ".");
         if (stockMax > 0 && stock <= 0) deplete(g, ev.id());
         return Result.ok();
+    }
+
+    /** The same resource source, harvested by an actual deployed matching tool rather than an actor's hand. */
+    public boolean catchInNet(Rpg g,FishingNet net) {
+        if(kind!=Kind.FISH || waters!=Waters.LAKE || needs!=Items.FISHING_NET || !net.contents.has(needs,1) || depleted())return false;
+        Actor fisher=g.actor(net.owner);if(fisher==null || fisher.skills.level(skill)<level)return false;
+        ItemStack catchItem=new ItemStack(product,1,net.owner,false,id);
+        if(!net.contents.canAdd(catchItem))return false;
+        net.contents.add(catchItem);g.state.mint(product,1);
+        var event=g.state.commit("ResourceGathered",net.owner,id,jurisdiction(),0,product.name+" caught in deployed net "+net.id);
+        if(stockMax>0 && --stock<=0)deplete(g,event.id());
+        return true;
     }
 
     private void deplete(Rpg g, long cause) {

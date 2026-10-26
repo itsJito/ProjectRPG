@@ -5,10 +5,13 @@ package rpg.item;
  * the item's own governing skill (a Godly sword asks 90 Strength, Godly armour 90 Defense). Black and White are peers on
  * one requirement, separate sets. There are no light/mail/heavy classes: a tier sets baseline power. The Sword-family
  * Strength bonus is the GDD's locked baseline (fractional in the data so each tier above Steel still improves).
+ * The bottom of the ladder: Wooden weapons, tools and shields and Stone (which replaced Leather) both ask level 1, the
+ * GDD's starting baseline - a new character starts with Stone gathering tools and must be able to use them.
  */
 public enum Tier {
-    LEATHER("Leather", 1, 1, 0x8B5A2B, 0),
-    BRONZE("Bronze", 5, 2, 0xB0703A, 0),
+    WOODEN("Wooden", 1, 1, 0x9A7040, 0),
+    STONE("Stone", 1, 1, 0x8C8A84, 1),
+    BRONZE("Bronze", 5, 2, 0xB0703A, 2),
     CHAINMAIL("Chainmail", 10, 3, 0x8A8F96, 3),
     IRON("Iron", 20, 4, 0x6E6E72, 6),
     BLACK("Black", 30, 5, 0x2A2A30, 9),
@@ -32,6 +35,10 @@ public enum Tier {
 
     Tier(String title, int requirement, int power, int color, float swordStrength) { this.title = title; this.requirement = requirement; this.power = power; this.color = color; this.swordStrength = swordStrength; }
 
-    /** Tiers that make weapons and shields (Leather and Chainmail are armor only in the devmap's catalogue). */
-    public boolean metal() { return this != LEATHER && this != CHAINMAIL; }
+    /** Plate-metal tiers: Wooden and Stone are worked by hand, Chainmail is rings. */
+    public boolean metal() { return this != WOODEN && this != STONE && this != CHAINMAIL; }
+    /** Tiers that make shields (Chainmail is armor only in the devmap's catalogue). */
+    public boolean shields() { return this != CHAINMAIL; }
+    /** Tiers that make helm, body and legs: there is no wooden armour. */
+    public boolean armour() { return this != WOODEN; }
 }

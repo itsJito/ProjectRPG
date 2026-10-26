@@ -28,7 +28,7 @@ public final class Meshes {
         public float[] vertices() {
             float[] v = new float[list.size() * 36 * 10];
             int k = 0;
-            for (float[] b : list) k = b.length > 7 ? box(v, k, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], 1) : box(v, k, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[6], b[6], 1);
+            for (float[] b : list) k = b.length > 7 ? box(v, k, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b.length > 9 ? b[9] : 1) : box(v, k, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[6], b[6], 1);
             return v;
         }
         public int count() { return list.size() * 36; }
@@ -81,6 +81,28 @@ public final class Meshes {
      * column i at x 0.5 - i/16 and row j at y 0.5 - j/16): each lid from the brow's foot to below the eye, in the skin a
      * shade darker, with the lash line along its lower edge.
      */
+    /** Small cached overlays replace only brows and lips; the face's eyes, nose and skin remain its own. */
+    public static Boxes expression(int skin,int hair,Faces.Mood mood,int speaking,boolean female) {
+        Boxes b=new Boxes(); int brow=Skin.shade(0xFF000000|hair,0.78f)&0xFFFFFF;
+        float front=-0.519f;
+        for(int side:new int[]{-1,1}) {
+            float center=side*0.25f;
+            b.span(center-0.15f,0.055f,front,center+0.15f,0.21f,-0.501f,skin);
+            for(int step=0;step<3;step++) {
+                float x=center+(step-1)*0.08f;
+                float slope=switch(mood) { case ANGRY -> 0.035f*side*(step-1); case AFRAID -> -0.035f*side*(step-1); case SUSPICIOUS -> side>0?0.018f*step:0; default -> 0; };
+                float y=0.105f+(mood==Faces.Mood.AFRAID?0.055f:0)+slope;
+                b.span(x-0.045f,y,front-0.005f,x+0.045f,y+(female?0.025f:0.04f),front+0.005f,brow);
+            }
+        }
+        b.span(-0.16f,-0.415f,-0.52f,0.16f,-0.26f,-0.503f,skin);
+        float opening=speaking*0.023f+(mood==Faces.Mood.AFRAID?0.03f:0);
+        b.span(-0.105f,-0.353f-opening,-0.532f,0.105f,-0.331f,-0.515f,0x492024);
+        if(mood==Faces.Mood.WARM)for(int side:new int[]{-1,1})b.span(side*0.105f-0.015f,-0.336f,-0.534f,side*0.105f+0.015f,-0.308f,-0.516f,0x693B32);
+        if(mood==Faces.Mood.ANGRY && speaking==0)b.span(-0.09f,-0.351f,-0.537f,0.09f,-0.334f,-0.521f,0xDDD4BD);
+        return b;
+    }
+
     public static Boxes eyelids(int skin, boolean female) {
         Boxes b = new Boxes();
         int lid = Skin.shade(0xFF000000 | skin, 0.86f) & 0xFFFFFF, lash = female ? 0x1E1A1A : Skin.shade(0xFF000000 | skin, 0.55f) & 0xFFFFFF;

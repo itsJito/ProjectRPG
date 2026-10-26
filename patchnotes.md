@@ -1,3 +1,115 @@
+# Patch Notes Version 0.1.6: Stone Cold Bounty
+
+Kingdoms now keep their own books, doors behave like doors, and the world got a lot more to stand on.
+
+## New Features
+
+### Blocks
+- Added Spruce Log, Jungle Log and Birch Log
+- Added Granite, Stone Bricks, Marble Block, Clay, Mud, Sandstone and Red Sandstone
+- Added White Stained Glass and Light Blue Stained Glass
+- Added White Carpet, Black Carpet, Brown Carpet and Red Carpet
+- Added Limestone Bricks, Block of Iron, Block of Gold, Block of Copper, Block of Coal and Hay Bale
+- Added the new blocks around the devmap: hay in the barn, carpets in the chancery and houses, a marble altar dais, stone brick town walls, a limestone chancery in DevTown and more
+
+### Items
+- Added the Wooden tier. Wooden weapons, tools and shields need level 1
+- Added the Stone tier in place of Leather. Stone gear needs level 2
+
+### NPC's
+- Added bounty hunter posses. Once a kingdom's bounty passes 1,000G, a posse comes looking for you roughly every 30 to 40 minutes
+- Added border ambushes. Fleeing a kingdom with a bounty of 100G or more can find hunters waiting just over the line
+- Added law dogs, which run with the larger posses
+- NPC's can now offer you items, such as an herbalist sharing food when you are hurt. A popup lets you accept or decline
+
+### Gameplay
+- Added a reminder when you enter a kingdom where you are wanted, showing your bounty there
+- Added town lockdowns. With a bounty of 500G or more in a town, its shops close and the watch attacks on sight
+- Added arson as a crime. Setting fire to buildings or other people's property in town carries a 200G bounty
+- Added fishing animations for the rod, the small net and the crab cage, including a line and float for the rod
+- Added more foliage: shrubs, thistles, daisies, bluebells, cattails, heather, dock and bracken
+- Added the game's fonts to the interface, headings, chat, combat numbers and item descriptions
+- Added jingles for skill level ups, combat level ups, reaching the maximum combat level, reaching level 100 in a skill, and dying
+
+## Changes
+
+### Blocks
+- Changed Dirt, Sand, Glass and Cobblestone to new, more detailed textures
+- Changed every block to have a material, which now decides its footstep sound, whether it burns, whether it conducts electricity and how it takes the light
+- Changed trees and leaves of every kind so they now burn
+- Changed water and mud so they now conduct electricity
+
+### Items
+- Changed the Leather tier to Stone. Leather boots, gloves and the leather pouch stay as they are
+- Changed the starting outfit so new characters now start in a linen tunic instead of leather armour
+- Changed old saves so leather gear now carries over as the matching Stone gear
+
+### NPC's
+- Changed Brown Bears so they now hit less hard, have less health and are less accurate
+- Changed town guards so they now only go after bounties higher than 21G, unless you talk to them while wanted
+- Changed lawmen so they now leave their post for a wanted player more readily
+- Changed the herbalist so she now gathers herbs, and only picks berries when the herb patches are bare
+- Changed guards so they no longer order a thief out of town unless they know what the thief has done
+
+### Gameplay
+- Changed leveling so it is now much slower and follows the XP curve
+- Changed bounties so each new reported crime now adds to that kingdom's total, with no maximum
+- Changed bounties so a bounty in one kingdom no longer applies in another
+- Changed bounties to a fixed schedule: Disorderly Conduct 5G, Vandalism 10G, Animal Slaughter 30G, Horse Slaughter 50G, Trespassing 50G, Arson 200G, Murder 400G, Murdering a Guard or Lawman 500G, Murdering a Noble 600G and Murdering a Royal 1,000G
+- Changed High Honor so it now halves every bounty you are given
+- Changed bounty hunters so killing them or their dogs no longer adds to your bounty
+- Changed bare-fisted brawls so they now count as Disorderly Conduct. With a weapon it is still Assault
+- Changed foliage so it now bends as people and animals walk through it, rustles, and springs back after
+- Changed doors so they now swing open up to the wall in either direction, and walking into an open door pushes it out of your way
+- Changed third-person aiming so your body now turns side-on with a bow, crossbow or throwing weapon
+- Changed the throw arc to a white, glowing, dotted line along the exact path the throw will take, with a ring where it lands. The ring turns red when something is in the way or the landing is too close
+- Changed thrown weapons so they now tumble in flight and can bounce once or twice before coming to rest
+- Changed throwing so your feet now stay planted for a moment as you release
+- Changed spells on water: ice now freezes a wider patch, fire thaws ice back into water, and lightning spreads further through it
+- Changed water so it now ripples around anyone standing in it, leaves a wake behind anyone wading through, and throws up spray when you run through it
+- Changed the level up confetti to be smaller and quicker
+- Changed the chat box to be larger, with every message wrapping
+- Changed the dialogue box to be larger, with long replies wrapping onto more lines instead of shrinking
+- Changed containers, bodies and shops so they now open in their own window beside your inventory
+- Changed the Take All button on containers and bodies into two, one for equipment and one for items
+- Changed resisting arrest so it now closes the dialogue box
+- Changed the pause menu to match the Settings screen
+- Changed the inventory, character, skills, journal, magic and map screens to a new look, with the new slot and tab icons
+- Removed the Cut option from foliage. Foliage can still be burned away
+- Removed your equipped item and Honor from the pause menu
+
+## Technical Changes
+- Added door points to the waypoint network, so people can plan trips into buildings and through doors they are able to open
+- Added a step-back for people who end up off walkable ground, such as at the water's edge
+- Added a shared solver for the throw arc and the throw itself, so both use the same path
+- Removed the old throw prediction code
+- Added regression tests for doors, locked doors, NPC routines and the throw prediction
+
+## Fixed Bugs
+
+### NPC's
+- AE-1601 - Fixed bug where shopkeepers could not get through their own locked doors
+- AE-1602 - Fixed bug where lawmen tried to route through their own locked jail cells and stood blocked
+- AE-1603 - Fixed bug where the fisherman walked into the pond and stayed stuck there
+- AE-1604 - Fixed bug where NPC's waited at an empty shop counter trying to buy bread
+- AE-1605 - Fixed bug where the herbalist waited all day for berry bushes to regrow
+- AE-1606 - Fixed bug where guards spent all morning ordering a resident thief out of town
+- AE-1607 - Fixed bug where a hiding NPC could stay hidden for hours in a busy street
+- AE-1608 - Fixed bug where trips to the inside of buildings were planned to the wrong place
+
+### Gameplay
+- AE-1609 - Fixed bug where you could not hit or target someone standing beside an open door
+- AE-1610 - Fixed bug where door leaves swung through the walls beside them
+- AE-1611 - Fixed bug where legs twisted round each other when turning on the spot instead of stepping
+- AE-1612 - Fixed bug where foliage did not react to people or animals walking through it
+- AE-1613 - Fixed bug where spells passed straight through water instead of affecting it
+- AE-1614 - Fixed bug where picking a lock on a container was not treated as the same crime as picking a door's lock
+- AE-1615 - Fixed bug where the road was paved through the floor of a house in DevCity
+- AE-1616 - Fixed bug where old saves brought back the old, much faster leveling rate
+- AE-1617 - Fixed bug where a campfire on grass could burn the whole meadow, the herb beds and anyone in it
+- AE-1618 - Fixed bug where NPC's walked through campfires
+- AE-1619 - Fixed bug where someone walking into your campfire counted as you attacking them
+
 # Patch Notes Version 0.1.0: Fresh Start
 
 A title screen with music, a character creator worth lingering in, and a world that fights back harder and bleeds properly. Every weapon has been re-forged, prayer and magic work as the old books describe, and your character finally runs like they mean it. Happy exploring!
@@ -337,3 +449,116 @@ Everything in the world got a little heavier this update. Doors swing on real hi
 - Animals are mostly silent for now; only the fox has a voice.
 - Pickaxe icons lie on their side in the inventory.
 - Carried weight only slows you, not NPCs, for now.
+
+---
+
+# Patch Notes Version 0.1.3: A Working Town
+
+Five new residents bring real working trades to the devmap. Crime, custody and recovery now keep closer track of actual belongings, while fire, foliage and injuries share the same physical world.
+
+## New Features
+- **Five new townspeople:** Elowen the Lake Net Fisherman, Oren the Ore Miner, Tamsin the Blacksmith, Sir Alden the Escort Knight and Fenna the Predator Hunter.
+- **All 25 occupational profiles** across Fisherman, Miner, Craftsman, Knight and Hunter are available to compatible agents. Only five new residents are spawned. Workers need appropriate fixed skills, actual tools, materials and suitable sites; NPC work never grants XP.
+- **Deployed fishing nets and snares.** Nets retain their tool and actual catch across saves. Snares catch rabbits that physically cross them, and trappers return to the same captured animal or carcass.
+- **Ten kinds of dynamic foliage:** ferns, tall grass, clover, reeds, brambles, wildflowers, ivy, moss, mushrooms and saplings. Soil, shade, walls and nearby water determine where they grow; cutting and burning persist until valid regrowth.
+- **Voxel injuries and charring.** Human cuts recess the surface; animal cuts carve private copies of their model parts. Healing restores the original surface. Fire darkens characters, equipment and world props.
+- **Physical water feedback.** Moving people, ragdolls and rigid items disturb water with bounded splashes and ripples.
+- **Unfilled and Filled cemetery stones.** Burial removes the body and preserves its actual possessions in the named stone. Player recovery protections still apply.
+
+## Changes
+- **All 18 skills use the standard XP curve:** level 100 requires 14,391,160 XP. Existing saves retain raw XP; their levels and progress are recalculated. New characters still start at Health 10, now at 1,154 XP, and level 1 in other skills.
+- **Jail takes the bounty plus 3% tax**, rounded up, from affordable carried currency. An unpaid shortfall extends the sentence. All remaining clean possessions, including equipment and filled bags, stay in private escrow until release; stolen goods are confiscated. NPC prisoners use the same rules.
+- **City deaths go directly to Undertaker custody**, without a death-site gravestone. Wilderness graves remain exposed containers. Undertaker recovery excludes stolen goods and explains that rule before payment.
+- **Guards, raiders and escorts coordinate local tactics** with distinct anchor, flanking and support orders, while threatened fighters can seek cover.
+- **Enemy searches follow remembered locations and visible evidence**, with bounded patience. Civilians choose hiding places from nearby cover rather than a fixed home destination.
+- **Burning NPCs stop, drop and roll through Sydney** after three seconds of sustained fire. Ground contact can smother the flames; a separate nearby fire can still ignite them again.
+- **Body flames follow their emitter on the GPU.** Smoke can drift freely. Rain streaks remain upright, clouds advect with accumulated wind, and wet grass stays diffuse instead of reflecting like metal.
+- **Chatboxes return to the main conversation choices** after a response; Goodbye exits. Long Worldbox messages wrap and can be scrolled.
+- **Roof trespassing starts with a witnessed warning**, then a small, rate-limited bounty if ignored. DevTown replaces JUR-BETA in displayed names and structured legal saves.
+- **Pickpocketing opens the actual pocket inventory.** Looking is free; choosing an item starts the theft attempt and its detection risk.
+- The Fire staff requires Magic 10. Player Morphbeast lasts less time than the NPC effect. Fresh leather swords have a pre-armor maximum hit of at least 2.
+- Every enclosed devmap building, including the barn, now has a physical door.
+
+## Fixed Bugs
+- Fixed title-screen Settings ignoring clicks after the opening click, and moved profile deletion off the render thread.
+- Fixed Godric holding an empty bow instead of switching to a real melee weapon and answering a new attacker.
+- Fixed the first-person camera using the previous frame's world-space head location, including downward sprint clipping and movement stutter.
+- Fixed guards selecting other guards as enemies, and searches accumulating yaw until NPCs spun around.
+- Fixed blood evidence interrupting an already committed body collection. Undertakers can collect and bury normal city corpses.
+- Fixed corpse and burial interactions retaining stale physical bodies without their corresponding inventory.
+- Fixed recovered stolen goods being returned to the player, and jail equipment losing its original slots across save/load.
+- Fixed healing and respawning restoring stale burning receivers. Respawning also removes the player's detached limbs.
+- Fixed necklaces disappearing inside armor, and ensured positive fall and environmental damage use the hurt-voice path.
+- Fixed prone-target melee aim using standing chest height, and witnessed beast attacks being mistaken for witnessed human murder.
+- Fixed horses' attack poses, rabbits' excessive hopping cadence and dead animals' residual leg motion.
+- Fixed arrival state leaving stale movement goals, and gave occupational work resumable, committed tasks.
+
+## Technical Changes
+- Windows runtime builds use incremental Ninja when available, with two or four workers. The fallback compiler uses bounded parallel compilation instead of serial NMake. Verification executables stay outside the interactive launch dependency graph.
+- The engine supplies shared behavior-tree and hierarchical-task-network control nodes driving existing native agents. Human, Animal and reserved Monster domains are separate; no monster content was added.
+- Foliage uses shared model banks and cached chunk meshes, with distance/frustum culling, at most one dirty chunk upload per frame and no tiny foliage shadow passes.
+- Attached flame state stays on the GPU, retains full emitter identity and reuses source slots without CPU particle readback.
+- Added regression coverage for XP boundaries, fixed NPC progression, property conservation, custody reloads, professions, trap persistence, voxel healing, fire recovery and rigid-body water contact.
+- [Visual review and verification details](docs/RELEASE_013_REVIEW.md) include captured animation frames and the hardware-validation limits.
+
+## Known Issues
+- The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still needs measurement on that hardware. Software-rendered cloud screenshots are visual checks, not a hardware performance result.
+- River, coastal and offshore professions require corresponding authored water resources and safe travel access. The devmap contains lake fishing; this update does not add an ocean or a ship.
+
+---
+
+# Patch Notes Version 0.1.4: Working Supply Chains
+
+Craftsmen now keep the materials their work needs and use the market for supplies outside their own trade.
+
+## Changes
+- Blacksmiths and Armorers can smelt actual ore into bars for their forge work.
+- Finished crafted goods can be delivered one at a time, so large equipment does not require an impossible three-item batch.
+
+## Fixed Bugs
+- Fixed craftsmen repeatedly choosing gathering work without the necessary tool instead of buying available ingredients.
+- Fixed Tailors selling woven cloth before making garments.
+- Fixed Carpenters selling planks needed for unfinished, eligible joinery projects.
+
+## Technical Changes
+- Removed the unused cross-profession gathering selector.
+- Added actual-world checks for ingredient purchasing, ore consumption, garment production and owned furniture construction, while verifying that NPC XP stays fixed.
+
+## Known Issues
+- The hardware-validation and authored maritime-content limits described in Version 0.1.3 still apply.
+
+---
+
+# Patch Notes Version 0.1.5: Open Doors
+
+A maintenance pass on moving through town, working routines and the feedback that makes physical interactions readable.
+
+## Changes
+- **Foliage bends around nearby people and animals**, keeps its roots planted and returns as they move away. Shared chunk meshes stay on the GPU; brushing a plant does not create another physics body or upload its mesh again.
+- **Carried inventories are now four cells across and ten down**, for the player and human NPCs. Equipped bags remain beside the main grid. Existing ten-by-four save layouts are transposed with their item shapes, contents and ownership intact.
+- **Conjured allies have their own following duty.** They stay with their caster and defend nearby, without adopting a hunter's meals, sleep, work or corpse-looting routine. They return when an opponent moves outside their protection range.
+- Morphbeast forces the player into third person for the spell, then restores the previous camera preference.
+
+## Fixed Bugs
+- Fixed building doors being left out of the registry used for NPC opening and hinge updates. Human routes now recognize unlocked doors as passages they can open.
+- Fixed door hinges stopping on one side. Unlatched leaves can swing nearly flat in either direction, open away from the person using them and close from their actual current angle.
+- Fixed full-cell door blockers and duplicate voxel panels intercepting targeting and attacks through a visibly open doorway. Interaction, melee, arrows and sight now test the physical leaves.
+- Fixed turn-in-place foot corrections using an unreachable threshold and being mistaken for unfinished walking steps. Both feet can lift, reposition and settle.
+- Fixed wild-wood trees lacking gathering nodes. Their actual trunk height, wood type, yields, stumps and regrowth now use the existing gathering rules.
+- Fixed lingering fire, queued elemental effects and old missiles restarting a dead player's combat after respawn. Fire still burns; its old attack attribution ends. This also survives an immediate save and reload.
+- Fixed a selected pickpocket attempt waiting forever inside a paused inventory. The pocket view closes while the lift runs and reopens on success, showing the actual item and highlighting the receiving stack.
+- Fixed ordinary lamps and fires skipping human body shadows. Local occlusion includes nearby standing, sleeping and reacting humans within the existing bounded shadow budget.
+- Fixed thin model shadows being missed by the soft-shadow blocker search. Shadow sampling stays stable when temporal antialiasing is disabled.
+- Reduced rapid fire-light variation and replaced arbitrary first-sensor lighting with stable, grouped sources that fade in and out.
+- Fixed interrupted occupational plans surviving a change of goal or blocked route. Workers replan, and fatigue recovers only after actually reaching sleep.
+
+## Technical Changes
+- Added an engine command to retire attribution from active receivers and queued elemental volumes without extinguishing them.
+- Reused bounded actor proxies for foliage contact. Each chunk considers at most eight nearby proxies; chemical lighting retains six selected sources plus two fading slots and refreshes selection at chemistry cadence or after camera travel.
+- Removed the redundant voxel door render shape. Door ray tests use the native rigid pose rather than an assumed open angle.
+- Added regression coverage for actual NPC doorway travel, bidirectional hinges, doorway focus and arrow hits, wild-tree conservation, conjured following, morph camera recovery, theft, packed-inventory migration and fire attribution across death and reload.
+- [Maintenance review and captured evidence](docs/RELEASE_015_REVIEW.md) record the checks and their limits.
+
+## Known Issues
+- The i5-3570 / GTX 660 / 8 GB target at 1080p and 30 FPS still requires measurement on that hardware. Cloud software rendering verifies the changed visuals, not that performance target.
+- Local body shadows and foliage contact use bounded nearby proxies; distant foliage remains inexpensive scenery.

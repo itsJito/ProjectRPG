@@ -5,8 +5,8 @@ package rpg;
  * None of these is final balance; the GDD leaves them open.
  */
 public final class Config {
-    /** Multiplier on every test XP reward (the debug panel changes it). */
-    public float xpRate = 10f;
+    /** Multiplier on every XP reward (the console changes it): 1 keeps the action values on the shared curve (gamefixes: leveling was far too fast at 10). */
+    public float xpRate = 1f;
     /** Interaction: commit range, inspect range, the assist cone (cosine). */
     public float interactRange = 3f, inspectRange = 5f, assistCos = 0.97f;
     /** Gaits: brisk walking, a jog (Caps Lock), sprint on Shift, and a deliberate sneak. */
@@ -18,9 +18,15 @@ public final class Config {
     public float xpPerDamage = 4f, healthXpPerDamage = 1.33f, defenseXpPerDamage = 2f, defenseXpPerBlocked = 2f;
     /** Parry window: a guard raised this long before contact parries. */
     public float parryWindow = 0.2f;
-    /** Bounty: a theft is half the stolen value; the stated ceiling. */
+    /**
+     * Bounty (gamefixes): a theft is half the stolen value; an assault is its own charge; there is no ceiling. Town guards
+     * go after a bounty only above pursuitBounty (unless spoken to); at lockdownBounty the town shuts its shops and the
+     * watch attacks on sight; past posseBounty, posses track the offender down every posseMinutes..+10 of real time;
+     * bounty hunters wait at the border for someone fleeing with ambushBounty or more.
+     */
     public float theftBountyShare = 0.5f;
-    public int bountyCap = 1500, assaultBounty = 40, murderBounty = 1000;
+    public int assaultBounty = 40, pursuitBounty = 21, lockdownBounty = 500, posseBounty = 1000, ambushBounty = 100;
+    public float posseMinutes = 30;
     /** How far a noise of combat carries for NPC ears. */
     public float combatNoise = 18f;
     /** Game minutes per real second. */

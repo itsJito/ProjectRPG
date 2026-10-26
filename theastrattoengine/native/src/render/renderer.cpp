@@ -167,17 +167,17 @@ Renderer::~Renderer() {
     if (decalVbo_) g_.DeleteBuffers(1, &decalVbo_);
     if (decalVao_) g_.DeleteVertexArrays(1, &decalVao_);
     Program* all[] = {&gWorld_, &gModel_, &sWorld_, &sModel_, &lighting_, &cull_, &gtao_, &aoBlur_, &ssr_, &vol_, &fogApply_, &fWorld_, &fModel_,
-                      &particle_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_};
+                      &particle_, &chemistryParticles_, &waterWaves_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_};
     for (Program* p : all) p->destroy(g_);
     if (leafTex_) g_.DeleteTextures(1, &leafTex_);
-    GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], layerMat_, white_, shadowTex_, paletteTex_};
+    GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], layerMat_, white_, shadowTex_, paletteTex_, water_[0], water_[1], waterMask_};
     for (GLuint x : t) if (x) g_.DeleteTextures(1, &x);
     GLuint f[] = {lumFbo_, expoFbo_[0], expoFbo_[1]};
     for (GLuint x : f) if (x) g_.DeleteFramebuffers(1, &x);
     if (shadowTex_) g_.DeleteFramebuffers(4, shadowFbo_);
-    GLuint b[] = {lightBuf_, tileBuf_, ebo_, particleVbo_, quadVbo_, quadEbo_};
+    GLuint b[] = {lightBuf_, tileBuf_, ebo_, particleVbo_, quadVbo_, quadEbo_, chemistryVbo_, chemistryState_, chemistrySources_};
     for (GLuint x : b) if (x) g_.DeleteBuffers(1, &x);
-    GLuint a[] = {fsVao_, particleVao_, quadVao_};
+    GLuint a[] = {fsVao_, particleVao_, quadVao_, chemistryVao_};
     for (GLuint x : a) if (x) g_.DeleteVertexArrays(1, &x);
 }
 
@@ -226,7 +226,7 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
         if (vs.empty() || fs.empty()) { error_ = std::string("no shader source handed over for ") + (vs.empty() ? p.vs : p.fs); return false; }
         if (!p.p->build(g_, vs, fs, error_)) { error_ = std::string(p.vs) + " + " + p.fs + ": " + error_; return false; }
     }
-    const P comp[] = {{&cull_, "light_cull.comp", nullptr}};
+    const P comp[] = {{&cull_, "light_cull.comp", nullptr}, {&chemistryParticles_, "chemistry_particles.comp", nullptr}, {&waterWaves_, "water_waves.comp", nullptr}};
     for (const P& p : comp) {
         std::string cs = src(p.vs);
         if (cs.empty()) { error_ = std::string("no shader source handed over for ") + p.vs; return false; }
@@ -257,6 +257,16 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
         g_.VertexAttribDivisor(i, 1);
     }
     // 2D quads
+    water_[0]=tex2D(RGBA16F,256,256,LINEAR,1);water_[1]=tex2D(RGBA16F,256,256,LINEAR,1);waterMask_=tex2D(RGBA16F,256,256,NEAREST,1);
+    for(GLuint texture:{water_[0],water_[1],waterMask_})g_.ClearTexImage(texture,0,RGBA,FLOAT,nullptr);
+    // Chemical motion stays on the GPU; the CPU uploads only a bounded set of emitters.
+    g_.GenVertexArrays(1, &chemistryVao_); g_.GenBuffers(1, &chemistryVbo_); g_.GenBuffers(1, &chemistryState_); g_.GenBuffers(1, &chemistrySources_);
+    std::vector<float> empty(4096 * 16, 0);
+    g_.BindVertexArray(chemistryVao_); g_.BindBuffer(ARRAY_BUFFER, chemistryVbo_);
+    g_.BufferData(ARRAY_BUFFER, static_cast<GLsizeiptr>(4096*48), empty.data(), DYNAMIC_COPY);
+    for (GLuint i = 0; i < 3; ++i) { g_.VertexAttribPointer(i,4,FLOAT,FALSE_,48,reinterpret_cast<const void*>(static_cast<uintptr_t>(i*16))); g_.EnableVertexAttribArray(i); g_.VertexAttribDivisor(i,1); }
+    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistryState_); g_.BufferData(SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(4096*64), empty.data(), DYNAMIC_COPY);
+    g_.BindBuffer(SHADER_STORAGE_BUFFER, chemistrySources_); g_.BufferData(SHADER_STORAGE_BUFFER, 64*80, nullptr, STREAM_DRAW);
     g_.GenVertexArrays(1, &quadVao_);
     g_.GenBuffers(1, &quadVbo_);
     g_.GenBuffers(1, &quadEbo_);
@@ -407,8 +417,9 @@ int32_t Renderer::texture(const astratto_texture_desc& d, uint32_t* out) {
     if (t.target == TEXTURE_2D_ARRAY) g_.TexImage3D(t.target, 0, static_cast<GLint>(RGBA8), static_cast<GLsizei>(d.width), static_cast<GLsizei>(d.height), static_cast<GLsizei>(d.layers), 0, RGBA, UNSIGNED_BYTE, d.pixels);
     else g_.TexImage2D(t.target, 0, static_cast<GLint>(RGBA8), static_cast<GLsizei>(d.width), static_cast<GLsizei>(d.height), 0, RGBA, UNSIGNED_BYTE, d.pixels);
     const bool mip = (d.flags & ASTRATTO_TEX_MIPMAP) != 0, nearest = (d.flags & ASTRATTO_TEX_NEAREST) != 0, mipLinear = (d.flags & ASTRATTO_TEX_MIP_LINEAR) != 0;
-    const GLenum minFilter = !mip ? (nearest ? NEAREST : LINEAR)
-                                  : nearest ? (mipLinear ? NEAREST_MIPMAP_LINEAR : NEAREST_MIPMAP_NEAREST) : (mipLinear ? LINEAR_MIPMAP_LINEAR : LINEAR_MIPMAP_NEAREST);
+    const bool minNearest = nearest && (d.flags & ASTRATTO_TEX_MIN_LINEAR) == 0;
+    const GLenum minFilter = !mip ? (minNearest ? NEAREST : LINEAR)
+                                  : minNearest ? (mipLinear ? NEAREST_MIPMAP_LINEAR : NEAREST_MIPMAP_NEAREST) : (mipLinear ? LINEAR_MIPMAP_LINEAR : LINEAR_MIPMAP_NEAREST);
     g_.TexParameteri(t.target, TEXTURE_MIN_FILTER, static_cast<GLint>(minFilter));
     g_.TexParameteri(t.target, TEXTURE_MAG_FILTER, static_cast<GLint>(nearest ? NEAREST : LINEAR));
     const uint32_t maxLevel = (d.flags >> 8) & 15u;
@@ -494,6 +505,8 @@ int32_t Renderer::worldLook(const astratto_world_look& look) {
     atlasTex_ = look.atlas; noiseTex_ = look.noise; layers_ = std::max<uint32_t>(1, look.layers);
     palette_.assign(look.palette, look.palette + 256 * 8);
     std::memset(opaqueMask_, 0, sizeof opaqueMask_);
+    std::memset(particleCollision_,0,sizeof particleCollision_);
+    for(uint32_t id=0;id<t.block_count;id++)if(t.blocks[id].flags&(ASTRATTO_RB_SOLID|ASTRATTO_RB_LIQUID))particleCollision_[id>>5]|=1u<<(id&31);
     for (uint32_t id = 0; id < t.block_count; id++) if (t.blocks[id].flags & ASTRATTO_RB_OCCLUDES) opaqueMask_[id >> 5] |= 1u << (id & 31);
     const float ground = look.ground_y;
     // per atlas layer: roughness, metalness, emission
@@ -563,6 +576,8 @@ void Renderer::bindWorld(Engine* e, astratto_handle h) {
     if (w == nullptr) return;
     if (!sameSize && !buildPrograms(w->sizeX(), w->sizeY(), w->sizeZ())) return;
     world_ = w;
+    waterVersions_.clear(); waterAccumulator_=waterClock_=0;
+    for(GLuint texture:{water_[0],water_[1]})g_.ClearTexImage(texture,0,RGBA,FLOAT,nullptr);
     sizeX_ = w->sizeX(); sizeY_ = w->sizeY(); sizeZ_ = w->sizeZ();
     CX_ = w->columnsX(); CZ_ = w->columnsZ();
     const size_t n = static_cast<size_t>(CX_) * CZ_;
@@ -935,11 +950,11 @@ void Renderer::bankUniforms(Program& s) {
 
 // ------------------------------------------------------------------ the frame
 bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
-    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); quads_.clear(); portraits_.clear();
+    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); emitters_.clear(); quads_.clear(); portraits_.clear();
     hasCamera_ = false; hasClear_ = false; grading_ = Grading();
     doFoliage_ = doProps_ = doDecals_ = false;
     decalVerts_.clear();
-    smoke_.clear();
+    smoke_.clear(); ripples_.clear();
     astratto_handle world = worldHandle_;
     bool worldSaid = false;
     uint32_t at = 0;
@@ -997,6 +1012,27 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 if (c.emissive > 0.5f) f |= ASTRATTO_MODEL_NO_SHADOW;
                 m.flags = f;
                 models_.push_back(m);
+                break;
+            }
+            case ASTRATTO_RCMD_RIPPLE: {
+                astratto_rcmd_ripple c;
+                if(!readRecord(r,head.bytes,c)) { error_="short ripple record";return false; }
+                if(!std::isfinite(c.x+c.z+c.radius+c.strength) || c.radius<=0 || c.radius>8 || std::abs(c.strength)>30) { error_="invalid water ripple";return false; }
+                if(ripples_.size()<32*4)ripples_.insert(ripples_.end(),{c.x,c.z,c.radius,c.strength});
+                break;
+            }
+            case ASTRATTO_RCMD_EMITTER: {
+                astratto_rcmd_emitter c;
+                if (!readRecord(r, head.bytes, c)) { error_ = "short emitter record"; return false; }
+                bool valid = true;
+                for (int i = 0; i < 4; ++i) valid = valid && std::isfinite(c.position[i]) && std::isfinite(c.color[i]) && std::isfinite(c.motion[i]) && std::isfinite(c.params[i]);
+                if (!valid || c.position[3] < 0 || c.position[3] > 3 || c.motion[3] <= 0 || c.motion[3] > 8 || c.params[0] < 0 || c.params[0] > 200) { error_ = "invalid element emitter"; return false; }
+                if (emitters_.size() < 64*20) {
+                    emitters_.insert(emitters_.end(),c.position,c.position+4); emitters_.insert(emitters_.end(),c.color,c.color+4);
+                    emitters_.insert(emitters_.end(),c.motion,c.motion+4); emitters_.insert(emitters_.end(),c.params,c.params+4);
+                    // Four exact 16-bit float words retain the full source ID without NaN encodings or hash collisions.
+                    for (unsigned shift=0;shift<64;shift+=16) emitters_.push_back(static_cast<float>((c.id>>shift)&65535u));
+                }
                 break;
             }
             case ASTRATTO_RCMD_PARTICLES: {
@@ -1434,10 +1470,11 @@ bool Renderer::visibleModel(const Model& model, const Frustum& frustum) const {
         }
     }
     // Enclosing the transformed box also handles nonuniform scales, reflections and shear conservatively.
-    return frustum.sphere(center[0], center[1], center[2], std::sqrt(extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]));
+    return frustum.sphere(center[0], center[1], center[2], std::sqrt(extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]) + ((model.flags & ASTRATTO_MODEL_FOLIAGE) ? 3.0f : 0.0f));
 }
 
 void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
+    s.f3("uFoliage",foliage_.wind_x,foliage_.wind_z,env_.time);
     float csky = 1, cblk = 0;
     if (viewmodel && w) {
         const int ix = static_cast<int>(std::floor(cam_.x)), iy = static_cast<int>(std::floor(cam_.y)), iz = static_cast<int>(std::floor(cam_.z));
@@ -1453,6 +1490,27 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
             sky = static_cast<float>(w->sky(ix, iy, iz)) / 15.0f; blk = static_cast<float>(w->blockLight(ix, iy, iz)) / 15.0f;
         }
         s.mat4("uModel", m.m);
+        const bool foliage = (m.flags & ASTRATTO_MODEL_FOLIAGE) != 0;
+        s.f1("uSway", foliage ? 1.0f : 0.0f);
+        if (foliage) {
+            // 2.6: what bends a plant: the bodies standing in it now, and the frame's pushers (the game's trail of where
+            // bodies passed a moment ago, shrinking as the stems spring back)
+            float benders[16 * 4] = {}; int count = 0;
+            const ModelMesh& mesh = meshes_[m.mesh];
+            const float cx = m.m[12] + mesh.center[0], cz = m.m[14] + mesh.center[2];
+            for (int i = 0; i < bodyCount_ && count < 16; i++) {
+                const float* body = bodies_ + i * 5;
+                if (std::abs(body[0]-cx)>mesh.extent[0]+1.2f || std::abs(body[2]-cz)>mesh.extent[2]+1.2f) continue;
+                std::copy(body, body+4, benders+count*4); ++count;
+            }
+            for (uint32_t i = 0; i < std::min<uint32_t>(8, foliage_.push_count) && count < 16; i++) {
+                const float* p = foliage_.push + i * 4;   // x, z, radius, y
+                if (p[2] <= 0 || std::abs(p[0]-cx)>mesh.extent[0]+1.2f || std::abs(p[1]-cz)>mesh.extent[2]+1.2f) continue;
+                float* o = benders + count * 4; o[0] = p[0]; o[1] = p[3]; o[2] = p[1]; o[3] = p[2]; ++count;
+            }
+            s.i1("uBendCount", count);
+            for (int i = 0; i < count; i++) { const std::string name = "uBenders[" + std::to_string(i) + "]"; const float* b = benders+i*4; s.f4(name.c_str(), b[0],b[1],b[2],b[3]); }
+        }
         s.f4("uTint", m.par[0], m.par[1], m.par[2], m.par[3]);
         s.f1("uEmissive", m.par[4]);
         s.f1("uFlag", m.par[4] > 0.5f ? 2.0f : (viewmodel ? 1.0f : 0.0f));
@@ -1558,7 +1616,7 @@ void Renderer::lightingPass() {
     s.tex("uShadowRaw", 13, TEXTURE_2D_ARRAY, shadowTex_);
     g_.BindSampler(13, rawShadowSampler_);
     s.f4("uCascadeDepth", cascadeDepth_[0], cascadeDepth_[1], cascadeDepth_[2], cascadeDepth_[3]);
-    s.f1("uFrame", static_cast<float>(frameNo_ & 1023));
+    s.f1("uFrame", q_.taa ? static_cast<float>(frameNo_ & 1023) : 0.0f);
     probeUniforms(s, 7);
     s.tex("uProbeVis", 10, TEXTURE_3D, probeVis_);
     s.tex("uVox", 11, TEXTURE_3D, voxTex_);
@@ -1587,6 +1645,10 @@ void Renderer::lightingPass() {
 }
 
 void Renderer::fogPass() {
+    const float cloudDt = cloudClock_ < 0 ? 0.0f : std::clamp(env_.time - cloudClock_, 0.0f, 0.25f);
+    cloudClock_ = env_.time;
+    cloudX_ += foliage_.wind_x * cloudDt * 0.08f;
+    cloudZ_ += foliage_.wind_z * cloudDt * 0.08f;
     const float density = env_.fogDensity * 0.62f;
     if (q_.volumetrics) {
         g_.BindFramebuffer(FRAMEBUFFER, fogFbo_);
@@ -1611,6 +1673,8 @@ void Renderer::fogPass() {
         vol_.f1("uHeightBase", groundY_);
         vol_.f1("uMaxDist", 140.0f);
         vol_.f1("uTime", env_.time);
+        vol_.f1("uCloudCover", std::max(0.0f,env_.overcast));
+        vol_.f2("uCloudOffset",cloudX_,cloudZ_);
         // the smoke volumes as three vec4 each: (x y z radius) (density r g b) (glow rise swirl seed)
         const int smokeN = static_cast<int>(smoke_.size() / 12);
         vol_.i1("uSmokeN", smokeN);
@@ -1642,7 +1706,75 @@ void Renderer::fogPass() {
 }
 
 // ------------------------------------------------------------------ forward
-void Renderer::forwardPass(VoxelWorld*) {
+void Renderer::advanceWater(VoxelWorld* world) {
+    if(!world)return;
+    const bool fresh=waterVersions_.size()!=static_cast<size_t>(CX_*CZ_);
+    if(fresh) { waterVersions_.assign(static_cast<size_t>(CX_*CZ_),0);waterMaskData_.assign(256*256*4,0);waterCells_=0; }
+    bool changed=false;
+    // A changed wall or burning log invalidates its column, never a full height scan of the whole map.
+    for(int cx=0;cx<CX_;cx++)for(int cz=0;cz<CZ_;cz++) {
+        const size_t column=static_cast<size_t>(cx*CZ_+cz);const uint32_t version=world->columnVersion(cx,cz);
+        if(!fresh && waterVersions_[column]==version)continue;
+        waterVersions_[column]=version;changed=true;
+        const int x0=(cx*16*256+sizeX_-1)/sizeX_,x1=std::min(256,((cx+1)*16*256+sizeX_-1)/sizeX_);
+        const int z0=(cz*16*256+sizeZ_-1)/sizeZ_,z1=std::min(256,((cz+1)*16*256+sizeZ_-1)/sizeZ_);
+        for(int x=x0;x<x1;x++)for(int z=z0;z<z1;z++) {
+            const size_t at=static_cast<size_t>((z*256+x)*4);
+            if(waterMaskData_[at+1]>0)waterCells_--;
+            std::fill_n(waterMaskData_.begin()+static_cast<ptrdiff_t>(at),4,0.0f);
+            const int bx=x*sizeX_/256,bz=z*sizeZ_/256;
+            for(int y=sizeY_-1;y>=0;y--)if(world->def(bx,y,bz).flags&ASTRATTO_BLOCK_LIQUID) {
+                waterMaskData_[at]=static_cast<float>(y+1);waterMaskData_[at+1]=1;
+                waterMaskData_[at+2]=static_cast<float>(world->sky(bx,y+1,bz))/15.0f;waterCells_++;break;
+            }
+        }
+    }
+    if(changed) { g_.BindTexture(TEXTURE_2D,waterMask_);g_.TexSubImage2D(TEXTURE_2D,0,0,0,256,256,RGBA,FLOAT,waterMaskData_.data()); }
+    hasWater_=waterCells_>0;
+    if(!hasWater_)return;
+    waterAccumulator_+=std::min(0.066f,std::max(0.0f,cam_.dt));
+    constexpr float STEP=1.0f/120.0f;
+    const int steps=std::min(8,static_cast<int>(waterAccumulator_/STEP));
+    waterAccumulator_-=static_cast<float>(steps)*STEP;
+    waterWaves_.use();waterWaves_.tex("uMask",0,TEXTURE_2D,waterMask_);
+    waterWaves_.f2("uWorldSize",static_cast<float>(sizeX_),static_cast<float>(sizeZ_));
+    waterWaves_.f1("uDt",STEP);waterWaves_.f1("uRain",env_.rain);
+    waterWaves_.i1("uImpulses",static_cast<int>(ripples_.size()/4));
+    if(!ripples_.empty())g_.Uniform4fv(waterWaves_.loc("uImpulse"),static_cast<GLsizei>(ripples_.size()/4),ripples_.data());
+    for(int i=0;i<steps;i++) {
+        waterClock_+=STEP;waterWaves_.f1("uTime",waterClock_);
+        g_.BindImageTexture(0,water_[waterIndex_],0,FALSE_,0,READ_WRITE,RGBA16F);
+        g_.BindImageTexture(1,water_[1-waterIndex_],0,FALSE_,0,READ_WRITE,RGBA16F);
+        g_.DispatchCompute(32,32,1);g_.MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT|TEXTURE_FETCH_BARRIER_BIT);
+        waterIndex_=1-waterIndex_;
+    }
+}
+
+void Renderer::advanceChemicalParticles() {
+    chemistryQuiet_ = emitters_.empty() ? chemistryQuiet_ + cam_.dt : 0;
+    if (chemistryQuiet_ > 8) chemistryAlive_ = false;
+    if (emitters_.empty() && !chemistryAlive_) return;
+    if (cam_.reset) {
+        std::vector<float> zero(4096*16,0);
+        g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistryVbo_);g_.BufferSubData(SHADER_STORAGE_BUFFER,0,4096*48,zero.data());
+        g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistryState_);g_.BufferSubData(SHADER_STORAGE_BUFFER,0,4096*64,zero.data());
+    }
+    const int count = presetLevel_ <= 0 ? 1024 : presetLevel_ == 1 ? 2048 : 4096;
+    chemistryParticles_.use();
+    chemistryParticles_.i1("uCount",count); chemistryParticles_.i1("uEmitters",static_cast<int>(emitters_.size()/20));
+    chemistryParticles_.tex("uVox",0,TEXTURE_3D,voxTex_);
+    chemistryParticles_.uiv("uCollision",particleCollision_,8);
+    chemistryParticles_.f1("uDt",cam_.dt); chemistryParticles_.f1("uTime",env_.time); chemistryParticles_.f2("uWind",foliage_.wind_x,foliage_.wind_z);
+    g_.BindBuffer(SHADER_STORAGE_BUFFER,chemistrySources_);
+    if(!emitters_.empty())g_.BufferSubData(SHADER_STORAGE_BUFFER,0,static_cast<GLsizeiptr>(emitters_.size()*sizeof(float)),emitters_.data());
+    g_.BindBufferBase(SHADER_STORAGE_BUFFER,6,chemistryVbo_);g_.BindBufferBase(SHADER_STORAGE_BUFFER,7,chemistryState_);g_.BindBufferBase(SHADER_STORAGE_BUFFER,5,chemistrySources_);
+    g_.DispatchCompute(static_cast<GLuint>((count+63)/64),1,1);
+    g_.MemoryBarrier(SHADER_STORAGE_BARRIER_BIT|VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+    chemistryAlive_=true;
+}
+
+void Renderer::forwardPass(VoxelWorld* world) {
+    advanceWater(world);
     const float density = env_.fogDensity * 0.62f;
     g_.BindFramebuffer(FRAMEBUFFER, hdrBFbo_);
     g_.Viewport(0, 0, rw_, rh_);
@@ -1662,6 +1794,8 @@ void Renderer::forwardPass(VoxelWorld*) {
     fWorld_.tex("uSceneDepth", 7, TEXTURE_2D, gDepth_);
     fWorld_.mat4("uInvPV", invPVJ_.m);
     fWorld_.i1("uWaterSSR", q_.ssr ? 1 : 0);
+    fWorld_.tex("uWaves",8,TEXTURE_2D,water_[waterIndex_]);
+    fWorld_.tex("uWaterNoise",9,TEXTURE_2D,textures_.count(noiseTex_)?textures_[noiseTex_].id:white_);
     probeUniforms(fWorld_, 1);
     fWorld_.f3("uCam", cam_.x, cam_.y, cam_.z);
     fWorld_.f3("uFogCol", fogCol_[0], fogCol_[1], fogCol_[2]);
@@ -1716,7 +1850,8 @@ void Renderer::forwardPass(VoxelWorld*) {
     }
     // particles: premultiplied, so fire adds and smoke covers in one sorted-enough pass
     const size_t pcount = particles_.size() / 12;
-    if (pcount > 0) {
+    advanceChemicalParticles();
+    if (pcount > 0 || chemistryAlive_) {
         g_.BlendFunc(ONE, ONE_MINUS_SRC_ALPHA);
         particle_.use();
         particle_.mat4("uPV", pvJ_.m);
@@ -1732,12 +1867,18 @@ void Renderer::forwardPass(VoxelWorld*) {
         // depth is sampled in the shader for soft edges, so it cannot also be the depth attachment being tested
         g_.BindFramebuffer(FRAMEBUFFER, hdrBColorFbo_);
         g_.Disable(DEPTH_TEST);
+        if (pcount > 0) {
         g_.BindVertexArray(particleVao_);
         g_.BindBuffer(ARRAY_BUFFER, particleVbo_);
         if (pcount > particleCap_) { while (particleCap_ < pcount) particleCap_ *= 2; }
         g_.BufferData(ARRAY_BUFFER, static_cast<GLsizeiptr>(particleCap_ * 48), nullptr, STREAM_DRAW);    // orphan, then fill
         g_.BufferSubData(ARRAY_BUFFER, 0, static_cast<GLsizeiptr>(pcount * 48), particles_.data());
         g_.DrawArraysInstanced(TRIANGLE_STRIP, 0, 4, static_cast<GLsizei>(pcount));
+        }
+        if (chemistryAlive_) {
+            g_.BindVertexArray(chemistryVao_);
+            g_.DrawArraysInstanced(TRIANGLE_STRIP,0,4,presetLevel_ <= 0 ? 1024 : presetLevel_ == 1 ? 2048 : 4096);
+        }
         g_.BindVertexArray(0);
         g_.Enable(DEPTH_TEST);
     }

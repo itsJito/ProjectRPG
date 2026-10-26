@@ -113,7 +113,7 @@ public final class Acceptance {
         preview.world = game.world(); preview.x = 64.5f; preview.y = DevMap.FLOOR; preview.z = 66.5f;
         // every row cycles through exactly the GDD's counts (3.18: sex, body, skin, 20 hair per sex, 10 natural hair
         // colours, 20 facial hair, 20 tops / legs / shoes, 24 garment colours) and wraps
-        int[] want = {2, 3, 12, 20, 10, 20, 20, 24, 20, 24, 20, 24};
+        int[] want = {2, 3, 12, 20, 10, 20, 10, 20, 24, 20, 24, 20, 24};
         var rows = c.rows();
         boolean counts = rows.size() == want.length;
         for (int i = 0; counts && i < rows.size(); i++) counts = rows.get(i).count() == want[i];
@@ -129,10 +129,11 @@ public final class Acceptance {
         java.util.Set<String> outfits = new java.util.HashSet<>();
         for (int i = 0; i < 20; i++) { outfits.add("t" + rpg.render.Outfit.TOPS[i]); outfits.add("l" + rpg.render.Outfit.LEGS[i]); outfits.add("s" + rpg.render.Outfit.SHOES[i]); }
         need("20 distinct tops, 20 legs and 20 shoes (" + outfits.size() + " of 60)", outfits.size() == 60);
+        int startingHair=c.look.hair;
         for (int i = 0; i < 20; i++) c.step(rows.get(3), 1);
-        need("hairstyle row wraps after 20", c.look.hair == 1);
+        need("hairstyle row wraps after 20", c.look.hair == startingHair);
         c.step(rows.get(0), 1);
-        need("choosing female removes facial hair and its row", c.look.female && c.look.beard == 0 && c.rows().size() == want.length - 1);
+        need("choosing female removes facial hair and its row", c.look.female && c.look.beard == 0 && c.rows().size() == want.length - 2);
         c.step(c.rows().get(0), 1);
         c.look.hair = 12; c.look.beard = 4; c.look.top = 7; c.look.topColor = 15; c.look.skin = 6; c.look.hairColor = 1;
         for (int i = 0; i < 90; i++) {
@@ -178,28 +179,23 @@ public final class Acceptance {
         boolean allOne = true;
         for (Skill s : Skill.ALL) allOne &= g.player.skills.level(s) == (s == Skill.HEALTH ? 10 : 1);
         need("a new character starts with every skill at 1 but Health at 10, and 10 HP (" + g.player.maxHp() + ")", allOne && g.player.maxHp() == 10);
-        need("XP table: L10 43,446, L50 598,694, L60 935,503, L80 2,321,784, L90 3,720,933, L100 6,000,000",
-                XpTable.xpFor(10) == 43_446 && XpTable.xpFor(50) == 598_694 && XpTable.xpFor(60) == 935_503 && XpTable.xpFor(80) == 2_321_784 && XpTable.xpFor(90) == 3_720_933 && XpTable.xpFor(100) == 6_000_000);
+        need("XP table: L10 1,154, L50 101,333, L60 273,742, L80 1,986,068, L90 5,346,332, L100 14,391,160",
+                XpTable.xpFor(10) == 1_154 && XpTable.xpFor(50) == 101_333 && XpTable.xpFor(60) == 273_742 && XpTable.xpFor(80) == 1_986_068 && XpTable.xpFor(90) == 5_346_332 && XpTable.xpFor(100) == 14_391_160);
         boolean mono = true;
         for (int l = 2; l <= 100; l++) mono &= XpTable.xpFor(l) > XpTable.xpFor(l - 1) && XpTable.levelFor(XpTable.xpFor(l)) == l && XpTable.levelFor(XpTable.xpFor(l) - 1) == l - 1;
         need("the stored table is strictly increasing and levelFor agrees at every boundary", mono);
-        // train a stand-in through every milestone on every skill, through the real award path (events, level-ups)
-        Actor t = new Actor(9999, "Trainee", 28);
-        boolean milestones = true;
-        long levelUps = 0;
-        for (Skill s : Skill.ALL) {
-            for (int target : new int[]{60, 80, 90, 100}) {
-                long need = XpTable.xpFor(target) - t.skills.xp(s);
-                var a = g.prog.awardRaw(t, s, need, "milestone test", 0, g.state.newRequestId());
-                milestones &= t.skills.level(s) == target && t.skills.xp(s) == XpTable.xpFor(target);
-                if (a != null && a.levelledUp()) levelUps++;
-                if (target < 100) milestones &= XpTable.levelFor(t.skills.xp(s) - 1) == target - 1;
+        // The detached skill model exercises the curve; gameplay awards must reject non-player actors.
+        var model=new rpg.skill.Skills();boolean milestones=true;
+        for(Skill skill:Skill.ALL) {
+            for(int target:new int[]{60,80,90,100}) {
+                model.award(skill,XpTable.xpFor(target)-model.xp(skill));
+                milestones &= model.level(skill)==target && model.xp(skill)==XpTable.xpFor(target);
             }
-            g.prog.awardRaw(t, s, 1_000_000, "over the cap", 0, 0);
-            milestones &= t.skills.xp(s) == XpTable.MAX_XP && t.skills.level(s) == 100;
+            model.award(skill,1_000_000);milestones &= model.xp(skill)==XpTable.MAX_XP;
         }
-        need("every skill reaches exactly 60, 80, 90 and 100 at the table's thresholds, and caps at 6,000,000", milestones);
-        need("level-ups were committed as events (" + levelUps + ")", levelUps == 18 * 4);
+        need("all eighteen skill models reach the standard milestones and cap at 14,391,160",milestones);
+        Actor fixed=new Actor(9999,"Fixed profile",28);long[] fixedXp=fixed.skills.raw();
+        need("gameplay XP cannot advance a non-player profile",g.prog.awardRaw(fixed,Skill.ATTACK,1000,"invalid recipient",0,0)==null && java.util.Arrays.equals(fixedXp,fixed.skills.raw()));
         long req = g.state.newRequestId();
         long before = g.player.skills.xp(Skill.COOKING);
         g.prog.awardRaw(g.player, Skill.COOKING, 500, "dedupe test", 0, req);
@@ -207,9 +203,10 @@ public final class Acceptance {
         need("a repeated request pays XP once", g.player.skills.xp(Skill.COOKING) == before + 500);
         // the player's own level-up: overlay, jingle, fireworks
         long ups = g.prog.levelUps;
-        g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(3) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
+        int nextCooking=g.player.skills.level(Skill.COOKING)+1;
+        g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(nextCooking) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
         frames(20);
-        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && g.prog.celebrating != null && g.chat.contains("Cooking level is now 3"));
+        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelup").alpha > 0 && g.chat.contains("Cooking level is now "+nextCooking));
         shot("03-level-up");
     }
 
@@ -350,6 +347,11 @@ public final class Acceptance {
     // ------------------------------------------------------------------ 3. every skill's action
     private void skillActions() {
         long[] start = g.player.skills.raw();
+        // the skill lab cleared of passers-by for the tester's own swings, fires and casts (a pickaxe swung at the ore
+        // otherwise lands on whoever is working beside it, and the rest of the run is about that crime); Eda stays, to
+        // have her pocket picked, and everyone comes back at the end
+        java.util.List<Npc> away = new java.util.ArrayList<>();
+        for (Npc n : g.npcs) if (n.alive && n.loaded && n.id != Ids.VILLAGER && Math.hypot(n.x - 64, n.z - 25) < 40) { g.ai.unload(n); away.add(n); }
         // Woodcutting (gamefixes): a woodcutting axe wielded and swung at the tree; a battleaxe will not do; the XP comes
         // when the tree comes down, and it comes down whole
         Node tree = node("tree");
@@ -358,8 +360,8 @@ public final class Acceptance {
         long wc0 = g.player.skills.xp(Skill.WOODCUTTING);
         chopAt(tree, 4);
         need("a two-handed battleaxe does not fell trees (struck " + (int) tree.struck + ")", tree.struck == 0 && !tree.depleted());
-        wield("leather_axe");
-        need("the woodcutting axe is one-handed and 1 x 2 (" + Items.get("leather_axe").gw + " x " + Items.get("bronze_axe").gh + "), the battleaxe 1 x 4 and two-handed",
+        wield("wooden_axe");
+        need("the woodcutting axe is one-handed and 1 x 2 (" + Items.get("wooden_axe").gw + " x " + Items.get("bronze_axe").gh + "), the battleaxe 1 x 4 and two-handed",
                 Items.get("bronze_axe").gw == 1 && Items.get("bronze_axe").gh == 2 && !Items.get("bronze_axe").twoHanded() && Items.get("bronze_battleaxe").gh == 4 && Items.get("bronze_battleaxe").twoHanded());
         chopAt(tree, 1);
         need("a blow that bites the tree pays no XP yet (struck " + (int) tree.struck + ")", tree.struck >= 1 && g.player.skills.xp(Skill.WOODCUTTING) == wc0);
@@ -383,7 +385,7 @@ public final class Acceptance {
         long mn0 = g.player.skills.xp(Skill.MINING);
         chopAt(copper, 2);
         need("a sword on the ore mines nothing", g.player.skills.xp(Skill.MINING) == mn0 && copper.struck == 0);
-        wield("leather_pickaxe");
+        wield("wooden_pickaxe");
         chopAt(copper, 1);
         need("one strike of the pickaxe on the ore pays Mining XP (" + (g.player.skills.xp(Skill.MINING) - mn0) + ")", g.player.skills.xp(Skill.MINING) > mn0 && !g.player.has(Items.COPPER_ORE, 1));
         for (int i = 0; i < 30 && !g.player.has(Items.COPPER_ORE, 1); i++) chopAt(copper, 1);
@@ -419,6 +421,8 @@ public final class Acceptance {
         need("Cooking: shrimp cooked (or burnt by the seeded check, which pays no XP)", g.player.has(Items.SHRIMP, 1) && g.player.skills.xp(Skill.COOKING) > cookXp || g.player.has(Items.BURNT_FISH, 1));
         // Harvesting
         Node herb = node("herb_patch"), flax = node("flax");
+        // the herbalist works these patches too: if she has picked them bare, they are waited on to regrow
+        if (herb == null) { g.advanceTime(g.cfg.patchRespawn + 1, "waiting for the herb patches to regrow"); for (int i = 0; i < 120 && herb == null; i++) { frames(1); herb = node("herb_patch"); } }
         stand(herb);
         work(g.interact.request(g.player, herb, "gather"), 600, () -> g.player.has(Items.GUAM, 1));
         need("Harvesting: guam picked", g.player.has(Items.GUAM, 1));
@@ -448,6 +452,8 @@ public final class Acceptance {
         need("Agility: a geometry-derived ledge crossed", traversed && g.player.y > ledgeY + 0.8f && g.player.skills.xp(Skill.AGILITY) > start[Skill.AGILITY.ordinal()]);
         // Thieving: pickpocket (a seeded chance) until it succeeds
         Npc eda = npc(Ids.VILLAGER);
+        // (she spends her coins on bread now that her day works: a purse for the check)
+        if (eda.count(Items.COINS) < 10) g.give(eda, Items.COINS, 20);
         for (int i = 0; i < 8 && g.player.skills.xp(Skill.THIEVING) == start[Skill.THIEVING.ordinal()]; i++) {
             // a pocket is picked from someone standing still: one walking off is out of reach before the hand is in
             for (int w = 0; w < 900 && Math.hypot(eda.vx, eda.vz) > 0.15f; w++) frames(1);
@@ -468,6 +474,7 @@ public final class Acceptance {
         int trained = 0;
         for (Skill s : Skill.ALL) if (g.player.skills.xp(s) > start[s.ordinal()]) trained++;
         System.out.println("    non-combat skills trained by their actions: " + trained);
+        for (Npc n : away) if (n.alive && !n.loaded) g.ai.reload(n);
     }
 
     // ------------------------------------------------------------------ 4. combat
@@ -685,7 +692,7 @@ public final class Acceptance {
         tp(70.5f, 30.5f, 0);    // walk away; the witness goes to the law on her own
         boolean reported = false;
         for (int i = 0; i < 4800 && !reported; i++) { frames(1); reported = g.law.bounty(g.player.id, DevMap.ALPHA) > before; }
-        need("the witness travelled to the lawman and reported: JUR-ALPHA bounty " + g.law.bounty(g.player.id, DevMap.ALPHA), reported);
+        need("the witness travelled to the lawman and reported: DevCity bounty " + g.law.bounty(g.player.id, DevMap.ALPHA), reported);
         need("the bounty is half the stolen value, in Alpha only", g.law.bounty(g.player.id, DevMap.ALPHA) == before + Math.max(1, Math.round(Items.BREAD.value * 0.5f)) && g.law.bounty(g.player.id, DevMap.BETA) == 0);
         // whoever saw it and reported it walked to the lawman to do so (the report is made in person)
         Npc reporter = null;
@@ -742,7 +749,7 @@ public final class Acceptance {
         g.teleport(eda, bram.x + 1.2f, DevMap.FLOOR, bram.z + 1.2f);
         frames(2);
         Result rep = g.law.report(eda, m, bram);
-        need("wanted in JUR-ALPHA (bounty " + g.law.bounty(g.player.id, DevMap.ALPHA) + ")", rep.committed() && g.law.bounty(g.player.id, DevMap.ALPHA) > 0);
+        need("wanted in DevCity (bounty " + g.law.bounty(g.player.id, DevMap.ALPHA) + ")", rep.committed() && g.law.bounty(g.player.id, DevMap.ALPHA) > 0);
         // the guard comes to arrest; the player strikes him first
         tp(cole.x + 2.0f, cole.z, (float) Math.PI / 2);
         for (int i = 0; i < 240 && cole.goal != Brain.Goal.FIGHT; i++) frames(1);
@@ -1626,42 +1633,28 @@ public final class Acceptance {
         var grave = graves.isEmpty() ? null : graves.get(graves.size() - 1);
         if (grave == null) return;
         need("a grave outside the walls is exposed, with ten minutes to stand", !grave.secured && Math.abs(g.undertaker.left(grave) - 600) < 10);
-        // the ten minutes run out: what is left goes to the undertaker, for a fee with the outside surcharge
+        // Expiry schedules a real journey; it never teleports the possessions into a service chest.
         grave.expiresAt = g.time;
         frames(3);
-        need("when the time is up the grave goes to the undertaker (" + g.undertaker.claims.size() + " claim, " + g.undertaker.held() + " held, fee " + g.undertaker.fee() + ")",
-                grave.removed && g.undertaker.held() > 0 && g.undertaker.fee() == rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE);
+        need("an expired outside grave waits for actual collection", !grave.buried && g.undertaker.held()==0);
+        for(int i=0;i<120*60 && !grave.buried;i++)frames(1);
+        need("the undertaker physically collects and buries the expired grave (" + g.undertaker.claims.size() + " claim, " + g.undertaker.held() + " held, fee " + g.undertaker.fee() + ")",
+                grave.buried && g.undertaker.held() > 0 && g.undertaker.fee() == rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE);
         Npc morrow = npc(Ids.UNDERTAKER);
         g.teleport(p, morrow.x + 1, DevMap.FLOOR, morrow.z);
         frames(3);
-        int before = p.count(rpg.item.Items.COINS) + g.objects.custody.contents.count(rpg.item.Items.COINS);
+        int before = p.count(rpg.item.Items.COINS) + grave.contents.count(rpg.item.Items.COINS);
         g.give(p, rpg.item.Items.COINS, 60);
         var r = g.undertaker.redeem(p, morrow);
         need("the undertaker hands it all back for his fee (" + r.status() + ", ring back: " + p.has(rpg.item.Items.get("gold_ring"), 1) + ")",
                 !r.rejected() && p.has(rpg.item.Items.get("gold_ring"), 1) && p.count(rpg.item.Items.COINS) == before + 60 - (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) && g.undertaker.held() == 0);
-        // inside the walls: secured, and a guard comes for it once word reaches the watch
-        g.give(p, rpg.item.Items.BREAD, 1);
-        tp(100.5f, 74.5f, 0);
-        p.alive = false; p.hp = 0;
-        g.onKilled(p, null, 0);
-        for (int i = 0; i < 60 * 6 && g.death.active; i++) frames(1);
-        var town = g.undertaker.graves().isEmpty() ? null : g.undertaker.graves().get(g.undertaker.graves().size() - 1);
-        need("a death inside the walls leaves a secured grave", town != null && town.secured);
-        if (town != null) {
-            // (word reaches the watch after two minutes: skipped here)
-            town.expiresAt = g.time + rpg.law.Undertaker.GRAVE_SECONDS - 130;
-            Npc cole = npc(Ids.GUARD);
-            cole.hunt = null; cole.fightTarget = 0; cole.nextThink = 0; cole.investigation = null; cole.aware.clear();
-            g.teleport(cole, town.x + 6, DevMap.FLOOR, town.z);
-            boolean carried2 = false;
-            for (int i = 0; i < 60 * 60 && !town.removed; i++) { frames(1); carried2 |= town.heldBy == cole.id; if (i % 60 == 0) { cole.investigation = null; cole.aware.clear(); } }
-            need("a guard gathers it up and carries it to the undertaker (" + carried2 + ", " + cole.lastOutcome + ")", carried2 && town.removed && g.undertaker.held() > 0);
-            g.give(p, rpg.item.Items.COINS, 30);
-            g.teleport(p, morrow.x + 1, DevMap.FLOOR, morrow.z);
-            frames(3);
-            g.undertaker.redeem(p, morrow);
-            need("redeemed for the town fee alone", g.undertaker.held() == 0);
-        }
+        // Town deaths bypass the death-site grave and create a private Undertaker claim immediately.
+        g.give(p,rpg.item.Items.BREAD,1);tp(100.5f,74.5f,0);p.alive=false;p.hp=0;g.onKilled(p,null,0);
+        for(int i=0;i<60*6 && g.death.active;i++)frames(1);
+        need("city death has no exposed death-site grave",g.undertaker.graves().isEmpty());
+        need("city belongings are immediately in Undertaker custody",g.undertaker.held()>0);
+        g.give(p,rpg.item.Items.COINS,30);g.teleport(p,morrow.x+1,DevMap.FLOOR,morrow.z);frames(3);
+        g.undertaker.redeem(p,morrow);need("redeemed for the town fee alone",g.undertaker.held()==0);
     }
 
     // ------------------------------------------------------------------ Honor, the fence, jewellery
@@ -2138,7 +2131,7 @@ public final class Acceptance {
 
     /** The gathering tools the tests handed out, taken out of the pack again (through the ledger) to make room. */
     void stowTools() {
-        java.util.Set<String> ids = java.util.Set.of("bronze_battleaxe", "leather_axe", "leather_pickaxe", "bronze_sword", "fishing_rod", "small_fishing_net");
+        java.util.Set<String> ids = java.util.Set.of("bronze_battleaxe", "wooden_axe", "wooden_pickaxe", "bronze_sword", "fishing_rod", "small_fishing_net");
         for (rpg.item.Inventory inv : g.player.grids()) for (int i = 0; i < inv.size(); i++) {
             ItemStack s = inv.get(i);
             if (s != null && ids.contains(s.def.id)) { inv.set(i, null); g.state.burn(s.def, s.amount); }

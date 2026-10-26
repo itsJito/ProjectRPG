@@ -114,6 +114,7 @@ def engineResources = tasks.register('engineResources', Sync) {
     from('resources') { into 'astratto/resources' }
     // Runtime jars carry the engine library; test and example gameplay modules belong to verification.
     from("native/bin/$astrattoPlatform") { into "astratto/natives/$astrattoPlatform"; include '*.dll', '*.so', '*.dylib'; exclude '*astratto_test_module*', '*astratto_example_module*' }
+    from('astrattoenginelogo.png') { into 'astratto' }
     from('NOTICE.md') { into 'astratto' }
     from('LICENSE.md') { into 'astratto' }
     into layout.buildDirectory.dir('generated/engine-resources')

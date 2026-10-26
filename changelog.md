@@ -4,6 +4,147 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 6: the new gamefixes list (Version 0.1.6)
+
+Worked down the current `gamefixes.md` with `instructions.md` first and the GDD for the rest. Where I could, I measured before changing anything (headless probes for doors and NPC routines). I judged visuals from gallery captures (`RPG_GALLERY_ONLY=gamefixes-ui`, `gamefixes-blocks`, `gamefixes-aim`, `locomotion`); the captures are in `rpggame/build/review-gamefixes/`.
+
+### Bugs from the list
+- **Doors.** A headless probe (`DoorPassageTest`) showed that house doors did open for NPCs, but the leaves swung to ±3.05 rad, straight through the wall beside them (`RIGID_NO_WORLD`). Changes:
+  - `Door.SWING` is now 1.92 rad: to the wall, a little past square, either way.
+  - `Door.shove()`: a body touching an open leaf while moving through the doorway drives the hinge in its direction of travel (the sign comes from the door's own `inward[]`), so the leaf gets out of the way.
+  - `Door.knock()`: a blade striking an open leaf swings it.
+  - Owners and key-holders now unlock a locked door when their trip ends on the other side, pass through, and relock it once it latches (`relock`, saved).
+- **Doorway targeting.** Open leaves were hard walls for the melee rays, the blade-clearance test and the focus ray. Someone in a doorway could not be hit or targeted when a swung leaf stood beside them. Changes:
+  - `Voxels.ray(..., leaves)` and `clear(..., leaves)` can skip open leaves (shut ones still count).
+  - `Hit.door` names the struck leaf.
+  - Melee knocks the leaf and carries on.
+  - The focus uses the leaf-free distance for actors.
+- **NPC routines.** A five-hour headless probe of every NPC (now `NpcRoutineTest`) found these problems, all fixed:
+  - Lawmen were routed into their own locked jail cells. `Waypoints.route` now takes a door predicate.
+  - The waypoint graph had no points inside buildings. `Waypoints.doors()` now adds a pair of points per doorway, linked through it and to everything in clear sight of each point.
+  - `Waypoints.clear` treated a locked door as a wall.
+  - The fisher was sent to a fishing spot out on the water. `standSpot` now searches rings up to 4 cells out for a dry bank, and nets are hauled from the bank.
+  - People stood at an unattended counter trying to buy bread. Buying now needs the shopkeeper at the counter.
+  - Maud waited all day for berry bushes. She now gathers herbs.
+  - Guards spent the morning evicting the resident thief. Eviction is now for bandits and brutes, and for thieves only when a crime is known. An outlaw who is ordered out heads for the nearest wild waypoint.
+  - Hiding now ends after 60 s even if clues keep coming.
+  - Hale drank against his own cell's fence.
+  - `agentStuck` now steps an NPC off non-standable ground.
+  - Stuck events over five hours went from about 600 to 7.
+- **Legs when turning.** `Rig` now tracks the yaw rate. While turning in place:
+  - the corrective-step threshold drops from 1.8 to 0.9 px;
+  - steps take 0.15–0.24 s;
+  - each step lands where the turn will have carried the body (`toWorldTurned`).
+
+  Filmed as `turnaround` and `pivot`: the feet now step round. Some knee bunching remains mid-turn (about 13–14/20 on my review).
+- **Foliage reaction.** The engine already bent chunk foliage around body records, but no trail was ever sent (`push` was null). Changes:
+  - `Foliage` now keeps a trail of where bodies pushed through (a point every 0.2 s, recovering over 2.2 s) and sends the freshest 8 as pushers.
+  - The native renderer takes up to 16 benders per chunk: bodies first, then pushers.
+  - `model.vert` bends further (0.9 of the height, dropping 0.45), and a trail point's hold fades with its radius.
+  - Bodies moving through plants make a rustle, and a noise for stealth.
+
+### Changes from the list
+- **Tiers.**
+  - `Tier.LEATHER` is gone, replaced by `WOODEN` (level 1: weapons, tools and shields; no armour) and `STONE` (level 2).
+  - `wooden_sword` and `wooden_shield` now come from the tier loop.
+  - Bronze's sword bonus is corrected to the GDD's +2.
+  - `Items.saved()` maps `leather_*` ids in old saves to `stone_*`.
+  - The player now starts in a linen tunic, and the shop sells wooden and stone tools.
+- **XP.** `Config.xpRate` was 10x, and it was saved into every profile. It is now 1x and no longer saved, so action values sit on the OSRS-shaped curve.
+- **Bears.** Skills went from 40/48/30/55 to 26/28/20/35, swipe damage from 12 to 6 and impact from 90 to 70. Max hit dropped from about 7 to 4.
+- **Bounty overhaul** (`Law`, plus the new `law/Posses`):
+  - `charge()` follows the schedule. Murder carries 400, 500, 600 or 1,000 G by victim (`Npc.Standing`, `GUARD`/`LAWMAN`).
+  - There is no cap, and high Honor (+33 or more) halves each charge.
+  - `pursued()`: the watch acts on bounties above 21 G, or on any bounty once the player has talked to them (`confront`).
+  - `lockdown()` at 500 G: shops shut and the watch no longer halts first.
+  - A `BountyReminder` HUD card appears when you enter a kingdom where you are wanted.
+  - Tracking posses set out once a kingdom's bounty passes 1,000 G, every 30–40 minutes of play.
+  - Border ambushes happen when you head out with 100 G or more: half the time, at most once every 10 minutes.
+  - Posses follow the given make-up table, with law dogs. Their NPCs are saved and restored, and killing them or their dogs is lawful.
+  - Arson is detected in `Chemistry` when an owned fire burns building wood or someone else's property in town.
+  - A bare-fisted assault is now `DISORDERLY`.
+  - `Container` used `"Lockpicking"`, which is not a recognised crime kind; it is now `"LOCKPICKING"`.
+- **Resisting arrest** now closes the dialogue (`closeChoice`).
+- **Chemistry.** `Blocks.Material` now drives burning, conduction and freezing for every block: all logs and leaves burn; water, mud and ore conduct. Elemental spell projectiles now stop at the water's surface:
+  - ice freezes a 2.4 m patch;
+  - lightning spreads 1.8 m;
+  - fire thaws ice (the native engine already handled this).
+- **Detached windows.** Containers and shops now draw as their own card, left of the inventory frame (`Windows.detach`; on narrow screens they fall back to the screen edge). The item info panel stays visible.
+- **Two Take All buttons:** `takeall:equipment` and `takeall:items`. A body's worn gear counts as equipment.
+- **Chat and dialogue.**
+  - Chat is now 214 px tall and up to 640 px wide, in Arial Narrow at 14 px, always wrapped.
+  - The dialogue box is now 780 px wide with 8 lines of text. Replies wrap and are numbered by the key that picks them.
+- **Throw arc.** The new `combat/ThrowSolver` replaces `Ballistics`, which is removed.
+  - The target is where the camera's centre looks and the origin is the hand bone; t = d / speed and v = (target - start - ½ g t²) / t, with per-item gravity of 13–20.
+  - The path is 30 points with a 0.15 m sphere sweep (world and bodies), cut at the first contact. The landing ring is red when blocked short of the target or under 1.5 m away.
+  - The plan is only re-solved when the aim moves more than 0.5°.
+  - It draws as additive world-space dots every 0.22 m, fading from 100% to 40%, plus a landing ring.
+  - The release flies the same plan. Thrown weapons tumble at up to ±12 rad/s and bounce with 0.3 restitution up to twice. The thrower's root freezes for 0.1 s on release.
+  - Body throws use the plan too.
+- **Level-up confetti.** Two bursts of 34 small, short-lived embers instead of three bursts of 70.
+- **NPC item offers.** `Brain.offer()`: a wounded player is offered food through a parchment `OfferCard` with Accept and Decline. Nothing changes hands until Accept, and then the actual stack moves.
+- **Pause menu.** Rebuilt as a Settings-style parchment card, without the equipped item or Honor.
+- **Menus.**
+  - `Style` is redone: dark parchment with a gold trim and studs, bevelled wells, stone buttons and hanging tabs.
+  - Panels get Morpheus headings with gold rules, over inset sheets.
+  - The equipment doll uses the provided slot plates, and the tabs use the provided icons.
+  - Inventory grids are now trays of cells, and the world map sits in a trimmed mount.
+- **Foliage.** Eight new kinds:
+  - Half of every candidate cell now grows something, and an unsuitable kind falls through to one that suits the spot.
+  - Plants sit off the grid lattice, and ivy climbs any stone or wood.
+  - The Cut option is removed; fire still destroys plants.
+- **Third-person ranged aim.** `Rig` turns the torso, hips and feet side-on (-1.2 rad) while drawing a bow, crossbow or throw.
+
+### Added from the list
+- **Water.** `WaterContacts` now leaves a wake ahead of a wading body (every 0.12–0.42 s depending on speed), throws spray when running, and rings round a still body every 1.1 s.
+- **Fonts.** `Ui2D.Face`, each font baked at its own size, with the old font as the fallback:
+  - Friz Quadrata for the interface;
+  - Morpheus for headings;
+  - Arial Narrow for chat;
+  - Skurri for combat numbers;
+  - Nimrod MT Italic for flavour text.
+- **Music.** The provided jingles now play on:
+  - skill level ups;
+  - combat level ups (with a chat line);
+  - reaching the maximum combat level, 127;
+  - reaching level 100 in a skill;
+  - death, which also stops the score.
+
+  The score ducks under each one.
+- **Fishing animations** (`Rig.fishPose`):
+  - Rod: a back-cast, then the cast. The rod is held tip-up with a bob while the off hand sits on the reel and winds at the end. A line runs to a red and white float that bobs and dips on a bite.
+  - Net: gathered, flung and held.
+  - Crab cage: lowered to arm's length.
+- **26 blocks** (ids 51–72, layers 47–74), painted at 64 x 64. Dirt, Sand, Glass and Cobblestone are redrawn. All are placed with a purpose on the devmap:
+  - hay in the barn, spruce barn posts and birch kiosk posts;
+  - a red runner in Chancery A, and rugs in the houses and the contact's den;
+  - a marble altar dais and stone-brick town walls;
+  - a limestone Chancery B with light-blue glass, and white glass at the undertaker's;
+  - a granite den, clay and mud banks, mud round the duck pond, and sandstone cover on the range;
+  - metal and coal blocks in the locked store.
+
+  The atlas took two passes. In the first, birch, marble, granite, mud and clay scored under 16/20 because I had misread the noise octaves; the second pass brought them to about 16.
+
+### Found along the way
+- The caravan road was paved through House 1's floor. Buildings are now floored again after the roads (`floors()`).
+- `ItemInfo` was hidden whenever a container was open; it now stays visible.
+
+### Found by the acceptance suite
+- **Wildfire.** One campfire on the lawn burned 942 grass cells, the herb and flax beds, and killed Dag and Oren (logged as murders by the tester). Grass turf is no longer tinder; the plants on it, the leaves and the trees still burn. `CampfireSpreadTest` covers it.
+- **Embers.** A lit `Fire` marks its cell with the new non-solid hazard block `Blocks.EMBERS` (id 73), so routes go round a campfire. A body stuck on one steps off, and only living, loaded, upright NPCs are ever stepped (the step-off had been able to move corpses).
+- **Hearth accidents.** Burning at a cooking fire its owner lit is no longer an attack by that owner.
+- **Halts.** Being told to halt (or resisting) counts as dealing with that kingdom's watch, so a resisted bounty of 21 G or less is still acted on.
+- **Wooden sword.** The Wooden tier's sword bonus is now 0, as the old untiered wooden sword had; +0.5 had put its hits on a rounding edge.
+- **Acceptance fixtures.** The skill-action section now clears passers-by from the lab (NPCs whose routines now work were walking into the tester's swings), waits for herb regrowth, and gives Eda a purse for the pickpocket check.
+
+### Verification
+- All 163 unit tests pass.
+  - New: `DoorPassageTest` (3 tests) and `NpcRoutineTest`.
+  - Updated: `MaintenanceTest` (the new wall stops), `SocietyRegressionTest` (aid goes to an NPC; a player gets an offer) and `ReleaseSystemsTest` (the solver lands on the wall face).
+- Full acceptance went from 67/68 (stopped by the wildfire's exception) to 240/263 before the last round of fixes; the run after those fixes was stopped for low memory and is not yet recorded. The stealth section passes in isolation; several remaining failures were order-dependent leftovers of the earlier ones.
+
+---
+
 ## Pass 5: the gamefixes list, then the GDD core (Version 0.1.0)
 
 This pass went down `gamefixes.md` in order (bugs first, then the changes, then the overhauls), then started on the GDD core systems, with `instructions.md` as the authority. I judged everything visual from gallery shots (`./gradlew gallery`, `RPG_GALLERY_ONLY=...`), with 8/10 as the bar. Animations I checked on threes (frames 1, 4, 7...).

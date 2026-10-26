@@ -276,18 +276,23 @@ public final class Gore {
     /** Stains where a spray lands: rays from the wound along the blow and down, stopping at the first face. */
     /** (whose blood, and who drew it: evidence keeps both, so an outlaw's blood is known as one) */
     private void spatter(float px, float py, float pz, float dx, float dz, float amount, long source, long culprit) {
-        int rays = 2 + Math.min(9, (int) (amount * 18));
+        int rays = 4 + Math.min(10, (int) (amount * 20));
         for (int i = 0; i < rays; i++) {
-            float sx = dx + (rnd.nextFloat() - 0.5f) * 0.9f, sz = dz + (rnd.nextFloat() - 0.5f) * 0.9f, sy = -0.15f - rnd.nextFloat() * 0.9f;
-            Voxels.Hit h = g.vox.ray(px, py, pz, sx, sy, sz, 3.4f, true);
+            float sx = dx + (rnd.nextFloat() - 0.5f) * 0.9f, sz = dz + (rnd.nextFloat() - 0.5f) * 0.9f, sy = (rnd.nextFloat() - 0.55f) * 1.3f;
+            Voxels.Hit h = g.vox.ray(px, py, pz, sx, sy, sz, 4.2f, true);
             if (!h.hit || h.block == Blocks.WATER) continue;
             float size = 0.22f + rnd.nextFloat() * 0.34f + Math.min(0.45f, amount);
-            stain(h.x, h.y, h.z, h.nx, h.ny, h.nz, size);
+            surfaceStain(h.x,h.y,h.z,h.nx,h.ny,h.nz,size);
+            for(int drop=0;drop<2;drop++) {
+                float u=(rnd.nextFloat()-0.5f)*0.7f,v=(rnd.nextFloat()-0.5f)*0.7f;
+                float x=h.x+(h.nx==0?u:0),y=h.y+(h.ny==0?v:0),z=h.z+(h.nx!=0?u:h.ny!=0?v:0);
+                surfaceStain(x,y,z,h.nx,h.ny,h.nz,size*(0.12f+rnd.nextFloat()*0.15f));
+            }
             if (h.ny > 0) evidence(Kind.BLOOD, h.x, h.y, h.z, size * 0.6f, source, culprit);
             else if (amount > 0.12f) {
                 // on a wall it runs: a streak of smaller stains below the splash, the heavier the blow the longer
                 int run = 2 + (int) Math.min(5, amount * 12);
-                for (int k = 1; k <= run; k++) stain(h.x + h.nx * 0.002f, h.y - k * size * 0.32f, h.z + h.nz * 0.002f, h.nx, h.ny, h.nz, size * (0.55f - k * 0.05f));
+                for (int k = 1; k <= run; k++) surfaceStain(h.x + h.nx * 0.002f, h.y - k * size * 0.32f, h.z + h.nz * 0.002f, h.nx, h.ny, h.nz, size * (0.55f - k * 0.05f));
             }
         }
     }
@@ -308,8 +313,9 @@ public final class Gore {
     /** Blood on the floor under someone (a drip, a wound, the pool round a body). */
     public void pool(float x, float z, float size, long source, long culprit) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-        int top = DevMap.FLOOR - 1;
-        for (int y = DevMap.FLOOR + 2; y >= 1; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
+        Actor owner=g.actor(source);int from=(int)Math.floor(owner==null?DevMap.FLOOR+2:owner.y+owner.height);
+        int top = 0;
+        for (int y = Math.min(DevMap.SY-1,from); y >= 0; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
         if (g.vox.block(bx, top + 1, bz) == Blocks.WATER) return;   // into water: it washes away
         float y = top + 1;
         stain(x + (rnd.nextFloat() - 0.5f) * 0.2f, y, z + (rnd.nextFloat() - 0.5f) * 0.2f, 0, 1, 0, size);
@@ -318,10 +324,15 @@ public final class Gore {
         evidence(Kind.BLOOD, x, y, z, size, source, culprit);
     }
 
+    private void surfaceStain(float x,float y,float z,float nx,float ny,float nz,float size) {
+        if(!g.vox.solid((int)Math.floor(x-nx*0.03f),(int)Math.floor(y-ny*0.03f),(int)Math.floor(z-nz*0.03f)))return;
+        stain(x,y,z,nx,ny,nz,size);
+    }
+
     private void stain(float x, float y, float z, float nx, float ny, float nz, float size) {
         stains.add(new Stain(x, y, z, nx, ny, nz, size, rnd.nextFloat() * 6.28f));
         stainCount++;
-        if (stains.size() > 400) stains.remove(0);
+        if (stains.size() > 512) stains.remove(0);
     }
 
     private Evidence evidence(Kind k, float x, float y, float z, float size, long source, long culprit) {
@@ -507,6 +518,11 @@ public final class Gore {
         }
         // bodies are evidence while they lie there; evidence goes when what it was is gone (a day for blood)
         for (Npc n : g.npcs) if (!n.alive && n.ragdoll != 0 && !bodyKnown(n.id)) evidence(Kind.BODY, n.x, DevMap.FLOOR, n.z, 1, n.id, n.cs.lastAttacker);
+        // a body is found where it lies now, not where it fell (it may have been carried off, thrown, dragged)
+        for (Evidence e : evidence) if (e.kind == Kind.BODY && g.actor(e.source) instanceof Npc n && n.ragdoll != 0) {
+            var pose = g.lastBodies.ragdoll(n.ragdoll);
+            if (pose != null) { e.x = pose.comX; e.z = pose.comZ; }
+        }
         evidence.removeIf(e -> e.kind == Kind.BLOOD && g.time - e.at > 1440 / Math.max(0.01, g.cfg.minutesPerSecond)
                 || e.kind == Kind.BODY && !(g.actor(e.source) instanceof Npc n && !n.alive && n.ragdoll != 0)
                 || e.kind == Kind.LIMB && g.time - e.at > 1800);
@@ -527,7 +543,11 @@ public final class Gore {
     private boolean bodyKnown(long id) { for (Evidence e : evidence) if (e.kind == Kind.BODY && e.source == id) return true; return false; }
 
     /** A body is revived (a bandit back at camp): its wounds and lost parts heal. */
-    public void healed(Actor a) { wounds.remove(a.id); a.blood.wash(); a.bloodied = 0; }
+    public void healed(Actor a) {
+        wounds.remove(a.id); a.blood.wash(); a.bloodied = 0;
+        limbs.removeIf(limb -> { if (limb.owner != a.id) return false; g.game.commands().release(limb.body); return true; });
+        evidence.removeIf(e -> e.source == a.id && e.kind == Kind.LIMB);
+    }
 
     // ------------------------------------------------------------------ finding it
     /**
@@ -535,12 +555,13 @@ public final class Gore {
      * clear line to it, and light enough to make it out (a body is easier to see than a stain); each thing once.
      */
     public void perceive(Npc n) {
-        if (!n.alive || !n.loaded || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE) return;
+        if (!n.alive || !n.loaded) return;
         Set<Long> seen = noticed.computeIfAbsent(n.id, k -> new HashSet<>());
         float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
         Evidence best = null;
         for (Evidence e : evidence) {
             if (seen.contains(e.id) || e.source == n.id) continue;
+            if (e.kind == Kind.BODY && inLawfulCare(e)) continue;
             float dx = e.x - n.x, dz = e.z - n.z, d = (float) Math.hypot(dx, dz);
             float reach = e.kind == Kind.BODY ? 18 : e.kind == Kind.LIMB ? 12 : 6 + e.size * 6;
             if (d > reach) continue;
@@ -553,7 +574,19 @@ public final class Gore {
         }
         if (best == null) return;
         found++;
+        if (g.carrying.busy(n) || n.goal == rpg.ai.Brain.Goal.COLLECT) return;
+        if (n.hunt != null && (n.hunt.source == best.source || n.hunt.target != 0)) return;
         react(n, best);
+    }
+
+    /**
+     * A body already in the law's hands is no new scene: one the watch or the undertaker is carrying, or one laid in a
+     * graveyard (gamefixes: guards took up the bodies they had just delivered as fresh murders).
+     */
+    private boolean inLawfulCare(Evidence e) {
+        if (!(g.actor(e.source) instanceof Npc dead)) return false;
+        if (g.actor(dead.carriedBy) instanceof Npc carrier && (carrier.role == Npc.Role.GUARD || carrier.role == Npc.Role.LAWMAN || carrier.role == Npc.Role.UNDERTAKER)) return true;
+        return e.x >= DevMap.GRAVE_X0 && e.x <= DevMap.GRAVE_X1 + 1 && e.z >= DevMap.GRAVE_Z0 - 1 && e.z <= DevMap.GRAVE_Z1 + 1;
     }
 
     /**
@@ -564,11 +597,33 @@ public final class Gore {
     private boolean lawful(Evidence e) {
         Actor v = g.actor(e.source);
         boolean lawHurt = v instanceof Npc o && o.alive && (o.role == Npc.Role.GUARD || o.role == Npc.Role.LAWMAN) && e.kind == Kind.BLOOD;
-        return lawHurt || v == g.player || v instanceof rpg.animal.Animal || v instanceof Npc o && o.hostileToPlayer && (o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE);
+        return lawHurt || v == g.player || v instanceof rpg.animal.Animal || v instanceof rpg.monster.Monster || v instanceof Npc o && o.hostileToPlayer && (o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE);
+    }
+
+    /** Follow only a fresh visible stain belonging to the searched body/person; provenance never identifies its attacker. */
+    public void followTrail(Npc n) {
+        Hunt hunt=n.hunt;if(hunt==null)return;
+        long source=hunt.target!=0?hunt.target:hunt.source;if(source==0)return;
+        Evidence clue=null;
+        for(Evidence stain:evidence)if(stain.kind==Kind.BLOOD && stain.source==source && stain.id>hunt.lastTrail && g.time-stain.at<20
+                && Math.hypot(stain.x-n.x,stain.z-n.z)<8 && g.vox.sight(n.x,n.eyeY(),n.z,stain.x,stain.y+0.1f,stain.z)
+                && (clue==null || stain.id>clue.id))clue=stain;
+        if(clue!=null) { hunt.lastTrail=clue.id;hunt.clue(clue.x,clue.z,0,0,g.time);n.lastOutcome="following a visible blood trail"; }
     }
 
     private void react(Npc n, Evidence e) {
         String jur = DevMap.jurisdiction(e.x, e.z);
+        for(var memory:n.memories) if(memory.kind.equals("BEAST_ATTACK") && memory.victim==e.source) {
+            g.ai.say(n,"An animal did this. Keep away from its trail.");
+            if(n.combatant() && n.hunt==null) { n.hunt=new Hunt(memory.subject,"witnessed a beast attack",e.x,e.z,g.time,40);n.nextThink=0; }
+            return;
+        }
+        if(n.role==Npc.Role.BANDIT || n.role==Npc.Role.BRUTE) {
+            if(g.actor(e.source) instanceof Npc victim && victim.team==n.team && n.hunt==null) {
+                n.hunt=new Hunt(0,"found a fallen ally",e.x,e.z,g.time,40);n.hunt.source=e.source;n.nextThink=0;g.ai.say(n,"Someone got one of ours. Spread out.");
+            }
+            return;
+        }
         String what = e.kind == Kind.BODY ? "a body" : e.kind == Kind.LIMB ? "a severed limb" : "blood";
         g.state.commit("EvidenceFound", n.id, e.source, jur, 0, what + String.format(" at (%.1f, %.1f)", e.x, e.z));
         // an outlaw's end is remarked on, not investigated
@@ -578,6 +633,7 @@ public final class Gore {
             // the law goes to look, and searches for whoever did it
             if (n.hunt == null || n.hunt.target == 0) {
                 Hunt h = new Hunt(0, "found " + what, e.x, e.z, g.time, e.kind == Kind.BLOOD ? 35 : 60);
+                h.source = e.source;
                 h.clueAt = g.time - (e.kind == Kind.BLOOD ? Math.min(20, g.time - e.at) : 0);
                 n.hunt = h;
                 n.nextThink = 0;

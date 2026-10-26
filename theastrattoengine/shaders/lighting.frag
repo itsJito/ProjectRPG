@@ -46,7 +46,9 @@ float cascadeShadow(int c, vec3 P, vec3 N, float ndl) {
     mat2 rot = mat2(cos(a), sin(a), -sin(a), cos(a));
     // the blockers: within a search radius of about 0.6 m in the world
     float searchTexels = clamp(0.6 / texel, 2.0, 14.0);
-    float blockers = 0.0, nb = 0.0;
+    float centerDepth = texture(uShadowRaw, vec3(s.xy, float(c))).r;
+    float centerBlocked = centerDepth < s.z - bias ? 1.0 : 0.0;
+    float blockers = centerDepth * centerBlocked, nb = centerBlocked;
     for (int i = 0; i < 8; i++) {
         vec2 o = rot * POISSON[i * 2] * searchTexels * px;
         float d = texture(uShadowRaw, vec3(s.xy + o, float(c))).r;
@@ -58,7 +60,7 @@ float cascadeShadow(int c, vec3 P, vec3 N, float ndl) {
     float gap = (s.z - blockers / nb) * uCascadeDepth[c];
     float width = clamp(gap * 0.035 / texel, 1.0, 12.0);
     // deep inside the umbra (every search sample blocked, a narrow penumbra): no filtering would find light
-    if (nb > 7.5 && width < 2.5) return 0.0;
+    if (nb > 8.5 && width < 2.5) return 0.0;
     // a narrow penumbra is resolved by half the taps (the comparison sampler filters each one bilinearly)
     // (two fixed loops: a tap count chosen at run time would not be unrolled)
     float sum = 0.0;
@@ -210,7 +212,7 @@ void main() {
     // ---- local lights of this tile
     ivec2 t = min(ivec2(gl_FragCoord.xy) / uTileSize, uTiles - 1);
     uint base = uint(t.y * uTiles.x + t.x) * 32u;
-    uint n = min(tile[base], 31u);
+    uint n = min(tile[base], 31u), bodyLights = 0u;
     for (uint i = 0u; i < n; i++) {
         uint li = tile[base + 1u + i];
         Light l = lights[li];
@@ -223,9 +225,14 @@ void main() {
         int lf = int(l.col.a + 0.5);
         if ((lf & 2) != 0) att *= smoothstep(l.dir.w, mix(l.dir.w, 1.0, 0.45), dot(-L, l.dir.xyz));
         if (att < 1e-3) continue;
-        if ((lf & 1) != 0 && int(li) < uShadowedLights) { att *= voxelVisibility(P + N * 0.08, l.posR.xyz); if (uBodyCount > 0 && att > 1e-3) att *= bodyVisibility(P + N * 0.05, l.posR.xyz); }
+        if ((lf & 1) != 0 && int(li) < uShadowedLights) att *= voxelVisibility(P + N * 0.08, l.posR.xyz);
         else if ((lf & 4) != 0 && flag != 1) att *= smoothstep(0.0, 0.3, blk);   // unshadowed lamps never reach where their baked light did not
         if (att < 1e-3) continue;
+        // Capsule occlusion remains available for ordinary lamps/fires and every quality level.
+        // Bound work to the first two contributing nearby tile lights; detailed sun silhouettes use the model shadow maps.
+        if (bodyLights < 2u && uBodyCount > 0 && dist < 10.0 && att > 1e-3) {
+            att *= bodyVisibility(P + N * 0.05, l.posR.xyz); bodyLights++;
+        }
         col += shade(albedo, f0, rough, metal, N, V, L, l.col.rgb * att);
     }
 

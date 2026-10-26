@@ -546,7 +546,7 @@ enum {
     ASTRATTO_CONTROL_RELEASE = 4,      /* Sydney stops driving it (the caller takes the body back into animation) */
     ASTRATTO_CONTROL_LIMBS = 5,        /* value: limbs that do not work (bits 0 left arm, 1 right arm, 2 left leg, 3 right leg, 4 head) */
     ASTRATTO_CONTROL_WAKE = 6,         /* a body at rest is simulated again */
-    ASTRATTO_CONTROL_KINEMATIC = 7     /* value 1: caller poses a dead carried body; 0: resume dynamics */
+    ASTRATTO_CONTROL_KINEMATIC = 7     /* value 1: fully posed; 2: support trunk with passive limbs; 0: resume dynamics */
 };
 typedef struct astratto_cmd_ragdoll_control {
     astratto_record head;
@@ -835,6 +835,7 @@ enum {
     ASTRATTO_CMD_AGENT_GOAL = 68,       /* astratto_cmd_agent_goal: the place an action of kind MOVE_TO_GOAL goes */
     ASTRATTO_CMD_AGENT_POLICY = 69,     /* astratto_cmd_agent_policy: a different mind */
     ASTRATTO_CMD_NOISE = 70,            /* astratto_cmd_noise: something was heard */
+    ASTRATTO_CMD_AGENT_RATE = 72,       /* astratto_cmd_agent_fact: index ignored, value scales navigation speed (0..2) */
     ASTRATTO_CMD_AGENT_FORCE = 71       /* astratto_cmd_agent_force: this action, now, whatever the scores say (or -1 to stop) */
 };
 enum {
@@ -889,6 +890,8 @@ typedef struct astratto_cmd_policy_create {
 } astratto_cmd_policy_create;
 
 enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3 };
+/* Domain bits are orthogonal to movement flags and faction teams. Monster reserves a controller domain only. */
+enum { ASTRATTO_AGENT_DOMAIN_HUMAN = 0, ASTRATTO_AGENT_DOMAIN_ANIMAL = 1u << 16, ASTRATTO_AGENT_DOMAIN_MONSTER = 2u << 16, ASTRATTO_AGENT_DOMAIN_MASK = 3u << 16 };
 typedef struct astratto_cmd_agent_create {
     astratto_record head;
     astratto_handle handle;
@@ -1031,7 +1034,28 @@ ASTRATTO_API int32_t astratto_frame(astratto_engine* engine, astratto_frame_io* 
  * astratto_snap_mover, _ragdoll, _softbody (+ particle_count * 3 floats), _vehicle, astratto_snap_agent.
  * AUDIO: an astratto_audio_stats.
  */
-enum { ASTRATTO_SNAPSHOT_STATS = 1, ASTRATTO_SNAPSHOT_BODIES = 2, ASTRATTO_SNAPSHOT_AGENTS = 3, ASTRATTO_SNAPSHOT_AUDIO = 4, ASTRATTO_SNAPSHOT_RIGIDS = 5 };
+/* Chemistry: game-defined material tags; element volumes are the only way receivers affect other receivers. */
+enum { ASTRATTO_CMD_CHEM_MATERIAL = 192, ASTRATTO_CMD_CHEM_SENSOR = 193, ASTRATTO_CMD_CHEM_EMIT = 194,
+       ASTRATTO_CMD_CHEM_REMOVE = 195, ASTRATTO_CMD_CHEM_WIND = 196, ASTRATTO_CMD_CHEM_RESET = 197, ASTRATTO_CMD_CHEM_WEATHER = 198, ASTRATTO_CMD_CHEM_DISOWN = 199 };
+enum { ASTRATTO_EVT_CHEM_STATE = 192, ASTRATTO_SNAP_CHEM_SENSOR = 192 };
+enum { ASTRATTO_CHEM_FLAMMABLE = 1u, ASTRATTO_CHEM_CONDUCTIVE = 2u, ASTRATTO_CHEM_FREEZABLE = 4u, ASTRATTO_CHEM_WIND_SENSITIVE = 8u };
+enum { ASTRATTO_CHEM_FIRE = 1, ASTRATTO_CHEM_WATER = 2, ASTRATTO_CHEM_ICE = 3, ASTRATTO_CHEM_WIND = 4, ASTRATTO_CHEM_ELECTRIC = 5 };
+enum { ASTRATTO_CHEM_WET = 1u, ASTRATTO_CHEM_BURNING = 2u, ASTRATTO_CHEM_FROZEN = 4u, ASTRATTO_CHEM_CHARGED = 8u, ASTRATTO_CHEM_BURNT = 16u };
+typedef struct astratto_cmd_chem_material { astratto_record head; uint32_t block, tags, burnt; float fuel; } astratto_cmd_chem_material;
+typedef struct astratto_cmd_chem_sensor {
+    astratto_record head; uint64_t id, owner; float x,y,z,radius; uint32_t tags,state; float fuel,wet,heat; uint32_t restore;
+} astratto_cmd_chem_sensor;
+typedef struct astratto_cmd_chem_emit {
+    astratto_record head; uint64_t owner; uint32_t element; float x,y,z,radius,power,life; uint32_t reserved;
+} astratto_cmd_chem_emit;
+typedef struct astratto_cmd_chem_weather { astratto_record head; float rain, temperature; } astratto_cmd_chem_weather;
+typedef struct astratto_cmd_chem_wind { astratto_record head; float x,z; } astratto_cmd_chem_wind;
+typedef struct astratto_evt_chem_state { astratto_record head; uint64_t id,owner; uint32_t state,previous; float x,y,z; uint32_t reserved; } astratto_evt_chem_state;
+typedef struct astratto_snap_chem_sensor {
+    astratto_record head; uint64_t id,owner; float x,y,z,radius; uint32_t tags,state; float fuel,wet,heat; uint32_t block,original_block,reserved;
+} astratto_snap_chem_sensor;
+
+enum { ASTRATTO_SNAPSHOT_STATS = 1, ASTRATTO_SNAPSHOT_BODIES = 2, ASTRATTO_SNAPSHOT_AGENTS = 3, ASTRATTO_SNAPSHOT_AUDIO = 4, ASTRATTO_SNAPSHOT_RIGIDS = 5, ASTRATTO_SNAPSHOT_CHEMISTRY = 6 };
 
 typedef struct astratto_stats {
     uint32_t struct_size;
@@ -1286,7 +1310,9 @@ ASTRATTO_API const char* astratto_renderer_error(astratto_renderer* renderer);
  * mip chain at level n.
  */
 enum { ASTRATTO_TEX_2D = 0, ASTRATTO_TEX_ARRAY = 1 };
-enum { ASTRATTO_TEX_NEAREST = 1u << 0, ASTRATTO_TEX_MIPMAP = 1u << 1, ASTRATTO_TEX_REPEAT = 1u << 2, ASTRATTO_TEX_MIP_LINEAR = 1u << 3, ASTRATTO_TEX_ANISOTROPIC = 1u << 4 };
+/* 2.0.1: TEX_MIN_LINEAR keeps a NEAREST texture crisp when magnified but filters it when minified (texels smaller than
+ * pixels): voxel-art textures stay blocky up close without shimmering at a distance. */
+enum { ASTRATTO_TEX_NEAREST = 1u << 0, ASTRATTO_TEX_MIPMAP = 1u << 1, ASTRATTO_TEX_REPEAT = 1u << 2, ASTRATTO_TEX_MIP_LINEAR = 1u << 3, ASTRATTO_TEX_ANISOTROPIC = 1u << 4, ASTRATTO_TEX_MIN_LINEAR = 1u << 5 };
 #define ASTRATTO_TEX_MAX_LEVEL(n) ((uint32_t)(((n) + 1) & 15) << 8)
 typedef struct astratto_texture_desc {
     uint32_t struct_size;
@@ -1337,6 +1363,8 @@ enum {
     ASTRATTO_RCMD_DECALS = 14,         /* astratto_rcmd_decals + vertex_count * 10 floats: draw the DECAL layers and these marks (2.1) */
     ASTRATTO_RCMD_LENS = 15,           /* astratto_rcmd_lens: motion blur and depth of field, for the passes that draw them (2.4) */
     ASTRATTO_RCMD_SMOKE = 16,
+    ASTRATTO_RCMD_RIPPLE = 19,        /* astratto_rcmd_ripple: surface impulse in world x/z, radius and acceleration */
+    ASTRATTO_RCMD_EMITTER = 18,       /* GPU element particles, bounded persistent pool */
     ASTRATTO_RCMD_PORTRAIT = 17       /* astratto_rcmd_portrait + count * astratto_portrait_part; ordered among UI quads */
 
 };
@@ -1363,13 +1391,15 @@ typedef struct astratto_rcmd_light {
     uint32_t flags;
     float dx, dy, dz, cos_outer;
 } astratto_rcmd_light;
-enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16 };
+enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32 };
 typedef struct astratto_rcmd_model {
     astratto_record head;
     uint32_t mesh, flags;               /* ASTRATTO_MODEL_* */
     float matrix[16];
     float r, g, b, a, emissive, light, roughness, metallic;
 } astratto_rcmd_model;
+typedef struct astratto_rcmd_ripple { astratto_record head; float x,z,radius,strength; } astratto_rcmd_ripple;
+typedef struct astratto_rcmd_emitter { astratto_record head; uint64_t id; float position[4], color[4], motion[4], params[4]; } astratto_rcmd_emitter;
 typedef struct astratto_rcmd_particles { astratto_record head; uint32_t count, reserved; } astratto_rcmd_particles;
 /* 2D: quads in pixels from the top-left; a vertex is x y u v r g b a mode (0 colour, 1 texture, 2 text: alpha from red). */
 typedef struct astratto_rcmd_quads { astratto_record head; uint32_t texture, count; } astratto_rcmd_quads;

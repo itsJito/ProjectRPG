@@ -61,7 +61,7 @@ public final class AnimalModels {
             case COW -> quad(s, v, 14, 12, 22, 10, 4, 8, 8, 8, 3, cowCoat(v));
             case SHEEP -> quad(s, v, 14, 12, 18, 8, 3, 5, 6, 6, 2, sheepCoat(v));
             case PIG -> quad(s, v, 12, 10, 18, 5, 3, 7, 7, 6, 2, pigCoat(v));
-            case HORSE -> quad(s, v, 11, 11, 26, 15, 4, 5, 6, 10, 0, horseCoat(v));
+            case HORSE -> quad(s, v, 11, 11, 26, 15, 4, 5, 6, 7, 5, horseCoat(v));
             case DOG -> quad(s, v, 6, 7, 13, 7, 2, 5, 5, 5, 3, dogCoat(v));
             case CAT -> quad(s, v, 5, 5, 10, 5, 2, 4, 4, 3, 1, catCoat(v));
             case FOX -> quad(s, v, 5, 6, 11, 6, 2, 5, 4, 4, 3, foxCoat());
@@ -106,8 +106,8 @@ public final class AnimalModels {
         f.legB = new float[]{inX, -bh / 2f + 2, bl / 2f - legW / 2f - 1.5f};
         // the head, on its neck
         f.head = head(s, v, hw, hh, hl, snout, coat);
-        f.headClosed = closeEyes(f.head, (s == Species.HORSE ? 9 : 1) + hh - Math.max(2, hh / 3), snout + 2, 2, hw + 1);
-        f.neck = s == Species.HORSE ? new float[]{0, bh / 2f + 1, -bl / 2f + 2} : new float[]{0, bh / 2f - hh * 0.35f + (s == Species.PIG ? -1 : 1), -bl / 2f + 1};
+        f.headClosed = closeEyes(f.head, (s == Species.HORSE ? 7 : 1) + hh - Math.max(2, hh / 3), snout + 2, 2, hw + 1);
+        f.neck = s == Species.HORSE ? new float[]{0, bh / 2f - 1, -bl / 2f + 4} : new float[]{0, bh / 2f - hh * 0.35f + (s == Species.PIG ? -1 : 1), -bl / 2f + 1};
         f.tail = tail(s, coat);
         f.tailAt = new float[]{0, bh / 2f - (s == Species.PIG ? 2 : 1.5f), bl / 2f - 0.5f};
         return f;
@@ -129,10 +129,10 @@ public final class AnimalModels {
     /** The head: a block with a snout in front, eyes, a nose, and the species' ears, horns, mane. Pivot: where the neck joins (its back-bottom). */
     private static ItemModels.Model head(Species s, int v, int hw, int hh, int hl, int snout, Coat coat) {
         boolean horse = s == Species.HORSE;
-        int neckL = horse ? 9 : 0;
+        int neckL = horse ? 6 : 0;
         int sx = hw + 4, sy = hh + (horse ? 12 : 6), sz = hl + snout + neckL + 2;
         VoxModel m = new VoxModel(sx, sy, sz);
-        int ox = 2, oy = horse ? 9 : 1, oz = 1;   // where the skull's box starts (back-bottom-left)
+        int ox = 2, oy = horse ? 7 : 1, oz = 1;   // where the skull's box starts (back-bottom-left)
         int back = oz + hl + snout + neckL;      // z of the back of the skull (+z is backward)
         // the skull
         for (int x = 0; x < hw; x++) for (int y = 0; y < hh; y++) for (int z = 0; z < hl; z++) {
@@ -176,7 +176,7 @@ public final class AnimalModels {
                 for (int side : new int[]{ox, ox + hw - 1}) { m.set(side, top, ez, earC); m.set(side, top + 1, ez, earC); }
                 // the mane down the neck
                 int mane = coat.at("mane", 0, 0, 0, 1, 1, 1);
-                for (int z = 0; z < neckL + 3; z++) for (int y = 0; y < 2; y++) m.set(ox + hw / 2, top - z * 9 / (neckL + 3) - y + 1, ez + z, mane);
+                for (int z = 0; z < neckL + 3; z++) for (int y = 0; y < 2; y++) m.set(ox + hw / 2, top - z * (oy - 1) / (neckL + 3) - y + 1, ez + z, mane);
             }
             case COW, SHEEP, PIG -> {
                 for (int side : new int[]{ox - 1, ox + hw}) { m.set(side, top - 2, ez, earC); m.set(side, top - 3, ez - (s == Species.PIG ? 1 : 0), earC); }
@@ -189,7 +189,7 @@ public final class AnimalModels {
             // the neck: from the skull's back down and back to the shoulders
             int nc = coat.at("head", 0, 0, 0, hw, hh, hl);
             for (int z = 0; z < neckL + 1; z++) {
-                int yBase = oy - z * 9 / (neckL + 1);
+                int yBase = oy - z * (oy - 1) / (neckL + 1);
                 for (int x = 0; x < hw; x++) for (int y = 0; y < hh; y++) m.set(ox + x, yBase + y, oz + snout + hl + z - 1, fur(nc & 0xFFFFFF, x, y, z, 0.08f));
             }
         }

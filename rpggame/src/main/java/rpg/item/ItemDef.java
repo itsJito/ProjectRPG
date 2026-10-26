@@ -21,6 +21,7 @@ public final class ItemDef {
     public Slot slot;
     public Family family = Family.NONE;
     public Tier tier;
+    public boolean conductive;
     public Skill reqSkill;
     public int reqLevel;
     /** Weapon: base damage, impact, reach (m), swing time scale; armor: protection and guard; arrows: damage bonus. */
@@ -33,6 +34,12 @@ public final class ItemDef {
     public DamageType damageType = DamageType.NONE;
     /** Food: HP restored. */
     public int heal;
+    /** Faith XP for burying it (bones of every kind); 0 for things that are not buried. */
+    public int buryXp;
+    /** A monster's own weapon (claws, fists, a touch): part of it, never a thing to loot, drop or draw in its hand. */
+    public boolean natural;
+    /** The shape a monster's drop is modelled as (LootModels: "essence", "pelt", "fang" ...), null for everything else. */
+    public String look;
     /** Gathering tool power (axes for Woodcutting, pickaxes for Mining). */
     public int toolPower;
     public Skill toolSkill;
@@ -46,6 +53,7 @@ public final class ItemDef {
 
     public ItemDef(String id, String name) { this.id = id; this.name = name; }
 
+    /** Equipment: anything worn or wielded (it has a slot). Everything else is an item (Take All Equipment / Items). */
     public boolean equippable() { return slot != null; }
     /** A weapon held in both hands (a greatsword, a battleaxe), as bows and staffs always are. */
     public boolean twoHand;

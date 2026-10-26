@@ -49,6 +49,7 @@ public final class NativeEngine implements AutoCloseable {
     }
 
     private long handle;
+    private long frameSequence;
     private final ByteBuffer io = MemoryUtil.memCalloc(AstrattoNative.SIZEOF_FRAME).order(ByteOrder.nativeOrder());
     private final ByteBuffer snap = MemoryUtil.memCalloc(AstrattoNative.SIZEOF_SNAPSHOT).order(ByteOrder.nativeOrder());
     private final Set<Long> worlds = new HashSet<>();
@@ -226,6 +227,9 @@ public final class NativeEngine implements AutoCloseable {
     }
 
     // ------------------------------------------------------------------ the tick
+    /** Successful native batches completed, including paused pumps; advances before their event callbacks. */
+    public long frameSequence() { live(); return frameSequence; }
+
     /**
      * One tick: the batch goes across, the engine runs dt seconds of simulation, and what it answers and what happened is
      * given to {@code out} before this returns. The buffer is cleared for the next tick. False when the engine refused
@@ -237,6 +241,7 @@ public final class NativeEngine implements AutoCloseable {
                 .putInt(16, commands == null ? 0 : commands.bytes()).putInt(20, 0).putLong(24, 0).putInt(32, 0).putInt(36, 0);
         boolean good = ok(AstrattoNative.frame(handle, io));
         if (commands != null) commands.clear();
+        if (good) frameSequence++;
         long events = io.getLong(24);
         int bytes = io.getInt(32);
         if (events != 0 && bytes > 0 && out != null) dispatch(MemoryUtil.memByteBuffer(events, bytes).order(ByteOrder.nativeOrder()), bytes, out);
@@ -302,6 +307,7 @@ public final class NativeEngine implements AutoCloseable {
 
     public Snapshots.Stats stats() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_STATS); return b == null ? new Snapshots.Stats() : Snapshots.Stats.read(b); }
     public Snapshots.AudioStats audioStats() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_AUDIO); return b == null ? new Snapshots.AudioStats() : Snapshots.AudioStats.read(b); }
+    public java.util.List<Snapshots.Chemical> chemistry() { return Snapshots.chemistry(snapshot(AstrattoNative.SNAPSHOT_CHEMISTRY)); }
     public Snapshots.Bodies bodies() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_BODIES); return b == null ? new Snapshots.Bodies() : Snapshots.Bodies.read(b, b.capacity()); }
     /** 2.2: every Impulsis rigid body and joint, as the last frame left them. */
     public Snapshots.Rigids rigids() { ByteBuffer b = snapshot(AstrattoNative.SNAPSHOT_RIGIDS); return b == null ? new Snapshots.Rigids() : Snapshots.Rigids.read(b, b.capacity()); }

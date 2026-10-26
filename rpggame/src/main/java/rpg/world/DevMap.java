@@ -20,7 +20,7 @@ public final class DevMap {
     public static final int DOOR_HEIGHT = 2;
 
     /** The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). */
-    public static final String ALPHA = "JUR-ALPHA", BETA = "JUR-BETA", WILDS = "WILDS";
+    public static final String ALPHA = "DevCity", BETA = "DevTown", WILDS = "WILDS";
 
     public static String jurisdiction(double x, double z) {
         if (x >= 82 && z >= 46) return ALPHA;
@@ -77,6 +77,10 @@ public final class DevMap {
     public static final int CONTACT_X0 = 44, CONTACT_Z0 = 108, CONTACT_X1 = 52, CONTACT_Z1 = 116;
     public static final int KIOSK_X0 = 58, KIOSK_Z0 = 100, KIOSK_X1 = 64, KIOSK_Z1 = 106;
     public static final float[] CARAVAN_A = {91.5f, 64.5f}, CARAVAN_B = {27.5f, 108.5f};
+    /** The Bank of Gameworld (gamefixes), DevTown: its walls, its doorway in the north wall, the counter across the hall, where the teller stands. */
+    public static final int BANK_X0 = 66, BANK_Z0 = 104, BANK_X1 = 78, BANK_Z1 = 116, BANK_COUNTER_Z = 110;
+    public static final int[][] BANK_DOOR = {{71, BANK_Z0}, {72, BANK_Z0}};
+    public static final float[] BANK_TELLER = {72.0f, 111.4f};
     // animals (GDD 3.9): a wild wood in the north-west and a farm south of the houses
     public static final int WILD_X0 = 3, WILD_Z0 = 3, WILD_X1 = 44, WILD_Z1 = 40;
     public static final int WILD_POND_X0 = 22, WILD_POND_Z0 = 17, WILD_POND_X1 = 28, WILD_POND_Z1 = 22;
@@ -84,8 +88,10 @@ public final class DevMap {
     public static final int[][] WILD_BUSHES = {{12, 18}, {13, 19}, {32, 26}, {33, 26}, {20, 30}, {36, 14}, {6, 14}, {27, 9}};
     /** The den: a rock shelter in the wood's corner (the bear's and the lion's lie-up). */
     public static final int DEN_X0 = 5, DEN_Z0 = 4, DEN_X1 = 10, DEN_Z1 = 8;
+    /** Monster lairs (gamefixes): the goblins' camp in the wood's north-east corner; the imps nest on the interaction shed's roof (the bats roost in the den). */
+    public static final float[] GOBLIN_CAMP = {38.5f, 10.5f}, IMP_NEST = {55.5f, 15.5f}, BAT_ROOST = {38.5f, 31.5f};
     public static final int FARM_X0 = 86, FARM_Z0 = 102, FARM_X1 = 122, FARM_Z1 = 124;
-    /** The paddock's gate (a door in the fence) and the shelter (an open-fronted barn: roof, back and sides). */
+    /** The paddock's gate (a door in the fence) and the shelter (a closed barn with a two-leaf entrance). */
     public static final int[][] FARM_GATE = {{100, 102}, {101, 102}};
     public static final int BARN_X0 = 110, BARN_Z0 = 116, BARN_X1 = 121, BARN_Z1 = 123;
     public static final int DUCK_POND_X0 = 89, DUCK_POND_Z0 = 115, DUCK_POND_X1 = 95, DUCK_POND_Z1 = 120;
@@ -129,7 +135,9 @@ public final class DevMap {
             new Piece("BED", 110, 53, 110, 54, 1, 0, rpg.Ids.LAWMAN_A)};     // the lawman's cot in chancery A
     /** The graveyard's pieces (built after every older fixture, so their ids hold): the undertaker's counter and cot, the stones. */
     public static final Piece[] GRAVEYARD_PIECES = {
-            new Piece("COUNTER", 121, 96, 121, 98, 1, 1, rpg.Ids.UNDERTAKER), new Piece("BED", 124, 95, 124, 96, 1, 0, rpg.Ids.UNDERTAKER),
+            // the counter stands along the south wall, clear of the doorway (gamefixes: it used to fill the space just
+            // inside the door, so whoever came in was pinned between it and the swung leaves)
+            new Piece("COUNTER", 120, 99, 122, 99, 1, 0, rpg.Ids.UNDERTAKER), new Piece("BED", 124, 95, 124, 96, 1, 0, rpg.Ids.UNDERTAKER),
             stone(0), stone(1), stone(2), stone(3), stone(4), stone(5), stone(6), stone(7), stone(8), stone(9), stone(10), stone(11), stone(12), stone(13),
             // the fence's nook behind Store B: crates to sit his goods on and to hide him from the road
             new Piece("CRATE", 10, 115, 10, 115, 1, 0, rpg.Ids.FENCE), new Piece("CRATE", 13, 115, 13, 115, 1, 1, rpg.Ids.FENCE),
@@ -164,9 +172,9 @@ public final class DevMap {
             {"DEBUG / CONTROL ZONE", 64.5f, 62.5f}, {"MOVEMENT / COMBAT LANE", 30.5f, 44.5f}, {"HOSTILE PEN", 21.5f, 69.5f},
             {"ARCHERY RANGE", 14.5f, 59.5f}, {"INTERACTION SHED", 55.5f, 24f}, {"WORKSTATIONS", 68.5f, 28.5f}, {"BUILD SPOT", 77.5f, 29.5f},
             {"MINING ROCKS", 54.5f, 38.5f}, {"TREE GROVE", 96.5f, 18.5f}, {"FISHING POND", 96.5f, 42f}, {"PATCHES", 72.5f, 36.5f},
-            {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (JUR-ALPHA)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
-            {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (JUR-BETA)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
-            {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}};
+            {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
+            {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
+            {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}, {"BANK OF GAMEWORLD", 72f, 102.5f}};
 
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
     public static long build(NativeEngine e) {
@@ -203,6 +211,7 @@ public final class DevMap {
             yard();
             economyBay();
             roads();
+            floors();
             wilds();
             farm();
             graveyard();
@@ -229,9 +238,9 @@ public final class DevMap {
 
         void combatLane() {
             ground(6, 42, 44, 66, SAND);
-            // simple cover
-            fill(26, FLOOR, 50, 29, FLOOR + 1, 50, STONE);
-            fill(33, FLOOR, 56, 33, FLOOR + 1, 60, STONE);
+            // simple cover: weathered sandstone, as a sandy range would have
+            fill(26, FLOOR, 50, 29, FLOOR + 1, 50, SANDSTONE);
+            fill(33, FLOOR, 56, 33, FLOOR + 1, 60, RED_SANDSTONE);
             // archery: two targets (furniture) on a backstop, distance stripes at 10, 20 and 30 m
             fill(TARGET_X - 1, FLOOR, 53, TARGET_X - 1, FLOOR + 3, 64, BRICK);
             for (int d : new int[]{10, 20, 30}) fill(TARGET_X + d, FLOOR - 1, 54, TARGET_X + d, FLOOR - 1, 64, MARK_YELLOW);
@@ -249,6 +258,8 @@ public final class DevMap {
         }
 
         void skillLab() {
+            fill(ALTAR[0], FLOOR, ALTAR[1], ALTAR[0], FLOOR, ALTAR[1], TABLE);
+            ground(ALTAR[0] - 1, ALTAR[1] - 1, ALTAR[0] + 1, ALTAR[1] + 1, MARBLE);          // the altar stands on a marble dais
             // the interaction shed: plank walls on beams, a door, a locked store room, a roof
             int x0 = SHED_X0, z0 = SHED_Z0, x1 = SHED_X1, z1 = SHED_Z1, top = FLOOR + 3;
             ground(x0, z0, x1, z1, PLANKS);
@@ -259,6 +270,8 @@ public final class DevMap {
             for (int[] d : SHED_DOOR) fill(d[0], FLOOR, d[1], d[0], FLOOR + DOOR_HEIGHT - 1, d[1], DOOR);
             fill(57, FLOOR, z0, 57, top, z1, PLANKS);
             for (int[] d : STORE_DOOR) fill(d[0], FLOOR, d[1], d[0], FLOOR + DOOR_HEIGHT - 1, d[1], LOCKED_DOOR);
+            // what the locked store keeps: smithing stock in blocks, stacked at its far end
+            set(61, FLOOR, 21, IRON_BLOCK); set(60, FLOOR, 21, COPPER_BLOCK); set(61, FLOOR, 20, COAL_BLOCK); set(61, FLOOR + 1, 21, GOLD_BLOCK);
             fill(51, FLOOR + 1, z0, 53, FLOOR + 2, z0, GLASS);
             fill(x0, FLOOR + 1, 15, x0, FLOOR + 2, 17, GLASS);
             set(53, top, 15, LAMP);
@@ -316,11 +329,11 @@ public final class DevMap {
         }
 
         void yard() {
-            // the town wall along z 46 with a gate and a climbable section (the Agility shortcut)
-            fill(82, FLOOR, 46, 126, FLOOR + 2, 46, STONE);
+            // the town wall along z 46 with a gate and a climbable section (the Agility shortcut): dressed stone bricks
+            fill(82, FLOOR, 46, 126, FLOOR + 2, 46, STONE_BRICKS);
             fill(97, FLOOR, 46, 100, FLOOR + 2, 46, AIR);
             set(SHORTCUT[0], FLOOR + 2, SHORTCUT[1], MARK_GREEN);
-            fill(82, FLOOR, 46, 82, FLOOR + 2, 100, STONE);
+            fill(82, FLOOR, 46, 82, FLOOR + 2, 100, STONE_BRICKS);
             fill(82, FLOOR, 66, 82, FLOOR + 2, 70, AIR);
             fill(82, FLOOR, 94, 82, FLOOR + 2, 98, AIR);
             // the square and its well
@@ -347,15 +360,46 @@ public final class DevMap {
         void economyBay() {
             ground(14, 96, 80, 124, GRASS);
             building(SHOP_B_X0, SHOP_B_Z0, SHOP_B_X1, SHOP_B_Z1, PLASTER, new int[]{SHOP_B_X1, 108}, 'x');
-            building(CH_B_X0, CH_B_Z0, CH_B_X1, CH_B_Z1, BRICK, new int[]{35, CH_B_Z0}, 'z');
+            // DevTown builds in pale limestone, its chancery lit through blue-stained panes
+            building(CH_B_X0, CH_B_Z0, CH_B_X1, CH_B_Z1, LIMESTONE_BRICKS, new int[]{35, CH_B_Z0}, 'z', LIGHT_BLUE_GLASS);
             building(CONTACT_X0, CONTACT_Z0, CONTACT_X1, CONTACT_Z1, PLASTER, new int[]{48, CONTACT_Z0}, 'z');
+            ground(CONTACT_X0 + 2, CONTACT_Z0 + 3, CONTACT_X1 - 2, CONTACT_Z1 - 2, BLACK_CARPET);
             // the quest kiosk: an open hut on four posts (its table is furniture)
             ground(KIOSK_X0, KIOSK_Z0, KIOSK_X1, KIOSK_Z1, PLANKS);
-            for (int[] c : new int[][]{{KIOSK_X0, KIOSK_Z0}, {KIOSK_X1, KIOSK_Z0}, {KIOSK_X0, KIOSK_Z1}, {KIOSK_X1, KIOSK_Z1}}) fill(c[0], FLOOR, c[1], c[0], FLOOR + 2, c[1], BEAM);
+            for (int[] c : new int[][]{{KIOSK_X0, KIOSK_Z0}, {KIOSK_X1, KIOSK_Z0}, {KIOSK_X0, KIOSK_Z1}, {KIOSK_X1, KIOSK_Z1}}) fill(c[0], FLOOR, c[1], c[0], FLOOR + 2, c[1], BIRCH_LOG);
             fill(KIOSK_X0, FLOOR + 3, KIOSK_Z0, KIOSK_X1, FLOOR + 3, KIOSK_Z1, ROOF);
             // blue posts on Beta's edge
             for (int x = 6; x < 82; x += 8) { if (x >= 26 && x <= 30) continue; fill(x, FLOOR, 93, x, FLOOR + 2, 93, BEAM); set(x, FLOOR + 3, 93, MARK_BLUE); }
             lampPost(30, 100); lampPost(55, 100);
+            bank();
+        }
+
+        /**
+         * The Bank of Gameworld: a stone-brick hall with a marble floor, entered from the road through a door in its north
+         * wall; a counter runs across it, the teller's place behind and the strongroom's wall at the back.
+         */
+        void bank() {
+            building(BANK_X0, BANK_Z0, BANK_X1, BANK_Z1, STONE_BRICKS, new int[]{BANK_DOOR[0][0], BANK_Z0}, 'z', WHITE_GLASS);
+            ground(BANK_X0 + 1, BANK_Z0 + 1, BANK_X1 - 1, BANK_Z1 - 1, MARBLE);
+            ground(BANK_DOOR[0][0], BANK_Z0 + 1, BANK_DOOR[1][0], BANK_COUNTER_Z - 1, RED_CARPET);
+            ground(BANK_DOOR[0][0], 98, BANK_DOOR[1][0], BANK_Z0 - 1, COBBLE);
+            // the strongroom: a gold-banded wall across the back, its iron door shut
+            fill(BANK_X0 + 1, FLOOR, BANK_Z1 - 2, BANK_X1 - 1, FLOOR + 2, BANK_Z1 - 2, STONE_BRICKS);
+            fill(BANK_X0 + 4, FLOOR + 2, BANK_Z1 - 2, BANK_X1 - 4, FLOOR + 2, BANK_Z1 - 2, GOLD_BLOCK);
+            fill(71, FLOOR, BANK_Z1 - 2, 72, FLOOR + 1, BANK_Z1 - 2, IRON_BLOCK);
+            lampPost(BANK_DOOR[0][0] - 2, BANK_Z0 - 2); lampPost(BANK_DOOR[1][0] + 2, BANK_Z0 - 2);
+        }
+
+        /**
+         * The buildings' floors, laid again after the roads (the caravan road was paved straight through the first house's
+         * floor), and their furnishing: a red runner up the chancery to the lawman's desk, rugs in the houses.
+         */
+        void floors() {
+            for (int[] b : new int[][]{{SHOP_A_X0, SHOP_A_Z0, SHOP_A_X1, SHOP_A_Z1}, {CH_A_X0, CH_A_Z0, CH_A_X1, CH_A_Z1}, {HOUSE1_X0, HOUSE1_Z0, HOUSE1_X1, HOUSE1_Z1}, {HOUSE2_X0, HOUSE2_Z0, HOUSE2_X1, HOUSE2_Z1}})
+                ground(b[0] + 1, b[1] + 1, b[2] - 1, b[3] - 1, PLANKS);
+            ground(113, CH_A_Z0 + 2, 114, CH_A_Z1 - 1, RED_CARPET);
+            ground(HOUSE1_X0 + 2, HOUSE1_Z0 + 3, HOUSE1_X1 - 2, HOUSE1_Z1 - 3, BROWN_CARPET);
+            ground(HOUSE2_X0 + 2, HOUSE2_Z0 + 3, HOUSE2_X1 - 2, HOUSE2_Z1 - 3, WHITE_CARPET);
         }
 
         void roads() {
@@ -376,29 +420,64 @@ public final class DevMap {
             for (int[] t : WILD_TREES) tree(t[0], t[1], (t[0] + t[1]) % 2 == 0 ? OAK_LOG : LOG, (t[0] + t[1]) % 2 == 0 ? OAK_LEAVES : LEAVES, 4 + (t[0] * 7 + t[1]) % 3);
             for (int[] b : WILD_BUSHES) fill(b[0], FLOOR, b[1], b[0] + 1, FLOOR, b[1], LEAVES);
             pond(WILD_POND_X0, WILD_POND_Z0, WILD_POND_X1, WILD_POND_Z1);
-            // the den: a rock shelter open to the south-east
-            fill(DEN_X0, FLOOR, DEN_Z0, DEN_X1, FLOOR + 2, DEN_Z0, STONE);
-            fill(DEN_X0, FLOOR, DEN_Z0, DEN_X0, FLOOR + 2, DEN_Z1, STONE);
-            fill(DEN_X0, FLOOR + 3, DEN_Z0, DEN_X1, FLOOR + 3, DEN_Z1, STONE);
-            fill(DEN_X1, FLOOR + 2, DEN_Z0, DEN_X1, FLOOR + 2, DEN_Z1, STONE);
+            // the den: a granite shelter open to the south-east
+            fill(DEN_X0, FLOOR, DEN_Z0, DEN_X1, FLOOR + 2, DEN_Z0, GRANITE);
+            fill(DEN_X0, FLOOR, DEN_Z0, DEN_X0, FLOOR + 2, DEN_Z1, GRANITE);
+            fill(DEN_X0, FLOOR + 3, DEN_Z0, DEN_X1, FLOOR + 3, DEN_Z1, GRANITE);
+            fill(DEN_X1, FLOOR + 2, DEN_Z0, DEN_X1, FLOOR + 2, DEN_Z1, GRANITE);
             ground(DEN_X0 + 1, DEN_Z0 + 1, DEN_X1, DEN_Z1, DIRT);
+            // the wild pond's banks: clay on the dry side, mud where the animals come down to drink
+            ground(WILD_POND_X0 - 1, WILD_POND_Z0, WILD_POND_X0 - 1, WILD_POND_Z1, CLAY);
+            ground(WILD_POND_X1 + 1, WILD_POND_Z0, WILD_POND_X1 + 1, WILD_POND_Z1, MUD);
+            goblinCamp();
         }
 
-        /** The farm: a fenced paddock with a gate, an open barn with nest boxes, a duck pond, a trough. */
+        /**
+         * The goblins' camp (GDD 3.14: huts, fire pit, totem, loot pile): two low hide huts, a ring of stones round a fire
+         * pit, a bone-fence of stakes and a totem pole with a skull on top - the camp's marks, so it can be read before it
+         * is walked into. Trampled earth underfoot.
+         */
+        void goblinCamp() {
+            int cx = (int) GOBLIN_CAMP[0], cz = (int) GOBLIN_CAMP[1];
+            ground(cx - 6, cz - 6, cx + 6, cz + 5, DIRT);
+            ground(cx - 1, cz - 1, cx + 1, cz + 1, BARE_PATCH);
+            for (int[] s : new int[][]{{-2, 0}, {2, 0}, {0, -2}, {0, 2}, {-1, -2}, {1, 2}}) set(cx + s[0], FLOOR, cz + s[1], COBBLE);
+            // the huts: hide over a frame of poles, each open to the fire
+            for (int[] h : new int[][]{{cx - 5, cz - 5}, {cx + 3, cz - 5}}) {
+                fill(h[0], FLOOR, h[1], h[0] + 2, FLOOR + 1, h[1], BROWN_CARPET);
+                fill(h[0], FLOOR, h[1], h[0], FLOOR + 1, h[1] + 2, BROWN_CARPET);
+                fill(h[0] + 2, FLOOR, h[1], h[0] + 2, FLOOR + 1, h[1] + 2, BROWN_CARPET);
+                fill(h[0], FLOOR + 2, h[1], h[0] + 2, FLOOR + 2, h[1] + 2, HAY_BALE);
+            }
+            // stakes round the camp's south side, a gap to walk in by; the totem pole beside the way in
+            for (int x = cx - 5; x <= cx + 5; x += 2) if (Math.abs(x - cx) > 1) set(x, FLOOR, cz + 5, BIRCH_LOG);
+            fill(cx + 2, FLOOR, cz + 4, cx + 2, FLOOR + 2, cz + 4, OAK_LOG);
+            set(cx + 2, FLOOR + 3, cz + 4, MARBLE);
+        }
+
+        /** The farm: a fenced paddock with a gate, a barn with nest boxes, a duck pond, a trough. */
         void farm() {
             ground(FARM_X0 + 1, FARM_Z0 + 1, FARM_X1 - 1, FARM_Z1 - 1, GRASS);
             walls(FARM_X0, FARM_Z0, FARM_X1, FARM_Z1, FLOOR, FLOOR, FENCE);
             for (int[] d : FARM_GATE) fill(d[0], FLOOR, d[1], d[0], FLOOR + DOOR_HEIGHT - 1, d[1], DOOR);
             ground(FARM_GATE[0][0], 97, FARM_GATE[1][0], FARM_Z0 - 1, COBBLE);
-            // the barn: back and side walls of planks on beams, a roof, open to the north
+            // Barn entrance is two blocks wide; animal and human movers share its physical door.
             int top = FLOOR + 3;
+            fill(BARN_X0, FLOOR, BARN_Z0, BARN_X1, top, BARN_Z0, PLANKS);
+            fill((BARN_X0+BARN_X1)/2,FLOOR,BARN_Z0,(BARN_X0+BARN_X1)/2+1,FLOOR+1,BARN_Z0,AIR);
             fill(BARN_X0, FLOOR, BARN_Z1, BARN_X1, top, BARN_Z1, PLANKS);
             fill(BARN_X0, FLOOR, BARN_Z0, BARN_X0, top, BARN_Z1, PLANKS);
             fill(BARN_X1, FLOOR, BARN_Z0, BARN_X1, top, BARN_Z1, PLANKS);
-            for (int[] c : new int[][]{{BARN_X0, BARN_Z0}, {BARN_X1, BARN_Z0}, {BARN_X0, BARN_Z1}, {BARN_X1, BARN_Z1}}) fill(c[0], FLOOR, c[1], c[0], top, c[1], BEAM);
+            for (int[] c : new int[][]{{BARN_X0, BARN_Z0}, {BARN_X1, BARN_Z0}, {BARN_X0, BARN_Z1}, {BARN_X1, BARN_Z1}}) fill(c[0], FLOOR, c[1], c[0], top, c[1], SPRUCE_LOG);
             fill(BARN_X0, top + 1, BARN_Z0, BARN_X1, top + 1, BARN_Z1, ROOF);
             ground(BARN_X0 + 1, BARN_Z0, BARN_X1 - 1, BARN_Z1 - 1, DIRT);
+            // the winter fodder, baled in the corner away from the nest boxes
+            fill(BARN_X1 - 2, FLOOR, BARN_Z0 + 1, BARN_X1 - 1, FLOOR, BARN_Z0 + 2, HAY_BALE);
+            set(BARN_X1 - 1, FLOOR + 1, BARN_Z0 + 1, HAY_BALE);
             pond(DUCK_POND_X0, DUCK_POND_Z0, DUCK_POND_X1, DUCK_POND_Z1);
+            // the ducks have trodden its sides to mud
+            ground(DUCK_POND_X0 - 1, DUCK_POND_Z0, DUCK_POND_X0 - 1, DUCK_POND_Z1, MUD);
+            ground(DUCK_POND_X1 + 1, DUCK_POND_Z0, DUCK_POND_X1 + 1, DUCK_POND_Z1, MUD);
             lampPost(FARM_GATE[0][0] - 2, FARM_Z0 - 1);
         }
 
@@ -418,11 +497,12 @@ public final class DevMap {
             ground(GRAVE_GATE[0] + 2, 96, UNDERTAKER_X0 - 1, 97, DIRT);
             // a bare grave's mound in front of each stone
             for (int[] h : HEADSTONES) ground(h[0], h[1] - 1, h[0], h[1] - 1, BARE_PATCH);
-            building(UNDERTAKER_X0, UNDERTAKER_Z0, UNDERTAKER_X1, UNDERTAKER_Z1, PLASTER, new int[]{UNDERTAKER_X0, 96}, 'x');
+            building(UNDERTAKER_X0, UNDERTAKER_Z0, UNDERTAKER_X1, UNDERTAKER_Z1, PLASTER, new int[]{UNDERTAKER_X0, 96}, 'x', WHITE_GLASS);
             lampPost(118, 94);
         }
 
-        void building(int x0, int z0, int x1, int z1, int wall, int[] door, char axis) {
+        void building(int x0, int z0, int x1, int z1, int wall, int[] door, char axis) { building(x0, z0, x1, z1, wall, door, axis, GLASS); }
+        void building(int x0, int z0, int x1, int z1, int wall, int[] door, char axis, int pane) {
             int top = FLOOR + 3;
             ground(x0, z0, x1, z1, PLANKS);
             walls(x0, z0, x1, z1, FLOOR, top, wall);
@@ -432,8 +512,8 @@ public final class DevMap {
             else { fill(door[0], FLOOR, door[1], door[0], FLOOR + 1, door[1] + 1, AIR); fill(door[0], FLOOR + 2, door[1], door[0], FLOOR + 2, door[1] + 1, BEAM); }
             // windows on the long walls
             int mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
-            if (axis == 'z') { fill(x0, FLOOR + 1, mz - 1, x0, FLOOR + 2, mz, GLASS); fill(x1, FLOOR + 1, mz - 1, x1, FLOOR + 2, mz, GLASS); }
-            else { fill(mx - 1, FLOOR + 1, z0, mx, FLOOR + 2, z0, GLASS); fill(mx - 1, FLOOR + 1, z1, mx, FLOOR + 2, z1, GLASS); }
+            if (axis == 'z') { fill(x0, FLOOR + 1, mz - 1, x0, FLOOR + 2, mz, pane); fill(x1, FLOOR + 1, mz - 1, x1, FLOOR + 2, mz, pane); }
+            else { fill(mx - 1, FLOOR + 1, z0, mx, FLOOR + 2, z0, pane); fill(mx - 1, FLOOR + 1, z1, mx, FLOOR + 2, z1, pane); }
             set(mx, top, mz, LAMP);
         }
 

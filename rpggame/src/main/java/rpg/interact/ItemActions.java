@@ -45,8 +45,10 @@ public final class ItemActions {
         if (d.heal > 0) o.add(Option.on("eat", "Eat", 10, 0));
         if (d.restoresFaith > 0) o.add(Option.on("drink", "Drink", 10, 0));
         if (d.maxCharges > 0) o.add(Option.when(a.has(Items.COAL, 1) && s.charges < d.maxCharges, "recharge", "Recharge (coal)", 6, s.charges >= d.maxCharges ? "It is fully charged." : "You need coal.", 0));
-        if (d == Items.BONES || d == Items.BIG_BONES) o.add(Option.on("bury", "Bury", 10, 0));
+        if (d.buryXp > 0) o.add(Option.on("bury", "Bury", 10, 0));
         if (d == Items.XP_LAMP) o.add(Option.on("rub", "Rub", 10, 0));
+        if (d == Items.BUCKET) o.add(Option.when(nearWater(a), "fill", "Fill", 9, "You need to be at the water's edge.", 0));
+        if (d == Items.BUCKET_OF_WATER) o.add(Option.on("empty", "Empty", 9, 0));
         if ((d == Items.RAW_SHRIMP || d == Items.RAW_TROUT || d.id.equals("raw_crab")) && !s.stolen)
             o.add(Option.when(nearWater(a), "release", "Release", 4, "You need to be at the water's edge.", 0));
         if (d == Items.LOGS || d == Items.OAK_LOGS || d == Items.WILLOW_LOGS) {
@@ -103,7 +105,7 @@ public final class ItemActions {
                 g.state.burn(d, 1);
                 g.state.commit(req, "FishReleased", a.id, 0, null, 0, d.name);
                 if (a == g.player) { g.chat.say("You slip the " + d.name.toLowerCase().replace("raw ", "") + " back into the water. It darts away."); g.honor.released(); }
-                if (g.fx != null) g.fx.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
                 yield Result.ok();
             }
             case "bury" -> {
@@ -113,12 +115,23 @@ public final class ItemActions {
                     grid.take(slot, 1);
                     g.state.burn(d, 1);
                     var ev = g.state.commit("BonesBuried", a.id, 0, null, 0, d.name);
-                    g.prog.award(a, Skill.FAITH, d == Items.BIG_BONES ? 15 : 5, "buried " + d.name.toLowerCase(), ev.id());
+                    g.prog.award(a, Skill.FAITH, d.buryXp, "buried " + d.name.toLowerCase(), ev.id());
                     if (a == g.player) g.chat.say("You bury the bones.");
                     return Result.ok();
                 }));
                 yield Result.started();
             }
+            case "fill" -> {
+                if (!nearWater(a)) yield Result.no("You need to be at the water's edge.");
+                grid.take(slot, 1);
+                g.state.burn(d, 1);
+                g.grant(a, new ItemStack(Items.BUCKET_OF_WATER, 1));
+                g.state.commit(req, "BucketFilled", a.id, 0, null, 0, "water");
+                if (a == g.player) g.chat.say("You fill the bucket with water.");
+                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                yield Result.ok();
+            }
+            case "empty" -> empty(a, grid, slot, req);
             case "read_warrant" -> {
                 if (s.contract == null) yield Result.no("There is no signed warrant on this scroll.");
                 if (a == g.player) g.ui.dialog(new rpg.ui.Dialog("Signed warrant", "Wanted: " + g.nameOf(s.contract.target()) + ". Reward: " + s.contract.reward() + " gold from " + s.contract.jurisdiction() + ". Return this scroll after bringing them down. The map records the watch's last sighting."));
@@ -180,6 +193,25 @@ public final class ItemActions {
             return Result.ok();
         }));
         return Result.started();
+    }
+
+    /**
+     * A bucket of water poured out in front: it wets what is there (the chemistry's water), and a fire it lands on goes
+     * out. The bucket is kept.
+     */
+    private Result empty(Actor a, Inventory grid, int slot, long req) {
+        float fx = a.x - (float) Math.sin(a.yaw) * 1.0f, fz = a.z - (float) Math.cos(a.yaw) * 1.0f, fy = g.vox.groundY(fx, a.y + 0.5f, fz);
+        grid.take(slot, 1);
+        g.state.burn(Items.BUCKET_OF_WATER, 1);
+        g.grant(a, new ItemStack(Items.BUCKET, 1));
+        g.chemistry.emit(a, astratto.bridge.AstrattoNative.CHEM_WATER, fx, fy + 0.3f, fz, 1.2f, 3, 0.6f);
+        if (g.fx != null) g.chemistry.splash(fx, fy + 0.1f, fz);
+        Fire doused = null;
+        for (var o : g.objects.all()) if (o instanceof Fire f && !f.removed && Math.hypot(f.x - fx, f.z - fz) < 1.5) { doused = f; f.outAt = g.state.minutes; }
+        g.state.commit(req, "BucketEmptied", a.id, doused == null ? 0 : doused.id, DevMap.jurisdiction(fx, fz), 0, doused == null ? "on the ground" : "on a fire");
+        if (a == g.player) g.chat.say(doused == null ? "You empty the bucket." : "You empty the bucket over the fire. It hisses out.");
+        if (doused != null && g.sfx != null) g.sfx.play("splash", fx, fy, fz, 0.6f);
+        return Result.ok();
     }
 
     /** Fires go on open ground: not indoors, not in water, not on top of another fire. */

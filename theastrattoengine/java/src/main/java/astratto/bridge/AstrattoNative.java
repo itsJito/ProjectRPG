@@ -27,6 +27,10 @@ import org.lwjgl.system.SharedLibrary;
 public final class AstrattoNative {
     private AstrattoNative() {}
 
+    public static final int CMD_CHEM_MATERIAL = 192, CMD_CHEM_SENSOR = 193, CMD_CHEM_EMIT = 194, CMD_CHEM_REMOVE = 195, CMD_CHEM_WIND = 196, CMD_CHEM_RESET = 197, CMD_CHEM_WEATHER = 198, CMD_CHEM_DISOWN = 199, SNAPSHOT_CHEMISTRY = 6;
+    public static final int CHEM_FLAMMABLE = 1, CHEM_CONDUCTIVE = 2, CHEM_FREEZABLE = 4, CHEM_WIND_SENSITIVE = 8;
+    public static final int CHEM_FIRE = 1, CHEM_WATER = 2, CHEM_ICE = 3, CHEM_WIND = 4, CHEM_ELECTRIC = 5;
+    public static final int CHEM_WET = 1, CHEM_BURNING = 2, CHEM_FROZEN = 4, CHEM_CHARGED = 8, CHEM_BURNT = 16;
     public static final int API_MAJOR = 2, API_MINOR = 5, API_VERSION = API_MAJOR << 16 | API_MINOR;
 
     // ---- status
@@ -82,7 +86,7 @@ public final class AstrattoNative {
 
     // ---- AI (64-95)
     public static final int CMD_POLICY_CREATE = 64, CMD_AGENT_CREATE = 65, CMD_AGENT_FACT = 66, CMD_AGENT_TARGET = 67, CMD_AGENT_GOAL = 68, CMD_AGENT_POLICY = 69,
-            CMD_NOISE = 70, CMD_AGENT_FORCE = 71;
+            CMD_NOISE = 70, CMD_AGENT_FORCE = 71, CMD_AGENT_RATE = 72;
     public static final int EVT_AGENT_ACTION = 64, EVT_AGENT_SEES = 65, EVT_AGENT_LOST = 66, EVT_AGENT_ARRIVED = 67, EVT_AGENT_STUCK = 68, EVT_AGENT_HEARD = 69;
     public static final int ACT_IDLE = 0, ACT_WANDER = 1, ACT_MOVE_TO_GOAL = 2, ACT_APPROACH = 3, ACT_FLEE = 4, ACT_INVESTIGATE = 5, ACT_HOLD = 6, ACT_CUSTOM = 7;
     public static final int IN_FACT0 = 0, IN_TARGET_SEEN = 16, IN_TARGET_DISTANCE = 17, IN_SINCE_SEEN = 18, IN_SINCE_HEARD = 19, IN_TIME_IN_ACTION = 20,
@@ -125,17 +129,19 @@ public final class AstrattoNative {
     // ---- rendering: the renderer (2.0)
     public static final int QUALITY_LOW = 0, QUALITY_MEDIUM = 1, QUALITY_HIGH = 2, QUALITY_ULTRA = 3;
     public static final int TEX_2D = 0, TEX_ARRAY = 1;
-    public static final int TEX_NEAREST = 1, TEX_MIPMAP = 1 << 1, TEX_REPEAT = 1 << 2, TEX_MIP_LINEAR = 1 << 3, TEX_ANISOTROPIC = 1 << 4;
+    public static final int TEX_NEAREST = 1, TEX_MIPMAP = 1 << 1, TEX_REPEAT = 1 << 2, TEX_MIP_LINEAR = 1 << 3, TEX_ANISOTROPIC = 1 << 4, TEX_MIN_LINEAR = 1 << 5;
     /** Stops a texture's mip chain at level n (OR it into the flags). */
     public static int texMaxLevel(int n) { return ((n + 1) & 15) << 8; }
     public static final int RES_TEXTURE = 1, RES_MESH = 2;
     public static final int RCMD_CAMERA = 1, RCMD_ENV = 2, RCMD_LIGHT = 3, RCMD_MODEL = 4, RCMD_PARTICLES = 5, RCMD_QUADS = 6, RCMD_GRADING = 7,
-            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17;
+            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17, RCMD_EMITTER = 18, RCMD_RIPPLE = 19;
     /** 2.1: the renderer's layers. */
     public static final int LAYER_FOLIAGE = 1, LAYER_PROP = 2, LAYER_DECAL = 3, INSTANCES_SHADOW = 1;
     public static final int PASS_GTAO = 1, PASS_SSR = 1 << 1, PASS_VOLUMETRICS = 1 << 2, PASS_TAA = 1 << 3, PASS_BLOOM = 1 << 4, PASS_MOTION_BLUR = 1 << 5, PASS_DEPTH_OF_FIELD = 1 << 6;
     public static final int LIGHT_SHADOW = 1, LIGHT_SPOT = 2, LIGHT_STATIC = 4;
-    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16;
+    /** GPU flame particles that follow a stable emitter, while ordinary fire and smoke stay in world space. */
+    public static final int EMITTER_ATTACHED_FIRE = 16;
+    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16, MODEL_FOLIAGE = 32;
 
     // ---- structure sizes (bytes) on a 64-bit machine; every one is checked against the library when it loads
     static final int SIZEOF_CONFIG = 24, SIZEOF_BLOCK_DEF = 12, SIZEOF_BLOCK_TABLE = 16, SIZEOF_WORLD_DESC = 56, SIZEOF_WORLD_VIEW = 64,

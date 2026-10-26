@@ -71,6 +71,10 @@ public final class Recipes {
         r("cook_meat", "Cooked meat", Station.RANGE, Skill.COOKING, 1, 300, 2f).in(Items.RAW_MEAT, 1).out(Items.COOKED_MEAT, 1).burn(25).burnt(Items.BURNT_MEAT);
         r("cook_trout", "Trout", Station.RANGE, Skill.COOKING, 20, 700, 1.8f).in(Items.RAW_TROUT, 1).out(Items.TROUT, 1).burn(45);
         // crafting
+        r("weave_linen", "Linen cloth", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 30, 1.2f).in(Items.FLAX, 2).out(Items.CLOTH, 1);
+        r("sew_hood", "Linen hood", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 35, 1.2f).in(Items.CLOTH, 1).out(Items.CLOTH_HOOD, 1);
+        r("sew_tunic", "Linen tunic", Station.CRAFT_TABLE, Skill.CRAFTING, 5, 60, 1.5f).in(Items.CLOTH, 2).out(Items.CLOTH_TUNIC, 1);
+        r("craft_snare", "Rabbit snare", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 30, 1.2f).in(Items.LOGS, 1).in(Items.BOWSTRING, 1).out(Items.SNARE, 1);
         r("craft_shafts", "Arrow shafts (15)", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 50, 1.6f).in(Items.LOGS, 1).out(Items.ARROW_SHAFT, 15).tool(Items.KNIFE);
         r("craft_bowstring", "Bowstring", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 150, 1.6f).in(Items.FLAX, 1).out(Items.BOWSTRING, 1);
         r("craft_bronze_arrows", "Bronze arrows (15)", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 195, 2f).in(Items.ARROW_SHAFT, 15).in(Items.BRONZE_BAR, 1).out(Items.BRONZE_ARROWS, 15);

@@ -208,12 +208,13 @@ public final class Animals {
         a.fit();
         c.moverCreate(a.body, a.x, DevMap.FLOOR + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
-        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, 0, (int) a.id * 7919);
+        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags, (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
         java.util.Arrays.fill(a.facts, -1);
         a.targetBody = -1;
         a.loaded = true;
         desire(a, AnimalMind.A_HOLD);
+        if(g.chemistry!=null)g.chemistry.register(a);
     }
 
     /** An animal for a picture: placed, facing, its mind off (the gallery's catalog and gait films). */
@@ -247,13 +248,33 @@ public final class Animals {
     private void makeRagdoll(Animal a, float jx, float jy, float jz, boolean knockdown) {
         int live = 0;
         Animal oldest = null;
-        for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
-        if (live >= MAX_RAGDOLLS && oldest != null) dropRagdoll(oldest);
+        for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && o.carriedBy==0 && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
+        if (live >= MAX_RAGDOLLS) { if(oldest==null)return;dropRagdoll(oldest); }
         a.ragdoll = AnimalRagdoll.create(g, a, jx, jy, jz, knockdown);
         if (a.ragdoll != null) ragdolls++;
     }
 
-    void dropRagdoll(Animal a) { if (a.ragdoll != null) { a.ragdoll.release(g); a.ragdoll = null; } }
+    void dropRagdoll(Animal a) {
+        if(a.ragdoll==null)return;
+        if(!a.alive && !a.butchered)captureRest(a);else a.restPose.clear();
+        a.ragdoll.release(g);a.ragdoll=null;
+    }
+    private void captureRest(Animal a) {
+        if(a.ragdoll==null)return;
+        for(var piece:a.ragdoll.pieces) { var body=g.lastRigids.body(piece.body());if(body!=null)a.restPose.put(piece.part(),body); }
+    }
+    /** Re-enter physics only when needed; visible settled bodies remain interactable after load or budget eviction. */
+    public boolean ensurePhysical(Animal a) {
+        if(a.alive || a.butchered || !a.loaded)return false;
+        if(a.ragdoll!=null)return true;
+        makeRagdoll(a,0,0,0,false);
+        if(a.ragdoll==null)return false;
+        for(var piece:a.ragdoll.pieces) {
+            var rest=a.restPose.get(piece.part());if(rest==null)continue;
+            g.game.commands().rigidPlace(piece.body(),rest.x,rest.y,rest.z,rest.qw,rest.qx,rest.qy,rest.qz,0,0,0,0,0,0);
+        }
+        return true;
+    }
 
     /**
      * Each tick for a body in physics' hands: the animal is where its trunk is; a knocked-down one is handed back to its
@@ -264,7 +285,10 @@ public final class Animals {
         float[] t = r.trunkAt(g);
         if (t == null) return;
         a.x = t[0]; a.z = t[2];
-        if (!r.knockdown) return;
+        if (!r.knockdown) {
+            if (a.carriedBy == 0 && g.time-r.since > 1.5 && r.asleep(g)) dropRagdoll(a);
+            return;
+        }
         if (g.time - r.since < 1.2 || (!r.asleep(g) && g.time - r.since < 2.6)) return;
         // facing the way the trunk faces (its forward is -z in its own frame)
         float qw = t[3], qx = t[4], qy = t[5], qz = t[6];
@@ -323,9 +347,12 @@ public final class Animals {
     }
 
     /** A carcass worth eating within reach (one not picked clean). */
-    Animal carcassNear(Animal a, float r) {
-        Animal best = null;
-        for (Animal c : animals) if (c.carcass() && !c.butchered && c.loaded && c.distTo(a) < r && c.species != a.species && (best == null || c.distTo(a) < best.distTo(a))) best = c;
+    Actor carcassNear(Animal a, float radius) {
+        Actor best=null; float distance=radius;
+        for(Animal corpse:animals) if(corpse.carcass() && !corpse.butchered && corpse.loaded && corpse.carriedBy==0 && corpse.species!=a.species && corpse.distTo(a)<distance) { best=corpse; distance=corpse.distTo(a); }
+        for(rpg.ai.Npc corpse:g.npcs) if(!corpse.alive && corpse.corpse!=0 && corpse.ragdoll!=0 && corpse.carriedBy==0 && corpse.summonOwner==0 && corpse.distTo(a)<distance
+                && g.objects.get(corpse.corpse) instanceof rpg.objects.Corpse object && !object.removed) { best=corpse; distance=corpse.distTo(a); }
+        if(best!=null && !g.vox.sight(a.x,a.eyeY(),a.z,best.x,best.y+0.25f,best.z))return null;
         return best;
     }
 
@@ -481,7 +508,10 @@ public final class Animals {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
             if (!a.loaded) continue;
+            g.game.commands().agentRate(a.agent,a.actionRate()*(a.cs.slowT>0?0.6f:1));
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
+            if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
+            a.trappedBy=0;
             if (a.puppet) { face(a, dt); continue; }
             double due = nextSense.getOrDefault(a.id, 0.0);
             if (g.time >= due) { mind.sense(a, (float) Math.min(0.5, g.time - due + 0.2)); nextSense.put(a.id, g.time + 0.2); }
@@ -651,7 +681,9 @@ public final class Animals {
         // a mother's young lose her; a predator that killed it may come to eat
         for (Animal b : animals) if (b.mother == a.id && b.alive) b.mother = 0;
         // killing someone's livestock is a crime, seen like any other
-        if (a.owned() && killer != null && killer.id != a.owner && !(killer instanceof Animal)) g.law.crime(killer, "LIVESTOCK", a.owner, value(a), null, cause);
+        // (a bounty hunter's law dog is not livestock: killing it, like killing them, adds nothing)
+        if (a.owned() && killer != null && killer.id != a.owner && !(killer instanceof Animal) && !(g.actor(a.owner) instanceof rpg.ai.Npc n && n.posse))
+            g.law.crime(killer, "LIVESTOCK", a.owner, a.species == Species.HORSE ? 50 : 30, null, cause);
     }
 
     /** What an animal is worth to its owner (Gold), for a theft or a killing. */
@@ -668,9 +700,33 @@ public final class Animals {
     }
 
     /** A scavenger or predator eats at a carcass: its meat goes, and with it what a butcher could take. */
-    void eat(Animal c, float dm) {
-        c.eatenMinutes += dm;
-        if (c.eatenMinutes > 30 + c.species.meat * 12) { c.butchered = true; c.lastEvent = "eaten"; }
+    void eat(Animal feeder,Actor corpse,float dm) {
+        float total=corpse instanceof Animal animal?30+animal.species.meat*12:90;
+        corpse.eatenMinutes+=dm;
+        if(g.time-feeder.lastBite>1.2) {
+            feeder.lastBite=g.time;
+            g.gore.pool(corpse.x,corpse.z,0.2f,corpse.id,0);
+            var wound=g.gore.of(corpse);
+            var parts=new rpg.combat.Gore.Part[]{rpg.combat.Gore.Part.ARM_L,rpg.combat.Gore.Part.LEG_R,rpg.combat.Gore.Part.ARM_R,rpg.combat.Gore.Part.LEG_L,rpg.combat.Gore.Part.HEAD};
+            int eaten=(int)(corpse.eatenMinutes/total*parts.length);
+            for(int i=0;i<Math.min(eaten,parts.length);i++)if(!wound.lost(parts[i])) {
+                if(corpse instanceof Animal animal)g.gore.severAnimal(animal,parts[i],0,0,feeder);
+                else g.gore.sever(corpse,parts[i],0,0,feeder);
+                break;
+            }
+            if(g.sfx!=null)g.sfx.play("soft.heavy",corpse.x,corpse.y,corpse.z,0.25f);
+        }
+        if(corpse.eatenMinutes<total)return;
+        if(corpse instanceof Animal animal) { animal.butchered=true; animal.lastEvent="eaten"; dropRagdoll(animal); }
+        else if(corpse instanceof rpg.ai.Npc dead && g.objects.get(dead.corpse) instanceof rpg.objects.Corpse body) {
+            // Flesh can be consumed; possessions cannot disappear with it.
+            var items=new ArrayList<>(body.contents.stacks()); items.addAll(dead.eq.stacks());
+            for(ItemStack item:items)g.objects.drop(item,dead.x,dead.y+0.1f,dead.z);
+            body.contents.clear(); dead.eq.clear(); body.removed=true; dead.corpse=0;
+            if(dead.ragdoll!=0)g.game.commands().release(dead.ragdoll); dead.ragdoll=0;
+        }
+        for(var limb:new ArrayList<>(g.gore.limbs))if(limb.owner==corpse.id) { g.game.commands().release(limb.body);g.gore.limbs.remove(limb); }
+        feeder.nextThink=0;
     }
 
     // ------------------------------------------------------------------ the tiers: near animals in full, far wild ones as cohort counts
@@ -758,6 +814,12 @@ public final class Animals {
             if (a.puppet) continue;
             Map<String, Object> m = new java.util.LinkedHashMap<>();
             m.put("id", a.id); m.put("sp", a.species.name()); m.put("baby", a.baby); m.put("female", a.female); m.put("alive", a.alive);
+            if(!a.alive)captureRest(a);
+            java.util.List<Object> rest=new ArrayList<>();
+            for(var entry:a.restPose.entrySet()) { var b=entry.getValue();rest.add(java.util.Map.of("part",entry.getKey().name(),"x",b.x,"y",b.y,"z",b.z,"qw",b.qw,"qx",b.qx,"qy",b.qy,"qz",b.qz)); }
+            m.put("restPose",rest);
+            m.put("charred",a.charred);m.put("injuries",a.injuries.save());
+            m.put("y",(double)a.y);
             m.put("x", (double) a.x); m.put("z", (double) a.z); m.put("yaw", (double) a.yaw); m.put("hp", (double) a.hp);
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
             m.put("home", a.home == null ? "" : a.home.id); m.put("hx", (double) a.homeX); m.put("hz", (double) a.homeZ); m.put("range", (double) a.range);
@@ -817,7 +879,16 @@ public final class Animals {
             if (tr != null) for (var e : tr.entrySet()) a.trust.put(Long.parseLong(e.getKey()), ((Number) e.getValue()).floatValue());
             a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
             a.hp = a.alive ? (float) astratto.util.Json.num(m, "hp", a.maxHp()) : 0;
-            a.y = DevMap.FLOOR;
+            a.y = (float)astratto.util.Json.num(m,"y",DevMap.FLOOR);
+            a.charred=(float)astratto.util.Json.num(m,"charred",0);a.injuries.load(astratto.util.Json.list(m,"injuries"));
+            if(!a.alive)a.lieT=1;
+            var poses=astratto.util.Json.list(m,"restPose");
+            if(poses!=null)for(Object entry:poses)if(entry instanceof Map<?,?> raw) {
+                @SuppressWarnings("unchecked") Map<String,Object> pose=(Map<String,Object>)raw;
+                var b=new Snapshots.Rigid();b.x=(float)astratto.util.Json.num(pose,"x",a.x);b.y=(float)astratto.util.Json.num(pose,"y",a.y);b.z=(float)astratto.util.Json.num(pose,"z",a.z);
+                b.qw=(float)astratto.util.Json.num(pose,"qw",1);b.qx=(float)astratto.util.Json.num(pose,"qx",0);b.qy=(float)astratto.util.Json.num(pose,"qy",0);b.qz=(float)astratto.util.Json.num(pose,"qz",0);
+                a.restPose.put(rpg.combat.Gore.Part.valueOf(astratto.util.Json.str(pose,"part","TORSO")),b);
+            }
             animals.add(a);
             if (a.alive) spawnBody(a); else a.loaded = true;
         }
@@ -892,6 +963,14 @@ public final class Animals {
                 if (who == g.player) g.chat.say("The " + a.kind().toLowerCase() + " eats the " + food.name.toLowerCase() + ".");
                 return Result.ok();
             }
+            case "milk" -> {
+                if (a.species != Species.COW || !a.female || a.baby || !a.alive) return Result.no("You can't milk that.");
+                if (!who.has(Items.BUCKET, 1)) return Result.no("You need an empty bucket.");
+                if (g.state.minutes - a.lastMilked <= MILK_REFILL) return Result.no("She has been milked recently.");
+                if (Math.hypot(who.x - a.x, who.z - a.z) > g.cfg.interactRange + a.radius) return Result.no("You're too far away.");
+                g.interact.begin(new Work(who, a, "milk", "Milking", 2.2f, false, g.time, () -> milkNow(a, who, req)));
+                return Result.started();
+            }
             case "butcher" -> {
                 if (!a.carcass() || a.butchered) return Result.no("Nothing left to take.");
                 if (blade(who) == null) return Result.no("You need a knife or a blade.");
@@ -901,6 +980,24 @@ public final class Animals {
             }
             default -> { return Result.no("You can't do that."); }
         }
+    }
+
+    /** Game minutes a cow takes to give a full bucket again. */
+    public static final double MILK_REFILL = 240;
+
+    /** A bucket filled from the cow: the milk is the owner's when the cow is someone else's, and taking it is theft. */
+    private Result milkNow(Animal a, Actor who, long req) {
+        if (!a.alive || a.goal == Goal.FLEE || a.goal == Goal.DEFEND) return Result.no("She won't stand for it.");
+        if (who.takeItems(Items.BUCKET, 1) == null) return Result.no("You need an empty bucket.");
+        g.state.burn(Items.BUCKET, 1);
+        a.lastMilked = g.state.minutes;
+        boolean theirs = a.owned() && a.owner != who.id;
+        g.grant(who, theirs ? new ItemStack(Items.MILK, 1, a.owner, true, a.id) : new ItemStack(Items.MILK, 1));
+        var ev = g.state.commit(req, "CowMilked", who.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind());
+        if (who == g.player) g.chat.say("You fill the bucket with warm milk.");
+        sound(a, a.species.idleSound, 0.5f);
+        if (theirs) g.law.crime(who, "THEFT", a.owner, Items.MILK.value, null, ev.id());
+        return Result.ok();
     }
 
     /** The yield, once: into the butcher's packs (or at their feet), still the owner's if it was someone's livestock. */

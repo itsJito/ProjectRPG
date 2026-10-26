@@ -44,31 +44,39 @@ final class Panels {
         Panel(String id, float pw, float ph) { super(id); this.pw = pw; this.ph = ph; fadeIn = 0.12f; fadeOut = 0.12f; }
         @Override public float width() { return pw; }
         @Override public float height() { return ph; }
-        void title(Ui2D ui, String t, float x, float y) { ui.text(t, x, y, Style.TITLE, Style.ACCENT); }
+        /** A section heading: Morpheus in gold over a gold rule the panel's width. */
+        void title(Ui2D ui, String t, float x, float y) { title(ui, t, x, y, pw); }
+        void title(Ui2D ui, String t, float x, float y, float w) { ui.text(ui.heading, t, x, y - 4, 21, Style.ACCENT); Style.rule(ui, x, y + 19, w); }
+        /** An inset section behind a group of rows: a darker sheet with a faint gold edge. */
+        static void sheet(Ui2D ui, float x, float y, float w, float h) {
+            ui.rect(x, y, w, h, 0x50000000);
+            ui.border(x, y, w, h, 1, 0x30C8A060);
+        }
     }
 
     // ------------------------------------------------------------------ the frame: tabs to every panel scene
     static final class Frame extends Panel {
-        static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory_Icon_UI", "I"}, {Hud.Scene.CHARACTER, "Character", "Worn_Equipment_icon_UI", "C"},
-                {Hud.Scene.SKILLS, "Skills", "Skills_icon_UI", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
+        static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory", "I"}, {Hud.Scene.CHARACTER, "Character", "Equipment", "C"},
+                {Hud.Scene.SKILLS, "Skills", "Skills_icon", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
         Frame(Hud h) { super("frame", Hud.FW, Hud.FH); }
         @Override public void draw(Ui2D ui, float x, float y) {
-            ui.rect(0, 0, hud.w, hud.h, 0x48000000);   // the world steps back behind a panel
-            ui.rect(x, y, pw, ph, 0xF4141518);
-            ui.border(x, y, pw, ph, 1, Style.EDGE);
-            float tw = 128;
+            ui.rect(0, 0, hud.w, hud.h, 0x60000000);   // the world steps back behind a panel
+            Style.card(ui, x, y, pw, ph);
+            // the tab strip: a darker band the tabs hang in, the open one joined to the page below it
+            ui.rect(x + 4, y + 4, pw - 8, 40, 0x70000000);
+            float tw = 124;
             for (int i = 0; i < TABS.length; i++) {
                 Hud.Scene s = (Hud.Scene) TABS[i][0];
-                float tx = x + 12 + i * (tw + 4);
+                float tx = x + 10 + i * (tw + 4);
                 boolean on = hud.scene == s;
-                if (Style.tab(ui, "", tx, y + 6, tw, 34, on)) { hud.go(s); hud.sound("UIbutton1", 0.4f); }
-                ui.img((String) TABS[i][2], tx + 8, y + 12, 20, on ? 0xFFFFFFFF : 0xA0FFFFFF);
-                ui.text((String) TABS[i][1], tx + 34, y + 14, 13, on ? Style.TEXT : Style.DIM);
-                if (ui.hover(tx, y + 6, tw, 34)) hud.tooltip(TABS[i][1] + "\nKey " + TABS[i][3]);
+                if (Style.tab(ui, "", tx, y + 8, tw, 34, on)) { hud.go(s); hud.sound("UIbutton1", 0.4f); }
+                ui.img((String) TABS[i][2], tx + 8, y + 12, 24, on ? 0xFFFFFFFF : 0xB0FFFFFF);
+                ui.text((String) TABS[i][1], tx + 38, y + 17, 14, on ? 0xFFFFD15E : Style.DIM);
+                if (ui.hover(tx, y + 8, tw, 34)) hud.tooltip(TABS[i][1] + "\nKey " + TABS[i][3]);
             }
-            ui.rect(x + 12, y + 41, pw - 24, 1, Style.EDGE);
-            if (Style.button(ui, "x", x + pw - 34, y + 10, 24, 24, true)) hud.go(Hud.Scene.WORLD);
-            ui.img("questionmark_UI", x + pw - 64, y + 12, 20, 0xA0FFFFFF);
+            Style.rule(ui, x + 6, y + 44, pw - 12);
+            if (Style.button(ui, "x", x + pw - 36, y + 12, 26, 26, true)) hud.go(Hud.Scene.WORLD);
+            ui.img("questionmark_UI", x + pw - 68, y + 14, 22, 0xC0FFFFFF);
             if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M map, B magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
         }
     }
@@ -83,30 +91,43 @@ final class Panels {
             Rpg g = hud.g;
             Player p = g.player;
             title(ui, "Equipment", x, y);
-            float cs = 50, ox = x + (pw - cs * 3) / 2 - 4, oy = y + 26;
+            float cs = 50, ox = x + (pw - cs * 3) / 2 - 4, oy = y + 30;
+            // the figure's outline behind the slots, faint, so the doll reads as a body
+            ui.img("Equipment", ox + cs * 0.5f, oy + cs * 0.6f, cs * 2.2f, 0x18FFFFFF);
             for (Object[] e : SLOTS) {
                 Slot s = (Slot) e[0];
                 float cx = ox + (int) e[1] * (cs + 4), cy = oy + (int) e[2] * (cs + 4);
-                Style.well(ui, cx, cy, cs, cs);
                 ItemStack it = p.eq.get(s);
                 boolean hv = ui.hover(cx, cy, cs, cs);
+                String plate = slotIcon(s);
+                // an empty slot is its stone plate (the provided slot icons); a filled one, the item on a darkened plate
+                Style.well(ui, cx, cy, cs, cs);
+                if (plate != null) ui.img(plate, cx + 1, cy + 1, cs - 2, it == null ? 0xFFFFFFFF : 0x50FFFFFF);
+                else if (it == null) ui.flatCentered(s.name().toLowerCase(), cx + cs / 2, cy + cs / 2 - 7, 10, Style.FAINT);
                 if (hv) ui.border(cx, cy, cs, cs, 1, Style.EDGE_HI);
                 if (it != null) hud.itemIcon(ui, it, cx + 2, cy + 2, cs - 4, cs - 4, 1);
-                else ui.flatCentered(s.name().toLowerCase(), cx + cs / 2, cy + cs / 2 - 7, 10, Style.FAINT);
                 if (hv && it != null) hud.tooltip(hud.describe(it) + "\nClick to remove");
                 if (it != null && live && ui.clicked(cx, cy, cs, cs)) { Result r = g.items.unequip(p, s); if (r.rejected()) g.chat.warn(r.reason()); else hud.sound("UI_Trading_ItemSelect", 0.4f); }
                 hud.inventory.zone(cx, cy, cs, cs, d -> hud.inventory.equipFromDrag(d, s));
                 hud.named.put("slot:" + s.name(), new float[]{cx + cs / 2, cy + cs / 2});
             }
             float sy = oy + 6 * (cs + 4) + 4;
-            ui.text(String.format("Armor %.1f   Protection %.0f", p.eq.armor(), CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor())), x + 4, sy, 12, Style.DIM);
+            sheet(ui, x, sy - 4, pw, 24);
+            ui.text(String.format("Armor %.1f   Protection %.0f", p.eq.armor(), CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor())), x + 8, sy + 1, 12, Style.DIM);
+        }
+        /** The stone plate an empty slot shows (the provided OSRS-style slot icons); a worn bag's slots have none. */
+        static String slotIcon(Slot s) {
+            return switch (s) {
+                case HEAD -> "Head_slot"; case CAPE -> "Cape_slot"; case NECK -> "Neck_slot"; case AMMO -> "Ammo_slot"; case MAIN -> "Weapon_slot";
+                case BODY -> "Body_slot"; case OFF -> "Shield_slot"; case LEGS -> "Legs_slot"; case HANDS -> "Hands_slot"; case FEET -> "Feet_slot";
+                case RING -> "Ring_slot"; default -> null;
+            };
         }
     }
 
     // ------------------------------------------------------------------ what the mouse is over, the load and the purse
     static final class ItemInfo extends Panel {
         ItemInfo(Hud h) { super("iteminfo", 268, 400); }
-        @Override protected boolean active() { return hud.win != Hud.Win.CONTAINER && hud.win != Hud.Win.SHOP; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Rpg g = hud.g;
             Player p = g.player;
@@ -121,14 +142,19 @@ final class Panels {
             if (coins >= 100_000) ui.text(Currency.full(coins), x + 60, y + 98, 11, Style.FAINT);
             ItemStack s = hud.inventory.hovered;
             float iy = y + 128;
-            ui.rect(x, iy - 8, pw, 1, Style.EDGE);
+            title(ui, "Item", x, iy - 6);
+            iy += 22;
             if (s == null) { ui.text("Point at an item to see it here.", x, iy, 12, Style.FAINT); return; }
-            hud.itemIcon(ui, s, x, iy, 48, 48, 1);
-            ui.text(s.def.name, x + 58, iy + 2, 14, Style.TEXT);
-            ui.text(s.def.category().name().toLowerCase(), x + 58, iy + 22, 11, Style.DIM);
-            float ly = iy + 60;
+            Style.well(ui, x, iy, 52, 52);
+            hud.itemIcon(ui, s, x + 2, iy + 2, 48, 48, 1);
+            ui.text(s.def.name, x + 62, iy + 4, Math.min(15, (pw - 64) / Math.max(1, ui.width(s.def.name, 1))), 0xFFFFD15E);
+            ui.text(s.def.category().name().toLowerCase(), x + 62, iy + 26, 11, Style.DIM);
+            float ly = iy + 62;
             for (String l : hud.describe(s).split("\n")) { if (l.equals(s.def.name)) continue; ui.text(l, x, ly, 12, l.startsWith("Stolen") ? Style.BAD : Style.DIM); ly += 16; }
-            for (String l : HudFragments.wrap(ui, s.def.examine == null ? "" : s.def.examine, 12, pw)) { ui.text(l, x, ly + 4, 12, Style.FAINT); ly += 15; }
+            // the flavour text, in the lore face
+            Ui2D.Face was = ui.use(ui.lore);
+            for (String l : HudFragments.wrap(ui, s.def.examine == null ? "" : s.def.examine, 13, pw)) { ui.text(l, x, ly + 4, 13, 0xFFC8B896); ly += 16; }
+            ui.use(was);
         }
     }
 
@@ -140,8 +166,11 @@ final class Panels {
             Player p = g.player;
             ItemDef main = p.main();
             title(ui, p.name, x, y);
-            ui.text("Level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 24, 13, Style.DIM);
-            ui.text("Combat & condition", x, y + 56, 13, Style.TEXT);
+            ui.text("Combat level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 28, 13, Style.DIM);
+            sheet(ui, x - 6, y + 50, 340, 372);
+            sheet(ui, x + 352, y + 50, 300, 90);
+            sheet(ui, x + 352, y + 158, 300, 152);
+            ui.text("Combat & condition", x, y + 56, 13, 0xFFFFD15E);
             float prot = CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor());
             String[][] rows = {
                     {"Health", String.format("%.0f / %.0f", p.hp, p.maxHp())}, {"Stamina", String.format("%.0f / %.0f", p.stamina, p.maxStamina())},
@@ -163,11 +192,12 @@ final class Panels {
             ui.text(hn.discount() > 0 ? String.format("Merchants who know you: %.0f%% off", hn.discount() * 100) : "No Honor discount (from +33)", x + 360, y + 112, 11, Style.FAINT);
             for (int i = 0; i < rows.length; i++) {
                 float ry = y + 84 + i * 21;
+                if (i % 2 == 0) ui.rect(x - 4, ry - 3, 336, 20, 0x14FFE0A0);
                 ui.text(rows[i][0], x, ry, 13, Style.DIM);
                 ui.text(rows[i][1], x + 140, ry, 13, i == rows.length - 1 ? Currency.color(p.count(Items.COINS)) : Style.TEXT);
             }
             String[] help = {"LMB tap: light swing    LMB hold: heavy", "RMB: guard (shield or weapon), or the off hand", "Guard just before a hit to parry", "Q dodge    R cast    1-0 the action bar", "V first / third person    E interact (hold for all options)"};
-            ui.text("Controls", x + 360, y + 168, 13, Style.TEXT);
+            ui.text("Controls", x + 360, y + 166, 13, 0xFFFFD15E);
             for (int i = 0; i < help.length; i++) ui.text(help[i], x + 360, y + 194 + i * 20, 12, Style.FAINT);
         }
     }
@@ -182,12 +212,15 @@ final class Panels {
                 int i = s.ordinal();
                 float cx = x + (i % 3) * cw, cy = y + (i / 3) * ch;
                 boolean hv = ui.hover(cx, cy, cw - 4, ch - 4), sel = hud.guide == s;
-                ui.rect(cx, cy, cw - 4, ch - 4, sel ? 0x26FFFFFF : hv ? 0x18FFFFFF : 0x0CFFFFFF);
-                if (sel) ui.rect(cx, cy + ch - 6, cw - 4, 2, Style.ACCENT);
-                ui.img(Atlas.skill(s), cx + 6, cy + 7, 38, 0xFFFFFFFF);
+                // each skill a stone tile: its icon in a sunken plate, the level large, the way to the next as a bar
+                ui.rect(cx, cy, cw - 4, ch - 4, sel ? 0xFF3A3024 : hv ? 0xFF2C251C : 0xFF211C16);
+                ui.border(cx, cy, cw - 4, ch - 4, 1, sel ? Style.GOLD : hv ? 0xFF5A4A30 : 0xFF0E0B08);
+                if (sel) ui.rect(cx + 1, cy + 1, cw - 6, 1, 0x80E0BC6C);
+                Style.well(ui, cx + 5, cy + 6, 40, 40);
+                ui.img(Atlas.skill(s), cx + 7, cy + 8, 36, 0xFFFFFFFF);
                 int lvl = g.player.skills.level(s);
-                ui.text(s.title, cx + 50, cy + 6, 12, Style.DIM);
-                ui.text(String.valueOf(lvl), cx + 50, cy + 20, 18, lvl >= 100 ? Style.ACCENT : Style.TEXT);
+                ui.text(s.title, cx + 52, cy + 6, 12, sel ? Style.TEXT : Style.DIM);
+                ui.text(String.valueOf(lvl), cx + 52, cy + 20, 18, lvl >= 100 ? 0xFFFFD15E : Style.TEXT);
                 Style.bar(ui, cx + 50, cy + 44, cw - 62, 3, (float) XpTable.progress(g.player.skills.xp(s)), lvl >= 100 ? Style.ACCENT : Style.GOOD);
                 if (hv) {
                     long xp = g.player.skills.xp(s);
@@ -210,10 +243,12 @@ final class Panels {
         @Override public void draw(Ui2D ui, float x, float y) {
             Skill s = hud.guide;
             if (s != seen) { scroll = 0; seen = s; }
-            ui.img(Atlas.skill(s), x, y, 40, 0xFFFFFFFF);
-            ui.text(s.title, x + 50, y + 2, Style.TITLE, Style.ACCENT);
-            ui.text("level " + hud.g.player.skills.level(s), x + 50, y + 22, 12, Style.DIM);
-            float dy = y + 50;
+            Style.well(ui, x, y, 44, 44);
+            ui.img(Atlas.skill(s), x + 2, y + 2, 40, 0xFFFFFFFF);
+            ui.text(ui.heading, s.title, x + 54, y - 2, 24, Style.ACCENT);
+            ui.text("level " + hud.g.player.skills.level(s), x + 54, y + 26, 12, Style.DIM);
+            Style.rule(ui, x, y + 48, pw);
+            float dy = y + 56;
             for (String l : HudFragments.wrap(ui, s.description, 12, pw)) { ui.text(l, x, dy, 12, Style.DIM); dy += 15; }
             dy += 8;
             List<String> lines = SkillGuide.unlocks(s);
@@ -240,14 +275,17 @@ final class Panels {
             title(ui, "Quests", x, y);
             var st = g.quests.courier;
             int c = switch (st) { case NOT_STARTED -> Style.DIM; case ACTIVE -> Style.ACCENT; case COMPLETED -> Style.GOOD; case FAILED -> Style.BAD; };
-            ui.img("Quest_map_icon", x, y + 26, 16, 0xFFFFFFFF);
-            ui.text("Courier (test quest) - " + st.name().toLowerCase().replace('_', ' ') + (g.quests.failReason != null ? ": " + g.quests.failReason : ""), x + 22, y + 26, 13, c);
-            float yy = y + 60;
+            sheet(ui, x - 4, y + 26, pw + 8, 24);
+            ui.img("Quest_map_icon", x, y + 29, 18, 0xFFFFFFFF);
+            ui.text("Courier (test quest) - " + st.name().toLowerCase().replace('_', ' ') + (g.quests.failReason != null ? ": " + g.quests.failReason : ""), x + 26, y + 31, 13, c);
+            float yy = y + 66;
             title(ui, "Journal", x, yy);
             yy += 24;
             List<String> j = g.quests.journal;
             if (j.isEmpty()) { ui.text("Nothing learned yet.", x, yy, 12, Style.FAINT); yy += 16; }
-            for (int i = Math.max(0, j.size() - 8); i < j.size(); i++) for (String l : HudFragments.wrap(ui, j.get(i), 12, pw)) { ui.text(l, x, yy, 12, Style.TEXT); yy += 15; }
+            Ui2D.Face was = ui.use(ui.lore);
+            for (int i = Math.max(0, j.size() - 8); i < j.size(); i++) for (String l : HudFragments.wrap(ui, j.get(i), 13, pw)) { ui.text(l, x, yy, 13, 0xFFE0D2B0); yy += 16; }
+            ui.use(was);
             yy += 14;
             title(ui, "The law", x, yy);
             yy += 24;
@@ -284,7 +322,7 @@ final class Panels {
             Rpg g = hud.g;
             Player p = g.player;
             // the open spellbook (GDD 2.5: one at a time, changed at an altar) and its eleven slots
-            title(ui, p.book.title + " spellbook", x, y);
+            title(ui, p.book.title + " spellbook", x, y, 420);
             ui.text(String.format("Mana %.0f / %.0f  -  a point a minute", p.mana, p.maxMana()), x + 230, y + 3, 11, Style.MANA);
             ui.text(p.book.about + " Click to select; R (or a staff) casts. Change books at an altar.", x, y + 20, 10, Style.FAINT);
             float yy = y + 40;
@@ -302,7 +340,7 @@ final class Panels {
                 yy += 33;
             }
             // the prayers: toggled; each drains a point of Faith per interval while it is raised
-            title(ui, "Prayers", x + 448, y);
+            title(ui, "Prayers", x + 448, y, 420);
             ui.text(String.format("Faith %.0f / %.0f  -  a point every %.1f s for each prayer", p.faith, p.maxFaith(), rpg.combat.Prayers.interval(p)), x + 548, y + 3, 11, Style.FAITH);
             yy = y + 28;
             for (Spells.Prayer b : Spells.Prayer.values()) {

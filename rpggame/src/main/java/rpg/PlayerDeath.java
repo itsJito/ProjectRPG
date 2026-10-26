@@ -50,16 +50,20 @@ public final class PlayerDeath {
         camSet = false;
         bearingAt = -9;
         bearing = 0.45f;
-        ragdoll = g.game.reserve(KIND_RAGDOLL);
+        boolean existing = g.reactions.died(p);
+        ragdoll = existing ? p.ragdoll : g.game.reserve(KIND_RAGDOLL);
+        p.ragdoll = 0;
         boolean posed = p.posePts != null && g.time - p.poseAt < 0.5;
-        g.game.commands().ragdollCreate(ragdoll, 1, SYDNEY_HUMAN, RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), p.x, p.y, p.z, p.yaw, 0, 0, 0);
-        if (posed) g.game.commands().ragdollPose(ragdoll, p.vx, 0, p.vz, p.posePts);
+        if (!existing) g.game.commands().ragdollCreate(ragdoll, 1, SYDNEY_HUMAN, RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), p.x, p.y, p.z, p.yaw, 0, 0, 0);
+        if (!existing && posed) g.game.commands().ragdollPose(ragdoll, p.vx, 0, p.vz, p.posePts);
         g.game.commands().ragdollControl(ragdoll, CONTROL_DIE, 1);
         if (by != null && by != p) {
             float dx = p.x - by.x, dz = p.z - by.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
             g.game.commands().ragdollHit(ragdoll, RD_NECK, dx / l, 0.2f, dz / l, 110, 30);
         }
-        if (g.sfx != null) g.sfx.ui("QuestFailed", 0.45f);
+        // the death sting (gamefixes: the provided music): the score stops for it
+        if (g.music != null) g.music.stopNow();
+        if (g.sfx != null) g.sfx.ui("Death", 0.85f);
     }
 
     /** The world's clock through the death: a breath of slow motion as the body goes down, easing back to real time. */
@@ -159,7 +163,7 @@ public final class PlayerDeath {
         active = false;
         g.respawn();
         if (grave != null) g.chat.add(secured
-                ? "Your belongings lie in a grave where you fell. Inside the walls nobody may touch it: a guard will carry it to the undertaker if you don't reach it first."
+                ? "Morrow holds your belongings at the Undertaker’s chest. Stolen goods are confiscated and will not be returned. Speak to him to recover the rest."
                 : "Your belongings lie in a grave where you fell, outside the walls. Anyone who finds it may help themselves: hurry. It stands ten minutes.", rpg.Chat.Kind.WARN);
         if (exit && g.ui != null) g.ui.toTitle();
     }

@@ -27,6 +27,7 @@ public final class Weather {
     public enum Kind {
         //          rain  snow  fog   wind  cloud
         CLEAR(0.00f, 0.00f, 0.00f, 0.18f, 0.00f),
+        OVERCAST(0.00f, 0.00f, 0.12f, 0.28f, 0.65f),
         FOG(0.00f, 0.00f, 1.00f, 0.06f, 0.55f),
         RAIN(0.55f, 0.00f, 0.30f, 0.38f, 0.80f),
         STORM(1.00f, 0.00f, 0.50f, 1.00f, 1.00f),
@@ -82,6 +83,9 @@ public final class Weather {
     public final float[] bolt = new float[3 * 200];
     public int boltPoints;
     public float boltAge = 99f;
+
+    /** No lightning or delayed thunder from the abandoned timeline survives loading. */
+    public void clearTransient() { pendingThunder.clear();pulseCount=0;pulseT=0;lightning=0;boltAge=99;boltPoints=0;nextStrike=8; }
 
     public Kind kind() { return kind; }
 

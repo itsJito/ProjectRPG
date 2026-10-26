@@ -17,11 +17,6 @@ public final class Progression {
     /** Recent XP drops for the HUD: skill, amount, when. */
     public record Drop(Skill skill, long amount, double at) {}
     public final ArrayDeque<Drop> drops = new ArrayDeque<>();
-    /** The level-up being celebrated (null none), and when it began. */
-    public Skills.Award celebrating;
-    /** What the level just reached revealed (gamefixes: what a skill gives is kept hidden until the level is reached). */
-    public final List<String> revealed = new ArrayList<>();
-    public double celebratedAt = -99;
     /** Awards made, for the acceptance checks. */
     public long awards, levelUps;
 
@@ -37,6 +32,7 @@ public final class Progression {
         // Only this session's player progresses; NPCs, animals and training dummies retain their configured skills.
         if (xp <= 0 || a == null || a != g.player) return null;
         if (requestId != 0 && g.state.alreadyCommitted(requestId)) return null;
+        int combatBefore = a.skills.combatLevel();
         Skills.Award w = a.skills.award(s, xp);
         awards++;
         if (g.invariants != null) g.invariants.onAward(a, s, w.applied());
@@ -44,7 +40,7 @@ public final class Progression {
         if (w.levelledUp()) {
             levelUps++;
             g.state.commit("LevelUp", a.id, 0, null, ev.id(), s.name() + " " + w.fromLevel() + "->" + w.toLevel());
-            if (a == g.player) celebrate(w);
+            if (a == g.player) celebrate(w, combatBefore, a.skills.combatLevel());
         }
         if (a == g.player && w.applied() > 0) {
             drops.addLast(new Drop(s, w.applied(), g.time));
@@ -53,7 +49,7 @@ public final class Progression {
         return w;
     }
 
-    private void celebrate(Skills.Award w) {
+    private void celebrate(Skills.Award w, int combatBefore, int combatNow) {
         Skill s = w.skill();
         g.chat.add("Congratulations, you've just advanced " + article(s) + " " + s.title + " level. Your " + s.title + " level is now " + w.toLevel() + ".", rpg.Chat.Kind.LEVEL);
         if (w.toLevel() >= XpTable.MAX_LEVEL)
@@ -62,15 +58,16 @@ public final class Progression {
         if (s == Skill.FAITH) g.player.faith = Math.min(g.player.maxFaith(), g.player.faith + (w.toLevel() - w.fromLevel()));
         if (s == Skill.MAGIC) g.player.mana = Math.min(g.player.maxMana(), g.player.mana + (w.toLevel() - w.fromLevel()));
         // what the new level opens up, announced now that it is earned (the guide showed only "???" until this moment)
-        revealed.clear();
+        List<String> revealed=new ArrayList<>();
         for (String line : rpg.ui.SkillGuide.unlocks(s)) {
             int need = Integer.parseInt(line.substring(0, line.indexOf(' ')));
             if (need > w.fromLevel() && need <= w.toLevel()) revealed.add(line.substring(line.indexOf(' ') + 1));
         }
         for (String r : revealed) g.chat.add("New at " + s.title + " level " + w.toLevel() + ": " + r + ".", rpg.Chat.Kind.LEVEL);
-        celebrating = w;
-        celebratedAt = g.time;
-        if (g.sfx != null) g.sfx.jingle();
+        boolean combatUp = combatNow > combatBefore, combatMax = combatUp && combatNow >= Skills.MAX_COMBAT;
+        if (combatUp) g.chat.add("Your combat level is now " + combatNow + ".", rpg.Chat.Kind.LEVEL);
+        if (g.sfx != null) g.sfx.jingle(w.toLevel() >= XpTable.MAX_LEVEL, combatUp, combatMax);
+        if (g.music != null) g.music.duckFor(combatMax || w.toLevel() >= XpTable.MAX_LEVEL ? 8 : 4);
         if (g.fx != null) g.fx.fireworks(g.player.x, g.player.y + 2.2f, g.player.z);
     }
 
@@ -78,6 +75,5 @@ public final class Progression {
 
     public void update() {
         while (!drops.isEmpty() && g.time - drops.peekFirst().at() > 2.4) drops.removeFirst();
-        if (celebrating != null && g.time - celebratedAt > 4.5) celebrating = null;
     }
 }

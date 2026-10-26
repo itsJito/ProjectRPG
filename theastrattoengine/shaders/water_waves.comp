@@ -1,0 +1,33 @@
+#include "include/head.glsl"
+layout(local_size_x=8,local_size_y=8) in;
+layout(rgba16f,binding=0) readonly uniform image2D uPrevious;
+layout(rgba16f,binding=1) writeonly uniform image2D uNext;
+uniform sampler2D uMask;
+uniform vec2 uWorldSize;
+uniform float uDt,uTime,uRain;
+uniform int uImpulses;
+uniform vec4 uImpulse[32];
+float heightAt(ivec2 p,float center) {
+ p=clamp(p,ivec2(0),ivec2(255));
+ return texelFetch(uMask,p,0).g>0.5?imageLoad(uPrevious,p).r:center;
+}
+float hash(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+void main() {
+ ivec2 p=ivec2(gl_GlobalInvocationID.xy);if(any(greaterThanEqual(p,ivec2(256))))return;
+ if(texelFetch(uMask,p,0).g<0.5) { imageStore(uNext,p,vec4(0));return; }
+ vec4 state=imageLoad(uPrevious,p);float h=state.r,v=state.g;
+ vec2 cell=uWorldSize/256.0,world=(vec2(p)+0.5)*cell;
+ float lap=(heightAt(p+ivec2(1,0),h)+heightAt(p-ivec2(1,0),h)-2.0*h)/(cell.x*cell.x)
+          +(heightAt(p+ivec2(0,1),h)+heightAt(p-ivec2(0,1),h)-2.0*h)/(cell.y*cell.y);
+ // Wave speed is CFL bounded for the smallest world cell, even in tiny engine test worlds.
+ float c=min(2.6,min(cell.x,cell.y)*0.45/uDt);
+ v=(v+c*c*lap*uDt)*exp(-1.4*uDt);
+ for(int i=0;i<min(uImpulses,32);i++) {
+  vec4 impulse=uImpulse[i];float d=distance(world,impulse.xy)/max(impulse.z,0.2);
+  v+=exp(-d*d*3.0)*impulse.w*uDt;
+ }
+ float drop=hash(vec2(p)+floor(uTime*120.0));
+ if(drop<uRain*texelFetch(uMask,p,0).b*0.0015)v-=0.12;
+ h=clamp(h+v*uDt,-0.18,0.18);
+ imageStore(uNext,p,vec4(h,clamp(v,-2.0,2.0),0,0));
+}

@@ -15,7 +15,8 @@ uniform sampler3D uProbeR, uProbeG, uProbeB;
 // swirl, seed)
 uniform int uSmokeN;
 uniform vec4 uSmoke[96];
-uniform float uTime;
+uniform float uTime,uCloudCover;
+uniform vec2 uCloudOffset;
 float hash31(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float vnoise(vec3 p) {
     vec3 i = floor(p), f = fract(p);
@@ -142,6 +143,27 @@ void main() {
         }
         scat = sscat + scat * strans;
         trans *= strans;
+    }
+    // Bounded cloud slab, at the existing quarter-resolution fog target. Geometry depth clips the march.
+    if(uCloudCover>0.01 && dir.y>0.025) {
+        float nearCloud=max(0.0,(78.0-uCam.y)/dir.y), farCloud=(106.0-uCam.y)/dir.y;
+        farCloud=min(farCloud,d>=0.99999?800.0:length(ray));
+        if(farCloud>nearCloud) {
+            int count=uSteps<=10?6:10; float stride=(farCloud-nearCloud)/float(count);
+            vec3 cloud=vec3(0);float visibility=1.0;
+            for(int i=0;i<10;i++) {
+                if(i>=count)break;
+                vec3 p=uCam+dir*(nearCloud+(float(i)+0.5)*stride);
+                vec3 uv=(p-vec3(uCloudOffset.x,0,uCloudOffset.y))*0.024;
+                float shape=vnoise(uv)*0.7+vnoise(uv*2.2)*0.3;
+                float edge=smoothstep(78.0,84.0,p.y)*(1.0-smoothstep(98.0,106.0,p.y));
+                float amount=max(0.0,shape-(0.7-uCloudCover*0.38))*edge;
+                float a=1.0-exp(-amount*stride*0.14);
+                vec3 light=uAmbient*(0.8+0.5*edge)+uSunCol*(0.28+0.35*max(mu,0.0));
+                cloud+=visibility*a*light;visibility*=1.0-a;
+            }
+            scat+=trans*cloud;trans*=visibility;
+        }
     }
     // (what lies beyond the march is fogged where this is applied, the same for a wall as for the sky behind it)
     oFog = vec4(scat, trans);

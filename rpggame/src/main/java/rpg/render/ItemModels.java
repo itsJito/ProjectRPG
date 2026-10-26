@@ -42,7 +42,8 @@ public final class ItemModels {
      * from their 1/32 m designs, doubled and bevelled, with any dark metal brought up to the reflectance metal has.
      */
     private static Model fine(ItemDef d) {
-        Tier t = d.tier;
+        // wooden gear keeps the wood designs (planked shield, a wooden blade)
+        Tier t = d.tier == Tier.WOODEN ? null : d.tier;
         if (d.id.startsWith("cape_")) return HiResItems.skillcape(Skill.valueOf(d.id.substring(5).toUpperCase()));
         switch (d.family) {
             case SWORD: return HiResItems.sword(d, t);
@@ -69,14 +70,20 @@ public final class ItemModels {
                 break;
             default: break;
         }
+        Model treasure = TreasureModels.of(d);
+        if (treasure != null) return treasure;
+        if (d.look != null && d.slot == null) { Model loot = LootModels.of(d); if (loot != null) return loot; }
         if (d.restoresFaith > 0) return HiResItems.bottle(d);
         if (d.family == rpg.item.ItemDef.Family.JEWEL) return d.slot == Slot.RING ? HiResItems.ring(d) : HiResItems.necklace(d);
-        if (d.id.startsWith("uncut_") || d.id.equals("sapphire") || d.id.equals("emerald") || d.id.equals("ruby") || d.id.equals("diamond")) return HiResItems.gem(d, d.id.startsWith("uncut_"));
+        if (d.id.startsWith("uncut_")) return HiResItems.gem(d, true);
         if (d.id.endsWith("_mould")) return HiResItems.mould(d);
         if (d.id.equals("gold_bar")) return HiResItems.bar(0xE8C048);
         if (d.id.equals("chisel")) return HiResItems.chisel();
         Model coarse = switch (d.id) {
             case "small_fishing_net" -> net();
+            case "snare" -> snare();
+            case "cloth_roll" -> clothRoll();
+            case "stone_block" -> quarryBlock();
             case "crab_cage" -> cage();
             case "raw_crab", "crab" -> crab(d);
             default -> build(d);
@@ -90,6 +97,35 @@ public final class ItemModels {
             if (l < 150) v.col[i] = (METAL << 24) | (Tex.shade(c, Math.min(2.2f, 150f / Math.max(20, l))) & 0xFFFFFF);
         }
         return m;
+    }
+
+    private static Model snare() {
+        VoxModel vox=new VoxModel(15,16,3);
+        for(int x=0;x<15;x++)for(int y=0;y<15;y++) {
+            float distance=(float)Math.hypot(x-7,y-7);
+            if(distance>5.5f && distance<6.7f)vox.set(x,y,1,mat(0xAB9769));
+        }
+        vox.box(6,0,1,7,4,1,mat(0x8C7750));vox.box(1,2,0,2,15,1,mat(0x785537));
+        return new Model(vox,7.5f,0.5f,1.5f);
+    }
+    private static Model clothRoll() {
+        VoxModel vox=new VoxModel(14,10,10);
+        for(int x=0;x<14;x++)for(int y=0;y<10;y++)for(int z=0;z<10;z++) {
+            float radius=(float)Math.hypot(y-4.5f,z-4.5f);if(radius>4.5f)continue;
+            int color=x==0 || x==13?((int)(radius*2)%2==0?0xC9BCA0:0x968B73):(x+y+z)%4==0?0xB9AD91:0xC5B99D;
+            if(x==4 || x==9)color=0x7E745B;
+            vox.set(x,y,z,mat(color));
+        }
+        return new Model(vox,7,0.5f,5);
+    }
+    private static Model quarryBlock() {
+        VoxModel vox=new VoxModel(14,10,10);
+        for(int x=0;x<14;x++)for(int y=0;y<10;y++)for(int z=0;z<10;z++) {
+            if((x==0 || x==13) && (y==0 || y==9) && (z==0 || z==9))continue;
+            int grain=Math.floorMod(x*31+y*17+z*13,9);
+            vox.set(x,y,z,mat(grain<2?0x757A7D:grain>6?0x9A9C97:0x888C88));
+        }
+        return new Model(vox,7,0.5f,5);
     }
 
     /** A small hand net: a hoop on a short handle, the mesh across it. (1/32 m, doubled.) */
@@ -203,6 +239,7 @@ public final class ItemModels {
         if (t == null) return new Look(mat(d.color), mat(0x4A3020), mat(0x6A4A2A), mat(0x5A3A20), 0);
         int b = metal(t.color);
         return switch (t) {
+            case STONE -> new Look(mat(0x8E8C86), mat(0x5A3A22), mat(0x6A6862), mat(0x7A7872), 0);
             case BRONZE -> new Look(b, mat(0x5A3A22), metal(0x8A5A2A), metal(0x9A6030), 1);
             case IRON -> new Look(b, mat(0x3A2A1C), metal(0x55555A), metal(0x5A5A60), 2);
             case BLACK -> new Look(b, mat(0x18161A), metal(0x3A3A44), metal(0x2A2A32), 3);
@@ -416,7 +453,7 @@ public final class ItemModels {
 
     // ------------------------------------------------------------------ armour
     private static int[] armourColours(Tier t, ItemDef d) {
-        if (t == null || t == Tier.LEATHER) return new int[]{mat(d.color), mat(Tex.shade(d.color, 1.3f)), 0};
+        if (t == null) return new int[]{mat(d.color), mat(Tex.shade(d.color, 1.3f)), 0};
         if (t == Tier.CHAINMAIL) return new int[]{metal(0x8A8F96), metal(0x5E636A), 1};
         Look L = look(t, d);
         return new int[]{L.blade(), L.guard(), 2};

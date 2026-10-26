@@ -83,7 +83,7 @@ public final class Console {
         var("sensitivity", "1", "Mouse sensitivity multiplier.");
         var("volume", "1", "Master volume (0 - 1).");
         var("console_filter", "", "Show only console lines containing this text (empty: all).");
-        var("xp_rate", "10", "XP rate multiplier on every award.", c -> g.cfg.xpRate = Math.max(0, c.f()));
+        var("xp_rate", "1", "XP rate multiplier on every award.", c -> g.cfg.xpRate = Math.max(0, c.f()));
         var("minimap", "1", "Show the minimap.");
         var("motion_blur", "0", "Camera motion blur (off by default).", c -> g.cfg.motionBlur = c.on());
         var("depth_of_field", "0", "Depth of field (off by default).", c -> g.cfg.depthOfField = c.on());
@@ -114,6 +114,15 @@ public final class Console {
             for (ItemDef d : Items.all()) if (t.isEmpty() || norm(d.id).contains(t) || norm(d.name).contains(t)) { print(String.format("%-28s %s", d.id, d.name), TEXT); n++; }
             print(n + " items", DIM);
         });
+        cmd("occupation","occupation <npc-id> <subtype> [principal-id]: changes a compatible fixed NPC profession; no XP is granted.",a->{
+            if(a.length<3){for(var type:rpg.ai.Profession.values())print(type.name()+" - "+type.title,DIM);return;}
+            if(!(g.actor(Long.parseLong(a[1])) instanceof Npc npc)){print("No such NPC.",ERR);return;}
+            var type=rpg.ai.Profession.valueOf(a[2].toUpperCase(java.util.Locale.ROOT));
+            if(type.family!=npc.role){print("That subtype belongs to "+type.family+", not "+npc.role,ERR);return;}
+            g.interact.cancel(npc,"occupation changed");type.assign(npc);
+            if(a.length>3)npc.dutyTarget=Long.parseLong(a[3]);npc.dutyX=npc.postX;npc.dutyZ=npc.postZ;
+            print(npc.name+" is now a "+type.title+"; existing skills and belongings retained.",GOOD);
+        });
         cmd("npcs", "Every person: id, name, where, alive or dead.", a -> { for (Npc n : g.npcs) print(String.format("#%-6d %-10s %-12s (%.0f, %.0f) %s", n.id, n.name, n.role, n.x, n.z, n.alive ? "" : "DEAD"), TEXT); });
         cmd("animals", "Every animal near you (within 60 m).", a -> { for (var an : g.animals.all()) if (an.alive && an.distTo(g.player) < 60) print(String.format("#%-6d %-14s level %-3d (%.0f, %.0f)", an.id, an.kind(), an.skills.combatLevel(), an.x, an.z), TEXT); });
         cmd("invariants", "Checks every world-state invariant.", a -> { var f = g.invariants.check(); if (f.isEmpty()) print("All invariants hold.", GOOD); else for (String s : f) print(s, ERR); });
@@ -130,7 +139,7 @@ public final class Console {
         cmd("invisible", "Toggles invisibility to NPCs and animals (the ai_ignore_player variable).", a -> { core.set("ai_ignore_player", invisible ? "0" : "1"); print("invisible " + (invisible ? "ON" : "OFF"), TEXT); });
         cmd("hurt", "hurt <hp>: hurts you (a negative amount heals).", a -> { float d = a.length > 1 ? DevConsole.num(a[1], 1) : 1; g.player.hp = Math.max(1, Math.min(g.player.maxHp(), g.player.hp - d)); });
         cmd("kill", "Kills you (no one is to blame).", a -> g.combat.bleedOutNow(g.player));
-        cmd("heal", "Restores HP, stamina, Faith and mana; stops bleeding.", a -> { g.player.restore(); if (g.gore != null) g.gore.healed(g.player); });
+        cmd("heal", "Restores all resources and clears burning, shock, frost and bleeding.", a -> { g.player.restore(); g.chemistry.cleanse(g.player); if (g.gore != null) g.gore.healed(g.player); });
         cmd("goto", "goto <x> <y> <z>, or goto <place>: start, combat, skills, yard, economy, quest, farm, wilds, pond, graveyard, fence.", a -> {
             if (a.length >= 4) { g.teleport(g.player, DevConsole.num(a[1], g.player.x), DevConsole.num(a[2], g.player.y), DevConsole.num(a[3], g.player.z)); return; }
             Map<String, float[]> spots = places();

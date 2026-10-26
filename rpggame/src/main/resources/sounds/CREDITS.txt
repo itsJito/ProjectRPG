@@ -54,3 +54,27 @@ glass/break.ogg
     https://github.com/minetest/minetest_game/blob/master/mods/default/sounds/default_break_glass.1.ogg
     Per-file credits: https://github.com/minetest/minetest_game/blob/master/mods/default/README.md#sounds
     https://creativecommons.org/licenses/by/3.0/ (attribution required; royalty-free).
+
+
+elements/fire.ogg
+    Dynamicell, real fire recording, CC BY 3.0.
+    Original: https://www.freesound.org/people/Dynamicell/sounds/17548/
+    Downloaded unchanged as fire_fire.1.ogg from https://github.com/minetest/minetest_game/tree/master/mods/fire/sounds
+    Credits: https://github.com/minetest/minetest_game/blob/master/mods/fire/README.md
+
+elements/water1.ogg, water2.ogg, water3.ogg
+    AGFX, recorded water footsteps/splashes, CC BY 3.0.
+    Original: https://www.freesound.org/people/AGFX/packs/1253/
+    Downloaded unchanged as default_water_footstep.1.ogg through .3.ogg from:
+    https://github.com/minetest/minetest_game/tree/master/mods/default/sounds
+    Credits: https://github.com/minetest/minetest_game/blob/master/mods/default/README.md#sounds
+    License for the above: https://creativecommons.org/licenses/by/3.0/
+
+Ragdoll falls use recorded Kenney heavy soft impacts (Impact Sounds 1.0, CC0), credited above.
+
+Recorded thunder: hantorio, Freesound sound 121945.
+Original: https://freesound.org/people/hantorio/sounds/121945/
+Unmodified mirror: https://github.com/minetest-mods/lightning/blob/master/sounds/lightning_thunder.1.ogg
+License: CC-BY-SA, as credited by the upstream README (which does not specify a version).
+Upstream credit and license statement: https://github.com/minetest-mods/lightning/blob/master/README.md
+No lightning mod code or textures are included.

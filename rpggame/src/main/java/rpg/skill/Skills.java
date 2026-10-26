@@ -10,6 +10,11 @@ import java.util.List;
  */
 public final class Skills {
     private final long[] xp = new long[Skill.COUNT];
+    /**
+     * Levels a monster has beyond the table's 100 (a dragon fights at levels a person never reaches): added to the
+     * level its XP gives. Always zero for people and animals, who rise only by XP (NPCs never gain any).
+     */
+    private final int[] beyond = new int[Skill.COUNT];
 
     /** What one award did. */
     public record Award(Skill skill, long requested, long applied, int fromLevel, int toLevel) {
@@ -17,9 +22,11 @@ public final class Skills {
     }
 
     public long xp(Skill s) { return xp[s.ordinal()]; }
-    public int level(Skill s) { return XpTable.levelFor(xp[s.ordinal()]); }
+    public int level(Skill s) { return XpTable.levelFor(xp[s.ordinal()]) + beyond[s.ordinal()]; }
+    /** A monster's stat: its level, however high (over 100, the excess rides beyond the XP table). */
+    public void setStat(Skill s, int level) { setLevel(s, Math.min(XpTable.MAX_LEVEL, level)); beyond[s.ordinal()] = Math.max(0, level - XpTable.MAX_LEVEL); }
 
-    /** Adds XP (capped at the level-100 total; the cap is the GDD's post-100 rule left open, here XP stops at 6M). */
+    /** Adds XP (capped at the level-100 total; the cap is the GDD's post-100 rule left open, here XP stops at 14,391,160). */
     public Award award(Skill s, long amount) {
         if (amount < 0) throw new IllegalArgumentException("negative XP");
         int i = s.ordinal();
@@ -49,6 +56,9 @@ public final class Skills {
      * evaluated in whole numbers (everything times 40) so no floating-point rounding can land on the wrong side of an
      * integer: a new character (Health 10, the rest 1) is level 3; every combat skill at 100 is 127.
      */
+    /** The highest combat level there is: every combat skill at 100. */
+    public static final int MAX_COMBAT = combatLevel(100, 100, 100, 100, 100, 100, 100);
+
     public int combatLevel() { return combatLevel(level(Skill.ATTACK), level(Skill.STRENGTH), level(Skill.DEFENSE), level(Skill.HEALTH), level(Skill.ARCHERY), level(Skill.MAGIC), level(Skill.FAITH)); }
 
     public static int combatLevel(int attack, int strength, int defense, int health, int archery, int magic, int faith) {

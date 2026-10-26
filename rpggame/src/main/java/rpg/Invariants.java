@@ -49,7 +49,7 @@ public final class Invariants {
     public void onAward(Actor a, Skill s, long applied) { expectedXp.computeIfAbsent(a.id, k -> a.skills.raw().clone())[s.ordinal()] += applied; }
     public java.util.Set<String> reportedPairs() { return reported; }
 
-    private List<Actor> all() { List<Actor> l = new ArrayList<>(); l.add(g.player); l.addAll(g.npcs); l.addAll(g.dummies); return l; }
+    private List<Actor> all() { List<Actor> l = new ArrayList<>(); l.add(g.player); l.addAll(g.npcs); l.addAll(g.dummies); if (g.monsters != null) l.addAll(g.monsters.all()); return l; }
 
     public List<String> check() {
         checksRun++;
@@ -70,6 +70,7 @@ public final class Invariants {
         for (Actor a : all()) {
             for (ItemStack s : a.inv.stacks()) at.accept(s, a.name + " inventory");
             for (ItemStack s : a.eq.stacks()) at.accept(s, a.name + " equipment");
+            for (var lodged : a.stuck) at.accept(lodged.stack(), a.name + " (lodged in the body)");
         }
         for (WorldObject o : g.objects.everything()) {
             if (o.removed) continue;
@@ -127,9 +128,9 @@ public final class Invariants {
         }
         if (xpBad == 0) ok.add("XP accounting: every skill of " + all().size() + " actors matches its committed awards");
         // 5. the table itself
-        if (XpTable.xpFor(100) != 6_000_000L || XpTable.xpFor(60) != 935_503L || XpTable.xpFor(80) != 2_321_784L || XpTable.xpFor(90) != 3_720_933L || XpTable.levelFor(XpTable.xpFor(100) - 1) != 99)
+        if (XpTable.xpFor(100) != 14_391_160L || XpTable.xpFor(60) != 273_742L || XpTable.xpFor(80) != 1_986_068L || XpTable.xpFor(90) != 5_346_332L || XpTable.levelFor(XpTable.xpFor(100) - 1) != 99)
             fail.add("XP table thresholds differ from the GDD");
-        else ok.add("XP table: 60/80/90/100 thresholds exact, 6,000,000 at 100");
+        else ok.add("XP table: 60/80/90/100 thresholds exact, 14,391,160 at 100");
         // 6. references resolve (memories, quest, dead NPCs stay resolvable)
         int refs = 0;
         // (subject 0 is a crime with no known culprit - a body or blood found - and is allowed)

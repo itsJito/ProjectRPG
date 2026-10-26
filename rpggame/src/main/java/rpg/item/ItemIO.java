@@ -28,7 +28,7 @@ public final class ItemIO {
     public static ItemStack stack(Object o) {
         if (!(o instanceof Map)) return null;
         Map<String, Object> m = (Map<String, Object>) o;
-        ItemDef d = Items.find(Json.str(m, "id", ""));
+        ItemDef d = Items.saved(Json.str(m, "id", ""));
         if (d == null) return null;
         ItemStack s = new ItemStack(d, Json.integer(m, "n", 1), Json.lng(m, "owner", 0), Json.bool(m, "stolen", false), Json.lng(m, "origin", 0));
         if (s.inner != null) inventory(s.inner, Json.list(m, "inner"));
@@ -51,6 +51,24 @@ public final class ItemIO {
             l.add(m);
         }
         return l;
+    }
+
+    /** Rotate an old 10-by-4 carried layout into 4-by-10 without repacking, loss or provenance changes. */
+    public static List<Object> transpose(List<Object> saved) {
+        List<Object> rotated = new ArrayList<>();
+        if (saved == null) return rotated;
+        for (Object value : saved) {
+            if (!(value instanceof Map<?, ?> entry)) continue;
+            Map<String, Object> item = new HashMap<>();
+            for (var e : entry.entrySet()) item.put(e.getKey().toString(), e.getValue());
+            if (item.containsKey("x")) {
+                int x = Json.integer(item, "x", 0);
+                item.put("x", Json.integer(item, "y", 0)); item.put("y", x);
+                item.put("r", !Json.bool(item, "r", false));
+            }
+            rotated.add(item);
+        }
+        return rotated;
     }
 
     /** Puts a saved grid back: each item where it lay (or wherever it fits, for an old save without places). */

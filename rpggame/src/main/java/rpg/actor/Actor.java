@@ -10,12 +10,13 @@ import rpg.skill.Skill;
 import rpg.skill.Skills;
 
 /**
- * Anyone who can act and be hurt: the player and every NPC share this record (GDD 3.3: tiered parity - NPCs train the
- * same skills on the same table, carry real inventories and equipment, and fight with the same combat rules). The
+ * Anyone who can act and be hurt: the player and every NPC share this record (GDD 3.3: tiered parity - NPCs have fixed profiles on the
+ * same skill table, carry real inventories and equipment, and fight with the same combat rules). The
  * engine owns the body (a mover); this is the rules' side of it.
  */
 public class Actor {
     public final long id;
+    public astratto.ai.AgentDomain domain = astratto.ai.AgentDomain.HUMAN;
     public String name;
     public final Skills skills = new Skills();
     public final Inventory inv;
@@ -30,8 +31,12 @@ public class Actor {
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
+    public float eatenMinutes;
+    public float charred;
+    public double burnSince=-1, lastRoll=-99, rollContact;
     /** Blood on the body itself, splash by splash where it landed (painted onto the figure). */
     public final Blood blood = new Blood();
+    public final Injuries injuries = new Injuries();
     /** When this body last cried out (hurt cries are not repeated faster than a breath). */
     public double lastCry = -99;
     public boolean alive = true;
@@ -40,12 +45,32 @@ public class Actor {
     public double poseAt = -1;
     /** The figure's animation memory is to be started afresh (the body was handed back from Sydney somewhere else). */
     public boolean poseReset;
+    /** Human physical reaction body; animal articulation has its own typed body record. */
+    public long ragdoll;
+    public boolean reacting, wentDown;
+    public double reactSince;
+    public rpg.objects.GroundItem dropped;
     /** Creeping: low and slow, harder to see and to hear (stealth). */
     public boolean sneaking;
     /** Actual native stance, including being unable to stand beneath a low ceiling. */
     public boolean crouched;
     public long carryBody, carriedBy;
     public double carrySince = -99, carryLowerAt = -99, throwAt = -99;
+    /** The throwing hand in the world, as last posed (and when); the throw being aimed; the root held still after a release. */
+    public final float[] hand = new float[3];
+    /**
+     * The last thing taken up from the world (gamefixes: every person reaches for what they pick up): when, and where it
+     * was. The figure's free hand reaches there and comes back while the rest of the body carries on.
+     */
+    public double grabAt = -99;
+    public float grabX, grabY, grabZ;
+    public void grab(double now, float x, float y, float z) { grabAt = now; grabX = x; grabY = y; grabZ = z; }
+    /** Arrows, bolts and thrown blades lodged in the body (gamefixes: each one a real item, where it struck). */
+    public final java.util.List<rpg.combat.CombatSystem.Stuck> stuck = new java.util.ArrayList<>();
+    public double handAt = -99, throwFreezeUntil = -99;
+    public final rpg.combat.ThrowSolver throwPlan = new rpg.combat.ThrowSolver();
+    /** The timed work under way (fishing, chopping...), for the body to show it; null when idle. */
+    public rpg.interact.Work working;
     public Traversal.Motion traversal;
     public double traverseAgain = -99;
     public float reachX, reachY, reachZ;
@@ -56,8 +81,8 @@ public class Actor {
     /** The hitbox (a capsule): set from the body plan by {@link #fitBody}. */
     public float radius = Body.MALE.radius, height = Body.MALE.height;
 
-    /** Every person carries a base grid of 10 x 4 (gamefixes); worn containers add grids of their own (see {@link #grids}). */
-    public Actor(long id, String name, int invSize) { this.id = id; this.name = name; this.inv = new Inventory(10, 4); }
+    /** Every person carries a base grid of 4 x 10 (gamefixes); worn containers add grids of their own (see {@link #grids}). */
+    public Actor(long id, String name, int invSize) { this.id = id; this.name = name; this.inv = new Inventory(4, 10); }
 
     /** Every grid this actor carries: the base grid, then each worn container's (the backpack's, the pouch's). */
     public java.util.List<Inventory> grids() {
@@ -115,6 +140,9 @@ public class Actor {
 
     /** The body plan this actor's look gives it (part sizes, joints, hitbox). */
     public Body plan() { return Body.of(look); }
+    /** The scale of this body's Sydney skeleton (a person's is 1; a goblin's is smaller, a troll's far bigger), and its profile. */
+    public float ragdollScale() { return 1; }
+    public int sydneyProfile() { return astratto.bridge.AstrattoNative.SYDNEY_HUMAN; }
     /** Sizes the hitbox to the body plan; call after the look is set and before the engine body is made. */
     public void fitBody() { Body b = plan(); radius = b.radius; height = b.height; }
 
@@ -129,8 +157,11 @@ public class Actor {
     /** Time toward the next point of Mana (seconds of play), kept across saves so no partial minute is lost or doubled. */
     public float manaAcc;
     /** The spells on this body: mist (Gaseous Form), surer hands (Enhance Ability), a stranger's face (Disguise Self), seconds left. */
-    public float gaseousT, enhanceT, disguiseT;
-    public void restore() { hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
+    public float gaseousT, enhanceT, disguiseT, morphT, chronoT;
+    public long summonOwner;
+    public double summonUntil;
+    public float actionRate() { return chronoT > 0 ? 0.45f : 1; }
+    public void restore() { injuries.clear(); hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }
@@ -164,6 +195,8 @@ public class Actor {
         public boolean blocking;
         /** This swing's tool has already bitten a tree or a rock (one strike a swing). */
         public boolean gathered;
+        /** This swing has already scraped the ground (one scrape a swing; a low cut skims on rather than stopping). */
+        public boolean grazed;
         public double blockStart = -9;
         public float staggered, stabilityBonus, iframes, dodgeT, dodgeX, dodgeZ, hitstop;
         public float charge, draw, aim, castCooldown, regenDelay, flash, slowT;
@@ -175,7 +208,7 @@ public class Actor {
         public long lastAttacker;
 
         public boolean busy() { return phase != Phase.IDLE || staggered > 0 || dodgeT > 0; }
-        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; aim = 0; gathered = false; }
+        public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; aim = 0; gathered = false; grazed = false; }
         /** 0..1 through the whole move (for animation). */
         public float progress() {
             return switch (phase) {

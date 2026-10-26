@@ -130,6 +130,17 @@ class InteropTest {
         }
     }
 
+    @Test void successfulNativeBatchesHaveAMonotonicCompletionSequence() {
+        try (NativeEngine engine=Fixtures.engine()) {
+            assertEquals(0,engine.frameSequence());
+            CommandBuffer commands=new CommandBuffer();
+            try {
+                assertTrue(engine.frame(commands,0,null));assertEquals(1,engine.frameSequence());
+                assertTrue(engine.frame(commands,0,null));assertEquals(2,engine.frameSequence());
+            } finally { commands.free(); }
+        }
+    }
+
     @Test void javaFallbacksOffMeansFactoriesThrowInsteadOfReturningNull() {
         NativeMesher.BlockDef[] blocks = new NativeMesher.BlockDef[300];   // more than 256 kinds: malformed
         assertThrows(IllegalStateException.class, () -> NativeMesher.create(blocks, new NativeMesher.ShapeDef[]{new NativeMesher.ShapeDef()}, 0));

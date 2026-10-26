@@ -33,6 +33,12 @@ final class AnimalMind {
     float threatWeight(Animal a, Actor t) {
         if (t == a || !t.alive || t.dummy) return 0;
         if (a.cs.lastAttacker == t.id && g.time - a.cs.lastHurt < 20) return 2f;
+        // a monster: something to be afraid of, the more so the bigger it is (and the dragon above all)
+        if (t instanceof rpg.monster.Monster m) {
+            if (m.kind == rpg.monster.MonsterKind.DRAGON) return 2.5f;
+            if (m.kind == rpg.monster.MonsterKind.BAT) return a.species.w < 0.6f ? 0.8f : 0.2f;
+            return Math.min(2f, 0.7f + m.kind.mh * 0.35f) * (a.species == Species.BROWN_BEAR ? 0.5f : 1);
+        }
         if (t instanceof Animal o) {
             if (o.baby) return 0;
             if (o.species.prey.contains(a.species)) return a.owned() && o.owned() ? 0 : 1.2f;
@@ -114,7 +120,7 @@ final class AnimalMind {
             float d = a.distTo(threat);
             boolean hurt = a.cs.lastAttacker == threat.id && g.time - a.cs.lastHurt < 15;
             boolean young = sys.youngNear(a, 9) && sp.defends || sp == Species.BROWN_BEAR && sys.youngNear(a, 12);
-            boolean stands = !a.baby && (sp.flight <= 0 || young || hurt && sys.couldWin(a, threat));
+            boolean stands = !a.baby && (sp == Species.HORSE ? hurt && sys.couldWin(a, threat) : sp.flight <= 0 || young || hurt && sys.couldWin(a, threat));
             if (a.baby && mother != null) s.add(new Score(Goal.FLEE, 0.97f, mother.id, "frightened by " + threat.name + "; running to its mother"));
             else if (stands) {
                 if (hurt || d < Math.max(1.6f, sp.wary * 0.3f) || young && d < sp.wary * 0.6f) s.add(new Score(Goal.DEFEND, 0.96f, threat.id, (young ? "protecting its young from " : hurt ? "fighting back against " : "cornered by ") + threat.name));
@@ -127,9 +133,9 @@ final class AnimalMind {
         if (a.thirst > 0.7f) s.add(new Score(Goal.DRINK, 0.55f + a.thirst * 0.3f, 0, String.format("thirsty (%.0f%%)", a.thirst * 100)));
         if (a.hunger > 0.6f && !a.baby) {
             boolean meat = sp.diet == Species.Diet.HUNTER || sp.diet == Species.Diet.OMNIVORE || sp.diet == Species.Diet.SCAVENGER;
-            Animal carcass = meat ? sys.carcassNear(a, 30) : null;
+            Actor carcass = meat ? sys.carcassNear(a, 30) : null;
             Animal prey = sp.prey.isEmpty() ? null : sys.preyFor(a);
-            if (carcass != null) s.add(new Score(Goal.FEED, 0.5f + a.hunger * 0.35f, carcass.id, "hungry; feeding on a " + carcass.kind().toLowerCase() + " carcass"));
+            if (carcass != null) s.add(new Score(Goal.FEED, 0.5f + a.hunger * 0.35f, carcass.id, "hungry; feeding on a " + carcass.name.toLowerCase() + " carcass"));
             else if (prey != null) s.add(new Score(Goal.HUNT, 0.5f + a.hunger * 0.35f, prey.id, "hungry; hunting a " + prey.kind().toLowerCase() + String.format(" %.0f m off", a.distTo(prey))));
             else if (sp.diet != Species.Diet.HUNTER) s.add(new Score(Goal.GRAZE, 0.45f + a.hunger * 0.3f, 0, String.format("hungry (%.0f%%); %s", a.hunger * 100, sys.troughFor(a) != null ? "to the trough" : "foraging")));
         }
@@ -147,6 +153,11 @@ final class AnimalMind {
         if (a.owned() && sp == Species.DOG) {
             Actor owner = g.actor(a.owner);
             if (owner != null && owner.alive && a.distTo(owner) > 5) s.add(new Score(Goal.SEEK, 0.48f, owner.id, "following " + owner.name));
+            // a bounty hunter's law dog is set on whoever its handler is fighting
+            if (owner instanceof rpg.ai.Npc handler && handler.posse && handler.fightTarget != 0) {
+                Actor quarry = g.actor(handler.fightTarget);
+                if (quarry != null && quarry.alive && a.distTo(quarry) < 30) s.add(new Score(Goal.DEFEND, 0.97f, quarry.id, "set on " + quarry.name + " by " + handler.name));
+            }
         }
         Animal lead = sys.groupLead(a);
         if (lead != null && a.distTo(lead) > spacing(a)) s.add(new Score(Goal.FOLLOW, 0.42f, lead.id, "keeping with the " + groupWord(sp)));
@@ -186,8 +197,36 @@ final class AnimalMind {
     static float spacing(Animal a) { return a.species.group == Species.Group.PACK ? 7 : a.species.group == Species.Group.FAMILY ? 6 : 5 + a.species.w * 2; }
 
     // ------------------------------------------------------------------ acting
+    private boolean edible(Animal animal) {
+        Actor body=g.actor(animal.other);
+        return body!=null && !body.alive && body.carriedBy==0
+                && (body instanceof Animal carcass ? carcass.carcass() && !carcass.butchered : body instanceof Npc npc && npc.corpse!=0);
+    }
+    private astratto.ai.TaskNetwork<Animal> needsNetwork() {
+        return new astratto.ai.TaskNetwork<>(List.of(
+            new astratto.ai.TaskNetwork.Method<>("approach and feed", a->a.goal==Goal.FEED && edible(a), a->{
+                Actor food=g.actor(a.other);
+                return astratto.ai.Behavior.sequence(List.of(
+                    animal->sys.goTo(animal,food.x,food.z,false,animal.radius+0.6f)?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING,
+                    animal->{animal.headDown=true;animal.hunger=Math.max(0,animal.hunger-animal.needStep/12f);sys.eat(animal,food,animal.needStep);
+                        return animal.hunger<0.02f?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING;}
+                ));
+            }),
+            new astratto.ai.TaskNetwork.Method<>("approach a real bank and drink",a->a.goal==Goal.DRINK && sys.waterFor(a)!=null,a->{
+                float[] water=sys.waterFor(a);
+                return astratto.ai.Behavior.sequence(List.of(
+                    animal->sys.goTo(animal,water[0],water[1],false,1.1f)?astratto.ai.Behavior.Status.SUCCESS:astratto.ai.Behavior.Status.RUNNING,
+                    animal->{animal.headDown=true;animal.wantYaw=water.length>2?water[2]:Float.NaN;animal.thirst=Math.max(0,animal.thirst-animal.needStep/6f);
+                        if(animal.thirst<=0.02f){animal.nextThink=0;return astratto.ai.Behavior.Status.SUCCESS;}return astratto.ai.Behavior.Status.RUNNING;}
+                ));
+            })
+        ));
+    }
+
     void act(Animal a, float dt, float dm) {
         Species sp = a.species;
+        a.needStep=dm;
+        if(a.needs!=null && a.goal!=Goal.FEED && a.goal!=Goal.DRINK)a.needs.cancel();
         boolean resting = a.goal == Goal.REST && a.atRest;
         // needs, per game minute: hunger and thirst build; grazing, drinking and resting meet them
         float hungerRate = sp.diet == Species.Diet.HUNTER ? 1 / 520f : 1 / 380f;
@@ -223,20 +262,11 @@ final class AnimalMind {
                 else sys.goTo(a, a.x + (a.x - a.threatX) * 2, a.z + (a.z - a.threatZ) * 2, true, 1);
             }
             case DEFEND, HUNT -> engage(a, o, dt);
-            case FEED -> {
-                if (!(o instanceof Animal c) || !c.carcass() || c.butchered) { a.nextThink = 0; sys.desire(a, A_HOLD); break; }
-                if (sys.goTo(a, c.x, c.z, false, a.radius + 0.6f)) {
-                    a.headDown = true;
-                    a.hunger = Math.max(0, a.hunger - dm / 12f);
-                    sys.eat(c, dm);
-                }
+            case FEED, DRINK -> {
+                if(a.needs==null)a.needs=needsNetwork();
+                if(a.needs.tick(a)==astratto.ai.Behavior.Status.FAILURE) {sys.desire(a,A_HOLD);a.nextThink=0;}
             }
             case GRAZE -> graze(a, dm);
-            case DRINK -> {
-                float[] w = sys.waterFor(a);
-                if (w == null) { a.thirst = 0; break; }
-                if (sys.goTo(a, w[0], w[1], false, 1.1f)) { a.headDown = true; a.wantYaw = w.length > 2 ? w[2] : Float.NaN; a.thirst = Math.max(0, a.thirst - dm / 6f); if (a.thirst <= 0.02f) a.nextThink = 0; }
-            }
             case REST -> {
                 float[] r = sys.restFor(a);
                 if (r == null || sys.goTo(a, r[0] + a.restOx, r[1] + a.restOz, false, 1.3f)) { sys.desire(a, A_HOLD); a.atRest = true; }

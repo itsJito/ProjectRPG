@@ -21,14 +21,34 @@ import static org.lwjgl.stb.STBTruetype.*;
  */
 public final class Ui2D {
     private static final int FW = 512, FH = 512, FIRST = 32, COUNT = 96;
-    private static final float BAKE = 20f;
     private RenderCommands cmd;
     private float[] v = new float[36 * 512];
     private int n, tex;
-    public int font, icons;
+    public int icons;
     public final int parchment;
-    private STBTTBakedChar.Buffer chars;
-    private final float[] advance = new float[COUNT];
+
+    /**
+     * A typeface baked once (gamefixes: the provided fonts, each where it belongs). Friz Quadrata is the interface's
+     * face, Morpheus its headings, Arial Narrow the chat, Skurri the numbers struck in combat and Nimrod italic the
+     * flavour text of things.
+     */
+    public static final class Face {
+        final float bake;
+        final int texture;
+        final STBTTBakedChar.Buffer chars;
+        final float[] advance = new float[COUNT];
+        final float baseline;
+        Face(float bake, int texture, STBTTBakedChar.Buffer chars, float baseline) { this.bake = bake; this.texture = texture; this.chars = chars; this.baseline = baseline; }
+    }
+    public final Face body, heading, chat, combat, lore;
+    private Face face;
+    /** Switches the face text is set in; returns the one it replaces (put it back after). */
+    public Face use(Face f) { Face was = face; face = f == null ? body : f; return was; }
+    /** Text in another face, the current one restored after. */
+    public float text(Face f, String s, float x, float y, float size, int argb) { Face was = use(f); try { return text(s, x, y, size, argb); } finally { use(was); } }
+    public float width(Face f, String s, float size) { Face was = use(f); try { return width(s, size); } finally { use(was); } }
+    public void centered(Face f, String s, float cx, float y, float size, int argb) { Face was = use(f); try { centered(s, cx, y, size, argb); } finally { use(was); } }
+    public void flatCentered(Face f, String s, float cx, float y, float size, int argb) { Face was = use(f); try { flatCentered(s, cx, y, size, argb); } finally { use(was); } }
     public float mx, my;
     public boolean click, rclick, down, released, consumed;
     /** Everything drawn is faded by this (a fragment's fade in and out). */
@@ -37,8 +57,25 @@ public final class Ui2D {
     public Atlas atlas;
     public double scroll;
 
+    public final int engineLogo;
+    private static int image(NativeRenderer renderer, String path) {
+        try (var stream = Ui2D.class.getResourceAsStream(path)) {
+            if (stream == null) throw new IllegalStateException("Missing branding asset " + path);
+            var image = javax.imageio.ImageIO.read(stream); java.nio.ByteBuffer rgba = org.lwjgl.system.MemoryUtil.memAlloc(image.getWidth()*image.getHeight()*4);
+            try { for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++) { int c=image.getRGB(x,y);rgba.put((byte)(c>>16)).put((byte)(c>>8)).put((byte)c).put((byte)(c>>>24)); } rgba.flip();return renderer.texture(astratto.bridge.AstrattoNative.TEX_2D,image.getWidth(),image.getHeight(),1,0,rgba); }
+            finally { org.lwjgl.system.MemoryUtil.memFree(rgba); }
+        } catch (java.io.IOException e) { throw new IllegalStateException("Could not load " + path,e); }
+    }
+
     public Ui2D(NativeRenderer r) {
-        bakeFont(r);
+        engineLogo = image(r, "/astratto/astrattoenginelogo.png");
+        Face friz = bake(r, resource("FrizQuadrataTT.ttf"), 22f);
+        body = friz != null ? friz : bake(r, fallbackFont(), 20f);
+        heading = orElse(bake(r, resource("MORPHEUS.TTF"), 34f), body);
+        chat = orElse(bake(r, resource("arialnarrow.ttf"), 22f), body);
+        combat = orElse(bake(r, resource("skurri.ttf"), 30f), body);
+        lore = orElse(bake(r, resource("NimrodMT-Italic.otf"), 22f), body);
+        face = body;
         icons = Icons.texture(r);
         atlas = new Atlas(r);
         ByteBuffer paper = MemoryUtil.memAlloc(128 * 128 * 4);
@@ -55,7 +92,11 @@ public final class Ui2D {
         } finally { MemoryUtil.memFree(paper); }
     }
 
-    private void bakeFont(NativeRenderer r) {
+    private static Face orElse(Face f, Face fallback) { return f != null ? f : fallback; }
+    private static byte[] resource(String name) {
+        try (InputStream in = Ui2D.class.getResourceAsStream("/ui/fonts/" + name)) { return in == null ? null : in.readAllBytes(); } catch (Exception e) { return null; }
+    }
+    private static byte[] fallbackFont() {
         byte[] data = null;
         try (InputStream in = Ui2D.class.getResourceAsStream("/astratto/resources/fonts/DejaVuSans.ttf")) { if (in != null) data = in.readAllBytes(); } catch (Exception ignored) { }
         for (String p : new String[]{"C:/Windows/Fonts/verdana.ttf", "C:/Windows/Fonts/arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"}) {
@@ -63,16 +104,36 @@ public final class Ui2D {
             try { data = Files.readAllBytes(Path.of(p)); } catch (Exception ignored) { }
         }
         if (data == null) throw new IllegalStateException("no font found");
+        return data;
+    }
+
+    /** Bakes a face's printable ASCII into its own texture at a pixel height (null: the file could not be read as a font). */
+    private static Face bake(NativeRenderer r, byte[] data, float px) {
+        if (data == null) return null;
         ByteBuffer ttf = MemoryUtil.memAlloc(data.length).put(data).flip();
-        ByteBuffer bitmap = MemoryUtil.memAlloc(FW * FH);
-        chars = STBTTBakedChar.malloc(COUNT);
-        stbtt_BakeFontBitmap(ttf, BAKE, bitmap, FW, FH, FIRST, chars);
-        ByteBuffer rgba = MemoryUtil.memAlloc(FW * FH * 4);
-        for (int i = 0; i < FW * FH; i++) { byte c = bitmap.get(i); rgba.put(c).put((byte) 255).put((byte) 255).put((byte) 255); }
-        rgba.flip();
-        font = r.texture(AstrattoNative.TEX_2D, FW, FH, 1, 0, rgba);
-        for (int i = 0; i < COUNT; i++) advance[i] = chars.get(i).xadvance();
-        MemoryUtil.memFree(rgba); MemoryUtil.memFree(bitmap); MemoryUtil.memFree(ttf);
+        ByteBuffer bitmap = MemoryUtil.memCalloc(FW * FH);
+        STBTTBakedChar.Buffer chars = STBTTBakedChar.malloc(COUNT);
+        try {
+            int rows = stbtt_BakeFontBitmap(ttf, px, bitmap, FW, FH, FIRST, chars);
+            if (rows == 0) { chars.free(); return null; }
+            // the baseline: where the font's own ascent puts it at this size
+            float baseline = px * 0.8f;
+            try (MemoryStack st = MemoryStack.stackPush()) {
+                var info = org.lwjgl.stb.STBTTFontinfo.malloc(st);
+                if (stbtt_InitFont(info, ttf)) {
+                    int[] asc = {0}, desc = {0}, gap = {0};
+                    stbtt_GetFontVMetrics(info, asc, desc, gap);
+                    baseline = asc[0] * stbtt_ScaleForPixelHeight(info, px);
+                }
+            }
+            ByteBuffer rgba = MemoryUtil.memAlloc(FW * FH * 4);
+            for (int i = 0; i < FW * FH; i++) { byte c = bitmap.get(i); rgba.put(c).put((byte) 255).put((byte) 255).put((byte) 255); }
+            rgba.flip();
+            Face f = new Face(px, r.texture(AstrattoNative.TEX_2D, FW, FH, 1, 0, rgba), chars, baseline);
+            for (int i = 0; i < COUNT; i++) f.advance[i] = chars.get(i).xadvance();
+            MemoryUtil.memFree(rgba);
+            return f;
+        } finally { MemoryUtil.memFree(bitmap); MemoryUtil.memFree(ttf); }
     }
 
     public void begin(RenderCommands c) { cmd = c; n = 0; tex = -1; }
@@ -155,24 +216,25 @@ public final class Ui2D {
 
     // ------------------------------------------------------------------ text
     public float width(String s, float size) {
-        float sc = size / BAKE, w = 0;
-        for (int i = 0; i < s.length(); i++) { int c = s.charAt(i) - FIRST; if (c < 0 || c >= COUNT) c = '?' - FIRST; w += advance[c]; }
+        Face f = face;
+        float sc = size / f.bake, w = 0;
+        for (int i = 0; i < s.length(); i++) { int c = s.charAt(i) - FIRST; if (c < 0 || c >= COUNT) c = '?' - FIRST; w += f.advance[c]; }
         return w * sc;
     }
 
     public float text(String s, float x, float y, float size, int argb) {
         if (s == null) return 0;
-        float sc = size / BAKE;
+        Face f = face;
+        float sc = size / f.bake;
         try (MemoryStack st = MemoryStack.stackPush()) {
             STBTTAlignedQuad q = STBTTAlignedQuad.malloc(st);
             float[] px = {0}, py = {0};
-            float baseline = BAKE * 0.8f;
             for (int i = 0; i < s.length(); i++) {
                 int c = s.charAt(i);
                 if (c < FIRST || c >= FIRST + COUNT) c = '?';
-                stbtt_GetBakedQuad(chars, FW, FH, c - FIRST, px, py, q, true);
-                float x0 = x + q.x0() * sc, y0 = y + (q.y0() + baseline) * sc, x1 = x + q.x1() * sc, y1 = y + (q.y1() + baseline) * sc;
-                if (x1 > x0) quad(font, new float[]{x0, y0, x1, y0, x1, y1, x0, y1}, new float[]{q.s0(), q.t0(), q.s1(), q.t0(), q.s1(), q.t1(), q.s0(), q.t1()}, argb, 1);
+                stbtt_GetBakedQuad(f.chars, FW, FH, c - FIRST, px, py, q, true);
+                float x0 = x + q.x0() * sc, y0 = y + (q.y0() + f.baseline) * sc, x1 = x + q.x1() * sc, y1 = y + (q.y1() + f.baseline) * sc;
+                if (x1 > x0) quad(f.texture, new float[]{x0, y0, x1, y0, x1, y1, x0, y1}, new float[]{q.s0(), q.t0(), q.s1(), q.t0(), q.s1(), q.t1(), q.s0(), q.t1()}, argb, 1);
             }
             return px[0] * sc;
         }
@@ -255,5 +317,5 @@ public final class Ui2D {
         return enabled && clicked(x, y, w, h);
     }
 
-    public void free() { if (chars != null) { chars.free(); chars = null; } }
+    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat, lore))) f.chars.free(); }
 }

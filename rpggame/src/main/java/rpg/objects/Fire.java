@@ -10,6 +10,16 @@ import rpg.item.Recipes;
  */
 public final class Fire extends Station {
     public double outAt;
+    private double emitAt;
+    private boolean attributed = true, marked;
+    /** The fire's own cell, marked as a hazard for routes while it burns (Blocks.EMBERS) and cleared when it goes out. */
+    private void mark(Rpg g, boolean on) {
+        int bx = (int) Math.floor(x), by = (int) Math.floor(y + 0.1f), bz = (int) Math.floor(z);
+        int now = g.vox.block(bx, by, bz);
+        if (on && now == rpg.world.Blocks.AIR) { g.setBlock(bx, by, bz, rpg.world.Blocks.EMBERS); marked = true; }
+        else if (!on && now == rpg.world.Blocks.EMBERS) g.setBlock(bx, by, bz, rpg.world.Blocks.AIR);
+    }
+    public void retireAttribution() { attributed = false; }
 
     public Fire(long id, float x, float y, float z, double outAt, long owner) {
         super(id, "fire", "Fire", Recipes.Station.RANGE, x, y, z);
@@ -19,16 +29,22 @@ public final class Fire extends Station {
 
     public void update(Rpg g, float dt) {
         if (removed) return;
+        if (!marked && g.state.minutes < outAt) mark(g, true);
         if (g.state.minutes >= outAt) {
             removed = true;
+            mark(g, false);
             g.state.commit("FireBurntOut", 0, id, jurisdiction(), 0, "at " + (int) x + "," + (int) z);
             if (g.fx != null) g.fx.puff(x, y, z);
             return;
         }
-        if (g.fx != null) for (int i = 0; i < 2; i++) g.fx.flame(x, y + 0.05f, z, 1f);
+        if (g.time >= emitAt) { emitAt = g.time + 0.5; g.chemistry.emit(attributed ? g.actor(owner) : null, astratto.bridge.AstrattoNative.CHEM_FIRE, x, y + 0.3f, z, 1, 1, 0.6f); }
     }
 
     @Override public String examine(Rpg g) { return "A fire. It will burn for about " + Math.max(0, (int) (outAt - g.state.minutes)) + " more minutes."; }
 
-    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("x", x); m.put("y", y); m.put("z", z); m.put("outAt", outAt); return m; }
+    @Override public void load(Rpg g, Map<String,Object> saved) {
+        super.load(g,saved); attributed=astratto.util.Json.bool(saved,"attributed",true);
+    }
+
+    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("x", x); m.put("y", y); m.put("z", z); m.put("outAt", outAt); m.put("attributed",attributed); return m; }
 }

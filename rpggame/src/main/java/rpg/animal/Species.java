@@ -112,7 +112,7 @@ public enum Species {
         WOLF.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, CHICKEN, DUCK, COW, HORSE));
         MOUNTAIN_LION.skills(32, 30, 20, 30, 30).weapon("claw", 8, 40, 0.55f, DamageType.SLASH).senses(1.35f, 1.4f, 10, 0).breeds(600, 1, 2, 2160, 2160).yields(3, 1, true, 0).sounds("animal.lion", "animal.lion", "animal.lion", "animal.lion");
         MOUNTAIN_LION.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, DUCK, CHICKEN, DOG, COYOTE, FOX));
-        BROWN_BEAR.skills(40, 48, 30, 55, 12).weapon("swipe", 12, 90, 0.75f, DamageType.SLASH).senses(1.0f, 1.2f, 9, 0).breeds(900, 1, 2, 2880, 2880).yields(8, 2, true, 0).sounds("animal.bear", "animal.bear", "animal.bear", "animal.bear");
+        BROWN_BEAR.skills(26, 28, 20, 35, 12).weapon("swipe", 6, 70, 0.75f, DamageType.SLASH).senses(1.0f, 1.2f, 9, 0).breeds(900, 1, 2, 2880, 2880).yields(8, 2, true, 0).sounds("animal.bear", "animal.bear", "animal.bear", "animal.bear");
         BROWN_BEAR.defends = true;
         BROWN_BEAR.prey.addAll(EnumSet.of(RABBIT, PIG, SHEEP));
         DUCK.skills(1, 1, 1, 3, 6).weapon("peck", 1, 2, 0.3f, DamageType.PIERCE).senses(1.25f, 1.2f, 3, 1.6f).breeds(480, 3, 6, 1440, 960).yields(1, 0, false, 5).sounds("animal.duck", "animal.duck", "animal.duck", "animal.duck");

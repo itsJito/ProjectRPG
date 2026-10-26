@@ -34,7 +34,7 @@ public final class Glass {
     public Glass(Rpg g) { this.g = g; }
 
     /** Whether a cell is glass that can break. */
-    public boolean isGlass(int x, int y, int z) { return g.vox.block(x, y, z) == Blocks.GLASS; }
+    public boolean isGlass(int x, int y, int z) { return Blocks.glass(g.vox.block(x, y, z)); }
 
     /**
      * Breaks the pane at a cell: struck at (px, py, pz) along (dx, dy, dz) with a force (about 1 for a sword's blow).

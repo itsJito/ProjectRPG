@@ -25,6 +25,9 @@ public final class Animal extends Actor implements Interactable {
     public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM }
 
     public final Species species;
+    public long trappedBy;
+    astratto.ai.TaskNetwork<Animal> needs;
+    float needStep;
     public boolean baby, female;
     /** Game minutes: born at, grown at (babies). */
     public double bornAt, matureAt;
@@ -53,12 +56,13 @@ public final class Animal extends Actor implements Interactable {
     /** The heading it wants (NaN: the way it walks); its spot at the resting place. */
     public float wantYaw = Float.NaN, restOx, restOz;
     public double lastBite = -99, nextVoice, lastEgg = -1e9;
+    /** Game minutes when it was last milked: a cow gives a bucket and then needs a few hours to fill again. */
+    public double lastMilked = -1e9;
     public double careAgain;
     /** The route last asked of the engine. */
     float rx, rz;
     boolean routed;
     /** Carcass: how long scavengers have eaten at it (game minutes). */
-    public float eatenMinutes;
     /** When each person last petted it (a bond grows from a pattern, not from clicking). */
     public final Map<Long, Double> pettedAt = new HashMap<>();
     /** Where it heads (when it has somewhere to be). */
@@ -89,10 +93,13 @@ public final class Animal extends Actor implements Interactable {
     public boolean puppet;
     /** Its body in physics' hands (dead, or knocked off its feet), or null; and the last blow it took (direction, how hard). */
     public AnimalRagdoll ragdoll;
+    /** Parked dead-body transforms retain the exact visible pose outside the physics budget. */
+    public final java.util.Map<rpg.combat.Gore.Part,astratto.bridge.Snapshots.Rigid> restPose = new java.util.EnumMap<>(rpg.combat.Gore.Part.class);
     public float blowX, blowZ, blowImpact;
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {
         super(id, s.label(baby), 0);
+        this.domain=astratto.ai.AgentDomain.ANIMAL;
         this.species = s; this.baby = baby; this.female = female;
         this.x = x; this.z = z; this.y = DevMap.FLOOR;
         this.homeX = x; this.homeZ = z;
@@ -145,14 +152,18 @@ public final class Animal extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         if (carcass()) {
-            o.add(Option.when(carriedBy == 0 && a.carryBody == 0, "carry", "Carry carcass", 5, "That body is already being carried.", 2.2f));
             boolean blade = Animals.blade(a) != null;
             o.add(Option.when(blade && !butchered, "butcher", "Butcher", 10, butchered ? "Nothing left to take." : "You need a knife or a blade.", r));
+            o.add(Option.when(carriedBy == 0 && a.carryBody == 0 && rpg.actor.BodyCarry.lightEnough(this), "carry", "Carry carcass", 5, rpg.actor.BodyCarry.lightEnough(this) ? "That body is already being carried." : "That body is too heavy to lift.", 2.2f));
         } else {
             boolean calm = goal != Goal.FLEE && goal != Goal.DEFEND && goal != Goal.WARN && goal != Goal.HUNT;
             boolean pettable = calm && (species.domestic || trustOf(a.id) > 0.3f) && species != Species.BROWN_BEAR;
             o.add(Option.when(pettable, "pet", "Pet", 6, !calm ? "It's too agitated." : "It won't let you near enough.", r));
             ItemDef food = Animals.feedFor(this, a);
+            if (species == Species.COW && female && !baby) {
+                boolean full = g.state.minutes - lastMilked > Animals.MILK_REFILL;
+                o.add(Option.when(calm && full && a.has(Items.BUCKET, 1), "milk", "Milk", 8, !calm ? "It's too agitated." : !full ? "She has been milked recently." : "You need an empty bucket.", r));
+            }
             o.add(Option.when(food != null && calm, "feed", "Feed" + (food == null ? "" : " (" + food.name.toLowerCase() + ")"), 7, food == null ? "You have nothing it would eat." : "It's too agitated.", r));
         }
         o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));

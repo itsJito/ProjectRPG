@@ -35,6 +35,7 @@ public:
         float eye = 1.6f, viewRange = 40, viewCos = 0.5f, hearRange = 30;
         uint32_t team = 0, flags = 0, rng = 1;
         float facts[16] = {};
+        float rate = 1;
         // perception
         bool sees = false, hasTargetPlace = false;
         float targetX = 0, targetY = 0, targetZ = 0;       // where the target is, as far as the agent knows

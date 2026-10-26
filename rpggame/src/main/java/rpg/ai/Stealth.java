@@ -58,10 +58,7 @@ public final class Stealth {
     // ------------------------------------------------------------------ light
     /** The sky's share of light for the hour (the same curve the renderer lights the world with). */
     public static float daylight(double hour) {
-        double sy = Math.sin((hour - 6) / 12.0 * Math.PI);
-        // a smooth curve with a real twilight: dark until the sun is well below the horizon behind, full well after rising
-        double t = Math.max(0, Math.min(1, (sy + 0.3) / 0.7));
-        return (float) (0.05 + 0.95 * t * t * (3 - 2 * t));
+        return astratto.weather.TimeSystem.daylight(hour);
     }
 
     /**
@@ -72,7 +69,7 @@ public final class Stealth {
 
     public float light(float x, float y, float z) {
         int bx = (int) Math.floor(x), by = (int) Math.floor(y), bz = (int) Math.floor(z);
-        float l = Math.max(g.vox.skyLight(bx, by, bz) * daylight(g.state.hourOfDay()), g.vox.blockLight(bx, by, bz));
+        float l = Math.max(g.vox.skyLight(bx, by, bz) * daylight(g.state.hourOfDay()) * (1 - g.timeSystem.weather.overcast * 0.35f), g.vox.blockLight(bx, by, bz));
         for (WorldObject o : g.objects.all()) if (o instanceof Fire f) {
             float d = (float) Math.sqrt((f.x - x) * (f.x - x) + (f.y - y) * (f.y - y) + (f.z - z) * (f.z - z));
             if (d < 7) l = Math.max(l, 1 - d / 7f);
