@@ -85,7 +85,7 @@ public final class RenderCommands {
     }
     public void pointLight(float x, float y, float z, float radius, float r, float g, float b, int flags) { light(x, y, z, radius, r, g, b, flags, 0, -1, 0, -1); }
 
-    /** A model instance: a mesh made with {@link NativeRenderer#mesh}, flags ({@code MODEL_*}), its matrix, tint, emission, light, roughness, metalness. */
+    /** A model instance: a mesh made with {@link NativeRenderer#mesh}, flags ({@code MODEL_*}), its matrix, tint, emission, light, roughness, metalness. With MODEL_DISSOLVE, alpha is erosion progress (0..1). */
     public void model(int mesh, int flags, float[] matrix, float r, float g, float b, float a, float emissive, float light, float roughness, float metallic) {
         head(AstrattoNative.RCMD_MODEL, 112).buf.putInt(mesh).putInt(flags);
         put16(matrix);

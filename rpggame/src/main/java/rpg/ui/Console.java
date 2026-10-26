@@ -168,17 +168,30 @@ public final class Console {
             else print("givebest weapons | armor", WARN);
         });
         cmd("gearkit", "The old debug gear kit.", a -> hud.gearKit());
-        cmd("spawn", "spawn <animal species>: makes one in front of you (spawn wolf, spawn cow baby).", a -> {
-            if (a.length < 2) { print("Usage: spawn <cow, wolf, brown_bear ...> [baby]", WARN); return; }
-            float fx = (float) -Math.sin(g.controller.camYaw), fz = (float) -Math.cos(g.controller.camYaw), x = g.player.x + fx * 3, z = g.player.z + fz * 3;
-            for (var s : rpg.animal.Species.values()) if (s.name().equalsIgnoreCase(a[1]) || s.label.equalsIgnoreCase(a[1].replace('_', ' '))) {
-                var an = g.animals.release(s, a.length > 2 && a[2].equalsIgnoreCase("baby"), (g.state.tick & 1) == 0, x, z);
-                print("spawned " + an.kind() + " #" + an.id, GOOD);
-                return;
-            }
-            print("spawn: no such creature '" + a[1] + "'", ERR);
+        rpg.DebugContent content = new rpg.DebugContent(g);
+        cmd("features", "features [filter]: searchable creature, NPC, object, spell, prayer and dungeon catalog.", a -> {
+            String filter=a.length>1?DevConsole.join(a,1).toLowerCase(Locale.ROOT):"";
+            content.catalog().forEach((id,label)->{if((id+" "+label).toLowerCase(Locale.ROOT).contains(filter))print(id+" - "+label,TEXT);});
         });
-        core.completer("spawn", t -> { List<String> l = new ArrayList<>(); for (var s : rpg.animal.Species.values()) if (s.name().toLowerCase(Locale.ROOT).startsWith(t)) l.add(s.name().toLowerCase(Locale.ROOT)); return l; });
+        cmd("spawn", "spawn <id> [level|baby]: monster:goblin, npc:carpenter, animal:wolf, object:<fixture-id>, furniture:bed. 'features' lists all IDs.", a -> {
+            if(a.length<2){print("Use features to list spawn IDs.",WARN);return;}
+            float x=g.player.x-(float)Math.sin(g.controller.camYaw)*3,z=g.player.z-(float)Math.cos(g.controller.camYaw)*3;
+            print("Spawned "+content.spawn(a[1],a.length>2&&a[2].equalsIgnoreCase("baby"),a.length>2?(int)DevConsole.num(a[2],0):0,x,z),GOOD);
+        });
+        core.completer("spawn", t -> content.catalog().keySet().stream().filter(id->!id.startsWith("spell:")&&!id.startsWith("prayer:")&&!id.startsWith("dungeon:")&&id.startsWith(t)).toList());
+        cmd("interact", "interact <entity-id> [action]: lists or performs any entity's registered interactions.",a->{
+            if(a.length<2)throw new IllegalArgumentException("interact <entity-id> [action]");
+            long id=Long.parseLong(a[1]);var actor=g.actor(id);rpg.interact.Interactable target=actor instanceof rpg.interact.Interactable entity?entity:g.objects.get(id);
+            if(target==null)throw new IllegalArgumentException("No such entity.");
+            if(a.length<3){for(var option:target.options(g,g.player))print(option.toString(),TEXT);return;}
+            var result=g.interact.request(g.player,target,a[2]);print(result.rejected()?result.reason():"Committed "+a[2],result.rejected()?ERR:GOOD);
+        });
+        cmd("cast", "cast <spell-id>: casts any registered spell through its normal resource and skill checks.",a->{if(a.length<2)throw new IllegalArgumentException("Use features spell");var spell=rpg.combat.Spells.Spell.valueOf(a[1].replace("spell:","").toUpperCase(Locale.ROOT));g.combat.cast(g.player,spell,g.controller.camYaw,g.controller.camPitch);});
+        cmd("prayer", "prayer <id>: toggles a registered prayer through normal checks.",a->{if(a.length<2)throw new IllegalArgumentException("Use features prayer");g.prayers.toggle(g.player,rpg.combat.Spells.Prayer.valueOf(a[1].replace("prayer:","").toUpperCase(Locale.ROOT)));});
+        cmd("dungeon", "dungeon <id>: enters a registered dungeon through its actual entrance and scaling rules.",a->{if(a.length<2)throw new IllegalArgumentException("Use features dungeon");int id=Integer.parseInt(a[1]);for(var door:g.dungeons.doors)if(!door.inside&&door.layout.id==id){g.teleport(g.player,door.x,DevMap.FLOOR,door.z-1.3f);g.interact.request(g.player,door,"enter");return;}throw new IllegalArgumentException("No such dungeon.");});
+        cmd("ragdoll", "Hands the player to Sydney's physical fall and recovery controller.",a->{g.reactions.falling(g.player,0);if(g.player.ragdoll!=0)g.game.commands().ragdollControl(g.player.ragdoll,astratto.bridge.AstrattoNative.CONTROL_COLLAPSE,1);});
+        cmd("weather", "weather <kind>: sets a registered weather state.",a->{if(a.length<2){for(var kind:astratto.weather.Weather.Kind.values())print(kind.name(),TEXT);return;}g.timeSystem.weather.set(astratto.weather.Weather.Kind.valueOf(a[1].toUpperCase(Locale.ROOT)));});
+        cmd("block", "block <x> <y> <z> <block-id>: changes an engine world cell.",a->{if(a.length!=5)throw new IllegalArgumentException("block <x> <y> <z> <block-id>");int id=Integer.parseInt(a[4]);if(id<0||id>=rpg.world.Blocks.COUNT)throw new IllegalArgumentException("Invalid block ID");g.setBlock(Integer.parseInt(a[1]),Integer.parseInt(a[2]),Integer.parseInt(a[3]),id);});
         cmd("remove", "Removes what you are looking at (an item, an animal).", a -> {
             var f = g.interact.focus;
             if (f instanceof rpg.objects.GroundItem gi) { gi.removed = true; g.state.burn(gi.stack.def, gi.stack.amount); print("removed " + gi.stack, TEXT); }
@@ -275,6 +288,7 @@ public final class Console {
     public void draw(Ui2D ui, int w, int h, float dt) {
         slide += ((core.open ? 1 : 0) - slide) * Math.min(1, dt * 14);
         if (slide < 0.01f) return;
+        Ui2D.Face was = ui.use(ui.chat);
         float ch = h * 0.46f, top = -ch * (1 - slide);
         ui.rect(0, top, w, ch, 0xE6101216);
         ui.rect(0, top + ch - 2, w, 2, 0xFF3A4048);
@@ -305,5 +319,6 @@ public final class Console {
                 ui.text(nm + (v != null && core.isVar(nm) ? "  " + v.value : ""), 20, my + 3 + i * 17, 13, v != null ? ECHO : TEXT);
             }
         }
+        ui.use(was);
     }
 }

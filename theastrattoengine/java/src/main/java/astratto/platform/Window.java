@@ -14,6 +14,7 @@ public final class Window {
     public int width, height;
     public final Input input = new Input();
     private boolean cursorLocked;
+    private boolean cursorModeApplied;
     /** True when the context is OpenGL 4.5 core: the deferred hybrid-GI renderer can run. */
     public boolean gl45;
     public String glInfo = "";
@@ -117,10 +118,11 @@ public final class Window {
     public boolean adaptiveVsync;
 
     public void setCursorLocked(boolean locked) {
-        if (locked == cursorLocked) return;
+        if (cursorModeApplied && locked == cursorLocked) return;
+        cursorModeApplied = true;
         cursorLocked = locked;
         glfwSetInputMode(handle, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN); // the UI draws a pixel-art cursor
-        if (locked && glfwRawMouseMotionSupported()) glfwSetInputMode(handle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        if (glfwRawMouseMotionSupported()) glfwSetInputMode(handle, GLFW_RAW_MOUSE_MOTION, locked ? GLFW_TRUE : GLFW_FALSE);
         input.resetMouseDelta();
     }
 

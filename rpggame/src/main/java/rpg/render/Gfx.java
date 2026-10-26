@@ -374,8 +374,7 @@ public final class Gfx implements AutoCloseable {
         // arrows and blades lodged in bodies, where they went in
         for (Actor a : g.actors()) for (CombatSystem.Stuck st : a.stuck) {
             float[] w = st.world(g, a);
-            float len = CombatSystem.ammoLength(st.stack().def);
-            held(st.stack().def, new float[]{w[0] - w[3] * len, w[1] - w[4] * len, w[2] - w[5] * len}, new float[]{w[3], w[4], w[5]}, a.yaw, false);
+            projectileItem(st.stack().def, w[0], w[1], w[2], new float[]{w[3], w[4], w[5]}, a.yaw);
         }
         // clutches being sat: a ring of straw and the eggs in it
         if (g.animals != null) for (var ne : g.animals.nests) {
@@ -569,7 +568,7 @@ public final class Gfx implements AutoCloseable {
     private void put(int mesh, int flags, float r, float g, float b, float emissive, float light, float rough, float metal) {
         if (mesh == 0) return;
         System.arraycopy(m.m, 0, m16, 0, 16);
-        cmd.model(mesh, flags, m16, r*charTint, g*charTint, b*charTint, 1, emissive, light, rough, metal);
+        cmd.model(mesh, mDissolve > 0 ? flags | AstrattoNative.MODEL_DISSOLVE : flags, m16, r*charTint, g*charTint, b*charTint, mDissolve > 0 ? mDissolve : 1, emissive, light, rough, metal);
     }
 
     /** How much bigger than a person's grip what a hand holds is drawn (a troll's club is a troll's size). */
@@ -588,6 +587,17 @@ public final class Gfx implements AutoCloseable {
             return;
         }
         drawItem(d, 0);
+    }
+
+    /** Place the actual mesh tip at the physical contact, irrespective of its hand-grip pivot. */
+    private void projectileItem(ItemDef item, float x, float y, float z, float[] direction, float yaw) {
+        float tip = projectileTipFromGrip(item);
+        held(item, new float[]{x - direction[0] * tip, y - direction[1] * tip, z - direction[2] * tip}, direction, yaw, false);
+    }
+    static float projectileTipFromGrip(ItemDef item) {
+        if (item.family == Family.ARROW || item.family == Family.BOLT) return CombatSystem.ammoLength(item);
+        var model = ItemModels.of(item);
+        return (astratto.voxel.VoxRaster.bounds(model.vox())[4] - model.gy()) * ItemModels.VOX;
     }
 
     /** Held bows share the inventory geometry; the string joins the limb tips to the actual drawing hand. */
@@ -1018,7 +1028,7 @@ public final class Gfx implements AutoCloseable {
     private static final class MonsterPose { float phase, amp, flap, lean; }
     private final java.util.Map<Long, MonsterPose> monsterPoses = new java.util.HashMap<>();
     private final Mat4 mf = new Mat4(), mp = new Mat4(), mq = new Mat4(), ma = new Mat4(), mb = new Mat4(), mc = new Mat4();
-    private float mShade = 1, mAlpha = 1, mGlow = 0;
+    private float mShade = 1, mAlpha = 1, mGlow = 0, mDissolve;
 
     /** One of a monster's parts in a frame measured in its voxels (the frame carries the figure's scale). */
     private void mpart(Mat4 frame, ItemModels.Model p) {
@@ -1029,7 +1039,7 @@ public final class Gfx implements AutoCloseable {
         if (mesh == 0) return;
         System.arraycopy(m.m, 0, m16, 0, 16);
         float sh = mShade * charTint;
-        cmd.model(mesh, mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
+        cmd.model(mesh, mDissolve > 0 ? AstrattoNative.MODEL_DISSOLVE : mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mDissolve > 0 ? mDissolve : mAlpha, mGlow, 1, 0.85f, 0);
     }
     private static float[] at(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformPoint(x, y, z, o); return o; }
     private static float[] dirOf(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformDir(x, y, z, o); return norm(o); }
@@ -1069,6 +1079,7 @@ public final class Gfx implements AutoCloseable {
         var f = MonsterModels.of(mo.kind, mo.breed);
         float previous = charTint; charTint = 1 - mo.charred * 0.86f;
         try {
+            mDissolve = rpg.monster.Monsters.dissolution(mo, clock);
             boolean ghost = mo.kind == rpg.monster.MonsterKind.GHOST;
             mShade = 1 + mo.cs.flash * 0.8f;
             mAlpha = ghost ? 0.5f + 0.08f * (float) Math.sin(clock * 1.7 + mo.id) : 1;
@@ -1085,7 +1096,7 @@ public final class Gfx implements AutoCloseable {
                 default -> dragon(mo, f, st, dt);
             }
             if (mo.alive && !ghost) cmd.shadowBody(mo.x, mo.y, mo.z, Math.max(mo.radius, mo.kind.hw * 0.4f), mo.height);
-        } finally { charTint = previous; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; }
+        } finally { charTint = previous; mShade = 1; mAlpha = 1; mGlow = 0; mDissolve = 0; heldScale = 1; }
     }
 
     private static float smooth(float x) { return x * x * (3 - 2 * x); }
@@ -2160,7 +2171,7 @@ public final class Gfx implements AutoCloseable {
         if (o instanceof GroundItem gi && gi.dir != null) {
             // one arrow, bolt or thrown blade exactly as it lies: lodged where it struck, or as its body came to rest
             float len = CombatSystem.ammoLength(gi.stack.def);
-            held(gi.stack.def, new float[]{gi.x - gi.dir[0] * len / 2, gi.y - gi.dir[1] * len / 2, gi.z - gi.dir[2] * len / 2}, gi.dir, gi.id * 1.7f, false);
+            projectileItem(gi.stack.def, gi.x + gi.dir[0] * len / 2, gi.y + gi.dir[1] * len / 2, gi.z + gi.dir[2] * len / 2, gi.dir, gi.id * 1.7f);
         } else if (o instanceof GroundItem gi) {
             // the item's own model on the ground: long things lie down, the rest stand on their base
             ItemDef d = gi.stack.def;
@@ -2182,7 +2193,7 @@ public final class Gfx implements AutoCloseable {
         } else if (o instanceof rpg.dungeon.Dungeons.Trap tr) {
             // a trap shows once it has been found or sprung: its plate, and the spikes or the rock as it goes off
             float since = (float) (clock - tr.sprungAt);
-            if (tr.found || tr.disarmed || since < 1.2f) {
+            if (!tr.removed) {
                 m.identity().translate(tr.x, DevMap.FLOOR, tr.z);
                 drawLayers("dungeon-plate:" + tr.disarmed, () -> Props.trapPlate(tr.disarmed));
                 if (since >= 0 && since < 1.2f) {
@@ -2271,9 +2282,8 @@ public final class Gfx implements AutoCloseable {
                 m.identity().translate(o.x + sd * 0.5f, fl + 1.17f, o.z).scale(0.03f, 0.05f, 0.03f); put(box, 0, 1f, 0.8f, 0.3f, 3f, 1, 0.5f, 0);
             }
         } else if (o instanceof Fixtures.Board) {
-            m.identity().translate(o.x, o.y - 0.2f, o.z).scale(1.5f, 1.5f, 0.14f); put(box, 0x60452C, 1, 0.85f, 0);
-            for (int side = -1; side <= 1; side += 2) { m.identity().translate(o.x + side * 0.55f, o.y - 0.55f, o.z).scale(0.1f, 1.3f, 0.14f); put(box, 0x49331E, 1, 0.85f, 0); }
-            for (int page = -1; page <= 1; page++) { m.identity().translate(o.x + page * 0.4f, o.y - 0.12f + (page == 0 ? 0.12f : 0), o.z + 0.08f).scale(0.3f, 0.53f, 0.015f); put(box, 0xBCA67A, 1, 0.95f, 0); }
+            m.identity().translate(o.x, DevMap.FLOOR, o.z);
+            drawLayers("bounty-board", Props::bountyBoard);
         } else if (o instanceof Fixtures.Terminal) {
             m.identity().translate(o.x, DevMap.FLOOR + 0.6f, o.z).scale(0.7f, 1.2f, 0.5f); put(box, 0x30343A, 1, 0.4f, 0.5f);
             m.identity().translate(o.x, DevMap.FLOOR + 1.0f, o.z + 0.26f).scale(0.55f, 0.4f, 0.02f); put(box, 0, 0.3f, 1f, 0.6f, 2.5f, 1, 0.2f, 0);
@@ -2329,8 +2339,7 @@ public final class Gfx implements AutoCloseable {
             float[] up = norm3(new float[]{-(kz / kl) * d[1], (kz / kl) * d[0] - (kx / kl) * d[2], (kx / kl) * d[1]});
             float c = (float) Math.cos(spin), s = (float) Math.sin(spin);
             float[] t = {d[0] * c + up[0] * s, d[1] * c + up[1] * s, d[2] * c + up[2] * s};
-            float half = p.ammo.def.thrown.equals("javelin") ? 0.9f : 0.2f;
-            held(p.ammo.def, new float[]{p.x - t[0] * half, p.y - t[1] * half, p.z - t[2] * half}, t, 0, false);
+            projectileItem(p.ammo.def, p.x, p.y, p.z, t, 0);
             return;
         }
         limb(new float[]{p.x - d[0] * 0.7f, p.y - d[1] * 0.7f, p.z - d[2] * 0.7f}, new float[]{p.x, p.y, p.z}, 0.025f, 0.025f, 0, 0xB08050, 1, 0.8f, 0);

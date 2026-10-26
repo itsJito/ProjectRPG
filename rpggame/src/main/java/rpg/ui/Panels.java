@@ -132,32 +132,36 @@ final class Panels {
     static final class ItemInfo extends Panel {
         ItemInfo(Hud h) { super("iteminfo", 268, 400); }
         @Override public void draw(Ui2D ui, float x, float y) {
-            Rpg g = hud.g;
-            Player p = g.player;
-            title(ui, "Carrying", x, y);
-            float kg = p.carried(), b = p.burden();
-            ui.text(String.format("%.1f kg", kg), x, y + 26, 13, Style.TEXT);
-            Style.bar(ui, x, y + 46, pw, 4, Math.min(1, kg / 60f), b < 1 ? Style.BAD : Style.GOOD);
-            ui.text(b < 1 ? String.format("Burdened: %.0f%% speed", b * 100) : "Unburdened (free to 30 kg)", x, y + 54, 12, b < 1 ? Style.BAD : Style.DIM);
-            int coins = p.count(Items.COINS);
-            ui.text("Gold", x, y + 82, 13, Style.DIM);
-            ui.text(Currency.text(coins) + " G", x + 60, y + 82, 13, Currency.color(coins));
-            if (coins >= 100_000) ui.text(Currency.full(coins), x + 60, y + 98, 11, Style.FAINT);
-            ItemStack s = hud.inventory.hovered;
-            float iy = y + 128;
-            title(ui, "Item", x, iy - 6);
-            iy += 22;
-            if (s == null) { ui.text("Point at an item to see it here.", x, iy, 12, Style.FAINT); return; }
-            Style.well(ui, x, iy, 52, 52);
-            hud.itemIcon(ui, s, x + 2, iy + 2, 48, 48, 1);
-            ui.text(s.def.name, x + 62, iy + 4, Math.min(15, (pw - 64) / Math.max(1, ui.width(s.def.name, 1))), 0xFFFFD15E);
-            ui.text(s.def.category().name().toLowerCase(), x + 62, iy + 26, 11, Style.DIM);
-            float ly = iy + 62;
-            for (String l : hud.describe(s).split("\n")) { if (l.equals(s.def.name)) continue; ui.text(l, x, ly, 12, l.startsWith("Stolen") ? Style.BAD : Style.DIM); ly += 16; }
-            // the flavour text, in the lore face
-            Ui2D.Face was = ui.use(ui.lore);
-            for (String l : HudFragments.wrap(ui, s.def.examine == null ? "" : s.def.examine, 13, pw)) { ui.text(l, x, ly + 4, 13, 0xFFC8B896); ly += 16; }
-            ui.use(was);
+            Ui2D.Face information = ui.use(ui.chat);
+            try {
+                Rpg g = hud.g;
+                Player p = g.player;
+                title(ui, "Carrying", x, y);
+                float kg = p.carried(), b = p.burden();
+                ui.text(String.format("%.1f kg", kg), x, y + 26, 13, Style.TEXT);
+                Style.bar(ui, x, y + 46, pw, 4, Math.min(1, kg / 60f), b < 1 ? Style.BAD : Style.GOOD);
+                ui.text(b < 1 ? String.format("Burdened: %.0f%% speed", b * 100) : "Unburdened (free to 30 kg)", x, y + 54, 12, b < 1 ? Style.BAD : Style.DIM);
+                int coins = p.count(Items.COINS);
+                ui.text("Gold", x, y + 82, 13, Style.DIM);
+                ui.text(Currency.text(coins) + " G", x + 60, y + 82, 13, Currency.color(coins));
+                if (coins >= 100_000) ui.text(Currency.full(coins), x + 60, y + 98, 11, Style.FAINT);
+                ItemStack s = hud.inventory.hovered;
+                float iy = y + 128;
+                title(ui, "Item", x, iy - 6);
+                iy += 22;
+                if (s == null) { ui.text("Point at an item to see it here.", x, iy, 12, Style.FAINT); return; }
+                Style.well(ui, x, iy, 52, 52);
+                hud.itemIcon(ui, s, x + 2, iy + 2, 48, 48, 1);
+                ui.text(s.def.name, x + 62, iy + 4, Math.min(15, (pw - 64) / Math.max(1, ui.width(s.def.name, 1))), 0xFFFFD15E);
+                ui.text(s.def.category().name().toLowerCase(), x + 62, iy + 26, 11, Style.DIM);
+                float ly = iy + 62;
+                for (String l : hud.describe(s).split("\n")) { if (l.equals(s.def.name)) continue; ui.text(l, x, ly, 12, l.startsWith("Stolen") ? Style.BAD : Style.DIM); ly += 16; }
+                // Literature uses Morpheus; ordinary item information uses Arial Narrow.
+                boolean literature = s.def.id.contains("book") || s.def.id.contains("scroll") || s.def.id.contains("letter");
+                Ui2D.Face was = ui.use(literature ? ui.lore : ui.chat);
+                for (String l : HudFragments.wrap(ui, s.def.examine == null ? "" : s.def.examine, 13, pw)) { ui.text(l, x, ly + 4, 13, 0xFFC8B896); ly += 16; }
+                ui.use(was);
+            } finally { ui.use(information); }
         }
     }
 
@@ -282,11 +286,11 @@ final class Panels {
             ui.img("Quest_map_icon", x, y + 29, 18, 0xFFFFFFFF);
             ui.text("Courier (test quest) - " + st.name().toLowerCase().replace('_', ' ') + (g.quests.failReason != null ? ": " + g.quests.failReason : ""), x + 26, y + 31, 13, c);
             float yy = y + 66;
-            title(ui, "Journal", x, yy);
+            ui.text(ui.lore, "Journal", x, yy - 4, 21, Style.ACCENT); Style.rule(ui,x,yy+19,pw);
             yy += 24;
             List<String> j = g.quests.journal;
             if (j.isEmpty()) { ui.text("Nothing learned yet.", x, yy, 12, Style.FAINT); yy += 16; }
-            Ui2D.Face was = ui.use(ui.lore);
+            Ui2D.Face was = ui.use(ui.body);
             for (int i = Math.max(0, j.size() - 8); i < j.size(); i++) for (String l : HudFragments.wrap(ui, j.get(i), 13, pw)) { ui.text(l, x, yy, 13, 0xFFE0D2B0); yy += 16; }
             ui.use(was);
             yy += 14;

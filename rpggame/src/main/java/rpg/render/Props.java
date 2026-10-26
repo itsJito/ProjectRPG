@@ -19,6 +19,28 @@ public final class Props {
     private static Layer glow(Meshes.Boxes b, float e) { return new Layer(b, 0.9f, 0, e); }
     private static Layer stone(Meshes.Boxes b) { return new Layer(b, 0.92f, 0, 0); }
 
+    /** Watch noticeboard: braced posts, capped frame and pinned, legible warrant sheets. */
+    public static Layer[] bountyBoard() {
+        Meshes.Boxes timber = new Meshes.Boxes(), iron = new Meshes.Boxes(), paper = new Meshes.Boxes();
+        for (int side : new int[]{-1, 1}) {
+            timber.rgb(side*0.82f,1.12f,0,0.16f,2.24f,0.22f,0x513A24);
+            timber.rgb(side*0.82f,0.12f,0,0.3f,0.24f,0.4f,0x393027);
+            iron.rgb(side*0.82f,0.75f,0,0.18f,0.12f,0.24f,0x383A3B);
+        }
+        timber.rgb(0,1.52f,0,1.55f,1.15f,0.14f,0x6A4B2C);
+        for(int side:new int[]{-1,1}) timber.rgb(0,1.52f+side*0.59f,0,1.94f,0.12f,0.26f,0x8B6336);
+        timber.rgb(0,2.22f,0,2.08f,0.14f,0.42f,0x48301D);
+        for(int page=-1;page<=1;page++) {
+            float x=page*0.47f,y=1.53f+(page==0?0.08f:-0.04f);
+            paper.rgb(x,y,-0.085f,0.39f,0.7f,0.02f,0xD8C69A);
+            paper.rgb(x,y+0.17f,-0.1f,0.15f,0.17f,0.008f,0x65533A);
+            paper.rgb(x,y-0.23f,-0.104f,0.07f,0.07f,0.012f,0x963D2C);
+            for(int line=0;line<3;line++)paper.rgb(x,y-0.02f-line*0.065f,-0.101f,0.25f-line*0.025f,0.014f,0.008f,0x675944);
+            iron.rgb(x,y+0.29f,-0.108f,0.035f,0.035f,0.015f,0x353638);
+        }
+        return new Layer[]{wood(timber),metal(iron),wood(paper)};
+    }
+
     // ------------------------------------------------------------------ dungeons
     /**
      * A dungeon's mouth (gamefixes): a heap of its theme's rock with a black way down in it, the front at -z. A warren's
@@ -90,8 +112,13 @@ public final class Props {
     /** A trap's plate, found: a square set in the floor (wedged, once disarmed). */
     public static Layer[] trapPlate(boolean wedged) {
         Meshes.Boxes b = new Meshes.Boxes();
-        b.rgb(0, 0.012f, 0, 0.62f, 0.025f, 0.62f, wedged ? 0x5A5A56 : 0x6E6A62);
+        b.rgb(0, 0.012f, 0, 0.82f, 0.045f, 0.82f, wedged ? 0x5A5A56 : 0x6E6A62);
         b.rgb(0, 0.02f, 0, 0.5f, 0.02f, 0.5f, wedged ? 0x4A4A46 : 0x7E7A70);
+        for (int side : new int[]{-1, 1}) {
+            b.rgb(side * 0.37f, 0.04f, 0, 0.035f, 0.035f, 0.78f, wedged ? 0x657458 : 0xC49448);
+            b.rgb(0, 0.04f, side * 0.37f, 0.78f, 0.035f, 0.035f, wedged ? 0x657458 : 0xC49448);
+        }
+        for (int i = -1; i <= 1; i++) b.rgb(i * 0.19f, 0.035f, 0, 0.055f, 0.012f, 0.42f, 0x24201A);
         if (wedged) b.rgb(0.2f, 0.04f, 0.2f, 0.16f, 0.05f, 0.06f, 0x6A4A2A);
         return new Layer[]{stone(b)};
     }

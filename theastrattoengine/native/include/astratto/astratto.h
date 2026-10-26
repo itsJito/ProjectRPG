@@ -1391,7 +1391,7 @@ typedef struct astratto_rcmd_light {
     uint32_t flags;
     float dx, dy, dz, cos_outer;
 } astratto_rcmd_light;
-enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32 };
+enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32, ASTRATTO_MODEL_DISSOLVE = 64 }; // alpha is erosion progress (0..1), rendered opaque with spatial coverage
 typedef struct astratto_rcmd_model {
     astratto_record head;
     uint32_t mesh, flags;               /* ASTRATTO_MODEL_* */

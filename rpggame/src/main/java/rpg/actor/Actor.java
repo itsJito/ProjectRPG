@@ -48,6 +48,7 @@ public class Actor {
     public boolean poseReset;
     /** Human physical reaction body; animal articulation has its own typed body record. */
     public long ragdoll;
+    public boolean debugSpawn;
     public boolean reacting, wentDown;
     public double reactSince;
     public rpg.objects.GroundItem dropped;

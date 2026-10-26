@@ -21,6 +21,10 @@ public final class Corpse extends Container {
     public final long body;
     public boolean delivered;
 
+    /** Monster remains are legitimate loot, including corpses from older saves. */
+    @Override public boolean isTheft(Actor a) { return !monsterRemains && super.isTheft(a); }
+    public boolean monsterRemains;
+
     public Corpse(long id, String name, long body, float x, float y, float z, long owner) {
         super(id, "corpse", name + "'s body", "corpse", x, y, z, 40, owner);
         this.body = body;
@@ -90,7 +94,7 @@ public final class Corpse extends Container {
     }
 
     @Override public java.util.Map<String, Object> save() { var m = super.save(); m.put("delivered", delivered); return m; }
-    @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); delivered = astratto.util.Json.bool(m, "delivered", false); heldBy = 0; }
+    @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); monsterRemains = g.actor(body) instanceof rpg.monster.Monster; delivered = astratto.util.Json.bool(m, "delivered", false); heldBy = 0; }
     @Override public String examine(Rpg g) {
         Npc n = npc(g);
         return n == null ? "A body." : n.name + ", dead." + (empty(g) ? " Nothing left on them." : "");

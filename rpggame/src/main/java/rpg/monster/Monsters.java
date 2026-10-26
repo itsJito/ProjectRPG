@@ -91,13 +91,14 @@ public final class Monsters {
         m.look = rpg.actor.Appearance.monster(kind, m.id);
         if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.ANCIENTS;
         if (kind == MonsterKind.DRAGON) m.breed = MonsterKind.Breed.values()[(int) Math.floorMod(m.id, MonsterKind.Breed.values().length)];
+        if (g.dungeons != null) g.dungeons.configureResident(m);
         kit(m);
         m.restore();
         m.nextThink = g.time + Math.floorMod(m.id * 73, 400) / 1000.0;
         monsters.add(m);
         spawnBody(m);
         spawned++;
-        g.state.commit("MonsterSpawned", 0, m.id, DevMap.jurisdiction(x, z), 0, kind.title + " level " + level + (lair == null ? "" : " at " + lair.name));
+        g.state.commit("MonsterSpawned", 0, m.id, DevMap.jurisdiction(x, z), 0, kind.title + " level " + m.level + (lair == null ? "" : " at " + lair.name));
         return m;
     }
 
@@ -210,7 +211,11 @@ public final class Monsters {
 
     /** The nearest open cell to a point (somewhere a body can stand), within a few cells. */
     float[] open(Monster m, float x, float z) {
-        x = Math.max(2, Math.min(DevMap.SX - 3, x)); z = Math.max(2, Math.min(DevMap.SZ - 3, z));
+        var dungeon = rpg.world.DungeonLayout.at(m.lairX, m.lairZ);
+        float minX = dungeon == null ? 2 : dungeon.ox + 1, minZ = dungeon == null ? 2 : dungeon.oz + 1;
+        float maxX = dungeon == null ? DevMap.SX - 3 : dungeon.ox + dungeon.w - 2;
+        float maxZ = dungeon == null ? DevMap.SZ - 3 : dungeon.oz + dungeon.d - 2;
+        x = Math.clamp(x, minX, maxX); z = Math.clamp(z, minZ, maxZ);
         if (m.kind.flies()) return new float[]{x, z};
         for (int r = 0; r < 5; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
             int cx = (int) Math.floor(x) + dx, cz = (int) Math.floor(z) + dz;
@@ -267,6 +272,14 @@ public final class Monsters {
             float ax = m.x + dx / l * (m.radius + 0.8f), az = m.z + dz / l * (m.radius + 0.8f);
             for (int up = 0; up < 6; up++) if (g.vox.solid((int) Math.floor(ax), (int) Math.floor(m.y + 0.2f + up), (int) Math.floor(az))) want = Math.max(want, (float) Math.floor(m.y) + up + 1.2f);
         }
+        var dungeon = rpg.world.DungeonLayout.at(m.x, m.z);
+        if (dungeon != null) {
+            int ceiling = DevMap.FLOOR + 3;
+            for (int y = DevMap.FLOOR + 1; y < rpg.world.DungeonLayout.ROCK_TOP; y++)
+                if (g.vox.solid((int)Math.floor(m.x), y, (int)Math.floor(m.z))) { ceiling = y; break; }
+            want = Math.min(want, Math.max(DevMap.FLOOR + 0.05f, ceiling - m.height - 0.15f));
+            if (m.y > ceiling - m.height) m.y = want;
+        }
         float vy = Math.max(-4, Math.min(4, (want - m.y) * 2.5f));
         if (m.kind == MonsterKind.GHOST) {
             // drifting: no body in the world's way at all
@@ -278,6 +291,8 @@ public final class Monsters {
     }
 
     private float groundBelow(Monster m) {
+        // A floater must never treat a dungeon roof as its new floor.
+        if (rpg.world.DungeonLayout.at(m.x, m.z) != null) return DevMap.FLOOR;
         int bx = (int) Math.floor(m.x), bz = (int) Math.floor(m.z);
         for (int y = (int) Math.floor(m.y + 0.5f); y > 0; y--) if (g.vox.solid(bx, y - 1, bz)) return y;
         return DevMap.FLOOR;
@@ -286,6 +301,7 @@ public final class Monsters {
     // ------------------------------------------------------------------ the frame
     public void update(float dt) {
         for (Monster m : new ArrayList<>(monsters)) {
+            if (!m.alive && g.time - m.diedAt >= 63) { dissolve(m); continue; }
             if (!m.alive || !m.loaded || m.body == 0) continue;
             if (m.reacting) continue;
             if (m.puppet) {
@@ -453,6 +469,30 @@ public final class Monsters {
     /** Struck (the combat system tells it): remembered against whoever did it. */
     public void onHurt(Monster m, Actor by, float damage) { mind.onHurt(m, by, damage); }
 
+    public static float dissolution(Monster m, double now) {
+        return m.alive ? 0 : (float)Math.clamp((now - m.diedAt - 60) / 3, 0, 1);
+    }
+    private void dissolve(Monster m) {
+        for (var actor : g.actors()) if (actor.carryBody == m.id) g.carrying.drop(actor, false);
+        if (g.objects.get(m.corpse) instanceof rpg.objects.Corpse corpse) {
+            for (var item : new ArrayList<>(corpse.contents.stacks())) g.objects.drop(item, m.x, m.y + 0.1f, m.z);
+            corpse.contents.clear(); corpse.removed = true;
+        }
+        for (var grid : m.grids()) {
+            for (var item : new ArrayList<>(grid.stacks())) if (!item.def.natural) g.objects.drop(item, m.x, m.y + 0.1f, m.z);
+            grid.clear();
+        }
+        for (var slot : ItemDef.Slot.values()) {
+            var item = m.eq.get(slot);
+            if (item != null && !item.def.natural) g.objects.drop(item, m.x, m.y + 0.1f, m.z);
+            m.eq.set(slot, null);
+        }
+        g.combat.shedLodged(m, Integer.MAX_VALUE);
+        g.game.commands().chemRemove(m.id);
+        remove(m);
+        g.state.commit("MonsterDissolved", m.id, m.corpse, DevMap.WILDS, 0, "remains dispersed; original loot dropped");
+    }
+
     // ------------------------------------------------------------------ voice, words, saving
     public void sound(Monster m, String key, float vol) {
         if (g.sfx == null || key == null) return;
@@ -485,12 +525,12 @@ public final class Monsters {
         List<Object> ms = new ArrayList<>();
         for (Monster m : monsters) {
             Map<String, Object> o = record.apply(m);
-            o.put("kind", m.kind.name()); o.put("level", m.level); o.put("lair", m.lair); o.put("lairX", m.lairX); o.put("lairZ", m.lairZ);
+            o.put("encounterScaled",m.encounterScaled); o.put("kind", m.kind.name()); o.put("level", m.level); o.put("lair", m.lair); o.put("lairX", m.lairX); o.put("lairZ", m.lairZ);
             o.put("hunger", (double) m.hunger); o.put("fatigue", (double) m.fatigue); o.put("loaded", m.loaded);
             if (m.breed != null) o.put("breed", m.breed.name());
             var rd = !m.alive && m.ragdoll != 0 ? g.lastBodies.ragdoll(m.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); o.put("pose", pose); }
-            o.put("corpse", m.corpse);
+            o.put("corpse", m.corpse); o.put("deadAge", m.alive ? 0 : Math.max(0, g.time - m.diedAt));
             ms.add(o);
         }
         root.put("monsters", ms);
@@ -517,7 +557,10 @@ public final class Monsters {
             m.look = rpg.actor.Appearance.monster(kind, m.id);
             apply.accept(m, r);
             m.alive = astratto.util.Json.bool(r, "alive", true);
+            float savedHp=m.hp;
             m.stats();
+            if(astratto.util.Json.bool(r,"encounterScaled",false))m.encounterLevel(m.level);
+            m.hp=Math.min(savedHp,m.maxHp());
             m.lair = astratto.util.Json.lng(r, "lair", 0); m.lairX = (float) astratto.util.Json.num(r, "lairX", m.x); m.lairZ = (float) astratto.util.Json.num(r, "lairZ", m.z);
             m.homeX = m.lairX; m.homeZ = m.lairZ;
             m.hunger = (float) astratto.util.Json.num(r, "hunger", 0.3); m.fatigue = (float) astratto.util.Json.num(r, "fatigue", 0);
@@ -526,13 +569,14 @@ public final class Monsters {
             monsters.add(m);
             if (m.alive && astratto.util.Json.bool(r, "loaded", true)) spawnBody(m);
             else if (!m.alive) {
-                m.diedAt = g.time;
+                m.diedAt = g.time - astratto.util.Json.num(r, "deadAge", 0);
                 m.ragdoll = g.game.reserve(KIND_RAGDOLL);
                 g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE, m.x, DevMap.FLOOR, m.z, m.yaw, 0, 0, 0);
                 List<Object> pose = astratto.util.Json.list(r, "pose");
                 if (pose != null && pose.size() >= RD_PARTICLES * 3) { float[] p = new float[pose.size()]; for (int i = 0; i < p.length; i++) p[i] = ((Number) pose.get(i)).floatValue(); g.game.commands().ragdollPose(m.ragdoll, 0, 0, 0, p); }
                 g.game.commands().ragdollControl(m.ragdoll, CONTROL_DIE, 1);
                 m.corpse = astratto.util.Json.lng(r, "corpse", 0);
+                if (g.objects.get(m.corpse) instanceof rpg.objects.Corpse corpse) { corpse.monsterRemains = true; corpse.owner = 0; }
             }
         }
     }

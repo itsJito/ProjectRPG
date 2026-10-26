@@ -41,6 +41,7 @@ public final class Dungeons {
     public final List<Door> doors = new ArrayList<>();
     public final List<Trap> traps = new ArrayList<>();
     private final Map<Integer, Long> visited = new HashMap<>();
+    private final Map<Integer, Integer> encounterLevels = new HashMap<>();
 
     public Dungeons(Rpg g) { this.g = g; }
 
@@ -51,7 +52,7 @@ public final class Dungeons {
         public final boolean inside;
         /** Where it takes you, and which way you face on arriving. */
         public float toX, toZ, toYaw;
-        Door(long id, DungeonLayout l, boolean inside, float x, float z) {
+        public Door(long id, DungeonLayout l, boolean inside, float x, float z) {
             super(id, inside ? "dungeon_exit" : "dungeon_entrance", inside ? "Way out" : l.name, x, DevMap.FLOOR, z);
             this.layout = l; this.inside = inside;
         }
@@ -87,12 +88,12 @@ public final class Dungeons {
         public final int level;
         public boolean armed = true, found, disarmed;
         public double sprungAt = -99, readyAt;
-        Trap(long id, int kind, float threat, int level, float x, float z) {
+        public Trap(long id, int kind, float threat, int level, float x, float z) {
             super(id, "dungeon_trap", kind == 0 ? "Spike plate" : "Loose stone", x, DevMap.FLOOR, z);
             this.kind = kind; this.threat = threat; this.level = level;
         }
         @Override public float focusRadius() { return 0.45f; }
-        @Override public boolean exists() { return !removed && (found || disarmed); }
+        @Override public boolean exists() { return !removed; }
         @Override public String examine(Rpg g) {
             return disarmed ? "A trap's plate, wedged so it will not spring." : kind == 0 ? "A plate in the floor, sitting a little proud. Spikes wait under it." : "A loose stone underfoot. The roof above it is cracked and heavy.";
         }
@@ -250,12 +251,30 @@ public final class Dungeons {
             g.controller.snapTo(door.toYaw);
             var l = door.layout;
             if (!door.inside) {
+                configureEncounter(l);
                 g.chat.add("You enter the " + l.name + ". (" + l.type.title + ", " + l.threatWord() + " threat)", Chat.Kind.GAME);
                 if (!visited.containsKey(l.id)) { visited.put(l.id, (long) g.state.minutes); g.chat.say(firstWords(l)); }
             } else g.chat.add("You climb back out into the open air.", Chat.Kind.GAME);
         }
         g.state.commit(req, door.inside ? "DungeonLeft" : "DungeonEntered", a.id, door.id, DevMap.WILDS, 0, door.layout.name);
     }
+    /** Scale the living encounter at its boundary; injured enemies retain their health share. */
+    public void configureEncounter(DungeonLayout layout) {
+        encounterLevels.put(layout.id, g.player.skills.combatLevel());
+        for (var monster : g.monsters.all()) if (monster.alive && DungeonLayout.at(monster.lairX, monster.lairZ) == layout) configureResident(monster);
+    }
+    public void configureResident(rpg.monster.Monster monster) {
+        var layout = DungeonLayout.at(monster.lairX, monster.lairZ);
+        if (layout == null || !encounterLevels.containsKey(layout.id)) return;
+        int playerLevel = encounterLevels.get(layout.id);
+        int target = switch (layout.type) {
+            case MICRO, MACRO -> Math.max(1, playerLevel - Math.floorMod(monster.id, 4));
+            case ELITE -> playerLevel + 5 + Math.floorMod(monster.id, 8);
+            case BOSS -> playerLevel + Math.max(10, playerLevel / 4);
+        };
+        monster.encounterLevel(target);
+    }
+
     private static String firstWords(DungeonLayout l) {
         return switch (l.theme) {
             case WARREN -> "Low tunnels, dug by small hands. Somewhere ahead, goblins are arguing.";
@@ -305,11 +324,15 @@ public final class Dungeons {
         Map<String, Object> v = new HashMap<>();
         for (var e : visited.entrySet()) v.put(String.valueOf(e.getKey()), e.getValue());
         m.put("visited", v);
+        Map<String,Object> levels=new HashMap<>();encounterLevels.forEach((id,level)->levels.put(id.toString(),level));m.put("encounters",levels);
         return m;
     }
     public void load(Map<String, Object> m) {
-        visited.clear();
+        visited.clear(); encounterLevels.clear();
+        if(m!=null && astratto.util.Json.obj(m,"encounters") instanceof Map<String,Object> levels)
+            levels.forEach((id,value)->{if(value instanceof Number n)encounterLevels.put(Integer.parseInt(id),n.intValue());});
         if (m != null && astratto.util.Json.obj(m, "visited") instanceof Map<String, Object> v) for (var e : v.entrySet()) if (e.getValue() instanceof Number n) visited.put(Integer.parseInt(e.getKey()), n.longValue());
         populate();
+        for(var monster:g.monsters.all())if(monster.alive)configureResident(monster);
     }
 }

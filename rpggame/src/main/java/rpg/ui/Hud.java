@@ -120,7 +120,7 @@ public final class Hud {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
         group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
-                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "levelbanner", Placement.at(Anchor.TOP, 0, 96), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
+                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
         group("frame", "frame", Placement.at(Anchor.CENTER, 0, FRAME_Y));
         // what is not the player's own (a container, a body, a shop) stands apart, left of the frame (Windows.detach)
@@ -136,11 +136,12 @@ public final class Hud {
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
+        group("celebrations", "levelbanner", Placement.at(Anchor.TOP, 0, 86));
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
-        scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
+        scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "celebrations", "top")));
         for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.MAP}) {
             String content = s.name().toLowerCase();
-            scenes.put(s, new ArrayList<>(List.of("world", "vitals", "frame", content, "talk", "inspect", "addons", "top")));
+            scenes.put(s, new ArrayList<>(List.of("world", "vitals", "frame", content, "talk", "inspect", "addons", "celebrations", "top")));
         }
     }
 
@@ -384,6 +385,7 @@ public final class Hud {
 
     private void flushTooltip(Ui2D ui) {
         if (tip == null) return;
+        Ui2D.Face was = ui.use(ui.chat);
         String[] lines = tip.split("\n");
         float tw = 0;
         for (String l : lines) tw = Math.max(tw, ui.width(l, 12));
@@ -392,6 +394,7 @@ public final class Hud {
         ui.border(x, y, tw + 12, lines.length * 15 + 8, 1, Style.EDGE_HI);
         for (int i = 0; i < lines.length; i++) ui.text(lines[i], x + 6, y + 4 + i * 15, 12, i == 0 ? Style.TEXT : Style.DIM);
         tip = null;
+        ui.use(was);
     }
 
     void openMenu(String title, float x, float y, List<MenuItem> items) {

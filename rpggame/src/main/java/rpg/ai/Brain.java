@@ -172,7 +172,10 @@ public final class Brain {
             case WORKER, VILLAGER, CARTER, MERCHANT, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
                 boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
-                s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : "day's work: " + workText(n)));
+                Actor principal = n.profession == Profession.ESCORT_KNIGHT ? g.actor(n.dutyTarget) : null;
+                boolean escort = !night && principal != null && principal.alive;
+                s.add(new Score(Goal.WORK, committed ? 0.88f : escort ? 0.70f : night ? 0.2f : 0.5f,
+                        committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : escort ? "escorting " + principal.name : "day's work: " + workText(n)));
             }
             case THIEF -> {
                 float opp = ai.stealOpportunity(n);
@@ -855,6 +858,7 @@ public final class Brain {
      * it stands (round corners, behind cover) and that no one else searching is already checking, looking round each.
      */
     private void search(Npc n) {
+        if (g.traps.hunt(n)) return;
         Hunt h = n.hunt;
         if (h == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = Math.min(n.nextThink, g.time + 0.2); return; }
         if (g.gore != null) g.gore.followTrail(n);
@@ -1177,7 +1181,10 @@ public final class Brain {
         Npc p = ai.partnerFor(n);
         if (p == null) { n.lastOutcome = "no one to talk to"; n.social = 0.3f; return; }
         n.socialPartner = p.id;
-        if (!goTo(n, p.x + (n.x > p.x ? 1.4f : -1.4f), p.z, false, 0.9f)) return;
+        float[] approach = ai.conversationSpot(n, p);
+        if (approach == null) { n.unreachable.put(p.id, g.time + 30); n.socialPartner = 0; return; }
+        if (!goTo(n, approach[0], approach[1], false, 0.55f)) return;
+        if (n.distTo(p) > 3.6f || !g.vox.sight(n.x, n.eyeY(), n.z, p.x, p.eyeY(), p.z)) return;
         if (n.chatUntil < g.time - 1) { n.chatUntil = g.time + 4; g.ai.say(n, ai.smallTalk(n, p)); }
         n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
         if (g.time >= n.chatUntil) {

@@ -33,12 +33,30 @@ public final class Objects {
     public Fixtures.Altar altar;
     public final List<Furniture> furniture = new ArrayList<>();
 
-    public Objects(Rpg g) { this.g = g; }
+    public final PropCollision collisions;
+    public Objects(Rpg g) { this.g = g; collisions = new PropCollision(g); g.vox.props(collisions); }
 
     public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
     public List<WorldObject> everything() { return list; }
     public WorldObject get(long id) { for (WorldObject o : list) if (o.id == id) return o; return null; }
-    public <T extends WorldObject> T add(T o) { list.add(o); if (o instanceof Door door) doors.add(door); return o; }
+    public <T extends WorldObject> T add(T o) { list.add(o); collisions.add(o); if (o instanceof Door door) doors.add(door); return o; }
+    /** Retire runtime prefab registrations and native shapes before reconstructing a save. */
+    public void resetDynamic() {
+        for(var object:list) if(object.id>=Ids.DYNAMIC && !object.def.equals("cargo")) {
+            object.removed=true;
+            if(object instanceof Door door) {
+                for(long joint:door.hinge)if(joint!=0)g.game.commands().release(joint);
+                for(long body:door.leaf)if(body!=0)g.game.commands().release(body);
+            }
+        }
+        list.removeIf(object->object.id>=Ids.DYNAMIC && !object.def.equals("cargo"));
+        nodes.removeIf(object->object.id>=Ids.DYNAMIC);
+        furniture.removeIf(object->object.id>=Ids.DYNAMIC);
+        doors.removeIf(object->object.id>=Ids.DYNAMIC);
+        g.dungeons.traps.removeIf(object->object.id>=Ids.DYNAMIC);
+        collisions.update();
+    }
+
     private long fid() { return nextFixture++; }
 
     /** The authored fixtures, in a fixed order. */
@@ -246,6 +264,7 @@ public final class Objects {
     }
 
     public void update(float dt) {
+        collisions.update();
         for (Node n : nodes) n.update(g);
         for(var object:all())if(object instanceof FishingNet net)net.update(g);
         stall.update(g);

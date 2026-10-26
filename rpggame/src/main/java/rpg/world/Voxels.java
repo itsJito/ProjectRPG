@@ -25,6 +25,8 @@ public final class Voxels {
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.plant(i)) { solid[i] = false; opaque[i] = false; }
     }
 
+    private rpg.objects.PropCollision props;
+    public void props(rpg.objects.PropCollision props) { this.props = props; }
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
     public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }
     private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
@@ -65,6 +67,7 @@ public final class Voxels {
                 h.hit = true; h.dist = t; h.bx = x; h.by = y; h.bz = z; h.nx = nx; h.ny = ny; h.nz = nz; h.block = b;
                 h.x = ox + dx * t; h.y = oy + dy * t; h.z = oz + dz * t;
                 for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
+                if (props != null) props.ray(h, ox, oy, oz, dx, dy, dz, t);
                 return h;
             }
             if (tmx < tmy && tmx < tmz) { t = tmx; tmx += tdx; x += sx; nx = -sx; ny = 0; nz = 0; }
@@ -72,6 +75,7 @@ public final class Voxels {
             else { t = tmz; tmz += tdz; z += sz; nx = 0; ny = 0; nz = -sz; }
         }
         for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, max);
+        if (props != null) props.ray(h, ox, oy, oz, dx, dy, dz, max);
         return h;
     }
 

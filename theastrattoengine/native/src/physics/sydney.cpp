@@ -864,20 +864,26 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
             if (!legs && cfg.style != SydneyConfig::CRAWLER) { outcome = CRAWL; break; }
             if (tries >= cfg.getUpTries + static_cast<int>((traits.endurance - 1) * 2)) { outcome = STUCK; break; }
             tries++;
-            getUpT_ = 0; getUpPhase_ = s.supine ? 0 : 1; getUpPhaseT_ = 0;
+            getUpT_ = 0; settled = 0; getUpPhase_ = s.supine ? 0 : 1; getUpPhaseT_ = 0;
             rollSide_ = rand01() < 0.5f ? -1.0f : 1.0f;
             go(GETUP);
             break;
         case GETUP: {
             if (!legs && cfg.style != SydneyConfig::CRAWLER) { go(DOWN); downFor = 0.3f; break; }
-            const bool upright = s.height > s.standHeight * 0.88f && s.tilt < rad(18) && s.feet > 0;
+            const bool upright = s.height > s.standHeight * 0.88f && s.tilt < rad(18) && s.feet > 0
+                    && s.captureOut < -0.015f * body->scale && s.speed < 0.45f;
+            settled = upright ? settled + h : 0;
             if (cfg.style == SydneyConfig::CRAWLER) {
                 const bool four = s.height > s.standHeight * cfg.crawlHeight * 0.72f && std::fabs(s.up.y) < 0.62f && s.speed < 1.4f;
                 if ((four && getUpT_ > cfg.getUpTime * 0.75f) || getUpT_ > cfg.getUpTime * 1.6f) { outcome = RECOVERED; recoveries++; }
                 break;
             }
-            if (upright && getUpPhase_ >= 3) { steps = 0; settled = 0; go(STAND); break; }
-            if (t > cfg.getUpTime + cfg.getUpTimeout) { go(DOWN); downFor = 0.8f; }
+            if (settled > 0.18f && getUpPhase_ >= 3) {
+                // This is the supervisor's handoff condition, already verified against support and velocity.
+                // Requiring a second, different settling test in STAND can lose this valid recovery window.
+                steps = 0; outcome = RECOVERED; recoveries++; settled = cfg.recoverSettle; go(STAND); break;
+            }
+            if (t > cfg.getUpTime + cfg.getUpTimeout + (getUpPhase_ >= 3 ? 3.0f : 0.0f)) { go(DOWN); downFor = 0.8f; }
             break;
         }
         case DEAD:
@@ -1454,7 +1460,8 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
             }
             // the knees under the hips (the hips up off the ground) is enough: kneeling up raises the chest
             const float hipsUp = r.body(PELVIS).p.y - s.groundY;
-            const bool four = (s.height > s.standHeight * 0.42f || hipsUp > 0.42f * r.scale) && s.speed < 1.2f && !s.supine;
+            const bool braced = s.handsDown > 0 || s.feet > 0 || s.otherContacts > 0;
+            const bool four = braced && (s.height > s.standHeight * 0.34f || hipsUp > 0.32f * r.scale) && s.speed < 1.2f && !s.supine;
             if (four && getUpPhaseT_ > 0.55f) { getUpPhase_ = 2; getUpPhaseT_ = 0; stepSide_ = rand01() < 0.5f ? 0 : 1; }
             else if (getUpPhaseT_ > 2.0f) { getUpPhaseT_ = 0.2f; }
             if (s.supine && getUpPhaseT_ > 0.6f) { getUpPhase_ = 0; getUpPhaseT_ = 0; }
@@ -1501,9 +1508,10 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
             g_.heightWant = lerp(s.standHeight * 0.62f, s.standHeight * 0.97f, e); g_.heightGain = 1.5f * str;
             // the reference: rising over the front foot, the support easing off as the legs take the weight
             {
-                const V3 fp = r.body(FOOT[front]).p, pp = r.body(PELVIS).p;
-                g_.assist = true; g_.assistMax = 0.7f * (1 - smooth((getUpPhaseT_ - 0.6f) / 0.6f));
-                g_.assistAt = V3(lerp(pp.x, fp.x, 0.5f), s.groundY + lerp(0.62f, 0.80f, e) * scale, lerp(pp.z, fp.z, 0.5f));
+                const V3 fp = r.body(FOOT[front]).p;
+                g_.assist = true; g_.assistMax = 0.7f * (1 - smooth(clampf(settled / 0.22f, 0, 1)));
+                const V3 support = s.feet == 2 ? s.supportCentre : fp;
+                g_.assistAt = V3(support.x - s.comV.x * 0.12f, s.groundY + lerp(0.62f, 0.80f, e) * scale, support.z - s.comV.z * 0.12f);
                 g_.assistQ = g_.torsoTarget;
             }
             setJoint(LEG[front][0], lerp(1.4f, 0.05f, e), 0, 0, 0.6f);
@@ -1518,7 +1526,7 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
             } else { setJoint(LEG[back][0], 0.05f, 0, 0, 0.5f); setJoint(LEG[back][1], -0.1f, 0, 0, 0.6f); setJoint(LEG[back][2], 0, 0, 0, 0.5f); }
             relaxArms(0.5f);
             setJoint(NECK, 0, 0, 0, 0.7f);
-            if (getUpPhaseT_ > 2.4f || s.height < s.standHeight * 0.4f) { getUpPhase_ = 1; getUpPhaseT_ = 0.3f; }
+            if (s.height < s.standHeight * 0.4f) { getUpPhase_ = 1; getUpPhaseT_ = 0.3f; }
             break;
         }
     }

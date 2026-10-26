@@ -29,8 +29,11 @@ class PosseKnowledgeTest {
             assertEquals(witness.id,officer.playerSighting.witness());
             g.teleport(g.player,24,DevMap.FLOOR,24);
             g.law.all().computeIfAbsent(DevMap.ALPHA,k->new java.util.HashMap<>()).put(g.player.id,1200);
+            assertFalse(g.law.posses.form(DevMap.ALPHA,1200,false),"assembly is deferred while the whole known search area is ahead of the player");
+            g.controller.snapTo(0);
             assertTrue(g.law.posses.form(DevMap.ALPHA,1200,false));
             for(Npc hunter:g.law.posses.members()) {
+                assertTrue(g.law.posses.outsideView(hunter.x,hunter.z));
                 assertEquals(80,hunter.hunt.x);assertEquals(72,hunter.hunt.z);assertEquals(witness.id,hunter.hunt.source);
             }
             var file=java.nio.file.Files.createTempFile("sighting",".json");

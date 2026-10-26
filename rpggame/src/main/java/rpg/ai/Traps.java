@@ -23,6 +23,17 @@ public final class Traps {
                 for(var item:trap.contents.stacks())g.state.burn(item.def,item.amount);
                 trap.contents.clear();trap.removed=true;g.game.commands().chemRemove(trap.id);
             }
+            if (trap.quarry != 0) {
+                var quarry = g.actor(trap.quarry);
+                if (!trap.removed && trap.caught == 0 && trap.contents.has(Items.SNARE,1) && quarry != null && quarry.alive
+                        && quarry.grounded && quarry.distTo(trap.x,trap.z)<quarry.radius+0.2f && Math.abs(quarry.y-trap.y)<0.5f) {
+                    trap.caught=quarry.id; quarry.cs.slowT=Math.max(quarry.cs.slowT,6); quarry.cs.staggered=Math.max(quarry.cs.staggered,0.65f);
+                    g.state.commit("BountySnareSprung",trap.owner,quarry.id,DevMap.jurisdiction(trap.x,trap.z),0,"confirmed physical contact");
+                    if(quarry==g.player)g.chat.warn("A hunter's snare catches your leg!");
+                    if(g.fx!=null)g.fx.puff(trap.x,trap.y+0.2f,trap.z);
+                }
+                continue;
+            }
             Animal caught=g.animals.byId(trap.caught);
             if(caught!=null && caught.alive && !trap.removed && trap.contents.has(Items.SNARE,1))caught.trappedBy=trap.id;
             if(caught!=null && !caught.alive)caught.trappedBy=0;
@@ -34,6 +45,27 @@ public final class Traps {
             }
         }
     }
+    /** Use only the hunt's communicated or directly perceived clue; walk to the placement and spend a real snare. */
+    public boolean hunt(Npc hunter) {
+        Hunt clue=hunter.hunt;
+        if(!hunter.posse || clue==null || !hunter.has(Items.SNARE,1) || g.time-clue.clueAt>120 || hunter.fightTarget!=0)return false;
+        for(var object:g.objects.all())if(object instanceof Trap trap && trap.owner==hunter.id && trap.quarry!=0 && trap.caught==0)return false;
+        float speed=(float)Math.hypot(clue.vx,clue.vz),lead=speed>0.2f?Math.min(8,speed*3):0;
+        float x=(float)Math.floor(clue.x+(speed>0?clue.vx/speed*lead:0))+0.5f;
+        float z=(float)Math.floor(clue.z+(speed>0?clue.vz/speed*lead:0))+0.5f;
+        if(!g.vox.solid((int)x,DevMap.FLOOR-1,(int)z)||g.vox.solid((int)x,DevMap.FLOOR,(int)z)||g.vox.solid((int)x,DevMap.FLOOR+1,(int)z))return false;
+        // Do not abandon an active search on an inaccessible trap site.
+        if(hunter.dutyTarget!=clue.target){hunter.dutyTarget=clue.target;hunter.dutyUntil=g.time+12;}
+        if(g.time>hunter.dutyUntil)return false;
+        hunter.lastOutcome="approaching an ambush site from the last confirmed heading";
+        if(!g.ai.brain.goTo(hunter,x,z,false,0.9f))return true;
+        Trap trap=new Trap(g.state.newEntityId(),hunter.id,x,DevMap.FLOOR,z);trap.quarry=clue.target;
+        for(var item:hunter.takeItems(Items.SNARE,1))trap.contents.add(item);
+        g.objects.add(trap);hunter.dutyUntil=0;
+        g.state.commit("BountySnareSet",hunter.id,clue.target,DevMap.jurisdiction(x,z),0,"at "+x+", "+z+" from clue by "+clue.source);
+        return true;
+    }
+
     public void work(Npc hunter) {
         Trap mine=null;
         for(var object:g.objects.all())if(object instanceof Trap trap && trap.owner==hunter.id && trap.contents.has(Items.SNARE,1)){mine=trap;break;}

@@ -63,6 +63,11 @@ public final class Node extends WorldObject {
         if (kind == Kind.TREE) y = DevMap.FLOOR + 1.2f;
     }
 
+    public Node copyAt(long id, int x, int z) {
+        Node copy = new Node(id,def,name,kind,skill,level,product,xp,baseTime,stockMax,respawnMinutes,block,x,z,leaves,height);
+        copy.needs=needs;copy.waters=waters;return copy;
+    }
+
     @Override public float focusRadius() { return kind == Kind.TREE ? 0.9f : kind == Kind.FISH ? 1.2f : 0.75f; }
     /** Only a node with a stock can run out (a fishing spot has none and never does). */
     public boolean depleted() { return stockMax > 0 && stock <= 0; }

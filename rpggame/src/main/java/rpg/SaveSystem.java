@@ -68,12 +68,19 @@ public final class SaveSystem {
         List<Object> npcs = new ArrayList<>();
         for (Npc n : g.npcs) {
             Map<String, Object> m = actor(n);
+            m.put("role",n.role.name());
             m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
             if (n.profession != null) m.put("profession",n.profession.name()); m.put("dutyTarget",n.dutyTarget); m.put("dutyPhase",n.dutyPhase); m.put("dutyX",n.dutyX); m.put("dutyZ",n.dutyZ); m.put("dutyLeft",Math.max(0,n.dutyUntil-g.time));
             m.put("arrested", n.arrestedUntil); m.put("arrestJur", n.arrestJurisdiction); m.put("patrol", n.patrolIndex);
             if (n.playerSighting != null) {
                 var sight = n.playerSighting;
                 m.put("playerSighting", Map.of("witness", sight.witness(), "x", sight.x(), "z", sight.z(), "vx", sight.vx(), "vz", sight.vz(), "age", g.time - sight.at()));
+            }
+            if(n.hunt!=null) {
+                var hunt=n.hunt;Map<String,Object> search=new HashMap<>();
+                search.put("target",hunt.target);search.put("source",hunt.source);search.put("why",hunt.why);
+                search.put("x",hunt.x);search.put("z",hunt.z);search.put("vx",hunt.vx);search.put("vz",hunt.vz);
+                search.put("age",Math.max(0,g.time-hunt.clueAt));search.put("patience",hunt.patience);m.put("hunt",search);
             }
             if (n.posse) { m.put("posse", true); m.put("posseJur", n.homeJurisdiction); }
             if (n.standing != Npc.Standing.COMMON) m.put("standing", n.standing.name());
@@ -91,7 +98,8 @@ public final class SaveSystem {
             if (o.def.equals("cargo")) continue;   // the economy saves its crates
             if (o.id >= Ids.DYNAMIC && o.removed) continue;
             Map<String, Object> m = o.save();
-            m.put("id", o.id); m.put("def", o.def); m.put("kind", o.getClass().getSimpleName());
+            m.put("id", o.id); m.put("def", o.def);
+            if(o.debugPrefab!=null){m.put("debugPrefab",o.debugPrefab);m.put("x",o.x);m.put("y",o.y);m.put("z",o.z);} m.put("kind", o.getClass().getSimpleName());
             if (o instanceof Container ct) {
                 m.put("x", ct.x); m.put("y", ct.y); m.put("z", ct.z); m.put("name", ct.name); m.put("ckind", ct.kind); m.put("ownerOnly", ct.ownerOnly);
                 // a grave keeps its standing: the seconds it has left, whether it is secured, who killed its owner
@@ -136,6 +144,7 @@ public final class SaveSystem {
         m.put("look", look);
         if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.morphCameraSaved ? p.morphFirstPerson : p.firstPerson); m.put("book", p.book.name()); }
         m.put("manaAcc", (double) a.manaAcc);
+        m.put("debugSpawn",a.debugSpawn);
         m.put("injuries",a.injuries.save()); m.put("charred",a.charred); m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
         if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
         if (g.prayers != null) m.put("prayers", g.prayers.save(a));
@@ -165,6 +174,7 @@ public final class SaveSystem {
         try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
+        g.prog.banners.clear(); g.prog.banner=null;
         g.chemistry.beforeLoad();
         migrateJurisdictions(root);
         g.interact.work.clear();
@@ -196,7 +206,7 @@ public final class SaveSystem {
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
         g.player.diedAt = -1;
         g.teleport(g.player, g.player.x, g.player.y, g.player.z);
-        for(Npc old:new ArrayList<>(g.npcs))if(old.summonOwner!=0 || old.posse)g.magic.dismiss(old);
+        for(Npc old:new ArrayList<>(g.npcs))if(old.summonOwner!=0 || old.posse || old.debugSpawn)g.magic.dismiss(old);
         var savedNpcIds=new java.util.HashSet<Long>();
         for(Object record:Json.list(root,"npcs"))savedNpcIds.add(Json.lng((Map<String,Object>)record,"id",-1));
         var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
@@ -208,6 +218,10 @@ public final class SaveSystem {
                 Npc ally=new Npc(Json.lng(m,"id",-1),Json.str(m,"name","Bound revenant"),Npc.Role.HUNTER,"Conjured ally",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
                 Actor owner=g.actor(Json.lng(m,"summonOwner",0)); ally.team=owner==null?0:owner.team;
                 ally.loaded=false; g.npcs.add(ally); a=ally;
+            }
+            if(a==null && Json.bool(m,"debugSpawn",false)) {
+                Npc npc=new Npc(Json.lng(m,"id",-1),Json.str(m,"name","Debug NPC"),Npc.Role.valueOf(Json.str(m,"role","VILLAGER")),"Debug NPC",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
+                npc.debugSpawn=true;npc.loaded=false;g.npcs.add(npc);a=npc;
             }
             if(a==null && Json.bool(m,"posse",false)) {
                 Npc hunter=new Npc(Json.lng(m,"id",-1),Json.str(m,"name","Bounty hunter"),Npc.Role.HUNTER,"Bounty Hunter",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
@@ -223,6 +237,11 @@ public final class SaveSystem {
             var sight = Json.obj(m, "playerSighting");
             n.playerSighting = sight == null ? null : new Npc.Sighting(Json.lng(sight,"witness",0), (float)Json.num(sight,"x",0), (float)Json.num(sight,"z",0), (float)Json.num(sight,"vx",0), (float)Json.num(sight,"vz",0), g.time-Json.num(sight,"age",600));
             applyActor(n, m);
+            var search=Json.obj(m,"hunt");n.hunt=null;
+            if(search!=null){
+                n.hunt=new rpg.ai.Hunt(Json.lng(search,"target",0),Json.str(search,"why","confirmed search"),(float)Json.num(search,"x",n.x),(float)Json.num(search,"z",n.z),g.time-Json.num(search,"age",0),(float)Json.num(search,"patience",600));
+                n.hunt.source=Json.lng(search,"source",0);n.hunt.vx=(float)Json.num(search,"vx",0);n.hunt.vz=(float)Json.num(search,"vz",0);
+            }
             if(m.containsKey("profession")) try { rpg.ai.Profession.valueOf(Json.str(m,"profession","")).assign(n); } catch(IllegalArgumentException invalid) { g.chat.warn("Ignored incompatible saved occupation for "+n.name); }
             g.ai.brain.resetJob(n);
             n.dutyPhase=Json.integer(m,"dutyPhase",0); n.dutyTarget=Json.lng(m,"dutyTarget",0); n.dutyX=(float)Json.num(m,"dutyX",n.postX); n.dutyZ=(float)Json.num(m,"dutyZ",n.postZ); n.dutyUntil=g.time+Json.num(m,"dutyLeft",0);
@@ -252,13 +271,15 @@ public final class SaveSystem {
             }
         }
         // objects: fixtures by id; things made in play recreated
-        g.objects.everything().removeIf(o -> o.id >= Ids.DYNAMIC && !o.def.equals("cargo"));
+        g.objects.resetDynamic();
         for (Object o : Json.list(root, "objects")) {
             Map<String, Object> m = (Map<String, Object>) o;
             long id = Json.lng(m, "id", 0);
             if (id < Ids.DYNAMIC) { WorldObject w = g.objects.get(id); if (w != null) w.load(g, m); continue; }
             String kind = Json.str(m, "kind", "");
             float x = (float) Json.num(m, "x", 0), y = (float) Json.num(m, "y", 0), z = (float) Json.num(m, "z", 0);
+            String debugPrefab=Json.str(m,"debugPrefab","");
+            if(!debugPrefab.isEmpty()) {new DebugContent(g).restore(debugPrefab,id,x,z).load(g,m);continue;}
             switch (kind) {
                 case "GroundItem" -> { var s = ItemIO.stack(m.get("stack")); if (s != null) g.objects.add(new GroundItem(id, s, x, y, z)).restorePose(m); }
                 case "Fire" -> g.objects.add(new Fire(id, x, y, z, Json.num(m, "outAt", 0), Json.lng(m, "owner", 0))).load(g,m);
@@ -270,8 +291,8 @@ public final class SaveSystem {
                 }
                 case "Container", "Corpse" -> {
                     long body = Json.lng(m, "body", 0);
-                    Container ct = body != 0 && g.actor(body) instanceof Npc deadActor && !deadActor.alive
-                            ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body).name, body, x, y, z, Json.lng(m, "owner", 0)))
+                    Container ct = body != 0
+                            ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body)==null?Json.str(m,"name","Monster"):g.actor(body).name, body, x, y, z, Json.lng(m, "owner", 0)))
                             : g.objects.add(new Container(id, Json.str(m, "def", "grave"), Json.str(m, "name", "Grave"), Json.str(m, "ckind", "grave"), x, y, z, Json.integer(m, "gridCells", 28), Json.lng(m, "owner", 0)));
                     if (ct instanceof rpg.objects.Corpse cp && g.actor(body) instanceof rpg.ai.Npc dead) dead.corpse = cp.id;
                     ct.ownerOnly = Json.bool(m, "ownerOnly", false);
@@ -319,7 +340,7 @@ public final class SaveSystem {
         ItemIO.equipment(a.eq, Json.list(m, "eq"));
         List<Object> look = Json.list(m, "look");
         // (a townsperson's look is theirs from the roster: an old save's rolled look could give a man a woman's body and cry)
-        if (look != null && (!(a instanceof rpg.ai.Npc) || Json.lng(m,"summonOwner",0)!=0)) { int[] l = new int[look.size()]; for (int i = 0; i < l.length; i++) l[i] = ((Number) look.get(i)).intValue(); a.look = Appearance.fromArray(l); }
+        if (look != null && (!(a instanceof rpg.ai.Npc) || Json.lng(m,"summonOwner",0)!=0 || a.debugSpawn)) { int[] l = new int[look.size()]; for (int i = 0; i < l.length; i++) l[i] = ((Number) look.get(i)).intValue(); a.look = Appearance.fromArray(l); }
         a.hp = (float) Json.num(m, "hp", a.maxHp()); a.stamina = (float) Json.num(m, "stamina", a.maxStamina());
         a.faith = (float) Json.num(m, "faith", a.maxFaith()); a.mana = (float) Json.num(m, "mana", a.maxMana());
         a.cs.cancel(); a.cs.staggered = 0;

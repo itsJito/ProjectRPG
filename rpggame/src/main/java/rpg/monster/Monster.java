@@ -19,7 +19,8 @@ import rpg.skill.Skill;
  */
 public final class Monster extends Npc {
     public final MonsterKind kind;
-    public final int level;
+    public int level;
+    public boolean encounterScaled;
     /** A dragon's breed (null for every other kind). */
     public MonsterKind.Breed breed;
     /** Its lair (0: a wanderer), and where that lair is. */
@@ -93,6 +94,21 @@ public final class Monster extends Npc {
         skills.setStat(Skill.HEALTH, Math.max(3, Math.round(s * hp)));
         skills.setStat(Skill.AGILITY, Math.max(1, kind.archetype == MonsterKind.Archetype.HARASSER ? s * 2 : s));
         if (kind.ranged != null) { skills.setStat(Skill.ARCHERY, s); skills.setStat(Skill.MAGIC, Math.max(10, s)); }
+    }
+
+    /** Encounter configuration, never an XP award or in-combat progression. */
+    public void encounterLevel(int target) {
+        float healthShare = hp / maxHp();
+        level = Math.max(1, target); encounterScaled = true;
+        for (Skill skill : Skill.ALL) skills.setStat(skill, 1);
+        stats();
+        // Kind-specific Health/ranged stats must also respect the requested combat-level ceiling.
+        while (skills.combatLevel() > level) {
+            for (Skill skill : new Skill[]{Skill.ATTACK, Skill.STRENGTH, Skill.DEFENSE, Skill.HEALTH, Skill.ARCHERY, Skill.MAGIC})
+                skills.setStat(skill, Math.max(1, skills.level(skill) - 1));
+        }
+        while (skills.combatLevel() < level) skills.setStat(Skill.HEALTH, skills.level(Skill.HEALTH) + 1);
+        title = label(); hp = Math.max(1, maxHp() * Math.clamp(healthShare, 0, 1));
     }
 
     /** The body and hitbox for its kind (the gamefixes sizes). */

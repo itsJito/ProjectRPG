@@ -715,6 +715,24 @@ public final class AiSystem {
         return best;
     }
 
+    /** A reachable customer-side anchor replaces the old arbitrary offset behind a counter. */
+    public float[] conversationSpot(Npc visitor, Npc partner) {
+        var shop = g.econ.shopOf(partner);
+        if (shop != null && partner.working()) return g.econ.counterSpot(shop);
+        if (partner.id == Ids.TELLER && partner.working()) return g.bank.customerSpot();
+        float[] best = null; float score = Float.MAX_VALUE;
+        for (int x = (int)Math.floor(partner.x) - 3; x <= (int)Math.floor(partner.x) + 3; x++)
+            for (int z = (int)Math.floor(partner.z) - 3; z <= (int)Math.floor(partner.z) + 3; z++) {
+                float px = x + 0.5f, pz = z + 0.5f, d = partner.distTo(px, pz);
+                if (d < 1 || d > 2.8f || !standable(x, z) || !g.vox.sight(px, partner.eyeY(), pz, partner.x, partner.eyeY(), partner.z)) continue;
+                // Avoid choosing the other side of an obstructing wall just because it is near.
+                if (!g.vox.clear(px, partner.y + 0.4f, pz, visitor.x, visitor.y + 0.4f, visitor.z) && visitor.distTo(px, pz) < 3) continue;
+                float candidate = visitor.distTo(px, pz) + Math.abs(d - 1.6f);
+                if (candidate < score) { score = candidate; best = new float[]{px, pz}; }
+            }
+        return best;
+    }
+
     public Npc partnerFor(Npc n) {
         Npc best = null;
         float bd = 30;
@@ -844,7 +862,8 @@ public final class AiSystem {
         // what they carried stays on the body, to be searched (worn things stay worn: the search mirrors them); an outlaw's
         // is anyone's, anyone else's is still theirs. What will not fit lies beside the body; bones are left
         boolean outlaw = n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
-        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, DevMap.FLOOR + 0.2f, n.z, outlaw ? 0 : n.id));
+        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, DevMap.FLOOR + 0.2f, n.z, outlaw || n instanceof rpg.monster.Monster ? 0 : n.id));
+        corpse.monsterRemains = n instanceof rpg.monster.Monster;
         for (int i = 0; i < n.inv.size(); i++) {
             ItemStack s = n.inv.get(i);
             if (s == null) continue;

@@ -12,6 +12,12 @@ public final class Chat {
     private final ArrayDeque<Line> lines = new ArrayDeque<>();
     private int total;
     public double now;
+    private final java.util.Map<String, Double> crimeNotices = new java.util.HashMap<>();
+    /** Presentation cooldown only: evidence, witnesses and bounty transactions still commit normally. */
+    public void crime(String type, String text) {
+        if (now - crimeNotices.getOrDefault(type, -1e30) < 30) return;
+        crimeNotices.put(type, now); add(text, Kind.CRIME);
+    }
 
     public void say(String text) { add(text, Kind.GAME); }
     public void warn(String text) { add(text, Kind.WARN); }

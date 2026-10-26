@@ -342,7 +342,7 @@ private:
      *  system that keeps it up must act as much sooner (its servos and its steps are paced by this). */
     float pace() const { return std::sqrt(std::max(1.0f, body->gravity) / 9.81f); }
     void go(State st) { state = st; t = 0; }
-    void fallNow() { falls++; quiet = 0; releaseGrips(); go(FALL); }
+    void fallNow() { outcome = NONE; settled = 0; falls++; quiet = 0; releaseGrips(); go(FALL); }
     void sense(const VoxelWorld* w);
     void proprioception(float h);
     void assist(float h);

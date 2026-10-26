@@ -315,8 +315,8 @@ final class HudFragments {
                 if (number) {
                     boolean zero = f.text().equals("0");
                     ui.disc(p2[0], p2[1] + 8, 11, Style.fade(zero ? 0xFF2F5CA8 : 0xFFA82A22, a));
-                    ui.flatCentered(ui.combat, f.text(), p2[0], p2[1] - 2, 19, Style.fade(0xFFFFFFFF, a));
-                } else ui.centered(ui.combat, f.text(), p2[0], p2[1], 19, Style.fade(0xFF000000 | f.color(), a));
+                    ui.flatCentered(f.color()==0xFFFFFFFF ? ui.combat : ui.chat, f.text(), p2[0], p2[1] - 2, f.color()==0xFFFFFFFF ? 23 : 19, Style.fade(0xFFFFFFFF, a));
+                } else ui.centered(ui.body, f.text(), p2[0], p2[1], 19, Style.fade(0xFF000000 | f.color(), a));
             }
             if (g.player.alive && g.time - g.player.cs.lastHurt < 6 && !g.player.firstPerson && gfx.project(g.player.x, g.player.y + 2.15f, g.player.z, p2))
                 bar(ui, p2[0], p2[1], g.player.hp / g.player.maxHp());
@@ -415,6 +415,7 @@ final class HudFragments {
          * card, wrapped to a readable measure, with a tail down to the speaker; it fades with distance.
          */
         private float bubble(Ui2D ui, String text, float x, float bottom, float dist) {
+            Ui2D.Face previous = ui.use(ui.chat);
             float size = 14, maxW = 260, pad = 8, lh = 17;
             List<String> lines = wrap(ui, text, size, maxW);
             float bw = 0;
@@ -427,6 +428,7 @@ final class HudFragments {
             ui.rect(bx, by, bw, bh, Style.fade(0xF8F4EEE0, a));
             for (int i = 0; i < 7; i++) ui.rect(x - 7 + i, by + bh + i, 14 - 2 * i, 1, Style.fade(0xF8F4EEE0, a));
             for (int i = 0; i < lines.size(); i++) ui.text(lines.get(i), bx + pad, by + pad - 3 + i * lh, size, Style.fade(0xFF1C1914, a));
+            ui.use(previous);
             return bw;
         }
     }
@@ -1114,7 +1116,15 @@ final class HudFragments {
     static final class LevelBanner extends Fragment {
         LevelBanner(Hud h) { super("levelbanner"); fadeIn = 0.05f; fadeOut = 0.4f; }
         static final float SHOW = 3.4f, COMBAT_AT = 0.75f;
-        @Override protected boolean active() { var b = hud.g.prog.banner; return b != null && hud.now - b.at() < SHOW; }
+        private rpg.skill.Progression.Banner current;
+        private double shownAt;
+        @Override protected boolean active() {
+            if (current != null && hud.now - shownAt >= SHOW) current = null;
+            if (current == null && !hud.g.prog.banners.isEmpty()) {
+                current = hud.g.prog.banners.removeFirst(); shownAt = hud.now;
+            }
+            return current != null;
+        }
         @Override public float width() { return 560; }
         @Override public float height() { return 250; }
         // (the banner sits over the action; nothing in it takes the mouse)
@@ -1127,9 +1137,9 @@ final class HudFragments {
         }
         private static int fade(int argb, float a) { return ((int) (((argb >>> 24) & 255) * Math.max(0, Math.min(1, a))) << 24) | (argb & 0xFFFFFF); }
         @Override public void draw(Ui2D ui, float x, float y) {
-            var b = hud.g.prog.banner;
+            var b = current;
             if (b == null) return;
-            float t = (float) (hud.now - b.at()), out = Math.min(1, Math.max(0, (SHOW - t) / 0.45f));
+            float t = (float) (hud.now - shownAt), out = Math.min(1, Math.max(0, (SHOW - t) / 0.45f));
             float cx = x + 280;
             // the ribbon: a dark band, gilded at its edges, widening out from the middle as the words land
             float open = Math.min(1, t / 0.2f), rw = 520 * open;
@@ -1226,7 +1236,10 @@ final class HudFragments {
         private List<String> lines(Dialog d) {
             float width = width() - (hud.g.actor(d.npc) instanceof Npc ? 144 : 34);
             if (d != measured || width != measuredWidth || choiceLines.size() != d.choices.size()) {
-                measured = d; measuredWidth = width; textLines = wrap(hud.ui, d.text, TEXT, width);
+                measured = d; measuredWidth = width;
+                Ui2D.Face previous = hud.ui.use(hud.ui.chat);
+                textLines = wrap(hud.ui, d.text, TEXT, width);
+                hud.ui.use(previous);
                 choiceLines.clear();
                 for (int i = 0; i < d.choices.size(); i++) choiceLines.add(wrap(hud.ui, d.choices.get(i).label(), 13, width - 30));
             }
@@ -1264,7 +1277,7 @@ final class HudFragments {
             List<String> lines = lines(d);
             int rows = Math.min(ROWS, lines.size());
             if (live && ui.hover(tx, y + 40, textWidth, Math.max(32, rows * LINE))) d.textOffset = Math.max(0, Math.min(Math.max(0, lines.size() - rows), d.textOffset - (int) ui.scroll));
-            for (int i = 0; i < rows; i++) ui.text(lines.get(i + d.textOffset), tx, y + 43 + i * LINE, TEXT, 0xFFF0E5CD);
+            for (int i = 0; i < rows; i++) ui.text(ui.chat, lines.get(i + d.textOffset), tx, y + 43 + i * LINE, TEXT, 0xFFF0E5CD);
             float top = y + 50 + Math.max(2, rows) * LINE;
             int count = d.choices.size();
             int visible = Math.min(8, count);
@@ -1316,7 +1329,7 @@ final class HudFragments {
             hud.itemIcon(ui, d.offer, px + 10, py + 8, ps - 20, ps - 20, 1);
             float tx = px + ps + 18, tw = W - (tx - x) - 20;
             ui.text(d.offer.def.name, tx, py + 4, Math.min(16, tw / Math.max(1, ui.width(d.offer.def.name, 1))), Style.TEXT);
-            Ui2D.Face was = ui.use(ui.lore);
+            Ui2D.Face was = ui.use(ui.chat);
             List<String> about = wrap(ui, d.offer.def.examine == null ? "" : d.offer.def.examine, 13, tw);
             for (int i = 0; i < Math.min(3, about.size()); i++) ui.text(about.get(i), tx, py + 28 + i * 15, 13, 0xFFD7C7A4);
             ui.use(was);

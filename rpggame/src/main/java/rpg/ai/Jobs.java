@@ -237,7 +237,7 @@ final class Jobs {
             boolean eligible=switch(n.profession) {
                 case MONSTER_HUNTER -> actor.domain==astratto.ai.AgentDomain.MONSTER;
                 // a posse rides on the kingdom's warrant; a resident hunter acts on what they know
-                case BOUNTY_HUNTER -> (actor==g.player || actor instanceof Npc) && g.law.bounty(actor.id,n.homeJurisdiction)>0 && (n.posse ? actor==g.player : n.crimeKnown(actor.id)!=null);
+                case BOUNTY_HUNTER -> (actor==g.player || actor instanceof Npc) && g.law.bounty(actor.id,n.homeJurisdiction)>0 && (n.posse ? n.hunt!=null && actor.id==n.hunt.target : n.crimeKnown(actor.id)!=null);
                 case PREDATOR_HUNTER -> actor instanceof Animal animal && !animal.baby && animal.species.diet==rpg.animal.Species.Diet.HUNTER && threatensPeople(animal,n);
                 default -> false;
             };

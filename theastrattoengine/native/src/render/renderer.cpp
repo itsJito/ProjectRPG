@@ -1008,8 +1008,12 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 m.par[0] = c.r; m.par[1] = c.g; m.par[2] = c.b; m.par[3] = c.a; m.par[4] = c.emissive; m.par[5] = c.light; m.par[6] = c.roughness; m.par[7] = c.metallic;
                 uint32_t f = c.flags;
                 // anything see-through cannot live in a G-buffer; anything purely self-lit and see-through adds its light
-                if (c.a < 0.98f || it->second.translucent) { f |= ASTRATTO_MODEL_FORWARD | ASTRATTO_MODEL_NO_SHADOW; if (c.emissive >= 0.99f && c.a < 0.98f) f |= ASTRATTO_MODEL_ADDITIVE; }
+                if (!(f & ASTRATTO_MODEL_DISSOLVE) && (c.a < 0.98f || it->second.translucent)) { f |= ASTRATTO_MODEL_FORWARD | ASTRATTO_MODEL_NO_SHADOW; if (c.emissive >= 0.99f && c.a < 0.98f) f |= ASTRATTO_MODEL_ADDITIVE; }
                 if (c.emissive > 0.5f) f |= ASTRATTO_MODEL_NO_SHADOW;
+                if (f & ASTRATTO_MODEL_DISSOLVE) {
+                    m.par[3] = -std::max(0.00001f, std::min(1.0f, c.a));
+                    f = (f & ~(ASTRATTO_MODEL_FORWARD | ASTRATTO_MODEL_ADDITIVE)) | ASTRATTO_MODEL_NO_SHADOW;
+                }
                 m.flags = f;
                 models_.push_back(m);
                 break;

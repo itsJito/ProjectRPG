@@ -29,8 +29,7 @@ public final class Ui2D {
 
     /**
      * A typeface baked once (gamefixes: the provided fonts, each where it belongs). Friz Quadrata is the interface's
-     * face, Morpheus its headings, Arial Narrow the chat, Skurri the numbers struck in combat and Nimrod italic the
-     * flavour text of things.
+     * face and headings, Morpheus the lore, Arial Narrow chat, information and tooltips, and Skurri big combat text.
      */
     public static final class Face {
         final float bake;
@@ -56,6 +55,10 @@ public final class Ui2D {
     /** The provided icon art (assets to add/Icons), by name. */
     public Atlas atlas;
     public double scroll;
+    private float[] clip;
+    /** Clips axis-aligned UI quads and their mouse regions (including glyphs and rotated inventory icons). */
+    public void clip(float x, float y, float w, float h) { clip = new float[]{x, y, x + w, y + h}; }
+    public void unclip() { clip = null; }
 
     public final int engineLogo;
     private static int image(NativeRenderer renderer, String path) {
@@ -71,10 +74,10 @@ public final class Ui2D {
         engineLogo = image(r, "/astratto/astrattoenginelogo.png");
         Face friz = bake(r, resource("FrizQuadrataTT.ttf"), 22f);
         body = friz != null ? friz : bake(r, fallbackFont(), 20f);
-        heading = orElse(bake(r, resource("MORPHEUS.TTF"), 34f), body);
+        heading = body;
         chat = orElse(bake(r, resource("arialnarrow.ttf"), 22f), body);
         combat = orElse(bake(r, resource("skurri.ttf"), 30f), body);
-        lore = orElse(bake(r, resource("NimrodMT-Italic.otf"), 22f), body);
+        lore = orElse(bake(r, resource("MORPHEUS.TTF"), 30f), body);
         face = body;
         icons = Icons.texture(r);
         atlas = new Atlas(r);
@@ -158,6 +161,18 @@ public final class Ui2D {
 
     /** A quad from four corners (clockwise from top-left), textured or not. */
     public void quad(int texture, float[] xy, float[] uv, int argb, float mode) {
+        if (clip != null) {
+            float x0 = xy[0], y0 = xy[1], x1 = xy[4], y1 = xy[5];
+            if (x1 <= clip[0] || y1 <= clip[1] || x0 >= clip[2] || y0 >= clip[3] || x1 <= x0 || y1 <= y0) return;
+            float[] originalUv = uv;
+            xy = xy.clone(); uv = uv.clone();
+            for (int i = 0; i < 4; i++) {
+                float x = Math.clamp(xy[i*2], clip[0], clip[2]), y = Math.clamp(xy[i*2+1], clip[1], clip[3]);
+                float tx = (x-x0)/(x1-x0), ty = (y-y0)/(y1-y0);
+                xy[i*2]=x; xy[i*2+1]=y;
+                for (int j=0;j<2;j++) uv[i*2+j] = (1-ty)*((1-tx)*originalUv[j]+tx*originalUv[2+j]) + ty*((1-tx)*originalUv[6+j]+tx*originalUv[4+j]);
+            }
+        }
         int q = slot(texture);
         for (int i = 0; i < 4; i++) vert(q * 4 + i, xy[i * 2], xy[i * 2 + 1], uv[i * 2], uv[i * 2 + 1], argb, mode);
     }
@@ -294,7 +309,7 @@ public final class Ui2D {
     /** This frame's click is the second of a double click. */
     public boolean doubleClick;
 
-    public boolean hover(float x, float y, float w, float h) { return mx >= x && my >= y && mx < x + w && my < y + h; }
+    public boolean hover(float x, float y, float w, float h) { return (clip == null || mx >= clip[0] && my >= clip[1] && mx < clip[2] && my < clip[3]) && mx >= x && my >= y && mx < x + w && my < y + h; }
 
     /** Whether a left click landed here this frame (and takes it). */
     public boolean clicked(float x, float y, float w, float h) {

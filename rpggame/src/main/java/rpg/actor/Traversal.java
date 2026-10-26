@@ -44,6 +44,7 @@ public final class Traversal {
     /** A capsule's conservative cell bounds, plus occupied character space at the landing. */
     public boolean free(Actor a, float x, float y, float z) {
         float radius = a.radius * 0.96f;
+        if (g.objects.collisions.overlaps(x,y,z,radius,a.height)) return false;
         for (int bx = (int) Math.floor(x - radius); bx <= (int) Math.floor(x + radius); bx++)
             for (int bz = (int) Math.floor(z - radius); bz <= (int) Math.floor(z + radius); bz++)
                 for (int by = (int) Math.floor(y + 0.02f); by <= (int) Math.floor(y + a.height - 0.02f); by++) if (g.vox.solid(bx, by, bz)) return false;

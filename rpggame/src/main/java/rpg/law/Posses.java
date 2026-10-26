@@ -89,6 +89,17 @@ public final class Posses {
                 }
             }
         }
+        // The same pursuit applies to other wanted humans, using the watch's actual local knowledge.
+        for (var kingdom : law.all().entrySet()) for (var warrant : new ArrayList<>(kingdom.getValue().entrySet())) {
+            var quarry = g.actor(warrant.getKey());
+            if (quarry == null || quarry == p || !quarry.alive || law.inCustody(quarry) || warrant.getValue() <= g.cfg.posseBounty) continue;
+            String key = kingdom.getKey() + ":" + quarry.id;
+            double due = nextTracking.computeIfAbsent(key, ignored -> g.time + 120 + unit()*180);
+            if (g.time >= due && !active(kingdom.getKey())) {
+                form(kingdom.getKey(), warrant.getValue(), false, quarry);
+                nextTracking.put(key,g.time+g.cfg.posseMinutes*60);
+            }
+        }
         tend();
     }
 
@@ -112,24 +123,36 @@ public final class Posses {
         return known != null && g.time - known.at() <= 600 ? known : null;
     }
 
+    private Npc.Sighting briefing(String kingdom, rpg.actor.Actor target) {
+        Npc officer=g.ai.lawmanFor(kingdom);
+        if(officer==null)return null;
+        var sight=officer.aware.get(target.id);
+        if(sight!=null && sight.seenAt>=0 && g.time-sight.seenAt<=600)
+            return new Npc.Sighting(officer.id,sight.x,sight.z,0,0,sight.seenAt);
+        var search=officer.hunt;
+        if(search!=null && search.target==target.id && search.source!=0 && g.time-search.clueAt<=600)
+            return new Npc.Sighting(search.source,search.x,search.z,search.vx,search.vz,search.clueAt);
+        return null;
+    }
+
     /** Sends a posse of the kingdom's hunters after the player. Returns false when nowhere suitable was found. */
-    boolean form(String kingdom, int bounty, boolean ambush) {
-        var p = g.player;
+    boolean form(String kingdom, int bounty, boolean ambush) { return form(kingdom,bounty,ambush,g.player); }
+    boolean form(String kingdom, int bounty, boolean ambush, rpg.actor.Actor p) {
         // a tracking posse starts from what the kingdom knows: the newest sighting, or the watch's post when nobody has
         // seen the quarry since the crime (they do not know where the player is now)
-        var report = briefing(kingdom);
+        var report = p == g.player ? briefing(kingdom) : briefing(kingdom,p);
         Npc officer = g.ai.lawmanFor(kingdom);
         if (officer == null) return false;
-        if (ambush && report == null) return false;
+        if ((ambush || p != g.player) && report == null) return false;
         float[] known = report == null ? new float[]{officer.postX, officer.postZ, (float)g.time} : new float[]{report.x(), report.z(), (float)report.at()};
-        float[] at = ambush ? ambushPoint(report) : trackingPoint(p, known);
+        float[] at = trackingPoint(p, known); // Even an ambush must assemble outside the current view, then travel to its site.
         if (at == null) return false;
         Makeup m = makeup(bounty);
         int level = Math.min(45, 12 + bounty / 40);
         Npc lead = null;
         for (int i = 0; i < m.hunters(); i++) {
             float ox = (i % 3 - 1) * 1.3f, oz = (i / 3) * 1.3f;
-            if (!open(at[0] + ox, at[1] + oz)) { ox = 0; oz = 0; }
+            if (!open(at[0] + ox, at[1] + oz) || !outsideView(at[0] + ox, at[1] + oz)) { ox = 0; oz = 0; }
             Npc n = new Npc(g.state.newEntityId(), "Bounty hunter", Npc.Role.HUNTER, "Bounty Hunter", at[0] + ox, at[1] + oz);
             Profession.BOUNTY_HUNTER.assign(n);
             n.homeJurisdiction = kingdom; n.posse = true; n.hostileToPlayer = false; n.aggroRange = 30;
@@ -144,8 +167,10 @@ public final class Posses {
             n.fitBody(); n.restore(); n.yaw = (float) Math.atan2(-(known[0] - n.x), -(known[1] - n.z));
             g.npcs.add(n); g.ai.spawnBody(n);
             n.hunt = new Hunt(p.id, "a bounty of " + bounty + " G in " + kingdom, known[0], known[1], known[2], ambush ? 240 : 600);
-            n.playerSighting = report;
+            n.playerSighting = p == g.player ? report : null;
             n.hunt.source = report == null ? 0 : report.witness();
+            if (report != null) { n.hunt.vx = report.vx(); n.hunt.vz = report.vz(); }
+            if (i < 2) { n.store(new ItemStack(Items.SNARE, 1)); g.state.mint(Items.SNARE, 1); }
             if (lead == null) lead = n;
         }
         for (int i = 0; i < m.dogs() && lead != null; i++) {
@@ -161,8 +186,9 @@ public final class Posses {
 
     /** Hunters keep after the player (tracking posses know roughly where they are); a posse with no business goes home. */
     private void tend() {
-        var p = g.player;
         for (Npc n : members()) {
+            var p = n.hunt == null ? g.player : g.actor(n.hunt.target);
+            if (p == null) { disband(n); continue; }
             if (!n.alive) continue;
             boolean wanted = law.bounty(p.id, n.homeJurisdiction) > 0 && p.alive && !law.inCustody(p);
             float d = n.distTo(p);
@@ -173,15 +199,15 @@ public final class Posses {
             if (!wanted) { n.hunt = null; n.fightTarget = 0; continue; }
             boolean sees = g.ai.canSee(n, p);
             // Ask people actually met on the search. An isolated witness cannot update this hunter.
-            for (Npc neighbor : g.npcs) tell(neighbor, n);
-            var word = n.playerSighting;
+            if (p == g.player) for (Npc neighbor : g.npcs) tell(neighbor, n);
+            var word = p == g.player ? n.playerSighting : null;
             if (n.hunt == null) {
                 if (word == null && !sees) continue;
                 n.hunt = sees ? new Hunt(p.id, "a bounty in " + n.homeJurisdiction, p.x, p.z, g.time, 600)
                         : new Hunt(p.id, "sighting by " + g.nameOf(word.witness()), word.x(), word.z(), word.at(), 600);
             }
             if (sees) {
-                n.playerSighting = new Npc.Sighting(n.id, p.x, p.z, p.vx, p.vz, g.time);
+                if (p == g.player) n.playerSighting = new Npc.Sighting(n.id, p.x, p.z, p.vx, p.vz, g.time);
                 n.hunt.source = n.id; n.hunt.clue(p.x, p.z, p.vx, p.vz, g.time);
                 if (d < 28) { n.fightTarget = p.id; n.nextThink = 0; }
             } else if (word != null && word.at() > n.hunt.clueAt) {
@@ -212,21 +238,17 @@ public final class Posses {
         for (int tries = 0; tries < 40; tries++) {
             double a = unit() * Math.PI * 2; float r = 25 + unit() * 20;
             float x = known[0] + (float) Math.sin(a) * r, z = known[1] + (float) Math.cos(a) * r;
-            if (!open(x, z) || g.vox.sight(p.x, p.eyeY(), p.z, x, DevMap.FLOOR + 1.6f, z)) continue;
+            if (!outsideView(x, z) || !open(x, z) || g.vox.sight(p.x, p.eyeY(), p.z, x, DevMap.FLOOR + 1.6f, z)) continue;
             return new float[]{x, z};
         }
         return null;
     }
 
-    /** Just over the border ahead of a fleeing player, a little off their line. */
-    private float[] ambushPoint(Npc.Sighting p) {
-        float speed = (float) Math.max(0.01, Math.hypot(p.vx(), p.vz())), dx = p.vx() / speed, dz = p.vz() / speed;
-        for (int tries = 0; tries < 24; tries++) {
-            float ahead = 18 + unit() * 10, side = (unit() - 0.5f) * 10;
-            float x = p.x() + dx * ahead - dz * side, z = p.z() + dz * ahead + dx * side;
-            if (open(x, z)) return new float[]{x, z};
-        }
-        return null;
+    /** Spawn presentation never leaks a hunter into the forward hemisphere, even behind an occluder. */
+    public boolean outsideView(float x, float z) {
+        float dx = x - g.player.x, dz = z - g.player.z;
+        float d = (float)Math.hypot(dx,dz);
+        return d > 20 && (dx * -(float)Math.sin(g.controller.camYaw) + dz * -(float)Math.cos(g.controller.camYaw)) / d < -0.2f;
     }
 
     private boolean open(float x, float z) {

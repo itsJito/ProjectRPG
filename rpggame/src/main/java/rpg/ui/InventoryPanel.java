@@ -143,6 +143,11 @@ final class InventoryPanel extends Fragment {
 
     /** One grid: its cells, its items at their footprints, the drop preview, and the mouse on it. */
     void drawGrid(Ui2D ui, Inventory inv, float x, float y, float cs, Source src) {
+        drawGrid(ui, inv, x, y, cs, src, 0, inv.h);
+    }
+    void drawGrid(Ui2D ui, Inventory inv, float x, float visibleY, float cs, Source src, int firstRow, int rows) {
+        float y = visibleY - firstRow * cs;
+        ui.clip(x - 2, visibleY - 2, inv.w * cs + 4, rows * cs + 4);
         hud.spots.put(inv, new float[]{x, y, cs});
         // a tray of sunken cells (gamefixes: the menus redesigned): each cell a small well, the whole in a gold-edged rim
         ui.rect(x - 2, y - 2, inv.w * cs + 4, inv.h * cs + 4, 0xFF0E0B08);
@@ -187,7 +192,8 @@ final class InventoryPanel extends Fragment {
             boolean ok = drag.source == Source.SHOP || landing(drag, inv, c[0], c[1]);
             ui.rect(x + c[0] * cs, y + c[1] * cs, drag.fw() * cs, drag.fh() * cs, ok ? 0x3086B97E : 0x30D06A5E);
         }
-        zone(x, y, inv.w * cs, inv.h * cs, d -> dropOnGrid(d, inv, x, y, cs, src));
+        zone(x, visibleY, inv.w * cs, rows * cs, d -> dropOnGrid(d, inv, x, y, cs, src));
+        ui.unclip();
     }
 
     private String hint(Source src) {

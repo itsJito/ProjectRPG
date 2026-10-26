@@ -30,7 +30,7 @@ class FoliagePassageTest {
         for (Foliage.Kind kind : Foliage.Kind.values()) {
             if (kind == Foliage.Kind.IVY || kind == Foliage.Kind.MOSS) continue;   // these grow on walls
             var plant = g.foliage.chunks.values().stream().flatMap(c -> c.plants.stream())
-                    .filter(p -> !p.removed && p.kind == kind && open(p.x - 2.5f, p.z) && open(p.x + 1.5f, p.z) && open(p.x - 1.2f, p.z) && open(p.x + 0.6f, p.z)).findFirst().orElse(null);
+                    .filter(p -> !p.removed && p.kind == kind && clearApproach(p.x,p.z)).findFirst().orElse(null);
             if (plant == null || plant.x < 6 || plant.z < 6) continue;
             tried++;
             g.teleport(g.player, plant.x - 2.5f, DevMap.FLOOR, plant.z);
@@ -59,9 +59,17 @@ class FoliagePassageTest {
         assertEquals("", blocked.toString(), "harvest plants must never stop a body:\n" + blocked);
     }
 
+    private boolean clearApproach(float x,float z) {
+        // A plant beside a solid entrance is not an isolated foliage probe. Check the complete swept approach.
+        for(float dx=-2.5f;dx<=1.6f;dx+=0.1f) {
+            if(!open(x+dx,z) || g.objects.collisions.overlaps(x+dx,DevMap.FLOOR,z,g.player.radius+0.15f,g.player.height))return false;
+        }
+        return true;
+    }
+
     /** A clear standing cell: soil or floor under it, nothing solid where the body goes. */
     private boolean open(float x, float z) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-        return g.vox.solid(bx, DevMap.FLOOR - 1, bz) && !g.vox.solid(bx, DevMap.FLOOR, bz) && !g.vox.solid(bx, DevMap.FLOOR + 1, bz) && g.vox.block(bx, DevMap.FLOOR - 1, bz) != Blocks.WATER;
+        return !g.objects.collisions.overlaps(x, DevMap.FLOOR, z, g.player.radius, g.player.height) && g.vox.solid(bx, DevMap.FLOOR - 1, bz) && !g.vox.solid(bx, DevMap.FLOOR, bz) && !g.vox.solid(bx, DevMap.FLOOR + 1, bz) && g.vox.block(bx, DevMap.FLOOR - 1, bz) != Blocks.WATER;
     }
 }

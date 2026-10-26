@@ -18,6 +18,7 @@ public abstract class WorldObject implements Interactable {
     public long owner;
     public boolean removed;
     public float charred;
+    public String debugPrefab;
 
     protected WorldObject(long id, String def, String name, float x, float y, float z) {
         this.id = id; this.def = def; this.name = name; this.x = x; this.y = y; this.z = z;

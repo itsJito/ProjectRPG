@@ -141,7 +141,7 @@ public final class AstrattoNative {
     public static final int LIGHT_SHADOW = 1, LIGHT_SPOT = 2, LIGHT_STATIC = 4;
     /** GPU flame particles that follow a stable emitter, while ordinary fire and smoke stay in world space. */
     public static final int EMITTER_ATTACHED_FIRE = 16;
-    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16, MODEL_FOLIAGE = 32;
+    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16, MODEL_FOLIAGE = 32, MODEL_DISSOLVE = 64;
 
     // ---- structure sizes (bytes) on a 64-bit machine; every one is checked against the library when it loads
     static final int SIZEOF_CONFIG = 24, SIZEOF_BLOCK_DEF = 12, SIZEOF_BLOCK_TABLE = 16, SIZEOF_WORLD_DESC = 56, SIZEOF_WORLD_VIEW = 64,

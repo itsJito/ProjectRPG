@@ -66,6 +66,10 @@ else()
     target_compile_options(astratto PRIVATE -Wall -Wextra -ffp-contract=off $<$<BOOL:${ASTRATTO_WERROR}>:-Werror>)
 endif()
 
+add_executable(astratto_sydney_lab tests/sydney_lab.cpp src/physics/ragdoll.cpp src/physics/sydney.cpp src/impulsis/space.cpp src/impulsis/collide.cpp src/world/voxel_world.cpp)
+target_include_directories(astratto_sydney_lab PRIVATE include src)
+target_link_libraries(astratto_sydney_lab PRIVATE Threads::Threads)
+
 add_executable(astratto_selftest tests/selftest.cpp tests/services.cpp tests/hardening.cpp tests/impulsis.cpp)
 target_link_libraries(astratto_selftest PRIVATE astratto)
 
@@ -88,7 +92,7 @@ foreach(t astratto_example_module astratto_test_module)
     endif()
 endforeach()
 
-foreach(t astratto astratto_selftest astratto_example_module astratto_test_module astratto_bench)
+foreach(t astratto astratto_sydney_lab astratto_selftest astratto_example_module astratto_test_module astratto_bench)
     set_target_properties(${t} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${ASTRATTO_OUT}" LIBRARY_OUTPUT_DIRECTORY "${ASTRATTO_OUT}"
         RUNTIME_OUTPUT_DIRECTORY_RELEASE "${ASTRATTO_OUT}" LIBRARY_OUTPUT_DIRECTORY_RELEASE "${ASTRATTO_OUT}"
@@ -105,5 +109,6 @@ if(NOT WIN32)
 endif()
 
 enable_testing()
+add_test(NAME sydney_recovery COMMAND astratto_sydney_lab recovercheck WORKING_DIRECTORY "${ASTRATTO_OUT}")
 add_test(NAME astratto_selftest COMMAND astratto_selftest WORKING_DIRECTORY "${ASTRATTO_OUT}")
 add_test(NAME astratto_bench COMMAND astratto_bench "${CMAKE_CURRENT_SOURCE_DIR}/tests/budgets.txt" WORKING_DIRECTORY "${ASTRATTO_OUT}")

@@ -195,7 +195,27 @@ int main(int argc, char** argv) {
         else if (!std::strcmp(argv[i], "--extra") && i + 1 < argc) extra = static_cast<float>(atof(argv[++i]));
     }
     const std::string w = what;
-    if (w == "stand") {
+    if (w == "recovercheck") {
+        int failures = 0;
+        for (float strength : {0.76f, 1.0f, 1.55f}) for (V3 direction : {V3(0,0,1),V3(0,0,-1),V3(1,0,0),V3(-1,0,0)}) {
+            Sim sim(20.5f, FLOOR, 20.5f, 0, true);
+            sim.sy->traits.strength = strength; sim.sy->traits.agility = strength; sim.sy->traits.endurance = 0.83f;
+            sim.run(0.5f);
+            sim.sy->hit(rd::NECK,direction.x,0,direction.z,240,40);
+            bool fell = false, recovered = false;
+            for (int frame = 0; frame < 60*30; frame++) {
+                sim.frame(1.0f/60);
+                fell |= sim.sy->state == SydneyCharacter::DOWN;
+                if (fell && sim.sy->state == SydneyCharacter::STAND && sim.sy->outcome == SydneyCharacter::RECOVERED) {
+                    recovered = sim.sy->s.height > sim.sy->s.standHeight*0.82f && sim.sy->s.captureOut < 0 && sim.sy->s.speed < 0.5f;
+                    break;
+                }
+            }
+            std::printf("RECOVERY strength %.2f dir %.0f %.0f: %s at %.2fs\n",strength,direction.x,direction.z,recovered?"PASS":"FAIL",sim.t);
+            if (!recovered) failures++;
+        }
+        return failures ? 1 : 0;
+    } else if (w == "stand") {
         Sim s(20.5f, FLOOR, 20.5f, 0, true);
         float minHead = 1e9f, maxHead = -1e9f, drift = 0;
         const float x0 = s.body.com().x, z0 = s.body.com().z;

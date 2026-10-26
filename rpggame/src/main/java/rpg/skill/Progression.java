@@ -75,12 +75,15 @@ public final class Progression {
         // a combat level heals the body whole; a skill's does not
         if (combatUp) g.player.hp = g.player.maxHp();
         banner = new Banner(s, w.toLevel(), combatUp ? combatNow : 0, combatMax, g.time);
+        banners.addLast(banner);
         if (combatUp) g.state.commit("CombatLevelUp", g.player.id, 0, null, 0, String.valueOf(combatNow));
     }
 
     /** The banner splashed across the screen for the latest level: the skill and its level, and the new combat level if one came with it. */
     public record Banner(Skill skill, int level, int combat, boolean combatMax, double at) {}
     public Banner banner;
+    /** Every earned celebration is delivered once, even when several skills advance on one hit. */
+    public final java.util.ArrayDeque<Banner> banners = new java.util.ArrayDeque<>();
 
     /** In a fight: striking or struck just now, the last blow just landed, or a foe close at hand. */
     private boolean fighting() {

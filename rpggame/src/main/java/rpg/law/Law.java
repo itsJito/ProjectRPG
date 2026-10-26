@@ -271,8 +271,8 @@ public final class Law {
             g.ai.rumors.alarm(w, w.memories.get(w.memories.size() - 1));
         }
         if (culprit == g.player) {
-            if (seen.isEmpty()) g.chat.add("[Crime] " + kind.toLowerCase() + " in " + jur + " - nobody saw you.", Chat.Kind.CRIME);
-            else g.chat.add("[Crime] " + kind.toLowerCase() + " in " + jur + " was seen by " + names(seen) + ". No bounty unless they report it.", Chat.Kind.CRIME);
+            if (seen.isEmpty()) g.chat.crime(kind, "[Crime] " + kind.toLowerCase() + " in " + jur + " - nobody saw you.");
+            else g.chat.crime(kind, "[Crime] " + kind.toLowerCase() + " in " + jur + " was seen by " + names(seen) + ". No bounty unless they report it.");
         }
         return seen.size();
     }
@@ -358,7 +358,7 @@ public final class Law {
         g.state.commit("BountyChanged", lawman.id, m.subject, m.jurisdiction, ev.id(), before + " -> " + after);
         String line = String.format("%s reported %s's %s to %s: bounty in %s %d -> %d", witness.name, g.nameOf(m.subject), m.kind.toLowerCase(), lawman.name, m.jurisdiction, before, after);
         reportsLog.add(line);
-        if (m.subject == g.player.id) g.chat.add("[Crime] " + line + ".", Chat.Kind.CRIME);
+        if (m.subject == g.player.id) g.chat.crime(m.kind, "[Crime] " + line + ".");
         g.ai.say(witness, "I saw " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!");
         // everyone in the jurisdiction's force now knows to look
         for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD) && n.homeJurisdiction.equals(m.jurisdiction)) n.nextThink = 0;

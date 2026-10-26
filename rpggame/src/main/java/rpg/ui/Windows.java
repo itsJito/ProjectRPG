@@ -58,6 +58,8 @@ final class Windows {
 
     // ------------------------------------------------------------------ a container: a window of its own, beside the inventory
     static final class ContainerWin extends Win {
+        private long shownContainer;
+        private int firstRow;
         ContainerWin(Hud h) { super("container", 300, 500); }
         @Override protected boolean active() { detach(this); return hud.win == Hud.Win.CONTAINER && hud.container != null; }
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -71,9 +73,20 @@ final class Windows {
                 ui.text(Currency.text(g.bank.coinsIn(c.owner)) + " G / " + c.contents.size() + " cells", ix, top + 15, 11, Style.DIM);
                 top += 20;
             }
-            float cs = Math.min(Math.min(30, iw / c.contents.w), (wh - (c.kind.equals("vault") ? 256 : 200)) / c.contents.h);
-            hud.inventory.drawGrid(ui, c.contents, ix, top + 20, cs, InventoryPanel.Source.CONTAINER);
-            float by = top + 20 + c.contents.h * cs + 10;
+            boolean vault = c.kind.equals("vault");
+            float cs = vault ? Math.min(30, iw / c.contents.w) : Math.min(Math.min(30, iw / c.contents.w), (wh - 200) / c.contents.h);
+            int rows = vault ? Math.min(8, c.contents.h) : c.contents.h;
+            if (shownContainer != c.id) { shownContainer = c.id; firstRow = 0; }
+            if (vault && ui.hover(ix, top + 20, iw, rows * cs) && ui.scroll != 0) firstRow -= (int)Math.signum(ui.scroll) * 2;
+            firstRow = Math.clamp(firstRow, 0, c.contents.h - rows);
+            hud.inventory.drawGrid(ui, c.contents, ix, top + 20, cs, InventoryPanel.Source.CONTAINER, firstRow, rows);
+            float by = top + 20 + rows * cs + 10;
+            if (vault) {
+                if (Style.button(ui, "Up", ix, by, 44, 22, live && firstRow > 0)) firstRow = Math.max(0, firstRow - rows);
+                ui.flatCentered("Rows " + (firstRow + 1) + "-" + (firstRow + rows) + " / " + c.contents.h, ix + iw / 2, by + 4, 11, Style.DIM);
+                if (Style.button(ui, "Down", ix + iw - 44, by, 44, 22, live && firstRow + rows < c.contents.h)) firstRow = Math.min(c.contents.h - rows, firstRow + rows);
+                by += 28;
+            }
             x = ix;
             // a body: what they still wear, as it is on them - a piece taken comes off the body
             if (c instanceof rpg.objects.Corpse cp) {

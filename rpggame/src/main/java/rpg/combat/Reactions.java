@@ -24,7 +24,7 @@ public final class Reactions {
     private final Rpg g;
     /** The people Sydney holds at the moment (alive). */
     private final List<Actor> held = new ArrayList<>();
-    public int started, recovered, fallen;
+    public int started, recovered, fallen, nativeRecoveries, assistedRecoveries;
 
     public Reactions(Rpg g) { this.g = g; }
 
@@ -154,22 +154,21 @@ public final class Reactions {
                 }
             }
             boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND;
-            boolean tooLong = g.time - n.reactSince > 14;
+            boolean tooLong = g.time - n.reactSince > 30;
             boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
             boolean shocked = g.time < n.shockUntil;
             if (!rolling && !shocked) g.game.commands().ragdollControl(n.ragdoll, CONTROL_STAY_DOWN, 0);
             if (!rolling && !shocked && (back || tooLong || rd.outcome == OUTCOME_STUCK)) {
                 // handed back to the figure, standing where the feet are, facing the way the trunk faces - but never
                 // inside someone else (the body may have reeled into them): stepped out to arm's length
-                float sx = rd.standX, sz = rd.standZ;
-                for (rpg.actor.Actor o : g.actors()) {
-                    if (o == n || !o.alive || o.dummy || o instanceof Npc other && !other.loaded) continue;
-                    float ox = sx - o.x, oz = sz - o.z, ol = (float) Math.hypot(ox, oz), min = n.radius + o.radius + 0.1f;
-                    if (ol >= min) continue;
-                    if (ol < 1e-3f) { ox = (float) Math.sin(n.yaw); oz = (float) Math.cos(n.yaw); ol = 1; }
-                    sx = o.x + ox / ol * min; sz = o.z + oz / ol * min;
-                }
+                float[] standing = standingSpace(n, rd);
+                if (standing == null) continue; // Never hand a full-height mover back inside a wall or a low roof.
+                float sx = standing[0], sz = standing[2];
+                n.y = standing[1];
+                if (back) nativeRecoveries++; else assistedRecoveries++;
                 n.x = sx; n.z = sz; n.yaw = rd.yaw;
+                n.vx = n.vz = 0; n.grounded = true; n.crouched = false;
+                if (n == g.player) g.controller.snapTo(rd.yaw);
                 // back on their feet, the weapon knocked from their hand is the first thing they reach for
                 if (n.dropped != null && !n.dropped.removed && n.eq.get(rpg.item.ItemDef.Slot.MAIN) == null && Math.hypot(n.dropped.x - sx, n.dropped.z - sz) < 3.5) {
                     var w = n.dropped.stack;
@@ -193,6 +192,22 @@ public final class Reactions {
                 if (n instanceof Npc npc) { npc.hasGoalPos = false; npc.nextThink = 0; }
             }
         }
+    }
+
+    /** Find support under the actual body; ankles are joint centres, never a mover's floor height. */
+    private float[] standingSpace(Actor actor, Snapshots.Ragdoll body) {
+        float top = Math.max(body.comY, footY(body)) + 0.6f;
+        for (int ring = 0; ring <= 8; ring++) for (int ix = -ring; ix <= ring; ix++) for (int iz = -ring; iz <= ring; iz++) {
+            if (Math.max(Math.abs(ix), Math.abs(iz)) != ring) continue;
+            float x = body.standX + ix * 0.25f, z = body.standZ + iz * 0.25f;
+            float y = g.vox.groundY(x, top, z);
+            if (Math.abs(y - footY(body)) > 1.3f || !g.traversal.free(actor, x, y, z)) continue;
+            boolean support = true;
+            for (int side : new int[]{-1, 1}) for (int front : new int[]{-1, 1})
+                if (!g.vox.solid((int)Math.floor(x + side * actor.radius * 0.7f), (int)Math.floor(y - 0.05f), (int)Math.floor(z + front * actor.radius * 0.7f))) support = false;
+            if (support) return new float[]{x, y, z};
+        }
+        return null;
     }
 
     /** Ends a reaction at once (the body is moved, reloaded or reset): the figure takes over where it stands. */
