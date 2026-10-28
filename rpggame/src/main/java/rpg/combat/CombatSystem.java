@@ -53,6 +53,8 @@ public final class CombatSystem {
         public long id, rigid;
         public Actor owner;
         public float x, y, z, vx, vy, vz, gravity, life, potential, impact;
+        /** A creature's own magic (weaker effects than the learned spell's). */
+        public boolean innate;
         public DamageType type;
         public Skill skill;
         public ItemStack ammo;
@@ -64,6 +66,8 @@ public final class CombatSystem {
         public long target;
         /** What a monster hurled that is no item: "boulder" or "web" (null for everything else). */
         public String what;
+        /** Those a Wave has already swept through (it strikes each body in its path once and rolls on). */
+        public java.util.Set<Long> swept;
     }
 
     /**
@@ -84,6 +88,12 @@ public final class CombatSystem {
         if (d.family == Family.BOLT) return 0.45f;
         if (d.family == Family.THROWN) return switch (d.thrown) { case "javelin" -> 1.8f; case "tomahawk" -> 0.42f; case "knife" -> 0.3f; default -> 0.22f; };
         return 0.85f;
+    }
+
+    /** How long a thing lies when it lies along a direction: ammunition its own length, a weapon about its reach. */
+    public static float lyingLength(ItemDef d) {
+        if (d.family == Family.ARROW || d.family == Family.BOLT || d.family == Family.THROWN) return ammoLength(d);
+        return Math.max(0.35f, Math.min(1.9f, d.reach * 0.8f));
     }
 
     /** The turn (w, x, y, z) that takes +y onto a unit direction. */
@@ -136,6 +146,7 @@ public final class CombatSystem {
         }
         c.lastAttack = g.time;
         g.interact.cancel(a, "attacking");
+        g.ai.arms.shown(a, rpg.ai.Arms.Kind.SWING);
         return true;
     }
 
@@ -298,6 +309,7 @@ public final class CombatSystem {
         shots++;
         if (g.sfx != null) g.sfx.play("crossbow", a.x, a.eyeY(), a.z, 0.8f, 1, 30);
         g.state.commit("BoltLoosed", a.id, 0, null, 0, String.format("%s potential=%.1f", ammo.def.name, p.potential));
+        g.ai.arms.shown(a, rpg.ai.Arms.Kind.SHOT);
         return true;
     }
 
@@ -321,6 +333,7 @@ public final class CombatSystem {
         shots++;
         if (g.sfx != null) g.sfx.play("bow", a.x, a.eyeY(), a.z, 0.7f);
         g.state.commit("ArrowLoosed", a.id, 0, null, 0, String.format("%s draw=%.2f potential=%.1f", ammo.def.name, draw, p.potential));
+        g.ai.arms.shown(a, rpg.ai.Arms.Kind.SHOT);
         return true;
     }
 
@@ -328,12 +341,7 @@ public final class CombatSystem {
         if (a.skills.level(Skill.MAGIC) < s.level) return "You need Magic level " + s.level + " to cast " + s.title + ".";
         if (a instanceof rpg.actor.Player p && p.book != s.book) return s.title + " is in the " + s.book.title + " spellbook; yours is " + p.book.title + ". Change it at an altar.";
         if (a instanceof rpg.ai.Npc npc && npc.spellBook != s.book) return "That spellbook is not prepared.";
-        if (s == Spell.FIRE_BLAST) {
-            ItemStack staff = a.eq.get(ItemDef.Slot.MAIN);
-            if (staff == null || !staff.def.id.equals("fire_staff")) return "Fire Blast needs the Fire staff in your hand.";
-            if (staff.charges <= 0) return "The Fire staff has no charges left. Recharge it with coal.";
-        }
-        if (a.mana < s.cost) return "You don't have enough mana.";
+        if (a.mana < cost(a, s)) return "You don't have enough mana.";
         if (!a.alive || a.morphT > 0 || a.reacting || a.cs.castCooldown > 0 || a.cs.busy()) return "";
         return null;
     }
@@ -342,30 +350,22 @@ public final class CombatSystem {
         if (a.morphT > 0 || a.reacting || g.carrying.busy(a) || g.traversal.busy(a) || g.time - a.throwAt < 0.45) return false;
         String no = castRefusal(a, s);
         if (no != null) { if (a == g.player && !no.isEmpty()) g.chat.add(no, Chat.Kind.WARN); return false; }
-        if (s == Spell.TELEGRAB) { boolean cast=telegrab(a,s,yaw,pitch); if(cast)a.castAt=g.time; return cast; }
+        if (s == Spell.TELEGRAB) { boolean cast=telegrab(a,s,yaw,pitch); if(cast){a.castAt=g.time;a.castSpell=s;g.ai.arms.shown(a,rpg.ai.Arms.Kind.SPELL);} return cast; }
         if (s.utility) {
             if (!g.magic.cast(a, s, yaw, pitch)) return false;
-            a.castAt=g.time;
-            a.mana -= s.cost;
+            a.castAt=g.time; a.castSpell=s;
+            g.ai.arms.shown(a, rpg.ai.Arms.Kind.SPELL);
+            a.mana -= cost(a, s);
             a.cs.castCooldown = 0.7f;
             casts++;
             var uev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
             g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, uev.id());
             if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
-            float[] hand=castOrigin(a,yaw,pitch);
-            g.chemistry.visual(2,hand[0],hand[1],hand[2],0.12f,60,0.2f,0.4f,1.0f,2f,3.5f);
             return true;
         }
-        if (s == Spell.FIRE_BLAST) a.eq.get(ItemDef.Slot.MAIN).charges--;
-        a.mana -= s.cost;
+        a.mana -= cost(a, s);
         a.cs.castCooldown = 0.7f;
-        Projectile p = launch(a, yaw, pitch, s.speed, 0);
-        spellFromHand(p, a, yaw, pitch);
-        a.castAt=g.time;
-        p.spell = s; p.type = DamageType.MAGIC; p.skill = Skill.MAGIC;
-        float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
-        p.potential = CombatMath.magicMax(s.base, magicBonus);
-        p.impact = 12 + s.base * 0.6f;
+        Projectile p = bolt(a, s, yaw, pitch, 1);
         if (s == Spell.SPELLDAGGERS) {
             Actor target = g.magic.target(a,yaw,pitch,24); p.target = target == null ? 0 : target.id;
             for (float offset : new float[]{-0.11f,0.11f}) {
@@ -376,6 +376,46 @@ public final class CombatSystem {
         casts++;
         var ev = g.state.commit("SpellCast", a.id, 0, null, 0, s.title);
         g.prog.award(a, Skill.MAGIC, s.xp, "cast " + s.title, ev.id());
+        if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
+        return true;
+    }
+
+    /** What a spell costs this caster: an elemental staff in hand makes its own element's spells very cheap. */
+    public int cost(Actor a, Spell s) {
+        ItemStack held = a.eq.get(ItemDef.Slot.MAIN);
+        return s.cost(held == null ? null : held.def.staffElement);
+    }
+
+    /**
+     * A spell sent on its way from the hand: its maximum hit the tier's best that the caster has open (with equipment's
+     * Magic damage on it), scaled for innate magic by how strong the creature is (share).
+     */
+    private Projectile bolt(Actor a, Spell s, float yaw, float pitch, float share) {
+        Projectile p = launch(a, yaw, pitch, s.speed, 0);
+        spellFromHand(p, a, yaw, pitch);
+        a.castAt = g.time; a.castSpell = s;
+        g.ai.arms.shown(a, rpg.ai.Arms.Kind.SPELL);
+        p.spell = s; p.type = DamageType.MAGIC; p.skill = Skill.MAGIC;
+        float magicBonus = 0; for (ItemStack item : a.eq.stacks()) magicBonus += item.def.magicDamageBonusPct;
+        float base = s.maxBase(a.skills.level(Skill.MAGIC)) * share;
+        p.potential = CombatMath.magicMax(base, magicBonus);
+        p.impact = 12 + base * 0.6f;
+        p.innate = share < 1;
+        return p;
+    }
+
+    /**
+     * A creature's own magic (an imp's spit of fire, a ghost's grave-cold rush): no book and no Mana, as strong as the
+     * creature is - a spell's full strength only at its Magic level - and the same spell once it flies.
+     */
+    public boolean castInnate(Actor a, Spell s, float yaw, float pitch) {
+        if (!a.alive || a.morphT > 0 || a.reacting || a.cs.castCooldown > 0 || a.cs.busy()) return false;
+        a.cs.castCooldown = 0.7f;
+        float share = Math.max(0.2f, Math.min(0.99f, a.skills.level(Skill.MAGIC) / (float) Math.max(1, s.level)));
+        bolt(a, s, yaw, pitch, share);
+        a.castAt = g.time; a.castSpell = s;
+        casts++;
+        g.state.commit("SpellCast", a.id, 0, null, 0, s.title + " (innate)");
         if (g.sfx != null) g.sfx.play("cast", a.x, a.eyeY(), a.z, 0.6f);
         return true;
     }
@@ -458,6 +498,7 @@ public final class CombatSystem {
             if (g.sfx != null && c.reload == 0) g.sfx.play("bow.nock", a.x, a.eyeY(), a.z, 0.3f, 1.1f, 10);
         }
         c.slowT = Math.max(0, c.slowT - dt);
+        c.frozenT = Math.max(0, c.frozenT - dt);
         c.stabilityBonus = Math.max(0, c.stabilityBonus - dt * 8f);
         if (c.staggered > 0) { c.staggered -= dt; c.blocking = false; }
         // Resources: stamina recovers outside guard/recovery; mana regenerates, while Faith requires restoration.
@@ -720,6 +761,26 @@ public final class CombatSystem {
 
     /** Whether two actors on one team may still fight (a guard arresting a resisting townsperson). */
     private boolean hostileTo(Actor a, Actor v) { return g.ai != null && g.ai.hostile(a, v); }
+    /** On the same side and not at odds: a shot that strikes them is a stray, not an attack. */
+    private boolean friendly(Actor a, Actor v) { return v.team != 0 && v.team == a.team && !hostileTo(a, v) || a.summonOwner == v.id || v.summonOwner == a.id; }
+
+    /**
+     * The first body other than the shooter and the target standing in the line from the shooter's eye to the target's
+     * chest (within a body's breadth of it), or null when the line is clear: what an archer looks past before loosing.
+     */
+    public Actor inLineOfFire(Actor shooter, Actor target) {
+        float ox = shooter.x, oy = shooter.eyeY(), oz = shooter.z, dx = target.x - ox, dy = target.chestY() - oy, dz = target.z - oz;
+        float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (len < 0.5f) return null;
+        dx /= len; dy /= len; dz /= len;
+        Actor best = null; float nearest = len;
+        for (Actor v : g.actors()) {
+            if (v == shooter || v == target || !v.alive || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
+            float distance = HitVolumes.ray(g, v, ox, oy, oz, dx, dy, dz, nearest, 0.2f);
+            if (distance < nearest) { nearest = distance; best = v; }
+        }
+        return best;
+    }
 
     private void meleeContact(Actor a, Actor v, Move m, float px, float py, float pz) {
         ItemDef w = a.cs.offHand ? a.off() : a.main();
@@ -900,6 +961,9 @@ public final class CombatSystem {
         if (!v.alive) return;
         long by = woundedBy != 0 && woundedBy != v.id ? woundedBy : v.cs.lastAttacker;
         Actor killer = by != 0 ? g.actor(by) : null;
+        // the watch's own wound on a wanted offender ends in custody, not a grave: the bleeding is stopped and they are
+        // taken in (an officer kills only when he must - a lawman's cut used to bleed a wanted thief to death)
+        if (killer != null && g.law != null && g.law.arrestInsteadOfKill(killer, v)) { v.hp = Math.max(1, v.hp); if (g.gore != null) g.gore.staunch(v); return; }
         var ev = g.state.commit("BledOut", killer == null ? 0 : killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), 0, v.name);
         kill(killer == null ? v : killer, v, ev.id());
     }
@@ -925,12 +989,38 @@ public final class CombatSystem {
         for (Actor other : g.actors()) if (other.cs.lastAttacker == v.id) other.cs.lastAttacker = 0;
         v.hp = 0;
         v.cs.cancel();
+        if (v != g.player) dropHeld(v);
         kills++;
         var ev = g.state.commit("ActorKilled", killer == null ? 0 : killer.id, v.id, rpg.world.DevMap.jurisdiction(v.x, v.z), cause, v.name + " killed by " + (killer == null ? "the environment" : killer.name));
         // a person's last cry, on the voice bus, from their own throat's bank (there was never a plain "death" bank, so no
         // human - the player included - made a sound when they died); a creature's cry is its species' (Animals)
         if (g.sfx != null && !(v instanceof rpg.animal.Animal)) g.sfx.deathCry(v);
         g.onKilled(v, killer, ev.id());
+    }
+
+    /**
+     * (gamefixes) the dead let go: what was in their hands - the weapon, the shield or a second blade - falls from where
+     * the hands were, a loose thing tumbling to the ground, not kept in the corpse's grip nor its pack. A creature's own
+     * teeth and claws are no item and stay. (The player's own go with them to the grave, as before.)
+     */
+    private void dropHeld(Actor v) {
+        if (g.objects == null) return;
+        boolean fresh = g.time - v.handAt < 0.5;
+        float yaw = v.yaw;
+        int k = 0;
+        for (ItemDef.Slot slot : new ItemDef.Slot[]{ItemDef.Slot.MAIN, ItemDef.Slot.OFF}) {
+            ItemStack held = v.eq.get(slot);
+            if (held == null || held.def.natural) continue;
+            v.eq.set(slot, null);
+            float side = slot == ItemDef.Slot.MAIN ? 1 : -1;
+            float rx = (float) Math.cos(yaw) * side * 0.3f, rz = (float) -Math.sin(yaw) * side * 0.3f;
+            float x = fresh && slot == ItemDef.Slot.MAIN ? v.hand[0] : v.x + rx, y = fresh && slot == ItemDef.Slot.MAIN ? v.hand[1] : v.chestY(), z = fresh && slot == ItemDef.Slot.MAIN ? v.hand[2] : v.z + rz;
+            double r = g.roll(v.id, 71 + k++);
+            float[] dir = {(float) Math.cos(yaw + r * 2) * 0.6f, 0.75f, (float) -Math.sin(yaw + r * 2) * 0.6f};
+            float vx = v.vx * 0.6f + rx * 2.5f, vz = v.vz * 0.6f + rz * 2.5f;
+            if (held.def.family == Family.SHIELD) g.objects.drop(held, x, Math.max(v.y + 0.05f, g.vox.groundY(x, v.y + 1, z) + 0.05f), z);
+            else g.objects.dropLong(held, x, y, z, dir, false, vx, 0.6f, vz);
+        }
     }
 
     // ------------------------------------------------------------------ projectiles
@@ -978,21 +1068,45 @@ public final class CombatSystem {
         if (p.rigid != 0) { g.game.commands().release(p.rigid); p.rigid=0; }
     }
 
+    /**
+     * What a spell does besides its damage: Fogish ice freezes the target where it stands (a creature's own ice for less
+     * time), lightning jolts it, and Wind from Blast up can throw it off its feet - the likelier the smaller it is beside
+     * a person and the further its skill falls short of the caster's.
+     */
+    private void spellEffect(Projectile p, Actor struck, float dx, float dz) {
+        Spell s = p.spell;
+        if (s == null) return;
+        if (s.freeze() > 0) { struck.cs.frozenT = Math.max(struck.cs.frozenT, s.freeze() * (p.innate ? 0.4f : 1)); struck.cs.slowT = Math.max(struck.cs.slowT, struck.cs.frozenT); }
+        if (s.element == Spells.Element.ELECTRIC) struck.cs.staggered = Math.max(struck.cs.staggered, 0.25f + (s.tier == null ? 0 : s.tier.ordinal() * 0.05f));
+        float k = s.knockdown();
+        if (k <= 0 || struck.dummy || struck.reacting || struck.morphT > 0) return;
+        float size = Math.max(0.3f, struck.figureScale());
+        int theirs = Math.max(struck.skills.level(Skill.DEFENSE), struck.skills.level(Skill.STRENGTH)), mine = p.owner.skills.level(Skill.MAGIC);
+        float chance = k / (size * size) * Math.max(0.3f, Math.min(1.8f, 1 + (mine - theirs) / 60f));
+        if (g.roll(g.state.tick, struck.id ^ 0x77494E44L) >= chance) return;
+        float l = Math.max(1e-3f, (float) Math.hypot(dx, dz));
+        if (struck instanceof rpg.animal.Animal an) { if (g.animals != null) g.animals.makeRagdoll(an, dx / l * 6, 2, dz / l * 6, true); return; }
+        g.reactions.falling(struck, 1);
+        if (struck.ragdoll != 0) g.game.commands().ragdollHit(struck.ragdoll, astratto.bridge.AstrattoNative.RD_PELVIS, dx / l, 0.25f, dz / l, 90 + 40 * s.tier.ordinal(), 30);
+    }
+
     private void spellImpact(Projectile p,float x,float y,float z,Actor primary) {
-        int element=switch(p.spell) {
-            case FIRE_BOLT,FIRE_BLAST -> astratto.bridge.AstrattoNative.CHEM_FIRE;
-            case FROST_LANCE -> astratto.bridge.AstrattoNative.CHEM_ICE;
-            case SPARK -> astratto.bridge.AstrattoNative.CHEM_WIND;
-            case VOLTCHAIN -> astratto.bridge.AstrattoNative.CHEM_ELECTRIC;
+        int element=switch(p.spell.element) {
+            case FIRE -> astratto.bridge.AstrattoNative.CHEM_FIRE;
+            case ICE -> astratto.bridge.AstrattoNative.CHEM_ICE;
+            case AIR -> astratto.bridge.AstrattoNative.CHEM_WIND;
+            case ELECTRIC -> astratto.bridge.AstrattoNative.CHEM_ELECTRIC;
+            case WATER -> astratto.bridge.AstrattoNative.CHEM_WATER;
             default -> 0;
         };
+        // the bursting fire of Blast and above catches those beside the target
+        boolean burst = p.spell.element == Spells.Element.FIRE && p.spell.tier != null && p.spell.tier.ordinal() >= Spells.Tier.BLAST.ordinal();
         // on water the element spreads through the surface: frost skins it over, lightning runs out across it
         boolean onWater=g.vox.block((int)Math.floor(x),(int)Math.floor(y-0.6f),(int)Math.floor(z))==Blocks.WATER || g.vox.block((int)Math.floor(x),(int)Math.floor(y),(int)Math.floor(z))==Blocks.WATER;
-        float radius=p.spell==Spell.FIRE_BLAST?3:onWater && element==astratto.bridge.AstrattoNative.CHEM_ICE?2.4f:onWater && element==astratto.bridge.AstrattoNative.CHEM_ELECTRIC?1.8f:1.2f;
-        if(element!=0)g.chemistry.emit(p.owner,element,x,onWater?(float)Math.floor(y-0.6f)+0.5f:y,z,radius,3,p.spell==Spell.FIRE_BLAST?1.2f:onWater?0.6f:0.3f);
-        boolean fire=p.spell.element==Spells.Element.FIRE;
-        g.chemistry.visual(fire?0:2,x,y,z,fire?0.35f:0.15f,120,0.25f,0.7f,fire?5:1,fire?1.6f:2,fire?0.2f:5);
-        if(p.spell==Spell.FIRE_BLAST) for(Actor other:g.actors()) {
+        float radius=burst?3:onWater && element==astratto.bridge.AstrattoNative.CHEM_ICE?2.4f:onWater && element==astratto.bridge.AstrattoNative.CHEM_ELECTRIC?1.8f:1.2f;
+        if(element!=0)g.chemistry.emit(p.owner,element,x,onWater?(float)Math.floor(y-0.6f)+0.5f:y,z,radius,3,burst?1.2f:onWater?0.6f:0.3f);
+        // (how it looks landing is the renderer's: SpellFx, by element and tier)
+        if(burst) for(Actor other:g.actors()) {
             if(other==primary || other==p.owner || !other.alive || other.dummy || other.distTo(x,z)>3 || !g.vox.sight(x,y,z,other.x,other.chestY(),other.z))continue;
             float falloff=1-other.distTo(x,z)/4;
             resolve(p.owner,other,p.potential*falloff,p.impact*falloff,DamageType.MAGIC,p,other.x,other.chestY(),other.z,p.spell.title,false);
@@ -1025,10 +1139,14 @@ public final class CombatSystem {
         Actor struck = null;
         float nearest = Float.POSITIVE_INFINITY;
         float inv = 1 / Math.max(1e-6f, len);
-        for (Actor v : projectileTargets) {
+        // (gamefixes: wave spells hit nothing) a Wave is a crescent as wide as a person is tall: it strikes every body its
+        // breadth passes over, not only one under its middle, and rolls on through them to the first wall
+        if (p.spell != null && p.spell.tier == Spells.Tier.WAVE) { wave(p, sx * inv, sy * inv, sz * inv, wall); }
+        else for (Actor v : projectileTargets) {
             boolean body = v instanceof rpg.ai.Npc npc && npc.ragdoll != 0 && !npc.alive;
+            // (gamefixes: an archer's arrow phased through the people between it and the player) a friend in the way is
+            // in the way: the shot stops in them, as a stray
             if (v == p.owner || !v.alive && !body || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
-            if (v.alive && v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v)) continue;
             float distance = HitVolumes.ray(g, v, p.x, p.y, p.z, sx * inv, sy * inv, sz * inv, wall, 0.03f);
             if (distance < nearest) { nearest = distance; struck = v; }
         }
@@ -1036,10 +1154,15 @@ public final class CombatSystem {
             float qx = p.x + sx * inv * nearest, qy = p.y + sy * inv * nearest, qz = p.z + sz * inv * nearest;
             p.done = true;
             if (p.ammo != null) lodgeInBody(p, struck, qx, qy, qz, sx * inv, sy * inv, sz * inv);
+            if (struck.alive && friendly(p.owner, struck)) {
+                // a stray: it hurts, but it was no one's blow - no grudge, no crime, no fight started
+                environmentalDamage(struck, Math.max(1, Math.round(p.potential * 0.5f * (float) damageRandom.nextDouble())), "a stray " + (p.spell != null ? p.spell.title : "arrow") + " from " + p.owner.name);
+                if (p.spell != null) spellImpact(p, qx, qy, qz, struck);
+                return;
+            }
             if (struck.alive) {
                 if ("web".equals(p.what)) { struck.cs.slowT = Math.max(struck.cs.slowT, 4); if (g.fx != null) g.fx.puff(qx, qy, qz); return; }
-                if (p.spell == Spell.FROST_LANCE) struck.cs.slowT = 3;
-                if (p.spell == Spell.VOLTCHAIN)struck.cs.staggered=Math.max(struck.cs.staggered,0.4f);
+                spellEffect(p, struck, sx * inv, sz * inv);
                 resolve(p.owner, struck, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell != null ? p.spell.title : "arrow", false);
             } else if (g.sfx != null) g.sfx.play(p.ammo != null ? "arrow.flesh" : "hit", qx, qy, qz, 0.4f);
             if(p.spell!=null) spellImpact(p,qx,qy,qz,struck);
@@ -1076,6 +1199,21 @@ public final class CombatSystem {
             return;
         }
         p.x = nx; p.y = ny; p.z = nz;
+    }
+
+    private void wave(Projectile p, float dx, float dy, float dz, float wall) {
+        if (p.swept == null) p.swept = new java.util.HashSet<>();
+        for (Actor v : projectileTargets) {
+            if (v == p.owner || !v.alive || v instanceof rpg.ai.Npc npc && !npc.loaded || p.swept.contains(v.id)) continue;
+            if (v.team != 0 && v.team == p.owner.team && !hostileTo(p.owner, v)) continue;
+            float distance = HitVolumes.ray(g, v, p.x, p.y, p.z, dx, dy, dz, wall, 0.7f);
+            if (distance >= wall) continue;
+            p.swept.add(v.id);
+            float qx = p.x + dx * distance, qy = p.y + dy * distance, qz = p.z + dz * distance;
+            spellEffect(p, v, dx, dz);
+            resolve(p.owner, v, p.potential, p.impact, p.type, p, qx, qy, qz, p.spell.title, false);
+            spellImpact(p, qx, qy, qz, v);
+        }
     }
 
     /** An arrow in the archery target: Archery XP growing with the distance shot from (the arrow stays in the target). */

@@ -1321,6 +1321,15 @@ typedef struct astratto_texture_desc {
     uint64_t bytes;
 } astratto_texture_desc;
 ASTRATTO_API int32_t astratto_render_texture(astratto_renderer* renderer, const astratto_texture_desc* desc, uint32_t* out);
+/* 2.7: a 2D texture's pixels replaced in place (RGBA8, its full size): no new texture made, no old one released - a
+ * texture redrawn often (a map) costs an upload, not a stall. */
+typedef struct astratto_texture_update {
+    uint32_t struct_size;
+    uint32_t id;
+    const uint8_t* pixels;
+    uint64_t bytes;
+} astratto_texture_update;
+ASTRATTO_API int32_t astratto_render_texture_update(astratto_renderer* renderer, const astratto_texture_update* update);
 /* Model meshes: triangles of 40-byte vertices - position (3 floats), colour (4 floats, alpha < 1 = see-through), normal (3 floats). */
 ASTRATTO_API int32_t astratto_render_mesh(astratto_renderer* renderer, const float* vertices, uint32_t vertex_count, uint32_t* out);
 /* Releases a texture or a mesh (deferred until no frame in flight uses it). */

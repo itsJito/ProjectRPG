@@ -70,6 +70,8 @@ public final class Hud {
     final Map<Scene, List<String>> scenes = new EnumMap<>(Scene.class);
     final InventoryPanel inventory;
     final ActionBar bar;
+    /** The radial wheel (TAB held in play; docked by the inventory to assign it). */
+    public final RadialWheel radial;
     final ItemIcons icons;
     final Addons addons;
     private String tip;
@@ -88,6 +90,7 @@ public final class Hud {
         icons = new ItemIcons(r);
         inventory = new InventoryPanel(this);
         bar = new ActionBar(this);
+        radial = new RadialWheel(this);
         HudFragments.register(this);
         Panels.register(this);
         Windows.register(this);
@@ -132,11 +135,11 @@ public final class Hud {
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
-        group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
+        group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cooking", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
-        group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0));
+        group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0), "radial", Placement.at(Anchor.CENTER, 0, 0));
         scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
         for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.MAP}) {
             String content = s.name().toLowerCase();
@@ -242,6 +245,21 @@ public final class Hud {
     /** The number keys in the world: the action bar's slots. */
     public void hotkey(int k) { bar.use(k); }
 
+    /** Uses an item of a kind the player carries by its first action (eat, wield, light...): the action bar's and the wheel's way. */
+    void useItem(rpg.item.ItemDef def) {
+        for (rpg.item.Inventory grid : g.player.grids()) {
+            int slot = grid.first(def);
+            if (slot < 0) continue;
+            for (rpg.interact.Option op : g.items.options(g.player, grid, slot)) {
+                if (op.id().equals("drop") || op.id().equals("examine")) continue;
+                if (op.enabled()) g.items.perform(g.player, grid, slot, op.id()); else g.chat.warn(op.reason());
+                return;
+            }
+            return;
+        }
+        g.chat.warn("You have no " + def.name.toLowerCase() + ".");
+    }
+
     /** Input the window hands over each frame. */
     public void input(String typed, boolean backspace, boolean rotate) { this.typed = typed == null ? "" : typed; this.backspace = backspace; this.rotate = rotate; }
 
@@ -275,6 +293,8 @@ public final class Hud {
             at.put("iteminfo",inFrame("iteminfo",404,52));
             at.put("container",Placement.at(Anchor.CENTER,-frameWidth()/2-166,FRAME_Y));
         }
+        stackTop(on, at);
+        if (scene == Scene.INVENTORY) at.put("radial", Placement.at(Anchor.CENTER, frameWidth() / 2 + 16 + radial.width() / 2, FRAME_Y + 48));
         if (settings.open) on.clear();
         // dead, the interface steps aside for the death itself (the rest fades out where it was)
         if (!g.player.alive) on.retainAll(java.util.Set.of("death", "console"));
@@ -320,6 +340,22 @@ public final class Hud {
         overlays(ui);
         console.draw(ui, w, h, dt);
     }
+
+    /**
+     * The notices at the top of the screen (a jail sentence, the foe's bar, a level's banner, a quest, Honor, a bounty
+     * reminder) share one column: each takes its own height, weighted by its fade so the rest slide rather than jump,
+     * and none paints over another (gamefixes: a level-up and a wanted notice on entering a city covered each other).
+     */
+    private void stackTop(java.util.Set<String> on, Map<String, Placement> at) {
+        float y = 16;
+        for (String id : TOP_STACK) {
+            Fragment f = fragments.get(id);
+            if (f == null || !on.contains(id) || f.moved != null) continue;
+            at.put(id, Placement.at(Anchor.TOP, 0, y));
+            y += (f.height() + 8) * Math.min(1, f.alpha * 1.6f);
+        }
+    }
+    static final String[] TOP_STACK = {"sentence", "target", "levelbanner", "levelup", "honor", "bountynotice"};
 
     /** cl_showfps and cl_showpos: the frame rate, and where you are, top left over everything. */
     private void overlays(Ui2D ui) {
@@ -384,14 +420,16 @@ public final class Hud {
 
     private void flushTooltip(Ui2D ui) {
         if (tip == null) return;
-        String[] lines = tip.split("\n");
-        float tw = 0;
-        for (String l : lines) tw = Math.max(tw, ui.width(l, 12));
-        float x = Math.min(w - tw - 16, ui.mx + 14), y = Math.min(h - lines.length * 15 - 12, ui.my + 16);
-        ui.rect(x, y, tw + 12, lines.length * 15 + 8, 0xF0141518);
-        ui.border(x, y, tw + 12, lines.length * 15 + 8, 1, Style.EDGE_HI);
-        for (int i = 0; i < lines.length; i++) ui.text(lines[i], x + 6, y + 4 + i * 15, 12, i == 0 ? Style.TEXT : Style.DIM);
-        tip = null;
+        Ui2D.Face was = ui.use(ui.chat);   // tooltips are set in Arial Narrow
+        try {
+            String[] lines = tip.split("\n");
+            float tw = 0;
+            for (String l : lines) tw = Math.max(tw, ui.width(l, 13));
+            float x = Math.min(w - tw - 16, ui.mx + 14), y = Math.min(h - lines.length * 15 - 12, ui.my + 16);
+            ui.rect(x, y, tw + 12, lines.length * 15 + 8, 0xF0141518);
+            ui.border(x, y, tw + 12, lines.length * 15 + 8, 1, Style.EDGE_HI);
+            for (int i = 0; i < lines.length; i++) ui.text(lines[i], x + 6, y + 4 + i * 15, 13, i == 0 ? Style.TEXT : Style.DIM);
+        } finally { ui.use(was); tip = null; }
     }
 
     void openMenu(String title, float x, float y, List<MenuItem> items) {

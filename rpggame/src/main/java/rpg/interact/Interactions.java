@@ -99,7 +99,7 @@ public final class Interactions {
             w.commits++;
             if (r.committed()) committed++; else rejected++;
             if (r.rejected() && a == g.player && r.reason() != null) g.chat.add(r.reason(), Chat.Kind.WARN);
-            if (r.committed() && w.repeat) w.t = 0;
+            if (r.committed() && w.repeat && (w.limit <= 0 || w.commits < w.limit)) w.t = 0;
             else { work.remove(a.id); if (a.working == w) a.working = null; }
         }
     }

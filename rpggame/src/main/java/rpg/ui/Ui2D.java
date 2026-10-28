@@ -29,8 +29,9 @@ public final class Ui2D {
 
     /**
      * A typeface baked once (gamefixes: the provided fonts, each where it belongs). Friz Quadrata is the interface's
-     * face, Morpheus its headings, Arial Narrow the chat, Skurri the numbers struck in combat and Nimrod italic the
-     * flavour text of things.
+     * face - quest text, the level-up banners, names, most of what is on the screen; Morpheus the lore's - the quest
+     * log's headers, books, scrolls and letters; Arial Narrow the chat, information, tooltips and small numbers; Skurri
+     * the big numbers that pop over a body struck in combat.
      */
     public static final class Face {
         final float bake;
@@ -40,7 +41,7 @@ public final class Ui2D {
         final float baseline;
         Face(float bake, int texture, STBTTBakedChar.Buffer chars, float baseline) { this.bake = bake; this.texture = texture; this.chars = chars; this.baseline = baseline; }
     }
-    public final Face body, heading, chat, combat, lore;
+    public final Face body, heading, chat, combat;
     private Face face;
     /** Switches the face text is set in; returns the one it replaces (put it back after). */
     public Face use(Face f) { Face was = face; face = f == null ? body : f; return was; }
@@ -74,7 +75,6 @@ public final class Ui2D {
         heading = orElse(bake(r, resource("MORPHEUS.TTF"), 34f), body);
         chat = orElse(bake(r, resource("arialnarrow.ttf"), 22f), body);
         combat = orElse(bake(r, resource("skurri.ttf"), 30f), body);
-        lore = orElse(bake(r, resource("NimrodMT-Italic.otf"), 22f), body);
         face = body;
         icons = Icons.texture(r);
         atlas = new Atlas(r);
@@ -200,6 +200,16 @@ public final class Ui2D {
         }
     }
 
+    /** A slice of a ring between two radii and two angles (radians, 0 along +x, clockwise on the screen). */
+    public void sector(float cx, float cy, float r0, float r1, double a0, double a1, int argb) {
+        int seg = Math.max(2, (int) Math.ceil(Math.abs(a1 - a0) / (Math.PI / 24)));
+        for (int i = 0; i < seg; i++) {
+            double b0 = a0 + (a1 - a0) * i / seg, b1 = a0 + (a1 - a0) * (i + 1) / seg;
+            float c0 = (float) Math.cos(b0), s0 = (float) Math.sin(b0), c1 = (float) Math.cos(b1), s1 = (float) Math.sin(b1);
+            quad(0, new float[]{cx + c0 * r1, cy + s0 * r1, cx + c1 * r1, cy + s1 * r1, cx + c1 * r0, cy + s1 * r0, cx + c0 * r0, cy + s0 * r0}, new float[]{0, 0, 0, 0, 0, 0, 0, 0}, argb, 0);
+        }
+    }
+
     /** A pie of a disc (orb fill): from the bottom up to a share. */
     public void discFill(float cx, float cy, float r, float share, int argb) {
         share = Math.max(0, Math.min(1, share));
@@ -317,5 +327,5 @@ public final class Ui2D {
         return enabled && clicked(x, y, w, h);
     }
 
-    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat, lore))) f.chars.free(); }
+    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat))) f.chars.free(); }
 }

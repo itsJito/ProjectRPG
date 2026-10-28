@@ -105,7 +105,13 @@ void main() {
         float r = sqrt(max(0.0, 1.0 - z * z)), phi = float(i) * 2.39996323;
         vec3 d = uRot * vec3(cos(phi) * r, sin(phi) * r, z);
         float dist;
-        vec3 L = min(trace(o, d, dist), vec3(24.0));
+        // a ray that happens to hit a small bright source (a lamp's glass) is clamped by its brightness, colour kept: a
+        // handful of rays either struck the lamp or missed it, and the probes by every lamp swung from update to update
+        // - at night, when the lamps are all the light there is, the walls round them flickered (the lamp's own light
+        // on them is the point light's, not the probes')
+        vec3 L = trace(o, d, dist);
+        float lum = dot(L, vec3(0.2126, 0.7152, 0.0722));
+        if (lum > 6.0) L *= 6.0 / lum;
         a0 += L; ax += L * d.x; ay += L * d.y; az += L * d.z;
         d0 += dist; d1 += dist * d;
     }

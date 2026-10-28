@@ -16,29 +16,66 @@ public final class Blood {
     /** Faces, as the skin numbers them. */
     public static final int TOP = 0, BOTTOM = 1, RIGHT = 2, FRONT = 3, LEFT = 4, BACK = 5;
 
-    /** One splash: part, face, where on the face (0..1 across, 0..1 down), how big (texels), wet or dried, its own shape. */
-    public record Mark(int part, int face, float u, float v, float radius, boolean wet, int seed, double at) {}
+    /**
+     * One splash: part, face, where on the face (0..1 across, 0..1 down), how big (texels), wet or dried, its own shape -
+     * or a scorch (gamefixes: fire chars bodies where it burns them): soot and burnt cloth, glowing at its edge while wet
+     * (still smouldering), ash-grey and black once it has cooled.
+     */
+    public record Mark(int part, int face, float u, float v, float radius, boolean wet, int seed, double at, boolean scorch) {}
 
     public final List<Mark> marks = new ArrayList<>();
     /** Bumped on every change, so the figure is repainted only when the blood on it changed. */
     public int version;
     private int seeds = 1;
     public static final int MAX = 28;
+    /** Scorches kept besides the blood (a burnt body is charred all over in time, in patches). */
+    public static final int MAX_SCORCH = 24;
 
     public boolean any() { return !marks.isEmpty(); }
 
     public void add(int part, int face, float u, float v, float radius, double now) {
         if (radius < 0.6f) return;
-        marks.add(new Mark(part, face, clamp(u), clamp(v), Math.min(7f, radius), true, seeds++ * 0x2F6B, now));
-        while (marks.size() > MAX) marks.remove(0);
+        marks.add(new Mark(part, face, clamp(u), clamp(v), Math.min(7f, radius), true, seeds++ * 0x2F6B, now, false));
+        trim();
         version++;
     }
+
+    /**
+     * Fire on the body: a scorch where the flames are licking. A scorch already near the spot grows (up to the face's
+     * size) rather than a new one being laid, so a long burn chars a body through, patch by patch, rather than piling up.
+     */
+    public void scorch(int part, int face, float u, float v, float grow, double now) {
+        for (int i = marks.size() - 1; i >= 0; i--) {
+            Mark m = marks.get(i);
+            if (!m.scorch || m.part != part || m.face != face || Math.hypot(m.u - u, m.v - v) > 0.3f) continue;
+            if (m.radius >= 9f && m.wet) return;
+            marks.set(i, new Mark(part, face, m.u, m.v, Math.min(9f, m.radius + grow), true, m.seed, now, true));
+            version++;
+            return;
+        }
+        marks.add(new Mark(part, face, clamp(u), clamp(v), Math.max(1.2f, grow), true, seeds++ * 0x2F6B, now, true));
+        trim();
+        version++;
+    }
+
+    /** The oldest blood goes past its cap, the oldest scorch past its own. */
+    private void trim() {
+        int blood = 0, soot = 0;
+        for (Mark m : marks) if (m.scorch) soot++; else blood++;
+        for (int i = 0; i < marks.size() && (blood > MAX || soot > MAX_SCORCH); i++) {
+            Mark m = marks.get(i);
+            if (m.scorch ? soot > MAX_SCORCH : blood > MAX) { marks.remove(i--); if (m.scorch) soot--; else blood--; }
+        }
+    }
+
+    /** Whether any of the marks is a scorch (the figure is then this body's own). */
+    public boolean scorched() { for (Mark m : marks) if (m.scorch) return true; return false; }
 
     /** Blood runs down from the last mark on a part (a wound that keeps bleeding): a smaller mark a little below it. */
     public void run(int part, double now) {
         for (int i = marks.size() - 1; i >= 0; i--) {
             Mark m = marks.get(i);
-            if (m.part != part || m.face == TOP || m.face == BOTTOM) continue;
+            if (m.scorch || m.part != part || m.face == TOP || m.face == BOTTOM) continue;
             if (m.v > 0.93f) return;
             add(part, m.face, m.u + ((m.seed >>> 3) % 5 - 2) * 0.02f, m.v + 0.09f + m.radius * 0.01f, Math.max(0.9f, m.radius * 0.72f), now);
             return;
@@ -50,13 +87,17 @@ public final class Blood {
         boolean changed = false;
         for (int i = marks.size() - 1; i >= 0; i--) {
             Mark m = marks.get(i);
-            if (now - m.at > 900) { marks.remove(i); changed = true; }
-            else if (m.wet && now - m.at > 90) { marks.set(i, new Mark(m.part, m.face, m.u, m.v, m.radius, false, m.seed, m.at)); changed = true; }
+            // (a scorch is burnt into the cloth and skin: it is not flaked away by time; it cools in seconds)
+            if (!m.scorch && now - m.at > 900) { marks.remove(i); changed = true; }
+            else if (m.wet && now - m.at > (m.scorch ? 4 : 90)) { marks.set(i, new Mark(m.part, m.face, m.u, m.v, m.radius, false, m.seed, m.at, m.scorch)); changed = true; }
         }
         if (changed) version++;
     }
 
-    public void wash() { if (!marks.isEmpty()) { marks.clear(); version++; } }
+    /** Water washes the blood off (a scorch is burnt in: it stays). */
+    public void wash() { if (marks.removeIf(m -> !m.scorch)) version++; }
+    /** Healed whole (a new life, a mending): every mark goes. */
+    public void clear() { if (!marks.isEmpty()) { marks.clear(); version++; } }
 
     private static float clamp(float x) { return Math.max(0.04f, Math.min(0.96f, x)); }
 

@@ -38,4 +38,36 @@ class PosseKnowledgeTest {
             assertEquals(witness.id,officer.playerSighting.witness());assertEquals(80,officer.playerSighting.x());
         }
     }
+
+    /** Gamefixes: hunters never appear where the player looks, and they hunt actively - laying snares for the quarry. */
+    @Test void huntersFormOutOfViewAndLaySnaresForTheirQuarry() {
+        var config=new NativeEngine.Config(); config.deterministic=true;
+        try(Game game=Game.create(config)) {
+            game.activate(DevMap.build(game.engine()));
+            Rpg g=game.add(new Rpg(game,"Snares",new Appearance(),true));
+            g.teleport(g.player,64.5f,DevMap.FLOOR,64.5f);
+            g.controller.snapTo(0);
+            game.tick(0);
+            g.law.all().computeIfAbsent(DevMap.ALPHA,k->new java.util.HashMap<>()).put(g.player.id,1200);
+            assertTrue(g.law.posses.form(DevMap.ALPHA,1200,false));
+            float fx=(float)-Math.sin(g.controller.camYaw),fz=(float)-Math.cos(g.controller.camYaw);
+            for(Npc hunter:g.law.posses.members()) {
+                float dx=hunter.x-g.player.x,dz=hunter.z-g.player.z,d=(float)Math.hypot(dx,dz);
+                assertTrue(d>=20,"a hunter formed "+d+" m away");
+                assertTrue((dx*fx+dz*fz)/d<0 || d>=70,"a hunter formed in front of the player");
+            }
+            // on the trail at the last known location: the snares are laid there
+            Npc hunter=g.law.posses.members().get(0);
+            g.teleport(hunter,hunter.hunt.x,DevMap.FLOOR,hunter.hunt.z);
+            hunter.hunt.reachedLkp=true; hunter.goal=rpg.ai.Brain.Goal.SEARCH; hunter.nextThink=0;
+            for(int i=0;i<60*45 && hunter.snaresSet<2;i++) assertTrue(game.tick(1f/60));
+            assertTrue(hunter.snaresSet>=1,"the hunter lays a snare: "+hunter.lastOutcome);
+            var snare=g.dungeons.traps.stream().filter(t->t.kind==2 && !t.removed).findFirst().orElseThrow();
+            assertEquals(hunter.id,snare.owner);
+            // it spares its hunters, and holds the quarry fast
+            g.teleport(g.player,snare.x,DevMap.FLOOR,snare.z);
+            for(int i=0;i<20;i++) assertTrue(game.tick(1f/60));
+            assertTrue(g.player.cs.frozenT>0,"the snare holds the player");
+        }
+    }
 }

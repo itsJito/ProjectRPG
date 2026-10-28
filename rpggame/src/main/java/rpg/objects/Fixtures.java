@@ -22,7 +22,7 @@ public final class Fixtures {
 
     /**
      * An altar (GDD 2.5, 3.11): praying at it restores Faith to the full (the one way the pool fills besides holy drink),
-     * and its rite opens another spellbook - Standard, Ancients, Lunar or Arcane - in place of the one in use. Nothing
+     * and its rite opens another spellbook - Sun, Fogish or Moon - in place of the one in use. Nothing
      * that has not been learned is unlocked by it.
      */
     public static final class Altar extends WorldObject {
@@ -43,7 +43,7 @@ public final class Fixtures {
             if (why != null) return Result.no(why);
             if (action.startsWith("book:") && a instanceof rpg.actor.Player p) {
                 p.book = rpg.combat.Spells.Book.valueOf(action.substring(5));
-                for (rpg.combat.Spells.Spell s : rpg.combat.Spells.Spell.values()) if (s.book == p.book && s.level <= p.skills.level(Skill.MAGIC)) { p.spell = s; break; }
+                for (rpg.combat.Spells.Spell s : rpg.combat.Spells.book(p.book)) if (s.level <= p.skills.level(Skill.MAGIC)) { p.spell = s; break; }
                 g.state.commit(req, "SpellbookChanged", a.id, id, jurisdiction(), 0, p.book.title);
                 g.chat.say("You kneel at the altar; the " + p.book.title + " spellbook opens to you.");
                 if (g.sfx != null) g.sfx.ui("SpellBookCloseA", 0.5f);
@@ -201,6 +201,18 @@ public final class Fixtures {
         private final String jurisdiction;
         public Board(long id, float x, float y, float z, String jurisdiction) { super(id, "bounty_board", "Bounty board", x, y, z); this.jurisdiction = jurisdiction; }
         @Override public float focusRadius() { return 0.75f; }
+        /** The panel's half extents (Gfx draws it 1.5 x 1.5 x 0.14 over two posts from the ground). */
+        public static final float HALF_W = 0.76f, HALF_H = 0.8f, HALF_D = 0.08f;
+        /**
+         * The board and its posts are solid (gamefixes: bodies walked through it; then its collision took a block and a half
+         * of empty air round it): a fixed box exactly the panel's size, not whole voxel cells.
+         */
+        public Board solid(Rpg g) {
+            long body = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+            g.game.commands().rigidCreate(body, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, HALF_W, HALF_H, HALF_D, 0,
+                    x, rpg.world.DevMap.FLOOR + HALF_H, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+            return this;
+        }
         @Override public String examine(Rpg g) { return "Sworn warrants posted by the watch of " + jurisdiction + "."; }
         @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("read", "Read warrants", 10, g.cfg.interactRange), Option.on("examine", "Examine", 0, g.cfg.inspectRange)); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {

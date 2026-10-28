@@ -25,10 +25,13 @@ class MonsterTest {
         try (Game game = Game.create(config)) {
             Rpg g = open(game);
             g.state.minutes = 12 * 60;
-            assertEquals(4, g.monsters.living(MonsterKind.GOBLIN));
-            assertEquals(5, g.monsters.living(MonsterKind.BAT));
-            assertEquals(2, g.monsters.living(MonsterKind.IMP));
+            // (the overworld's own: the dungeons hold more of each kind underground)
+            java.util.function.ToLongFunction<MonsterKind> above = k -> g.monsters.all().stream().filter(m -> m.alive && m.kind == k && !rpg.world.DungeonLayout.inDungeonRegion(m.x)).count();
+            assertEquals(4, above.applyAsLong(MonsterKind.GOBLIN));
+            assertEquals(5, above.applyAsLong(MonsterKind.BAT));
+            assertEquals(2, above.applyAsLong(MonsterKind.IMP));
             for (Monster m : g.monsters.all()) {
+                if (rpg.world.DungeonLayout.inDungeonRegion(m.x)) continue;   // (dungeon residents are scaled to who enters: DungeonScalingTest)
                 assertTrue(m.level >= m.kind.minLevel && m.level <= m.kind.maxLevel);
                 assertTrue(m.skills.combatLevel() >= Math.max(3, m.level - 6) && m.skills.combatLevel() <= m.level + 6, m.label() + " fights at combat level " + m.skills.combatLevel());
             }

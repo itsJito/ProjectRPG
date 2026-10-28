@@ -10,12 +10,12 @@ import java.util.Random;
  * attribute, an equipment slot or the rules.
  */
 public final class Appearance {
-    public static final int SKIN_TONES = 12, HAIRSTYLES = 20, BEARDS = 20, TOPS = 20, BOTTOMS = 20, SHOES = 20, COLORS = 24, HAIR_COLORS = 10, BODY_TYPES = 3;
+    public static final int SKIN_TONES = 12, HAIRSTYLES = 20, BEARDS = 20, TOPS = 20, BOTTOMS = 20, SHOES = 20, COLORS = 24, HAIR_COLORS = 10, BODY_TYPES = 3, EYE_COLORS = 8;
     /** The body silhouettes (visual only): Masculine, Heavy, Skinny. */
     public static final int MASCULINE = 0, HEAVY = 1, SKINNY = 2;
 
     public boolean female;
-    public int bodyType = MASCULINE, skin = 3, hair = 1, hairColor = 2, beard = 0, beardColor = 2, top = 0, topColor = 16, bottom = 0, bottomColor = 9, shoes = 0, shoesColor = 16;
+    public int bodyType = MASCULINE, skin = 3, hair = 1, hairColor = 2, beard = 0, beardColor = 2, top = 0, topColor = 16, bottom = 0, bottomColor = 9, shoes = 0, shoesColor = 16, eyeColor = 1;
 
     /** Twelve realistic skin tones, light to deep (their own catalog; never garment colours). */
     public static final int[] SKIN = {0xF6D9C4, 0xF1C9A5, 0xE8B58E, 0xDDA27A, 0xD09068, 0xC07E58, 0xAD6B47, 0x98593A, 0x82492F, 0x6C3B26, 0x56301F, 0x412519};
@@ -24,9 +24,15 @@ public final class Appearance {
     /** The sole authored creator starting point; randomisation remains optional. */
     public static Appearance henric() {
         Appearance a = new Appearance(); a.female = false; a.bodyType = 0; a.skin = 0; a.hair = 0; a.hairColor = a.beardColor = 1;
-        a.beard = 9; a.top = 8; a.topColor = 5; a.bottom = 1; a.bottomColor = 16; a.shoes = 10; a.shoesColor = 23; return a;
+        a.beard = 9; a.top = 8; a.topColor = 5; a.bottom = 1; a.bottomColor = 16; a.shoes = 10; a.shoesColor = 23; a.eyeColor = 5; return a;
     }
 
+    /** E01-E08: the eye colours (gamefixes: the player's own to choose), darkest to palest. */
+    public static final int[] EYES = {0x2E1C10, 0x5A3A20, 0x7A5A2A, 0x9A6A24, 0x4A7A3A, 0x3A6AA8, 0x6A7078, 0x86A6CC};
+    public static final String[] EYE_NAMES = {"Dark Brown", "Brown", "Hazel", "Amber", "Green", "Blue", "Grey", "Pale Blue"};
+    public static int eyeColor(int index) { return EYES[Math.floorMod(index, EYE_COLORS)]; }
+    /** The colour a look saved before eyes could be chosen had (it followed from skin, hair and top). */
+    private static int oldEyes(int skin, int hairColor, int top) { return new int[]{1, 2, 5, 4, 6}[Math.floorMod(skin * 3 + hairColor + top, 5)]; }
     public static final String[] HAIR_NAMES = {"Black", "Dark Brown", "Medium Brown", "Light Brown", "Chestnut", "Auburn", "Natural Red", "Strawberry Blonde", "Dark Blonde", "Light Blonde"};
     /** C01-C24: the twenty-four starting-clothes colours (GDD 2.1 reference swatches). */
     public static final int[] PALETTE = {0xD12C36, 0xF08424, 0xEAD43A, 0x9ACF34, 0x278B49, 0x707837, 0x1A827B, 0x35BEDA, 0x3570D6, 0x283B7B, 0x793DAF, 0xB69EE3,
@@ -79,7 +85,7 @@ public final class Appearance {
     public Appearance copy() {
         Appearance a = new Appearance();
         a.female = female; a.bodyType = bodyType; a.skin = skin; a.hair = hair; a.hairColor = hairColor; a.beard = beard; a.beardColor = beardColor;
-        a.top = top; a.topColor = topColor; a.bottom = bottom; a.bottomColor = bottomColor; a.shoes = shoes; a.shoesColor = shoesColor;
+        a.top = top; a.topColor = topColor; a.bottom = bottom; a.bottomColor = bottomColor; a.shoes = shoes; a.shoesColor = shoesColor; a.eyeColor = eyeColor;
         a.monster = monster;
         return a;
     }
@@ -100,15 +106,17 @@ public final class Appearance {
         a.beard = a.female || r.nextInt(3) == 0 ? 0 : r.nextInt(BEARDS); a.beardColor = a.hairColor;
         a.top = r.nextInt(TOPS); a.topColor = r.nextInt(COLORS);
         a.bottom = r.nextInt(BOTTOMS); a.bottomColor = r.nextInt(COLORS); a.shoes = r.nextInt(SHOES); a.shoesColor = r.nextInt(COLORS);
+        a.eyeColor = r.nextInt(EYE_COLORS);
         return a;
     }
 
-    public int[] toArray() { return new int[]{female ? 1 : 0, bodyType, skin, hair, hairColor, beard, beardColor, top, topColor, bottom, bottomColor, shoes, shoesColor}; }
+    public int[] toArray() { return new int[]{female ? 1 : 0, bodyType, skin, hair, hairColor, beard, beardColor, top, topColor, bottom, bottomColor, shoes, shoesColor, eyeColor}; }
     public static Appearance fromArray(int[] v) {
         Appearance a = new Appearance();
         if (v == null || v.length < 13) return a;
         a.female = v[0] == 1; a.bodyType = v[1]; a.skin = v[2]; a.hair = v[3]; a.hairColor = v[4]; a.beard = v[5]; a.beardColor = v[6];
         a.top = v[7]; a.topColor = v[8]; a.bottom = v[9]; a.bottomColor = v[10]; a.shoes = v[11]; a.shoesColor = v[12];
+        a.eyeColor = v.length > 13 ? v[13] : oldEyes(a.skin, a.hairColor, a.top);
         a.clamp();
         return a;
     }
@@ -117,6 +125,6 @@ public final class Appearance {
         bodyType = Math.floorMod(bodyType, BODY_TYPES); skin = Math.floorMod(skin, SKIN_TONES); hair = Math.floorMod(hair, HAIRSTYLES);
         beard = female ? 0 : Math.floorMod(beard, BEARDS); top = Math.floorMod(top, TOPS); bottom = Math.floorMod(bottom, BOTTOMS); shoes = Math.floorMod(shoes, SHOES);
         hairColor = Math.floorMod(hairColor, HAIR_COLORS); beardColor = Math.floorMod(beardColor, HAIR_COLORS); topColor = Math.floorMod(topColor, COLORS);
-        bottomColor = Math.floorMod(bottomColor, COLORS); shoesColor = Math.floorMod(shoesColor, COLORS);
+        bottomColor = Math.floorMod(bottomColor, COLORS); shoesColor = Math.floorMod(shoesColor, COLORS); eyeColor = Math.floorMod(eyeColor, EYE_COLORS);
     }
 }

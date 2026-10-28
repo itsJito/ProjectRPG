@@ -20,6 +20,19 @@ public final class Chat {
         total++;
         while (lines.size() > 200) lines.removeFirst();
     }
+    /**
+     * A crime notice, at most once every 30 seconds for each kind of crime (gamefixes: the same crime spammed the box -
+     * every witness, every report). Notices held back are not lost to the game: the law still records each one.
+     */
+    public static final double CRIME_PAUSE = 30;
+    private final java.util.Map<String, Double> crimeSaid = new java.util.HashMap<>();
+    public boolean crime(String kind, String text) {
+        Double at = crimeSaid.get(kind);
+        if (at != null && now - at < CRIME_PAUSE && now >= at) return false;
+        crimeSaid.put(kind, now);
+        add(text, Kind.CRIME);
+        return true;
+    }
     public List<Line> last(int n) {
         List<Line> l = new ArrayList<>(lines);
         return l.subList(Math.max(0, l.size() - n), l.size());

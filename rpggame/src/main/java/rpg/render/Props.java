@@ -87,13 +87,48 @@ public final class Props {
         return new Layer[]{stone(rock), wood(wood), glow(light, 0.35f)};
     }
 
-    /** A trap's plate, found: a square set in the floor (wedged, once disarmed). */
-    public static Layer[] trapPlate(boolean wedged) {
-        Meshes.Boxes b = new Meshes.Boxes();
-        b.rgb(0, 0.012f, 0, 0.62f, 0.025f, 0.62f, wedged ? 0x5A5A56 : 0x6E6A62);
-        b.rgb(0, 0.02f, 0, 0.5f, 0.02f, 0.5f, wedged ? 0x4A4A46 : 0x7E7A70);
-        if (wedged) b.rgb(0.2f, 0.04f, 0.2f, 0.16f, 0.05f, 0.06f, 0x6A4A2A);
-        return new Layer[]{stone(b)};
+    /**
+     * A trap in the floor (gamefixes: traps were invisible until found). Every plate shows to a careful eye: a square
+     * set proud of the floor in darker, newer stone, its seam cut clean, a ring of holes for the spikes or, under a
+     * loose stone, rubble and a crack in the floor beneath the bad roof. Found, it is marked as an adventurer marks one
+     * - a scratched red cross on the plate and chalk round it; disarmed, it is wedged with a wooden peg.
+     * state: 0 hidden, 1 found, 2 disarmed; kind: 0 spikes, 1 falling rock.
+     */
+    public static Layer[] trapPlate(int state, int kind) {
+        Meshes.Boxes b = new Meshes.Boxes(), dark = new Meshes.Boxes(), mark = new Meshes.Boxes(), wood = new Meshes.Boxes();
+        if (kind == 2) {
+            // a hunter's snare: a loop of rope laid flat in the leaves, its tail run to a peg driven in beside it; found,
+            // a strip of red cloth tied to the peg; cut, the loop lies open
+            Meshes.Boxes rope = new Meshes.Boxes(), leaf = new Meshes.Boxes();
+            int n = 12;
+            for (int i = 0; i < n; i++) {
+                if (state == 2 && i < 2) continue;
+                double a = i * Math.PI * 2 / n;
+                rope.rgb((float) Math.cos(a) * 0.22f, 0.012f, (float) Math.sin(a) * 0.22f, 0.07f, 0.02f, 0.07f, 0xB09A6A);
+            }
+            for (int i = 0; i < 4; i++) rope.rgb(0.26f + i * 0.06f, 0.014f, 0, 0.07f, 0.02f, 0.025f, 0xA89062);
+            wood.rgb(0.52f, 0.1f, 0, 0.05f, 0.22f, 0.05f, 0x5A3E22);
+            java.util.Random r = new java.util.Random(7);
+            for (int i = 0; i < 9; i++) leaf.rgb((r.nextFloat() - 0.5f) * 0.6f, 0.02f, (r.nextFloat() - 0.5f) * 0.6f, 0.09f, 0.01f, 0.06f, shadeRgb(0x6A5A2A, 0.8f + r.nextFloat() * 0.4f));
+            if (state >= 1) mark.rgb(0.52f, 0.2f, 0.035f, 0.08f, 0.05f, 0.01f, 0xC02A1E);
+            return new Layer[]{wood(rope), wood(wood), new Layer(leaf, 0.95f, 0, 0), glow(mark, 0.25f)};
+        }
+        boolean wedged = state == 2;
+        dark.rgb(0, 0.006f, 0, 0.7f, 0.012f, 0.7f, 0x1E1C1A);                                  // the clean-cut seam round it
+        b.rgb(0, 0.02f, 0, 0.6f, 0.03f, 0.6f, wedged ? 0x5A5A56 : 0x6A665E);                     // the plate, set proud
+        b.rgb(0, 0.04f, 0, 0.46f, 0.012f, 0.46f, wedged ? 0x4A4A46 : 0x777268);
+        if (kind == 0) for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) dark.rgb(x * 0.15f, 0.047f, z * 0.15f, 0.05f, 0.006f, 0.05f, 0x121110);   // the spike holes
+        else {
+            dark.rgb(0.08f, 0.047f, -0.05f, 0.34f, 0.006f, 0.025f, 0x141312); dark.rgb(-0.1f, 0.047f, 0.08f, 0.025f, 0.006f, 0.28f, 0x141312);   // cracked
+            for (int i = 0; i < 5; i++) b.rgb(-0.42f + i * 0.2f, 0.05f, (i % 2 == 0 ? 0.42f : -0.4f), 0.09f, 0.08f, 0.08f, 0x6E6A62);        // fallen grit
+        }
+        if (state >= 1) {
+            // found: a red cross scratched across it, chalk at its corners
+            for (int s2 = -1; s2 <= 1; s2 += 2) for (int i = -3; i <= 3; i++) mark.rgb(i * 0.06f, 0.05f, s2 * i * 0.06f, 0.06f, 0.006f, 0.035f, 0xB02A1E);
+            for (int cx = -1; cx <= 1; cx += 2) for (int cz = -1; cz <= 1; cz += 2) { mark.rgb(cx * 0.4f, 0.014f, cz * 0.34f, 0.16f, 0.006f, 0.03f, 0xE8E4D8); mark.rgb(cx * 0.34f, 0.014f, cz * 0.4f, 0.03f, 0.006f, 0.16f, 0xE8E4D8); }
+        }
+        if (wedged) { wood.rgb(0.2f, 0.06f, 0.2f, 0.18f, 0.06f, 0.07f, 0x6A4A2A); wood.rgb(-0.18f, 0.06f, -0.2f, 0.07f, 0.06f, 0.18f, 0x5E4224); }
+        return new Layer[]{stone(b), new Layer(dark, 1, 0, 0), state >= 1 ? glow(mark, 0.25f) : stone(mark), wood(wood)};
     }
     /** The spikes that come up through a sprung plate. */
     public static Layer[] trapSpikes() {
@@ -111,6 +146,8 @@ public final class Props {
 
     /** What stands beside a fence cell: 3 more fence (or bars), 2 a wall it butts against, 0 nothing. */
     public interface FenceSides { int at(int x, int y, int z); }
+    /** How charred a fence cell is, 0 .. 1. */
+    public interface FenceChar { float at(int x, int y, int z); }
 
     /**
      * The fences of one 16 x 16 column of the world as a model (gamefixes: fences were plain blocks). A fence cell is a
@@ -118,7 +155,9 @@ public final class Props {
      * a lone cell is a post. Fence stacked on fence (the jail fronts) is iron bars instead: square uprights a hand
      * apart, banded top and bottom, joined to the bars beside them. Coordinates are from the column's corner.
      */
-    public static Layer[] fences(int x0, int z0, int y0, int y1, FenceSides sides) {
+    public static Layer[] fences(int x0, int z0, int y0, int y1, FenceSides sides) { return fences(x0, z0, y0, y1, sides, (x, y, z) -> 0); }
+    /** The same with the fire's work on it: each cell's wood darkened toward char by how much of it has burnt. */
+    public static Layer[] fences(int x0, int z0, int y0, int y1, FenceSides sides, FenceChar burnt) {
         Meshes.Boxes wood = new Meshes.Boxes(), iron = new Meshes.Boxes();
         int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         for (int x = x0; x < x0 + 16; x++) for (int z = z0; z < z0 + 16; z++) for (int y = y0; y <= y1; y++) {
@@ -141,16 +180,17 @@ public final class Props {
                 iron.rgb(cx, by + 0.5f, cz, alongX ? 1 : 0.07f, 0.05f, alongX ? 0.07f : 1, 0x44464C);
                 continue;
             }
-            // the post, a little sunk at its foot; its cap
-            wood.rgb(cx, by + 0.5f, cz, 0.2f, 1.0f, 0.2f, shadeRgb(0x6A4A2E, k));
-            wood.rgb(cx, by + 1.02f, cz, 0.25f, 0.06f, 0.25f, shadeRgb(0x7E5C3A, k));
-            wood.rgb(cx, by + 0.04f, cz, 0.26f, 0.08f, 0.26f, shadeRgb(0x4A3420, k));
+            // the post, a little sunk at its foot; its cap (charred as far as the fire has got: the top first, as flames climb)
+            float ch = burnt.at(x, y, z);
+            wood.rgb(cx, by + 0.5f, cz, 0.2f, 1.0f, 0.2f, charred(shadeRgb(0x6A4A2E, k), ch));
+            wood.rgb(cx, by + 1.02f, cz, 0.25f, 0.06f, 0.25f, charred(shadeRgb(0x7E5C3A, k), Math.min(1, ch * 1.4f)));
+            wood.rgb(cx, by + 0.04f, cz, 0.26f, 0.08f, 0.26f, charred(shadeRgb(0x4A3420, k), ch * 0.7f));
             // rails toward every neighbour that is fence, or a wall to butt against
             for (int[] d : dirs) {
                 if (sides.at(x + d[0], y, z + d[1]) == 0) continue;
                 for (int r = 0; r < 2; r++) {
                     float ry = by + (r == 0 ? 0.36f : 0.76f), sag = (h >>> (12 + r * 3) & 3) * 0.008f;
-                    int board = shadeRgb(r == 0 ? 0x8C6640 : 0x96704A, k * (0.96f + r * 0.05f));
+                    int board = charred(shadeRgb(r == 0 ? 0x8C6640 : 0x96704A, k * (0.96f + r * 0.05f)), Math.min(1, ch * (r == 0 ? 0.9f : 1.25f)));
                     float mx = cx + d[0] * 0.25f, mz = cz + d[1] * 0.25f;
                     wood.rgb(mx, ry - sag, mz, d[0] != 0 ? 0.5f : 0.06f, 0.12f, d[1] != 0 ? 0.5f : 0.06f, board);
                 }
@@ -159,6 +199,14 @@ public final class Props {
         return new Layer[]{wood(wood), metal(iron)};
     }
     private static boolean stacked(FenceSides sides, int x, int y, int z) { return sides.at(x, y, z) == 3 && (sides.at(x, y + 1, z) == 3 || sides.at(x, y - 1, z) == 3); }
+    /** Wood darkened toward char: by half its fire the grain is brown-black, burnt through it is soot with a grey of ash. */
+    private static int charred(int rgb, float c) {
+        if (c <= 0) return rgb;
+        c = Math.min(1, c);
+        int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
+        float t = c * c * (3 - 2 * c);
+        return (int) (r + (30 - r) * t) << 16 | (int) (g + (25 - g) * t) << 8 | (int) (b + (21 - b) * t);
+    }
     private static int shadeRgb(int rgb, float k) {
         int r = Math.min(255, (int) (((rgb >> 16) & 255) * k)), g = Math.min(255, (int) (((rgb >> 8) & 255) * k)), b = Math.min(255, (int) ((rgb & 255) * k));
         return r << 16 | g << 8 | b;

@@ -16,7 +16,7 @@ public final class Gait {
     /** Where a walk has fully become a run (m/s): between them the stride blends. */
     public static final float WALK_TOP = 2.6f, RUN_FROM = 3.5f;
     /** Model pixels: knee bend at a walk, the hips' pendulum drop, and the extra crouch when sneaking. */
-    public static final float WALK_BEND = 0.9f, PENDULUM = 0.6f, SNEAK_CROUCH = 5.2f;
+    public static final float WALK_BEND = 0.45f, PENDULUM = 0.4f, SNEAK_CROUCH = 5.2f;   // (0.1.8: a taller walk and run - knees soft, not folded)
 
     /** 0 at a walk, 1 at a run and faster. */
     public static float runShare(float speed) { return Math.max(0, Math.min(1, (speed - WALK_TOP) / (RUN_FROM - WALK_TOP))); }
@@ -26,7 +26,10 @@ public final class Gait {
         // Deep crouching needs short steps; full standing reach straightened the trailing leg along the floor.
         if (sneaking) return 4.5f;
         float leg = Body.THIGH + Body.SHIN - 0.15f;
-        float hip = Body.LEGS - 0.35f - WALK_BEND - PENDULUM;
+        // (0.1.9) the reach is judged at the bottom of the stride, where the hips dip a pixel and a half whatever the
+        // standing height: judged at the taller walk's standing hips, a planted leg could not span a walking step at
+        // the half-second cadence, and the walk lost its double support
+        float hip = Body.LEGS - 0.35f - Math.max(WALK_BEND + PENDULUM, 1.5f);
         return (float) Math.sqrt(Math.max(0, leg * leg - hip * hip)) * 0.95f;
     }
 
@@ -34,19 +37,21 @@ public final class Gait {
     public static float cadence(float speed, boolean sneaking) {
         if (speed < 0.05f) return 0;
         // Preferred walk step: 0.42 m plus a fifth of the speed, shortened below if leg reach requires it.
-        // Running cadence rises slowly (1.45 cycles/s at 4 m/s, 1.85 at 6.6) while flight lengthens the step.
+        // Running cadence (0.1.9) suits this figure's short legs: 1.9 cycles/s at 4 m/s, up to 2 (a half-second cycle,
+        // the quickest a loop may be) - at the old 1.45 a jog's step was over twice the leg, and every stride a lunge.
+        // Faster than that, a sprint covers its ground in the air, not by splitting the legs wider (see stance).
         float walk = Math.max(0.6f, speed / (2 * (0.42f + 0.2f * Math.min(speed, WALK_TOP))));
         // Walking retains double support without stretching a planted leg beyond its reach.
         walk = Math.max(walk, speed * 0.55f / (2 * halfReach(sneaking) * Body.PX));
-        float run = 1.45f + (speed - 4f) * 0.154f;
+        float run = 1.9f + (speed - 4f) * 0.2f;
         float k = runShare(speed);
-        return Math.min(2f, Math.max(0.6f, walk * (1 - k) + Math.max(1.25f, run) * k));
+        return Math.min(2f, Math.max(0.6f, walk * (1 - k) + Math.max(1.6f, run) * k));
     }
 
     /** Ground contact per cycle. At a run the contact shortens to fit the leg's reachable span; the rest is flight. */
     public static float stance(float speed, boolean sneaking) {
         float k = runShare(speed);
-        float run = 0.32f - 0.06f * Math.max(0, Math.min(1, (speed - 4f) / 2.6f));
+        float run = 0.32f - 0.12f * Math.max(0, Math.min(1, (speed - 4f) / 4f));
         float duty = 0.55f * (1 - k) + run * k;
         return speed < 0.05f ? duty : Math.min(duty, 2 * halfReach(sneaking) * Body.PX * cadence(speed, sneaking) / speed);
     }

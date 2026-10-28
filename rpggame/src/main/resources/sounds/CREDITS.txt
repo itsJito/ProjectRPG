@@ -77,7 +77,11 @@ elements/water1.ogg, water2.ogg, water3.ogg
     Credits: https://github.com/minetest/minetest_game/blob/master/mods/default/README.md#sounds
     License for the above: https://creativecommons.org/licenses/by/3.0/
 
-Ragdoll falls use recorded Kenney heavy soft impacts (Impact Sounds 1.0, CC0), credited above.
+Ragdoll falls (foley/bodyfall_01.wav .. 05.wav)
+    dklon, "body hitting ground" (a body's fall onto a floor, recorded with a Zoom H4N), CC BY 3.0.
+    Original: https://opengameart.org/content/body-hitting-ground (body_hits.wav)
+    Cut into its five separate hits, mono, peak-levelled. Kenney's heavy soft impacts (CC0, above) remain the fallback.
+    License: https://creativecommons.org/licenses/by/3.0/
 
 Recorded thunder: hantorio, Freesound sound 121945.
 Original: https://freesound.org/people/hantorio/sounds/121945/
@@ -85,3 +89,18 @@ Unmodified mirror: https://github.com/minetest-mods/lightning/blob/master/sounds
 License: CC-BY-SA, as credited by the upstream README (which does not specify a version).
 Upstream credit and license statement: https://github.com/minetest-mods/lightning/blob/master/README.md
 No lightning mod code or textures are included.
+
+Monster voices (creature/) - each monster kind's idle, alarm, hurt and death sounds
+creature/rd1_*.ogg
+    rubberduck, "80 CC0 creature SFX", CC0. https://opengameart.org/content/80-cc0-creature-sfx
+    Copied unchanged (rd1_ prefix added).
+creature/rd2_*.ogg
+    rubberduck, "80 CC0 creture SFX #2", CC0. https://opengameart.org/content/80-cc0-creture-sfx-2
+    Copied unchanged (rd2_ prefix added).
+creature/ghostmoan_01.mp3 .. 05.mp3
+    qubodup, "Ghost Monster Voice Moaning & Growling", CC0. https://opengameart.org/content/ghost-monster-voice-moaning-growling
+    Copied unchanged from the pack's mp3 folder (renamed).
+creature/jalastram_001.mp3 .. 010.mp3
+    Jesus Lastra (jalastram), "Monster and Creatures Sound Effects PACK 001", CC BY 3.0.
+    https://opengameart.org/content/monster-and-creatures-sound-effects-pack-001
+    Copied unchanged (renamed). License: https://creativecommons.org/licenses/by/3.0/

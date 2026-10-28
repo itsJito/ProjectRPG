@@ -31,6 +31,8 @@ public final class ItemDef {
     public float magicDamageBonusPct;
     /** Faith bonus (GDD 2.5: each point lengthens a prayer's drain interval by 3.33%); Faith restored when drunk; charges a stack is made with. */
     public int faithBonus, restoresFaith, maxCharges;
+    /** An elemental staff's element: that element's Sun spells cost very little with it in hand (null: none). */
+    public rpg.combat.Spells.Element staffElement;
     public DamageType damageType = DamageType.NONE;
     /** Food: HP restored. */
     public int heal;

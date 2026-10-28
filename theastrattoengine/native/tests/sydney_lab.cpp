@@ -77,7 +77,11 @@ struct Sim {
     Sim(float x, float y, float z, float yaw, bool active) {
         body.gravity = 22.0f;
         body.standAt(x, y, z, yaw);
-        if (active) { SydneyConfig c = SydneyConfig::human(); tune(c); sy = new SydneyCharacter(&body, c); }
+        if (active) {
+            SydneyConfig c = SydneyConfig::human(); tune(c); sy = new SydneyCharacter(&body, c);
+            // LAB_TRAITS="strength,agility,toughness,endurance": a weaker or stronger body (a new player is about 0.76)
+            if (const char* tr = std::getenv("LAB_TRAITS")) std::sscanf(tr, "%f,%f,%f,%f", &sy->traits.strength, &sy->traits.agility, &sy->traits.toughness, &sy->traits.endurance);
+        }
     }
     ~Sim() { delete sy; }
     void frame(float dt) {

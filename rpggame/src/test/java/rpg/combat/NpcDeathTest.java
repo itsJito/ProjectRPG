@@ -50,8 +50,10 @@ class NpcDeathTest {
                     g.gore.of(npc).bleed = 2;
                     for (int tick = 0; tick < 600 && npc.alive; tick++) assertTrue(game.tick(1f / 60));
                 } else {
-                    g.combat.resolve(g.player, npc, npc.maxHp() * 3, way == 1 ? 400 : 0,
-                            ItemDef.DamageType.BLUNT, null, npc.x, npc.y + 1, npc.z, "death regression", false);
+                    // (damage is rolled up to the blow's maximum: blows land until one is the killing one)
+                    for (int blow = 0; blow < 8 && npc.alive; blow++)
+                        g.combat.resolve(g.player, npc, npc.maxHp() * 3, way == 1 ? 400 : 0,
+                                ItemDef.DamageType.BLUNT, null, npc.x, npc.y + 1, npc.z, "death regression", false);
                 }
                 assertFalse(npc.alive, "kill path " + way + " must actually kill its target");
                 assertNotEquals(0, npc.ragdoll);

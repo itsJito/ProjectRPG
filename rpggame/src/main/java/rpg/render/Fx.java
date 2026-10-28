@@ -19,7 +19,7 @@ public final class Fx {
 
     private final List<P> ps = new ArrayList<>();
     public final List<Floating> floating = new ArrayList<>();
-    private final Random rnd = new Random(5);
+    final Random rnd = new Random(5);
     public float shake;
     public double now;
     private float[] data = new float[12 * 1024];
@@ -55,7 +55,7 @@ public final class Fx {
     }
     public float[] data() { return data; }
 
-    private P add(int kind, float x, float y, float z, float vx, float vy, float vz, float size, float r, float g, float b, float a, float life, float gravity, float drag) {
+    P add(int kind, float x, float y, float z, float vx, float vy, float vz, float size, float r, float g, float b, float a, float life, float gravity, float drag) {
         P p = new P();
         p.kind = kind; p.x = x; p.y = y; p.z = z; p.vx = vx; p.vy = vy; p.vz = vz; p.size = size; p.r = r; p.g = g; p.b = b; p.a = a;
         p.life = life; p.gravity = gravity; p.drag = drag; p.seed = rnd.nextFloat();
@@ -63,7 +63,7 @@ public final class Fx {
         return p;
     }
 
-    private float s() { return rnd.nextFloat() * 2 - 1; }
+    float s() { return rnd.nextFloat() * 2 - 1; }
 
     // ------------------------------------------------------------------ the level-up's Holy Light (gamefixes)
     /** How long the whole Holy Light lasts (s): the beam's rise, its burst at the top, the sparkles' fall. */
@@ -127,15 +127,15 @@ public final class Fx {
         float out = 1.2f + energy * 0.28f, up = 1.6f + energy * 0.55f;
         for (int i = 0; i < crown; i++) {
             float a = rnd.nextFloat() * 6.283f, r = radius * (0.6f + rnd.nextFloat() * 0.5f), sp = out * (0.6f + rnd.nextFloat() * 0.6f);
-            add(2, x + (float) Math.cos(a) * r, surface + 0.02f, z + (float) Math.sin(a) * r, (float) Math.cos(a) * sp, up * (0.55f + rnd.nextFloat() * 0.6f), (float) Math.sin(a) * sp,
-                    0.03f + rnd.nextFloat() * 0.035f, 0.85f, 0.95f, 1.1f, 0.9f, 0.6f + rnd.nextFloat() * 0.5f, 9.8f, 0.35f);
+            add(8, x + (float) Math.cos(a) * r, surface + 0.02f, z + (float) Math.sin(a) * r, (float) Math.cos(a) * sp, up * (0.55f + rnd.nextFloat() * 0.6f), (float) Math.sin(a) * sp,
+                    0.03f + rnd.nextFloat() * 0.035f, 0.66f, 0.8f, 0.92f, 0.9f, 0.6f + rnd.nextFloat() * 0.5f, 9.8f, 0.35f);
         }
         if (energy > 4.5f) {
             // the jet: water closing over the hole and thrown straight back up
             int jet = (int) (energy * 6);
             for (int i = 0; i < jet; i++)
-                add(2, x + s() * 0.12f, surface + 0.05f, z + s() * 0.12f, s() * 0.35f, energy * (0.55f + rnd.nextFloat() * 0.35f), s() * 0.35f,
-                        0.045f + rnd.nextFloat() * 0.03f, 0.9f, 1.0f, 1.15f, 0.9f, 0.8f + rnd.nextFloat() * 0.4f, 9.8f, 0.2f);
+                add(8, x + s() * 0.12f, surface + 0.05f, z + s() * 0.12f, s() * 0.35f, energy * (0.55f + rnd.nextFloat() * 0.35f), s() * 0.35f,
+                        0.045f + rnd.nextFloat() * 0.03f, 0.7f, 0.82f, 0.94f, 0.9f, 0.8f + rnd.nextFloat() * 0.4f, 9.8f, 0.2f);
         }
         // the foam: white, low, spreading and thinning on the surface
         int foam = (int) (18 + energy * 6);

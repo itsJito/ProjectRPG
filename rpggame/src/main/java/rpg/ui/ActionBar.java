@@ -2,8 +2,6 @@ package rpg.ui;
 
 import rpg.Rpg;
 import rpg.combat.Spells;
-import rpg.interact.Option;
-import rpg.item.Inventory;
 import rpg.item.ItemDef;
 import rpg.item.Items;
 
@@ -28,7 +26,7 @@ final class ActionBar extends Fragment {
         super("actionbar");
         this.hud = h;
         binds[0] = Bind.of(Spells.Prayer.WARD); binds[1] = Bind.of(Spells.Prayer.BURST_OF_STRENGTH); binds[2] = Bind.of(Spells.Prayer.MEND);
-        binds[3] = Bind.of(Spells.Spell.SPARK);
+        binds[3] = Bind.of(Spells.Spell.WIND_STRIKE);
         wake("combat", "scene").linger(5);
         h.add(this);
     }
@@ -56,17 +54,7 @@ final class ActionBar extends Fragment {
             g.controller.in.cast = true;
             return;
         }
-        for (Inventory grid : g.player.grids()) {
-            int slot = grid.first(b.item());
-            if (slot < 0) continue;
-            for (Option op : g.items.options(g.player, grid, slot)) {
-                if (op.id().equals("drop") || op.id().equals("examine")) continue;
-                if (op.enabled()) g.items.perform(g.player, grid, slot, op.id()); else g.chat.warn(op.reason());
-                return;
-            }
-            return;
-        }
-        g.chat.warn("You have no " + b.item().name.toLowerCase() + ".");
+        hud.useItem(b.item());
     }
 
     @Override public void draw(Ui2D ui, float x, float y) {

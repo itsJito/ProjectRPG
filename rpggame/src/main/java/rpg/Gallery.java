@@ -65,6 +65,14 @@ final class Gallery {
         if ("pause".equals(System.getenv("RPG_GALLERY_ONLY"))) { pauseShot(); return 0; }
         // RPG_GALLERY_ONLY=gamefixes-ui / gamefixes-blocks: the menus and windows of this pass, and the new blocks where they stand
         if ("gamefixes-ui".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesUi(); return 0; }
+        // RPG_GALLERY_ONLY=radial: the radial wheel open in play (a slot picked), released, and docked by the inventory to edit
+        if ("radial".equals(System.getenv("RPG_GALLERY_ONLY"))) { radialShots(); return 0; }
+        // RPG_GALLERY_ONLY=cooking: the cooking window at a fire with raw food carried, then three shrimp cooked, on threes
+        if ("cooking".equals(System.getenv("RPG_GALLERY_ONLY"))) { cookingShots(); return 0; }
+        // RPG_GALLERY_ONLY=beds: every bed in the map from above its foot, with the room round it (gamefixes: backwards beds)
+        if ("beds".equals(System.getenv("RPG_GALLERY_ONLY"))) { bedShots(); return 0; }
+        // RPG_GALLERY_ONLY=spells: spells cast across open ground, each in flight (twice) and as it lands, from the side
+        if ("spells".equals(System.getenv("RPG_GALLERY_ONLY"))) { spellShots(); return 0; }
         if ("gamefixes-blocks".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesBlocks(); return 0; }
         if ("gamefixes-aim".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesAim(); return 0; }
         if ("gamefixes-foliage".equals(System.getenv("RPG_GALLERY_ONLY"))) { gamefixesFoliage(); return 0; }
@@ -84,6 +92,7 @@ final class Gallery {
         // RPG_GALLERY_ONLY=levelup: the Holy Light filmed on threes, out of a fight (with the cheer) and on a combat level
         if ("levelup".equals(System.getenv("RPG_GALLERY_ONLY"))) { levelUpShots(); return 0; }
         // RPG_GALLERY_ONLY=splash: the player dropped into the pond from a height, filmed on threes
+        if ("water".equals(System.getenv("RPG_GALLERY_ONLY"))) { g.state.minutes = 12 * 60; place(96.5f, 66.5f, 0); frames(30); waterShots(); return 0; }
         if ("splash".equals(System.getenv("RPG_GALLERY_ONLY"))) {
             g.state.minutes = 12 * 60;
             place(96.5f, 66.5f, 0); frames(60);
@@ -97,6 +106,7 @@ final class Gallery {
                 if (i % 3 == 0) { tiles.add(captureFrame()); labels.add(String.format("f%d  y %.2f", i + 1, g.player.y)); }
             }
             sheet("splash-jump", tiles, labels, 6);
+            waterShots();
             return 0;
         }
         // RPG_GALLERY_ONLY=dungeons: each dungeon's entrance in the wilds, its rooms inside, and the cliff they lie under
@@ -146,7 +156,13 @@ final class Gallery {
         boolean motionOnly = "motion".equals(System.getenv("RPG_GALLERY_ONLY"));
         // RPG_GALLERY_ONLY=daycycle: one view of the street across a whole day, each still after the eye has adapted
         if ("daycycle".equals(System.getenv("RPG_GALLERY_ONLY"))) { dayCycle(); return 0; }
+        // RPG_GALLERY_ONLY=interiorlight: a still view inside a house by night, dusk and day, measured for flicker
+        if ("interiorlight".equals(System.getenv("RPG_GALLERY_ONLY"))) { interiorLight(); return 0; }
         if ("creator".equals(System.getenv("RPG_GALLERY_ONLY"))) { creatorShots(); return 0; }
+        // RPG_GALLERY_ONLY=titledelete: the title screen with three profiles (in a scratch folder), one deleted, frame times kept
+        if ("titledelete".equals(System.getenv("RPG_GALLERY_ONLY"))) { titleDelete(); return 0; }
+        // RPG_GALLERY_ONLY=burn: the player set alight and filmed from the front each second (scorches and ash), then put out
+        if ("burn".equals(System.getenv("RPG_GALLERY_ONLY"))) { burnShots(); return 0; }
         // RPG_GALLERY_ONLY=death: the player cut down in town, the death watched through, then the grave on the map
         if ("death".equals(System.getenv("RPG_GALLERY_ONLY"))) { deathShots(); return 0; }
         if ("npc-deaths".equals(System.getenv("RPG_GALLERY_ONLY"))) { npcDeathShots(); return 0; }
@@ -208,10 +224,10 @@ final class Gallery {
         film(tag + "-turn", 45, i -> { g.controller.in.forward = 1; if (i == 12) g.controller.camYaw += (float) Math.PI / 2; }, a -> new float[]{60.5f, a.y + 4.5f, 70.5f + 1.5f, 60.5f, a.y, 67.5f}, 6);
         g.controller.in.forward = 0;
         frames(40);
-        // the quick turn: back tapped twice
+        // the quick turn: Ctrl+S
         place(64.5f, 66.5f, (float) Math.PI);
         frames(20);
-        film(tag + "-quickturn", 30, i -> { g.controller.in.backTap = i == 1 || i == 5; }, a -> new float[]{a.x + 3.2f, a.y + 1.4f, a.z + 1.5f, a.x, a.y + 0.9f, a.z}, 0);
+        film(tag + "-quickturn", 30, i -> { g.controller.in.turnBack = i == 1; }, a -> new float[]{a.x + 3.2f, a.y + 1.4f, a.z + 1.5f, a.x, a.y + 0.9f, a.z}, 0);
         frames(30);
         // blows: a light swing and a heavy one
         place(64.5f, 66.5f, (float) Math.PI);
@@ -261,12 +277,23 @@ final class Gallery {
                 g.controller.in.sprint = gait.equals("sprint");
             }, a -> side(a, -4.6f), 60);
         }
-        // turning round on the spot: the double-tapped back key's quick turn, and a slower pivot of the view
+        // a sprint stopped short (gamefixes: the feet kicked outward): seen from the side and from behind
+        for (String view : new String[]{"side", "behind"}) {
+            g.controller.in.forward = 0; g.controller.in.sprint = false; g.controller.jogging = false;
+            place(54.5f, 64.5f, (float) -Math.PI / 2);
+            frames(30);
+            g.player.stamina = g.player.maxStamina();
+            film(tag + "-locomotion-sprintstop-" + view, 60, i -> {
+                g.controller.in.forward = i < 6 ? 1 : 0;
+                g.controller.in.sprint = i < 6;
+            }, a -> view.equals("side") ? side(a, -4.6f) : new float[]{a.x - 3.6f, a.y + 1.6f, a.z + 0.4f, a.x, a.y + 0.8f, a.z}, 60);
+        }
+        // turning round on the spot: the Ctrl+S quick turn, and a slower pivot of the view
         g.controller.in.forward = 0; g.controller.in.sprint = false; g.controller.jogging = false;
         place(54.5f, 64.5f, 0);
         frames(40);
         float[] fixed = {g.player.x + 3.3f, g.player.y + 1.5f, g.player.z + 2.6f, g.player.x, g.player.y + 0.85f, g.player.z};
-        film(tag + "-locomotion-turnaround", 54, i -> { g.controller.in.backTap = i == 0 || i == 5; }, a -> fixed, 0);
+        film(tag + "-locomotion-turnaround", 54, i -> { g.controller.in.turnBack = i == 0; }, a -> fixed, 0);
         place(54.5f, 64.5f, 0);
         frames(40);
         film(tag + "-locomotion-pivot", 72, i -> { if (i >= 0 && i < 45) g.controller.snapTo(i * (float) Math.PI / 45); }, a -> fixed, 0);
@@ -329,7 +356,7 @@ final class Gallery {
                 game.tick(dt);
                 gfx.probeFresh = false;
                 draw(null, dt);
-                g.controller.in.backTap = false;
+                g.controller.in.turnBack = false;
                 t += dt;
                 if (gfx.probeFresh && i >= 30) { samples.add(java.util.Arrays.copyOf(gfx.probe, 18)); times.add(t); }
                 if (System.getenv("RPG_TWITCH_DUMP") != null && name.equals(System.getenv("RPG_TWITCH_DUMP")) && i >= 30 && i < 70)
@@ -425,6 +452,109 @@ final class Gallery {
     }
 
     /** Every menu and window of the gamefixes pass, in the real HUD over the real world. */
+    private void spellShots() {
+        g.state.minutes = 19.5 * 60;   // dusk: what glows shows
+        place(64.5f, 62.5f, (float) (Math.PI / 2));
+        for (rpg.ai.Npc n : g.npcs) g.ai.unload(n);
+        for (var sk : rpg.skill.Skill.values()) g.player.skills.setLevel(sk, 99);
+        g.player.restore();
+        float f = DevMap.FLOOR;
+        for (int x = 50; x <= 66; x++) for (int z = 59; z <= 66; z++) for (int y = (int) f; y < f + 5; y++) g.setBlock(x, y, z, rpg.world.Blocks.AIR);
+        for (int y = (int) f; y < f + 4; y++) for (int z = 59; z <= 66; z++) g.setBlock(51, y, z, rpg.world.Blocks.STONE);   // a wall to land on
+        frames(20);
+        rpg.combat.Spells.Spell[] list = {
+                rpg.combat.Spells.Spell.FIRE_STRIKE, rpg.combat.Spells.Spell.FIRE_BOLT, rpg.combat.Spells.Spell.FIRE_BLAST, rpg.combat.Spells.Spell.FIRE_WAVE, rpg.combat.Spells.Spell.FIRE_SURGE,
+                rpg.combat.Spells.Spell.ELECTRIC_STRIKE, rpg.combat.Spells.Spell.ELECTRIC_BOLT, rpg.combat.Spells.Spell.ELECTRIC_BLAST, rpg.combat.Spells.Spell.ELECTRIC_WAVE, rpg.combat.Spells.Spell.ELECTRIC_SURGE,
+                rpg.combat.Spells.Spell.WATER_STRIKE, rpg.combat.Spells.Spell.WATER_BOLT, rpg.combat.Spells.Spell.WATER_BLAST, rpg.combat.Spells.Spell.WATER_WAVE, rpg.combat.Spells.Spell.WATER_SURGE,
+                rpg.combat.Spells.Spell.WIND_BLAST, rpg.combat.Spells.Spell.EARTH_BLAST, rpg.combat.Spells.Spell.ICE_BLITZ};
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        float[] cam = {58.5f, f + 1.9f, 67.5f, 57.5f, f + 1.5f, 62.5f}, hit = {54.5f, f + 1.7f, 65.0f, 51.5f, f + 1.3f, 62.5f};
+        for (var sp : list) {
+            g.teleport(g.player, 64.5f, f, 62.5f); g.controller.snapTo((float) (Math.PI / 2));
+            g.player.mana = g.player.maxMana(); g.player.cs.castCooldown = 0; frames(40);
+            g.player.book = sp.book; g.player.spell = sp;
+            if (!g.combat.cast(g.player, sp, (float) (Math.PI / 2), 0)) { System.out.println("[spells] could not cast " + sp); continue; }
+            int shotAt = 0;
+            for (int i = 0; i < 90; i++) {
+                game.tick(1f / 60);
+                boolean flying = g.combat.projectiles.stream().anyMatch(pp -> pp.spell == sp);
+                draw(flying ? cam : hit, 1f / 60);
+                if (flying && (i == 6 || i == 14)) { tiles.add(captureFrame()); labels.add(sp.title + " f" + i); }
+                if (!flying && shotAt == 0) shotAt = i;
+                if (shotAt > 0 && (i == shotAt + 2 || i == shotAt + 9)) { tiles.add(captureFrame()); labels.add(sp.title + " lands +" + (i - shotAt)); }
+            }
+            while (tiles.size() % 4 != 0) { tiles.add(new BufferedImage(TILE, TILE, BufferedImage.TYPE_INT_RGB)); labels.add(""); }
+        }
+        sheet("spells", tiles, labels, 4);
+    }
+
+    private void bedShots() {
+        g.state.minutes = 12 * 60;
+        place(64.5f, 70.5f, 0);
+        frames(10);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (rpg.objects.Furniture fu : g.objects.furniture) {
+            if (fu.kind != rpg.objects.Furniture.Kind.BED) continue;
+            float cx = (fu.x0 + fu.x1 + 1) / 2f, cz = (fu.z0 + fu.z1 + 1) / 2f, f = DevMap.FLOOR;
+            // from the foot, looking toward the head (+z turned by the bed's facing)
+            float hx = (float) Math.sin(fu.yaw()), hz = (float) Math.cos(fu.yaw());
+            float[] cam = {cx - hx * 2.2f + 0.3f, f + 2.7f, cz - hz * 2.2f, cx + hx * 0.2f, f + 0.3f, cz + hz * 0.2f};
+            for (int i = 0; i < 20; i++) draw(cam, 1 / 60f);
+            tiles.add(capture(cam));
+            labels.add(String.format("%s (%d,%d)-(%d,%d) f%d", fu.name, fu.x0, fu.z0, fu.x1, fu.z1, fu.facing));
+        }
+        sheet("beds", tiles, labels, 4);
+    }
+
+    private void cookingShots() {
+        g.state.minutes = 17 * 60;
+        place(64.5f, 70.5f, 0);
+        frames(20);
+        float f = DevMap.FLOOR, fx = g.player.x, fz = g.player.z - 1.3f;
+        var fire = new rpg.objects.Fire(g.state.newEntityId(), fx, g.vox.groundY(fx, f + 0.5f, fz), fz, g.state.minutes + 100000, g.player.id);
+        g.objects.add(fire);
+        g.give(g.player, rpg.item.Items.RAW_SHRIMP, 5); g.give(g.player, rpg.item.Items.RAW_MEAT, 2);
+        frames(20);
+        hud.openStation(fire);
+        reviewUi("cooking-window");
+        hud.closeAll();
+        int before = g.player.count(rpg.item.Items.SHRIMP) + g.player.count(rpg.item.Items.get("burnt_fish"));
+        g.interact.request(g.player, fire, "cook:cook_shrimp:3");
+        film("cooking-side", 66, i -> { }, a -> new float[]{a.x + 2.6f, a.y + 1.5f, a.z - 0.4f, a.x, a.y + 0.9f, a.z - 0.6f}, 0);
+        for (int i = 0; i < 60 * 8 && g.player.working != null; i++) step();
+        int after = g.player.count(rpg.item.Items.SHRIMP) + g.player.count(rpg.item.Items.get("burnt_fish"));
+        System.out.println("[cooking] cooked " + (after - before) + " of 3; raw left " + g.player.count(rpg.item.Items.RAW_SHRIMP) + " (5 before)");
+    }
+
+    private void radialShots() {
+        g.state.minutes = 13 * 60;
+        place(55.5f, 12.5f, (float) Math.PI);
+        frames(30);
+        var p = g.player;
+        p.quick[0] = new rpg.actor.Player.QuickSlot(rpg.item.Items.BREAD, 0);
+        p.quick[2] = new rpg.actor.Player.QuickSlot(rpg.item.Items.SHRIMP, 0);
+        p.quick[5] = new rpg.actor.Player.QuickSlot(rpg.item.Items.TINDERBOX, 0);
+        p.quick[7] = new rpg.actor.Player.QuickSlot(rpg.item.Items.SHORTBOW, 0);
+        p.hp = p.maxHp() * 0.6f;
+        hud.radial.openInPlay();
+        hud.radial.pointer(0, -120);
+        reviewUi("radial-play-top");
+        hud.radial.pointer(130, 120);
+        reviewUi("radial-play-right");
+        int bread = p.count(rpg.item.Items.BREAD);
+        hud.radial.pointer(-130, -240);
+        hud.radial.release();
+        frames(10);
+        System.out.println("[radial] released on the top slot: bread " + bread + " -> " + p.count(rpg.item.Items.BREAD) + ", slot 1 now " + p.quick[0]);
+        hud.go(Hud.Scene.INVENTORY);
+        hud.radial.editing = true;
+        reviewUi("radial-edit");
+        hud.radial.editing = false;
+        hud.closeAll();
+    }
+
     private void gamefixesUi() {
         g.state.minutes = 13 * 60;
         place(55.5f, 12.5f, (float) Math.PI);
@@ -522,7 +652,7 @@ final class Gallery {
     private void releasePolishShots() {
         var preview = new Gfx.Preview();
         preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
-        var title = new rpg.ui.TitleScreen("0.1.2");
+        var title = new rpg.ui.TitleScreen(Main.VERSION);
         for (int i = 0; i < 30; i++) { gfx.title(preview, Main.defaultLook(), win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1f / 60, false, false); ui.end(); gfx.frame(win.width, win.height); }
         Main.shot(gfx, win.width, win.height, new File(shots, "title.png"));
         var creator = new rpg.ui.Creator();
@@ -627,6 +757,57 @@ final class Gallery {
         Main.shot(gfx,win.width,win.height,new File(shots,"settings-clicked-vsync-off.png"));settings.escape();
     }
 
+    private void titleDelete() {
+        java.nio.file.Path was = Profiles.root;
+        try {
+            Profiles.root = java.nio.file.Files.createTempDirectory("rpg-profiles");
+            int count = Integer.parseInt(System.getenv().getOrDefault("RPG_PROFILES", "3"));
+            for (int i = 0; i < count; i++) { Appearance l = Appearance.random(i * 77L); var p = Profiles.create("Hero" + i, l); new SaveSystem(g).save(p.save()); }
+            { long s0 = System.nanoTime(); new rpg.audio.Sfx(game); System.out.printf("[titledelete] a sound bank built (its recordings decoded at launch) in %.1f ms%n", (System.nanoTime() - s0) / 1e6); }
+            var title = new rpg.ui.TitleScreen(Main.VERSION);
+            title.sound = n -> { long s0 = System.nanoTime(); rpg.audio.Sfx.shared(game).ui(n, 0.5f); System.out.printf("[titledelete] sound %s %.1f ms%n", n, (System.nanoTime() - s0) / 1e6); };
+            var stage = new Gfx.Preview(); stage.world = rpg.world.TitleStage.build(game.engine()); stage.dungeon = true; stage.x = 8.5f; stage.y = DevMap.FLOOR; stage.z = 8.5f;
+            double worst = 0, sum = 0; int n = 0;
+            for (int f = 0; f < 420; f++) {
+                long t0 = System.nanoTime();
+                game.tick(1 / 60f);
+                ui.click = false; ui.mx = 900; ui.my = 900;
+                if (f == 120) { ui.mx = 300; ui.my = 214 + 82 * count + 66 + 18; ui.click = true; }       // Delete profile
+                if (f == 160) { ui.mx = 150; ui.my = 320; ui.click = true; }       // Delete for good
+                gfx.title(stage, title.selected == null ? null : title.selected.look, win.width, win.height, 1 / 60f, g.time);
+                ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1 / 60f, false, false); ui.end();
+                gfx.frame(win.width, win.height);
+                double ms = (System.nanoTime() - t0) / 1e6;
+                if (f > 30) { worst = Math.max(worst, ms); sum += ms; n++; }
+                if (f >= 155 && f < 200 || ms > 50) System.out.printf("[titledelete] frame %d %.1f ms profiles %d selected %s%n", f, ms, title.profiles().size(), title.selected == null ? "-" : title.selected.name);
+                if (f == 150 || f == 300) Main.shot(gfx, win.width, win.height, new File(shots, "titledelete-" + f + ".png"));
+            }
+            System.out.printf("[titledelete] mean %.1f ms, worst %.1f ms, %d profiles left%n", sum / n, worst, title.profiles().size());
+        } catch (java.io.IOException e) { throw new java.io.UncheckedIOException(e); }
+        finally { Profiles.root = was; }
+    }
+
+    private void burnShots() {
+        g.state.minutes = 13 * 60;
+        if (g.player instanceof rpg.actor.Player pl) pl.firstPerson = false;
+        place(40.5f, 34.5f, (float) Math.PI);
+        frames(12);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        tiles.add(capture(front(g.player, 2.2f))); labels.add("before");
+        for (int sec = 0; sec < 10; sec++) {
+            for (int i = 0; i < 60; i++) {
+                if (sec < 8 && i % 20 == 0) g.chemistry.emit(null, astratto.bridge.AstrattoNative.CHEM_FIRE, g.player.x, g.player.y + 0.3f, g.player.z, 0.6f, 3, 0.4f);
+                g.player.hp = g.player.maxHp();
+                step();
+            }
+            if (sec % 2 == 1 || sec == 9) { tiles.add(capture(front(g.player, 2.2f))); labels.add("burning " + (sec + 1) + " s, " + g.player.blood.marks.size() + " marks"); }
+        }
+        float yaw = g.player.yaw; g.player.yaw += (float) Math.PI;
+        tiles.add(capture(front(g.player, 2.2f))); labels.add("its back"); g.player.yaw = yaw;
+        sheet("burn", tiles, labels, 4);
+    }
+
     private void ultimateSurfaces() {
         place(40.5f,34.5f,(float)Math.PI);g.player.eq.clear();frames(12);
         List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
@@ -666,7 +847,7 @@ final class Gallery {
         for(var n:g.npcs)g.ai.unload(n);
         place(64.5f,70.5f,0);
         g.player.skills.setLevel(rpg.skill.Skill.HEALTH,100);g.player.skills.setLevel(rpg.skill.Skill.MAGIC,100);g.player.restore();
-        g.player.eq.clear();g.player.book=rpg.combat.Spells.Book.STANDARD;
+        g.player.eq.clear();g.player.book=rpg.combat.Spells.Book.SUN;
         var npc=(rpg.ai.Npc)g.actor(Ids.GUARD);g.ai.reload(npc);g.teleport(npc,66.5f,DevMap.FLOOR,70.5f);
         npc.goal=rpg.ai.Brain.Goal.IDLE;npc.nextThink=Double.MAX_VALUE;npc.skills.setLevel(rpg.skill.Skill.HEALTH,100);npc.restore();
         float[] camera={68.5f,DevMap.FLOOR+2.2f,66.5f,65.2f,DevMap.FLOOR+1,70.5f};
@@ -1549,6 +1730,76 @@ final class Gallery {
         sheet("daycycle", tiles, labels, 4);
     }
 
+    /**
+     * Gamefixes: water did not really ripple for what was in it. From above the pond: the player wading across it, then
+     * standing still in it, then a stone thrown in; each filmed on threes.
+     */
+    private void waterShots() {
+        float f = DevMap.FLOOR, px = (DevMap.POND_X0 + DevMap.POND_X1) / 2f + 0.5f, pz = (DevMap.POND_Z0 + DevMap.POND_Z1) / 2f + 0.5f;
+        float[] cam = {px + 2.5f, f + 3.0f, pz + 3.0f, px, f - 0.6f, pz};
+        g.teleport(g.player, DevMap.POND_X0 + 0.5f, f - 1, pz); frames(30);
+        java.util.function.Function<Actor, float[]> follow = a -> new float[]{a.x + 2.2f, f + 2.6f, a.z + 2.6f, a.x, f - 0.6f, a.z};
+        film("water-wade", 72, i -> { g.controller.in.forward = 1; g.controller.snapTo((float) (-Math.PI / 2)); }, follow, 20);
+        g.controller.in.forward = 0;
+        film("water-still", 48, i -> { }, follow, 30);
+        g.teleport(g.player, px + 6, f, pz + 6); frames(40);
+        var stone = new rpg.item.ItemStack(rpg.item.Items.get("stone_pickaxe"), 1);
+        film("water-throw", 60, i -> { if (i == 0) g.objects.drop(stone, px, f + 2.5f, pz); }, a -> cam, 0);
+        // lightning into the pond (gamefixes: the water should flicker as the charge runs through it), at dusk so the light reads
+        g.state.minutes = 19 * 60 + 30;
+        float[] wide = {px + 6f, f + 3.5f, pz + 7f, px, f - 0.4f, pz};
+        film("water-electric", 60, i -> { if (i == 0 || i == 30) g.chemistry.emit(null, astratto.bridge.AstrattoNative.CHEM_ELECTRIC, px, f - 0.4f, pz, 1.8f, 3, 0.6f); }, a -> wide, 0);
+    }
+
+    /**
+     * Gamefixes: interior lights flicker. A still camera in a house (by its lamp at night, at dusk, at noon), the eye
+     * settled; then a second of frames, each pixel's brightness followed through it. Printed: how much the whole frame
+     * pulses (the spread of its mean brightness) and how much the worst one percent of pixels jump frame to frame; saved:
+     * the frames and a map of where it flickers (brighter: more).
+     */
+    private void interiorLight() {
+        float f = DevMap.FLOOR;
+        Object[][] views = {{22f, "night"}, {19.25f, "dusk"}, {12f, "noon"}};
+        float[][] cams = {{87.5f, f + 1.6f, 93.2f, 92.5f, f + 1.1f, 87.5f}, {93.0f, f + 1.7f, 92.8f, 87.0f, f + 0.9f, 88.0f}};
+        place(64.5f, 70.5f, 0);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (Object[] v : views) for (int c = 0; c < cams.length; c++) {
+            float h = (Float) v[0];
+            double now = g.state.hourOfDay();
+            g.advanceTime(((h - now) % 24 + 24) % 24 * 60, "interior light view");
+            float[] cam = cams[c];
+            for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            int n = 60;
+            float[][] lum = new float[n][];
+            BufferedImage first = null;
+            for (int k = 0; k < n; k++) {
+                game.tick(1 / 60f); draw(cam, 1 / 60f);
+                BufferedImage img = captureFrame();
+                if (first == null) first = img;
+                float[] l = new float[TILE * TILE];
+                for (int y = 0; y < TILE; y++) for (int x = 0; x < TILE; x++) { int p = img.getRGB(x, y); l[y * TILE + x] = 0.2126f * (p >> 16 & 255) + 0.7152f * (p >> 8 & 255) + 0.0722f * (p & 255); }
+                lum[k] = l;
+            }
+            float lo = Float.MAX_VALUE, hi = 0, sum = 0;
+            float[] jump = new float[TILE * TILE];
+            for (int k = 0; k < n; k++) {
+                float m = 0; for (float x : lum[k]) m += x; m /= lum[k].length;
+                lo = Math.min(lo, m); hi = Math.max(hi, m); sum += m;
+                if (k > 0) for (int i = 0; i < jump.length; i++) jump[i] = Math.max(jump[i], Math.abs(lum[k][i] - lum[k - 1][i]));
+            }
+            float[] sorted = jump.clone(); java.util.Arrays.sort(sorted);
+            float p99 = sorted[(int) (sorted.length * 0.99f)], p999 = sorted[(int) (sorted.length * 0.999f)], mean = sum / n;
+            System.out.printf("[interior] %-5s view %d: mean %.1f, frame mean %.1f..%.1f (pulse %.1f%%), frame-to-frame jump p99 %.1f, p99.9 %.1f of 255%n",
+                    v[1], c, mean, lo, hi, (hi - lo) / Math.max(1, mean) * 100, p99, p999);
+            BufferedImage map = new BufferedImage(TILE, TILE, BufferedImage.TYPE_INT_RGB);
+            for (int i = 0; i < jump.length; i++) { int q = Math.min(255, (int) (jump[i] * 8)); map.setRGB(i % TILE, i / TILE, q << 16 | q << 8 | q); }
+            tiles.add(first); labels.add(v[1] + " view " + c);
+            tiles.add(map); labels.add(String.format("flicker x8  p99 %.1f", p99));
+        }
+        sheet("interiorlight", tiles, labels, 4);
+    }
+
     /** The renderer's review views: the tree grove close and far, against the light and with it; the pond; the street. */
     private void scenery() {
         float f = DevMap.FLOOR;
@@ -1632,7 +1883,7 @@ final class Gallery {
         game.tick(1 / 60f);
         draw(null, 1 / 60f);
         g.controller.in.forward = fwd; g.controller.in.strafe = str; g.controller.in.mainDown = main; g.controller.in.sprint = spr;
-        g.controller.in.backTap = false;
+        g.controller.in.turnBack = false;
     }
 
     /** The middle of the screen, as the camera sees the actor (the frame is drawn twice on a still camera). */
@@ -1738,16 +1989,19 @@ final class Gallery {
         for (var kind : rpg.monster.MonsterKind.values()) {
             if (pick != null && !pick.contains(kind.name())) continue;
             float size = Math.max(kind.mh, Math.max(kind.mw, kind.md)), d = Math.max(2.2f, size * 2.2f);
-            for (int mode = 0; mode < 3; mode++) {
+            for (int mode = 0; mode < (kind.flies() ? 4 : 3); mode++) {
                 var mo = sys.display(kind, (kind.minLevel + kind.maxLevel) / 2, 50.5f, 70.5f, (float) -Math.PI / 2);
-                mo.wantAltitude = 0;
+                // mode 3: a flyer aloft, flying past (taken from below and to the side, so the wings read)
+                boolean aloft = mode == 3;
+                mo.wantAltitude = aloft ? (kind == rpg.monster.MonsterKind.DRAGON ? 7 : 2.5f) : 0;
                 frames(4);
-                boolean run = mode == 1;
+                boolean run = mode == 1 || aloft;
+                if (aloft) for (int i = 0; i < 150; i++) { sys.puppetTo(mo, 95, 70.5f, true); step(); }
                 if (mode < 2) for (int i = 0; i < 30; i++) { sys.puppetTo(mo, 95, 70.5f, run); step(); }
                 List<BufferedImage> ft = new ArrayList<>();
                 List<String> fl = new ArrayList<>();
                 for (int i = 0; i < 36; i++) {
-                    if (mode < 2) sys.puppetTo(mo, 95, 70.5f, run);
+                    if (mode < 2 || aloft) sys.puppetTo(mo, 95, 70.5f, run);
                     else if (i == 0) {
                         // the attack: a person's swing through the combat system for the humanoids, a creature's wind-up and strike for the beasts
                         if (kind.form == rpg.monster.MonsterKind.Form.HUMANOID) g.combat.attack(mo, false, kind == rpg.monster.MonsterKind.TROLL ? Actor.Combat.Move.HEAVY : rpg.combat.CombatSystem.lightMove(mo, false));
@@ -1759,7 +2013,7 @@ final class Gallery {
                         fl.add(String.format("f%d  %.2fm/s", i + 1, Math.hypot(mo.vx, mo.vz)));
                     }
                 }
-                sheet("monster-" + kind.name().toLowerCase() + "-" + (mode == 0 ? "walk" : mode == 1 ? "run" : "attack"), ft, fl, 6);
+                sheet("monster-" + kind.name().toLowerCase() + "-" + (mode == 0 ? "walk" : mode == 1 ? "run" : mode == 2 ? "attack" : "fly"), ft, fl, 6);
                 sys.remove(mo);
             }
         }
@@ -1813,7 +2067,7 @@ final class Gallery {
     private void summonStress() {
         place(60.5f, 70.5f, 0);
         g.player.skills.setLevel(rpg.skill.Skill.MAGIC, 99);
-        if (g.player instanceof rpg.actor.Player p) p.book = rpg.combat.Spells.Book.ANCIENTS;
+        if (g.player instanceof rpg.actor.Player p) p.book = rpg.combat.Spells.Book.FOGISH;
         int made = 0;
         for (int round = 0; round < 60; round++) {
             for (int i = 0; i < 4; i++) {

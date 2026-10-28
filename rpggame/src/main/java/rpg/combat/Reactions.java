@@ -153,7 +153,13 @@ public final class Reactions {
                     if (g.fx != null) g.fx.text("Disarmed!", n.x, n.y + 2.1f, n.z, 0xFFFFC040);
                 }
             }
-            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND;
+            // back: Sydney says so - or, having gone down, they have stood steadily on both feet again for a moment (the
+            // strict verdict waits for a body standing quite still, which a winded one swaying on its feet may not give
+            // for seconds: held that long, the player was left lying in wait for it)
+            float headUp = rd.p[RD_HEAD * 3 + 1] - footY(rd);
+            boolean steady = rd.state == SYDNEY_STAND && headUp > n.height * 0.8f && rd.balance < 0.03f;
+            n.uprightFor = n.wentDown && steady ? n.uprightFor + (float) g.lastDt : 0;
+            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND || n.uprightFor > 0.3f;
             boolean tooLong = g.time - n.reactSince > 14;
             boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
             boolean shocked = g.time < n.shockUntil;
@@ -186,7 +192,10 @@ public final class Reactions {
                 n.reacting = false;
                 n.cs.staggered = 0.15f;
                 if (n.wentDown) fallen++;
-                n.wentDown = false;
+                n.wentDown = false; n.uprightFor = 0;
+                // the fall is over: what it measured (from the top of a long drop) must not read as another one starting
+                // the moment the figure takes over - it handed the body straight back to Sydney, again and again
+                g.falling.reset(n);
                 recovered++;
                 held.remove(i);
                 n.poseReset = true;
@@ -199,7 +208,8 @@ public final class Reactions {
     public void cancel(Actor n) {
         if (!held.remove(n)) return;
         if (n.ragdoll != 0) { g.game.commands().ragdollControl(n.ragdoll, CONTROL_RELEASE, 0); g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
-        n.reacting = false; n.wentDown = false; n.poseReset = true;
+        n.reacting = false; n.wentDown = false; n.uprightFor = 0; n.poseReset = true;
+        g.falling.reset(n);
         if (n.body != 0) g.game.commands().moverInput(n.body, 0, 0, 0, 0, 80, 0);
     }
 

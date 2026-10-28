@@ -101,6 +101,15 @@ public enum MonsterKind {
         this.always = always; this.common = common; this.uncommon = uncommon; this.rare = rare; this.veryRare = veryRare; return this;
     }
     private MonsterKind looks(int skin, int skin2) { this.skin = skin; this.skin2 = skin2; return this; }
+    static {
+        // each kind its own recorded voice (Sfx's "m.<kind>.*" banks); the skeleton keeps its rattle of bones
+        for (MonsterKind k : values()) {
+            String v = switch (k) { case GOBLIN -> "goblin"; case ORC -> "orc"; case TROLL -> "troll"; case IMP -> "imp"; case BAT -> "bat"; case GHOST -> "ghost";
+                case ZOMBIE -> "zombie"; case WEREWOLF -> "werewolf"; case DRAGON -> "dragon"; case GIANT_SPIDER -> "spider"; default -> null; };
+            if (v != null) k.sounds("m." + v + ".idle", "m." + v + ".alarm", "m." + v + ".hurt", "m." + v + ".death");
+        }
+    }
+
     private MonsterKind sounds(String idle, String alarm, String hurt, String death) { idleSound = idle; alarmSound = alarm; hurtSound = hurt; deathSound = death; return this; }
     private static String[] of(String... s) { return s; }
 
@@ -186,5 +195,12 @@ public enum MonsterKind {
     /** How much bigger than a person's figure (1.8 m) its own is (the humanoids' skeletons are a person's, scaled). */
     public float scale() { return mh / 1.8f; }
     public boolean flies() { return move == Move.FLY || move == Move.HOVER; }
+    /**
+     * How far off the sight of one throws people into fear (gamefixes: a dragon in the city should cause a genuine panic):
+     * within it, whoever sees it raises the alarm, the townsfolk run for shelter and the city's fighters turn out against
+     * it. 0: a monster people deal with as they come to it.
+     */
+    public float terror() { return switch (this) { case DRAGON -> 55; case TROLL -> 22; case WEREWOLF -> 20; case GIANT_SPIDER -> 12; default -> 0; }; }
+
     public boolean undead() { return this == ZOMBIE || this == SKELETON || this == GHOST; }
 }

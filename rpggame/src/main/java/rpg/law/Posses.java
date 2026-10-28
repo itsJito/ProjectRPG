@@ -154,8 +154,8 @@ public final class Posses {
         }
         formed++;
         g.state.commit("PosseFormed", lead == null ? 0 : lead.id, p.id, kingdom, 0, (ambush ? "border ambush" : "tracking") + ": " + m.hunters() + " hunters, " + m.dogs() + " dogs, bounty " + bounty);
-        if (ambush) g.chat.add("[Crime] Someone is waiting on the road out of " + kingdom + ".", rpg.Chat.Kind.CRIME);
-        else g.chat.add("[Crime] Bounty hunters from " + kingdom + " are on your trail.", rpg.Chat.Kind.CRIME);
+        if (ambush) g.chat.crime("ambush", "Someone is waiting on the road out of " + kingdom + ".");
+        else g.chat.crime("hunters", "Bounty hunters from " + kingdom + " are on your trail.");
         return true;
     }
 
@@ -212,7 +212,7 @@ public final class Posses {
         for (int tries = 0; tries < 40; tries++) {
             double a = unit() * Math.PI * 2; float r = 25 + unit() * 20;
             float x = known[0] + (float) Math.sin(a) * r, z = known[1] + (float) Math.cos(a) * r;
-            if (!open(x, z) || g.vox.sight(p.x, p.eyeY(), p.z, x, DevMap.FLOOR + 1.6f, z)) continue;
+            if (!open(x, z) || seen(p, x, z)) continue;
             return new float[]{x, z};
         }
         return null;
@@ -224,9 +224,22 @@ public final class Posses {
         for (int tries = 0; tries < 24; tries++) {
             float ahead = 18 + unit() * 10, side = (unit() - 0.5f) * 10;
             float x = p.x() + dx * ahead - dz * side, z = p.z() + dz * ahead + dx * side;
-            if (open(x, z)) return new float[]{x, z};
+            if (open(x, z) && !seen(g.player, x, z)) return new float[]{x, z};
         }
         return null;
+    }
+
+    /**
+     * Whether the player would see a party appear there (gamefixes: hunters stepped out of thin air in front of them):
+     * anywhere in the half of the world the camera faces, near enough to matter, or anywhere in plain sight.
+     */
+    private boolean seen(rpg.actor.Actor p, float x, float z) {
+        float dx = x - p.x, dz = z - p.z, d = (float) Math.hypot(dx, dz);
+        if (d < 24) return true;
+        float yaw = p == g.player && g.controller != null ? g.controller.camYaw : p.yaw;
+        float fx = (float) -Math.sin(yaw), fz = (float) -Math.cos(yaw);
+        if ((dx * fx + dz * fz) / d > -0.15f && d < 70) return true;
+        return g.vox.sight(p.x, p.eyeY(), p.z, x, DevMap.FLOOR + 1.6f, z);
     }
 
     private boolean open(float x, float z) {

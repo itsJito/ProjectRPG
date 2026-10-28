@@ -15,7 +15,7 @@ class ProfessionTest {
     @BeforeEach void start(){var config=new NativeEngine.Config();config.deterministic=true;game=Game.create(config);game.activate(DevMap.build(game.engine()));g=game.add(new Rpg(game,"Professions",Appearance.henric(),true));for(Npc n:g.npcs)g.ai.unload(n);g.state.minutes=600;}
     @AfterEach void close(){game.close();}
     @Test void allFiveFamiliesHaveFiveValidSubtypesButOnlyFiveResidentsWereAdded() {
-        assertEquals(28,g.npcs.size());assertEquals(25,Profession.values().length);
+        assertEquals(34,g.npcs.size());assertEquals(25,Profession.values().length);   // (34 since 0.1.8: Wren, then the Cook, Quarry Worker, Border Knight, Shellfish Gatherer and River Fisherman)
         for(var family:new Npc.Role[]{Npc.Role.FISHERMAN,Npc.Role.MINER,Npc.Role.CRAFTSMAN,Npc.Role.KNIGHT,Npc.Role.HUNTER})assertEquals(5,java.util.Arrays.stream(Profession.values()).filter(type->type.family==family).count());
         assertEquals(5,g.npcs.stream().filter(n->n.id>=Ids.FISHERMAN && n.id<=Ids.PREDATOR_HUNTER).count());
         assertThrows(IllegalArgumentException.class,()->Profession.BLACKSMITH.assign((Npc)g.actor(Ids.FISHERMAN)));

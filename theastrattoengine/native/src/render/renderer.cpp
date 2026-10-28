@@ -411,6 +411,7 @@ int32_t Renderer::texture(const astratto_texture_desc& d, uint32_t* out) {
     Texture t;
     t.target = d.kind == ASTRATTO_TEX_ARRAY ? TEXTURE_2D_ARRAY : TEXTURE_2D;
     t.layers = d.kind == ASTRATTO_TEX_ARRAY ? d.layers : 1;
+    t.width = d.width; t.height = d.height;
     g_.GenTextures(1, &t.id);
     g_.BindTexture(t.target, t.id);
     g_.PixelStorei(UNPACK_ALIGNMENT, 1);
@@ -436,6 +437,17 @@ int32_t Renderer::texture(const astratto_texture_desc& d, uint32_t* out) {
     const uint32_t id = nextTexture_++;
     textures_[id] = t;
     *out = id;
+    return ASTRATTO_OK;
+}
+
+int32_t Renderer::textureUpdate(uint32_t id, const uint8_t* pixels, uint64_t bytes) {
+    auto it = textures_.find(id);
+    if (it == textures_.end() || it->second.target != TEXTURE_2D) { error_ = "no such 2D texture"; return ASTRATTO_ERR_ARGUMENT; }
+    const GLsizei w = static_cast<GLsizei>(it->second.width), h = static_cast<GLsizei>(it->second.height);
+    g_.BindTexture(TEXTURE_2D, it->second.id);
+    if (bytes < static_cast<uint64_t>(w) * h * 4) { error_ = "fewer pixels than the texture's size"; return ASTRATTO_ERR_ARGUMENT; }
+    g_.PixelStorei(UNPACK_ALIGNMENT, 1);
+    g_.TexSubImage2D(TEXTURE_2D, 0, 0, 0, w, h, RGBA, UNSIGNED_BYTE, pixels);
     return ASTRATTO_OK;
 }
 
@@ -841,7 +853,8 @@ void Renderer::probesUpdate(int budget, int rays, float camX, float camZ) {
         batch_[n * 2] = best / CZ_; batch_[n * 2 + 1] = best % CZ_;
         const bool stale = signature_[best] != currentSignature_;
         // first light replaces whatever was there; after that new samples are folded in so noise averages out
-        blend_[n] = !everLit_[best] ? 1.0f : passes_[best] < 2 || stale ? 0.6f : passes_[best] < SETTLED ? 0.35f : 0.2f;
+        // (a stale probe - the sky moved on - is folded toward the new light, not swapped for one noisy pass of it)
+        blend_[n] = !everLit_[best] ? 1.0f : passes_[best] < 2 ? 0.6f : stale ? 0.4f : passes_[best] < SETTLED ? 0.35f : 0.2f;
         if (stale) { signature_[best] = currentSignature_; passes_[best] = std::min(passes_[best], SETTLED - 3); }
         passes_[best]++;
         everLit_[best] = 1;
@@ -1708,41 +1721,60 @@ void Renderer::fogPass() {
 // ------------------------------------------------------------------ forward
 void Renderer::advanceWater(VoxelWorld* world) {
     if(!world)return;
+    // 1.2 (gamefixes: water did not really ripple for what moved in it): the waves live on a grid of fifth-of-a-metre cells
+    // that follows the camera - one grid over the whole map had cells a metre wide, too coarse to carry a body's ring at
+    // all. The grid's corner keeps to an 8 m lattice; when the camera takes it to a new corner the wave state is carried
+    // across by whole cells (WATER_SHIFT), so rings already spreading are not lost.
+    constexpr int N=256;constexpr float CELL=WATER_CELL,SPAN=CELL*N,SNAP=8.0f;
+    const float ox=std::floor((cam_.x-SPAN*0.5f)/SNAP)*SNAP,oz=std::floor((cam_.z-SPAN*0.5f)/SNAP)*SNAP;
+    const bool moved=!waterPlaced_ || ox!=waterOrigin_[0] || oz!=waterOrigin_[1];
+    int shiftX=0,shiftZ=0;
+    if(moved && waterPlaced_) { shiftX=static_cast<int>(std::lround((ox-waterOrigin_[0])/CELL));shiftZ=static_cast<int>(std::lround((oz-waterOrigin_[1])/CELL)); }
     const bool fresh=waterVersions_.size()!=static_cast<size_t>(CX_*CZ_);
-    if(fresh) { waterVersions_.assign(static_cast<size_t>(CX_*CZ_),0);waterMaskData_.assign(256*256*4,0);waterCells_=0; }
-    bool changed=false;
-    // A changed wall or burning log invalidates its column, never a full height scan of the whole map.
-    for(int cx=0;cx<CX_;cx++)for(int cz=0;cz<CZ_;cz++) {
+    if(fresh) waterVersions_.assign(static_cast<size_t>(CX_*CZ_),0);
+    // a changed wall or burning log under the grid invalidates it (column versions; never a scan of the whole map)
+    bool changed=moved || fresh;
+    const int bx0=static_cast<int>(std::floor(ox)),bz0=static_cast<int>(std::floor(oz)),bx1=bx0+static_cast<int>(std::ceil(SPAN)),bz1=bz0+static_cast<int>(std::ceil(SPAN));
+    for(int cx=std::max(0,bx0/16);cx<=std::min(CX_-1,bx1/16);cx++)for(int cz=std::max(0,bz0/16);cz<=std::min(CZ_-1,bz1/16);cz++) {
         const size_t column=static_cast<size_t>(cx*CZ_+cz);const uint32_t version=world->columnVersion(cx,cz);
-        if(!fresh && waterVersions_[column]==version)continue;
-        waterVersions_[column]=version;changed=true;
-        const int x0=(cx*16*256+sizeX_-1)/sizeX_,x1=std::min(256,((cx+1)*16*256+sizeX_-1)/sizeX_);
-        const int z0=(cz*16*256+sizeZ_-1)/sizeZ_,z1=std::min(256,((cz+1)*16*256+sizeZ_-1)/sizeZ_);
-        for(int x=x0;x<x1;x++)for(int z=z0;z<z1;z++) {
-            const size_t at=static_cast<size_t>((z*256+x)*4);
-            if(waterMaskData_[at+1]>0)waterCells_--;
-            std::fill_n(waterMaskData_.begin()+static_cast<ptrdiff_t>(at),4,0.0f);
-            const int bx=x*sizeX_/256,bz=z*sizeZ_/256;
+        if(waterVersions_[column]!=version) { waterVersions_[column]=version;changed=true; }
+    }
+    waterOrigin_[0]=ox;waterOrigin_[1]=oz;waterPlaced_=true;
+    if(changed) {
+        waterMaskData_.assign(static_cast<size_t>(N*N*4),0.0f);waterCells_=0;
+        // each block column under the grid once: its water surface, the sky over it, into the cells it covers
+        for(int bx=bx0;bx<bx1;bx++)for(int bz=bz0;bz<bz1;bz++) {
+            if(bx<0 || bz<0 || bx>=sizeX_ || bz>=sizeZ_)continue;
             for(int y=sizeY_-1;y>=0;y--)if(world->def(bx,y,bz).flags&ASTRATTO_BLOCK_LIQUID) {
-                waterMaskData_[at]=static_cast<float>(y+1);waterMaskData_[at+1]=1;
-                waterMaskData_[at+2]=static_cast<float>(world->sky(bx,y+1,bz))/15.0f;waterCells_++;break;
+                const float top=static_cast<float>(y+1),sky=static_cast<float>(world->sky(bx,y+1,bz))/15.0f;
+                const int x0=std::max(0,static_cast<int>(std::ceil((bx-ox)/CELL-0.5f))),x1=std::min(N,static_cast<int>(std::ceil((bx+1-ox)/CELL-0.5f)));
+                const int z0=std::max(0,static_cast<int>(std::ceil((bz-oz)/CELL-0.5f))),z1=std::min(N,static_cast<int>(std::ceil((bz+1-oz)/CELL-0.5f)));
+                for(int x=x0;x<x1;x++)for(int z=z0;z<z1;z++) {
+                    const size_t at=static_cast<size_t>((z*N+x)*4);
+                    waterMaskData_[at]=top;waterMaskData_[at+1]=1;waterMaskData_[at+2]=sky;waterCells_++;
+                }
+                break;
             }
         }
+        g_.BindTexture(TEXTURE_2D,waterMask_);g_.TexSubImage2D(TEXTURE_2D,0,0,0,N,N,RGBA,FLOAT,waterMaskData_.data());
     }
-    if(changed) { g_.BindTexture(TEXTURE_2D,waterMask_);g_.TexSubImage2D(TEXTURE_2D,0,0,0,256,256,RGBA,FLOAT,waterMaskData_.data()); }
     hasWater_=waterCells_>0;
     if(!hasWater_)return;
     waterAccumulator_+=std::min(0.066f,std::max(0.0f,cam_.dt));
     constexpr float STEP=1.0f/120.0f;
-    const int steps=std::min(8,static_cast<int>(waterAccumulator_/STEP));
+    int steps=std::min(8,static_cast<int>(waterAccumulator_/STEP));
+    if((shiftX!=0 || shiftZ!=0) && steps==0) { steps=1;waterAccumulator_+=STEP; }   // the carry rides on a step
     waterAccumulator_-=static_cast<float>(steps)*STEP;
     waterWaves_.use();waterWaves_.tex("uMask",0,TEXTURE_2D,waterMask_);
-    waterWaves_.f2("uWorldSize",static_cast<float>(sizeX_),static_cast<float>(sizeZ_));
+    waterWaves_.f2("uOrigin",ox,oz);waterWaves_.f1("uCell",CELL);
     waterWaves_.f1("uDt",STEP);waterWaves_.f1("uRain",env_.rain);
+    // a ripple's push is given over this frame's steps, so it is as strong at any frame rate
+    waterWaves_.f1("uImpulseScale",steps>0?1.0f/static_cast<float>(steps):0.0f);
     waterWaves_.i1("uImpulses",static_cast<int>(ripples_.size()/4));
     if(!ripples_.empty())g_.Uniform4fv(waterWaves_.loc("uImpulse"),static_cast<GLsizei>(ripples_.size()/4),ripples_.data());
     for(int i=0;i<steps;i++) {
         waterClock_+=STEP;waterWaves_.f1("uTime",waterClock_);
+        waterWaves_.i2("uShift",i==0?shiftX:0,i==0?shiftZ:0);
         g_.BindImageTexture(0,water_[waterIndex_],0,FALSE_,0,READ_WRITE,RGBA16F);
         g_.BindImageTexture(1,water_[1-waterIndex_],0,FALSE_,0,READ_WRITE,RGBA16F);
         g_.DispatchCompute(32,32,1);g_.MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT|TEXTURE_FETCH_BARRIER_BIT);
@@ -1795,6 +1827,7 @@ void Renderer::forwardPass(VoxelWorld* world) {
     fWorld_.mat4("uInvPV", invPVJ_.m);
     fWorld_.i1("uWaterSSR", q_.ssr ? 1 : 0);
     fWorld_.tex("uWaves",8,TEXTURE_2D,water_[waterIndex_]);
+    fWorld_.f3("uWaveGrid",waterOrigin_[0],waterOrigin_[1],WATER_CELL);
     fWorld_.tex("uWaterNoise",9,TEXTURE_2D,textures_.count(noiseTex_)?textures_[noiseTex_].id:white_);
     probeUniforms(fWorld_, 1);
     fWorld_.f3("uCam", cam_.x, cam_.y, cam_.z);

@@ -182,7 +182,7 @@ struct SydneyConfig {
     int maxSteps = 8;
     float stepWidth = 0.05f, shiftTime = 0.03f, landBrake = 1.0f, hipStrategy = 0.3f, pelvisGain = 1.85f, rootMode = 0, spineStiff = 1.5f, hipRollKeep = 0.72f, rollTwist = 1.0f;   // (not in the API's profile)
     float fallTilt = 55, fallHeight = 0.55f, lostReach = 1.1f, recoverSettle = 0.45f;
-    float fallStrength = 0.35f, brace = 0.85f, downStrength = 0.1f, downMin = 0.9f, downPerForce = 0.02f, downMax = 3.5f;
+    float fallStrength = 0.35f, brace = 0.85f, downStrength = 0.1f, downMin = 0.6f, downPerForce = 0.015f, downMax = 2.4f;
     bool holdWound = true;
     float holdForce = 60;
     float getUpTime = 2.6f, getUpStrength = 1.35f, getUpTimeout = 2.4f;
@@ -317,6 +317,7 @@ private:
     impulsis::V3 stepFrom_, stepTo_;
     float getUpT_ = 0, getUpPhaseT_ = 0, flailT_ = 0, limpT_ = 0, hangT_ = 0, writheT_ = 0, breathT_ = 0, braceT_ = 0;
     int getUpPhase_ = 0;
+    float steady_ = 0;                         // just risen: seconds of steadying support left (see SydneyCharacter::assist)
     float rollSide_ = 1;
     astratto_handle grip_[2] = {0, 0};
     impulsis::V3 gripAt_[2], ledgeAt_[2];

@@ -132,7 +132,11 @@ public final class Rig {
         // a walk starts a little above the still threshold and stops a little below it, so a body hovering at the
         // threshold does not flick between stepping and standing
         boolean wasWalking = st.walking;
-        st.walking = grounded && (st.walking ? st.spd > Gait.STILL * 0.75f : st.spd > Gait.STILL * 1.25f);
+        // Braking hard (the body's real speed fallen well under the smoothed one) ends the stride cycle at once: a foot
+        // in the air finishes its own quick step in under the body. Left to the cycle, whose cadence falls with the
+        // smoothed speed, the back foot of a stopped sprint hung a stride behind, kicked up, for half a second (gamefixes)
+        boolean braking = speed < st.spd * 0.45f && speed < 1.2f;
+        st.walking = grounded && !braking && (st.walking ? st.spd > Gait.STILL * 0.75f : st.spd > Gait.STILL * 1.25f);
         boolean walking = st.walking;
         float ampT = walking ? Math.min(1, st.spd / 1.2f) : 0;
         st.amp += (ampT - st.amp) * Math.min(1, dt * 5);
@@ -207,7 +211,13 @@ public final class Rig {
             // walk) takes a step of its own; only one at a time, the worse first
             // Turning, the threshold drops and the steps quicken (left, right, left round the turn), and each lands where
             // the turn will have carried the body by then, so the feet come round with it instead of trailing.
-            if (st.corrective < 0) {
+            // a foot still in the air when the walk ended (a hard stop) comes down on its own step - left alone it hung
+            // there, mid-stride, until the other foot's correction was done
+            for (int k = 0; k < 2; k++) if (!st.stance[k] && st.corrective != k) {
+                st.swing[k] = Math.min(1, st.swing[k] + dt / Math.max(0.12f, st.swingTime[k]));
+                if (st.swing[k] >= 1) plant(a, st, k);
+            }
+            if (st.corrective < 0 && st.stance[0] && st.stance[1]) {
                 int worst = -1; float far = 0;
                 for (int k = 0; k < 2; k++) {
                     float[] rest = toWorldTurned(a, (k == 0 ? 1 : -1) * hipX, k == 0 ? -0.6f : 0.6f, sideTurn);
@@ -216,7 +226,8 @@ public final class Rig {
                 }
                 if (far > (turning ? 0.9f : 1.8f) * Body.PX) {
                     st.corrective = worst;
-                    liftOff(st, worst, turning ? Math.max(0.15f, 0.24f - st.turnRate * 0.012f) : 0.26f);
+                    // a foot left far out by a hard stop is brought in briskly; a small shuffle takes its time
+                    liftOff(st, worst, turning ? Math.max(0.15f, 0.24f - st.turnRate * 0.012f) : far > 5 * Body.PX ? 0.2f : 0.26f);
                 }
             }
             if (st.corrective >= 0) {
@@ -228,13 +239,15 @@ public final class Rig {
                 if (st.swing[k] >= 1) { plant(a, st, k); st.corrective = -1; }
             }
         }
-        if (DEBUG && a instanceof rpg.actor.Player) { float[] f0 = toFigure(a, st.foot[0][0], st.foot[0][1], st.foot[0][2]); System.out.printf("RIG ph %.3f beta %.2f cad %.2f st0 %s sw0 %.2f z0 %.1f spd %.2f%n", st.phase, beta, cadence, st.stance[0], st.swing[0], f0[2], st.spd); }
+        if (DEBUG && a instanceof rpg.actor.Player) { float[] f0 = toFigure(a, st.foot[0][0], st.foot[0][1], st.foot[0][2]), f1 = toFigure(a, st.foot[1][0], st.foot[1][1], st.foot[1][2]); System.out.printf("RIG ph %.3f walk %s cad %.2f st %s/%s sw %.2f/%.2f z %.1f/%.1f spd %.2f raw %.2f corr %d%n", st.phase, walking, cadence, st.stance[0], st.stance[1], st.swing[0], st.swing[1], f0[2], f1[2], st.spd, speed, st.corrective); }
         // where each foot is, in figure space: planted ones pinned; swinging ones on their arc
         float[][] foot = new float[2][3];
         float[] footFwd = new float[2];
         // a walking foot clears the ground by a little; a running one is kicked up behind (the heel toward the seat) and
         // carried through at knee height
-        float lift = (1.3f + 2.4f * runF + 1.6f * sprintF) * Math.max(0.55f, st.amp);
+        // (0.1.8: the heel comes up high and early at a run - the trailing leg trailed low and straight, so every stride
+        // read as a lunge)
+        float lift = (1.3f + 4.6f * runF + 2.6f * sprintF) * Math.max(0.55f, st.amp);
         float sd = Math.max(1e-3f, speed), tdx = vx / sd, tdz = vz / sd;
         for (int k = 0; k < 2; k++) {
             float wx, wy, wz;
@@ -246,7 +259,7 @@ public final class Rig {
                 float kick = runF * (2.2f + 1.5f * sprintF) * Body.PX * (float) Math.sin(Math.PI * Math.min(1, t * 1.7f)) * (1 - t);
                 wx = st.from[k][0] + (st.to[k][0] - st.from[k][0]) * er - tdx * kick;
                 wz = st.from[k][2] + (st.to[k][2] - st.from[k][2]) * er - tdz * kick;
-                float arc = (float) Math.sin(Math.PI * Math.pow(t, 1 - 0.35f * runF));
+                float arc = (float) Math.sin(Math.PI * Math.pow(t, 1 - 0.55f * runF));
                 wy = st.from[k][1] + (st.to[k][1] - st.from[k][1]) * e + lift * Body.PX * arc;
                 st.foot[k][0] = wx; st.foot[k][1] = wy; st.foot[k][2] = wz;
             }
@@ -345,8 +358,11 @@ public final class Rig {
         sway *= (1 - runF * 0.6f);
         st.sway += (sway * Math.min(1, st.amp + 0.3f) - st.sway) * Math.min(1, dt * 7);
         // the pendulum rides down between the feet only so far: a stride is not a lunge
-        if (grounded && runF < 0.5f) want = Math.max(want, hipFloor);
-        want -= st.land * 2.6f + crouch + runF * 0.6f;
+        if (grounded && (runF < 0.5f || !walking)) want = Math.max(want, hipFloor);
+        // nor is a run: the reaching leg straightens toward a long stride rather than dragging the hips down into a lunge
+        // (0.1.8: the jog and sprint were run crouched low, every stride a lunge)
+        else if (grounded) want = Math.max(want, b.hipY() - 0.35f - strideBend - 0.9f);
+        want -= st.land * 2.6f + crouch + runF * 0.25f;
         if (!grounded) want = b.hipY();
         if (st.hipH < 0) st.hipH = want;
         // Exact critically damped response for this frame's target. Explicit Euler integration
@@ -519,6 +535,9 @@ public final class Rig {
             } else if (fishing(a) != null) {
                 float[][] fp = fishPose(a, st, shoulder, side, isMain, time, b);
                 target = fp[0]; dir = fp[1];
+            } else if (cooking(a) != null) {
+                float[][] cp = cookPose(a, shoulder, side, isMain, time);
+                target = cp[0]; dir = cp[1];
             } else if (shieldSide) {
                 // the guard: the shield (or the blade) brought across in front of the chest and up to the chin, where it
                 // covers the body from a blow - and where the eyes, behind it, can still see over it
@@ -588,6 +607,38 @@ public final class Rig {
     }
 
     /** A foot leaves the ground: its swing starts from where it stood. */
+    /** What is being cooked while cooking is under way at a range or a fire (gamefixes: cooking is animated), or null. */
+    public static ItemDef cooking(Actor a) {
+        var w = a.working;
+        if (w == null || !(w.target instanceof rpg.objects.Station s) || s.kind != rpg.item.Recipes.Station.RANGE) return null;
+        String[] parts = w.action.split(":");
+        var r = parts.length > 1 ? rpg.item.Recipes.byId(parts[1]) : null;
+        return r == null || r.inputs.isEmpty() ? null : r.inputs.get(0).item();
+    }
+
+    /**
+     * Cooking, on each cook's cycle: the food held out over the heat at arm's length and low, slowly drawn round as it
+     * cooks, lifted and turned over at half time, then settled back to finish; the other hand held out to the warmth,
+     * palm toward the fire.
+     */
+    private float[][] cookPose(Actor a, float[] shoulder, int side, boolean isMain, double time) {
+        var w = a.working;
+        float k = w.t / Math.max(0.2f, w.duration);
+        if (!isMain) {
+            float sway = (float) Math.sin(time * 1.3 + a.id) * 0.25f;
+            return new float[][]{torsoPoint(shoulder, -side * 0.5f + sway, -4.6f, -5.6f), norm(torsoDir(0, 0.25f, -1f))};
+        }
+        float settle = Math.min(1, w.t / 0.35f), e = settle * settle * (3 - 2 * settle);
+        float[] rest = torsoPoint(shoulder, side * 0.3f, -3.5f, -3.0f), over = torsoPoint(shoulder, -side * 0.4f, -5.8f, -7.4f);
+        // a slow circle over the coals, and the turn at half time: up a little and over
+        float circle = (float) (time * 2.1);
+        float turn = (float) Math.exp(-Math.pow((k - 0.5f) / 0.07f, 2));
+        float[] p = lerp(rest, over, e);
+        p = add(add(p, torsoRight, (float) Math.cos(circle) * 0.35f), torsoUp, (float) Math.sin(circle) * 0.2f + turn * 1.4f);
+        float[] dir = norm(torsoDir(side * 0.15f, -0.35f + turn * 0.9f, -1f));
+        return new float[][]{p, dir};
+    }
+
     /** The fishing tool in the hand while fishing is under way at a fishing spot (gamefixes: fishing is animated), or null. */
     static ItemDef fishing(Actor a) {
         var w = a.working;

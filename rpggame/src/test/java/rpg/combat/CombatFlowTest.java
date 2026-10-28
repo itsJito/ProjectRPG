@@ -134,7 +134,7 @@ class CombatFlowTest {
         g.controller.in.mainDown = false; assertTrue(game.tick(1f / 60));
         assertEquals(0, g.player.cs.draw);
         assertEquals(9, g.player.eq.get(ItemDef.Slot.AMMO).amount);
-        assertEquals(1, g.combat.projectiles.size());
+        assertEquals(1, g.combat.projectiles.stream().filter(p -> p.owner == g.player).count());   // (a hunter about the town may be shooting too)
     }
     @Test void meleeTimingCarriesUnusedFrameTimeAcrossPhaseBoundaries() {
         var c = g.player.cs;

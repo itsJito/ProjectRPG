@@ -32,7 +32,26 @@ public final class Blocks {
             COAL_BLOCK = 71, HAY_BALE = 72,
             // the cell a lit fire stands in: nothing to see or bump into, but a hazard routes go round (people do not
             // walk through a campfire)
-            EMBERS = 73, COUNT = 74;
+            EMBERS = 73,
+            // 0.1.8: what burnt wood becomes - each block charred from its own grain (gamefixes: fire charred everything to
+            // one premade coal block), in the order of CHAR_SOURCES
+            CHARRED_PLANKS = 74, CHARRED_LOG = 75, CHARRED_OAK_LOG = 76, CHARRED_WILLOW_LOG = 77, CHARRED_SPRUCE_LOG = 78,
+            CHARRED_JUNGLE_LOG = 79, CHARRED_BIRCH_LOG = 80, CHARRED_BEAM = 81, CHARRED_ROOF = 82, CHARRED_STUMP = 83,
+            COUNT = 84;
+    /** The wooden cubes that char into a twin of their own (CHARRED_PLANKS onward); anything else that burns to char is CHARRED. */
+    public static final int[] CHAR_SOURCES = {PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, STUMP};
+    /** What a block chars into when fire is done with it. */
+    public static int charredOf(int id) {
+        for (int i = 0; i < CHAR_SOURCES.length; i++) if (CHAR_SOURCES[i] == id) return CHARRED_PLANKS + i;
+        return CHARRED;
+    }
+    /** Burnt through already: char of any kind (it does not catch again). */
+    public static boolean charred(int id) { return id == CHARRED || id >= CHARRED_PLANKS && id <= CHARRED_STUMP; }
+    /**
+     * The invisible collision of a prop the game draws as its own model (a dungeon's rock mound, a bounty board): object
+     * cells that sound and burn like what the prop is made of - stone, or wood.
+     */
+    public static final int PROP_STONE = HEADSTONE, PROP_WOOD = TABLE;   // (both seen through: what stands in them stays in focus)
     /** Cobblestone is the cobble block (one block, redesigned), as Dirt, Sand and Glass are. */
     public static final int COBBLESTONE = COBBLE;
 
@@ -48,7 +67,8 @@ public final class Blocks {
             case GRASS, DIRT, BARE_PATCH, CLAY, MUD -> Material.EARTH;
             case SAND -> Material.SAND;
             case PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
-                 CRAFT_TABLE, SAWBENCH, TARGET, DOOR, LOCKED_DOOR, CHARRED -> Material.WOOD;
+                 CRAFT_TABLE, SAWBENCH, TARGET, DOOR, LOCKED_DOOR, CHARRED, CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG,
+                 CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF, CHARRED_STUMP -> Material.WOOD;
             case LEAVES, OAK_LEAVES, WILLOW_LEAVES, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
             case WHITE_CARPET, BLACK_CARPET, BROWN_CARPET, RED_CARPET, BED -> Material.CLOTH;
             case HAY_BALE -> Material.STRAW;
@@ -71,7 +91,8 @@ public final class Blocks {
     public static boolean traversable(int id) {
         return switch (id) { case GRASS, DIRT, STONE, BRICK, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SAND, COBBLE, ROOF, CRATE, PLASTER, BEAM, CHARRED,
                 SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, GRANITE, STONE_BRICKS, MARBLE, CLAY, MUD, SANDSTONE, RED_SANDSTONE, WHITE_CARPET, BLACK_CARPET,
-                BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE -> true; default -> false; };
+                BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE,
+                CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG, CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF -> true; default -> false; };
     }
     /** Plants drawn as crossed planes that bodies walk through (gamefixes: no foliage is ever solid - the berry bush neither). */
     public static boolean plant(int id) { return id == HERB_PATCH || id == FLAX_PATCH || id == BERRY_BUSH; }
@@ -88,8 +109,10 @@ public final class Blocks {
             L_RED_SANDSTONE_TOP = 60, L_RED_SANDSTONE = 61, L_WHITE_GLASS = 62, L_BLUE_GLASS = 63, L_WHITE_CARPET = 64,
             L_BLACK_CARPET = 65, L_BROWN_CARPET = 66, L_RED_CARPET = 67, L_LIMESTONE = 68, L_IRON_BLOCK = 69, L_GOLD_BLOCK = 70,
             L_COPPER_BLOCK = 71, L_COAL_BLOCK = 72, L_HAY_TOP = 73, L_HAY_SIDE = 74;
-    /** Texture layers, each TEX x TEX texels: 64 to the metre. */
-    public static final int LAYERS = 75, TEX = 64;
+    /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
+    public static final int CHAR_LAYER0 = 75, LAYERS = 88, TEX = 64;
+    /** Per charred layer, the layer it was charred from (filled with FACES). */
+    private static final int[] CHAR_FROM = new int[LAYERS - CHAR_LAYER0];
 
     /** Per block id: top, side, bottom layer. */
     private static final int[][] FACES = new int[COUNT][];
@@ -112,13 +135,27 @@ public final class Blocks {
         f(LIMESTONE_BRICKS, L_LIMESTONE); f(IRON_BLOCK, L_IRON_BLOCK); f(GOLD_BLOCK, L_GOLD_BLOCK); f(COPPER_BLOCK, L_COPPER_BLOCK); f(COAL_BLOCK, L_COAL_BLOCK);
         f(HAY_BALE, L_HAY_TOP, L_HAY_SIDE, L_HAY_TOP);
         f(EMBERS, L_COAL);
+        // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
+        int next = CHAR_LAYER0;
+        int[] charOf = new int[CHAR_LAYER0];
+        java.util.Arrays.fill(charOf, -1);
+        for (int i = 0; i < CHAR_SOURCES.length; i++) {
+            int[] src = FACES[CHAR_SOURCES[i]], twin = new int[3];
+            for (int k = 0; k < 3; k++) {
+                if (charOf[src[k]] < 0) { charOf[src[k]] = next; CHAR_FROM[next - CHAR_LAYER0] = src[k]; next++; }
+                twin[k] = charOf[src[k]];
+            }
+            FACES[CHARRED_PLANKS + i] = twin;
+        }
+        if (next != LAYERS) throw new IllegalStateException("charred layers: " + (next - CHAR_LAYER0) + ", LAYERS expects " + (LAYERS - CHAR_LAYER0));
     }
     private static void f(int id, int top, int side, int bottom) { FACES[id] = new int[]{top, side, bottom}; }
     private static void f(int id, int all) { f(id, all, all, all); }
 
     /** The block colours for the minimap (RGB). */
     public static int mapColor(int id) {
-        int[] c = BASE[FACES[Math.max(1, Math.min(COUNT - 1, id))][0]];
+        int top = FACES[Math.max(1, Math.min(COUNT - 1, id))][0];
+        int[] c = top >= CHAR_LAYER0 ? new int[]{42, 36, 32} : BASE[top];
         return c[0] << 16 | c[1] << 8 | c[2];
     }
 
@@ -217,14 +254,32 @@ public final class Blocks {
     public static ByteBuffer atlasPixels() {
         ByteBuffer px = MemoryUtil.memAlloc(TEX * TEX * 4 * LAYERS);
         for (int l = 0; l < LAYERS; l++) {
-            Painter p = new Painter(l);
+            // a charred layer is its wood painted as it was, then burnt over (Painter.charred), so the grain still shows
+            boolean burnt = l >= CHAR_LAYER0;
+            Painter p = new Painter(burnt ? CHAR_FROM[l - CHAR_LAYER0] : l), fire = burnt ? new Painter(l) : null;
+            int[][] layer = new int[TEX * TEX][];
             for (int y = 0; y < TEX; y++) for (int x = 0; x < TEX; x++) {
                 int[] c = p.paint(x, y);
-                px.put((byte) c[0]).put((byte) c[1]).put((byte) c[2]).put((byte) c[3]);
+                if (fire != null) c = fire.charred(c, x, y);
+                layer[y * TEX + x] = c;
             }
+            if (painterly(l)) layer = Painterly.finish(layer, TEX, 7 + l * 31L);
+            for (int[] c : layer) px.put((byte) c[0]).put((byte) c[1]).put((byte) c[2]).put((byte) c[3]);
         }
         px.flip();
         return px;
+    }
+
+    /**
+     * Which layers take the painterly finish (0.1.9, gamefixes: the new art style): every material surface - not the
+     * see-through ones (glass, the cut-out plants and the fence), the lamp's glowing panes, the archery target, the
+     * test markers and the debug grid, which are signs rather than materials.
+     */
+    private static boolean painterly(int l) {
+        return switch (l) {
+            case L_GLASS, L_WHITE_GLASS, L_BLUE_GLASS, L_LAMP, L_TARGET, L_FENCE, L_HERB, L_FLAX, L_RED, L_BLUE, L_YELLOW, L_GREEN, L_DEBUG -> false;
+            default -> true;
+        };
     }
 
     /** Paints one 64 x 64 layer: tileable noise, then the material's own structure (boards, courses, stones, rings...). */
@@ -257,6 +312,36 @@ public final class Blocks {
             float a = g[Math.floorMod(y0, p) * p + Math.floorMod(x0, p)], b = g[Math.floorMod(y0, p) * p + Math.floorMod(x0 + 1, p)];
             float c = g[Math.floorMod(y0 + 1, p) * p + Math.floorMod(x0, p)], d = g[Math.floorMod(y0 + 1, p) * p + Math.floorMod(x0 + 1, p)];
             return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+        }
+
+        /**
+         * Wood as fire leaves it, from what it was (a colour of the unburnt layer): darkened to soot by how light it was, so
+         * the grain and the joints still read; split into the blocky "alligator" checks charred timber cracks into, dark in
+         * the cracks; grey ash bloomed over the ridges; and here and there a crack still holding a dull ember.
+         */
+        int[] charred(int[] c, int x, int y) {
+            float lum = (0.3f * c[0] + 0.59f * c[1] + 0.11f * c[2]) / 255f;
+            // soot over the wood: its light and dark kept (the grain and joints read through), warm brown-black
+            float soot = 20 + lum * 78;
+            float r = soot * 1.1f, gg = soot * 0.9f, b = soot * 0.78f;
+            // the checks: uneven blocks, longer along the grain (rows) than across, wavering as real char cracks do
+            float u = x / 12.5f + noise(1, x, y) * 1.1f, v = y / 7.0f + noise(2, x, y) * 0.7f;
+            float fu = u - (float) Math.floor(u), fv = v - (float) Math.floor(v);
+            float edge = Math.min(Math.min(fu, 1 - fu) * 12.5f, Math.min(fv, 1 - fv) * 7.0f);
+            float ash = fbm(x * 1.3f, y * 1.3f);
+            if (edge < 0.75f) {
+                // a crack: near black - and, deep in a few, a dull ember still glowing
+                r = 12; gg = 9; b = 8;
+                if (noise(3, x, y) > 0.8f && noise(0, x, y) > 0.62f) { r = 150; gg = 52; b = 16; }
+            } else {
+                if (edge < 1.8f) { r *= 0.62f; gg *= 0.62f; b *= 0.62f; }   // each block's edge rounding down into its crack
+                else if (edge > 3.2f) { r *= 1.12f; gg *= 1.1f; b *= 1.08f; } // and its face standing proud
+                if (ash > 0.58f) {
+                    float k = Math.min(1, (ash - 0.58f) * 3.2f) * 0.78f;
+                    r += (118 - r) * k; gg += (112 - gg) * k; b += (106 - b) * k;
+                }
+            }
+            return new int[]{clamp(r), clamp(gg), clamp(b), c[3]};
         }
 
         /** Fractal noise from coarse to fine (0..1). */
@@ -706,11 +791,14 @@ public final class Blocks {
     public static float[] palette() {
         float[] p = new float[256 * 8];
         for (int id = 1; id < COUNT; id++) {
-            int[] c = BASE[FACES[id][1]];
+            int side = FACES[id][1];
+            int[] c = side >= CHAR_LAYER0 ? new int[]{40, 34, 30} : BASE[side];
             for (int k = 0; k < 3; k++) p[id * 8 + k] = (float) Math.pow(c[k] / 255.0, 2.2);
             p[id * 8 + 3] = 1;
         }
-        p[LAMP * 8 + 4] = 6f; p[LAMP * 8 + 5] = 5.2f; p[LAMP * 8 + 6] = 3.6f;
+        // (0.1.9: a lantern's warm flame, and its bounce no longer floods the whole room evenly - the pool of light round
+        // the lamp is its own direct light, Gfx.lampLights)
+        p[LAMP * 8 + 4] = 2.6f; p[LAMP * 8 + 5] = 1.75f; p[LAMP * 8 + 6] = 0.85f;
         p[FURNACE * 8 + 4] = 3f; p[FURNACE * 8 + 5] = 1.4f; p[FURNACE * 8 + 6] = 0.4f;
         return p;
     }
@@ -740,6 +828,7 @@ public final class Blocks {
                 {L_WHITE_CARPET, 0.98f, 0f}, {L_BLACK_CARPET, 0.98f, 0f}, {L_BROWN_CARPET, 0.98f, 0f}, {L_RED_CARPET, 0.98f, 0f}, {L_HAY_TOP, 0.95f, 0f}, {L_HAY_SIDE, 0.95f, 0f},
                 {L_IRON_BLOCK, 0.34f, 1f}, {L_GOLD_BLOCK, 0.26f, 1f}, {L_COPPER_BLOCK, 0.36f, 1f}, {L_COAL_BLOCK, 0.55f, 0f}};
         for (Object[] t : table) { int l = (Integer) t[0]; m[l * 4] = (byte) rough((Float) t[1]); m[l * 4 + 1] = (byte) clamp((Float) t[2] * 255); }
+        for (int l = CHAR_LAYER0; l < LAYERS; l++) m[l * 4] = (byte) rough(0.97f);   // char is dry and dull
         m[L_LAMP * 4 + 2] = (byte) 255;
         m[L_FURNACE * 4 + 2] = (byte) 120;
         for (int l = 0; l < LAYERS; l++) m[l * 4 + 3] = (byte) rough((m[l * 4] & 255) / 255f * 0.55f);

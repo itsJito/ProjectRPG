@@ -255,6 +255,7 @@ public final class MonsterMind {
     private void enter(Monster m) {
         switch (m.state) {
             case ENGAGE -> {
+                m.swoop = 0; m.swoopUntil = g.time + 0.3;
                 // group aggro: a call alerts the others in call range (kill the caller and the call is never made)
                 if (m.kind.archetype == Archetype.PACK_RAIDER || m.kind.social > 0.5f) {
                     sys.sound(m, m.kind.alarmSound, 0.9f);
@@ -388,6 +389,8 @@ public final class MonsterMind {
         float reach = m.kind.reach * m.kind.scale() + (m.main() != null && !m.main().natural ? m.main().reach : 0);
         boolean ranged = m.kind.ranged != null && g.time >= m.nextRanged && d > Math.max(3, reach + 1) && d < m.kind.rangedRange && g.vox.sight(m.x, m.eyeY(), m.z, t.x, t.chestY(), t.z);
         // the harassers keep moving: hit and run; the ranged keep their distance; the brutes close in
+        if (m.kind == MonsterKind.BAT) { batFight(m, t, d, reach, ranged); return; }
+        if (m.kind.archetype == Archetype.PACK_RAIDER) { packFight(m, t, d, reach, ranged, dt); return; }
         switch (m.kind.archetype) {
             case HARASSER -> {
                 if (ranged && sys.rnd(m) < 0.6) { sys.ranged(m, t); return; }
@@ -404,6 +407,95 @@ public final class MonsterMind {
                 if (m.outOfReach > 4) { m.outOfReach = 0; if (m.kind.ranged != null) m.nextRanged = 0; else { m.state = State.ALERT; m.nextThink = g.time + 3; } }
             }
         }
+    }
+
+    /**
+     * (gamefixes: bats had bad combat AI) a bat fights as bats do: it circles out of reach over the target's head, drops
+     * into a dive at its chest, bites as it passes and climbs away past it, then circles round for the next pass - in the
+     * dive it is low enough to be struck; and now and then it screeches from the circle to rattle its prey.
+     */
+    private void batFight(Monster m, Actor t, float d, float reach, boolean ranged) {
+        float chest = Math.max(0.5f, t.chestY() - t.y - 0.15f), over = t.height + 1.15f;
+        double now = g.time;
+        switch (m.swoop) {
+            case 1 -> {   // the dive
+                m.wantAltitude = chest;
+                sys.moveTo(m, t.x, t.z, true, 0.2f);
+                if (d < reach + 0.3f && now >= m.nextStrike) {
+                    attack(m, t);
+                    float ax = t.x - m.x, az = t.z - m.z, l = Math.max(0.1f, (float) Math.hypot(ax, az));
+                    m.tx = t.x + ax / l * 3.5f; m.tz = t.z + az / l * 3.5f;
+                    m.swoop = 2; m.swoopUntil = now + 1.1;
+                } else if (now > m.swoopUntil) { m.swoop = 2; m.swoopUntil = now + 0.8; m.tx = m.x + (m.x - t.x); m.tz = m.z + (m.z - t.z); }
+            }
+            case 2 -> {   // climbing away past it
+                m.wantAltitude = over;
+                if (sys.moveTo(m, m.tx, m.tz, true, 0.8f) || now > m.swoopUntil) {
+                    m.swoop = 0; m.swoopUntil = now + 1.2 + sys.rnd(m) * 1.6;
+                    if (sys.rnd(m) < 0.3) m.orbit = -m.orbit;
+                }
+            }
+            default -> {   // circling overhead
+                m.wantAltitude = over;
+                double a = Math.atan2(m.z - t.z, m.x - t.x) + m.orbit * 0.8;
+                float r = 3.2f + (m.id % 3) * 0.4f;
+                sys.moveTo(m, t.x + (float) Math.cos(a) * r, t.z + (float) Math.sin(a) * r, true, 0.3f);
+                if (ranged && sys.rnd(m) < 0.004) { sys.ranged(m, t); return; }
+                // one bat dives at a time from a swarm (the others keep the circle), and only when it can bite again
+                boolean another = false;
+                for (Monster o : sys.kin(m, 10)) if (o.target == m.target && o.swoop == 1) another = true;
+                if (now > m.swoopUntil && now >= m.nextStrike - 0.3 && !another) { m.swoop = 1; m.swoopUntil = now + 2.2; }
+            }
+        }
+    }
+
+    /**
+     * (gamefixes: goblins had bad combat AI) a pack raider never queues up in front of its target: the band spreads round
+     * it on a ring just out of reach, the first slots behind and beside it, and each darts in from its own slot when its
+     * blow is ready - no more than two at once - strikes, and falls back to the ring. A blow wound up at it close by sends
+     * it hopping back; with a throw to hand it throws from the ring.
+     */
+    private void packFight(Monster m, Actor t, float d, float reach, boolean ranged, float dt) {
+        double now = g.time;
+        List<Monster> band = new ArrayList<>();
+        band.add(m);
+        for (Monster o : sys.kin(m, 30)) if (o.target == m.target && o.state == State.ENGAGE) band.add(o);
+        band.sort(Comparator.comparingLong(o -> o.id));
+        int i = band.indexOf(m), n = band.size();
+        // slots: the first straight behind the target, then alternately round either side of it
+        double back = t.yaw + Math.PI;
+        int k = (i + 1) / 2;
+        double slot = back + (i % 2 == 0 ? 1 : -1) * k * Math.min(1.1, 2 * Math.PI / Math.max(2, n));
+        float ring = reach + t.radius + m.radius + 1.3f;
+        boolean threatened = t.cs.phase == Actor.Combat.Phase.WINDUP && d < 2.4f && Math.abs(rpg.actor.Actor.wrap(yawTo(t, m.x, m.z) - t.yaw)) < 0.7f;
+        if (threatened && m.swoop != 2) { m.swoop = 2; m.swoopUntil = now + 0.7; }
+        switch (m.swoop) {
+            case 1 -> {   // darting in
+                if (d <= reach + 0.15f) {
+                    hold(m);
+                    if (now >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); m.swoop = 2; m.swoopUntil = now + 0.9; }
+                } else sys.moveTo(m, t.x, t.z, true, reach * 0.9f);
+                if (now > m.swoopUntil) { m.swoop = 2; m.swoopUntil = now + 0.6; }
+            }
+            case 2 -> {   // falling back to its slot
+                float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az));
+                sys.moveTo(m, t.x + ax / l * ring, t.z + az / l * ring, true, 0.4f);
+                if (now > m.swoopUntil) { m.swoop = 0; m.swoopUntil = now + 0.4 + sys.rnd(m) * 0.8; }
+            }
+            default -> {   // on the ring, edging round to its slot, watching
+                // (a slot inside a wall is taken at the nearest open ground to it)
+                float[] open = sys.open(m, t.x + (float) Math.cos(slot) * ring, t.z + (float) Math.sin(slot) * ring);
+                float sx = open[0], sz = open[1];
+                if (sys.moveTo(m, sx, sz, d > ring + 2, 0.6f)) { hold(m); m.wantYaw = yawTo(m, t.x, t.z); }
+                if (ranged && sys.rnd(m) < 0.01) { sys.ranged(m, t); return; }
+                int darting = 0;
+                for (Monster o : band) if (o != m && o.swoop == 1) darting++;
+                if (now > m.swoopUntil && now >= m.nextStrike && darting < 2) { m.swoop = 1; m.swoopUntil = now + 2.5; }
+            }
+        }
+        // a target it cannot get to (up on something, behind something): it throws, or gives it up
+        if (d > reach + 0.5f && Math.hypot(m.vx, m.vz) < 0.2f) m.outOfReach += dt; else m.outOfReach = Math.max(0, m.outOfReach - dt);
+        if (m.outOfReach > 4) { m.outOfReach = 0; if (m.kind.ranged != null) m.nextRanged = 0; else { m.state = State.ALERT; m.nextThink = g.time + 3; } }
     }
 
     /** A blow at the target, as its kind deals them: the humanoids through the melee system (with their weapons or their own claws), the creatures by a telegraphed strike. */

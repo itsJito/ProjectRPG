@@ -9,6 +9,8 @@ uniform float uDensity;
 // 2.4: the lit scene behind the glass and water (before them), its depth, and how to read a point back from it - for
 // reflections in water of what is really there
 uniform sampler2D uSceneColor, uSceneDepth,uWaves,uWaterNoise;
+// 1.2: the wave grid's corner (x, z) and cell (m): it follows the camera
+uniform vec3 uWaveGrid;
 uniform mat4 uPV, uInvPV;
 uniform int uWaterSSR;
 layout(location=0) out vec4 oColor;
@@ -48,13 +50,21 @@ void main() {
     vec3 albedo = pow(tex.rgb, vec3(2.2));
     vec3 V = normalize(uCam - vWorld);
     if (dot(N, V) < 0.0) N = -N;
+    float ripple=0.0,crest=0.0,rippleLight=0.0;
     if (liquid && N.y > 0.5) {
-        vec2 uv=vWorld.xz/vec2(WORLD_X,WORLD_Z),pixel=vec2(1.0/256.0);
-        vec2 slope=vec2(texture(uWaves,uv+vec2(pixel.x,0)).r-texture(uWaves,uv-vec2(pixel.x,0)).r,
-                        texture(uWaves,uv+vec2(0,pixel.y)).r-texture(uWaves,uv-vec2(0,pixel.y)).r);
+        // the ripples: the surface's own slope (dh/dx, dh/dz) from the wave grid, faded out toward its edge
+        vec2 uv=(vWorld.xz-uWaveGrid.xy)/(uWaveGrid.z*256.0),pixel=vec2(1.0/256.0);
+        vec2 grad=vec2(texture(uWaves,uv+vec2(pixel.x,0)).r-texture(uWaves,uv-vec2(pixel.x,0)).r,
+                       texture(uWaves,uv+vec2(0,pixel.y)).r-texture(uWaves,uv-vec2(0,pixel.y)).r)/(2.0*uWaveGrid.z);
+        vec2 edge=smoothstep(vec2(0.0),vec2(0.1),uv)*(1.0-smoothstep(vec2(0.9),vec2(1.0),uv));
+        grad*=edge.x*edge.y;
         vec2 first=texture(uWaterNoise,vWorld.xz*0.09+vec2(uTime*0.018,uTime*0.011)).rg*2.0-1.0;
         vec2 second=texture(uWaterNoise,vWorld.xz*0.17+vec2(-uTime*0.013,uTime*0.021)).gb*2.0-1.0;
-        N=normalize(vec3(slope.x*1.5+(first.x+second.x)*0.035,1.0,slope.y*1.5+(first.y+second.y)*0.035));
+        N=normalize(vec3(-grad.x*0.8+(first.x+second.x)*0.035,1.0,-grad.y*0.8+(first.y+second.y)*0.035));
+        ripple=clamp(length(grad),0.0,1.5);
+        // how much more (or less) of the light a ring's slope faces than the flat water does: the rings read as bands
+        rippleLight=dot(normalize(vec3(-grad.x,1.0,-grad.y)),normalize(uSunDir+vec3(0.0,0.6,0.0)))-dot(vec3(0.0,1.0,0.0),normalize(uSunDir+vec3(0.0,0.6,0.0)));
+        crest=texture(uWaves,uv).r*edge.x*edge.y;
     }
     vec3 uvw = (vWorld + N) / (vec3(WORLD_X, WORLD_Y, WORLD_Z));
     vec4 r = texture(uProbeR, uvw), g = texture(uProbeG, uvw), b = texture(uProbeB, uvw);
@@ -68,7 +78,8 @@ void main() {
     float a = max(tex.a, liquid ? 0.62 : 0.0);
     if(liquid) {
         vec4 clip=uPV*vec4(vWorld,1);vec2 screen=clip.xy/clip.w*0.5+0.5;
-        vec2 distorted=clamp(screen+N.xz*0.025,vec2(0.002),vec2(0.998));
+        // 1.2: a ripple bends what is seen through it (the bed wobbles under a ring) as much as the noise does
+        vec2 distorted=clamp(screen+N.xz*(0.025+0.05*ripple),vec2(0.002),vec2(0.998));
         float behind=texture(uSceneDepth,distorted).r;
         if(behind>clip.z/clip.w*0.5+0.5+0.0001) {
             vec3 refracted=texture(uSceneColor,distorted).rgb;
@@ -76,6 +87,13 @@ void main() {
         }
     }
     col = mix(col, refl, fres);
+    if (liquid) {
+        // a ring catches the sun on its slopes (a tight glint) and its crests show a touch lighter
+        col += uSunCol * pow(max(dot(R, uSunDir), 0.0), 180.0) * (0.6 + 2.4 * ripple) * smoothstep(0.6, 1.0, sky);
+        col *= 1.0 + clamp(crest * 6.0, -0.12, 0.18) + clamp(rippleLight * 5.0, -0.32, 0.45);
+        col = mix(col, vec3(0.92, 0.96, 1.0) * max(0.4, dot(uSunCol, vec3(0.33))), smoothstep(0.006, 0.02, crest) * smoothstep(0.35, 0.9, ripple) * 0.3);   // foam on a steep crest
+        a = clamp(a + ripple * 0.15, 0.0, 1.0);
+    }
     a = clamp(a + fres * 0.6, 0.0, 1.0);
     oColor = vec4(airFog(col, vWorld, uCam, uDensity, uAmbient * uFogCol), a);
 }

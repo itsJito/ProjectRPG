@@ -47,7 +47,7 @@ class ReleaseSystemsTest {
     @Test void transformationUsesCasterAimAndRetainsIdentitySkillsAndBelongings(@TempDir Path directory) {
         Npc n=target(Ids.VILLAGER,100.5f,68.5f);
         n.inv.add(new ItemStack(Items.BREAD,2,n.id,true,991));var xp=n.skills.raw().clone();
-        g.player.book=Spells.Book.ARCANE;
+        g.player.book=Spells.Book.MOON;
         assertTrue(g.combat.cast(g.player,Spells.Spell.MORPHBEAST,0,pitch(g.player,n)));
         assertEquals(8,n.morphT);assertFalse(g.combat.attack(n,false,Actor.Combat.Move.PUNCH));
         assertArrayEquals(xp,n.skills.raw());assertTrue(n.inv.stacks().stream().anyMatch(s->s.origin==991&&s.stolen));
@@ -61,7 +61,7 @@ class ReleaseSystemsTest {
         assertTrue(patient.hp>1);assertEquals(before,g.player.hp);assertArrayEquals(xp,healer.skills.raw());
     }
     @Test void summonsAreBoundedPersistTheirOwnerAndLeaveNoLootOrExperience(@TempDir Path directory) {
-        g.player.book=Spells.Book.ANCIENTS;
+        g.player.book=Spells.Book.FOGISH;
         assertTrue(g.combat.cast(g.player,Spells.Spell.NECROCALL,0,0));
         g.player.cs.castCooldown=0;
         assertTrue(g.combat.cast(g.player,Spells.Spell.NECROCALL,(float)Math.PI/2,0));
@@ -93,7 +93,7 @@ class ReleaseSystemsTest {
         assertTrue(g.player.skills.xp(Skill.MAGIC)>magic);assertArrayEquals(npcXp,victim.skills.raw());
     }
     @Test void phaseStepStopsBeforeAFullHeightWall() {
-        g.player.book=Spells.Book.LUNAR;
+        g.player.book=Spells.Book.MOON;
         for(int x=99;x<=101;x++)for(int y=DevMap.FLOOR;y<DevMap.FLOOR+4;y++)g.setBlock(x,y,70,Blocks.STONE);
         game.tick(0);
         g.player.aimYaw=0;g.player.pitch=0;

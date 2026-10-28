@@ -170,7 +170,7 @@ public final class AstrattoNative {
             {"astratto_cmd_audio_mix", 40}, {"astratto_cmd_audio_pause", 16}, {"astratto_stream_io", 32}, {"astratto_frame_io", 40}, {"astratto_stats", 176}, {"astratto_snap_mover", 48}, {"astratto_snap_ragdoll", 624},
             {"astratto_snap_softbody", 40}, {"astratto_snap_vehicle", 176}, {"astratto_snap_agent", 72}, {"astratto_audio_stats", 72},
             {"astratto_snapshot_io", 24}, {"astratto_evt_module_log", 24}, {"astratto_render_block", 12}, {"astratto_shape_def", 12},
-            {"astratto_render_table", 48}, {"astratto_mesh_io", 72}, {"astratto_renderer_desc", 32}, {"astratto_texture_desc", 40},
+            {"astratto_render_table", 48}, {"astratto_mesh_io", 72}, {"astratto_renderer_desc", 32}, {"astratto_texture_desc", 40}, {"astratto_texture_update", 24},
             {"astratto_world_look", 48}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 112}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},
             {"astratto_rcmd_particles", 16}, {"astratto_rcmd_quads", 16}, {"astratto_rcmd_grading", 32}, {"astratto_rcmd_body", 32},
             {"astratto_rcmd_world", 16}, {"astratto_rcmd_clear", 24}, {"astratto_rcmd_quality", 24}, {"astratto_rcmd_lens", 24}, {"astratto_rcmd_smoke", 16}, {"astratto_render_io", 120},
@@ -183,7 +183,7 @@ public final class AstrattoNative {
     private static long fnVersion, fnBuildInfo, fnLayout, fnCreate, fnCreateStatus, fnDestroy, fnLastError, fnReserve, fnRelease,
             fnBlockTable, fnWorldCreate, fnWorldView, fnWorldEdit, fnFrame, fnSnapshot, fnSoundCreate, fnAudioRender, fnModuleLoad, fnStreamCreate, fnStreamWrite,
             fnMesherCreate, fnMesherDestroy, fnMeshColumn,
-            fnRendererShader, fnRendererCreate, fnRendererDestroy, fnRendererError, fnRenderTexture, fnRenderMesh, fnRenderRelease, fnRenderWorldLook,
+            fnRendererShader, fnRendererCreate, fnRendererDestroy, fnRendererError, fnRenderTexture, fnRenderTextureUpdate, fnRenderMesh, fnRenderRelease, fnRenderWorldLook,
             fnRenderFrame, fnRenderReadPixels, fnRenderLayerMesh, fnRenderInstances;
     private static boolean tried;
     private static String why = "not looked for yet", path = "";
@@ -298,6 +298,7 @@ public final class AstrattoNative {
             fnRendererShader = l.getFunctionAddress("astratto_renderer_shader"); fnRendererCreate = l.getFunctionAddress("astratto_renderer_create");
             fnRendererDestroy = l.getFunctionAddress("astratto_renderer_destroy"); fnRendererError = l.getFunctionAddress("astratto_renderer_error");
             fnRenderTexture = l.getFunctionAddress("astratto_render_texture"); fnRenderMesh = l.getFunctionAddress("astratto_render_mesh");
+            fnRenderTextureUpdate = l.getFunctionAddress("astratto_render_texture_update");   // 2.7 (0 from an older library)
             fnRenderRelease = l.getFunctionAddress("astratto_render_release"); fnRenderWorldLook = l.getFunctionAddress("astratto_render_world_look");
             fnRenderFrame = l.getFunctionAddress("astratto_render_frame"); fnRenderReadPixels = l.getFunctionAddress("astratto_render_read_pixels");
             fnRenderLayerMesh = l.getFunctionAddress("astratto_render_layer_mesh"); fnRenderInstances = l.getFunctionAddress("astratto_render_instances");
@@ -380,6 +381,8 @@ public final class AstrattoNative {
     static String rendererError(long renderer) { long p = JNI.invokePP(renderer, fnRendererError); return p == 0 ? "" : MemoryUtil.memUTF8(p); }
     static int renderTexture(long renderer, ByteBuffer desc, long out) { return JNI.invokePPPI(renderer, MemoryUtil.memAddress(desc), out, fnRenderTexture); }
     static int renderMesh(long renderer, long vertices, int count, long out) { return JNI.invokePPPI(renderer, vertices, count, out, fnRenderMesh); }
+    static boolean hasTextureUpdate() { return fnRenderTextureUpdate != 0; }
+    static int renderTextureUpdate(long renderer, long update) { return JNI.invokePPI(renderer, update, fnRenderTextureUpdate); }
     static int renderRelease(long renderer, int kind, int id) { return JNI.invokePI(renderer, kind, id, fnRenderRelease); }
     static int renderWorldLook(long renderer, ByteBuffer look) { return JNI.invokePPI(renderer, MemoryUtil.memAddress(look), fnRenderWorldLook); }
     static int renderFrame(long renderer, long engine, ByteBuffer io) { return JNI.invokePPPI(renderer, engine, MemoryUtil.memAddress(io), fnRenderFrame); }

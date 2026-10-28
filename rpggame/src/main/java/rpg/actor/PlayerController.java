@@ -32,9 +32,9 @@ public final class PlayerController {
         public boolean jogToggle;
         public boolean sprint, sneak, jump, dodge, mainDown, offDown, cast, interact, interactHeld, toggleCamera;
         /** The back key was just pressed (two taps of it close together turn the player about). */
-        public boolean backTap;
+        public boolean turnBack;
         public int bless = -1;
-        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = backTap = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
+        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = turnBack = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
     }
 
     private final Rpg g;
@@ -55,7 +55,7 @@ public final class PlayerController {
     private float sprintRecover, quickTurn, quickYaw, quickCam, sprintTime;
     /** When the last sprint was stopped short (the figure plants its feet and leans back: see Rig). */
     public double sprintStopAt = -9;
-    private double lastBackTap = -9, lastGrounded = -9, lastJump = -9;
+    private double lastGrounded = -9, lastJump = -9;
     /** The jog kept on (Caps Lock toggles it). */
     public boolean jogging;
     private float jumpBuffer;
@@ -246,14 +246,11 @@ public final class PlayerController {
         if (l > 1) { dx /= l; dz /= l; l = 1; }
         Actor.Combat c = p.cs;
         boolean strafe = strafing(p);
-        // the quick turn: the back key tapped twice, never while aiming
-        if (in.backTap) {
-            if (g.time - lastBackTap < 0.3 && !strafe && p.grounded && quickTurn <= 0 && c.staggered <= 0 && c.dodgeT <= 0) {
-                quickTurn = 0.32f;
-                quickYaw = Actor.wrap(p.yaw + (float) Math.PI);
-                quickCam = Actor.wrap(camYaw + (float) Math.PI);
-            }
-            lastBackTap = g.time;
+        // the quick turn: Ctrl+S (crouch and back together), never while aiming
+        if (in.turnBack && !strafe && p.grounded && quickTurn <= 0 && c.staggered <= 0 && c.dodgeT <= 0) {
+            quickTurn = 0.32f;
+            quickYaw = Actor.wrap(p.yaw + (float) Math.PI);
+            quickCam = Actor.wrap(camYaw + (float) Math.PI);
         }
         int agility = p.skills.level(Skill.AGILITY);
         boolean moving = l > 0.1f && quickTurn <= 0;
@@ -295,6 +292,7 @@ public final class PlayerController {
         if (c.charge > 0) max *= 0.7f;
         if (c.draw > 0) max *= 0.75f;
         if (c.slowT > 0) max *= 0.6f;
+        if (c.frozenT > 0) max = 0;
         // the load: a heavy pack slows every gait, makes the body slower to get going and tires a sprint sooner
         float burden = p.burden();
         max *= burden * p.actionRate();
@@ -311,6 +309,9 @@ public final class PlayerController {
         float decel = wasSprinting || speedNow > g.cfg.walkSpeed * 1.15f ? 26f : 32f;
         if (c.staggered > 0) decel = 22f;
         accel *= 0.55f + 0.45f * burden;
+        // (gamefixes: first person should feel snappier; third person stays as it is) through one's own eyes the body
+        // answers the keys at once: it is up to speed in a stride and stops in half of one
+        if (p.firstPerson && p.morphT <= 0) { accel *= p.sprinting ? 1.7f : 2.2f; decel *= 1.6f; }
         if (!p.grounded) { accel *= 0.15f; decel *= 0.15f; }
         float nvx, nvz;
         if (speedNow > 0.5f && moving && !strafe) {
@@ -367,8 +368,11 @@ public final class PlayerController {
             camYaw = Actor.wrap(camYaw + Actor.wrap(quickCam - camYaw) * Math.min(1, dt / Math.max(dt, quickTurn)));
             return;
         }
-        if (strafing(p)) p.turnToward(p.aimYaw, c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
+        if (strafing(p)) p.turnToward(p.aimYaw, p.firstPerson ? 26f : c.phase == Actor.Combat.Phase.WINDUP || c.blocking ? 16f : 11f, dt);
         else if (speed > 0.4f) p.turnToward((float) Math.atan2(-p.vx, -p.vz), p.sprinting ? 7f : 14f, dt);
+        // at work on something (a fire, a forge, a fishing spot): the body turns to face it
+        else if (p.working != null && p.working.target instanceof rpg.interact.WorldObject o && Math.hypot(o.x - p.x, o.z - p.z) > 0.2)
+            p.turnToward((float) Math.atan2(-(o.x - p.x), -(o.z - p.z)), 6f, dt);
         // Standing in third person, looking moves the head; the feet turn with movement or an action.
     }
 

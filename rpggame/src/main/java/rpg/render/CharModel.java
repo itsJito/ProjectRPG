@@ -52,7 +52,7 @@ public final class CharModel {
      */
     private void feminine(Skin s, Body b, float tx, float tz, float h) {
         float wy = 4, cy = 7;                                    // the hips run to 4 px up, the waist to 7, the chest to the top
-        float ww = tx - b.waist, hw = tx + b.hips * 0.5f, wz = tz - b.waist * 0.35f, hz = tz + b.hips * 0.2f;
+        float ww = tx - b.waist, hw = tx + b.hips * 0.5f, wz = tz - b.waist * 0.35f, hz = tz + b.hips * 0.3f;
         float by0 = cy + 0.8f, by1 = cy + 2.6f, by2 = cy + 3.5f, bx = tx - 0.55f;
         java.util.List<float[]> in = new java.util.ArrayList<>(), out = new java.util.ArrayList<>();
         for (int layer = 0; layer < 2; layer++) {

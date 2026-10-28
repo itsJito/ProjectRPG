@@ -128,6 +128,11 @@ public final class Items {
     public static final ItemDef IRON_ARROWS = arrows("iron_arrows", "Iron arrows", 15, 9, 3, 0x6E6E72);
     public static final ItemDef STAFF = staff("apprentice_staff", "Apprentice staff", 1, 40, 0x7A5A9A, Family.STAFF);
     public static final ItemDef FIRE_STAFF = staff("fire_staff", "Fire staff", 10, 400, 0xC04020, Family.STAFF);
+    // the gamefixes' elemental staffs: each makes its own element's Sun spells very cheap to cast
+    public static final ItemDef AIR_STAFF = staff("air_staff", "Air staff", 10, 400, 0xD8E4EC, Family.STAFF);
+    public static final ItemDef WATER_STAFF = staff("water_staff", "Water staff", 10, 400, 0x3A6AC8, Family.STAFF);
+    public static final ItemDef ELECTRIC_STAFF = staff("electric_staff", "Electric staff", 10, 400, 0xE8D040, Family.STAFF);
+    public static final ItemDef EARTH_STAFF = staff("earth_staff", "Earth staff", 10, 400, 0x7A5A32, Family.STAFF);
     public static final ItemDef WAND = staff("wand", "Oak wand", 1, 30, 0x9A7A50, Family.WAND);
     public static final ItemDef HOLY_SYMBOL = holy("holy_symbol", "Holy symbol", 1, 60);
     public static final ItemDef BLESSED_SYMBOL = holy("blessed_symbol", "Blessed symbol", 30, 600);
@@ -419,7 +424,7 @@ public final class Items {
                 {"raw_crab", 1, 1, 0.4f}, {"crab", 1, 1, 0.3f}, {"religious_wine", 1, 2, 0.8f}, {"restorative_potion", 1, 1, 0.3f}, {"lockpick", 1, 1, 0.05f},
                 {"sealed_letter", 1, 1, 0.02f}, {"xp_lamp", 2, 1, 0.8f}, {"chancery_key", 1, 1, 0.1f},
                 {"shortbow", 1, 4, 0.9f}, {"oak_shortbow", 1, 4, 1f}, {"willow_shortbow", 1, 4, 1f}, {"bronze_arrows", 1, 3, 0.03f}, {"iron_arrows", 1, 3, 0.03f},
-                {"apprentice_staff", 1, 5, 1.6f}, {"fire_staff", 1, 5, 1.8f}, {"wand", 1, 2, 0.3f}, {"holy_symbol", 1, 1, 0.3f}, {"blessed_symbol", 1, 1, 0.3f},
+                {"apprentice_staff", 1, 5, 1.6f}, {"fire_staff", 1, 5, 1.8f}, {"air_staff", 1, 5, 1.8f}, {"water_staff", 1, 5, 1.8f}, {"electric_staff", 1, 5, 1.8f}, {"earth_staff", 1, 5, 1.8f}, {"wand", 1, 2, 0.3f}, {"holy_symbol", 1, 1, 0.3f}, {"blessed_symbol", 1, 1, 0.3f},
                 {"leather_boots", 2, 2, 1.2f}, {"leather_gloves", 2, 1, 0.4f},
                 {"basic_backpack", 3, 3, 1.4f}, {"leather_pouch", 2, 1, 0.3f}, {"sack", 2, 2, 0.4f},
                 {"raw_meat", 2, 1, 0.5f}, {"cooked_meat", 2, 1, 0.4f}, {"burnt_meat", 2, 1, 0.3f}, {"rawhide", 2, 2, 2.5f}, {"wool", 1, 1, 0.3f},
@@ -512,7 +517,12 @@ public final class Items {
         ItemDef d = def(id, name, value, color, f == Family.WAND ? "Casts the selected spell from the off hand." : "Casts the selected spell.");
         d.magicDamageBonusPct = f == Family.STAFF ? 16 : 8;
         d.slot = f == Family.WAND ? Slot.OFF : Slot.MAIN; d.family = f; d.reqSkill = Skill.MAGIC; d.reqLevel = req; d.damage = (f == Family.STAFF ? 4 : 2) * rpg.combat.CombatMath.HP_SCALE; d.impact = 10; d.reach = 1.3f; d.speed = 1.1f; d.damageType = DamageType.BLUNT;
-        if (id.equals("fire_staff")) { d.damage = 8 * rpg.combat.CombatMath.HP_SCALE; d.maxCharges = 30; d.examine = "The Fire staff: it casts Fire Blast, a charge at a time (recharge it with coal)."; }
+        rpg.combat.Spells.Element e = switch (id) { case "fire_staff" -> rpg.combat.Spells.Element.FIRE; case "air_staff" -> rpg.combat.Spells.Element.AIR;
+            case "water_staff" -> rpg.combat.Spells.Element.WATER; case "electric_staff" -> rpg.combat.Spells.Element.ELECTRIC; case "earth_staff" -> rpg.combat.Spells.Element.EARTH; default -> null; };
+        if (e != null) {
+            d.staffElement = e; d.damage = 6 * rpg.combat.CombatMath.HP_SCALE;
+            d.examine = "A staff bound to " + e.word() + ": " + e.word() + " spells cost very little Mana with it in hand.";
+        }
         return d;
     }
 

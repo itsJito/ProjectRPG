@@ -134,7 +134,8 @@ public final class SaveSystem {
         m.put("eq", ItemIO.equipment(a.eq));
         List<Object> look = new ArrayList<>(); for (int v : a.look.toArray()) look.add(v);
         m.put("look", look);
-        if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.morphCameraSaved ? p.morphFirstPerson : p.firstPerson); m.put("book", p.book.name()); }
+        if (a instanceof rpg.actor.Player p) { m.put("spell", p.spell.name()); m.put("fp", p.morphCameraSaved ? p.morphFirstPerson : p.firstPerson); m.put("book", p.book.name());
+            java.util.List<Object> quick = new java.util.ArrayList<>(); for (var q : p.quick) quick.add(q == null ? "" : q.item().id); m.put("quick", quick); }
         m.put("manaAcc", (double) a.manaAcc);
         m.put("injuries",a.injuries.save()); m.put("charred",a.charred); m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
         if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
@@ -189,9 +190,14 @@ public final class SaveSystem {
         // the player
         Map<String, Object> pm = Json.obj(root, "player");
         applyActor(g.player, pm);
-        try { g.player.spell = rpg.combat.Spells.Spell.valueOf(Json.str(pm, "spell", "SPARK")); } catch (IllegalArgumentException e) { g.player.spell = rpg.combat.Spells.Spell.SPARK; }
-        try { g.player.book = rpg.combat.Spells.Book.valueOf(Json.str(pm, "book", "STANDARD")); } catch (IllegalArgumentException e) { g.player.book = rpg.combat.Spells.Book.STANDARD; }
+        try { g.player.spell = rpg.combat.Spells.Spell.of(Json.str(pm, "spell", "WIND_STRIKE")); } catch (IllegalArgumentException e) { g.player.spell = rpg.combat.Spells.Spell.WIND_STRIKE; }
+        try { g.player.book = rpg.combat.Spells.Book.of(Json.str(pm, "book", "SUN")); } catch (IllegalArgumentException e) { g.player.book = rpg.combat.Spells.Book.SUN; }
         g.player.firstPerson = Json.bool(pm, "fp", false); g.player.morphCameraSaved = false;
+        java.util.Arrays.fill(g.player.quick, null);
+        var quick = Json.list(pm, "quick");
+        for (int i = 0; i < Math.min(8, quick.size()); i++) if (quick.get(i) instanceof String id && !id.isEmpty() && rpg.item.Items.find(id) != null)
+            g.player.quick[i] = new rpg.actor.Player.QuickSlot(rpg.item.Items.find(id), 0);
+        g.player.refreshQuick();
         g.player.alive = Json.bool(pm, "alive", true);
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
         g.player.diedAt = -1;
@@ -271,7 +277,7 @@ public final class SaveSystem {
                 case "Container", "Corpse" -> {
                     long body = Json.lng(m, "body", 0);
                     Container ct = body != 0 && g.actor(body) instanceof Npc deadActor && !deadActor.alive
-                            ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body).name, body, x, y, z, Json.lng(m, "owner", 0)))
+                            ? g.objects.add(new rpg.objects.Corpse(id, g.actor(body).name, body, x, y, z, deadActor instanceof rpg.monster.Monster ? 0 : Json.lng(m, "owner", 0)))
                             : g.objects.add(new Container(id, Json.str(m, "def", "grave"), Json.str(m, "name", "Grave"), Json.str(m, "ckind", "grave"), x, y, z, Json.integer(m, "gridCells", 28), Json.lng(m, "owner", 0)));
                     if (ct instanceof rpg.objects.Corpse cp && g.actor(body) instanceof rpg.ai.Npc dead) dead.corpse = cp.id;
                     ct.ownerOnly = Json.bool(m, "ownerOnly", false);

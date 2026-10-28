@@ -82,18 +82,21 @@ public final class Dungeons {
      * after; disarmed for good by careful hands.
      */
     public static final class Trap extends WorldObject {
-        public final int kind;          // 0 spikes, 1 falling rock
+        public final int kind;          // 0 spikes, 1 falling rock, 2 a hunter's snare
         public final float threat;
         public final int level;
         public boolean armed = true, found, disarmed;
         public double sprungAt = -99, readyAt;
-        Trap(long id, int kind, float threat, int level, float x, float z) {
-            super(id, "dungeon_trap", kind == 0 ? "Spike plate" : "Loose stone", x, DevMap.FLOOR, z);
+        /** Who set it (a hunter's snare: it does not take them, nor their party); 0 for a dungeon's own. */
+        public long owner;
+        public Trap(long id, int kind, float threat, int level, float x, float z) {
+            super(id, "dungeon_trap", kind == 0 ? "Spike plate" : kind == 1 ? "Loose stone" : "Hunter's snare", x, DevMap.FLOOR, z);
             this.kind = kind; this.threat = threat; this.level = level;
         }
         @Override public float focusRadius() { return 0.45f; }
         @Override public boolean exists() { return !removed && (found || disarmed); }
         @Override public String examine(Rpg g) {
+            if (kind == 2) return disarmed ? "A snare, its noose cut." : "A noose of rope laid in the leaves, pegged to a stake. Someone means to catch someone.";
             return disarmed ? "A trap's plate, wedged so it will not spring." : kind == 0 ? "A plate in the floor, sitting a little proud. Spikes wait under it." : "A loose stone underfoot. The roof above it is cracked and heavy.";
         }
         @Override public List<Option> options(Rpg g, Actor a) {
@@ -115,7 +118,7 @@ public final class Dungeons {
                 disarmed = true; armed = false;
                 g.state.commit(req, "TrapDisarmed", a.id, id, jurisdiction(), 0, name);
                 g.prog.award(a, Skill.THIEVING, 25 + level * 1.5 * threat, "disarmed a trap", 0);
-                if (a == g.player) g.chat.say("You wedge the plate. The trap will not spring now.");
+                if (a == g.player) g.chat.say(kind == 2 ? "You cut the noose. The snare will not catch anyone now." : "You wedge the plate. The trap will not spring now.");
                 if (g.sfx != null) g.sfx.play("lock", x, y + 0.2f, z, 0.5f);
             } else {
                 if (a == g.player) g.chat.add("Your hand slips!", Chat.Kind.WARN);
@@ -134,6 +137,7 @@ public final class Dungeons {
         for (DungeonLayout l : DungeonLayout.all()) {
             float[] gate = entranceSpot(l);
             Door entrance = g.objects.add(new Door(id++, l, false, gate[0], gate[1]));
+            mound(entrance);
             Door exit = g.objects.add(new Door(id++, l, true, l.worldX(l.entryX) + 0.5f, l.worldZ(l.entryZ) + 0.5f));
             entrance.toX = exit.x + 1.2f; entrance.toZ = exit.z; entrance.toYaw = (float) (-Math.PI / 2);
             exit.toX = entrance.x; exit.toZ = entrance.z + 1.6f; exit.toYaw = 0;
@@ -186,6 +190,50 @@ public final class Dungeons {
             case HALL -> MonsterKind.TROLL;
         };
     }
+    /**
+     * The levels a dungeon's residents have for someone of a given combat level coming in (gamefixes). No dungeon's
+     * strongest but a boss dungeon's is above the visitor's own combat level; the weakest rise too: from combat level
+     * 20 on, from level 10, one level for every two the visitor gains. (An elite dungeon is no higher; its residents
+     * crowd toward the top of the range instead - see scale.) A boss dungeon is as it was made. {min, max}.
+     */
+    public static int[] range(DungeonLayout l, int combat) {
+        int min = combat < 20 ? Math.max(1, combat / 2) : 10 + (combat - 20) / 2, max = Math.max(1, combat);
+        return new int[]{Math.min(min, max), max};
+    }
+
+    /**
+     * Matches a dungeon's living residents to who comes in: each at its place between the range's weakest and
+     * strongest by how deep its room lies (its master at the top), with a little spread so a room is not a row of
+     * equals. Measured by combat level - the residents' skills decide theirs, as anyone's do.
+     */
+    void scale(DungeonLayout l, int combat) {
+        if (l.type == DungeonLayout.Type.BOSS) return;
+        int[] r = range(l, combat);
+        int deepest = 1;
+        for (Spot s : l.spots) if (s.what().equals("resident")) deepest = Math.max(deepest, s.arg());
+        // the strongest: a master, or else the first of those in the deepest room (the den's leader)
+        Spot lead = null;
+        for (Spot s : l.spots) if (s.what().equals("master")) lead = s;
+        if (lead == null) for (Spot s : l.spots) if (s.what().equals("resident") && s.arg() == deepest) { lead = s; break; }
+        for (var m : new ArrayList<>(g.monsters.all())) {
+            if (!m.alive || DungeonLayout.at(m.lairX, m.lairZ) != l) continue;
+            Spot home = null; float best = Float.MAX_VALUE;
+            for (Spot s : l.spots) {
+                if (!s.what().equals("resident") && !s.what().equals("master")) continue;
+                float d = (float) Math.hypot(l.worldX(s.x()) + 0.5f - m.lairX, l.worldZ(s.z()) + 0.5f - m.lairZ);
+                if (d < best) { best = d; home = s; }
+            }
+            boolean master = home != null && home == lead || m.leader;
+            float share = master ? 1 : home == null ? 0.5f : 0.15f + 0.7f * (float) Math.pow(Math.min(1f, home.arg() / (float) (deepest + 1)), 0.8);
+            if (l.type == DungeonLayout.Type.ELITE && !master) share = (float) Math.sqrt(share);   // elite: most near the cap
+            float spread = (Math.floorMod(m.id * 2654435761L, 1000) / 1000f - 0.5f) * 0.3f * (r[1] - r[0]);
+            int target = Math.round(r[0] + (r[1] - r[0]) * Math.min(1, share) + (master ? 0 : spread));
+            target = Math.max(r[0], Math.min(r[1], target));
+            g.monsters.relevel(m, target, master ? r[1] : Math.min(r[1], target + 2));
+        }
+        g.state.commit("DungeonScaled", g.player.id, 0, DevMap.WILDS, 0, l.name + " " + r[0] + "-" + r[1] + " for combat " + combat);
+    }
+
     /** A resident's level: the dungeon's threat on the room's depth. */
     private static int level(DungeonLayout l, int depth) {
         return switch (l.type) {
@@ -211,6 +259,17 @@ public final class Dungeons {
         for (int i = 0; i < 1 + (t >= 2.5f ? 2 : 0); i++) { ItemDef d = Items.find(gear[r.nextInt(gear.length)]); if (d != null) out.add(new ItemStack(d, 1)); }
         if (l.type == DungeonLayout.Type.BOSS) { ItemDef heart = Items.find("troll_heart"); if (heart != null) out.add(new ItemStack(heart, 1)); }
         return out;
+    }
+
+    /**
+     * The entrance's rock mound is solid (gamefixes: it had no collision - bodies walked through the heap and stood in
+     * the black of the way down): its footprint, five cells across and three deep behind the mouth, two high, in
+     * stone collision cells. Only open air is filled, so nothing the mound happens to overlap (a tree, a wall) is lost.
+     */
+    private void mound(Door entrance) {
+        int cx = (int) Math.floor(entrance.x), cz = (int) Math.floor(entrance.z);
+        for (int x = cx - 2; x <= cx + 2; x++) for (int z = cz; z <= cz + 2; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 2; y++)
+            if (g.vox.block(x, y, z) == rpg.world.Blocks.AIR) g.setBlock(x, y, z, rpg.world.Blocks.PROP_STONE);
     }
 
     /** Where a dungeon's entrance stands in the wilds: near its residents' kin above ground, on clear ground. */
@@ -249,6 +308,7 @@ public final class Dungeons {
         if (a == g.player) {
             g.controller.snapTo(door.toYaw);
             var l = door.layout;
+            if (!door.inside) scale(l, a.skills.combatLevel());
             if (!door.inside) {
                 g.chat.add("You enter the " + l.name + ". (" + l.type.title + ", " + l.threatWord() + " threat)", Chat.Kind.GAME);
                 if (!visited.containsKey(l.id)) { visited.put(l.id, (long) g.state.minutes); g.chat.say(firstWords(l)); }
@@ -266,7 +326,23 @@ public final class Dungeons {
     }
 
     // ------------------------------------------------------------------ the frame: traps
+    /**
+     * A bounty hunter's snare (gamefixes: the hunters set traps for whoever carries the bounty): a noose laid at the
+     * hunter's feet, hidden to all but a thief's eye like any trap. It takes whoever treads in it but the hunter and the
+     * hunter's party, holds them a moment, and the hunter hears it go.
+     */
+    public Trap snare(rpg.ai.Npc hunter, float x, float z) {
+        Trap t = g.objects.add(new Trap(g.state.newEntityId(), 2, 1, Math.max(1, hunter.skills.level(Skill.THIEVING)), x, z));
+        t.owner = hunter.id;
+        traps.add(t);
+        g.state.commit("SnareSet", hunter.id, t.id, DevMap.jurisdiction(x, z), 0, String.format("at (%.1f, %.1f)", x, z));
+        return t;
+    }
+
     public void update() {
+        // a hunter's snares go with the hunt: lifted when the one who set them is gone or has given up
+        for (Trap t : traps) if (t.kind == 2 && !t.removed && !(g.actor(t.owner) instanceof rpg.ai.Npc h && h.alive && h.hunt != null)) t.removed = true;
+        traps.removeIf(t -> t.kind == 2 && t.removed);
         for (Trap t : traps) {
             if (t.removed || t.disarmed) continue;
             if (!t.armed && g.time >= t.readyAt) t.armed = true;
@@ -278,6 +354,7 @@ public final class Dungeons {
             if (!t.armed) continue;
             for (Actor a : g.actors()) {
                 if (!a.alive || a.dummy || a instanceof rpg.monster.Monster || !a.grounded && !(a instanceof rpg.animal.Animal)) continue;
+                if (t.owner != 0 && (a.id == t.owner || a instanceof rpg.ai.Npc n && n.posse)) continue;   // a snare spares its hunters
                 if (Math.abs(a.x - t.x) < 0.45f && Math.abs(a.z - t.z) < 0.45f && a.y < DevMap.FLOOR + 0.3f) { spring(t, a); break; }
             }
         }
@@ -286,6 +363,18 @@ public final class Dungeons {
     /** A trap goes off under someone: spikes up through the plate, or the roof's rock down on them. */
     void spring(Trap t, Actor a) {
         t.armed = false; t.found = true; t.sprungAt = g.time; t.readyAt = g.time + 8;
+        if (t.kind == 2) {
+            // the noose snaps tight round an ankle: held where they stand a moment, a little hurt, and heard
+            a.cs.frozenT = Math.max(a.cs.frozenT, 3.5f); a.cs.slowT = Math.max(a.cs.slowT, 6);
+            g.combat.environmentalDamage(a, 1 + t.level / 25, "a snare");
+            if (a == g.player) g.chat.add("A snare snaps tight round your ankle!", Chat.Kind.WARN);
+            if (g.sfx != null) g.sfx.play("rope", t.x, t.y + 0.3f, t.z, 0.8f);
+            g.noise(a, t.x, t.y, t.z, 16, 0.7f);
+            if (g.actor(t.owner) instanceof rpg.ai.Npc h && h.hunt != null && h.hunt.target == a.id) { h.hunt.clue(t.x, t.z, 0, 0, g.time); h.nextThink = 0; }
+            t.readyAt = g.time + 1e9;   // a sprung snare is spent
+            g.state.commit("TrapSprung", a.id, t.id, DevMap.jurisdiction(t.x, t.z), 0, t.name);
+            return;
+        }
         int harm = Math.round((4 + t.level * 0.35f) * t.threat);
         g.combat.environmentalDamage(a, harm, t.kind == 0 ? "spike trap" : "falling rock");
         if (t.kind == 0) a.cs.slowT = Math.max(a.cs.slowT, 2.5f);

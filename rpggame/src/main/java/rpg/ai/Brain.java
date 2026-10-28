@@ -68,6 +68,25 @@ public final class Brain {
         ai.keepHunt(n);
         Actor rooftop=g.law.roofTarget(n);
         if(threat==null && rooftop!=null){n.watchTarget=rooftop.id;s.add(new Score(Goal.WATCH,0.72f,"ordering a trespasser down from a roof"));}
+        // the alarm (gamefixes: a dragon in the city should cause a genuine panic): heard, it is cried on; the city's
+        // fighters turn out after the terror, everyone else makes for shelter and stays there while the alarm is up
+        AiSystem.Alarm alarm = ai.alarmFor(n);
+        if (alarm != null && n.alarmCryAt < alarm.raisedAt) {
+            n.alarmCryAt = g.time;
+            String what = g.nameOf(alarm.monster).toLowerCase();
+            if (n.speech == null) g.ai.say(n, defender(n) ? "The " + what + "! With me - to the " + place(alarm.x, alarm.z) + "!" : "Did you hear? A " + what + "! Inside, quick!");
+            ai.heardAlarm(n, alarm);
+        }
+        Actor terror = alarm == null ? null : g.actor(alarm.monster);
+        if (terror != null && !defender(n)) {
+            if (n.fearOf != terror.id) n.hideSet = false;
+            n.fearOf = terror.id; n.fearSeenAt = g.time;
+            n.fearX = threat == terror ? terror.x : alarm.x; n.fearZ = threat == terror ? terror.z : alarm.z;
+            s.add(new Score(Goal.HIDE, 0.93f, "sheltering from the " + terror.name.toLowerCase() + (threat == terror ? " (in sight)" : " (the alarm is up)")));
+        } else if (terror != null && threat == null && (n.hunt == null || n.hunt.target != terror.id)) {
+            n.hunt = new Hunt(terror.id, "turned out at the alarm", alarm.x, alarm.z, g.time, 60);
+            g.state.commit("SearchStarted", n.id, terror.id, DevMap.jurisdiction(alarm.x, alarm.z), 0, "the alarm");
+        }
         // a foe lost from sight, or the culprit behind something found: search where they were last placed
         if (n.hunt != null && threat == null) {
             Hunt h = n.hunt;
@@ -88,6 +107,11 @@ public final class Brain {
         if (threat != null) n.investigation = null;   // something real to deal with: no more wondering
         // a beast bearing down on someone who cannot fight it: what they flee, they remember (and will report)
         if (threat instanceof rpg.animal.Animal beast && !n.combatant()) { n.fearOf = beast.id; n.fearX = beast.x; n.fearZ = beast.z; n.fearSeenAt = g.time; n.hideSet = false; }
+        // arms shown in the street (Arms): the watch keeps an eye on whoever is waving them about, a while
+        // (and a scholar comes to see a spell worked close up)
+        boolean curious = n.role == Npc.Role.SCHOLAR && n.armsKind == Arms.Kind.SPELL;
+        if (threat == null && (n.watch() || curious) && n.watchTarget == g.player.id && g.time < n.watchUntil && g.time - n.armsAt < 45 && g.player.alive && (curious || ai.canSee(n, g.player)))
+            s.add(new Score(Goal.WATCH, curious ? 0.72f : 0.63f, curious ? "come to see " + g.player.name + "'s magic close up" : "keeping an eye on " + g.player.name + ", who has been showing arms in the street"));
         // a guard who has heard the player is violent - but has no warrant (a rumor is not a report) - keeps an eye on them
         if (threat == null && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && g.player.alive && g.law.bounty(g.player.id, n.homeJurisdiction) <= 0) {
             Memory bad = n.crimeKnown(g.player.id);
@@ -124,7 +148,7 @@ public final class Brain {
                 }
             }
         }
-        if (threat != null) {
+        if (threat != null && !(threat == terror && !defender(n))) {
             boolean weak = n.hp < n.maxHp() * (civilian ? 0.95f : 0.25f);
             if (civilian || weak) s.add(new Score(Goal.FLEE, weak && !civilian ? 0.95f : 0.85f, (weak ? "badly hurt" : "not a fighter") + "; fleeing " + threat.name));
             else s.add(new Score(Goal.FIGHT, 0.9f, "engaging " + threat.name + (n.hostileToPlayer ? " (hostile)" : "")));
@@ -153,7 +177,9 @@ public final class Brain {
             // (enough at night to keep anyone from their bed; by day a civilian weighs it against their work)
             double hr = g.state.hourOfDay();
             boolean nightNow = hr >= 21 || hr < 5.5;
-            if (w.level >= Stealth.INVESTIGATING) s.add(new Score(Goal.INVESTIGATE, nightNow ? 0.8f : n.combatant() ? 0.66f : 0.46f, (heard ? "heard something at " : "glimpsed someone at ") + where + "; deciding what to do"));
+            // (an escort keeps to the one in their charge: they turn to look, and go only for the sound of violence)
+            boolean escort = n.profession == Profession.ESCORT_KNIGHT && g.time - n.violenceHeardAt > 4;
+            if (w.level >= Stealth.INVESTIGATING && !escort) s.add(new Score(Goal.INVESTIGATE, nightNow ? 0.8f : n.combatant() ? 0.66f : 0.46f, (heard ? "heard something at " : "glimpsed someone at ") + where + "; deciding what to do"));
             else s.add(new Score(Goal.LOOK, 0.56f, (heard ? "a sound from " : "a movement at ") + where));
         }
         if (threat == null && !n.hostileToPlayer && hasFood(n) && n.hp > n.maxHp() * 0.7f) {
@@ -302,11 +328,16 @@ public final class Brain {
             case HIDE -> hide(n);
             case WATCH -> {
                 Actor p = g.actor(n.watchTarget);
+                // (a curious scholar who only heard the spell goes toward it to see)
+                if (p != null && p.alive && !ai.canSee(n, p) && n.role == Npc.Role.SCHOLAR && g.time - n.armsAt < 45) { goTo(n, p.x, p.z, false, 4.5f); break; }
                 if (p == null || !p.alive || !ai.canSee(n, p)) { ai.desire(n, AiSystem.A_HOLD); n.nextThink = 0; break; }
                 n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
                 if (n.distTo(p) > 5 && !g.law.onRoof(p)) goTo(n, p.x, p.z, false, 4.5f); else ai.desire(n, AiSystem.A_HOLD);
                 if (n.speech == null && g.time - n.lastDialogAt > 8) {
-                    g.ai.say(n, g.law.onRoof(p) ? "Get down from that roof, now." : p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?" : "I've heard about you. Don't try anything.");
+                    boolean arms = g.time - n.armsAt < 45;
+                    g.ai.say(n, g.law.onRoof(p) ? "Get down from that roof, now." : p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?"
+                            : arms && n.role == Npc.Role.SCHOLAR ? "Slowly, this time. I want to see how the hands go."
+                            : arms ? (n.armsKind == Arms.Kind.SPELL ? "Keep your hands still where I can see them." : "Easy now. Keep it sheathed.") : "I've heard about you. Don't try anything.");
                     n.lastDialogAt = g.time;
                 }
                 n.lastOutcome = "watching " + p.name + (p.bloodied >= 0.25f ? "; visible blood, asking questions" : "");
@@ -339,7 +370,7 @@ public final class Brain {
         if (target == null || !target.alive || target.hp >= target.maxHp() * 0.8f || !hasFood(n)) { n.nextThink = 0; ai.desire(n, AiSystem.A_IDLE); return; }
         if (!goTo(n, target.x, target.z, false, n.radius + target.radius + 0.5f)) return;
         n.wantYaw = (float) Math.atan2(-(target.x - n.x), -(target.z - n.z));
-        if (n.spellBook==rpg.combat.Spells.Book.LUNAR && n.skills.level(Skill.MAGIC)>=60 && n.mana>=rpg.combat.Spells.Spell.VITALMEND.cost) {
+        if (n.spellBook==rpg.combat.Spells.Book.MOON && n.skills.level(Skill.MAGIC)>=60 && n.mana>=rpg.combat.Spells.Spell.VITALMEND.cost) {
             float pitch=(float)Math.atan2(target.chestY()-n.eyeY(),Math.max(0.1f,n.distTo(target)));
             if(g.combat.cast(n,rpg.combat.Spells.Spell.VITALMEND,n.wantYaw,pitch))return;
         }
@@ -553,7 +584,7 @@ public final class Brain {
             n.gx = tx; n.gz = tz; n.hasGoalPos = true;
             g.game.commands().agentGoal(n.agent, tx, DevMap.FLOOR, tz);
         }
-        ai.desire(n, run ? AiSystem.A_RUN : AiSystem.A_GOTO);
+        ai.desire(n, run ? ai.pace(n, x, z, within) : AiSystem.A_GOTO);
         return false;
     }
 
@@ -804,10 +835,23 @@ public final class Brain {
         n.lastOutcome = "running from " + f.name;
     }
 
-    /** Keeping hidden from what they fled (crouched where they cannot be seen), until it has been out of sight a while. */
+    /**
+     * Those who stand against a terror when the alarm goes up: the watch, the knights, the hunters (and whatever a
+     * caster has called); everyone else - the bandits too - takes cover.
+     */
+    static boolean defender(Npc n) { return n.watch() || n.role == Npc.Role.KNIGHT || n.role == Npc.Role.HUNTER || n.summonOwner != 0; }
+
+    /**
+     * Keeping hidden from what they fled (crouched where they cannot be seen), until it has been out of sight a while.
+     * From a terror there is no crouching behind a cart: they run for the shelter of home, if it is near enough.
+     */
     private void hide(Npc n) {
-        if (!n.hideSet) { float[] h = hideSpot(n, n.fearX, n.fearZ); n.hideX = h[0]; n.hideZ = h[1]; n.hideSet = true; }
-        n.sneaking = true;
+        boolean terror = g.actor(n.fearOf) instanceof rpg.monster.Monster tm && tm.kind.terror() > 0;
+        if (!n.hideSet) {
+            float[] h = terror && n.homeX != 0 && Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 90 ? new float[]{n.homeX, n.homeZ} : hideSpot(n, n.fearX, n.fearZ);
+            n.hideX = h[0]; n.hideZ = h[1]; n.hideSet = true;
+        }
+        n.sneaking = !terror || Math.hypot(n.hideX - n.x, n.hideZ - n.z) < 1.5f;
         n.lastOutcome = "hiding from " + g.nameOf(n.fearOf);
         if (goTo(n, n.hideX, n.hideZ, true, 0.9f)) { ai.desire(n, AiSystem.A_HOLD); n.wantYaw = (float) Math.atan2(-(n.fearX - n.x), -(n.fearZ - n.z)); }
         if (n.speech == null && (n.id + (long) g.time) % 9 == 0) g.ai.say(n, "Please don't find me...");
@@ -858,6 +902,8 @@ public final class Brain {
         Hunt h = n.hunt;
         if (h == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = Math.min(n.nextThink, g.time + 0.2); return; }
         if (g.gore != null) g.gore.followTrail(n);
+        if (n.watch() && h.target != 0 && askAround(n, h)) return;
+        if (n.posse && n.profession == Profession.BOUNTY_HUNTER && setSnare(n, h)) return;
         if (n.stuck && g.time-h.startedAt>3) { h.reachedLkp=true;h.hasPoint=false; }
         if (!h.reachedLkp) {
             float lead = (float) Math.min(2.5, Math.hypot(h.vx, h.vz) * 0.7);
@@ -885,6 +931,94 @@ public final class Brain {
             n.lastOutcome = "checked a spot (" + h.checked + "); nobody";
         }
     }
+
+    /**
+     * The watch asks after the one it is searching for (gamefixes): an officer on a search stops someone nearby and asks
+     * whether they have seen them. The answer is that person's own memory - where and when they last saw them, if they
+     * did - and a newer sighting than the officer's own moves the search there. Someone who thinks well of the one sought
+     * may say they saw nothing; someone who fears or loathes them tells all. Each person is asked once a while.
+     */
+    private boolean askAround(Npc n, Hunt h) {
+        if (g.time < n.askAgain) return false;
+        Actor sought = g.actor(h.target);
+        if (sought == null) return false;
+        Npc best = null; float bd = 7;
+        for (Npc w : g.npcs) {
+            if (w == n || w.id == h.target || !w.alive || !w.loaded || w.asleep() || w.reacting || w.watch() || w.hostileToPlayer || w instanceof rpg.monster.Monster) continue;
+            if (w.goal == Goal.FLEE || w.goal == Goal.FIGHT || w.goal == Goal.HIDE || g.law.inCustody(w)) continue;
+            Double asked = n.questioned.get(w.id);
+            if (asked != null && g.time - asked < 90) continue;
+            float d = n.distTo(w);
+            if (d < bd && ai.canSee(n, w)) { bd = d; best = w; }
+        }
+        if (best == null) { n.askAgain = g.time + 2; return false; }
+        if (bd > 2.6f) { goTo(n, best.x, best.z, false, 2.2f); n.lastOutcome = "going to ask " + best.name + " about " + sought.name; return true; }
+        Npc w = best;
+        n.questioned.put(w.id, g.time);
+        n.askAgain = g.time + 6;
+        ai.desire(n, AiSystem.A_HOLD);
+        n.wantYaw = (float) Math.atan2(-(w.x - n.x), -(w.z - n.z));
+        w.wantYaw = (float) Math.atan2(-(n.x - w.x), -(n.z - w.z));
+        ai.say(n, pickLine(n, "Have you seen " + sought.name + "?", "I'm looking for " + sought.name + ". Seen them?", "You there - " + sought.name + ". Have they been by?"));
+        // what they remember: their last clear sight of the player (kept), or of anyone else the passing awareness
+        Npc.Sighting last = sought == g.player ? w.playerSighting : null;
+        Stealth.Aware glimpse = w.aware.get(h.target);
+        float sx = last != null ? last.x() : glimpse != null ? glimpse.x : 0, sz = last != null ? last.z() : glimpse != null ? glimpse.z : 0;
+        double seenAt = last != null ? last.at() : glimpse != null ? glimpse.seenAt : -99;
+        boolean saw = seenAt > -90 && g.time - seenAt < 900;
+        // what they think of the one sought decides whether they say: a friend covers for them
+        boolean covers = sought == g.player && ai.rumors.opinion(w) > 0.55f && w.crimeKnown(sought.id) == null;
+        if (!saw || covers) {
+            ai.say(w, covers ? pickLine(w, "No. Haven't seen anyone like that.", "Can't say I have.") : pickLine(w, "No, sorry.", "Not that I've noticed.", "Haven't seen them today."));
+            n.lastOutcome = "asked " + w.name + " about " + sought.name + ": " + (covers ? "nothing (covering for them)" : "not seen");
+            g.state.commit("WitnessQuestioned", n.id, w.id, n.homeJurisdiction, 0, sought.name + ": nothing");
+            return true;
+        }
+        float ago = (float) (g.time - seenAt);
+        String when = ago < 30 ? "just now" : ago < 120 ? "a minute or two ago" : ago < 420 ? "a few minutes ago" : "a while back";
+        float dx = sx - w.x, dz = sz - w.z;
+        String where = Math.hypot(dx, dz) < 4 ? "right around here" : "off to the " + compass(dx, dz) + " of here";
+        ai.say(w, pickLine(w, "Aye, " + when + " - " + where + ".", "I saw them " + when + ", " + where + ".", "Yes! " + where.substring(0, 1).toUpperCase() + where.substring(1) + ", " + when + "."));
+        boolean newer = seenAt > h.clueAt;
+        if (newer) {
+            h.clue(sx, sz, 0, 0, seenAt);
+            h.patience = Math.max(h.patience, (float) (g.time - seenAt) + 60);
+            h.source = w.id;
+        }
+        n.lastOutcome = "asked " + w.name + " about " + sought.name + ": seen " + when + " at (" + (int) sx + ", " + (int) sz + ")" + (newer ? " - searching there" : " - no newer than what I had");
+        g.state.commit("WitnessQuestioned", n.id, w.id, n.homeJurisdiction, 0, String.format("%s seen %.0fs ago at (%.0f, %.0f)%s", sought.name, ago, sx, sz, newer ? ", search moved" : ""));
+        return true;
+    }
+
+    /**
+     * A bounty hunter on the trail lays snares where the quarry was last placed and on the way they were going: two at
+     * most, not one on top of another, each a short kneel's work.
+     */
+    private boolean setSnare(Npc n, Hunt h) {
+        if (n.snaresSet >= 2 || g.time < n.snareAgain || g.dungeons == null) return false;
+        if (Math.hypot(n.x - h.x, n.z - h.z) > 9 || !standable(n.x, n.z)) return false;
+        for (var t : g.dungeons.traps) if (!t.removed && Math.hypot(t.x - n.x, t.z - n.z) < 5) return false;
+        n.snaresSet++;
+        n.snareAgain = g.time + 18;
+        float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
+        float sx = n.x + fx * 0.9f, sz = n.z + fz * 0.9f;
+        if (!standable(sx, sz)) { sx = n.x; sz = n.z; }
+        g.dungeons.snare(n, (float) Math.floor(sx) + 0.5f, (float) Math.floor(sz) + 0.5f);
+        ai.desire(n, AiSystem.A_HOLD);
+        h.lookUntil = g.time + 1.4; h.lookYaw = n.yaw;
+        if (n.distTo(g.player) < 12) ai.say(n, pickLine(n, "That'll hold them.", "Let's see them walk through this.", "One more for luck."));
+        n.lastOutcome = "set a snare (" + n.snaresSet + ") near where " + g.nameOf(h.target) + " was last placed";
+        return true;
+    }
+
+    private static String compass(float dx, float dz) {
+        // the devmap's north is -z
+        double a = Math.toDegrees(Math.atan2(dx, -dz));
+        String[] names = {"north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"};
+        return names[(int) Math.floorMod(Math.round(a / 45), 8)];
+    }
+
+    private String pickLine(Npc n, String... lines) { return lines[(int) Math.floorMod(n.id * 31 + (long) (g.time / 7), lines.length)]; }
 
     /** Whether someone could stand at a spot: open cells at body height, ground beneath, inside the map. */
     private boolean standable(float x, float z) {
@@ -1223,7 +1357,7 @@ public final class Brain {
             float yaw=(float)Math.atan2(-(t.x-n.x),-(t.z-n.z)), pitch=(float)Math.atan2(t.chestY()-n.eyeY(),Math.max(0.1f,d));
             if(spell!=null && g.combat.cast(n,spell,yaw,pitch)) { ai.desire(n,AiSystem.A_HOLD); return; }
         }
-        if (n.hostileToPlayer && Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 26 && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12)) { n.fightTarget = 0; n.goal = Goal.RETURN; n.lastOutcome = "gave up the chase (leash)"; return; }
+        if (n.hostileToPlayer && Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 26 && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12)) { n.fightTarget = 0; n.goal = Goal.RETURN; n.lastOutcome = "gave up the chase (leash)"; ai.giveUp(n, t.id); return; }
         // out of sight for a heartbeat: it heads for where it last saw them, not for where they really are
         boolean visible = ai.canSee(n, t);
         if (!visible) {
@@ -1280,7 +1414,17 @@ public final class Brain {
         String choice;
         if (archer) {
             n.pitch=(float)Math.atan2(targetY-n.eyeY(),Math.max(0.3f,d));
+            Actor between = d < 5 ? null : g.combat.inLineOfFire(n, t);
             if (d < 5) { choice = "back off to shooting range"; backOff(n, t, 9); }
+            else if (between != null && !ai.hostile(n, between)) {
+                // someone of no quarrel stands in the line: hold the shot and step aside to a clear one (the side away
+                // from them), rather than loose through them
+                choice = "step aside for a clear shot";
+                n.cs.draw = Math.max(0, n.cs.draw - dt);
+                float lx = t.z - n.z, lz = -(t.x - n.x), ll = (float) Math.max(0.01, Math.hypot(lx, lz));
+                float side = (between.x - n.x) * lx + (between.z - n.z) * lz > 0 ? -1 : 1;
+                goTo(n, n.x + lx / ll * side * 2.5f, n.z + lz / ll * side * 2.5f, false, 0.4f);
+            }
             else if (n.cs.draw > 0 || (!n.cs.busy() && g.vox.sight(n.x, n.eyeY(), n.z, t.x, t.chestY(), t.z))) {
                 choice = "draw and shoot";
                 ai.desire(n, AiSystem.A_HOLD);
@@ -1290,6 +1434,33 @@ public final class Brain {
                 } else n.cs.draw = Math.min(1, n.cs.draw + dt / 1.1f);
                 if (n.cs.draw >= 1) { g.combat.shoot(n, n.yaw, n.pitch + d * 0.004f, 1); n.cs.draw = 0; }
             } else { choice = "find a line of sight"; goTo(n, t.x, t.z, false, 6); }
+        } else if (t instanceof rpg.monster.Monster big && big.kind.terror() >= 20 && n.hp < n.maxHp() * 0.4f && d < 9) {
+            // against a terror, the hurt fall back out of its reach and let the others hold it
+            choice = "fall back, hurt";
+            g.combat.setBlock(n, hasGuard);
+            backOff(n, t, 12);
+        } else if (t instanceof rpg.monster.Monster big && big.kind.terror() >= 20 && d < 11 && inFront(big, n, 0.8f) && !(d <= reach + 0.55f && opening)) {
+            // never square in front of it - its jaws and its breath are there: round to its flank (each to the side
+            // they are nearer), and strike from there
+            choice = "round to its flank, out of its breath";
+            g.combat.setBlock(n, hasGuard && d < 5);
+            float side = Actor.wrap((float) Math.atan2(-(n.x - big.x), -(n.z - big.z)) - big.yaw) >= 0 ? 1 : -1;
+            float ang = big.yaw + side * 1.9f, r = Math.max(reach + big.radius + 0.4f, 2.5f);
+            ai.combatGoal(n, big.x - (float) Math.sin(ang) * r, big.z - (float) Math.cos(ang) * r);
+        } else if (t instanceof rpg.monster.Monster fm && fm.kind.flies() && t.chestY() - n.y > 1.9f + Math.max(0, reach - 1) * 0.5f) {
+            // (gamefixes: people stood swinging at bats in the air) a flyer up out of reach: no blow is thrown at the air -
+            // guard, keep it in view a step off, and strike when it dives; the unarmed and the townsfolk give it up and run
+            n.flyerWait += dt;
+            boolean fighter = main != null && main.damage > 0 || n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN || n.role == Npc.Role.BRUTE;
+            if (!fighter && n.flyerWait > 6) {
+                choice = "run from the flyer";
+                g.combat.setBlock(n, false);
+                ai.target(n, t.body); ai.desire(n, AiSystem.A_FLEE);
+            } else {
+                choice = "wait for it to dive";
+                g.combat.setBlock(n, hasGuard);
+                if (d < 1.2f) backOff(n, t, 2.2f); else ai.desire(n, AiSystem.A_HOLD);
+            }
         } else if (n.hp < n.maxHp() * 0.45f && hasFood(n) && d > 3.5f && !n.cs.busy()) {
             choice = "eat to recover";
             eatInFight(n);
@@ -1312,6 +1483,7 @@ public final class Brain {
         } else if (facing && (d <= reach + 0.55f && !n.cs.busy() && n.stamina > 12 && !t.cs.blocking || opening && d <= reach + 0.55f && !n.cs.busy())) {
             boolean heavy = opening || t.cs.blocking || n.role == Npc.Role.BRUTE && (n.id + (long) (g.time * 2)) % 3 == 0;
             choice = heavy ? "heavy blow into the opening" : "quick strike";
+            n.flyerWait = 0;
             g.combat.setBlock(n, false);
             g.combat.attack(n, false, heavy ? Move.HEAVY : CombatSystem.lightMove(n, false));
             ai.desire(n, AiSystem.A_HOLD);
@@ -1328,9 +1500,15 @@ public final class Brain {
             g.combat.setBlock(n, n.off() != null && n.off().family == ItemDef.Family.SHIELD && d < reach + 2 && !n.cs.busy());
             // (to striking distance - within reach, but not in the target's own cell: a goal there walks into them)
             float stand = Math.min(reach + 0.3f, Math.max(0.9f, reach * 0.8f));
-            ai.combatGoal(n, t.x + (n.x - t.x) / Math.max(0.1f, d) * stand, t.z + (n.z - t.z) / Math.max(0.1f, d) * stand);
+            ai.closeIn(n, t.x + (n.x - t.x) / Math.max(0.1f, d) * stand, t.z + (n.z - t.z) / Math.max(0.1f, d) * stand);
         }
         if (!choice.equals(n.lastOutcome)) n.lastOutcome = choice;
+    }
+
+    /** Whether n stands within a cone (half-angle in radians) ahead of a body. */
+    private static boolean inFront(Actor body, Actor n, float half) {
+        float to = (float) Math.atan2(-(n.x - body.x), -(n.z - body.z));
+        return Math.abs(Actor.wrap(to - body.yaw)) < half;
     }
 
     private void backOff(Npc n, Actor t, float range) {

@@ -24,8 +24,8 @@ import static astratto.bridge.AstrattoNative.*;
  * crime), keeps memories, chooses goals with reasons, and carries out the work, talk, reports and fights.
  */
 public final class AiSystem {
-    public static final int A_IDLE = 0, A_WANDER = 1, A_GOTO = 2, A_RUN = 3, A_APPROACH = 4, A_FLEE = 5, A_INVESTIGATE = 6, A_HOLD = 7, A_COMBAT = 8, ACTIONS = 9;
-    public static final String[] ACTION_NAMES = {"idle", "wander", "go to goal", "run to goal", "approach", "flee", "investigate", "hold/face", "combat move"};
+    public static final int A_IDLE = 0, A_WANDER = 1, A_GOTO = 2, A_RUN = 3, A_APPROACH = 4, A_FLEE = 5, A_INVESTIGATE = 6, A_HOLD = 7, A_COMBAT = 8, A_SPRINT = 9, ACTIONS = 10;
+    public static final String[] ACTION_NAMES = {"idle", "wander", "go to goal", "run to goal", "approach", "flee", "investigate", "hold/face", "combat move", "sprint to goal"};
 
     private final Rpg g;
     public final Brain brain;
@@ -39,7 +39,9 @@ public final class AiSystem {
     private final java.util.Map<Long, Double> heardAt = new java.util.HashMap<>();
     private double abstractClock;
 
-    public AiSystem(Rpg g) { this.g = g; this.brain = new Brain(g, this); this.stealth = new Stealth(g); this.rumors = new Rumors(g, this); }
+    public AiSystem(Rpg g) { this.g = g; this.brain = new Brain(g, this); this.stealth = new Stealth(g); this.rumors = new Rumors(g, this); this.arms = new Arms(g, this); }
+    /** Arms shown in the open, and who reacts to them how. */
+    public final Arms arms;
 
     // ------------------------------------------------------------------ setting up
     public void init() {
@@ -49,13 +51,14 @@ public final class AiSystem {
         acts.add(new CommandBuffer.Action(A_IDLE, ACT_IDLE).base(1).consider(IN_FACT0 + A_IDLE, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_WANDER, ACT_WANDER).base(1).range(6).speed(g.cfg.walkSpeed * 0.8f).consider(IN_FACT0 + A_WANDER, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_GOTO, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.walkSpeed).consider(IN_FACT0 + A_GOTO, CURVE_LINEAR, 0, 1, 1));
-        acts.add(new CommandBuffer.Action(A_RUN, ACT_MOVE_TO_GOAL).base(1).speed(4.8f).consider(IN_FACT0 + A_RUN, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_RUN, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.jogSpeed).consider(IN_FACT0 + A_RUN, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_APPROACH, ACT_APPROACH).base(1).range(1.6f).speed(4.2f).consider(IN_FACT0 + A_APPROACH, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_FLEE, ACT_FLEE).base(1).range(16).speed(6.2f).consider(IN_FACT0 + A_FLEE, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_INVESTIGATE, ACT_INVESTIGATE).base(1).speed(2.2f).consider(IN_FACT0 + A_INVESTIGATE, CURVE_LINEAR, 0, 1, 1)
                 .consider(IN_SINCE_HEARD, CURVE_INVERSE, 0, 15, 0.6f));
         acts.add(new CommandBuffer.Action(A_HOLD, ACT_HOLD).base(1).consider(IN_FACT0 + A_HOLD, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_COMBAT, ACT_CUSTOM).base(1).speed(3.4f).consider(IN_FACT0 + A_COMBAT, CURVE_LINEAR, 0, 1, 1));
+        acts.add(new CommandBuffer.Action(A_SPRINT, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.runSpeed * 0.9f).consider(IN_FACT0 + A_SPRINT, CURVE_LINEAR, 0, 1, 1));
         c.policyCreate(policy, acts, 0.1f, 0.1f);
         roster();
     }
@@ -116,7 +119,8 @@ public final class AiSystem {
         for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
     }
 
-    private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR,Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER,Ids.TELLER);
+    private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR,Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER,Ids.TELLER,
+            Ids.COOK,Ids.QUARRY_WORKER,Ids.BORDER_KNIGHT,Ids.SHELLFISH_GATHERER,Ids.RIVER_FISHERMAN);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
@@ -140,7 +144,7 @@ public final class AiSystem {
             }
             case (int)Ids.HEALER -> {
                 Npc maud = npc(Ids.HEALER, "Maud", Npc.Role.HEALER, "Herbalist", 108.5f, 82.5f, 142);
-                give(maud, Items.TROUT, 8); give(maud, Items.COINS, 30); maud.skills.setLevel(Skill.MAGIC, 60); maud.spellBook = rpg.combat.Spells.Book.LUNAR;
+                give(maud, Items.TROUT, 8); give(maud, Items.COINS, 30); maud.skills.setLevel(Skill.MAGIC, 60); maud.spellBook = rpg.combat.Spells.Book.MOON;
                 return maud;
             }
             case (int)Ids.PRIEST -> {
@@ -157,7 +161,7 @@ public final class AiSystem {
             }
             case (int)Ids.SCHOLAR -> {
                 Npc isolde = npc(Ids.SCHOLAR, "Isolde", Npc.Role.SCHOLAR, "Travelling scholar", 103.5f, 58.5f, 145);
-                isolde.skills.setLevel(Skill.MAGIC, 40); isolde.spellBook = rpg.combat.Spells.Book.ARCANE; give(isolde, Items.COINS, 60); give(isolde, Items.BREAD, 2);
+                isolde.skills.setLevel(Skill.MAGIC, 40); isolde.spellBook = rpg.combat.Spells.Book.MOON; give(isolde, Items.COINS, 60); give(isolde, Items.BREAD, 2);
                 return isolde;
             }
             case (int)Ids.FISHERMAN -> {
@@ -181,13 +185,50 @@ public final class AiSystem {
                 levels(alden,35,35,40,40);wear(alden,"steel_sword","steel_shield","steel_body");give(alden,Items.TROUT,3);return alden;
             }
             case (int)Ids.PREDATOR_HUNTER -> {
-                Npc fenna=npc(id,"Fenna",Npc.Role.HUNTER,"Predator Hunter",82.5f,91.5f,150);
+                Npc fenna=npc(id,"Fenna",Npc.Role.HUNTER,"Predator Hunter",84.5f,91.5f,150);   // (inside the lodge: 82 is its wall)
                 Profession.PREDATOR_HUNTER.assign(fenna);levels(fenna,18,18,15,22);fenna.skills.setLevel(Skill.ARCHERY,25);
                 wear(fenna,"shortbow",null,"stone_body");give(fenna,Items.get("bronze_dagger"),1);give(fenna,Items.KNIFE,1);give(fenna,Items.BREAD,2);give(fenna,Items.SNARE,1);
                 fenna.eq.set(ItemDef.Slot.AMMO,new ItemStack(Items.BRONZE_ARROWS,30));g.state.mint(Items.BRONZE_ARROWS,30);return fenna;
             }
+            // the five of 0.1.8 (gamefixes: new people of callings no one held yet)
+            case (int)Ids.COOK -> {
+                Npc hilda=npc(id,"Hilda",Npc.Role.CRAFTSMAN,"Cook",DevMap.RANGE_AT[0]+0.5f,DevMap.RANGE_AT[1]+1.8f,151);
+                Profession.COOK.assign(hilda);hilda.skills.setLevel(Skill.COOKING,32);
+                give(hilda,Items.RAW_SHRIMP,6);give(hilda,Items.RAW_MEAT,3);give(hilda,Items.COINS,50);return hilda;
+            }
+            case (int)Ids.QUARRY_WORKER -> {
+                Npc bertram=npc(id,"Bertram",Npc.Role.MINER,"Quarry Worker",96.5f,21.5f,152);
+                Profession.QUARRY_WORKER.assign(bertram);bertram.skills.setLevel(Skill.MINING,22);levels(bertram,8,14,8,14);
+                give(bertram,Items.get("bronze_pickaxe"),1);give(bertram,Items.BREAD,2);give(bertram,Items.COINS,30);return bertram;
+            }
+            case (int)Ids.BORDER_KNIGHT -> {
+                // posted where DevCity's ground meets DevTown's, on the road between them
+                float[] border=border(DevMap.ALPHA,110.5f,58.5f,38.5f,116.5f);
+                Npc roderic=npc(id,"Sir Roderic",Npc.Role.KNIGHT,"Border Knight",border[0],border[1],153);
+                Profession.BORDER_KNIGHT.assign(roderic);roderic.dutyX=border[0];roderic.dutyZ=border[1];
+                levels(roderic,38,38,42,42);wear(roderic,"steel_sword","steel_shield","steel_body");give(roderic,Items.TROUT,3);return roderic;
+            }
+            case (int)Ids.SHELLFISH_GATHERER -> {
+                Npc wynn=npc(id,"Wynn",Npc.Role.FISHERMAN,"Shellfish Gatherer",DevMap.FISH_SPOTS[2][0]+0.5f,DevMap.FISH_SPOTS[2][1]+2.5f,154);
+                Profession.SHELLFISH_GATHERER.assign(wynn);wynn.skills.setLevel(Skill.FISHING,18);
+                give(wynn,Items.CRAB_CAGE,1);give(wynn,Items.BREAD,2);give(wynn,Items.COINS,25);return wynn;
+            }
+            case (int)Ids.RIVER_FISHERMAN -> {
+                Npc corwin=npc(id,"Corwin",Npc.Role.FISHERMAN,"River Fisherman",DevMap.STREAM_X0-1.5f,(DevMap.STREAM_Z0+DevMap.STREAM_Z1)/2f,155);
+                Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
+                give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
+            }
             default -> throw new IllegalArgumentException("Not an authored release NPC: "+id);
         }
+    }
+
+    /** Where a straight way from inside a jurisdiction first leaves it (its border on that road); the far end if it never does. */
+    private static float[] border(String jurisdiction, float x0, float z0, float x1, float z1) {
+        for (int i = 0; i <= 200; i++) {
+            float t = i / 200f, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t;
+            if (!jurisdiction.equals(DevMap.jurisdiction(x, z))) return new float[]{x, z};
+        }
+        return new float[]{x1, z1};
     }
 
     /** Older profiles acquire new authored residents and their initial stock exactly once per saved timeline. */
@@ -282,10 +323,39 @@ public final class AiSystem {
     /** The one action this NPC wants now: its desire fact high, the others low (the engine chooses, with inertia). */
     public void desire(Npc n, int action) {
         if (n.agent == 0) return;
+        n.sprinting = action == A_SPRINT;
         for (int i = 0; i < ACTIONS; i++) {
             float v = i == action ? 1f : i == A_IDLE ? 0.08f : 0.02f;
             if (n.facts[i] != v) { n.facts[i] = v; g.game.commands().agentFact(n.agent, i, v); }
         }
+    }
+
+    /**
+     * How fast someone in a hurry goes (gamefixes: people never sprinted, nor knew when to). A sprint is for what cannot
+     * wait - running from danger, after a foe or a fleeing thief, to report a killing, to a wound - and only out of
+     * doors, with the breath for it (they set off on 40% of their stamina and give up at 12%), and the way long enough to
+     * be worth it. A quarry that only walks is closed on at a jog; the last steps to anywhere are eased into.
+     */
+    int pace(Npc n, float x, float z, float within) {
+        float left = (float) Math.hypot(n.x - x, n.z - z) - within;
+        if (left < 1.2f) return A_GOTO;
+        Actor quarry = n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.SEARCH ? g.actor(n.fightTarget != 0 ? n.fightTarget : n.hunt != null ? n.hunt.target : 0) : null;
+        float quarrySpeed = quarry == null ? 99 : (float) Math.hypot(quarry.vx, quarry.vz);
+        boolean urgent = switch (n.goal) {
+            case FLEE, HIDE, WARN, AID -> true;
+            case FIGHT -> quarry != null && (quarrySpeed > g.cfg.jogSpeed * 0.8f || left > 14);
+            case SEARCH -> n.hunt != null && g.time - n.hunt.clueAt < 8;
+            case REPORT_CRIME -> { Memory m = null; for (Memory k : n.memories) if (k.crime() && !k.reported) { m = k; break; } yield m != null && (m.kind.equals("MURDER") || m.kind.equals("ASSAULT")); }
+            // (a foe that just slipped out of sight is run down at its last place, not strolled after)
+            case INVESTIGATE -> n.investigation != null && (n.investigation.stimulus == Investigation.Stimulus.VIOLENCE
+                    || n.investigation.plan == Investigation.Plan.CONFRONT && g.time - n.investigation.lastClue < 8);
+            default -> false;
+        };
+        boolean wounded = n.hp < n.maxHp() * 0.3f && n.goal != Brain.Goal.FLEE;
+        boolean indoors = g.vox.skyLight((int) Math.floor(n.x), (int) Math.floor(n.y + 1), (int) Math.floor(n.z)) < 0.2f;
+        float breath = n.stamina / n.maxStamina();
+        boolean sprint = urgent && !wounded && !indoors && n.carryBody == 0 && left > 6 && breath > (n.sprinting ? 0.12f : 0.4f);
+        return sprint ? A_SPRINT : A_RUN;
     }
 
     public void target(Npc n, long body) {
@@ -304,6 +374,23 @@ public final class AiSystem {
         desire(n, A_COMBAT);
     }
 
+    /**
+     * A chase given up on purpose (an outlaw too far from its camp): the quarry is let go - what it knows of them is
+     * marked looked into and any look-about for them dropped - so it walks home instead of turning back to every
+     * glimpse and turning home again (gamefixes: AI choices flip-flopping each second).
+     */
+    void giveUp(Npc n, long quarry) {
+        Stealth.Aware w = n.aware.get(quarry);
+        if (w != null) w.settledAt = g.time;
+        if (n.investigation != null && n.investigation.subject == quarry) n.investigation = null;
+    }
+
+    /** Closing on a foe: the careful fighting step only for the last few metres; from farther, a jog or a sprint (pace). */
+    public void closeIn(Npc n, float x, float z) {
+        combatGoal(n, x, z);
+        if (Math.hypot(n.x - x, n.z - z) > 4.5f) desire(n, pace(n, x, z, 0));
+    }
+
     // ------------------------------------------------------------------ the frame
     private double watchAt;
     public void update(float dt) {
@@ -312,10 +399,11 @@ public final class AiSystem {
             for (Npc n : g.npcs) if (java.util.Arrays.asList(System.getenv("RPG_WATCH").split(",")).contains(n.name))
                 System.out.printf("      [watch] " + n.name + " t %.1f %s at (%.2f, %.2f) v (%.2f, %.2f) goal (%.1f, %.1f) %s route %d inv %s last %s%n", g.time, n.goal, n.x, n.z, n.vx, n.vz, n.gx, n.gz, n.nativeAction, n.routeCells, n.inv.stacks(), n.lastOutcome);
         }
+        updateAlarms();
         for (Npc n : g.npcs) {
             if (!n.alive) { respawnCheck(n); continue; }
             if (!n.loaded) continue;
-            g.game.commands().agentRate(n.agent, n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1));
+            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1));
             if (n.morphT > 0) {
                 n.cs.cancel(); n.cs.blocking = false; n.sneaking = true;
                 g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_CROUCH | MOVER_STANCE_ONLY);
@@ -395,6 +483,8 @@ public final class AiSystem {
             if (!n.alive || !n.loaded) continue;
             Snapshots.Mover m = bodies.mover(n.body);
             if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
+            // a sprint costs breath as the player's does
+            if (n.sprinting && Math.hypot(n.vx, n.vz) > g.cfg.jogSpeed) { n.stamina = Math.max(0, n.stamina - g.cfg.staminaSprint * (float) g.lastDt); n.cs.regenDelay = 0.6f; }
             Snapshots.Agent a = agents.agent(n.agent);
             if (a != null) {
                 n.agentYaw = a.yaw;
@@ -530,6 +620,10 @@ public final class AiSystem {
             if (!mo.alive || !mo.loaded || !canSee(n, mo)) continue;
             boolean hunting = mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK || n.cs.lastAttacker == mo.id;
             float reach = hunting ? (n.combatant() ? 18 : 12) : (n.combatant() ? 12 : 7);
+            // a terror (a dragon over the roofs): seen from far off, it is the alarm raised and the town's business
+            // - come into a settlement; one in the wilds (on its own ground or hunting there) is fled or fought as it comes
+            boolean loose = !DevMap.WILDS.equals(DevMap.jurisdiction(mo.x, mo.z));
+            if (mo.kind.terror() > 0 && loose && n.distTo(mo) < mo.kind.terror()) { raiseAlarm(n, mo); reach = mo.kind.terror(); }
             if (n.distTo(mo) < reach && (hunting || !n.combatant() || ZonePolicy.routineAllowed(n, mo.x, mo.z))) return mo;
         }
         // a dangerous animal close by: guards deal with it, everyone else gets away from it
@@ -550,6 +644,75 @@ public final class AiSystem {
             if (n.role == Npc.Role.VILLAGER && m != null && !m.settled && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
         }
         return null;
+    }
+
+    // ------------------------------------------------------------------ the alarm
+    /**
+     * A town's alarm at a terror among it (gamefixes: a dragon in the city should cause a genuine panic): which monster,
+     * where it was seen, when, by whom, and in which place. It spreads by voice - whoever is within earshot of the cry
+     * knows of it without seeing it - and lasts while it is seen again; a minute after the last sighting it is let fall.
+     */
+    public static final class Alarm {
+        public final long monster; public final String place;
+        public float x, z; public double raisedAt, seenAt;
+        Alarm(long monster, String place, float x, float z, double now) { this.monster = monster; this.place = place; this.x = x; this.z = z; raisedAt = seenAt = now; }
+    }
+    public final List<Alarm> alarms = new ArrayList<>();
+    /** How far a cry of alarm carries (and from someone who has heard it, again: the town passes it on). */
+    public static final float ALARM_EARSHOT = 32;
+
+    /** Someone sees a terror: the alarm is raised (or kept up, where it is now), with a cry the first time and now and then. */
+    public void raiseAlarm(Npc n, rpg.monster.Monster mo) {
+        Alarm a = null;
+        for (Alarm o : alarms) if (o.monster == mo.id) a = o;
+        String place = DevMap.jurisdiction(mo.x, mo.z);
+        if (a == null) {
+            a = new Alarm(mo.id, place, mo.x, mo.z, g.time);
+            alarms.add(a);
+            g.state.commit("AlarmRaised", n.id, mo.id, place, 0, mo.kind.title + " sighted by " + n.name);
+        }
+        a.x = mo.x; a.z = mo.z; a.seenAt = g.time;
+        if (!knowsWorse(n, mo)) n.alarmHeard = mo.id;
+        if (g.time - n.alarmCryAt > 6) {
+            n.alarmCryAt = g.time;
+            String what = mo.kind.title.toUpperCase();
+            if (n.speech == null) say(n, Brain.defender(n) ? "A " + mo.kind.title.toLowerCase() + "! To arms - everyone to arms!" : "A " + what + "! " + what + "! Get inside!");
+            heardAlarm(n, a);
+        }
+    }
+
+    /** The cry is heard: everyone awake within earshot who has not yet heard knows of it now, and cries it on. */
+    public void heardAlarm(Npc crier, Alarm a) {
+        for (Npc o : g.npcs) {
+            if (o == crier || !o.alive || !o.loaded || o.asleep() || o instanceof rpg.monster.Monster || o.alarmHeard == a.monster) continue;
+            if (o.distTo(crier) > ALARM_EARSHOT || g.actor(a.monster) instanceof rpg.monster.Monster mo && knowsWorse(o, mo)) continue;
+            o.alarmHeard = a.monster; o.nextThink = Math.min(o.nextThink, g.time + 0.3 + (o.id % 5) * 0.15);
+        }
+    }
+
+    /** Whether n already knows of a worse terror than this one (a spider's alarm does not drown out a dragon's). */
+    private boolean knowsWorse(Npc n, rpg.monster.Monster mo) {
+        Alarm known = alarmFor(n);
+        return known != null && known.monster != mo.id && g.actor(known.monster) instanceof rpg.monster.Monster k && k.kind.terror() > mo.kind.terror();
+    }
+
+    /** The alarm this NPC knows of (heard or raised), still up: or null. */
+    public Alarm alarmFor(Npc n) {
+        for (Alarm a : alarms) if (a.monster == n.alarmHeard) return a;
+        return null;
+    }
+
+    /** Alarms fall a minute after their terror was last seen, or when it is dead. */
+    void updateAlarms() {
+        alarms.removeIf(a -> {
+            Actor m = g.actor(a.monster);
+            boolean over = m == null || !m.alive || g.time - a.seenAt > 60;
+            if (over) {
+                g.state.commit("AlarmLifted", 0, a.monster, a.place, 0, m != null && !m.alive ? "it is dead" : "not seen for a minute");
+                for (Npc o : g.npcs) if (o.alarmHeard == a.monster) { o.alarmHeard = 0; if (o.fearOf == a.monster) o.fearOf = 0; }
+            }
+            return over;
+        });
     }
 
     /** Whether the NPC can place a foe right now: seen, or seen a heartbeat ago (stepping behind a post does not make anyone vanish). */
@@ -636,6 +799,7 @@ public final class AiSystem {
         boolean leash = n.hostileToPlayer && Math.hypot(h.x - n.spawnX, h.z - n.spawnZ) > 26;
         if (h.expired(g.time) || leash) {
             n.hunt = null;
+            if (leash) giveUp(n, h.target);
             n.vigilantUntil = g.time + 90;
             say(n, leash ? "Not worth it." : h.target == 0 ? "Whoever did this is long gone." : n.role == Npc.Role.GUARD ? "Lost them. Keep your eyes open." : "Must have got away.");
             g.state.commit("SearchAbandoned", n.id, h.target, DevMap.jurisdiction(n.x, n.z), 0, String.format("after %.0fs, %d spots checked%s", g.time - h.startedAt, h.checked, leash ? " (too far)" : ""));
@@ -795,6 +959,11 @@ public final class AiSystem {
         return n.main() != null && (node.kind == Node.Kind.FISH ? n.main() == node.needs : n.main().toolSkill == node.skill);
     }
 
+    private boolean rockAt(Node self, int x, int z) {
+        for (Node o : g.objects.nodes) if (o != self && o.kind == Node.Kind.ROCK && !o.depleted() && o.bx == x && o.bz == z) return true;
+        return false;
+    }
+
     public float[] standSpot(Npc n, Node node) {
         // the nearest dry, open cell to stand on: beside the node, or - for a fishing spot out on the water - on the bank
         // within a few metres of it (gamefixes: a fisher was sent into the pond and stood stuck at its edge all day)
@@ -806,6 +975,13 @@ public final class AiSystem {
                 int cx = node.bx + dx, cz = node.bz + dz;
                 if (g.vox.solid(cx, DevMap.FLOOR, cz) || g.vox.solid(cx, DevMap.FLOOR + 1, cz) || !g.vox.solid(cx, DevMap.FLOOR - 1, cz)) continue;
                 float d = (float) Math.hypot(cx + 0.5f - node.x, cz + 0.5f - node.z) * 2 + (float) Math.hypot(cx + 0.5f - n.x, cz + 0.5f - n.z) * 0.1f;
+                // a rock is worked square on, from a side where the swing's sideways sweep crosses no other deposit on its
+                // way to this one - from a corner, or with a neighbouring rock in the sweep, the blow lands on the neighbour
+                // (gamefixes: a quarry worker cut clay from the bank beside the face all morning)
+                if (node.kind == Node.Kind.ROCK) {
+                    if (dx != 0 && dz != 0) d += 4;
+                    else if (ring == 1 && (rockAt(node, node.bx + dz, node.bz + dx) || rockAt(node, node.bx - dz, node.bz - dx))) d += 6;
+                }
                 if (d < bd) { bd = d; best = new float[]{cx + 0.5f, cz + 0.5f}; }
             }
         return best;
@@ -842,9 +1018,9 @@ public final class AiSystem {
         g.game.commands().ragdollHit(n.ragdoll, RD_NECK, dx / l, 0.2f, dz / l, 120, 30);
         despawnBody(n);
         // what they carried stays on the body, to be searched (worn things stay worn: the search mirrors them); an outlaw's
-        // is anyone's, anyone else's is still theirs. What will not fit lies beside the body; bones are left
-        boolean outlaw = n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
-        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, DevMap.FLOOR + 0.2f, n.z, outlaw ? 0 : n.id));
+        // (and a monster's) is anyone's, anyone else's is still theirs. What will not fit lies beside the body; bones are left
+        boolean ownerless = n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n instanceof rpg.monster.Monster;
+        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, DevMap.FLOOR + 0.2f, n.z, ownerless ? 0 : n.id));
         for (int i = 0; i < n.inv.size(); i++) {
             ItemStack s = n.inv.get(i);
             if (s == null) continue;

@@ -40,6 +40,18 @@ public final class Chemistry {
     public final java.util.ArrayDeque<Visual> visuals=new java.util.ArrayDeque<>();
     public record Ripple(float x,float z,float radius,float strength,double until) {}
     public final java.util.ArrayDeque<Ripple> ripples=new java.util.ArrayDeque<>();
+    /**
+     * Water carrying a charge (gamefixes: water should react visibly when electricity hits it): where, how far it runs
+     * across the surface, since and until when. The renderer flickers it - light jumping over the surface, sparks
+     * skittering across it, the surface shivering.
+     */
+    public record Charge(float x,float y,float z,float radius,double since,double until) {}
+    public final java.util.ArrayDeque<Charge> charges=new java.util.ArrayDeque<>();
+    /** Whether the point is in or on water (the block at it, or the one under it). */
+    public boolean onWater(float x,float y,float z) {
+        int bx=(int)Math.floor(x),bz=(int)Math.floor(z);
+        return g.vox.block(bx,(int)Math.floor(y),bz)==Blocks.WATER || g.vox.block(bx,(int)Math.floor(y-0.6f),bz)==Blocks.WATER;
+    }
     public void splash(float x,float y,float z) { disturb(x,y,z,0.8f,3,true); }
     public void disturb(float x,float y,float z,float radius,float strength,boolean spray) {
         if(spray)visual(8,x,y,z,0.035f,Math.min(120,30+strength*20),0.12f,0.45f,0.6f,0.85f,1);
@@ -50,13 +62,21 @@ public final class Chemistry {
         if(visuals.size()>=48)visuals.removeFirst();
         visuals.addLast(new Visual(++visualId,kind,x,y,z,radius,rate,life,red,green,blue,g.time+duration));
     }
+    /** How charred each fence cell is, 0 .. 1 (Props darkens the fence by it). */
+    private final java.util.Map<Long, Float> fenceChar = new java.util.HashMap<>();
+    public float fenceChar(int x, int y, int z) { return fenceChar.getOrDefault(cell(x, y, z), 0f); }
+    private static long cell(int x, int y, int z) { return ((long) x & 0xfffff) << 40 | ((long) y & 0xfffff) << 20 | (long) z & 0xfffff; }
+
     public Chemistry(Rpg g) {
         this.g = g; var c = g.game.commands(); c.chemReset();
         // what burns, carries a charge or freezes follows each block's material (gamefixes: trees and leaves burn, water conducts)
         for (int block = 1; block < Blocks.COUNT; block++) {
-            if (Blocks.objectCell(block) && Blocks.material(block) != Blocks.Material.METAL || block == Blocks.DOOR || block == Blocks.LOCKED_DOOR || block == Blocks.CHARRED) continue;   // objects burn as objects
+            if (Blocks.objectCell(block) && Blocks.material(block) != Blocks.Material.METAL || block == Blocks.DOOR || block == Blocks.LOCKED_DOOR || Blocks.charred(block)) continue;   // objects burn as objects
+            // a fence (drawn as posts and rails, not a cube) burns in its own shape - blackening (Props) - and then is gone,
+            // never turning into a block of char (gamefixes); a wooden cube chars into its own charred twin
+            if (block == Blocks.FENCE) { c.chemMaterial(block, CHEM_FLAMMABLE | CHEM_WIND_SENSITIVE, Blocks.AIR, 9); continue; }
             switch (Blocks.material(block)) {
-                case WOOD -> c.chemMaterial(block, CHEM_FLAMMABLE, Blocks.CHARRED, Blocks.isTreeLog(block) ? 18 : 14);
+                case WOOD -> c.chemMaterial(block, CHEM_FLAMMABLE, Blocks.charredOf(block), Blocks.isTreeLog(block) ? 18 : 14);
                 case FOLIAGE -> c.chemMaterial(block, CHEM_FLAMMABLE | CHEM_WIND_SENSITIVE, Blocks.AIR, 5);
                 case STRAW -> c.chemMaterial(block, CHEM_FLAMMABLE | CHEM_WIND_SENSITIVE, Blocks.AIR, 9);
                 case CLOTH -> c.chemMaterial(block, CHEM_FLAMMABLE, Blocks.CHARRED, 8);
@@ -84,6 +104,27 @@ public final class Chemistry {
         if(actor.ragdoll!=0)g.game.commands().ragdollControl(actor.ragdoll,CONTROL_STAY_DOWN,0);
     }
     private final float[] receiverCenter=new float[3];
+
+    /**
+     * (gamefixes: fire should char bodies as the blood engine marks them) a burning body is charred patch by patch where
+     * the flames are: from the legs up in the first seconds (fire climbs), then anywhere; each patch grows while the fire
+     * stays on it. A handful of marks a second at most, painted into the figure's own skin - nothing per frame.
+     */
+    private void scorch(Actor a) {
+        if (a instanceof rpg.animal.Animal || g.time < a.scorchAt) return;
+        a.scorchAt = g.time + 0.3;
+        long k = (long) (g.time * 10);
+        double r0 = g.roll(a.id, k), r1 = g.roll(a.id, k + 1), r2 = g.roll(a.id, k + 2), r3 = g.roll(a.id, k + 3);
+        double burning = g.time - a.burnSince;
+        int part;
+        if (burning < 1.5) part = r0 < 0.5 ? rpg.actor.Blood.R_LEG : rpg.actor.Blood.L_LEG;
+        else if (burning < 3.5) part = r0 < 0.3 ? rpg.actor.Blood.R_LEG : r0 < 0.6 ? rpg.actor.Blood.L_LEG : r0 < 0.85 ? rpg.actor.Blood.TORSO : r0 < 0.93 ? rpg.actor.Blood.R_ARM : rpg.actor.Blood.L_ARM;
+        else part = (int) (r0 * 6);
+        int face = 2 + (int) (r1 * 4);
+        // low on a leg first, climbing as it burns
+        float v = burning < 1.5 ? 0.55f + (float) r3 * 0.4f : (float) r3;
+        a.blood.scorch(part, face, (float) r2, v, 1.3f, g.time);
+    }
     /** Fire and chemistry follow the actual posed body, including a fallen torso rather than an upright chest offset. */
     public void center(Actor actor,float[] out) {
         out[0]=actor.x;out[1]=actor.chestY();out[2]=actor.z;
@@ -105,14 +146,37 @@ public final class Chemistry {
         retired.put(owner.id,g.game.engine().frameSequence()); g.game.commands().chemDisown(owner.id);
         for (var object:g.objects.all()) if (object instanceof rpg.objects.Fire fire && fire.owner==owner.id) fire.retireAttribution();
     }
-    public void emit(Actor owner, int element, float x, float y, float z, float radius, float strength, float life) { g.game.commands().chemEmit(owner == null || !owner.alive ? 0 : owner.id, element, x, y, z, radius, strength, life); }
+    public void emit(Actor owner, int element, float x, float y, float z, float radius, float strength, float life) {
+        g.game.commands().chemEmit(owner == null || !owner.alive ? 0 : owner.id, element, x, y, z, radius, strength, life);
+        if (element == CHEM_ELECTRIC && onWater(x, y, z)) {
+            // the surface: the top of the water column here
+            int bx = (int) Math.floor(x), bz = (int) Math.floor(z), by = (int) Math.floor(y);
+            while (by < rpg.world.DevMap.SY - 1 && g.vox.block(bx, by + 1, bz) == Blocks.WATER) by++;
+            while (by > 0 && g.vox.block(bx, by, bz) != Blocks.WATER) by--;
+            if (charges.size() >= 12) charges.removeFirst();
+            charges.addLast(new Charge(x, by + 0.92f, z, Math.max(1.5f, radius * 1.8f), g.time, g.time + 1.2 + strength * 0.25));
+            disturb(x, by + 0.92f, z, radius, 2.2f, false);
+        }
+    }
     private void acknowledgeRetirements() {
         long frame=g.game.engine().frameSequence();retired.values().removeIf(queued -> queued<frame);
     }
     public void update() {
         acknowledgeRetirements();
-        visuals.removeIf(v->g.time>v.until); ripples.removeIf(v->g.time>v.until);
+        visuals.removeIf(v->g.time>v.until); ripples.removeIf(v->g.time>v.until); charges.removeIf(c->g.time>c.until);
+        // a charged surface shivers: small impulses round it, here and there, as long as the charge lasts
+        for (Charge c : charges) if (ripples.size() < 28) {
+            double a = g.roll(g.state.tick, (long) (c.since * 1000)) * Math.PI * 2, r = g.roll(g.state.tick, 7 + (long) (c.since * 1000)) * c.radius;
+            ripples.addLast(new Ripple(c.x + (float) (Math.cos(a) * r), c.z + (float) (Math.sin(a) * r), 0.18f, -0.5f, g.time + 0.05));
+        }
         if (g.time < next) return; next = g.time + 0.25;
+        // a fence burning blackens where the flames are, post by post, until there is nothing left to burn (the cell
+        // goes to air); the char stays on what survives a fire put out
+        for (var c : active) if ((c.state() & CHEM_BURNING) != 0 && c.originalBlock() == Blocks.FENCE) {
+            long key = cell((int) Math.floor(c.x()), (int) Math.floor(c.y()), (int) Math.floor(c.z()));
+            fenceChar.merge(key, 0.08f, (a, b) -> Math.min(1, a + b));
+        }
+        fenceChar.entrySet().removeIf(e -> { long id = e.getKey(); return g.vox.block((int) ((id >>> 40) & 0xfffff), (int) ((id >>> 20) & 0xfffff), (int) (id & 0xfffff)) != Blocks.FENCE; });
         var thaw=thawAt.entrySet().iterator();
         while(thaw.hasNext()) { var entry=thaw.next(); if(g.time<entry.getValue())continue;
             long id=entry.getKey();int x=(int)((id>>>40)&0xfffff),y=(int)((id>>>20)&0xfffff),z=(int)(id&0xfffff);
@@ -175,6 +239,7 @@ public final class Chemistry {
             if((bits & CHEM_BURNING)!=0) {
                 if(a.burnSince<0)a.burnSince=g.time;
                 a.charred=Math.min(1,a.charred+0.02f);
+                scorch(a);
                 if(a instanceof Npc && g.time-a.burnSince>=3) {
                     if(!a.reacting){g.reactions.falling(a,0);g.game.commands().ragdollControl(a.ragdoll,CONTROL_COLLAPSE,1);}
                     g.game.commands().ragdollControl(a.ragdoll,CONTROL_STAY_DOWN,1);

@@ -14,6 +14,8 @@ public final class Window {
     public int width, height;
     public final Input input = new Input();
     private boolean cursorLocked;
+    /** Whether a cursor mode was ever applied: a fresh window shows the OS cursor until the first call sets one. */
+    private boolean cursorModeSet;
     /** True when the context is OpenGL 4.5 core: the deferred hybrid-GI renderer can run. */
     public boolean gl45;
     public String glInfo = "";
@@ -117,7 +119,8 @@ public final class Window {
     public boolean adaptiveVsync;
 
     public void setCursorLocked(boolean locked) {
-        if (locked == cursorLocked) return;
+        if (cursorModeSet && locked == cursorLocked) return;
+        cursorModeSet = true;
         cursorLocked = locked;
         glfwSetInputMode(handle, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN); // the UI draws a pixel-art cursor
         if (locked && glfwRawMouseMotionSupported()) glfwSetInputMode(handle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);

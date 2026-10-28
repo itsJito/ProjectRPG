@@ -1,8 +1,184 @@
-# Patch Notes Version 0.1.7: Deep Trouble
+# Patch Notes Version 0.1.9: Here Be Dragons, There Be Fog
 
-The monsters can finally be seen, and they have somewhere to live.
+The town now knows what to do when something big comes calling, and the world got a fresh coat of paint.
 
 ## New Features
+
+### Blocks
+- Added a hand-painted look to the world's blocks. Stone, brick, wood, earth, ore and grass now read as brushwork with clear outlines
+- Added a morning mist that gathers in the low ground and drifts in banks. It is thickest at dawn, light by noon and returns at dusk
+- Added two more crab cage spots in the pond's shallows and a second face at the quarry
+
+### NPC's
+- Added the town alarm. When a dragon or another fearsome beast comes into a settlement, whoever sees it raises the cry and it spreads from person to person
+- Added sheltering. Townsfolk now run home and stay inside while the alarm is up
+- Added defenders. Guards, the lawmen, knights and hunters now turn out against a beast in town, shoot from range, work round its flanks and fall back when hurt
+
+### Gameplay
+- Added eye colour to the character creator, with eight colours to choose from
+- Added a note at the top of the character creator explaining that you need to set your appearance before you begin
+- Added scorch marks. Fire now chars bodies patch by patch where it burns them, starting at the legs, and burning bodies shed ash
+- Added a reaction to lightning on water. The surface now flickers with cold light, throws sparks and shivers while the charge runs through it
+
+## Changes
+
+### Blocks
+- Changed dungeons so their halls and passages are now much wider and taller, with cut corners, alcoves and small side chambers
+- Changed lamps so they now give a warm, low light that pools around them, leaving the corners of a room in shadow
+
+### NPC's
+- Changed bats so they now circle out of reach, dive in to bite and climb away again, one at a time
+- Changed goblins so they now spread out around you, dart in to strike from different sides and fall back again
+- Changed people fighting a bat or another flyer high above them so they now wait for it to dive instead of swinging at the air
+- Changed archers so they now step aside for a clear shot instead of firing through someone in the way
+- Changed the dragon's animations. It now stalks low on bent legs with its head held out, and beats its wings hard in flight with its legs tucked up
+- Changed the Border Knight so he now patrols along the border at his post instead of wandering around the houses
+- Changed monsters so they no longer cry out with a human voice when they lose a limb
+
+### Gameplay
+- Changed the dead so they now drop the weapon and shield they were holding, which fall to the ground beside them
+- Changed first-person movement so it now starts and stops much more quickly. Third person is unchanged
+- Changed jogging so it is now upright with quicker, shorter steps instead of long lunges
+- Changed female characters so they now have a more feminine figure in every build
+- Changed skirts, robes and long tunics so they now hang closer and no longer split into strips as they swing
+- Changed the way your eyes adjust to the dark, so night stays dark and lamplit rooms now look like evening
+
+## Technical Changes
+- Changed the far draw distance so it now ends just past the fog, which saves work on distant scenery
+- Changed sound loading so it now happens in the background while the game starts
+- Added the version number 0.1.9
+
+## Fixed Bugs
+
+### NPC's
+- AE-1901 - Fixed bug where bats had poor combat behaviour
+- AE-1902 - Fixed bug where goblins had poor combat behaviour
+- AE-1903 - Fixed bug where people kept swinging at bats flying above them
+- AE-1904 - Fixed bug where arrows and spells aimed at a flying creature went over its head
+- AE-1905 - Fixed bug where an archer's arrow passed through other people to hit you
+
+### Items
+- AE-1906 - Fixed bug where Earth Wave, Water Wave, Fire Wave and the other Wave spells did not hit anything
+
+### Gameplay
+- AE-1907 - Fixed bug where the game nearly froze when deleting a profile on the title screen
+- AE-1908 - Fixed bug where the character creator would not change your outfit, legs or their colours
+- AE-1909 - Fixed bug where the character creator showed the last character you played instead of the one being made
+- AE-1910 - Fixed bug where target practice dummies had no collision
+- AE-1911 - Fixed bug where a lamplit room at night looked as bright as day
+- AE-1912 - Fixed bug where fire only darkened a character evenly instead of burning them where the flames were
+
+# Patch Notes Version 0.1.8: Wheel of Fortune, Pot of Stew
+
+Five new neighbours, a quick wheel, a proper cooking fire and a town that notices when you wave a sword about.
+
+## New Features
+
+### Blocks
+- Added a brook running south out of the pond in the western wood, with two fishing spots on it
+
+### Items
+- Added charred versions of planks, logs, beams, roofs and stumps. Burnt wood now keeps its own grain under the soot instead of turning into the same black block
+
+### NPC's
+- Added Hilda the Cook, who cooks her raw stock at the workshop range and sells what she makes
+- Added Bertram the Quarry Worker, who cuts building stone at the quarry face
+- Added Sir Roderic the Border Knight, who keeps the road where DevCity's ground ends and calls the watch when something comes over it
+- Added Wynn the Shellfish Gatherer, who sets crab cages in the pond shallows when the water is low
+- Added Corwin the River Fisherman, who fishes the new brook and moves on when a spot goes quiet
+- Added reactions to arms shown in the open. Swinging a weapon, loosing arrows or casting near people now gets a reaction that depends on who they are
+- Added guards that warn you, keep an eye on you and give you a last warning if you keep swinging a blade in town
+- Added townsfolk that flinch away from a blade swung close to them, stare from further off and shout for the guard if it keeps happening
+- Added scholars that come over to watch when you cast a spell nearby
+- Added brutes and bandits that take a blade swung within reach as a challenge
+- Added conversation topics for the five new residents, each with advice about their own work
+
+### Gameplay
+- Added the Quick Wheel. Hold Tab to open eight quick slots around the middle of the screen, point at one and let go of Tab to use it
+- Added a Quick Wheel button to the inventory. Click an item to put it in the highlighted slot, or drag it onto a slot. Right-click a slot to clear it
+- Added a cooking window. Using a range or a fire now lists the raw food you carry, what it becomes, how likely it is to burn and how many to cook
+- Added a cooking animation. The food is held out over the fire, turned halfway through and finished off
+- Added an Auto-Sort button to the inventory that packs everything neatly with each kind of item together
+- Added spell animations for every spell. Strikes, Bolts, Blasts, Waves and Surges share one shape per tier, and each element has its own look
+- Added casting effects for spells that don't fly, such as Forcewave, Necrocall, Vitalmend and Chronoslow
+
+## Changes
+
+### Blocks
+- Changed burning fences so they now blacken where the flames are and then burn away, instead of becoming a block
+- Changed the caravan road so it now goes around the houses instead of running through the first one
+- Changed the path from the debug square so it now enters the city through the west gate
+- Changed the beds in both houses so their heads now rest against the back wall
+- Changed the lawman's cot and the undertaker's bed so they now face the right way
+
+### NPC's
+- Changed people so they now sprint when something is urgent, such as fleeing danger, chasing someone running away or reporting a killing, and only while they have the breath for it
+- Changed people so they now ease into a walk for the last few steps of a trip
+- Changed fighters so they now jog or sprint to close on a foe instead of shuffling the whole way
+- Changed people so they now recognise anyone in plain view within ten blocks
+- Changed people so they are now less certain of figures further than ten blocks away
+- Changed people so they can now see through glass, but can only make anyone out up to five blocks away through it
+- Changed escort knights so they now stay with the person they are guarding instead of going to look at every noise
+- Changed people so they no longer keep going back to look at you when you are standing in the open with nothing known against you
+- Changed bandits so they now walk home after giving up a chase instead of turning back and forth
+- Changed some explanations, such as the herbalist's and the undertaker's, so they now sound like people talking
+
+### Gameplay
+- Changed the quick turn so it is now Ctrl+S instead of tapping back twice
+- Changed Tab so a tap still frees the mouse and holding it now opens the Quick Wheel
+- Changed new characters so they now start with 25 gold and a neatly packed inventory
+- Changed water so it now ripples in fine rings around anyone wading, standing or falling into it, and around anything thrown in
+- Changed water splashes so the drops now look like water instead of sparks
+- Changed fire spells so they now look like balls of flame that leave embers and smoke
+- Changed electric spells so they now crackle with forked lightning
+- Changed water spells so they now splash back off whatever they hit
+- Changed elite dungeons so their strongest residents are now capped at your combat level, like every other dungeon except boss dungeons. Most of their residents are close to that cap
+- Changed level-up banners, quest notices, Honor changes and wanted reminders so they now stack at the top of the screen instead of covering each other
+- Changed the walk so it is now more upright, with softly bent knees instead of a crouch
+
+## Technical Changes
+- Changed water ripples to a finer simulation that follows the camera
+- Changed the anti-aliasing so still scenes no longer shimmer
+- Changed ambient occlusion so it no longer leaves a moving pattern on walls
+- Changed the sunlight shadows so surfaces past the edge of a shadow map now use the baked sky light instead of full sun
+- Added console commands: weather, spells, book, cast, ignite and wheel
+- Added the version number 0.1.8
+
+## Fixed Bugs
+
+### Blocks
+- AE-1801 - Fixed bug where wooden blocks that are not cubes, such as fences, turned into a full block when they burned
+- AE-1802 - Fixed bug where the bounty board's collision took up far more room than the board
+- AE-1803 - Fixed bug where a road led straight into the wall of the first house
+
+### NPC's
+- AE-1804 - Fixed bug where every guard still followed you around after you successfully lied to one
+- AE-1805 - Fixed bug where people sometimes could not see you standing right in front of them
+- AE-1806 - Fixed bug where people standing beside you did not notice you if they were facing away
+- AE-1807 - Fixed bug where people never sprinted
+- AE-1808 - Fixed bug where the quarry worker cut clay from the bank beside the quarry face
+- AE-1809 - Fixed bug where some beds faced backwards
+
+### Gameplay
+- AE-1810 - Fixed bug where the level-up banner and the wanted notice covered each other
+- AE-1811 - Fixed bug where interior walls flickered and shimmered, most of all by lamplight
+- AE-1812 - Fixed bug where water barely rippled for anything moving in it
+
+# Patch Notes Version 0.1.7: Deep Trouble
+
+The monsters can finally be seen, they have somewhere to live, and magic has been rewritten from the ground up.
+
+## New Features
+
+### Items
+- Added the Air Staff, Water Staff, Electric Staff and Earth Staff. Each makes its own element's spells very cheap to cast
+
+### NPC's
+- Added a giant spider's web in the western wood. Its spider only comes out at night
+- Added questioning. The watch now asks people nearby whether they have seen a wanted suspect, and searches wherever that person last saw them
+- Added snares. Bounty hunters now lay snares where their quarry was last seen, and come running when one is sprung
+- Added an option at the Undertaker to buy back the items in a gravestone that is still standing
+- Added a voice of its own to every monster, from a goblin's grunts to a ghost's moans
 
 ### Gameplay
 - Added dungeons. Each one is its own sealed map, entered through a cave mouth in the wilds and left by its own way out
@@ -16,9 +192,11 @@ The monsters can finally be seen, and they have somewhere to live.
 - Added a cheer when you level up outside of a fight
 - Added a LEVEL UP! banner, and a separate banner showing your new Combat Level when it rises
 - Added a Move All button to the bank vault
-
-### NPC's
-- Added a giant spider's web in the western wood. Its spider only comes out at night
+- Added the Sun spellbook's 25 elemental spells, from Wind Strike to Fire Surge, in five tiers: Strike, Bolt, Blast, Wave and Surge
+- Added Fogish's ice spells: Ice Rush, Ice Burst, Ice Blitz and Ice Barrage. Each freezes its target in place, from 5 to 20 seconds
+- Added a chance for Wind Blast, Wind Wave and Wind Surge to knock a target off their feet. Smaller and less skilled targets go down more easily
+- Added remains that dissolve. A monster's body now crumbles to ash a minute after it dies, leaving whatever it carried on the ground
+- Added pillared halls to the larger dungeon rooms
 
 ## Changes
 
@@ -27,6 +205,9 @@ The monsters can finally be seen, and they have somewhere to live.
 - Changed jail fronts to iron bars
 - Changed Redberry bushes so you can now walk through them, like any other plant
 
+### Items
+- Changed the Fire Staff so it no longer needs charges. It now makes fire spells cheap to cast instead
+
 ### NPC's
 - Changed guards so they now hunt for a killer and look into crimes before fetching bodies to the undertaker
 - Changed guards and the undertaker so they no longer carry dead monsters to the graveyard
@@ -34,6 +215,9 @@ The monsters can finally be seen, and they have somewhere to live.
 - Changed NPC dialogue to have far more variety, with remarks on your wounds, blood, a body on your shoulder, a drawn blade, the weather, the time of day, monsters nearby and your reputation
 - Changed NPC small talk so they now talk about the weather, their work, monsters and news instead of repeating greetings
 - Changed monsters so they are now always active underground
+- Changed bounty hunters so they no longer appear in front of you or within sight
+- Changed townsfolk who know of your crimes so they now say so in plain words
+- Changed the lawman's crime reports to read as he would tell them
 
 ### Gameplay
 - Changed leveling to be faster. Agility, Thieving and Faith now level a little faster than the rest, and combat skills a little slower
@@ -48,10 +232,25 @@ The monsters can finally be seen, and they have somewhere to live.
 - Changed a combat level up so it now heals you fully. A skill level up does not
 - Changed splashes so jumping or falling into water now throws up a much bigger splash, with foam and waves
 - Changed monsters so big ones now swing and reach as far as their size suggests
+- Changed the spellbooks. Standard is now Sun, Ancients is now Fogish, and Lunar and Arcane are now one book, Moon
+- Changed the spells of a tier so the lower ones now hit as hard as the strongest one of that tier you have unlocked
+- Changed dungeons so their monsters now match you as you enter. A regular dungeon's strongest monster is never above your combat level, with weaker ones filling in, and elite dungeons go higher. Boss dungeons are unchanged
+- Changed the weakest dungeon monsters so they now grow stronger with you from combat level 20
+- Changed dungeons to be wider, with broader passages, larger rooms and higher ceilings
+- Changed dungeon traps so they can now be spotted by a careful eye, and are marked once found
+- Changed crime messages so the same kind of crime is now announced at most once every 30 seconds
+- Changed the fonts. Friz Quadrata is now used for most of the interface, banners and names, Morpheus for the quest log and spellbooks, Arial Narrow for chat, tooltips and descriptions, and Skurri for the damage numbers over a body
+- Changed knocked-down bodies so they now get back up sooner and stay on their feet once up
+- Changed falling bodies to recorded body-fall sounds
+- Changed the default performance budget to 60 FPS. The picture now lowers its resolution slightly in heavy scenes rather than dropping frames
 
 ## Technical Changes
 - Changed the world to be wider, to make room for the dungeons beyond the cliffs at its edge
 - Removed unused sound files and stale sound banks
+- Changed sight checks, the minimap and the repainting of wounded characters to cost far less, which reduces lag in fights
+- Changed fog and smoke to be cheaper to draw
+- Added developer console commands to spawn any animal, monster or kind of person, and to list them all
+- Removed an unused font and the old spells replaced by the new spellbooks
 
 ## Fixed Bugs
 
@@ -64,12 +263,28 @@ The monsters can finally be seen, and they have somewhere to live.
 - AE-1706 - Fixed bug where the thief hid from every passing guard, and the guards spent the morning searching for him instead of keeping to their routines
 - AE-1707 - Fixed bug where an NPC trying to talk to someone they could not reach kept trying all day
 - AE-1708 - Fixed bug where dead monsters left a pile of bones as well as their own remains
+- AE-1713 - Fixed bug where lawmen and guards could let a wanted person bleed to death from their wounds instead of arresting them
+- AE-1714 - Fixed bug where ghosts drifted up out of their dungeon through the rock and fell into DevCity
+- AE-1715 - Fixed bug where monsters cried out with human voices when hurt or killed
+- AE-1716 - Fixed bug where people kicked a leg out behind them when they stopped sprinting
+- AE-1717 - Fixed bug where Fenna's home was inside a wall
 
 ### Gameplay
 - AE-1709 - Fixed bug where some foliage blocked movement
 - AE-1710 - Fixed bug where bow shots were heard about a second after the arrow was released
 - AE-1711 - Fixed bug where a conjured ally's body could be left behind in the world after its time ran out
 - AE-1712 - Fixed bug where a body being carried could break when it left the world
+- AE-1718 - Fixed bug where the mouse cursor still showed on the title screen
+- AE-1719 - Fixed bug where taking items from a monster's remains counted as theft
+- AE-1720 - Fixed bug where you could be left stuck on the ground after being knocked down by a fall, a shock or a spell
+- AE-1721 - Fixed bug where you were knocked down again the moment you got up from a long fall
+- AE-1722 - Fixed bug where the Level Up and Combat Level banners did not show when you levelled up
+- AE-1723 - Fixed bug where you could walk through dungeon entrances
+- AE-1724 - Fixed bug where you could walk through bounty boards
+- AE-1725 - Fixed bug where you could bleed out while in jail. You are now healed when jailed
+- AE-1726 - Fixed bug where a bright circle followed everyone around and shadows under lamps were inverted
+- AE-1727 - Fixed bug where walls flickered near lamps at night
+- AE-1728 - Fixed bug where the equipment cabinet was sunk into its wall
 
 ---
 

@@ -37,7 +37,21 @@ final class Bench {
             new Stop("pond, evening (reflections)", 17.5f, 88f, 45f, 96f, 34f, false),
             new Stop("campfire, night (smoke, lamps)", 21f, 87.5f, 26.5f, 91.5f, 21.5f, false),
             new Stop("sprint down the street", 15f, 60f, 90f, 60f, 40f, true),
+            // gamefixes: combat-heavy scenes lagged - a dozen monsters on the watch and the townsfolk, in the yard
+            new Stop("battle in the yard (monsters, the watch)", 13f, 96f, 74f, 104f, 66f, false),
     };
+
+    /** The battle stop's fight: goblins and orcs set upon the yard, where the watch stands; the player out of reach. */
+    private void battle(Rpg g, Stop s) {
+        g.player.skills.setLevel(rpg.skill.Skill.HEALTH, 99); g.player.restore();
+        for (int i = 0; i < 12; i++) {
+            var kind = i % 3 == 0 ? rpg.monster.MonsterKind.ORC : rpg.monster.MonsterKind.GOBLIN;
+            float a = i * 0.52f;
+            var m = g.monsters.spawn(kind, kind == rpg.monster.MonsterKind.ORC ? 25 : 10, s.tx + (float) Math.sin(a) * 4, s.tz + (float) Math.cos(a) * 4, null);
+            m.hostileToPlayer = true;
+        }
+        for (var n : g.npcs) if (n.watch() && n.loaded) { g.teleport(n, s.tx + (n.id % 5) - 2, DevMap.FLOOR, s.tz + 2); n.nextThink = 0; }
+    }
 
     // a sampler: the main thread's stack every 2 ms while a frame runs; a slow frame prints where its time went
     private final java.util.List<StackTraceElement[]> samples = java.util.Collections.synchronizedList(new ArrayList<>());
@@ -83,7 +97,7 @@ final class Bench {
         g.ui = hud;
         gfx.findLamps(g.vox);
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
-        g.cfg.targetFps = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_TARGET", "30"));
+        g.cfg.targetFps = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_TARGET", "60"));
         g.cfg.quality = Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_QUALITY", Integer.toString(g.cfg.quality)));
         System.out.printf("bench: %d x %d, %d frames a stop, %s%n", win.width, win.height, frames, Runtime.version());
         List<double[]> all = new ArrayList<>();
@@ -96,6 +110,7 @@ final class Bench {
             double now = g.state.hourOfDay();
             g.advanceTime(((s.hour - now) % 24 + 24) % 24 * 60, "bench");
             // settle: meshing, probes and exposure catch up (a real arrival would have streamed them on the way)
+            if (s.name.startsWith("battle")) battle(g, s);
             for (int i = 0; i < Integer.parseInt(System.getenv().getOrDefault("RPG_BENCH_SETTLE", "180")); i++) frame(g, hud, s, null);
             // RPG_BENCH_SHOTS=<dir>: a full-size picture of each stop, settled (to compare render scales and passes)
             String shots = System.getenv("RPG_BENCH_SHOTS");

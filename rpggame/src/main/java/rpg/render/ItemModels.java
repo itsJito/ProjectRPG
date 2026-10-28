@@ -424,12 +424,15 @@ public final class ItemModels {
     }
 
     private static Model staff(ItemDef d) {
-        boolean fire = d.id.equals("fire_staff");
+        // an elemental staff's orb is its element's colour, the haft darkened toward it; the plain staff's is violet
+        boolean fire = d.id.equals("fire_staff"), elemental = d.staffElement != null;
+        int orb = fire ? 0xFF6020 : elemental ? d.color : 0xB070F0;
         VoxModel m = new VoxModel(7, 54, 7);
-        haft(m, 3, 0, 46, 3, mat(fire ? 0x5A2A1A : 0x6A4A7A));
-        m.box(2, 45, 2, 4, 46, 4, mat(fire ? 0x8A3A1A : 0x8A6AA0));
-        m.sphere(3.5f, 49.5f, 3.5f, 2.6f, mat(fire ? 0xFF6020 : 0xB070F0));
+        haft(m, 3, 0, 46, 3, mat(fire ? 0x5A2A1A : elemental ? sh(d.color, 0.38f) : 0x6A4A7A));
+        m.box(2, 45, 2, 4, 46, 4, mat(fire ? 0x8A3A1A : elemental ? sh(d.color, 0.6f) : 0x8A6AA0));
+        m.sphere(3.5f, 49.5f, 3.5f, 2.6f, mat(orb));
         if (fire) { m.set(3, 53, 3, mat(0xFFD040)); m.set(2, 52, 3, mat(0xFF9020)); m.set(4, 52, 4, mat(0xFF9020)); }
+        else if (elemental) { m.set(3, 53, 3, mat(sh(d.color, 1.3f))); m.set(2, 52, 3, mat(sh(d.color, 1.15f))); m.set(4, 52, 4, mat(sh(d.color, 1.15f))); }
         return new Model(m, 3.5f, 14.5f, 3.5f);
     }
 

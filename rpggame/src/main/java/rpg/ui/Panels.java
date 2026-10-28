@@ -46,7 +46,9 @@ final class Panels {
         @Override public float height() { return ph; }
         /** A section heading: Morpheus in gold over a gold rule the panel's width. */
         void title(Ui2D ui, String t, float x, float y) { title(ui, t, x, y, pw); }
-        void title(Ui2D ui, String t, float x, float y, float w) { ui.text(ui.heading, t, x, y - 4, 21, Style.ACCENT); Style.rule(ui, x, y + 19, w); }
+        /** The lore face (Morpheus) heads the quest log and the spellbooks; the rest of the interface is Friz Quadrata. */
+        boolean lore(String t) { return t.equals("Quests") || t.equals("Journal") || t.endsWith("spellbook"); }
+        void title(Ui2D ui, String t, float x, float y, float w) { ui.text(lore(t) ? ui.heading : ui.body, t, x, y - 4, 21, Style.ACCENT); Style.rule(ui, x, y + 19, w); }
         /** An inset section behind a group of rows: a darker sheet with a faint gold edge. */
         static void sheet(Ui2D ui, float x, float y, float w, float h) {
             ui.rect(x, y, w, h, 0x50000000);
@@ -154,8 +156,8 @@ final class Panels {
             ui.text(s.def.category().name().toLowerCase(), x + 62, iy + 26, 11, Style.DIM);
             float ly = iy + 62;
             for (String l : hud.describe(s).split("\n")) { if (l.equals(s.def.name)) continue; ui.text(l, x, ly, 12, l.startsWith("Stolen") ? Style.BAD : Style.DIM); ly += 16; }
-            // the flavour text, in the lore face
-            Ui2D.Face was = ui.use(ui.lore);
+            // the flavour text: info text, in Arial Narrow
+            Ui2D.Face was = ui.use(ui.chat);
             for (String l : HudFragments.wrap(ui, s.def.examine == null ? "" : s.def.examine, 13, pw)) { ui.text(l, x, ly + 4, 13, 0xFFC8B896); ly += 16; }
             ui.use(was);
         }
@@ -248,7 +250,7 @@ final class Panels {
             if (s != seen) { scroll = 0; seen = s; }
             Style.well(ui, x, y, 44, 44);
             ui.img(Atlas.skill(s), x + 2, y + 2, 40, 0xFFFFFFFF);
-            ui.text(ui.heading, s.title, x + 54, y - 2, 24, Style.ACCENT);
+            ui.text(ui.body, s.title, x + 54, y - 2, 24, Style.ACCENT);
             ui.text("level " + hud.g.player.skills.level(s), x + 54, y + 26, 12, Style.DIM);
             Style.rule(ui, x, y + 48, pw);
             float dy = y + 56;
@@ -286,7 +288,7 @@ final class Panels {
             yy += 24;
             List<String> j = g.quests.journal;
             if (j.isEmpty()) { ui.text("Nothing learned yet.", x, yy, 12, Style.FAINT); yy += 16; }
-            Ui2D.Face was = ui.use(ui.lore);
+            Ui2D.Face was = ui.use(ui.body);
             for (int i = Math.max(0, j.size() - 8); i < j.size(); i++) for (String l : HudFragments.wrap(ui, j.get(i), 13, pw)) { ui.text(l, x, yy, 13, 0xFFE0D2B0); yy += 16; }
             ui.use(was);
             yy += 14;
@@ -329,18 +331,22 @@ final class Panels {
             ui.text(String.format("Mana %.0f / %.0f  -  a point a minute", p.mana, p.maxMana()), x + 230, y + 3, 11, Style.MANA);
             ui.text(p.book.about + " Click to select; R (or a staff) casts. Change books at an altar.", x, y + 20, 10, Style.FAINT);
             float yy = y + 40;
-            for (int lv : Spells.SLOTS) {
-                Spells.Spell s = Spells.slot(p.book, lv);
-                boolean has = s != null, lvl = p.skills.level(Skill.MAGIC) >= lv, sel = s != null && p.spell == s;
-                if (has && Style.tab(ui, "", x, yy, 420, 30, sel) && live) { if (lvl) { p.spell = s; hud.sound("UI_select", 0.4f); } else g.chat.warn("You need Magic level " + lv + "."); }
-                ui.img("Magic_Icon", x + 4, yy + 5, 20, has && lvl ? 0xFFFFFFFF : 0x40FFFFFF);
-                if (!has) { ui.text("Level " + lv + "  -  (an empty slot)", x + 30, yy + 8, 11, Style.FAINT); yy += 33; continue; }
-                // hidden until earned (gamefixes): what a level gives is shown only once it is reached
-                if (!lvl) { ui.text("Level " + lv + "  -  ???", x + 30, yy + 8, 12, Style.FAINT); yy += 33; continue; }
-                ui.text(s.title + (s.element != Spells.Element.NONE ? "  (" + s.element.name().toLowerCase() + ")" : ""), x + 30, yy + 2, 12, Style.TEXT);
-                ui.text("level " + lv + "  -  " + s.cost + " Mana" + (s == Spells.Spell.FIRE_BLAST ? " + a staff charge" : ""), x + 30, yy + 16, 10, Style.DIM);
-                if (ui.hover(x, yy, 420, 30)) hud.tooltip(s.title + "\n" + s.effect);
-                yy += 33;
+            // the book's spells in the order they open, two to a row (Sun has thirty); what is not yet earned shows as ???
+            java.util.List<Spells.Spell> spells = Spells.book(p.book);
+            int magic = p.skills.level(Skill.MAGIC);
+            for (int i = 0; i < spells.size(); i++) {
+                Spells.Spell s = spells.get(i);
+                float sx = x + (i % 2) * 212, sy = yy + (i / 2) * 26;
+                boolean lvl = magic >= s.level, sel = p.spell == s;
+                if (Style.tab(ui, "", sx, sy, 208, 24, sel) && live) { if (lvl) { p.spell = s; hud.sound("UI_select", 0.4f); } else g.chat.warn("You need Magic level " + s.level + "."); }
+                ui.img("Magic_Icon", sx + 3, sy + 4, 16, lvl ? 0xFFFFFFFF : 0x40FFFFFF);
+                if (!lvl) { ui.text("Level " + s.level + "  -  ???", sx + 24, sy + 6, 11, Style.FAINT); continue; }
+                ui.text(s.title, sx + 24, sy + 1, 11, Style.TEXT);
+                int cost = g.combat.cost(p, s);
+                String hit = s.utility ? "" : "  -  hits " + (int) s.maxBase(magic);
+                ui.text(cost + " Mana" + hit, sx + 24, sy + 13, 9, cost < s.cost ? Style.GOOD : Style.DIM);
+                if (ui.hover(sx, sy, 208, 24)) hud.tooltip(s.title + " (Magic " + s.level + ")\n" + s.effect + (s.tier != null ? "\nEvery " + s.tier.title + " you know hits as hard as the strongest you have learned." : "")
+                        + (cost < s.cost ? "\nYour staff makes it cheap to cast." : ""));
             }
             // the prayers: toggled; each drains a point of Faith per interval while it is raised
             title(ui, "Prayers", x + 448, y, 420);

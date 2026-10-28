@@ -120,7 +120,7 @@ public final class TitleScreen {
         cursor(ui);
     }
 
-    static void cursor(Ui2D ui) {
+    public static void cursor(Ui2D ui) {
         ui.line(ui.mx, ui.my, ui.mx + 10, ui.my + 14, 3, 0xFF000000);
         ui.line(ui.mx, ui.my, ui.mx, ui.my + 16, 3, 0xFF000000);
         ui.line(ui.mx, ui.my, ui.mx + 9, ui.my + 13, 1.5f, 0xFFF0EEE8);

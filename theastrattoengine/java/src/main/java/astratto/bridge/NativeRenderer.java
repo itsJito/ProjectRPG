@@ -95,6 +95,21 @@ public final class NativeRenderer implements AutoCloseable {
         }
     }
 
+    /**
+     * A 2D texture's pixels replaced in place (RGBA8, its whole size): for one redrawn often. False when it could not
+     * be (an older native library, an unknown texture): make a new one instead.
+     */
+    public boolean textureUpdate(int id, ByteBuffer pixels) {
+        live();
+        if (!AstrattoNative.hasTextureUpdate() || id == 0 || pixels == null) return false;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            // astratto_texture_update: struct_size, id, pixels, bytes (24 bytes, the pointer 8-aligned)
+            ByteBuffer u = stack.calloc(24).order(ByteOrder.nativeOrder());
+            u.putInt(0, 24).putInt(4, id).putLong(8, MemoryUtil.memAddress(pixels)).putLong(16, pixels.remaining());
+            return ok(AstrattoNative.renderTextureUpdate(handle, MemoryUtil.memAddress(u)));
+        }
+    }
+
     /** A model mesh: count vertices of 10 floats (position, colour with alpha, normal), three a triangle. Copied. Returns its id, or 0. */
     public int mesh(float[] vertices, int count) {
         live();

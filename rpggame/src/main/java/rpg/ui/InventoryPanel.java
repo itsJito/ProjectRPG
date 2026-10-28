@@ -132,7 +132,19 @@ final class InventoryPanel extends Fragment {
             ui.text("More room", bx, by, 12, Style.DIM);
             ui.text("Wear a backpack", bx, by + 20, 12, Style.FAINT);
             ui.text("or a belt pouch.", bx, by + 37, 12, Style.FAINT);
+            by += 56;
         }
+        // Auto-Sort: every grid carried, kinds together; level with the foot of the carried grid unless the bags reach lower
+        float sy = Math.max(by, gy + 18 + grids.get(0).h * CS - 26);
+        if (Style.button(ui, "Auto-Sort", bx, sy, 104, 26, live && drag == null)) autoSort(grids);
+        if (Style.button(ui, hud.radial.editing ? "Done" : "Quick Wheel", bx + 110, sy, 112, 26, live)) { hud.radial.editing = !hud.radial.editing; hud.sound("UIbutton1", 0.35f); }
+    }
+
+    private void autoSort(List<Inventory> grids) {
+        boolean all = true;
+        for (Inventory inv : grids) all &= inv.sort();
+        hud.sound("UI_select", 0.4f);
+        if (!all) hud.g.chat.warn("Some of your things are packed too tightly to sort.");
     }
 
     private void label(Ui2D ui, String name, Inventory inv, float x, float y, float cs) {
@@ -220,6 +232,8 @@ final class InventoryPanel extends Fragment {
             case CONTAINER -> { if (hud.container != null) g.interact.request(g.player, hud.container, "take:" + slot); }
             case SHOP -> { }
             default -> {
+                // the wheel docked for editing: a click puts the item in its armed slice
+                if (hud.radial.editing && hud.win == Hud.Win.NONE) { hud.radial.assign(hud.radial.armed, s.def); return; }
                 int gi = g.player.grids().indexOf(inv);
                 if (hud.win == Hud.Win.SHOP) { Result r = g.econ.sell(g.player, inv, hud.shop, slot, 1, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); return; }
                 if (hud.win == Hud.Win.CONTAINER) { g.interact.request(g.player, hud.container, "deposit:" + gi + ":" + slot); return; }

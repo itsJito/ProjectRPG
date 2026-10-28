@@ -17,6 +17,7 @@ import rpg.monster.Monster.State;
 import rpg.skill.Skill;
 import rpg.world.Blocks;
 import rpg.world.DevMap;
+import rpg.world.DungeonLayout;
 import static astratto.bridge.AstrattoNative.*;
 
 /**
@@ -89,7 +90,7 @@ public final class Monsters {
         for (int i = 0; i < m.nudge.length; i++) { seed ^= seed >>> 29; seed *= 0xBF58476D1CE4E5B9L; m.nudge[i] = ((seed >>> 40) % 301 - 150) / 1000f; }
         m.hunger = 0.2f + (m.id % 5) * 0.08f;
         m.look = rpg.actor.Appearance.monster(kind, m.id);
-        if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.ANCIENTS;
+        if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.FOGISH;
         if (kind == MonsterKind.DRAGON) m.breed = MonsterKind.Breed.values()[(int) Math.floorMod(m.id, MonsterKind.Breed.values().length)];
         kit(m);
         m.restore();
@@ -99,6 +100,23 @@ public final class Monsters {
         spawned++;
         g.state.commit("MonsterSpawned", 0, m.id, DevMap.jurisdiction(x, z), 0, kind.title + " level " + level + (lair == null ? "" : " at " + lair.name));
         return m;
+    }
+
+    /**
+     * Sets a living monster to the strength it should have (a dungeon matched to who comes into it): the combat level
+     * asked for, through its level and so its skills (its skills decide its combat level), never past the cap.
+     * Its wounds keep their share.
+     */
+    public void relevel(Monster m, int level, int combatCap) {
+        if (!m.alive) return;
+        float share = m.hp / Math.max(1, m.maxHp());
+        m.level = Math.max(1, level);
+        m.stats();
+        // (aimed at the combat level asked for, which its skills give it, then held under the cap)
+        while (m.skills.combatLevel() < Math.min(level, combatCap) && m.level < 400) { m.level++; m.stats(); }
+        while (m.level > 1 && m.skills.combatLevel() > combatCap) { m.level--; m.stats(); }
+        m.hp = Math.max(1, share * m.maxHp());
+        m.title = m.kind.title + " (level " + m.level + ")";
     }
 
     /** What a monster carries: its kind's weapon (or its own claws), a few throwing weapons, a bow and arrows for a skeleton archer. */
@@ -252,7 +270,7 @@ public final class Monsters {
 
     /** A flyer's own steering: toward its goal at the height it wants, rising over what is in its way (ghosts drift straight through). */
     private void fly(Monster m, float dt) {
-        float speed = (m.running ? m.kind.run : m.kind.walk) * (m.cs.slowT > 0 ? 0.6f : 1);
+        float speed = (m.running ? m.kind.run : m.kind.walk) * (m.cs.frozenT > 0 ? 0 : m.cs.slowT > 0 ? 0.6f : 1);
         float dx = m.hasGoalPos ? m.tx - m.x : 0, dz = m.hasGoalPos ? m.tz - m.z : 0, l = (float) Math.hypot(dx, dz);
         float vx = 0, vz = 0;
         if (l > 0.3f) { vx = dx / l * speed; vz = dz / l * speed; }
@@ -262,6 +280,9 @@ public final class Monsters {
         }
         float ground = groundBelow(m);
         float want = ground + m.wantAltitude;
+        // never up into the roof: what flies keeps under the ceiling of the space it is in (a cave's, a crypt's, a canopy's)
+        float ceiling = ceilingAbove(m, ground);
+        want = Math.min(want, Math.max(ground + 0.3f, ceiling - m.height - 0.15f));
         // something ahead: rise over it (the ghost passes through)
         if (m.kind != MonsterKind.GHOST && l > 0.3f) {
             float ax = m.x + dx / l * (m.radius + 0.8f), az = m.z + dz / l * (m.radius + 0.8f);
@@ -269,18 +290,41 @@ public final class Monsters {
         }
         float vy = Math.max(-4, Math.min(4, (want - m.y) * 2.5f));
         if (m.kind == MonsterKind.GHOST) {
-            // drifting: no body in the world's way at all
+            // drifting: no body in the world's way at all - but bound to the place it haunts. A ghost born in a dungeon
+            // stays inside that dungeon's rock (it passes through the walls between its halls, never out through the
+            // roof to the cliff top, nor over the edge into the town below); one found outside is drawn back home
             float nx = m.x + vx * dt, ny = m.y + vy * dt, nz = m.z + vz * dt;
+            DungeonLayout haunt = DungeonLayout.at(m.lairX, m.lairZ);
+            if (haunt != null) {
+                nx = Math.max(haunt.ox + 0.6f, Math.min(haunt.ox + haunt.w - 0.6f, nx));
+                nz = Math.max(haunt.oz + 0.6f, Math.min(haunt.oz + haunt.d - 0.6f, nz));
+                ny = Math.max(DevMap.FLOOR, Math.min(DevMap.FLOOR + 6, ny));
+                if (DungeonLayout.at(m.x, m.z) != haunt || m.y > DevMap.FLOOR + 8) { nx = m.lairX; nz = m.lairZ; ny = DevMap.FLOOR + 0.8f; }
+            }
             g.game.commands().moverPlace(m.body, nx, ny, nz, 0, 0, 0);
             m.vx = vx; m.vz = vz;
         } else g.game.commands().moverInput(m.body, vx, vz, vy, 0, m.kind == MonsterKind.DRAGON ? 6 : 18, MOVER_FLY);
         m.altitude = Math.max(0, m.y - ground);
     }
 
+    /**
+     * The floor under a flyer: the top of the first solid below the open space it is in. A ghost inside rock (passing
+     * through a wall) takes the floor of the open space under that rock - not the rock it is in, which read as ground
+     * under it and lifted it, cell by cell, out through the roof.
+     */
     private float groundBelow(Monster m) {
         int bx = (int) Math.floor(m.x), bz = (int) Math.floor(m.z);
-        for (int y = (int) Math.floor(m.y + 0.5f); y > 0; y--) if (g.vox.solid(bx, y - 1, bz)) return y;
+        int y = (int) Math.floor(m.y + 0.5f);
+        while (y > 0 && g.vox.solid(bx, y, bz)) y--;
+        for (; y > 0; y--) if (g.vox.solid(bx, y - 1, bz)) return y;
         return DevMap.FLOOR;
+    }
+
+    /** The underside of whatever is over a flyer's floor (the open sky: the top of the world). */
+    private float ceilingAbove(Monster m, float ground) {
+        int bx = (int) Math.floor(m.x), bz = (int) Math.floor(m.z);
+        for (int y = (int) ground; y < DevMap.SY - 1; y++) if (g.vox.solid(bx, y, bz)) return y;
+        return DevMap.SY;
     }
 
     // ------------------------------------------------------------------ the frame
@@ -310,6 +354,37 @@ public final class Monsters {
             if (g.time > m.nextVoice && (m.state == State.IDLE || m.state == State.PATROL)) { m.nextVoice = g.time + 8 + rnd(m) * 14; sound(m, m.kind.idleSound, 0.4f); }
         }
         if (g.time >= lifeAt) { lifeAt = g.time + 5; life(); }
+        for (Monster m : new ArrayList<>(monsters)) if (!m.alive && !m.puppet) remains(m);
+    }
+
+    /**
+     * A monster's remains lie a minute, then go: in a couple of seconds the body darkens to ash, glows at its edges and
+     * sinks away in rising motes (gamefixes). What was still on it is not lost with it - it falls where the body lay.
+     * Nothing goes while it is being carried.
+     */
+    public static final float CORPSE_SECONDS = 60, DISSOLVE_SECONDS = 2.5f;
+    private void remains(Monster m) {
+        if (m.carriedBy != 0) { m.diedAt = Math.max(m.diedAt, g.time - CORPSE_SECONDS + 5); m.dissolve = 0; return; }
+        float t = (float) (g.time - m.diedAt) - CORPSE_SECONDS;
+        m.dissolve = Math.max(0, Math.min(1, t / DISSOLVE_SECONDS));
+        if (t > 0 && t - (float) g.lastDt <= 0 && g.sfx != null) g.sfx.play("monster.dissolve", m.x, m.y + 0.5f, m.z, 0.35f, 1f, 10);
+        if (m.dissolve < 1) return;
+        float x = m.x, z = m.z;
+        if (g.objects.get(m.corpse) instanceof rpg.objects.Corpse c) {
+            x = c.x; z = c.z;
+            int k = 0;
+            for (int i = 0; i < c.contents.size(); i++) {
+                ItemStack s = c.contents.get(i);
+                if (s == null) continue;
+                c.contents.set(i, null);
+                g.objects.drop(s, x + (k % 3 - 1) * 0.3f, DevMap.FLOOR + 0.05f, z + (k / 3 - 1) * 0.3f); k++;
+            }
+            c.removed = true;
+        }
+        for (ItemDef.Slot s : ItemDef.Slot.values()) { ItemStack w = m.eq.get(s); if (w != null && !w.def.natural) g.objects.drop(w, x, DevMap.FLOOR + 0.05f, z); m.eq.set(s, null); }
+        g.state.commit("MonsterRemainsGone", 0, m.id, DevMap.jurisdiction(x, z), 0, m.kind.title);
+        if (g.carrying != null) g.carrying.release(m);
+        remove(m);
     }
 
     /** Positions from the engine (and the dead from their ragdolls). */
@@ -382,9 +457,13 @@ public final class Monsters {
         float yaw = MonsterMind.yawTo(m, t.x, t.z), pitch = (float) Math.atan2(t.chestY() - m.eyeY(), Math.max(0.3f, m.distTo(t)));
         m.wantYaw = yaw;
         switch (m.kind.ranged) {
-            case "firebolt" -> { m.mana = Math.max(m.mana, 3); g.combat.cast(m, rpg.combat.Spells.Spell.FIRE_BOLT, yaw, pitch); }
-            case "spectral" -> { m.mana = Math.max(m.mana, 4); g.combat.cast(m, rpg.combat.Spells.Spell.FROST_LANCE, yaw, pitch); }
+            // (a creature's own magic: born to it, not learned - no book, no Mana, as strong as the creature is)
+            case "firebolt" -> g.combat.castInnate(m, rpg.combat.Spells.Spell.FIRE_STRIKE, yaw, pitch);
+            case "spectral" -> g.combat.castInnate(m, rpg.combat.Spells.Spell.ICE_RUSH, yaw, pitch);
             case "shortbow" -> {
+                // not through one of its own kind standing in the way
+                Actor between = g.combat.inLineOfFire(m, t);
+                if (between instanceof Monster mo && mo.kind == m.kind) { m.nextRanged = g.time + 0.6; return; }
                 if (m.main() != null && m.main().family == ItemDef.Family.BOW && m.eq.get(ItemDef.Slot.AMMO) != null) g.combat.shoot(m, yaw, pitch + m.distTo(t) * 0.004f, 1);
             }
             case "boulder" -> g.combat.hurl(m, null, "boulder", t.x, t.chestY(), t.z, 16, 14, m.kind.damage * 1.2f, m.kind.impact * 1.2f, ItemDef.DamageType.BLUNT);
@@ -491,6 +570,7 @@ public final class Monsters {
             var rd = !m.alive && m.ragdoll != 0 ? g.lastBodies.ragdoll(m.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); o.put("pose", pose); }
             o.put("corpse", m.corpse);
+            if (!m.alive) o.put("deadFor", g.time - m.diedAt);
             ms.add(o);
         }
         root.put("monsters", ms);
@@ -522,11 +602,11 @@ public final class Monsters {
             m.homeX = m.lairX; m.homeZ = m.lairZ;
             m.hunger = (float) astratto.util.Json.num(r, "hunger", 0.3); m.fatigue = (float) astratto.util.Json.num(r, "fatigue", 0);
             if (r.containsKey("breed")) m.breed = MonsterKind.Breed.valueOf(astratto.util.Json.str(r, "breed", "FIRE"));
-            if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.ANCIENTS;
+            if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.FOGISH;
             monsters.add(m);
             if (m.alive && astratto.util.Json.bool(r, "loaded", true)) spawnBody(m);
             else if (!m.alive) {
-                m.diedAt = g.time;
+                m.diedAt = g.time - astratto.util.Json.num(r, "deadFor", 0);
                 m.ragdoll = g.game.reserve(KIND_RAGDOLL);
                 g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE, m.x, DevMap.FLOOR, m.z, m.yaw, 0, 0, 0);
                 List<Object> pose = astratto.util.Json.list(r, "pose");

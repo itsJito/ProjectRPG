@@ -26,9 +26,9 @@ import static org.lwjgl.glfw.GLFW.*;
  *   ./gradlew run          the character creator, then the devmap
  *   ./gradlew acceptance   off-screen: every GDD 4.2 end-to-end flow, scripted and checked, with screenshots
  * </pre>
- * Controls: WASD walk, Shift run (tap twice and hold: sprint), Space jump, Q dodge, mouse look; LMB main hand (tap light, hold heavy, draw a
+ * Controls: WASD walk, Shift run (tap twice and hold: sprint), Ctrl+S quick turn, Space jump, Q dodge, mouse look; LMB main hand (tap light, hold heavy, draw a
  * bow), RMB off hand (guard, or the off-hand item); R cast; 1-3 blessings; E interact (hold for every option); V camera;
- * Tab frees the mouse for the interface; F1-F4/F7 panels; F5/F6 save/load; F8-F11 developer inspectors; Esc menus.
+ * Tab tapped frees the mouse for the interface, held opens the radial wheel; F1-F4/F7 panels; F5/F6 save/load; F8-F11 developer inspectors; Esc menus.
  */
 public final class Main {
     public static void main(String[] args) {
@@ -54,6 +54,8 @@ public final class Main {
 
     static int run(boolean acceptance, boolean gallery, boolean female, boolean hidden, String shots) {
         System.out.println(Astratto.NAME + " " + Astratto.VERSION + " - RPGGAME devmap" + (Astratto.javaFallbackAllowed() ? "" : " (Java fallbacks disabled)"));
+        // the recordings decode on background threads while the window, the engine and the intro come up
+        rpg.audio.Sfx.warm();
         Window win = new Window();
         win.show = !hidden;
         if (bench) win.create("RPGGAME - bench", 1920, 1080); else win.create("RPGGAME", 1600, 900);
@@ -132,7 +134,7 @@ public final class Main {
         gfx.findLamps(new rpg.world.Voxels(game.view()));
         // ---- the title screen: the profiles
         TitleScreen title = new TitleScreen(VERSION);
-        title.sound = n -> rpg.audio.Sfx.shared(game).ui(n, 0.5f);
+        title.sound = n -> { var sfx = rpg.audio.Sfx.ready(game); if (sfx != null) sfx.ui(n, 0.5f); };
         Gfx.Preview stage = new Gfx.Preview();
         stage.world = dungeon; stage.dungeon = true; stage.x = 8.5f; stage.y = DevMap.FLOOR; stage.z = 8.5f;
         rpg.ui.SettingsPanel menuSettings = new rpg.ui.SettingsPanel(Preferences.load(java.nio.file.Path.of("saves", "preferences.json")), p -> {
@@ -140,6 +142,8 @@ public final class Main {
         }, true);
         title.settings = menuSettings::show;
         if (!brandShown) { brandShown = true; splash(win, game, gfx, ui, stage); }
+        // the sound bank, built at the cut from the intro to the title (its recordings decoded meanwhile), so no click pays for it
+        rpg.audio.Sfx.shared(game);
 
         Profiles.Profile profile = null;
         boolean fresh = false;
@@ -157,6 +161,7 @@ public final class Main {
             if (menuSettings.open) {
                 boolean capture = menuSettings.capturingKey(); menuSettings.keyInput(in); if (capture) ui.click = ui.rclick = false;
                 menuSettings.draw(ui, win.width, win.height); if (!capture && in.keyPressed(GLFW_KEY_ESCAPE)) menuSettings.escape();
+                TitleScreen.cursor(ui);
             } else title.draw(ui, win.width, win.height, dt, in.keyPressed(GLFW_KEY_ENTER), in.keyPressed(GLFW_KEY_ESCAPE));
             ui.end();
             gfx.frame(win.width, win.height);
@@ -180,7 +185,7 @@ public final class Main {
         long loadStarted = System.nanoTime();
         Rpg g = game.add(new Rpg(game, profile.name, profile.look, false));
         g.profile = profile;
-        // Dynamic resolution targets the configured 30 FPS budget, independently of presentation refresh rate.
+        // Dynamic resolution targets the configured FPS budget (60 by default), independently of presentation refresh rate.
         g.music = music;
         Hud hud = new Hud(g, gfx);
         g.ui = hud;
@@ -206,7 +211,7 @@ public final class Main {
     /** The character creator; null when backed out of. */
     private static Creator creator(Window win, Game game, Gfx gfx, Ui2D ui, Gfx.Preview preview, rpg.audio.Music music, Input in) {
         Creator creator = new Creator();
-        creator.sound = n -> rpg.audio.Sfx.shared(game).ui(n, 0.5f);
+        creator.sound = n -> { var sfx = rpg.audio.Sfx.ready(game); if (sfx != null) sfx.ui(n, 0.5f); };
         long last = System.nanoTime();
         while (!win.shouldClose() && !creator.done && !creator.cancelled) {
             win.poll();
@@ -238,7 +243,8 @@ public final class Main {
         boolean eMenuOpened = false;
         // a mouse button is the body's only when it went down while the mouse was looking (not on a menu): the click
         // that picks a dialogue choice or closes a window is never also a swing when the menu closes under it
-        boolean mainArmed = false, offArmed = false, wasPaused = false, crouchToggle = false, sprintToggle = false;
+        boolean mainArmed = false, offArmed = false, wasPaused = false, crouchToggle = false, sprintToggle = false, turnLatch = false;
+        double tabAt = -1;
         hud.settings.displayChanged = () -> { win.setFullscreen(hud.settings.values.fullscreen); win.setVsync(hud.settings.values.vsync); };
         hud.settings.displayChanged.run();
         hud.onQuit = win::requestClose;
@@ -277,15 +283,21 @@ public final class Main {
             it.forward = typing ? 0 : (preferences.down(in, Preferences.Action.FORWARD) ? 1 : 0) - (preferences.down(in, Preferences.Action.BACK) ? 1 : 0);
             it.strafe = typing ? 0 : (preferences.down(in, Preferences.Action.RIGHT) ? 1 : 0) - (preferences.down(in, Preferences.Action.LEFT) ? 1 : 0);
             it.sprint = !typing && preferences.down(in, Preferences.Action.SPRINT);
+            // the quick turn is Ctrl+S: the crouch key with the back key, either pressed second; the crouch it began is undone
+            boolean turnBack = !typing && (preferences.pressed(in, Preferences.Action.BACK) && preferences.down(in, Preferences.Action.CROUCH)
+                    || preferences.pressed(in, Preferences.Action.CROUCH) && preferences.down(in, Preferences.Action.BACK));
+            if (turnBack) turnLatch = true;
+            if (!preferences.down(in, Preferences.Action.CROUCH)) turnLatch = false;
             if (!typing && preferences.pressed(in, Preferences.Action.CROUCH)) crouchToggle = !crouchToggle;
+            if (turnBack) crouchToggle = !crouchToggle;
             if (!typing && preferences.pressed(in, Preferences.Action.SPRINT)) sprintToggle = !sprintToggle;
-            it.sneak = !typing && (preferences.toggleCrouch ? crouchToggle : preferences.down(in, Preferences.Action.CROUCH));
+            it.sneak = !typing && !turnLatch && (preferences.toggleCrouch ? crouchToggle : preferences.down(in, Preferences.Action.CROUCH));
             if (preferences.toggleSprint) it.sprint = !typing && sprintToggle;
             it.jogToggle = !typing && in.keyPressed(GLFW_KEY_CAPS_LOCK);
             it.jump = !typing && preferences.pressed(in, Preferences.Action.JUMP);
             it.jumpHeld = !typing && preferences.down(in, Preferences.Action.JUMP);
             it.dodge = !typing && preferences.pressed(in, Preferences.Action.DODGE);
-            it.backTap = !typing && preferences.pressed(in, Preferences.Action.BACK);
+            it.turnBack = turnBack;
             it.cast = !free && in.keyPressed(GLFW_KEY_R);
             it.toggleCamera = preferences.pressed(in, Preferences.Action.CAMERA);
             it.mainDown = !free && mainArmed;
@@ -326,7 +338,20 @@ public final class Main {
             if (in.keyPressed(GLFW_KEY_F11)) hud.telemetry = !hud.telemetry;
             if (in.keyPressed(GLFW_KEY_PAGE_UP)) hud.nextInspected(-1);
             if (in.keyPressed(GLFW_KEY_PAGE_DOWN)) hud.nextInspected(1);
-            if (!typing && in.keyPressed(GLFW_KEY_TAB)) cursorFree = !cursorFree;
+            // TAB: a tap frees the mouse for the interface (or takes it back); held, the radial wheel opens in play and
+            // what it points at is used when TAB is let go
+            if (!typing && in.keyPressed(GLFW_KEY_TAB)) tabAt = g.time;
+            if (tabAt >= 0 && in.keyDown(GLFW_KEY_TAB) && g.time - tabAt > 0.18 && hud.scene == Hud.Scene.WORLD && !hud.captures() && g.player.alive) hud.radial.openInPlay();
+            if (tabAt >= 0 && !in.keyDown(GLFW_KEY_TAB)) {
+                if (hud.radial.open) hud.radial.release(); else if (!typing) cursorFree = !cursorFree;
+                tabAt = -1;
+            }
+            if (hud.radial.open) {
+                // the wheel holds the body still: no steps, no look, no hands
+                hud.radial.pointer((float) in.dx, (float) in.dy);
+                it.forward = 0; it.strafe = 0; it.lookYaw = 0; it.lookPitch = 0; it.sprint = false; it.jump = false; it.jumpHeld = false;
+                it.dodge = false; it.mainDown = false; it.offDown = false; it.cast = false; it.interact = false; it.turnBack = false;
+            }
             if (!typing && !hud.captures() && in.keyPressed(GLFW_KEY_F5) && new SaveSystem(g).save(g.savePath())) g.chat.add("Game saved.", Chat.Kind.DEBUG);
             if (!typing && !hud.captures() && in.keyPressed(GLFW_KEY_F6) && new SaveSystem(g).load(g.savePath())) g.chat.add("Game loaded.", Chat.Kind.DEBUG);
             if (in.keyPressed(GLFW_KEY_F12)) shot(gfx, win.width, win.height, new File("shots", "shot-" + System.currentTimeMillis() + ".png"));
@@ -374,7 +399,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "0.1.6";
+    public static final String VERSION = "0.1.9";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

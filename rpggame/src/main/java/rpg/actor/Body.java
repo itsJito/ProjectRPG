@@ -24,7 +24,9 @@ public final class Body {
     /** A woman's silhouettes (Average, Curvy, Slender): softer limbs, and the fullness at the hips and bust rather than the belly. */
     private static final float[][] SILHOUETTE_F = {{1f, 1f, 0.9f}, {1.08f, 1.12f, 0.98f}, {0.9f, 0.88f, 0.8f}};
     /** Her figure (pixels): how far the waist draws in, the hips flare out and the bust stands forward, per silhouette. */
-    private static final float[][] FIGURE_F = {{0.65f, 0.55f, 1.0f}, {0.4f, 0.85f, 1.3f}, {0.55f, 0.35f, 0.75f}};
+    // (gamefixes: women more feminine whatever the build) every build has a clear waist and hips wider than it - the
+    // slender one too - so the hourglass reads at a distance, not only up close
+    private static final float[][] FIGURE_F = {{0.9f, 1.2f, 1.15f}, {0.65f, 1.65f, 1.5f}, {0.8f, 0.95f, 0.9f}};
 
     public static final Body MALE = new Body(false, 0, new int[]{8, 8, 8}, new int[]{8, 12, 4}, new int[]{4, 12, 4}, new int[]{4, 12, 4}, 0.6f);
     public static final Body FEMALE = new Body(true, 0, new int[]{8, 8, 8}, new int[]{6, 12, 3}, new int[]{3, 12, 4}, new int[]{4, 12, 4}, 0.45f);

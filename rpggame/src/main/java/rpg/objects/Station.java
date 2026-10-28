@@ -46,6 +46,12 @@ public class Station extends WorldObject {
 
     public List<Recipe> recipes() { return Recipes.at(kind); }
 
+    /** The chance (0 .. 0.6) of burning a recipe at a cook's level: falls to nothing at the recipe's burn-stop level. */
+    public static double burnChance(Recipe r, Actor a) {
+        if (r.burnt == null) return 0;
+        return Math.max(0, 0.6 * (r.burnStop - a.skills.level(r.skill)) / Math.max(1.0, r.burnStop - r.level));
+    }
+
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         o.add(Option.on("use", verb() + " (" + recipes().size() + " recipes)", 10, g.cfg.interactRange));
@@ -58,13 +64,18 @@ public class Station extends WorldObject {
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
         if (action.equals("use")) { if (a == g.player) g.ui.openStation(this); return Result.ok(); }
-        boolean all = action.startsWith("makeall:");
-        if (action.startsWith("make:") || all) {
-            Recipe r = Recipes.byId(action.substring(action.indexOf(':') + 1));
+        boolean all = action.startsWith("makeall:"), some = action.startsWith("cook:");
+        if (action.startsWith("make:") || all || some) {
+            // cook:<recipe>:<how many> (the cooking window's choice); make:<recipe> once; makeall:<recipe> while it can
+            String[] parts = action.split(":");
+            Recipe r = Recipes.byId(parts.length > 1 ? parts[1] : "");
+            int times = some && parts.length > 2 ? Math.max(1, Integer.parseInt(parts[2])) : 0;
             if (r == null || r.station != kind) return Result.no("You can't make that here.");
             String no = refusal(r, a);
             if (no != null) return Result.no(no);
-            g.interact.begin(new Work(a, this, action, r.station == Recipes.Station.RANGE ? "Cooking" : "Making " + r.name, r.seconds, all, g.time, () -> make(g, a, r)));
+            Work w = new Work(a, this, action, r.station == Recipes.Station.RANGE ? "Cooking" : "Making " + r.name, r.seconds, all || times > 1, g.time, () -> make(g, a, r));
+            w.limit = times;
+            g.interact.begin(w);
             return Result.started();
         }
         return Result.no("You can't do that.");
@@ -80,7 +91,7 @@ public class Station extends WorldObject {
         boolean burnt = false;
         double roll = 0, chance = 0;
         if (r.burnt != null) {
-            chance = Math.max(0, 0.6 * (r.burnStop - a.skills.level(r.skill)) / Math.max(1.0, r.burnStop - r.level));
+            chance = burnChance(r, a);
             roll = g.roll(req, id);
             burnt = roll < chance;
         }

@@ -33,7 +33,7 @@ public final class Furniture extends WorldObject {
     public final Kind kind;
     /** The cells it stands on: x0..x1, z0..z1 from the floor up, h cells tall. */
     public final int x0, z0, x1, z1, h;
-    /** Quarter turns from facing +z (the side a bed's foot, a counter's front, a target's face is on). */
+    /** Quarter turns from facing +z (the side a bed's head, a counter's front, a target's face is on). */
     public final int facing;
     /** Built and standing (furniture a build spot makes is not, until it is built). */
     public boolean placed;

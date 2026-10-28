@@ -116,7 +116,7 @@ const Layout LAYOUTS[] = {
     L(astratto_frame_io), L(astratto_stats), L(astratto_snap_mover), L(astratto_snap_ragdoll), L(astratto_snap_softbody), L(astratto_snap_vehicle),
     L(astratto_snap_agent), L(astratto_audio_stats), L(astratto_snapshot_io), L(astratto_evt_module_log), L(astratto_module_host), L(astratto_module),
     L(astratto_render_block), L(astratto_shape_def), L(astratto_render_table), L(astratto_mesh_io),
-    L(astratto_renderer_desc), L(astratto_texture_desc), L(astratto_world_look), L(astratto_rcmd_camera), L(astratto_rcmd_env), L(astratto_rcmd_light),
+    L(astratto_renderer_desc), L(astratto_texture_desc), L(astratto_texture_update), L(astratto_world_look), L(astratto_rcmd_camera), L(astratto_rcmd_env), L(astratto_rcmd_light),
     L(astratto_rcmd_model), L(astratto_rcmd_particles), L(astratto_rcmd_quads), L(astratto_rcmd_grading), L(astratto_rcmd_body), L(astratto_rcmd_world),
     L(astratto_rcmd_clear), L(astratto_rcmd_quality), L(astratto_rcmd_lens), L(astratto_rcmd_smoke), L(astratto_render_io), L(astratto_rcmd_foliage), L(astratto_rcmd_props), L(astratto_rcmd_decals),
     L(astratto_cmd_rigid_create), L(astratto_cmd_rigid_place), L(astratto_cmd_rigid_impulse), L(astratto_cmd_rigid_set), L(astratto_cmd_rigid_explode),
@@ -357,6 +357,13 @@ int32_t astratto_render_texture(astratto_renderer* renderer, const astratto_text
     return rguarded(renderer, [&](astratto::Renderer& r) -> int32_t {
         if (desc == nullptr || out == nullptr || desc->struct_size < sizeof(astratto_texture_desc)) { r.fail("bad texture description"); return ASTRATTO_ERR_ARGUMENT; }
         return r.texture(*desc, out);
+    });
+}
+
+int32_t astratto_render_texture_update(astratto_renderer* renderer, const astratto_texture_update* update) {
+    return rguarded(renderer, [&](astratto::Renderer& r) -> int32_t {
+        if (update == nullptr || update->pixels == nullptr || update->struct_size < sizeof(astratto_texture_update)) { r.fail("bad texture update"); return ASTRATTO_ERR_ARGUMENT; }
+        return r.textureUpdate(update->id, update->pixels, update->bytes);
     });
 }
 

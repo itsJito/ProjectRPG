@@ -135,13 +135,19 @@ public final class Law {
                 m.reported = true; m.settled = true; reportedCrimes.add(m.eventId);
             }
             if ((n.role != Npc.Role.GUARD && n.role != Npc.Role.LAWMAN) || !jur.equals(n.homeJurisdiction)) continue;
+            // (gamefixes: after a lie that landed, the whole watch still came after the player) the matter is closed for
+            // every officer, not just those on it: what they know of where the player is stays known, marked looked into,
+            // so the player standing among them is not a fresh mystery to go and see about
+            var known = n.aware.get(a.id);
+            if (known != null) known.settledAt = g.time;
+            if (n.investigation != null && n.investigation.subject == a.id) { n.investigation = null; if (n.goal == rpg.ai.Brain.Goal.INVESTIGATE) { n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = 0; } }
             boolean involved = n.fightTarget == a.id || n.cs.lastAttacker == a.id || n.watchTarget == a.id
                     || n.hunt != null && n.hunt.target == a.id || n.investigation != null && n.investigation.subject == a.id;
             involved |= n.goal == rpg.ai.Brain.Goal.FIGHT && n.fightTarget == 0 && n.cs.lastAttacker == 0;
             if (!involved) continue;
             stoodDown.add(n);
             n.fightTarget = 0; n.cs.lastAttacker = 0; n.cs.cancel(); n.cs.blocking = false; n.cs.draw = 0;
-            n.hunt = null; n.investigation = null; n.aware.remove(a.id); n.watchTarget = 0;
+            n.hunt = null; n.investigation = null; n.watchTarget = 0;
             n.goal = rpg.ai.Brain.Goal.IDLE; n.hasGoalPos = false; n.nextThink = 0;
             if (n.alive && n.loaded) g.ai.desire(n, rpg.ai.AiSystem.A_IDLE);
         }
@@ -271,8 +277,8 @@ public final class Law {
             g.ai.rumors.alarm(w, w.memories.get(w.memories.size() - 1));
         }
         if (culprit == g.player) {
-            if (seen.isEmpty()) g.chat.add("[Crime] " + kind.toLowerCase() + " in " + jur + " - nobody saw you.", Chat.Kind.CRIME);
-            else g.chat.add("[Crime] " + kind.toLowerCase() + " in " + jur + " was seen by " + names(seen) + ". No bounty unless they report it.", Chat.Kind.CRIME);
+            if (seen.isEmpty()) g.chat.crime("unseen " + kind, "Nobody saw your " + crimeWord(kind) + " in " + jur + ".");
+            else g.chat.crime("seen " + kind, names(seen) + (seen.size() == 1 ? " saw" : " all saw") + " your " + crimeWord(kind) + " in " + jur + ". You will be wanted if it is reported to the watch.");
         }
         return seen.size();
     }
@@ -356,9 +362,11 @@ public final class Law {
         reports++;
         var ev = g.state.commit("CrimeReported", witness.id, m.subject, m.jurisdiction, m.eventId, m.kind + " reported to " + lawman.name + "; bounty " + before + " -> " + after);
         g.state.commit("BountyChanged", lawman.id, m.subject, m.jurisdiction, ev.id(), before + " -> " + after);
-        String line = String.format("%s reported %s's %s to %s: bounty in %s %d -> %d", witness.name, g.nameOf(m.subject), m.kind.toLowerCase(), lawman.name, m.jurisdiction, before, after);
+        // the lawman's own account, as he would tell it (the record above keeps the numbers)
+        String line = String.format("%s came to %s about %s - %s. That puts the bounty on %s at %d coins", witness.name, lawman.name,
+                g.nameOf(m.subject), crimeWord(m.kind), g.nameOf(m.subject), after);
         reportsLog.add(line);
-        if (m.subject == g.player.id) g.chat.add("[Crime] " + line + ".", Chat.Kind.CRIME);
+        if (m.subject == g.player.id) g.chat.crime("reported " + m.kind, witness.name + " told " + lawman.name + " about your " + crimeWord(m.kind) + ". Your bounty in " + m.jurisdiction + " is now " + after + " coins.");
         g.ai.say(witness, "I saw " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!");
         // everyone in the jurisdiction's force now knows to look
         for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD) && n.homeJurisdiction.equals(m.jurisdiction)) n.nextThink = 0;
@@ -381,6 +389,16 @@ public final class Law {
     }
 
     public boolean resisting(long id) { return resisting.contains(id); }
+    /** A crime's kind in words a person would use (the records' THEFT is a "theft", TRESPASS "trespassing"). */
+    public static String crimeWord(String kind) {
+        return switch (kind) {
+            case "THEFT" -> "theft"; case "ASSAULT" -> "assault"; case "MURDER" -> "killing"; case "TRESPASS" -> "trespassing";
+            case "VANDALISM" -> "vandalism"; case "LOCKPICKING" -> "lock-picking"; case "ARSON" -> "arson"; case "LIVESTOCK" -> "livestock theft";
+            default -> kind.toLowerCase().replace('_', ' ');
+        };
+    }
+    /** The wanted refuse to come quietly: the officer who halted them (and the watch) take them by force. */
+    public void resist(Actor p, Npc officer) { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, officer.id, officer.homeJurisdiction, 0, ""); }
 
     /** Whether a blow struck (or a grudge formed) at a moment was settled by an arrest since (the law does not fight it again). */
     public boolean settled(long offender, double when) { Double at = settledAt.get(offender); return at != null && when <= at; }
@@ -418,7 +436,7 @@ public final class Law {
     public void halt(Npc guard, Actor p) {
         Double at = haltedAt.get(p.id);
         if (at != null && g.time - at < 14) {
-            if (g.time - at > 10 && bounty(p.id, guard.homeJurisdiction) > 0) { resisting.add(p.id); g.ai.say(guard, "Then we do this the hard way!"); g.ui.closeDialog(); }
+            if (g.time - at > 10 && bounty(p.id, guard.homeJurisdiction) > 0) { resisting.add(p.id); g.ai.say(guard, "Then we do this the hard way!"); if (g.ui != null) g.ui.closeDialog(); }
             return;
         }
         haltedAt.put(p.id, g.time);
@@ -431,8 +449,8 @@ public final class Law {
         d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
         d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
         d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, guard.homeJurisdiction, guard); });
-        d.closeChoice("Never! (resist arrest)", () -> { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, guard.id, guard.homeJurisdiction, 0, ""); });
-        if (p == g.player) g.ui.dialog(d);
+        d.closeChoice("Never! (resist arrest)", () -> resist(p, guard));
+        if (p == g.player && g.ui != null) g.ui.dialog(d);
     }
 
     /** A guard beating a wanted offender down arrests them instead of killing them. */
@@ -478,7 +496,12 @@ public final class Law {
         float cz = cell != null ? cell.z() : lawman != null ? lawman.postZ + 3 : a.z;
         g.teleport(a, cx, DevMap.FLOOR, cz);
         if (a == g.player && cell != null) g.controller.snapTo((float) Math.atan2(-(cell.gateX() + 0.5f - cx), -(cell.frontZ() + 0.5f - cz)));
-        a.hp = Math.max(a.hp, a.maxHp() * 0.5f);
+        // taken in, the prisoner's wounds are seen to (gamefixes: they bled out in the cell): whole again, the bleeding
+        // stopped, any fire on them out
+        a.hp = a.maxHp();
+        if (g.gore != null) g.gore.staunch(a);
+        a.burnSince = -1;
+        if (g.chemistry != null) g.chemistry.cleanse(a);
         a.cs.cancel();
         a.cs.blocking = false;
         haltedAt.remove(a.id);

@@ -24,9 +24,9 @@ public final class DungeonLayout {
     public static final int ROCK_TOP = DevMap.FLOOR + 9;
 
     public enum Type {
-        MICRO("Micro-dungeon", 28, 28, 3, 4, 3, 1.0f, true),
-        MACRO("Dungeon", 60, 56, 8, 11, 2, 1.0f, true),
-        ELITE("Elite dungeon", 44, 44, 5, 7, 3, 2.6f, true),
+        MICRO("Micro-dungeon", 36, 36, 3, 4, 5, 1.0f, true),
+        MACRO("Dungeon", 62, 60, 6, 9, 5, 1.0f, true),
+        ELITE("Elite dungeon", 48, 50, 4, 6, 6, 2.6f, true),
         BOSS("Boss dungeon", 40, 52, 0, 0, 3, 3.0f, false);
         public final String title;
         /** The region's size (cells), how many rooms it has (min..max), its corridors' width, how hard its residents are, and whether it is generated. */
@@ -42,6 +42,8 @@ public final class DungeonLayout {
     public enum Theme { CAVE, WARREN, CRYPT, HALL }
 
     public enum RoomKind { ENTRY, CHAMBER, DEN, TREASURE, HAZARD, BOSS }
+    /** A passage's ceiling height (cells): the corridors are told from the rooms by it. */
+    static final int PASSAGE = 5;
     public record Room(int x0, int z0, int x1, int z1, RoomKind kind, int height) {
         public float cx() { return (x0 + x1) / 2f + 0.5f; }
         public float cz() { return (z0 + z1) / 2f + 0.5f; }
@@ -78,9 +80,9 @@ public final class DungeonLayout {
         if (all == null) {
             all = List.of(
                     new DungeonLayout(0, "Goblin Warren", Type.MACRO, Theme.WARREN, 0x6A0B11L, X0, 4),
-                    new DungeonLayout(1, "Spider Hollow", Type.MICRO, Theme.CAVE, 0x5B1D3EL, X0 + 64, 4),
+                    new DungeonLayout(1, "Spider Hollow", Type.MICRO, Theme.CAVE, 0x5B1D3EL, X0 + 66, 4),
                     new DungeonLayout(2, "Old Catacombs", Type.ELITE, Theme.CRYPT, 0xCA7A00L, X0, 66),
-                    new DungeonLayout(3, "Troll's Den", Type.BOSS, Theme.HALL, 0x7B0115L, X0 + 50, 66));
+                    new DungeonLayout(3, "Troll's Den", Type.BOSS, Theme.HALL, 0x7B0115L, X0 + 54, 66));
         }
         return all;
     }
@@ -96,14 +98,17 @@ public final class DungeonLayout {
     private void generate() {
         Random r = new Random(seed);
         int want = type.minRooms + r.nextInt(type.maxRooms - type.minRooms + 1);
-        int minSize = type == Type.MICRO ? 6 : 5, maxSize = type == Type.MICRO ? 10 : type == Type.ELITE ? 10 : 9;
+        // (gamefixes: wider and more like a dungeon - broad halls with thick rock between them, wide passages)
+        // (0.1.9, asked again: wider still) halls up to fifteen across, their corners cut and their walls let into
+        // alcoves, the passages five and six wide and five high, swelling here and there into a side chamber
+        int minSize = type == Type.MICRO ? 9 : 9, maxSize = type == Type.MICRO ? 13 : type == Type.ELITE ? 15 : 14;
         for (int tries = 0; tries < 400 && rooms.size() < want; tries++) {
             int rw = minSize + r.nextInt(maxSize - minSize + 1), rd = minSize + r.nextInt(maxSize - minSize + 1);
             int x0 = 2 + r.nextInt(Math.max(1, w - rw - 4)), z0 = 2 + r.nextInt(Math.max(1, d - rd - 4));
             boolean clash = false;
-            for (Room o : rooms) if (x0 - 2 <= o.x1() && x0 + rw + 1 >= o.x0() && z0 - 2 <= o.z1() && z0 + rd + 1 >= o.z0()) { clash = true; break; }
+            for (Room o : rooms) if (x0 - 3 <= o.x1() && x0 + rw + 2 >= o.x0() && z0 - 3 <= o.z1() && z0 + rd + 2 >= o.z0()) { clash = true; break; }
             if (clash) continue;
-            rooms.add(new Room(x0, z0, x0 + rw - 1, z0 + rd - 1, RoomKind.CHAMBER, 4 + (rw * rd > 60 ? 1 : 0)));
+            rooms.add(new Room(x0, z0, x0 + rw - 1, z0 + rd - 1, RoomKind.CHAMBER, 6 + (rw * rd > 150 ? 1 : 0)));
         }
         // the entry: the room nearest the region's west edge (the side the overworld is on)
         Room entry = rooms.get(0);
@@ -139,14 +144,37 @@ public final class DungeonLayout {
             if (type == Type.MICRO && kind == RoomKind.HAZARD) kind = RoomKind.DEN;
             rooms.set(i, new Room(o.x0(), o.z0(), o.x1(), o.z1(), kind, o.height()));
         }
-        for (Room o : rooms) carveRoom(o);
+        // every dungeon keeps a hoard: with fewer, bigger halls the turn of the count may have passed it by
+        if (rooms.stream().noneMatch(o -> o.kind() == RoomKind.TREASURE) && rooms.size() >= 3)
+            for (int i = 1; i < rooms.size(); i++) if (i != deepest) { Room o = rooms.get(i); rooms.set(i, new Room(o.x0(), o.z0(), o.x1(), o.z1(), RoomKind.TREASURE, o.height())); break; }
+        for (Room o : rooms) carveRoom(o, r);
         for (int[] l : links) corridor(rooms.get(l[0]), rooms.get(l[1]), r);
         entryX = (int) rooms.get(0).cx(); entryZ = (int) rooms.get(0).cz();
         furnish(r, depth);
     }
 
-    private void carveRoom(Room o) {
-        for (int x = o.x0(); x <= o.x1(); x++) for (int z = o.z0(); z <= o.z1(); z++) { open[x][z] = true; height[x][z] = Math.max(height[x][z], o.height()); }
+    /**
+     * A hall: its floor, its corners cut back (a chamber hewn out, not a box), and two to four alcoves let into its walls -
+     * niches a body can step into, a pillar's worth deep - wherever the rock round it allows.
+     */
+    private void carveRoom(Room o, Random r) {
+        int cut = Math.min(o.x1() - o.x0(), o.z1() - o.z0()) >= 10 ? 2 : 1;
+        for (int x = o.x0(); x <= o.x1(); x++) for (int z = o.z0(); z <= o.z1(); z++) {
+            int ex = Math.min(x - o.x0(), o.x1() - x), ez = Math.min(z - o.z0(), o.z1() - z);
+            if (ex + ez < cut) continue;   // the cut corners
+            open[x][z] = true; height[x][z] = Math.max(height[x][z], o.height());
+        }
+        int alcoves = 2 + r.nextInt(3);
+        for (int k = 0; k < alcoves; k++) {
+            int side = r.nextInt(4), len = 2 + r.nextInt(2), deep = 2;
+            int along = side < 2 ? o.x0() + 2 + r.nextInt(Math.max(1, o.x1() - o.x0() - 3 - len)) : o.z0() + 2 + r.nextInt(Math.max(1, o.z1() - o.z0() - 3 - len));
+            for (int i = 0; i < len; i++) for (int dd = 1; dd <= deep; dd++) {
+                int x = side == 0 || side == 1 ? along + i : side == 2 ? o.x0() - dd : o.x1() + dd;
+                int z = side == 0 ? o.z0() - dd : side == 1 ? o.z1() + dd : along + i;
+                if (x < 2 || z < 2 || x >= w - 2 || z >= d - 2) continue;
+                if (!open[x][z]) { open[x][z] = true; height[x][z] = Math.max(height[x][z], o.height() - 2); }
+            }
+        }
     }
 
     /** An L-shaped corridor between two rooms' middles, the corridor's width wide; a dog-leg one way or the other. */
@@ -157,12 +185,21 @@ public final class DungeonLayout {
         line(ax, az, mx, mz, cw); line(mx, mz, bx, bz, cw);
     }
     private void line(int x0, int z0, int x1, int z1, int cw) {
-        int sx = Integer.signum(x1 - x0), sz = Integer.signum(z1 - z0), x = x0, z = z0;
+        int sx = Integer.signum(x1 - x0), sz = Integer.signum(z1 - z0), x = x0, z = z0, step = 0;
         while (true) {
+            // every so often the passage swells into a small side chamber (a guard post, a collapse, a place to turn)
+            if (++step % 11 == 6) {
+                int bw = cw + 2;
+                for (int i = 0; i < bw; i++) for (int j = 0; j < bw; j++) {
+                    int cx = x - bw / 2 + i, cz = z - bw / 2 + j;
+                    if (cx < 1 || cz < 1 || cx >= w - 1 || cz >= d - 1) continue;
+                    if (!open[cx][cz]) { open[cx][cz] = true; height[cx][cz] = PASSAGE; }
+                }
+            }
             for (int i = 0; i < cw; i++) for (int j = 0; j < cw; j++) {
                 int cx = x - cw / 2 + i, cz = z - cw / 2 + j;
                 if (cx < 1 || cz < 1 || cx >= w - 1 || cz >= d - 1) continue;
-                if (!open[cx][cz]) { open[cx][cz] = true; height[cx][cz] = 3; }
+                if (!open[cx][cz]) { open[cx][cz] = true; height[cx][cz] = PASSAGE; }
             }
             if (x == x1 && z == z1) break;
             if (x != x1) x += sx; else z += sz;
@@ -171,6 +208,12 @@ public final class DungeonLayout {
 
     /** Lamps along the walls, the residents of each room, chests, traps in the corridors, hazards; all from the same seed. */
     private void furnish(Random r, int[] depth) {
+        // a big hall of worked stone stands on pillars, two rows of them in from its walls (the cave's are its own rock)
+        for (Room o : rooms) {
+            int rw = o.x1() - o.x0() + 1, rd = o.z1() - o.z0() + 1;
+            if (theme == Theme.CAVE || o.kind() == RoomKind.ENTRY || rw < 10 || rd < 10) continue;
+            for (int px : new int[]{o.x0() + 2, o.x1() - 3}) for (int pz = o.z0() + 2; pz <= o.z1() - 3; pz += Math.max(4, (rd - 4) / 2)) spots.add(new Spot("pillar", px, pz, 0));
+        }
         for (int i = 0; i < rooms.size(); i++) {
             Room o = rooms.get(i);
             // a lamp in the middle of two of its walls (the crypt's and the hall's lit better than a cave's)
@@ -180,7 +223,7 @@ public final class DungeonLayout {
             int level = depth[i] < 0 ? 1 : depth[i];
             switch (o.kind()) {
                 case ENTRY -> spots.add(new Spot("exit", entryX, entryZ, 0));
-                case DEN -> { int n = (o.x1() - o.x0() + 1) * (o.z1() - o.z0() + 1) > 50 ? 3 : 2; for (int k = 0; k < n; k++) spots.add(new Spot("resident", o.x0() + 1 + r.nextInt(Math.max(1, o.x1() - o.x0() - 1)), o.z0() + 1 + r.nextInt(Math.max(1, o.z1() - o.z0() - 1)), level)); }
+                case DEN -> { int n = (o.x1() - o.x0() + 1) * (o.z1() - o.z0() + 1) > 90 ? 4 : 3; for (int k = 0; k < n; k++) { int[] c = clear(o, r); spots.add(new Spot("resident", c[0], c[1], level)); } }
                 case BOSS -> { spots.add(new Spot("master", (int) o.cx(), (int) o.cz(), level + 2)); spots.add(new Spot("resident", o.x0() + 1, o.z0() + 1, level)); spots.add(new Spot("resident", o.x1() - 1, o.z1() - 1, level)); spots.add(new Spot("chest", o.x1() - 1, o.z0() + 1, 3)); }
                 case TREASURE -> { spots.add(new Spot("chest", (int) o.cx(), o.z0() + 1, 1 + level / 2)); spots.add(new Spot("resident", (int) o.cx() - 1, (int) o.cz(), level)); spots.add(new Spot("trap", (int) o.cx(), (int) o.cz() - 1, 0)); }
                 case HAZARD -> {
@@ -196,13 +239,24 @@ public final class DungeonLayout {
         int traps = type == Type.MICRO ? 1 : type == Type.ELITE ? 6 : 4;
         for (int t = 0, tries = 0; t < traps && tries < 600; tries++) {
             int x = 1 + r.nextInt(w - 2), z = 1 + r.nextInt(d - 2);
-            if (!open[x][z] || height[x][z] != 3 || Math.hypot(x - entryX, z - entryZ) < 8) continue;
+            if (!open[x][z] || height[x][z] != PASSAGE || Math.hypot(x - entryX, z - entryZ) < 8) continue;
             boolean near = false;
             for (Spot s : spots) if (s.what().equals("trap") && Math.hypot(s.x() - x, s.z() - z) < 6) near = true;
             if (near) continue;
             spots.add(new Spot("trap", x, z, r.nextInt(2)));
             t++;
         }
+    }
+
+    /** A cell inside a room clear of its pillars (each 2 x 2). */
+    private int[] clear(Room o, Random r) {
+        for (int tries = 0; tries < 40; tries++) {
+            int x = o.x0() + 1 + r.nextInt(Math.max(1, o.x1() - o.x0() - 1)), z = o.z0() + 1 + r.nextInt(Math.max(1, o.z1() - o.z0() - 1));
+            boolean onPillar = false;
+            for (Spot s : spots) if (s.what().equals("pillar") && x >= s.x() - 1 && x <= s.x() + 2 && z >= s.z() - 1 && z <= s.z() + 2) { onPillar = true; break; }
+            if (!onPillar) return new int[]{x, z};
+        }
+        return new int[]{(int) o.cx(), (int) o.cz()};
     }
 
     /** A lamp on a wall, at the wall cell nearest the one asked for along the wall (a doorway there moves it along). */
@@ -223,8 +277,9 @@ public final class DungeonLayout {
         Room ante = new Room(3, 22, 9, 30, RoomKind.ENTRY, 4);
         Room arena = new Room(18, 6, 36, 46, RoomKind.BOSS, 7);
         rooms.add(ante); rooms.add(arena);
-        carveRoom(ante); carveRoom(arena);
-        line(9, 26, 13, 26, 3); line(13, 26, 13, 34, 3); line(13, 34, 18, 34, 3);
+        Random r = new Random(seed);
+        carveRoom(ante, r); carveRoom(arena, r);
+        line(9, 26, 13, 26, 5); line(13, 26, 13, 34, 5); line(13, 34, 18, 34, 5);
         entryX = 5; entryZ = 26;
         spots.add(new Spot("exit", entryX, entryZ, 0));
         wallLamp(2, 26, 1); wallLamp(10, 23, 3);

@@ -194,8 +194,8 @@ final class HudFragments {
         String title = "Y O U   H A V E   F A L L E N";
         float ts = Math.min(56, w / 20f);
         float rise = (1 - a1) * 14;
-        ui.text(ui.heading, title, cx - ui.width(ui.heading, title, ts) / 2 + 2, cy + rise + 2, ts, Style.fade(0xFF000000, a1 * 0.8f));
-        ui.text(ui.heading, title, cx - ui.width(ui.heading, title, ts) / 2, cy + rise, ts, Style.fade(0xFFE9E1D2, a1));
+        ui.text(ui.body, title, cx - ui.width(ui.body, title, ts) / 2 + 2, cy + rise + 2, ts, Style.fade(0xFF000000, a1 * 0.8f));
+        ui.text(ui.body, title, cx - ui.width(ui.body, title, ts) / 2, cy + rise, ts, Style.fade(0xFFE9E1D2, a1));
         // a red rule drawing out from the middle
         float rule = ease((t - 1.3f) / 1.2f) * Math.min(520, w * 0.4f);
         ui.rect(cx - rule / 2, cy + ts * 1.25f, rule, 2, Style.fade(0xFF9A1E1A, a1));
@@ -314,9 +314,10 @@ final class HudFragments {
                 boolean number = f.text().chars().allMatch(Character::isDigit);
                 if (number) {
                     boolean zero = f.text().equals("0");
-                    ui.disc(p2[0], p2[1] + 8, 11, Style.fade(zero ? 0xFF2F5CA8 : 0xFFA82A22, a));
-                    ui.flatCentered(ui.combat, f.text(), p2[0], p2[1] - 2, 19, Style.fade(0xFFFFFFFF, a));
-                } else ui.centered(ui.combat, f.text(), p2[0], p2[1], 19, Style.fade(0xFF000000 | f.color(), a));
+                    // the damage over a body: big, in Skurri, on its splat
+                    ui.disc(p2[0], p2[1] + 10, 14, Style.fade(zero ? 0xFF2F5CA8 : 0xFFA82A22, a));
+                    ui.flatCentered(ui.combat, f.text(), p2[0], p2[1] - 2, 23, Style.fade(0xFFFFFFFF, a));
+                } else ui.centered(ui.chat, f.text(), p2[0], p2[1], 17, Style.fade(0xFF000000 | f.color(), a));   // (words: info text, Arial Narrow)
             }
             if (g.player.alive && g.time - g.player.cs.lastHurt < 6 && !g.player.firstPerson && gfx.project(g.player.x, g.player.y + 2.15f, g.player.z, p2))
                 bar(ui, p2[0], p2[1], g.player.hp / g.player.maxHp());
@@ -637,7 +638,7 @@ final class HudFragments {
             float x0 = dungeon == null ? 0 : dungeon.ox, z0 = dungeon == null ? 0 : dungeon.oz;
             float span = dungeon == null ? DevMap.SX : Math.max(dungeon.w, dungeon.d);
             java.util.function.BiFunction<Float, Float, float[]> at = (wx, wz) -> new float[]{left + (wx - x0) / span * size, top + (wz - z0) / span * size};
-            ui.text(ui.heading, dungeon == null ? "World Map" : dungeon.name, left, y - 6, 22, Style.ACCENT);
+            ui.text(ui.body, dungeon == null ? "World Map" : dungeon.name, left, y - 6, 22, Style.ACCENT);
             // the map as a chart pinned in a frame: a dark mount, the gold trim, the paper a little warm
             ui.rect(left - 6, top - 6, size + 12, size + 12, 0xFF0E0B08);
             float u1 = dungeon == null ? 1 : span / dungeon.w * 1, v1 = dungeon == null ? 1 : span / dungeon.d;
@@ -724,9 +725,12 @@ final class HudFragments {
             if (all) { for (int z = 0; z < S; z++) for (int x = 0; x < S; x++) column(g, x, z); }
             else for (int k : g.mapColumns) { int x = k >> 16, z = (short) (k & 0xFFFF); if (x >= 0 && z >= 0 && x < S && z < S) column(g, x, z); }
             g.mapColumns.clear();
-            if (tex != 0) hud.r.release(AstrattoNative.RES_TEXTURE, tex);
             px.position(0).limit(S * S * 4);
-            tex = hud.r.texture(AstrattoNative.TEX_2D, S, S, 1, AstrattoNative.TEX_NEAREST, px);
+            // redrawn in place (gamefixes: remaking the texture each time hitched the frame by tens of milliseconds)
+            if (tex == 0 || !hud.r.textureUpdate(tex, px)) {
+                if (tex != 0) hud.r.release(AstrattoNative.RES_TEXTURE, tex);
+                tex = hud.r.texture(AstrattoNative.TEX_2D, S, S, 1, AstrattoNative.TEX_NEAREST, px);
+            }
             builtAt = g.time;
             g.mapDirty = false;
         }
@@ -1096,11 +1100,11 @@ final class HudFragments {
         @Override public float height(){return 108+(current==null?0:current.unlocks.size()*17);}
         @Override public void draw(Ui2D ui,float x,float y) {
             if(current==null)return;
-            y+=hud.fragment("honor").alpha*88-(1-alpha)*12;
+            y-=(1-alpha)*12;
             ui.rect(x,y,360,height(),0xF814171C);ui.border(x,y,360,height(),1,0x70D8B46A);
             ui.rect(x+60,y,240,2,current.color);
             ui.img(current.icon,x+160,y+10,40,0xFFFFFFFF);
-            ui.flatCentered(ui.heading,current.title,x+180,y+54,24,current.color);
+            ui.flatCentered(ui.body,current.title,x+180,y+54,24,current.color);
             ui.flatCentered(current.detail,x+180,y+82,14,Style.TEXT);
             for(int i=0;i<current.unlocks.size();i++)ui.flatCentered("Unlocked: "+current.unlocks.get(i),x+180,y+106+i*17,11,Style.GOOD);
         }
@@ -1114,9 +1118,10 @@ final class HudFragments {
     static final class LevelBanner extends Fragment {
         LevelBanner(Hud h) { super("levelbanner"); fadeIn = 0.05f; fadeOut = 0.4f; }
         static final float SHOW = 3.4f, COMBAT_AT = 0.75f;
-        @Override protected boolean active() { var b = hud.g.prog.banner; return b != null && hud.now - b.at() < SHOW; }
+        // (the banner is stamped with the game's clock, not the interface's own - which starts at nought each session)
+        @Override protected boolean active() { var b = hud.g.prog.banner; return b != null && hud.g.time - b.at() >= 0 && hud.g.time - b.at() < SHOW; }
         @Override public float width() { return 560; }
-        @Override public float height() { return 250; }
+        @Override public float height() { var b = hud.g.prog.banner; return b != null && b.combat() > 0 ? 246 : 134; }
         // (the banner sits over the action; nothing in it takes the mouse)
         /** A landing: big, then settling to its size with a small overshoot. */
         private static float pop(float t) {
@@ -1129,7 +1134,7 @@ final class HudFragments {
         @Override public void draw(Ui2D ui, float x, float y) {
             var b = hud.g.prog.banner;
             if (b == null) return;
-            float t = (float) (hud.now - b.at()), out = Math.min(1, Math.max(0, (SHOW - t) / 0.45f));
+            float t = (float) (hud.g.time - b.at()), out = Math.min(1, Math.max(0, (SHOW - t) / 0.45f));
             float cx = x + 280;
             // the ribbon: a dark band, gilded at its edges, widening out from the middle as the words land
             float open = Math.min(1, t / 0.2f), rw = 520 * open;
@@ -1141,9 +1146,9 @@ final class HudFragments {
             if (s > 0) {
                 float size = 58 * s;
                 String words = "LEVEL UP!";
-                float w = ui.width(ui.heading, words, size);
-                ui.text(ui.heading, words, cx - w / 2 + 3, y + 54 - size / 2 + 3, size, fade(0xC0000000, out));
-                ui.text(ui.heading, words, cx - w / 2, y + 54 - size / 2, size, fade(0xFFF6D46A, out));
+                float w = ui.width(ui.body, words, size);
+                ui.text(ui.body, words, cx - w / 2 + 3, y + 54 - size / 2 + 3, size, fade(0xC0000000, out));
+                ui.text(ui.body, words, cx - w / 2, y + 54 - size / 2, size, fade(0xFFF6D46A, out));
             }
             String line = b.skill().title + "  level " + b.level();
             ui.img(Atlas.skill(b.skill()), cx - ui.width(line, 17) / 2 - 28, y + 97, 22, fade(0xFFFFFFFF, out));
@@ -1158,12 +1163,12 @@ final class HudFragments {
             ui.rect(cx - cw / 2 + 6, by + 6, cw - 12, 1, fade(0x70F0C878, out));
             if (cs > 0) {
                 String head = b.combatMax() ? "MAXIMUM COMBAT LEVEL!" : "CONGRATULATIONS!";
-                ui.flatCentered(ui.heading, head, cx, by + 10, 26 * cs, fade(0xFFF0C060, out));
+                ui.flatCentered(ui.body, head, cx, by + 10, 26 * cs, fade(0xFFF0C060, out));
                 String lvl = "Combat Level " + b.combat();
-                float lw = ui.width(ui.heading, lvl, 36 * cs);
+                float lw = ui.width(ui.body, lvl, 36 * cs);
                 ui.img("Sword_map_icon", cx - lw / 2 - 40, by + 46, 30, fade(0xFFFFFFFF, out));
                 ui.img("Sword_map_icon", cx + lw / 2 + 10, by + 46, 30, fade(0xFFFFFFFF, out));
-                ui.text(ui.heading, lvl, cx - lw / 2, by + 44, 36 * cs, fade(0xFFFFF0D0, out));
+                ui.text(ui.body, lvl, cx - lw / 2, by + 44, 36 * cs, fade(0xFFFFF0D0, out));
             }
         }
     }
@@ -1252,8 +1257,8 @@ final class HudFragments {
             ui.border(x, y, cw, ch, 1, 0xFF85714D);
             ui.border(x + 4, y + 4, cw - 8, ch - 8, 1, 0x665F5136);
             float nameX = x + (cw - ui.width(d.speaker, 16)) / 2;
-            nameX = x + (cw - ui.width(ui.heading, d.speaker, 20)) / 2;
-            ui.text(ui.heading, d.speaker, nameX, y + 10, 20, 0xFFFFD15E);
+            nameX = x + (cw - ui.width(ui.body, d.speaker, 20)) / 2;
+            ui.text(ui.body, d.speaker, nameX, y + 10, 20, 0xFFFFD15E);
             boolean portrait = hud.g.actor(d.npc) instanceof Npc;
             float tx = x + (portrait ? 126 : 16), textWidth = cw - (tx - x) - 18;
             if (portrait) {
@@ -1307,7 +1312,7 @@ final class HudFragments {
             ui.rectTex(ui.parchment, x, y, W, H, 0, 0, W / 128, H / 128, 0xFFFFFFFF);
             ui.border(x, y, W, H, 1, Style.ACCENT);
             ui.border(x + 4, y + 4, W - 8, H - 8, 1, 0x665F5136);
-            ui.flatCentered(ui.heading, d.speaker + " offers you", x + W / 2, y + 12, 20, 0xFFFFD15E);
+            ui.flatCentered(ui.body, d.speaker + " offers you", x + W / 2, y + 12, 20, 0xFFFFD15E);
             // the item on a lit plinth
             float px = x + 24, py = y + 46, ps = 84;
             ui.rect(px, py, ps, ps, 0x40302015);
@@ -1316,7 +1321,7 @@ final class HudFragments {
             hud.itemIcon(ui, d.offer, px + 10, py + 8, ps - 20, ps - 20, 1);
             float tx = px + ps + 18, tw = W - (tx - x) - 20;
             ui.text(d.offer.def.name, tx, py + 4, Math.min(16, tw / Math.max(1, ui.width(d.offer.def.name, 1))), Style.TEXT);
-            Ui2D.Face was = ui.use(ui.lore);
+            Ui2D.Face was = ui.use(ui.chat);
             List<String> about = wrap(ui, d.offer.def.examine == null ? "" : d.offer.def.examine, 13, tw);
             for (int i = 0; i < Math.min(3, about.size()); i++) ui.text(about.get(i), tx, py + 28 + i * 15, 13, 0xFFD7C7A4);
             ui.use(was);
@@ -1358,7 +1363,7 @@ final class HudFragments {
             ui.rectTex(ui.parchment, x, y, W, h, 0, 0, W / 128, h / 128, 0xFFFFFFFF);
             ui.border(x, y, W, h, 1, Style.ACCENT);
             ui.border(x + 4, y + 4, W - 8, h - 8, 1, 0x665F5136);
-            ui.text(ui.heading, "GAME PAUSED", x + 28, y + 18, 32, 0xFFFFD15E);
+            ui.text(ui.body, "GAME PAUSED", x + 28, y + 18, 32, 0xFFFFD15E);
             ui.text("Esc to resume", x + 28, y + 57, 13, Style.DIM);
             ui.rect(x + 28, y + 86, W - 56, 1, 0x665F5136);
             boolean moved = ui.mx != lastMouseX || ui.my != lastMouseY;

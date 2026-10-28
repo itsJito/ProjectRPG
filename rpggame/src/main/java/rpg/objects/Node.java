@@ -98,7 +98,7 @@ public final class Node extends WorldObject {
 
     /** Why the actor cannot work this node with what they hold (null: they can). */
     public String refusal(Actor a) {
-        if (depleted()) return kind == Kind.TREE ? "This tree has been cut down." : kind == Kind.ROCK ? "There is no ore left in this rock." : "There's nothing left to pick.";
+        if (depleted()) return kind == Kind.TREE ? "This tree has been cut down." : kind == Kind.ROCK ? (product != null && product.id.endsWith("_ore") || product == rpg.item.Items.COAL ? "There is no ore left in this rock." : "There's nothing left to dig here for now.") : "There's nothing left to pick.";
         if (a.skills.level(skill) < level) return "You need " + skill.title + " level " + level + " to " + verb().toLowerCase() + " this.";
         if (tool(a) == null) {
             ItemDef held = a.main();

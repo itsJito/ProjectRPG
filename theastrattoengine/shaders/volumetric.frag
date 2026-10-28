@@ -24,25 +24,19 @@ float vnoise(vec3 p) {
     return mix(mix(mix(hash31(i), hash31(i + vec3(1, 0, 0)), f.x), mix(hash31(i + vec3(0, 1, 0)), hash31(i + vec3(1, 1, 0)), f.x), f.y),
                mix(mix(hash31(i + vec3(0, 0, 1)), hash31(i + vec3(1, 0, 1)), f.x), mix(hash31(i + vec3(0, 1, 1)), hash31(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
-/** How thick the smoke is at a point (per metre), what colour it scatters and how much it glows. Billows: two octaves
- *  of noise carried up with the smoke's rise, thinning toward the volume's edge and its top. */
-float smokeAt(vec3 p, out vec3 albedo, out float glow) {
-    float total = 0.0;
-    albedo = vec3(0.0); glow = 0.0;
-    for (int i = 0; i < 32; i++) {
-        if (i >= uSmokeN) break;
-        vec4 a = uSmoke[i * 3], b = uSmoke[i * 3 + 1], c = uSmoke[i * 3 + 2];
-        vec3 q = (p - a.xyz) / a.w;
-        float l = length(q * vec3(1.15, 0.6, 1.15));                 // taller than wide: a column
-        if (l >= 1.0) continue;
-        vec3 n = p * (1.6 / max(a.w, 0.3)) - vec3(0.0, uTime * c.y / max(a.w, 0.3) * 1.6, 0.0) + vec3(c.w * 17.0);
-        float billow = vnoise(n) * 0.5 + vnoise(n * 2.3 + 7.1) * 0.3 + vnoise(n * 5.1 + 3.3) * 0.2;
-        float k = b.x * (1.0 - smoothstep(0.2, 1.0, l)) * mix(1.0, smoothstep(0.25, 0.75, billow) * 1.8, clamp(c.z, 0.0, 1.0));
-        if (k <= 0.0) continue;
-        total += k; albedo += b.yzw * k; glow += c.x * k;
-    }
-    if (total > 0.0) { albedo /= total; glow /= total; }
-    return total;
+/** How thick a volume's smoke is at a point (per metre), what colour it scatters and how much it glows. Billows: two
+ *  octaves of noise carried up with the smoke's rise, thinning toward the volume's edge and its top. */
+// (the march through a volume samples only that volume: summing every plume at every step made the cost grow with
+// the square of the plumes in view - milliseconds a frame over a town of chimneys)
+float smokeOne(int i, vec3 p, out vec3 albedo, out float glow) {
+    vec4 a = uSmoke[i * 3], b = uSmoke[i * 3 + 1], c = uSmoke[i * 3 + 2];
+    albedo = b.yzw; glow = c.x;
+    vec3 q = (p - a.xyz) / a.w;
+    float l = length(q * vec3(1.15, 0.6, 1.15));
+    if (l >= 1.0) return 0.0;
+    vec3 n = p * (1.6 / max(a.w, 0.3)) - vec3(0.0, uTime * c.y / max(a.w, 0.3) * 1.6, 0.0) + vec3(c.w * 17.0);
+    float billow = vnoise(n) * 0.5 + vnoise(n * 2.3 + 7.1) * 0.3 + vnoise(n * 5.1 + 3.3) * 0.2;
+    return max(0.0, b.x * (1.0 - smoothstep(0.2, 1.0, l)) * mix(1.0, smoothstep(0.25, 0.75, billow) * 1.8, clamp(c.z, 0.0, 1.0)));
 }
 // 0.9, interiors: how much of the sky's light there is in the air at a point, 0..1, from the light the probes hold there.
 // The haze used to glow with the full ambient of the open sky wherever it was - in a sealed corridor, a cellar, a
@@ -64,10 +58,19 @@ float sunVis(vec3 P, float viewZ) {
     if (s.x < 0.0 || s.y < 0.0 || s.x > 1.0 || s.y > 1.0 || s.z > 1.0) return 1.0;
     return texture(uShadow, vec4(s.xy, float(c), s.z - 0.0006));
 }
-float density(vec3 p) {
+float density(vec3 p, float air) {
     // thicker near the street, thinning with height; underground air is still and heavy
     float h = p.y - uHeightBase;
-    return uDensity * (h < -3.0 ? 2.2 : exp(-max(h, 0.0) * 0.045));
+    if (h < -3.0) return uDensity * 2.2;
+    float haze = exp(-max(h, 0.0) * 0.045);
+    // 0.1.9, the mist: a layer a few metres deep lying on the ground, torn by slow noise into banks that drift with
+    // the air - thick in the hollows, clear between - so the fog is a thing in the world, not a tint over it. Only in
+    // the open air (the probes' sky light): a room keeps its own air.
+    vec3 q = p * vec3(0.05, 0.16, 0.05) + vec3(uTime * 0.011, -uTime * 0.004, uTime * 0.006);
+    float n = vnoise(q) * 0.62 + vnoise(q * 2.6 + vec3(5.3, 1.7, 9.1)) * 0.38;
+    float layer = exp(-max(h + 0.5, 0.0) * 0.36);
+    float mist = smoothstep(0.36, 0.82, n) * layer * smoothstep(0.3, 0.75, air);
+    return uDensity * (haze + mist * 5.5);
 }
 void main() {
     float d = textureLod(uDepth, vUV, 0.0).r;
@@ -83,14 +86,19 @@ void main() {
     float phase = (1.0 - g * g) / (4.0 * PI * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
     vec3 scat = vec3(0.0);
     float trans = 1.0;
+    // the air's own light changes slowly along a ray: read from the probes at its near end, middle and far end, and
+    // blended between (three probe reads a step were a third of the fog's cost)
+    float air0 = airLight(uCam + dir * min(len, 1.0)), air1 = airLight(uCam + dir * (len * 0.5)), air2 = airLight(uCam + dir * len);
     for (int i = 0; i < uSteps; i++) {
         float t = (float(i) + j) * stepLen;
         vec3 p = uCam + dir * t;
-        float dens = density(p);
+        float u = t / max(len, 1e-3);
+        float air = u < 0.5 ? mix(air0, air1, u * 2.0) : mix(air1, air2, u * 2.0 - 1.0);
+        float dens = density(p, air);
         if (dens <= 0.0) continue;
         float ext = dens * stepLen;
         float tr = exp(-ext);
-        vec3 light = uAmbient * airLight(p) + uSunCol * phase * 6.0 * sunVis(p, dot(p - uCam, uCamFwd));
+        vec3 light = uAmbient * air + uSunCol * phase * 6.0 * sunVis(p, dot(p - uCam, uCamFwd));
         // the nearest local lights glow in the haze (flashlight cone, fires, muzzle flashes)
         for (int k = 0; k < min(uLightCount, 4); k++) {
             vec3 ld = lights[k].posR.xyz - p;
@@ -123,7 +131,7 @@ void main() {
             for (int i = 0; i < N; i++) {
                 vec3 p = uCam + dir * (t0 + (float(i) + j) * sl);
                 vec3 col; float glow;
-                float k = smokeAt(p, col, glow);
+                float k = smokeOne(v, p, col, glow);
                 if (k <= 0.0) continue;
                 float tr = exp(-k * sl);
                 // lit by the sky and the sun (broadly: smoke scatters with a weak forward lobe, and shades itself a little),

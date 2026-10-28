@@ -122,7 +122,7 @@ final class Jobs {
         if((g.chemistry.state(node.id)&astratto.bridge.AstrattoNative.CHEM_BURNING)!=0)return false;
         if(n.profession==Profession.COAL_MINER) {
             boolean ventilation=g.vox.skyLight(node.bx,(int)node.y+2,node.bz)>0.2f;
-            if(!ventilation || g.vox.block(node.bx,(int)node.y,node.bz)==rpg.world.Blocks.CHARRED)return false;
+            if(!ventilation || rpg.world.Blocks.charred(g.vox.block(node.bx,(int)node.y,node.bz)))return false;
         }
         if(n.profession==Profession.CLAY_DIGGER && g.vox.block(node.bx,(int)node.y,node.bz)==rpg.world.Blocks.WATER)return false;
         return true;
@@ -225,9 +225,38 @@ final class Jobs {
                 n.dutyTarget=person.id;n.aidTarget=person.id;n.goal=Brain.Goal.AID;n.nextThink=g.time+2;n.lastOutcome="accepted a visible request for aid";return;
             }
         }
-        float side=(n.patrolIndex&1)==0?1:-1;
-        if(brain.goTo(n,n.dutyX+side*5,n.dutyZ,false,1)) { n.patrolIndex++;n.lastOutcome="inspected the assigned border"; }
+        if(n.profession==Profession.BORDER_KNIGHT) {
+            // an incursion at the border (GDD: reacts to known incursions, calls for reinforcement under actual threat): a
+            // monster, or a beast set on people, near the post and in sight is met; any watch officer within call comes too
+            for(Actor actor:g.actors()) {
+                if(actor==n || !actor.alive || actor.distTo(n.dutyX,n.dutyZ)>18 || !g.ai.canSee(n,actor))continue;
+                if(!(actor.domain==astratto.ai.AgentDomain.MONSTER || actor instanceof Animal animal && animal.dangerous()))continue;
+                n.fightTarget=actor.id;n.nextThink=0;n.lastOutcome="meeting an incursion at the border: "+actor.name;
+                if(g.time-n.lastDialogAt>20){g.ai.say(n,"To arms! Something's come over the border!");n.lastDialogAt=g.time;
+                    for(Npc o:g.npcs)if(o.alive && o.loaded && o.watch() && o.distTo(n)<30 && o.fightTarget==0){o.fightTarget=actor.id;o.nextThink=0;}}
+                return;
+            }
+        }
+        // the beat: a few paces either way along the border from the post, along whichever line is open there (a beat
+        // laid across a wall sent him the long way round the houses on every leg, half the day away from his post)
+        float side=(n.patrolIndex&1)==0?1:-1, reach=beat(n);
+        boolean alongX=reach>0;
+        float bx=n.dutyX+(alongX?side*reach:0), bz=n.dutyZ+(alongX?0:side*-reach);
+        if(brain.goTo(n,bx,bz,false,1)) { n.patrolIndex++;n.lastOutcome="inspected the assigned border"; }
     }
+    /** How far the border beat runs from the post: positive along x, negative along z, whichever is clear for longer (at most 5 m). */
+    private float beat(Npc n) {
+        float y=DevMap.FLOOR+1;
+        float best=0;
+        for(float d=5;d>=1.5f;d-=0.5f) {
+            if(g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX+d,y,n.dutyZ) && g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX-d,y,n.dutyZ)) { best=d; break; }
+        }
+        for(float d=5;d>=1.5f;d-=0.5f) {
+            if(g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX,y,n.dutyZ+d) && g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX,y,n.dutyZ-d)) { if(d>best)return -d; break; }
+        }
+        return best>0?best:-1.5f;
+    }
+
     private void hunter(Npc n,float dt) {
         if(n.profession==Profession.GAME_HUNTER){brain.huntSmallGame(n,dt);return;}
         if(n.profession==Profession.TRAPPER){g.traps.work(n);return;}

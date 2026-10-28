@@ -69,6 +69,7 @@ public:
     void fail(const std::string& e) { error_ = e; }
 
     int32_t texture(const astratto_texture_desc& d, uint32_t* out);
+    int32_t textureUpdate(uint32_t id, const uint8_t* pixels, uint64_t bytes);
     int32_t mesh(const float* vertices, uint32_t count, uint32_t* out);
     int32_t release(uint32_t kind, uint32_t id);
     int32_t worldLook(const astratto_world_look& look);
@@ -135,7 +136,7 @@ private:
     struct Quads { uint32_t texture = 0; int portrait = -1; std::vector<float> v; };
     struct Grading { float death = 0, hurt = 0, infection = 0, flash = 0, bile = 0; };
     struct ModelMesh { gl::GLuint vao = 0, vbo = 0; uint32_t count = 0; bool translucent = false; float center[3] = {}, extent[3] = {}; };
-    struct Texture { gl::GLuint id = 0; gl::GLenum target = 0; uint32_t layers = 1; };
+    struct Texture { gl::GLuint id = 0; gl::GLenum target = 0; uint32_t layers = 1, width = 0, height = 0; };
 
     bool parse(const uint8_t* cmds, uint32_t bytes);
     void bindWorld(Engine* e, astratto_handle h);
@@ -234,6 +235,10 @@ private:
     int waterIndex_ = 0;
     bool hasWater_ = false;
     float waterAccumulator_ = 0, waterClock_ = 0;
+    /** The wave grid's corner (world x, z) and cell size: it follows the camera (advanceWater). */
+    float waterOrigin_[2] = {0, 0};
+    bool waterPlaced_ = false;
+    static constexpr float WATER_CELL = 0.2f;
     float cloudClock_ = -1, cloudX_ = 0, cloudZ_ = 0;
     std::vector<uint32_t> waterVersions_;
     std::vector<float> waterMaskData_;

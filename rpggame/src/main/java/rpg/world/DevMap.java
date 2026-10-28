@@ -85,6 +85,16 @@ public final class DevMap {
     // animals (GDD 3.9): a wild wood in the north-west and a farm south of the houses
     public static final int WILD_X0 = 3, WILD_Z0 = 3, WILD_X1 = 44, WILD_Z1 = 40;
     public static final int WILD_POND_X0 = 22, WILD_POND_Z0 = 17, WILD_POND_X1 = 28, WILD_POND_Z1 = 22;
+    /** The brook running south out of the wild pond (0.1.8: a river for a river fisherman), and its two rod spots. */
+    public static final int STREAM_X0 = 25, STREAM_X1 = 26, STREAM_Z0 = 23, STREAM_Z1 = 44;
+    public static final float[][] STREAM_SPOTS = {{25.5f, 29.5f}, {26.5f, 39.5f}};
+    /**
+     * 0.1.9 (gamefixes: the devmap's missing objects, its people's needs first): what the new residents' work wanted
+     * and did not have - two more cage spots in the pond's shore shallows for the shellfish gatherer (one spot, half
+     * the day under the tide, was a day's idling), and a second supported face at the quarry beside the first.
+     */
+    public static final float[][] MORE_CRAB_SPOTS = {{87.5f, 38.5f}, {104.5f, 31.5f}};
+    public static final int[] QUARRY_FACE_2 = {95, 19};
     public static final int[][] WILD_TREES = {{8, 26}, {14, 34}, {34, 8}, {38, 30}, {30, 36}, {18, 8}, {40, 18}};
     public static final int[][] WILD_BUSHES = {{12, 18}, {13, 19}, {32, 26}, {33, 26}, {20, 30}, {36, 14}, {6, 14}, {27, 9}};
     /** The den: a rock shelter in the wood's corner (the bear's and the lion's lie-up). */
@@ -129,16 +139,16 @@ public final class DevMap {
             new Piece("TABLE", 60, 104, 62, 104, 1, 0, 0),                   // the quest kiosk
             new Piece("CRATE", 24, 62, 24, 62, 1, 0, 0), new Piece("CRATE", 25, 62, 25, 62, 1, 0, 0), new Piece("CRATE", 26, 62, 26, 62, 1, 1, 0),   // cover on the lane
             new Piece("TARGET", 7, 56, 7, 57, 2, 3, 0), new Piece("TARGET", 7, 61, 7, 62, 2, 3, 0),          // the archery range, facing the shooters
-            new Piece("BED", 91, 91, 91, 92, 1, 0, rpg.Ids.MERCHANT_A), new Piece("BED", 92, 91, 92, 92, 1, 0, rpg.Ids.WORKER),
-            new Piece("BED", 93, 91, 93, 92, 1, 0, rpg.Ids.CARTER),          // house 1
-            new Piece("BED", 105, 91, 105, 92, 1, 0, rpg.Ids.VILLAGER), new Piece("BED", 106, 91, 106, 92, 1, 0, 0),
-            new Piece("BED", 107, 91, 107, 92, 1, 0, 0),                     // house 2 (two spare beds anyone may use)
-            new Piece("BED", 110, 53, 110, 54, 1, 0, rpg.Ids.LAWMAN_A)};     // the lawman's cot in chancery A
+            new Piece("BED", 91, 92, 91, 93, 1, 0, rpg.Ids.MERCHANT_A), new Piece("BED", 92, 92, 92, 93, 1, 0, rpg.Ids.WORKER),
+            new Piece("BED", 93, 92, 93, 93, 1, 0, rpg.Ids.CARTER),          // house 1 (heads to the back wall)
+            new Piece("BED", 105, 92, 105, 93, 1, 0, rpg.Ids.VILLAGER), new Piece("BED", 106, 92, 106, 93, 1, 0, 0),
+            new Piece("BED", 107, 92, 107, 93, 1, 0, 0),                     // house 2 (two spare beds anyone may use)
+            new Piece("BED", 110, 53, 110, 54, 1, 2, rpg.Ids.LAWMAN_A)};     // the lawman's cot in chancery A (head to its north wall)
     /** The graveyard's pieces (built after every older fixture, so their ids hold): the undertaker's counter and cot, the stones. */
     public static final Piece[] GRAVEYARD_PIECES = {
             // the counter stands along the south wall, clear of the doorway (gamefixes: it used to fill the space just
             // inside the door, so whoever came in was pinned between it and the swung leaves)
-            new Piece("COUNTER", 120, 99, 122, 99, 1, 0, rpg.Ids.UNDERTAKER), new Piece("BED", 124, 95, 124, 96, 1, 0, rpg.Ids.UNDERTAKER),
+            new Piece("COUNTER", 120, 99, 122, 99, 1, 0, rpg.Ids.UNDERTAKER), new Piece("BED", 124, 95, 124, 96, 1, 2, rpg.Ids.UNDERTAKER),
             stone(0), stone(1), stone(2), stone(3), stone(4), stone(5), stone(6), stone(7), stone(8), stone(9), stone(10), stone(11), stone(12), stone(13),
             // the fence's nook behind Store B: crates to sit his goods on and to hide him from the road
             new Piece("CRATE", 10, 115, 10, 115, 1, 0, rpg.Ids.FENCE), new Piece("CRATE", 13, 115, 13, 115, 1, 1, rpg.Ids.FENCE),
@@ -321,7 +331,7 @@ public final class DevMap {
             fill(113, 2, 33, 121, 2, 43, SAND);
             fill(113, 3, 33, 121, 3, 43, WATER);
             for (int z = 34; z <= 42; z += 2) set(117 + ((z / 2) % 2 == 0 ? 0 : 1), FLOOR - 1, z, STONE);
-            ground(114, 44, 121, 46, COBBLE);
+            ground(114, 44, 121, 45, COBBLE);   // up to the town wall (the shortcut is climbed from it), not under it
             // course fences so it is walked in order
             fill(112, FLOOR, 6, 112, FLOOR, 46, FENCE);
             fill(122, FLOOR, 6, 122, FLOOR, 46, FENCE);
@@ -405,14 +415,20 @@ public final class DevMap {
         }
 
         void roads() {
-            // the caravan road: store A south to the bay, west to store B
-            ground(90, 63, 92, 96, COBBLE);
-            ground(28, 95, 92, 97, COBBLE);
+            // the caravan road: store A south to the bay, west to store B - round the houses, through the gap between
+            // them (gamefixes: it ran in at house 1's front wall and out through its back one)
+            ground(90, 63, 92, 85, COBBLE);
+            ground(93, 84, 98, 85, COBBLE);
+            ground(96, 85, 98, 97, COBBLE);
+            ground(28, 95, 98, 97, COBBLE);
+            // a doorstep from the square to each house's door
+            ground(HOUSE1_X0 + 3, HOUSE1_Z0 - 1, HOUSE1_X0 + 4, HOUSE1_Z0 - 1, COBBLE);
+            ground(HOUSE2_X0 + 3, HOUSE2_Z0 - 1, HOUSE2_X0 + 4, HOUSE2_Z0 - 1, COBBLE);
             ground(27, 97, 29, 109, COBBLE);
             // walks from the debug zone to each area
             ground(63, 28, 65, 54, COBBLE);
             ground(44, 63, 54, 65, COBBLE);
-            ground(74, 63, 82, 65, COBBLE);
+            ground(74, 66, 87, 68, COBBLE);   // through the west gate (it ran into the wall beside it)
             ground(63, 74, 65, 95, COBBLE);
             ground(98, 40, 99, 46, COBBLE);
         }
@@ -422,6 +438,11 @@ public final class DevMap {
             for (int[] t : WILD_TREES) tree(t[0], t[1], (t[0] + t[1]) % 2 == 0 ? OAK_LOG : LOG, (t[0] + t[1]) % 2 == 0 ? OAK_LEAVES : LEAVES, 4 + (t[0] * 7 + t[1]) % 3);
             for (int[] b : WILD_BUSHES) fill(b[0], FLOOR, b[1], b[0] + 1, FLOOR, b[1], LEAVES);
             pond(WILD_POND_X0, WILD_POND_Z0, WILD_POND_X1, WILD_POND_Z1);
+            // its brook, two wide and a block deep, out of the south bank to a pool at its foot
+            fill(STREAM_X0, 2, STREAM_Z0, STREAM_X1, FLOOR - 1, STREAM_Z1, AIR);
+            fill(STREAM_X0, 2, STREAM_Z0, STREAM_X1, 2, STREAM_Z1, SAND);
+            fill(STREAM_X0, 3, STREAM_Z0, STREAM_X1, 3, STREAM_Z1, WATER);
+            pond(STREAM_X0 - 2, STREAM_Z1 - 1, STREAM_X1 + 2, STREAM_Z1 + 2);
             // the den: a granite shelter open to the south-east
             fill(DEN_X0, FLOOR, DEN_Z0, DEN_X1, FLOOR + 2, DEN_Z0, GRANITE);
             fill(DEN_X0, FLOOR, DEN_Z0, DEN_X0, FLOOR + 2, DEN_Z1, GRANITE);

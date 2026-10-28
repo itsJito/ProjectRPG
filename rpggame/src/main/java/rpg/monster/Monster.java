@@ -19,7 +19,7 @@ import rpg.skill.Skill;
  */
 public final class Monster extends Npc {
     public final MonsterKind kind;
-    public final int level;
+    public int level;
     /** A dragon's breed (null for every other kind). */
     public MonsterKind.Breed breed;
     /** Its lair (0: a wanderer), and where that lair is. */
@@ -51,6 +51,8 @@ public final class Monster extends Npc {
     public float tx, tz, ty;
     /** Where it is roosting/perched (flyers), its flight height now, and where it means to be up to. */
     public float altitude, wantAltitude;
+    /** A dead one's remains going to ash and mist (0 whole .. 1 gone): see {@link Monsters#CORPSE_SECONDS}. */
+    public float dissolve;
     /** The cadence of its own attacks (natural strikes, ranged): next allowed, and the telegraph under way (a creature's wind-up). */
     public double nextStrike, nextRanged, windupUntil;
     public String windup;
@@ -65,6 +67,13 @@ public final class Monster extends Npc {
     /** Running (its faster gait), and when it next makes a noise of its own. */
     public boolean running;
     public double nextVoice;
+    /**
+     * A fight's own rhythm: a bat's swoop (0 circling overhead, 1 diving in, 2 climbing away) and a pack raider's (0
+     * waiting on the ring round the target, 1 darting in, 2 falling back); until when it holds, and which way it circles.
+     */
+    public int swoop;
+    public double swoopUntil;
+    public float orbit = 1;
     /** A gallery puppet: moved by hand, its mind left out. */
     public boolean puppet;
 
@@ -104,8 +113,10 @@ public final class Monster extends Npc {
     @Override public void fitBody() { fit(); }
     @Override public float ragdollScale() { return kind.form == MonsterKind.Form.HUMANOID ? kind.scale() : Math.max(0.5f, Math.min(2.5f, kind.mh / 1.8f)); }
     @Override public int sydneyProfile() { return kind.sydney; }
-    @Override public float eyeY() { return y + height * (kind.form == MonsterKind.Form.HUMANOID ? 0.9f : 0.7f) + altitude; }
-    @Override public float chestY() { return y + height * 0.55f + altitude; }
+    // (its body's y is already up in the air when it flies: the altitude is only how far that is above the ground - added
+    // again here it put a bat's chest metres over the bat, where every arrow, spell and eye was aimed)
+    @Override public float eyeY() { return y + height * (kind.form == MonsterKind.Form.HUMANOID ? 0.9f : 0.7f); }
+    @Override public float chestY() { return y + height * 0.55f; }
 
     /** How big its figure is against a person's (its own skeleton's scale): the humanoids' swings reach as far as their arms. */
     @Override public float figureScale() { return kind.form == MonsterKind.Form.HUMANOID ? kind.scale() : 1; }

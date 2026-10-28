@@ -34,12 +34,14 @@ const vec2 POISSON[16] = vec2[](vec2(-0.94201624, -0.39906216), vec2(0.94558609,
     vec2(0.44323325, -0.97511554), vec2(0.53742981, -0.47373420), vec2(-0.26496911, -0.41893023), vec2(0.79197514, 0.19090188),
     vec2(-0.24188840, 0.99706507), vec2(-0.81409955, 0.91437590), vec2(0.19984126, 0.78641367), vec2(0.14383161, -0.14100790));
 float shadowNoise() { return fract(52.9829189 * fract(dot(gl_FragCoord.xy + uFrame * 5.588238, vec2(0.06711056, 0.00583715)))); }
-float cascadeShadow(int c, vec3 P, vec3 N, float ndl) {
+float cascadeShadow(int c, vec3 P, vec3 N, float ndl, float baked) {
     float texel = uCascadeTexel[c];
     vec3 Pb = P + N * texel * (1.6 + 2.0 * (1.0 - ndl));
     vec4 sp = uShadowVP[c] * vec4(Pb, 1.0);
     vec3 s = sp.xyz * 0.5 + 0.5;
-    if (s.x < 0.0 || s.y < 0.0 || s.x > 1.0 || s.y > 1.0 || s.z > 1.0) return 1.0;
+    // 1.2: off the cascade's map there is no shadow to read - what the baked sky light says, not full sun (a room's
+    // walls past the map's edge were lit by the sun through the roof)
+    if (s.x < 0.0 || s.y < 0.0 || s.x > 1.0 || s.y > 1.0 || s.z > 1.0) return baked;
     float px = 1.0 / uShadowRes;
     float bias = 0.00035 * (1.0 + float(c));
     float a = shadowNoise() * 6.2831853;
@@ -78,11 +80,11 @@ float sunShadow(vec3 P, vec3 N, float ndl, float viewZ, float skyVis) {
     float last = uSplits[uCascades - 1];
     float baked = smoothstep(0.5, 0.95, skyVis);
     if (viewZ >= last) return baked;
-    float sh = cascadeShadow(c, P, N, ndl);
+    float sh = cascadeShadow(c, P, N, ndl, baked);
     // cross-fade into the next cascade (or into the baked sky term past the last one)
     float end = uSplits[c], band = end * 0.12;
     float k = smoothstep(end - band, end, viewZ);
-    if (k > 0.0) sh = mix(sh, c + 1 < uCascades ? cascadeShadow(c + 1, P, N, ndl) : baked, k);
+    if (k > 0.0) sh = mix(sh, c + 1 < uCascades ? cascadeShadow(c + 1, P, N, ndl, baked) : baked, k);
     return sh;
 }
 
@@ -100,11 +102,13 @@ float bodyVisibility(vec3 a, vec3 b) {
         vec3 foot = vec3(uBodies[i * 5], uBodies[i * 5 + 1], uBodies[i * 5 + 2]);
         float r = uBodies[i * 5 + 3], h = uBodies[i * 5 + 4];
         vec3 c0 = foot + vec3(0.0, r, 0.0), c1 = foot + vec3(0.0, max(h - r, r), 0.0);
-        // the surface itself belongs to this body
+        // the surface itself belongs to this body - but never the ground it stands on: the floor under the feet is
+        // within the same reach of the capsule, and skipping it lit a bright disc under every body with its shadow
+        // round the outside (a lamp's shadow came out inverted, a halo followed everyone about)
         vec3 ax = c1 - c0;
         float axl = max(dot(ax, ax), 1e-6);
         float ta = clamp(dot(a - c0, ax) / axl, 0.0, 1.0);
-        if (length(a - (c0 + ax * ta)) < r * 1.35) continue;
+        if (a.y > foot.y + 0.06 && length(a - (c0 + ax * ta)) < r * 1.35) continue;
         // A body-attached emitter (burning clothing, a held light) must not be occluded by its own source body.
         // Otherwise every ray ends inside the capsule and a moving bright wedge appears on the ground.
         float tb = clamp(dot(b - c0, ax) / axl, 0.0, 1.0);

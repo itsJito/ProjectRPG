@@ -240,12 +240,34 @@ public final class Inventory {
     /** The total weight (kg) of what is in the grid, bags' contents included. */
     public float weight() { float kg = 0; for (ItemStack s : stacks) if (s != null) kg += s.weight(); return kg; }
 
-    /** Packs everything again from the top left, largest first (the interface's "sort"); false (and unchanged) if it would not fit. */
-    public boolean pack() {
+    /** The order a tidy pack keeps: arms, armour, tools, goods, food, bags, other things, coins last. */
+    private static final ItemDef.Category[] SHELF = {ItemDef.Category.WEAPON, ItemDef.Category.ARMOR, ItemDef.Category.TOOL, ItemDef.Category.RESOURCE,
+            ItemDef.Category.CONSUMABLE, ItemDef.Category.CONTAINER, ItemDef.Category.MISC, ItemDef.Category.CURRENCY};
+    private static int shelf(ItemDef d) { return java.util.Arrays.asList(SHELF).indexOf(d.category()); }
+    public static final java.util.Comparator<ItemStack> TIDY = java.util.Comparator.<ItemStack>comparingInt(s -> shelf(s.def))
+            .thenComparing(s -> -s.def.gw * s.def.gh).thenComparing(s -> s.def.name);
+
+    /**
+     * The interface's Auto-Sort: like stacks merged, then everything laid again from the top left in {@link #TIDY}
+     * order (kinds together), or - when that order leaves no room for something - largest first. False (and unchanged)
+     * if neither fits.
+     */
+    public boolean sort() {
+        List<ItemStack> l = new ArrayList<>();
+        outer:
+        for (ItemStack s : stacks()) {
+            for (int i = 0; i < l.size(); i++) if (s.def.stackable && l.get(i).sameKind(s)) { ItemStack m = l.get(i).copyWhole(); m.absorb(s.copyWhole()); l.set(i, m); continue outer; }
+            l.add(s);
+        }
+        l.sort(TIDY);
+        if (pack(l)) return true;
+        l.sort((a, b) -> Integer.compare(b.def.gw * b.def.gh, a.def.gw * a.def.gh));
+        return pack(l);
+    }
+
+    private boolean pack(List<ItemStack> l) {
         Inventory probe = new Inventory(w, h);
         probe.container = container;
-        List<ItemStack> l = stacks();
-        l.sort((a, b) -> Integer.compare(b.def.gw * b.def.gh, a.def.gw * a.def.gh));
         for (ItemStack s : l) { int[] sp = probe.findSpace(s.def, -1); if (sp == null || !probe.placeNew(s, sp[0], sp[1], sp[2] == 1)) return false; }
         clear();
         System.arraycopy(probe.stacks, 0, stacks, 0, stacks.length);

@@ -25,7 +25,7 @@ class SummonStressTest {
         g.state.minutes = 600;
         g.teleport(g.player, 60.5f, DevMap.FLOOR, 70.5f);
         g.player.skills.setLevel(Skill.MAGIC, 99); g.player.skills.setLevel(Skill.HEALTH, 99); g.player.restore();
-        if (g.player instanceof rpg.actor.Player p) p.book = Spells.Book.ANCIENTS;
+        if (g.player instanceof rpg.actor.Player p) p.book = Spells.Book.FOGISH;
         game.tick(0);
     }
     @AfterEach void close() { game.close(); }

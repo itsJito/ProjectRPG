@@ -167,6 +167,7 @@ public final class Skin {
      */
     private void blood(rpg.actor.Blood.Mark m) {
         if (m.part() < 0 || m.part() >= BLOOD_PARTS.length) return;
+        if (m.scorch()) { scorch(m); return; }
         int[] r = face(BLOOD_PARTS[m.part()][0], m.face());
         int w = r[2], h = r[3];
         if (w <= 0 || h <= 0) return;
@@ -196,6 +197,39 @@ public final class Skin {
                     int c = get(p, m.face(), i, j);
                     if ((c >>> 24) != 0) set(p, m.face(), i, j, mix(c, base, 0.75f));
                 }
+            }
+        }
+    }
+
+    /**
+     * A scorch: charred black at its heart, a ring of browned, singed cloth or skin round it, flecked with grey ash; while
+     * it smoulders (wet) the edge of the black glows ember-orange. Ragged, from its own noise, on the base layer and any
+     * armor over it (metal darkens and blues rather than burning: it is only sooted).
+     */
+    private void scorch(rpg.actor.Blood.Mark m) {
+        int[] r = face(BLOOD_PARTS[m.part()][0], m.face());
+        int w = r[2], h = r[3];
+        if (w <= 0 || h <= 0) return;
+        float cx = m.u() * w, cy = m.v() * h, rad = m.radius();
+        long sd = m.seed() * 0x9E3779B97F4A7C15L;
+        for (int layer = 0; layer < 2; layer++) {
+            Part p = BLOOD_PARTS[m.part()][layer];
+            for (int j = (int) Math.floor(cy - rad - 2); j <= cy + rad + 2; j++) for (int i = (int) Math.floor(cx - rad - 2); i <= cx + rad + 2; i++) {
+                if (i < 0 || j < 0 || i >= w || j >= h) continue;
+                long hh = (sd + i * 0x632BE59BD9B4E019L + j * 0x85EBCA77C2B2AE63L);
+                hh ^= hh >>> 31; hh *= 0xBF58476D1CE4E5B9L; hh ^= hh >>> 29;
+                float noise = (hh & 1023) / 1023f;
+                // flames climb: the scorch reaches further up its face than down
+                float d = (float) Math.hypot(i + 0.5f - cx, (j + 0.5f - cy) * (j < cy ? 0.8f : 1.2f)) / Math.max(0.5f, rad);
+                float edge = 0.75f + noise * 0.5f;
+                if (d > edge + 0.45f) continue;
+                int c = get(p, m.face(), i, j);
+                if ((c >>> 24) == 0) continue;
+                int out;
+                if (d < edge * 0.7f) out = ((hh >>> 12) & 7) == 0 ? 0xFF6E6A66 : mix(0xFF141110, c, 0.12f + noise * 0.1f);          // charred through, ash flecks
+                else if (d < edge) out = m.wet() && ((hh >>> 16) & 3) == 0 ? 0xFFE0702A : mix(0xFF2A1E16, c, 0.35f);                 // the burning line
+                else out = mix(c, 0xFF5A3A22, 0.45f * (1 - (d - edge) / 0.45f));                                                      // singed round it
+                set(p, m.face(), i, j, out);
             }
         }
     }
@@ -245,8 +279,7 @@ public final class Skin {
         }
         rect(Part.HEAD, FRONT, 2, 7, 7, 8, shade(skin, 0.9f));   // lids
         rect(Part.HEAD, FRONT, 9, 7, 14, 8, shade(skin, 0.9f));
-        int[] irises = {0xFF5A3A20, 0xFF7A5A2A, 0xFF3A6AA8, 0xFF4A7A3A, 0xFF6A7078};
-        int iris = irises[(look.skin * 3 + look.hairColor + look.top) % irises.length];
+        int iris = 0xFF000000 | Appearance.eyeColor(look.eyeColor);
         for (int e = 0; e < 2; e++) {
             int x0 = e == 0 ? 3 : 10;
             rect(Part.HEAD, FRONT, x0, 8, x0 + 3, 10, 0xFFF2EEE6);

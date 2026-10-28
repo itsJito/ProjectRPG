@@ -711,14 +711,14 @@ void SydneyCharacter::spinal(float h) {
 // this supplies, up to a share of the body's weight; the muscles do the rest, and the body stays a body: it collides,
 // it can be struck down again, and once upright it balances itself.
 void SydneyCharacter::assist(float h) {
-    if (!g_.assist || state != GETUP) return;
+    if (!g_.assist || (state != GETUP && state != STAND && state != STEP)) return;
     Ragdoll& r = *body;
     Body& P = r.body(PELVIS);
     Body& T = r.body(TORSO);
     const float M = s.mass, w0 = 2 * PI * 2.2f;
     const V3 pv = partV_[PELVIS];
     V3 F = (g_.assistAt - P.p) * (M * w0 * w0) - pv * (2 * 1.0f * M * w0);
-    F.y += M * r.gravity * 0.5f;                       // half the weight is expected of the support at most
+    F.y += M * r.gravity * std::min(0.5f, g_.assistMax);   // half the weight is expected of the support at most
     const float fmax = M * r.gravity * g_.assistMax, fl = len(F);
     if (fl > fmax && fl > 1e-6f) F = F * (fmax / fl);
     const float mp = r.partMass[PELVIS], mt = r.partMass[TORSO];
@@ -786,6 +786,7 @@ void SydneyCharacter::collapse() { if (state != DEAD && state != FALL && state !
 void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
     t += h;
     stun = std::max(0.0f, stun - h);
+    steady_ = state == STAND || state == STEP ? std::max(0.0f, steady_ - h) : 0.0f;
     hitDelay_ = std::max(0.0f, hitDelay_ - h);
     if (intent.time > 0) { intent.time -= h; if (intent.time <= 0) intent = SydneyIntent(); }
     airborne = s.feet == 0 && s.otherContacts == 0 ? airborne + h : 0;
@@ -814,7 +815,7 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
 
     switch (state) {
         case STAND: {
-            if (!legs || toppled || airborne > 0.25f) { fallNow(); break; }
+            if (!legs || toppled || airborne > 0.25f) { steady_ = 0; fallNow(); break; }
             const float thr = 0.035f * cfg.stepThreshold * body->scale;
             over = s.captureOut > thr && s.feet > 0 ? over + h : 0;
             // back inside the feet for a moment: the stagger is over, and the steps it took are forgotten
@@ -876,7 +877,7 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
                 if ((four && getUpT_ > cfg.getUpTime * 0.75f) || getUpT_ > cfg.getUpTime * 1.6f) { outcome = RECOVERED; recoveries++; }
                 break;
             }
-            if (upright && getUpPhase_ >= 3) { steps = 0; settled = 0; go(STAND); break; }
+            if (upright && getUpPhase_ >= 3) { steps = 0; settled = 0; steady_ = 1.2f; go(STAND); break; }
             if (t > cfg.getUpTime + cfg.getUpTimeout) { go(DOWN); downFor = 0.8f; }
             break;
         }
@@ -903,6 +904,15 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
         case DOWN: lieGoals(h); holdGoals(); break;
         case GETUP: getUpGoals(w, h); break;
         case DEAD: limpGoals(h); break;
+    }
+    if (steady_ > 0 && (state == STAND || state == STEP)) {
+        // just risen: the get-up's support eases off over a moment instead of ending the instant the body is upright -
+        // the hips held over the feet and the trunk upright while the legs take the whole weight, through the step or
+        // two that catches what momentum the rise left (let go at the top, a body staggered and went straight back down)
+        const V3 pp = body->body(PELVIS).p;
+        g_.assist = true; g_.assistMax = 0.5f * smooth(steady_ / 1.2f);
+        g_.assistAt = V3(s.supportCentre.x, pp.y, s.supportCentre.z);
+        g_.assistQ = heading(-(body->body(L_FOOT).R.col(2) + body->body(R_FOOT).R.col(2)));
     }
     for (int e = 0; e < 4; e++) { reaching[e] = g_.eff[e]; reachAt[e] = g_.effAt[e]; }
     // stunned, the muscles answer weakly; a blow is answered by a flinch - a brief stiffening - before the response
@@ -1396,7 +1406,7 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
             // head turns to look where the body is going.
             const float sd = rollSide_;                    // +1: over to its right, -1: over to its left
             const int nearArm = sd > 0 ? 1 : 0, farArm = 1 - nearArm;
-            const float k = smooth((getUpPhaseT_ - 0.3f) / 0.5f);   // 0 knees drawn up, 1 fallen to the side
+            const float k = smooth((getUpPhaseT_ - 0.15f) / 0.4f);  // 0 knees drawn up, 1 fallen to the side
             for (int f = 0; f < 2; f++) {
                 setJoint(LEG[f][0], 1.25f, -0.85f * sd * k * cfg.rollTwist, 0.25f * sd * k, 1.2f * str);
                 setJoint(LEG[f][1], -1.9f, 0, 0, 1.0f * str);
@@ -1424,7 +1434,7 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
                 if (hlen(yl) < 1e-3f) yl = flat(s.fwd);
                 yl = norm(yl);
                 const V3 zb(0, 1, 0), xr = cross(yl, zb);
-                g_.assist = true; g_.assistMax = 0.35f * k + 0.05f;
+                g_.assist = true; g_.assistMax = 0.6f * k + 0.05f;
                 g_.assistAt = V3(r.body(PELVIS).p.x, s.groundY + 0.14f * scale, r.body(PELVIS).p.z);
                 g_.assistQ = basisQ(xr, yl, zb);
             }
@@ -1521,6 +1531,12 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
             if (getUpPhaseT_ > 2.4f || s.height < s.standHeight * 0.4f) { getUpPhase_ = 1; getUpPhaseT_ = 0.3f; }
             break;
         }
+    }
+    // trying harder: each attempt after the first, and a phase that has stalled, is given more of the support - a weak
+    // or hurt body is slower to rise, but it rises, rather than failing the same way until it gives up
+    if (g_.assist) {
+        const float stall = smooth((getUpPhaseT_ - 1.0f) / 1.2f);
+        g_.assistMax = std::min(1.1f, g_.assistMax * (1.0f + 0.45f * static_cast<float>(std::max(0, tries - 1)) + 0.6f * stall));
     }
 }
 

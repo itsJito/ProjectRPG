@@ -6,14 +6,19 @@ uniform mat4 uInvProj, uView;
 uniform vec2 uScreen;
 uniform float uFrame, uRadius, uProjScale;
 vec3 viewPos(vec2 uv) { float d = textureLod(uDepth, uv, 0.0).r; vec4 c = uInvProj * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); return c.xyz / c.w; }
-float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
 void main() {
     float d = textureLod(uDepth, vUV, 0.0).r;
     if (d >= 1.0 || d < 0.03) { oAO = 1.0; return; }
     vec3 P = viewPos(vUV);
     vec3 N = normalize(mat3(uView) * (texture(uNormal, vUV).xyz * 2.0 - 1.0));
     vec3 V = normalize(-P);
-    float noiseA = ign(gl_FragCoord.xy + uFrame * 5.588238), noiseB = ign(gl_FragCoord.xy * 1.7 + uFrame * 3.17);
+    // 1.2 (interiors shimmered): the slice and step offsets from a 4 x 4 tile, not from a noise that runs on along
+    // diagonals - every 4 x 4 window holds each of the sixteen once, so the blur after (4 x 4) averages the whole set and
+    // the result is smooth and still from frame to frame; the frame only nudges the steps a little for the TAA to resolve
+    const float BAYER[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+    ivec2 q = ivec2(gl_FragCoord.xy) & 3;
+    float noiseA = (BAYER[q.y * 4 + q.x] + 0.5) / 16.0;
+    float noiseB = fract((float((q.x + 2 * q.y) & 3) + 0.5) / 4.0 + mod(uFrame, 4.0) * 0.0625);
     // world-space radius projected to the screen, capped so near surfaces do not sample half the frame
     float rUV = clamp(uRadius * uProjScale / -P.z, 4.0 / uScreen.y, 0.12);
     const int SLICES = 2, STEPS = 4;

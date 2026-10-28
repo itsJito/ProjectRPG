@@ -136,6 +136,31 @@ public final class Undertaker {
         return item!=null && item.amount>0 && !item.stolen && (holder!=g.objects.custody || item.owner==0 || item.owner==g.player.id);
     }
 
+    /** What the undertaker asks to send for the player's standing graves at once and hand back what is in them. */
+    public static final int PROMPT = 10;
+    public int buyBackFee() {
+        int f = fee();
+        for (Container grave : graves()) f += FEE + (grave.secured ? 0 : OUTSIDE_SURCHARGE);
+        return graves().isEmpty() ? f : f + PROMPT;
+    }
+
+    /**
+     * Buys back what lies in the player's gravestones while they still stand (gamefixes): the undertaker sends for
+     * them at once - each a claim as if collected, and a small charge for the haste - and hands everything back with
+     * whatever he already held. The coins in the graves themselves count toward it, as they do at any redemption.
+     */
+    public Result buyBack(Actor a, Npc undertaker) {
+        List<Container> standing = graves();
+        if (standing.isEmpty()) return redeem(a, undertaker);
+        int fee = buyBackFee(), purse = a.count(Items.COINS), inGraves = 0;
+        for (Container grave : standing) inGraves += grave.contents.count(Items.COINS);
+        for (Container holder : holders()) for (ItemStack item : holder.contents.stacks()) if (item.def == Items.COINS && recoverable(holder, item)) inGraves += item.amount;
+        if (purse + inGraves < fee) return Result.no("The undertaker wants " + fee + " coins to fetch your things, and you have " + (purse + inGraves) + " all told.");
+        for (Container grave : standing) toCustody(grave, "sent for by the undertaker");
+        if (!claims.isEmpty()) claims.get(claims.size() - 1).fee += PROMPT;
+        return redeem(a, undertaker);
+    }
+
     public Result redeem(Actor a, Npc undertaker) {
         if (claims.isEmpty() || held() == 0) return Result.no("The undertaker holds nothing of yours.");
         List<Container> holders = holders();

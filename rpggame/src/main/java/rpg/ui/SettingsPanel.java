@@ -38,7 +38,7 @@ public final class SettingsPanel {
     public void draw(Ui2D ui, int width, int height) {
         float w = Math.min(920, width - 40), h = Math.min(650, height - 40), x = (width - w) / 2, y = (height - h) / 2;
         ui.rect(0, 0, width, height, 0xB5101418); ui.rectTex(ui.parchment, x, y, w, h, 0, 0, w / 128, h / 128, 0xFFFFFFFF); ui.border(x, y, w, h, 1, Style.ACCENT);
-        ui.text(ui.heading, "SETTINGS", x + 28, y + 18, 32, 0xFFFFD15E);
+        ui.text(ui.body, "SETTINGS", x + 28, y + 18, 32, 0xFFFFD15E);
         ui.text("Tune your display, sound and controls", x + 28, y + 57, 13, Style.DIM);
         String[] tabs = {"Display", "Audio", "Controls", "Accessibility"};
         for (int i = 0; i < tabs.length; i++) { float tx = x + 28 + i * (w - 56) / 4; if (ui.button(tabs[i], tx, y + 88, (w - 64) / 4, 32, true)) { tab = i; binding = null; } if (i == tab) ui.rect(tx, y + 122, (w - 64) / 4, 2, Style.ACCENT); }

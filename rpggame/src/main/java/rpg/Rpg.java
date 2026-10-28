@@ -191,17 +191,36 @@ public final class Rpg implements GameModule {
             if (i == 2) { d.eq.set(rpg.item.ItemDef.Slot.BODY, new ItemStack(Items.get("steel_body"), 1)); state.mint(Items.get("steel_body"), 1); d.name = "Armored dummy"; }
             d.restore();
             dummies.add(d);
+            solidDummy(d);
         }
         invariants.baseline();
         state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on the devmap");
         chat.add("Welcome to the RPGGAME devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
-    /** What a new character carries (gamefixes): wooden arms and a shortbow worn, the gathering tools and a little food packed, no coins. */
+    /**
+     * A target dummy stands in the way (gamefixes: bodies walked through them): its post and sack as one fixed box, its
+     * crossbar arms as another, the size Gfx draws them (it faces along z, so the arms run along x).
+     */
+    private void solidDummy(Actor d) {
+        var c = game.commands();
+        long post = game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID), arms = game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+        c.rigidCreate(post, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, 0.22f, 0.92f, 0.18f, 0,
+                d.x, d.y + 0.92f, d.z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+        c.rigidCreate(arms, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, 0.52f, 0.05f, 0.05f, 0,
+                d.x, d.y + 1.25f, d.z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+    }
+
+    /** What a new character carries (gamefixes): wooden arms worn, a shortbow, the gathering tools, a little food and 25 gold, packed tidily. */
     private void starterKit() {
+        // what is worn goes on first, so the pack holds only what is carried
         give(player, Items.WOODEN_SWORD, 1);
         give(player, Items.get("wooden_shield"), 1);
         give(player, Items.get("wooden_arrows"), 25);
+        var r = items.equipFirst(player, Items.WOODEN_SWORD, rpg.item.ItemDef.Slot.MAIN, 0);
+        var r2 = items.equipFirst(player, Items.get("wooden_shield"), rpg.item.ItemDef.Slot.OFF, 0);
+        var r3 = items.equipFirst(player, Items.get("wooden_arrows"), rpg.item.ItemDef.Slot.AMMO, 0);
+        if (r.rejected() || r2.rejected() || r3.rejected()) chat.warn("Starter gear could not be equipped.");
         give(player, Items.SHORTBOW, 1);
         give(player, Items.get("stone_axe"), 1);
         give(player, Items.get("stone_pickaxe"), 1);
@@ -211,10 +230,8 @@ public final class Rpg implements GameModule {
         give(player, Items.BUCKET, 1);
         give(player, Items.BREAD, 1);
         give(player, Items.SHRIMP, 1);
-        var r = items.equipFirst(player, Items.WOODEN_SWORD, rpg.item.ItemDef.Slot.MAIN, 0);
-        var r2 = items.equipFirst(player, Items.get("wooden_shield"), rpg.item.ItemDef.Slot.OFF, 0);
-        var r3 = items.equipFirst(player, Items.get("wooden_arrows"), rpg.item.ItemDef.Slot.AMMO, 0);
-        if (r.rejected() || r2.rejected() || r3.rejected()) chat.warn("Starter gear could not be equipped.");
+        give(player, Items.COINS, 25);
+        for (rpg.item.Inventory grid : player.grids()) grid.sort();
     }
 
     /**

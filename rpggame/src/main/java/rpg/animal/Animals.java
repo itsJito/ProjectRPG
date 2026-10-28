@@ -508,7 +508,7 @@ public final class Animals {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
             if (!a.loaded) continue;
-            g.game.commands().agentRate(a.agent,a.actionRate()*(a.cs.slowT>0?0.6f:1));
+            g.game.commands().agentRate(a.agent,a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1));
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
             if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
             a.trappedBy=0;

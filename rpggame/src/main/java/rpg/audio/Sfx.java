@@ -38,10 +38,64 @@ public final class Sfx {
 
     private static Sfx shared;
     /** One sound bank per engine (the character creator plays through it before the game world exists). */
-    public static synchronized Sfx shared(Game game) { if (shared == null || shared.game != game) shared = new Sfx(game); return shared; }
+    public static synchronized Sfx shared(Game game) {
+        if (shared == null || shared.game != game) {
+            if (warming != null) warming.join();   // (what the background pass has not decoded yet would be decoded twice)
+            shared = new Sfx(game);
+        }
+        return shared;
+    }
 
-    public Sfx(Game game) {
+    /**
+     * The bank for an interface click: only once the recordings are decoded (gamefixes: the game nearly choked when a
+     * profile was deleted - the title's first click built the whole bank, decoding every recording, for five seconds on
+     * the frame). Before that, the click is silent.
+     */
+    public static synchronized Sfx ready(Game game) {
+        if (shared != null && shared.game == game) return shared;
+        return warming != null && warming.isDone() ? shared(game) : null;
+    }
+
+    // ------------------------------------------------------------------ decoding ahead
+    /** Every recording decoded once, by path (and how much of it is kept), shared by every bank built after. */
+    private static final java.util.concurrent.ConcurrentHashMap<String, float[]> decoded = new java.util.concurrent.ConcurrentHashMap<>();
+    private static java.util.concurrent.CompletableFuture<Void> warming;
+    /** A decode-only pass (no engine): it walks the same list of recordings and only fills {@link #decoded}. */
+    private final List<java.util.concurrent.Future<?>> decodes;
+    private final java.util.concurrent.ExecutorService decoders;
+
+    /** Starts decoding every recording on background threads (at launch), so building a bank later costs no decoding. */
+    public static synchronized void warm() {
+        if (warming != null) return;
+        warming = java.util.concurrent.CompletableFuture.runAsync(() -> {
+            int n = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
+            var pool = java.util.concurrent.Executors.newFixedThreadPool(n, r -> { Thread t = new Thread(r, "sfx-decode"); t.setDaemon(true); t.setPriority(Thread.MIN_PRIORITY); return t; });
+            try {
+                Sfx pass = new Sfx(null, pool);
+                for (var f : pass.decodes) try { f.get(); } catch (Exception e) { /* reported where it failed */ }
+            } finally { pool.shutdown(); }
+        });
+    }
+
+    private static float[] decode(String path, float maxSeconds) throws IOException, Codecs.Failure {
+        String key = path + "@" + maxSeconds;
+        float[] w = decoded.get(key);
+        if (w == null) {
+            try (InputStream in = Sfx.class.getResourceAsStream("/sounds/" + path)) {
+                if (in == null) return null;
+                w = Codecs.decode(in.readAllBytes(), path, maxSeconds).mono();
+            }
+            decoded.put(key, w);
+        }
+        return w.clone();
+    }
+
+    public Sfx(Game game) { this(game, null); }
+
+    private Sfx(Game game, java.util.concurrent.ExecutorService decoders) {
         this.game = game;
+        this.decoders = decoders;
+        this.decodes = decoders == null ? null : new ArrayList<>();
         // ---- recorded: the world
         bank("step.grass", "foley/footstep_grass_00", 5);
         bank("step.earth", "foley/footstep0", 10);
@@ -101,6 +155,193 @@ public final class Sfx {
         bank("creature_die", "sfx/creature_die_0", 1, ".ogg", 1);
         bank("creature_roar", "sfx/creature_roar_0", 3, ".ogg", 1);
         bank("creature_slime", "sfx/creature_slime_0", 4, ".ogg", 1);
+        // each monster's own voice (gamefixes: they all cried out like people): idle, alarm, hurt and death banks, from
+        // rubberduck's two "80 CC0 creature SFX" packs (CC0), qubodup's ghost moans (CC0) and jalastram's monster and
+        // creature voices (CC BY 3.0) - see CREDITS.txt
+        one("m.goblin.idle", "creature/rd1_grunt_01.ogg", 0);
+        one("m.goblin.idle", "creature/rd1_grunt_02.ogg", 0);
+        one("m.goblin.idle", "creature/rd1_grunt_03.ogg", 0);
+        one("m.goblin.idle", "creature/rd1_grunt_04.ogg", 0);
+        one("m.goblin.idle", "creature/rd1_grunt_05.ogg", 0);
+        one("m.goblin.alarm", "creature/rd2_attack_01.ogg", 0);
+        one("m.goblin.alarm", "creature/rd2_attack_02.ogg", 0);
+        one("m.goblin.alarm", "creature/rd2_attack_03.ogg", 0);
+        one("m.goblin.alarm", "creature/rd2_attack_04.ogg", 0);
+        one("m.goblin.alarm", "creature/rd2_attack_05.ogg", 0);
+        one("m.goblin.hurt", "creature/rd1_hurt_01.ogg", 0);
+        one("m.goblin.hurt", "creature/rd1_hurt_02.ogg", 0);
+        one("m.goblin.hurt", "creature/rd1_hurt_03.ogg", 0);
+        one("m.goblin.hurt", "creature/rd1_hurt_04.ogg", 0);
+        one("m.goblin.hurt", "creature/rd1_hurt_05.ogg", 0);
+        one("m.goblin.death", "creature/rd2_die_01.ogg", 0);
+        one("m.goblin.death", "creature/rd2_die_02.ogg", 0);
+        one("m.goblin.death", "creature/rd2_die_03.ogg", 0);
+        one("m.goblin.death", "creature/rd2_die_04.ogg", 0);
+        one("m.orc.idle", "creature/rd2_grunt_06.ogg", 0);
+        one("m.orc.idle", "creature/rd2_grunt_07.ogg", 0);
+        one("m.orc.idle", "creature/rd2_grunt_08.ogg", 0);
+        one("m.orc.idle", "creature/rd2_grunt_09.ogg", 0);
+        one("m.orc.alarm", "creature/rd2_roar_04.ogg", 0);
+        one("m.orc.alarm", "creature/rd2_roar_05.ogg", 0);
+        one("m.orc.alarm", "creature/rd2_roar_06.ogg", 0);
+        one("m.orc.alarm", "creature/jalastram_001.mp3", 0);
+        one("m.orc.alarm", "creature/jalastram_002.mp3", 0);
+        one("m.orc.alarm", "creature/jalastram_003.mp3", 0);
+        one("m.orc.hurt", "creature/rd1_hurt_01.ogg", 0);
+        one("m.orc.hurt", "creature/rd1_hurt_02.ogg", 0);
+        one("m.orc.hurt", "creature/rd1_hurt_03.ogg", 0);
+        one("m.orc.hurt", "creature/rd1_hurt_04.ogg", 0);
+        one("m.orc.hurt", "creature/rd1_hurt_05.ogg", 0);
+        one("m.orc.death", "creature/rd2_die_01.ogg", 0);
+        one("m.orc.death", "creature/rd2_die_02.ogg", 0);
+        one("m.orc.death", "creature/rd2_die_03.ogg", 0);
+        one("m.orc.death", "creature/rd2_die_04.ogg", 0);
+        one("m.troll.idle", "creature/rd1_troll_01.ogg", 0);
+        one("m.troll.idle", "creature/rd1_troll_02.ogg", 0);
+        one("m.troll.idle", "creature/rd1_troll_03.ogg", 0);
+        one("m.troll.alarm", "creature/rd1_roar_01.ogg", 0);
+        one("m.troll.alarm", "creature/rd1_roar_02.ogg", 0);
+        one("m.troll.alarm", "creature/rd1_roar_03.ogg", 0);
+        one("m.troll.hurt", "creature/rd1_troll_01.ogg", 0);
+        one("m.troll.hurt", "creature/rd1_troll_02.ogg", 0);
+        one("m.troll.hurt", "creature/rd1_troll_03.ogg", 0);
+        one("m.troll.death", "creature/rd2_die_01.ogg", 0);
+        one("m.troll.death", "creature/rd2_die_02.ogg", 0);
+        one("m.troll.death", "creature/rd2_die_03.ogg", 0);
+        one("m.troll.death", "creature/rd2_die_04.ogg", 0);
+        one("m.imp.idle", "creature/rd1_weird_01.ogg", 0);
+        one("m.imp.idle", "creature/rd1_weird_02.ogg", 0);
+        one("m.imp.idle", "creature/rd1_weird_03.ogg", 0);
+        one("m.imp.idle", "creature/rd1_weird_04.ogg", 0);
+        one("m.imp.idle", "creature/rd1_weird_05.ogg", 0);
+        one("m.imp.alarm", "creature/rd1_scream_01.ogg", 0);
+        one("m.imp.alarm", "creature/rd1_scream_02.ogg", 0);
+        one("m.imp.alarm", "creature/rd1_spit_01.ogg", 0);
+        one("m.imp.alarm", "creature/rd1_spit_02.ogg", 0);
+        one("m.imp.alarm", "creature/rd1_spit_03.ogg", 0);
+        one("m.imp.hurt", "creature/rd2_weird_06.ogg", 0);
+        one("m.imp.hurt", "creature/rd2_weird_07.ogg", 0);
+        one("m.imp.hurt", "creature/rd2_weird_08.ogg", 0);
+        one("m.imp.hurt", "creature/rd2_weird_09.ogg", 0);
+        one("m.imp.death", "creature/rd2_die_01.ogg", 0);
+        one("m.imp.death", "creature/rd2_die_02.ogg", 0);
+        one("m.imp.death", "creature/rd2_die_03.ogg", 0);
+        one("m.imp.death", "creature/rd2_die_04.ogg", 0);
+        one("m.ghost.idle", "creature/ghostmoan_01.mp3", 0);
+        one("m.ghost.idle", "creature/ghostmoan_02.mp3", 0);
+        one("m.ghost.idle", "creature/ghostmoan_03.mp3", 0);
+        one("m.ghost.idle", "creature/ghostmoan_04.mp3", 0);
+        one("m.ghost.idle", "creature/ghostmoan_05.mp3", 0);
+        one("m.ghost.alarm", "creature/ghostmoan_01.mp3", 0);
+        one("m.ghost.alarm", "creature/ghostmoan_02.mp3", 0);
+        one("m.ghost.alarm", "creature/ghostmoan_03.mp3", 0);
+        one("m.ghost.alarm", "creature/ghostmoan_04.mp3", 0);
+        one("m.ghost.alarm", "creature/ghostmoan_05.mp3", 0);
+        one("m.ghost.hurt", "creature/ghostmoan_01.mp3", 0);
+        one("m.ghost.hurt", "creature/ghostmoan_02.mp3", 0);
+        one("m.ghost.hurt", "creature/ghostmoan_03.mp3", 0);
+        one("m.ghost.hurt", "creature/ghostmoan_04.mp3", 0);
+        one("m.ghost.hurt", "creature/ghostmoan_05.mp3", 0);
+        one("m.ghost.death", "creature/ghostmoan_01.mp3", 0);
+        one("m.ghost.death", "creature/ghostmoan_02.mp3", 0);
+        one("m.ghost.death", "creature/ghostmoan_03.mp3", 0);
+        one("m.ghost.death", "creature/ghostmoan_04.mp3", 0);
+        one("m.ghost.death", "creature/ghostmoan_05.mp3", 0);
+        one("m.zombie.idle", "creature/rd2_monster_08.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_09.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_10.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_11.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_12.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_13.ogg", 0);
+        one("m.zombie.idle", "creature/rd2_monster_14.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_15.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_16.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_17.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_18.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_19.ogg", 0);
+        one("m.zombie.alarm", "creature/rd2_monster_20.ogg", 0);
+        one("m.zombie.hurt", "creature/rd2_slime_01.ogg", 0);
+        one("m.zombie.hurt", "creature/rd2_slime_02.ogg", 0);
+        one("m.zombie.hurt", "creature/rd2_slime_03.ogg", 0);
+        one("m.zombie.hurt", "creature/rd2_slime_04.ogg", 0);
+        one("m.zombie.death", "creature/rd1_burble_01.ogg", 0);
+        one("m.zombie.death", "creature/rd1_burble_02.ogg", 0);
+        one("m.bat.idle", "creature/rd1_cute_01.ogg", 0);
+        one("m.bat.idle", "creature/rd1_cute_02.ogg", 0);
+        one("m.bat.idle", "creature/rd1_cute_03.ogg", 0);
+        one("m.bat.idle", "creature/rd1_cute_04.ogg", 0);
+        one("m.bat.idle", "creature/rd1_cute_05.ogg", 0);
+        one("m.bat.alarm", "creature/rd1_cute_06.ogg", 0);
+        one("m.bat.alarm", "creature/rd1_cute_07.ogg", 0);
+        one("m.bat.alarm", "creature/rd1_cute_08.ogg", 0);
+        one("m.bat.alarm", "creature/rd1_cute_09.ogg", 0);
+        one("m.bat.alarm", "creature/rd1_cute_10.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_01.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_02.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_03.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_04.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_05.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_06.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_07.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_08.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_09.ogg", 0);
+        one("m.bat.hurt", "creature/rd1_cute_10.ogg", 0);
+        one("m.bat.death", "creature/rd1_cute_06.ogg", 0);
+        one("m.bat.death", "creature/rd1_cute_07.ogg", 0);
+        one("m.bat.death", "creature/rd1_cute_08.ogg", 0);
+        one("m.bat.death", "creature/rd1_cute_09.ogg", 0);
+        one("m.bat.death", "creature/rd1_cute_10.ogg", 0);
+        one("m.spider.idle", "creature/rd1_bug_01.ogg", 0);
+        one("m.spider.idle", "creature/rd1_bug_02.ogg", 0);
+        one("m.spider.idle", "creature/rd1_bug_03.ogg", 0);
+        one("m.spider.idle", "creature/rd1_bug_04.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_05.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_06.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_07.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_08.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_09.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_10.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_11.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_12.ogg", 0);
+        one("m.spider.alarm", "creature/rd2_bug_13.ogg", 0);
+        one("m.spider.hurt", "creature/rd1_spit_01.ogg", 0);
+        one("m.spider.hurt", "creature/rd1_spit_02.ogg", 0);
+        one("m.spider.hurt", "creature/rd1_spit_03.ogg", 0);
+        one("m.spider.death", "creature/rd2_bug_05.ogg", 0);
+        one("m.spider.death", "creature/rd2_bug_06.ogg", 0);
+        one("m.spider.death", "creature/rd2_bug_07.ogg", 0);
+        one("m.spider.death", "creature/rd2_bug_08.ogg", 0);
+        one("m.werewolf.idle", "creature/jalastram_004.mp3", 0);
+        one("m.werewolf.idle", "creature/jalastram_005.mp3", 0);
+        one("m.werewolf.idle", "creature/jalastram_006.mp3", 0);
+        one("m.werewolf.alarm", "creature/rd1_howl.ogg", 0);
+        one("m.werewolf.hurt", "creature/rd1_hurt_01.ogg", 0);
+        one("m.werewolf.hurt", "creature/rd1_hurt_02.ogg", 0);
+        one("m.werewolf.hurt", "creature/rd1_hurt_03.ogg", 0);
+        one("m.werewolf.hurt", "creature/rd1_hurt_04.ogg", 0);
+        one("m.werewolf.hurt", "creature/rd1_hurt_05.ogg", 0);
+        one("m.werewolf.death", "creature/rd2_die_01.ogg", 0);
+        one("m.werewolf.death", "creature/rd2_die_02.ogg", 0);
+        one("m.werewolf.death", "creature/rd2_die_03.ogg", 0);
+        one("m.werewolf.death", "creature/rd2_die_04.ogg", 0);
+        one("m.dragon.idle", "creature/jalastram_007.mp3", 0);
+        one("m.dragon.idle", "creature/jalastram_008.mp3", 0);
+        one("m.dragon.alarm", "creature/rd1_roar_01.ogg", 0);
+        one("m.dragon.alarm", "creature/rd1_roar_02.ogg", 0);
+        one("m.dragon.alarm", "creature/rd1_roar_03.ogg", 0);
+        one("m.dragon.alarm", "creature/rd2_roar_04.ogg", 0);
+        one("m.dragon.alarm", "creature/rd2_roar_05.ogg", 0);
+        one("m.dragon.alarm", "creature/rd2_roar_06.ogg", 0);
+        one("m.dragon.alarm", "creature/jalastram_009.mp3", 0);
+        one("m.dragon.alarm", "creature/jalastram_010.mp3", 0);
+        one("m.dragon.hurt", "creature/rd1_roar_01.ogg", 0);
+        one("m.dragon.hurt", "creature/rd1_roar_02.ogg", 0);
+        one("m.dragon.hurt", "creature/rd1_roar_03.ogg", 0);
+        one("m.dragon.death", "creature/rd2_roar_04.ogg", 0);
+        one("m.dragon.death", "creature/rd2_roar_05.ogg", 0);
+        one("m.dragon.death", "creature/rd2_roar_06.ogg", 0);
+        // a body falling (a ragdoll striking the ground): dklon's recorded body hits (CC BY 3.0)
+        numberedWav("body.fall", "foley/bodyfall_", 5);
         bank("stones", "sfx/stones_0", 4, ".ogg", 1);
         // ---- recorded: the animals (gamefixes: every species heard). Long field recordings are cut into their separate
         // calls by loudness (see calls()), so a pond of ducks or a pack's howling becomes a bank of single cries.
@@ -159,7 +400,8 @@ public final class Sfx {
         bank("arrow.flesh", "archery/arrow_flesh_0", 6, ".ogg", 1);
         alias("zap", "metal.light"); alias("click", "ui.UIbutton1"); alias("fail", "ui.UIbutton2");
         alias("eat", "cloth"); alias("bless", "ui.LevelUp");
-        bank("cast", "sfx/spell_0", 2, ".ogg", 1); alias("fire", "crackle"); alias("body.fall", "soft.heavy");
+        bank("cast", "sfx/spell_0", 2, ".ogg", 1); alias("fire", "crackle"); if (!banks.containsKey("body.fall")) alias("body.fall", "soft.heavy");
+        alias("monster.dissolve", "crackle"); alias("rope", "wood.light");   // remains going to ash; a snare snapping shut
         if (System.getenv("RPG_SFX_REPORT") != null) {
             java.util.TreeMap<String, Integer> t = new java.util.TreeMap<>();
             for (var e : banks.entrySet()) if (e.getKey().startsWith("animal.")) t.put(e.getKey(), e.getValue().size());
@@ -177,13 +419,15 @@ public final class Sfx {
     /** n variations numbered from 01 (prefix + 01 .. nn + .ogg). */
     private void numbered(String name, String prefix, int n) { for (int i = 1; i <= n; i++) one(name, prefix + String.format("%02d", i) + ".ogg", 0); }
 
+    private void numberedWav(String name, String prefix, int n) { for (int i = 1; i <= n; i++) one(name, prefix + String.format("%02d", i) + ".wav", 0); }
+
     /** One recording into a bank; maxSeconds > 0 keeps only its start (a hurt grunt from a death cry). */
     private void one(String name, String path, float maxSeconds) {
-        try (InputStream in = Sfx.class.getResourceAsStream("/sounds/" + path)) {
-            if (in == null) return;
-            byte[] raw = in.readAllBytes();
-            Codecs.Decoded d = Codecs.decode(raw, path, maxSeconds);
-            float[] w = trimLead(d.mono());
+        if (game == null) { ahead(path, maxSeconds); return; }
+        try {
+            float[] raw = decode(path, maxSeconds);
+            if (raw == null) return;
+            float[] w = trimLead(raw);
             if (maxSeconds > 0) fade(w, 0.06f);
             long h = game.engine().createSound(w, 1, RATE);
             if (h != 0) { banks.computeIfAbsent(name, k -> new ArrayList<>()).add(h); loaded++; }
@@ -201,11 +445,19 @@ public final class Sfx {
      * judged over 20 ms windows), each from a little before it starts to a little after it ends, between a shortest
      * and a longest length, faded at both ends. At most max calls, the loudest first.
      */
+    /** In the decode-only pass: one recording decoded on a background thread. */
+    private void ahead(String path, float maxSeconds) {
+        decodes.add(decoders.submit(() -> {
+            try { decode(path, maxSeconds); } catch (IOException | Codecs.Failure e) { System.err.println("[sfx] could not load " + path + ": " + e.getMessage()); }
+        }));
+    }
+
     private void calls(String name, String path, int max, float minLen, float maxLen) {
+        if (game == null) { ahead(path, 0); return; }
         float[] w;
-        try (InputStream in = Sfx.class.getResourceAsStream("/sounds/" + path)) {
-            if (in == null) return;
-            w = Codecs.decode(in.readAllBytes(), path, 0).mono();
+        try {
+            w = decode(path, 0);
+            if (w == null) return;
         } catch (IOException | Codecs.Failure e) { System.err.println("[sfx] could not load " + path + ": " + e.getMessage()); return; }
         int win = RATE / 50, nWin = w.length / win;
         if (nWin < 2) return;
@@ -275,6 +527,7 @@ public final class Sfx {
     }
 
     private void make(String name, float[] wave) {
+        if (game == null) return;
         long h = game.engine().createSound(wave, 1, RATE);
         if (h != 0) banks.computeIfAbsent(name, k -> new ArrayList<>()).add(h);
     }
@@ -314,6 +567,7 @@ public final class Sfx {
 
     /** A person dying: one of the recorded death cries for their sex, from the head, pitched a little for each throat. */
     public void deathCry(Actor a) {
+        if (a instanceof rpg.monster.Monster m) { creature(m, m.kind.deathSound, 1f); return; }
         float pitch = 0.95f + (float) ((a.id * 0x9E3779B97F4A7C15L >>> 40) % 1000) / 1000f * 0.1f;
         voice(HumanVoice.of(a).deathBank, a.x, a.eyeY(), a.z, 1f, pitch);
     }
@@ -322,8 +576,16 @@ public final class Sfx {
     public void hurtCry(Actor a, double now) {
         if (now - a.lastCry < 0.9) return;
         a.lastCry = now;
+        if (a instanceof rpg.monster.Monster m) { creature(m, m.kind.hurtSound, 0.8f); return; }
         float pitch = 0.95f + (float) ((a.id * 0x9E3779B97F4A7C15L >>> 40) % 1000) / 1000f * 0.1f;
         voice(HumanVoice.of(a).hurtBank, a.x, a.eyeY(), a.z, 0.75f, pitch * 1.04f);
+    }
+
+    /** A monster's own voice (never a person's): pitched by its size - a big throat lower, a small one higher. */
+    public void creature(rpg.monster.Monster m, String bank, float gain) {
+        if (!has(bank)) return;
+        float pitch = 1.25f - Math.min(0.75f, m.kind.scale() * 0.22f);
+        play(bank, m.x, m.eyeY(), m.z, gain, pitch * (0.95f + rnd.nextFloat() * 0.1f), 22 * gain);
     }
 
     /** An interface sound. */

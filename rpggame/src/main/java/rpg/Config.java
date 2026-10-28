@@ -16,6 +16,7 @@ public final class Config {
      * landed, a little less).
      */
     public static float skillPace(rpg.skill.Skill s) {
+        if (s == null) return 1;   // (an award with no skill named: a fist's blow before its style is known)
         return switch (s) {
             case AGILITY, THIEVING, FAITH -> 1.3f;
             case ATTACK, STRENGTH, DEFENSE, HEALTH, ARCHERY, MAGIC -> 0.85f;
@@ -61,7 +62,7 @@ public final class Config {
     public boolean autoScale = true;
     public float minScale = 0.5f;
     /** The GPU budget for the 2013 hardware target; presentation may use the monitor's refresh rate. */
-    public int targetFps = 30;
+    public int targetFps = 60;
     /** A fixed render scale from RPG_RENDER_SCALE (for measuring), or -1: none. */
     public float fixedScale() {
         String e = System.getenv("RPG_RENDER_SCALE");

@@ -33,7 +33,11 @@ public class Actor {
     public float bloodied;
     public float eatenMinutes;
     public float charred;
+    /** When the fire on this body next chars a patch of it (Chemistry). */
+    public double scorchAt;
     public double burnSince=-1, lastRoll=-99, rollContact, shockUntil=-99, lastSpasm=-99, castAt=-99;
+    /** The spell last cast (with castAt: the renderer shows each spell's own casting). */
+    public rpg.combat.Spells.Spell castSpell;
     /** Blood on the body itself, splash by splash where it landed (painted onto the figure). */
     public final Blood blood = new Blood();
     public final Injuries injuries = new Injuries();
@@ -50,6 +54,8 @@ public class Actor {
     public long ragdoll;
     public boolean reacting, wentDown;
     public double reactSince;
+    /** How long a body that went down has stood steadily upright again in Sydney's hands (seconds). */
+    public float uprightFor;
     public rpg.objects.GroundItem dropped;
     /** Creeping: low and slow, harder to see and to hear (stealth). */
     public boolean sneaking;
@@ -205,6 +211,8 @@ public class Actor {
         public double blockStart = -9;
         public float staggered, stabilityBonus, iframes, dodgeT, dodgeX, dodgeZ, hitstop;
         public float charge, draw, aim, castCooldown, regenDelay, flash, slowT;
+        /** Frozen in place (Fogish ice): seconds left in which the feet cannot move - the hands still can. */
+        public float frozenT;
         /** (The old cast-once blessings' timers are gone: prayers are toggled; see combat.Prayers.) */
         /** A crossbow being loaded again (seconds left). */
         public float reload;

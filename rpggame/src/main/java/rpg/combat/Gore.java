@@ -375,7 +375,9 @@ public final class Gore {
         pool(v.x, v.z, 0.6f, v.id, by == null ? 0 : by.id);
         if (g.sfx != null) {
             g.sfx.play("soft.heavy", lx, ly, lz, 0.9f);
-            if (part != Part.HEAD && v.alive && !(v instanceof rpg.animal.Animal)) g.sfx.voice(v.look.female ? "hurt.female" : "hurt.male", v.x, v.y + 1.6f, v.z, 1f, 0.9f);
+            if (part != Part.HEAD && v.alive && v instanceof rpg.monster.Monster m) g.sfx.creature(m, m.kind.hurtSound, 1f);
+            else if (part != Part.HEAD && v.alive && v instanceof rpg.monster.Monster mo) g.sfx.creature(mo, mo.kind.hurtSound, 1f);   // its own scream, never a man's
+            else if (part != Part.HEAD && v.alive && !(v instanceof rpg.animal.Animal)) g.sfx.voice(v.look.female ? "hurt.female" : "hurt.male", v.x, v.y + 1.6f, v.z, 1f, 0.9f);
         }
         // what it can no longer do
         if (part == Part.ARM_R) dropHeld(v, ItemDef.Slot.MAIN);
@@ -487,6 +489,7 @@ public final class Gore {
             Wounds w = e.getValue();
             if (a == null) { it.remove(); continue; }
             if (w.bleed <= 0.005f) { w.bleed = 0; continue; }
+            if (a.alive && g.law != null && g.law.inCustody(a)) { w.bleed = 0; w.spurtUntil = 0; continue; }   // held: dressed
             if (a.alive && !a.dummy) {
                 // the player bleeds to a lesser degree, and a wound alone never finishes them (a blow does)
                 boolean player = a == g.player;
@@ -542,9 +545,15 @@ public final class Gore {
 
     private boolean bodyKnown(long id) { for (Evidence e : evidence) if (e.kind == Kind.BODY && e.source == id) return true; return false; }
 
+    /** The bleeding is stopped (a prisoner's wounds dressed): the marks stay, nothing more runs from them. */
+    public void staunch(Actor a) {
+        Wounds w = wounds.get(a.id);
+        if (w != null) { w.bleed = 0; w.spurtUntil = 0; }
+    }
+
     /** A body is revived (a bandit back at camp): its wounds and lost parts heal. */
     public void healed(Actor a) {
-        wounds.remove(a.id); a.blood.wash(); a.bloodied = 0;
+        wounds.remove(a.id); a.blood.clear(); a.bloodied = 0;
         limbs.removeIf(limb -> { if (limb.owner != a.id) return false; g.game.commands().release(limb.body); return true; });
         evidence.removeIf(e -> e.source == a.id && e.kind == Kind.LIMB);
     }
@@ -679,7 +688,7 @@ public final class Gore {
             n.remember(new Memory("MURDER", a.id, victim, DevMap.jurisdiction(e.x, e.z), g.state.minutes, 0.9f, "witnessed", e.id, 0, "caught bloodied by " + (e.kind == Kind.BODY ? "a body" : "the blood")), 24);
             g.ai.say(n, "You there - that's blood on you! Stop!");
             g.state.commit("SuspectSpotted", n.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, String.format("bloodied %.2f near %s", a.bloodied, e.kind));
-            if (a == g.player) g.chat.add("[Crime] " + n.name + " saw blood on you near the scene.", rpg.Chat.Kind.CRIME);
+            if (a == g.player) g.chat.crime("bloodied", n.name + " saw blood on you near the scene.");
             return true;
         }
         return false;

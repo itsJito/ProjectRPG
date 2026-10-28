@@ -31,7 +31,7 @@ public class Npc extends Actor implements Interactable {
     public Standing standing = Standing.COMMON;
     /** A bounty hunter of a posse (law/Posses): hunted or killed, they add nothing to a bounty. */
     public boolean posse;
-    public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.STANDARD;
+    public rpg.combat.Spells.Book spellBook = rpg.combat.Spells.Book.SUN;
     public String title;
     public Profession profession;
     astratto.ai.TaskNetwork<Npc> job;
@@ -47,6 +47,11 @@ public class Npc extends Actor implements Interactable {
     public boolean loaded = true;
     /** Needs, 0 (met) .. 1 (pressing). */
     public float hunger, fatigue, social;
+    /** How long a flyer it fights has hung out of its reach overhead (it waits for the dive; the unarmed give up and run). */
+    public float flyerWait;
+    /** The terror whose alarm this one has heard (0: none), and when it last cried it. */
+    public long alarmHeard;
+    public double alarmCryAt = -99;
     public float homeX, homeZ, postX, postZ;
     /** A grave this NPC has seen and has business with (negative: one he is done with), and his looting's pace. */
     public long graveSeen;
@@ -68,6 +73,10 @@ public class Npc extends Actor implements Interactable {
     /** A guard keeping an eye on a player he has heard bad things about, until (then a while before he does again). */
     public double watchUntil = -999;
     public long watchTarget;
+    /** Arms seen shown lately (Arms): how often (fading over a minute), when last, what kind, and when they last spoke of it. */
+    public float armsSeen;
+    public double armsAt = -999, armsSaidAt = -999;
+    public Arms.Kind armsKind;
     CombatTactics.Plan tactic;
     double nextTactic;
     public double lastLootAt, lootStarted = -99, lootUntil = -99;
@@ -101,6 +110,8 @@ public class Npc extends Actor implements Interactable {
     public int legAt;
     public float legsX, legsZ;
     public boolean hasGoalPos, seesTarget;
+    /** Sprinting now (AiSystem.pace): it costs stamina, and it is given up when the breath runs short. */
+    public boolean sprinting;
     public int routeCells;
     public boolean stuck;
     public long fightTarget, socialPartner, aidTarget;
@@ -130,6 +141,12 @@ public class Npc extends Actor implements Interactable {
     public double speechUntil;
     /** What it is aware of, by actor id (stealth: Unaware -> Curious -> Investigating -> Alert). */
     public final java.util.Map<Long, Stealth.Aware> aware = new java.util.HashMap<>();
+    /** An officer's questioning on a search: who was asked about the one sought, and when (asked once a while each). */
+    public final java.util.Map<Long, Double> questioned = new java.util.HashMap<>();
+    public double askAgain;
+    /** A bounty hunter's snares set on this hunt, and when the next may be. */
+    public int snaresSet;
+    public double snareAgain;
     /** The heading the mind wants the body to face (NaN: wherever it is going); the engine agent's own heading. */
     public float wantYaw = Float.NaN, agentYaw;
     /** Its velocity smoothed over a few physics steps: where it is heading, as a body turns to it (not step to step). */
@@ -219,8 +236,10 @@ public class Npc extends Actor implements Interactable {
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
         }
         if (role == Role.UNDERTAKER) {
+            // contextual (gamefixes): offered only when there is something of the player's to get back
             int held = g.undertaker.held(), fee = g.undertaker.fee();
-            o.add(Option.when(held > 0, "reclaim", "Reclaim belongings" + (held > 0 ? " (" + fee + " coins)" : ""), 9, "He holds nothing of yours.", r));
+            if (!g.undertaker.graves().isEmpty() && a == g.player) o.add(Option.on("buyback", "Buy back your gravestone items (" + g.undertaker.buyBackFee() + " coins)", 9, r));
+            else if (held > 0) o.add(Option.on("reclaim", "Reclaim belongings (" + fee + " coins)", 9, r));
         }
         if (role == Role.LAWMAN) {
             int b = g.law.bounty(a.id, homeJurisdiction);
@@ -264,6 +283,11 @@ public class Npc extends Actor implements Interactable {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
                 return g.undertaker.redeem(a, this);
+            }
+            case "buyback" -> {
+                String why = dist(g, a, g.cfg.interactRange);
+                if (why != null) return Result.no(why);
+                return g.undertaker.buyBack(a, this);
             }
             case "pay" -> {
                 String why = dist(g, a, g.cfg.interactRange);

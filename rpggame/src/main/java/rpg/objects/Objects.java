@@ -83,7 +83,7 @@ public final class Objects {
         add(new Fixtures.Climb(fid(), "Climbing wall", 117.5f, f + 1.4f, DevMap.AG_WALL_Z + 0.5f));
         add(new Fixtures.Climb(fid(), "Wall shortcut", DevMap.SHORTCUT[0] + 0.5f, f + 1.4f, DevMap.SHORTCUT[1] + 0.5f));
         // the combat lane's cabinet, the debug terminal, the stall, the kiosk
-        add(new Fixtures.Cabinet(fid(), DevMap.CABINET[0] + 0.5f, f + 1f, DevMap.CABINET[1] - 0.2f));
+        add(new Fixtures.Cabinet(fid(), DevMap.CABINET[0] + 0.5f, f + 1f, DevMap.CABINET[1] + 0.3f));   // (in front of its backboard, not sunk in it)
         add(new Fixtures.Terminal(fid(), DevMap.DEBUG_TERMINAL[0] + 0.5f, f + 1.4f, DevMap.DEBUG_TERMINAL[1] + 0.5f));
         stall = add(new Fixtures.Stall(fid(), DevMap.STALL[0] + 0.5f, f + 1.1f, DevMap.STALL[1] + 0.5f, Ids.MERCHANT_A));
         add(new Fixtures.Kiosk(fid(), 61.5f, f + 1.2f, 104.5f));
@@ -137,7 +137,7 @@ public final class Objects {
             Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
             slab.name = "Cell slab"; furniture.add(slab);
         }
-        for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction()));
+        for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction())).solid(g);
         node(Node.Kind.ROCK,"quarry_face","Supported quarry face",Skill.MINING,1,Items.STONE_BLOCK,15,3,3,g.cfg.rockRespawn,Blocks.STONE,new int[]{96,19},0,0);
         node(Node.Kind.ROCK,"clay_bank","Clay bank",Skill.MINING,1,Items.CLAY,12,2.2f,3,g.cfg.rockRespawn,Blocks.DIRT,new int[]{97,19},0,0);
         node(Node.Kind.ROCK,"gem_deposit","Uncertain gem deposit",Skill.MINING,30,Items.get("uncut_sapphire"),45,4,1,g.cfg.rockRespawn,Blocks.COPPER_ROCK,new int[]{98,19},0,0);
@@ -166,6 +166,20 @@ public final class Objects {
         bankBed = add(new Furniture(fid(), Furniture.Kind.BED, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 4, DevMap.BANK_X1 - 2, DevMap.BANK_Z1 - 3, 1, 0, Ids.TELLER, true));
         furniture.add(bankBed); bankBed.name = "Teller's cot";
         for (Furniture furnishing : furniture) if (furnishing.owner == Ids.TELLER) furnishing.place(g, true);
+        // 0.1.8 (after every older fixture, so their ids hold): the brook's rod spots, river water; and the crab cage's
+        // spot is the pond's shore shallows, which the shellfish gatherer works
+        for (float[] at : DevMap.STREAM_SPOTS) {
+            node(Node.Kind.FISH, "river_spot", "Fishing spot (rod, brook)", Skill.FISHING, 20, Items.RAW_TROUT, 50, 4f, 0, 0, 0, new int[]{(int) at[0], (int) at[1]}, 0, 0);
+            Node spot = nodes.get(nodes.size() - 1); spot.waters = Node.Waters.RIVER; spot.needs = Items.FISHING_ROD;
+        }
+        // 0.1.9 (after every older fixture, so their ids hold): the cage spots and the quarry face the residents' work wanted
+        for (float[] at : DevMap.MORE_CRAB_SPOTS) {
+            node(Node.Kind.FISH, "crab_spot", "Fishing spot (cage)", Skill.FISHING, 10, Items.RAW_CRAB, 30, 4.6f, 0, 0, 0, new int[]{(int) at[0], (int) at[1]}, 0, 0);
+            nodes.get(nodes.size() - 1).needs = Items.CRAB_CAGE;
+        }
+        node(Node.Kind.ROCK, "quarry_face", "Supported quarry face", Skill.MINING, 1, Items.STONE_BLOCK, 15, 3, 3, g.cfg.rockRespawn, Blocks.STONE, DevMap.QUARRY_FACE_2, 0, 0);
+        nodes.get(nodes.size() - 1).setBlocks(g, true);
+        for (Node node : nodes) if (node.def.equals("crab_spot")) node.waters = Node.Waters.SHORE;
         g.vox.doors(doors);
         rpg.ai.Waypoints.doors(g.vox, doors);
     }
@@ -212,17 +226,26 @@ public final class Objects {
      * a thin rigid body in the physics world, thrown on with a velocity, that tumbles and settles where it will.
      */
     public GroundItem dropAmmo(ItemStack one, float x, float y, float z, float[] dir, boolean lodged, float vx, float vy, float vz) {
+        return dropLong(one, x, y, z, dir, lodged, vx, vy, vz);
+    }
+
+    /**
+     * A long thing - an arrow, a thrown blade, a sword or a spear let go of - where it is, lodged or loose: loose, a thin
+     * rigid body as long as the thing is, thrown on with a velocity, tumbling and settling where it will.
+     */
+    public GroundItem dropLong(ItemStack one, float x, float y, float z, float[] dir, boolean lodged, float vx, float vy, float vz) {
         GroundItem gi = drop(one, x, y, z);
         float l = (float) Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         gi.dir = l < 1e-5f ? new float[]{0, 0, 1} : new float[]{dir[0] / l, dir[1] / l, dir[2] / l};
         gi.lodged = lodged;
         if (!lodged) {
             float[] q = rpg.combat.CombatSystem.alongY(gi.dir);
-            float half = rpg.combat.CombatSystem.ammoLength(one.def) / 2;
+            float half = rpg.combat.CombatSystem.lyingLength(one.def) / 2;
+            boolean ammo = one.def.family == rpg.item.ItemDef.Family.ARROW || one.def.family == rpg.item.ItemDef.Family.BOLT;
             gi.rigid = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
             gi.rigidSince = g.time;
             g.game.commands().rigidCreate(gi.rigid, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_DEBRIS | astratto.bridge.AstrattoNative.RIGID_NO_MOVERS,
-                    0.02f, half, 0.02f, one.def.family == rpg.item.ItemDef.Family.THROWN ? Math.max(0.1f, one.def.weight) : 0.05f, x, y, z, q[0], q[1], q[2], q[3],
+                    ammo ? 0.02f : 0.04f, half, ammo ? 0.02f : 0.04f, ammo ? 0.05f : Math.max(0.1f, one.def.weight), x, y, z, q[0], q[1], q[2], q[3],
                     vx, vy, vz, (float) (Math.random() - 0.5) * 6, (float) (Math.random() - 0.5) * 2, (float) (Math.random() - 0.5) * 6, 0.95f, 0.1f, 0, null);
         }
         return gi;

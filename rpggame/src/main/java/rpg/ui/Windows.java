@@ -31,6 +31,7 @@ final class Windows {
         hud.add(new ContainerWin(hud));
         hud.add(new ShopWin(hud));
         hud.add(new StationWin(hud));
+        hud.add(new CookWin(hud));
         hud.add(new CabinetWin(hud));
         hud.add(new KioskWin(hud));
     }
@@ -41,9 +42,10 @@ final class Windows {
         @Override public float width() { return ww; }
         @Override public float height() { return wh; }
         /** A free-standing window's card, title and close button; returns the content's top. */
-        float card(Ui2D ui, String title, float x, float y) {
+        float card(Ui2D ui, String title, float x, float y) { return cardOf(ui, title, x, y, wh); }
+        float cardOf(Ui2D ui, String title, float x, float y, float wh) {
             Style.card(ui, x, y, ww, wh);
-            ui.text(ui.heading, title, x + 12, y + 6, 20, Style.ACCENT);
+            ui.text(ui.body, title, x + 12, y + 6, 20, Style.ACCENT);
             if (Style.button(ui, "x", x + ww - 32, y + 7, 24, 22, live)) { hud.win = Hud.Win.NONE; hud.sound("UI_windowclose", 0.4f); }
             ui.rect(x + 12, y + 36, ww - 24, 1, Style.EDGE);
             return y + 46;
@@ -162,7 +164,7 @@ final class Windows {
     // ------------------------------------------------------------------ a station's recipes
     static final class StationWin extends Win {
         StationWin(Hud h) { super("station", 460, 380); }
-        @Override protected boolean active() { return hud.win == Hud.Win.STATION && hud.station != null; }
+        @Override protected boolean active() { return hud.win == Hud.Win.STATION && hud.station != null && hud.station.kind != Recipes.Station.RANGE; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Station s = hud.station;
             if (s == null) return;
@@ -180,6 +182,72 @@ final class Windows {
                 if (Style.button(ui, "Make", x + ww - 116, yy + 4, 50, 24, live && ok)) { g.interact.request(g.player, s, "make:" + rc.id); hud.win = Hud.Win.NONE; }
                 if (Style.button(ui, "All", x + ww - 60, yy + 4, 46, 24, live && ok)) { g.interact.request(g.player, s, "makeall:" + rc.id); hud.win = Hud.Win.NONE; }
                 yy += 36;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ cooking: the raw food carried, and how many
+    /**
+     * The cooking window (gamefixes: a proper cooking menu). At a range or a fire it lists what raw food the player
+     * carries - raw on the left, what it becomes on the right, how much of it there is, the level it needs and how
+     * likely it is to burn at theirs - each with how many to cook (one, a few, all of it) and a Cook button.
+     */
+    static final class CookWin extends Win {
+        private final Map<String, Integer> amounts = new LinkedHashMap<>();
+        CookWin(Hud h) { super("cooking", 520, 380); }
+        /** As tall as its rows (one a kind of raw food carried; a message when there is none), at most five. */
+        @Override public float height() {
+            Station s = hud.station;
+            int rows = 0;
+            if (s != null) for (Recipes.Recipe rc : s.recipes()) if (!rc.inputs.isEmpty() && hud.g.player.count(rc.inputs.get(0).item()) > 0) rows++;
+            return rows == 0 ? 200 : 54 + Math.min(5, rows) * 64;
+        }
+        @Override protected boolean active() { return hud.win == Hud.Win.STATION && hud.station != null && hud.station.kind == Recipes.Station.RANGE; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Station s = hud.station;
+            if (s == null) return;
+            Rpg g = hud.g;
+            var p = g.player;
+            float wh = height();
+            float yy = cardOf(ui, "Cooking - " + s.name, x, y, wh);
+            int level = p.skills.level(rpg.skill.Skill.COOKING);
+            String lv = "Cooking level " + level;
+            ui.text(lv, x + ww - 44 - ui.width(lv, 12), y + 12, 12, Style.DIM);
+            List<Recipes.Recipe> raw = new ArrayList<>();
+            for (Recipes.Recipe rc : s.recipes()) if (!rc.inputs.isEmpty() && p.count(rc.inputs.get(0).item()) > 0) raw.add(rc);
+            if (raw.isEmpty()) {
+                ui.flatCentered("You have nothing raw to cook.", x + ww / 2, yy + 50, 15, Style.TEXT);
+                ui.flatCentered("Catch fish or butcher game, then come back to the fire.", x + ww / 2, yy + 74, 12, Style.DIM);
+                return;
+            }
+            for (Recipes.Recipe rc : raw) {
+                if (yy > y + wh - 60) break;
+                ItemDef in = rc.inputs.get(0).item(), out = rc.outputs.isEmpty() ? null : rc.outputs.get(0).item();
+                int have = p.count(in) / Math.max(1, rc.inputs.get(0).amount());
+                String why = s.refusal(rc, p);
+                boolean ok = why == null;
+                int n = Math.max(1, Math.min(have, amounts.getOrDefault(rc.id, have)));
+                ui.rect(x + 10, yy, ww - 20, 58, 0x30000000);
+                ui.border(x + 10, yy, ww - 20, 58, 1, Style.EDGE);
+                hud.itemIcon(ui, new ItemStack(in, have), x + 16, yy + 9, 40, 40, 1);
+                ui.text(">", x + 61, yy + 20, 14, Style.FAINT);
+                if (out != null) hud.itemIcon(ui, new ItemStack(out, 1), x + 74, yy + 9, 40, 40, ok ? 1 : 0.4f);
+                ui.text(rc.name, x + 124, yy + 7, 14, ok ? Style.TEXT : Style.DIM);
+                double burn = Station.burnChance(rc, p);
+                String risk = rc.burnt == null ? "" : burn <= 0 ? "  -  you won't burn it" : burn < 0.15 ? "  -  rarely burns" : burn < 0.35 ? "  -  sometimes burns" : "  -  often burns";
+                ui.text(ok ? have + " raw carried" + risk : why, x + 124, yy + 25, 11, ok ? Style.DIM : Style.BAD);
+                ui.text("Level " + rc.level + "   " + (rc.xp / 10) + " xp each", x + 124, yy + 40, 10, Style.FAINT);
+                // how many: - n + and All
+                float qx = x + ww - 196;
+                if (Style.button(ui, "-", qx, yy + 16, 24, 26, live && ok && n > 1)) amounts.put(rc.id, n - 1);
+                ui.flatCentered(String.valueOf(n), qx + 42, yy + 21, 15, Style.TEXT);
+                if (Style.button(ui, "+", qx + 60, yy + 16, 24, 26, live && ok && n < have)) amounts.put(rc.id, n + 1);
+                if (Style.button(ui, "All", qx + 88, yy + 16, 36, 26, live && ok && n < have)) amounts.put(rc.id, have);
+                if (Style.button(ui, "Cook", qx + 130, yy + 16, 56, 26, live && ok)) {
+                    g.interact.request(p, s, "cook:" + rc.id + ":" + n);
+                    hud.win = Hud.Win.NONE; hud.sound("UI_select", 0.4f);
+                }
+                yy += 64;
             }
         }
     }
@@ -212,7 +280,7 @@ final class Windows {
                 yy += 27;
             }
             Object[][] extras = {{"Bows & arrows", new String[]{"shortbow", "oak_shortbow", "willow_shortbow", "bronze_arrows", "iron_arrows"}},
-                    {"Magic & faith", new String[]{"apprentice_staff", "fire_staff", "wand", "holy_symbol", "blessed_symbol"}},
+                    {"Magic & faith", new String[]{"apprentice_staff", "fire_staff", "air_staff", "water_staff", "electric_staff", "earth_staff", "wand", "holy_symbol", "blessed_symbol"}},
                     {"Tools", new String[]{"tinderbox", "knife", "hammer", "fishing_rod", "lockpick"}},
                     {"Bags", new String[]{"backpack", "pouch", "sack"}}};
             for (Object[] e : extras) {

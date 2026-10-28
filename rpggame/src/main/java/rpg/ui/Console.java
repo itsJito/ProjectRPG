@@ -168,22 +168,44 @@ public final class Console {
             else print("givebest weapons | armor", WARN);
         });
         cmd("gearkit", "The old debug gear kit.", a -> hud.gearKit());
-        cmd("spawn", "spawn <animal species>: makes one in front of you (spawn wolf, spawn cow baby).", a -> {
-            if (a.length < 2) { print("Usage: spawn <cow, wolf, brown_bear ...> [baby]", WARN); return; }
+        cmd("spawn", "spawn <animal | monster | person> [level | baby | breed]: makes one in front of you (spawn wolf baby, spawn goblin 12, spawn dragon ice, spawn guard). 'spawnlist' names them all.", a -> {
+            if (a.length < 2) { print("Usage: spawn <cow, goblin, dragon, guard, bounty_hunter ...> [level | baby | breed]", WARN); return; }
             float fx = (float) -Math.sin(g.controller.camYaw), fz = (float) -Math.cos(g.controller.camYaw), x = g.player.x + fx * 3, z = g.player.z + fz * 3;
-            for (var s : rpg.animal.Species.values()) if (s.name().equalsIgnoreCase(a[1]) || s.label.equalsIgnoreCase(a[1].replace('_', ' '))) {
-                var an = g.animals.release(s, a.length > 2 && a[2].equalsIgnoreCase("baby"), (g.state.tick & 1) == 0, x, z);
+            String want = norm(a[1]), extra = a.length > 2 ? a[2] : "";
+            for (var s : rpg.animal.Species.values()) if (norm(s.name()).equals(want) || norm(s.label).equals(want)) {
+                var an = g.animals.release(s, extra.equalsIgnoreCase("baby"), (g.state.tick & 1) == 0, x, z);
                 print("spawned " + an.kind() + " #" + an.id, GOOD);
                 return;
             }
-            print("spawn: no such creature '" + a[1] + "'", ERR);
+            for (var k : rpg.monster.MonsterKind.values()) if (norm(k.name()).equals(want) || norm(k.title).equals(want)) {
+                int level = (int) Math.max(k.minLevel, Math.min(k.maxLevel, DevConsole.num(extra, (k.minLevel + k.maxLevel) / 2f)));
+                var m = g.monsters.spawn(k, level, x, z, null);
+                for (var b : rpg.monster.MonsterKind.Breed.values()) if (k == rpg.monster.MonsterKind.DRAGON && b.name().equalsIgnoreCase(extra)) m.breed = b;
+                print("spawned " + m.label() + " #" + m.id, GOOD);
+                return;
+            }
+            Npc person = person(want, x, z, (int) DevConsole.num(extra, 0));
+            if (person != null) { print("spawned " + person.title + " #" + person.id, GOOD); return; }
+            print("spawn: no such creature or person '" + a[1] + "' (spawnlist names them all)", ERR);
         });
-        core.completer("spawn", t -> { List<String> l = new ArrayList<>(); for (var s : rpg.animal.Species.values()) if (s.name().toLowerCase(Locale.ROOT).startsWith(t)) l.add(s.name().toLowerCase(Locale.ROOT)); return l; });
+        core.completer("spawn", t -> spawnable().stream().filter(n -> n.startsWith(t)).toList());
+        cmd("spawnlist", "Every animal, monster and kind of person 'spawn' can make.", a -> {
+            List<String> animals = new ArrayList<>(), monsters = new ArrayList<>(), people = new ArrayList<>();
+            for (var s : rpg.animal.Species.values()) animals.add(s.name().toLowerCase(Locale.ROOT));
+            for (var k : rpg.monster.MonsterKind.values()) monsters.add(k.name().toLowerCase(Locale.ROOT));
+            for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER) people.add(r.name().toLowerCase(Locale.ROOT));
+            for (rpg.ai.Profession pr : rpg.ai.Profession.values()) people.add(pr.name().toLowerCase(Locale.ROOT));
+            print("Animals: " + String.join(", ", animals), TEXT);
+            print("Monsters (spawn <kind> [level]; dragons take a breed): " + String.join(", ", monsters), TEXT);
+            print("People (spawn <role or calling> [level]): " + String.join(", ", people), TEXT);
+        });
         cmd("remove", "Removes what you are looking at (an item, an animal).", a -> {
             var f = g.interact.focus;
             if (f instanceof rpg.objects.GroundItem gi) { gi.removed = true; g.state.burn(gi.stack.def, gi.stack.amount); print("removed " + gi.stack, TEXT); }
             else if (f instanceof rpg.animal.Animal an) { g.animals.remove(an); print("removed " + an.kind(), TEXT); }
-            else print("remove: look at an item or an animal", WARN);
+            else if (f instanceof rpg.monster.Monster mo) { g.monsters.remove(mo); print("removed " + mo.label(), TEXT); }
+            else if (f instanceof Npc n && spawned.contains(n.id)) { g.ai.despawnBody(n); g.npcs.remove(n); spawned.remove(n.id); print("removed " + n.title, TEXT); }
+            else print("remove: look at an item, an animal, a monster or someone you spawned", WARN);
         });
         cmd("slay", "Kills what you are looking at (a person or an animal).", a -> {
             if (g.interact.focus instanceof Actor v && v.alive && !v.dummy) g.combat.bleedOutNow(v); else print("slay: look at someone", WARN);
@@ -215,6 +237,46 @@ public final class Console {
             double want = DevConsole.num(a[1], 12), now = g.state.hourOfDay(), d = (want - now + 24) % 24;
             g.advanceTime(d * 60, "console");
         });
+        // 0.1.8 (gamefixes: everything in the game reachable from the console)
+        cmd("weather", "weather <clear|overcast|fog|rain|storm|snow>: sets the weather at once.", a -> {
+            if (a.length < 2) { print("weather: " + g.timeSystem.weather.kind().name().toLowerCase(Locale.ROOT), TEXT); return; }
+            try { g.timeSystem.weather.set(astratto.weather.Weather.Kind.valueOf(a[1].toUpperCase(Locale.ROOT))); g.timeSystem.weather.snap(); print("Weather: " + a[1], GOOD); }
+            catch (IllegalArgumentException e) { print("weather: clear, overcast, fog, rain, storm or snow", ERR); }
+        });
+        cmd("spells", "Every spell, by book, with its level.", a -> {
+            for (var book : rpg.combat.Spells.Book.values()) {
+                StringBuilder b = new StringBuilder(book.name().toLowerCase(Locale.ROOT) + ":");
+                for (var sp : rpg.combat.Spells.Spell.values()) if (sp.book == book) b.append(' ').append(sp.name().toLowerCase(Locale.ROOT)).append('(').append(sp.level).append(')');
+                print(b.toString(), DIM);
+            }
+        });
+        cmd("book", "book <sun|fogish|moon>: switches your spellbook (as at the altar).", a -> {
+            if (a.length < 2) { print("book: " + g.player.book.name().toLowerCase(Locale.ROOT), TEXT); return; }
+            try { g.player.book = rpg.combat.Spells.Book.valueOf(a[1].toUpperCase(Locale.ROOT)); print("Spellbook: " + g.player.book.name().toLowerCase(Locale.ROOT), GOOD); }
+            catch (IllegalArgumentException e) { print("book: sun, fogish or moon", ERR); }
+        });
+        cmd("cast", "cast <spell>: casts it where you look, its book and mana given (spells names them).", a -> {
+            if (a.length < 2) { print("cast <spell>", ERR); return; }
+            rpg.combat.Spells.Spell sp;
+            try { sp = rpg.combat.Spells.Spell.valueOf(a[1].toUpperCase(Locale.ROOT)); } catch (IllegalArgumentException e) { print("cast: no such spell (spells names them)", ERR); return; }
+            g.player.book = sp.book; g.player.spell = sp; g.player.mana = g.player.maxMana(); g.player.cs.castCooldown = 0;
+            if (g.player.skills.level(Skill.MAGIC) < sp.level) hud.debugSetLevel(Skill.MAGIC, sp.level);
+            if (!g.combat.cast(g.player, sp, g.controller.camYaw, g.controller.camPitch)) print("cast: it would not go off here", WARN);
+        });
+        cmd("ignite", "Sets fire to where you look (a few metres ahead).", a -> {
+            float d = 3, x = g.player.x - (float) Math.sin(g.controller.camYaw) * d, z = g.player.z - (float) Math.cos(g.controller.camYaw) * d;
+            g.chemistry.emit(g.player, astratto.bridge.AstrattoNative.CHEM_FIRE, x, g.player.y + 0.6f, z, 0.6f, 3, 0.6f);
+            print("Fire set.", GOOD);
+        });
+        cmd("wheel", "wheel <slot 1-8> <item> | wheel clear: puts an item you carry in a quick-wheel slot.", a -> {
+            if (a.length > 1 && a[1].equalsIgnoreCase("clear")) { java.util.Arrays.fill(g.player.quick, null); print("Quick wheel cleared.", GOOD); return; }
+            if (a.length < 3) { for (int i = 0; i < 8; i++) print((i + 1) + ": " + (g.player.quick[i] == null ? "-" : g.player.quick[i].item().name), TEXT); return; }
+            int slot = (int) DevConsole.num(a[1], 0) - 1;
+            rpg.item.ItemDef d = rpg.item.Items.find(a[2]);
+            if (slot < 0 || slot > 7 || d == null) { print("wheel <1-8> <item id>", ERR); return; }
+            g.player.quick[slot] = new rpg.actor.Player.QuickSlot(d, g.player.count(d)); g.player.refreshQuick();
+            print(g.player.quick[slot] == null ? "You carry no " + d.name + "." : "Slot " + (slot + 1) + ": " + d.name, g.player.quick[slot] == null ? WARN : GOOD);
+        });
         cmd("revive", "revive [all|<npc>]: brings the dead back.", a -> {
             for (Npc n : g.npcs) if (!n.alive && (a.length < 2 || a[1].equalsIgnoreCase("all") || n.name.equalsIgnoreCase(a[1]))) { g.ai.revive(n, true); print("revived " + n.name, GOOD); }
         });
@@ -233,12 +295,63 @@ public final class Console {
         cmd("npc_unload", "npc_unload <name>: takes a person out of the simulated area (abstract simulation), or back.", a -> { for (Npc n : g.npcs) if (a.length > 1 && n.name.equalsIgnoreCase(a[1])) { if (n.loaded) g.ai.unload(n); else g.ai.reload(n); } });
     }
 
+    /** The names 'spawn' knows: every species, monster kind, role and calling. */
+    private static List<String> spawnable() {
+        List<String> l = new ArrayList<>();
+        for (var s : rpg.animal.Species.values()) l.add(s.name().toLowerCase(Locale.ROOT));
+        for (var k : rpg.monster.MonsterKind.values()) l.add(k.name().toLowerCase(Locale.ROOT));
+        for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER) l.add(r.name().toLowerCase(Locale.ROOT));
+        for (rpg.ai.Profession pr : rpg.ai.Profession.values()) l.add(pr.name().toLowerCase(Locale.ROOT));
+        return l;
+    }
+
+    /** The people the console made (only these may be removed again). */
+    private final java.util.Set<Long> spawned = new java.util.HashSet<>();
+
+    /**
+     * A person of a role or calling, made where asked: dressed and armed as that kind of person is, at a fitting level
+     * (or the one asked for), at home where they stand, under the jurisdiction of the ground. Null: no such kind.
+     */
+    private Npc person(String want, float x, float z, int level) {
+        Npc.Role role = null; rpg.ai.Profession calling = null;
+        for (rpg.ai.Profession pr : rpg.ai.Profession.values()) if (norm(pr.name()).equals(want) || norm(pr.title).equals(want)) { calling = pr; role = pr.family; }
+        if (role == null) for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER && norm(r.name()).equals(want)) role = r;
+        if (role == null) return null;
+        String title = calling != null ? calling.title : role.name().charAt(0) + role.name().substring(1).toLowerCase(Locale.ROOT).replace('_', ' ');
+        Npc n = new Npc(g.state.newEntityId(), title, role, title, x, z);
+        if (calling != null) calling.assign(n);
+        boolean fighter = role == Npc.Role.GUARD || role == Npc.Role.KNIGHT || role == Npc.Role.LAWMAN || role == Npc.Role.BANDIT || role == Npc.Role.BRUTE || role == Npc.Role.HUNTER;
+        int lv = level > 0 ? Math.min(99, level) : switch (role) { case KNIGHT -> 45; case GUARD, LAWMAN -> 35; case BRUTE -> 28; case BANDIT -> 15; case HUNTER -> 22; default -> 1; };
+        for (Skill s : new Skill[]{Skill.ATTACK, Skill.STRENGTH, Skill.DEFENSE, Skill.ARCHERY}) n.skills.setLevel(s, lv);
+        n.skills.setLevel(Skill.HEALTH, Math.max(10, fighter ? lv : 10));
+        n.look = rpg.actor.Appearance.random(n.id, (n.id & 1) == 0);
+        String[] kit = switch (role) {
+            case GUARD, LAWMAN, KNIGHT -> new String[]{"steel_sword", "steel_shield", "steel_body"};
+            case BANDIT -> new String[]{"iron_sword"};
+            case BRUTE -> new String[]{"iron_battleaxe"};
+            case HUNTER -> new String[]{"shortbow"};
+            default -> new String[0];
+        };
+        for (String id : kit) { ItemDef d = Items.find(id); if (d != null) { n.eq.set(d.slot, new rpg.item.ItemStack(d, 1)); g.state.mint(d, 1); } }
+        if (role == Npc.Role.HUNTER && Items.find("bronze_arrows") != null) n.eq.set(ItemDef.Slot.AMMO, new rpg.item.ItemStack(Items.get("bronze_arrows"), 30));
+        n.homeJurisdiction = DevMap.jurisdiction(x, z);
+        n.hostileToPlayer = role == Npc.Role.BANDIT || role == Npc.Role.BRUTE;
+        n.fitBody(); n.restore();
+        n.yaw = (float) Math.atan2(x - g.player.x, z - g.player.z);
+        g.npcs.add(n); g.ai.spawnBody(n);
+        spawned.add(n.id);
+        g.state.commit("ConsoleSpawned", g.player.id, n.id, n.homeJurisdiction, 0, title + " level " + lv);
+        return n;
+    }
+
     private static Map<String, float[]> places() {
         Map<String, float[]> spots = new LinkedHashMap<>();
         spots.put("start", new float[]{DevMap.SPAWN_X, DevMap.SPAWN_Z}); spots.put("combat", new float[]{30.5f, 48.5f}); spots.put("skills", new float[]{66.5f, 29.5f});
         spots.put("yard", new float[]{100.5f, 68.5f}); spots.put("economy", new float[]{30.5f, 100.5f}); spots.put("quest", new float[]{61.5f, 98.5f});
         spots.put("farm", new float[]{(DevMap.FARM_X0 + DevMap.FARM_X1) / 2f, DevMap.FARM_Z0 - 2}); spots.put("wilds", new float[]{24.5f, 28.5f}); spots.put("pond", new float[]{96.5f, 43.5f});
         spots.put("graveyard", new float[]{DevMap.GRAVEYARD_SPAWN[0], DevMap.GRAVEYARD_SPAWN[1]}); spots.put("fence", new float[]{DevMap.FENCE_POST[0] + 1.5f, DevMap.FENCE_POST[1] - 1.5f});
+        // inside each dungeon, at its way out (goto warren, goto catacombs ...)
+        for (var l : rpg.world.DungeonLayout.all()) spots.put(norm(l.name.replace("Goblin ", "").replace("Spider ", "").replace("Old ", "").replace("'s", "s")), new float[]{l.worldX(l.entryX) + 1.7f, l.worldZ(l.entryZ) + 0.5f});
         return spots;
     }
 

@@ -9,14 +9,14 @@ import astratto.bridge.WorldView;
  */
 public final class Voxels {
     private final WorldView v;
-    private final boolean[] solid = new boolean[256], opaque = new boolean[256], leafy = new boolean[256];
+    private final boolean[] solid = new boolean[256], opaque = new boolean[256], leafy = new boolean[256], glassy = new boolean[256];
 
     public Voxels(WorldView view) {
         this.v = view;
         for (int i = 1; i < Blocks.COUNT; i++) { solid[i] = true; opaque[i] = true; }
         solid[Blocks.WATER] = false; opaque[Blocks.WATER] = false;
         solid[Blocks.EMBERS] = false; opaque[Blocks.EMBERS] = false;
-        for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.glass(i)) opaque[i] = false;
+        for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.glass(i)) { opaque[i] = false; glassy[i] = true; }
         opaque[Blocks.ICE] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.FENCE, Blocks.BERRY_BUSH}) opaque[i] = false;
         for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.BERRY_BUSH}) leafy[i] = true;
@@ -109,7 +109,14 @@ public final class Voxels {
      * How much of a sight line gets through, 0 .. 1: an opaque cell stops it; each leafy cell it crosses (leaves, a berry
      * bush) lets some through - foliage hides without walling off. Glass and fences cost nothing.
      */
-    public float seeThrough(float ax, float ay, float az, float bx, float by, float bz) {
+    public float seeThrough(float ax, float ay, float az, float bx, float by, float bz) { return seeThrough(ax, ay, az, bx, by, bz, Float.MAX_VALUE); }
+
+    /**
+     * The same for eyes that must make out a figure (gamefixes: NPCs see through glass, but recognise nothing behind it
+     * past five blocks): a line that crosses glass and is longer than {@code glassReach} gets nothing through, and each
+     * pane it does cross dims it a little.
+     */
+    public float seeThrough(float ax, float ay, float az, float bx, float by, float bz, float glassReach) {
         float dx = bx - ax, dy = by - ay, dz = bz - az, d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         int steps = (int) Math.ceil(d / 0.25f);
         float t = 1;
@@ -122,6 +129,7 @@ public final class Voxels {
             int b = v.block(x, y, z);
             if (!door(b) && opaque[b]) return 0;
             if (leafy[b]) t *= 0.55f;
+            if (glassy[b]) { if (d > glassReach) return 0; t *= 0.85f; }
         }
         return panelBlocks(ax,ay,az,dx,dy,dz,d) ? 0 : t;
     }

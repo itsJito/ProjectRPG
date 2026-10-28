@@ -4,6 +4,478 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 10: the 0.1.9 gamefixes list - creator, flyers, waves, fog, panic, paint (Version 0.1.9)
+
+Worked down the new `gamefixes.md` (instructions.md first, then gamefixes, then the GDD). Version is now 0.1.9
+(`Main.VERSION`). Passes 8 and 9 are still uncommitted underneath; this pass builds on them. Visual work was captured in
+gallery sheets and judged frame by frame (modes under Tooling); each behaviour change has a headless test.
+
+### Bugs from the list
+- **Deleting a profile nearly choked the game.** Measured with a new gallery probe (`titledelete`): the deletion itself
+  costs nothing (worst frame 13 ms). The stall was the sound bank: the title's click sounds went through
+  `Sfx.shared(game)`, so the first click on the title (often "Delete profile") built the whole bank on the frame -
+  decoding every recording, 4.8 s. `Sfx.warm()` now decodes all recordings on background threads from launch into a
+  shared cache (`Sfx.decode`); building a bank afterwards only uploads them (0.35 s), and that happens at the cut from
+  the engine intro to the title. Interface clicks use `Sfx.ready(game)`, which never builds a bank on the spot.
+- **The creator could not change outfit, legs or their colours; it showed the last model.** `Gfx.uploadsThisFrame`
+  (the one-figure-upload-per-frame cap) was only reset in `scene()`. The title and the creator never call it, so after
+  the first figure was uploaded every later one waited forever: the creator kept showing the title's character (the
+  last profile played) in its clothes whatever was chosen. The cap is now reset in `frame()`, which every path ends
+  with. Seen in the `creator` gallery before (summary red/green, figure green/brown) and after.
+- **Eye colour.** `Appearance.eyeColor` (eight colours, `EYES`/`EYE_NAMES`), chosen on the Body tab (swatches),
+  listed on Finish, randomised with the body; part of the figure key and the skin (`Skin` iris). Saved as a 14th
+  appearance number; looks saved before take the colour their old formula gave them (`oldEyes`).
+- **Base outfits with cloth looked bad.** Skirts, robes and long hems were twelve flat strips that splayed into a
+  fringe of slits as they swung. `Gfx.panels` sizes each strip to close the ring at the hem, not only at the waist, and
+  the flare is gentler (`garments`: pleated 0.9 -> 0.6, robe 0.7 -> 0.45, hems `0.4 + loose * 0.9`). Pleat shading
+  0.82 -> 0.9.
+- **Bats' combat AI.** `MonsterMind.batFight`: a bat circles over its target out of reach (`height + 1.15 m`), dives at
+  chest height, bites in passing, climbs away past it and circles again; one bat of a swarm dives at a time; now and
+  then it screeches from the circle. `Monster.swoop/swoopUntil/orbit` hold the rhythm.
+- **Goblins' combat AI.** `MonsterMind.packFight` for every pack raider: the band takes slots on a ring round its
+  target just out of reach (the first behind it, then alternately round each side), each darts in from its slot when
+  its blow is ready (no more than two at once), strikes and falls back; a blow wound up at one close by sends it
+  hopping back; with a javelin it throws from the ring. Stuck out of reach it throws or gives up.
+- **Humans swinging at bats in the air.** Found the cause on the way: `Monster.chestY()/eyeY()` added the flight
+  altitude to a `y` that already included it, so every arrow, spell and eye was aimed metres over a flyer. Fixed. And
+  in `Brain` a flyer whose chest is above the fighter's reach is no longer swung at: the NPC guards and waits for it to
+  dive (`Npc.flyerWait`); townsfolk without a weapon give it up and run after six seconds.
+- **Earth / Water / Fire Wave hit nothing.** A Wave's visual is a 1.5 m crescent, but its hit test was a 3 cm ray down
+  its middle. `CombatSystem.wave`: a Wave sweeps 0.7 m either side, strikes every body its breadth passes over once
+  (`Projectile.swept`) and rolls on to the first wall.
+- **Fire did not char models.** Scorches join the blood marks (`Blood.Mark.scorch`, `Blood.scorch`, their own cap of
+  24, not washed off by water, cleared by healing). `Chemistry.scorch` lays or grows one every 0.3 s on a burning body:
+  from the legs up in the first seconds, then anywhere. `Skin.scorch` paints it charred black with grey ash flecks, a
+  burning line (ember-orange while it smoulders) and singed cloth round it; the old even darkening is lighter (0.45).
+  Burning bodies shed pale ash and black cloth flakes. Cheap: a few marks a second, painted into the figure's skin.
+- **Target dummies had no collision.** Two fixed boxes each (post and sack, crossbar), `Rpg.solidDummy`.
+- **Arrows phased through NPCs to hit the player.** Projectiles skipped living bodies of the shooter's team. Now a
+  friend in the way stops the shot: a stray (`environmentalDamage`, no grudge, no crime). Archers look along their
+  line first (`CombatSystem.inLineOfFire`): with someone of no quarrel in it they hold and step aside for a clear
+  shot; monster archers do not shoot through their own kind.
+- **Dragon animations.** `Gfx.dragon` rewritten: low on bent legs (front elbows back, hind knees forward), body roll
+  and bob with the gait, an S-necked head held out level, a travelling tail wave that grows to the tip; aloft a fast
+  downstroke and slow recovery, the body lifting on each stroke, the legs folded up under it; the bite rears and
+  drives. Filmed with a new flight mode in the `monsters` gallery.
+- **Interior lighting** (pass 9 brought the flicker down; this pass the night look). The lamp's light flooded rooms
+  evenly: the lamp block's probe emission was 6 / 5.2 / 3.6 (now 2.6 / 1.75 / 0.85, warm), and every lamp was a 9 m
+  near-white light (`Gfx.lampLights`: a roofed lamp 7 m and warm, a street lamp 10 m; the three nearest cast
+  shadows). `exposure.frag` adapts only part of the way into the dark (`0.16 * (avg / 0.16)^0.6`). Measured in
+  `interiorlight`: frame-to-frame p99 7.8 / 9.9 at night (pass 9: 7.7 / 10.6); night rooms now read amber against
+  cool daylight.
+
+### Changes from the list
+- **Wider dungeons.** `DungeonLayout`: corridors 5 wide (elite 6), passages 5 high, halls 9-15 across with cut corners
+  and two to four wall alcoves, passages that swell into a small side chamber every eleven cells; the boss approach 5
+  wide. A dungeon whose few big halls skipped the treasure room gets one.
+- **Monster sounds.** Already their own recorded banks since pass 9 (rubberduck CC0, qubodup, jalastram). One human
+  voice was left: losing a limb cried `hurt.male`; a monster now screams with its own hurt bank.
+- **DevMap.** The pass 9 audit (`DevMapAuditTest`) is clean. Iterated on the people's needs first (`NpcRoutineTest`):
+  two more crab-cage spots in the pond's shore shallows (`MORE_CRAB_SPOTS`), a second supported quarry face
+  (`QUARRY_FACE_2`), appended after every older fixture so saves keep their ids. The border knight's beat ran across a
+  wall and sent him round the houses on every leg: `Jobs.beat` lays it along whichever line is open at his post (24 of
+  91 samples at his post -> 91 of 91).
+- **Walk and run.** The run's cadence suited long legs (1.45 strides a second): at 4.6 m/s a step was over twice this
+  figure's leg - every jog stride a lunge. `Gait.cadence`: 1.9 at 4 m/s rising to the 2-a-second cap (half-second
+  cycle, the shortest the gamefixes allow); a sprint shortens its ground contact instead (`stance` 0.32 -> 0.2) and
+  covers the rest in the air. `halfReach` judges reach at the bottom of the stride (pass 9's taller walk had left the
+  walk without double support - `GaitTest` was failing).
+- **Electricity on water.** `Chemistry.Charge`: lightning that lands on water charges its surface for a second or two;
+  the renderer jumps a cold blue-white light about over it every few frames, throws streak sparks across it, and the
+  surface shivers with small impulses. Filmed in a new `water` gallery mode (`water-electric`).
+- **Feminine models.** `Body.FIGURE_F`: every female build now has a clear waist, wider hips and bust (Average 0.9 /
+  1.2 / 1.15, Curvy 0.65 / 1.65 / 1.5, Slender 0.8 / 0.95 / 0.9), hips deeper too (`CharModel.feminine`).
+- **Dropped weapons.** `CombatSystem.dropHeld`: the dead (not the player, whose things go to the grave) let go of main
+  and off hand; long things fall from the hand as loose rigid bodies the length of the weapon (`Objects.dropLong`,
+  `CombatSystem.lyingLength`), shields drop at the feet. Natural weapons stay.
+- **Snappier first person.** Acceleration x2.2 (sprint x1.7), braking x1.6 and the body turning to the view at 26
+  rad/s in first person only. To 90% walking speed in 4 frames (third person 9), stopped in 2 (4).
+- **New profile prompt** at the top of the creator (`Creator.PROMPT`).
+- **Fight or flight.** `MonsterKind.terror()` (dragon 55 m, troll 22, werewolf 20, giant spider 12). A terror seen
+  inside a settlement raises the alarm (`AiSystem.Alarm`, `raiseAlarm`): a cry that everyone awake within 32 m hears and
+  cries on (`heardAlarm`), a worse terror's alarm not drowned by a lesser one's; it falls a minute after the terror was
+  last seen, or when it dies. Townsfolk run for home and stay inside while it lasts (`Brain` HIDE, `hide` sheltering at
+  home); the watch, knights and hunters (`Brain.defender`) turn out - archers shoot, swordsmen work round to its flank
+  out of the breath and jaws (`inFront`), the hurt fall back. A terror in the wilds is still only fled or fought as it
+  comes. Events `AlarmRaised` / `AlarmLifted`.
+
+### Added from the list
+- **Painterly textures.** `Painterly.finish` over every material layer of the block atlas: a Kuwahara filter (noise
+  gathered into flat brush dabs), ink lines where the value breaks (stone joints, mortar, rings), a warm-light /
+  cool-shadow split with richer colour, and a soft value wash; all tileable. See-through layers, the lamp, the target,
+  markers and the debug grid are left alone (`Blocks.painterly`).
+- **Fog.** `volumetric.frag`: a ground mist layer a few metres deep, torn by slow drifting noise into banks, only in
+  the open air (by the probes' sky light). `Gfx.environment`: the mist's strength by the hour (heaviest round dawn,
+  light at noon, again at dusk and over the night, thickened by weather), coloured by the sky's horizon (gold-grey at
+  dawn, blue-grey by day, deep blue at night), the fog bank on (about 100 m out by day, 60 at dawn, 75 at night) with
+  the horizon of the sky blended into it. For performance the far plane closes in behind the bank and objects past it
+  are not drawn.
+
+### Found along the way
+- `Monster.chestY/eyeY` double-counted flight altitude (above).
+- `NewResidentsTest` stopped as soon as stone, trout and a cooked meal were seen - often after 13 s, before the border
+  knight had walked to his post; it now always watches at least 90 s.
+- Extra rod spots down the brook were tried and dropped: the brook's fisherman could not fish one of them from its
+  bank.
+
+### Tooling
+- Gallery modes: `titledelete` (title screen with scratch profiles, a deletion, frame times; `RPG_PROFILES`), `burn`
+  (the player set alight, filmed each second), `water` (wading, still, a thrown stone and now lightning), and a fly mode
+  per flyer in `monsters` (`RPG_MONSTERS=DRAGON,BAT`).
+- `rpg.TestLanes.open(g)`: a clear 5 x 16 m lane of open ground for tests.
+- Tests: `WaveSpellTest`, `DummyCollisionTest`, `ArrowLineOfFireTest`, `MonsterFightTest`, `DeathDropTest`,
+  `FirstPersonResponseTest`, `TerrorAlarmTest`.
+
+### Not done / open
+- The painterly pass covers the block atlas (blocks, doors, crates, bark, ore). Foliage cards, the prop models (fences,
+  furniture) and the figures are still painted the old way; leaf layers stay speckled.
+- The sprint (8.2 m/s) still takes a long bounding stride: at the 2-a-second cadence cap a step is 2 m.
+- The dragon is about 7/10: the box model limits it (long straight neck segments, no wing fingers).
+- Grey soft discs show near fires and in some dusk views (the smoke and remains emitters); not looked into.
+- `MonsterTest` camp check fails (a mountain lion near the camp frightens the goblins off) - open since pass 8.
+- The Blacksmith still waits for supplies most of the day (his chain runs through the miner's ore sold at the store).
+
+### Verification
+Full unit suite (`gradlew test`): 228 tests, 8 failed on the final run (10 on the first; fixed three tests that
+assumed things no longer true - `CombatFlowTest` counted a hunter's arrow as the player's, `UndertakerFlowTest`
+forgot the 25 starting gold of 0.1.8, `GraveyardDeliveryTest` counted another death's body - and made
+`MonsterFightTest` independent of the camp's mountain lion). The eight:
+- Known before this pass: `MonsterTest` (the mountain lion at the goblin camp), `RecoveryRegressionTest` (the ledger of
+  authored residents' stock across an old save), `SocietyRegressionTest` (corpse delivery waits on the guard's search),
+  all on pass 8's open list.
+- From pass 9's "the player is not re-investigated for 300 s": `InvestigationPriorityTest` and
+  `RequestedFixesTest.lawmenSearch...` expect an NPC to investigate a noise the player made.
+- `FoliagePassageTest`: a sapling at (9.3, 9.5) stops a body; foliage was not touched in this pass, not looked into.
+- Intermittent (passed in isolation and on earlier runs this pass): `NpcRoutineTest` (Oswin's route blocked 61 of 600
+  samples while socialising), `GraveyardDeliveryTest` (guards re-checking a spot by the graveyard).
+All seven new tests pass, as do `DevMapAuditTest`, `NewResidentsTest`, `GaitTest`, the dungeon tests and
+`SprintStopTest`. The acceptance run (`gradlew acceptance`) was not run this pass. Visual checks by gallery: creator,
+catalogs, figures, monsters (dragon, bat), burn, titledelete, water, daycycle, interiorlight, dungeons, locomotion,
+scenery.
+
+---
+
+## Pass 9: the 0.1.8 gamefixes list - wheel, cooking, arms, residents, water, light, sight (Version 0.1.8)
+
+Worked down the new `gamefixes.md` (instructions.md first, then gamefixes, then the GDD). Version is now 0.1.8
+(`Main.VERSION`). Pass 8's uncommitted work is still underneath; this pass builds on it. Visual work was captured and
+scored in gallery sheets (modes listed under Tooling); each behaviour change has a headless test.
+
+### Bugs from the list
+- **Water ripples.** The wave heightfield was one 256 x 256 grid over the whole 248 x 128 world (cells ~1 m x 0.5 m),
+  too coarse to carry a body's ring. `renderer.cpp advanceWater` now runs it on a camera-local grid of 0.2 m cells
+  (51 m across) whose corner snaps to an 8 m lattice; on a move the state is carried by whole cells (`uShift`), the
+  mask rebuilt only for the columns under it. `water_waves.comp`: ripple speed 1.25 m/s, damping 1.1/s, a height
+  relaxation (the old field kept a lasting offset because velocity was damped and height never was), impulses are
+  zero-mean and tight (12-40 cm, not the body's whole radius), and split over the frame's sub-steps. `world_forward.frag`:
+  real gradients (dh/dx), an edge fade, refraction bent by the ripple slope, sun glints, slope shading of the rings
+  and foam on steep crests. `Fx.splash` drops are alpha droplets (kind 8), not additive sparks. Scored ~6/10: wakes and
+  rings read; very clear shallow water over pale sand at noon still shows them faintly. A thrown object's ring was
+  not seen in the capture (the stone did not appear in frame).
+- **Notices covering each other.** Fixed offsets (16/66/74/96/150 px) for target, Honor, quest, level banner and
+  bounty reminder: `Hud.stackTop` lays the top-centre notices (`TOP_STACK`) in one column, each its own height
+  weighted by its fade. `LevelBanner` height follows whether a combat banner comes with it; the quest notice's own
+  Honor offset hack is gone.
+- **Lying to a guard.** Reproduced (`LieToGuardTest`): after the lie, every officer went INVESTIGATE and crowded the
+  player at under 1 m. `Law.settle` removed the officers' awareness of the player, so the next tick re-noticed them
+  as a fresh unknown figure. It now keeps it, marked looked into (`settledAt`), for every officer of the place, and
+  drops any investigation of the player.
+- **Interior flicker.** New gallery mode `interiorlight` (a still camera in a house at night, dusk, noon; per-pixel
+  frame-to-frame jumps measured) and `RPG_PASSES_OFF` in Gfx to switch passes off. TAA off: p99 5/255 (the floor). The
+  shimmer was GTAO's interleaved-gradient noise (diagonal bands a 3 x 3 blur could not cancel) and a TAA clamp to the
+  jittered min/max box. `gtao.frag`: offsets from a 4 x 4 Bayer tile; `ao_blur.frag`: 4 x 4 (every window holds the
+  whole tile); `taa.frag`: variance clipping in YCoCg, a wider box and a lower blend for still pixels, luminance-
+  weighted blend. Night p99 13.5 -> 7.7, noon 19.3 -> 9.4. `lighting.frag cascadeShadow` returns the baked sky term
+  off the cascade's map (was full sun). A moving arc in the noon views is drifting light (it still changes with TAA
+  off) and was left. Seen, not fixed: at night a lamp-lit room is exposed as bright as day by auto-exposure.
+- **Bounty board collision.** Voxel cells round it took up to 3 x 1 m for a 1.5 x 0.14 m panel. It is a
+  `RIGID_STATIC` box the panel's size (`Board.HALF_*`); `BountyBoardCollisionTest`: a body stops at the face (gap
+  0.00 m) and passes beside its end. NPC routes do not know the box (it stands by the jail release point).
+- **Fire on non-cube blocks.** Fences (models) charred into the CHARRED cube. Fences now burn as `FENCE -> AIR`
+  (fuel 9); `Chemistry.fenceChar` blackens each burning cell (`Props.fences` darkens posts and rails, top first) and
+  the fence mesh rebuilds as it does. Wooden cubes char into twins of their own (`CHARRED_PLANKS` .. `CHARRED_STUMP`,
+  `Blocks.charredOf/charred`): 13 new texture layers (`CHAR_LAYER0` 75, `LAYERS` 88) painted from each wood's own layer
+  by `Painter.charred` - soot keeping the grain's light and dark, alligator checks, grey ash, a few embers in cracks.
+  `FireCharTest`.
+- **Human AI sprinting.** NPCs had walk (2.45) and "run" (4.8, below the player's jog) and closed on foes at the
+  3.4 m/s combat step. `AiSystem.A_SPRINT` (0.9 x the player's sprint) and `pace()`: sprint only for urgent goals
+  (flee, hide, warn, aid, a fleeing quarry, a fresh search, a violent report, a foe just lost from sight), out of
+  doors, unwounded, not carrying, more than 6 m to go, starting on 40% stamina and stopping at 12%; it drains stamina
+  as the player's does. The last steps are walked. `closeIn` jogs/sprints to a foe beyond 4.5 m. `NpcPaceTest`.
+- **NPCs not seeing the player in front of them.** `Stealth.exposure`: the view-cone check ran even for someone within
+  arm's reach behind (the comment said otherwise); within 10 m anyone upright, ahead, mostly in view and not in pitch
+  dark is recognised at once (`RECOGNISE`); past 10 m confidence falls off to 0.6x. `NpcSightTest`.
+
+### Changes from the list
+- **Lawmen asking around**, **wider dungeons**, **monster sounds**, **undertaker buy-back** and **console spawning**
+  were done in pass 8 and are unchanged.
+- **Dungeon scaling.** Elite dungeons were `1.2 x cl + 6`; every dungeon but boss dungeons is now capped at the
+  player's combat level, floor 10 from combat 20 rising one per two levels. Elite residents crowd toward the cap
+  (`share = sqrt(share)`). `DungeonScalingTest` updated.
+- **DevMap.** Map dump rendered as an image (`MapDumpProbe` + scratch script) and the beds filmed (`gallery beds`).
+  The caravan road ran in through house 1's front wall and out through its back: rerouted between the houses (x 96-98)
+  with doorsteps. The debug square's walk ran into the city wall beside the west gate: through the gate now. Agility
+  course cobble no longer runs under the town wall. House beds moved to the back wall; the lawman's and undertaker's
+  beds turned round (`facing 2`); the Furniture comment said +z was a bed's foot (it is its head). `DevMapAuditTest`
+  now checks beds' heads against a wall and roads under walls (the square's two test occluders exempt).
+- **Walk and run.** `Gait.WALK_BEND` 0.9 -> 0.45, `PENDULUM` 0.6 -> 0.4, the run's extra drop 0.6 -> 0.25, a hip
+  floor while running, a higher and earlier heel lift. The walk is visibly taller (~6.5/10). The jog and sprint still
+  read as lunges: the trailing foot is planted, not swinging, so the fix is in stance/lift-off timing - not done.
+- **Textures** (painterly overhaul of every block, foliage and prop texture): not done this pass, beyond the charred
+  layers.
+- **Dialogue.** The herbalist's and the undertaker's rule-sheet explanations rewritten in voice; each new resident
+  has a topic that teaches their part of the game as a tip ("turn it once, halfway", "work a face square-on").
+- **Dev console.** `weather`, `spells`, `book`, `cast`, `ignite`, `wheel`. Spawning already covered every role and
+  calling, the new ones included.
+- **Physics foley.** Checked again: all sounds are recorded; the native "synthesis" mentions are Sydney's motion.
+- **Spell animations** (`render/SpellFx.java`). Every spell in flight was one glowing cube. Now one formula per tier
+  (Strike orb, Bolt dart, Blast orb with orbiting motes, Wave crescent of seven, Surge comet with satellites; the ice
+  spells map Rush/Burst/Blitz/Barrage onto Strike/Bolt/Blast/Surge), styled per element: fire flame tongues, embers,
+  dark smoke; water a droplet shedding falling drops; earth a tumbling rock with pebbles; air wisps and gust rings;
+  electric forked lightning re-struck at 24 Hz with a jagged wake; ice spinning shards and frost. Landings (detected
+  when a spell projectile disappears) throw back the way the spell came, rings only on ground close under. Casts with
+  no flight have their own (Forcewave cone, Necrocall smoke, Chronoslow ring, Vitalmend motes...). The old generic
+  landing and hand glows in `CombatSystem` are removed. `Actor.castSpell` records the spell (innate casts too).
+  Voxel ball mesh in Gfx. Scored ~7/10; earth's dust still lights up pale against a lit wall.
+- **Quick turn** is Ctrl+S (`in.turnBack`; the crouch toggle it began is undone, `turnLatch` keeps the body from
+  sneaking while Ctrl is held for it).
+- **NPCs and glass.** `Voxels.seeThrough(..., glassReach)`: through glass, nothing past 5 m; each pane dims a little.
+- **25 gold** for a new character; the kit is packed tidily (`Inventory.sort`, `TIDY`: arms, armour, tools, goods,
+  food, bags, other, coins; like stacks merged on copies; largest-first if the tidy order does not fit). Worn gear is
+  equipped before the rest is given (with the coins added, the pot and bucket had overflowed). Auto-Sort button.
+  `StarterKitTest`.
+
+### Added from the list
+- **NPC reactions to arms** (`ai/Arms.java`, hooked where the player's swing, shot or cast commits). Seen within 12 m
+  (swing) / 18 m, or heard within 9 m (shot) / 12 m (spell); each witness keeps a count fading over a minute.
+  Watch: warns, `WATCH` goal for 20-40 s, last warning on the third; knight, hunter, priest/healer: their own lines;
+  scholar: comes to watch a spell (score 0.72, and walks toward a spell only heard); thief/fence: hides; brute/bandit:
+  fights a blade swung within 5 m; others flinch away within 4-8 m, stare beyond, and on the third display shout for
+  the nearest officer. A rumor in town at most every five minutes. Not a crime. `ArmsReactionTest`.
+- **Cooking menu** (`Windows.CookWin`): at a range or fire, the raw food carried, raw -> cooked icons, level, xp, a
+  burn-risk word (`Station.burnChance`), -/+/All and Cook, sized to its rows. `cook:<recipe>:<n>` with `Work.limit`.
+  The body turns to what it works at; `Rig.cookPose` holds the food over the heat, circling it, turning it at half
+  time, the other hand to the warmth; Gfx puts the food in the hand and the arms away. Gallery `cooking`.
+- **Radial wheel** (`ui/RadialWheel.java`): TAB tapped frees the mouse as before, held 0.18 s opens the wheel; body
+  input frozen, the world dimmed; the pointer moved by the mouse's own motion (works with the cursor locked); polar
+  angle from the top snapped to eighths with a 30 px dead zone; use on release (the slice under the pointer then, not
+  the last one drawn). `Player.quick[8]` (item, count), refreshed each draw and cleared when the item is gone, saved
+  as item ids. Edit mode: the Quick Wheel button docks it right of the inventory; hover arms a slice, a click on an
+  item assigns it, a drop on the wheel assigns by angle, right-click clears. `RadialWheelTest`, gallery `radial`.
+- **Five new residents** from callings no one held (GDD 1136-1346): Hilda (Cook), Bertram (Quarry Worker), Sir Roderic
+  (Border Knight, posted where a line from DevCity to DevTown leaves DevCity's ground; meets monsters and dangerous
+  beasts within 18 m of the post and calls officers within 30 m), Wynn (Shellfish Gatherer; the crab spot is now SHORE
+  water), Corwin (River Fisherman; a new brook out of the wild pond, `STREAM_*`, with two RIVER rod spots made after
+  every older fixture so saved ids hold). Ids 552-556, added to `ADDED_ROSTER` for older saves.
+  `NewResidentsTest`; `ProfessionTest`'s count is 34 (it expected 28; the roster was already 29).
+
+### Found along the way
+- Quarry worker mined clay all morning: a light swing sweeps sideways and from beside the face it hit the clay bank
+  next door. `AiSystem.standSpot` avoids corners and sides whose sweep crosses another deposit (helps anyone mining
+  those packed deposits).
+- Bandits flipped RETURN/INVESTIGATE every second after their leash: `AiSystem.giveUp` marks the quarry looked into.
+- An escort knight spent a quarter of the morning investigating figures: escorts no longer go to look (they still
+  turn), except at the sound of violence. The player, once looked into and found going about openly, is not a fresh
+  mystery again for 300 s (as known NPCs already were); by day in a town where nothing is known against them, not at
+  all.
+- The empty-quarry message said "no ore left" for stone and clay.
+- `aCarpenterReserves...`, failing since pass 8, passes now.
+
+### Tooling
+- Tests: `LieToGuardTest`, `NpcSightTest`, `NpcPaceTest`, `BountyBoardCollisionTest`, `RadialWheelTest`,
+  `StarterKitTest`, `ArmsReactionTest`, `NewResidentsTest`, `FireCharTest`; `DevMapAuditTest`, `DungeonScalingTest`,
+  `ProfessionTest` updated.
+- Gallery modes: `interiorlight`, `radial`, `cooking`, `beds`, `spells`; `splash` also films `water-wade/still/throw`.
+- `RPG_PASSES_OFF=gtao,ssr,volumetrics,taa,bloom` (Gfx) for isolating passes in captures.
+- Native rebuilt (`build.bat notest`) for the water grid.
+
+### Not done / open
+- The painterly texture overhaul.
+- Jog and sprint still read as lunges (stance timing).
+- Night interiors auto-exposed to daylight brightness.
+- Water ripples faint over pale sand by day; the thrown-object case not confirmed on film.
+- NPC routes do not know the bounty board's collision box.
+
+### Verification
+- Every test listed under Tooling passes, as do `NpcRoutineTest`, `ProfessionTest` (all 8), `ChemistryPersistenceTest`,
+  `CampfireSpreadTest`, `MaterialAuditTest`, `BountyBoardTest`, the dungeon tests and `DevMapAuditTest`.
+- The full `./gradlew test` run was started and stopped by Claude Code because the machine ran low on memory; it was
+  not finished, so the whole suite has not been run on this pass. The acceptance suite was not run.
+
+---
+
+## Pass 8: the next gamefixes list - Sydney, spells, scaling, performance (Version 0.1.7)
+
+Worked down the new `gamefixes.md` (instructions.md first, then gamefixes, then the GDD). The version stays 0.1.7, as both
+documents ask. The working tree still held pass 7's uncommitted work; this pass is built on it. Every fix below has a
+headless test or a probe unless marked otherwise.
+
+### Bugs from the list
+- **Cursor on the title screen.** `Window.setCursorLocked(false)` returned early on a fresh window (its state starts
+  false), so the OS cursor was never hidden on the first title screen; `cursorModeSet` makes the first call apply. The
+  title's settings panel drew no cursor of its own: it now draws `TitleScreen.cursor` (public).
+- **Looting monsters was theft.** A monster's `Corpse` was owned by the monster. `AiSystem` makes monster corpses
+  ownerless (as outlaws' already were); `SaveSystem` drops the owner on old saves. `MonsterRemainsTest` checks it.
+- **Stuck after a Sydney knockdown.** Reproduced with `PlayerGetUpTest` (forcewave, 14 m fall, shock). Three causes:
+  - The get-up stalled (3-5 s a phase) and, for a weak body (a new player's traits ~0.76), the body stood, staggered
+    eight steps and fell again, until the game's 14 s timeout popped it upright. In `sydney.cpp`: the root assist now
+    escalates with each retry and with a stalled phase (`tries`, `getUpPhaseT_`); the roll-over phase starts earlier with
+    more support; after GETUP -> STAND a 1.2 s steadying window (`steady_`) keeps a decaying assist over the feet,
+    through any catch-steps. Human `downMin/downPerForce/downMax` 0.9/0.02/3.5 -> 0.6/0.015/2.4. Lab (`build.bat lab`,
+    new `LAB_TRAITS`): normal 7.8 -> 6.4 s total, weak bodies now stay up; `push` and `drop` now recover (they did not).
+  - `Reactions` waited for Sydney's strict RECOVERED verdict; a body standing steadily (head up, capture point inside
+    the feet) for 0.3 s after going down is now handed back (`Actor.uprightFor`).
+  - The real lock: after a long fall `Falling` still held the fall's top height, so the first ungrounded frame after the
+    hand-back started a new fall and handed the player straight back to Sydney, over and over. `Reactions` now resets
+    the fall record on hand-back and on cancel.
+  - Result: fall 14.0 s (timeout) -> 7.8 s, shock 13.3 s -> 6.1 s, forcewave 7.1 -> 5.9 s; all walk away afterwards.
+- **Level-up banners.** `LevelBanner` measured its age as `hud.now - banner.at`: the HUD's own clock (from 0 at the
+  session start) against a game-time stamp, so it showed at the wrong moment or never. It uses `g.time` now.
+- **Ghosts on top of dungeons / falling into DevCity.** Ghosts pass through rock; `groundBelow` took the rock a ghost
+  was inside as ground, so its wanted altitude lifted it cell by cell out through the roof to the cliff top, from where
+  it drifted over the overworld. Ground is now the floor of the open space under the rock, every flyer keeps under its
+  ceiling (`ceilingAbove`), and a ghost born in a dungeon is clamped to that dungeon's footprint and height (and drawn
+  home if found outside).
+- **Dungeon entrances and bounty boards had no collision.** `Blocks.PROP_STONE`/`PROP_WOOD` (see-through object cells,
+  so focus still works): the entrance mound fills its 5 x 3 footprint two high (only air cells), boards their panel.
+- **Bleeding out in jail.** `Law.arrest` now heals fully, stops bleeding (`Gore.staunch`) and cleanses chemistry
+  (fire); `Gore.update` keeps a prisoner's bleed at zero.
+- **Feet kicked out on a sprint stop.** Filmed (`locomotion` gallery, new `sprintstop-side/behind` sheets) and traced
+  (`RPG_RIG_DEBUG`, richer line): the back foot was mid-swing a stride behind when the body stopped and was dragged in
+  by a stride cycle slowing with the smoothed speed, hanging there for ~0.5 s; the hips sank into a lunge. `Rig`: a
+  braking rule ends the cycle when real speed falls well under the smoothed speed; a foot left in the air finishes its
+  own step (it used to freeze at 99% while the other corrected); the hip floor applies whenever not walking; far feet
+  correct in 0.2 s. Feet are under the body by 0.45 s (was 0.75 s). Scored ~7.5/10 (was ~5). `SprintStopTest`.
+- **Lawmen don't arrest.** `LawmanArrestTest` shows Bram halts a wanted player and, resisted and beaten down, arrests
+  rather than kills. The gap found: a watch officer's own wound bleeding a wanted offender to death went through
+  `bleedOut` -> kill with no arrest check; it now arrests (staunched at 1 HP). `Law.resist` added (the dialog uses it);
+  `halt` no longer needs a HUD.
+- **The circle under everyone / inverted lamp shadows.** `lighting.frag`'s body-capsule shadow skipped surface points
+  within 1.35 radii of the capsule axis as "the body itself" - the ground under the feet included. So a lamp lit a disc
+  under each body with the capsule's shadow round it. Self-exclusion now applies only above the feet.
+- **Walls flickering at night.** Probe GI rays that happened to hit a lamp's glass added its full emission (clamped at
+  24): with 16-32 rays and a new rotation each update, probes by lamps swung between "hit" and "missed". Each ray's
+  radiance is clamped by luminance (6) in `probes.comp`; a stale probe re-blends at 0.4 instead of 0.6. Not checked
+  in a night capture this pass.
+
+### Changes from the list
+- **Monster corpses dissolve.** After 60 s (`Monsters.CORPSE_SECONDS`) a dead monster goes in 2.5 s: charred toward
+  ash, an ember glow, fading, with rising ash motes and a crackle; what was on it (carried or worn) drops where it
+  lay; the corpse object goes. Not while carried; the timer is saved (`deadFor`). `MonsterRemainsTest`.
+- **Dungeons scale to the player** (`Dungeons.range/scale`, `Monsters.relevel`). On entering, every living resident
+  is set between the range's floor and cap by its room's depth (the master, or the first resident of the deepest room,
+  at the cap; +-15% spread). Cap: the player's combat level for micro/macro, `1.2 x + 6` for elite; floor: half the
+  combat level below 20, then `10 + (cl - 20) / 2`; boss dungeons untouched. Levels are aimed at combat level, which
+  the residents' skills decide. `DungeonScalingTest` (15/57/114: e.g. Warren 73..114 for 114).
+- **Crime notice spam.** `Chat.crime(kind, text)`: one notice per kind of crime every 30 s. The lines are worded for
+  the player now ("Mara saw your theft in DevCity...", "...told Bram about your theft. Your bounty in DevCity is now
+  120 coins."; `Law.crimeWord`).
+- **Fonts.** Friz Quadrata: interface, level-up and death banners, names, quest text, window/panel/settings titles.
+  Morpheus: the quest log's headers and the spellbook title. Arial Narrow: chat, tooltips, examine/info text, floating
+  words. Skurri: the damage numbers over a body (23 px on a bigger splat). The Nimrod italic face (not in the list) and
+  its file are removed.
+- **Dungeon traps more visible.** Every plate is drawn now (a seam, a proud plate, spike holes or a cracked floor with
+  grit); found ones get a scratched red cross and chalk marks; disarmed ones are pegged.
+- **Lag in fights; free-roam stutter.** New bench stop "battle in the yard" (12 goblins and orcs, the watch). Found
+  and fixed: `Stealth.smoke/light` scanned every world object for fires in every sight ray (now a per-tick list); the
+  minimap re-created its GPU texture on each refresh (40 ms hitches) - a new engine call
+  `astratto_render_texture_update` (`NativeRenderer.textureUpdate`) updates it in place; bodies freshly bloodied repainted
+  and uploaded every hit (now at most every 0.4 s, 1.5 s for the dead, one figure upload a frame). Volumetric smoke
+  marched every plume at every step (quadratic; now each volume samples itself) and the haze read three probe
+  textures a step (now three a ray, interpolated). The default performance budget is 60 FPS (was 30), so dynamic
+  resolution engages: tour mean 16.9 -> 12.0 ms, frames over 16.7 ms 1292 -> 165 of 2800; battle mean 18.6 -> 14.7 ms,
+  p99 49 -> 25 ms. The engine's own frame (physics with many bodies) remains the largest single cost in the battle.
+- **Lawmen ask around** (`Brain.askAround`). An officer on a search walks up to someone nearby and asks after the
+  suspect; the answer is that person's last real sighting (`playerSighting`, else their awareness), told as how long
+  ago and which way; a newer one moves the search (`Hunt.clue`, patience extended). Someone who thinks well of the
+  player and knows no crime of theirs covers for them. Each person is asked once in 90 s. `WitnessQuestioningTest`.
+- **Wider dungeons.** Micro 36x36, macro 62x60, elite 48x50; rooms 7-13 (micro 8-12), five high (six when large),
+  three cells of rock between rooms, passages 4-5 wide and 4 high (`DungeonLayout.PASSAGE`); halls of worked stone of
+  10 x 10 and up get two rows of 2x2 pillars, residents placed clear of them (`clear`). Regions moved to fit.
+- **Monster sounds.** They used human voices because monsters are NPCs underneath: `hurtCry`/`deathCry` and Gore's
+  wound cry went through `HumanVoice`. They now go to each kind's own banks (`Sfx.creature`, `m.<kind>.idle/alarm/
+  hurt/death`) from rubberduck's two "80 CC0 creature SFX" packs (CC0), qubodup's ghost moans (CC0) and jalastram's
+  monster voices (CC BY 3.0); 104 files in `sounds/creature/`, each stored once. `MonsterVoiceTest`. Chosen by the
+  packs' categories, not auditioned.
+- **DevMap placement** (`DevMapAuditTest`: floating blocks, holes, objects sunk in blocks, blocked homes/posts,
+  walled-in doors over the whole overworld). Found and fixed: the equipment cabinet sunk in its plank backboard, and
+  Fenna's home and post inside the lodge wall. None of the other kinds of problem were found. The map's layout itself
+  was not redesigned.
+- **Undertaker buy-back.** While a grave stands, the Undertaker offers (option and dialogue) to send for it at once:
+  each grave's claim fee plus 10 for the haste, then the usual redemption (coins in the graves count). The reclaim and
+  buy-back options appear only when there is something to get back. `UndertakerFlowTest`.
+- **Developer-coded dialogue.** Greetings that printed raw memory records ("(assault, heard)") and the lawman's report
+  lines ("bounty in DevCity 0 -> 120") read as speech now; crime notices as above.
+- **Dev console.** `spawn` makes any animal, monster (with level; dragons with a breed) or person by role or calling,
+  armed and levelled to fit; `spawnlist` names them all; `remove` takes monsters and spawned people; `goto warren /
+  hollow / catacombs / trollsden`.
+- **Physics foley.** The game's sounds were already all recorded (no synthesis); ragdoll falls used a generic soft
+  impact. They now use dklon's recorded body hits (CC BY 3.0, cut into five).
+- **Version** 0.1.7 (`Main.VERSION`; the gallery's title shot uses it).
+- **Bounty hunters.** Posse spawn points are never within 24 m, in the half of the world the camera faces (out to
+  70 m), or in plain sight (`Posses.seen`); ambushes too. On the trail, a hunter lays up to two snares near the last
+  known location (`Brain.setSnare`, `Dungeons.snare`: a dungeon trap of kind 2, hidden like any trap). A snare spares its
+  posse, holds its victim 3.5 s, is heard, and moves its hunter's search there; it goes when the hunt ends. Test in
+  `PosseKnowledgeTest`.
+
+### Added from the list: the spellbooks
+- Books: Sun (was Standard), Fogish (was Ancients), Moon (Lunar and Arcane together); old saves map across
+  (`Book.of`, `Spell.of`: Spark -> Wind Strike, Frost lance -> Ice Rush, Voltchain -> Electric Bolt).
+- Sun: the 25 tiered elemental spells exactly as listed (levels and bases), plus Forcewave. `Spell.maxBase(magic)`:
+  a tier hits as hard as its strongest open element. Fogish: Necrocall, Spelldaggers and Ice Rush/Burst/Blitz/Barrage
+  (16/22/26/30, freeze 5/10/15/20 s: `cs.frozenT` stops the feet of players, NPCs, animals and monsters). Moon: the
+  thirteen utility spells.
+- Elemental staffs: the Fire staff loses its charges; Air, Water, Electric and Earth staffs are added (as the list
+  names them); a staff makes its element's tiered spells cost 15% (at least 1). Orbs in the element's colour.
+- Wind Blast/Wave/Surge knock down at 22/35/50%, divided by the target's size squared, scaled by Magic against the
+  target's Defense/Strength. Fire from Blast up bursts on those beside the target; electric jolts.
+- Monsters' innate magic (`castInnate`): no book or Mana, its strength by the creature's Magic against the spell's
+  level; imps cast Fire Strike, ghosts Ice Rush (freezing for 40% of the time).
+- The spellbook panel lists every spell two to a row with its cost (green with a staff) and current maximum hit.
+  `SpellbookTest`.
+
+### Found along the way
+- `Config.skillPace(null)` threw (an award with no skill): returns 1.
+- `MonsterTest` counted dungeon residents as the overworld's goblins and checked their levels against the overworld
+  rule; it counts the overworld only now.
+- `NpcDeathTest` depended on one damage roll killing; it lands blows until one does.
+- `Monster.level` was final (it is set when a dungeon is scaled).
+
+### Tooling
+- `PlayerGetUpTest`, `SprintStopTest`, `LawmanArrestTest`, `WitnessQuestioningTest`, `DungeonScalingTest`,
+  `SpellbookTest`, `MonsterRemainsTest`, `MonsterVoiceTest`, `DevMapAuditTest`, additions to `UndertakerFlowTest` and
+  `PosseKnowledgeTest`.
+- Sydney lab: `LAB_TRAITS="str,agi,tough,end"`. Bench: the battle stop, `RPG_BENCH_TARGET` default 60.
+- Gallery `locomotion`: the sprint stop from the side and from behind.
+
+### Not done / open
+- **Textures** ("ALL textures of blocks, foliage and non-block models in Stylized Heroic Fantasy / painterly"): not
+  started this pass. It is a full art pass over every painted block, foliage and prop texture with review captures.
+- **Human walk and run polish** beyond the sprint stop: not done.
+- **DevMap** improvements beyond the audit's fixes (building and zone layout): not done.
+- The night-time flicker and lamp-shadow fixes were made from the shaders' logic and not reviewed in a night capture.
+- Free-roam p99 is still 21-30 ms at some stops; the largest remaining cost in fights is the engine's own frame.
+- `MonsterTest`'s camp check can fail when the camp's goblins are already fighting wildlife that wandered in (they
+  engage the wolf, not the player): the world's ecology, not fixed.
+
+### Verification
+- `./gradlew test` (rpggame), after all the changes: 204 tests, 199 passed, 5 failed:
+  - `ProfessionTest.allFiveFamilies...` expects 28 people; the roster has 29 since Wren (civic) was added in an
+    earlier pass - the test is stale.
+  - `SocietyRegressionTest.guardsPhysicallyDeliverAnActualCorpse...`: the guard searches for the killer first, as
+    pass 7 made the watch do on purpose; the test still expects the body fetched within ten seconds.
+  - `RecoveryRegressionTest.olderProfilesAdd...`: item-ledger mismatches (natural claws and touch counted but never
+    minted - pass 7's monsters - and one iron axe, bucket and pot fewer than the ledger).
+  - `ProfessionTest.aCarpenterReserves...` (the carpenter never starts the table) and
+    `MonsterTest.theWildsHaveTheirLairs...` (above).
+  - Reverting the Fenna move did not change any of them. The carpenter and ledger failures were not traced to a
+    cause this pass, so a part of them may be this pass's; the acceptance suite (`./gradlew acceptance`) was not run.
+- Every new test listed under Tooling passes, as do the combat, dungeon, law, render and audio classes touched.
+- `nativeuild.bat notest` and `build.bat lab` build clean; the Sydney lab scenarios stand, push, drop and getup were
+  compared with the previous lab build.
+
+---
+
 ## Pass 7: monsters, dungeons and the Holy Light (Version 0.1.7)
 
 Worked down the current `gamefixes.md` with `instructions.md` first and the GDD after. The working tree already held an
@@ -157,7 +629,7 @@ I built on it rather than reverting it. Visual work was judged from gallery capt
 - Monster behaviour still runs in `MonsterMind`'s own state machine; it shares the engine agents, the stealth senses and
   the hostility rules with people and animals, but was not ported to the engine's `TaskNetwork` the animals use.
 
-TEST_RESULTS_PLACEHOLDER
+(This pass's own test results were not recorded; pass 8's verification ran the suite over both passes' work.)
 
 ---
 

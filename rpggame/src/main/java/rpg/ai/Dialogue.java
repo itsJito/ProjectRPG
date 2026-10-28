@@ -22,8 +22,8 @@ public final class Dialogue {
         String greet = known == null ? greeting(n) : known.settled
                 ? "Your debt to the law is settled. I still remember what happened."
                 : known.witnessed()
-                ? "I saw you - " + known.kind.toLowerCase() + ". Keep your distance."
-                : "I've heard about you (" + known.kind.toLowerCase() + ", " + known.source + "). I'm watching you.";
+                ? "I saw what you did - the " + rpg.law.Law.crimeWord(known.kind) + ". Keep your distance."
+                : "I've heard about you. " + (known.kind.equals("MURDER") ? "They say you've killed" : "Word is it was " + rpg.law.Law.crimeWord(known.kind)) + ". I'm watching you.";
         Dialog d = new Dialog(n.name + " - " + n.title, greet);
         d.npc = n.id; d.employment = n.employmentState();
         // a courtesy (Honor, GDD 3.5): a warm greeting to someone who will take it, once each
@@ -53,10 +53,12 @@ public final class Dialogue {
             case UNDERTAKER -> {
                 if (!n.working()) break;
                 int held = g.undertaker.held();
-                if (held > 0) d.choice("I've come for my belongings (" + g.undertaker.fee() + " coins).", () -> g.interact.request(g.player, n, "reclaim"));
-                d.choice("How does this work?", () -> g.ui.dialog(new Dialog(n.name, "Die inside the walls and your lawful belongings come straight into my keeping. Stolen goods are confiscated, never reclaimed. Die out in the wild and you'd best get "
-                        + "back to it quick: anyone may help themselves. Either way, after ten minutes I fetch what's left. " + rpg.law.Undertaker.FEE + " coins to have it back, "
-                        + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. I'll take it out of your own purse if that's all you have.")));
+                if (!g.undertaker.graves().isEmpty()) d.choice("My grave is still out there. Can you fetch my things now? (" + g.undertaker.buyBackFee() + " coins)", () -> g.interact.request(g.player, n, "buyback"));
+                else if (held > 0) d.choice("I've come for my belongings (" + g.undertaker.fee() + " coins).", () -> g.interact.request(g.player, n, "reclaim"));
+                d.choice("How does this work?", () -> g.ui.dialog(new Dialog(n.name, "Fall inside the walls and the watch brings your things to me - all but anything stolen, which goes back where it came from. Fall out in the wild and you'd best get "
+                        + "back to your body quick, because anyone passing may help themselves. Either way, after ten minutes I send for what's left. " + rpg.law.Undertaker.FEE + " coins to have it back, "
+                        + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. I'll take it out of your own purse if that's all you have. "
+                        + "Can't wait? Pay me " + rpg.law.Undertaker.PROMPT + " more and I'll send for your grave straight away.")));
             }
             case BEGGAR -> d.choice("Offer a loaf of bread.", () -> {
                 if (!g.player.has(Items.BREAD, 1) || !n.canStore(new ItemStack(Items.BREAD, 1))) { g.chat.warn("You need a loaf to spare."); return; }
@@ -64,12 +66,26 @@ public final class Dialogue {
                 n.hunger = Math.max(0, n.hunger - 0.25f); g.ai.say(n, "Bless you. A warm meal at last.");
                 g.state.commit("FoodGiven", g.player.id, n.id, n.homeJurisdiction, 0, "bread");
             });
-            case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "Food restores the body. I share what I carry with the wounded, but my supplies are finite. The shops will buy herbs and berries.")));
+            case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.")));
             case PRIEST -> d.choice("Who tends the dead?", () -> g.ui.dialog(new Dialog(n.name, "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.")));
             case SCHOLAR -> d.choice("Where can I sell questionable goods?", () -> g.ui.dialog(new Dialog(n.name, "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.")));
             case HUNTER -> d.choice("Any advice for the wilderness?", () -> g.ui.dialog(new Dialog(n.name, "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.")));
             case CIVIC -> { if (n.id == Ids.TELLER) g.bank.choices(n, d); }
             case THIEF -> d.choice("Got anything for me?", () -> g.ui.dialog(new Dialog(n.name, "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.")));
+            default -> { }
+        }
+        // the callings of 0.1.8: each talks of their own work, as a tip from someone who does it
+        if (n.profession != null) switch (n.profession) {
+            case COOK -> d.choice("Any secret to cooking?", () -> g.ui.dialog(new Dialog(n.name, "Any fire will do, or a range. Hold it over the heat and turn it once, halfway. "
+                    + "You'll burn a few at first - everyone does. The more you cook, the surer your hands get, and one day you just stop burning things.")));
+            case QUARRY_WORKER -> d.choice("What do you cut here?", () -> g.ui.dialog(new Dialog(n.name, "Building stone, block by block. Work a face square-on, from the front. "
+                    + "Swing at it from the side and you'll take a chunk of whatever's next to it - I filled a sack with clay that way, my first week.")));
+            case BORDER_KNIGHT -> d.choice("What do you watch for?", () -> g.ui.dialog(new Dialog(n.name, "This is where the city's ground ends. Anything that comes over it - beasts, worse - "
+                    + "meets me first, and I call the watch. Past this line the city's watch can't help you. Its warrants stop here too, mind - but word travels.")));
+            case SHELLFISH_GATHERER -> d.choice("When are the crabs about?", () -> g.ui.dialog(new Dialog(n.name, "When the water's low. Set a cage in the shallows and leave it be - "
+                    + "crabs won't come to a crowd. If a bed's picked clean, give it time, or find another.")));
+            case RIVER_FISHERMAN -> d.choice("Any luck on the brook?", () -> g.ui.dialog(new Dialog(n.name, "Trout like moving water. If one spot goes quiet, try the next bend - "
+                    + "that's the whole art of it. And watch the woods behind you. Things come down to drink.")));
             default -> { }
         }
         d.choice("What do you know?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
@@ -249,8 +265,11 @@ public final class Dialogue {
 
     private String reports(Npc lawman) {
         StringBuilder b = new StringBuilder();
-        for (String r : g.law.reportsLog) if (r.contains(lawman.name)) b.append(r).append(". ");
-        return b.length() == 0 ? "No crimes have been reported to me." : b.toString();
+        // the last few, in his own words ("came to me", not his own name)
+        java.util.List<String> mine = new java.util.ArrayList<>();
+        for (String r : g.law.reportsLog) if (r.contains(" came to " + lawman.name + " ")) mine.add(r.replace(" came to " + lawman.name + " ", " came to me "));
+        for (int i = Math.max(0, mine.size() - 4); i < mine.size(); i++) b.append(mine.get(i)).append(". ");
+        return b.length() == 0 ? "Nobody has come to me with anything. Quiet times." : b.toString();
     }
 
     /** The XP lamp: rubbing it grants XP in a chosen skill (a quest reward; not scaled by the test rate). */

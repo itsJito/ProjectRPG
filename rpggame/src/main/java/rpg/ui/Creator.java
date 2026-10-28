@@ -7,7 +7,7 @@ import java.util.function.IntSupplier;
 import rpg.actor.Appearance;
 
 /**
- * Character creation (GDD 2.1): sex, one of three bodies (Masculine, Heavy, Skinny), one of 12 skin tones, twenty
+ * Character creation (GDD 2.1): sex, one of three bodies (Masculine, Heavy, Skinny), one of 12 skin tones, eight eye colours, twenty
  * hairstyles per sex, twenty facial-hair presets, twenty tops, legs and shoes each; ten natural hair colours for hair and
  * facial hair, twenty-four garment colours for the clothes. Appearance is cosmetic only.
  *
@@ -46,6 +46,7 @@ public final class Creator {
         r.add(new Row("Sex", 2, () -> look.female ? 1 : 0, v -> { look.female = v == 1; if (look.female) look.beard = 0; }, v -> v == 1 ? "Female" : "Male", false));
         r.add(new Row("Body", Appearance.BODY_TYPES, () -> look.bodyType, v -> look.bodyType = v, v -> Appearance.bodyNames(look.female)[v], false));
         r.add(new Row("Skin", Appearance.SKIN_TONES, () -> look.skin, v -> look.skin = v, v -> "Tone " + (v + 1) + " / 12", false));
+        r.add(new Row("Eye colour", Appearance.EYE_COLORS, () -> look.eyeColor, v -> look.eyeColor = v, v -> Appearance.EYE_NAMES[v], true));
         r.add(new Row("Hair", Appearance.HAIRSTYLES, () -> look.hair, v -> look.hair = v, v -> (look.female ? Appearance.HAIR_FEMALE : Appearance.HAIR_MALE)[v], false));
         r.add(new Row("Hair colour", Appearance.HAIR_COLORS, () -> look.hairColor, v -> { if (look.beardColor == look.hairColor) look.beardColor = v; look.hairColor = v; }, v -> String.format("H%02d %s", v + 1, Appearance.HAIR_NAMES[v]), true));
         if (!look.female) {
@@ -69,7 +70,7 @@ public final class Creator {
 
     public void randomise() {
         Appearance a = Appearance.random(seed++ * 7919 + System.nanoTime() % 1000);
-        look.female = a.female; look.bodyType = a.bodyType; look.skin = a.skin; look.hair = a.hair; look.hairColor = a.hairColor; look.beard = a.beard; look.beardColor = a.beardColor;
+        look.female = a.female; look.bodyType = a.bodyType; look.skin = a.skin; look.eyeColor = a.eyeColor; look.hair = a.hair; look.hairColor = a.hairColor; look.beard = a.beard; look.beardColor = a.beardColor;
         look.top = a.top; look.topColor = a.topColor; look.bottom = a.bottom; look.bottomColor = a.bottomColor; look.shoes = a.shoes; look.shoesColor = a.shoesColor;
     }
 
@@ -89,7 +90,7 @@ public final class Creator {
     public void randomiseTab() {
         Appearance a = Appearance.random(seed++ * 7919 + System.nanoTime() % 1000);
         switch (tab) {
-            case 0 -> { look.female = a.female; look.bodyType = a.bodyType; look.skin = a.skin; if (look.female) look.beard = 0; }
+            case 0 -> { look.female = a.female; look.bodyType = a.bodyType; look.skin = a.skin; look.eyeColor = a.eyeColor; if (look.female) look.beard = 0; }
             case 1 -> { look.hair = a.hair; look.hairColor = a.hairColor; look.beard = look.female ? 0 : a.beard; look.beardColor = a.beardColor; }
             case 2 -> { look.top = a.top; look.topColor = a.topColor; look.bottom = a.bottom; look.bottomColor = a.bottomColor; look.shoes = a.shoes; look.shoesColor = a.shoesColor; }
             default -> randomise();
@@ -104,8 +105,10 @@ public final class Creator {
     public float zoom;
     private float panelFade;
     private String nameWarning;
+    /** The new profile's prompt (gamefixes: shown at the top), in two lines. */
+    static final String[] PROMPT = {"Before you get started, you'll need to set the appearance of your character.", "Please use the open interface to set your appearance."};
     private static final String[] STEPS = {"Body", "Hair", "Clothing", "Finish"};
-    private static final String[] STEP_HINT = {"Sex, build and skin", "Style and colour", "Top, legs and shoes", "Name and review"};
+    private static final String[] STEP_HINT = {"Sex, build, skin, eyes", "Style and colour", "Top, legs and shoes", "Name and review"};
     private static final String[] NAMES_M = {"Aldric", "Bram", "Corin", "Edrin", "Garrick", "Hal", "Osric", "Rowan", "Tobin", "Wulfric"};
     private static final String[] NAMES_F = {"Ada", "Brynn", "Elsa", "Isolde", "Maren", "Nell", "Rhea", "Sabine", "Wren", "Yara"};
 
@@ -171,6 +174,12 @@ public final class Creator {
 
         // the figure's own controls, under it
         float cx = 478 + (w - 478) / 2f;
+        // (gamefixes) what a new profile asks of the player first, over the top of the figure's side
+        float bw = Math.min(w - 520, 760);
+        ui.rect(cx - bw / 2, 22, bw, 54, 0xC0101214);
+        ui.border(cx - bw / 2, 22, bw, 54, 1, 0x60D8B46A);
+        ui.centered(PROMPT[0], cx, 31, 14, Style.TEXT);
+        ui.centered(PROMPT[1], cx, 52, 13, Style.DIM);
         if (Style.button(ui, autoRotate ? "Pause rotation" : "Resume rotation", cx - 80, h - 94, 160, 30, true)) autoRotate = !autoRotate;
         ui.rect(cx - 170, h - 54, 340, 38, 0x70101214);
         if (Style.button(ui, "<", cx - 164, h - 50, 34, 30, true)) turn -= 0.5f;
@@ -283,7 +292,9 @@ public final class Creator {
         y = heading(ui, "Build", x, y, w);
         y = cards(ui, Appearance.bodyNames(look.female), look.bodyType, v -> look.bodyType = v, x, y, w, 56);
         y = heading(ui, "Skin tone", x, y, w);
-        return swatches(ui, Appearance.SKIN_TONES, 6, () -> look.skin, v -> look.skin = v, v -> Appearance.SKIN[v], v -> "Tone " + (v + 1) + " of 12", x, y, w);
+        y = swatches(ui, Appearance.SKIN_TONES, 6, () -> look.skin, v -> look.skin = v, v -> Appearance.SKIN[v], v -> "Tone " + (v + 1) + " of 12", x, y, w);
+        y = heading(ui, "Eye colour", x, y, w);
+        return swatches(ui, Appearance.EYE_COLORS, 8, () -> look.eyeColor, v -> look.eyeColor = v, Appearance::eyeColor, v -> Appearance.EYE_NAMES[v], x, y, w);
     }
 
     private float hairTab(Ui2D ui, float x, float y, float w) {
@@ -357,11 +368,11 @@ public final class Creator {
             int v = r.get().getAsInt();
             ui.text(r.label(), x, y, 12, Style.DIM);
             float vx = x + 150;
-            if (r.colour()) { ui.rect(vx, y + 1, 12, 12, 0xFF000000 | (r.label().startsWith("Hair") || r.label().startsWith("Facial") ? Appearance.hairColor(v) : Appearance.color(v))); vx += 18; }
+            if (r.colour()) { ui.rect(vx, y + 1, 12, 12, 0xFF000000 | (r.label().startsWith("Hair") || r.label().startsWith("Facial") ? Appearance.hairColor(v) : r.label().startsWith("Eye") ? Appearance.eyeColor(v) : Appearance.color(v))); vx += 18; }
             if (r.label().equals("Skin")) { ui.rect(vx, y + 1, 12, 12, 0xFF000000 | Appearance.SKIN[v]); vx += 18; }
             ui.text(r.text().apply(v), vx, y, 12, Style.TEXT);
             // a click on a line goes back to the tab that chooses it
-            if (ui.clicked(x, y - 2, w, 18)) { tab = r.label().startsWith("Sex") || r.label().startsWith("Body") || r.label().startsWith("Skin") ? 0 : r.label().startsWith("Hair") || r.label().startsWith("Facial") ? 1 : 2; garment = r.label().startsWith("Legs") ? 1 : r.label().startsWith("Shoes") ? 2 : 0; click(); }
+            if (ui.clicked(x, y - 2, w, 18)) { tab = r.label().startsWith("Sex") || r.label().startsWith("Body") || r.label().startsWith("Skin") || r.label().startsWith("Eye") ? 0 : r.label().startsWith("Hair") || r.label().startsWith("Facial") ? 1 : 2; garment = r.label().startsWith("Legs") ? 1 : r.label().startsWith("Shoes") ? 2 : 0; click(); }
             y += 20;
         }
         return y;

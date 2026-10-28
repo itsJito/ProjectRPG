@@ -37,7 +37,8 @@ class GraveyardDeliveryTest {
                     if (!n.alive || n == victim) continue;
                     if (n.goal == Brain.Goal.COLLECT) collecting++;
                     if (buriedAt < 0) continue;
-                    if (n.goal == Brain.Goal.COLLECT) collectsAfter++;
+                    // (another death in the town over these minutes is another body to fetch: only this one's grave counts)
+                    if (n.goal == Brain.Goal.COLLECT && n.goalReason != null && n.goalReason.contains(String.format("(%.0f, %.0f)", 100f, 78f))) collectsAfter++;
                     if (n.hunt != null && n.hunt.source == victim.id) { investigationsAfter++; if (investigationsAfter < 5) log.append(n.name).append(" investigating: ").append(n.lastOutcome).append('\n'); }
                 }
             }

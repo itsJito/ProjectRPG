@@ -67,10 +67,25 @@ public final class Stealth {
      */
     public float light(Actor a) { return light(a.x, a.y + 0.2f, a.z); }
 
+    /**
+     * The fires burning this tick, gathered once (gamefixes: combat lagged - every sight line, three a look for every
+     * pair of eyes and body, walked every object in the world twice over to find the few fires).
+     */
+    private final java.util.List<Fire> fires = new java.util.ArrayList<>();
+    private double firesAt = Double.NaN;
+    private java.util.List<Fire> fires() {
+        if (firesAt != g.time) {
+            firesAt = g.time;
+            fires.clear();
+            for (WorldObject o : g.objects.all()) if (o instanceof Fire f && !f.removed) fires.add(f);
+        }
+        return fires;
+    }
+
     public float light(float x, float y, float z) {
         int bx = (int) Math.floor(x), by = (int) Math.floor(y), bz = (int) Math.floor(z);
         float l = Math.max(g.vox.skyLight(bx, by, bz) * daylight(g.state.hourOfDay()) * (1 - g.timeSystem.weather.overcast * 0.35f), g.vox.blockLight(bx, by, bz));
-        for (WorldObject o : g.objects.all()) if (o instanceof Fire f) {
+        for (Fire f : fires()) {
             float d = (float) Math.sqrt((f.x - x) * (f.x - x) + (f.y - y) * (f.y - y) + (f.z - z) * (f.z - z));
             if (d < 7) l = Math.max(l, 1 - d / 7f);
         }
@@ -113,7 +128,7 @@ public final class Stealth {
         float cone = 1;
         // someone right beside you is sensed whichever way you face - unless they creep
         float close = a.sneaking ? CLOSE_CREEPING : CLOSE;
-        if (d > 0.05f) {
+        if (d > close) {
             float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
             float cos = (fx * dx + fz * dz) / d;
             // close in, the edge of the eye (90 degrees each side); far out, only what is ahead (about 50 degrees)
@@ -128,7 +143,7 @@ public final class Stealth {
         float seen = 0;
         for (int i = 0; i < 3; i++) {
             rays++;
-            float t = g.vox.seeThrough(n.x, ey, n.z, a.x, a.y + at[i], a.z);
+            float t = g.vox.seeThrough(n.x, ey, n.z, a.x, a.y + at[i], a.z, GLASS_REACH);
             if (t > 0) t *= smoke(n.x, ey, n.z, a.x, a.y + at[i], a.z);
             seen += weight[i] * t;
         }
@@ -139,14 +154,22 @@ public final class Stealth {
         float lit = Math.max(0.07f, light(a));
         // near at hand a body is hard to miss in any but the darkest place: a strong, smooth bonus inside six metres
         float dist = d <= close ? 2f : Math.max(0.1f, 1.1f - d / RANGE) + Math.max(0, (6 - d) / 6f) * 0.9f;
+        // past the recognising range a figure is a shape, not a face: less sure the farther it is
+        if (d > RECOGNISE) dist *= 1 - 0.4f * Math.min(1, (d - RECOGNISE) / (RANGE - RECOGNISE));
         float mist = a.gaseousT > 0 ? 0.15f : 1;   // Gaseous Form: a shimmer, hard to see
-        return Math.min(2, seen * cone * stance * motion * lit * dist * acuity * mist);
+        float e = Math.min(2, seen * cone * stance * motion * lit * dist * acuity * mist);
+        // (gamefixes: NPCs missed the player standing right in front of them) within ten blocks, anyone going about
+        // upright in plain view - most of the body in the line of sight, ahead, not in pitch dark - is recognised at once
+        if (d <= RECOGNISE && !low && mist == 1 && cone == 1 && seen >= 0.55f && lit >= 0.12f && acuity >= 0.9f) e = Math.max(e, CLEAR * 1.6f);
+        return e;
     }
+    /** How far a figure in plain view is recognised outright; how far through glass anything is made out. */
+    public static final float RECOGNISE = 10, GLASS_REACH = 5;
 
     /** Smoke over the fires: a sight line through the column above one is thinned. */
     private float smoke(float ax, float ay, float az, float bx, float by, float bz) {
         float t = 1;
-        for (WorldObject o : g.objects.all()) if (o instanceof Fire f) {
+        for (Fire f : fires()) {
             float dx = bx - ax, dz = bz - az, len2 = dx * dx + dz * dz;
             if (len2 < 1e-4f) continue;
             float s = Math.max(0, Math.min(1, ((f.x - ax) * dx + (f.z - az) * dz) / len2));
@@ -297,11 +320,18 @@ public final class Stealth {
             // routines all morning - the thief hid from each guard, crouched, and the guards came to see why, and so on)
             boolean resident = who instanceof Npc person && !person.hostileToPlayer && !ZonePolicy.outlaw(person) && person.summonOwner == 0;
             if (resident && !who.sneaking && day) continue;
+            // and so is the player, out openly by day in a town where nothing is known against them (half-seen at a
+            // distance, a figure in the street is someone in the street - not something to go and look into)
+            if (who == g.player && !who.sneaking && day && !DevMap.WILDS.equals(DevMap.jurisdiction(who.x, who.z)) && n.crimeKnown(who.id) == null
+                    && g.law.bounty(who.id, DevMap.jurisdiction(who.x, who.z)) <= 0) continue;
             // looked into lately: no mystery again for a while, unless they are creeping about now - and someone known by
             // sight already found creeping about, with nothing known against them, is not a fresh mystery for minutes
             if (g.time - w.settledAt < 30 && (who == null || !who.sneaking)) continue;
             boolean known = who instanceof Npc person && !person.hostileToPlayer && person.summonOwner == 0;
             if (known && g.time - w.settledAt < 300 && n.crimeKnown(who.id) == null) continue;
+            // the player too, once looked into and found going about openly: not a fresh mystery again for minutes (a
+            // border knight went back to look at the same figure standing in the same place all morning)
+            if (who == g.player && !who.sneaking && g.time - w.settledAt < 300 && n.crimeKnown(who.id) == null) continue;
             if (who instanceof rpg.animal.Animal an && !an.dangerous()) continue;
             if (best == null || w.level > best.getValue().level) best = e;
         }

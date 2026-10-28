@@ -11,7 +11,7 @@ import rpg.world.DevMap;
 import rpg.world.Voxels;
 
 /**
- * The non-damaging spells (GDD 2.5: Lunar traversal and social magic, Arcane illusion, obscuration, identity and
+ * The non-damaging spells (GDD 2.5; mostly the Moon book: traversal and social magic, illusion, obscuration, identity and
  * influence), each resolving through the same world as everything else - a step is a real teleport, an illusion a real
  * noise the NPCs' ears hear, a darkness a real drop in the light the stealth system reads, a disguise a witness who cannot
  * name who they saw, a charm a person who stops fighting. Every one is aimed: what the caster looks at is its target.

@@ -19,7 +19,7 @@ public final class Preferences {
     public final Map<Action, Integer> keys = new java.util.EnumMap<>(Action.class);
     public float master = 1, sfx = 1, music = 0.65f, voice = 1, ambience = 0.8f, ui = 0.8f;
     public float sensitivity = 1, fov = 70, renderScale = 1;
-    public int quality = 1, targetFps = 30;
+    public int quality = 1, targetFps = 60;
     public boolean fullscreen, vsync = true, autoScale = true, reducedMotion, subtitles = true, invertY, toggleCrouch, toggleSprint;
     public Preferences() { for (Action a : Action.values()) keys.put(a, a.defaultKey); }
 

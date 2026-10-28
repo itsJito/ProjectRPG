@@ -544,7 +544,7 @@ public final class Acceptance {
         // magic
         long mag = g.player.skills.xp(Skill.MAGIC);
         float mana = g.player.mana;
-        g.player.spell = Spells.Spell.SPARK;
+        g.player.spell = Spells.Spell.WIND_STRIKE;
         aimAt(dummy.x, dummy.y + 1.2f, dummy.z);
         g.controller.in.cast = true; frames(60);
         need("Magic: a spell costs mana, flies, hits, trains Magic", g.player.skills.xp(Skill.MAGIC) > mag && g.player.mana < mana + 1);
