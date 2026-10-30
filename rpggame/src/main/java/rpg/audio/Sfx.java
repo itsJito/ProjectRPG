@@ -400,6 +400,8 @@ public final class Sfx {
         bank("arrow.flesh", "archery/arrow_flesh_0", 6, ".ogg", 1);
         alias("zap", "metal.light"); alias("click", "ui.UIbutton1"); alias("fail", "ui.UIbutton2");
         alias("eat", "cloth"); alias("bless", "ui.LevelUp");
+        // (0.2.2) the sheathe: a blade drawn rings out; one put away is the leather and the belt taking it
+        alias("unsheathe", "draw"); bank("sheathe", "foley/beltHandle", 2, ".ogg", 1); bank("sheathe", "foley/clothBelt", 1, ".ogg", -1);
         bank("cast", "sfx/spell_0", 2, ".ogg", 1); alias("fire", "crackle"); if (!banks.containsKey("body.fall")) alias("body.fall", "soft.heavy");
         alias("monster.dissolve", "crackle"); alias("rope", "wood.light");   // remains going to ash; a snare snapping shut
         if (System.getenv("RPG_SFX_REPORT") != null) {

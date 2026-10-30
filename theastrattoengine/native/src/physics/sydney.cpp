@@ -161,7 +161,13 @@ void Oscillator::step(float h, float fb0, float fb1, float c0, float c1) {
 }
 
 // ------------------------------------------------------------------ profiles
-SydneyConfig SydneyConfig::human() { return SydneyConfig(); }
+SydneyConfig SydneyConfig::human() {
+    // (0.2.1, gamefixes: ragdolling took too long to stand up from) a person knocked down lies a moment, not seconds,
+    // and rises at twice the lab's pace on stronger legs: down to up in about two seconds, not five to eight
+    SydneyConfig c;
+    c.downMin = 0.25f; c.downMax = 0.7f; c.getUpPace = 2.0f; c.getUpStrength = 1.8f; c.getUpTime = 1.8f; c.getUpTimeout = 2.0f;
+    return c;
+}
 
 SydneyConfig SydneyConfig::infected() {
     SydneyConfig c;
@@ -861,7 +867,8 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
             break;
         }
         case DOWN:
-            if (t < downFor || stayDown) break;
+            // (0.2.1) at least the profile's own minimum: the old fixed 1.2 s default was only ever raised, never reset
+            if (t < std::max(downFor, cfg.downMin) || stayDown) break;
             if (!legs && cfg.style != SydneyConfig::CRAWLER) { outcome = CRAWL; break; }
             if (tries >= cfg.getUpTries + static_cast<int>((traits.endurance - 1) * 2)) { outcome = STUCK; break; }
             tries++;
@@ -877,7 +884,7 @@ void SydneyCharacter::coordinate(const VoxelWorld* w, float h) {
                 if ((four && getUpT_ > cfg.getUpTime * 0.75f) || getUpT_ > cfg.getUpTime * 1.6f) { outcome = RECOVERED; recoveries++; }
                 break;
             }
-            if (upright && getUpPhase_ >= 3) { steps = 0; settled = 0; steady_ = 1.2f; go(STAND); break; }
+            if (upright && getUpPhase_ >= 3) { steps = 0; settled = 0; steady_ = 1.2f; downFor = 0; go(STAND); break; }
             if (t > cfg.getUpTime + cfg.getUpTimeout) { go(DOWN); downFor = 0.8f; }
             break;
         }
@@ -1387,7 +1394,7 @@ void SydneyCharacter::getUpGoals(const VoxelWorld* w, float h) {
     (void)w;
     const Ragdoll& r = *body;
     const float scale = r.scale;
-    getUpT_ += h; getUpPhaseT_ += h;
+    getUpT_ += h; getUpPhaseT_ += h * cfg.getUpPace;
     const float str = cfg.getUpStrength;
     if (cfg.style == SydneyConfig::CRAWLER) {
         // up onto all fours, and stay there

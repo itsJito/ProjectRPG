@@ -52,6 +52,23 @@ public final class Reactions {
         g.game.commands().ragdollHit(n.ragdoll, nearestPoint(n, px, py, pz), dx, dy, dz, impulse, force);
     }
 
+    /**
+     * Knocked off their feet (gamefixes: a strong Earth Wave should throw people down): the body goes to Sydney, the blow
+     * lands along (dx, dz) and up a little, and it is told to collapse - it goes down, lies a moment and gets up as any
+     * fall does. A body not drawn lately still falls (as a long fall does), standing up into it.
+     */
+    public void knockDown(Actor a, float dx, float dz, float impulse, float px, float py, float pz) {
+        if (!a.alive || a.dummy || a instanceof rpg.animal.Animal || a instanceof Npc npc && !npc.loaded) return;
+        if (a.ragdoll == 0) {
+            if (a.posePts != null && g.time - a.poseAt <= 0.5) struck(a, dx, 0.35f, dz, impulse, impulse * 0.4f, px, py, pz);
+            else { falling(a, 0); if (a.ragdoll != 0) g.game.commands().ragdollHit(a.ragdoll, nearestPoint(a, px, py, pz), dx, 0.35f, dz, impulse, impulse * 0.4f); }
+        } else g.game.commands().ragdollHit(a.ragdoll, nearestPoint(a, px, py, pz), dx, 0.35f, dz, impulse, impulse * 0.4f);
+        if (a.ragdoll == 0) return;
+        g.game.commands().ragdollControl(a.ragdoll, CONTROL_COLLAPSE, 1);
+        a.cs.cancel(); a.cs.blocking = false;
+        fallen++;
+    }
+
     /** A long fall hands the existing body to Sydney even outside the renderer's view. */
     public void falling(Actor a, float verticalSpeed) {
         if (!a.alive || a.reacting || a instanceof rpg.animal.Animal) return;
@@ -159,8 +176,13 @@ public final class Reactions {
             float headUp = rd.p[RD_HEAD * 3 + 1] - footY(rd);
             boolean steady = rd.state == SYDNEY_STAND && headUp > n.height * 0.8f && rd.balance < 0.03f;
             n.uprightFor = n.wentDown && steady ? n.uprightFor + (float) g.lastDt : 0;
-            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND || n.uprightFor > 0.3f;
-            boolean tooLong = g.time - n.reactSince > 14;
+            // (0.2.1, gamefixes: ragdolling took too long to stand up from) rising: up off the ground on bent knees, the trunk
+            // over the hips - the figure takes over there and stands the rest of the way itself (Rig's rise), rather
+            // than waiting out the physical struggle to full height and a steady stance
+            float tx = rd.p[RD_HEAD * 3] - rd.p[RD_PELVIS * 3], tz = rd.p[RD_HEAD * 3 + 2] - rd.p[RD_PELVIS * 3 + 2];
+            boolean rising = n.wentDown && rd.state == SYDNEY_GETUP && headUp > n.height * 0.6f && Math.hypot(tx, tz) < 0.3f;
+            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND || n.uprightFor > 0.15f || rising;
+            boolean tooLong = g.time - n.reactSince > 9;
             boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
             boolean shocked = g.time < n.shockUntil;
             if (!rolling && !shocked) g.game.commands().ragdollControl(n.ragdoll, CONTROL_STAY_DOWN, 0);
@@ -168,6 +190,11 @@ public final class Reactions {
                 // handed back to the figure, standing where the feet are, facing the way the trunk faces - but never
                 // inside someone else (the body may have reeled into them): stepped out to arm's length
                 float sx = rd.standX, sz = rd.standZ;
+                // (0.2.2, gamefixes: people vanished or jumped mid-fight) the stance is where the body lies, never further
+                // than a stride from its centre, nor inside a wall - the old hand-back could leap through one
+                float sd = (float) Math.hypot(sx - rd.comX, sz - rd.comZ);
+                if (sd > 0.8f) { sx = rd.comX + (sx - rd.comX) / sd * 0.8f; sz = rd.comZ + (sz - rd.comZ) / sd * 0.8f; }
+                if (g.vox.solid((int) Math.floor(sx), (int) Math.floor(n.y + 0.5f), (int) Math.floor(sz))) { sx = rd.comX; sz = rd.comZ; }
                 for (rpg.actor.Actor o : g.actors()) {
                     if (o == n || !o.alive || o.dummy || o instanceof Npc other && !other.loaded) continue;
                     float ox = sx - o.x, oz = sz - o.z, ol = (float) Math.hypot(ox, oz), min = n.radius + o.radius + 0.1f;
@@ -176,6 +203,7 @@ public final class Reactions {
                     sx = o.x + ox / ol * min; sz = o.z + oz / ol * min;
                 }
                 n.x = sx; n.z = sz; n.yaw = rd.yaw;
+                if (rising) n.riseAt = g.time;
                 // back on their feet, the weapon knocked from their hand is the first thing they reach for
                 if (n.dropped != null && !n.dropped.removed && n.eq.get(rpg.item.ItemDef.Slot.MAIN) == null && Math.hypot(n.dropped.x - sx, n.dropped.z - sz) < 3.5) {
                     var w = n.dropped.stack;

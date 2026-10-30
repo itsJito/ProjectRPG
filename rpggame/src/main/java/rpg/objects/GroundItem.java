@@ -70,7 +70,6 @@ public final class GroundItem extends WorldObject {
         return Result.ok();
     }
 
-    @Override public String examine(Rpg g) { return stack.def.examine; }
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  stack=" + stack + " item owner=" + g.nameOf(stack.owner) + " stolen=" + stack.stolen; }
 
     @Override public Map<String, Object> save() {

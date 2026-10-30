@@ -21,15 +21,21 @@ import rpg.world.DevMap;
  * A door (GDD 3.2; gamefixes: doors are physical): open or shut, locked or not; opened by hand or by the key, or picked
  * with a lockpick and Thieving. Each leaf is a rigid body (Impulsis) hung on a hinge at its post: a shut door is
  * latched - its hinge held at zero, so it stands like a wall and a body walking into it is stopped by it - and opening
- * it lifts the latch and swings the leaf in. An open leaf swings freely within its stops: a character walking into it
- * pushes it, as an NPC does on its way through, and it pushes back. The door's cells say to the rest of the world
+ * it lifts the latch and swings the leaf in. An open leaf is a free body on its hinge, swinging between shut and its
+ * stop: a character walking into it pushes it, as an NPC does on its way through, and it pushes back; pushed home, it
+ * latches. (gamefixes: open doors flung to either side and could not be pushed - the hinge was in the middle of the wall,
+ * so an open leaf turned into the wall itself and stuck there.) A house door is hung on the inside face of its wall:
+ * it opens away from whoever opens it - into the room a little past square, or out over the step as far as square - and
+ * is then a free body either way; a gate in a fence, with no roof on either side, swings fully both ways. The door's cells say to the rest of the world
  * (routes, sight, light) where a door stands: while the leaf is shut they are a closed door (not walked through by
  * those who do not open doors, not seen through); swung open, they are air. A locked door's cells are solid and sealed.
  * Picking an owned lock is a crime that witnesses can report.
  */
 public final class Door extends WorldObject {
     public final int[][] cells;
-    public final int height = DevMap.DOOR_HEIGHT;
+    public final int height;
+    /** (0.2.2, gamefixes) A fence-gate: one block high, rails and a brace in the fence's own boards, in a fence's line. */
+    public final boolean fenceGate;
     /** open: unlatched (swung, or free to swing); locked: latched and locked. */
     public boolean open, locked;
     public final ItemDef key;
@@ -40,26 +46,39 @@ public final class Door extends WorldObject {
     /** The leaves: their bodies and hinges, the turn that swings each one in (+1 or -1), and the angle each is at. */
     public long[] leaf = new long[0], hinge = new long[0];
     public float[] inward = new float[0], angle = new float[0];
-    /** The initial motor swings away from whoever opens it; an unlatched hinge then permits both directions. */
+    /** Which side is in (+1 / -1 along the doorway's normal), the doorway's line; a gate swings away from whoever opens it. */
     private float inSide = 1, line, swingSign = 1;
+    /** A gate in a fence (no roof either side): hung on the line, swinging both ways. A house door opens inward only. */
+    private boolean gate;
+    /** When a free leaf came back to rest at its frame (it latches if it stays there). */
+    private double homeSince = -1;
     public final float[][] hingeAt;
     private boolean closing, cellsOpen;
     private double motorUntil;
-    /**
-     * How far an unlatched leaf turns either way: to the wall it hangs in, a little past square (gamefixes: a door swings
-     * fully either way on its hinge, and never through the wall beside it).
-     */
-    public static final float LEAF_MASS = 28, SWING = 1.92f;
+    /** How far an unlatched leaf turns: a little past square, into the room (a gate as far either way). */
+    public static final float LEAF_MASS = 28, SWING = 1.75f;
+    /** How far a house door turns outward (pushed from inside): to square and a little short, never into the wall's thickness. */
+    public static final float OUT = 1.45f;
+    /** A leaf's thickness, half: the hinge sits this far in from the wall's inner face. */
+    private static final float HALF_THICK = 0.06f;
     /** Leaf transforms shared by physical targeting and rendering. */
     private final float[][] leafPose = new float[2][16];
+    /** A leaf's pose as drawn (column-major 4x4: its axes, then its centre). */
+    public float[] leafPose(int i) { return leafPose[i]; }
     public float leafWidth = 1;
     public static final int MATERIAL_WOOD_DOOR = 2;
 
     public Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner) {
-        super(id, "door", name, cx(cells), DevMap.FLOOR + 1.2f, cz(cells));
+        this(id, name, cells, locked, key, lockLevel, owner, DevMap.DOOR_HEIGHT, false);
+    }
+    private Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner, int height, boolean fenceGate) {
+        super(id, "door", name, cx(cells), DevMap.FLOOR + (fenceGate ? 0.5f : 1.2f), cz(cells));
         this.cells = cells; this.locked = locked; this.key = key; this.lockLevel = lockLevel; this.owner = owner;
+        this.height = height; this.fenceGate = fenceGate;
         this.hingeAt = new float[Math.min(2, cells.length)][];
     }
+    /** A gate in a fence, as high as the fence (one block): it swings either way and can be climbed over. */
+    public static Door fenceGate(long id, String name, int[][] cells, long owner) { return new Door(id, name, cells, false, null, 1, owner, 1, true); }
 
     private static float cx(int[][] c) { float s = 0; for (int[] p : c) s += p[0] + 0.5f; return s / c.length; }
     private static float cz(int[][] c) { float s = 0; for (int[] p : c) s += p[1] + 0.5f; return s / c.length; }
@@ -92,13 +111,16 @@ public final class Door extends WorldObject {
         }
         float in = plus >= minus ? 1 : -1;
         inSide = in; this.line = line;
+        gate = plus == 0 && minus == 0;
+        // a house door hangs on the inside face of its wall (a gate on the fence line)
+        float inset = gate ? 0 : 0.5f - HALF_THICK;
         float leafW = cells.length >= 2 ? (maxA - minA + 1) / 2f : 1f;
         leafWidth = leafW;
         float h = height - 0.04f, y = DevMap.FLOOR + 0.02f + h / 2;
         for (int i = 0; i < n; i++) {
             boolean first = i == 0;
             float hingeA = first ? minA : maxA + 1;
-            float hx = ax ? hingeA : line, hz = ax ? line : hingeA;
+            float hx = ax ? hingeA : line + in * inset, hz = ax ? line + in * inset : hingeA;
             hingeAt[i] = new float[]{hx, hz};
             // the leaf runs from its hinge toward the doorway's middle: its own +x
             float ex = ax ? (first ? 1 : -1) : 0, ez = ax ? 0 : (first ? 1 : -1);
@@ -113,7 +135,7 @@ public final class Door extends WorldObject {
             float half = leafW / 2 - 0.015f;
             g.game.commands().rigidCreate(leaf[i], AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT, half, h / 2, 0.06f, LEAF_MASS,
                     hx + ex * leafW / 2, y, hz + ez * leafW / 2, qw, 0, qy, 0, 0, 0, 0, 0, 0, 0, 0.5f, 0, 0.05f, 0.6f, 0, 0, 0, MATERIAL_WOOD_DOOR, null);
-            float lo = open ? -SWING : 0, hi = open ? SWING : 0;
+            float lo = open ? lo(i) : 0, hi = open ? hi(i) : 0;
             g.game.commands().jointCreate(hinge[i], leaf[i], 0, AstrattoNative.JOINT_HINGE, AstrattoNative.JOINT_LIMITED, hx, y, hz, 0, 1, 0, lo, hi, 0, 5, 0);
             restPose(i, hx + ex * leafW / 2, y, hz + ez * leafW / 2, yaw);
         }
@@ -135,6 +157,11 @@ public final class Door extends WorldObject {
         }
         if (motorUntil > 0 && g.time > motorUntil && !closing) { friction(g); motorUntil = 0; }
         if (closing && most < 0.06f) { latch(g); closing = false; if (relock) { relock = false; setLocked(g, true); } }
+        // a free leaf pushed back into its frame and left there a moment is shut: it latches, as a real one clicks to
+        if (open && !closing && motorUntil == 0 && most < 0.05f) {
+            if (homeSince < 0) homeSince = g.time;
+            else if (g.time - homeSince > 0.6 && !blocked(g)) { open = false; latch(g); homeSince = -1; g.state.commit("DoorClosed", 0, id, jurisdiction(), 0, name + " (pushed shut)"); if (g.sfx != null) g.sfx.play("door.close", x, y, z, 0.45f); }
+        } else homeSince = -1;
         boolean wayOpen = most > 0.35f;
         if (wayOpen != cellsOpen) applyCells(g, wayOpen);
     }
@@ -187,7 +214,10 @@ public final class Door extends WorldObject {
         motorUntil = g.time + seconds;
     }
 
-    private void unlatch(Rpg g) { for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, -SWING, SWING); }
+    private void unlatch(Rpg g) { for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, lo(i), hi(i)); }
+    /** A leaf's stops, unlatched: from shut to SWING into the room (a gate, either way). */
+    private float lo(int i) { return gate ? -SWING : Math.min(inward[i] * SWING, -inward[i] * OUT); }
+    private float hi(int i) { return gate ? SWING : Math.max(inward[i] * SWING, -inward[i] * OUT); }
 
     private void latch(Rpg g) {
         for (int i = 0; i < hinge.length; i++) { g.game.commands().jointLimits(hinge[i], true, 0, 0); g.game.commands().jointMotor(hinge[i], 0, 0); }
@@ -214,12 +244,10 @@ public final class Door extends WorldObject {
             o.add(Option.when(lvl && pick, "lockpick", "Pick lock", 8, !lvl ? "You need Thieving level " + lockLevel + "." : "You need a lockpick.", r));
         } else o.add(Option.on("open", "Open", 10, r));
         if (!open && !locked && key != null && a.has(key, 1)) o.add(Option.on("lock", "Lock", 2, r));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
         switch (action) {
@@ -310,6 +338,8 @@ public final class Door extends WorldObject {
     public void setOpen(Rpg g, boolean o, Actor by, long req) {
         open = o;
         if (leaf.length == 0) spawn(g);
+        // a door (or a gate) swings away from whoever opens it, so it never swings into them: into the room from the
+        // street, out over the step from inside
         if (o && by != null) swingSign = alongXSide(by) ? 1 : -1;
         if (o) { closing = false; unlatch(g); swing(g, 0.25f); }
         else { closing = true; motorUntil = 0; }
@@ -335,7 +365,6 @@ public final class Door extends WorldObject {
         if (open && !locked) { unlatch(g); swing(g, 1.6f); }
     }
 
-    @Override public String examine(Rpg g) { return locked ? "A sturdy door with an iron lock." : open ? "A wooden door, standing open." : "A wooden door, latched shut."; }
     @Override public String inspect(Rpg g) {
         return super.inspect(g) + "\n  open=" + open + " locked=" + locked + " key=" + (key == null ? "-" : key.name) + " lockLevel=" + lockLevel
                 + String.format(" leaves=%s", java.util.Arrays.toString(angle));

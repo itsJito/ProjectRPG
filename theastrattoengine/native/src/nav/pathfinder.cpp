@@ -39,6 +39,12 @@ bool Pathfinder::pass(const VoxelWorld& w, int x, int y, int z, bool doors) {
     // open doors, unless it is sealed
     if (f & ASTRATTO_BLOCK_DOOR) return doors && !w.sealed(x, y, z);
     if (f & ASTRATTO_BLOCK_SOLID) return false;
+    // shallow water is waded (a cow into the duck pond, a person across a brook; the cost of it is in the search):
+    // liquid with no more liquid over it. Deeper water, over a body's head, stays out of bounds
+    if (f & ASTRATTO_BLOCK_LIQUID) {
+        const int above = w.get(x, y + 1, z);
+        return above == 0 || (w.defOf(above).flags & ASTRATTO_BLOCK_LIQUID) == 0;
+    }
     return (f & ASTRATTO_BLOCK_HAZARD) == 0;
 }
 

@@ -76,8 +76,8 @@ class RequestedFixesTest {
         g.player.eq.set(ItemDef.Slot.MAIN,new ItemStack(Items.SHORTBOW,1));g.player.eq.set(ItemDef.Slot.AMMO,new ItemStack(Items.BRONZE_ARROWS,3));
         assertTrue(g.combat.shoot(g.player,0,0,1));var shot=g.combat.projectiles.get(0);
         frames(3);assertNotEquals(0,shot.rigid);assertNotNull(g.lastRigids.body(shot.rigid));assertTrue(shot.z<70,"shot at "+shot.x+","+shot.y+","+shot.z+" v="+shot.vx+","+shot.vy+","+shot.vz);
-        frames(30);assertTrue(shot.done);assertEquals(0,shot.rigid,"native body released after world impact");
-        assertTrue(g.combat.projectiles.isEmpty());
+        frames(30);assertTrue(shot.done,"shot at "+shot.x+","+shot.y+","+shot.z+" v="+shot.vx+","+shot.vy+","+shot.vz+" rigid "+shot.rigid);assertEquals(0,shot.rigid,"native body released after world impact");
+        frames(2);assertFalse(g.combat.projectiles.contains(shot),"the finished shot leaves the list on the next frame (the world's other shots - a spider spitting - go on)");
     }
     @Test void spellsStartAtThePosedHandAndAnimateWithoutAStaff() {
         g.player.skills.setLevel(Skill.MAGIC,100);g.player.restore();g.player.eq.clear();

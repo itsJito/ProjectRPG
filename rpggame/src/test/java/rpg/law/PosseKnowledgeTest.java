@@ -67,7 +67,7 @@ class PosseKnowledgeTest {
             // it spares its hunters, and holds the quarry fast
             g.teleport(g.player,snare.x,DevMap.FLOOR,snare.z);
             for(int i=0;i<20;i++) assertTrue(game.tick(1f/60));
-            assertTrue(g.player.cs.frozenT>0,"the snare holds the player");
+            assertTrue(g.player.cs.frozenT>0,"the snare holds the player (sprung by "+g.state.all().stream().filter(e->e.type().equals("TrapSprung")).map(e->g.nameOf(e.actor())).toList()+" armed "+snare.armed+" removed "+snare.removed+" sprung "+snare.sprungAt+" grounded "+g.player.grounded+" y "+g.player.y+" at "+g.player.x+","+g.player.z+" snare "+snare.x+","+snare.z+")");
         }
     }
 }

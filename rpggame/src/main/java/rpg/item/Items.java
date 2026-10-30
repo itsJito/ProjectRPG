@@ -65,6 +65,8 @@ public final class Items {
     public static final ItemDef COPPER_ORE = def("copper_ore", "Copper ore", 5, 0xC07040, "Ore with copper in it.");
     public static final ItemDef TIN_ORE = def("tin_ore", "Tin ore", 5, 0xA8A8A0, "Ore with tin in it.");
     public static final ItemDef STONE_BLOCK = def("stone_block", "Quarry stone block", 9, 0x92928A, "Usable masonry cut from a supported quarry face.");
+    /** (0.2.0) what DevPalace's quarry yields: the quarry worker's calling already reckoned with it. */
+    public static final ItemDef MARBLE_BLOCK = def("marble_block", "Marble block", 24, 0xE8E4DC, "A block of white marble cut from the quarry face south of DevPalace.");
     public static final ItemDef CLAY = def("clay", "Clay", 5, 0x9C7258, "Workable clay from a dry bank.");
     public static final ItemDef CLOTH = def("cloth_roll", "Linen cloth", 12, 0xB6A78C, "Woven flax for a tailor's patterns.");
     public static final ItemDef CLOTH_HOOD = garment("cloth_hood", "Linen hood", Slot.HEAD);

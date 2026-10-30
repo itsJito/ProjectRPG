@@ -41,7 +41,6 @@ public interface Interactable {
     List<Option> options(Rpg g, Actor actor);
     /** Carries out an action now (or begins its timed work), after revalidating it. */
     Result perform(Rpg g, Actor actor, String actionId, long requestId);
-    String examine(Rpg g);
     /** A line or two for the developer inspector. */
     default String inspect(Rpg g) { return ""; }
     /** Owner entity id (0: nobody's). */

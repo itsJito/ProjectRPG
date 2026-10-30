@@ -28,5 +28,4 @@ public final class FishingNet extends Container {
     }
     @Override public Map<String,Object> save(){var m=super.save();m.put("source",source);m.put("nextCatch",nextCatch);return m;}
     @Override public void load(Rpg g,Map<String,Object> m){super.load(g,m);source=Json.lng(m,"source",0);nextCatch=Json.num(m,"nextCatch",g.state.minutes+4);}
-    @Override public String examine(Rpg g){return "A deployed lake net. It holds at most five fish; its tool and catch can be taken.";}
 }

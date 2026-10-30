@@ -47,6 +47,21 @@ public class Container extends WorldObject {
         this.contents.container = !kind.equals("grave") && !kind.equals("corpse") && !kind.equals("memorial") && !kind.equals("claim") && !kind.equals("escrow");
     }
 
+    /** The drawn chest's half extents (Gfx: a 0.94 x 0.66 x 0.64 box on the floor). */
+    public static final float CHEST_HX = 0.47f, CHEST_HY = 0.34f, CHEST_HZ = 0.32f;
+    private long solidBody;
+
+    /**
+     * (0.2.2, gamefixes: the undertaker's chest and every other had no collision) a chest is solid: a fixed box exactly
+     * its drawn size, as the bounty boards are, so bodies stand against it and it can be stood on.
+     */
+    public void solid(Rpg g) {
+        if (solidBody != 0 || g.game == null) return;
+        solidBody = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+        g.game.commands().rigidCreate(solidBody, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, CHEST_HX, CHEST_HY, CHEST_HZ, 0,
+                x, rpg.world.DevMap.FLOOR + CHEST_HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+    }
+
     /** A transient view over an actor's live inventory; never registered or serialized as a second owner. */
     protected Container(long id,String name,String kind,float x,float y,float z,long owner,Inventory contents) {
         super(id,kind,name,x,y,z);this.kind=kind;this.owner=owner;this.contents=contents;
@@ -61,15 +76,6 @@ public class Container extends WorldObject {
     }
     @Override public String label() { return name + ((kind.equals("memorial") || kind.equals("grave") && buried) ? buried ? " (Filled)" : " (Unfilled)" : locked ? " (locked)" : ""); }
 
-    /** A grave's inscription, chosen by the Honor its owner died with (GDD 3.5 memorial). */
-    public String epitaph(Rpg g) {
-        String who = g.player.name;
-        if (honor >= 66) return "\"Here lies " + who + ". The town grieves a good heart.\"";
-        if (honor >= 22) return "\"" + who + ". Remembered kindly.\"";
-        if (honor > -22) return "\"Here lies " + who + ".\"";
-        if (honor > -66) return "\"" + who + ". Few will mourn.\"";
-        return "\"" + who + ". Good riddance.\" (scratched in by another hand)";
-    }
 
     public boolean isTheft(Actor a) { return owner != 0 && owner != a.id; }
 
@@ -79,21 +85,19 @@ public class Container extends WorldObject {
         if (kind.equals("claim") || kind.equals("escrow") || kind.equals("vault")) return o;
         if (kind.equals("memorial") && !buried) {
             o.add(Option.when(g.carrying.busy(a), "bury", "Bury carried body", 10, "Carry a body to this unfilled grave first.", r));
-            o.add(Option.on("examine", "Examine", 0, r)); return o;
+            return o;
         }
         String open = kind.equals("grave") ? "Search grave" : kind.equals("cargo") ? "Search cargo" : "Open";
-        if(kind.equals("grave") && (secured||buried)) { o.add(Option.off("open",open,10,"Speak to the undertaker about this protected claim.",r));o.add(Option.on("examine","Examine",0,g.cfg.inspectRange));return o; }
+        if(kind.equals("grave") && (secured||buried)) { o.add(Option.off("open",open,10,"Speak to the undertaker about this protected claim.",r));return o; }
         if (locked) {
             o.add(Option.off("open", open, 10, "It's locked.", r));
             boolean lvl = a.skills.level(Skill.THIEVING) >= lockLevel, pick = a.has(Items.LOCKPICK, 1);
             o.add(Option.when(lvl && pick, "lockpick", "Pick lock", 9, !lvl ? "You need Thieving level " + lockLevel + "." : "You need a lockpick.", r));
         } else o.add(Option.on("open", open + (isTheft(a) ? " (owned)" : ""), 10, r));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
         if (kind.equals("claim") || kind.equals("escrow")) return Result.no("These belongings are held in custody.");
@@ -136,10 +140,22 @@ public class Container extends WorldObject {
             for (int i = 0; i < contents.size(); i++) if (contents.get(i) != null && which.test(contents.get(i))) { Result r = take(g, a, i, Integer.MAX_VALUE, g.state.newRequestId()); if (r.rejected()) return r; }
             return Result.ok();
         }
+        if (action.equals("depositcoins")) {
+            // the gold carried, into it (the bank's "Deposit Gold")
+            if (!kind.equals("vault")) return Result.no("You can't do that.");
+            int n = a.count(rpg.item.Items.COINS);
+            if (n <= 0) return Result.no("You aren't carrying any gold.");
+            ItemStack probe = new ItemStack(rpg.item.Items.COINS, n);
+            if (!contents.canAdd(probe)) return Result.no("There's no room for it.");
+            for (ItemStack coin : a.takeItems(rpg.item.Items.COINS, n)) contents.add(coin);
+            g.state.commit(g.state.newRequestId(), "ItemDeposited", a.id, id, jurisdiction(), 0, n + " x Gold coins");
+            if (a == g.player && g.sfx != null) g.sfx.ui("LootCoinSmall", 0.5f);
+            return Result.ok();
+        }
         if (action.equals("depositall")) {
             // everything carried into it (gamefixes: "Move All" at the bank) - what is worn stays worn; a bag that still
             // holds things stays carried; anything that will not fit stays in the pack
-            if (kind.equals("cargo") || kind.equals("grave")) return Result.no("You can't put things in there.");
+            if (kind.equals("grave")) return Result.no("You can't put things in there.");
             int moved = 0, left = 0;
             for (var from : a.grids()) for (int slot = 0; slot < from.size(); slot++) {
                 ItemStack s = from.get(slot);
@@ -164,7 +180,9 @@ public class Container extends WorldObject {
             var from = grids.get(gi);
             ItemStack s = from.get(slot);
             if (s == null) return Result.no("Nothing there.");
-            if (kind.equals("cargo") || kind.equals("grave")) return Result.no("You can't put things in there.");
+            // (0.2.2, gamefixes) a caravan's crate takes things like any other box - what is in it when it arrives goes
+            // into the receiving store's stock with the rest of the load
+            if (kind.equals("grave")) return Result.no("You can't put things in there.");
             ItemStack moving = s.copyWhole();
             if (!contents.accepts(moving)) return Result.no("Only an empty bag can go inside another container.");
             boolean placed = f.length >= 5 && contents.fits(moving.def, Integer.parseInt(f[2]), Integer.parseInt(f[3]), f[4].equals("1"), -1);
@@ -209,8 +227,6 @@ public class Container extends WorldObject {
 
     protected void onTaken(Rpg g) { }
 
-    @Override public String examine(Rpg g) { if (kind.equals("memorial") && !buried) return "Unfilled gravestone. A carried body may be buried here; its belongings remain in this stone."; if (buried) return name + "." + (kind.equals("grave") ? " Your original belongings are protected here; speak to the undertaker." : " The departed's possessions rest inside."); return kind.equals("grave") ? String.format("%s What you were carrying when you died. %s %d:%02d before the undertaker takes what is left.", epitaph(g),
-            secured ? "Inside the walls: nobody may touch it." : "Outside the walls: anyone may.", (int) Math.max(0, expiresAt - g.time) / 60, (int) Math.max(0, expiresAt - g.time) % 60) : owner == 0 ? "A container." : "It belongs to " + g.nameOf(owner) + "."; }
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  locked=" + locked + " contents=" + contents.stacks(); }
 
     @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("locked", locked); m.put("buried", buried); m.put("burialPlot", burialPlot); m.put("gridCells", contents.size()); m.put("items", ItemIO.inventory(contents)); if (!custodySlots.isEmpty()) m.put("custodySlots", custodySlots); return m; }

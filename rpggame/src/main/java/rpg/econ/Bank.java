@@ -9,6 +9,7 @@ import rpg.actor.Actor;
 import rpg.ai.Npc;
 import rpg.interact.Result;
 import rpg.item.Currency;
+import rpg.item.ItemDef;
 import rpg.item.ItemStack;
 import rpg.item.Items;
 import rpg.objects.Container;
@@ -204,6 +205,26 @@ public final class Bank {
         n.store(new ItemStack(Items.COINS, drawn));
         g.state.commit(req, "BankWithdrawal", n.id, Ids.TELLER, DevMap.BETA, 0, n.name + " withdrew " + drawn + " G");
         return drawn > 0 ? "withdrew " + drawn + " G" : null;
+    }
+
+    /**
+     * (0.2.2) An NPC lays goods in its vault at the counter (a full pack no store would buy from): opens an account the
+     * first time, from its purse. Returns how many went in.
+     */
+    public int depositGoods(Npc n, ItemDef d) {
+        if (refusal(n) != null) return 0;
+        if (!hasAccount(n.id) && openAccount(n, g.state.newRequestId()).rejected()) return 0;
+        int moved = 0;
+        for (Container c : vaults(n.id)) {
+            while (n.has(d, 1)) {
+                List<ItemStack> one = n.takeItems(d, Math.min(n.count(d), d.stackable ? n.count(d) : 1));
+                boolean all = true;
+                for (ItemStack s : one) { if (c.contents.add(s)) moved += s.amount; else { n.store(s); all = false; } }
+                if (!all) break;
+            }
+        }
+        if (moved > 0) g.state.commit(g.state.newRequestId(), "BankDepositGoods", n.id, Ids.TELLER, DevMap.BETA, 0, n.name + " deposited " + moved + " x " + d.name);
+        return moved;
     }
 
     // ------------------------------------------------------------------ the teller's conversation

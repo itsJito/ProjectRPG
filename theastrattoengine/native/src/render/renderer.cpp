@@ -185,7 +185,7 @@ void Renderer::preset(int level) {
     presetLevel_ = std::max(0, std::min(3, level));
     switch (presetLevel_) {
         case 0: q_.fogDiv = 4; q_.shadowRes = 1024; q_.cascades = 3; q_.shadowedLights = 0; q_.probeBudget = 3; q_.probeRays = 16; q_.volumetricSteps = 8; q_.maxLights = 48; q_.shadowDistance = 100; break;
-        case 1: q_.fogDiv = 4; q_.shadowRes = 2048; q_.cascades = 3; q_.shadowedLights = 1; q_.probeBudget = 5; q_.probeRays = 24; q_.volumetricSteps = 10; q_.maxLights = 80; q_.shadowDistance = 140; break;
+        case 1: q_.fogDiv = 4; q_.shadowRes = 2048; q_.cascades = 3; q_.shadowedLights = 1; q_.probeBudget = 5; q_.probeRays = 24; q_.volumetricSteps = 8; q_.maxLights = 80; q_.shadowDistance = 140; break;
         case 2: q_.fogDiv = 4; q_.shadowRes = 2048; q_.cascades = 4; q_.shadowedLights = 2; q_.probeBudget = 8; q_.probeRays = 32; q_.volumetricSteps = 14; q_.maxLights = 128; q_.shadowDistance = 150; break;
         default: q_.fogDiv = 2; q_.shadowRes = 4096; q_.cascades = 4; q_.shadowedLights = 6; q_.probeBudget = 20; q_.probeRays = 64; q_.volumetricSteps = 24; q_.maxLights = 224; q_.shadowDistance = 240; break;
     }
@@ -908,14 +908,15 @@ void Renderer::environment() {
     const float sx = e.sun[0] / sl, sy = e.sun[1] / sl, sz = e.sun[2] / sl;
     const float cloud = e.overcast >= 0 ? e.overcast : e.rain;
     const float day = e.daylight, clear = 1 - cloud * 0.75f;
-    const float sunK = sstep(-0.04f, 0.14f, sy) * 3.4f * clear, warm = std::max(0.0f, std::min(1.0f, sy * 2.5f));
+    // (0.2.1, gamefixes: overly harsh, bright sunlight) the sun a little softer and warmer; the sky and bounce carry more
+    const float sunK = sstep(-0.04f, 0.14f, sy) * 2.75f * clear, warm = std::max(0.0f, std::min(1.0f, sy * 2.5f));
     const float moonK = sstep(0.0f, 0.25f, -sy) * 0.085f * clear;
     // 2.3: the moon is always opposite the true sun (the light's direction is the moon's by night, so the moon's disc
     // was drawn opposite that - under the horizon - and never seen)
     moonDir_[0] = -sx; moonDir_[1] = -sy; moonDir_[2] = -sz;
     if (sunK >= moonK) {
         sunDir_[0] = sx; sunDir_[1] = sy; sunDir_[2] = sz;
-        sunCol_[0] = sunK; sunCol_[1] = sunK * (0.55f + 0.41f * warm); sunCol_[2] = sunK * (0.30f + 0.58f * warm);
+        sunCol_[0] = sunK; sunCol_[1] = sunK * (0.53f + 0.37f * warm); sunCol_[2] = sunK * (0.27f + 0.47f * warm);
     } else {
         sunDir_[0] = -sx; sunDir_[1] = -sy; sunDir_[2] = -sz;
         sunCol_[0] = moonK * 0.55f; sunCol_[1] = moonK * 0.68f; sunCol_[2] = moonK;
@@ -1196,7 +1197,9 @@ int32_t Renderer::frame(Engine* engine, astratto_render_io& io) {
             environment();
             if (voxelDirty_.empty()) for (int done = 0; done < 192; done += MAX_BATCH) probesUpdate(std::min(MAX_BATCH, 192 - done), q_.probeRays, cam_.x, cam_.z);
         } else {
-            meshColumns(engine, *w, pending_.size() > 600 ? 512 : 160);
+            // (0.2.1, gamefixes: stuttering on the larger map) in play a frame meshes a few columns, nearest first -
+            // a burst of edits (a fire, a fall of blocks) is spread over frames instead of stalling one
+            meshColumns(engine, *w, pending_.size() > 600 ? 192 : pending_.size() > 96 ? 32 : 12);
             voxelSync(*w, 48);
             environment();
             probesUpdate(q_.probeBudget, q_.probeRays, cam_.x, cam_.z);
@@ -1333,7 +1336,9 @@ void Renderer::fullscreen() { g_.BindVertexArray(fsVao_); g_.DrawArrays(TRIANGLE
 // ------------------------------------------------------------------ shadows
 void Renderer::shadowPass(VoxelWorld*) {
     const int n = q_.cascades;
-    const float nearP = 0.2f, farP = q_.shadowDistance;
+    // (0.2.1) no further than the world is drawn: past the fog bank a shadow is never seen, and the cascades' texels
+    // are better spent near the camera
+    const float nearP = 0.2f, farP = std::max(40.0f, std::min(q_.shadowDistance, cam_.viewDistance * 0.85f));
     // practical split scheme: mostly logarithmic, so the first cascade stays tight around the camera
     for (int i = 0; i < n; i++) {
         const float k = static_cast<float>(i + 1) / static_cast<float>(n);

@@ -28,7 +28,7 @@ class MenuPreviewTest {
                 Gfx.Preview preview = new Gfx.Preview();
                 preview.world = TitleStage.build(game.engine());
                 preview.dungeon = true;
-                preview.x = preview.z = 8.5f;
+                preview.x = TitleStage.STAND_X; preview.z = TitleStage.STAND_Z;
                 preview.y = DevMap.FLOOR;
                 assertTrue(game.tick(0));
                 try (Gfx gfx = new Gfx(game.engine(), window.width, window.height)) {

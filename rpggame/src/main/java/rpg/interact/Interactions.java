@@ -28,8 +28,12 @@ public final class Interactions {
     /** Every interactable: world objects and living NPCs. */
     public List<Interactable> all() {
         List<Interactable> l = new ArrayList<>();
-        for (var object : g.objects.all()) if (object.exists()) l.add(object);
+        // (0.2.2, gamefixes: the yellow marker still hovered over plants) foliage has nothing to offer since Examine went:
+        // it is never a target
+        for (var object : g.objects.all()) if (object.exists() && !(object instanceof rpg.world.Foliage.Patch)) l.add(object);
         for (var n : g.npcs) if (n.alive && n.loaded) l.add(n);
+        // monsters are in the sights too (gamefixes: the slay command could not find one; nor could Examine)
+        if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded) l.add(m);
         if (g.animals != null) for (var a : g.animals.all()) if (a.exists()) l.add(a);
         return l;
     }

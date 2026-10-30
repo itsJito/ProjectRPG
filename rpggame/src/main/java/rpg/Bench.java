@@ -37,6 +37,9 @@ final class Bench {
             new Stop("pond, evening (reflections)", 17.5f, 88f, 45f, 96f, 34f, false),
             new Stop("campfire, night (smoke, lamps)", 21f, 87.5f, 26.5f, 91.5f, 21.5f, false),
             new Stop("sprint down the street", 15f, 60f, 90f, 60f, 40f, true),
+            // (0.2.1, gamefixes: heavy stuttering on the larger map) DevPalace's forum, and a run from DevCity into it
+            new Stop("DevPalace forum, afternoon", 15f, 150f, 78f, 160f, 70f, false),
+            new Stop("sprint DevCity to DevPalace", 14f, 112f, 76.5f, 175f, 76.5f, true),
             // gamefixes: combat-heavy scenes lagged - a dozen monsters on the watch and the townsfolk, in the yard
             new Stop("battle in the yard (monsters, the watch)", 13f, 96f, 74f, 104f, 66f, false),
     };
@@ -117,8 +120,10 @@ final class Bench {
             if (shots != null) Main.shot(gfx, win.width, win.height, new java.io.File(shots, "bench-" + s.name.replaceAll("[^a-z]+", "-") + ".png"));
             double[][] rows = new double[frames][];
             int gcBefore = gcCount();
+            java.util.Arrays.fill(g.prof, 0);
             for (int i = 0; i < frames; i++) {
                 int gc0 = gcCount();
+                long[] prof0 = Rpg.PROF ? g.prof.clone() : null;
                 samples.clear(); sampling = true;
                 rows[i] = frame(g, hud, s, new double[8 + NativeRenderer.GPU_PASSES]);
                 sampling = false;
@@ -126,10 +131,23 @@ final class Bench {
                 // a hitch: what took the time
                 if (r[0] > 25) System.out.printf("  hitch at frame %d: %.1f ms = sim %.1f + draw %.1f (renderer cpu %.1f) + swap %.1f; gpu %.1f%s%n",
                         i, r[0], r[1], r[2], r[3], r[5], r[4], gcCount() > gc0 ? " (a gc ran)" : "");
+                if (Rpg.PROF) {
+                    var ns = game.engine().stats();
+                    if (r[0] > 25 && nsLast != null) System.out.printf("    native: frame %.1f ms (step %.1f), paths %d (%d expanded), sights %d, nav v%d doors %d%n", ns.lastFrameMs, ns.simMs,
+                            ns.pathRequests - nsLast.pathRequests, ns.pathExpansions - nsLast.pathExpansions, ns.sightRequests - nsLast.sightRequests, ns.navVersion, ns.sealedDoors);
+                    nsLast = ns;
+                    if (r[0] > 25) {
+                        StringBuilder top = new StringBuilder("    java:");
+                        java.util.stream.IntStream.range(0, g.prof.length).boxed().sorted((a, b) -> Long.compare(g.prof[b] - prof0[b], g.prof[a] - prof0[a])).limit(4)
+                                .forEach(k -> top.append(String.format(" %s %.1f", Rpg.PROF_NAMES[k], (g.prof[k] - prof0[k]) / 1e6)));
+                        System.out.println(top);
+                    }
+                }
                 if (r[0] > 25 && r[3] < r[2] * 0.5) printHotspots();
             }
             if (gcCount() > gcBefore) System.out.printf("  %d gc in the stop%n", gcCount() - gcBefore);
             report(s.name + (g.cfg.fixedScale() > 0 ? "" : String.format(" [scale %.2f, aiming %d fps]", gfx.renderScaleNow(), g.cfg.targetFps)), rows);
+            if (Rpg.PROF) { System.out.println("  sim by system (whole stop):"); g.profile().lines().limit(8).forEach(l -> System.out.println("    " + l)); }
             all.addAll(Arrays.asList(rows));
             g.controller.in.forward = 0; g.controller.in.sprint = false;
         }
@@ -138,6 +156,8 @@ final class Bench {
         System.out.printf("java heap: %.0f MB used of %.0f MB; gc: %s%n", (rt.totalMemory() - rt.freeMemory()) / 1048576.0, rt.totalMemory() / 1048576.0, gcLine());
         return 0;
     }
+
+    private astratto.bridge.Snapshots.Stats nsLast;
 
     /** One frame of play; with a row, its times: total, sim, draw, render cpu, gpu, swap, quads, models, then gpu by pass. */
     private double[] frame(Rpg g, Hud hud, Stop s, double[] row) {

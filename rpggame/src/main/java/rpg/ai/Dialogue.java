@@ -52,13 +52,10 @@ public final class Dialogue {
             }
             case UNDERTAKER -> {
                 if (!n.working()) break;
-                int held = g.undertaker.held();
-                if (!g.undertaker.graves().isEmpty()) d.choice("My grave is still out there. Can you fetch my things now? (" + g.undertaker.buyBackFee() + " coins)", () -> g.interact.request(g.player, n, "buyback"));
-                else if (held > 0) d.choice("I've come for my belongings (" + g.undertaker.fee() + " coins).", () -> g.interact.request(g.player, n, "reclaim"));
                 d.choice("How does this work?", () -> g.ui.dialog(new Dialog(n.name, "Fall inside the walls and the watch brings your things to me - all but anything stolen, which goes back where it came from. Fall out in the wild and you'd best get "
-                        + "back to your body quick, because anyone passing may help themselves. Either way, after ten minutes I send for what's left. " + rpg.law.Undertaker.FEE + " coins to have it back, "
-                        + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. I'll take it out of your own purse if that's all you have. "
-                        + "Can't wait? Pay me " + rpg.law.Undertaker.PROMPT + " more and I'll send for your grave straight away.")));
+                        + "back to your body quick, because anyone passing may help themselves. Either way, after ten minutes I send for what's left. What I hold of yours lies in the unfinished casket by the path: "
+                        + rpg.law.Undertaker.FEE + " coins in the box to have it back, " + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. Your own purse counts, if that's all you have. "
+                        + "Can't wait? " + rpg.law.Undertaker.PROMPT + " more in the casket and I'll send for your grave straight away.")));
             }
             case BEGGAR -> d.choice("Offer a loaf of bread.", () -> {
                 if (!g.player.has(Items.BREAD, 1) || !n.canStore(new ItemStack(Items.BREAD, 1))) { g.chat.warn("You need a loaf to spare."); return; }
@@ -121,8 +118,40 @@ public final class Dialogue {
         if (n.hunger > 0.75f) return pick(n, "Forgive me. I haven't eaten, and I have little patience left.", "I'm famished. Whatever it is, be quick.");
         if (n.fatigue > 0.85f) return pick(n, "I've been on my feet too long. What do you need?", "I'm dead on my feet. What is it?");
         String line = n.profession != null ? trade(n) : calling(n);
+        // (0.2.1, gamefixes: more dialogue variety) what they are about right now comes first when it is worth saying;
+        // DevPalace's people talk of their own city; a second word the same day is met as one
+        String doing = doing(n);
+        if (doing != null) line = doing;
+        else if (rpg.world.DevMap.PALACE.equals(n.homeJurisdiction) && Math.floorMod(n.conversations + n.id, 3) == 0) line = palace(n);
+        if (n.talkedDay == (int) (g.state.minutes / 1440) && n.conversations > 1 && doing == null)
+            line = pick(n, "You again. ", "Back so soon? ", "Still here, then. ", "Twice in a day - you must want something. ") + line;
+        n.talkedDay = (int) (g.state.minutes / 1440);
         String remark = remark(n);
         return remark == null ? line : line + " " + remark;
+    }
+
+    /** What they are in the middle of, if it shapes what they say (null: nothing worth a word). */
+    private String doing(Npc n) {
+        return switch (n.goal) {
+            case SHELTER -> pick(n, "Get in out of this rain, if you've any sense.", "Not now - I'm soaked through already.", "Rain like this, a roof is worth more than gold.");
+            case PRAY -> pick(n, "Hush. I'm at my prayers.", "A moment - let me finish.", "Come back when I've said my piece to the altar.");
+            case SOCIALIZE -> pick(n, "We were just talking. Join us, if you like.", "Oh - I was miles away, gossiping.", "You've caught us passing the time.");
+            case PATROL -> pick(n, "Walk with me, if you're talking. I've a round to keep.", "Make it quick. The round won't walk itself.");
+            case EAT -> pick(n, "Let a body eat in peace.", "Mm. Sorry - mouth full.");
+            case BANK -> pick(n, "I'm off to the bank. Coin doesn't keep itself.", "Errands. The bank won't wait.");
+            default -> null;
+        };
+    }
+
+    /** DevPalace's people on their own city: what stands in it and who rules it. */
+    private String palace(Npc n) {
+        return switch (n.role) {
+            case GUARD, LAWMAN, KNIGHT -> pick(n, "The legion keeps the gates. You'll keep to the decumanus.", "Mind yourself near the palace steps. The emperor's household is watchful.", "Disorder in the forum is answered at the basilica.");
+            case MERCHANT -> pick(n, "Everything worth having passes through the market hall sooner or later.", "Prices are fair here. The praetor sees to that.");
+            case PRIEST -> pick(n, "The temple doors are open from dawn. Come and be quiet a while.", "Leave something at the altar, if only a thought.");
+            case CIVIC -> pick(n, "The senate sits when it sits. Patience is the first civic virtue.", "The emperor hears petitions from the throne, when he is minded to.");
+            default -> pick(n, "Have you seen the forum fountain? Best water in the city.", "The baths are the only warm place on a cold night.", "Walk the cardo to the palace if you want to see grandeur. Walk it back if you want to see the rest of us.", "The temple bell, the market crowd, the legion's boots. That's DevPalace.");
+        };
     }
 
     /** A line of their trade, for the townsfolk with a profession: what the day's work is like for one of them. */
@@ -153,16 +182,19 @@ public final class Dialogue {
             case QUEST_GIVER -> pick(n, "I could use a reliable pair of hands.", "Have you time for a little paid work?", "There you are. I have a delivery to arrange.");
             case CONTACT -> pick(n, "Were you looking for me?", "If you've brought a letter, let's have it.", "I've been expecting word. Is that why you're here?");
             case FENCE -> pick(n, "Keep your voice down. What have you got?", "Names cost extra. Best leave them out.", "Show me the goods. We'll discuss the price quietly.");
-            case UNDERTAKER -> g.undertaker.held() > 0 ? "I have your belongings. Take your time; they're safe here." : pick(n, "Mind your step among the stones.", "Every name here belonged to someone. Remember that.", "If you need to make arrangements, I'll hear you out.");
+            case UNDERTAKER -> g.undertaker.held() > 0 ? "Your belongings are in the casket by the path. Leave the fee in the box." : pick(n, "Mind your step among the stones.", "Every name here belonged to someone. Remember that.", "If you need to make arrangements, I'll hear you out.");
             case FARMER -> pick(n, "Shut the gate behind you. They take any chance to wander.", "The stock eats before I do, most mornings.", "Hands away from the feed unless you're helping.", "A fox has been at the coop again. I'll have its hide.");
             case BANDIT -> pick(n, "That's close enough. Keep your hands where I can see them.", "You're on the wrong road, friend.", "Looking for trouble, or merely lost?");
             case BEGGAR -> pick(n, "A loaf to spare? I'll remember the kindness.", "The cold finds you quicker without a roof.", "Spare a thought, if not a coin.");
             case HEALER -> pick(n, "Let me see that wound. Have you eaten?", "I can share what I have. There isn't much.", "Guam for the blood, rest for the rest.");
             case PRIEST -> pick(n, "We keep their names, even when their stories are lost.", "Walk gently among the stones.", "The altar is open to anyone who comes in peace.");
-            case HUNTER -> pick(n, "The wind carries your scent farther than your footsteps.", "Never stand between a mother and her young.");
-            case FISHERMAN, MINER, CRAFTSMAN, KNIGHT -> "There is work to be done.";
+            case HUNTER -> pick(n, "The wind carries your scent farther than your footsteps.", "Never stand between a mother and her young.", "Every set of tracks is a question. I'm still answering this morning's.", "The woods are quiet when something big is near.");
+            case FISHERMAN -> pick(n, "The water's been kind this week. It won't last.", "Wet boots and an empty creel, some days.", "Fish don't care who's watching.");
+            case MINER -> pick(n, "There's ore in the hills, if you've the back for it.", "A good pick is worth more than a good friend. Some days.", "The rock gives up nothing without a fight.");
+            case CRAFTSMAN -> pick(n, "Bring me the stock and I'll bring you the work.", "Every tool on this bench has a story. Most of them involve my thumbs.", "Good work outlasts the hands that made it.");
+            case KNIGHT -> pick(n, "Keep your blade clean and your word cleaner.", "There's a road to watch. There always is.", "I serve. That's the whole of it.");
             case CIVIC -> g.bank.open() ? pick(n, "Welcome to the Bank of Gameworld. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
-                    : "We're closed just now. Come back when I'm at the counter.";
+                    : pick(n, "We're closed just now. Come back when I'm at the counter.", "The counter's shut. The vaults aren't going anywhere.", "Banking hours are over. Your coin is sleeping, as I'd like to be.");
             case SCHOLAR -> pick(n, "A story is only as sound as its witness.", "I collect accounts, not certainties. What have you seen?", "Everyone in this town has a version. I like to compare them.");
             case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");
             case MONSTER -> "...";
@@ -179,8 +211,20 @@ public final class Dialogue {
         boolean town = !rpg.world.DevMap.WILDS.equals(rpg.world.DevMap.jurisdiction(n.x, n.z));
         if (p.carryBody != 0) return watch ? "And who is that over your shoulder? Explain yourself." : pick(n, "Is that... a body? Gods.", "Who - who is that you're carrying?", "I'm not going to ask. I don't want to know.");
         if (p.hp < p.maxHp() * 0.35f) return n.role == Npc.Role.HEALER ? "You're badly hurt. Sit, before you fall." : outlaw ? "You look half dead. Easy pickings." : pick(n, "You're hurt - you should see the healer.", "You're bleeding. Get that seen to.", "Sit down before you fall down.");
+        // (0.2.2) blood they saw spilled is no mystery to them: they saw what did it
+        if (p.bloodied >= 0.4f && g.ai.bloodExplained(n, p)) {
+            var w = n.aware.get(p.id); rpg.actor.Actor by = g.actor(w.bloodBy);
+            String what = by == null ? "that" : by instanceof rpg.monster.Monster mo ? "that " + mo.kind.title.toLowerCase() : by instanceof rpg.animal.Animal an ? "that " + an.kind() : by.name;
+            return watch ? pick(n, "I saw " + what + " get you. Get yourself patched up.", "That was a nasty one. Are you standing all right?")
+                    : outlaw ? "Took a beating, didn't you?" : pick(n, "I saw what " + what + " did to you. Gods, are you all right?", "You need a healer after that.");
+        }
         if (p.bloodied >= 0.4f) return watch ? "Is that your blood, or someone else's?" : outlaw ? "Busy day?" : pick(n, "You're covered in blood!", "Is - is that blood?", "Please tell me that isn't yours.");
-        if (town && p.main() != null && p.main().damage > 0 && !watch && !outlaw && (n.conversations + n.id) % 2 == 0) return pick(n, "Put that away, would you? You're frightening people.", "There's no call for a blade in the street.");
+        if (town && g.combat.drawn(p) && !outlaw && (n.conversations + n.id) % 2 == 0) return watch ? "Weapons sheathed while you're in town. I won't ask twice." : pick(n, "Put that away, would you? You're frightening people.", "There's no call for a blade in the street.");
+        if (town && p.sheathed && p.sheathable() && watch && (n.conversations + n.id) % 5 == 0) return "Good - keep it sheathed while you're within the walls.";
+        String hurt = woundTalk(n, p, watch, outlaw);
+        if (hurt != null && (n.conversations + n.id) % 2 == 1) return hurt;
+        String gear = gearTalk(n, p, watch, outlaw);
+        if (gear != null && (n.conversations + n.id) % 4 == 2) return gear;
         if (g.law.lockdown(n.homeJurisdiction)) return watch ? "The town is shut until this is settled." : "The shops are shut and the watch is everywhere. Something's happened.";
         String monster = monsterTalk(n);
         if (monster != null && (n.conversations + n.id) % 3 != 1) return monster;
@@ -193,6 +237,34 @@ public final class Dialogue {
         String weather = weatherTalk(n);
         if (weather != null && (n.conversations + n.id) % 2 == 0) return weather;
         return (n.conversations + n.id) % 3 == 0 ? hourTalk(n) : null;
+    }
+
+    /**
+     * (0.2.2, gamefixes: more dialogue variety) What they can see of where the player is hurt - the walk, the arm held
+     * in, the knock to the head - each in their own manner.
+     */
+    private String woundTalk(Npc n, rpg.actor.Actor p, boolean watch, boolean outlaw) {
+        float[] inj = p.injury;
+        if (inj == null) return null;
+        float leg = Math.max(inj[4], inj[5]), arm = Math.max(inj[2], inj[3]);
+        if (leg > 0.35f) return n.role == Npc.Role.HEALER ? "You're limping. Sit, let me look at that leg." : outlaw ? "Limping, eh? Wouldn't get far if someone came after you." : pick(n, "You're favouring that leg.", "That's a bad limp. Did something bite you?", "Mind how you go on that leg.");
+        if (arm > 0.35f) return watch ? "That arm's no good for a sword like that. Get it seen to." : pick(n, "You're holding that arm like it's broken.", "Your arm - is it bad?");
+        if (inj[0] > 0.3f) return pick(n, "You took a knock to the head? Your eyes look wrong.", "Steady - you're swaying on your feet.");
+        if (inj[1] > 0.4f) return pick(n, "You're bent double. Was it a blade?", "Hand pressed to your side like that - you're bleeding, aren't you?");
+        return null;
+    }
+
+    /** What they make of what the player carries put away: a bow on the back, a great weapon, a shield. */
+    private String gearTalk(Npc n, rpg.actor.Actor p, boolean watch, boolean outlaw) {
+        if (!p.sheathed || p.main() == null) return null;
+        var f = p.main().family;
+        boolean hunter = n.role == Npc.Role.HUNTER;
+        if (f == rpg.item.ItemDef.Family.BOW) return hunter ? "Nice bow. What do you draw on it?" : pick(n, "A bow on your back - you a hunter?", "Bring me back a rabbit, archer.");
+        if (f == rpg.item.ItemDef.Family.CROSSBOW) return n.role == Npc.Role.KNIGHT ? "A crossbow. A coward's weapon, some say. Not me." : "Heavy thing, that crossbow, to carry about.";
+        if (f == rpg.item.ItemDef.Family.STAFF) return n.role == Npc.Role.SCHOLAR ? "A staff! Are you one of the learned, then?" : pick(n, "A staff? Are you a wizard or a shepherd?", "Mind you don't poke anyone with that staff.");
+        if (p.main().twoHanded()) return watch ? "That's a lot of steel on your back. Keep it there." : outlaw ? "Big blade. Bet it's slow." : pick(n, "That's a lot of steel to be carrying about.", "Who are you planning to fight with that?");
+        if (p.off() != null && p.off().family == rpg.item.ItemDef.Family.SHIELD) return watch ? "Sword at your hip, shield on your back. Good. That's how it's done here." : null;
+        return null;
     }
 
     /** A monster they know of: the nearest living one about (a lair close to town, something seen on the road). */
@@ -250,7 +322,9 @@ public final class Dialogue {
             case 0 -> n.profession != null ? trade(n) : calling(n);
             case 1 -> hourTalk(n);
             case 2 -> pick(n, "How's the family, " + other.name + "?", "Good to see you, " + other.name + ".", "Still alive, " + other.name + "?");
-            case 3 -> pick(n, "Prices at the store are robbery.", "Have you tried the bread at Store A? Like stone.", "The well water's gone strange.");
+            case 3 -> pick(n, "Prices at the store are robbery.", "Have you tried the bread at Store A? Like stone.", "The well water's gone strange.",
+                    "The undertaker's put a casket out by the path. Gives me the shivers.", "Did you see the farm's new gate? Mara's proud of it.",
+                    "The bank's full of fish, I heard. Someone had nowhere else to put his catch.", "The guards want every blade sheathed in town now.");
             default -> n.profession != null ? trade(n) : calling(n);
         };
     }

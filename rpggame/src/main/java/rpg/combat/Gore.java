@@ -1,6 +1,7 @@
 package rpg.combat;
 
 import astratto.bridge.AstrattoNative;
+import static astratto.bridge.AstrattoNative.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +90,9 @@ public final class Gore {
         public rpg.animal.Species species;
         public int variant;
         public float scale = 1;
+        /** A monster's part (0.2.1): drawn from its kind's own figure. */
+        public rpg.monster.MonsterKind monster;
+        public rpg.monster.MonsterKind.Breed breed;
         Limb(long body, long owner, Part part, Appearance look, float length) { this.body = body; this.owner = owner; this.part = part; this.look = look; this.length = length; }
     }
 
@@ -110,13 +114,14 @@ public final class Gore {
 
     public Gore(Rpg g) { this.g = g; }
 
-    public Wounds of(Actor a) { return wounds.computeIfAbsent(a.id, k -> new Wounds()); }
+    public Wounds of(Actor a) { Wounds w = wounds.computeIfAbsent(a.id, k -> new Wounds()); a.injury = w.hurt; return w; }
     public boolean lost(Actor a, Part p) { Wounds w = wounds.get(a.id); return w != null && w.severed[p.ordinal()]; }
 
     // ------------------------------------------------------------------ a blow lands
     /** Which part a contact point is on: by its height up the body and how far to the side of the spine it is. */
     public Part partAt(Actor v, float px, float py, float pz) {
         if (v instanceof rpg.animal.Animal an) return animalPartAt(an, px, py, pz);
+        if (v instanceof rpg.monster.Monster mo && mo.kind.form != rpg.monster.MonsterKind.Form.HUMANOID) return HitVolumes.beastPart(mo, px, py, pz);
         Part posed = HitVolumes.part(g, v, px, py, pz);
         if (posed != null) return posed;
         float h = (py - v.y) / Math.max(0.5f, v.height * (v.sneaking || v.crouched ? 0.5f : 1));
@@ -174,6 +179,20 @@ public final class Gore {
      * never heavy enough to take anything off: that is why dismemberment did not work.)
      */
     public void onHit(Actor a, Actor v, int dealt, float force, DamageType type, float px, float py, float pz, float dirX, float dirZ, boolean deadly) {
+        onHit(a, v, dealt, force, type, Spells.Element.NONE, px, py, pz, dirX, dirZ, deadly);
+    }
+
+    /**
+     * How a spell's element wounds flesh (gamefixes: magic did no visible damage, could not take a head, and a deadly spell
+     * should dismember): fire and lightning burn - a scorch where it struck and little blood; ice and wind cut and pierce
+     * like steel; earth and water batter like a club; a blood spell opens the veins. Any of them, killing, takes the part
+     * it struck clean off - a head included - and an overwhelming one tears off another besides.
+     */
+    static float magicBleed(Spells.Element e) {
+        return switch (e) { case FIRE -> 0.25f; case ELECTRIC -> 0.3f; case ICE -> 0.9f; case AIR -> 1.0f; case EARTH -> 0.6f; case WATER -> 0.35f; case BLOOD -> 1.6f; default -> 0.5f; };
+    }
+
+    public void onHit(Actor a, Actor v, int dealt, float force, DamageType type, Spells.Element element, float px, float py, float pz, float dirX, float dirZ, boolean deadly) {
         if (v.dummy || dealt <= 0) return;
         hits++;
         Part part = partAt(v, px, py, pz);
@@ -183,8 +202,14 @@ public final class Gore {
         w.hurt[part.ordinal()] += share;
         w.last = part;
         if (a != null) w.by = a.id;
-        float bleedy = switch (type) { case SLASH -> 1.2f; case PIERCE -> 1.0f; case BLUNT -> 0.25f; default -> 0f; };
+        boolean magic = type == DamageType.MAGIC;
+        float bleedy = switch (type) { case SLASH -> 1.2f; case PIERCE -> 1.0f; case BLUNT -> 0.25f; case MAGIC -> magicBleed(element); default -> 0f; };
         if (bleedy <= 0) return;
+        // fire and lightning sear where they strike: a char on the figure, smouldering at its edge
+        if (magic && (element == Spells.Element.FIRE || element == Spells.Element.ELECTRIC) && !animal) {
+            float[] at = rpg.actor.Blood.locate(v, px, py, pz);
+            v.blood.scorch((int) at[0], (int) at[1], at[2], at[3], 0.9f + Math.min(2.4f, share * 9), g.time);
+        }
         w.bleed = Math.min(2f, w.bleed + share * bleedy * (part == Part.HEAD || part == Part.TORSO ? 1.3f : 1f));
         // the spray: droplets thrown along the blow - a mist of fine drops and heavier gouts - and where they land,
         // stains: on a wall behind (streaked the way the blow went), on the floor below
@@ -212,15 +237,32 @@ public final class Gore {
         }
         // a part off: a heavy cut, or a deadly one (the player keeps their limbs unless the blow kills); animals as people,
         // a leg, a wing, the tail or the head
-        boolean cleave = type == DamageType.SLASH && part != Part.TORSO;
+        boolean[] whole = w.severed.clone();
+        boolean cleave = (type == DamageType.SLASH || magic && element != Spells.Element.WATER) && part != Part.TORSO;
         if (cleave && !w.severed[part.ordinal()]) {
-            boolean deadlyCut = deadly && cutShare >= 0.12f;
-            boolean grievous = v != g.player && !deadly && part != Part.HEAD && w.hurt[part.ordinal()] >= (animal ? 0.45f : 0.6f) && cutShare >= (part == Part.TAIL ? 0.08f : 0.16f);
+            boolean deadlyCut = deadly && cutShare >= (magic ? 0.08f : 0.12f);
+            boolean grievous = v != g.player && !deadly && !magic && part != Part.HEAD && w.hurt[part.ordinal()] >= (animal ? 0.45f : 0.6f) && cutShare >= (part == Part.TAIL ? 0.08f : 0.16f);
             if (deadlyCut || grievous) {
                 if (animal) severAnimal((rpg.animal.Animal) v, part, dirX, dirZ, a);
-                else if (part != Part.TAIL) sever(v, part, dirX, dirZ, a);
+                else if (part != Part.TAIL || v instanceof rpg.monster.Monster) sever(v, part, dirX, dirZ, a);
             }
         }
+        // a killing spell that strikes the trunk, or one far past what was needed, tears a limb off as well
+        if (magic && deadly && !animal && v != g.player && (part == Part.TORSO ? cutShare >= 0.1f : cutShare >= 0.55f)) {
+            Part[] limbs = {Part.ARM_R, Part.ARM_L, Part.LEG_R, Part.LEG_L, Part.HEAD};
+            Part extra = limbs[(int) Math.floorMod(v.id * 31 + (long) (g.time * 7), limbs.length)];
+            for (int k = 0; k < limbs.length && w.severed[extra.ordinal()]; k++) extra = limbs[(java.util.Arrays.asList(limbs).indexOf(extra) + 1) % limbs.length];
+            if (!w.severed[extra.ordinal()]) sever(v, extra, dirX, dirZ, a);
+        }
+        if (magic && (element == Spells.Element.FIRE || element == Spells.Element.ELECTRIC) && !animal) for (Part p : Part.values()) if (w.severed[p.ordinal()] && !whole[p.ordinal()] && p != Part.TORSO) charStump(v, p);
+    }
+
+    /** The stump a burning spell left is charred, not raw: a scorch where the part was. */
+    private void charStump(Actor v, Part p) {
+        int region = switch (p) { case HEAD -> rpg.actor.Blood.TORSO; case ARM_R -> rpg.actor.Blood.R_ARM; case ARM_L -> rpg.actor.Blood.L_ARM; case LEG_R -> rpg.actor.Blood.R_LEG; case LEG_L -> rpg.actor.Blood.L_LEG; default -> rpg.actor.Blood.TORSO; };
+        float vv = p == Part.HEAD ? 0.05f : 0.15f;
+        v.blood.scorch(region, rpg.actor.Blood.TOP, 0.5f, 0.5f, 1.6f, g.time);
+        v.blood.scorch(region, rpg.actor.Blood.FRONT, 0.5f, vv, 1.2f, g.time);
     }
 
     /**
@@ -343,6 +385,38 @@ public final class Gore {
     }
 
     /** A part comes off: a body of its own thrown along the blow, a gush, a scream, and what the injured can no longer do. */
+    /**
+     * Where a monster's part is and how big, for the piece cut off it: {x, y, z, length, half-thickness} - from the
+     * pose its figure was last drawn in (a humanoid's joints), from its beast zones, or from its kind's own proportions.
+     */
+    private float[] monsterPart(rpg.monster.Monster mo, Part part) {
+        if (mo.kind.form != rpg.monster.MonsterKind.Form.HUMANOID) {
+            for (float[] z : HitVolumes.zones(mo)) if ((int) z[0] == part.ordinal()) {
+                float l = (float) Math.sqrt(Math.pow(z[4] - z[1], 2) + Math.pow(z[5] - z[2], 2) + Math.pow(z[6] - z[3], 2)) + z[7];
+                return new float[]{(z[1] + z[4]) / 2, (z[2] + z[5]) / 2, (z[3] + z[6]) / 2, Math.max(0.1f, l), Math.max(0.04f, z[7] * 0.8f)};
+            }
+            return null;
+        }
+        float[] p = HitVolumes.pose(g, mo);
+        int a, c;
+        switch (part) {
+            case HEAD -> { a = RD_NECK; c = RD_HEAD; }
+            case ARM_R -> { a = RD_R_SHOULDER; c = RD_R_WRIST; }
+            case ARM_L -> { a = RD_L_SHOULDER; c = RD_L_WRIST; }
+            case LEG_R -> { a = RD_R_HIP; c = RD_R_ANKLE; }
+            case LEG_L -> { a = RD_L_HIP; c = RD_L_ANKLE; }
+            default -> { return null; }
+        }
+        var f = rpg.render.MonsterModels.of(mo.kind, mo.breed);
+        float thick = (part == Part.HEAD ? f.headHalf : 1.6f) * f.vs;
+        float len = (part == Part.HEAD ? f.headHalf * 2 : part == Part.ARM_R || part == Part.ARM_L ? f.upperArm + f.foreArm : f.thigh + f.shin) * f.vs;
+        if (p != null) return new float[]{(p[a * 3] + p[c * 3]) / 2, (p[a * 3 + 1] + p[c * 3 + 1]) / 2, (p[a * 3 + 2] + p[c * 3 + 2]) / 2, len, thick};
+        float h = part == Part.HEAD ? mo.height - len / 2 : part == Part.ARM_R || part == Part.ARM_L ? mo.height * 0.62f : len / 2;
+        float s = part == Part.ARM_R || part == Part.LEG_R ? 1 : part == Part.ARM_L || part == Part.LEG_L ? -1 : 0, rx = (float) Math.cos(mo.yaw), rz = (float) -Math.sin(mo.yaw);
+        float out = (part == Part.ARM_R || part == Part.ARM_L ? f.shoulder[0] : f.hip[0]) * f.vs * s;
+        return new float[]{mo.x + rx * out, mo.y + h, mo.z + rz * out, len, thick};
+    }
+
     public void sever(Actor v, Part part, float dirX, float dirZ, Actor by) {
         Wounds w = of(v);
         w.severed[part.ordinal()] = true;
@@ -352,7 +426,9 @@ public final class Gore {
         float rx = (float) Math.cos(v.yaw), rz = (float) -Math.sin(v.yaw);
         float side = part == Part.ARM_R || part == Part.LEG_R ? 1 : part == Part.ARM_L || part == Part.LEG_L ? -1 : 0;
         float lx, ly, lz, hx, hy, hz, len;
-        switch (part) {
+        float[] at = v instanceof rpg.monster.Monster mo ? monsterPart(mo, part) : null;
+        if (at != null) { lx = at[0]; ly = at[1]; lz = at[2]; len = at[3]; hx = hz = at[4]; hy = len / 2; }
+        else switch (part) {
             case HEAD -> { len = b.head[1] * px; lx = v.x; ly = v.y + (b.neckY() + b.head[1] / 2f) * px; lz = v.z; hx = b.head[0] * px / 2; hy = len / 2; hz = b.head[2] * px / 2; }
             case ARM_R, ARM_L -> { len = (Body.UPPER_ARM + Body.FOREARM) * px; lx = v.x + rx * side * b.shoulderX() * px; ly = v.y + b.shoulderY() * px - len / 2; lz = v.z + rz * side * b.shoulderX() * px;
                 hx = b.arm[0] * b.limb * px / 2; hy = len / 2; hz = b.arm[2] * px / 2; }
@@ -365,7 +441,9 @@ public final class Gore {
                 Math.max(0.04f, hx), Math.max(0.05f, hy), Math.max(0.04f, hz), part == Part.HEAD ? 4.5f : part == Part.ARM_R || part == Part.ARM_L ? 3.5f : 9f,
                 lx, ly, lz, (float) Math.cos(ang / 2), 0, (float) Math.sin(ang / 2), 0,
                 dirX * sp, 1.6f + rnd.nextFloat(), dirZ * sp, (rnd.nextFloat() - 0.5f) * 12, (rnd.nextFloat() - 0.5f) * 6, (rnd.nextFloat() - 0.5f) * 12, 0.7f, 0.05f, 0, null);
-        limbs.add(new Limb(body, v.id, part, v.look.copy(), len));
+        Limb cut = new Limb(body, v.id, part, v.look.copy(), len);
+        if (v instanceof rpg.monster.Monster mo) { cut.monster = mo.kind; cut.breed = mo.breed; }
+        limbs.add(cut);
         evidence(Kind.LIMB, lx, DevMap.FLOOR, lz, 0.6f, v.id, by == null ? 0 : by.id);
         // the gush
         w.spurtUntil = g.time + 6;
@@ -383,7 +461,7 @@ public final class Gore {
         if (part == Part.ARM_R) dropHeld(v, ItemDef.Slot.MAIN);
         if (part == Part.ARM_L) dropHeld(v, ItemDef.Slot.OFF);
         if (part == Part.LEG_R || part == Part.LEG_L) { v.cs.cancel(); v.cs.staggered = Math.max(v.cs.staggered, 2.5f); }
-        if (v instanceof Npc n && v.alive) { n.say(part == Part.ARM_R || part == Part.ARM_L ? "My arm!" : "My leg!", g.time + 3); n.nextThink = 0; }
+        if (v instanceof Npc n && !(v instanceof rpg.monster.Monster) && v.alive) { n.say(part == Part.ARM_R || part == Part.ARM_L ? "My arm!" : "My leg!", g.time + 3); n.nextThink = 0; }
         if (v instanceof Npc n) limbsToBody(n);
         g.state.commit("Dismembered", by == null ? 0 : by.id, v.id, DevMap.jurisdiction(v.x, v.z), 0, part.name());
     }
@@ -553,7 +631,7 @@ public final class Gore {
 
     /** A body is revived (a bandit back at camp): its wounds and lost parts heal. */
     public void healed(Actor a) {
-        wounds.remove(a.id); a.blood.clear(); a.bloodied = 0;
+        wounds.remove(a.id); a.injury = null; a.blood.clear(); a.bloodied = 0;
         limbs.removeIf(limb -> { if (limb.owner != a.id) return false; g.game.commands().release(limb.body); return true; });
         evidence.removeIf(e -> e.source == a.id && e.kind == Kind.LIMB);
     }
@@ -583,10 +661,48 @@ public final class Gore {
         }
         if (best == null) return;
         found++;
+        // (0.2.2, gamefixes) its own work: the one who struck the blow does not discover it - it stands by why it did it,
+        // or it is sorry. Blood it saw spilled (a beast mauling someone before its eyes) is no mystery to look into.
+        if (best.culprit == n.id) { ownWork(n, best); return; }
+        if (best.kind == Kind.BLOOD && g.actor(best.source) instanceof Actor hurt && g.ai.bloodExplained(n, hurt)) return;
         if (g.carrying.busy(n) || n.goal == rpg.ai.Brain.Goal.COLLECT) return;
         if (n.hunt != null && (n.hunt.source == best.source || n.hunt.target != 0)) return;
         react(n, best);
     }
+
+    /** Who struck the blow behind a person's blood or body (the player's minimap marks only searches over its own deeds). */
+    public long culpritOf(long victim) {
+        if (victim == 0) return 0;
+        for (Evidence e : evidence) if (e.source == victim && e.culprit != 0) return e.culprit;
+        return 0;
+    }
+
+    /**
+     * An NPC comes upon its own work: a body or blood it spilled itself. Whoever it had a reason for - one who struck it
+     * first, an outlaw, a known criminal, someone wanted, or the one it was set on fighting - it stands by ("had it
+     * coming"); anyone else it is shaken by, and it does not linger (no cry of murder, no search for a culprit).
+     */
+    private void ownWork(Npc n, Evidence e) {
+        if (e.kind == Kind.BLOOD) return;
+        Actor v = g.actor(e.source);
+        String name = v == null ? "them" : v.name;
+        boolean struck = v != null && n.cs.lastAttacker == v.id;
+        boolean outlaw = v instanceof Npc o && (o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE || o.role == Npc.Role.THIEF || o.hostileToPlayer);
+        boolean criminal = v != null && (n.crimeKnown(v.id) != null || g.law.bounty(v.id, n.homeJurisdiction) > 0);
+        boolean foe = v != null && n.fightTarget == v.id;
+        boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
+        String line;
+        if (struck) line = pick(n, name + " came at me first. I did what I had to.", "They swung first. Nobody can say otherwise.");
+        else if (criminal) line = law ? pick(n, "The law's been served. " + name + " knew what was coming.", name + " had a price on them. It's done.") : pick(n, name + " had it coming, after what they did.", "Justice, of a kind.");
+        else if (outlaw) line = pick(n, "One less outlaw on the road.", "That's what comes of living by the blade.");
+        else if (foe) line = pick(n, name + " wouldn't back down. It didn't have to end like this.", "I'd do it again. I think.");
+        else line = pick(n, "Gods... what have I done?", "I didn't mean - " + name + "... no.", "Forgive me. Forgive me.");
+        g.ai.say(n, line);
+        n.lastOutcome = struck || criminal || outlaw || foe ? "stood over " + name + ", justified" : "shaken over " + name + ", guilty";
+        g.state.commit("OwnWork", n.id, e.source, DevMap.jurisdiction(e.x, e.z), 0, n.lastOutcome);
+    }
+
+    private static String pick(Npc n, String... lines) { return lines[(int) Math.floorMod(n.id * 31 + (long) (n.conversations), lines.length)]; }
 
     /**
      * A body already in the law's hands is no new scene: one the watch or the undertaker is carrying, or one laid in a

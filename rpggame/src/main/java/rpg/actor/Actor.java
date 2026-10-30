@@ -53,6 +53,8 @@ public class Actor {
     /** Human physical reaction body; animal articulation has its own typed body record. */
     public long ragdoll;
     public boolean reacting, wentDown;
+    /** When Sydney last handed this body back part-way up from the ground (it stands the rest of the way animated). */
+    public double riseAt = -9;
     public double reactSince;
     /** How long a body that went down has stood steadily upright again in Sydney's hands (seconds). */
     public float uprightFor;
@@ -63,6 +65,23 @@ public class Actor {
     public boolean crouched;
     public long carryBody, carriedBy;
     public double carrySince = -99, carryLowerAt = -99, throwAt = -99;
+    /**
+     * (0.2.2, gamefixes: the sheathe system) Weapons and shield put away on the body - still equipped, drawn from their
+     * places (a blade at the hip, a bow, a staff, a great weapon or a shield on the back) - and when the last draw or
+     * sheathe began. Whatever is equipped while sheathed goes on the body too, until it is drawn.
+     */
+    public boolean sheathed;
+    public double sheatheAt = -99;
+    public static final float SHEATHE_TIME = 0.6f;
+    /** (0.2.2) How hurt each part is (Gore.Part order: head, torso, right arm, left arm, right leg, left leg), for the
+     *  figure's injured gaits; null when unhurt. */
+    public float[] injury;
+    /** When a weapon was last drawn or used (an NPC keeps it out a while after). */
+    public double armsUsedAt = -99;
+    /** Whether the hands hold what is equipped now: drawn, or still on its way to or from its place on the body. */
+    public boolean inHand(double time) { float s = (float) ((time - sheatheAt) / SHEATHE_TIME); return sheathed ? s < 0.5f : s >= 0.5f; }
+    /** Whether anything equipped in the hands could be put away. */
+    public boolean sheathable() { return main() != null || off() != null; }
     /** The throwing hand in the world, as last posed (and when); the throw being aimed; the root held still after a release. */
     public final float[] hand = new float[3];
     /**

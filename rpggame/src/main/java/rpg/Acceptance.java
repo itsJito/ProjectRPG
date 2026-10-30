@@ -281,7 +281,7 @@ public final class Acceptance {
         tp(55f, 26.5f, (float) Math.PI);
         frames(30);
         var opts = door.options(g, g.player);
-        need("the shed door offers Open and Examine", opts.stream().anyMatch(o -> o.id().equals("open") && o.enabled()) && opts.stream().anyMatch(o -> o.id().equals("examine")));
+        need("the shed door offers Open and no Examine (0.2.1: removed from the world)", opts.stream().anyMatch(o -> o.id().equals("open") && o.enabled()) && opts.stream().noneMatch(o -> o.id().equals("examine")));
         tp(55f, 34f, (float) Math.PI);
         frames(10);
         Result far = g.interact.request(g.player, door, "open");

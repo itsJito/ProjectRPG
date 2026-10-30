@@ -21,11 +21,22 @@ import rpg.world.DevMap;
  * interactable: Talk, Trade, Pickpocket, Pay bounty, Examine, each enabled or disabled with its reason.
  */
 public class Npc extends Actor implements Interactable {
+    /** Time saved up while simulated at a reduced rate far from the player (AiSystem's level of detail). */
+    /** The day morning prayers were last said (Brain.PRAY), and when this prayer began. */
+    public int prayedDay = -1;
+    public double prayStarted = -1;
+    /** The day the player last spoke with them (Dialogue's 'you again'). */
+    public int talkedDay = -1;
+    public float lodDt;
     public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC, MONSTER }
 
     public final Role role;
     /** Not before then does the bank see them again (an errand done, or the bank found shut). */
     public double bankAgain;
+    /** (0.2.2) Its pack is full: off to sell what it carries, or to bank it, before the work can go on. */
+    public boolean unloading;
+    /** (0.2.2) How long it has watched the player go about a town with a weapon drawn (seconds; negative: answered). */
+    public float drawnFor;
     /** Rank by birth, which weighs on a murder's bounty (gamefixes): commoner 400 G, noble 600 G, royal 1,000 G. */
     public enum Standing { COMMON, NOBLE, ROYAL }
     public Standing standing = Standing.COMMON;
@@ -89,6 +100,15 @@ public class Npc extends Actor implements Interactable {
     /** A confirmed identification, carried only by its eyewitness and people they actually tell. */
     public record Sighting(long witness, float x, float z, float vx, float vz, double at) {}
     public Sighting playerSighting;
+    /** A tip-off (gamefixes): a sighting of a wanted player this NPC is carrying to the watch, and when it last told one. */
+    public Sighting tip;
+    public double tippedAt = -999;
+    /** The last knock of a mender's hammer (a sound every so often while they work). */
+    public double mendKnock = -99;
+    /** Law-abiding folk: people who would tell the watch where a wanted person is (no crook, outlaw or hireling of the player's). */
+    public boolean lawAbiding() {
+        return !hostileToPlayer && summonOwner == 0 && !posse && switch (role) { case THIEF, BANDIT, BRUTE, FENCE, MONSTER -> false; default -> true; };
+    }
     public enum EmploymentState { FREE, WORKING }
     public EmploymentState employmentState() {
         return alive && loaded && !reacting && fightTarget == 0
@@ -170,6 +190,7 @@ public class Npc extends Actor implements Interactable {
         this.homeJurisdiction = DevMap.jurisdiction(x, z);
         this.team = role == Role.BANDIT || role == Role.BRUTE ? 3 : role == Role.THIEF ? 4 : 2;
         this.hostileToPlayer = role == Role.BANDIT || role == Role.BRUTE;
+        this.sheathed = true;   // (0.2.2) people go about with their weapons put away until there is a use for them
         skills.setLevel(Skill.AGILITY, defaultAgility(role));
     }
 
@@ -231,17 +252,11 @@ public class Npc extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         if (canTalk(g)) o.add(Option.on("talk", "Talk-to", 10, r));
-        if (role == Role.MERCHANT || role == Role.FENCE) {
+        if (role == Role.MERCHANT || role == Role.FENCE || g.econ.shopOf(this) != null) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
         }
-        if (role == Role.UNDERTAKER) {
-            // contextual (gamefixes): offered only when there is something of the player's to get back
-            int held = g.undertaker.held(), fee = g.undertaker.fee();
-            if (!g.undertaker.graves().isEmpty() && a == g.player) o.add(Option.on("buyback", "Buy back your gravestone items (" + g.undertaker.buyBackFee() + " coins)", 9, r));
-            else if (held > 0) o.add(Option.on("reclaim", "Reclaim belongings (" + fee + " coins)", 9, r));
-        }
-        if (role == Role.LAWMAN) {
+        if (role == Role.LAWMAN || role == Role.GUARD) {
             int b = g.law.bounty(a.id, homeJurisdiction);
             o.add(Option.when(b > 0, "pay", "Pay bounty" + (b > 0 ? " (" + b + ")" : ""), 9, "You have no bounty in " + homeJurisdiction + ".", r));
         }
@@ -250,12 +265,10 @@ public class Npc extends Actor implements Interactable {
             o.add(Option.when(lvl, "pickpocket", "Inspect pockets", 3, "You need Thieving level " + pickpocketLevel + ".", 1.6f));
             o.add(Option.when(lvl && room,"pickpocket-direct","Quick pickpocket",2,!lvl?"Your Thieving level is too low.":"Your inventory is too full.",1.6f));
         }
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         switch (action) {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
@@ -278,16 +291,6 @@ public class Npc extends Actor implements Interactable {
                 if (why != null) return Result.no(why);
                 if (a == g.player) g.ui.openShop(g.econ.shopOf(this));
                 return Result.ok();
-            }
-            case "reclaim" -> {
-                String why = dist(g, a, g.cfg.interactRange);
-                if (why != null) return Result.no(why);
-                return g.undertaker.redeem(a, this);
-            }
-            case "buyback" -> {
-                String why = dist(g, a, g.cfg.interactRange);
-                if (why != null) return Result.no(why);
-                return g.undertaker.buyBack(a, this);
             }
             case "pay" -> {
                 String why = dist(g, a, g.cfg.interactRange);
@@ -388,9 +391,6 @@ public class Npc extends Actor implements Interactable {
         return Result.ok();
     }
 
-    @Override public String examine(Rpg g) {
-        return name + ", " + title.toLowerCase() + ". Level " + skills.combatLevel() + (crimeKnown(g.player.id) != null ? ". They eye you with suspicion." : ".");
-    }
 
     @Override public String inspect(Rpg g) {
         return String.format("%s #%d (%s) at (%.1f, %.1f) hp %.0f/%.0f %s", name, id, role, x, z, hp, maxHp(), loaded ? "loaded" : "UNLOADED (abstract)");
@@ -399,5 +399,4 @@ public class Npc extends Actor implements Interactable {
     @Override public long id() { return id; }
     @Override public long owner() { return 0; }
 
-    public boolean isQuestNpc() { return id == Ids.QUEST_GIVER || id == Ids.CONTACT; }
 }

@@ -66,7 +66,7 @@ public final class Decals {
         default int lining(int x, int y, int z, int d) { return -1; }
     }
 
-    private static final int PATCH = 16, VF = 10, MAX_DYNAMIC = 640;
+    private static final int PATCH = 16, VF = 10, MAX_DYNAMIC = 2048;
 
     private static final class Patch { int version, vao, vbo, verts, nat; boolean built; float[] data; int n; }
 
@@ -90,6 +90,9 @@ public final class Decals {
     // ---- dynamic ring: per decal 6 vertices + {born, life}
     private final float[] dyn = new float[MAX_DYNAMIC * 6 * VF];
     private final float[] dynBorn = new float[MAX_DYNAMIC], dynLife = new float[MAX_DYNAMIC];
+    /** The block each mark lies on (packed cell): a block broken away takes its marks with it ({@link #detach}). */
+    private final long[] dynCell = new long[MAX_DYNAMIC];
+    private static long cell(int x, int y, int z) { return ((long) (x & 0xFFFFF) << 40) | ((long) (y & 0xFFFFF) << 20) | (z & 0xFFFFF); }
     private int dynNext, dynLive;
     private final FloatBuffer dynBuf = MemoryUtil.memAllocFloat(MAX_DYNAMIC * 6 * VF);
     public float time;
@@ -320,6 +323,7 @@ public final class Decals {
         dynNext = (dynNext + 1) % MAX_DYNAMIC;
         dynLive = Math.min(MAX_DYNAMIC, dynLive + 1);
         dynBorn[slot] = time; dynLife[slot] = life;
+        dynCell[slot] = cell((int) Math.floor(x - nx * 0.1f), (int) Math.floor(y - ny * 0.1f), (int) Math.floor(z - nz * 0.1f));
         float[][] c4 = {{-1, -1, 0, 1}, {1, -1, 1, 1}, {1, 1, 1, 0}, {-1, 1, 0, 0}};
         int[] order = {0, 1, 2, 0, 2, 3};
         int o = slot * 6 * VF;
@@ -331,6 +335,12 @@ public final class Decals {
     }
 
     public int dynamicCount() { int n = 0; for (int i = 0; i < MAX_DYNAMIC; i++) if (dynLife[i] > 0 && time - dynBorn[i] < dynLife[i]) n++; return n; }
+    /** The block at (x, y, z) is gone: the marks laid on its faces (soot, blood) go with it rather than hang in the air. */
+    public int detach(int x, int y, int z) {
+        long c = cell(x, y, z); int n = 0;
+        for (int i = 0; i < MAX_DYNAMIC; i++) if (dynLife[i] > 0 && dynCell[i] == c) { dynLife[i] = 0; n++; }
+        return n;
+    }
     public void clearDynamic() { java.util.Arrays.fill(dynLife, 0); dynLive = 0; }
 
     // ------------------------------------------------------------------ 2.0: the engine's renderer

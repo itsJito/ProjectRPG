@@ -292,7 +292,6 @@ public final class ItemActions {
             public boolean exists() { return a.alive; }
             public List<Option> options(Rpg g, Actor x) { return List.of(); }
             public Result perform(Rpg g, Actor x, String id, long r) { return Result.no(null); }
-            public String examine(Rpg g) { return ""; }
         };
     }
 }

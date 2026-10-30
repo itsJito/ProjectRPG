@@ -50,6 +50,16 @@ public final class Economy {
     public Shop shopA, shopB;
     /** The fence's stock (GDD 3.3 Fence): goods bought quietly, sold quietly; what is stolen stays stolen. */
     public Shop fence;
+    /**
+     * The blacksmith's rack at the anvil (gamefixes: she waited for supplies most of the day - with the store's shelves
+     * full of tools and its purse empty, nothing she made could be sold, so she made nothing): what the store will not
+     * take she sets out here and sells to whoever comes to the forge.
+     */
+    public Shop forge;
+    /** DevPalace's market hall (0.2.0): the trader Flavia's counter. */
+    public Shop macellum;
+    /** Where someone of a town sells what they gather: their own kingdom's market. */
+    public Shop localShop(Npc n) { return DevMap.PALACE.equals(n.homeJurisdiction) ? macellum : DevMap.BETA.equals(n.homeJurisdiction) ? shopB : shopA; }
     public final List<Shipment> shipments = new ArrayList<>();
     public long sales, purchases, deliveries, losses;
 
@@ -59,6 +69,10 @@ public final class Economy {
         shopA = new Shop(Ids.MERCHANT_A, "Store A", DevMap.ALPHA, DevMap.SHOP_A_COUNTER[0], DevMap.SHOP_A_COUNTER[1] + 2.2f);
         shopB = new Shop(Ids.MERCHANT_B, "Store B", DevMap.BETA, DevMap.SHOP_B_COUNTER[0] + 2.2f, DevMap.SHOP_B_COUNTER[1]);
         fence = new Shop(Ids.FENCE, "Silas's crates", DevMap.BETA, DevMap.FENCE_POST[0], DevMap.FENCE_POST[1] - 1.2f);
+        macellum = new Shop(Ids.MACELLUM, "The Macellum", DevMap.PALACE, rpg.world.Expanse.MERCHANT_POST[0] - 1.6f, rpg.world.Expanse.MERCHANT_POST[1]);
+        stock(macellum, Items.BREAD, 6, 10); stock(macellum, Items.RELIGIOUS_WINE, 4, 6); stock(macellum, Items.TROUT, 4, 8); stock(macellum, Items.BERRIES, 3, 8);
+        stock(macellum, Items.get("iron_sword"), 1, 1); stock(macellum, Items.get("iron_shield"), 1, 1); stock(macellum, Items.FISHING_ROD, 1, 2); stock(macellum, Items.get("gold_ring"), 1, 1);
+        forge = new Shop(Ids.CRAFTSMAN, "The forge rack", DevMap.jurisdiction(DevMap.ANVIL_AT[0], DevMap.ANVIL_AT[1]), DevMap.ANVIL_AT[0] + 0.5f, DevMap.ANVIL_AT[1] + 1.7f);
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
@@ -80,8 +94,9 @@ public final class Economy {
         if (n > 0 && s.stock.add(new ItemStack(d, n, s.merchant, false, s.merchant))) g.state.mint(d, n);
     }
 
-    public Shop shopOf(Npc merchant) { return merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : null; }
-    public boolean isFence(Shop s) { return s == fence; }
+    public Shop shopOf(Npc merchant) { return merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
+    /** Whether this shop is a craftsman's own rack (sold from where they work, not a counter they keep all day). */
+    public boolean rack(Shop s) { return s == forge; }
     public Npc merchant(Shop s) { return g.actor(s.merchant) instanceof Npc n ? n : null; }
     public float[] counterSpot(Shop s) { return new float[]{s.counterX, s.counterZ}; }
 
@@ -118,8 +133,9 @@ public final class Economy {
         Shop s = shopOf(merchant);
         if (s == null) return "They have nothing to trade.";
         if (!merchant.alive) return "They're dead.";
-        if (!merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
-            return merchant.name + " is off duty. Come back when they're working.";
+        if (rack(s) ? !merchant.working() || Math.hypot(merchant.x - s.counterX, merchant.z - s.counterZ) > 9
+                : !merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
+            return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work." : " is off duty. Come back when they're working.");
         if (s == fence) {
             // a fence deals with the wanted and the known alike - but never under the eyes of the law, and never with
             // someone who has turned on him
@@ -193,11 +209,42 @@ public final class Economy {
     }
 
     /** An NPC producer sells what it gathered: the goods go into stock, the merchant's coins pay its wages. */
+    /** Whether a shop would take one of a thing off someone now: its merchant there and able to pay, and room on the shelf. */
+    public boolean buys(Shop s, ItemDef d) {
+        Npc m = merchant(s);
+        return m != null && m.alive && !glut(s, d) && m.has(Items.COINS, sellPrice(s, d)) && s.stock.canAdd(new ItemStack(d, 1, s.merchant, false, 0));
+    }
+    /**
+     * Shelves already full of a thing: twice what the shop likes to keep (gamefixes: the merchant bought every berry
+     * brought to him until his purse was empty, and then could pay no one - the smith stood idle with her wares). He
+     * buys no more of it in bulk until some is sold; his coin goes on what he is short of.
+     */
+    public boolean glut(Shop s, ItemDef d) { return s != fence && s.stock.count(d) >= Math.max(3, s.target.getOrDefault(d.id, 4) * 2); }
+
+    /**
+     * A sale between two people at the price the shop would have paid the seller (gamefixes: the blacksmith waited for
+     * supplies all day while the miner sat on his ore - the shop had no coin left to buy it with). Returns how many changed hands.
+     */
+    public int trade(Npc seller, Npc buyer, ItemDef d, int n) {
+        int price = sellPrice(shopA, d), sold = 0;
+        for (int i = 0; i < n && seller.has(d, 1) && buyer.has(Items.COINS, price * (sold + 1)); i++) {
+            if (!buyer.canStore(new ItemStack(d, 1))) break;
+            for (ItemStack one : seller.takeItems(d, 1)) { one.owner = buyer.id; buyer.store(one); }
+            sold++;
+        }
+        if (sold > 0) {
+            buyer.takeItems(Items.COINS, price * sold);
+            seller.store(new ItemStack(Items.COINS, price * sold));
+            g.state.commit("Trade", seller.id, buyer.id, DevMap.jurisdiction(seller.x, seller.z), 0, seller.name + " sold " + sold + " x " + d.name + " to " + buyer.name + " for " + price * sold);
+        }
+        return sold;
+    }
+
     public int sellToShop(Npc seller, Shop s, ItemDef d, int n) {
         Npc m = merchant(s);
         if (m == null || !m.alive) return 0;
         int sold = 0, pay = 0;
-        for (int i = 0; i < n && seller.has(d, 1); i++) {
+        for (int i = 0; i < n && seller.has(d, 1) && !glut(s, d); i++) {
             int p = sellPrice(s, d);
             if (!m.has(Items.COINS, pay + p)) break;
             ItemStack one = new ItemStack(d, 1, s.merchant, false, seller.id);
@@ -284,6 +331,8 @@ public final class Economy {
         m.put("a", ItemIO.inventory(shopA.stock));
         m.put("b", ItemIO.inventory(shopB.stock));
         m.put("fence", ItemIO.inventory(fence.stock));
+        m.put("forge", ItemIO.inventory(forge.stock));
+        m.put("macellum", ItemIO.inventory(macellum.stock));
         List<Object> sh = new ArrayList<>();
         for (Shipment s : shipments) {
             Map<String, Object> o = new HashMap<>();
@@ -300,6 +349,8 @@ public final class Economy {
         ItemIO.inventory(shopA.stock, astratto.util.Json.list(m, "a"));
         ItemIO.inventory(shopB.stock, astratto.util.Json.list(m, "b"));
         if (astratto.util.Json.list(m, "fence") != null) ItemIO.inventory(fence.stock, astratto.util.Json.list(m, "fence"));
+        if (astratto.util.Json.list(m, "forge") != null) ItemIO.inventory(forge.stock, astratto.util.Json.list(m, "forge"));
+        if (astratto.util.Json.list(m, "macellum") != null) ItemIO.inventory(macellum.stock, astratto.util.Json.list(m, "macellum"));
         for (Shipment s : shipments) g.objects.everything().remove(s.crate);
         shipments.clear();
         List<Object> sh = astratto.util.Json.list(m, "shipments");

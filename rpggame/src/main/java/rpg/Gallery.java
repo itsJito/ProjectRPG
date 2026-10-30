@@ -89,6 +89,10 @@ final class Gallery {
         if ("monsters".equals(System.getenv("RPG_GALLERY_ONLY"))) { monsterSheets(); return 0; }
         // RPG_GALLERY_ONLY=summons: allies called over and over with the renderer running (gamefixes: the familiars crash)
         if ("summons".equals(System.getenv("RPG_GALLERY_ONLY"))) { summonStress(); return 0; }
+        // RPG_GALLERY_ONLY=brawl: the player punches a bandit in DevTown's street with the whole game drawn (0.2.2: a crash)
+        if ("brawl".equals(System.getenv("RPG_GALLERY_ONLY"))) { brawlStress(); return 0; }
+        // RPG_GALLERY_ONLY=sheathe: each loadout put away (back three-quarters and side), the draw filmed on threes
+        if ("sheathe".equals(System.getenv("RPG_GALLERY_ONLY"))) { sheatheShots(); return 0; }
         // RPG_GALLERY_ONLY=levelup: the Holy Light filmed on threes, out of a fight (with the cheer) and on a combat level
         if ("levelup".equals(System.getenv("RPG_GALLERY_ONLY"))) { levelUpShots(); return 0; }
         // RPG_GALLERY_ONLY=splash: the player dropped into the pond from a height, filmed on threes
@@ -158,11 +162,18 @@ final class Gallery {
         if ("daycycle".equals(System.getenv("RPG_GALLERY_ONLY"))) { dayCycle(); return 0; }
         // RPG_GALLERY_ONLY=interiorlight: a still view inside a house by night, dusk and day, measured for flicker
         if ("interiorlight".equals(System.getenv("RPG_GALLERY_ONLY"))) { interiorLight(); return 0; }
+        // RPG_GALLERY_ONLY=wallflicker: DevCity's buildings from outside, the camera still and then drifting, measured frame to frame
+        if ("wallflicker".equals(System.getenv("RPG_GALLERY_ONLY"))) { wallFlicker(); return 0; }
         if ("creator".equals(System.getenv("RPG_GALLERY_ONLY"))) { creatorShots(); return 0; }
         // RPG_GALLERY_ONLY=titledelete: the title screen with three profiles (in a scratch folder), one deleted, frame times kept
         if ("titledelete".equals(System.getenv("RPG_GALLERY_ONLY"))) { titleDelete(); return 0; }
+        if ("title".equals(System.getenv("RPG_GALLERY_ONLY"))) { titleShots(); return 0; }
         // RPG_GALLERY_ONLY=burn: the player set alight and filmed from the front each second (scorches and ash), then put out
         if ("burn".equals(System.getenv("RPG_GALLERY_ONLY"))) { burnShots(); return 0; }
+        // RPG_GALLERY_ONLY=wounds: a townsman struck by arrows and by each kind of spell, then killed by one (gore, the head)
+        if ("wounds".equals(System.getenv("RPG_GALLERY_ONLY"))) { woundShots(); return 0; }
+        // RPG_GALLERY_ONLY=palace: DevPalace and the 0.2.0 lands from the ground and from the air
+        if ("palace".equals(System.getenv("RPG_GALLERY_ONLY"))) { palaceShots(); return 0; }
         // RPG_GALLERY_ONLY=death: the player cut down in town, the death watched through, then the grave on the map
         if ("death".equals(System.getenv("RPG_GALLERY_ONLY"))) { deathShots(); return 0; }
         if ("npc-deaths".equals(System.getenv("RPG_GALLERY_ONLY"))) { npcDeathShots(); return 0; }
@@ -175,6 +186,8 @@ final class Gallery {
         if ("figures".equals(System.getenv("RPG_GALLERY_ONLY"))) { figureShots(); return 0; }
         if ("menus".equals(System.getenv("RPG_GALLERY_ONLY"))) { menuShots(); creatorShots(); return 0; }
         if ("gear".equals(System.getenv("RPG_GALLERY_ONLY"))) { gearShots(); heldShots(); return 0; }
+        // RPG_GALLERY_ONLY=armor: full armour sets worn over loose base clothes (a hooded robe, a skirt), all round, standing and walking
+        if ("armor".equals(System.getenv("RPG_GALLERY_ONLY"))) { armorShots(); return 0; }
         if ("items".equals(System.getenv("RPG_GALLERY_ONLY"))) { itemSheet(); return 0; }
         if ("gore".equals(System.getenv("RPG_GALLERY_ONLY"))) { goreShots(); return 0; }
         // RPG_GALLERY_ONLY=scenery: the grove, the pond and the street at several hours (leaves, shadows, water, haze)
@@ -262,10 +275,13 @@ final class Gallery {
     private void locomotionShots(String tag) {
         g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, null);
         g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null);
-        for (String gait : new String[]{"walk", "jog", "sprint"}) {
+        // RPG_LOCO_GAITS=jog,sprint films only those (and skips the stop and turn sheets)
+        String only = System.getenv("RPG_LOCO_GAITS");
+        for (String gait : only != null ? only.split(",") : new String[]{"walk", "jog", "sprint", "sneak"}) {
             g.controller.in.forward = 0;
             g.controller.in.sprint = false;
             g.controller.jogging = false;
+            g.player.sneaking = false;
             place(54.5f, 64.5f, (float) -Math.PI / 2);
             frames(30);
             g.player.stamina = g.player.maxStamina();
@@ -275,8 +291,11 @@ final class Gallery {
             film(tag + "-locomotion-" + gait, 72, i -> {
                 g.controller.in.forward = 1;
                 g.controller.in.sprint = gait.equals("sprint");
+                g.controller.in.sneak = gait.equals("sneak");
             }, a -> side(a, -4.6f), 60);
+            g.controller.in.sneak = false;
         }
+        if (only != null) return;
         // a sprint stopped short (gamefixes: the feet kicked outward): seen from the side and from behind
         for (String view : new String[]{"side", "behind"}) {
             g.controller.in.forward = 0; g.controller.in.sprint = false; g.controller.jogging = false;
@@ -386,6 +405,33 @@ final class Gallery {
 
     /** The character creator as the player sees it, for a few looks (each shot after the figure has settled). */
     /** A shield and a sword in hand: standing, walking and guarding, from the front, the side, and through the eyes. */
+    /** (0.2.1, gamefixes: armour clipped through the base clothes) every set over the loosest clothes, from all sides. */
+    private void armorShots() {
+        for (var n : g.npcs) g.ai.unload(n);
+        for (var m : new ArrayList<>(g.monsters.all())) g.ai.unload(m);
+        int robeTop = 0, robeLegs = 0;
+        for (int i = 0; i < 64; i++) if (rpg.render.Outfit.top(i).detail() == rpg.render.Outfit.T_HOOD) { robeTop = i; break; }
+        for (int i = 0; i < 64; i++) if (rpg.render.Outfit.legs(i).kind() == rpg.render.Outfit.L_ROBE) { robeLegs = i; break; }
+        String[][] sets = {{"iron_body", "iron_legs", "iron_helm"}, {"steel_body", "steel_legs", "steel_helm"}, {"chainmail_body", "chainmail_legs", "cloth_hood"}};
+        java.util.List<BufferedImage> tiles = new ArrayList<>();
+        java.util.List<String> labels = new ArrayList<>();
+        for (String[] set : sets) {
+            g.player.look.top = robeTop; g.player.look.bottom = robeLegs;
+            for (var slot : rpg.item.ItemDef.Slot.values()) g.player.eq.set(slot, null);
+            for (String id : set) { var d = rpg.item.Items.find(id); if (d != null) g.player.eq.set(d.slot, new rpg.item.ItemStack(d, 1)); }
+            for (String id : new String[]{"leather_boots", "leather_gloves"}) { var d = rpg.item.Items.find(id); if (d != null) g.player.eq.set(d.slot, new rpg.item.ItemStack(d, 1)); }
+            place(64.5f, 62.5f, (float) Math.PI);
+            frames(40);
+            tiles.add(capture(front(g.player, 3.6f))); labels.add(set[0] + " front");
+            tiles.add(capture(side(g.player, 3.6f))); labels.add(set[0] + " side");
+            tiles.add(capture(front(g.player, -3.6f))); labels.add(set[0] + " back");
+            g.controller.in.forward = 1; frames(20);
+            tiles.add(capture(side(g.player, 3.8f))); labels.add(set[0] + " walk");
+            g.controller.in.forward = 0; frames(20);
+        }
+        sheet("armor-sets", tiles, labels, 4);
+    }
+
     private void gearShots() {
         for (var n : g.npcs) g.ai.unload(n);
         g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("iron_sword"), 1));
@@ -559,7 +605,7 @@ final class Gallery {
         g.state.minutes = 13 * 60;
         place(55.5f, 12.5f, (float) Math.PI);
         frames(30);
-        for (Hud.Scene sc : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.CHARACTER, Hud.Scene.SKILLS, Hud.Scene.JOURNAL, Hud.Scene.MAGIC, Hud.Scene.MAP}) {
+        for (Hud.Scene sc : new Hud.Scene[]{Hud.Scene.INVENTORY, Hud.Scene.CHARACTER, Hud.Scene.SKILLS, Hud.Scene.JOURNAL, Hud.Scene.MAGIC, Hud.Scene.FAITH, Hud.Scene.MAP}) {
             hud.go(sc);
             reviewUi("ui-" + sc.name().toLowerCase());
             hud.closeAll();
@@ -648,10 +694,21 @@ final class Gallery {
         for (Object[] v : views) adapted((float[]) v[1], (String) v[0]);
     }
 
+    /** (0.2.3) The title shot alone, a second apart, to judge the closer lens, its sway and the floor fog. */
+    private void titleShots() {
+        var preview = new Gfx.Preview();
+        preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = rpg.world.TitleStage.STAND_X; preview.y = DevMap.FLOOR; preview.z = rpg.world.TitleStage.STAND_Z;
+        var title = new rpg.ui.TitleScreen(Main.VERSION);
+        for (int i = 0; i <= 180; i++) {
+            gfx.title(preview, Main.defaultLook(), win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1f / 60, false, false); ui.end(); gfx.frame(win.width, win.height);
+            if (i % 60 == 0 && i > 0) Main.shot(gfx, win.width, win.height, new File(shots, "title-" + i / 60 + ".png"));
+        }
+    }
+
     /** Character layout and first-person weapon poses, captured through the normal scene renderer. */
     private void releasePolishShots() {
         var preview = new Gfx.Preview();
-        preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
+        preview.world = rpg.world.TitleStage.build(game.engine()); preview.dungeon = true; preview.x = rpg.world.TitleStage.STAND_X; preview.y = DevMap.FLOOR; preview.z = rpg.world.TitleStage.STAND_Z;
         var title = new rpg.ui.TitleScreen(Main.VERSION);
         for (int i = 0; i < 30; i++) { gfx.title(preview, Main.defaultLook(), win.width, win.height, 1f / 60, i / 60.0); ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1f / 60, false, false); ui.end(); gfx.frame(win.width, win.height); }
         Main.shot(gfx, win.width, win.height, new File(shots, "title.png"));
@@ -747,7 +804,7 @@ final class Gallery {
             return;
         }
         var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
-        var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+        var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x = rpg.world.TitleStage.STAND_X;preview.y=DevMap.FLOOR;preview.z = rpg.world.TitleStage.STAND_Z;
         // Reproduce the consumed click that opened Settings, then exercise next frame's input path.
         ui.consumed=true;Main.mouse(ui,new astratto.platform.Input());ui.mx=1000;ui.my=232;ui.click=true;
         gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height);
@@ -766,14 +823,16 @@ final class Gallery {
             { long s0 = System.nanoTime(); new rpg.audio.Sfx(game); System.out.printf("[titledelete] a sound bank built (its recordings decoded at launch) in %.1f ms%n", (System.nanoTime() - s0) / 1e6); }
             var title = new rpg.ui.TitleScreen(Main.VERSION);
             title.sound = n -> { long s0 = System.nanoTime(); rpg.audio.Sfx.shared(game).ui(n, 0.5f); System.out.printf("[titledelete] sound %s %.1f ms%n", n, (System.nanoTime() - s0) / 1e6); };
-            var stage = new Gfx.Preview(); stage.world = rpg.world.TitleStage.build(game.engine()); stage.dungeon = true; stage.x = 8.5f; stage.y = DevMap.FLOOR; stage.z = 8.5f;
+            var stage = new Gfx.Preview(); stage.world = rpg.world.TitleStage.build(game.engine()); stage.dungeon = true; stage.x = rpg.world.TitleStage.STAND_X; stage.y = DevMap.FLOOR; stage.z = rpg.world.TitleStage.STAND_Z;
             double worst = 0, sum = 0; int n = 0;
             for (int f = 0; f < 420; f++) {
                 long t0 = System.nanoTime();
                 game.tick(1 / 60f);
                 ui.click = false; ui.mx = 900; ui.my = 900;
-                if (f == 120) { ui.mx = 300; ui.my = 214 + 82 * count + 66 + 18; ui.click = true; }       // Delete profile
-                if (f == 160) { ui.mx = 150; ui.my = 320; ui.click = true; }       // Delete for good
+                float menuX = win.width - 64 - 420;   // (0.2.1) the menu is on the right now
+                if (f == 120) { ui.mx = menuX + 236; ui.my = 214 + 82 * count + 66 + 18; ui.click = true; }       // Delete profile
+                if (f == 160) { ui.mx = menuX + 86; ui.my = 320; ui.click = true; }       // Delete for good
+                if (f == 230) { ui.mx = 155; ui.my = win.height - 75; ui.click = true; }  // Updates
                 gfx.title(stage, title.selected == null ? null : title.selected.look, win.width, win.height, 1 / 60f, g.time);
                 ui.begin(gfx.cmd); title.draw(ui, win.width, win.height, 1 / 60f, false, false); ui.end();
                 gfx.frame(win.width, win.height);
@@ -781,6 +840,7 @@ final class Gallery {
                 if (f > 30) { worst = Math.max(worst, ms); sum += ms; n++; }
                 if (f >= 155 && f < 200 || ms > 50) System.out.printf("[titledelete] frame %d %.1f ms profiles %d selected %s%n", f, ms, title.profiles().size(), title.selected == null ? "-" : title.selected.name);
                 if (f == 150 || f == 300) Main.shot(gfx, win.width, win.height, new File(shots, "titledelete-" + f + ".png"));
+                if (f == 260) Main.shot(gfx, win.width, win.height, new File(shots, "title-updates.png"));
             }
             System.out.printf("[titledelete] mean %.1f ms, worst %.1f ms, %d profiles left%n", sum / n, worst, title.profiles().size());
         } catch (java.io.IOException e) { throw new java.io.UncheckedIOException(e); }
@@ -806,6 +866,100 @@ final class Gallery {
         float yaw = g.player.yaw; g.player.yaw += (float) Math.PI;
         tiles.add(capture(front(g.player, 2.2f))); labels.add("its back"); g.player.yaw = yaw;
         sheet("burn", tiles, labels, 4);
+        // a wooden wall set alight: soot spreading over its faces as it burns, before it chars through
+        tiles.clear(); labels.clear();
+        int wx = DevMap.SHED_X0, wz = (DevMap.SHED_Z0 + DevMap.SHED_Z1) / 2;
+        for (int dz = 0; dz < 7; dz++) if (rpg.world.Blocks.material(g.vox.block(wx, DevMap.FLOOR + 1, wz - dz)) == rpg.world.Blocks.Material.WOOD && rpg.world.Blocks.material(g.vox.block(wx, DevMap.FLOOR, wz - dz)) == rpg.world.Blocks.Material.WOOD) { wz -= dz; break; }
+        place(wx - 6.5f, wz + 0.5f, (float) Math.PI / 2);
+        float[] cam = {wx - 3.2f, DevMap.FLOOR + 1.7f, wz + 2.2f, wx, DevMap.FLOOR + 1.2f, wz + 0.5f};
+        System.out.println("[burn] wall block " + g.vox.block(wx, DevMap.FLOOR + 1, wz) + " material " + rpg.world.Blocks.material(g.vox.block(wx, DevMap.FLOOR + 1, wz)));
+        tiles.add(capture(cam)); labels.add("the wall");
+        for (int sec = 0; sec < 16; sec++) {
+            for (int i = 0; i < 60; i++) { if (sec < 3 && i % 30 == 0) g.chemistry.emit(null, astratto.bridge.AstrattoNative.CHEM_FIRE, wx - 0.3f, DevMap.FLOOR + 0.6f, wz + 0.5f, 0.8f, 3, 0.6f); step(); }
+            if (sec % 3 == 2) { tiles.add(capture(cam)); labels.add("burning " + (sec + 1) + " s, " + g.chemistry.sootCount + " soot"); }
+            if (sec == 2) { int k = 0; for (var st : g.chemistry.soot) if (k++ < 6) System.out.println("[burn] soot " + st); long burning = g.chemistry.active.stream().filter(c -> (c.state() & astratto.bridge.AstrattoNative.CHEM_BURNING) != 0).count(); System.out.println("[burn] burning sensors " + burning + " of " + g.chemistry.active.size());
+                for (var c : g.chemistry.active) if ((c.state() & astratto.bridge.AstrattoNative.CHEM_BURNING) != 0 && k++ < 12) System.out.println("[burn] sensor " + c.id() + " at " + c.x() + "," + c.y() + "," + c.z() + " block " + c.originalBlock()); }
+        }
+        sheet("burn-wall", tiles, labels, 4);
+    }
+
+    /** DevPalace and the new lands (0.2.0): its gate, forum, temple, palace, basilica, baths, a house; the wood, the lake, the lodge. */
+    private void palaceShots() {
+        g.state.minutes = 10 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        float f = DevMap.FLOOR;
+        Object[][] views = {
+                {new float[]{118f, f + 9f, 73.5f, 140f, f + 3f, 73.5f}, "the west gate from the DevCity road"},
+                {new float[]{146f, f + 6f, 96f, 162f, f + 2f, 86f}, "the forum and its fountain"},
+                {new float[]{159.5f, f + 3f, 79f, 159.5f, f + 5f, 62f}, "the temple from the forum"},
+                {new float[]{159.5f, f + 2.4f, 47f, 159.5f, f + 2f, 30f}, "the emperor's hall"},
+                {new float[]{138f, f + 6f, 90f, 146f, f + 2f, 106f}, "the basilica"},
+                {new float[]{167f, f + 3.5f, 107f, 180f, f, 116f}, "the baths"},
+                {new float[]{140f, f + 2.5f, 35f, 139.5f, f + 1f, 32f}, "a house's atrium"},
+                {new float[]{160f, f + 60f, 40f, 160f, f, 75f}, "DevPalace from the air"},
+                {new float[]{64f, f + 4f, 140f, 60f, f + 2f, 160f}, "the southern wood and its brook"},
+                {new float[]{140f, f + 22f, 130f, 160f, f, 160f}, "the lake country"},
+                {new float[]{100f, f + 3f, 126f, 91f, f + 1.5f, 136f}, "the forester's lodge"},
+                {new float[]{96f, f + 175f, 97f, 96f, f, 96f}, "the whole map from above"}};
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (Object[] v : views) {
+            float[] cam = (float[]) v[0];
+            place(cam[0], cam[2], 0);
+            for (int i = 0; i < 90; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            tiles.add(capture(cam)); labels.add((String) v[1]);
+        }
+        sheet("palace", tiles, labels, 4);
+    }
+
+    /** What arrows and spells leave on a body (gamefixes: magic and ranged attacks did no visible damage). */
+    private void woundShots() {
+        g.state.minutes = 13 * 60;
+        if (g.player instanceof rpg.actor.Player pl) pl.firstPerson = false;
+        g.player.skills.setLevel(rpg.skill.Skill.MAGIC, 99); g.player.book = rpg.combat.Spells.Book.SUN;
+        place(40.5f, 40.5f, 0);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        rpg.ai.Npc foe = null;
+        for (rpg.ai.Npc n : g.npcs) if (foe == null && n.role == rpg.ai.Npc.Role.VILLAGER) foe = n;
+        rpg.ai.Npc f = foe;
+        for (rpg.ai.Npc n : g.npcs) if (n != f) g.ai.unload(n);
+        g.ai.reload(f); g.teleport(f, 40.5f, DevMap.FLOOR, 34.5f);
+        f.skills.setLevel(rpg.skill.Skill.HEALTH, 99); f.restore();
+        Runnable hold = () -> { f.yaw = 0; f.wantYaw = 0; f.nextThink = Double.MAX_VALUE; f.goal = rpg.ai.Brain.Goal.IDLE; f.fightTarget = 0; f.hp = Math.max(f.hp, 30); };
+        hold.run(); frames(12);
+        tiles.add(capture(onBody(f, 2.0f))); labels.add("before");
+        System.out.printf("[wounds] foe %s at (%.1f, %.1f, %.1f) loaded %s alive %s; player (%.1f, %.1f)%n", f.name, f.x, f.y, f.z, f.loaded, f.alive, g.player.x, g.player.z);
+        for (int k = 0; k < 2; k++) {
+            g.combat.hurl(g.player, new rpg.item.ItemStack(rpg.item.Items.BRONZE_ARROWS, 1), "arrow", f.x + (k == 0 ? 0.12f : -0.1f), f.y + (k == 0 ? 1.15f : 0.75f), f.z + 0.2f, 40, 9.8f, 3 * rpg.combat.CombatMath.HP_SCALE, 0, rpg.item.ItemDef.DamageType.PIERCE);
+            for (int i = 0; i < 30; i++) { hold.run(); step(); }
+        }
+        for (int i = 0; i < 90; i++) { hold.run(); step(); }
+        tiles.add(capture(onBody(f, 2.0f))); labels.add("two arrows: " + ((rpg.actor.Actor) f).stuck.size() + " lodged, " + f.blood.marks.size() + " marks");
+        rpg.combat.Spells.Spell[] spells = {rpg.combat.Spells.Spell.FIRE_STRIKE, rpg.combat.Spells.Spell.ELECTRIC_STRIKE, rpg.combat.Spells.Spell.WIND_STRIKE, rpg.combat.Spells.Spell.EARTH_STRIKE};
+        for (var s : spells) {
+            g.player.mana = g.player.maxMana(); g.player.cs.castCooldown = 0;
+            float pitch = (float) Math.atan2(f.chestY() - g.player.eyeY(), 6);
+            if (g.combat.cast(g.player, s, 0, pitch)) { var p = g.combat.projectiles.get(g.combat.projectiles.size() - 1); p.potential = 4 * rpg.combat.CombatMath.HP_SCALE; p.impact = 0; }
+            for (int i = 0; i < 120; i++) { hold.run(); step(); }
+            tiles.add(capture(onBody(f, 2.0f))); labels.add("after " + s.title + ": " + f.blood.marks.size() + " marks");
+        }
+        // the killing spell, to the head
+        g.player.mana = g.player.maxMana(); g.player.cs.castCooldown = 0;
+        float head = (float) Math.atan2(f.y + f.height * 0.93f - g.player.eyeY(), 6);
+        if (g.combat.cast(g.player, rpg.combat.Spells.Spell.FIRE_BOLT, 0, head)) { var p = g.combat.projectiles.get(g.combat.projectiles.size() - 1); p.potential = 10000; p.impact = 0; }
+        for (int i = 0; i < 40; i++) step();
+        tiles.add(capture(onBody(f, 2.4f))); labels.add("killed by a Fire Bolt to the head");
+        for (int i = 0; i < 120; i++) step();
+        tiles.add(capture(onBody(f, 1.8f))); labels.add("the body, 2 s on");
+        sheet("wounds", tiles, labels, 4);
+    }
+
+    /** A camera on a body wherever it is - standing, or down and in Sydney's hands - from its front-right, above. */
+    private float[] onBody(Actor a, float d) {
+        float cx = a.x, cy = a.y + 1.0f, cz = a.z;
+        var rd = a.ragdoll != 0 && g.lastBodies != null ? g.lastBodies.ragdoll(a.ragdoll) : null;
+        if (rd != null) { cx = 0; cy = 0; cz = 0; int n = rd.p.length / 3; for (int i = 0; i < n; i++) { cx += rd.p[i * 3]; cy += rd.p[i * 3 + 1]; cz += rd.p[i * 3 + 2]; } cx /= n; cy /= n; cz /= n; }
+        return new float[]{cx + d * 0.55f, cy + d * 0.45f, cz - d * 0.8f, cx, cy, cz};
     }
 
     private void ultimateSurfaces() {
@@ -1119,7 +1273,7 @@ final class Gallery {
             for(int i=0;i<36;i++) { game.tick(1f/60);draw(null,1f/60);if(i%3==0)Main.shot(gfx,win.width,win.height,new File(shots,"chatbox-f"+(i+1)+".png")); }
             hud.closeAll();
             var settings=new rpg.ui.SettingsPanel(new Preferences(),p->gfx.menuPreferences=p,false);settings.show();
-            var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x=8.5f;preview.y=DevMap.FLOOR;preview.z=8.5f;
+            var preview=new Gfx.Preview();preview.world=rpg.world.TitleStage.build(game.engine());preview.dungeon=true;preview.x = rpg.world.TitleStage.STAND_X;preview.y=DevMap.FLOOR;preview.z = rpg.world.TitleStage.STAND_Z;
             for(int i=0;i<8;i++) { gfx.title(preview,Main.defaultLook(),win.width,win.height,1f/60,g.time);ui.begin(gfx.cmd);settings.draw(ui,win.width,win.height);ui.end();gfx.frame(win.width,win.height); }
             Main.shot(gfx,win.width,win.height,new File(shots,"title-settings.png"));settings.escape();
         }
@@ -1190,6 +1344,14 @@ final class Gallery {
             for (int x = 63; x <= 65; x++) for (int y = 0; y < 2; y++) g.setBlock(x, DevMap.FLOOR + y, 59, Blocks.BRICK);
             place(64.5f, 60.8f, 0); frames(4);
             film("ledge-traversal", 72, i -> { if (i == 0 && !g.traversal.begin(g.player, 0)) throw new IllegalStateException("No review ledge"); }, a -> new float[]{68, DevMap.FLOOR + 2.2f, 62.5f, 64.5f, DevMap.FLOOR + 1.5f, 59.7f}, 0);
+        }
+        // RPG_GALLERY_ONLY=vault (0.2.1): a fence vaulted at Agility 2, from the side
+        if (only == null || only.equals("vault")) {
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 2); g.player.restore(); g.player.eq.clear();
+            for (int x = 60; x <= 69; x++) for (int z = 55; z <= 65; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 6; y++) g.setBlock(x, y, z, Blocks.AIR);
+            for (int x = 62; x <= 66; x++) g.setBlock(x, DevMap.FLOOR, 59, Blocks.FENCE);
+            place(64.5f, 60.8f, 0); frames(4);
+            film("vault-fence", 48, i -> { if (i == 0 && !g.traversal.begin(g.player, 0)) throw new IllegalStateException("No fence to vault"); }, a -> new float[]{70.5f, DevMap.FLOOR + 1.3f, 59.8f, 64.5f, DevMap.FLOOR + 0.9f, 59.6f}, 0);
         }
         if (only == null || only.equals("carry")) {
             var dead = (rpg.ai.Npc) g.actor(Ids.BANDIT_1); g.ai.spawnBody(dead); g.teleport(dead, 64.5f, DevMap.FLOOR, 61);
@@ -1580,7 +1742,6 @@ final class Gallery {
             }
             for (int i = 0; i < 40; i++) {
                 game.tick(1 / 60f);
-                c.spin(1 / 60f);
                 preview.focus = c.focus; preview.aim = c.aim; preview.zoom = c.zoom;
                 gfx.creator(preview, c.look, c.turn, win.width, win.height, 1 / 60f, g.time);
                 ui.begin(gfx.cmd);
@@ -1757,6 +1918,42 @@ final class Gallery {
      * pulses (the spread of its mean brightness) and how much the worst one percent of pixels jump frame to frame; saved:
      * the frames and a map of where it flickers (brighter: more).
      */
+    /** Twitching walls (gamefixes: some walls in DevCity twitched): the largest frame-to-frame change over each pixel, still and drifting. */
+    private void wallFlicker() {
+        float f = DevMap.FLOOR;
+        float[][] cams = {{91f, f + 1.7f, 70f, 91f, f + 2f, 57f}, {114f, f + 1.7f, 70f, 114f, f + 2f, 57f}, {97f, f + 1.7f, 80f, 90f, f + 2f, 90f}, {104f, f + 1.7f, 80f, 104f, f + 2f, 90f}};
+        g.state.minutes = 12 * 60;
+        place(100.5f, 75.5f, 0);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (int c = 0; c < cams.length; c++) for (int drift = 0; drift < 2; drift++) {
+            float[] base = cams[c];
+            for (int i = 0; i < 120; i++) { game.tick(1 / 60f); draw(base, 1 / 60f); }
+            int n = 40;
+            float[] prev = null, jump = new float[TILE * TILE];
+            BufferedImage first = null;
+            for (int k = 0; k < n; k++) {
+                float[] cam = base.clone();
+                if (drift == 1) { cam[0] += k * 0.02f; cam[3] += k * 0.02f; }
+                game.tick(1 / 60f); draw(cam, 1 / 60f);
+                BufferedImage img = captureFrame();
+                if (first == null) first = img;
+                float[] l = new float[TILE * TILE];
+                for (int y = 0; y < TILE; y++) for (int x = 0; x < TILE; x++) { int p = img.getRGB(x, y); l[y * TILE + x] = 0.2126f * (p >> 16 & 255) + 0.7152f * (p >> 8 & 255) + 0.0722f * (p & 255); }
+                if (prev != null) for (int i = 0; i < jump.length; i++) jump[i] = Math.max(jump[i], Math.abs(l[i] - prev[i]));
+                prev = l;
+            }
+            float[] sorted = jump.clone(); java.util.Arrays.sort(sorted);
+            float p99 = sorted[(int) (sorted.length * 0.99f)];
+            System.out.printf("[walls] view %d %s: frame-to-frame jump p99 %.1f, p99.9 %.1f%n", c, drift == 0 ? "still" : "drift", p99, sorted[(int) (sorted.length * 0.999f)]);
+            BufferedImage map = new BufferedImage(TILE, TILE, BufferedImage.TYPE_INT_RGB);
+            for (int i = 0; i < jump.length; i++) { int q = Math.min(255, (int) (jump[i] * 6)); map.setRGB(i % TILE, i / TILE, q << 16 | q << 8 | q); }
+            if (drift == 0) { tiles.add(first); labels.add("view " + c); }
+            tiles.add(map); labels.add(String.format("%s x6 p99 %.1f", drift == 0 ? "still" : "drift", p99));
+        }
+        sheet("wallflicker", tiles, labels, 3);
+    }
+
     private void interiorLight() {
         float f = DevMap.FLOOR;
         Object[][] views = {{22f, "night"}, {19.25f, "dusk"}, {12f, "noon"}};
@@ -2080,6 +2277,67 @@ final class Gallery {
             for (int k = 0; k < 20; k++) { step(); draw(new float[]{g.player.x + 5, g.player.y + 3, g.player.z + 5, g.player.x, g.player.y + 1, g.player.z}, 0); }
         }
         System.out.println("[summons] called " + made + ", npcs now " + g.npcs.size());
+    }
+
+    private void sheatheShots() {
+        g.state.minutes = 12 * 60;
+        place(64.5f, 40.5f, 0);
+        String[][] loadouts = {{"iron_sword", "iron_shield"}, {"iron_battleaxe", null}, {"shortbow", null}, {"iron_crossbow", null}, {"apprentice_staff", null}, {"iron_dagger", "iron_dagger"}, {"iron_halberd", null}};
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (String[] lo : loadouts) {
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get(lo[0]), 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, lo[1] == null ? null : new rpg.item.ItemStack(rpg.item.Items.get(lo[1]), 1));
+            g.player.sheathed = true; g.player.sheatheAt = -99;
+            frames(20);
+            float yaw = g.player.yaw;
+            float bx = (float) Math.sin(yaw + 0.6) * 2.6f, bz = (float) Math.cos(yaw + 0.6) * 2.6f;
+            tiles.add(capture(new float[]{g.player.x + bx, g.player.y + 1.6f, g.player.z + bz, g.player.x, g.player.y + 1.0f, g.player.z})); labels.add(lo[0] + " back 3/4");
+            float sx = (float) Math.cos(yaw) * 2.6f, sz = (float) -Math.sin(yaw) * 2.6f;
+            tiles.add(capture(new float[]{g.player.x - sx, g.player.y + 1.3f, g.player.z - sz, g.player.x, g.player.y + 1.0f, g.player.z})); labels.add(lo[0] + " left side");
+        }
+        sheet("sheathe-loadouts", tiles, labels, 4);
+        // the draw and the sheathe, on threes, from the front three-quarters
+        for (String[] lo : new String[][]{{"iron_sword", "iron_shield"}, {"iron_battleaxe", null}, {"shortbow", null}}) {
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get(lo[0]), 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, lo[1] == null ? null : new rpg.item.ItemStack(rpg.item.Items.get(lo[1]), 1));
+            g.player.sheathed = true; g.player.sheatheAt = -99; frames(10);
+            tiles = new ArrayList<>(); labels = new ArrayList<>();
+            float[] cam = quarter(g.player, 3.0f);
+            g.combat.sheathe(g.player, false);
+            for (int i = 0; i < 40; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("draw f" + (i + 1)); } }
+            g.combat.sheathe(g.player, true);
+            for (int i = 0; i < 40; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("sheathe f" + (i + 1)); } }
+            sheet("sheathe-anim-" + lo[0], tiles, labels, 7);
+        }
+        // long hair as the head turns (gamefixes: it stayed on the back)
+        g.player.look.female = true; g.player.look.hair = 13; g.player.eq.set(rpg.item.ItemDef.Slot.HEAD, null);
+        tiles = new ArrayList<>(); labels = new ArrayList<>();
+        for (float look : new float[]{-1.1f, 0, 1.1f}) {
+            g.player.aimYaw = g.player.yaw + look; frames(20);
+            float bx = (float) Math.sin(g.player.yaw) * 2.4f, bz = (float) Math.cos(g.player.yaw) * 2.4f;
+            tiles.add(capture(new float[]{g.player.x + bx, g.player.y + 1.7f, g.player.z + bz, g.player.x, g.player.y + 1.4f, g.player.z})); labels.add("head turned " + look);
+        }
+        sheet("hair-turn", tiles, labels, 3);
+    }
+
+    private void brawlStress() {
+        g.state.minutes = 12 * 60;
+        for (var n : g.npcs) g.ai.reload(n);
+        rpg.ai.Npc bandit = (rpg.ai.Npc) g.actor(Ids.BANDIT_1);
+        place(94.5f, 82.0f, 0);
+        g.teleport(bandit, 94.5f, DevMap.FLOOR, 80.5f);
+        for (int i = 0; i < 90 && bandit.alive; i++) {
+            float dx = bandit.x - g.player.x, dz = bandit.z - g.player.z, d = (float) Math.hypot(dx, dz);
+            g.player.yaw = (float) Math.atan2(-dx, -dz); g.controller.snapTo(g.player.yaw);
+            if (d > 1.6f) g.teleport(g.player, bandit.x - dx / d * 1.3f, DevMap.FLOOR, bandit.z - dz / d * 1.3f);
+            g.player.stamina = g.player.maxStamina();
+            g.combat.attack(g.player, false, rpg.actor.Actor.Combat.Move.PUNCH);
+            for (int k = 0; k < 30; k++) { step(); draw(null, 1f / 60); }
+            if (i % 15 == 0) { System.out.println("[brawl] " + i + " bandit hp " + bandit.hp + " at " + bandit.x + "," + bandit.z + " player hp " + g.player.hp + " at " + g.player.x + "," + g.player.z + " phase " + g.player.cs.phase); Main.shot(gfx, win.width, win.height, new File(shots, "brawl-" + i + ".png")); }
+        }
+        for (int k = 0; k < 600; k++) { step(); draw(null, 1f / 60); }
+        System.out.println("[brawl] done; bandit alive " + bandit.alive);
     }
 
     /** Every item's icon, from its own voxel model (the inventory's icons, the same models the world draws). */

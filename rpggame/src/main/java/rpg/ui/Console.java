@@ -207,8 +207,9 @@ public final class Console {
             else if (f instanceof Npc n && spawned.contains(n.id)) { g.ai.despawnBody(n); g.npcs.remove(n); spawned.remove(n.id); print("removed " + n.title, TEXT); }
             else print("remove: look at an item, an animal, a monster or someone you spawned", WARN);
         });
-        cmd("slay", "Kills what you are looking at (a person or an animal).", a -> {
-            if (g.interact.focus instanceof Actor v && v.alive && !v.dummy) g.combat.bleedOutNow(v); else print("slay: look at someone", WARN);
+        cmd("slay", "Kills what you are looking at (a person, an animal or a monster).", a -> {
+            Actor v = g.interact.focus instanceof Actor f && f.alive && !f.dummy ? f : sighted(40);
+            if (v != null) { g.combat.bleedOutNow(v); print("slay: " + v.name, GOOD); } else print("slay: look at someone", WARN);
         });
 
         // ---- the world and the character
@@ -418,5 +419,20 @@ public final class Console {
                 ui.text(nm + (v != null && core.isVar(nm) ? "  " + v.value : ""), 20, my + 3 + i * 17, 13, v != null ? ECHO : TEXT);
             }
         }
+    }
+
+    /** The living body nearest the middle of the view (within a few degrees), out to a range: anyone, any animal, any monster. */
+    private Actor sighted(float range) {
+        float yaw = g.controller.camYaw, pitch = g.controller.camPitch;
+        float dx = (float) (-Math.sin(yaw) * Math.cos(pitch)), dy = (float) Math.sin(pitch), dz = (float) (-Math.cos(yaw) * Math.cos(pitch));
+        Actor best = null; float bestCos = 0.985f;
+        for (Actor v : g.actors()) {
+            if (v == g.player || !v.alive || v.dummy) continue;
+            float rx = v.x - g.player.x, ry = v.chestY() - g.player.eyeY(), rz = v.z - g.player.z, d = (float) Math.sqrt(rx * rx + ry * ry + rz * rz);
+            if (d < 0.01f || d > range) continue;
+            float c = (rx * dx + ry * dy + rz * dz) / d;
+            if (c > bestCos) { bestCos = c; best = v; }
+        }
+        return best;
     }
 }

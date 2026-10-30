@@ -57,7 +57,11 @@ bool VoxelWorld::set(int x, int y, int z, int id) {
     // the mesh only changes when something the mesher draws changed (door leaves are drawn as entities by the game)
     const bool aSkip = (a.flags & ASTRATTO_BLOCK_DOOR) != 0 || old == 0, bSkip = (b.flags & ASTRATTO_BLOCK_DOOR) != 0 || id == 0;
     if (!aSkip || !bSkip) markDirty(x, z);
-    if (a.emission != b.emission || ((a.flags ^ b.flags) & (ASTRATTO_BLOCK_OPAQUE | ASTRATTO_BLOCK_LIGHT_PASS)) != 0) lightBox(x - 15, z - 15, x + 15, z + 15, true);
+    // (0.2.3, rpg stutter) a door swinging (door <-> open way, or one door for another) keeps the light it was built with:
+    // a 31 x 31 full-height relight for every cell of every door that moved was a frame-sized hitch in a busy town
+    const bool aDoor = (a.flags & ASTRATTO_BLOCK_DOOR) != 0, bDoor = (b.flags & ASTRATTO_BLOCK_DOOR) != 0;
+    const bool swing = (aDoor && (bDoor || id == 0)) || (bDoor && old == 0);
+    if (!swing && (a.emission != b.emission || ((a.flags ^ b.flags) & (ASTRATTO_BLOCK_OPAQUE | ASTRATTO_BLOCK_LIGHT_PASS)) != 0)) lightBox(x - 15, z - 15, x + 15, z + 15, true);
     return nav;
 }
 

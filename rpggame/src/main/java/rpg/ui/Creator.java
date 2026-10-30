@@ -23,10 +23,9 @@ public final class Creator {
     /** Backed out of (Esc): no profile is made. */
     public boolean cancelled;
     public float turn;
-    public boolean autoRotate = true;
     private boolean dragging;
     private float lastMx;
-    /** Whether the player is turning the figure by hand (the slow turn waits meanwhile). */
+    /** Whether the player is turning the figure by hand (0.2.1: the only way it turns). */
     public boolean dragging() { return dragging; }
     private long seed = 1;
 
@@ -72,18 +71,6 @@ public final class Creator {
         Appearance a = Appearance.random(seed++ * 7919 + System.nanoTime() % 1000);
         look.female = a.female; look.bodyType = a.bodyType; look.skin = a.skin; look.eyeColor = a.eyeColor; look.hair = a.hair; look.hairColor = a.hairColor; look.beard = a.beard; look.beardColor = a.beardColor;
         look.top = a.top; look.topColor = a.topColor; look.bottom = a.bottom; look.bottomColor = a.bottomColor; look.shoes = a.shoes; look.shoesColor = a.shoesColor;
-    }
-
-    /**
-     * The figure's turn for a frame: slowly round by itself, or - while the hair is chosen - round to face the camera, so
-     * the face is what is seen up close. Held still while dragged.
-     */
-    public void spin(float dt) {
-        if (dragging || !autoRotate) return;
-        if (tab == 1) {
-            float tau = (float) (2 * Math.PI), off = (float) (turn - Math.rint(turn / tau) * tau);
-            turn -= off * Math.min(1, dt * 3);
-        } else turn += dt * 0.25f;
     }
 
     /** Randomises only what the open tab chooses (the rest of the look is kept). */
@@ -180,7 +167,6 @@ public final class Creator {
         ui.border(cx - bw / 2, 22, bw, 54, 1, 0x60D8B46A);
         ui.centered(PROMPT[0], cx, 31, 14, Style.TEXT);
         ui.centered(PROMPT[1], cx, 52, 13, Style.DIM);
-        if (Style.button(ui, autoRotate ? "Pause rotation" : "Resume rotation", cx - 80, h - 94, 160, 30, true)) autoRotate = !autoRotate;
         ui.rect(cx - 170, h - 54, 340, 38, 0x70101214);
         if (Style.button(ui, "<", cx - 164, h - 50, 34, 30, true)) turn -= 0.5f;
         if (Style.button(ui, ">", cx + 130, h - 50, 34, 30, true)) turn += 0.5f;

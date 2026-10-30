@@ -133,12 +133,10 @@ public final class Node extends WorldObject {
         List<Option> o = new ArrayList<>();
         String why = refusal(a);
         o.add(Option.when(why == null, "gather", verb(), 10, why, g.cfg.interactRange + (kind == Kind.FISH ? 1.5f : 0)));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         if (!action.equals("gather")) return Result.no("You can't do that.");
         String why = reach(g, a, g.cfg.interactRange + (kind == Kind.FISH ? 1.5f : 0));
         if (why == null) why = refusal(a);
@@ -277,15 +275,6 @@ public final class Node extends WorldObject {
         }
     }
 
-    @Override public String examine(Rpg g) {
-        String how = switch (kind) {
-            case TREE -> " Wield a woodcutting axe and swing at it.";
-            case ROCK -> " Wield a pickaxe and strike the ore.";
-            case FISH -> " Wield a " + needs.name.toLowerCase() + " and cast here.";
-            default -> "";
-        };
-        return name + ": " + skill.title + " " + level + ", gives " + product.name.toLowerCase() + (stockMax > 0 ? " (" + stock + "/" + stockMax + " left)" : "") + "." + how;
-    }
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  " + skill.title + " " + level + " stock " + stock + "/" + stockMax + (regrowAt >= 0 ? " regrows@" + (int) regrowAt : "") + " struck " + (int) struck; }
 
     @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("stock", stock); m.put("regrowAt", regrowAt); return m; }

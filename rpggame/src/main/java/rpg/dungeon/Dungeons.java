@@ -56,16 +56,10 @@ public final class Dungeons {
             this.layout = l; this.inside = inside;
         }
         @Override public float focusRadius() { return 1.1f; }
-        @Override public String examine(Rpg g) {
-            if (inside) return "Daylight, a long way up. The way back out of the " + layout.name + ".";
-            String who = switch (layout.theme) { case WARREN -> "Goblin tracks lead in and out of it, and it smells of smoke."; case CAVE -> "Old webs hang across the mouth of it."; case CRYPT -> "Cold air breathes out of it. Something inside is not resting."; case HALL -> "Huge knuckle-prints are worn into the rock at its mouth."; };
-            return layout.name + " - " + layout.type.title.toLowerCase() + ", " + layout.threatWord() + " threat. " + who;
-        }
         @Override public List<Option> options(Rpg g, Actor a) {
-            return List.of(Option.on(inside ? "leave" : "enter", inside ? "Leave the " + layout.name : "Enter the " + layout.name, 10, g.cfg.interactRange), Option.on("examine", "Examine", 0, 5));
+            return List.of(Option.on(inside ? "leave" : "enter", inside ? "Leave the " + layout.name : "Enter the " + layout.name, 10, g.cfg.interactRange));
         }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             if (!action.equals("enter") && !action.equals("leave")) return Result.no("You can't do that.");
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
@@ -95,18 +89,13 @@ public final class Dungeons {
         }
         @Override public float focusRadius() { return 0.45f; }
         @Override public boolean exists() { return !removed && (found || disarmed); }
-        @Override public String examine(Rpg g) {
-            if (kind == 2) return disarmed ? "A snare, its noose cut." : "A noose of rope laid in the leaves, pegged to a stake. Someone means to catch someone.";
-            return disarmed ? "A trap's plate, wedged so it will not spring." : kind == 0 ? "A plate in the floor, sitting a little proud. Spikes wait under it." : "A loose stone underfoot. The roof above it is cracked and heavy.";
-        }
         @Override public List<Option> options(Rpg g, Actor a) {
-            if (disarmed) return List.of(Option.on("examine", "Examine", 0, 5));
+            if (disarmed) return List.of();
             int need = disarmLevel();
-            return List.of(Option.when(a.skills.level(Skill.THIEVING) >= need, "disarm", "Disarm", 10, "You need Thieving level " + need + " to disarm this.", 1.6f), Option.on("examine", "Examine", 0, 5));
+            return List.of(Option.when(a.skills.level(Skill.THIEVING) >= need, "disarm", "Disarm", 10, "You need Thieving level " + need + " to disarm this.", 1.6f));
         }
         int disarmLevel() { return Math.min(90, 5 + level); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             if (!action.equals("disarm") || disarmed) return Result.no("You can't do that.");
             String why = reach(g, a, 1.6f);
             if (why != null) return Result.no(why);
@@ -140,7 +129,9 @@ public final class Dungeons {
             mound(entrance);
             Door exit = g.objects.add(new Door(id++, l, true, l.worldX(l.entryX) + 0.5f, l.worldZ(l.entryZ) + 0.5f));
             entrance.toX = exit.x + 1.2f; entrance.toZ = exit.z; entrance.toYaw = (float) (-Math.PI / 2);
-            exit.toX = entrance.x; exit.toZ = entrance.z + 1.6f; exit.toYaw = 0;
+            // (0.2.2, gamefixes: coming out, the player stood inside the rabbit hole) out in front of the mouth, facing away
+            // from it: the mound and its solid cells lie behind the mouth (+z), where the old landing spot was
+            exit.toX = entrance.x; exit.toZ = entrance.z - 1.6f; exit.toYaw = 0;
             doors.add(entrance); doors.add(exit);
             java.util.Random r = new java.util.Random(l.seed ^ 0x7EA5);
             for (Spot s : l.spots) {
@@ -285,7 +276,7 @@ public final class Dungeons {
             int cx = (int) Math.floor(want[0]) + dx, cz = (int) Math.floor(want[1]) + dz;
             if (cx < 3 || cz < 3 || cx >= DevMap.SX - 3 || cz >= DevMap.SZ - 3) continue;
             boolean ok = true;
-            for (int ox = -1; ox <= 1 && ok; ox++) for (int oz = -1; oz <= 2 && ok; oz++)
+            for (int ox = -1; ox <= 1 && ok; ox++) for (int oz = -2; oz <= 2 && ok; oz++)
                 ok = g.vox.solid(cx + ox, DevMap.FLOOR - 1, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR + 1, cz + oz) && g.vox.block(cx + ox, DevMap.FLOOR - 1, cz + oz) != rpg.world.Blocks.WATER;
             if (ok) return new float[]{cx + 0.5f, cz + 0.5f};
         }
@@ -354,11 +345,16 @@ public final class Dungeons {
             if (!t.armed) continue;
             for (Actor a : g.actors()) {
                 if (!a.alive || a.dummy || a instanceof rpg.monster.Monster || !a.grounded && !(a instanceof rpg.animal.Animal)) continue;
-                if (t.owner != 0 && (a.id == t.owner || a instanceof rpg.ai.Npc n && n.posse)) continue;   // a snare spares its hunters
+                // a snare spares its hunters - the one who set it, the posse, and (0.2.2) anyone hunting the same quarry
+                // (the lawman leading the hunt walked into his own party's snare before the quarry came near)
+                if (t.owner != 0 && a.id != quarry(t) && (a.id == t.owner || a instanceof rpg.ai.Npc n && (n.posse || n.watch() || n.hunt != null && n.hunt.target == quarry(t)))) continue;
                 if (Math.abs(a.x - t.x) < 0.45f && Math.abs(a.z - t.z) < 0.45f && a.y < DevMap.FLOOR + 0.3f) { spring(t, a); break; }
             }
         }
     }
+
+    /** Whom a hunter's snare is set for: its setter's quarry (0 when it has none). */
+    private long quarry(Trap t) { return g.actor(t.owner) instanceof rpg.ai.Npc h && h.hunt != null ? h.hunt.target : 0; }
 
     /** A trap goes off under someone: spikes up through the plate, or the roof's rock down on them. */
     void spring(Trap t, Actor a) {

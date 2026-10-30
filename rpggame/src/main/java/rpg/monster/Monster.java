@@ -42,7 +42,7 @@ public final class Monster extends Npc {
         public float x, z, threat, damage;
         public double at;
         public String sense = "";
-        Known(long id) { this.id = id; }
+        public Known(long id) { this.id = id; }
     }
     public final Map<Long, Known> known = new HashMap<>();
     /** Its current target (0: none), since when, and the spot it is heading to. */
@@ -124,10 +124,9 @@ public final class Monster extends Npc {
     public String label() { return (breed != null ? breed.title + " dragon" : kind.title) + "  (level " + level + ")"; }
 
     @Override public List<Option> options(Rpg g, Actor a) {
-        return List.of(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
+        return List.of();
     }
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(g.monsters.examine(this)); return Result.ok(); }
         return Result.no("You can't do that.");
     }
     @Override public String inspect(Rpg g) {

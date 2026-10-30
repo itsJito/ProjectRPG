@@ -35,6 +35,10 @@ class MonsterTest {
                 assertTrue(m.level >= m.kind.minLevel && m.level <= m.kind.maxLevel);
                 assertTrue(m.skills.combatLevel() >= Math.max(3, m.level - 6) && m.skills.combatLevel() <= m.level + 6, m.label() + " fights at combat level " + m.skills.combatLevel());
             }
+            // (the camp's quarrel with the player alone: no lion or miner wandering by to take them off it)
+            for (var a : g.animals.all()) { a.loaded = false; g.animals.despawnBody(a); }
+            for (var n : g.npcs) g.ai.unload(n);
+            for (var m : g.monsters.all()) if (m.kind != MonsterKind.GOBLIN) g.monsters.despawnBody(m);
             // far from the camp the goblins are about their own business, not after the player
             g.teleport(g.player, 64.5f, DevMap.FLOOR, 66.5f);
             for (int f = 0; f < 60 * 10; f++) assertTrue(game.tick(1f / 60));
@@ -48,7 +52,7 @@ class MonsterTest {
                 for (Monster m : g.monsters.all()) if (m.kind == MonsterKind.GOBLIN && m.state == Monster.State.ENGAGE && m.target == g.player.id) engaged = true;
             }
             StringBuilder b = new StringBuilder();
-            for (Monster m : g.monsters.all()) if (m.kind == MonsterKind.GOBLIN) b.append(m.inspect(g)).append('\n');
+            for (Monster m : g.monsters.all()) if (m.kind == MonsterKind.GOBLIN) b.append(m.inspect(g)).append(" known ").append(m.known.values().stream().map(k -> g.nameOf(k.id) + "=" + k.threat).toList()).append(String.format(" at %.1f,%.1f", m.x, m.z)).append('\n');
             assertTrue(engaged, "the goblins took on the intruder at their camp:\n" + b);
             assertTrue(g.player.hp < hp, "and struck them:\n" + b);
             // kill one: no crime, a body with its drop

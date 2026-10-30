@@ -461,7 +461,9 @@ void AiService::step(Engine& e, float dt) {
         const Policy* p = policies_.get(a.policy);
         if (a.thinkTimer <= 0) { a.thinkTimer += p ? p->think : 0.2f; if (a.thinkTimer < 0) a.thinkTimer = 0; decide(e, a); }
         plan(e, a, w);
-        if (w != nullptr && a.moving && a.navSeen != w->navVersion()) { a.navSeen = w->navVersion(); if (!a.route.empty()) a.wantPath = true; }
+        // (0.2.3) a changed nav (a door swinging) re-routes those walking, spread over 0.6 s by handle instead of all in
+        // the same frame - in a town that was dozens of searches at once, a hitch every time a door moved
+        if (w != nullptr && a.moving && a.navSeen != w->navVersion()) { a.navSeen = w->navVersion(); if (!a.route.empty()) { a.wantPath = true; a.repathTimer = std::max(a.repathTimer, static_cast<float>(static_cast<uint32_t>(a.self) % 16u) * 0.04f); } }
     }
 
     // ---- routes for those that want one, in parallel

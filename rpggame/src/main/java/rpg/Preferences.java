@@ -12,7 +12,7 @@ public final class Preferences {
     public enum Action {
         FORWARD("Forward", GLFW_KEY_W), BACK("Backward", GLFW_KEY_S), LEFT("Left", GLFW_KEY_A), RIGHT("Right", GLFW_KEY_D),
         SPRINT("Sprint", GLFW_KEY_LEFT_SHIFT), CROUCH("Crouch", GLFW_KEY_LEFT_CONTROL), JUMP("Jump / grab", GLFW_KEY_SPACE),
-        DODGE("Dodge", GLFW_KEY_Q), INTERACT("Interact", GLFW_KEY_E), CAMERA("Camera", GLFW_KEY_V), MAP("Map", GLFW_KEY_M), INVENTORY("Inventory", GLFW_KEY_I), ATTACK("Attack / carry", astratto.platform.Input.MOUSE_OFFSET), GUARD("Guard / off hand", astratto.platform.Input.MOUSE_OFFSET + 1);
+        DODGE("Dodge", GLFW_KEY_Q), INTERACT("Interact", GLFW_KEY_E), CAMERA("Camera", GLFW_KEY_V), MAP("Map", GLFW_KEY_M), INVENTORY("Inventory", GLFW_KEY_I), SHEATHE("Sheathe / draw (hold)", GLFW_KEY_F), ATTACK("Attack / carry", astratto.platform.Input.MOUSE_OFFSET), GUARD("Guard / off hand", astratto.platform.Input.MOUSE_OFFSET + 1);
         public final String title; public final int defaultKey;
         Action(String title, int key) { this.title = title; defaultKey = key; }
     }

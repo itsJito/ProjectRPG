@@ -39,10 +39,13 @@ public final class Stealth {
         public float level, x, z, exposure;
         public double seenAt = -99, heardAt = -99, at = -99, changedAt = -99;
         /** When it was looked into and settled (an investigation that found the spot, and them or nobody, there). */
-        public double settledAt = -99;
+        public double settledAt = -1e9;   // (0.2.2: -99 read as "settled lately" for the first minutes of a game)
         /** Blood warrants a bounded conversation, not a permanent warrant or an endlessly renewed watch. */
         public double bloodQuestionUntil = -99, bloodQuestionAgain = -99;
         public float bloodSeen;
+        /** (0.2.2) Until when the blood on them is explained to this NPC (it saw the blow land), and whose blow it was. */
+        public double bloodKnownUntil = -99;
+        public long bloodBy;
         public Level shown = Level.UNAWARE;
         public Level level() { return of(level); }
     }
@@ -193,12 +196,19 @@ public final class Stealth {
     // ------------------------------------------------------------------ the senses, each frame
     private final Map<Long, Double> nextLook = new java.util.HashMap<>();
 
+    /** 0..1, fixed for an id and well spread between neighbouring ids (golden ratio): a beat's offset. */
+    public static double phase(long id) { double v = id * 0.6180339887; return v - Math.floor(v); }
+
     /** Five looks a second per NPC: every actor in reach is weighed, awareness rises with what is seen and fades without. */
     void update(Npc n, float dt) {
-        double due = nextLook.getOrDefault(n.id, 0.0);
+        // (0.2.3, gamefixes: constant stutter) each NPC looks on its own beat - they all used to start on the same frame
+        // and stay in step, every look in town (each one weighing every actor) landing on one frame in five
+        Double at = nextLook.get(n.id);
+        if (at == null) { nextLook.put(n.id, g.time + phase(n.id) * 0.2); return; }
+        double due = at;
         if (g.time < due) return;
         float step = (float) Math.min(0.5, g.time - due + 0.2);
-        nextLook.put(n.id, g.time + 0.2);
+        nextLook.put(n.id, Math.max(due + 0.2, g.time + 0.05));
         for (Actor a : g.actors()) {
             if (a == n || !a.alive || a.dummy) continue;
             // animals going about their lives are no one's concern; one that menaces people is

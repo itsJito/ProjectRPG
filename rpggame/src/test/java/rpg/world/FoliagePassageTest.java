@@ -18,6 +18,8 @@ class FoliagePassageTest {
         g = game.add(new Rpg(game, "Foliage", new Appearance(), true));
         for (Npc n : g.npcs) g.ai.unload(n);
         for (var m : g.monsters.all()) g.monsters.despawnBody(m);
+        // (and the animals: a bear and her cub stood across a daisy's path - a body in the way, not the plant)
+        for (var a : g.animals.all()) { a.loaded = false; g.animals.despawnBody(a); }
     }
     @AfterEach void close() { game.close(); }
     private void frames(int n) { for (int i = 0; i < n; i++) game.tick(1f / 60); }
@@ -38,7 +40,8 @@ class FoliagePassageTest {
             frames(4);
             for (int i = 0; i < 100; i++) { g.controller.in.forward = 1; game.tick(1f / 60); }
             g.controller.in.forward = 0; frames(4);
-            if (g.player.x < plant.x + 0.6f) blocked.append(String.format("%s at (%.1f, %.1f): stopped at x=%.2f%n", kind, plant.x, plant.z, g.player.x));
+            if (g.player.x < plant.x + 0.6f) blocked.append(String.format("%s at (%.1f, %.1f): stopped at x=%.2f near %s%n", kind, plant.x, plant.z, g.player.x,
+                    g.actors().stream().filter(a -> a != g.player && a.distTo(g.player) < 2.5f).map(a -> a.name + "@" + a.x + "," + a.z).toList() + " objects " + g.objects.all().stream().filter(o -> Math.hypot(o.x - g.player.x, o.z - g.player.z) < 2.5f).map(o -> o.name).toList()));
         }
         assertTrue(tried >= 6, "tried only " + tried + " kinds");
         assertEquals("", blocked.toString(), "plants must never stop a body:\n" + blocked);

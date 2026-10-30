@@ -22,19 +22,25 @@ import java.util.Random;
  */
 public final class Music {
     /** What the moment feels like, most urgent first. */
-    public enum Mood { COMBAT, HUNTED, MENU, WOOD_DAY, WOOD_NIGHT, TOWN_DAY, TOWN_NIGHT, OPEN_DAY, OPEN_NIGHT, NONE }
+    public enum Mood { COMBAT, HUNTED, MENU, DUNGEON, SACRED, PALACE_DAY, PALACE_NIGHT, WOOD_DAY, WOOD_NIGHT, TOWN_DAY, TOWN_NIGHT, OPEN_DAY, OPEN_NIGHT, NONE }
 
     private static final Map<Mood, String[]> TRACKS = new EnumMap<>(Mood.class);
     static {
-        TRACKS.put(Mood.COMBAT, new String[]{"combat"});
-        TRACKS.put(Mood.HUNTED, new String[]{"desert_ominous"});
-        TRACKS.put(Mood.MENU, new String[]{"mainmenu"});   // the title screen's own theme (MainMenu.mp3)
-        TRACKS.put(Mood.WOOD_DAY, new String[]{"forest", "enchanted_forest"});
-        TRACKS.put(Mood.WOOD_NIGHT, new String[]{"evil_forest"});
-        TRACKS.put(Mood.TOWN_DAY, new String[]{"desert", "forest"});
-        TRACKS.put(Mood.TOWN_NIGHT, new String[]{"mystery"});
-        TRACKS.put(Mood.OPEN_DAY, new String[]{"enchanted_forest", "desert", "forest"});
-        TRACKS.put(Mood.OPEN_NIGHT, new String[]{"mystery", "evil_forest"});
+        // (0.2.2) the second score from Asset_Queue joins the first: three more fights, a new title theme, a hymn for the
+        // altars, the wilderness suite for the open country and the wood, the civil pieces for town by day, two night pieces
+        TRACKS.put(Mood.COMBAT, new String[]{"combat", "fightmusic2", "fightmusic3", "fightmusic4"});
+        TRACKS.put(Mood.HUNTED, new String[]{"desert_ominous", "tense_night"});
+        TRACKS.put(Mood.MENU, new String[]{"newtitlemusic"});   // the title screen's own theme (NewTitleMusic.mp3)
+        TRACKS.put(Mood.DUNGEON, new String[]{"dungeon1", "dungeon2", "dungeon3"});
+        TRACKS.put(Mood.SACRED, new String[]{"religious"});
+        TRACKS.put(Mood.PALACE_DAY, new String[]{"roman_empire", "exotic", "exotic2"});
+        TRACKS.put(Mood.PALACE_NIGHT, new String[]{"roman_empire", "mystery", "dark_night"});
+        TRACKS.put(Mood.WOOD_DAY, new String[]{"forest", "enchanted_forest", "wilderness1", "wilderness3"});
+        TRACKS.put(Mood.WOOD_NIGHT, new String[]{"evil_forest", "dark_night"});
+        TRACKS.put(Mood.TOWN_DAY, new String[]{"civilizedarea", "happy_times", "peacetime", "peaceful_bgm", "peaceful"});
+        TRACKS.put(Mood.TOWN_NIGHT, new String[]{"mystery", "tense_night"});
+        TRACKS.put(Mood.OPEN_DAY, new String[]{"exploration", "wilderness1", "wilderness2", "wilderness3", "enchanted_forest", "exotic", "desert"});
+        TRACKS.put(Mood.OPEN_NIGHT, new String[]{"mystery", "evil_forest", "dark_night"});
     }
 
     private final Game game;
@@ -117,6 +123,7 @@ public final class Music {
             case WOOD_DAY, WOOD_NIGHT -> 1;
             case TOWN_DAY, TOWN_NIGHT -> 2;
             case OPEN_DAY, OPEN_NIGHT -> 3;
+            case PALACE_DAY, PALACE_NIGHT -> 4;
             default -> 10 + m.ordinal();
         };
     }
@@ -126,11 +133,17 @@ public final class Music {
         if (set == null) return;
         String pick = set[rnd.nextInt(set.length)];
         if (set.length > 1 && pick.equals(lastTrack)) pick = set[(java.util.Arrays.asList(set).indexOf(pick) + 1) % set.length];
-        final String file = "/sounds/music/" + pick + ".mp3";
-        MusicStream s = MusicStream.open(game.engine(), pick, () -> Music.class.getResourceAsStream(file), m == Mood.COMBAT || m == Mood.HUNTED || m == Mood.MENU);
+        final String file = file(pick);
+        MusicStream s = MusicStream.open(game.engine(), pick, () -> Music.class.getResourceAsStream(file), m == Mood.COMBAT || m == Mood.HUNTED || m == Mood.MENU || m == Mood.DUNGEON);
         if (s == null) { rest = 30; return; }
         lastTrack = pick;
         now = new Playing(s, game.reserve(AstrattoNative.KIND_VOICE), m);
+    }
+
+    /** A track's resource: the MP3 if there is one, else the Ogg (the score holds both). */
+    private static String file(String name) {
+        String mp3 = "/sounds/music/" + name + ".mp3";
+        return Music.class.getResource(mp3) != null ? mp3 : "/sounds/music/" + name + ".ogg";
     }
 
     private void fadeOut(Playing p, float seconds) {
@@ -145,7 +158,7 @@ public final class Music {
     /** A short piece over everything (the score ducks under it). */
     public void stinger(String name) {
         if (!enabled) return;
-        final String file = "/sounds/music/" + name + ".mp3";
+        final String file = file(name);
         MusicStream s = MusicStream.open(game.engine(), name, () -> Music.class.getResourceAsStream(file), false);
         if (s == null) return;
         Playing p = new Playing(s, game.reserve(AstrattoNative.KIND_VOICE), Mood.NONE);

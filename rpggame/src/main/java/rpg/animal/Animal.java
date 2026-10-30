@@ -166,7 +166,6 @@ public final class Animal extends Actor implements Interactable {
             }
             o.add(Option.when(food != null && calm, "feed", "Feed" + (food == null ? "" : " (" + food.name.toLowerCase() + ")"), 7, food == null ? "You have nothing it would eat." : "It's too agitated.", r));
         }
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
@@ -176,7 +175,6 @@ public final class Animal extends Actor implements Interactable {
         return g.animals.perform(this, a, action, req);
     }
 
-    @Override public String examine(Rpg g) { return g.animals.examine(this); }
 
     @Override public String inspect(Rpg g) {
         return String.format("%s %s %s, %s; goal %s (%s); hunger %.0f%% thirst %.0f%% fear %.0f%%%s%s", kind(), female ? "female" : "male",

@@ -186,6 +186,7 @@ struct SydneyConfig {
     bool holdWound = true;
     float holdForce = 60;
     float getUpTime = 2.6f, getUpStrength = 1.35f, getUpTimeout = 2.4f;
+    float getUpPace = 1;                   // how fast the get-up's phases run (1: the lab's tuning; a person rises quicker)
     int getUpTries = 3;
     float deathFade = 0.45f, deathPosture = 0.25f;
     int style = HUMAN;
@@ -237,7 +238,7 @@ public:
     State state = STAND;
     Outcome outcome = NONE;
     Activity activity = A_NONE;
-    float t = 0, settled = 0, airborne = 0, quiet = 0, downFor = 1.2f, stun = 0, react = 0, over = 0;
+    float t = 0, settled = 0, airborne = 0, quiet = 0, downFor = 0, stun = 0, react = 0, over = 0;
     int steps = 0, tries = 0, falls = 0, recoveries = 0;
     bool stayDown = false;
     float longestAir = 0;

@@ -38,25 +38,27 @@ class UndertakerFlowTest {
         }
     }
 
-    /** Gamefixes: the undertaker offers, while a grave still stands, to send for it and sell its contents back. */
-    @Test void theUndertakerSellsBackWhatLiesInAStandingGrave() {
+    /** Gamefixes: while a grave still stands, the unfinished casket (0.2.2: not the undertaker) sends for it and sells it back. */
+    @Test void theCasketSellsBackWhatLiesInAStandingGrave() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));
             Rpg g = game.add(new Rpg(game, "Buy back", new Appearance(), true));
             Npc morrow = (Npc) g.actor(Ids.UNDERTAKER);
-            g.teleport(g.player, morrow.x + 1, DevMap.FLOOR, morrow.z);
-            assertTrue(morrow.options(g, g.player).stream().noneMatch(o -> o.id().equals("buyback") || o.id().equals("reclaim")), "nothing to get back: nothing offered");
+            var casket = g.objects.casket;
+            g.teleport(g.player, casket.x, DevMap.FLOOR, casket.z - 1.2f);
+            assertTrue(casket.options(g, g.player).stream().noneMatch(o -> o.id().equals("buyback") || o.id().equals("reclaim") && o.enabled()), "nothing to get back: nothing offered");
+            assertTrue(morrow.options(g, g.player).stream().noneMatch(o -> o.id().equals("buyback") || o.id().equals("reclaim")), "the undertaker hands nothing over himself");
             var grave = g.objects.add(new Container(900002, "grave", "Your grave", "grave", 20.5f, DevMap.FLOOR, 30.5f, 40, g.player.id));
             grave.expiresAt = g.time + Undertaker.GRAVE_SECONDS;
             grave.contents.add(new ItemStack(Items.get("iron_sword"), 1));
             int fee = g.undertaker.buyBackFee(), purse = g.player.count(Items.COINS);   // (a new character starts with 25 gold)
             assertEquals(Undertaker.FEE + Undertaker.OUTSIDE_SURCHARGE + Undertaker.PROMPT, fee, "outside the walls, at once");
-            assertTrue(morrow.options(g, g.player).stream().anyMatch(o -> o.id().equals("buyback")), "a standing grave: buy-back offered");
-            assertTrue(g.undertaker.buyBack(g.player, morrow).rejected(), "no coins, no service");
+            assertTrue(casket.options(g, g.player).stream().anyMatch(o -> o.id().equals("buyback")), "a standing grave: buy-back offered at the casket");
+            assertTrue(casket.perform(g, g.player, "buyback", 1).rejected(), "no coins, no service");
             assertFalse(grave.removed, "and the grave is left as it was");
             g.give(g.player, Items.COINS, fee);
-            assertTrue(g.undertaker.buyBack(g.player, morrow).committed());
+            assertTrue(casket.perform(g, g.player, "buyback", 2).committed());
             assertTrue(grave.removed, "the grave is emptied");
             assertTrue(g.player.has(Items.get("iron_sword"), 1), "and its contents are back in hand");
             assertEquals(purse, g.player.count(Items.COINS), "for the fee");

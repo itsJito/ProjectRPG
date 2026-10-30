@@ -1,3 +1,286 @@
+# Patch Notes Version Alpha 0.2.3: Fog of Wardrobe
+
+A smoother-running build, a moodier title screen and livelier legs.
+
+## Changes
+
+### Gameplay
+- Changed the title screen camera to sit closer to your character, with a slight handheld sway
+- Changed the title screen floor to have a low fog rolling around your character's feet
+
+### NPC's
+- Changed the jog to be lighter and more upright, with quicker, shorter steps instead of long crouched lunges
+- Changed running arms to swing at the sides rather than being held out in front of the chest
+- Changed the sprint to lean into the run a little more, with a stronger arm pump
+- Changed fighters who are badly outmatched and alone to run for help instead of fighting to the death. Guards still hold their ground
+- Changed wounded monsters to fall back to their den and make a stand there, rather than scattering into the open
+- Changed drawing and sheathing to turn the shoulders into the reach, grip the weapon at its sheath, and bring the blade out in an arc
+
+## Technical Changes
+
+### Gameplay
+- Changed how townsfolk and monsters pace their looking and thinking, so a crowd no longer does all its work on the same frame
+- Changed doors so opening and closing them no longer recalculates the lighting around them
+- Removed a batch of unused leftover code
+
+## Fixed Bugs
+
+### Gameplay
+- AE-2047 - Fixed bug where the game stuttered every few seconds in town whenever a door opened or closed
+- AE-2048 - Fixed bug where the game hitched when all the townsfolk noticed things or made up their minds on the same frame
+
+### NPC's
+- AE-2049 - Fixed bug where doors were held open forever by anyone standing near them, so locked doors were never locked again
+
+# Patch Notes Version Alpha 0.2.2: Sheathe Happens
+
+Weapons can now be put away, the farm has a proper gate and the undertaker has handed his duties to a box.
+
+## New Features
+
+### Blocks
+- Added hedges, a dense clipped leaf block. DevPalace's greenery is now hedge
+- Added the fence-gate, a one-block-high gate that matches the fences around it. Mara's paddock now has one
+
+### Items
+- Added the sheathe system. Hold F to put your weapon and shield away on your body, and hold it again to draw them
+- Added sheathed spots for every kind of weapon. One-handed weapons now sit at the hip, while bows, crossbows, staves, polearms, great weapons and shields go on the back
+- Added drawing on attack. Pressing attack with your weapon sheathed now draws it first
+
+### NPC's
+- Added sheathe manners. Townsfolk now keep their weapons sheathed until they need them, and guards now tell you to put yours away in town
+- Added guilt. NPCs who come across someone they killed now either stand by their reasons or are shaken by it, instead of crying murder
+- Added full-pack errands. Workers now sell what they have gathered when their pack is full, and bank it if nobody will buy
+
+### Gameplay
+- Added the Unfinished Casket in the graveyard. You now buy back your belongings there instead of from the Undertaker
+- Added new music, including a new title theme, new fight music, wilderness and town pieces, and a hymn that plays near the altars
+- Added crash reports. If something goes wrong, the game now writes a report to the saves folder and carries on where it can
+
+## Changes
+
+### Blocks
+- Changed leaves to show bigger, clearer individual leaves
+
+### Items
+- Changed crossbows to be held in both hands in third person, with a kick when fired and a two-handed reload
+- Changed Chests to be solid, so you can no longer walk through them
+
+### NPC's
+- Changed NPCs to forget their quarrels with you once you are released from jail
+- Changed NPCs to react to wounds and to the gear on your back when you talk to them
+- Changed goblin camps so one goblin now always stays behind to keep watch
+- Changed monsters to fight hardest for the heart of their camp, and to take on whoever stands in it first
+- Changed goblins, imps and other monsters with hands so they can now open doors
+- Changed monsters to see a sheathed weapon as less of a threat
+- Changed hurt NPCs to slow down as well as limp
+
+### Gameplay
+- Changed the minimap to be more zoomed in
+- Changed walking and running so the arms now swing properly
+- Changed walking and running to show your injuries. A hurt leg now limps, a hurt arm hangs and a body wound hunches you over
+- Changed injuries so they no longer slow the player down, except for a moment while a blow lands
+- Changed sprinting to only use stamina while you are actually covering ground
+- Changed arrests so that a bounty worth more than everything you own now takes all of it for good
+- Changed dragon bodies to fall with physics and to vanish within ten seconds
+- Changed caravan cargo crates so you can now put items in them
+
+## Technical Changes
+
+### Gameplay
+- Changed the Undertaker's chest payments so his fee now goes to him, or to his chest if he is away
+- Changed several automated checks so they test only what they mean to
+
+## Fixed Bugs
+
+### Blocks
+- AE-2030 - Fixed bug where chests, including the Undertaker's chest, had no collision
+- AE-2031 - Fixed bug where you could not put items into cargo containers
+
+### Items
+- AE-2032 - Fixed bug where long hair was attached to the back and did not move with the head
+
+### NPC's
+- AE-2033 - Fixed bug where goblins and other monsters did not show on the minimap
+- AE-2034 - Fixed bug where NPCs who watched a monster attack you then questioned you about the blood
+- AE-2035 - Fixed bug where searches you had nothing to do with showed on the minimap
+- AE-2036 - Fixed bug where an NPC who killed someone then reported finding the body
+- AE-2037 - Fixed bug where NPCs could vanish or jump to another spot during a fight
+- AE-2038 - Fixed bug where the fisherman and other workers stopped working when their pack was full
+- AE-2039 - Fixed bug where dragons did not ragdoll when killed
+- AE-2040 - Fixed bug where goblins got stuck pushing at a shut door
+- AE-2041 - Fixed bug where a lawman could set off his own posse's snare
+
+### Gameplay
+- AE-2042 - Fixed bug where leaving a dungeon or the Spider Hollow left you stuck inside the entrance
+- AE-2043 - Fixed bug where fire did not char burning people or dead bodies
+- AE-2044 - Fixed bug where holding sprint against a wall still drained stamina
+- AE-2045 - Fixed bug where a yellow marker still hovered over plants
+- AE-2046 - Fixed bug where NPCs ignored suspicious sounds for the first few minutes of a game
+
+# Patch Notes Version Alpha 0.2.1: Walls Have Two Faces
+
+Houses are now finished inside, the title screen has moved underground and the light has calmed down.
+
+## New Features
+
+### Blocks
+- Added two-faced wall blocks. A wall can now be brick or stone outside and plaster or planks inside, all in one block
+- Added an iron-clad wall with a wooden lining. Fire burns the wood away and leaves the iron, which glows red with the heat
+
+### NPC's
+- Added sheltering. Townsfolk caught outside in heavy rain now head home until it passes
+- Added morning prayers. Devout townsfolk now visit their town's altar once a day
+- Added flanking. A monster that arrives while another is already fighting you now goes round to your other side
+- Added new tactics for monsters. They now weave in when you draw a bow on them and work round behind you when you block
+
+### Gameplay
+- Added vaulting. From Agility level 2 you can vault fences and low walls by sprinting or jumping at them, and NPCs vault them too
+- Added the Updates button to the title screen, where you can read every patch note
+
+## Changes
+
+### Blocks
+- Changed every house to the new building standard. Walls now stand at least three blocks high and every door opens onto clear ground
+- Changed fire to spread far more slowly. A wooden wall now takes most of a minute to burn along instead of a few seconds
+- Changed DevPalace's layout. An alley now runs either side of the imperial palace, and columns no longer stand in doorways
+
+### NPC's
+- Changed NPC dialogue to depend on what they are doing, and DevPalace's citizens now talk about their own city
+- Changed NPCs so they now notice when you talk to them twice in one day
+- Changed NPC routes. NPCs now use the gates and gaps in town walls instead of walking the long way round
+
+### Gameplay
+- Changed the title screen to a torch-lit dungeon chamber with your last character standing before a great doorway
+- Changed the title menu to the right side of the screen, and moved Settings into it
+- Changed the character creator so your character only turns when you turn them
+- Changed the minimap to zoom in when you are in a town, city or kingdom and out when you are in the wilds
+- Changed the lighting to be softer and warmer, with gentler shadows, calmer greens and a bluer haze
+- Changed the fog to begin closer, so the world now runs more smoothly
+- Changed the running animation. Strides are now shorter and quicker and the arms pump
+- Changed the bow draw seen from behind. The bow now comes up into the shot and is held at a slight cant
+- Changed knockdowns. You and NPCs now get back up noticeably faster
+- Removed the "?" controls button from the inventory, character, skills, journal, magic, faith and map pages
+- Removed Examine from everything in the world except items
+
+## Technical Changes
+- Changed distant NPCs to think less often while they go about their day, to reduce stutter on the larger map
+- Changed the world to rebuild only a few pieces of terrain a frame and to stop drawing shadows past the fog
+
+## Fixed Bugs
+
+### Blocks
+- AE-2019 - Fixed bug where soot stayed floating in the air after the block it was on broke or burnt away
+- AE-2020 - Fixed bug where some beds in DevPalace stood the wrong way round in the middle of the room
+
+### Items
+- AE-2021 - Fixed bug where the sleeves of your shirt showed through body armour between the elbow and the glove
+
+### NPC's
+- AE-2022 - Fixed bug where monsters could not lose limbs, wings, tails or heads
+- AE-2023 - Fixed bug where DevPalace's citizens got stuck on beds standing in the way
+- AE-2024 - Fixed bug where some DevPalace houses opened straight onto the palace wall
+- AE-2025 - Fixed bug where a tailor shelved the cloth they needed and a carpenter stopped building furniture
+- AE-2026 - Fixed bug where a knee could swing out sideways when stopping from a sprint
+
+### Gameplay
+- AE-2027 - Fixed bug where the game stuttered heavily on the larger map
+- AE-2028 - Fixed bug where getting back up after being knocked down took far too long
+- AE-2029 - Fixed bug where running looked like a series of lunges
+
+# Patch Notes Version Alpha 0.2.0: All Roads Lead to DevPalace
+
+The map has grown to its full size, an empire has moved in next door and the world has been repainted.
+
+## New Features
+
+### Blocks
+- Added a hand-painted look to every block of the world. Grass, stone, brick, wood, bark, leaves, water, roofs and every other surface have been redrawn from scratch
+- Added DevPalace, a walled Roman city east of DevCity with a marble forum and fountain, a temple, the emperor's palace, a basilica, a market hall, baths and houses round their atria
+- Added the southern wood, a great forest south of the old map with a brook running through it
+- Added the lake country south of DevPalace, with a lake and its beaches, mining hills, a marble quarry and fields of herbs, flax and berries
+- Added a meadow north of DevPalace and a forester's lodge at the edge of the southern wood
+- Added soot. Fire now blackens the walls it burns long before they burn through
+
+### Items
+- Added the Marble block, cut from the quarry south of DevPalace
+
+### NPC's
+- Added twenty residents of DevPalace, among them Emperor Severinus, Praetor Cassia, four legionaries, Senator Lucilla and Flavia the trader
+- Added Arthur, Sir Lancelot, Sir Gawain, Tristan, Percival and Merlin at the forester's lodge: a carpenter, a knight errant, a monster hunter, a trapper, a coal miner and a gem prospector
+- Added tip-offs. Townsfolk who know you are wanted now tell the nearest guard where they saw you
+- Added repairs. Smashed windows and burnt fences, walls and roofs in the kingdoms are now mended by the carpenter, and timber by woodcutters
+- Added the blacksmith's rack. Tamsin now sells what Store A will not take from her own rack at the forge
+
+### Gameplay
+- Added the Faith tab, a page of its own for your prayers, opened with P
+- Added DevPalace's own law, cell and market
+- Added new music for the dungeons, a theme for DevPalace and peaceful pieces for town and field, and a fanfare when your combat level rises
+
+## Changes
+
+### Blocks
+- Changed the devmap to the full size of the game map: 192 by 192 blocks and 100 blocks high
+- Changed doors so they now open away from whoever opens them and stay loose on their hinges once open, to be pushed either way. Pushed shut, a door latches
+- Changed electricity on water so arcs of lightning now crawl across the surface, and a bolt that strikes someone standing in water now runs into it
+
+### NPC's
+- Changed guards and lawmen so they no longer attack over a small bounty. They now ask you to pay the fine, and leave it on the books if you put it off
+- Changed the blacksmith so she now buys ore from the miner when the store has none and keeps working through the day
+- Changed shops so they now stop buying goods they already have plenty of
+- Changed townsfolk so they now sell what they gather at their own town's market
+- Changed ducks so they now swim on their pond, and cows, horses, pigs and others now wade into the shallows from time to time
+
+### Items
+- Changed spells so they now wound the body by their element. Fire and lightning scorch, ice and wind cut, earth and water batter
+- Changed deadly spells so they now take off limbs and heads
+- Changed Earth Blast, Earth Wave and Earth Surge so a strong hit now knocks people off their feet
+- Changed arrows and thrown blades so they now fall out of a body after a minute
+
+### Gameplay
+- Changed dying with a bounty over 25 gold so the law now takes a share of what you carried, more the higher the bounty, up to everything. Dying without a bounty is unchanged
+- Changed the Magic tab to a cleaner spellbook page, with the chosen spell written out beside it
+- Changed the bank so the vault now takes the middle of the screen, with buttons to deposit everything, deposit your gold or take everything out
+- Changed the character tab so it now shows your standing with each kingdom's law instead of the controls
+- Changed the wanted panel so bandits and others hunting you are now shown apart from the law
+- Changed sprinting so it is now quick, driving strides instead of long bounds
+- Changed sneaking so you now crouch low with your head up instead of folding over
+- Changed the bow in first person so it now pushes out as you draw, trembles when held and kicks when you loose
+
+## Technical Changes
+- Removed the painterly filter from 0.1.9
+- Changed campfire smoke so it is now drawn only as a lit cloud
+- Changed the walls' textures so they now shimmer much less at a distance
+- Added the version number Alpha 0.2.0
+
+## Fixed Bugs
+
+### NPC's
+- AE-2001 - Fixed bug where paying your bounty to a guard who had stopped you did nothing and the watch kept chasing you
+- AE-2002 - Fixed bug where bandits searching for you showed as the law
+- AE-2003 - Fixed bug where the blacksmith waited for supplies most of the day
+- AE-2004 - Fixed bug where cows and other animals could not go into water
+
+### Items
+- AE-2005 - Fixed bug where the arc shown for arrows and throws was not where they landed
+- AE-2006 - Fixed bug where the bow's draw looked wrong and the bow did not move in first person
+- AE-2007 - Fixed bug where Earth Wave did not knock anyone down
+- AE-2008 - Fixed bug where magic and ranged attacks left no wounds
+- AE-2009 - Fixed bug where magic could not take off a head
+- AE-2010 - Fixed bug where arrows stuck in the edge of a body twitched
+
+### Blocks
+- AE-2011 - Fixed bug where open doors could not be pushed and swung flat to either side
+- AE-2012 - Fixed bug where electricity on water barely showed
+- AE-2013 - Fixed bug where fire did not burn the surfaces it touched or keep charring bodies
+- AE-2014 - Fixed bug where some walls in DevCity shimmered
+- AE-2015 - Fixed bug where soft grey discs floated near campfires at night
+
+### Gameplay
+- AE-2016 - Fixed bug where the slay command did not work on monsters
+- AE-2017 - Fixed bug where sprinting took long bounding strides
+- AE-2018 - Fixed bug where sneaking looked wrong
+
 # Patch Notes Version 0.1.9: Here Be Dragons, There Be Fog
 
 The town now knows what to do when something big comes calling, and the world got a fresh coat of paint.

@@ -66,7 +66,7 @@ class DoorPassageTest {
         }
     }
 
-    @Test void anOpenLeafSwingsWellPastSquareEitherWayAsThePlayerWalksThrough() {
+    @Test void anOpenLeafSwingsIntoTheRoomPastSquareWhicheverWayThePlayerWalksThrough() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));
@@ -88,7 +88,7 @@ class DoorPassageTest {
                 g.controller.in.forward = 0;
                 reached[pass] = most;
             }
-            // to the wall either way (a little past square), and never through it
+            // into the room a little past square whichever side it was opened from (gamefixes: a door opens one way), never further
             assertTrue(reached[0] > 1.5f && reached[1] > 1.5f && reached[0] <= Door.SWING + 0.05f && reached[1] <= Door.SWING + 0.05f, "the leaves swung " + reached[0] + " and " + reached[1] + " rad");
         }
     }

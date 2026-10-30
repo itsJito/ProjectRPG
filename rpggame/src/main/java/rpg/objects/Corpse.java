@@ -48,7 +48,6 @@ public final class Corpse extends Container {
         float r = g.cfg.interactRange;
         o.add(Option.on("open", "Search body" + (isTheft(a) ? " (theft)" : "") + (empty(g) ? " (nothing left)" : ""), 10, r));
         o.add(Option.when(heldBy == 0 && a.carryBody == 0, "carry", "Carry body", 5, "That body is already being carried.", 2.2f));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
@@ -91,8 +90,4 @@ public final class Corpse extends Container {
 
     @Override public java.util.Map<String, Object> save() { var m = super.save(); m.put("delivered", delivered); return m; }
     @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); delivered = astratto.util.Json.bool(m, "delivered", false); heldBy = 0; }
-    @Override public String examine(Rpg g) {
-        Npc n = npc(g);
-        return n == null ? "A body." : n.name + ", dead." + (empty(g) ? " Nothing left on them." : "");
-    }
 }

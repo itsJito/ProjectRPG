@@ -31,7 +31,8 @@ class MonsterRemainsTest {
             assertFalse(body.isTheft(g.player), "searching a monster's remains is not theft");
             int carried = (int) body.contents.stacks().stream().filter(s -> s != null).count();
             for (ItemDef.Slot slot : ItemDef.Slot.values()) if (gob.eq.get(slot) != null && !gob.eq.get(slot).def.natural) carried++;   // and what it wore
-            long groundBefore = g.objects.all().stream().filter(o -> o instanceof GroundItem gi && !gi.removed).count();
+            float gx = gob.x, gz = gob.z;   // (0.2.1) only what lies where it lay: the new residents drop things elsewhere
+            long groundBefore = g.objects.all().stream().filter(o -> o instanceof GroundItem gi && !gi.removed && Math.hypot(gi.x - gx, gi.z - gz) < 4).count();
             // most of the minute: still there, whole
             gob.diedAt = g.time - (Monsters.CORPSE_SECONDS - 1);
             for (int f = 0; f < 30; f++) assertTrue(game.tick(1f / 60));
@@ -43,7 +44,7 @@ class MonsterRemainsTest {
             for (int f = 0; f < 60 * 3; f++) assertTrue(game.tick(1f / 60));
             assertFalse(g.monsters.all().contains(gob), "the remains are gone");
             assertTrue(body.removed, "and so is the body to search");
-            long groundAfter = g.objects.all().stream().filter(o -> o instanceof GroundItem gi && !gi.removed).count();
+            long groundAfter = g.objects.all().stream().filter(o -> o instanceof GroundItem gi && !gi.removed && Math.hypot(gi.x - gx, gi.z - gz) < 4).count();
             assertEquals(groundBefore + carried, groundAfter, "what was on it, carried or worn, is left on the ground");
         }
     }

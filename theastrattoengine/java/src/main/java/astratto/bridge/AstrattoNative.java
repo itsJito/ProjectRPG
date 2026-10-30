@@ -123,6 +123,8 @@ public final class AstrattoNative {
     // ---- rendering: the mesher (1.1)
     public static final int RB_CROSS = 1, RB_TRANSLUCENT = 1 << 1, RB_LIQUID = 1 << 2, RB_CUTOUT = 1 << 3, RB_EMISSIVE = 1 << 4, RB_LEAF = 1 << 5, RB_SWAY = 1 << 6,
             RB_OCCLUDES = 1 << 7, RB_DOOR = 1 << 8, RB_SOLID = 1 << 9, RB_STEP = 1 << 10, RB_SEAT = 1 << 11, RB_PLANT = 1 << 12;
+    /** (0.2.1) a two-faced block: its inner side (1 +x, 2 -x, 3 +z, 4 -z) at this shift, drawn with its bottom layer. */
+    public static final int RB_INNER_SHIFT = 13;
     public static final int ORIENT_NONE = 0, ORIENT_BACKING = 1, ORIENT_DOOR = 2, ORIENT_JOIN = 3, ORIENT_CHAIR = 4, ORIENT_PEW = 5, ORIENT_SCATTER = 6, ORIENT_STAIR = 7;
     public static final int MESH_DOORS = 1, MESH_NO_PLANTS = 1 << 1, MESH_LEAF_CUBES = 1 << 2;
 

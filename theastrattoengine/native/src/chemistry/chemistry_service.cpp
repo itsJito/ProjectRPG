@@ -113,7 +113,12 @@ void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
     if (v.type == WATER) { s.wet = std::min(1.0f, s.wet + v.power * 0.35f); s.heat = std::max(0.0f, s.heat - v.power); s.state = (s.state | WET) & ~BURNING; }
     if (v.type == FIRE) {
         if (s.state & FROZEN) { s.state &= ~FROZEN; Volume water = v; water.serial = 0; water.type = WATER; water.x = s.x; water.y = s.y; water.z = s.z; water.radius = s.radius; water.power = 0.5f; water.life = 0.25f; emit(water); }
-        s.heat = std::min(3.0f, s.heat + v.power * (1 - s.wet) * 0.3f);
+        // (0.2.1, gamefixes: fire raced through a whole wooden building in seconds) the flame a burning cell gives off warms
+        // its neighbours less the farther they are - a face neighbour most, a corner barely - so heat builds up over
+        // several seconds before the next plank catches; a spell's or a torch's own fire (no source cell) is unchanged
+        float reach = 1.0f;
+        if (v.source != 0) reach = std::clamp(1.0f - std::sqrt(d2) / (v.radius + s.radius), 0.15f, 1.0f) * 1.6f;
+        s.heat = std::min(3.0f, s.heat + v.power * reach * (1 - s.wet) * 0.3f);
         if ((s.tags & FLAMMABLE) && s.fuel > 0 && s.wet < 0.15f && s.heat > 0.35f) {
             s.state |= BURNING;
             // Passive wind/water and an older unowned flame must not erase a fresh attack's source.
@@ -164,7 +169,7 @@ void ChemistryService::step(Engine& e, float dt) {
         if(s.state&BURNING) {
             s.fuel=std::max(0.0f,s.fuel-h); if(s.wet>0.15f)s.state&=~BURNING;
             if(s.fuel<=0) { s.state=(s.state&~BURNING)|BURNT; if(s.cell&&e.active())e.setCell(e.activeHandle(),static_cast<int>(s.x),static_cast<int>(s.y),static_cast<int>(s.z),materials_[s.block].burnt); s.block = materials_[s.block].burnt; }
-            else if(time_>=s.emitAt) { s.emitAt=time_+0.45f; Volume fire; fire.source=s.id; fire.owner=s.owner; fire.type=FIRE; fire.x=s.x+windX_*0.08f; fire.y=s.y+0.25f; fire.z=s.z+windZ_*0.08f; fire.radius=s.radius+0.8f; fire.power=0.65f; fire.life=0.25f; emit(fire); Volume up=fire; up.type=WIND; up.power=0.4f; emit(up); }
+            else if(time_>=s.emitAt) { s.emitAt=time_+0.45f; Volume fire; fire.source=s.id; fire.owner=s.owner; fire.type=FIRE; fire.x=s.x+windX_*0.08f; fire.y=s.y+0.25f; fire.z=s.z+windZ_*0.08f; fire.radius=s.radius+0.6f; fire.power=0.05f; fire.life=0.25f; emit(fire); Volume up=fire; up.type=WIND; up.power=0.4f; emit(up); }
         } else s.heat += (0-s.heat)*std::min(1.0f,h*0.15f);
         if((s.state&FROZEN)&&s.heat>-0.15f)s.state&=~FROZEN;
         publish(e,s,previous);

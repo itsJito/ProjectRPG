@@ -10,12 +10,12 @@ public final class Style {
 
     public static final int CARD = 0xF01C1813, CARD_HI = 0xF8262019, WELL = 0xC0100D0A, EDGE = 0x40C8A060, EDGE_HI = 0xC0E8C878,
             TEXT = 0xFFEDE3CC, DIM = 0xFFA89C82, FAINT = 0xFF746A58, ACCENT = 0xFFE8C26A, ACCENT_BG = 0x40D8B46A,
-            GOOD = 0xFF8CC47E, BAD = 0xFFD8705E, INFO = 0xFF7EA8C9, MAGIC = 0xFF8C8CE0,
+            GOOD = 0xFF8CC47E, BAD = 0xFFD8705E, WARN = 0xFFE09A4A, INFO = 0xFF7EA8C9, MAGIC = 0xFF8C8CE0,
             HP = 0xFFB4483E, STAMINA = 0xFFC2A848, FAITH = 0xFF4FA6A8, MANA = 0xFF5470C0;
     /** The frame's metal: a dark outer line, the gold trim, its lit edge. */
     public static final int RIM = 0xFF0C0A07, GOLD = 0xFF9C7838, GOLD_LIT = 0xFFE0BC6C;
     /** NPCs on the minimap and over their heads keep the colours they have always had. */
-    public static final int NPC = 0xFFFFFF00, NPC_HOSTILE = 0xFFFF5050;
+    public static final int NPC = 0xFFFFFF00, NPC_HOSTILE = 0xFFFF5050, MONSTER = 0xFFB01818;
     public static final float BODY = 13, SMALL = 11, TITLE = 15;
 
     /** A panel: parchment darkened to leather, a gold trim inside a dark rim, a stud at each corner. */

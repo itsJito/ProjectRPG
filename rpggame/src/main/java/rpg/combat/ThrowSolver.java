@@ -9,15 +9,19 @@ import rpg.world.Voxels;
  *
  * <p>The target is where the camera's centre ray meets the world; the start is the throwing hand. The flight time is
  * the distance over the throw's speed, and the launch velocity is solved so the path passes through the target at that
- * time: v = (target - start - g t^2 / 2) / t. Thirty points are plotted along it and swept with a 0.15 m sphere between
- * each pair; the first contact cuts the path there and is where it lands. The landing is marked red when something is
+ * time: v = (target - start - g t^2 / 2) / t. Thirty points are plotted along it and swept between each pair with the
+ * same contact a thrown thing in flight has (its centre line against the world, a few centimetres of pad against
+ * bodies); the first contact cuts the path there and is where it lands. (gamefixes: the ring was not where a throw came
+ * down - swept with a 0.15 m sphere, the guide met the ground a hand's height early, half a metre short at a shallow
+ * angle, while the throw flew on to where its middle struck.) The landing is marked red when something is
  * in the way short of the target, or when the landing is under 1.5 m from the hand; white otherwise. The solve is redone
  * only when the aim has moved more than half a degree (or the hand has moved), and the release uses the very velocity
  * the guide shows.
  */
 public final class ThrowSolver {
     public static final int POINTS = 30;
-    public static final float RADIUS = 0.15f, MIN_DISTANCE = 1.5f, REACH = 45f;
+    /** The contact pad: what a projectile in flight is given against bodies (CombatSystem.sweep), and the world's rim rays. */
+    public static final float RADIUS = 0.03f, MIN_DISTANCE = 1.5f, REACH = 45f;
     private static final float HALF_DEGREE = (float) Math.toRadians(0.5);
 
     public final float[][] points = new float[POINTS][3];
@@ -83,7 +87,7 @@ public final class ThrowSolver {
             if (hit != null) {
                 points[count][0] = hit[0]; points[count][1] = hit[1]; points[count][2] = hit[2]; count++;
                 landing[0] = hit[0]; landing[1] = hit[1]; landing[2] = hit[2];
-                // short of the target by more than the sphere's own size: something is in the way
+                // short of the target by more than a little: something is in the way
                 blocked = Math.hypot(Math.hypot(hit[0] - target[0], hit[1] - target[1]), hit[2] - target[2]) > 0.6f;
                 tooClose = Math.hypot(hit[0] - start[0], hit[2] - start[2]) < MIN_DISTANCE;
                 return;
@@ -95,7 +99,7 @@ public final class ThrowSolver {
         tooClose = Math.hypot(px - start[0], pz - start[2]) < MIN_DISTANCE;
     }
 
-    /** A 0.15 m sphere swept along a segment: the world (the centre ray and four rays at the sphere's rim) and other bodies. */
+    /** The flight's contact swept along a segment: the world (the centre ray and four rays at the pad's rim) and other bodies. */
     private static float[] sweep(Rpg g, Actor a, float ax, float ay, float az, float bx, float by, float bz) {
         float dx = bx - ax, dy = by - ay, dz = bz - az, len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 1e-5f) return null;

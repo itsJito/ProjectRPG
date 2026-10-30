@@ -684,7 +684,13 @@ final class HudFragments {
 
     // ------------------------------------------------------------------ minimap: top right, flat; the NPC colours as they always were
     static final class Minimap extends Fragment {
-        private static final float R = 76, SCALE = 2.6f;
+        private static final float R = 76;
+        /** Map pixels per metre: (0.2.1, gamefixes) closer in than the old 2.6 - closest inside a town, city or kingdom's
+         *  bounds, where the streets matter, and drawing out over the wilds, easing between the two as one crosses over.
+         *  (0.2.2, gamefixes: more zoomed in) about a third closer again: 13 m to the rim in town, 19 m in the wilds. */
+        static final float TOWN_SCALE = 5.8f, WILD_SCALE = 4.0f, DUNGEON_SCALE = 6.2f;
+        private float SCALE = WILD_SCALE;
+        private double scaledAt = -1;
         private int tex;
         private double builtAt = -99, markersAt = -99;
         private final float[] p2 = new float[3];
@@ -702,7 +708,7 @@ final class HudFragments {
             int c = Blocks.mapColor(top);
             float shade = 0.62f + (ty - DevMap.FLOOR + 1) * 0.06f;
             if (top == Blocks.WATER) { c = 0x355E8C; shade = 1; }
-            boolean wall = ty >= DevMap.FLOOR && ty <= DevMap.FLOOR + 3 && (top == Blocks.BRICK || top == Blocks.PLANKS || top == Blocks.PLASTER || top == Blocks.STONE || top == Blocks.FENCE);
+            boolean wall = ty >= DevMap.FLOOR && ty <= DevMap.FLOOR + 3 && (Blocks.dual(top) || top == Blocks.BRICK || top == Blocks.PLANKS || top == Blocks.PLASTER || top == Blocks.STONE || top == Blocks.FENCE);
             // flat and low-contrast: colours pulled toward grey, walls a soft light line
             int rr = (int) (((c >> 16) & 255) * shade), gg = (int) (((c >> 8) & 255) * shade), bb = (int) ((c & 255) * shade);
             int grey = (rr + gg + bb) / 3;
@@ -804,6 +810,9 @@ final class HudFragments {
             // the map one is on: the world's, or the dungeon's own
             var dungeon = rpg.world.DungeonLayout.at(p.x, p.z);
             int shown = texFor(dungeon);
+            float want = dungeon != null ? DUNGEON_SCALE : DevMap.WILDS.equals(DevMap.jurisdiction(p.x, p.z)) ? WILD_SCALE : TOWN_SCALE;
+            float step = scaledAt < 0 ? 1 : (float) Math.min(1, (g.time - scaledAt) * 1.6);
+            SCALE += (want - SCALE) * Math.max(0, step); scaledAt = g.time;
             float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? DevMap.SX : dungeon.w, mapD = dungeon == null ? DevMap.SZ : dungeon.d;
             ui.disc(cx, cy, R + 3, 0x90141518);
             int seg = 48;
@@ -827,6 +836,12 @@ final class HudFragments {
             // the areas being searched (gamefixes): a soft patch where they think you are, pulsing at its edge
             for (var area : g.ai.searchAreas()) searchArea(ui, area, cx, cy, (float) g.time);
             for (Npc n : g.npcs) if (n.alive && n.loaded) dot(ui, n.x, n.z, cx, cy, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC, 3);
+            // (0.2.2, gamefixes: goblins were missing from the minimap) monsters: a dark red dot, ringed while one is after you
+            if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) if (mo.alive && mo.loaded) {
+                boolean after = mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK;
+                if (after && toMap(mo.x, mo.z, cx, cy)) ui.ring(p2[0], p2[1], 5, 1, Style.MONSTER);
+                dot(ui, mo.x, mo.z, cx, cy, Style.MONSTER, 3);
+            }
             if (hud.flag != null) dot(ui, hud.flag[0], hud.flag[1], cx, cy, 0xFFFF2020, 4);
             // the player's graves (gamefixes): a skull where each stands - held to the rim when it is off the map - and
             // under the map the time each has left before the undertaker takes it
@@ -891,7 +906,7 @@ final class HudFragments {
         private void searchArea(Ui2D ui, rpg.ai.AiSystem.SearchArea a, float cx, float cy, float t) {
             Rpg g = hud.g;
             boolean me = a.target() == g.player.id;
-            int fill = me ? 0x38D06A5E : 0x307EA8C9, edge = me ? Style.BAD : Style.INFO;
+            int fill = !me ? 0x307EA8C9 : a.law() ? 0x38D06A5E : 0x38E09A4A, edge = !me ? Style.INFO : a.law() ? Style.BAD : Style.WARN;
             float yaw = g.controller.camYaw;
             float fx = (float) -Math.sin(yaw), fz = (float) -Math.cos(yaw), rx = (float) Math.cos(yaw), rz = (float) -Math.sin(yaw);
             int seg = 32;
@@ -958,7 +973,7 @@ final class HudFragments {
         private final List<Row> rows = new ArrayList<>();
         private String status = "";
         private int statusColor = Style.DIM, heat;
-        private boolean spotted;
+        private boolean spotted, hunted;
         private float searchLeft = -1, searchTotal = 1;
         private double builtAt = -1;
         Wanted(Hud h) { super("wanted"); h.events.listen((type, detail) -> { if (type.equals("law")) builtAt = -1; }); }
@@ -981,16 +996,22 @@ final class HudFragments {
             }
             // the gauge follows the law's own lines: pursued, hunters at the border, lockdown, posses
             heat = total <= 0 ? 0 : total <= g.cfg.pursuitBounty ? 1 : total < g.cfg.ambushBounty ? 2 : total < g.cfg.lockdownBounty ? 3 : total <= g.cfg.posseBounty ? 4 : 5;
-            int closing = 0, searchers = 0;
+            int closing = 0, searchers = 0, outlaws = 0;
+            String outlawKind = "";
             searchLeft = -1;
             for (Npc n : g.npcs) {
                 if (!n.alive || !n.loaded) continue;
                 boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
                 if (law && n.goal == Brain.Goal.FIGHT && n.fightTarget == me) closing++;
-                if (n.hunt != null && n.hunt.target == me && (law || n.hostileToPlayer)) {
+                // (gamefixes: bandits looking for the player showed as the law) the watch's search is the law's; anyone
+                // else hostile out after the player is told apart, by what they are
+                if (n.hunt != null && n.hunt.target == me && law) {
                     searchers++;
                     float left = (float) (n.hunt.patience - (g.time - n.hunt.clueAt));
                     if (left > searchLeft) { searchLeft = left; searchTotal = n.hunt.patience; }
+                } else if (n.hunt != null && n.hunt.target == me && (n.hostileToPlayer || n.posse)) {
+                    outlaws++;
+                    outlawKind = n.posse ? "bounty hunter" : n.role == Npc.Role.BANDIT ? "bandit" : n.role == Npc.Role.BRUTE ? "brute" : n.role == Npc.Role.THIEF ? "thief" : n.title.toLowerCase();
                 }
                 // witnesses: on their way to the lawman, with how far they still have to go
                 Memory m = null;
@@ -1004,12 +1025,16 @@ final class HudFragments {
                 } else rows.add(new Row("questionmark_UI", n.name + " saw your " + m.kind.toLowerCase(), Style.DIM, -1, 0));
             }
             if (g.law.resisting(me)) rows.add(new Row("Boss_Icon", "Resisting arrest", Style.BAD, -1, 0));
+            if (outlaws > 0) rows.add(new Row("Boss_Icon", outlaws == 1 ? "A " + outlawKind + " is looking for you" : outlaws + " " + plural(outlawKind) + " are looking for you", Style.WARN, -1, 0));
+            hunted = outlaws > 0 && heat == 0 && searchers == 0 && closing == 0;
             spotted = closing > 0;
             if (spotted) { status = closing == 1 ? "SPOTTED - a guard is closing in" : "SPOTTED - " + closing + " guards are closing in"; statusColor = Style.BAD; }
             else if (searchers > 0) { status = searchers == 1 ? "SEARCHING - they've lost sight of you" : "SEARCHING - " + searchers + " are combing the area"; statusColor = Style.ACCENT; }
             else if (heat > 0) { status = "HIDDEN - no one has eyes on you"; statusColor = Style.GOOD; }
+            else if (hunted) { status = "NOT WANTED - but you are being hunted"; statusColor = Style.WARN; }
             else { status = rows.isEmpty() ? "" : "NOT WANTED - yet"; statusColor = Style.DIM; }
         }
+        private static String plural(String kind) { return kind.endsWith("thief") ? kind.substring(0, kind.length() - 1) + "ves" : kind + "s"; }
 
         @Override public void draw(Ui2D ui, float x, float y) {
             Rpg g = hud.g;
@@ -1019,7 +1044,7 @@ final class HudFragments {
             float pulse = spotted ? 0.55f + 0.45f * (float) Math.abs(Math.sin(g.time * 5)) : 1;
             ui.rect(x, y, 3, hgt, Style.fade(statusColor, pulse));
             // heat: five pips, lit by the total bounty
-            ui.text(heat > 0 ? "WANTED" : "LAW", x + 12, y + 7, 14, heat > 0 ? Style.BAD : Style.DIM);
+            ui.text(heat > 0 ? "WANTED" : hunted ? "HUNTED" : "LAW", x + 12, y + 7, 14, heat > 0 ? Style.BAD : hunted ? Style.WARN : Style.DIM);
             for (int i = 0; i < 5; i++) {
                 float px = x + W - 16 - (4 - i) * 16, py = y + 9;
                 boolean on = i < heat;

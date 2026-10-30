@@ -143,5 +143,4 @@ public final class Prayers {
         if (damage > 0) g.prog.award(v, Skill.FAITH, damage * 2.5f, "protected by prayer", cause);
     }
 
-    static boolean wieldsSymbol(Actor a) { ItemDef o = a.off(); return o != null && o.family == ItemDef.Family.SYMBOL; }
 }

@@ -82,6 +82,8 @@ public final class Rpg implements GameModule {
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
     public rpg.world.Chemistry chemistry;
+    /** What has been broken in the kingdoms and not yet mended (0.2.0). */
+    public rpg.world.Repairs repairs;
     public rpg.ai.Traps traps;
     public rpg.world.Foliage foliage;
     public rpg.world.WaterContacts waterContacts;
@@ -149,6 +151,7 @@ public final class Rpg implements GameModule {
         traversal = new rpg.actor.Traversal(this);
         carrying = new rpg.actor.BodyCarry(this);
         chemistry = new rpg.world.Chemistry(this);
+        repairs = new rpg.world.Repairs(this);
         traps = new rpg.ai.Traps(this);
         foliage = new rpg.world.Foliage(this);
         waterContacts = new rpg.world.WaterContacts(this);
@@ -248,7 +251,24 @@ public final class Rpg implements GameModule {
     public void give(Actor a, rpg.item.ItemDef d, int n) { grant(a, new ItemStack(d, n)); }
 
     // ------------------------------------------------------------------ the tick
+    /** RPG_PROF set: each system's share of the update, summed (nanoseconds) - see {@link #profile()}. */
+    public static final boolean PROF = System.getenv("RPG_PROF") != null;
+    public static final String[] PROF_NAMES = {"time+death", "law.update", "controller.update", "interact.update", "combat.update", "gore.update", "prayers.update", "magic.update", "ai", "carrying.update", "chemistry.update", "traps.update", "dungeons.update", "foliage.update", "objects.update", "undertaker.update", "spareWatch", "glass.update", "econ.update", "prog.update", "fx.update", "animals", "monsters", "engine.frame (native)", "afterFrame"};
+    public final long[] prof = new long[PROF_NAMES.length];
+    private long profAt;
+    private void mark(int i) { long now = System.nanoTime(); prof[i] += now - profAt; profAt = now; }
+    /** The profile so far, the costliest first. */
+    public String profile() {
+        Integer[] order = new Integer[prof.length];
+        for (int i = 0; i < order.length; i++) order[i] = i;
+        java.util.Arrays.sort(order, (a, b) -> Long.compare(prof[b], prof[a]));
+        StringBuilder b = new StringBuilder();
+        for (int i : order) b.append(String.format("%-24s %8.2f ms%n", PROF_NAMES[i], prof[i] / 1e6));
+        return b.toString();
+    }
+
     @Override public void update(GameContext ctx, float dt) {
+        if (PROF) profAt = System.nanoTime();
         time += dt;
         lastDt = dt;
         state.tick++;
@@ -258,31 +278,53 @@ public final class Rpg implements GameModule {
         game.commands().chemWeather(timeSystem.weather.rain);
         chat.now = time; fx.now = time;
         death.update();
+        if (PROF) mark(0);
         law.update();
+        if (PROF) mark(1);
         controller.update(dt);
+        if (PROF) mark(2);
         interact.update(dt);
+        if (PROF) mark(3);
         combat.update(dt);
+        if (PROF) mark(4);
         gore.update(dt);
+        if (PROF) mark(5);
         prayers.update(dt);
+        if (PROF) mark(6);
         magic.update(dt);
-        if (!aiDisabled()) { ai.update(dt); animals.update(dt); monsters.update(dt); }
+        if (PROF) mark(7);
+        if (!aiDisabled()) { ai.update(dt); if (PROF) mark(8); animals.update(dt); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
+        else if (PROF) mark(8);
         carrying.update();
+        if (PROF) mark(9);
         chemistry.update();
+        if (PROF) mark(10);
         traps.update();
+        if (PROF) mark(11);
         dungeons.update();
+        if (PROF) mark(12);
         foliage.update();
+        if (PROF) mark(13);
         objects.update(dt);
+        if (PROF) mark(14);
         undertaker.update();
+        if (PROF) mark(15);
         spareWatch();
+        if (PROF) mark(16);
         glass.update();
+        if (PROF) mark(17);
         econ.update();
+        if (PROF) mark(18);
         prog.update();
+        if (PROF) mark(19);
         fx.update(dt);
+        if (PROF) mark(20);
         for (Actor d : dummies) { d.hp = d.maxHp(); d.cs.staggered = 0; }
         if (audioOnRequest) game.engine().renderAudio(mix, Math.min(4096, Math.max(1, Math.round(dt * 44100))));
     }
 
     @Override public void afterFrame(GameContext ctx) {
+        if (PROF) mark(23);
         lastBodies = ctx.bodies();
         lastRigids = ctx.rigids();
         Snapshots.Mover m = lastBodies.mover(player.body);
@@ -300,6 +342,7 @@ public final class Rpg implements GameModule {
         monsters.afterFrame(lastBodies);
         controller.syncCamera();
         waterContacts.update();
+        if (PROF) mark(24);
     }
 
     @Override public void path(int request, int[] cells, int expansions) { controller.onPath(request, cells); }
@@ -343,6 +386,11 @@ public final class Rpg implements GameModule {
         for (Npc n : npcs) if (n.alive && n.loaded && n.hunt != null && n.hunt.target == player.id && n.distTo(player) < 45) return rpg.audio.Music.Mood.HUNTED;
         double h = state.hourOfDay();
         boolean night = h < 5.5 || h >= 20.5;
+        if (DevMap.inDungeon(player.x, player.z)) return rpg.audio.Music.Mood.DUNGEON;
+        // standing at a town's altar (DevTown's shrine, DevPalace's temple) the hymn plays
+        if (Math.hypot(player.x - DevMap.ALTAR[0] - 0.5, player.z - DevMap.ALTAR[1] - 0.5) < 9
+                || Math.hypot(player.x - rpg.world.Expanse.ALTAR[0], player.z - rpg.world.Expanse.ALTAR[1]) < 9) return rpg.audio.Music.Mood.SACRED;
+        if (DevMap.PALACE.equals(DevMap.jurisdiction(player.x, player.z))) return night ? rpg.audio.Music.Mood.PALACE_NIGHT : rpg.audio.Music.Mood.PALACE_DAY;
         boolean wood = player.x >= DevMap.WILD_X0 && player.x <= DevMap.WILD_X1 && player.z >= DevMap.WILD_Z0 && player.z <= DevMap.WILD_Z1;
         if (wood) return night ? rpg.audio.Music.Mood.WOOD_NIGHT : rpg.audio.Music.Mood.WOOD_DAY;
         boolean town = !DevMap.WILDS.equals(DevMap.jurisdiction(player.x, player.z));
@@ -410,7 +458,10 @@ public final class Rpg implements GameModule {
     }
 
     // ------------------------------------------------------------------ changing the world
-    public void setBlock(int x, int y, int z, int id) { game.commands().blockSet(x, y, z, id); mapDirty = true; mapColumns.add(x << 16 | (z & 0xFFFF)); }
+    public void setBlock(int x, int y, int z, int id) {
+        game.commands().blockSet(x, y, z, id); mapDirty = true; mapColumns.add(x << 16 | (z & 0xFFFF));
+        if (chemistry != null && (id == rpg.world.Blocks.AIR || id == rpg.world.Blocks.EMBERS || id == rpg.world.Blocks.WATER)) chemistry.cleared(x, y, z);
+    }
     /** The map columns edited since the minimap last looked (x << 16 | z); a whole redraw when mapDirty is set without them. */
     public final java.util.Set<Integer> mapColumns = new java.util.HashSet<>();
 
@@ -471,6 +522,8 @@ public final class Rpg implements GameModule {
      */
     public Container makeGrave(float x, float z, long killer, boolean secured) {
         int honorAtDeath = honor.score;
+        // the wanted pay for it first: the law takes its share before the rest goes to the grave
+        law.forfeitOnDeath(player);
         if (player.inv.isEmpty() && player.eq.stacks().isEmpty()) return null;
         Container grave = objects.add(new Container(state.newEntityId(), secured ? "death_claim" : "grave", player.name + "'s belongings", secured ? "claim" : "grave", secured ? DevMap.CUSTODY_CHEST[0] : x, DevMap.FLOOR + 0.3f, secured ? DevMap.CUSTODY_CHEST[1] : z, 320, player.id));
         grave.ownerOnly = secured;

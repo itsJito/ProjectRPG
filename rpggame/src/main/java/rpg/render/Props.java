@@ -527,6 +527,28 @@ public final class Props {
 
     // ------------------------------------------------------------------ doors
     /** A door leaf from its hinge (at the origin) along +x, one metre wide and as tall as the doorway. */
+    /**
+     * (0.2.2, gamefixes) A fence-gate leaf (x 0..1 from the hinge, y up from the ground, a block high): a stile at
+     * either end, the fence's two weathered rails at its heights, a diagonal brace from the hinge's foot to the latch
+     * side's top that keeps it from sagging, and an iron latch and strap hinges.
+     */
+    public static Layer[] fenceGateLeaf() {
+        Meshes.Boxes w = new Meshes.Boxes(), m = new Meshes.Boxes();
+        w.span(0.0f, 0.04f, -0.05f, 0.1f, 0.94f, 0.05f, 0x6A4A2E);              // the hanging stile
+        w.span(0.88f, 0.04f, -0.05f, 0.98f, 0.9f, 0.05f, 0x6E4E30);             // the latch stile
+        w.span(0.1f, 0.3f, -0.035f, 0.88f, 0.42f, 0.035f, 0x8C6640);            // the rails, as the fence's
+        w.span(0.1f, 0.7f, -0.035f, 0.88f, 0.82f, 0.035f, 0x96704A);
+        w.span(0.1f, 0.06f, -0.03f, 0.88f, 0.14f, 0.03f, 0x7E5A38);             // a kick board at the foot
+        // the brace: a run of short boards climbing from the hinge's foot to the far top, between the rails
+        for (int i = 0; i < 7; i++) {
+            float x = 0.14f + i * 0.105f, y = 0.14f + i * 0.08f;
+            w.span(x, y, -0.028f, x + 0.12f, y + 0.12f, 0.028f, 0x83603C);
+        }
+        for (float y : new float[]{0.32f, 0.72f}) m.span(0.0f, y, -0.06f, 0.26f, y + 0.07f, 0.06f, 0x3A3A40);   // strap hinges
+        m.span(0.9f, 0.56f, -0.075f, 0.99f, 0.62f, 0.075f, 0x2E2E32);           // the latch bar
+        return new Layer[]{wood(w), metal(m)};
+    }
+
     public static Layer[] doorLeaf(float height, boolean locked) {
         Meshes.Boxes w = new Meshes.Boxes(), m = new Meshes.Boxes();
         w.span(0.02f, 0, -0.05f, 0.98f, height - 0.02f, 0.05f, 0x8A5E34);

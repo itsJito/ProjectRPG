@@ -210,19 +210,6 @@ public final class Ui2D {
         }
     }
 
-    /** A pie of a disc (orb fill): from the bottom up to a share. */
-    public void discFill(float cx, float cy, float r, float share, int argb) {
-        share = Math.max(0, Math.min(1, share));
-        float top = cy + r - 2 * r * share;
-        int rows = (int) Math.max(1, r);
-        for (int i = 0; i < rows; i++) {
-            float y0 = cy - r + 2 * r * i / rows, y1 = cy - r + 2 * r * (i + 1) / rows;
-            if (y1 <= top) continue;
-            y0 = Math.max(y0, top);
-            float ym = (y0 + y1) / 2 - cy, hw = (float) Math.sqrt(Math.max(0, r * r - ym * ym));
-            rect(cx - hw, y0, hw * 2, y1 - y0, argb);
-        }
-    }
 
     // ------------------------------------------------------------------ text
     public float width(String s, float size) {

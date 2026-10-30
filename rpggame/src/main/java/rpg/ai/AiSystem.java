@@ -120,7 +120,11 @@ public final class AiSystem {
     }
 
     private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR,Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER,Ids.TELLER,
-            Ids.COOK,Ids.QUARRY_WORKER,Ids.BORDER_KNIGHT,Ids.SHELLFISH_GATHERER,Ids.RIVER_FISHERMAN);
+            Ids.COOK,Ids.QUARRY_WORKER,Ids.BORDER_KNIGHT,Ids.SHELLFISH_GATHERER,Ids.RIVER_FISHERMAN,
+            // 0.2.0: DevPalace's twenty, then the six at the forester's lodge
+            Ids.EMPEROR,Ids.PRAETOR,Ids.LEGIONARY_1,Ids.LEGIONARY_2,Ids.LEGIONARY_3,Ids.LEGIONARY_4,Ids.SENATOR,Ids.MACELLUM,Ids.PRIESTESS,Ids.MEDICUS,
+            Ids.PHILOSOPHER,Ids.STONEMASON,Ids.PALACE_BEGGAR,Ids.CITIZEN_1,Ids.CITIZEN_2,Ids.CITIZEN_3,Ids.FISHER_P,Ids.HUNTRESS,Ids.CITIZEN_4,Ids.CENTURION,
+            Ids.ARTHUR,Ids.LANCELOT,Ids.GAWAIN,Ids.TRISTAN,Ids.PERCIVAL,Ids.MERLIN);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
@@ -218,8 +222,89 @@ public final class AiSystem {
                 Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
                 give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
             }
-            default -> throw new IllegalArgumentException("Not an authored release NPC: "+id);
+            default -> { Npc n = expanse(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
         }
+    }
+
+    /**
+     * 0.2.0's residents (gamefixes). DevPalace's twenty, in Roman dress - the emperor on his throne with a centurion of his
+     * household at his side, the praetor at the basilica, four legionaries walking the city's round, a senator in the
+     * forum, a trader at the market hall, a priestess at the temple, a medicus, a philosopher, a stonemason for the marble
+     * quarry, a beggar, four citizens, a fisher and a huntress; and the six newcomers at the forester's lodge in the
+     * southern wood, each of a calling nobody on the devmap held before: Arthur the carpenter (who mends what is broken),
+     * Lancelot a knight errant, Gawain a monster hunter, Tristan a trapper, Percival a coal miner, Merlin a gem prospector.
+     */
+    private Npc expanse(long id) {
+
+        Npc n = switch ((int) id) {
+            case (int) Ids.EMPEROR -> { Npc s = roman(npc(id, "Severinus", Npc.Role.CIVIC, "Emperor of DevPalace", rpg.world.Expanse.THRONE[0], rpg.world.Expanse.THRONE[1] + 1.2f, 160), 15);
+                s.standing = Npc.Standing.ROYAL; s.postX = rpg.world.Expanse.THRONE[0]; s.postZ = rpg.world.Expanse.THRONE[1] + 1.2f; give(s, Items.COINS, 1200); s.pickpocketLevel = 60; yield s; }
+            case (int) Ids.PRAETOR -> { Npc c = roman(npc(id, "Cassia", Npc.Role.LAWMAN, "Praetor (DevPalace)", rpg.world.Expanse.PRAETOR[0], rpg.world.Expanse.PRAETOR[1], 161), 15);
+                levels(c, 40, 40, 40, 40); wear(c, "steel_sword", "steel_shield", "steel_body"); give(c, Items.COINS, 2500); c.postX = rpg.world.Expanse.PRAETOR[0]; c.postZ = rpg.world.Expanse.PRAETOR[1]; yield c; }
+            case (int) Ids.LEGIONARY_1, (int) Ids.LEGIONARY_2, (int) Ids.LEGIONARY_3, (int) Ids.LEGIONARY_4 -> {
+                int k = (int) (id - Ids.LEGIONARY_1);
+                String[] names = {"Titus", "Decimus", "Quintus", "Sextus"};
+                float[] at = rpg.world.Expanse.PATROL[k * 2];
+                Npc l = roman(npc(id, names[k], Npc.Role.GUARD, "Legionary (DevPalace)", at[0], at[1], 162 + k), 0);
+                levels(l, 30, 32, 30, 30); wear(l, "iron_sword", "iron_shield", "iron_body", "iron_helm"); give(l, Items.TROUT, 2); l.patrolIndex = k * 2; yield l; }
+            case (int) Ids.SENATOR -> { Npc s = roman(npc(id, "Lucilla", Npc.Role.CIVIC, "Senator", rpg.world.Expanse.SENATE_POST[0], rpg.world.Expanse.SENATE_POST[1], 166), 22);
+                s.standing = Npc.Standing.NOBLE; s.postX = rpg.world.Expanse.SENATE_POST[0]; s.postZ = rpg.world.Expanse.SENATE_POST[1]; give(s, Items.COINS, 400); yield s; }
+            case (int) Ids.MACELLUM -> { Npc f = roman(npc(id, "Flavia", Npc.Role.MERCHANT, "Trader (the Macellum)", rpg.world.Expanse.MERCHANT_POST[0], rpg.world.Expanse.MERCHANT_POST[1], 167), 18);
+                f.postX = rpg.world.Expanse.MERCHANT_POST[0]; f.postZ = rpg.world.Expanse.MERCHANT_POST[1]; give(f, Items.COINS, 600); f.pickpocketLevel = 5; yield f; }
+            case (int) Ids.PRIESTESS -> { Npc a = roman(npc(id, "Aurelia", Npc.Role.PRIEST, "Priestess of the temple", rpg.world.Expanse.ALTAR[0], rpg.world.Expanse.ALTAR[1] + 1.5f, 168), 22);
+                a.postX = rpg.world.Expanse.ALTAR[0]; a.postZ = rpg.world.Expanse.ALTAR[1] + 1.5f; a.skills.setLevel(Skill.FAITH, 45); give(a, Items.BREAD, 2); yield a; }
+            case (int) Ids.MEDICUS -> { Npc m = roman(npc(id, "Philon", Npc.Role.HEALER, "Medicus", rpg.world.Expanse.MEDICUS_POST[0], rpg.world.Expanse.MEDICUS_POST[1], 169), 20);
+                m.postX = rpg.world.Expanse.MEDICUS_POST[0]; m.postZ = rpg.world.Expanse.MEDICUS_POST[1]; give(m, Items.TROUT, 6); give(m, Items.COINS, 40); m.skills.setLevel(Skill.MAGIC, 45); m.spellBook = rpg.combat.Spells.Book.MOON; yield m; }
+            case (int) Ids.PHILOSOPHER -> { Npc p2 = roman(npc(id, "Nikias", Npc.Role.SCHOLAR, "Philosopher", 152.5f, 94.5f, 170), 22); p2.skills.setLevel(Skill.MAGIC, 35); give(p2, Items.COINS, 50); yield p2; }
+            case (int) Ids.STONEMASON -> { Npc g2 = roman(npc(id, "Gaius", Npc.Role.MINER, "Stonemason", 181.5f, 141.5f, 171), 19);
+                Profession.QUARRY_WORKER.assign(g2); g2.skills.setLevel(Skill.MINING, 32); levels(g2, 10, 16, 10, 16); give(g2, Items.get("bronze_pickaxe"), 1); give(g2, Items.BREAD, 2); give(g2, Items.COINS, 30); yield g2; }
+            case (int) Ids.PALACE_BEGGAR -> { Npc b = roman(npc(id, "Servius", Npc.Role.BEGGAR, "Beggar", 165.5f, 103.5f, 172), 16); b.postX = 165.5f; b.postZ = 103.5f; give(b, Items.BREAD, 1); yield b; }
+            case (int) Ids.CITIZEN_1 -> citizen(id, "Octavia", 146.5f, 92.5f, 173);
+            case (int) Ids.CITIZEN_2 -> citizen(id, "Marcellus", 170.5f, 92.5f, 174);
+            case (int) Ids.CITIZEN_3 -> citizen(id, "Cornelia", 150.5f, 76.5f, 175);
+            case (int) Ids.CITIZEN_4 -> citizen(id, "Livia", 168.5f, 76.5f, 178);
+            case (int) Ids.FISHER_P -> { Npc f = roman(npc(id, "Lucius", Npc.Role.FISHERMAN, "River Fisherman", rpg.world.Expanse.BROOK_SPOTS[0][0] - 2, rpg.world.Expanse.BROOK_SPOTS[0][1], 176), 6);
+                Profession.RIVER_FISHERMAN.assign(f); f.skills.setLevel(Skill.FISHING, 26); give(f, Items.FISHING_ROD, 1); give(f, Items.BREAD, 2); give(f, Items.COINS, 25); f.homeJurisdiction = DevMap.PALACE; yield f; }
+            case (int) Ids.HUNTRESS -> { Npc h = roman(npc(id, "Atalanta", Npc.Role.HUNTER, "Huntress", 150.5f, 14.5f, 177), 5);
+                Profession.GAME_HUNTER.assign(h); levels(h, 16, 14, 12, 20); h.skills.setLevel(Skill.HARVESTING, 26); h.skills.setLevel(Skill.ARCHERY, 30);
+                give(h, Items.KNIFE, 1); give(h, Items.BREAD, 2); wear(h, "shortbow", null, "stone_body"); h.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.BRONZE_ARROWS, 25)); g.state.mint(Items.BRONZE_ARROWS, 25); h.homeJurisdiction = DevMap.PALACE; yield h; }
+            case (int) Ids.CENTURION -> { Npc m = roman(npc(id, "Maximus", Npc.Role.KNIGHT, "Centurion of the household", rpg.world.Expanse.THRONE[0] + 2.5f, rpg.world.Expanse.THRONE[1] + 3, 179), 0);
+                Profession.HOUSEHOLD_KNIGHT.assign(m); m.dutyTarget = Ids.EMPEROR; m.dutyX = rpg.world.Expanse.THRONE[0] + 2.5f; m.dutyZ = rpg.world.Expanse.THRONE[1] + 3;
+                levels(m, 42, 42, 44, 44); wear(m, "steel_sword", "steel_shield", "steel_body", "iron_helm"); give(m, Items.TROUT, 3); yield m; }
+            case (int) Ids.ARTHUR -> { Npc a = npc(id, "Arthur", Npc.Role.CRAFTSMAN, "Carpenter", DevMap.SAW_AT[0] + 0.5f, DevMap.SAW_AT[1] + 1.8f, 180);
+                Profession.CARPENTER.assign(a); a.skills.setLevel(Skill.CONSTRUCTION, 40); a.skills.setLevel(Skill.CRAFTING, 30); a.postX = DevMap.SAW_AT[0] + 0.5f; a.postZ = DevMap.SAW_AT[1] + 1.8f;
+                give(a, Items.HAMMER, 1); give(a, Items.PLANK, 8); give(a, Items.LOGS, 4); give(a, Items.BREAD, 2); give(a, Items.COINS, 80); yield a; }
+            case (int) Ids.LANCELOT -> { Npc l = npc(id, "Sir Lancelot", Npc.Role.KNIGHT, "Knight Errant", 96.5f, 100.5f, 181);
+                Profession.KNIGHT_ERRANT.assign(l); levels(l, 46, 46, 46, 46); wear(l, "steel_sword", "steel_shield", "steel_body", "iron_helm", "iron_legs"); give(l, Items.TROUT, 3); yield l; }
+            case (int) Ids.GAWAIN -> { Npc g3 = npc(id, "Sir Gawain", Npc.Role.HUNTER, "Monster Hunter", 44.5f, 44.5f, 182);
+                Profession.MONSTER_HUNTER.assign(g3); levels(g3, 36, 36, 34, 38); g3.skills.setLevel(Skill.ARCHERY, 38);
+                wear(g3, "oak_shortbow", null, "iron_body"); give(g3, Items.get("iron_sword"), 1); g3.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.IRON_ARROWS, 40)); g.state.mint(Items.IRON_ARROWS, 40); give(g3, Items.TROUT, 3); yield g3; }
+            case (int) Ids.TRISTAN -> { Npc t = npc(id, "Tristan", Npc.Role.HUNTER, "Trapper", 40.5f, 150.5f, 183);
+                Profession.TRAPPER.assign(t); t.skills.setLevel(Skill.HARVESTING, 32); levels(t, 14, 12, 12, 18); give(t, Items.SNARE, 3); give(t, Items.KNIFE, 1); give(t, Items.BREAD, 2); give(t, Items.COINS, 20); yield t; }
+            case (int) Ids.PERCIVAL -> { Npc p3 = npc(id, "Percival", Npc.Role.MINER, "Coal Miner", 144.5f, 145.5f, 184);
+                Profession.COAL_MINER.assign(p3); p3.skills.setLevel(Skill.MINING, 38); levels(p3, 12, 20, 12, 20); give(p3, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(p3, Items.BREAD, 2); give(p3, Items.COINS, 25); yield p3; }
+            case (int) Ids.MERLIN -> { Npc m = npc(id, "Merlin", Npc.Role.MINER, "Gem Prospector", 139.5f, 147.5f, 185);
+                Profession.GEM_PROSPECTOR.assign(m); m.skills.setLevel(Skill.MINING, 40); m.skills.setLevel(Skill.MAGIC, 70); m.spellBook = rpg.combat.Spells.Book.MOON;
+                give(m, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(m, Items.get("chisel"), 1); give(m, Items.BREAD, 2); give(m, Items.COINS, 60); yield m; }
+            default -> null;
+        };
+        if (n == null) return null;
+        float[] bed = DevMap.bedOf(n.id);
+        if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; }
+        return n;
+    }
+    /** A citizen of DevPalace: picks what grows and sells it at the market hall. */
+    private Npc citizen(long id, String name, float x, float z, long seed) {
+        Npc c = roman(npc(id, name, Npc.Role.VILLAGER, "Citizen of DevPalace", x, z, seed), 22);
+        c.skills.setLevel(Skill.HARVESTING, 12); give(c, Items.COINS, 30); c.pickpocketLevel = 1;
+        return c;
+    }
+    /** Roman dress: a draped top over a robe and strapped sandals; colour by office (white for the citizen, red for the soldier...). */
+    private static Npc roman(Npc n, int color) {
+        n.look.top = 19; n.look.topColor = color; n.look.bottom = n.look.female ? 8 : 12; n.look.bottomColor = color == 0 ? 15 : 20; n.look.shoes = 5; n.look.shoesColor = 19;
+        if (!n.look.female && n.role != Npc.Role.BEGGAR) n.look.beard = n.id % 3 == 0 ? 3 : 0;
+        n.homeJurisdiction = DevMap.PALACE;
+        return n;
     }
 
     /** Where a straight way from inside a jurisdiction first leaves it (its border on that road); the far end if it never does. */
@@ -246,7 +331,8 @@ public final class AiSystem {
     }
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
-    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna");
+    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
+            "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
@@ -400,10 +486,22 @@ public final class AiSystem {
                 System.out.printf("      [watch] " + n.name + " t %.1f %s at (%.2f, %.2f) v (%.2f, %.2f) goal (%.1f, %.1f) %s route %d inv %s last %s%n", g.time, n.goal, n.x, n.z, n.vx, n.vz, n.gx, n.gz, n.nativeAction, n.routeCells, n.inv.stacks(), n.lastOutcome);
         }
         updateAlarms();
+        arms.tick();
         for (Npc n : g.npcs) {
             if (!n.alive) { respawnCheck(n); continue; }
             if (!n.loaded) continue;
-            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1));
+            keepArms(n);
+            // (0.2.1, gamefixes: heavy stuttering on the larger map) far from the player and about their ordinary day, a
+            // resident is simulated at a quarter of the rate - the time saved up and spent on its own frame - and its
+            // agent ticks slower; near the player, or in a fight, a flight or a hunt, every frame as before
+            boolean far = farAway(n);
+            int lod = far ? 4 : 1;
+            n.lodDt += dt;
+            if (far && Math.floorMod(g.state.tick + n.id, lod) != 0) continue;
+            float step = n.lodDt; n.lodDt = 0;
+            // (0.2.2) an NPC with a hurt leg goes slower as well as limping (the player only limps)
+            float legs = g.gore == null ? 1 : Math.max(0.35f, g.gore.legs(n));
+            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1) * (far ? 0.5f : 1) * legs);
             if (n.morphT > 0) {
                 n.cs.cancel(); n.cs.blocking = false; n.sneaking = true;
                 g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_CROUCH | MOVER_STANCE_ONLY);
@@ -411,21 +509,21 @@ public final class AiSystem {
                 if (attacker != null && attacker.alive) { target(n, attacker.body); desire(n, A_FLEE); } else desire(n, A_HOLD);
                 continue;
             }
-            stealth.update(n, dt);
-            if (g.traversal.update(n, dt)) continue;
+            stealth.update(n, step);
+            if (g.traversal.update(n, step)) continue;
             if (n.reacting) continue;           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
             Actor elevated = n.goal == Brain.Goal.FIGHT ? g.actor(n.fightTarget) : null;
-            if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, dt)) continue;
-            brain.act(n, dt);
+            if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, step)) continue;
+            brain.act(n, step);
             if (n.stuck && (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.RETURN) && n.hasGoalPos) {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
-                if (g.traversal.begin(n, heading) && g.traversal.update(n, dt)) continue;
+                if (g.traversal.begin(n, heading) && g.traversal.update(n, step)) continue;
             }
             g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking && n.goal != Brain.Goal.COLLECT ? MOVER_CROUCH : 0));
-            face(n, dt);
+            face(n, step);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
-            footsteps(n, dt);
+            if (!far) footsteps(n, step);
         }
         rumors.update();
         abstractSim();
@@ -523,8 +621,11 @@ public final class AiSystem {
         // off the walkable ground (over the water at a bank's edge, wedged at a wall): a step back onto the nearest
         // cell that has a floor and room to stand, from where routes exist again
         int bx = (int) Math.floor(n.x), bz = (int) Math.floor(n.z);
-        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && !standable(bx, bz)) {
-            for (int ring = 1; ring <= 3; ring++) {
+        // (0.2.2, gamefixes: NPCs teleported while in a fight) in a fight it is a step to the very next cell at most, and
+        // not at all for a moment after a blow - a knock-back that ends at a wall settles where it lies
+        boolean fighting = n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || g.time - n.cs.lastHurt < 1.5;
+        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && !standable(bx, bz) && !(fighting && g.time - n.cs.lastHurt < 1.5)) {
+            for (int ring = 1; ring <= (fighting ? 1 : 3); ring++) {
                 float best = Float.MAX_VALUE; int cx = 0, cz = 0;
                 for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != ring || !standable(bx + dx, bz + dz)) continue;
@@ -538,7 +639,6 @@ public final class AiSystem {
         if (n.goal == Brain.Goal.WORK) { brain.resetJob(n); g.interact.cancel(n, "stuck"); }
     }
 
-    public double lastHeard(Npc n) { return heardAt.getOrDefault(n.id, -99.0); }
 
     private Npc byAgent(long agent) { for (Npc n : g.npcs) if (n.agent == agent) return n; return null; }
 
@@ -550,6 +650,45 @@ public final class AiSystem {
     }
 
     /** Everyone who can see an act happen right now (the culprit excluded). */
+    /**
+     * (0.2.2, gamefixes: a guard watched a goblin maul someone, then questioned them about the blood) whoever sees a blow
+     * land knows where the blood on the struck came from, and whose blow it was - for a quarter of an hour it raises no
+     * questions with them. A beast's attack is remembered as such, so its blood and its victim's body are put down to it.
+     */
+    public void sawHurt(Actor striker, Actor victim) {
+        if (striker == null || victim == null || striker == victim) return;
+        boolean beast = striker.domain != astratto.ai.AgentDomain.HUMAN;
+        for (Npc n : g.npcs) {
+            if (n == victim || n == striker || !n.alive || !n.loaded || n.distTo(victim) > 30 || !canSee(n, victim)) continue;
+            Stealth.Aware w = n.aware.computeIfAbsent(victim.id, k -> new Stealth.Aware());
+            w.bloodKnownUntil = g.time + 900; w.bloodBy = striker.id;
+            if (!beast) continue;
+            boolean known = false;
+            for (Memory m : n.memories) if (m.kind.equals("BEAST_ATTACK") && m.victim == victim.id && g.state.minutes - m.minutes < 60) { known = true; break; }
+            if (!known) n.remember(new Memory("BEAST_ATTACK", striker.id, victim.id, DevMap.jurisdiction(victim.x, victim.z), g.state.minutes, 1, "witnessed", 0, 0, "saw a creature attack " + victim.name), 24);
+        }
+    }
+
+    /**
+     * (0.2.2, gamefixes: NPCs abide by the sheathe system) a person's weapons go out when there is a use for them - a
+     * fight, a hunt of a foe, the watch facing someone down, a tool at work, a weapon used a moment ago - and away again
+     * once there is none. The watch may go armed in town; everyone else puts theirs away there.
+     */
+    private void keepArms(Npc n) {
+        if (!n.sheathable() || n.reacting || n.cs.phase != Actor.Combat.Phase.IDLE || g.time - n.sheatheAt < Actor.SHEATHE_TIME * 2) return;
+        rpg.item.ItemDef m = n.main();
+        boolean want = n.goal == Brain.Goal.FIGHT || n.fightTarget != 0 || n.hunt != null && n.combatant() || g.time - n.armsUsedAt < 12
+                || n.watch() && (n.goal == Brain.Goal.WATCH || n.goal == Brain.Goal.EVICT || n.goal == Brain.Goal.WARN)
+                || n.goal == Brain.Goal.WORK && m != null && m.toolSkill != null;
+        if (want == n.sheathed) g.combat.sheathe(n, !want);
+    }
+
+    /** Whether the blood on someone is explained to this NPC (it saw them struck, not long ago). */
+    public boolean bloodExplained(Npc n, Actor a) {
+        Stealth.Aware w = n.aware.get(a.id);
+        return w != null && w.bloodKnownUntil > g.time;
+    }
+
     public List<Npc> witnesses(Actor culprit) {
         List<Npc> l = new ArrayList<>();
         for (Npc n : g.npcs) if (n != culprit && n.alive && n.loaded && Brain.bystander(n) && canSee(n, culprit)) l.add(n);
@@ -604,7 +743,7 @@ public final class AiSystem {
         }
         // searching for whoever did it (a body, blood): someone in sight with blood on them, close to it, is a suspect
         if (n.hunt != null && n.hunt.target == 0 && g.gore != null) for (Actor a : g.actors()) {
-            if (a == n || !a.alive || a.dummy || law && g.law.inCustody(a) || a instanceof rpg.animal.Animal || a.bloodied < 0.25f || !canSee(n, a)) continue;
+            if (a == n || !a.alive || a.dummy || law && g.law.inCustody(a) || a instanceof rpg.animal.Animal || a.bloodied < 0.25f || bloodExplained(n, a) || !canSee(n, a)) continue;
             if (g.gore.suspect(n, a)) { n.hunt = null; n.fightTarget = a.id; return a; }
         }
         // a foe being searched for, found again
@@ -635,7 +774,7 @@ public final class AiSystem {
                 // the watch goes after bounties above the pursuit line (or anyone who came to them); lawmen leave their
                 // post for it, and in a lockdown everyone watches further
                 float range = g.law.lockdown(n.homeJurisdiction) ? 34 : 24;
-                if (g.law.pursued(a.id, n.homeJurisdiction) && ZonePolicy.routineAllowed(n, a.x, a.z) && !g.law.inCustody(a) && n.distTo(a) < range && canSee(n, a)) return a;
+                if ((g.law.pursued(a.id, n.homeJurisdiction) || a == p && g.law.fineDue(n, a)) && ZonePolicy.routineAllowed(n, a.x, a.z) && !g.law.inCustody(a) && n.distTo(a) < range && canSee(n, a)) return a;
             }
         }
         if (!n.combatant()) {
@@ -807,7 +946,8 @@ public final class AiSystem {
     }
 
     /** One area being searched: a centre, how far it reaches, who is sought, and how many are searching it. */
-    public record SearchArea(float x, float z, float r, long target, int searchers, String jurisdiction) {}
+    /** A searched area; {@code law}: the watch's search (anyone else hostile searching is shown apart). */
+    public record SearchArea(float x, float z, float r, long target, int searchers, String jurisdiction, boolean law) {}
 
     /** The areas NPCs are searching right now (searches for the same quarry close together are one area). */
     public List<SearchArea> searchAreas() {
@@ -815,18 +955,21 @@ public final class AiSystem {
         for (Npc n : g.npcs) {
             if (!n.alive || !n.loaded || n.hunt == null) continue;
             Hunt h = n.hunt;
+            // (0.2.2, gamefixes) only searches that are about the player: for them, or for the culprit behind a body or
+            // blood the player left - a search over someone else's doing is none of the minimap's business
+            if (h.target != g.player.id && !(h.target == 0 && g.gore != null && g.gore.culpritOf(h.source) == g.player.id)) continue;
             float r = h.radius(g.time);
-            boolean merged = false;
+            boolean law = watch(n), merged = false;
             for (int i = 0; i < out.size(); i++) {
                 SearchArea a = out.get(i);
-                if (a.target() != h.target || Math.hypot(a.x() - h.x, a.z() - h.z) > a.r() + r) continue;
+                if (a.target() != h.target || a.law() != law || Math.hypot(a.x() - h.x, a.z() - h.z) > a.r() + r) continue;
                 float cx = (a.x() * a.searchers() + h.x) / (a.searchers() + 1), cz = (a.z() * a.searchers() + h.z) / (a.searchers() + 1);
                 float rr = Math.max(a.r(), r) + (float) Math.hypot(cx - h.x, cz - h.z) * 0.5f;
-                out.set(i, new SearchArea(cx, cz, Math.min(18, rr), h.target, a.searchers() + 1, a.jurisdiction()));
+                out.set(i, new SearchArea(cx, cz, Math.min(18, rr), h.target, a.searchers() + 1, a.jurisdiction(), law));
                 merged = true;
                 break;
             }
-            if (!merged) out.add(new SearchArea(h.x, h.z, r, h.target, 1, n.homeJurisdiction));
+            if (!merged) out.add(new SearchArea(h.x, h.z, r, h.target, 1, n.homeJurisdiction, law));
         }
         return out;
     }
@@ -860,7 +1003,7 @@ public final class AiSystem {
     }
 
     public Npc lawmanFor(String jurisdiction) {
-        long id = DevMap.ALPHA.equals(jurisdiction) ? Ids.LAWMAN_A : DevMap.BETA.equals(jurisdiction) ? Ids.LAWMAN_B : -1;
+        long id = DevMap.ALPHA.equals(jurisdiction) ? Ids.LAWMAN_A : DevMap.BETA.equals(jurisdiction) ? Ids.LAWMAN_B : DevMap.PALACE.equals(jurisdiction) ? Ids.PRAETOR : -1;
         Actor a = g.actor(id);
         return a instanceof Npc n && n.alive ? n : null;
     }
@@ -1069,6 +1212,14 @@ public final class AiSystem {
         give(n, Items.COINS, 10);
         spawnBody(n);
         g.state.commit("ActorRespawned", 0, n.id, DevMap.jurisdiction(n.x, n.z), 0, n.name);
+    }
+
+    /** Beyond this (m) from the player, a resident about its ordinary day is simulated at a reduced rate (see {@link #update}). */
+    public static final float LOD_FAR = 72;
+    private boolean farAway(Npc n) {
+        if (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.SEARCH || n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.HIDE
+                || n.goal == Brain.Goal.REPORT_CRIME || n.goal == Brain.Goal.TIP_OFF || n.reacting || n.traversal != null || n.cs.busy()) return false;
+        return Math.hypot(n.x - g.player.x, n.z - g.player.z) > LOD_FAR;
     }
 
     /** Unloads an NPC: its body goes, and its work is resolved abstractly from the same state and rules (GDD 3.8). */

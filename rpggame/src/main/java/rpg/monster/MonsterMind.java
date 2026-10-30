@@ -110,19 +110,25 @@ public final class MonsterMind {
         float proximity = Math.max(0, 1 - d / Math.max(4, m.kind.sight));
         float noise = t instanceof rpg.actor.Player p && (p.sprinting || p.running) || k.sense.equals("heard") ? 0.25f : 0;
         float damage = Math.min(1.5f, k.damage / Math.max(1, m.maxHp()) * 3);
-        float armed = t.main() != null && t.main().damage > 0 ? 0.15f + Math.min(0.35f, t.eq.armor() * 0.02f) : 0;
-        float intrusion = m.lair != 0 ? Math.max(0, 1 - (float) Math.hypot(k.x - m.lairX, k.z - m.lairZ) / Math.max(6, m.kind.range)) * m.kind.territory : 0;
+        // (0.2.2) a weapon in the hand is a threat; one sheathed on the back or the hip much less of one
+        float armed = t.main() != null && t.main().damage > 0 ? (g.combat.drawn(t) ? 0.15f : 0.04f) + Math.min(0.35f, t.eq.armor() * 0.02f) : 0;
+        float lairD = m.lair != 0 ? (float) Math.hypot(k.x - m.lairX, k.z - m.lairZ) : Float.MAX_VALUE;
+        float intrusion = m.lair != 0 ? Math.max(0, 1 - lairD / Math.max(6, m.kind.range)) * m.kind.territory : 0;
+        // (0.2.2, AI choices) whoever stands in the heart of the lair is dealt with before anyone passing at its edge
+        if (lairD < m.kind.core) intrusion += 0.5f * Math.max(0.3f, m.kind.territory);
         float score = (proximity + noise + damage + armed + intrusion) * fresh * Math.abs(regard);
         // how strong it looks against this monster and its fellows near it: a cautious kind keeps clear of something much
         // stronger (it becomes a thing to fear); brutes, the bound dead and the apex kinds do not weigh it so
         float caution = switch (m.kind.archetype) { case SOLITARY_BRUTE, BOUND_DEAD, APEX_SOVEREIGN -> 0; case APEX_HUNTER -> 0.4f; default -> 1; };
+        // (0.2.2) at the heart of its own lair nothing is weighed: it stands and fights for its hearth
+        if (lairD < m.kind.core) caution = 0;
         float odds = might(t) / Math.max(1, might(m) * (m.kind.archetype == Archetype.PACK_RAIDER ? sys.nearKin(m, 12) : 1));
         if (regard < 0 || caution > 0 && odds > 1.8f && damage < 0.5f) return -score * Math.max(1, odds * 0.5f) * Math.max(caution, regard < 0 ? 1 : 0);
         return score;
     }
 
     /** How dangerous something looks: its combat level and its hit points (a bat and a bear are not alike). */
-    static float might(Actor a) { return a.skills.combatLevel() + a.maxHp() * 0.5f; }
+    public static float might(Actor a) { return a.skills.combatLevel() + a.maxHp() * 0.5f; }
 
     // ------------------------------------------------------------------ drives
     void drives(Monster m, float dt) {
@@ -161,7 +167,7 @@ public final class MonsterMind {
     private record Score(State state, float value, String why) {}
 
     void think(Monster m) {
-        m.nextThink = g.time + 0.35 + (m.id % 5) * 0.04;
+        m.nextThink = g.time + 0.35 * (0.8 + 0.4 * rpg.ai.Stealth.phase(m.id + g.state.tick));   // (0.2.3) own beat, never in step with the pack
         MonsterKind k = m.kind;
         List<Score> s = new ArrayList<>();
         Known top = strongest(m);
@@ -188,7 +194,15 @@ public final class MonsterMind {
             // a haunter only turns hostile as its disturbance grows; the bound dead only when the living trespass
             if (k.archetype == Archetype.HAUNTER) engage *= Math.min(1.2f, m.disturbed / 12f);
             if (k.archetype == Archetype.BOUND_DEAD && k == MonsterKind.SKELETON && m.lair != 0 && Math.hypot(top.x - m.lairX, top.z - m.lairZ) > k.range) engage *= 0.2f;
-            if (fearNow > engage + 0.05f && k.woundedAt > 0) s.add(new Score(State.FLEE, 0.7f + fearNow * 0.3f, String.format("fear %.2f over aggression %.2f", fearNow, engage)));
+            // (0.2.3, gamefixes: monster AI choices) wounded near its den, a territorial kind falls back to the heart of it to
+            // make its stand there (where it no longer weighs the odds) rather than scattering into the open
+            boolean denStand = fearNow > engage + 0.05f && k.woundedAt > 0 && m.lair != 0 && k.territory > 0.3f && fromLair > k.core * 0.7f
+                    && fromLair < k.range && hpShare > 0.12f && k.archetype != Archetype.PACK_RAIDER;
+            boolean atHearth = fearNow > engage + 0.05f && k.woundedAt > 0 && m.lair != 0 && k.territory > 0.3f && fromLair <= k.core * 0.7f
+                    && hpShare > 0.12f && k.archetype != Archetype.PACK_RAIDER && threat != null;
+            if (denStand) s.add(new Score(State.RETURN, 0.85f + fearNow * 0.2f, String.format("wounded (%.0f%%); falling back to the den to make a stand", hpShare * 100)));
+            else if (atHearth) s.add(new Score(State.ENGAGE, 0.8f, "cornered at its den; fighting for it"));
+            else if (fearNow > engage + 0.05f && k.woundedAt > 0) s.add(new Score(State.FLEE, 0.7f + fearNow * 0.3f, String.format("fear %.2f over aggression %.2f", fearNow, engage)));
             else if (k.archetype == Archetype.APEX_HUNTER && threat != null && m.distTo(threat) > 6 && !isolated(threat) && g.time - m.cs.lastHurt > 10)
                 s.add(new Score(State.STALK, 0.6f + engage * 0.3f, "stalking " + g.nameOf(top.id) + ", waiting for them to be alone"));
             else if (k.archetype == Archetype.AMBUSH_PREDATOR && threat != null && m.distTo(threat) > 5 && g.time - m.cs.lastHurt > 6 && m.lair != 0)
@@ -214,6 +228,7 @@ public final class MonsterMind {
         // the day's round
         if (!abroad && fromLair < 4) s.add(new Score(State.DORMANT, 0.3f, "its resting hours"));
         else if (!abroad) s.add(new Score(State.RETURN, 0.32f, "back to the lair before its resting hours"));
+        else if (sentry(m, fromLair)) s.add(new Score(State.IDLE, 0.3f, "keeping watch over the camp while the others range"));
         else s.add(new Score(State.PATROL, 0.22f + m.territorial * 0.05f, "patrolling its range"));
         s.add(new Score(State.IDLE, 0.15f, "at the lair, about its business"));
         s.sort(Comparator.comparing(Score::value).reversed());
@@ -227,6 +242,20 @@ public final class MonsterMind {
             enter(m);
         }
         m.why = best.why;
+    }
+
+    /**
+     * (0.2.2, monster AI choices) A band never leaves its camp empty: the one at the lair with none of its fellows there
+     * stays as the sentry while the rest range (the weakest of those at home, so the strong go out).
+     */
+    private boolean sentry(Monster m, float fromLair) {
+        if (m.lair == 0 || m.kind.archetype != Archetype.PACK_RAIDER || fromLair > m.kind.core + 2) return false;
+        for (Monster o : sys.all()) {
+            if (o == m || !o.alive || o.lair != m.lair) continue;
+            float d = (float) Math.hypot(o.x - m.lairX, o.z - m.lairZ);
+            if (d <= m.kind.core + 2 && (o.state == State.IDLE || o.state == State.DORMANT || o.level < m.level || o.level == m.level && o.id < m.id)) return false;
+        }
+        return true;
     }
 
     /** The target it fights: switched only for a good reason, with a cooldown (wounded, struck from behind, more threatening). */
@@ -401,12 +430,44 @@ public final class MonsterMind {
             default -> {
                 if (ranged && (d > reach + 4 || m.kind == MonsterKind.DRAGON && sys.rnd(m) < 0.45) && sys.rnd(m) < 0.5) { sys.ranged(m, t); return; }
                 if (d <= reach + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) attack(m, t); }
-                else sys.moveTo(m, t.x, t.z, true, reach * 0.9f);
+                else { float[] way = approach(m, t, d, reach); sys.moveTo(m, way[0], way[1], true, way[2]); }
                 // a target it cannot get to (up on something, behind something) - it adapts: throws, backs off, calls help
                 if (d > reach + 0.5f && Math.hypot(m.vx, m.vz) < 0.2f) m.outOfReach += dt; else m.outOfReach = Math.max(0, m.outOfReach - dt);
                 if (m.outOfReach > 4) { m.outOfReach = 0; if (m.kind.ranged != null) m.nextRanged = 0; else { m.state = State.ALERT; m.nextThink = g.time + 3; } }
             }
         }
+    }
+
+    /**
+     * (0.2.1, gamefixes: monster AI choices expanded) where a brute closes in from, read from the fight as it stands:
+     * another of its kind already on the same foe - it goes round to the far side (a flank); a bow drawn on it - it
+     * weaves in rather than walk down the arrow's line; a foe behind a raised guard - it works round toward the foe's
+     * back before it closes. Otherwise straight in. {x, z, within}.
+     */
+    private float[] approach(Monster m, Actor t, float d, float reach) {
+        float tx = t.x, tz = t.z, within = reach * 0.9f;
+        Monster ally = null; float nearest = 10;
+        for (Monster o : g.monsters.all()) if (o != m && o.alive && o.target == t.id && o.state == State.ENGAGE && o.distTo(t) < nearest) { nearest = o.distTo(t); ally = o; }
+        if (ally != null && d > reach + 1) {
+            // the far side of the foe from the ally, at striking distance
+            float ax = t.x - ally.x, az = t.z - ally.z, al = (float) Math.max(0.3, Math.hypot(ax, az));
+            float fx = t.x + ax / al * (reach + t.radius + m.radius), fz = t.z + az / al * (reach + t.radius + m.radius);
+            if (g.vox.sight(m.x, m.eyeY(), m.z, fx, m.eyeY(), fz)) { m.lastOutcome = "flanking " + t.name + " with " + ally.label(); return new float[]{fx, fz, 0.6f}; }
+        }
+        if (t.cs.draw > 0.3f && d > 3) {
+            // across the line of the shot, one way then the other, a couple of metres either side of it
+            float lx = m.x - t.x, lz = m.z - t.z, ll = (float) Math.max(0.3, Math.hypot(lx, lz));
+            float side = (long) (g.time / 0.9) % 2 == 0 ? 1 : -1, step = Math.min(4, d * 0.5f);
+            m.lastOutcome = "weaving in on " + t.name + "'s bow";
+            return new float[]{m.x - lx / ll * step - lz / ll * side * 2.2f, m.z - lz / ll * step + lx / ll * side * 2.2f, 0.8f};
+        }
+        if (t.cs.blocking && d < 4) {
+            // round toward the foe's back: a point behind it, the way it is not facing
+            float bx = t.x + (float) Math.sin(t.yaw) * (reach + 0.8f), bz = t.z + (float) Math.cos(t.yaw) * (reach + 0.8f);
+            m.lastOutcome = "working round " + t.name + "'s guard";
+            return new float[]{bx, bz, 0.7f};
+        }
+        return new float[]{tx, tz, within};
     }
 
     /**

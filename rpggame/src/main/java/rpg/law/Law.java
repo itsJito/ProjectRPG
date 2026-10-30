@@ -27,7 +27,8 @@ import rpg.world.DevMap;
  *
  * Each kingdom keeps its own books (gamefixes): a bounty in one does not follow you over the border, and every report
  * adds to that kingdom's total by the crime's severity (see {@link #charge}), halved for high Honor, with no ceiling.
- * The watch goes after a bounty above 21 G, or any bounty of someone who walks up to them; at the lockdown bounty the
+ * The watch goes after a bounty above 21 G, or any bounty of someone who walks up to them (a petty one is a fine asked
+ * for face to face, never fought over); at the lockdown bounty the
  * town shuts its shops and the watch attacks on sight; bounty hunters (Posses) do the rest.
  */
 public final class Law {
@@ -115,9 +116,39 @@ public final class Law {
         returnPossessions(g.player);
         openEmptyCell(sentenceJurisdiction);
         if (cell != null) g.player.poseReset = true;
+        clearSlate(g.player);
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
         g.state.commit("SentenceServed", g.player.id, 0, sentenceJurisdiction, 0, "admission " + jailAdmissions);
         sentenceJurisdiction = "";
+    }
+
+    /**
+     * (0.2.2, gamefixes) A served sentence is a clean slate, as far as blows go: every townsperson who was fighting,
+     * hunting, watching or fleeing the released prisoner stands down, and the blows they took from them are answered.
+     * What they remember of the crime stays (gossip, opinion); only the outlaws, and a watch with a bounty still
+     * standing elsewhere, keep after them.
+     */
+    private void clearSlate(Actor a) {
+        for (Npc n : g.npcs) {
+            if (!n.alive || n.hostileToPlayer || n.posse) continue;
+            if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && bounty(a.id, n.homeJurisdiction) > 0) continue;
+            boolean involved = n.fightTarget == a.id || n.cs.lastAttacker == a.id || n.watchTarget == a.id || n.fearOf == a.id
+                    || n.hunt != null && n.hunt.target == a.id || n.investigation != null && n.investigation.subject == a.id;
+            var known = n.aware.get(a.id);
+            if (known != null) { known.level = 0; known.settledAt = g.time; }
+            if (!involved) continue;
+            if (n.fightTarget == a.id) n.fightTarget = 0;
+            if (n.cs.lastAttacker == a.id) n.cs.lastAttacker = 0;
+            if (n.watchTarget == a.id) n.watchTarget = 0;
+            if (n.fearOf == a.id) n.fearOf = 0;
+            if (n.hunt != null && n.hunt.target == a.id) n.hunt = null;
+            if (n.investigation != null && n.investigation.subject == a.id) n.investigation = null;
+            n.cs.cancel(); n.cs.blocking = false; n.cs.draw = 0;
+            n.goal = rpg.ai.Brain.Goal.IDLE; n.hasGoalPos = false; n.nextThink = 0;
+            if (n.loaded) g.ai.desire(n, rpg.ai.AiSystem.A_IDLE);
+        }
+        settledAt.put(a.id, g.time);
+        g.state.commit("SlateCleared", a.id, 0, sentenceJurisdiction, 0, "released: townsfolk stand down");
     }
 
     /** Close this jurisdiction's cases and cancel its force's outstanding attacks; personal memories remain. */
@@ -126,7 +157,7 @@ public final class Law {
         a.cs.cancel(); a.cs.blocking = false; a.cs.draw = 0;
         if (a == g.player) g.controller.cancelHandInput();
         if (bounties.containsKey(jur)) bounties.get(jur).remove(a.id);
-        confronted.remove(new Key(a.id, jur));
+        confronted.remove(new Key(a.id, jur)); fineDeclined.remove(new Key(a.id, jur));
         resisting.remove(a.id); haltedAt.remove(a.id);
         Set<Actor> stoodDown = new HashSet<>();
         stoodDown.add(a);
@@ -169,6 +200,20 @@ public final class Law {
     public boolean pursued(long offender, String jurisdiction) {
         int b = bounty(offender, jurisdiction);
         return b > g.cfg.pursuitBounty || b > 0 && confronted.contains(new Key(offender, jurisdiction));
+    }
+    /**
+     * A petty bounty (gamefixes: the watch attacked over 10 G): at or under the pursuit line the watch does not hunt
+     * or strike - an officer who sees the offender close by walks up and asks for the fine, and one who is put off lets
+     * it stand on the books and leaves them be for a while ({@link #FINE_GRACE} seconds).
+     */
+    public boolean petty(long offender, String jurisdiction) { int b = bounty(offender, jurisdiction); return b > 0 && b <= g.cfg.pursuitBounty; }
+    static final double FINE_GRACE = 240;
+    private final Map<Key, Double> fineDeclined = new HashMap<>();
+    /** Whether an officer who sees a petty offender this close should go and ask for the fine now. */
+    public boolean fineDue(Npc officer, Actor offender) {
+        if (!petty(offender.id, officer.homeJurisdiction) || officer.distTo(offender) > 9) return false;
+        Double at = fineDeclined.get(new Key(offender.id, officer.homeJurisdiction));
+        return at == null || g.time - at > FINE_GRACE;
     }
     /** A town in lockdown (gamefixes): the player is in it with a bounty this high - shops shut, the watch attacks on sight. */
     public boolean lockdown(String jurisdiction) {
@@ -296,6 +341,7 @@ public final class Law {
 
     /** Player and human NPC offenses use the same witness/report/bounty path. */
     public void onHit(Actor a, Actor v, long cause) {
+        g.ai.sawHurt(a, v);
         if(a.summonOwner!=0) { Actor owner=g.actor(a.summonOwner); if(owner==null)return; a=owner; }
         if(v.summonOwner!=0)return;
         if (!(v == g.player || v instanceof Npc) || lawfulForce(a, v)) return;
@@ -432,25 +478,49 @@ public final class Law {
         return Result.ok();
     }
 
-    /** The guard catches up with the wanted player: Halt! Pay, come quietly, or resist. */
-    public void halt(Npc guard, Actor p) {
+    /** The guard catches up with the wanted player: Halt! Pay, come quietly, or resist. A petty bounty is a fine asked for, never a fight. */
+    public Dialog halt(Npc guard, Actor p) {
+        String jur = guard.homeJurisdiction;
+        boolean petty = petty(p.id, jur);
         Double at = haltedAt.get(p.id);
         if (at != null && g.time - at < 14) {
-            if (g.time - at > 10 && bounty(p.id, guard.homeJurisdiction) > 0) { resisting.add(p.id); g.ai.say(guard, "Then we do this the hard way!"); if (g.ui != null) g.ui.closeDialog(); }
-            return;
+            // no answer (the challenge waved off): a serious bounty is resisted; a fine is left on the books
+            if (g.time - at > 10 && bounty(p.id, jur) > 0) {
+                if (petty) declineFine(p, guard); else { resisting.add(p.id); g.ai.say(guard, "Then we do this the hard way!"); }
+                if (g.ui != null) g.ui.closeDialog();
+            }
+            return null;
         }
         haltedAt.put(p.id, g.time);
-        confronted.add(new Key(p.id, guard.homeJurisdiction));   // told to halt, the matter is between them now
-        int b = bounty(p.id, guard.homeJurisdiction);
-        g.ai.say(guard, "Halt!");
+        confronted.add(new Key(p.id, jur));   // told to halt, the matter is between them now
+        int b = bounty(p.id, jur);
+        g.ai.say(guard, petty ? "A word with you." : "Halt!");
         float evidence = certainty(guard, p);
-        Dialog d = new Dialog(guard.name, (evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ") + "You are wanted in " + guard.homeJurisdiction + " for " + b + " coins. Pay, explain yourself, or come quietly.");
-        d.npc = guard.id;
-        d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
+        String charge = evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ";
+        Dialog d = new Dialog(guard.name, petty ? charge + "It's a small matter: a fine of " + b + " coins in " + jur + ". Pay it and we're done."
+                : charge + "You are wanted in " + jur + " for " + b + " coins. Pay, explain yourself, or come quietly.");
+        d.npc = guard.id; d.standoff = true;
+        d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) { g.chat.warn(r.reason()); if (petty) declineFine(p, guard); } });
         d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
-        d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, guard.homeJurisdiction, guard); });
-        d.closeChoice("Never! (resist arrest)", () -> resist(p, guard));
+        if (petty) d.closeChoice("Not now. (it stays on your record)", () -> declineFine(p, guard));
+        else {
+            d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, jur, guard); });
+            d.closeChoice("Never! (resist arrest)", () -> resist(p, guard));
+        }
         if (p == g.player && g.ui != null) g.ui.dialog(d);
+        return d;
+    }
+    /** A fine put off: the officer lets it stand, the watch leaves the offender be for a while; nobody is fought over it. */
+    private void declineFine(Actor p, Npc guard) {
+        Key key = new Key(p.id, guard.homeJurisdiction);
+        fineDeclined.put(key, g.time);
+        confronted.remove(key); haltedAt.remove(p.id);
+        for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && n.homeJurisdiction.equals(guard.homeJurisdiction) && n.fightTarget == p.id) {
+            n.fightTarget = 0; n.goal = rpg.ai.Brain.Goal.IDLE; n.hasGoalPos = false; n.nextThink = 0;
+            g.combat.setBlock(n, false);
+        }
+        g.ai.say(guard, "Suit yourself. It stays on the books until it's paid.");
+        g.state.commit("FineDeclined", p.id, guard.id, guard.homeJurisdiction, 0, bounty(p.id, guard.homeJurisdiction) + " coins left owing");
     }
 
     /** A guard beating a wanted offender down arrests them instead of killing them. */
@@ -489,6 +559,22 @@ public final class Law {
             coin.owner=lawman==null?0:lawman.id;coin.stolen=false;
             if(lawman==null || !lawman.store(coin))g.objects.drop(coin,by==null?a.x:by.x,DevMap.FLOOR+0.1f,by==null?a.z:by.z);
         }
+        // (0.2.2, gamefixes) a bounty worth more than everything the prisoner owns (their gold and the worth of their things
+        // together): all of it is forfeit to the crown, for good - sold off through the town's store (burnt if there is no
+        // room), never held for them and never to be bought back from the undertaker. What it fetched comes off the time.
+        int forfeited = 0;
+        if (a == g.player && b > worth(escrow.contents) + paid) {
+            var shop = lawman != null || by != null ? g.econ.localShop(lawman != null ? lawman : by) : null;
+            for (var item : new ArrayList<>(escrow.contents.stacks())) {
+                forfeited += item.def.value * item.amount;
+                item.owner = shop == null ? 0 : shop.merchant; item.stolen = false;
+                if (shop == null || !shop.stock.add(item)) g.state.burn(item.def, item.amount);
+            }
+            escrow.contents.clear(); escrow.custodySlots.clear();
+            paid = Math.min(bill, paid + forfeited);
+            g.state.commit("PossessionsForfeit", a.id, lawman == null ? 0 : lawman.id, jur, forfeited, "bounty " + b + " exceeded everything owned");
+            g.chat.add("Your bounty was worth more than everything you own. All of it is forfeit to " + jur + ".", Chat.Kind.CRIME);
+        }
         double duration=Math.min(180,30+b/10)+Math.ceil((bill-paid)/10.0);
         g.state.commit("PrisonFinePaid",a.id,lawman==null?0:lawman.id,jur,0,"bounty+3%="+bill+" paid="+paid+" shortfall served="+(bill-paid));
         var cell = rpg.world.Jails.forJurisdiction(jur);
@@ -524,6 +610,13 @@ public final class Law {
             n.fightTarget = 0;
             n.cs.lastAttacker = 0;
         }
+    }
+
+    /** What a held inventory is worth: its gold, and each thing at its value (bags with what is in them). */
+    private static int worth(rpg.item.Inventory inv) {
+        int w = 0;
+        for (ItemStack s : inv.stacks()) { w += s.def.value * s.amount; if (s.inner != null) w += worth(s.inner); }
+        return w;
     }
 
     private void returnPossessions(Actor actor) {
@@ -575,7 +668,57 @@ public final class Law {
         }
     }
 
-    public void clear() { confronted.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; }
+    public void clear() { confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; }
+
+    /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
+    public static final int FORFEIT_FROM = 25;
+    /** The share of what was carried the law seizes at death for a bounty: none to 25 G, a twentieth just past it, all of it at 500 G. */
+    public static float forfeitShare(int bounty) { return bounty <= FORFEIT_FROM ? 0 : Math.min(1, 0.05f + 0.95f * (bounty - FORFEIT_FROM) / 475f); }
+
+    /**
+     * The wanted die (gamefixes): with a bounty over 25 G the law of the kingdom that wants them most seizes a share of
+     * everything they carried and wore - scaling with the whole bounty, all of it at 500 G - before what is left goes to
+     * the grave as any death's does (the undertaker's buy-back and the grave are untouched; a death with no bounty, or a
+     * small one, loses nothing here). Which things go is the luck of the draw, the share counted by worth. Stolen goods
+     * among them go back to their owners; the rest to that kingdom's lawman. Returns how many things were taken.
+     */
+    public int forfeitOnDeath(Actor dead) {
+        int total = 0; String worst = null; int most = 0;
+        for (var e : bounties.entrySet()) { int b = e.getValue().getOrDefault(dead.id, 0); total += b; if (b > most) { most = b; worst = e.getKey(); } }
+        float share = forfeitShare(total);
+        if (share <= 0 || worst == null) return 0;
+        // everything carried and worn, by worth
+        record Held(rpg.item.Inventory grid, int index, rpg.item.ItemDef.Slot slot, ItemStack stack) {}
+        List<Held> held = new ArrayList<>();
+        for (var grid : dead.grids()) for (int i = 0; i < grid.size(); i++) { ItemStack s = grid.get(i); if (s != null) held.add(new Held(grid, i, null, s)); }
+        for (var slot : rpg.item.ItemDef.Slot.values()) { ItemStack s = dead.eq.get(slot); if (s != null) held.add(new Held(null, -1, slot, s)); }
+        long worth = 0; for (Held h : held) worth += Math.max(1, h.stack.value());
+        long due = share >= 1 ? Long.MAX_VALUE : Math.round(worth * share);
+        java.util.Collections.shuffle(held, new java.util.Random(dead.id * 31 + (long) g.time));
+        // a bag (a worn backpack) goes whole, its contents with it: the bag after its contents, so neither is counted twice
+        held.sort((a, b) -> Boolean.compare(a.stack.inner != null, b.stack.inner != null));
+        var seized = new rpg.item.Inventory(20, 20);
+        long taken = 0; int count = 0;
+        for (Held h : held) {
+            if (taken >= due) break;
+            boolean stillThere = h.slot != null ? dead.eq.get(h.slot) == h.stack : h.grid.get(h.index) == h.stack;
+            if (!stillThere) continue;
+            if (h.slot != null) dead.eq.set(h.slot, null); else h.grid.set(h.index, null);
+            taken += Math.max(1, h.stack.value()); count++;
+            if (!seized.add(h.stack)) g.objects.drop(h.stack, dead.x, DevMap.FLOOR + 0.05f, dead.z);
+        }
+        int returned = Property.confiscate(g, seized);
+        Npc lawman = g.ai.lawmanFor(worst);
+        for (ItemStack s : new ArrayList<>(seized.stacks())) {
+            s.owner = lawman == null ? 0 : lawman.id;
+            if (lawman == null || !lawman.store(s)) { var evidence = g.objects.custody; if (!evidence.contents.add(s)) g.objects.drop(s, evidence.x, evidence.y, evidence.z); }
+        }
+        g.state.commit("BountyForfeit", lawman == null ? 0 : lawman.id, dead.id, worst, 0,
+                String.format("bounty %d G: %.0f%% of %d worth seized (%d things, %d stolen returned)", total, share * 100, worth, count, returned));
+        if (dead == g.player) g.chat.add(String.format("The law of %s seizes %s of what you carried for your bounty of %s G.", worst,
+                share >= 1 ? "everything" : count == 1 ? "one thing" : count + " things", rpg.item.Currency.text(total)), Chat.Kind.CRIME);
+        return count;
+    }
 
     /** Death settles justice everywhere; personal memories, Honor and other people's fights remain. */
     public void playerRespawned() {

@@ -75,7 +75,6 @@ public final class Furniture extends WorldObject {
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         if (kind == Kind.BED || kind == Kind.SLAB) o.add(Option.when(sleepRefusal(g, a) == null, "sleep", "Sleep", 10, sleepRefusal(g, a), g.cfg.interactRange));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
@@ -91,7 +90,6 @@ public final class Furniture extends WorldObject {
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
         if (action.equals("sleep") && (kind == Kind.BED || kind == Kind.SLAB)) {
@@ -109,24 +107,6 @@ public final class Furniture extends WorldObject {
         }
         return Result.no("You can't do that.");
     }
-
-    @Override public String examine(Rpg g) {
-        return switch (kind) {
-            case TABLE -> "A sturdy table.";
-            case COUNTER -> "A shop counter.";
-            case CRATE -> "A wooden crate.";
-            case BOOKCASE -> "Shelves of books.";
-            case SLAB -> "A cold stone sleeping slab. Prisoners can sleep here to serve their sentence.";
-            case BED -> owner == 0 ? "A bed. Anyone may sleep here." : "A bed belonging to " + g.nameOf(owner) + ".";
-            case TARGET -> "An archery target. Shoot it for Archery XP; the farther the shot, the more it pays.";
-            case HEADSTONE -> HEADSTONE_LINES[(int) Math.floorMod(id * 7919L, (long) HEADSTONE_LINES.length)];
-        };
-    }
-
-    private static final String[] HEADSTONE_LINES = {"Here lies Old Wen, who trusted a bridge.", "In memory of Tamsin. She kept the lamps lit.",
-            "Rowan Ashby. Gone to the great forge.", "Here lies a stranger. The guards never learned his name.", "Brother Aldo. He prayed, and then he didn't.",
-            "Hesk the miller. Loved by his hens.", "Mira Vell. Taken by the wolves of the north wood.", "Here lies Cobb. He owed nobody anything.",
-            "The weathered stone is too worn to read.", "Ina and Joss, together still."};
 
     @Override public String inspect(Rpg g) { return super.inspect(g) + String.format("\n  %s cells (%d,%d)-(%d,%d) h%d facing %d placed=%s", kind, x0, z0, x1, z1, h, facing, placed); }
 

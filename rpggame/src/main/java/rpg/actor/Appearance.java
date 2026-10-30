@@ -71,7 +71,6 @@ public final class Appearance {
     public static int color(int index) { return PALETTE[Math.floorMod(index, COLORS)]; }
     /** A natural hair colour by its id (H01 = 0). */
     public static int hairColor(int index) { return HAIR[Math.floorMod(index, HAIR_COLORS)]; }
-    public String hairName() { return (female ? HAIR_FEMALE : HAIR_MALE)[Math.floorMod(hair, HAIRSTYLES)]; }
 
     /** A monster's figure (its kind's name; null for a person): its body, skin and features are its kind's (gamefixes). */
     public String monster;

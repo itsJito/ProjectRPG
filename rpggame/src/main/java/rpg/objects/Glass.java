@@ -42,7 +42,9 @@ public final class Glass {
      */
     public void shatter(int bx, int by, int bz, float px, float py, float pz, float dx, float dy, float dz, float force, Actor who) {
         if (!isGlass(bx, by, bz)) return;
+        int pane = g.vox.block(bx, by, bz);
         g.setBlock(bx, by, bz, Blocks.AIR);
+        if (g.repairs != null) g.repairs.broken(bx, by, bz, pane, "glass");
         broken++;
         float dl = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dl < 1e-4f) { dx = 0; dy = 0; dz = 1; dl = 1; }

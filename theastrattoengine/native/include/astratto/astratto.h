@@ -1201,6 +1201,8 @@ enum {
     ASTRATTO_RB_OCCLUDES = 1u << 7,     /* an opaque full cube: hides the faces against it and darkens corners */
     ASTRATTO_RB_DOOR = 1u << 8,         /* a door: left out unless asked for (in play its leaf is an entity) */
     ASTRATTO_RB_SOLID = 1u << 9,
+    /* 0.2.1, bits 13-15: a two-faced block's inner side (1 +x, 2 -x, 3 +z, 4 -z), drawn with its bottom layer */
+    ASTRATTO_RB_INNER_SHIFT = 13,
     ASTRATTO_RB_STEP = 1u << 10,        /* a stair tread */
     ASTRATTO_RB_SEAT = 1u << 11,        /* a table or a desk: a chair beside it faces it */
     ASTRATTO_RB_PLANT = 1u << 12        /* a crossed plant the renderer may grow as foliage instead (ASTRATTO_MESH_NO_PLANTS) */

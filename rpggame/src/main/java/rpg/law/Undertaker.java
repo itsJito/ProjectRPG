@@ -169,14 +169,17 @@ public final class Undertaker {
         int carried = a.count(Items.COINS), inClaim = 0;
         for (Container holder : holders) for(ItemStack item:holder.contents.stacks())if(item.def==Items.COINS && recoverable(holder,item))inClaim+=item.amount;
         if (carried + inClaim < fee) return Result.no("The undertaker wants " + fee + " coins, and you have " + (carried + inClaim) + " all told.");
-        if(!undertaker.canStore(new ItemStack(Items.COINS,fee,undertaker.id,false,undertaker.id)))return Result.no("The undertaker has no room to receive payment.");
+        // (0.2.2) paid into the casket: the fee is the undertaker's, in his purse if he is about, else in his chest
+        boolean toHim = undertaker != null && undertaker.alive && undertaker.canStore(new ItemStack(Items.COINS, fee, undertaker.id, false, undertaker.id));
+        long payee = undertaker != null ? undertaker.id : Ids.UNDERTAKER;
+        java.util.function.Consumer<ItemStack> pay = s -> { ItemStack c = new ItemStack(s.def, s.amount, payee, false, payee); if (!(toHim && undertaker.store(c)) && !g.objects.custody.contents.add(c)) g.objects.drop(c, a.x, a.y + 0.05f, a.z); };
         long req = g.state.newRequestId();
         int fromPurse = Math.min(fee, carried), fromClaim = fee - fromPurse; boolean paidFromClaim = fromClaim > 0;
-        if (fromPurse > 0) for (ItemStack s : a.takeItems(Items.COINS, fromPurse)) undertaker.store(new ItemStack(s.def, s.amount, undertaker.id, false, undertaker.id));
+        if (fromPurse > 0) for (ItemStack s : a.takeItems(Items.COINS, fromPurse)) pay.accept(s);
         if (fromClaim > 0) for (Container holder : holders) for(int i=0;i<holder.contents.size() && fromClaim>0;i++) {
             ItemStack item=holder.contents.get(i);if(!recoverable(holder,item) || item.def!=Items.COINS)continue;
             int take=Math.min(fromClaim,item.amount);ItemStack paid=holder.contents.take(i,take);
-            undertaker.store(new ItemStack(paid.def,paid.amount,undertaker.id,false,undertaker.id));fromClaim-=take;
+            pay.accept(paid);fromClaim-=take;
         }
         int back = 0;
         for (Container chest : holders) for (int i = 0; i < chest.contents.size(); i++) {
@@ -186,10 +189,10 @@ public final class Undertaker {
             if (!a.store(s)) g.objects.drop(s, a.x, a.y + 0.05f, a.z);
             back += s.amount;
         }
-        g.state.commit(req, "ClaimRedeemed", a.id, undertaker.id, DevMap.jurisdiction(undertaker.x, undertaker.z), 0, fee + " coins for " + back + " item(s)");
+        g.state.commit(req, "ClaimRedeemed", a.id, payee, DevMap.jurisdiction(a.x, a.z), 0, fee + " coins for " + back + " item(s)");
         for (Container holder : holders) if (holder.kind.equals("claim") && holder.contents.isEmpty()) holder.removed = true;
         claims.clear();
-        if (a == g.player) g.chat.say(undertaker.name + " hands back your belongings for " + fee + " coins" + (paidFromClaim ? " (taken from your own purse in his keeping)." : "."));
+        if (a == g.player) g.chat.say("You leave " + fee + " coins in the unfinished casket and take back your belongings" + (paidFromClaim ? " (the fee from your own purse among them)." : "."));
         return Result.ok();
     }
 

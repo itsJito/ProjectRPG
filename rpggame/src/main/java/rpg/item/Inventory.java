@@ -190,7 +190,6 @@ public final class Inventory {
     public int count(ItemDef d) { int n = 0; for (ItemStack t : stacks) if (t != null && t.def == d) n += t.amount; return n; }
     public boolean has(ItemDef d, int n) { return count(d) >= n; }
     public int first(ItemDef d) { for (int i = 0; i < stacks.length; i++) if (stacks[i] != null && stacks[i].def == d) return i; return -1; }
-    public boolean anyStolen() { for (ItemStack t : stacks) if (t != null && t.stolen) return true; return false; }
 
     /** Removes n of a definition (clean stacks last), returning what was taken merged by kind - or null, with nothing taken, when there are fewer. */
     public List<ItemStack> remove(ItemDef d, int n) {

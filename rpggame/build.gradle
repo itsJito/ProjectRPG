@@ -80,3 +80,6 @@ tasks.register('gallery', JavaExec) {
     def shots = providers.gradleProperty('galleryDir').getOrElse(layout.buildDirectory.dir('gallery').get().asFile.absolutePath)
     args(['--gallery', '--hidden', '--shots', shots] + (female ? ['--female'] : []))
 }
+
+// (0.2.1) the title screen's Updates panel reads the patch notes; packaged with the game for a build run elsewhere
+processResources { from('../patchnotes.md') }

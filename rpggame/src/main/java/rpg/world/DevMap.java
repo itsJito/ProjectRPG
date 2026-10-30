@@ -15,19 +15,31 @@ import static rpg.world.Blocks.*;
 public final class DevMap {
     private DevMap() {}
 
-    public static final int SX = 128, SY = 40, SZ = 128, FLOOR = 4;
+    /**
+     * The devmap's size (0.2.0, gamefixes: the size the real map will be): 192 x 192 blocks of overworld - 12 x 12 chunks
+     * of 16, 36,864 blocks of ground - and 100 high. The dungeons are dug in the rock beyond its east edge.
+     */
+    public static final int SX = 192, SY = 100, SZ = 192, FLOOR = 4;
     /** Doors and doorways are two blocks (2 m) tall. */
     public static final int DOOR_HEIGHT = 2;
 
     /** The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). */
     public static final String ALPHA = "DevCity", BETA = "DevTown", WILDS = "WILDS";
+    /** The kingdom of 0.2.0 (gamefixes): DevPalace, the Roman city in the east of the map. */
+    public static final String PALACE = "DevPalace";
+    /** Whether a point is in the dungeons (beyond the map's edge, where they are dug). */
+    public static boolean inDungeon(double x, double z) { return x >= SX; }
 
     public static String jurisdiction(double x, double z) {
         if (x >= SX) return WILDS;   // the dungeons are nobody's to police
-        if (x >= 82 && z >= 46) return ALPHA;
-        if (z >= 92 && x < 82) return BETA;
+        String palace = Expanse.jurisdiction(x, z);
+        if (palace != null) return palace;
+        if (x >= 82 && x < 128 && z >= 46 && z < 128) return ALPHA;
+        if (z >= 92 && z < 128 && x < 82) return BETA;
         return WILDS;
     }
+    /** The watch's round in each kingdom (DevTown keeps none: its lawman holds his chancery). */
+    public static float[][] patrol(String jurisdiction) { return PALACE.equals(jurisdiction) ? Expanse.PATROL : PATROL; }
 
     // ------------------------------------------------------------------ where things are
     public static final float SPAWN_X = 64.5f, SPAWN_Z = 68.5f;
@@ -116,6 +128,8 @@ public final class DevMap {
     public static final int UNDERTAKER_X0 = 119, UNDERTAKER_Z0 = 94, UNDERTAKER_X1 = 125, UNDERTAKER_Z1 = 100;
     /** Where the dead wake (inside the gate), where the undertaker stands (by the hut door), and the custody chest inside. */
     public static final float[] GRAVEYARD_SPAWN = {116.5f, 88.6f}, UNDERTAKER_POST = {117.6f, 96.5f}, CUSTODY_CHEST = {123.5f, 98.5f};
+    /** (0.2.2) The unfinished casket the dead buy their things back from: beside the path's end, before the hut. */
+    public static final float[] CASKET = {117.0f, 98.9f};
     public static final int[][] HEADSTONES = {{112, 89}, {114, 89}, {112, 92}, {114, 92}, {112, 95}, {114, 95}, {112, 98}, {114, 98},
             {119, 89}, {121, 89}, {123, 89}, {119, 91}, {121, 91}, {123, 91}};
     /** The fence's corner (GDD 3.3 Fence): a shaded nook behind Store B in Beta, out of the guards' sight, among crates. */
@@ -174,7 +188,7 @@ public final class DevMap {
     private static Piece[] concat(Piece[] a, Piece[] b) { Piece[] r = java.util.Arrays.copyOf(a, a.length + b.length); System.arraycopy(b, 0, r, a.length, b.length); return r; }
 
     public static float[] bedOf(long owner) {
-        for (Piece p : concat(FURNITURE, GRAVEYARD_PIECES)) if (p.kind.equals("BED") && p.owner == owner) return new float[]{(p.x0 + p.x1 + 1) / 2f, (p.z0 + p.z1 + 1) / 2f};
+        for (Piece p : concat(concat(FURNITURE, GRAVEYARD_PIECES), Expanse.PIECES)) if (p.kind.equals("BED") && p.owner == owner) return new float[]{(p.x0 + p.x1 + 1) / 2f, (p.z0 + p.z1 + 1) / 2f};
         return null;
     }
 
@@ -185,7 +199,8 @@ public final class DevMap {
             {"MINING ROCKS", 54.5f, 38.5f}, {"TREE GROVE", 96.5f, 18.5f}, {"FISHING POND", 96.5f, 42f}, {"PATCHES", 72.5f, 36.5f},
             {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
             {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
-            {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}, {"BANK OF GAMEWORLD", 72f, 102.5f}};
+            {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}, {"BANK OF GAMEWORLD", 72f, 102.5f},
+            {"DEVPALACE", 128.5f, 70.5f}, {"THE SOUTHERN WOOD", 64.5f, 130.5f}, {"THE LAKE", 159.5f, 146.5f}, {"MINING HILLS", 140.5f, 131.5f}};
 
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
     public static long build(NativeEngine e) {
@@ -193,6 +208,7 @@ public final class DevMap {
         long world = e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, null, null, 0);
         if (world == 0) throw new IllegalStateException("world refused: " + e.lastError());
         CommandBuffer b = new CommandBuffer(1 << 16);
+        BuildingKit.reset();
         new Builder(b).all();
         b.lightAll();
         b.pristineSave();
@@ -215,6 +231,8 @@ public final class DevMap {
             // a low boundary wall round the whole map
             for (int[] w : new int[][]{{0, 0, SX - 1, 0}, {0, SZ - 1, SX - 1, SZ - 1}, {0, 0, 0, SZ - 1}, {SX - 1, 0, SX - 1, SZ - 1}})
                 fill(w[0], FLOOR, w[1], w[2], FLOOR + 1, w[3], STONE);
+            // the new ground (0.2.0): DevPalace, the southern wood, the lake country, the meadow, the lodge
+            new Expanse.Builder(b).all();
             debugZone();
             combatLane();
             skillLab();
@@ -235,7 +253,7 @@ public final class DevMap {
                 fill(slab.x0(), FLOOR, slab.z0(), slab.x1(), FLOOR, slab.z1(), BED);
             }
             // furniture: the collision cells of the pieces (the game draws them)
-            for (Piece p : concat(FURNITURE, GRAVEYARD_PIECES)) {
+            for (Piece p : concat(concat(FURNITURE, GRAVEYARD_PIECES), Expanse.PIECES)) {
                 int id = switch (p.kind) { case "CRATE" -> CRATE; case "BOOKCASE" -> BOOKCASE; case "BED" -> BED; case "TARGET" -> TARGET; case "HEADSTONE" -> HEADSTONE; default -> TABLE; };
                 fill(p.x0, FLOOR, p.z0, p.x1, FLOOR + p.h - 1, p.z1, id);
             }
@@ -541,7 +559,8 @@ public final class DevMap {
         void farm() {
             ground(FARM_X0 + 1, FARM_Z0 + 1, FARM_X1 - 1, FARM_Z1 - 1, GRASS);
             walls(FARM_X0, FARM_Z0, FARM_X1, FARM_Z1, FLOOR, FLOOR, FENCE);
-            for (int[] d : FARM_GATE) fill(d[0], FLOOR, d[1], d[0], FLOOR + DOOR_HEIGHT - 1, d[1], DOOR);
+            // (0.2.2) a fence-gate, one block high like the fence it hangs in
+            for (int[] d : FARM_GATE) set(d[0], FLOOR, d[1], DOOR);
             ground(FARM_GATE[0][0], 97, FARM_GATE[1][0], FARM_Z0 - 1, COBBLE);
             // Barn entrance is two blocks wide; animal and human movers share its physical door.
             int top = FLOOR + 3;
@@ -587,7 +606,10 @@ public final class DevMap {
         void building(int x0, int z0, int x1, int z1, int wall, int[] door, char axis, int pane) {
             int top = FLOOR + 3;
             ground(x0, z0, x1, z1, PLANKS);
-            walls(x0, z0, x1, z1, FLOOR, top, wall);
+            // (0.2.1) raised to the standard: two-faced walls (brick or stone outside, plaster within; plaster outside,
+            // planks within), the plan kept for the standard's checks
+            BuildingKit.walls(this::set, x0, z0, x1, z1, FLOOR, top, wall);
+            BuildingKit.plan(new BuildingKit.Plan("building at " + x0 + "," + z0, x0, z0, x1, z1, door[0], door[1], axis, top - FLOOR + 1));
             for (int[] c : new int[][]{{x0, z0}, {x1, z0}, {x0, z1}, {x1, z1}}) fill(c[0], FLOOR, c[1], c[0], top, c[1], BEAM);
             fill(x0, top + 1, z0, x1, top + 1, z1, ROOF);
             if (axis == 'z') { fill(door[0], FLOOR, door[1], door[0] + 1, FLOOR + 1, door[1], AIR); fill(door[0], FLOOR + 2, door[1], door[0] + 1, FLOOR + 2, door[1], BEAM); }
@@ -620,6 +642,4 @@ public final class DevMap {
         }
     }
 
-    /** The cells a tree occupies above its stump (for felling and regrowing): its log and leaf blocks. */
-    public static int treeHeight(int logBlock) { return logBlock == OAK_LOG ? 5 : 4; }
 }

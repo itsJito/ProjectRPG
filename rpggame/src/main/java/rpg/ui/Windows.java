@@ -29,6 +29,7 @@ final class Windows {
 
     static void register(Hud hud) {
         hud.add(new ContainerWin(hud));
+        hud.add(new VaultWin(hud));
         hud.add(new ShopWin(hud));
         hud.add(new StationWin(hud));
         hud.add(new CookWin(hud));
@@ -116,6 +117,58 @@ final class Windows {
                 by += 36;
             }
             ui.text(String.format("%.1f kg inside", c.contents.weight()), ix, by + 2, 12, Style.FAINT);
+        }
+    }
+
+    // ------------------------------------------------------------------ the bank vault: the centre of the bank's window
+    /**
+     * The vault (gamefixes: a better, easier bank, the vault taking centre stage): the Bank of Gameworld's seal and the
+     * holder's name across the top with the gold and the room left; the vault itself, large, in the middle - drag into it
+     * from the pack on the right, or out of it; and under it the three things one comes to a bank to do in one press:
+     * put away everything carried, put away the gold, take everything out.
+     */
+    static final class VaultWin extends Win {
+        VaultWin(Hud h) { super("vault", Hud.VAULT_W, Hud.FH + 120); }
+        @Override protected boolean active() { return hud.vaultOpen(); }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Container c = hud.container;
+            if (c == null) return;
+            Rpg g = hud.g;
+            Style.card(ui, x, y, ww, wh);
+            // the seal: a gold coin ring with the bank's letter
+            float sx = x + 40, sy = y + 40;
+            ui.disc(sx, sy, 24, 0xFF3A2C14);
+            ui.ring(sx, sy, 24, 3, Style.GOLD_LIT);
+            ui.ring(sx, sy, 18, 1, Style.GOLD);
+            ui.flatCentered(ui.heading, "G", sx, sy - 14, 24, Style.GOLD_LIT);
+            ui.text(ui.heading, "Bank of Gameworld", x + 76, y + 12, 26, Style.ACCENT);
+            ui.text(g.nameOf(c.owner) + "'s vault", x + 78, y + 44, 13, Style.DIM);
+            if (Style.button(ui, "x", x + ww - 36, y + 12, 26, 26, live)) { hud.win = Hud.Win.NONE; hud.sound("UI_windowclose", 0.4f); }
+            // what is held
+            int used = c.contents.stacks().size(), cells = c.contents.size();
+            float ix = x + 330;
+            ui.img("Bank_map_icon", ix, y + 16, 22, 0xFFFFFFFF);
+            ui.text(Currency.full(g.bank.coinsIn(c.owner)), ix + 28, y + 18, 15, Currency.color(g.bank.coinsIn(c.owner)));
+            ui.text(used + " of " + cells + " spaces used", ix + 28, y + 40, 11, Style.DIM);
+            Style.bar(ui, ix + 28, y + 56, 230, 4, used / (float) Math.max(1, cells), used > cells * 0.9f ? Style.BAD : Style.GOOD);
+            Style.rule(ui, x + 12, y + 74, ww - 24);
+            // the vault, large
+            float gw = ww - 40, gh = wh - 74 - 26 - 64;
+            float cs = Math.min(Math.min(56, gw / c.contents.w), gh / c.contents.h);
+            float gx = x + (ww - cs * c.contents.w) / 2, gy = y + 86;
+            Style.well(ui, gx - 4, gy - 4, cs * c.contents.w + 8, cs * c.contents.h + 8);
+            hud.inventory.drawGrid(ui, c.contents, gx, gy, cs, InventoryPanel.Source.CONTAINER);
+            // the three errands
+            float by = y + wh - 56, bw = (ww - 24 - 16) / 3;
+            boolean carrying = g.player.grids().stream().anyMatch(grid -> !grid.stacks().isEmpty());
+            boolean coins = g.player.has(Items.COINS, 1), held = !c.contents.isEmpty();
+            if (Style.button(ui, "Deposit Inventory", x + 12, by, bw, 34, live && carrying)) { var r = g.interact.request(g.player, c, "depositall"); if (r.rejected()) g.chat.warn(r.reason()); }
+            if (Style.button(ui, "Deposit Gold", x + 20 + bw, by, bw, 34, live && coins)) { var r = g.interact.request(g.player, c, "depositcoins"); if (r.rejected()) g.chat.warn(r.reason()); }
+            if (Style.button(ui, "Withdraw All", x + 28 + bw * 2, by, bw, 34, live && held)) { var r = g.interact.request(g.player, c, "takeall:items"); var r2 = g.interact.request(g.player, c, "takeall:equipment"); if (r.rejected() && r2.rejected()) g.chat.warn(r.reason()); }
+            if (ui.hover(x + 12, by, bw, 34)) hud.tooltip("Everything in your pack into the vault\n(what you wear stays on you)");
+            if (ui.hover(x + 20 + bw, by, bw, 34)) hud.tooltip("All the gold you carry into the vault");
+            if (ui.hover(x + 28 + bw * 2, by, bw, 34)) hud.tooltip("Everything in the vault back into your pack, as far as it fits");
+            ui.text("Drag between the vault and your pack; right-click a thing for more.", x + 12, y + wh - 16, 11, Style.FAINT);
         }
     }
 

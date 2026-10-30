@@ -37,6 +37,24 @@ class PrisonPropertyTest {
             assertEquals(47,g.player.count(Items.COINS));assertEquals(0,g.player.count(Items.BREAD));
         }
     }
+    /** (0.2.2) a bounty worth more than everything owned: all of it is forfeit, nothing comes back on release. */
+    @Test void aBountyAboveEverythingOwnedForfeitsIt() {
+        var cfg=new NativeEngine.Config();cfg.deterministic=true;
+        try(Game game=Game.create(cfg)) {
+            game.activate(DevMap.build(game.engine()));Rpg g=game.add(new Rpg(game,"Forfeit",Appearance.henric(),true));
+            for(Npc npc:g.npcs)g.ai.unload(npc);
+            g.player.inv.clear();g.player.eq.clear();
+            g.player.eq.set(ItemDef.Slot.MAIN,new ItemStack(Items.WOODEN_SWORD,1,g.player.id,false,301));
+            g.player.inv.add(new ItemStack(Items.COINS,5));
+            int swords=g.econ.shopA.stock.count(Items.WOODEN_SWORD);
+            g.law.all().computeIfAbsent(DevMap.ALPHA,k->new java.util.HashMap<>()).put(g.player.id,900);
+            g.law.arrest(g.player,DevMap.ALPHA,(Npc)g.actor(Ids.GUARD));
+            assertTrue(g.state.all().stream().anyMatch(e->e.type().equals("PossessionsForfeit")));
+            g.law.sleepThroughSentence();assertFalse(g.law.inCustody(g.player));
+            assertTrue(g.player.inv.isEmpty());assertTrue(g.player.eq.stacks().isEmpty());
+            assertEquals(swords+1,g.econ.shopA.stock.count(Items.WOODEN_SWORD),"the sword went to the town's store");
+        }
+    }
     @Test void anUnpaidFineAddsTimeAndNpcPossessionsAreReturnedOnRelease() {
         var cfg=new NativeEngine.Config();cfg.deterministic=true;
         try(Game game=Game.create(cfg)) {

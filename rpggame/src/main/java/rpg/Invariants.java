@@ -47,7 +47,6 @@ public final class Invariants {
     public void baseline() { for (Actor a : all()) rebase(a); }
     public void rebase(Actor a) { expectedXp.put(a.id, a.skills.raw()); }
     public void onAward(Actor a, Skill s, long applied) { expectedXp.computeIfAbsent(a.id, k -> a.skills.raw().clone())[s.ordinal()] += applied; }
-    public java.util.Set<String> reportedPairs() { return reported; }
 
     private List<Actor> all() { List<Actor> l = new ArrayList<>(); l.add(g.player); l.addAll(g.npcs); l.addAll(g.dummies); if (g.monsters != null) l.addAll(g.monsters.all()); return l; }
 
@@ -59,7 +58,7 @@ public final class Invariants {
         Map<String, Long> counted = new HashMap<>();
         java.util.function.BiConsumer<ItemStack, String> at = new java.util.function.BiConsumer<>() {
             @Override public void accept(ItemStack s, String where) {
-                if (s == null) return;
+                if (s == null || s.def.natural) return;   // a monster's claws are its body, never minted
                 String prev = seen.put(s, where);
                 if (prev != null) fail.add("item stack " + s + " is in two places: " + prev + " and " + where);
                 counted.merge(s.def.id, (long) s.amount, Long::sum);
@@ -81,6 +80,8 @@ public final class Invariants {
         for (ItemStack s : g.econ.shopA.stock.stacks()) at.accept(s, "Store A stock");
         for (ItemStack s : g.econ.shopB.stock.stacks()) at.accept(s, "Store B stock");
         for (ItemStack s : g.econ.fence.stock.stacks()) at.accept(s, "the fence's stock");
+        for (ItemStack s : g.econ.forge.stock.stacks()) at.accept(s, "the forge rack");
+        for (ItemStack s : g.econ.macellum.stock.stacks()) at.accept(s, "the Macellum's stock");
         for (CombatSystem.Projectile p : g.combat.projectiles) at.accept(p.ammo, "arrow in flight");
         Map<String, Long> ledger = g.state.ledger();
         java.util.Set<String> ids = new java.util.HashSet<>(ledger.keySet());

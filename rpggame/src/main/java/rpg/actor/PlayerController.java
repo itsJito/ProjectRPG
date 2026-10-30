@@ -31,10 +31,12 @@ public final class PlayerController {
         public boolean jumpHeld;
         public boolean jogToggle;
         public boolean sprint, sneak, jump, dodge, mainDown, offDown, cast, interact, interactHeld, toggleCamera;
+        /** (0.2.2) F was held long enough: sheathe or draw. */
+        public boolean sheathe;
         /** The back key was just pressed (two taps of it close together turn the player about). */
         public boolean turnBack;
         public int bless = -1;
-        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = turnBack = jogToggle = false; bless = -1; lookYaw = lookPitch = 0; }
+        public void clearEdges() { jump = dodge = cast = interact = toggleCamera = turnBack = jogToggle = sheathe = false; bless = -1; lookYaw = lookPitch = 0; }
     }
 
     private final Rpg g;
@@ -108,6 +110,14 @@ public final class PlayerController {
             if (!in.mainDown && mainWas && g.carrying.ready(p)) { if (mainHeld >= 0.35f) g.carrying.drop(p, true); else g.carrying.putDown(p); }
             mainWas = in.mainDown; offWas = in.offDown;
             if (!in.mainDown) mainHeld = 0;
+            return;
+        }
+        // (0.2.2) hold F: sheathe or draw. Put away, a press of either hand draws again instead of striking
+        if (in.sheathe) g.combat.sheathe(p, !p.sheathed);
+        if (p.sheathed && p.sheathable() || !g.combat.armsReady(p)) {
+            queuedMelee = null; p.cs.blocking = false; p.cs.draw = p.cs.charge = 0;
+            if (p.sheathed && (in.mainDown && !mainWas || in.offDown && !offWas)) g.combat.sheathe(p, false);
+            mainWas = in.mainDown; offWas = in.offDown; mainHeld = 0;
             return;
         }
         ItemDef main = p.main(), off = p.off();
@@ -228,6 +238,8 @@ public final class PlayerController {
     private void move(Player p, float dt) {
         if (g.ui != null && g.ui.console.noclip) { fly(p, dt); return; }
         if (!g.traversal.busy(p) && in.sprint && in.forward > 0.1f && !in.sneak) g.traversal.begin(p, camYaw);
+        // (0.2.1) a jump into a fence or a low wall while moving toward it is a vault over it (Agility 2)
+        else if (!g.traversal.busy(p) && in.jump && p.grounded && in.forward > 0.1f && !in.sneak && g.traversal.vault(p, camYaw) != null) g.traversal.begin(p, camYaw);
         if (g.traversal.update(p, dt)) return;
         float fwd = in.forward, side = in.strafe;
         float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
@@ -298,10 +310,20 @@ public final class PlayerController {
         max *= burden * p.actionRate();
         if (p.morphT > 0) { max = Math.min(max, 2); p.sneaking = true; }
         if (g.carrying.busy(p)) max *= g.carrying.ready(p) ? 0.55f : 0;
-        // a badly hurt leg limps (Gore)
-        if (g.gore != null) max *= g.gore.legs(p);
+        // (0.2.2, gamefixes) a hurt leg changes how the player walks (Rig's injured gaits), never how fast: only a blow
+        // being taken this moment checks the stride (a stun stops it outright, below)
+        if (g.time - c.lastHurt < 0.4) max *= 0.7f;
         if (c.staggered > 0) max = 0;
-        if (p.sprinting) { float previousStamina = p.stamina; p.stamina = Math.max(0, p.stamina - g.cfg.staminaSprint * (1 - agility * 0.004f) / burden * dt); c.regenDelay = 0.6f; g.movementPractice.sprintCost(previousStamina - p.stamina); }
+        // (0.2.2, gamefixes: Shift held against a wall still drained stamina) the sprint is paid for in ground actually
+        // covered at a sprint: the share of the way from a walk to a full run the body is really making - nothing while
+        // it pushes at a wall, a little while it gathers speed
+        if (p.sprinting) {
+            float covered = Math.max(0, Math.min(1, (speedNow - g.cfg.walkSpeed) / Math.max(0.1f, g.cfg.runSpeed - g.cfg.walkSpeed)));
+            float previousStamina = p.stamina;
+            p.stamina = Math.max(0, p.stamina - g.cfg.staminaSprint * (1 - agility * 0.004f) / burden * dt * covered);
+            if (covered > 0) c.regenDelay = 0.6f;
+            g.movementPractice.sprintCost(previousStamina - p.stamina);
+        }
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)

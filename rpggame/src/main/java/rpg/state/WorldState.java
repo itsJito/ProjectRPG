@@ -86,5 +86,4 @@ public final class WorldState {
     public long[] counters() { return new long[]{revision, tick, nextEntity, nextEvent, nextRequest, eventsTotal}; }
     public void loadCounters(long[] c) { revision = c[0]; tick = c[1]; nextEntity = c[2]; nextEvent = c[3]; nextRequest = c[4]; eventsTotal = c[5]; }
     public void loadLog(List<DomainEvent> events) { log.clear(); log.addAll(events); }
-    public void clearRequests() { committedRequests.clear(); }
 }

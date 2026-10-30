@@ -507,8 +507,13 @@ public final class Skin {
         if (a.body() != null) {
             int c = 0xFF000000 | a.body().color;
             plate(Part.JACKET, 0, 24, c, a.body().tier);
-            plate(Part.R_SLEEVE, 0, 10, c, a.body().tier);
-            plate(Part.L_SLEEVE, 0, 10, c, a.body().tier);
+            // (0.2.1, gamefixes: armour showed the clothes through it) the sleeve runs on past the elbow as a vambrace to
+            // the wrist, so no band of the shirt's sleeve shows between it and a glove; the couter at the elbow darker
+            for (Part sl : new Part[]{Part.R_SLEEVE, Part.L_SLEEVE}) {
+                plate(sl, 0, 17, c, a.body().tier);
+                sides(sl, 10, 11, shade(c, 0.72f), 0.02f);
+                sides(sl, 16, 17, shade(c, 0.8f), 0.02f);
+            }
             cap(Part.JACKET, TOP, shade(c, 1.08f), 0.04f);
             cap(Part.R_SLEEVE, TOP, shade(c, 1.1f), 0.04f);
             cap(Part.L_SLEEVE, TOP, shade(c, 1.1f), 0.04f);

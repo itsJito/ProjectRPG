@@ -85,7 +85,10 @@ class NpcPaceTest {
         float fastest = 0;
         for (int i = 0; i < 60 * 90; i++) {
             assertTrue(game.tick(1f / 60));
-            for (Npc n : g.npcs) if (n.alive && n.loaded && n.summonOwner == 0 && !java.util.EnumSet.of(Brain.Goal.FIGHT, Brain.Goal.FLEE, Brain.Goal.HIDE, Brain.Goal.WARN, Brain.Goal.AID).contains(n.goal)) {
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.summonOwner == 0 && !java.util.EnumSet.of(Brain.Goal.FIGHT, Brain.Goal.FLEE, Brain.Goal.HIDE, Brain.Goal.WARN, Brain.Goal.AID).contains(n.goal)
+                    // (0.2.3) nor anything the pace rules themselves call urgent (a hunt on a fresh clue, a confrontation - left
+                    // over from the chases before, in this shared world): only a sprint those rules did not ask for fails
+                    && !(n.hasGoalPos && g.ai.pace(n, n.gx, n.gz, 0) == AiSystem.A_SPRINT)) {
                 float v = (float) Math.hypot(n.vx, n.vz);
                 if (n.sprinting || v > g.cfg.jogSpeed + 0.6f) { fastest = Math.max(fastest, v); who = n.name + " (" + n.goal + ", " + n.lastOutcome + ")"; }
             }

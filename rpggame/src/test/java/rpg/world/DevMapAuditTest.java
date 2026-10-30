@@ -51,7 +51,9 @@ class DevMapAuditTest {
                 if (n instanceof rpg.monster.Monster || n.homeX >= DevMap.SX) continue;
                 for (float[] p : new float[][]{{n.homeX, n.homeZ}, {n.postX, n.postZ}}) {
                     int bx = (int) Math.floor(p[0]), bz = (int) Math.floor(p[1]);
-                    if (g.vox.solid(bx, F, bz) && g.vox.block(bx, F, bz) != Blocks.BED || g.vox.solid(bx, F + 1, bz)) homeless.add(n.name + " at " + bx + "," + bz + " (block " + g.vox.block(bx, F, bz) + ")");
+                    // (0.2.1) a post up a step (a temple's podium) is a place to stand: the block underfoot, room for the body above it
+                    boolean step = g.vox.solid(bx, F, bz) && !g.vox.solid(bx, F + 1, bz) && !g.vox.solid(bx, F + 2, bz);
+                    if (g.vox.solid(bx, F, bz) && g.vox.block(bx, F, bz) != Blocks.BED && !step || g.vox.solid(bx, F + 1, bz) && !step) homeless.add(n.name + " at " + bx + "," + bz + " (block " + g.vox.block(bx, F, bz) + ")");
                 }
             }
             for (var d : g.objects.doors()) {
@@ -71,7 +73,7 @@ class DevMapAuditTest {
             // roads: cobble running under a building's wall
             java.util.Set<Integer> walls = java.util.Set.of(Blocks.PLASTER, Blocks.BRICK, Blocks.STONE_BRICKS, Blocks.LIMESTONE_BRICKS);
             for (int x = 1; x < DevMap.SX - 1; x++) for (int z = 1; z < DevMap.SZ - 1; z++)
-                if (g.vox.block(x, F - 1, z) == Blocks.COBBLE && walls.contains(g.vox.block(x, F + 1, z)) && !occluder(x, z)) throughWalls.add(x + "," + z);
+                if (g.vox.block(x, F - 1, z) == Blocks.COBBLE && walls.contains(Blocks.outerOf(g.vox.block(x, F + 1, z))) && !occluder(x, z)) throughWalls.add(x + "," + z);
             System.out.println("beds not against a wall (" + loose.size() + "): " + loose);
             System.out.println("road under walls (" + throughWalls.size() + "): " + throughWalls);
             assertTrue(loose.isEmpty(), "beds whose head is out in the room: " + loose);

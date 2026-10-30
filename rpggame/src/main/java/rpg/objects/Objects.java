@@ -31,6 +31,7 @@ public final class Objects {
     public BuildSpot buildSpot;
     public final List<Node> nodes = new ArrayList<>();
     public Fixtures.Altar altar;
+    public Fixtures.Casket casket;
     public final List<Furniture> furniture = new ArrayList<>();
 
     public Objects(Rpg g) { this.g = g; }
@@ -38,7 +39,12 @@ public final class Objects {
     public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
     public List<WorldObject> everything() { return list; }
     public WorldObject get(long id) { for (WorldObject o : list) if (o.id == id) return o; return null; }
-    public <T extends WorldObject> T add(T o) { list.add(o); if (o instanceof Door door) doors.add(door); return o; }
+    public <T extends WorldObject> T add(T o) {
+        list.add(o);
+        if (o instanceof Door door) doors.add(door);
+        if (o instanceof Container c && c.kind.equals("chest")) c.solid(g);
+        return o;
+    }
     private long fid() { return nextFixture++; }
 
     /** The authored fixtures, in a fixed order. */
@@ -107,7 +113,7 @@ public final class Objects {
             furniture.add(fu);
         }
         // the farm (after every older fixture, so their ids hold): a gate in the paddock fence, a trough, nest boxes, the farmer's chest
-        farmGate = add(new Door(fid(), "Paddock gate", DevMap.FARM_GATE, false, null, 1, 0));
+        farmGate = add(Door.fenceGate(fid(), "Paddock gate", DevMap.FARM_GATE, 0));
         farmGate.spawn(g);
         trough = add(new Container(fid(), "trough", "Feed trough", "trough", DevMap.TROUGH[0], f + 0.35f, DevMap.TROUGH[1], 40, Ids.FARMER));
         for (float[] nb : DevMap.NEST_BOXES) nestBoxes.add(add(new Container(fid(), "nest_box", "Nest box", "nest", nb[0], f + 0.3f, nb[1], 10, Ids.FARMER)));
@@ -130,14 +136,9 @@ public final class Objects {
         }
         custody = add(new Container(fid(), "custody", "The undertaker's chest", "chest", DevMap.CUSTODY_CHEST[0], f + 0.4f, DevMap.CUSTODY_CHEST[1], 100, Ids.UNDERTAKER));
         custody.locked = true; custody.lockLevel = 60;
-        for (var cell : rpg.world.Jails.CELLS) {
-            Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
-            door.spawn(g); jailDoors.add(door);
-            var p = cell.slab();
-            Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
-            slab.name = "Cell slab"; furniture.add(slab);
-        }
-        for (var cell : rpg.world.Jails.CELLS) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction())).solid(g);
+        // (the cells of the first two kingdoms here, so the old ids hold; DevPalace's is made with the rest of 0.2.0 below)
+        for (var cell : rpg.world.Jails.CELLS) if (!cell.jurisdiction().equals(DevMap.PALACE)) jailCell(cell);
+        for (var cell : rpg.world.Jails.CELLS) if (!cell.jurisdiction().equals(DevMap.PALACE)) add(new Fixtures.Board(fid(), cell.releaseX() - 2, f + 1, cell.releaseZ(), cell.jurisdiction())).solid(g);
         node(Node.Kind.ROCK,"quarry_face","Supported quarry face",Skill.MINING,1,Items.STONE_BLOCK,15,3,3,g.cfg.rockRespawn,Blocks.STONE,new int[]{96,19},0,0);
         node(Node.Kind.ROCK,"clay_bank","Clay bank",Skill.MINING,1,Items.CLAY,12,2.2f,3,g.cfg.rockRespawn,Blocks.DIRT,new int[]{97,19},0,0);
         node(Node.Kind.ROCK,"gem_deposit","Uncertain gem deposit",Skill.MINING,30,Items.get("uncut_sapphire"),45,4,1,g.cfg.rockRespawn,Blocks.COPPER_ROCK,new int[]{98,19},0,0);
@@ -180,8 +181,64 @@ public final class Objects {
         node(Node.Kind.ROCK, "quarry_face", "Supported quarry face", Skill.MINING, 1, Items.STONE_BLOCK, 15, 3, 3, g.cfg.rockRespawn, Blocks.STONE, DevMap.QUARRY_FACE_2, 0, 0);
         nodes.get(nodes.size() - 1).setBlocks(g, true);
         for (Node node : nodes) if (node.def.equals("crab_spot")) node.waters = Node.Waters.SHORE;
+        expanse(f);
+        // 0.2.2 (after every older fixture, so their ids hold): the unfinished casket where the dead buy back their things
+        casket = add(new Fixtures.Casket(fid(), DevMap.CASKET[0], f, DevMap.CASKET[1])).solid(g);
         g.vox.doors(doors);
         rpg.ai.Waypoints.doors(g.vox, doors);
+    }
+
+    private void jailCell(rpg.world.Jails.Cell cell) {
+        Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
+        door.spawn(g); jailDoors.add(door);
+        var p = cell.slab();
+        Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
+        slab.name = "Cell slab"; furniture.add(slab);
+    }
+
+    /**
+     * 0.2.0's fixtures (after every older one, so their ids hold): DevPalace's cell and its warrants board, the new
+     * buildings' furniture, and the new ground's resources - the southern wood's trees, the brook's and the lake's spots,
+     * the mining hills' rocks, the marble quarry, the fields' patches and the meadow's bushes.
+     */
+    private void expanse(float f) {
+        var palace = rpg.world.Jails.forJurisdiction(DevMap.PALACE);
+        jailCell(palace);
+        add(new Fixtures.Board(fid(), palace.releaseX() + 3, f + 1, palace.releaseZ(), DevMap.PALACE)).solid(g);
+        for (DevMap.Piece p : rpg.world.Expanse.PIECES) furniture.add(add(new Furniture(fid(), Furniture.Kind.valueOf(p.kind()), p.x0(), p.z0(), p.x1(), p.z1(), p.h(), p.facing(), p.owner(), true)));
+        for (int[] t : rpg.world.Expanse.WOOD_TREES) {
+            int s = t[2], log = rpg.world.Expanse.logOf(s), leaves = rpg.world.Expanse.leavesOf(s), h = rpg.world.Expanse.heightOf(t[0], t[1], s);
+            switch (s) {
+                case 1 -> node(Node.Kind.TREE, "oak", "Oak tree", Skill.WOODCUTTING, 15, Items.OAK_LOGS, 37, 4f, 4, g.cfg.treeRespawn, log, new int[]{t[0], t[1]}, leaves, h);
+                case 2 -> node(Node.Kind.TREE, "willow", "Willow tree", Skill.WOODCUTTING, 30, Items.WILLOW_LOGS, 68, 4.4f, 5, g.cfg.treeRespawn, log, new int[]{t[0], t[1]}, leaves, h);
+                default -> node(Node.Kind.TREE, "tree", s == 3 ? "Birch tree" : s == 4 ? "Spruce tree" : s == 5 ? "Jungle tree" : "Tree", Skill.WOODCUTTING, 1, Items.LOGS, 25, 3.2f, 3, g.cfg.treeRespawn, log, new int[]{t[0], t[1]}, leaves, h);
+            }
+        }
+        for (int[] t : rpg.world.Expanse.MEADOW_TREES) node(Node.Kind.TREE, "oak", "Oak tree", Skill.WOODCUTTING, 15, Items.OAK_LOGS, 37, 4f, 4, g.cfg.treeRespawn, Blocks.OAK_LOG, t, Blocks.OAK_LEAVES, 5);
+        for (float[] at : rpg.world.Expanse.BROOK_SPOTS) {
+            node(Node.Kind.FISH, "river_spot", "Fishing spot (rod, brook)", Skill.FISHING, 20, Items.RAW_TROUT, 50, 4f, 0, 0, 0, new int[]{(int) at[0], (int) at[1]}, 0, 0);
+            Node spot = nodes.get(nodes.size() - 1); spot.waters = Node.Waters.RIVER; spot.needs = Items.FISHING_ROD;
+        }
+        float[][] lake = rpg.world.Expanse.LAKE_SPOTS;
+        node(Node.Kind.FISH, "shrimp_spot", "Fishing spot (net, lake)", Skill.FISHING, 1, Items.RAW_SHRIMP, 10, 3.4f, 0, 0, 0, new int[]{(int) lake[0][0], (int) lake[0][1]}, 0, 0);
+        nodes.get(nodes.size() - 1).needs = Items.FISHING_NET; nodes.get(nodes.size() - 1).waters = Node.Waters.LAKE;
+        node(Node.Kind.FISH, "trout_spot", "Fishing spot (rod, lake)", Skill.FISHING, 20, Items.RAW_TROUT, 50, 4f, 0, 0, 0, new int[]{(int) lake[1][0], (int) lake[1][1]}, 0, 0);
+        nodes.get(nodes.size() - 1).needs = Items.FISHING_ROD; nodes.get(nodes.size() - 1).waters = Node.Waters.LAKE;
+        node(Node.Kind.FISH, "crab_spot", "Fishing spot (cage, lake)", Skill.FISHING, 10, Items.RAW_CRAB, 30, 4.6f, 0, 0, 0, new int[]{(int) lake[2][0], (int) lake[2][1]}, 0, 0);
+        nodes.get(nodes.size() - 1).needs = Items.CRAB_CAGE; nodes.get(nodes.size() - 1).waters = Node.Waters.SHORE;
+        for (int[] r : rpg.world.Expanse.COPPER) node(Node.Kind.ROCK, "copper_rock", "Copper rocks", Skill.MINING, 1, Items.COPPER_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.COPPER_ROCK, r, 0, 0);
+        for (int[] r : rpg.world.Expanse.TIN) node(Node.Kind.ROCK, "tin_rock", "Tin rocks", Skill.MINING, 1, Items.TIN_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.TIN_ROCK, r, 0, 0);
+        for (int[] r : rpg.world.Expanse.IRON) node(Node.Kind.ROCK, "iron_rock", "Iron rocks", Skill.MINING, 15, Items.IRON_ORE, 35, 3.6f, 1, g.cfg.rockRespawn, Blocks.IRON_ROCK, r, 0, 0);
+        for (int[] r : rpg.world.Expanse.COAL) node(Node.Kind.ROCK, "coal_rock", "Coal rocks", Skill.MINING, 30, Items.COAL, 50, 4f, 1, g.cfg.rockRespawn, Blocks.COAL_ROCK, r, 0, 0);
+        for (int[] r : rpg.world.Expanse.GEMS) { node(Node.Kind.ROCK, "gem_deposit", "Uncertain gem deposit", Skill.MINING, 30, Items.get("uncut_emerald"), 45, 4, 1, g.cfg.rockRespawn, Blocks.COPPER_ROCK, r, 0, 0); nodes.get(nodes.size() - 1).setBlocks(g, true); }
+        for (int[] r : new int[][]{rpg.world.Expanse.MARBLE_FACE, rpg.world.Expanse.MARBLE_FACE_2}) {
+            node(Node.Kind.ROCK, "marble_face", "Marble face", Skill.MINING, 20, Items.get("marble_block"), 30, 3.6f, 3, g.cfg.rockRespawn, Blocks.MARBLE, r, 0, 0);
+            nodes.get(nodes.size() - 1).setBlocks(g, true);
+        }
+        for (int[] p : rpg.world.Expanse.HERBS) node(Node.Kind.PATCH, "herb_patch", "Herb patch", Skill.HARVESTING, 1, Items.GUAM, 11, 2.2f, 3, g.cfg.patchRespawn, Blocks.HERB_PATCH, p, 0, 0);
+        for (int[] p : rpg.world.Expanse.FLAXES) node(Node.Kind.PATCH, "flax", "Flax", Skill.HARVESTING, 5, Items.FLAX, 8, 1.8f, 4, g.cfg.patchRespawn, Blocks.FLAX_PATCH, p, 0, 0);
+        for (int[] p : rpg.world.Expanse.BERRIES) node(Node.Kind.PATCH, "berry_bush", "Redberry bush", Skill.HARVESTING, 10, Items.BERRIES, 18, 2.4f, 3, g.cfg.patchRespawn, Blocks.BERRY_BUSH, p, 0, 0);
+        for (Node node : nodes) if (node.kind == Node.Kind.PATCH && node.bx > 128 && node.def.matches("herb_patch|flax|berry_bush")) node.setBlocks(g, true);
     }
 
     /** Where the bank's teller sleeps (in the back of the hall). */
@@ -279,12 +336,28 @@ public final class Objects {
         settleAmmo();
     }
 
+    /** In the doorway, or by it bound for somewhere on its far side (an imp idling beside a door does not hold it open). */
+    private static boolean passing(Door d, rpg.ai.Npc n) {
+        double dd = Math.hypot(n.x - d.x, n.z - d.z);
+        if (dd >= 2.6) return false;
+        float bx = n.legs != null ? n.legsX : n.gx, bz = n.legs != null ? n.legsZ : n.gz;
+        return dd < 1.3 || n.hasGoalPos && d.side(n.x, n.z) != d.side(bx, bz);
+    }
+
     /** NPCs open unlocked doors on their way through and close them behind them. */
     private void doorsForNpcs() {
         for (Door d : doors()) {
             boolean near = false;
             rpg.ai.Npc by = null;
-            for (var n : g.npcs) if (n.alive && n.loaded && !n.asleep() && !n.reacting && !g.law.inCustody(n) && Math.hypot(n.x - d.x, n.z - d.z) < 2.6) { near = true; by = n; }
+            // (0.2.3) near means passing through: in the doorway, or by it with somewhere to be on its far side - someone who
+            // has come through and stopped just inside (a shopkeeper at her counter) no longer holds it open behind her
+            for (var n : g.npcs) {
+                if (!n.alive || !n.loaded || n.asleep() || n.reacting || g.law.inCustody(n)) continue;
+                if (passing(d, n)) { near = true; by = n; }
+            }
+            // (0.2.2, pathfinding: goblins pushed at a shut shed door forever) a goblin, an imp, a troll - anything with
+            // hands - opens an unlocked door too; a beast does not (its routes keep to open ways)
+            if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded && m.kind.form == rpg.monster.MonsterKind.Form.HUMANOID && passing(d, m)) { near = true; if (by == null) by = m; }
             if (!d.open && !d.locked && near) { d.setOpen(g, true, by, 0); d.autoOpened = true; d.autoCloseAt = g.time + 3; }
             // a locked door its owner (or whoever carries its key) is on their way through: unlocked, opened, and locked
             // again behind them once it is shut (gamefixes: people open their own doors)

@@ -19,7 +19,7 @@ public final class DungeonLayout {
     /** The dungeon region starts here (the overworld is x 0 .. DevMap.SX - 1; the gap between is solid rock). */
     public static final int X0 = DevMap.SX + 8;
     /** The world's full width: the overworld and the dungeon region beyond it. */
-    public static final int WORLD_X = 248;
+    public static final int WORLD_X = DevMap.SX + 120;
     /** The rock's top over the dungeons (grassed: from the overworld it is a cliff beyond the border). */
     public static final int ROCK_TOP = DevMap.FLOOR + 9;
 
@@ -297,7 +297,6 @@ public final class DungeonLayout {
     public int worldX(int x) { return ox + x; }
     public int worldZ(int z) { return oz + z; }
     public boolean openAt(int wx, int wz) { int x = wx - ox, z = wz - oz; return x >= 0 && z >= 0 && x < w && z < d && open[x][z]; }
-    public Room roomAt(float wx, float wz) { for (Room r : rooms) if (r.contains(wx - ox, wz - oz)) return r; return null; }
     /** Waypoints for routing inside: each room's middle and every corridor bend (world coordinates). */
     public List<float[]> waypoints() {
         List<float[]> l = new ArrayList<>();

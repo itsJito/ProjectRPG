@@ -22,11 +22,22 @@ final class Jobs {
     Jobs(Rpg g, Brain brain) { this.g=g; this.brain=brain; }
     void tick(Npc n, float dt) {
         if(g.interact.of(n)!=null || n.cs.busy()) { g.ai.desire(n,AiSystem.A_HOLD); return; }
+        if(unload(n))return;
         if(n.profession==Profession.LAKE_NET_FISHERMAN){net(n);return;}
         if(n.profession.family==Npc.Role.KNIGHT) { knight(n); return; }
         if(n.profession.family==Npc.Role.HUNTER) { hunter(n,dt); return; }
+        // a carpenter's first work is what has been broken (Repairs): it comes before the day's orders
+        if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
         if(n.job==null)n.job=network(n.profession);
-        if(n.job.tick(n)==FAILURE) { g.ai.desire(n,AiSystem.A_HOLD); n.lastOutcome="No eligible work for "+n.profession.title+"; waiting for supplies or a suitable site"; }
+        if(n.job.tick(n)==FAILURE) {
+            var own=g.econ.shopOf(n);
+            if(own!=null && g.econ.rack(own) && !own.stock.isEmpty()) {
+                brain.goTo(n,own.counterX,own.counterZ,false,1.2f);
+                n.lastOutcome=n.profession.title+": minding the rack ("+own.stock.stacks().size()+" pieces for sale)";
+                return;
+            }
+            g.ai.desire(n,AiSystem.A_HOLD); n.lastOutcome="No eligible work for "+n.profession.title+"; waiting for supplies or a suitable site";
+        }
         else n.lastOutcome=n.profession.title+": "+n.job.active();
     }
     private void net(Npc n) {
@@ -56,12 +67,50 @@ final class Jobs {
         }
     }
 
+    /**
+     * (0.2.2, gamefixes: the fisherman stopped working with a full pack) a worker whose pack is full - or as good as - goes
+     * to empty it before anything else: it sells what a store will buy off it at the store's counter, and what no store
+     * will take it carries to the bank and lays in its vault (opening an account the first time). It works again once
+     * there is room. Tools of its trade, its coin and what it wears never leave it.
+     */
+    private boolean unload(Npc n) {
+        int free=n.inv.freeSlots();
+        if(!n.unloading && free>1)return false;
+        ItemDef goods=null; int most=0;
+        for(ItemStack item:n.inv.stacks())if(cargo(item) && n.count(item.def)>most){most=n.count(item.def);goods=item.def;}
+        if(goods==null || n.unloading && free>=6){n.unloading=false;return false;}
+        if(!n.unloading)g.state.commit("PackFull",n.id,0,DevMap.jurisdiction(n.x,n.z),0,n.name+" ("+free+" free) goes to unload "+goods.name);
+        n.unloading=true;
+        // first a store that will buy it
+        for(var shop:new rpg.econ.Economy.Shop[]{g.econ.shopA,g.econ.shopB})if(shop!=null && g.econ.buys(shop,goods)) {
+            if(brain.goTo(n,shop.counterX,shop.counterZ,false,1.4f)) {
+                int sold=g.econ.sellToShop(n,shop,goods,n.count(goods));
+                n.lastOutcome=n.profession.title+": pack full, sold "+sold+" "+goods.name.toLowerCase()+" at "+shop.name;
+            } else n.lastOutcome=n.profession.title+": pack full, taking "+goods.name.toLowerCase()+" to sell at "+shop.name;
+            return true;
+        }
+        // nobody buys it: the bank
+        float[] at=g.bank.customerSpot();
+        if(!brain.goTo(n,at[0],at[1],false,1.2f)){n.lastOutcome=n.profession.title+": pack full and no buyer; taking "+goods.name.toLowerCase()+" to the bank";return true;}
+        if(!g.bank.open()){g.ai.desire(n,AiSystem.A_HOLD);n.lastOutcome=n.profession.title+": waiting at the bank counter to deposit "+goods.name.toLowerCase();return true;}
+        int banked=g.bank.depositGoods(n,goods);
+        if(banked<=0){n.unloading=false;n.lastOutcome=n.profession.title+": the bank could not take the "+goods.name.toLowerCase();return false;}
+        n.lastOutcome=n.profession.title+": banked "+banked+" "+goods.name.toLowerCase();
+        return true;
+    }
+    /** What a worker can part with to make room: neither coin, nor a tool, nor anything it could wear or wield. */
+    private static boolean cargo(ItemStack item) {
+        return item.def!=Items.COINS && item.def.toolSkill==null && !item.def.equippable() && item.def!=Items.FISHING_NET;
+    }
+
     private TaskNetwork<Npc> network(Profession occupation) {
         return new TaskNetwork<>(List.of(
             new TaskNetwork.Method<>("deliver a real batch", n->n.profession==occupation && batch(n)!=null, n->sell(n,batch(n))),
+            new TaskNetwork.Method<>("set wares out on the rack", n->n.profession==occupation && shelve(n)!=null, n->rack(n,shelve(n))),
             new TaskNetwork.Method<>("make the selected order", n->n.profession==occupation && recipe(n)!=null, n->craft(n,recipe(n))),
             new TaskNetwork.Method<>("gather at a suitable site", n->n.profession==occupation && site(n)!=null, n->gather(n,site(n))),
-            new TaskNetwork.Method<>("buy missing inputs", n->n.profession==occupation && purchase(n)!=null, n->buy(n,purchase(n)))
+            new TaskNetwork.Method<>("buy missing inputs", n->n.profession==occupation && purchase(n)!=null, n->buy(n,purchase(n))),
+            new TaskNetwork.Method<>("fetch supplies from the producer", n->n.profession==occupation && supplier(n)!=null, n->fetch(n,supplier(n)))
         ));
     }
     private Behavior.Node<Npc> approach(float x,float z,float range) { return n->brain.goTo(n,x,z,false,range)?SUCCESS:RUNNING; }
@@ -88,8 +137,39 @@ final class Jobs {
         int minimum=n.profession.family==Npc.Role.CRAFTSMAN?1:3;
         boolean joinery=n.profession==Profession.CARPENTER && joineryPending(n);
         for(ItemStack item:n.inv.stacks())if(n.count(item.def)>=minimum && !item.stolen && product(n.profession,item.def)
-                && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery)return item.def;
+                && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery && g.econ.buys(g.econ.shopA,item.def))return item.def;
         return null;
+    }
+    /** A craftsman's own finished pieces not yet sold: past a few, more of them is waste (a forge is not a warehouse). */
+    static final int WARES = 4;
+    private int wares(Npc n) {
+        int count=0;
+        for(var grid:n.grids())for(ItemStack item:grid.stacks())if(!item.stolen && n.profession.family==Npc.Role.CRAFTSMAN && recipeOutput(n.profession,item.def) && !item.def.stackable && !material(n,item.def))count+=item.amount;
+        var own=g.econ.shopOf(n);
+        if(own!=null && g.econ.rack(own))for(ItemStack item:own.stock.stacks())if(recipeOutput(n.profession,item.def))count+=item.amount;
+        return count;
+    }
+    /** A finished piece the store would not take, with room on the craftsman's own rack (one of each kind out at a time). */
+    private ItemDef shelve(Npc n) {
+        var own=g.econ.shopOf(n);
+        if(own==null || !g.econ.rack(own))return null;
+        for(ItemStack item:n.inv.stacks())if(!item.stolen && recipeOutput(n.profession,item.def) && !item.def.stackable && !material(n,item.def) && own.stock.count(item.def)<2 && own.stock.canAdd(item))return item.def;
+        return null;
+    }
+    /** Something this craftsman works up into a finer piece (a tailor's woven cloth, a carpenter's planks): stock, not wares. */
+    private boolean material(Npc n,ItemDef def) {
+        for(var recipe:Recipes.ALL)if(accepts(n,recipe))for(var input:recipe.inputs)if(input.item()==def)return true;
+        return false;
+    }
+    private Behavior.Node<Npc> rack(Npc n,ItemDef piece) {
+        var own=g.econ.shopOf(n);
+        return Behavior.sequence(List.of(approach(own.counterX,own.counterZ,1.4f),person->{
+            var taken=person.takeItems(piece,1);
+            if(taken==null || taken.isEmpty())return FAILURE;
+            for(ItemStack one:taken){one.owner=person.id;own.stock.add(one);own.target.putIfAbsent(piece.id,2);}
+            g.state.commit("WaresShelved",person.id,0,own.jurisdiction,0,person.name+" set out a "+piece.name.toLowerCase()+" on "+own.name.toLowerCase());
+            return SUCCESS;
+        }));
     }
     private boolean joineryPending(Npc n) {
         for(var recipe:Recipes.ALL)if(recipe.furniture!=null && accepts(n,recipe) && station(recipe) instanceof rpg.objects.BuildSpot plot && !plot.built.getOrDefault(recipe.furniture,false))return true;
@@ -168,13 +248,30 @@ final class Jobs {
         return n.profession.family==Npc.Role.CRAFTSMAN && (metalInput || (recipe.furniture!=null ? n.profession==Profession.CARPENTER : recipe.outputs.stream().anyMatch(out->recipeOutput(n.profession,out.item()))))
                 && n.skills.level(recipe.skill)>=recipe.level;
     }
+    /** (0.2.1) each kind's station, found once: the lookup was a walk over every object in the world for every recipe. */
+    private final java.util.EnumMap<Recipes.Station,Station> stations=new java.util.EnumMap<>(Recipes.Station.class);
     private Station station(Recipes.Recipe recipe) {
-        for(var object:g.objects.all())if(object instanceof Station station && station.kind==recipe.station)return station;
+        Station known=stations.get(recipe.station);
+        if(known!=null && !known.removed)return known;
+        for(var object:g.objects.all())if(object instanceof Station station && station.kind==recipe.station){stations.put(recipe.station,station);return station;}
         return null;
     }
     private Recipes.Recipe recipe(Npc n) {
-        Recipes.Recipe selected=null;
-        for(var recipe:Recipes.ALL)if(accepts(n,recipe)) { Station station=station(recipe);if(station!=null && station.refusal(recipe,n)==null)selected=recipe; }
+        Recipes.Recipe selected=null;int fewest=Integer.MAX_VALUE;
+        boolean stocked=wares(n)>=WARES;
+        for(var recipe:Recipes.ALL)if(accepts(n,recipe)) {
+            Station station=station(recipe);
+            if(station==null || station.refusal(recipe,n)!=null)continue;
+            ItemDef out=recipe.outputs.isEmpty()?null:recipe.outputs.get(0).item();
+            boolean stockOnly=stock(recipe);
+            // furniture for the build spot is made in place, never stock on a shelf: the wares cap does not hold it back
+            if(stocked && !stockOnly && recipe.furniture==null)continue;
+            if(stockOnly && n.count(out)>=12)continue;
+            // the order: the piece she holds fewest of, the better metal first when it is a tie (the last listed); a
+            // piece of furniture for the build spot (no item comes of it) before anything
+            int have=out==null?-1:n.count(out);
+            if(have<=fewest){fewest=have;selected=recipe;}
+        }
         return selected;
     }
     private ItemDef purchase(Npc n) {
@@ -182,6 +279,32 @@ final class Jobs {
         for(var recipe:Recipes.ALL) if(accepts(n,recipe)) for(var input:recipe.inputs)
             if(n.count(input.item())<input.amount() && g.econ.shopA.stock.count(input.item())>0 && n.has(Items.COINS,g.econ.buyPrice(g.econ.shopA,input.item())))return input.item();
         return null;
+    }
+    /** Who makes what this craftsman lacks and has some to spare (a miner with ore), when the shop has none: the one nearest. */
+    private Npc supplier(Npc n) {
+        if(n.profession.family!=Npc.Role.CRAFTSMAN)return null;
+        boolean stocked=wares(n)>=WARES;
+        Npc best=null;float nearest=90;
+        for(var recipe:Recipes.ALL) if(accepts(n,recipe) && (!stocked || stock(recipe) && n.count(recipe.outputs.get(0).item())<12)) for(var input:recipe.inputs) {
+            if(n.count(input.item())>=input.amount() || g.econ.shopA.stock.count(input.item())>0 || !n.has(Items.COINS,g.econ.sellPrice(g.econ.shopA,input.item())))continue;
+            for(Npc o:g.npcs)if(o!=n && o.alive && o.loaded && o.profession!=null && o.goal!=Brain.Goal.FIGHT && o.goal!=Brain.Goal.FLEE && o.count(input.item())>0 && product(o.profession,input.item()) && n.distTo(o)<nearest){nearest=n.distTo(o);best=o;}
+        }
+        return best;
+    }
+    /** A recipe that makes stock for later work (bars from ore) rather than a finished piece to sell. */
+    private static boolean stock(Recipes.Recipe recipe) { return !recipe.outputs.isEmpty() && recipe.outputs.get(0).item().id.endsWith("_bar"); }
+    private Behavior.Node<Npc> fetch(Npc n,Npc from) {
+        return Behavior.sequence(List.of(
+            person->from.alive && from.loaded?(brain.goTo(person,from.x+0.9f,from.z+0.9f,false,1.6f)?SUCCESS:RUNNING):FAILURE,
+            person->{
+                int got=0;
+                for(var recipe:Recipes.ALL) if(accepts(person,recipe)) for(var input:recipe.inputs)
+                    if(person.count(input.item())<input.amount()*4 && from.count(input.item())>0) got+=g.econ.trade(from,person,input.item(),Math.min(from.count(input.item()),input.amount()*4-person.count(input.item())));
+                if(got==0)return FAILURE;
+                g.ai.say(person,"I'll take what ore you have.");g.ai.reply(from,"Fair price. Here.");
+                return SUCCESS;
+            }
+        ));
     }
     private Behavior.Node<Npc> buy(Npc n,ItemDef item) {
         float[] counter=g.econ.counterSpot(g.econ.shopA);

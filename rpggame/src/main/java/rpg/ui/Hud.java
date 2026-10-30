@@ -34,11 +34,11 @@ import rpg.ui.Fragment.Placement;
  * has always used, the action bar bottom centre.
  */
 public final class Hud {
-    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC, MAP }
+    public enum Scene { WORLD, INVENTORY, CHARACTER, SKILLS, JOURNAL, MAGIC, FAITH, MAP }
     public enum Win { NONE, CONTAINER, STATION, CABINET, SHOP, KIOSK, SKILL_GUIDE }
     /** Legacy side-panel indices, retained for tests and the remaining F-key shortcuts: each opens a scene. The debug tab is gone: the developer console (`) took its place. */
     public static final int TAB_COMBAT = 0, TAB_SKILLS = 1, TAB_QUESTS = 2, TAB_INV = 3, TAB_EQUIP = 4, TAB_MAGIC = 5, TAB_MAP = 6;
-    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC, Scene.MAP};
+    static final Scene[] TAB_SCENES = {Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.INVENTORY, Scene.CHARACTER, Scene.MAGIC, Scene.MAP, Scene.FAITH};
     /** The scene frame's size (panel scenes draw inside it). */
     static final float FW = 900, FH = 520, FRAME_Y = -24;
 
@@ -116,7 +116,7 @@ public final class Hud {
     /** A placement inside the scene frame: (fx, fy) from the frame's top-left corner. */
     Placement inFrame(String fragment, float fx, float fy) {
         Fragment f = fragments.get(fragment);
-        return Placement.at(Anchor.CENTER, -frameWidth() / 2 + fx + f.width() / 2, FRAME_Y - FH / 2 + fy + f.height() / 2);
+        return Placement.at(Anchor.CENTER, frameShift() - frameWidth() / 2 + fx + f.width() / 2, FRAME_Y - FH / 2 + fy + f.height() / 2);
     }
 
     private void layout() {
@@ -134,6 +134,7 @@ public final class Hud {
         group("skills", "skills", inFrame("skills", 16, 52), "guide", inFrame("guide", 452, 52));
         group("journal", "journal", inFrame("journal", 16, 52), "legend", inFrame("legend", 552, 52));
         group("magic", "magic", inFrame("magic", 16, 52));
+        group("faith", "faith", inFrame("faith", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
         group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cooking", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
@@ -141,7 +142,7 @@ public final class Hud {
         group("addons");
         group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0), "radial", Placement.at(Anchor.CENTER, 0, 0));
         scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
-        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.MAP}) {
+        for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.FAITH, Scene.MAP}) {
             String content = s.name().toLowerCase();
             scenes.put(s, new ArrayList<>(List.of("world", "vitals", "frame", content, "talk", "inspect", "addons", "top")));
         }
@@ -197,8 +198,16 @@ public final class Hud {
     }
     /** A scene key: opens it, or closes it when it is already open. */
     public void toggle(Scene s) { go(scene == s ? Scene.WORLD : s); }
-    public float frameWidth() { return inventoryOnly() ? 684 : FW; }
+    public float frameWidth() { return vaultOpen() ? VAULT_SIDE : inventoryOnly() ? 684 : FW; }
     public boolean inventoryOnly() { return win == Win.CONTAINER && container != null; }
+    /**
+     * At the bank (gamefixes: the bank's window should be easier, the vault taking centre stage): the vault is the big
+     * window in the middle, and the inventory steps aside to its right, just the grids to drag from.
+     */
+    public boolean vaultOpen() { return inventoryOnly() && container.kind.equals("vault"); }
+    static final float VAULT_W = 620, VAULT_SIDE = 400, VAULT_GAP = 14;
+    /** How far right of the screen's middle the frame stands (at the bank, beside the vault). */
+    float frameShift() { return vaultOpen() ? (VAULT_W + VAULT_GAP) / 2f : 0; }
     public void openTabKey(int t) { if (t >= 0 && t < TAB_SCENES.length) toggle(TAB_SCENES[t]); }
 
     public boolean escape() {
@@ -229,7 +238,7 @@ public final class Hud {
     /** A numbered choice on whatever is open (dialogue options, menu items) from the keyboard. */
     public void choose(int n) {
         if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog;
-            if (g.actor(d.npc) instanceof rpg.ai.Npc speaker && (!speaker.canTalk(g) || d.employment != null && d.employment != speaker.employmentState())) {
+            if (!d.stands(g) && g.actor(d.npc) instanceof rpg.ai.Npc speaker) {
                 dialog = speaker.canTalk(g) ? g.dialogue.talk(speaker) : null; return;
             }
             dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
@@ -292,6 +301,11 @@ public final class Hud {
             at.put("grids",inFrame("grids",16,52));
             at.put("iteminfo",inFrame("iteminfo",404,52));
             at.put("container",Placement.at(Anchor.CENTER,-frameWidth()/2-166,FRAME_Y));
+            if (vaultOpen()) {
+                on.remove("iteminfo"); on.remove("container"); on.add("vault");
+                at.put("frame", Placement.at(Anchor.CENTER, frameShift(), FRAME_Y));
+                at.put("vault", Placement.at(Anchor.CENTER, frameShift() - VAULT_SIDE / 2 - VAULT_GAP - VAULT_W / 2, FRAME_Y));
+            }
         }
         stackTop(on, at);
         if (scene == Scene.INVENTORY) at.put("radial", Placement.at(Anchor.CENTER, frameWidth() / 2 + 16 + radial.width() / 2, FRAME_Y + 48));
@@ -452,6 +466,8 @@ public final class Hud {
             case "container" -> sound("ContainerOpen", 0.55f);
             case "event:QuestCompleted" -> { sound("QuestComplete", 0.7f); if (g.music != null) g.music.stinger("sacred_stinger"); }
             case "event:QuestFailed" -> sound("QuestFailed", 0.7f);
+            // (0.2.0) the combat level rising has its own fanfare over the music
+            case "event:CombatLevelUp" -> { if (g.music != null) g.music.stinger("prophecy_fulfilled"); }
             default -> { }
         }
     }

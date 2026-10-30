@@ -102,6 +102,7 @@ public final class SaveSystem {
         }
         root.put("objects", objs);
         root.put("econ", g.econ.save());
+        root.put("repairs", g.repairs.save());
         root.put("animals", g.animals.save());
         root.put("monsters", g.monsters.save(this::actor));
         root.put("dungeons", g.dungeons.save());
@@ -295,6 +296,7 @@ public final class SaveSystem {
         for (Npc dead : g.npcs) if (!dead.alive && dead.corpse == 0 && dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
         g.bank.migrateAccounts();
         g.econ.load(Json.obj(root, "econ"));
+        g.repairs.load(Json.list(root, "repairs"));
         g.animals.load(Json.obj(root, "animals"));
         g.monsters.load(Json.obj(root, "monsters"), this::applyActor);
         g.dungeons.load(Json.obj(root, "dungeons"));

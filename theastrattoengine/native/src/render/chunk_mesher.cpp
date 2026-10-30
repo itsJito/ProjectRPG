@@ -206,7 +206,13 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                                 int layer, var;
                                 if (a == 1 && sgn > 0) { layer = b.layerTop; var = b.varTop; }
                                 else if (a == 1) { layer = b.layerBottom; var = b.varBottom; }
-                                else { layer = b.layerSide; var = b.varSide; }
+                                else {
+                                    // (0.2.1) a two-faced wall block (ASTRATTO_RB_INNER): its inner side shows the bottom's
+                                    // layer - a house's plaster inside, its brick outside, in one block
+                                    const int inner = static_cast<int>(b.flags >> 13) & 7, dir = a == 0 ? (sgn > 0 ? 1 : 2) : (sgn > 0 ? 3 : 4);
+                                    if (inner != 0 && inner == dir) { layer = b.layerBottom; var = b.varBottom; }
+                                    else { layer = b.layerSide; var = b.varSide; }
+                                }
                                 const bool leafy = leaf(bid);
                                 if (interior && ny >= 1 && ny + 1 < H_) {
                                     // the common case, the same rules read straight from the column: every cell round the face

@@ -440,6 +440,8 @@ public final class Animals {
 
     /** Somewhere in its range to wander to: inside its habitat, on open ground. */
     float[] roamPoint(Animal a) {
+        // a wader now and then makes for the shallows of its habitat's water instead (a duck for the middle of its pond)
+        if (a.species.wades > 0 && !a.baby && rnd.nextFloat() < a.species.wades) { float[] w = shallows(a); if (w != null) return w; }
         for (int t = 0; t < 12; t++) {
             double ang = rnd.nextDouble() * Math.PI * 2;
             float r = a.range * (0.3f + 0.7f * rnd.nextFloat());
@@ -459,6 +461,19 @@ public final class Animals {
             if (open(a, x, z)) return new float[]{x, z};
         }
         return new float[]{a.x, a.z};
+    }
+
+    /** A spot in shallow water within its range (water one block deep with air over it), or null. */
+    float[] shallows(Animal a) {
+        for (int t = 0; t < 16; t++) {
+            double ang = rnd.nextDouble() * Math.PI * 2;
+            float r = a.range * rnd.nextFloat();
+            float x = a.homeX + (float) Math.cos(ang) * r, z = a.homeZ + (float) Math.sin(ang) * r;
+            if (a.home != null && !a.home.contains(x, z)) continue;
+            int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
+            if (g.vox.block(bx, DevMap.FLOOR - 1, bz) == rpg.world.Blocks.WATER && g.vox.block(bx, DevMap.FLOOR, bz) == 0 && g.vox.solid(bx, DevMap.FLOOR - 2, bz)) return new float[]{x, z};
+        }
+        return null;
     }
 
     private boolean open(Animal a, float x, float z) {
@@ -932,7 +947,6 @@ public final class Animals {
     // ------------------------------------------------------------------ people and animals
     public Result perform(Animal a, Actor who, String action, long req) {
         switch (action) {
-            case "examine" -> { if (who == g.player) g.chat.say(examine(a)); return Result.ok(); }
             case "pet" -> {
                 if (Math.hypot(who.x - a.x, who.z - a.z) > g.cfg.interactRange + a.radius) return Result.no("You're too far away.");
                 if (!a.alive) return Result.no("It's dead.");
@@ -1074,17 +1088,6 @@ public final class Animals {
         return true;
     }
 
-    public String examine(Animal a) {
-        if (a.carcass()) return "A dead " + a.kind().toLowerCase() + (a.butchered ? ", picked clean." : ". It could be butchered with a knife.");
-        String who = a.owned() ? "It belongs to " + g.nameOf(a.owner) + "." : a.species.domestic ? "It's nobody's." : "A wild " + a.kind().toLowerCase() + ".";
-        String mood = switch (a.goal) {
-            case FLEE -> " It's running scared."; case WARN -> " It's warning you off."; case DEFEND, HUNT -> " It's on the attack!"; case ALERT -> " It's watching you warily.";
-            case REST -> " It's resting."; case GRAZE -> a.species.diet == Species.Diet.GRAZER ? " It's grazing." : " It's foraging."; case DRINK -> " It's drinking.";
-            case NEST -> " It's sitting on a clutch of eggs."; default -> "";
-        };
-        String state = a.dueAt > 0 ? " She's carrying young." : a.baby ? " Still young." : "";
-        return (a.female ? "A female " : "A male ") + a.kind().toLowerCase() + ". " + who + mood + state;
-    }
 
     // ------------------------------------------------------------------ sound
     public void sound(Animal a, String key, float vol) {

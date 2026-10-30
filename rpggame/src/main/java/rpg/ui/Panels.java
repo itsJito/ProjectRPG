@@ -36,6 +36,7 @@ final class Panels {
         hud.add(new Journal(hud));
         hud.add(new Legend(hud));
         hud.add(new Magic(hud));
+        hud.add(new Faith(hud));
         hud.add(hud.inventory);
     }
 
@@ -59,7 +60,8 @@ final class Panels {
     // ------------------------------------------------------------------ the frame: tabs to every panel scene
     static final class Frame extends Panel {
         static final Object[][] TABS = {{Hud.Scene.INVENTORY, "Inventory", "Inventory", "I"}, {Hud.Scene.CHARACTER, "Character", "Equipment", "C"},
-                {Hud.Scene.SKILLS, "Skills", "Skills_icon", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
+                {Hud.Scene.SKILLS, "Skills", "Skills_icon", "K"}, {Hud.Scene.JOURNAL, "Journal", "Quest_map_icon", "J"}, {Hud.Scene.MAGIC, "Magic", "Magic_Icon", "B"},
+                {Hud.Scene.FAITH, "Faith", "Faith_Icon", "P"}, {Hud.Scene.MAP, "Map", "Minigame_map_icon", "M"}};
         Frame(Hud h) { super("frame", Hud.FW, Hud.FH); }
         @Override public float width() { return hud.frameWidth(); }
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -68,7 +70,7 @@ final class Panels {
             Style.card(ui, x, y, pw, ph);
             // the tab strip: a darker band the tabs hang in, the open one joined to the page below it
             ui.rect(x + 4, y + 4, pw - 8, 40, 0x70000000);
-            float tw = 124;
+            float tw = 118;
             for (int i = 0; i < TABS.length; i++) {
                 if (hud.inventoryOnly() && i > 0) continue;
                 Hud.Scene s = (Hud.Scene) TABS[i][0];
@@ -81,8 +83,6 @@ final class Panels {
             }
             Style.rule(ui, x + 6, y + 44, pw - 12);
             if (Style.button(ui, "x", x + pw - 36, y + 12, 26, 26, true)) hud.go(Hud.Scene.WORLD);
-            ui.img("questionmark_UI", x + pw - 68, y + 14, 22, 0xC0FFFFFF);
-            if (ui.hover(x + pw - 66, y + 10, 24, 24)) hud.tooltip("Controls\nI inventory, C character, K skills, J journal, M map, B magic\nDrag items between grids; R rotates while dragging\nDrop on an equipment slot to wear it, on the bar to bind it\nDrop outside the panel to drop it on the ground\nRight-click an item for every option; Esc closes");
         }
     }
 
@@ -201,9 +201,15 @@ final class Panels {
                 ui.text(rows[i][0], x, ry, 13, Style.DIM);
                 ui.text(rows[i][1], x + 140, ry, 13, i == rows.length - 1 ? Currency.color(p.count(Items.COINS)) : Style.TEXT);
             }
-            String[] help = {"LMB tap: light swing    LMB hold: heavy", "RMB: guard (shield or weapon), or the off hand", "Guard just before a hit to parry", "Q dodge    R cast    1-0 the action bar", "V first / third person    E interact (hold for all options)"};
-            ui.text("Controls", x + 360, y + 166, 13, 0xFFFFD15E);
-            for (int i = 0; i < help.length; i++) ui.text(help[i], x + 360, y + 194 + i * 20, 12, Style.FAINT);
+            // (gamefixes: the controls came off the character sheet) where the player stands with each kingdom's law
+            ui.text("Standing", x + 360, y + 166, 13, 0xFFFFD15E);
+            String[] kingdoms = {rpg.world.DevMap.ALPHA, rpg.world.DevMap.BETA, rpg.world.DevMap.PALACE};
+            for (int i = 0; i < kingdoms.length; i++) {
+                int b = g.law.bounty(p.id, kingdoms[i]);
+                float ry = y + 194 + i * 24;
+                ui.text(kingdoms[i], x + 360, ry, 13, Style.DIM);
+                ui.text(b <= 0 ? "In good standing" : b <= g.cfg.pursuitBounty ? "Fine owed: " + b + " G" : "Wanted: " + Currency.text(b) + " G", x + 470, ry, 13, b <= 0 ? Style.GOOD : b <= g.cfg.pursuitBounty ? Style.WARN : Style.BAD);
+            }
         }
     }
 
@@ -320,48 +326,149 @@ final class Panels {
         }
     }
 
-    // ------------------------------------------------------------------ magic and faith
+    // ------------------------------------------------------------------ magic: the spellbook
+    /**
+     * The spellbook (gamefixes: magic and the prayers were one crowded page; magic wanted a cleaner, more polished look).
+     * A tome laid open: the book and the Mana it has to work with across the top; the spells as a grid of cards, each
+     * marked with its element's colour and tier, the one chosen raised in gold; what is not yet learned a dim locked card;
+     * and down the right, the chosen spell written out in full - cost, strength, what it does.
+     */
     static final class Magic extends Panel {
         Magic(Hud h) { super("magic", 868, 440); }
+        static int element(Spells.Element e) {
+            return switch (e) { case FIRE -> 0xFFE0703A; case WATER -> 0xFF4A9AE0; case EARTH -> 0xFFA88050; case AIR -> 0xFFC8E0E8; case ICE -> 0xFF9AD8F0;
+                case ELECTRIC -> 0xFFE8E070; case BLOOD -> 0xFFC03A4A; default -> 0xFFB090E0; };
+        }
         @Override public void draw(Ui2D ui, float x, float y) {
             Rpg g = hud.g;
             Player p = g.player;
-            // the open spellbook (GDD 2.5: one at a time, changed at an altar) and its eleven slots
-            title(ui, p.book.title + " spellbook", x, y, 420);
-            ui.text(String.format("Mana %.0f / %.0f  -  a point a minute", p.mana, p.maxMana()), x + 230, y + 3, 11, Style.MANA);
-            ui.text(p.book.about + " Click to select; R (or a staff) casts. Change books at an altar.", x, y + 20, 10, Style.FAINT);
-            float yy = y + 40;
-            // the book's spells in the order they open, two to a row (Sun has thirty); what is not yet earned shows as ???
+            // the tome's page: a deep violet wash over the frame, ruled
+            ui.rect(x - 6, y - 4, 880, 446, 0x30281A40);
+            ui.text(ui.heading, p.book.title + " Spellbook", x, y - 6, 26, 0xFFD8C8FF);
+            ui.text(p.book.about, x, y + 24, 11, Style.FAINT);
+            // the Mana: a jewelled bar
+            float mx = x + 470, mw = 380;
+            ui.text("Mana", mx, y - 2, 12, Style.MANA);
+            ui.text(String.format("%.0f / %.0f", p.mana, p.maxMana()), mx + mw - 64, y - 2, 12, Style.TEXT);
+            Style.well(ui, mx, y + 14, mw, 10);
+            Style.bar(ui, mx + 1, y + 15, mw - 2, 8, p.mana / Math.max(1, p.maxMana()), Style.MANA);
+            Style.rule(ui, x, y + 40, 852);
             java.util.List<Spells.Spell> spells = Spells.book(p.book);
             int magic = p.skills.level(Skill.MAGIC);
+            float cw = 140, ch = 46, gx = x, gy = y + 50;
+            int cols = 4;
+            Spells.Spell shown = p.spell;
             for (int i = 0; i < spells.size(); i++) {
                 Spells.Spell s = spells.get(i);
-                float sx = x + (i % 2) * 212, sy = yy + (i / 2) * 26;
-                boolean lvl = magic >= s.level, sel = p.spell == s;
-                if (Style.tab(ui, "", sx, sy, 208, 24, sel) && live) { if (lvl) { p.spell = s; hud.sound("UI_select", 0.4f); } else g.chat.warn("You need Magic level " + s.level + "."); }
-                ui.img("Magic_Icon", sx + 3, sy + 4, 16, lvl ? 0xFFFFFFFF : 0x40FFFFFF);
-                if (!lvl) { ui.text("Level " + s.level + "  -  ???", sx + 24, sy + 6, 11, Style.FAINT); continue; }
-                ui.text(s.title, sx + 24, sy + 1, 11, Style.TEXT);
-                int cost = g.combat.cost(p, s);
-                String hit = s.utility ? "" : "  -  hits " + (int) s.maxBase(magic);
-                ui.text(cost + " Mana" + hit, sx + 24, sy + 13, 9, cost < s.cost ? Style.GOOD : Style.DIM);
-                if (ui.hover(sx, sy, 208, 24)) hud.tooltip(s.title + " (Magic " + s.level + ")\n" + s.effect + (s.tier != null ? "\nEvery " + s.tier.title + " you know hits as hard as the strongest you have learned." : "")
-                        + (cost < s.cost ? "\nYour staff makes it cheap to cast." : ""));
+                float sx = gx + (i % cols) * (cw + 4), sy = gy + (i / cols) * (ch + 4);
+                boolean known = magic >= s.level, sel = p.spell == s, hv = ui.hover(sx, sy, cw, ch);
+                int el = element(s.element);
+                ui.rect(sx, sy, cw, ch, sel ? 0xFF3A2C4A : hv ? 0xFF2C2236 : 0xFF1E1826);
+                ui.border(sx, sy, cw, ch, 1, sel ? Style.GOLD : hv ? 0xFF6A5A80 : 0xFF0C0A10);
+                if (sel) ui.rect(sx + 1, sy + 1, cw - 2, 1, 0x90E0BC6C);
+                // the element's gem
+                ui.disc(sx + 17, sy + ch / 2, 11, known ? Style.fade(el, 0.35f) : 0x20FFFFFF);
+                ui.img("Magic_Icon", sx + 7, sy + ch / 2 - 10, 20, known ? 0xFFFFFFFF : 0x30FFFFFF);
+                if (!known) {
+                    ui.text(s.title.replaceAll("[A-Za-z]", "?"), sx + 34, sy + 8, 11, Style.FAINT);
+                    ui.text("Magic " + s.level, sx + 34, sy + 25, 10, 0xFF6A5A70);
+                } else {
+                    ui.text(s.title, sx + 34, sy + 7, 12, sel ? 0xFFFFE8B0 : Style.TEXT);
+                    int cost = g.combat.cost(p, s);
+                    ui.text(cost + " mana" + (s.tier != null ? "  " + s.tier.title : ""), sx + 34, sy + 25, 10, cost < s.cost ? Style.GOOD : Style.fade(el, 0.9f));
+                }
+                if (hv) shown = s;
+                if (hv && live && ui.clicked(sx, sy, cw, ch)) { if (known) { p.spell = s; hud.sound("UI_select", 0.4f); } else g.chat.warn("You need Magic level " + s.level + "."); }
             }
-            // the prayers: toggled; each drains a point of Faith per interval while it is raised
-            title(ui, "Prayers", x + 448, y, 420);
-            ui.text(String.format("Faith %.0f / %.0f  -  a point every %.1f s for each prayer", p.faith, p.maxFaith(), rpg.combat.Prayers.interval(p)), x + 548, y + 3, 11, Style.FAITH);
-            yy = y + 28;
-            for (Spells.Prayer b : Spells.Prayer.values()) {
-                boolean lvl = p.skills.level(Skill.FAITH) >= b.level, on = g.prayers.on(p, b);
-                if (Style.tab(ui, "", x + 448, yy, 420, 36, on) && live) { if (lvl) g.combat.bless(p, b); else g.chat.warn("You need Faith level " + b.level + "."); }
-                ui.img("Faith_Icon", x + 452, yy + 6, 22, lvl ? (on ? 0xFFFFFFFF : 0xC0FFFFFF) : 0x40FFFFFF);
-                if (!lvl) { ui.text("Level " + b.level + "  -  ???", x + 482, yy + 10, 12, Style.FAINT); yy += 39; continue; }
-                ui.text(b.title + (on ? "  (raised)" : ""), x + 482, yy + 2, 13, on ? Style.FAITH : Style.TEXT);
-                ui.text("level " + b.level + (b.category == Spells.Category.OVERHEAD ? "  -  overhead: one at a time" : ""), x + 482, yy + 19, 10, Style.DIM);
-                if (ui.hover(x + 448, yy, 420, 36)) hud.tooltip(b.title + "\n" + b.effect);
-                yy += 39;
+            // the chosen (or pointed-at) spell, written out
+            float dx = x + 4 * (cw + 4) + 6, dy = gy, dw = 852 - 4 * (cw + 4) - 6;
+            ui.rect(dx, dy, dw, 380, 0x40000000);
+            ui.border(dx, dy, dw, 380, 1, 0x40B090E0);
+            if (shown != null) {
+                boolean known = magic >= shown.level;
+                int el = element(shown.element);
+                ui.disc(dx + dw / 2, dy + 46, 30, Style.fade(el, 0.25f));
+                ui.ring(dx + dw / 2, dy + 46, 30, 2, Style.fade(el, 0.8f));
+                ui.img("Magic_Icon", dx + dw / 2 - 18, dy + 28, 36, known ? 0xFFFFFFFF : 0x40FFFFFF);
+                ui.flatCentered(ui.heading, known ? shown.title : "Unlearned", dx + dw / 2, dy + 84, 20, known ? 0xFFFFE8B0 : Style.FAINT);
+                float ly = dy + 116;
+                String[][] rows = {{"Level", "Magic " + shown.level}, {"Element", shown.element == Spells.Element.NONE ? "None" : shown.element.word().substring(0, 1).toUpperCase() + shown.element.word().substring(1)},
+                        {"Cost", g.combat.cost(p, shown) + " mana"}, {"Strikes for", shown.utility ? "-" : "up to " + (int) shown.maxBase(magic)}};
+                for (String[] r : rows) { ui.text(r[0], dx + 14, ly, 12, Style.DIM); ui.text(r[1], dx + 110, ly, 12, Style.TEXT); ly += 20; }
+                Style.rule(ui, dx + 10, ly + 4, dw - 20);
+                ly += 14;
+                for (String l : HudFragments.wrap(ui, known ? shown.effect : "Not yet learned. It opens at Magic level " + shown.level + ".", 12, dw - 28)) { ui.text(l, dx + 14, ly, 12, 0xFFC8B8E0); ly += 16; }
+                if (shown.tier != null && known) { ly += 6; for (String l : HudFragments.wrap(ui, "Every " + shown.tier.title + " you know hits as hard as the strongest you have learned.", 11, dw - 28)) { ui.text(l, dx + 14, ly, 11, Style.FAINT); ly += 14; } }
             }
+            ui.text("Click a spell to ready it; R (or a staff) casts it. Change books at an altar.", x, y + 428, 11, Style.FAINT);
+        }
+    }
+
+    // ------------------------------------------------------------------ faith: the prayers
+    /**
+     * Faith (gamefixes: the prayers have their own tab, with a religious feel): an altar page in ivory and gold. A sun
+     * with a halo crowns it and the Faith left to give is its light; each prayer is a votive tablet with a candle that
+     * burns while the prayer is raised; the overhead protections (one at a time) stand apart from the blessings.
+     */
+    static final class Faith extends Panel {
+        Faith(Hud h) { super("faith", 868, 440); }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            Rpg g = hud.g;
+            Player p = g.player;
+            float cx = x + 434;
+            // the altar page: warm light falling from the top
+            for (int i = 0; i < 12; i++) ui.rect(x - 6, y - 4 + i * 12, 880, 12, Style.fade(0xFFF0D890, 0.11f - i * 0.009f));
+            // the sun and its halo; its rays as long as the Faith that is left
+            float share = p.faith / Math.max(1, p.maxFaith());
+            for (int r = 0; r < 16; r++) {
+                double a = r / 16.0 * Math.PI * 2 + g.time * 0.05;
+                float len = 6 + 12 * share * (r % 2 == 0 ? 1 : 0.6f);
+                ui.line(cx + (float) Math.cos(a) * 20, y + 34 + (float) Math.sin(a) * 20, cx + (float) Math.cos(a) * (20 + len), y + 34 + (float) Math.sin(a) * (20 + len), 2, Style.fade(0xFFF2D27A, 0.35f + 0.5f * share));
+            }
+            ui.disc(cx, y + 34, 18, 0xFFF4DC8A);
+            ui.ring(cx, y + 34, 18, 2, 0xFFB8862E);
+            ui.ring(cx, y + 34, 26, 1, 0x80F4DC8A);
+            ui.img("Faith_Icon", cx - 12, y + 22, 24, 0xFF6A4A1A);
+            ui.flatCentered(ui.heading, "Faith", cx - 230, y + 4, 30, 0xFFF4DC8A);
+            ui.flatCentered("\"Light before me, light behind me.\"", cx - 230, y + 40, 12, 0xFFC8B48A);
+            ui.text("Faith", cx + 90, y + 6, 12, Style.FAITH);
+            ui.text(String.format("%.0f / %.0f", p.faith, p.maxFaith()), cx + 330, y + 6, 12, Style.TEXT);
+            Style.well(ui, cx + 90, y + 22, 300, 10);
+            Style.bar(ui, cx + 91, y + 23, 298, 8, share, 0xFFE8C860);
+            ui.text(String.format("each raised prayer draws a point every %.1f s", rpg.combat.Prayers.interval(p)), cx + 90, y + 38, 10, Style.FAINT);
+            Style.rule(ui, x, y + 76, 852);
+            // the prayers: the overhead protections first, then the blessings
+            float ty = y + 104;
+            int col = 0; float colY[] = {ty, ty};
+            for (Spells.Category cat : new Spells.Category[]{Spells.Category.OVERHEAD, null}) {
+                for (Spells.Prayer b : Spells.Prayer.values()) {
+                    boolean overhead = b.category == Spells.Category.OVERHEAD;
+                    if ((cat == Spells.Category.OVERHEAD) != overhead) continue;
+                    int c = overhead ? 0 : 1;
+                    float bx = x + c * 430, by = colY[c];
+                    boolean lvl = p.skills.level(Skill.FAITH) >= b.level, on = g.prayers.on(p, b), hv = ui.hover(bx, by, 422, 40);
+                    // the tablet: ivory stone, gold-edged when raised
+                    ui.rect(bx, by, 422, 40, on ? 0xFF4A3A20 : hv ? 0xFF332A1E : 0xFF241E16);
+                    ui.border(bx, by, 422, 40, 1, on ? 0xFFF2C24A : hv ? 0xFF8A7040 : 0xFF100C08);
+                    if (on) { ui.rect(bx + 1, by + 1, 420, 1, 0xA0F4DC8A); ui.rect(bx, by, 422, 40, 0x18F4DC8A); }
+                    // the candle: lit while raised
+                    float kx = bx + 18, ky = by + 30;
+                    ui.rect(kx - 3, ky - 14, 6, 14, lvl ? 0xFFEDE3CC : 0x40EDE3CC);
+                    if (on) { float fl = 1 + 0.15f * (float) Math.sin(g.time * 12 + b.ordinal()); ui.disc(kx, ky - 19, 5 * fl, 0x60FFC860); ui.disc(kx, ky - 19, 2.6f * fl, 0xFFFFE6A0); }
+                    else ui.line(kx, ky - 14, kx, ky - 17, 1, 0x80302820);
+                    ui.img("Faith_Icon", bx + 32, by + 9, 22, lvl ? (on ? 0xFFFFFFFF : 0xC0FFFFFF) : 0x30FFFFFF);
+                    if (!lvl) { ui.text("Faith " + b.level + "  -  not yet granted", bx + 62, by + 12, 12, Style.FAINT); }
+                    else {
+                        ui.text(b.title, bx + 62, by + 4, 14, on ? 0xFFF4DC8A : Style.TEXT);
+                        ui.text(on ? "raised" : overhead ? "protection  -  one at a time" : "blessing", bx + 62, by + 22, 10, on ? Style.FAITH : Style.DIM);
+                    }
+                    if (hv) hud.tooltip(b.title + " (Faith " + b.level + ")\n" + b.effect);
+                    if (hv && live && ui.clicked(bx, by, 422, 40)) { if (lvl) g.combat.bless(p, b); else g.chat.warn("You need Faith level " + b.level + "."); }
+                    colY[c] += 44;
+                }
+            }
+            ui.text("Protections", x + 2, y + 84, 12, 0xFFC8A860);
+            ui.text("Blessings", x + 432, y + 84, 12, 0xFFC8A860);
         }
     }
 

@@ -32,6 +32,7 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public final class Main {
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> crashLog(e, null));
         boolean acceptance = false, hidden = false, gallery = false, female = false;
         bench = false;
         String shots = null;
@@ -127,7 +128,7 @@ public final class Main {
         Input in = win.input;
         Gfx.Preview preview = new Gfx.Preview();
         long dungeon = rpg.world.TitleStage.build(game.engine());
-        preview.world = dungeon; preview.dungeon = true; preview.x = 8.5f; preview.y = DevMap.FLOOR; preview.z = 8.5f;
+        preview.world = dungeon; preview.dungeon = true; preview.x = rpg.world.TitleStage.STAND_X; preview.y = DevMap.FLOOR; preview.z = rpg.world.TitleStage.STAND_Z;
         long last = System.nanoTime();
         win.setCursorLocked(false);
         rpg.audio.Music music = new rpg.audio.Music(game);
@@ -136,7 +137,7 @@ public final class Main {
         TitleScreen title = new TitleScreen(VERSION);
         title.sound = n -> { var sfx = rpg.audio.Sfx.ready(game); if (sfx != null) sfx.ui(n, 0.5f); };
         Gfx.Preview stage = new Gfx.Preview();
-        stage.world = dungeon; stage.dungeon = true; stage.x = 8.5f; stage.y = DevMap.FLOOR; stage.z = 8.5f;
+        stage.world = dungeon; stage.dungeon = true; stage.x = rpg.world.TitleStage.STAND_X; stage.y = DevMap.FLOOR; stage.z = rpg.world.TitleStage.STAND_Z;
         rpg.ui.SettingsPanel menuSettings = new rpg.ui.SettingsPanel(Preferences.load(java.nio.file.Path.of("saves", "preferences.json")), p -> {
             gfx.menuPreferences = p; p.mix(game.commands()); win.setFullscreen(p.fullscreen); win.setVsync(p.vsync);
         }, true);
@@ -220,7 +221,6 @@ public final class Main {
             music.update(rpg.audio.Music.Mood.MENU, dt);
             music.updateStingers(dt);
             game.tick(dt);
-            creator.spin(dt);
             preview.focus = creator.focus; preview.aim = creator.aim; preview.zoom = creator.zoom;
             gfx.creator(preview, creator.look, creator.turn, win.width, win.height, dt, game.time());
             ui.begin(gfx.cmd);
@@ -294,6 +294,9 @@ public final class Main {
             it.sneak = !typing && !turnLatch && (preferences.toggleCrouch ? crouchToggle : preferences.down(in, Preferences.Action.CROUCH));
             if (preferences.toggleSprint) it.sprint = !typing && sprintToggle;
             it.jogToggle = !typing && in.keyPressed(GLFW_KEY_CAPS_LOCK);
+            // (0.2.2) F held a moment: sheathe or draw (a tap does nothing, so a stray press never bares a blade in town)
+            if (!typing && preferences.down(in, Preferences.Action.SHEATHE)) { sheatheHeld += dt; if (sheatheHeld >= 0.3f && !sheatheFired) { it.sheathe = true; sheatheFired = true; } }
+            else { sheatheHeld = 0; sheatheFired = false; }
             it.jump = !typing && preferences.pressed(in, Preferences.Action.JUMP);
             it.jumpHeld = !typing && preferences.down(in, Preferences.Action.JUMP);
             it.dodge = !typing && preferences.pressed(in, Preferences.Action.DODGE);
@@ -323,6 +326,7 @@ public final class Main {
                 if (in.keyPressed(GLFW_KEY_J)) hud.toggle(Hud.Scene.JOURNAL);
                 if (preferences.pressed(in, Preferences.Action.MAP)) hud.toggle(Hud.Scene.MAP);
                 if (in.keyPressed(GLFW_KEY_B)) hud.toggle(Hud.Scene.MAGIC);
+                if (in.keyPressed(GLFW_KEY_P)) hud.toggle(Hud.Scene.FAITH);
             }
             // E: a tap is the primary action, a hold opens every option
             if (!typing && preferences.pressed(in, Preferences.Action.INTERACT)) { eHeld = g.time; eMenuOpened = false; }
@@ -373,9 +377,18 @@ public final class Main {
             music.updateStingers(dt);
             // host_timescale: the world's clock runs faster or slower; the interface keeps the wall clock
             float worldDt = Math.min(0.1f, dt * Math.max(0.05f, Math.min(10f, hud.console.f("timescale"))) * g.death.timeScale());
-            if (paused) { it.clearEdges(); if (!game.pump()) break; }
-            else if (!game.tick(worldDt)) break;
-            drawGame(g, gfx, ui, hud, win.width, win.height, dt, free, paused);
+            // (0.2.2, gamefixes: a crash punching a bandit, not reproducible here) a fault inside one frame is written to
+            // saves/crash-*.txt with its stack and the frame goes on; only a fault that repeats every frame ends the game
+            try {
+                if (paused) { it.clearEdges(); if (!game.pump()) break; }
+                else if (!game.tick(worldDt)) break;
+                drawGame(g, gfx, ui, hud, win.width, win.height, dt, free, paused);
+                faultsInARow = 0;
+            } catch (RuntimeException fault) {
+                crashLog(fault, g);
+                if (++faultsInARow > 30) throw fault;
+                if (faultsInARow == 1) g.chat.add("Something went wrong (logged to saves/crash-*.txt).", Chat.Kind.WARN);
+            }
             if (shotNext) { shotNext = false; shot(gfx, win.width, win.height, new File("shots", "shot-" + System.currentTimeMillis() + ".png")); }
             win.swap();
             // fps_max: the console's frame cap (0: none but the monitor's)
@@ -383,6 +396,29 @@ public final class Main {
             if (cap >= 10) { long until = frameStart + (long) (1e9 / cap); while (System.nanoTime() < until) Thread.onSpinWait(); }
             in.endFrame();
         }
+    }
+
+    private static int faultsInARow;
+    private static float sheatheHeld;
+    private static boolean sheatheFired;
+    private static String lastFault = "";
+
+    /** Writes a fault, with where the player stood and what they were doing, to saves/crash-<time>.txt (once per kind). */
+    static void crashLog(Throwable fault, Rpg g) {
+        java.io.StringWriter w = new java.io.StringWriter();
+        fault.printStackTrace(new java.io.PrintWriter(w));
+        String trace = w.toString();
+        System.err.println(trace);
+        String key = trace.lines().limit(3).reduce("", String::concat);
+        if (key.equals(lastFault)) return;
+        lastFault = key;
+        try {
+            File dir = new File("saves"); dir.mkdirs();
+            StringBuilder b = new StringBuilder(VERSION + "  " + java.time.LocalDateTime.now() + "%n".formatted());
+            if (g != null && g.player != null) b.append(String.format("player at %.1f, %.1f, %.1f  hp %.1f  phase %s  jurisdiction %s%n", g.player.x, g.player.y, g.player.z, g.player.hp, g.player.cs.phase, rpg.world.DevMap.jurisdiction(g.player.x, g.player.z)));
+            b.append(trace);
+            java.nio.file.Files.writeString(new File(dir, "crash-" + System.currentTimeMillis() + ".txt").toPath(), b.toString());
+        } catch (Exception ignored) { }
     }
 
     static Dialog menu(Window win, Rpg g) {
@@ -399,7 +435,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "0.1.9";
+    public static final String VERSION = "Alpha 0.2.3";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

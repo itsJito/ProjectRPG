@@ -5,6 +5,20 @@ uniform sampler2D uColor, uBloom, uExposure;
 uniform float uBloomStrength, uTime, uDeath, uGrain, uFlash, uVignette, uHurt, uInfection, uSharpen, uBile;
 uniform vec2 uScreen;
 vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+// (0.2.1, gamefixes: the light was harsh and washed out, the greens oversaturated) a gentler shoulder than ACES alone -
+// highlights roll off instead of clipping white - then the grade: saturation eased (greens most), shadows cooled and
+// lifted a touch, highlights warmed, so every hour and weather sits on the same soft, natural base
+vec3 grade(vec3 c) {
+    float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    // greens pull hardest at the eye: where green leads the other two, it is eased back toward the luma
+    float greenLead = clamp((c.g - max(c.r, c.b)) * 4.0, 0.0, 1.0);
+    c = mix(vec3(l), c, 0.9 - 0.14 * greenLead);
+    // split tone: cool, gently lifted shadows; warm highlights
+    float hi = smoothstep(0.35, 0.95, l), lo = 1.0 - smoothstep(0.02, 0.4, l);
+    c *= mix(vec3(1.0), vec3(1.045, 1.0, 0.93), hi);
+    c = mix(c, c * vec3(0.95, 0.99, 1.06) + vec3(0.006, 0.008, 0.014), lo);
+    return c;
+}
 float h21(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void main() {
     vec2 px = 1.0 / uScreen;
@@ -28,7 +42,8 @@ void main() {
     }
     col *= texelFetch(uExposure, ivec2(0), 0).r;
     col += texture(uBloom, vUV).rgb * uBloomStrength;
-    col = aces(col);
+    col = aces(col * 0.92) * 1.02;
+    col = clamp(grade(col), 0.0, 1.0);
     col = pow(col, vec3(1.0 / 2.2));
     vec2 q = vUV - 0.5;
     float vig = dot(q, q);

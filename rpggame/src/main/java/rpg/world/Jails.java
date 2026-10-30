@@ -9,7 +9,10 @@ public final class Jails {
         new Cell(DevMap.ALPHA, 115, 56, 119, 53, 118, 116.5f, 54.5f, 118.5f, 58.5f,
                 new DevMap.Piece("SLAB", 118, 53, 118, 54, 1, 0, 0)),
         new Cell(DevMap.BETA, 36, 119, 39, 121, 38, 37.5f, 120.5f, 38.5f, 116.5f,
-                new DevMap.Piece("SLAB", 38, 120, 38, 121, 1, 2, 0))
+                new DevMap.Piece("SLAB", 38, 120, 38, 121, 1, 2, 0)),
+        // DevPalace's cell, in the back of the basilica behind the praetor's bench (0.2.0)
+        new Cell(DevMap.PALACE, 135, 118, 139, 121, 137, 137.0f, 120.0f, 138.5f, 115.5f,
+                new DevMap.Piece("SLAB", 136, 120, 136, 121, 1, 2, 0))
     };
     public static Cell forJurisdiction(String jurisdiction) {
         for (Cell cell : CELLS) if (cell.jurisdiction.equals(jurisdiction)) return cell;

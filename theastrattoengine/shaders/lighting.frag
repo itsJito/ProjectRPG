@@ -60,7 +60,8 @@ float cascadeShadow(int c, vec3 P, vec3 N, float ndl, float baked) {
     // the penumbra: the gap between blocker and receiver (m) times the spread of the sun's light (a soft sun, wider
     // than the real disc, as the eye reads shadows in a game), in shadow-map texels
     float gap = (s.z - blockers / nb) * uCascadeDepth[c];
-    float width = clamp(gap * 0.035 / texel, 1.0, 12.0);
+    // (0.2.1) a softer sun: the penumbra grows faster with the gap and is never pin-sharp, as the eye reads a sunlit day
+    float width = clamp(gap * 0.06 / texel, 1.6, 14.0);
     // deep inside the umbra (every search sample blocked, a narrow penumbra): no filtering would find light
     if (nb > 8.5 && width < 2.5) return 0.0;
     // a narrow penumbra is resolved by half the taps (the comparison sampler filters each one bilinearly)
@@ -206,7 +207,9 @@ void main() {
     float conf;
     vec3 irr = probeIrradiance(P, N, conf);
     vec3 fallback = skyBase(N) * skyVis * skyVis * 0.5;
-    irr = mix(fallback, irr, conf) + vec3(uAmbientFloor);
+    // (0.2.1, gamefixes: dark hard-edged shadows) the bounce and the sky fill the shade more: the probes' light, a little
+    // stronger and a little cooler where the sun does not reach, so shadow is gently lit, never a black hole
+    irr = (mix(fallback, irr, conf) + vec3(uAmbientFloor)) * vec3(1.22, 1.26, 1.34);
     col += albedo * (1.0 - metal) * irr * occl;
 
     // ---- indirect specular: screen-space reflection where it found one, probe / sky lobe elsewhere

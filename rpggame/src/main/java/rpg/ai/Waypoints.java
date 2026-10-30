@@ -44,6 +44,9 @@ public final class Waypoints {
             float[] in = d.front(d.x + (d.alongXAxis() ? 0 : 2), d.z + (d.alongXAxis() ? 2 : 0)), out = d.front(d.x - (d.alongXAxis() ? 0 : 2), d.z - (d.alongXAxis() ? 2 : 0));
             pts.add(in); pts.add(out);
         }
+        // (0.2.1, gamefixes: NPCs outside DevCity's west wall took the long way round) the openings in the town walls
+        // join the graph as doorways do - a point either side of each gap, linked through it
+        if (vox != null) for (float[] gap : gaps(vox, doors)) { pts.add(new float[]{gap[0], gap[1]}); pts.add(new float[]{gap[2], gap[3]}); }
         P = pts.toArray(new float[0][]);
         DOOR = java.util.Arrays.copyOf(DOOR, P.length);
         for (int i = 0; i < doors.size(); i++) { DOOR[first + 2 * i] = doors.get(i); DOOR[first + 2 * i + 1] = doors.get(i); }
@@ -53,6 +56,50 @@ public final class Waypoints {
             if (j == i || ADJ.get(i).contains(j)) continue;
             if (Math.hypot(P[i][0] - P[j][0], P[i][1] - P[j][1]) < 30 && clear(vox, P[i][0], P[i][1], P[j][0], P[j][1])) link(i, j);
         }
+    }
+    /**
+     * Every gap one to six cells wide (a door-width to a gate) through a wall at least three blocks tall (a gate, an arch, a breach) that a
+     * body can walk through: {x, z} a couple of metres before it and {x, z} as far beyond, for each. Doorways are left
+     * to their doors.
+     */
+    static List<float[]> gaps(Voxels vox, List<rpg.objects.Door> doors) {
+        int f = DevMap.FLOOR;
+        List<float[]> out = new ArrayList<>(), centres = new ArrayList<>();
+        java.util.function.BiPredicate<Integer, Integer> open = (x, z) -> !vox.solid(x, f, z) && !vox.solid(x, f + 1, z) && vox.solid(x, f - 1, z);
+        java.util.function.BiPredicate<Integer, Integer> wall = (x, z) -> vox.solid(x, f, z) && vox.solid(x, f + 1, z) && vox.solid(x, f + 2, z)
+                && vox.block(x, f, z) != rpg.world.Blocks.DOOR && vox.block(x, f, z) != rpg.world.Blocks.LOCKED_DOOR;
+        for (int axis = 0; axis < 2; axis++) {
+            int na = axis == 0 ? DevMap.SZ : DevMap.SX, nb = axis == 0 ? DevMap.SX : DevMap.SZ;
+            for (int a = 3; a < na - 3; a++) for (int b = 3; b < nb - 6; b++) {
+                // along the wall (b), across it (a): x, z for either axis
+                final int A = a, ax = axis;
+                java.util.function.IntFunction<Integer> X = bb -> ax == 0 ? bb : A, Z = bb -> ax == 0 ? A : bb;
+                if (!wall.test(X.apply(b), Z.apply(b)) || !wall.test(X.apply(b - 1), Z.apply(b - 1)) || !open.test(X.apply(b + 1), Z.apply(b + 1))) continue;
+                int e = b + 1;
+                while (e - b <= 6 && open.test(X.apply(e), Z.apply(e))) e++;
+                int w = e - b - 1;
+                if (w < 1 || w > 6 || !wall.test(X.apply(e), Z.apply(e)) || !wall.test(X.apply(e + 1), Z.apply(e + 1))) continue;
+                boolean through = true;
+                // the middle lane walks through: clear a couple of metres either side (a lamp by a gate's edge is no matter)
+                int lane = (b + e) / 2;
+                for (int d : new int[]{-2, -1, 1, 2}) {
+                    int cx = ax == 0 ? lane : a + d, cz = ax == 0 ? a + d : lane;
+                    if (!open.test(cx, cz)) { through = false; break; }
+                }
+                if (!through) continue;
+                float mid = (b + 1 + e) / 2f, cx = ax == 0 ? mid : a + 0.5f, cz = ax == 0 ? a + 0.5f : mid;
+                boolean known = false;
+                for (float[] c : centres) if (Math.hypot(c[0] - cx, c[1] - cz) < 2) { known = true; break; }
+                for (rpg.objects.Door d : doors) if (Math.hypot(d.x - cx, d.z - cz) < 2) { known = true; break; }
+                if (known) continue;
+                // the openings of towns' walls only: a gap in a wild camp's palisade is no road, and a waypoint there drew
+                // every creature fighting near it through the one point
+                if (DevMap.WILDS.equals(DevMap.jurisdiction(cx, cz)) && DevMap.WILDS.equals(DevMap.jurisdiction(cx + (ax == 0 ? 0 : 2), cz + (ax == 0 ? 2 : 0))) && DevMap.WILDS.equals(DevMap.jurisdiction(cx - (ax == 0 ? 0 : 2), cz - (ax == 0 ? 2 : 0)))) continue;
+                centres.add(new float[]{cx, cz});
+                out.add(ax == 0 ? new float[]{cx, cz - 2, cx, cz + 2} : new float[]{cx - 2, cz, cx + 2, cz});
+            }
+        }
+        return out;
     }
     private static void link(int a, int b) { if (!ADJ.get(a).contains(b)) { ADJ.get(a).add(b); ADJ.get(b).add(a); } }
 

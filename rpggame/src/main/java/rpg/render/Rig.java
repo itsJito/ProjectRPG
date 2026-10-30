@@ -46,6 +46,8 @@ public final class Rig {
         /** How far into the side-on archer's stance the body has turned (0..1). */
         float aimSide;
         float headYaw, bowRaise, guardRaise, crouchBlend;
+        /** The bow: how drawn it was last frame, when it was loosed, how long it has been held at full draw. */
+        float lastDraw, heldFull; double loosedAt = -9;
         final float[] armSwing = new float[2];
         /** The body's velocity as the eye reads it: the mover's own flickers from one physics step to the next, and a
          *  figure driven by it raw twitches - its steps aim at a target that jumps, its lean at a spike of acceleration. */
@@ -247,7 +249,9 @@ public final class Rig {
         // carried through at knee height
         // (0.1.8: the heel comes up high and early at a run - the trailing leg trailed low and straight, so every stride
         // read as a lunge)
-        float lift = (1.3f + 4.6f * runF + 2.6f * sprintF) * Math.max(0.55f, st.amp);
+        // (0.2.0, gamefixes: the sprint still bounded - the trailing leg kicked out straight and low) a sprinter's heel
+        // comes right up under the seat as the foot leaves the ground and is carried through high and tight, not trailed
+        float lift = (1.3f + 4.6f * runF + 6.0f * sprintF) * Math.max(0.55f, st.amp);
         float sd = Math.max(1e-3f, speed), tdx = vx / sd, tdz = vz / sd;
         for (int k = 0; k < 2; k++) {
             float wx, wy, wz;
@@ -255,8 +259,8 @@ public final class Rig {
             else {
                 float t = st.swing[k], e = t * t * (3 - 2 * t);
                 // running, the foot stays back a moment as the heel kicks up, then swings through fast
-                float er = (float) Math.pow(e, 1 + 0.6f * runF);
-                float kick = runF * (2.2f + 1.5f * sprintF) * Body.PX * (float) Math.sin(Math.PI * Math.min(1, t * 1.7f)) * (1 - t);
+                float er = (float) Math.pow(e, 1 + 0.6f * runF - 0.45f * sprintF);
+                float kick = runF * (2.2f - 1.4f * sprintF) * Body.PX * (float) Math.sin(Math.PI * Math.min(1, t * 1.7f)) * (1 - t);
                 wx = st.from[k][0] + (st.to[k][0] - st.from[k][0]) * er - tdx * kick;
                 wz = st.from[k][2] + (st.to[k][2] - st.from[k][2]) * er - tdz * kick;
                 float arc = (float) Math.sin(Math.PI * Math.pow(t, 1 - 0.55f * runF));
@@ -276,7 +280,12 @@ public final class Rig {
         }
         st.crouchBlend += ((a.sneaking || a.crouched ? 1 : 0) - st.crouchBlend) * (1 - (float) Math.exp(-16 * dt));
         crouch += SNEAK_CROUCH * st.crouchBlend;
-        extraLean += 0.65f * st.crouchBlend;
+        // (0.2.0, gamefixes: sneaking looked wrong - folded flat with the head thrust out) a sneak is knees bent and hips
+        // down, the back leaning in a little, the head held level and watchful
+        extraLean += 0.36f * st.crouchBlend;
+        // (0.2.1) handed back from a get-up part-way (Reactions' rising): from the kneel to full height over half a second
+        float rise = (float) (time - a.riseAt);
+        if (rise >= 0 && rise < 0.5f) { float k = 1 - rise / 0.5f; k = k * k * (3 - 2 * k); crouch += 10 * k; extraLean += 0.4f * k; }
         float looting = a instanceof rpg.ai.Npc npc && (npc.goal == rpg.ai.Brain.Goal.LOOT || npc.goal == rpg.ai.Brain.Goal.AID || npc.goal == rpg.ai.Brain.Goal.WORK && npc.role == rpg.ai.Npc.Role.HUNTER) && time < npc.lootUntil
                 ? Math.max(0, Math.min(1, Math.min((float) (time - npc.lootStarted) / 0.25f, (float) (npc.lootUntil - time) / 0.2f))) : 0;
         if (a.traversal != null) extraLean += 0.38f * (float) Math.sin(Math.PI * a.traversal.progress);
@@ -303,6 +312,16 @@ public final class Rig {
         if (c.staggered > 0) { float k = Math.min(1, c.staggered / 0.4f); extraLean -= 0.32f * k; extraTwist += 0.25f * k * (float) Math.sin(time * 9 + a.id); crouch += 1.2f * k; }
         extraLean -= 0.14f * c.flash;
         if (c.blocking) { extraLean += 0.06f; extraTwist -= 0.16f; crouch += 0.8f; }
+        // (0.2.2, gamefixes: the walk and run change with the injury) the hurt are drawn hurt, by where they are hurt: a
+        // body wound hunches them over it, a head wound tips the head and sets the walk wavering, an arm hangs or is
+        // held to the body, a leg limps (below, in the hips); the player's pace is not touched by any of it
+        float[] inj = a.injury;
+        float hurtHead = inj == null ? 0 : clamp01(inj[0] * 1.6f), hurtBody = inj == null ? 0 : clamp01(inj[1] * 1.6f);
+        float hurtArmR = inj == null ? 0 : clamp01(inj[2] * 1.8f), hurtArmL = inj == null ? 0 : clamp01(inj[3] * 1.8f);
+        float hurtLegR = inj == null ? 0 : clamp01(inj[4] * 1.8f), hurtLegL = inj == null ? 0 : clamp01(inj[5] * 1.8f);
+        extraLean += 0.22f * hurtBody + 0.05f * hurtHead;
+        crouch += 1.2f * hurtBody;
+        roll += 0.06f * hurtHead * (float) Math.sin(time * 1.3 + a.id) + 0.05f * (hurtLegR - hurtLegL);
         Move mv = c.move;
         float strike = strikeS(c);
         float strikeW = strikeWeight(c);
@@ -329,12 +348,15 @@ public final class Rig {
 
         if (a.traversal != null) {
             var motion = a.traversal; var anchor = motion.anchor;
-            float wallWeight = clamp((motion.progress - motion.reachEnd * 0.5f) / (motion.reachEnd * 0.5f), 0, 1) * clamp((motion.hangEnd + 0.08f - motion.progress) / 0.08f, 0, 1);
+            float wallWeight = anchor.vault()
+                    ? clamp((motion.progress - motion.reachEnd) / 0.08f, 0, 1) * clamp((motion.mantleEnd + 0.06f - motion.progress) / 0.12f, 0, 1)
+                    : clamp((motion.progress - motion.reachEnd * 0.5f) / (motion.reachEnd * 0.5f), 0, 1) * clamp((motion.hangEnd + 0.08f - motion.progress) / 0.08f, 0, 1);
             float landingWeight = clamp((motion.progress - motion.mantleEnd) / (1 - motion.mantleEnd), 0, 1);
             for (int k = 0; k < 2; k++) {
                 float side = (k == 0 ? 1 : -1) * hipX * Body.PX;
-                float[] wallFoot = toFigure(a, anchor.handX() + anchor.nx() * 0.07f + rx * side, anchor.top() - a.height * 0.75f, anchor.handZ() + anchor.nz() * 0.07f + rz * side);
-                float[] landing = toFigure(a, anchor.landX() + rx * side, anchor.top() + 0.03f, anchor.landZ() + rz * side);
+                // a vault tucks the feet up level with the top as the body goes over; a climb sets them against the wall
+                float[] wallFoot = toFigure(a, anchor.handX() + anchor.nx() * 0.07f + rx * side, anchor.vault() ? anchor.top() + 0.06f : anchor.top() - a.height * 0.75f, anchor.handZ() + anchor.nz() * 0.07f + rz * side);
+                float[] landing = toFigure(a, anchor.landX() + rx * side, anchor.landY(), anchor.landZ() + rz * side);
                 foot[k] = lerp(lerp(foot[k], wallFoot, wallWeight), landing, landingWeight);
             }
         }
@@ -355,14 +377,18 @@ public final class Rig {
         }
         // the weight goes over the standing foot
         if (planted == 1) sway = st.stance[0] ? 0.55f : -0.55f;
+        // a limp: the weight comes down hard and short on a hurt leg - the hips drop and lurch over it
+        if (planted == 1 && walking) { float limp = st.stance[0] ? hurtLegR : hurtLegL; want -= limp * 1.6f * st.amp; sway *= 1 + limp * 0.8f; }
         sway *= (1 - runF * 0.6f);
         st.sway += (sway * Math.min(1, st.amp + 0.3f) - st.sway) * Math.min(1, dt * 7);
         // the pendulum rides down between the feet only so far: a stride is not a lunge
         if (grounded && (runF < 0.5f || !walking)) want = Math.max(want, hipFloor);
         // nor is a run: the reaching leg straightens toward a long stride rather than dragging the hips down into a lunge
         // (0.1.8: the jog and sprint were run crouched low, every stride a lunge)
-        else if (grounded) want = Math.max(want, b.hipY() - 0.35f - strideBend - 0.9f);
-        want -= st.land * 2.6f + crouch + runF * 0.25f;
+        // (0.2.1) and higher still: a run is carried tall, the dip between footfalls a pixel, not two
+        // (0.2.3) a run is carried taller again: hips a pixel under standing, the knees soft, not sat into
+        else if (grounded) want = Math.max(want, b.hipY() - 0.35f - strideBend * 0.3f - 0.05f * (1 - sprintF) - 0.25f * sprintF);
+        want -= st.land * 2.6f + crouch + runF * 0.05f;
         if (!grounded) want = b.hipY();
         if (st.hipH < 0) st.hipH = want;
         // Exact critically damped response for this frame's target. Explicit Euler integration
@@ -378,7 +404,17 @@ public final class Rig {
         // ---- the torso: lean with speed and acceleration, roll into turns, counter-turn against the stride, breathe
         float stride = (footFwd[0] - footFwd[1]) / Math.max(1, legLen * 0.6f);   // + right foot ahead
         float gaitTwist = (0.1f + 0.05f * runF) * clamp(stride, -1.2f, 1.2f) * st.amp;
-        float lean = (0.03f + 0.11f * runF + 0.1f * sprintF) * st.amp * -st.dz + st.accLean + extraLean + 0.012f * (float) Math.sin(time * 1.7 + a.id);
+        float lean = (0.03f + 0.06f * runF + 0.12f * sprintF) * st.amp * -st.dz + st.accLean + extraLean + 0.012f * (float) Math.sin(time * 1.7 + a.id);
+        // (0.2.3, gamefixes: the sheathe 2/10) the body takes part: the shoulders turn toward the sheath and dip to it as
+        // the hand goes there, and come back round with the draw
+        float shS = (float) ((time - a.sheatheAt) / Actor.SHEATHE_TIME);
+        if (shS >= 0 && shS < 1 && a.sheathable()) {
+            float bodyIn = (float) Math.sin(Math.PI * clamp01(shS));
+            boolean hip = a.main() != null && !a.main().twoHanded() && a.main().family != Family.BOW && a.main().family != Family.CROSSBOW
+                    && a.main().family != Family.STAFF && a.main().family != Family.SPEAR && a.main().family != Family.HALBERD;
+            extraTwist += (hip ? 0.28f : -0.16f) * bodyIn;
+            lean += (hip ? 0.1f : 0.04f) * bodyIn;
+        }
         float twist = gaitTwist + extraTwist + sideTurn;
         float[] tm = seg[CharModel.Seg.TORSO.ordinal()];
         identity(tm);
@@ -410,21 +446,39 @@ public final class Rig {
             float[] d = sub(target, hip);
             float dd = len(d);
             if (dd > legLen - 0.02f) target = add(hip, d, (legLen - 0.02f) / dd);   // out of reach: the leg straight toward it
-            // the knee points along the foot's own heading, which leads the hips a little in a turn
-            float[] pole = norm(new float[]{side * 0.12f + sn * -1, 0.05f, -cs});
+            // the knee points along the foot's own heading, which leads the hips a little in a turn - and down: (0.2.1) a heel
+            // kicked up behind left the leg's line nearly opposite a level pole, so only its small outward lean survived the
+            // projection and the knee swung out to the side as a sprint braked (SprintStopTest)
+            float[] pole = norm(new float[]{side * 0.06f + sn * -1, -0.6f, -cs});
             float[] knee = ik(hip, target, L_LEG1, L_LEG2, pole);
             float[] right = {cs, 0, -sn};
             bone(seg[(k == 0 ? CharModel.Seg.R_LEG_UP : CharModel.Seg.L_LEG_UP).ordinal()], hip, knee, right);
             bone(seg[(k == 0 ? CharModel.Seg.R_LEG_LO : CharModel.Seg.L_LEG_LO).ordinal()], knee, target, right);
         }
         // ---- the arms
-        ItemDef main = a.main(), off = a.off();
+        // (0.2.2) put away, what is equipped rides on the body and the arms are free; drawing or sheathing, the hand goes
+        // to the item's place on the body and back, the item changing hands with the place halfway
+        boolean inHand = a.inHand(time);
+        ItemDef main = inHand ? a.main() : null, off = inHand ? a.off() : null;
+        float sheathS = (float) ((time - a.sheatheAt) / Actor.SHEATHE_TIME);
+        boolean sheathing = sheathS >= 0 && sheathS < 1 && a.sheathable();
+        boolean bowEquipped = a.main() != null && a.main().family == Family.BOW;
         boolean bow = main != null && main.family == Family.BOW;
         boolean crossbow = main != null && main.family == Family.CROSSBOW;
         st.bowRaise += ((bow && c.draw > 0 ? 1 : 0) - st.bowRaise) * (1 - (float) Math.exp(-18 * dt));
         st.guardRaise += ((c.blocking && main == null && off == null ? 1 : 0) - st.guardRaise) * (1 - (float) Math.exp(-22 * dt));
         float[] aim = {(float) Math.sin(st.headYaw) * -(float) Math.cos(a.pitch), (float) Math.sin(a.pitch), -(float) Math.cos(a.pitch) * (float) Math.cos(st.headYaw)};
-        float[] viewBow = firstPerson && bow ? view(aim, 1f, -1, 3.5f, 10f) : null;
+        // the bow through the eyes (gamefixes: in first person the bow did not move): pushed out toward the target as the
+        // string comes back, trembling a little and then more the longer full draw is held, and jumping forward and down
+        // as the arrow leaves; a little bob with the stride
+        if (bow && st.lastDraw > 0.2f && c.draw <= 0) st.loosedAt = time;
+        st.heldFull = bow && c.draw >= 0.98f ? st.heldFull + dt : Math.max(0, st.heldFull - dt * 3);
+        st.lastDraw = bow ? c.draw : 0;
+        float kick = (float) Math.max(0, 1 - (time - st.loosedAt) / 0.35);
+        float shake = Math.min(1, st.heldFull / 3f) * 0.35f + 0.04f;
+        float swayR = shake * (float) (Math.sin(time * 7.3 + a.id) * 0.6 + Math.sin(time * 13.1) * 0.4);
+        float swayU = shake * (float) (Math.sin(time * 6.1 + 1.3) * 0.6 + Math.sin(time * 11.7) * 0.4) + st.amp * 0.25f * (float) Math.sin(st.phase * Math.PI * 4);
+        float[] viewBow = firstPerson && bow ? view(aim, 1f - c.draw * 0.6f + swayR + kick * 0.4f, -1, 3.5f - c.draw * 0.8f - swayU + kick * 1.2f, 10f + c.draw * 1.6f - kick * 0.8f) : null;
         // aiming from the shoulder in third person (gamefixes: the drawing arm went through the chest): the line of the
         // shot runs past the right cheek - the string is drawn to it, a crossbow's stock is set under it - with 'perp' the
         // aim line's right, so the arms work either side of the body instead of across it
@@ -446,7 +500,11 @@ public final class Rig {
             // Bring camera-view shoulders forward so the fists can rise without exceeding the real arm lengths.
             if (firstPerson && bareGuard) shoulder = lerp(shoulder, view(aim, 6, side, 4, 0), st.guardRaise);
             // the arm swings with the opposite leg; a running arm is bent at the elbow
-            float desiredSwing = (float) Math.tanh((footFwd[1 - k] - footFwd[k]) / Math.max(1, legLen * 0.6f));
+            // (0.2.2, gamefixes: the arms barely swung) the swing is the arm's own pendulum on the stride's clock - not read
+            // off where the feet happen to stand, which a planted foot, a short step or a stop on the spot held still -
+            // so it keeps its full arc through a short stride and eases out as the body comes to rest
+            float armPh = (st.phase + (k == 0 ? 0 : 0.5f)) % 1f;
+            float desiredSwing = walking ? -(float) Math.cos(2 * Math.PI * armPh) : 0;
             st.armSwing[k] += (desiredSwing - st.armSwing[k]) * (1 - (float) Math.exp(-18 * dt));
             float opp = st.armSwing[k];
             float theta = swingAmp * opp;
@@ -455,19 +513,25 @@ public final class Rig {
             // back than forward, and the elbow is held bent - a little at a walk, near a right angle at a run, closing as
             // the arm comes forward - so the hand arcs from beside the hip up to the chest and drifts in toward the
             // body's middle on the forward swing; the hand's place follows from those two angles
-            float fAmp = (0.32f + 0.2f * runF + 0.08f * sprintF) * st.amp, bAmp = (0.32f + 0.42f * runF + 0.16f * sprintF) * st.amp;
+            // (0.2.1) a runner's arms pump: the old run swing (0.5 rad forward) left the forearm parked across the chest
+            // (0.2.3) at a jog the forward swing stops at the ribs, the hand never out past the chest like a guard
+            float fAmp = (0.5f + 0.02f * runF + 0.3f * sprintF) * st.amp, bAmp = (0.46f + 0.4f * runF + 0.2f * sprintF) * st.amp;
             // (taken against the torso's lean, so a sprinter's forward swing stays a forward swing in the world, not a
             // reach up past the chin)
             float phi = (opp >= 0 ? opp * fAmp : opp * bAmp) - lean * 0.8f;
-            float eps = 0.2f + runF * (1.2f + 0.15f * Math.max(0, opp));
+            float eps = 0.2f + runF * (1.0f + 0.1f * Math.max(0, opp) + 0.2f * sprintF);
             float u1 = L_ARM1 * 0.99f, u2 = L_ARM2 * 0.99f;
             float hy = -(u1 * (float) Math.cos(phi) + u2 * (float) Math.cos(phi + eps));
             float hz = -(u1 * (float) Math.sin(phi) + u2 * (float) Math.sin(phi + eps));
-            float hx = side * (0.75f + 0.25f * (1 - runF) - 0.9f * runF * Math.max(0, opp));
+            float hx = side * (0.75f + 0.25f * (1 - runF) - 0.45f * runF * Math.max(0, opp));
             float[] rest = torsoPoint(shoulder, hx, hy, hz);
+            // a hurt arm swings less, and a badly hurt one is held in against the body; so is the hand over a body wound
+            float armHurt = k == 0 ? hurtArmR : hurtArmL;
+            if (holds == null && armHurt > 0) rest = lerp(rest, torsoPoint(shoulder, -side * 1.6f, -7.2f, -3.6f), Math.min(1, armHurt * 1.2f));
+            else if (holds == null && k == 1 && hurtBody > 0.3f) rest = lerp(rest, torsoPoint(shoulder, -side * 2.6f, -6.4f, -3.4f), (hurtBody - 0.3f) * 1.4f);
             if (holds == null) rest = lerp(rest, new float[]{side * (b.shoulderX() + 0.6f), 4.8f, -8.5f + opp * 0.5f}, st.crouchBlend);
             if (holds != null && holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.STAFF)
-                rest = torsoPoint(shoulder, side * 0.5f, -7.4f + 0.6f * (float) Math.cos(theta), -3.8f - 1.25f * (float) Math.sin(theta));
+                rest = torsoPoint(shoulder, side * 0.5f, -7.4f + 1.0f * (float) Math.cos(theta), -3.8f - 3.0f * (float) Math.sin(theta));
             else if (holds != null && holds.family == Family.SHIELD) rest = torsoPoint(shoulder, side * 0.4f, -7.6f, -2.6f);
             // through the eyes: what the hands hold is carried up and out in front, low in the view (the shield at the left,
             // the weapon at the right), swaying with the stride
@@ -488,16 +552,48 @@ public final class Rig {
                 float[] dl2 = toFigureDir(a, gr[3], gr[4], gr[5]);
                 target = lerp(rest, hl, strikeW);
                 dir = norm(lerp(dir, dl2, strikeW));
+            } else if (sheathing && (bowEquipped ? (k == 1 ? a.main() : null) : isMain ? a.main() : a.off()) != null) {
+                ItemDef it = bowEquipped ? a.main() : isMain ? a.main() : a.off();
+                float[][] pl = sheathPlace(it, bowEquipped || isMain, b, a.eq.def(ItemDef.Slot.BACK) != null, a.eq.def(ItemDef.Slot.CAPE) != null);
+                float[] spot = point(tm, pl[0][0], pl[0][1], pl[0][2]);
+                // over the shoulder for the back, across the body for the hip: out from the body a little on the way
+                // (0.2.3) to the sheath by four tenths, the grip held there a beat while the item changes hands, then
+                // away; drawn, the blade comes out up and forward in an arc before it settles; put away, it is lifted
+                // round in that arc first and slid home
+                float sIn = clamp01(sheathS / 0.4f), sOut = clamp01((sheathS - 0.6f) / 0.4f);
+                float reach = sheathS < 0.4f ? sIn * sIn * (3 - 2 * sIn) : sheathS < 0.6f ? 1 : 1 - sOut * sOut * (3 - 2 * sOut);
+                float flourish = a.sheathed ? (float) Math.sin(Math.PI * sIn) * (1 - sIn * 0.3f) : (float) Math.sin(Math.PI * sOut);
+                float clear = (float) Math.sin(Math.PI * clamp01(sheathS)) * 0.5f;
+                spot = add(spot, torsoDir(0, 0, -1), clear * 1.5f);
+                target = add(lerp(rest, spot, reach), torsoDir(0, 0.8f, -0.6f), flourish * 3.2f);
+                dir = norm(lerp(dir, torsoDir(pl[1][0], pl[1][1], pl[1][2]), reach));
             } else if (crossbow && (isMain || off == null)) {
+                // (0.2.2, gamefixes: crossbows in third person) a two-handed weapon held in both hands: carried across the
+                // body at the waist, the trigger hand at the grip and the other under the fore-stock; raised, the stock to
+                // the cheek; loosed, it kicks up and back; then it is tipped down and the string spanned back with the
+                // free hand, and brought up again
                 float raise = firstPerson ? 0.35f + c.aim * 0.65f : c.aim;
+                float spent = clamp01(1 - c.reload / 1.25f), reloading = c.reload > 0 ? 1 : 0;
+                float xkick = c.reload > 0 ? (float) Math.sin(Math.PI * clamp01(spent / 0.12f)) : 0;
+                float span = c.reload > 0 && spent > 0.15f ? (float) Math.sin(Math.PI * clamp01((spent - 0.15f) / 0.8f)) : 0;
+                float[] port = torsoPoint(point(tm, -b.shoulderX(), b.shoulderY() - b.hipY(), 0), 1.2f, -6.8f, -3.4f);
+                float[] portDir = norm(torsoDir(0.5f, 0.35f, -0.8f)), lowDir = norm(torsoDir(0.1f, -0.75f, -0.65f));
                 if (isMain) {
                     // the grip under the cheek, the stock against the shoulder, the bolt on the line of the eye
-                    target = lerp(rest, firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : add(add(add(cheek, aim, 2.6f), new float[]{0, 1, 0}, -2.6f), perp, -1.2f), raise);
-                    dir = norm(lerp(dir, aim, raise));
+                    float[] up = firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : add(add(add(cheek, aim, 2.6f), new float[]{0, 1, 0}, -2.6f), perp, -1.2f);
+                    target = firstPerson ? lerp(rest, up, raise) : lerp(port, up, raise * (1 - span));
+                    dir = firstPerson ? norm(lerp(dir, aim, raise)) : norm(lerp(lerp(portDir, aim, raise), lowDir, span));
+                    target = add(add(target, aim, -1.4f * xkick), new float[]{0, 1, 0}, 0.9f * xkick);
+                    dir = norm(add(dir, new float[]{0, 1, 0}, 0.5f * xkick));
+                    if (!firstPerson && reloading > 0) target = lerp(target, add(port, new float[]{0, 1, 0}, -0.6f), span);
                 } else if (firstPerson) {
                     target = add(add(hand[0], itemDir[0], 2.5f), torsoRight, -0.8f);
                     target = add(target, torsoUp, -0.6f);
-                } else target = lerp(rest, add(add(hand[0], aim, 5.2f), new float[]{0, 1, 0}, -0.6f), Math.max(raise, 0.4f));
+                } else {
+                    // under the fore-stock; spanning, back along the stock to the latch and forward again
+                    float along = 5.2f - 3.6f * span;
+                    target = add(add(hand[0], itemDir[0], along), new float[]{0, 1, 0}, -0.6f + 0.8f * span);
+                }
             } else if (isMain && c.charge > 0 && !bow && a.carryBody == 0) {
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
                 target = lerp(rest, toFigure(a, gr[0], gr[1], gr[2]), c.charge);
@@ -551,8 +647,13 @@ public final class Rig {
             } else if (bow && !isMain && (st.bowRaise > 0.001f || c.blocking)) {
                 // the bow held out to the aim only while it is drawn (carried at rest, the bow hand swings like any other:
                 // held out the whole time, every running stride looked like a punch)
-                target = lerp(rest, viewBow != null ? viewBow : add(shoulder, aim, 8.6f), st.bowRaise);
-                dir = new float[]{0, 1, 0};
+                // (0.2.1, gamefixes: the third-person draw reworked) the bow comes up in an arc from low before the body to
+                // straight out along the line at the shoulder's height - not slid there - and is held canted a little
+                // toward the drawing side, as an archer holds it
+                float up = st.bowRaise * st.bowRaise * (3 - 2 * st.bowRaise), dropAngle = (1 - up) * 0.9f;
+                float[] low = norm(add(aim, new float[]{0, -1, 0}, (float) Math.tan(dropAngle)));
+                target = viewBow != null ? lerp(rest, viewBow, st.bowRaise) : lerp(rest, add(shoulder, low, 8.6f), Math.min(1, st.bowRaise * 1.4f));
+                dir = firstPerson ? new float[]{0, 1, 0} : norm(add(new float[]{0, 1, 0}, perp, 0.22f * up));
             } else if (bow && isMain && st.bowRaise > 0.001f) {
                 float[] bowHand = hand[1];
                 // the string from the bow back to the cheek as the draw comes on (through the eyes: straight back down the line)
@@ -572,8 +673,10 @@ public final class Rig {
             if (firstPerson && bareGuard) pole = norm(new float[]{side * 0.8f, -0.7f, -0.15f});
             // aiming side-on: the drawing elbow back along the line at the shoulder's height, the bow arm's elbow turned
             // down and out of the string's way; a crossbow's elbows down either side of the stock
+            // (0.2.0, gamefixes: the bow's draw looked wrong - the drawing elbow rose over the head) the drawing elbow points
+            // straight back and out at the height of the shoulder, the bow arm's elbow turned down
             if (!firstPerson && bow && st.bowRaise > 0.001f)
-                pole = norm(lerp(pole, isMain ? norm(new float[]{-aim[0] + perp[0] * 0.3f, 0.35f - aim[1], -aim[2] + perp[2] * 0.3f}) : norm(new float[]{-perp[0] * 0.35f, -1, -perp[2] * 0.35f}), st.bowRaise));
+                pole = norm(lerp(pole, isMain ? norm(new float[]{-aim[0] + perp[0] * 0.55f, -0.05f + 0.3f * c.draw - aim[1], -aim[2] + perp[2] * 0.55f}) : norm(new float[]{-perp[0] * 0.35f, -1, -perp[2] * 0.35f}), st.bowRaise));
             else if (!firstPerson && crossbow && c.aim > 0.05f)
                 pole = norm(lerp(pole, isMain ? norm(new float[]{perp[0] * 0.8f, -0.7f, perp[2] * 0.8f}) : norm(new float[]{-perp[0] * 0.4f, -1, -perp[2] * 0.4f}), Math.min(1, c.aim)));
             float[] elbow = ik(shoulder, target, L_ARM1, L_ARM2, pole);
@@ -783,6 +886,27 @@ public final class Rig {
     private float[] torsoPoint(float[] origin, float x, float y, float z) {
         return new float[]{origin[0] + torsoRight[0] * x + torsoUp[0] * y + torsoBack[0] * z, origin[1] + torsoRight[1] * x + torsoUp[1] * y + torsoBack[1] * z,
                 origin[2] + torsoRight[2] * x + torsoUp[2] * y + torsoBack[2] * z};
+    }
+
+    /**
+     * (0.2.2, gamefixes: the sheathe system) Where a put-away item rides, in the torso's frame (figure pixels, +x the
+     * figure's left, +y up from the hips, +z its back): {grip, direction from the grip to the tip, the item's broad side}.
+     * A bow, a crossbow, a staff, a great weapon or a polearm goes across the back, the hilt or the top over the right
+     * shoulder where the right hand finds it; a shield flat on the back; a one-handed weapon at the hip, the main hand's
+     * on the left (drawn across the body), the off hand's on the right behind the pouch. Over a pack or a cape, further out.
+     */
+    static float[][] sheathPlace(ItemDef d, boolean mainHand, Body b, boolean pack, boolean cape) {
+        float back = b.torso[2] * b.depth / 2f + 0.9f + (pack ? 2.6f : 0) + (cape ? 0.4f : 0), w = b.torso[0] * b.girth / 2f, h = b.torso[1];
+        Family f = d.family;
+        if (f == Family.SHIELD) return new float[][]{{0, h * 0.5f, back + 0.3f}, {0, 1, 0}, {-1, 0, 0}};
+        if (f == Family.BOW) return new float[][]{{0, h * 0.55f, back}, norm(new float[]{-0.45f, 0.89f, 0}), {1, 0, 0}};
+        if (f == Family.CROSSBOW) return new float[][]{{-w * 0.2f, h * 0.55f, back + 0.4f}, norm(new float[]{0.35f, -0.94f, 0}), {0, 0, 1}};
+        if (f == Family.STAFF || f == Family.SPEAR || f == Family.HALBERD) return new float[][]{{0, h * 0.45f, back}, norm(new float[]{-0.33f, 0.94f, 0}), {1, 0, 0}};
+        // an axe, a hammer or a club hangs head up (its haft from the left hip to over the right shoulder); a blade hilt up
+        if (d.twoHanded() && (f == Family.AXE || f == Family.WARHAMMER || f == Family.MACE)) return new float[][]{{w * 0.5f, h * 0.2f, back}, norm(new float[]{-0.55f, 0.83f, 0}), {1, 0, 0}};
+        if (d.twoHanded()) return new float[][]{{-w * 0.55f, h * 1.02f, back}, norm(new float[]{0.55f, -0.83f, 0}), {1, 0, 0}};
+        float side = mainHand ? 1 : -1;
+        return new float[][]{{side * (w + 0.7f), 1.6f, mainHand ? -1.0f : 1.4f}, norm(new float[]{side * 0.12f, -0.72f, 0.68f}), {0, 0, 1}};
     }
 
     // ------------------------------------------------------------------ small vector and matrix tools

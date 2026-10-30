@@ -55,12 +55,10 @@ public class Station extends WorldObject {
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         o.add(Option.on("use", verb() + " (" + recipes().size() + " recipes)", 10, g.cfg.interactRange));
-        o.add(Option.on("examine", "Examine", 0, g.cfg.inspectRange));
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
-        if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
         if (action.equals("use")) { if (a == g.player) g.ui.openStation(this); return Result.ok(); }
@@ -106,7 +104,4 @@ public class Station extends WorldObject {
         return Result.ok();
     }
 
-    @Override public String examine(Rpg g) { return switch (kind) {
-        case FURNACE -> "Smelts ore into bars."; case ANVIL -> "Hammer bars into equipment here."; case RANGE -> "For cooking.";
-        case CRAFT_TABLE -> "Fletching, spinning and fine work."; case SAWBENCH -> "Saws logs into planks."; case BUILD_SPOT -> "A plot for building on."; }; }
 }

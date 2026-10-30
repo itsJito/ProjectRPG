@@ -79,9 +79,16 @@ public enum Species {
     public String idleSound, alarmSound, hurtSound, deathSound;
     /** Builds the model at this scale per voxel (shared with people: about 5.6 cm). */
     public final float px = 1.8f / 32f;
+    /**
+     * How readily it goes into shallow water of its own accord (gamefixes: a cow could not go into water at all): a
+     * duck takes to its pond as often as not; cattle, horses and bears stand in the shallows now and then to drink or
+     * cool off; the rest only cross water when it is the way.
+     */
+    public float wades;
     static {
         // the weaknesses on record: fur and fire
         for (Species s : new Species[]{BROWN_BEAR, WOLF, COYOTE, FOX, MOUNTAIN_LION}) s.weakness = rpg.combat.Spells.Element.FIRE;
+        DUCK.wades = 0.55f; COW.wades = 0.2f; HORSE.wades = 0.15f; BROWN_BEAR.wades = 0.2f; PIG.wades = 0.12f; DOG.wades = 0.1f; SHEEP.wades = 0.04f;
     }
 
     Species(String label, String babyLabel, float w, float h, float babyScale, Plan plan, float walk, float run, Diet diet, Group group, int gMin, int gMax, boolean domestic, boolean nocturnal) {
@@ -129,8 +136,6 @@ public enum Species {
     /** A wild hunter: has prey and is not kept by people. */
     public boolean predator() { return !prey.isEmpty() && !domestic; }
 
-    /** Whether something of species s would hunt this one. */
-    public boolean preyOf(Species s) { return s.prey.contains(this); }
 
     public String label(boolean baby) { return baby ? babyLabel : label; }
 }

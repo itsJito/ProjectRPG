@@ -40,7 +40,6 @@ public final class Fire extends Station {
         if (g.time >= emitAt) { emitAt = g.time + 0.5; g.chemistry.emit(attributed ? g.actor(owner) : null, astratto.bridge.AstrattoNative.CHEM_FIRE, x, y + 0.3f, z, 1, 1, 0.6f); }
     }
 
-    @Override public String examine(Rpg g) { return "A fire. It will burn for about " + Math.max(0, (int) (outAt - g.state.minutes)) + " more minutes."; }
 
     @Override public void load(Rpg g, Map<String,Object> saved) {
         super.load(g,saved); attributed=astratto.util.Json.bool(saved,"attributed",true);

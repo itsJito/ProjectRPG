@@ -44,8 +44,8 @@ class MaintenanceTest {
             door.setOpen(g,true,null,0);
             for(long hinge:door.hinge)game.commands().jointMotor(hinge,side*2.4f,120);
             frames(95);
-            // to the wall either way (past square), never through it (gamefixes)
-            for(float angle:door.angle)assertTrue(angle*side>1.8 && angle*side<=Door.SWING+0.05f,()->"full swing: "+java.util.Arrays.toString(door.angle));
+            // well past square either way, never through the wall: to 1.75 inward, 1.45 outward (0.2.0 doors)
+            for(float angle:door.angle)assertTrue(angle*side>Door.OUT-0.05f && angle*side<=Door.SWING+0.05f,()->"full swing: "+java.util.Arrays.toString(door.angle));
             door.setOpen(g,false,null,0);frames(180);
             for(float angle:door.angle)assertEquals(0,angle,0.09,"closing must return from the actual side");
         }

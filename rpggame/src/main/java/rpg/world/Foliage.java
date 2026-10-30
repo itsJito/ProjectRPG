@@ -33,11 +33,8 @@ public final class Foliage {
         Patch(long id,Kind kind,int seed,int chunk,float x,float y,float z,float facing) {
             super(id,"foliage",kind.name().replace('_',' ').toLowerCase(java.util.Locale.ROOT),x,y,z);this.kind=kind;this.seed=seed;this.chunk=chunk;this.facing=facing;
         }
-        @Override public String examine(Rpg g){return "Naturally growing "+name+". It bends where you walk, and it burns.";}
-        @Override public float focusRadius(){return kind==Kind.IVY?0.6f:0.35f;}
-        @Override public List<Option> options(Rpg g,Actor actor){return List.of(Option.on("examine","Examine",0,4));}
+        @Override public List<Option> options(Rpg g,Actor actor){return List.of();}
         @Override public Result perform(Rpg g,Actor actor,String action,long request) {
-            if(action.equals("examine")){if(actor==g.player)g.chat.say(examine(g));return Result.ok();}
             return Result.no("You cannot do that.");
         }
     }

@@ -32,7 +32,12 @@ public final class Chemistry {
     private void changed(long id,int x,int y,int z,int original,int block) {
         Edit previous=edits.get(id);edits.put(id,new Edit(x,y,z,previous==null?original:previous.original,block));
         g.setBlock(x,y,z,block);
+        // a built thing burnt away is damage someone will come to mend (Repairs)
+        int was=previous==null?original:previous.original;
+        if(g.repairs!=null && (block==Blocks.AIR || Blocks.charred(block) || Blocks.dual(was) && block==Blocks.survivorOf(was)) && rpg.world.Repairs.mendable(was))g.repairs.broken(x,y,z,previous==null?original:previous.original,"fire");
     }
+    /** A cell mended (Repairs): the burning there is no longer this world's to restore or to keep. */
+    public void forget(int x,int y,int z) { edits.values().removeIf(e->e.x==x && e.y==y && e.z==z); }
     /** Restore only chemistry-owned edits before applying an earlier save's object state. */
     public void beforeLoad() { for(Edit edit:edits.values())g.setBlock(edit.x,edit.y,edit.z,edit.original);edits.clear();thawAt.clear(); }
     private final Map<Long,Double> thawAt=new HashMap<>();
@@ -46,6 +51,58 @@ public final class Chemistry {
      * skittering across it, the surface shivering.
      */
     public record Charge(float x,float y,float z,float radius,double since,double until) {}
+    /**
+     * Soot (gamefixes: fire did not burn the world's surfaces as it went): where a block is alight its open faces blacken,
+     * and the face above it (flames lick upward) - a scorch laid on the surface, darker with each layer, long before the
+     * block itself burns through to char. Drawn as decals; count says how many have ever been laid.
+     */
+    public record Soot(float x,float y,float z,float nx,float ny,float nz,float size,float rot) {}
+    public final java.util.ArrayDeque<Soot> soot=new java.util.ArrayDeque<>();
+    public int sootCount;
+    private final Map<Long,Double> sootAt=new HashMap<>();
+    private static final int[][] FACES={{1,0,0},{-1,0,0},{0,1,0},{0,0,1},{0,0,-1}};
+    /** Faces already sooted (each blackens once). */
+    private final Map<Long,Integer> sootLayers=new HashMap<>();
+    private void soot(long id,int x,int y,int z,float heat) {
+        if(g.time<sootAt.getOrDefault(id,0.0))return;
+        sootAt.put(id,g.time+2.5);
+        long k=(long)(g.time*10)+id;
+        for(int[] f:FACES) {
+            int ax=x+f[0],ay=y+f[1],az=z+f[2];
+            if(g.vox.solid(ax,ay,az) || !layer(x,y,z,f))continue;
+            // two or three patches of uneven size scattered over the face, leaning up (smoke rises): no two faces alike
+            int patches=1+(int)(g.roll(k,f[0]*5+f[2]*3+1)*2);
+            for(int p=0;p<patches;p++) {
+                long q=k*7+p*131+f[0]*17+f[1]*29+f[2]*41;
+                float u=(float)(g.roll(q,1)-0.5)*0.8f, v=(float)(g.roll(q,2)-0.35)*0.8f;
+                float ox=f[0]==0?u:0, oz=f[0]!=0?u:0, oy=f[1]==0?v:0;
+                if(f[1]!=0){ox=u;oz=v;}
+                addSoot(x+0.5f+f[0]*0.51f+ox,y+0.5f+f[1]*0.51f+oy,z+0.5f+f[2]*0.51f+oz,f[0],f[1],f[2],(0.45f+(float)g.roll(q,3)*0.75f)*(0.8f+heat*0.4f),(float)(g.roll(q,4)*6.28));
+            }
+        }
+        // the face above takes the smoke: the side of the block over it, where it is open
+        int uy=y+1;
+        if(g.vox.solid(x,uy,z)) for(int[] f:FACES) if(f[1]==0 && !g.vox.solid(x+f[0],uy,z+f[2]) && layer(x,uy,z,f)) addSoot(x+0.5f+f[0]*0.51f,uy+0.35f,z+0.5f+f[2]*0.51f,f[0],0,f[2],0.9f+heat*0.4f,(float)(g.roll(k,13)*6.28));
+    }
+    /** Blocks gone since the renderer last looked (packed cells): their soot and stains are taken down with them. */
+    public final java.util.ArrayDeque<int[]> gone=new java.util.ArrayDeque<>();
+    /** (0.2.1, gamefixes: soot hung on blocks that had broken away) a block emptied: its soot goes, and may be laid again if it is rebuilt. */
+    public void cleared(int x,int y,int z) {
+        soot.removeIf(st->(int)Math.floor(st.x()-st.nx()*0.6f)==x && (int)Math.floor(st.y()-st.ny()*0.6f)==y && (int)Math.floor(st.z()-st.nz()*0.6f)==z);
+        long base=cell(x,y,z)*8;
+        for(int k=0;k<18;k++)sootLayers.remove(base+k);
+        if(gone.size()<4096)gone.add(new int[]{x,y,z});
+    }
+    private boolean layer(int x,int y,int z,int[] f) {
+        long key=cell(x,y,z)*8+(f[0]+1)*3+(f[2]+1)+(f[1]>0?9:0);
+        int n=sootLayers.getOrDefault(key,0);
+        if(n>=1)return false;
+        sootLayers.put(key,n+1);return true;
+    }
+    private void addSoot(float x,float y,float z,float nx,float ny,float nz,float size,float rot) {
+        if(soot.size()>=2000)soot.removeFirst();
+        soot.addLast(new Soot(x,y,z,nx,ny,nz,size,rot)); sootCount++;
+    }
     public final java.util.ArrayDeque<Charge> charges=new java.util.ArrayDeque<>();
     /** Whether the point is in or on water (the block at it, or the one under it). */
     public boolean onWater(float x,float y,float z) {
@@ -75,6 +132,15 @@ public final class Chemistry {
             // a fence (drawn as posts and rails, not a cube) burns in its own shape - blackening (Props) - and then is gone,
             // never turning into a block of char (gamefixes); a wooden cube chars into its own charred twin
             if (block == Blocks.FENCE) { c.chemMaterial(block, CHEM_FLAMMABLE | CHEM_WIND_SENSITIVE, Blocks.AIR, 9); continue; }
+            // (0.2.1) a two-faced block burns as its halves do: a wooden half burns away and leaves the other standing
+            // (plaster, stone, iron); an iron half carries a charge and glows with the heat (Gfx.hotMetal)
+            if (Blocks.dual(block)) {
+                Blocks.Material o = Blocks.material(Blocks.outerOf(block)), in = Blocks.material(Blocks.innerOf(block));
+                boolean burns = o == Blocks.Material.WOOD || in == Blocks.Material.WOOD, metal = o == Blocks.Material.METAL || in == Blocks.Material.METAL;
+                int tags = (burns ? CHEM_FLAMMABLE : 0) | (metal ? CHEM_CONDUCTIVE : 0);
+                if (tags != 0) c.chemMaterial(block, tags, burns ? Blocks.survivorOf(block) : block, burns ? 12 : 0);
+                continue;
+            }
             switch (Blocks.material(block)) {
                 case WOOD -> c.chemMaterial(block, CHEM_FLAMMABLE, Blocks.charredOf(block), Blocks.isTreeLog(block) ? 18 : 14);
                 case FOLIAGE -> c.chemMaterial(block, CHEM_FLAMMABLE | CHEM_WIND_SENSITIVE, Blocks.AIR, 5);
@@ -224,6 +290,7 @@ public final class Chemistry {
                     continue;
                 }
                 int x=(int)sensor.x(),y=(int)sensor.y(),z=(int)sensor.z();
+                if((sensor.state()&CHEM_BURNING)!=0 && Blocks.material(sensor.originalBlock())!=Blocks.Material.FOLIAGE)soot(sensor.id(),x,y,z,Math.min(1,sensor.heat()));
                 if((sensor.state()&CHEM_BURNING)!=0 && Blocks.material(sensor.originalBlock())==Blocks.Material.WOOD && !Blocks.isTreeLog(sensor.originalBlock()))arson(sensor.owner(),sensor.x(),sensor.z());
                 if((sensor.state()&CHEM_FROZEN)!=0 && g.vox.block(x,y,z)==Blocks.WATER) { changed(sensor.id(),x,y,z,Blocks.WATER,Blocks.ICE);thawAt.put(sensor.id(),g.time+20); }
                 if(sensor.heat()>0.2f && g.vox.block(x,y,z)==Blocks.ICE) { changed(sensor.id(),x,y,z,Blocks.WATER,Blocks.WATER);thawAt.remove(sensor.id());emit(null,CHEM_WATER,sensor.x(),sensor.y(),sensor.z(),0.6f,1,0.25f); }
@@ -234,7 +301,7 @@ public final class Chemistry {
                 }
                 continue;
             }
-            if(!a.alive)continue;
+            if(!a.alive) { if((sensor.state()&CHEM_BURNING)!=0) { if(a.burnSince<0)a.burnSince=g.time; a.charred=Math.min(1,a.charred+0.02f); scorch(a); } continue; }
             int bits = sensor.state();
             if((bits & CHEM_BURNING)!=0) {
                 if(a.burnSince<0)a.burnSince=g.time;

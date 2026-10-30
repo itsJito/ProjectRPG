@@ -339,8 +339,9 @@ public final class Monsters {
                 continue;
             }
             g.ai.monsterSenses(m, dt);
-            double due = nextSense.getOrDefault(m.id, 0.0);
-            if (g.time >= due) { mind.sense(m, 0.25f); nextSense.put(m.id, g.time + 0.25); }
+            // (0.2.3) each on its own beat, never the whole camp sensing on one frame
+            double due = nextSense.computeIfAbsent(m.id, id -> g.time + rpg.ai.Stealth.phase(id) * 0.25);
+            if (g.time >= due) { mind.sense(m, 0.25f); nextSense.put(m.id, Math.max(due + 0.25, g.time + 0.05)); }
             mind.drives(m, dt);
             if (g.time >= m.nextThink) mind.think(m);
             m.sneaking = m.state == State.STALK;
@@ -362,10 +363,11 @@ public final class Monsters {
      * sinks away in rising motes (gamefixes). What was still on it is not lost with it - it falls where the body lay.
      * Nothing goes while it is being carried.
      */
-    public static final float CORPSE_SECONDS = 60, DISSOLVE_SECONDS = 2.5f;
+    public static final float CORPSE_SECONDS = 60, DISSOLVE_SECONDS = 2.5f, DRAGON_CORPSE_SECONDS = 10 - DISSOLVE_SECONDS;
     private void remains(Monster m) {
         if (m.carriedBy != 0) { m.diedAt = Math.max(m.diedAt, g.time - CORPSE_SECONDS + 5); m.dissolve = 0; return; }
-        float t = (float) (g.time - m.diedAt) - CORPSE_SECONDS;
+        // (0.2.2, gamefixes) a dragon's great body goes within ten seconds of its fall
+        float t = (float) (g.time - m.diedAt) - (m.kind == MonsterKind.DRAGON ? DRAGON_CORPSE_SECONDS : CORPSE_SECONDS);
         m.dissolve = Math.max(0, Math.min(1, t / DISSOLVE_SECONDS));
         if (t > 0 && t - (float) g.lastDt <= 0 && g.sfx != null) g.sfx.play("monster.dissolve", m.x, m.y + 0.5f, m.z, 0.35f, 1f, 10);
         if (m.dissolve < 1) return;
@@ -526,6 +528,15 @@ public final class Monsters {
             for (Monster o : monsters) if (o != m && o.alive && o.lair == l.id && o.distTo(m) < 20) { o.fear = Math.min(1.5f, o.fear + (wasLeader ? 0.5f : 0.2f)); o.nextThink = g.time + 0.2; }
         }
         sound(m, m.kind.deathSound, 0.9f);
+        // (0.2.2, gamefixes: dragons did not ragdoll) every monster falls in Sydney's hands - one not already reeling in
+        // them gets a body now where it stood (a dragon from the height it flew at), going limp as it is made
+        if (m.ragdoll == 0 && (g.reactions == null || !g.reactions.died(m))) {
+            boolean posed = m.posePts != null && g.time - m.poseAt < 0.5;
+            m.ragdoll = g.game.reserve(KIND_RAGDOLL);
+            g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), m.x, Math.max(DevMap.FLOOR, m.y), m.z, m.yaw, 0, 0, 0);
+            if (posed) g.game.commands().ragdollPose(m.ragdoll, m.vx, 0, m.vz, m.posePts);
+            g.game.commands().ragdollControl(m.ragdoll, CONTROL_DIE, 1);
+        } else if (m.ragdoll != 0 && g.reactions != null) g.reactions.died(m);
         g.state.commit("MonsterKilled", killer == null ? 0 : killer.id, m.id, DevMap.jurisdiction(m.x, m.z), 0, m.kind.title + " level " + m.level);
     }
 
@@ -541,15 +552,6 @@ public final class Monsters {
         g.sfx.play(bank, m.x, m.eyeY(), m.z, vol, pitch, 18 * vol);
     }
 
-    public String examine(Monster m) {
-        String state = switch (m.state) {
-            case DORMANT -> "It is still, resting at its lair."; case IDLE -> "It is about its own business."; case PATROL -> "It is roaming its territory.";
-            case ALERT -> "It has noticed something, and is watching."; case INVESTIGATE -> "It is creeping toward something it sensed."; case STALK -> "It is shadowing someone.";
-            case ENGAGE -> "It is fighting."; case FLEE -> "It is fleeing."; case REGROUP -> "It is falling back to its pack."; case FEED -> "It is feeding.";
-            case REST -> "It is resting."; case RETURN -> "It is heading back to its lair.";
-        };
-        return m.label() + ". " + state;
-    }
 
     public Map<String, Object> save(java.util.function.Function<Actor, Map<String, Object>> record) {
         Map<String, Object> root = new HashMap<>();

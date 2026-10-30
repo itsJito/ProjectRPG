@@ -25,6 +25,40 @@ public final class Fixtures {
      * and its rite opens another spellbook - Sun, Fogish or Moon - in place of the one in use. Nothing
      * that has not been learned is unlocked by it.
      */
+    /**
+     * (0.2.2, gamefixes) The unfinished casket in the graveyard, by the undertaker's path: where the player buys back what
+     * the undertaker holds of theirs - the claim's fee laid in its open box, the belongings taken from it - and, while
+     * a grave still stands, pays to have it sent for at once. The undertaker himself no longer hands things over.
+     */
+    public static final class Casket extends WorldObject {
+        /** Half extents of the box (2 m long along x, 0.7 m wide, 0.5 m tall). */
+        public static final float HX = 1.0f, HY = 0.25f, HZ = 0.36f;
+        public Casket(long id, float x, float y, float z) { super(id, "casket", "Unfinished casket", x, y, z); }
+        @Override public float focusRadius() { return 1.1f; }
+        public Casket solid(Rpg g) {
+            long body = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+            g.game.commands().rigidCreate(body, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, HX, HY, HZ, 0,
+                    x, rpg.world.DevMap.FLOOR + HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+            return this;
+        }
+        @Override public List<Option> options(Rpg g, Actor a) {
+            float r = g.cfg.interactRange;
+            if (a != g.player) return List.of();
+            if (!g.undertaker.graves().isEmpty()) return List.of(Option.on("buyback", "Buy back your gravestone items (" + g.undertaker.buyBackFee() + " coins)", 10, r));
+            int held = g.undertaker.held();
+            return List.of(Option.when(held > 0, "reclaim", "Reclaim belongings" + (held > 0 ? " (" + g.undertaker.fee() + " coins)" : ""), 10, "The undertaker holds nothing of yours.", r));
+        }
+        @Override public Result perform(Rpg g, Actor a, String action, long req) {
+            String why = reach(g, a, g.cfg.interactRange);
+            if (why != null) return Result.no(why);
+            return switch (action) {
+                case "reclaim" -> g.undertaker.redeem(a, g.undertaker.who());
+                case "buyback" -> g.undertaker.buyBack(a, g.undertaker.who());
+                default -> Result.no("You can't do that.");
+            };
+        }
+    }
+
     public static final class Altar extends WorldObject {
         public Altar(long id, float x, float y, float z) { super(id, "altar", "Altar", x, y, z); }
         @Override public float focusRadius() { return 1.0f; }
@@ -34,11 +68,9 @@ public final class Fixtures {
             o.add(Option.when(a.has(rpg.item.Items.COINS, 25), "donate", "Leave an offering (25 coins)", 4, "You need 25 coins.", g.cfg.interactRange));
             if (a instanceof rpg.actor.Player p) for (rpg.combat.Spells.Book b : rpg.combat.Spells.Book.values())
                 if (b != p.book) o.add(Option.on("book:" + b.name(), "Take up the " + b.title + " spellbook", 5, g.cfg.interactRange));
-            o.add(Option.on("examine", "Examine", 0, 5));
             return o;
         }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
             if (action.startsWith("book:") && a instanceof rpg.actor.Player p) {
@@ -68,27 +100,23 @@ public final class Fixtures {
             }));
             return Result.started();
         }
-        @Override public String examine(Rpg g) { return "An altar: pray here to restore your Faith, or take up another spellbook."; }
     }
 
     /** Discoverable course marker; traversal itself probes the same geometry anywhere in the world. */
     public static final class Climb extends WorldObject {
         public Climb(long id, String name, float x, float y, float z) { super(id, "climb", name, x, y, z); }
-        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("examine", "Examine", 0, g.cfg.inspectRange)); }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (!action.equals("examine")) return Result.no("Face a ledge and hold Sprint to traverse it (Agility 5).");
-            if (a == g.player) g.chat.say(examine(g)); return Result.ok();
+            return Result.no("Face a ledge and hold Sprint to climb it (Agility 5); jump at a fence or a low wall to vault it (Agility 2).");
         }
-        @Override public String examine(Rpg g) { return "A practice ledge. Face it and hold Sprint. Agility 5 allows a two-block ledge; higher Agility extends reach."; }
     }
 
     /** The equipment cabinet: every tier's gear for equipment-requirement tests (test supply - it mints what it hands out). */
     public static final class Cabinet extends WorldObject {
         public Cabinet(long id, float x, float y, float z) { super(id, "cabinet", "Equipment cabinet", x, y, z); }
         @Override public float focusRadius() { return 1f; }
-        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("open", "Browse gear", 10, g.cfg.interactRange), Option.on("kit", "Take combat test kit", 5, g.cfg.interactRange), Option.on("examine", "Examine", 0, 5)); }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("open", "Browse gear", 10, g.cfg.interactRange), Option.on("kit", "Take combat test kit", 5, g.cfg.interactRange)); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
             if (action.equals("open")) { if (a == g.player) g.ui.openCabinet(this); return Result.ok(); }
@@ -110,7 +138,6 @@ public final class Fixtures {
             g.state.commit(req, "TestSupplyTaken", a.id, id, jurisdiction(), 0, l.toString());
             return Result.ok();
         }
-        @Override public String examine(Rpg g) { return "Test equipment of every tier."; }
     }
 
     /** The debug terminal: opens the debug panel; sells skillcapes for mastered skills. */
@@ -121,11 +148,9 @@ public final class Fixtures {
             List<Option> o = new ArrayList<>();
             o.add(Option.on("use", "Use terminal", 10, g.cfg.interactRange));
             for (Skill s : Skill.ALL) if (a.skills.level(s) >= XpTable.MAX_LEVEL) o.add(Option.when(a.has(Items.COINS, 99000), "cape:" + s.name(), "Buy " + s.title + " cape", 4, "A skillcape costs 99,000 coins.", g.cfg.interactRange));
-            o.add(Option.on("examine", "Examine", 0, 5));
             return o;
         }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
             if (action.equals("use")) { if (a == g.player) { if (!g.ui.console.isOpen()) g.ui.console.toggle(); g.ui.console.print("The debug terminal: the developer console (` anywhere). Try give, setlevel, goto, spawn ... ('commands' lists them all)", 0xFFE6E6E0); } return Result.ok(); }
@@ -143,7 +168,6 @@ public final class Fixtures {
             }
             return Result.no("You can't do that.");
         }
-        @Override public String examine(Rpg g) { return "Debug controls: clock, teleports, XP, gear, AI and state inspectors, save/load."; }
     }
 
     /** A market stall: its goods belong to the merchant; stealing from it is Thieving, and a crime if seen. Restocks over time. */
@@ -155,11 +179,9 @@ public final class Fixtures {
         @Override public float focusRadius() { return 1.1f; }
         @Override public List<Option> options(Rpg g, Actor a) {
             boolean lvl = a.skills.level(Skill.THIEVING) >= level, any = !goods.isEmpty(), room = goods.isEmpty() || a.canStore(goods.stacks().get(0).copy(1));
-            return List.of(Option.when(lvl && any && room, "steal", "Steal from", 10, !lvl ? "You need Thieving level " + level + "." : !any ? "The stall is empty." : "Your inventory is too full.", g.cfg.interactRange),
-                    Option.on("examine", "Examine", 0, 5));
+            return List.of(Option.when(lvl && any && room, "steal", "Steal from", 10, !lvl ? "You need Thieving level " + level + "." : !any ? "The stall is empty." : "Your inventory is too full.", g.cfg.interactRange));
         }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
             if (!action.equals("steal")) return Result.no("You can't do that.");
@@ -190,7 +212,6 @@ public final class Fixtures {
                 if (goods.count(Items.BREAD) < 5 && goods.add(new ItemStack(Items.BREAD, 1, owner, false, id))) g.state.mint(Items.BREAD, 1);
             }
         }
-        @Override public String examine(Rpg g) { return "Bread for sale. It belongs to " + g.nameOf(owner) + ". (" + goods.count(Items.BREAD) + " loaves)"; }
         @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  goods=" + goods.stacks(); }
         @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("goods", rpg.item.ItemIO.inventory(goods)); m.put("restockAt", restockAt); return m; }
         @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); rpg.item.ItemIO.inventory(goods, astratto.util.Json.list(m, "goods")); restockAt = astratto.util.Json.num(m, "restockAt", 0); }
@@ -213,11 +234,9 @@ public final class Fixtures {
                     x, rpg.world.DevMap.FLOOR + HALF_H, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
             return this;
         }
-        @Override public String examine(Rpg g) { return "Sworn warrants posted by the watch of " + jurisdiction + "."; }
-        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("read", "Read warrants", 10, g.cfg.interactRange), Option.on("examine", "Examine", 0, g.cfg.inspectRange)); }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("read", "Read warrants", 10, g.cfg.interactRange)); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            String why = reach(g, a, action.equals("examine") ? g.cfg.inspectRange : g.cfg.interactRange); if (why != null) return Result.no(why);
-            if (action.equals("examine")) { if (a == g.player) g.chat.say("Sworn warrants posted by the watch of " + jurisdiction + "."); return Result.ok(); }
+            String why = reach(g, a, g.cfg.interactRange); if (why != null) return Result.no(why);
             if (!action.equals("read")) return Result.no("You cannot do that.");
             if (a == g.player && g.ui != null) g.ui.dialog(g.bountyBoard.browse(jurisdiction)); return Result.ok();
         }
@@ -227,14 +246,12 @@ public final class Fixtures {
     public static final class Kiosk extends WorldObject {
         public Kiosk(long id, float x, float y, float z) { super(id, "kiosk", "Quest-state kiosk", x, y, z); }
         @Override public float focusRadius() { return 1f; }
-        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("use", "Use quest panel", 10, g.cfg.interactRange), Option.on("examine", "Examine", 0, 5)); }
+        @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("use", "Use quest panel", 10, g.cfg.interactRange)); }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
-            if (action.equals("examine")) { if (a == g.player) g.chat.say(examine(g)); return Result.ok(); }
             String why = reach(g, a, g.cfg.interactRange);
             if (why != null) return Result.no(why);
             if (a == g.player) g.ui.openKiosk();
             return Result.ok();
         }
-        @Override public String examine(Rpg g) { return "Debug quest flags and the test quest's state machine."; }
     }
 }

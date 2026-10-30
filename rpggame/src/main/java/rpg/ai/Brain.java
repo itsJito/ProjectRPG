@@ -27,7 +27,7 @@ import rpg.world.DevMap;
  * policy scores them (with its own sight and hearing in the mix) and walks the body along routes it searches itself.
  */
 public final class Brain {
-    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK }
+    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK, TIP_OFF, SHELTER, PRAY }
 
     private final Rpg g;
     private final AiSystem ai;
@@ -38,9 +38,21 @@ public final class Brain {
 
     record Score(Goal goal, float value, String reason) {}
 
+    /** (0.2.3) Fighters of this NPC's own side within r metres, standing and able: the watch with the watch, outlaws with outlaws. */
+    int alliesNear(Npc n, float r) {
+        int c = 0;
+        for (Npc o : g.npcs) {
+            if (o == n || !o.alive || !o.loaded || !o.combatant() || o.hp < o.maxHp() * 0.25f || o.distTo(n) > r) continue;
+            boolean outlaw = n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE, oOutlaw = o.role == Npc.Role.BANDIT || o.role == Npc.Role.BRUTE;
+            if (outlaw == oOutlaw && o.hostileToPlayer == n.hostileToPlayer) c++;
+        }
+        return c;
+    }
+
     // ------------------------------------------------------------------ deciding
     public void think(Npc n) {
-        n.nextThink = g.time + (n.goal == Goal.FIGHT ? 0.35 : 0.8) + (n.id % 5) * 0.03;
+        // (0.2.3) spread over the whole beat by a per-NPC phase, so a crowd's decisions do not land on the same frame
+        n.nextThink = g.time + (n.goal == Goal.FIGHT ? 0.35 : 0.8) * (0.8 + 0.4 * Stealth.phase(n.id + g.state.tick));
         if (n.summonOwner != 0) {
             Actor owner = g.actor(n.summonOwner), target = ai.threatFor(n);
             Goal next = target == null ? Goal.FOLLOW : Goal.FIGHT;
@@ -91,7 +103,11 @@ public final class Brain {
         if (n.hunt != null && threat == null) {
             Hunt h = n.hunt;
             String who = h.target == 0 ? "whoever did it" : g.nameOf(h.target);
-            s.add(new Score(Goal.SEARCH, n.combatant() ? 0.86f : 0.72f, String.format("searching for %s near (%.0f, %.0f), %.0fs since the last clue", who, h.x, h.z, g.time - h.clueAt)));
+            // (0.2.2) a known foe is hunted hard; a culprit nobody saw is looked for while the trail is fresh, and with no
+            // new clue in a few seconds the scene's duties (the body, the report) come back ahead of it
+            float search = n.combatant() ? 0.86f : 0.72f;
+            if (h.target == 0) search = Math.max(0.5f, search - (float) (g.time - h.clueAt) * 0.08f);
+            s.add(new Score(Goal.SEARCH, search, String.format("searching for %s near (%.0f, %.0f), %.0fs since the last clue", who, h.x, h.z, g.time - h.clueAt)));
         }
         // dread (gamefixes: dynamic reactions): someone they know for a killer, or a beast, close and in sight - they run;
         // once it is out of sight they keep hidden a while; when it is safe, whoever can tell the guard does
@@ -134,7 +150,7 @@ public final class Brain {
         if (threat == null && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN)) {
             Actor bloody = null; float distance = 12;
             for (Actor a : g.actors()) if (a != n && a.alive && !a.dummy && (a == g.player || a instanceof Npc person && person.loaded) && a.bloodied >= 0.25f
-                    && n.distTo(a) < distance && ai.canSee(n, a)) { bloody = a; distance = n.distTo(a); }
+                    && !ai.bloodExplained(n, a) && n.distTo(a) < distance && ai.canSee(n, a)) { bloody = a; distance = n.distTo(a); }
             if (bloody != null) {
                 Stealth.Aware evidence = n.aware.computeIfAbsent(bloody.id, k -> new Stealth.Aware());
                 if (g.time >= evidence.bloodQuestionAgain || bloody.bloodied > evidence.bloodSeen + 0.2f) {
@@ -150,8 +166,15 @@ public final class Brain {
         }
         if (threat != null && !(threat == terror && !defender(n))) {
             boolean weak = n.hp < n.maxHp() * (civilian ? 0.95f : 0.25f);
+            // (0.2.3, gamefixes: human AI choices) a fighter weighs the odds as the monsters do: one facing something more than
+            // twice as strong, with none of its own side near enough to help, runs for help instead of throwing its life
+            // away; the watch holds its ground (that is its duty); with friends at hand, anyone stands
+            float odds = rpg.monster.MonsterMind.might(threat) / Math.max(1, rpg.monster.MonsterMind.might(n));
+            int friends = civilian || weak || odds <= 2 ? 0 : alliesNear(n, 14);
+            boolean outmatched = !civilian && !weak && !n.watch() && n.summonOwner == 0 && odds > 2 && friends == 0;
             if (civilian || weak) s.add(new Score(Goal.FLEE, weak && !civilian ? 0.95f : 0.85f, (weak ? "badly hurt" : "not a fighter") + "; fleeing " + threat.name));
-            else s.add(new Score(Goal.FIGHT, 0.9f, "engaging " + threat.name + (n.hostileToPlayer ? " (hostile)" : "")));
+            else if (outmatched) s.add(new Score(Goal.FLEE, 0.92f, String.format("outmatched by %s (%.1fx) and alone; running for help", threat.name, odds)));
+            else s.add(new Score(Goal.FIGHT, 0.9f, "engaging " + threat.name + (n.hostileToPlayer ? " (hostile)" : "") + (friends > 0 ? String.format(" (%.1fx, %d at my side)", odds, friends) : "")));
         }
         // a crime it saw with its own eyes, not yet reported, in a jurisdiction with a lawman
         Memory unreported = unreportedCrime(n);
@@ -161,6 +184,9 @@ public final class Brain {
         if (unreported != null && exposed) s.add(new Score(Goal.HIDE, 0.82f, "keeping out of " + culprit.name + "'s sight before reporting"));
         if (unreported != null && !exposed && ai.lawmanFor(unreported.jurisdiction) != null && unreported.subject != n.id)
             s.add(new Score(Goal.REPORT_CRIME, 0.78f, "saw " + g.nameOf(unreported.subject) + " commit " + unreported.kind.toLowerCase() + "; must tell the law"));
+        // a wanted player seen in town by someone who knows it: the watch is told where (gamefixes)
+        Npc tellWatch = threat == null ? tipFor(n) : null;
+        if (tellWatch != null) s.add(new Score(Goal.TIP_OFF, 0.74f, String.format("saw %s (wanted) at (%.0f, %.0f); telling %s", g.player.name, n.tip.x(), n.tip.z(), tellWatch.name)));
         // something half-seen or heard (Stealth): a curious mind stops to look; past that, each looks into it their own
         // way (Investigation: a guard checks and searches, a bold farmhand peeks, a timid one calls out or fetches the
         // guard, a thief hides) - and keeps to that plan until it is settled
@@ -228,6 +254,16 @@ public final class Brain {
         // money matters: a purse too heavy to carry about, or too light to work with, means an errand to the bank (by day)
         if (threat == null && !night && g.bank != null) { String why = g.bank.errand(n); if (why != null) s.add(new Score(Goal.BANK, 0.53f, why)); }
         if (!ZonePolicy.routineAllowed(n, n.x, n.z) && threat == null && !g.carrying.busy(n)) s.add(new Score(Goal.RETURN, 0.57f, "leaving an unwelcome zone"));
+        // (0.2.1, gamefixes: human AI choices expanded) a downpour sends ordinary folk out of doors home to shelter; the
+        // watch keeps its round, and work under a roof goes on
+        float rain = g.timeSystem.weather.rain;
+        if (threat == null && rain > 0.45f && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), DevMap.FLOOR + 1, (int) Math.floor(n.z)) > 0.9f)
+            s.add(new Score(Goal.SHELTER, 0.45f + rain * 0.25f, String.format("rain (%.0f%%); going in out of it", rain * 100)));
+        // the devout go to their town's altar of a morning, once a day
+        double hr = g.state.hourOfDay();
+        int today = (int) (g.state.minutes / 1440);
+        if (threat == null && !n.combatant() && devout(n) && hr >= 6.5 && hr < 9 && n.prayedDay != today && altarFor(n) != null)
+            s.add(new Score(Goal.PRAY, 0.56f, "morning prayers at the altar"));
         s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
         s.sort(Comparator.comparing(Score::value).reversed());
         // a little inertia: keep the current goal unless another beats it clearly
@@ -335,7 +371,7 @@ public final class Brain {
                 if (n.distTo(p) > 5 && !g.law.onRoof(p)) goTo(n, p.x, p.z, false, 4.5f); else ai.desire(n, AiSystem.A_HOLD);
                 if (n.speech == null && g.time - n.lastDialogAt > 8) {
                     boolean arms = g.time - n.armsAt < 45;
-                    g.ai.say(n, g.law.onRoof(p) ? "Get down from that roof, now." : p.bloodied >= 0.25f ? "Is that blood? Are you hurt? What happened?"
+                    g.ai.say(n, g.law.onRoof(p) ? "Get down from that roof, now." : p.bloodied >= 0.25f && !ai.bloodExplained(n, p) ? "Is that blood? Are you hurt? What happened?"
                             : arms && n.role == Npc.Role.SCHOLAR ? "Slowly, this time. I want to see how the hands go."
                             : arms ? (n.armsKind == Arms.Kind.SPELL ? "Keep your hands still where I can see them." : "Easy now. Keep it sheathed.") : "I've heard about you. Don't try anything.");
                     n.lastDialogAt = g.time;
@@ -343,6 +379,7 @@ public final class Brain {
                 n.lastOutcome = "watching " + p.name + (p.bloodied >= 0.25f ? "; visible blood, asking questions" : "");
             }
             case WARN -> warn(n);
+            case TIP_OFF -> tipOff(n);
             case FIGHT -> fight(n, dt);
             case STEAL -> steal(n);
             case COLLECT -> { n.sneaking = false; collect(n); }
@@ -350,7 +387,31 @@ public final class Brain {
             case LOOT -> loot(n);
             case AID -> aid(n);
             case BANK -> bank(n);
+            case SHELTER -> { if (goTo(n, n.homeX, n.homeZ, false, 1.4f)) { ai.desire(n, AiSystem.A_IDLE); n.lastOutcome = "sheltering from the rain"; } }
+            case PRAY -> pray(n);
         }
+    }
+
+    /** Who keeps the morning prayers: the priests' flock - the civic and village folk, the healers and scholars, some of each (by their id). */
+    private static boolean devout(Npc n) {
+        return switch (n.role) { case PRIEST -> false; case CIVIC, VILLAGER, HEALER, SCHOLAR, FARMER -> Math.floorMod(n.id, 3) == 0; default -> Math.floorMod(n.id, 7) == 0; };
+    }
+    /** The altar of the town a person lives in (DevPalace's temple, or the debug square's), or null in the wilds. */
+    private float[] altarFor(Npc n) {
+        if (DevMap.PALACE.equals(n.homeJurisdiction)) return rpg.world.Expanse.ALTAR;
+        if (DevMap.ALPHA.equals(n.homeJurisdiction) || DevMap.BETA.equals(n.homeJurisdiction)) return new float[]{DevMap.ALTAR[0] + 0.5f, DevMap.ALTAR[1] + 0.5f};
+        return null;
+    }
+    /** At the altar: a moment's prayer, head bowed, a word if spoken to; done for the day. */
+    private void pray(Npc n) {
+        float[] at = altarFor(n);
+        if (at == null) { n.nextThink = 0; return; }
+        if (!goTo(n, at[0], at[1] + 1.6f, false, 1.4f)) { n.lastOutcome = "on the way to prayers"; return; }
+        ai.desire(n, AiSystem.A_HOLD);
+        n.wantYaw = (float) Math.atan2(-(at[0] - n.x), -(at[1] - n.z));
+        if (n.prayStarted < n.goalSince) n.prayStarted = g.time;
+        n.lastOutcome = "praying at the altar";
+        if (g.time - n.prayStarted > 25) { n.prayedDay = (int) (g.state.minutes / 1440); n.nextThink = 0; }
     }
 
     /** To the bank counter; served when the teller is there (the bank shut, they come back later). */
@@ -572,7 +633,8 @@ public final class Brain {
     boolean goTo(Npc n, float x, float z, boolean run, float within) {
         if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
         if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
-        if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z, d -> !d.locked || d.owner == n.id || d.key != null && n.has(d.key, 1)); n.legAt = 0; n.legsX = x; n.legsZ = z; }
+        if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z, n instanceof rpg.monster.Monster mo && mo.kind.form != rpg.monster.MonsterKind.Form.HUMANOID ? d -> d.open && !d.locked
+                : d -> !d.locked || d.owner == n.id || d.key != null && n.has(d.key, 1)); n.legAt = 0; n.legsX = x; n.legsZ = z; }
         float tx = x, tz = z;
         while (n.legAt < n.legs.length) {
             float[] p = Waypoints.point(n.legs[n.legAt]);
@@ -877,6 +939,48 @@ public final class Brain {
         }
     }
 
+    /**
+     * A tip-off (gamefixes: good people who know the player is wanted report where they saw them). A law-abiding
+     * civilian who has just seen the player with their own eyes, knowing them wanted here (a crime of theirs witnessed
+     * or heard of, not settled, and a bounty on the books), carries that sighting to the nearest officer of the town who
+     * is not already on the player - by walking to him, so stopping the messenger stops the word. The officer searches
+     * where the player was seen. Once told, the same person waits a couple of minutes before telling again.
+     */
+    private Npc tipFor(Npc n) {
+        if (n.combatant() || !n.lawAbiding() || n.asleep() || g.time - n.tippedAt < 120) return null;
+        Actor p = g.player;
+        String jur = n.homeJurisdiction;
+        if (!p.alive || DevMap.WILDS.equals(jur) || g.law.bounty(p.id, jur) <= 0 || g.law.inCustody(p)) return null;
+        Memory known = n.crimeKnown(p.id);
+        if (known == null || known.settled) return null;
+        var seen = n.playerSighting;
+        if (n.tip == null || seen != null && seen.witness() == n.id && seen.at() > n.tip.at()) n.tip = seen != null && seen.witness() == n.id && g.time - seen.at() < 20 ? seen : null;
+        if (n.tip == null || g.time - n.tip.at() > 90 || !jur.equals(DevMap.jurisdiction(n.tip.x(), n.tip.z()))) { n.tip = null; return null; }
+        // too close to the wanted one to slip away and tell: it waits until out of their sight
+        if (n.distTo(p) < 6 && ai.canSee(n, p)) return null;
+        Npc officer = null; float best = 45;
+        for (Npc o : g.npcs) if (o.alive && o.loaded && o.watch() && jur.equals(o.homeJurisdiction) && o.fightTarget != p.id && !(o.hunt != null && o.hunt.target == p.id && o.hunt.clueAt >= n.tip.at())) {
+            float d = n.distTo(o);
+            if (d < best) { best = d; officer = o; }
+        }
+        return officer;
+    }
+    private void tipOff(Npc n) {
+        Npc officer = tipFor(n);
+        if (officer == null) { n.tip = null; n.nextThink = 0; return; }
+        if (!goTo(n, officer.x + 1.1f, officer.z + 1.1f, true, 1.9f)) { n.lastOutcome = "hurrying to tell " + officer.name; return; }
+        var seen = n.tip;
+        g.ai.say(n, g.player.name + " - the wanted one! I saw them by the " + place(seen.x(), seen.z()) + ".");
+        Hunt h = officer.hunt != null && officer.hunt.target == g.player.id ? officer.hunt : new Hunt(g.player.id, n.name + " saw them", seen.x(), seen.z(), seen.at(), 60);
+        if (h == officer.hunt) h.clue(seen.x(), seen.z(), seen.vx(), seen.vz(), seen.at()); else { h.vx = seen.vx(); h.vz = seen.vz(); officer.hunt = h; }
+        if (officer.playerSighting == null || officer.playerSighting.at() < seen.at()) officer.playerSighting = seen;
+        g.ai.reply(officer, "Good. I'll look into it.");
+        officer.nextThink = 0;
+        g.state.commit("WantedReported", n.id, g.player.id, officer.homeJurisdiction, 0, String.format("told %s: seen at (%.0f, %.0f) %.0fs ago", officer.name, seen.x(), seen.z(), g.time - seen.at()));
+        n.tippedAt = g.time; n.tip = null; n.nextThink = 0;
+        n.lastOutcome = "told " + officer.name + " where the wanted player was";
+    }
+
     /** A beast that kills: a hunter, or a bear (people keep away from one whatever it is doing). */
     static boolean predator(rpg.animal.Animal an) { return !an.baby && (an.species.diet == rpg.animal.Species.Diet.HUNTER || an.species == rpg.animal.Species.BROWN_BEAR); }
 
@@ -1061,6 +1165,24 @@ public final class Brain {
 
     public void resetJob(Npc n) { if(n.job!=null)n.job.cancel();n.job=null; }
 
+    /**
+     * Mending (gamefixes: broken fences, windows and the like put back by the people whose trade it is): the next thing
+     * broken that this person can mend (Repairs.claim) - walk to it, work at it a few seconds with the hands busy at the
+     * spot, and put it back. Returns false when there is nothing for them to mend.
+     */
+    boolean mend(Npc n) {
+        var d = g.repairs.claim(n);
+        if (d == null) return false;
+        float[] at = g.repairs.standSpot(n, d);
+        if (!goTo(n, at[0], at[1], false, 0.6f)) { n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; n.lootUntil = -99; return true; }
+        n.wantYaw = (float) Math.atan2(-(d.x() + 0.5f - n.x), -(d.z() + 0.5f - n.z));
+        ai.desire(n, AiSystem.A_HOLD);
+        if (n.lootUntil < g.time - 1) { n.lootStarted = g.time; n.lootUntil = g.time + 3.5; n.reachX = d.x() + 0.5f; n.reachY = d.y() + 0.5f; n.reachZ = d.z() + 0.5f; }
+        if (g.time >= n.lootUntil) { boolean done = g.repairs.mend(n, d); n.lootUntil = -99; n.lastOutcome = done ? "mended the " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")" : "could not mend it"; if (!done) g.repairs.release(n); }
+        else { n.lastOutcome = "mending the " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; if (g.sfx != null && g.time - n.mendKnock > 0.7) { g.sfx.play(d.glass() ? "glass.light" : "wood.light", n.reachX, n.reachY, n.reachZ, 0.45f); n.mendKnock = g.time; } }
+        return true;
+    }
+
     private void followCaster(Npc n) {
         Actor owner = g.actor(n.summonOwner);
         if (owner == null || !owner.alive) { ai.desire(n, AiSystem.A_HOLD); return; }
@@ -1074,7 +1196,7 @@ public final class Brain {
     private void work(Npc n,float dt) {
         if(n.profession!=null && n.summonOwner==0) { jobs.tick(n,dt); return; }
         switch (n.role) {
-            case WORKER -> gatherAndSell(n, Items.LOGS, "tree");
+            case WORKER -> { if (!mend(n)) gatherAndSell(n, Items.LOGS, "tree"); }
             case VILLAGER -> gatherAndSell(n, Items.BERRIES, "berry_bush");
             case CARTER -> {
                 float[] dest = g.econ.carterStep(n);
@@ -1233,10 +1355,12 @@ public final class Brain {
         int have = n.count(product);
         Node node = w != null && w.target instanceof Node nd ? nd : ai.nearestNode(n, nodeDef);
         if (have >= 5 || (node == null && have > 0)) {
-            float[] c = g.econ.counterSpot(g.econ.shopA);
+            // to their own town's market (DevPalace's people to the market hall, not across the map to Store A)
+            var shop = g.econ.localShop(n);
+            float[] c = g.econ.counterSpot(shop);
             if (goTo(n, c[0], c[1], false, 1.0f)) {
-                int sold = g.econ.sellToShop(n, g.econ.shopA, product, have);
-                n.lastOutcome = "sold " + sold + " " + product.name.toLowerCase() + " to Store A";
+                int sold = g.econ.sellToShop(n, shop, product, have);
+                n.lastOutcome = "sold " + sold + " " + product.name.toLowerCase() + " to " + shop.name;
             }
             return;
         }
@@ -1260,10 +1384,11 @@ public final class Brain {
     }
 
     private void patrol(Npc n) {
-        float[] p = DevMap.PATROL[n.patrolIndex % DevMap.PATROL.length];
+        float[][] round = DevMap.patrol(n.homeJurisdiction);
+        float[] p = round[n.patrolIndex % round.length];
         if (goTo(n, p[0], p[1], false, 1.0f)) {
             if (n.busyUntil < g.time - 3) n.busyUntil = g.time + 2;
-            if (g.time > n.busyUntil) { n.patrolIndex++; n.busyUntil = g.time - 10; n.lastOutcome = "reached patrol point " + (n.patrolIndex - 1) % DevMap.PATROL.length; }
+            if (g.time > n.busyUntil) { n.patrolIndex++; n.busyUntil = g.time - 10; n.lastOutcome = "reached patrol point " + (n.patrolIndex - 1) % round.length; }
         }
     }
 

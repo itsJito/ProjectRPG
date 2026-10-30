@@ -80,7 +80,6 @@ public final class Quests {
         g.state.commit("QuestReset", 0, 0, null, 0, "QT-COURIER fixture reset (debug)");
     }
 
-    public String stateText() { return courier + (failReason != null ? " - " + failReason : ""); }
 
     public Map<String, Object> save() {
         Map<String, Object> m = new HashMap<>();
