@@ -111,6 +111,7 @@ int AiService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32_t by
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
             Agent* a = agents_.get(c.handle);
             if (!a) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
+            if (!a->hasGoal || std::abs(a->goalX-c.x)+std::abs(a->goalY-c.y)+std::abs(a->goalZ-c.z)>0.5f) a->partialStreak=0;
             a->hasGoal = true; a->goalX = c.x; a->goalY = c.y; a->goalZ = c.z;
             a->wantPath = true; a->arrived = false; a->fails = 0; a->stuck = false;
             return ASTRATTO_OK;
@@ -332,8 +333,15 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             a.routeAt++;
             a.progressBest = 1e9f; a.progressTimer = 0;
             if (a.routeAt * 3 >= a.route.size()) {
-                a.route.clear(); a.routeAt = 0; a.moving = false; a.arrived = true;
-                astratto_evt_agent ev{}; ev.handle = a.self; ev.other = a.target; e.emit(ev, ASTRATTO_EVT_AGENT_ARRIVED);
+                a.route.clear();a.routeAt=0;
+                if(a.partial) {
+                    a.arrived=false;a.partialStreak++;
+                    if(a.partialStreak>=3){a.stuck=true;a.moving=false;astratto_evt_agent ev{};ev.handle=a.self;e.emit(ev,ASTRATTO_EVT_AGENT_STUCK);}
+                    else {a.wantPath=true;a.repathTimer=0.4f*static_cast<float>(a.partialStreak);}
+                } else {
+                    a.moving=false;a.arrived=true;a.partialStreak=0;
+                    astratto_evt_agent ev{};ev.handle=a.self;ev.other=a.target;e.emit(ev,ASTRATTO_EVT_AGENT_ARRIVED);
+                }
             }
         } else {
             dx /= std::max(d, 1e-4f); dz /= std::max(d, 1e-4f);
@@ -463,7 +471,11 @@ void AiService::step(Engine& e, float dt) {
         plan(e, a, w);
         // (0.2.3) a changed nav (a door swinging) re-routes those walking, spread over 0.6 s by handle instead of all in
         // the same frame - in a town that was dozens of searches at once, a hitch every time a door moved
-        if (w != nullptr && a.moving && a.navSeen != w->navVersion()) { a.navSeen = w->navVersion(); if (!a.route.empty()) { a.wantPath = true; a.repathTimer = std::max(a.repathTimer, static_cast<float>(static_cast<uint32_t>(a.self) % 16u) * 0.04f); } }
+        if (w != nullptr && a.moving && a.navSeen != w->navVersion()) {
+            a.navSeen=w->navVersion();bool changed=false;
+            for(const auto& column:a.navColumns)if(w->navColumnVersion(static_cast<int>(column.first>>16),static_cast<int>(column.first&65535))!=column.second){changed=true;break;}
+            if(changed && !a.route.empty()){a.wantPath=true;a.repathTimer=std::max(a.repathTimer,static_cast<float>(static_cast<uint32_t>(a.self)%16u)*0.04f);}
+        }
     }
 
     // ---- routes for those that want one, in parallel
@@ -480,7 +492,15 @@ void AiService::step(Engine& e, float dt) {
             q.goalY = true;
             q.mantle = (a.flags & ASTRATTO_AGENT_MANTLE) != 0;
             uint32_t expansions = 0;
-            if (!finders_[worker]->path(*w, tune, q, a.route, expansions)) a.route.clear();
+            auto& finder=*finders_[worker];
+            if (!finder.path(*w, tune, q, a.route, expansions)) a.route.clear();
+            a.partial=finder.partial();a.capped=finder.capped();a.repaths++;a.expansions+=expansions;
+            if(a.partial)a.partialPaths++;
+            if(a.capped)a.capHits++;
+            a.navColumns.clear();
+            for(size_t point=0;point<a.route.size();point+=3){uint32_t cx=static_cast<uint32_t>(a.route[point]>>4),cz=static_cast<uint32_t>(a.route[point+2]>>4),key=(cx<<16)|cz;
+                if(std::none_of(a.navColumns.begin(),a.navColumns.end(),[&](const auto& column){return column.first==key;}))a.navColumns.emplace_back(key,w->navColumnVersion(static_cast<int>(cx),static_cast<int>(cz)));}
+            uint32_t cx=static_cast<uint32_t>(std::max(0,fl(a.x))>>4),cz=static_cast<uint32_t>(std::max(0,fl(a.z))>>4);a.navColumns.emplace_back((cx<<16)|cz,w->navColumnVersion(static_cast<int>(cx),static_cast<int>(cz)));
         });
         for (size_t k : want) {
             Agent& a = *agents_.get(order_[k]);
@@ -488,10 +508,11 @@ void AiService::step(Engine& e, float dt) {
             a.navSeen = w->navVersion();
             if (a.route.empty()) {
                 const float dx = a.destX - a.x, dz = a.destZ - a.z;
-                if (dx * dx + dz * dz > 0.5f && ++a.fails >= 3) {
+                const bool distant = dx * dx + dz * dz > 0.5f || std::abs(a.destY - a.y) > 1.2f;
+                if (distant && ++a.fails >= 3) {
                     a.stuck = true; a.moving = false;
                     astratto_evt_agent ev{}; ev.handle = a.self; e.emit(ev, ASTRATTO_EVT_AGENT_STUCK);
-                }
+                } else if(distant){a.wantPath=true;a.repathTimer=0.4f;}
             }
         }
         e.counters().path_requests += want.size();
@@ -511,6 +532,7 @@ bool AiService::snapshot(Engine&, uint32_t kind, std::vector<uint8_t>& out) {
         const Policy* p = policies_.get(a.policy);
         s.action = p && a.current >= 0 ? static_cast<int32_t>(p->actions[static_cast<size_t>(a.current)].id) : -1;
         s.sees = a.sees ? 1u : 0u; s.moving = a.moving ? 1u : 0u; s.stuck = a.stuck ? 1u : 0u;
+        s.partial=a.partial?1u:0u;s.capped=a.capped?1u:0u;s.repaths=a.repaths;s.expansions=a.expansions;s.partial_paths=a.partialPaths;s.cap_hits=a.capHits;s.yields=a.yields;
         s.route_cells = static_cast<uint32_t>(a.route.size() / 3 - std::min(a.route.size() / 3, a.routeAt));
         appendRecord(out, s, ASTRATTO_SNAP_AGENT);
     });

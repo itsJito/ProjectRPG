@@ -14,6 +14,9 @@ import rpg.world.Voxels;
 public final class Waypoints {
     private Waypoints() {}
 
+    /** Remap persisted coordinates; saved books never depend on a graph's transient indices. */
+    public static int index(float x,float z){for(int i=0;i<P.length;i++)if(Math.hypot(P[i][0]-x,P[i][1]-z)<.1)return i;return -1;}
+
     /** Trips shorter than this (m), or with a clear line, go straight. */
     public static final float DIRECT = 22f;
 

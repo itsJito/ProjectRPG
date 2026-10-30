@@ -23,7 +23,7 @@ public final class Repairs {
     /** A broken thing: where, what stood there, what broke it (glass, fire), whose kingdom, and when. */
     public record Damage(long key, int x, int y, int z, int original, String cause, String jurisdiction, double at) {
         public boolean glass() { return Blocks.glass(original); }
-        public boolean timber() { return !glass(); }
+        public boolean timber() { return !glass() && (Blocks.material(original)==Blocks.Material.WOOD || Blocks.material(original)==Blocks.Material.STRAW || Blocks.material(original)==Blocks.Material.CLOTH || Blocks.dual(original) && (Blocks.material(Blocks.innerOf(original))==Blocks.Material.WOOD || Blocks.material(Blocks.outerOf(original))==Blocks.Material.WOOD)); }
     }
     private final Rpg g;
     private final Map<Long, Damage> open = new LinkedHashMap<>();
@@ -57,10 +57,10 @@ public final class Repairs {
     public static boolean mendable(int block) {
         if (Blocks.glass(block)) return true;
         // (0.2.1) a two-faced wall whose wooden half burnt away is mended back to both halves
-        if (Blocks.dual(block)) return Blocks.material(Blocks.innerOf(block)) == Blocks.Material.WOOD || Blocks.material(Blocks.outerOf(block)) == Blocks.Material.WOOD;
+        if (Blocks.dual(block)) return mendable(Blocks.innerOf(block)) || mendable(Blocks.outerOf(block));
         if (Blocks.isTreeLog(block) || Blocks.isLeaves(block) || block == Blocks.STUMP) return false;
         var m = Blocks.material(block);
-        return block == Blocks.FENCE || m == Blocks.Material.WOOD || m == Blocks.Material.STRAW || m == Blocks.Material.CLOTH;
+        return block == Blocks.FENCE || m == Blocks.Material.WOOD || m == Blocks.Material.STRAW || m == Blocks.Material.CLOTH || switch(block){case Blocks.STONE,Blocks.BRICK,Blocks.PLASTER,Blocks.COBBLE,Blocks.STONE_BRICKS,Blocks.MARBLE,Blocks.LIMESTONE_BRICKS,Blocks.SANDSTONE,Blocks.RED_SANDSTONE->true;default->false;};
     }
 
     public boolean contains(long key){return open.containsKey(key);}
@@ -106,7 +106,7 @@ public final class Repairs {
         known.computeIfAbsent(recipient.id,k->new java.util.HashSet<>()).add(damage.key);
         reported.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
         if(trade(recipient,damage)) {
-            int fee=damage.glass()?3:5;long payer=witness.role==Npc.Role.LAWMAN?witness.id:0;
+            int fee=damage.glass()?3:damage.timber()?5:6;long payer=witness.role==Npc.Role.LAWMAN?witness.id:0;
             var previous=orders.get(damage.key);
             if(previous==null || previous.payer==0 && payer!=0)orders.put(damage.key,new Order(witness.id,recipient.id,payer,payer==0?0:fee));
             g.ai.say(witness,payer==0?"The building is damaged. Can you mend it?":"Please see to the damage. You'll be paid when it is mended.");
@@ -141,9 +141,27 @@ public final class Repairs {
     public static ItemDef material(Npc n, Damage d) {
         if(!hammer(n))return null;
         if (d.glass()) return Items.HAMMER;
+        if(!d.timber())return n.has(Items.get("stone_block"),1)?Items.get("stone_block"):null;
         if (n.has(Items.PLANK, 1)) return Items.PLANK;
         if (n.has(Items.OAK_PLANK, 1)) return Items.OAK_PLANK;
         if (n.has(Items.LOGS, 1)) return Items.LOGS;
+        return null;
+    }
+
+    /** Keep real supplies for known repairs even while the settling period is still running. */
+    public int reserved(Npc worker,ItemDef item) {
+        if(item!=Items.PLANK && item!=Items.OAK_PLANK && item!=Items.LOGS && item!=Items.get("stone_block"))return 0;
+        int count=0;for(long key:known.getOrDefault(worker.id,java.util.Set.of())) {
+            Damage damage=open.get(key);if(damage!=null && trade(worker,damage) && (damage.timber()?item!=Items.get("stone_block"):!damage.glass() && item==Items.get("stone_block")))count++;
+        }
+        return Math.min(4,count);
+    }
+    public ItemDef missingSupply(Npc worker) {
+        for(long key:known.getOrDefault(worker.id,java.util.Set.of())) {
+            Damage damage=open.get(key);if(damage==null || !trade(worker,damage) || g.time-damage.at<SETTLE)continue;
+            if(!hammer(worker))return Items.HAMMER;
+            if(material(worker,damage)==null)return damage.timber()?Items.PLANK:Items.get("stone_block");
+        }
         return null;
     }
 
@@ -231,6 +249,7 @@ public final class Repairs {
         List<Object> l = new ArrayList<>();
         for (Damage d : open.values()) {
             Map<String,Object> row=new HashMap<>(Map.of("x",d.x,"y",d.y,"z",d.z,"original",d.original,"cause",d.cause,"age",g.time-d.at));
+            row.put("remaining",g.vox.block(d.x,d.y,d.z));
             row.put("known",known.entrySet().stream().filter(entry->entry.getValue().contains(d.key)).map(Map.Entry::getKey).toList());
             row.put("reported",reported.entrySet().stream().filter(entry->entry.getValue().contains(d.key)).map(Map.Entry::getKey).toList());
             Order order=orders.get(d.key);if(order!=null)row.put("order",Map.of("reporter",order.reporter,"worker",order.worker,"payer",order.payer,"fee",order.fee));
@@ -252,7 +271,8 @@ public final class Repairs {
             for(Object id:astratto.util.Json.list(m,"reported"))reported.computeIfAbsent(((Number)id).longValue(),k->new java.util.HashSet<>()).add(key);
             var order=astratto.util.Json.obj(m,"order");if(order!=null && !order.isEmpty())orders.put(key,new Order(astratto.util.Json.lng(order,"reporter",0),astratto.util.Json.lng(order,"worker",0),astratto.util.Json.lng(order,"payer",0),astratto.util.Json.integer(order,"fee",0)));
             // what was broken is broken again in the world as it is loaded (the map is rebuilt whole)
-            if (Blocks.glass(g.vox.block(x, y, z))) g.setBlock(x, y, z, Blocks.AIR);
+            int current=g.vox.block(x,y,z),original=astratto.util.Json.integer(m,"original",0);
+            if(current==original || Blocks.glass(current))g.setBlock(x,y,z,astratto.util.Json.integer(m,"remaining",Blocks.AIR));
         }
     }
     public void clear() { open.clear(); claimedBy.clear(); spots.clear();known.clear();reported.clear();orders.clear();observer=0;nextObserve=0; }

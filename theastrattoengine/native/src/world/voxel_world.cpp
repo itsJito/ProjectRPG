@@ -29,7 +29,7 @@ bool VoxelWorld::create(uint32_t sx, uint32_t sy, uint32_t sz, uint32_t belowFlo
     sealed_.clear();
     navVersion_++;
     dirty_.assign(static_cast<size_t>(columnsX()) * columnsZ(), 1);
-    columnVersion_.assign(dirty_.size(), 1);
+    columnVersion_.assign(dirty_.size(), 1);navColumns_.assign(dirty_.size(),1);
     return true;
 }
 
@@ -42,8 +42,8 @@ bool VoxelWorld::setRaw(int x, int y, int z, int id) {
     blocks_[i] = static_cast<uint8_t>(id);
     edits_++;
     const uint32_t a = table_->defs[old].flags, b = table_->defs[id].flags;
-    const bool nav = ((a ^ b) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR)) != 0;
-    if (nav) navVersion_++;
+    const bool nav = ((a ^ b) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR | ASTRATTO_BLOCK_HAZARD | ASTRATTO_BLOCK_LIQUID | ASTRATTO_BLOCK_CLIMB | ASTRATTO_BLOCK_STEP)) != 0;
+    if (nav) {navVersion_++;touchNavColumn(x,z);}
     return nav;
 }
 
@@ -71,13 +71,14 @@ void VoxelWorld::fill(int x0, int y0, int z0, int x1, int y1, int z1, int id) {
     if (x0 > x1 || y0 > y1 || z0 > z1) return;
     bool nav = false;
     for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
-        const size_t base = index(x, 0, z);
+        const size_t base = index(x, 0, z);bool columnNav=false;
         for (int y = y0; y <= y1; y++) {
             const int old = blocks_[base + y];
             if (old == (id & 0xFF)) continue;
-            nav |= ((table_->defs[old].flags ^ table_->defs[id & 0xFF].flags) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR)) != 0;
+            columnNav |= ((table_->defs[old].flags ^ table_->defs[id & 0xFF].flags) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR | ASTRATTO_BLOCK_HAZARD | ASTRATTO_BLOCK_LIQUID | ASTRATTO_BLOCK_CLIMB | ASTRATTO_BLOCK_STEP)) != 0;
             blocks_[base + y] = static_cast<uint8_t>(id);
         }
+        if(columnNav){touchNavColumn(x,z);nav=true;}
     }
     edits_++;
     if (nav) navVersion_++;
@@ -89,11 +90,11 @@ bool VoxelWorld::setColumn(int x, int z, const uint8_t* cells) {
     bool nav = false;
     for (int y = 0; y < sy_; y++) {
         if (col[y] == cells[y]) continue;
-        nav |= ((table_->defs[col[y]].flags ^ table_->defs[cells[y]].flags) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR)) != 0;
+        nav |= ((table_->defs[col[y]].flags ^ table_->defs[cells[y]].flags) & (ASTRATTO_BLOCK_SOLID | ASTRATTO_BLOCK_DOOR | ASTRATTO_BLOCK_HAZARD | ASTRATTO_BLOCK_LIQUID | ASTRATTO_BLOCK_CLIMB | ASTRATTO_BLOCK_STEP)) != 0;
         col[y] = cells[y];
     }
     edits_++;
-    if (nav) navVersion_++;
+    if (nav){navVersion_++;touchNavColumn(x,z);}
     return true;
 }
 
@@ -101,7 +102,7 @@ void VoxelWorld::clear() {
     std::fill(blocks_.begin(), blocks_.end(), uint8_t{0});
     std::fill(light_.begin(), light_.end(), uint8_t{0});
     sealed_.clear();
-    edits_++; navVersion_++; lightVersion_++;
+    edits_++; navTouched(); lightVersion_++;
     markAllDirty();
 }
 
@@ -109,7 +110,7 @@ bool VoxelWorld::restorePristine() {
     if (pristine_.size() != blocks_.size()) return false;
     std::memcpy(blocks_.data(), pristine_.data(), blocks_.size());
     edits_++;
-    navVersion_ += 100;
+    navVersion_ += 99;navTouched();
     markAllDirty();
     return true;
 }
@@ -117,7 +118,7 @@ bool VoxelWorld::restorePristine() {
 void VoxelWorld::seal(int x, int y, int z, bool sealed) {
     const uint64_t k = key(x, y, z);
     const bool changed = sealed ? sealed_.insert(k).second : sealed_.erase(k) != 0;
-    if (changed) navVersion_++;
+    if (changed){navVersion_++;touchNavColumn(x,z);}
 }
 
 // ------------------------------------------------------------------ dirty columns

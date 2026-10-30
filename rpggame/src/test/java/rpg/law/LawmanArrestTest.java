@@ -12,8 +12,7 @@ import rpg.world.DevMap;
 
 /**
  * Gamefixes: lawmen did not arrest - they should take in the wanted as the guards do, and kill only when they must. A
- * lawman alone with a wanted player: he closes in and tells them to halt; resisted and fought down, he takes them in
- * rather than killing them.
+ * lawman closes in and challenges a wanted player; explicitly resisting a serious arrest authorizes lethal force.
  */
 class LawmanArrestTest {
     private Game game;
@@ -37,7 +36,7 @@ class LawmanArrestTest {
     @AfterEach void close() { game.close(); }
     private void frames(int n) { for (int i = 0; i < n; i++) assertTrue(game.tick(1f / 60)); }
 
-    @Test void aLawmanHaltsTheWantedAndTakesThemInWhenTheyResist() {
+    @Test void aLawmanHaltsTheWantedAndUsesLethalForceAfterExplicitResistance() {
         boolean halted = false;
         for (int i = 0; i < 60 * 20 && !halted; i++) {
             frames(1);
@@ -45,12 +44,12 @@ class LawmanArrestTest {
         }
         System.out.println("bram: goal " + bram.goal + " / " + bram.lastOutcome + " / " + bram.scores);
         assertTrue(halted, "the lawman orders the wanted player to halt (goal " + bram.goal + ", " + bram.lastOutcome + ")");
-        // the player resists: he fights - and beaten down, they are arrested, not killed
+        // Explicit resistance closes peaceful payment and makes this serious arrest lethal.
         g.law.resist(g.player, bram);
         g.player.hp = 3;
         for (int i = 0; i < 60 * 30 && !g.law.inCustody(g.player) && g.player.alive; i++) frames(1);
         System.out.println("bram after resisting: goal " + bram.goal + " / " + bram.lastOutcome + "; player alive " + g.player.alive + " hp " + g.player.hp);
-        assertTrue(g.player.alive, "killed by the lawman instead of arrested");
-        assertTrue(g.law.inCustody(g.player), "the lawman takes the resisting player in");
+        assertFalse(g.player.alive, "explicit resistance to serious arrest is lethal");
+        assertFalse(g.law.inCustody(g.player), "explicitly defiant players are not arrested instead of killed");
     }
 }

@@ -5,11 +5,13 @@ layout(location=2) in vec3 aNormal;
 uniform mat4 uPV, uModel;
 uniform vec3 uFoliage;
 uniform float uSway;
+uniform vec3 uVoxelOrigin;
 uniform int uBendCount;
 uniform vec4 uBenders[16]; // x, feet y, z, radius; selected locally per foliage chunk (bodies, then their trails)
 out vec4 vCol;
 out vec3 vWorld;
 out vec3 vN;
+out vec3 vCell;
 void main() {
     vec4 w = uModel * vec4(aPos, 1.0);
     if(uSway>0.5) {
@@ -42,6 +44,7 @@ void main() {
         w.xz+=off;
         w.y-=min(rise*0.7,dot(off,off)/max(rise*1.4,0.10));
     }
+    vCell = aPos * 64.0 + uVoxelOrigin - aNormal * 0.01;
     vWorld = w.xyz;
     vCol = uSway>0.5 ? vec4(aCol.rgb,1.0) : aCol;
     // 1.0: normals go through the normal matrix (the inverse-transpose of the model matrix), not the model matrix: a

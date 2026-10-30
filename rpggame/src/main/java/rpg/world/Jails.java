@@ -20,7 +20,7 @@ public final class Jails {
                 new DevMap.Piece("SLAB", 38, 120, 38, 121, 1, 2, 0)),
         // DevPalace's cell, in the back of the basilica behind the praetor's bench (0.2.0)
         new Cell(DevMap.PALACE, 135, 118, 139, 121, 137, 137.0f, 120.0f, 138.5f, 115.5f,
-                new DevMap.Piece("SLAB", 136, 120, 136, 121, 1, 2, 0))
+                new DevMap.Piece("SLAB", 136, 119, 136, 120, 1, 0, 0))
     };
     public static Cell forJurisdiction(String jurisdiction) {
         for (Cell cell : CELLS) if (cell.jurisdiction.equals(jurisdiction)) return cell;

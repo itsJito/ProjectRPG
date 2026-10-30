@@ -97,6 +97,7 @@ public final class Rpg implements GameModule {
     public Profiles.Profile profile;
     public java.nio.file.Path savePath() { return profile != null ? profile.save() : SaveSystem.slot("slot1"); }
     public Invariants invariants;
+    private boolean worldReady;
     public double time;
     /** The last tick's length (seconds of the world's clock). */
     public double lastDt = 1 / 60.0;
@@ -196,9 +197,11 @@ public final class Rpg implements GameModule {
             dummies.add(d);
             solidDummy(d);
         }
+        repairs.clear(); // Fixture placement is construction, not damage.
+        worldReady=true;
         invariants.baseline();
         state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on the devmap");
-        chat.add("Welcome to the RPGGAME devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
+        chat.add("Welcome to the SHADOWVEIL devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
     /**
@@ -427,15 +430,19 @@ public final class Rpg implements GameModule {
         return null;
     }
 
+    public final java.util.Map<Long,String> rememberedNames=new java.util.LinkedHashMap<>();
+    public void rememberName(long id,String name) {
+        if(id==0 || name==null || name.isBlank())return;
+        rememberedNames.put(id,name);
+        while(rememberedNames.size()>2048)rememberedNames.remove(rememberedNames.keySet().iterator().next());
+    }
     public String nameOf(long id) {
-        if (id == 0) return "nobody";
-        Actor a = actor(id);
-        if (a != null) return a.name;
-        WorldObject o = objects == null ? null : objects.get(id);
-        return o != null ? o.name : "#" + id;
+        if(id==0)return "nobody";
+        Actor actor=actor(id);WorldObject object=objects==null?null:objects.get(id);
+        if(actor!=null)rememberName(id,actor.name);else if(object!=null)rememberName(id,object.name);
+        return rememberedNames.getOrDefault(id,"someone");
     }
 
-    /** The console's notarget (or ai_ignoreplayer): nothing perceives the player. */
     public boolean notarget() { return ui != null && ui.console.invisible; }
     /** The console's ai_disabled: every mind is frozen. */
     public boolean aiDisabled() { return ui != null && ui.console.on("ai_disabled"); }
@@ -460,7 +467,10 @@ public final class Rpg implements GameModule {
 
     // ------------------------------------------------------------------ changing the world
     public void setBlock(int x, int y, int z, int id) {
-        vox.edited(vox.block(x,y,z),id);
+        int before=vox.block(x,y,z);
+        if(worldReady && repairs!=null && before!=id && !rpg.world.Blocks.objectCell(before) && before!=rpg.world.Blocks.DOOR && before!=rpg.world.Blocks.LOCKED_DOOR
+                && (id==rpg.world.Blocks.AIR || rpg.world.Blocks.charred(id) || rpg.world.Blocks.dual(before) && id==rpg.world.Blocks.survivorOf(before)))repairs.broken(x,y,z,before,"damage");
+        vox.edited(x,y,z,before,id);
         game.commands().blockSet(x, y, z, id); mapDirty = true; mapColumns.add(x << 16 | (z & 0xFFFF));
         if (chemistry != null && (id == rpg.world.Blocks.AIR || id == rpg.world.Blocks.EMBERS || id == rpg.world.Blocks.WATER)) chemistry.cleared(x, y, z);
     }
@@ -492,7 +502,7 @@ public final class Rpg implements GameModule {
         a.x = x; a.y = y; a.z = z;
         a.poseReset=true; a.handAt=-99; a.throwPlan.solvedAt=-99;
         if(chemistry!=null)chemistry.register(a);
-        if (a instanceof Npc n) { if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
+        if (a instanceof Npc n) { n.routeBook.cancel(); if (reactions != null) reactions.cancel(n); n.legs = null; n.hasGoalPos = false; n.resetMotion(); }
         interact.cancel(a, "moved");
     }
 

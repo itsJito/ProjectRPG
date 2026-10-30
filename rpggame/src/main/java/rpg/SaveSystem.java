@@ -54,6 +54,7 @@ public final class SaveSystem {
         st.put("minutes", g.state.minutes);
         Map<String, Object> led = new HashMap<>(); for (var e : g.state.ledger().entrySet()) led.put(e.getKey(), e.getValue());
         st.put("ledger", led);
+        var names=new HashMap<String,Object>();g.rememberedNames.forEach((id,name)->names.put(Long.toString(id),name));st.put("names",names);
         List<Object> log = new ArrayList<>();
         List<DomainEvent> events = g.state.all();
         for (DomainEvent e : events.subList(Math.max(0, events.size() - 300), events.size())) {
@@ -79,6 +80,7 @@ public final class SaveSystem {
             if (n.standing != Npc.Standing.COMMON) m.put("standing", n.standing.name());
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
             m.put("memories", mem);
+            m.put("routes",n.routeBook.save(g.time));
             // a body lies as it lay: its fifteen points, so a load puts it back on the ground (never standing up to fall again)
             var rd = !n.alive && n.ragdoll != 0 ? g.lastBodies.ragdoll(n.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); m.put("pose", pose); }
@@ -173,6 +175,7 @@ public final class SaveSystem {
         g.combat.projectiles.clear();
         if (g.ui != null) g.ui.closeAll();
         Map<String, Object> st = Json.obj(root, "state");
+        g.rememberedNames.clear();for(var entry:Json.obj(st,"names").entrySet())try{g.rememberName(Long.parseLong(entry.getKey()),entry.getValue().toString());}catch(NumberFormatException ignored){}
         List<Object> c = Json.list(st, "counters");
         long[] counters = new long[c.size()];
         for (int i = 0; i < counters.length; i++) counters[i] = ((Number) c.get(i)).longValue();
@@ -235,6 +238,7 @@ public final class SaveSystem {
             if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
             n.arrestedUntil = Json.num(m, "arrested", -1); n.arrestJurisdiction = Json.str(m, "arrestJur", DevMap.jurisdiction(n.x, n.z)); n.patrolIndex = Json.integer(m, "patrol", 0);
+            n.routeBook.load(Json.list(m,"routes"),g.time);n.navPauseUntil=0;
             n.memories.clear();
             List<Object> mem = Json.list(m, "memories");
             if (mem != null) for (Object x : mem) n.remember(Memory.load((Map<String, Object>) x), 24);

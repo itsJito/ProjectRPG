@@ -23,6 +23,13 @@ final class Jobs {
     void tick(Npc n, float dt) {
         if(g.interact.of(n)!=null || n.cs.busy()) { g.ai.desire(n,AiSystem.A_HOLD); return; }
         if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
+        if(n.profession==Profession.CARPENTER) {
+            ItemDef needed=g.repairs.missingSupply(n);var shop=g.econ.localShop(n);
+            if(needed!=null && n.canStore(new ItemStack(needed,1)) && shop!=null && shop.stock.count(needed)>0 && n.has(Items.COINS,g.econ.buyPrice(shop,needed))) {
+                if(brain.goTo(n,shop.counterX,shop.counterZ,false,1.4f))g.econ.buy(n,shop,needed,1,g.state.newRequestId());
+                n.lastOutcome="collecting supplies for a known repair";return;
+            }
+        }
         if(unload(n))return;
         if(n.profession==Profession.LAKE_NET_FISHERMAN){net(n);return;}
         if(n.profession.family==Npc.Role.KNIGHT) { knight(n); return; }
@@ -77,14 +84,14 @@ final class Jobs {
         int free=n.inv.freeSlots();
         if(!n.unloading && free>1)return false;
         ItemDef goods=null; int most=0;
-        for(ItemStack item:n.inv.stacks())if(cargo(item) && n.count(item.def)>most){most=n.count(item.def);goods=item.def;}
+        for(ItemStack item:n.inv.stacks())if(cargo(item) && n.count(item.def)>g.repairs.reserved(n,item.def) && n.count(item.def)>most){most=n.count(item.def);goods=item.def;}
         if(goods==null || n.unloading && free>=6){n.unloading=false;return false;}
         if(!n.unloading)g.state.commit("PackFull",n.id,0,DevMap.jurisdiction(n.x,n.z),0,n.name+" ("+free+" free) goes to unload "+goods.name);
         n.unloading=true;
         // first a store that will buy it
         for(var shop:new rpg.econ.Economy.Shop[]{g.econ.shopA,g.econ.shopB})if(shop!=null && g.econ.buys(shop,goods)) {
             if(brain.goTo(n,shop.counterX,shop.counterZ,false,1.4f)) {
-                int sold=g.econ.sellToShop(n,shop,goods,n.count(goods));
+                int sold=g.econ.sellToShop(n,shop,goods,Math.max(0,n.count(goods)-g.repairs.reserved(n,goods)));
                 n.lastOutcome=n.profession.title+": pack full, sold "+sold+" "+goods.name.toLowerCase()+" at "+shop.name;
             } else n.lastOutcome=n.profession.title+": pack full, taking "+goods.name.toLowerCase()+" to sell at "+shop.name;
             return true;
@@ -136,7 +143,7 @@ final class Jobs {
     private ItemDef batch(Npc n) {
         int minimum=n.profession.family==Npc.Role.CRAFTSMAN?1:3;
         boolean joinery=n.profession==Profession.CARPENTER && joineryPending(n);
-        for(ItemStack item:n.inv.stacks())if(n.count(item.def)>=minimum && !item.stolen && product(n.profession,item.def)
+        for(ItemStack item:n.inv.stacks())if(n.count(item.def)>=minimum+g.repairs.reserved(n,item.def) && !item.stolen && product(n.profession,item.def)
                 && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery && g.econ.buys(g.econ.localShop(n),item.def))return item.def;
         return null;
     }
@@ -185,7 +192,7 @@ final class Jobs {
     }
     private Behavior.Node<Npc> sell(Npc n,ItemDef product) {
         var shop=g.econ.localShop(n);float[] counter=g.econ.counterSpot(shop);
-        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f), person->g.econ.sellToShop(person,shop,product,person.count(product))>0?SUCCESS:FAILURE));
+        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f), person->g.econ.sellToShop(person,shop,product,Math.max(0,person.count(product)-g.repairs.reserved(person,product)))>0?SUCCESS:FAILURE));
     }
     private boolean mineral(Profession p,ItemDef item) {
         return switch(p) {

@@ -60,7 +60,7 @@ class PosseKnowledgeTest {
             Npc hunter=g.law.posses.members().get(0);
             g.teleport(hunter,hunter.hunt.x,DevMap.FLOOR,hunter.hunt.z);
             hunter.hunt.reachedLkp=true; hunter.goal=rpg.ai.Brain.Goal.SEARCH; hunter.nextThink=0;
-            for(int i=0;i<60*45 && hunter.snaresSet<2;i++) assertTrue(game.tick(1f/60));
+            for(int i=0;i<60*45 && hunter.snaresSet<1;i++) assertTrue(game.tick(1f/60));
             assertTrue(hunter.snaresSet>=1,"the hunter lays a snare: "+hunter.lastOutcome);
             var snare=g.dungeons.traps.stream().filter(t->t.kind==2 && !t.removed).findFirst().orElseThrow();
             assertEquals(hunter.id,snare.owner);

@@ -1,4 +1,4 @@
-RPGGAME - where the sounds come from
+SHADOWVEIL - where the sounds come from
 
 ui/, voice/, devmapambience.ogg
     The game's own recordings (supplied with the project's assets). The only recorded human voices the game uses are

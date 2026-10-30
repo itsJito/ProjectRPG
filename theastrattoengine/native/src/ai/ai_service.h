@@ -56,6 +56,9 @@ public:
         float progressBest = 1e9f, progressTimer = 0, repathTimer = 0;
         int fails = 0;
         uint32_t navSeen = 0;
+        std::vector<std::pair<uint32_t,uint32_t>> navColumns;
+        bool partial=false,capped=false;
+        uint32_t repaths=0,expansions=0,partialPaths=0,capHits=0,yields=0,partialStreak=0;
         float speed = 0;
         float pause = 0;                                 // a wanderer stands a moment where it got to
         bool waiting = false;

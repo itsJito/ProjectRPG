@@ -1,0 +1,21 @@
+Alpha 0.2.6: Ash and Order — Shadow
+
+Full gameplay: 312 cases, 311 passed, 0 failures, 0 errors, 1 deliberately disabled profiling probe
+Final affected navigation/world/routine: 12 cases, 12 passed, 0 failures, 0 errors
+Engine native self-test: 121 passed, 0 failed
+Engine Java/OpenGL: 29 passed, 0 failed
+Distribution: installDist passed
+Standalone review tools: compiled against the final distribution
+Final distribution console integration: passed
+Final distribution navigation: see final/navigation.txt
+
+The disabled profiling probe is SimProfileProbe.profileTheSimulation.
+Full gameplay report: verification-rpggame-63555257801260
+Final affected report: verification-rpggame-63928343224874
+Final native/engine check: vertical-release-check.log
+Final API: 2.6; matching native library and Java bindings
+
+Visual captures: native renderer, llvmpipe OpenGL 4.5, 640 x 360
+Animation contact sheets: frames 1, 4, 7 through 58
+Reference: preserved Alpha 0.2.5 distribution
+Publication target: polish only

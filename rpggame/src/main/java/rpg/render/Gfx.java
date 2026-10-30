@@ -452,6 +452,7 @@ public final class Gfx implements AutoCloseable {
         fences(g);
         // characters
         Actor p = g.player;
+        if(!g.notarget()) {
         shadowProxy(g,p);
         if (p.alive && p.morphT > 0) animal(g.magic.form(p),dt,g.time);
         else if (p.alive && p.reacting && p.ragdoll != 0 && g.lastBodies.ragdoll(p.ragdoll) != null) {
@@ -463,6 +464,7 @@ public final class Gfx implements AutoCloseable {
             // the player's own body, fallen (gamefixes: the death is watched), until it becomes the grave
             Snapshots.Ragdoll rd = g.lastBodies.ragdoll(g.death.ragdoll);
             if (rd != null) ragdoll(rd, p);
+        }
         }
         for (Npc n : g.npcs) {
             if (n.loaded) shadowProxy(g,n);
@@ -910,13 +912,13 @@ public final class Gfx implements AutoCloseable {
     private final LinkedHashMap<DamageKey,DamageMesh> damagedParts=new LinkedHashMap<>(32,0.75f,true);
     private rpg.animal.Animal drawnAnimal;
     private ItemModels.Model injuredPart(rpg.animal.Animal animal,ItemModels.Model base,rpg.combat.Gore.Part part) {
-        if(animal==null || base==null || animal.injuries.version(animal)==0 || !animal.injuries.affects(VoxelInjuries.part(part)))return base;
+        if(animal==null || base==null || !animal.injuries.affects(VoxelInjuries.part(part)) && animal.blood.marks.stream().noneMatch(m->m.scorch() && m.part()==VoxelInjuries.part(part)))return base;
         var key=new DamageKey(animal.id,base,part);var state=damagedParts.computeIfAbsent(key,k->new DamageMesh());state.used=sceneGame.time;
-        int version=animal.injuries.version(animal);
+        int version=31*animal.injuries.version(animal)+animal.blood.version;
         if(state.version!=version) {
             if(state.pending!=null)state.pending.cancel(false);
-            var cuts=animal.injuries.snapshot();int severity=animal.injuries.severity(animal);state.version=version;
-            state.pending=builder.submit(()->{var model=VoxelInjuries.carve(base,part,cuts,severity);return new DamageBuild(model,model==base?null:VoxMesh.build(model));});
+            var cuts=animal.injuries.snapshot();var marks=animal.blood.snapshot();int severity=animal.injuries.severity(animal);state.version=version;
+            state.pending=builder.submit(()->{var model=VoxelInjuries.scorch(VoxelInjuries.carve(base,part,cuts,severity),part,marks);return new DamageBuild(model,model==base?null:VoxMesh.build(model));});
         }
         if(state.pending!=null && state.pending.isDone())try {
             var ready=state.pending.get();state.pending=null;
@@ -1204,6 +1206,7 @@ public final class Gfx implements AutoCloseable {
     private final java.util.Map<Long, MonsterPose> monsterPoses = new java.util.HashMap<>();
     private final Mat4 mf = new Mat4(), mp = new Mat4(), mq = new Mat4(), ma = new Mat4(), mb = new Mat4(), mc = new Mat4();
     private float mShade = 1, mAlpha = 1, mGlow = 0;
+    private boolean mDissolve;
 
     /** One of a monster's parts in a frame measured in its voxels (the frame carries the figure's scale). */
     /** (0.2.1) a part a monster has lost is not drawn (see {@link #lostPart}). */
@@ -1222,7 +1225,7 @@ public final class Gfx implements AutoCloseable {
         if (mesh == 0) return;
         System.arraycopy(m.m, 0, m16, 0, 16);
         float sh = mShade * charTint;
-        cmd.model(mesh, mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
+        cmd.model(mesh, mDissolve ? AstrattoNative.MODEL_DISSOLVE : mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
     }
     private static float[] at(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformPoint(x, y, z, o); return o; }
     private static float[] dirOf(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformDir(x, y, z, o); return norm(o); }
@@ -1269,13 +1272,14 @@ public final class Gfx implements AutoCloseable {
             if (!mo.alive && mo.dissolve > 0) {
                 // the remains going (gamefixes): charred to ash, a dull ember glow through it at the height of it, then
                 // fading into the motes that rise off it
-                float d = mo.dissolve, gone = smooth(Math.min(1, d * 1.15f));
+                float d = mo.dissolve;
                 charTint *= 1 - 0.75f * smooth(Math.min(1, d * 2.2f));
                 mGlow = Math.max(mGlow, 0.55f * (float) Math.sin(Math.PI * Math.min(1, d * 1.3f)));
-                mAlpha *= 1 - gone;
-                float ash = 0.62f - 0.25f * d;
-                cmd.emitter(mo.id ^ (5L << 54), 2, mo.x, mo.y + 0.25f + mo.height * 0.2f, mo.z, Math.max(0.3f, mo.radius * 1.2f), 70 * (1 - d * 0.6f), 0.05f, 1.1f,
-                        ash + 0.35f, ash + 0.1f, ash - 0.05f, 0, 0.9f, 0);
+                mDissolve=true;
+                mAlpha=1-d;
+                float ash = 0.22f - 0.08f * d;
+                cmd.emitter(mo.id ^ (5L << 54), 2, mo.x, mo.y + 0.25f + mo.height * 0.2f, mo.z, 0.012f, 24 * (1 - d), Math.max(0.2f, mo.radius * 0.9f), 0.55f,
+                        ash + 0.08f, ash + 0.035f, ash, 0, 0.35f, 0);
             }
             MonsterPose st = monsterPoses.computeIfAbsent(mo.id, k -> new MonsterPose());
             if (f.humanoid) {
@@ -1289,7 +1293,7 @@ public final class Gfx implements AutoCloseable {
                 default -> dragon(mo, f, st, dt);
             }
             if (mo.alive && !ghost) cmd.shadowBody(mo.x, mo.y, mo.z, Math.max(mo.radius, mo.kind.hw * 0.4f), mo.height);
-        } finally { charTint = previous; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; mHide = false; }
+        } finally { charTint = previous; mDissolve=false; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; mHide = false; }
     }
 
     private static float smooth(float x) { return x * x * (3 - 2 * x); }

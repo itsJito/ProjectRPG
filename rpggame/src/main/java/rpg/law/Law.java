@@ -38,6 +38,9 @@ public final class Law {
     public final List<String> reportsLog = new ArrayList<>();
     private final Map<Long, Double> haltedAt = new HashMap<>();
     private final Set<Long> resisting = new HashSet<>();
+    private final Set<String> defiance=new HashSet<>();
+    private static String defianceKey(long actor,String jurisdiction){return actor+":"+jurisdiction;}
+    public boolean refusesPeace(long actor,String jurisdiction){return defiance.contains(defianceKey(actor,jurisdiction));}
     private record Assault(long offender, long victim) {}
     private final Map<Assault, Double> assaultAt = new HashMap<>();
     /** When each offender was last arrested (game time): every grievance of the law's from before it is settled by the sentence. */
@@ -91,7 +94,7 @@ public final class Law {
             if(offender==null || !offender.alive){haltedAt.remove(entry.getKey());continue;}
             for(Npc officer:g.npcs)if(officer.alive && officer.fightTarget==offender.id
                     && (officer.role==Npc.Role.GUARD || officer.role==Npc.Role.LAWMAN)
-                    && petty(offender.id,officer.homeJurisdiction) && !resisting(offender.id)
+                    && petty(offender.id,officer.homeJurisdiction) && !resisting(offender.id,officer.homeJurisdiction)
                     && !(officer.cs.lastAttacker==offender.id && g.time-officer.cs.lastHurt<12)) {
                 declineFine(offender,officer);break;
             }
@@ -187,7 +190,8 @@ public final class Law {
         if (a == g.player) g.controller.cancelHandInput();
         if (bounties.containsKey(jur)) bounties.get(jur).remove(a.id);
         confronted.remove(new Key(a.id, jur)); fineDeclined.remove(new Key(a.id, jur));
-        resisting.remove(a.id); haltedAt.remove(a.id);
+        resisting.remove(a.id); haltedAt.remove(a.id);defiance.remove(defianceKey(a.id,jur));
+        if(a==g.player){reminder="";if(g.ui!=null && g.ui.dialog!=null && g.ui.dialog.standoff)g.ui.closeDialog();}
         Set<Actor> stoodDown = new HashSet<>();
         stoodDown.add(a);
         for (Npc n : g.npcs) {
@@ -272,6 +276,7 @@ public final class Law {
         return switch (m.kind) {
             case "THEFT" -> Math.max(1, Math.round(m.value * g.cfg.theftBountyShare));
             case "DISORDERLY" -> 5;
+            case "BRIBERY" -> 25;
             case "VANDALISM" -> 10;
             case "LIVESTOCK" -> m.value >= 50 ? 50 : 30;
             case "TRESPASS" -> 50;
@@ -308,6 +313,14 @@ public final class Law {
     }
     public boolean wantedAnywhere(long offender) { for (var m : bounties.values()) if (m.getOrDefault(offender, 0) > 0) return true; return false; }
     public Map<String, Map<Long, Integer>> all() { return bounties; }
+    /** Developer changes close existing case state before replacing its amount, scoped to one kingdom. */
+    public boolean setBounty(Actor actor,String jurisdiction,int amount){
+        if(amount<0 || !java.util.List.of(DevMap.ALPHA,DevMap.BETA,DevMap.PALACE).contains(jurisdiction))return false;
+        settle(actor,jurisdiction);
+        if(amount>0)bounties.computeIfAbsent(jurisdiction,k->new HashMap<>()).put(actor.id,amount);
+        g.state.commit("BountySet",actor.id,0,jurisdiction,0,Integer.toString(amount));return true;
+    }
+
 
     // ------------------------------------------------------------------ crimes and witnesses
     public void theft(Actor thief, long owner, ItemStack stolen, WorldObject where, long cause) {
@@ -328,7 +341,7 @@ public final class Law {
     public int crime(Actor culprit, String kind, long victim, int value, WorldObject where, long cause) {
         if (g.actor(victim) instanceof rpg.monster.Monster || culprit instanceof rpg.monster.Monster) return 0;
         if (g.scripted) System.out.printf("      [crime] %s by %s against %s at (%.1f, %.1f), t %.1f%n", kind, culprit.name, g.nameOf(victim), culprit.x, culprit.z, g.time);
-        crimes++;
+        crimes++;rememberName(culprit);if(g.actor(victim)!=null)rememberName(g.actor(victim));
         // Honor (GDD 3.5): the act weighs on the player's conscience whether or not anyone saw it - against innocents only
         // (not an outlaw, not someone who was attacking them); looting the dead is its own act, not a robbery as well
         if (culprit == g.player && g.honor != null) {
@@ -338,12 +351,17 @@ public final class Law {
         String jur = where != null ? where.jurisdiction() : DevMap.jurisdiction(culprit.x, culprit.z);
         var ev = g.state.commit("CrimeCommitted", culprit.id, victim, jur, cause, kind + " value=" + value);
         List<Npc> seen = g.ai.witnesses(culprit);
+        Actor affected=g.actor(victim);
+        seen.removeIf(w -> g.ai.stealth.exposure(w,culprit)<=0 || (where!=null
+                ? !g.vox.sightCell(w.x,w.eyeY(),w.z,(int)Math.floor(where.x),(int)Math.floor(where.y),(int)Math.floor(where.z))
+                : affected!=null && affected!=culprit && !g.vox.sight(w.x,w.eyeY(),w.z,affected.x,affected.chestY(),affected.z)));
         // under Disguise Self, the witnesses saw a stranger: the crime is known, the culprit is not (no bounty comes of it)
         long who = culprit.disguiseT > 0 ? 0 : culprit.id;
         // under Friends, a friend saw nothing they will tell
         seen.removeIf(w -> w.friendUntil > g.time && culprit == g.player);
         for (Npc w : seen) {
             w.remember(new Memory(kind, who, victim, jur, g.state.minutes, 1f, "witnessed", ev.id(), value, kind.toLowerCase() + " at " + (where == null ? "?" : where.name) + (who == 0 ? " (by a stranger)" : "")), 24);
+            w.memories.get(w.memories.size()-1).witness=w.id;
             g.state.commit("CrimeWitnessed", w.id, culprit.id, jur, ev.id(), kind + " seen by " + w.name);
             witnessed++;
             String protest=kind.equals("VANDALISM") ? switch(w.role) {
@@ -363,6 +381,8 @@ public final class Law {
         }
         return seen.size();
     }
+
+    private void rememberName(Actor actor){g.rememberName(actor.id,actor.name);}
 
     private static String names(List<Npc> l) { StringBuilder b = new StringBuilder(); for (Npc n : l) b.append(b.length() > 0 ? ", " : "").append(n.name); return b.toString(); }
 
@@ -409,12 +429,15 @@ public final class Law {
     /** A witness, in person, tells a lawman (GDD 3.5). Validated: a real witness, the right jurisdiction, close enough, alive. */
     public Result report(Npc witness, Memory m, Npc lawman) {
         String why = null;
-        if (m.settled) why = "the case has already been settled";
+        if(m.withheld)why="this eyewitness withheld the report";
+        else if (m.settled) why = "the case has already been settled";
         else if (!m.witnessed()) why = "a rumor is not evidence";
         else if (m.reported) why = "already reported";
+        else if(m.relays!=0 || m.witness!=0 && m.witness!=witness.id || !witness.memories.stream().anyMatch(owned->owned==m || owned.sameIncident(m) && owned.witnessed()))why="not this person's eyewitness account";
+        else if(lawman.role!=Npc.Role.LAWMAN && lawman.role!=Npc.Role.GUARD)why="not an officer";
         else if (!lawman.alive || !witness.alive) why = "someone is dead";
         else if (!lawman.homeJurisdiction.equals(m.jurisdiction)) why = lawman.name + " has no authority in " + m.jurisdiction;
-        else if (witness.distTo(lawman) > 2.8f) why = "too far from the lawman";
+        else if (witness.distTo(lawman) > 2.8f || !g.vox.sight(witness.x,witness.eyeY(),witness.z,lawman.x,lawman.eyeY(),lawman.z)) why = "cannot speak to the officer here";
         if (why != null) { rejectedReports++; return Result.no(why); }
         if (m.subject == 0) {
             // found, not seen done: no one to put a bounty on - the force goes to search where it was found
@@ -458,30 +481,49 @@ public final class Law {
 
     public Result payBounty(Actor a, Npc to, long req) {
         String jur = to.homeJurisdiction;
+        if(g.state.alreadyCommitted(req))return Result.no("This payment has already been settled.");
+        if(!a.alive || !to.alive || (to.role!=Npc.Role.GUARD && to.role!=Npc.Role.LAWMAN))return Result.no("The payment cannot be received.");
+        if(refusesPeace(a.id,jur))return Result.no("You chose to resist arrest. The watch will not accept payment during this fight.");
         int b = bounty(a.id, jur);
         if (b <= 0) return Result.no("You have no bounty in " + jur + ".");
         if (!a.has(Items.COINS, b)) return Result.no("You need " + b + " coins to pay your bounty.");
         ItemStack payment = new ItemStack(Items.COINS, b, to.id, false, a.id);
         if (!to.canStore(payment)) return Result.no("The watch cannot receive the payment right now.");
-        a.takeItems(Items.COINS, b);
-        to.store(payment);
+        String paidCrime="offence";int severity=-1;
+        for(Npc witness:g.npcs)for(Memory memory:witness.memories)if(memory.subject==a.id && memory.crime() && !memory.settled && jur.equals(memory.jurisdiction) && charge(memory)>severity){severity=charge(memory);paidCrime=memory.kind;}
+        for(ItemStack coin:a.takeItems(Items.COINS,b)){coin.owner=to.id;coin.stolen=false;to.store(coin);}
         settle(a, jur);
+        g.ai.say(to,paymentComment(paidCrime));
         g.state.commit(req, "BountyPaid", a.id, to.id, jur, 0, b + " coins to " + to.name);
-        if (a == g.player) { g.chat.add("You pay your bounty of " + b + " coins. You are no longer wanted in " + jur + ".", Chat.Kind.CRIME); if (g.sfx != null) g.sfx.ui("coins", 0.6f); g.honor.paidBounty(b); g.ai.rumors.deed("paid their bounty in full", to.id); }
+        if (a == g.player) { g.chat.add("You pay your bounty of " + b + " coins. You are no longer wanted in " + jur + ".", Chat.Kind.CRIME); if (g.sfx != null) g.sfx.ui("coins", 0.6f); g.honor.event("RESTITUTION",to.id,2,"bounty:"+req,false,"paid a bounty of "+b); g.ai.rumors.deed("paid their bounty in full", to.id); }
         return Result.ok();
     }
 
-    public boolean resisting(long id) { return resisting.contains(id); }
+    private static String paymentComment(String crime) {
+        return switch(crime) {
+            case "THEFT"->"The theft fine is paid. Keep your hands off other people's belongings.";
+            case "MURDER"->"The payment is recorded. It cannot bring back the dead.";
+            case "ARSON"->"The arson charge is settled. Leave the buildings standing.";
+            case "ASSAULT"->"Your assault fine is settled. Put the weapon away and keep the peace.";
+            case "VANDALISM"->"The damage fine is paid. Think of the people who must mend it.";
+            case "TRESPASS"->"The trespass fine is paid. Respect the boundaries next time.";
+            case "LIVESTOCK"->"The livestock fine is settled. Leave the animals alone.";
+            case "DISORDERLY"->"That settles the disturbance. No more trouble.";
+            default->"Your payment is recorded. Thank you for settling this peacefully.";
+        };
+    }
+    public boolean resisting(long id) { return resisting.contains(id) || defiance.stream().anyMatch(key->key.startsWith(id+":")); }
+    public boolean resisting(long id,String jurisdiction){return resisting.contains(id) || refusesPeace(id,jurisdiction); }
     /** A crime's kind in words a person would use (the records' THEFT is a "theft", TRESPASS "trespassing"). */
     public static String crimeWord(String kind) {
         return switch (kind) {
             case "THEFT" -> "theft"; case "ASSAULT" -> "assault"; case "MURDER" -> "killing"; case "TRESPASS" -> "trespassing";
-            case "VANDALISM" -> "vandalism"; case "LOCKPICKING" -> "lock-picking"; case "ARSON" -> "arson"; case "LIVESTOCK" -> "livestock theft";
+            case "BRIBERY" -> "attempted bribery"; case "VANDALISM" -> "vandalism"; case "LOCKPICKING" -> "lock-picking"; case "ARSON" -> "arson"; case "LIVESTOCK" -> "livestock theft";
             default -> kind.toLowerCase().replace('_', ' ');
         };
     }
     /** The wanted refuse to come quietly: the officer who halted them (and the watch) take them by force. */
-    public void resist(Actor p, Npc officer) { resisting.add(p.id); g.state.commit("ArrestResisted", p.id, officer.id, officer.homeJurisdiction, 0, ""); }
+    public void resist(Actor p, Npc officer) { if(petty(p.id,officer.homeJurisdiction)){declineFine(p,officer);return;} if(bounty(p.id,officer.homeJurisdiction)<=0)return;defiance.add(defianceKey(p.id,officer.homeJurisdiction));if(g.ui!=null)g.ui.closeDialog(); g.state.commit("ArrestResisted", p.id, officer.id, officer.homeJurisdiction, 0, ""); }
 
     /** Whether a blow struck (or a grudge formed) at a moment was settled by an arrest since (the law does not fight it again). */
     public boolean settled(long offender, double when) { Double at = settledAt.get(offender); return at != null && when <= at; }
@@ -518,6 +560,7 @@ public final class Law {
     /** The guard catches up with the wanted player: Halt! Pay, come quietly, or resist. A petty bounty is a fine asked for, never a fight. */
     public Dialog halt(Npc guard, Actor p) {
         String jur = guard.homeJurisdiction;
+        if(refusesPeace(p.id,jur))return null;
         boolean petty = petty(p.id, jur);
         Double at = haltedAt.get(p.id);
         if (at != null && g.time - at < 14) {
@@ -566,7 +609,7 @@ public final class Law {
     /** A guard beating a wanted offender down arrests them instead of killing them. */
     public boolean arrestInsteadOfKill(Actor attacker, Actor victim) {
         if (!(attacker instanceof Npc n) || (n.role != Npc.Role.GUARD && n.role != Npc.Role.LAWMAN)) return false;
-        if (bounty(victim.id, n.homeJurisdiction) <= 0) return false;
+        if (bounty(victim.id, n.homeJurisdiction) <= 0 || refusesPeace(victim.id,n.homeJurisdiction)) return false;
         arrest(victim, n.homeJurisdiction, n);
         return true;
     }
@@ -679,7 +722,7 @@ public final class Law {
 
     // ------------------------------------------------------------------ persistence
     public Map<String, Object> save() {
-        Map<String, Object> m = new HashMap<>();
+        Map<String, Object> m = new HashMap<>();m.put("_defiance",new ArrayList<>(defiance));
         m.put("_reported", new ArrayList<Object>(reportedCrimes));
         m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions, "bounty", sentenceBounty));
         for (var e : bounties.entrySet()) {
@@ -694,7 +737,9 @@ public final class Law {
     public void load(Map<String, Object> m) {
         clear();
         if (m == null) return;
+        for(Object entry:astratto.util.Json.list(m,"_defiance"))defiance.add(entry.toString());
         for (var e : m.entrySet()) {
+            if(e.getKey().equals("_defiance"))continue;
             if (e.getKey().equals("_custody")) {
                 Map<String, Object> custody = (Map<String, Object>) e.getValue();
                 sentenceUntil = astratto.util.Json.num(custody, "until", -1);
@@ -725,7 +770,7 @@ public final class Law {
         }
     }
 
-    public void clear() { confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
+    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
 
     /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
     public static final int FORFEIT_FROM = 25;
@@ -785,6 +830,7 @@ public final class Law {
         if (!heldIn.isEmpty()) openEmptyCell(heldIn);
         long id = g.player.id;
         for (var charges : bounties.values()) charges.remove(id);
+        defiance.removeIf(key->key.startsWith(id+":"));
         confronted.removeIf(k -> k.offender() == id);
         resisting.remove(id); haltedAt.remove(id); assaultAt.clear();
         settledAt.put(id, g.time);

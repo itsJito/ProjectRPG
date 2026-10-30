@@ -834,6 +834,7 @@ public final class Animals {
             for(var entry:a.restPose.entrySet()) { var b=entry.getValue();rest.add(java.util.Map.of("part",entry.getKey().name(),"x",b.x,"y",b.y,"z",b.z,"qw",b.qw,"qx",b.qx,"qy",b.qy,"qz",b.qz)); }
             m.put("restPose",rest);
             m.put("charred",a.charred);m.put("injuries",a.injuries.save());
+            var scorches=new ArrayList<Object>();for(var mark:a.blood.marks)if(mark.scorch())scorches.add(Map.of("part",mark.part(),"face",mark.face(),"u",mark.u(),"v",mark.v(),"radius",mark.radius(),"wet",mark.wet(),"seed",mark.seed(),"age",g.time-mark.at()));m.put("scorches",scorches);
             m.put("y",(double)a.y);
             m.put("x", (double) a.x); m.put("z", (double) a.z); m.put("yaw", (double) a.yaw); m.put("hp", (double) a.hp);
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
@@ -896,6 +897,10 @@ public final class Animals {
             a.hp = a.alive ? (float) astratto.util.Json.num(m, "hp", a.maxHp()) : 0;
             a.y = (float)astratto.util.Json.num(m,"y",DevMap.FLOOR);
             a.charred=(float)astratto.util.Json.num(m,"charred",0);a.injuries.load(astratto.util.Json.list(m,"injuries"));
+            for(Object value:astratto.util.Json.list(m,"scorches"))if(value instanceof Map<?,?> raw) {
+                @SuppressWarnings("unchecked") var mark=(Map<String,Object>)raw;
+                a.blood.marks.add(new rpg.actor.Blood.Mark(astratto.util.Json.integer(mark,"part",0),astratto.util.Json.integer(mark,"face",3),(float)astratto.util.Json.num(mark,"u",0.5),(float)astratto.util.Json.num(mark,"v",0.5),(float)astratto.util.Json.num(mark,"radius",1),astratto.util.Json.bool(mark,"wet",false),astratto.util.Json.integer(mark,"seed",1),g.time-astratto.util.Json.num(mark,"age",0),true));a.blood.version++;
+            }
             if(!a.alive)a.lieT=1;
             var poses=astratto.util.Json.list(m,"restPose");
             if(poses!=null)for(Object entry:poses)if(entry instanceof Map<?,?> raw) {

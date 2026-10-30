@@ -609,7 +609,10 @@ final class HiResItems {
         for (int x = -20; x <= 20; x++) { int bow = Math.abs(x) * Math.abs(x) / 50; m.set(cx + x, h - 4 - bow, cz + 1, Math.abs(x) > 17 ? k.edge() : k.blade()); m.set(cx + x, h - 5 - bow, cz + 1, k.blade()); }
         for (int x = -19; x <= 19; x++) m.set(cx + x, h - 14 + Math.abs(x) / 3, cz + 1, mat(0xE8E0C8));   // the string
         for (int x = -1; x <= 1; x++) m.set(cx + x, 16, cz + 3, k.pommel());                             // the trigger
-        return new ItemModels.Model(m, cx, 14, cz + 1);
+        VoxModel full=new VoxModel(66,60,11);
+        for(int x=0;x<full.sx;x++)for(int y=0;y<full.sy;y++)for(int z=0;z<full.sz;z++)
+            full.set(x,y,z,m.get(Math.min(m.sx-1,x*2/3),Math.min(m.sy-1,y*2/3),Math.min(m.sz-1,z*2/3)));
+        return new ItemModels.Model(full,cx*1.5f,21,(cz+1)*1.5f);
     }
 
     /** A thrown weapon as it is held: a dart (fins), a knife, a tomahawk (a small axe), a javelin (long and thin). */

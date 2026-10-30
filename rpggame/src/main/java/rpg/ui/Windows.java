@@ -122,7 +122,7 @@ final class Windows {
 
     // ------------------------------------------------------------------ the bank vault: the centre of the bank's window
     /**
-     * The vault (gamefixes: a better, easier bank, the vault taking centre stage): the Bank of Gameworld's seal and the
+     * The vault (gamefixes: a better, easier bank, the vault taking centre stage): the Bank of ASHENWRATH's seal and the
      * holder's name across the top with the gold and the room left; the vault itself, large, in the middle - drag into it
      * from the pack on the right, or out of it; and under it the three things one comes to a bank to do in one press:
      * put away everything carried, put away the gold, take everything out.
@@ -141,7 +141,7 @@ final class Windows {
             ui.ring(sx, sy, 24, 3, Style.GOLD_LIT);
             ui.ring(sx, sy, 18, 1, Style.GOLD);
             ui.flatCentered(ui.heading, "G", sx, sy - 14, 24, Style.GOLD_LIT);
-            ui.text(ui.heading, "Bank of Gameworld", x + 76, y + 12, 26, Style.ACCENT);
+            ui.text(ui.heading, "Bank of ASHENWRATH", x + 76, y + 12, 26, Style.ACCENT);
             ui.text(g.nameOf(c.owner) + "'s vault", x + 78, y + 44, 13, Style.DIM);
             if (Style.button(ui, "x", x + ww - 36, y + 12, 26, 26, live)) { hud.win = Hud.Win.NONE; hud.sound("UI_windowclose", 0.4f); }
             // what is held

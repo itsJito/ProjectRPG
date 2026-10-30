@@ -34,6 +34,7 @@ class Polish025Test {
             g.monsters.despawnBody(m);
         }
         for(int x=96;x<=108;x++)for(int z=65;z<=76;z++)for(int y=DevMap.FLOOR;y<=DevMap.FLOOR+4;y++)g.setBlock(x,y,z,Blocks.AIR);
+        g.repairs.clear();
         g.teleport(g.player,98.5f,DevMap.FLOOR,74.5f);
         game.tick(0);
     }

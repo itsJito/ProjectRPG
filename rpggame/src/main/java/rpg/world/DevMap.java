@@ -90,7 +90,7 @@ public final class DevMap {
     public static final int CONTACT_X0 = 44, CONTACT_Z0 = 108, CONTACT_X1 = 52, CONTACT_Z1 = 116;
     public static final int KIOSK_X0 = 58, KIOSK_Z0 = 100, KIOSK_X1 = 64, KIOSK_Z1 = 106;
     public static final float[] CARAVAN_A = {91.5f, 64.5f}, CARAVAN_B = {27.5f, 108.5f};
-    /** The Bank of Gameworld (gamefixes), DevTown: its walls, its doorway in the north wall, the counter across the hall, where the teller stands. */
+    /** The Bank of ASHENWRATH (gamefixes), DevTown: its walls, its doorway in the north wall, the counter across the hall, where the teller stands. */
     public static final int BANK_X0 = 66, BANK_Z0 = 104, BANK_X1 = 78, BANK_Z1 = 116, BANK_COUNTER_Z = 110;
     public static final int[][] BANK_DOOR = {{71, BANK_Z0}, {72, BANK_Z0}};
     public static final float[] BANK_TELLER = {72.0f, 111.4f};
@@ -254,8 +254,8 @@ public final class DevMap {
             farm();
             graveyard();
             for (Jails.Cell cell : Jails.CELLS) {
-                int wallMaterial=cell.jurisdiction().equals(ALPHA)?PLASTER:BRICK;
-                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), cell.jurisdiction().equals(ALPHA)?FENCE:wallMaterial);
+                int wallMaterial=cell.jurisdiction().equals(ALPHA)?PLASTER:cell.jurisdiction().equals(PALACE)?LIMESTONE_BRICKS:BRICK;
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), !cell.jurisdiction().equals(BETA)?FENCE:wallMaterial);
                 fill(cell.endX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
                 fill(cell.wallX(), FLOOR, cell.backZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
                 fill(cell.wallX(), FLOOR + 3, cell.frontZ(), cell.endX(), FLOOR + 3, cell.backZ(), wallMaterial);
@@ -417,7 +417,7 @@ public final class DevMap {
         }
 
         /**
-         * The Bank of Gameworld: a stone-brick hall with a marble floor, entered from the road through a door in its north
+         * The Bank of ASHENWRATH: a stone-brick hall with a marble floor, entered from the road through a door in its north
          * wall; a counter runs across it, the teller's place behind and the strongroom's wall at the back.
          */
         void bank() {

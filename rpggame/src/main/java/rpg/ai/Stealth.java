@@ -128,7 +128,7 @@ public final class Stealth {
         return exposure(n,acuity,a,false);
     }
     private float exposure(Actor n,float acuity,Actor a,boolean tracking) {
-        if (!n.alive || a == null || !a.alive || a == n) return 0;
+        if (!n.alive || a == null || !a.alive || a == n || a==g.player && g.notarget()) return 0;
         float dx = a.x - n.x, dz = a.z - n.z, d = (float) Math.hypot(dx, dz);
         if (d > RANGE) return 0;
         float cone = 1;

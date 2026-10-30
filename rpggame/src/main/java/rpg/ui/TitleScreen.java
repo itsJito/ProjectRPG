@@ -55,7 +55,7 @@ public final class TitleScreen {
         for (int i = 0; i < 40; i++) ui.rect(w - 360 - i * 10, 0, 360 + i * 10, h, Style.fade(0x06000000, fade));
         for (int i = 0; i < 12; i++) { ui.rect(0, 0, w, 14 + i * 6, 0x05000000); ui.rect(0, h - 14 - i * 6, w, 14 + i * 6, 0x06000000); }
         float x = w - MARGIN - MENU_W, y = 64;
-        ui.text("RPGGAME", x, y, 54, Style.fade(Style.ACCENT, fade));
+        ui.text("SHADOWVEIL", x, y, 54, Style.fade(Style.ACCENT, fade));
         ui.rect(x, y + 66, 300, 2, Style.fade(0x80D8B46A, fade));
         ui.text("A world that remembers.", x + 2, y + 76, 15, Style.fade(Style.DIM, fade));
         y += 128;

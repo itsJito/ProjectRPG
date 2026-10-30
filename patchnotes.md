@@ -1,3 +1,75 @@
+# Patch Notes Version Alpha 0.2.6: Ash and Order
+
+Witnesses now have more to say before the watch gets involved.
+
+_Developer: Shadow_
+
+## New Features
+
+### NPC's
+- Added appeals so players can now persuade, threaten, or offer Gold to a witness who is going to report their crime
+- Added one attempt per witness per crime, with responses now depending on the witness and the seriousness of the offence
+- Added witnesses who now report rejected bribes or threats as further offences
+- Added personal travel memories so townsfolk now remember completed journeys and reconsider failed routes
+
+### Gameplay
+- Added developer controls that now set or reset the player's bounty separately in DevCity, DevTown, and DevPalace
+
+## Changes
+
+### NPC's
+- Changed explicit resistance to a serious arrest so the watch now uses lethal force and refuses payment during that fight
+- Changed petty fines so choosing “Not now” now retains the existing grace period
+- Changed peaceful bounty payments so officers now acknowledge the crime being settled and players receive a small amount of Honor
+- Changed builders to now keep supplies for known repairs and buy missing materials when a local shop has stock
+- Changed nearby conversations so townsfolk can now share weaker knowledge of routes they have successfully travelled
+- Changed blocked travel so townsfolk now pause and reconsider instead of immediately repeating the same failed route
+- Changed overhead speech so up to six distinct conversations now appear at once, prioritising the player's conversation, danger, and reports
+
+### Items
+- Changed Crossbows to now have larger shared models when held, displayed, or dropped
+
+### Blocks
+- Changed DevPalace's cell partition to now use bars, with its enclosing masonry matching the building
+
+### Gameplay
+- Changed the playable area's name to SHADOWVEIL and the continent's name to ASHENWRATH
+- Changed monster remains to now break apart in small pieces with restrained ash instead of fading as a whole
+- Changed long falls so the player's physical tumble now begins after seven blocks of unsupported descent
+
+## Technical Changes
+
+### Gameplay
+- Changed distant travellers to now keep walking when an unrelated Door opens elsewhere
+- Changed travellers to now recognise supported floors at different heights
+- Changed saved games so witness appeals, arrest defiance, remembered names, travel memories, and animal scorch marks now survive loading
+
+## Fixed Bugs
+
+### NPC's
+- AE-2081 - Fixed bug where dialogue could display a missing person's number instead of a remembered name
+- AE-2082 - Fixed bug where secondhand knowledge or another person's account could be reported as personal eyewitness evidence
+- AE-2083 - Fixed bug where a witness could identify a crime without a clear view of the act itself
+- AE-2084 - Fixed bug where builders failed to record ordinary damage to fences and other built materials
+- AE-2085 - Fixed bug where builders sold supplies needed for known repairs
+- AE-2086 - Fixed bug where an incomplete route could be treated as arrival at the destination
+
+### Gameplay
+- AE-2087 - Fixed bug where a paid bounty could remain visible in the wanted display or payment reminder
+- AE-2088 - Fixed bug where an explicitly resisted arrest could still offer peaceful payment
+- AE-2089 - Fixed bug where repeated payment requests could attempt the same settlement again
+- AE-2090 - Fixed bug where developer invisibility could leave the player's body, equipment, and shadow visible
+- AE-2091 - Fixed bug where the developer reset command was unavailable
+- AE-2092 - Fixed bug where dead bodies could disappear from fire simulation after leaving active movement
+- AE-2093 - Fixed bug where animals could burn without retaining localized scorch marks
+
+### Blocks
+- AE-2094 - Fixed bug where jail doors could sit out of line with their surrounding bars
+- AE-2095 - Fixed bug where the DevPalace prison bed could intersect the wall
+- AE-2096 - Fixed bug where saved games could forget damage to fences and masonry
+
+---
+
 # Patch Notes Version Alpha 0.2.5: Pane Relief
 
 Townsfolk now have someone to tell when the neighbourhood needs mending.

@@ -129,9 +129,12 @@ public class Npc extends Actor implements Interactable {
     public double nextThink, goalSince;
     public float gx, gy, gz;
     /** A long trip's waypoints (indices into the map's travel graph), the next one, and the trip's end. */
+    public final RouteBook routeBook=new RouteBook();
+    public double navPauseUntil;
+    public float goalY;
     public int[] legs;
     public int legAt;
-    public float legsX, legsZ;
+    public float legsX, legsY, legsZ;
     public boolean hasGoalPos, seesTarget;
     /** Sprinting now (AiSystem.pace): it costs stamina, and it is given up when the breath runs short. */
     public boolean sprinting;
@@ -216,6 +219,7 @@ public class Npc extends Actor implements Interactable {
         for (int i = memories.size() - 1; i >= 0; i--) {
             Memory old = memories.get(i);
             if (!old.sameIncident(m)) continue;
+            m.influenceTried|=old.influenceTried;m.withheld|=old.withheld;
             m.settled |= old.settled; old.settled = m.settled;
             if (old.witnessed() && m.witnessed()) { m.reported |= old.reported; old.reported = m.reported; }
             if (old.witnessed() && !m.witnessed() || old.witnessed() == m.witnessed() && old.confidence >= m.confidence) m = old;
@@ -255,12 +259,19 @@ public class Npc extends Actor implements Interactable {
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
+        var report=rpg.law.WitnessInfluence.pending(g,this);
+        if(a==g.player && report!=null) {
+            o.add(Option.on("witness_persuade","Ask them not to report",12,r));
+            o.add(Option.on("witness_threaten","Threaten the witness",11,r));
+            int price=rpg.law.WitnessInfluence.price(g,report);
+            o.add(Option.when(a.has(Items.COINS,price),"witness_bribe","Offer "+price+" Gold for silence",11,"You do not have enough Gold.",r));
+        }
         if (canTalk(g)) o.add(Option.on("talk", "Talk-to", 10, r));
         if (role == Role.MERCHANT || role == Role.FENCE || g.econ.shopOf(this) != null) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
         }
-        if (role == Role.LAWMAN || role == Role.GUARD) {
+        if ((role == Role.LAWMAN || role == Role.GUARD) && !g.law.refusesPeace(a.id,homeJurisdiction)) {
             int b = g.law.bounty(a.id, homeJurisdiction);
             o.add(Option.when(b > 0, "pay", "Pay bounty" + (b > 0 ? " (" + b + ")" : ""), 9, "You have no bounty in " + homeJurisdiction + ".", r));
         }
@@ -273,6 +284,7 @@ public class Npc extends Actor implements Interactable {
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
+        if(action.equals("witness_persuade") || action.equals("witness_threaten") || action.equals("witness_bribe"))return rpg.law.WitnessInfluence.attempt(g,this,a,action,req);
         switch (action) {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);

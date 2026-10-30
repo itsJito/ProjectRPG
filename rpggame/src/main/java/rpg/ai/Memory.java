@@ -20,6 +20,7 @@ public final class Memory {
     public boolean reported;
     /** Legal closure does not erase the remembered act or personal grudge. */
     public boolean settled;
+    public boolean influenceTried,withheld;
     public final long eventId;
     public final int value;
     public final String detail;
@@ -33,7 +34,7 @@ public final class Memory {
     }
 
     public boolean witnessed() { return source.equals("witnessed"); }
-    public boolean crime() { return switch (kind) { case "THEFT", "ASSAULT", "MURDER", "LOCKPICKING", "VANDALISM", "LIVESTOCK", "TRESPASS", "ARSON", "DISORDERLY" -> true; default -> false; }; }
+    public boolean crime() { return switch (kind) { case "THEFT", "ASSAULT", "MURDER", "LOCKPICKING", "VANDALISM", "LIVESTOCK", "TRESPASS", "ARSON", "DISORDERLY", "BRIBERY" -> true; default -> false; }; }
 
     /** Stable incident identity; old saves/deeds without event ids keep their original time and details. */
     public boolean sameIncident(Memory other) {
@@ -62,7 +63,7 @@ public final class Memory {
         m.put("kind", kind); m.put("subject", subject); m.put("victim", victim); m.put("jur", jurisdiction); m.put("min", minutes); m.put("conf", (double) confidence);
         m.put("source", source); m.put("reported", reported); m.put("event", eventId); m.put("value", value); m.put("detail", detail);
         m.put("witness", witness); m.put("relays", relays);
-        m.put("settled", settled);
+        m.put("settled", settled);m.put("influenceTried",influenceTried);m.put("withheld",withheld);
         return m;
     }
 
@@ -71,6 +72,7 @@ public final class Memory {
                 astratto.util.Json.str(m, "jur", null), astratto.util.Json.num(m, "min", 0), (float) astratto.util.Json.num(m, "conf", 1),
                 astratto.util.Json.str(m, "source", "witnessed"), astratto.util.Json.lng(m, "event", 0), astratto.util.Json.integer(m, "value", 0), astratto.util.Json.str(m, "detail", ""));
         r.reported = astratto.util.Json.bool(m, "reported", false);
+        r.influenceTried=astratto.util.Json.bool(m,"influenceTried",false);r.withheld=astratto.util.Json.bool(m,"withheld",false);
         r.settled = astratto.util.Json.bool(m, "settled", false);
         r.witness = astratto.util.Json.lng(m, "witness", 0);
         r.relays = astratto.util.Json.integer(m, "relays", r.source.startsWith("rumor from ") ? 1 : 0);

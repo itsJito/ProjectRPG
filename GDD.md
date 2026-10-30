@@ -1,4 +1,4 @@
-# RPGGAME
+# SHADOWVEIL
 ## Game Design Document
 
 **Design status:** Definitive design baseline · **Version:** 3.21 · **Engineering handoff:** reusable-asset devmap and acceptance tests in §4.2; prototype contracts in §3.2 and §3.8; animal ecosystem and companion animals in §3.9; Magic/Faith in §2.5; stealth in §3.10; Honor in §3.5; estates/Construction, collections and estate activities in §3.11; player death and recovery in §3.12; cross-system causality and integration tests in §3.13; unified item definitions, 3D inventory/world assets and initial Gold-price anchors in §2.7
@@ -15,7 +15,7 @@
 
 	## 1.1 High concept
 
-	RPGGAME is a traditional open-world fantasy RPG in which one classless human adventurer develops eighteen permanent skills, acquires increasingly prestigious equipment, discovers authored quests, and participates in an autonomous, reactive society. The world is dangerous, geographically interconnected, and does **not** scale enemy levels to the player. Advancement is long-term and meaningful, while direct combat, exploration, and ordinary world interactions must be rewarding on their own.
+	SHADOWVEIL is a traditional open-world fantasy RPG in which one classless human adventurer develops eighteen permanent skills, acquires increasingly prestigious equipment, discovers authored quests, and participates in an autonomous, reactive society. The world is dangerous, geographically interconnected, and does **not** scale enemy levels to the player. Advancement is long-term and meaningful, while direct combat, exploration, and ordinary world interactions must be rewarding on their own.
 
 	**Core promise:** Progression gives the player goals; simulation gives the world independent life; authored stories give it identity; their interaction produces replayable, consequential situations.
 
@@ -267,7 +267,7 @@
 
 	### Open-world XP framework — five natural training routes per skill [established design; numerical tuning open]
 
-	**Purpose.** Each of the **18 skills** has **five distinct, recognizable sources of XP**, arranged from typically **Lowest (I)** to **Highest (V)** reward **per meaningful completion**. These represent gameplay already present in RPGGAME—combat, terrain, gathering, production, NPCs, supported workstations, spells, property, law and the persistent ecology—not isolated training courses, invented items, or extra minigames. The five rows are a **design classification, not an exhaustive whitelist**: any later-supported real act of the same skill must be classified under a suitable existing route or be explicitly designed and balanced. Progression from 1 to 100 must remain viable through ordinary adventuring and work; Tier V is not mandatory.
+	**Purpose.** Each of the **18 skills** has **five distinct, recognizable sources of XP**, arranged from typically **Lowest (I)** to **Highest (V)** reward **per meaningful completion**. These represent gameplay already present in SHADOWVEIL—combat, terrain, gathering, production, NPCs, supported workstations, spells, property, law and the persistent ecology—not isolated training courses, invented items, or extra minigames. The five rows are a **design classification, not an exhaustive whitelist**: any later-supported real act of the same skill must be classified under a suitable existing route or be explicitly designed and balanced. Progression from 1 to 100 must remain viable through ordinary adventuring and work; Tier V is not mandatory.
 
 	| Relative tier | **I · Lowest** | **II · Lower** | **III · Moderate** | **IV · High** | **V · Highest** |
 	|---|---|---|---|---|---|
@@ -536,11 +536,11 @@
 
 	## 2.3 Combat identity and resolution
 
-	The seven combat skills produce a **derived combat level** for players and applicable NPCs through the fixed formula below. RPGGAME uses responsive **real-time 3D action combat**, fully playable from first- and third-person cameras. The player's aim, spacing, weapon animation, collision, and defensive execution determine whether strikes connect. **No post-contact random accuracy contest or passive evasion roll is allowed.** Enemies do not level-scale to the player.
+	The seven combat skills produce a **derived combat level** for players and applicable NPCs through the fixed formula below. SHADOWVEIL uses responsive **real-time 3D action combat**, fully playable from first- and third-person cameras. The player's aim, spacing, weapon animation, collision, and defensive execution determine whether strikes connect. **No post-contact random accuracy contest or passive evasion roll is allowed.** Enemies do not level-scale to the player.
 
 	### Combat-level calculation and initial character state — established
 
-	**Combat level is calculated from current combat skill levels; it is not separately trained or used as an equipment requirement.** RPGGAME uses **Health** as the name of the skill called **Hitpoints** in the calculation. The spelling **Defense** in RPGGAME corresponds to **Defence** in the formula. **Ranged** is the Archery contribution, not an additional skill.
+	**Combat level is calculated from current combat skill levels; it is not separately trained or used as an equipment requirement.** SHADOWVEIL uses **Health** as the name of the skill called **Hitpoints** in the calculation. The spelling **Defense** in SHADOWVEIL corresponds to **Defence** in the formula. **Ranged** is the Archery contribution, not an additional skill.
 
 	```text
 	Base   = (Defense + Health + floor(Faith / 2)) / 4
@@ -1231,7 +1231,7 @@
 
 	### Player-visible NPC life and intervention — established design direction; tuning open
 
-	**Simulation contract:** The 100 concrete subtypes are not merely background work scripts. Every concrete subtype must create an **observable routine or dilemma**, at least one **grounded player participation/assistance route**, at least one **grounded disturbance or competition route**, an **NPC-initiated approach or situational response**, and a **persistent outcome** using RPGGAME’s already established systems. These are **behavioral design targets**, not one hundred new minigames, interfaces, items, creature types, or a requirement to finish all 100 in the current devmap build. The role/subtype taxonomy and existing gameplay action APIs remain authoritative.
+	**Simulation contract:** The 100 concrete subtypes are not merely background work scripts. Every concrete subtype must create an **observable routine or dilemma**, at least one **grounded player participation/assistance route**, at least one **grounded disturbance or competition route**, an **NPC-initiated approach or situational response**, and a **persistent outcome** using SHADOWVEIL’s already established systems. These are **behavioral design targets**, not one hundred new minigames, interfaces, items, creature types, or a requirement to finish all 100 in the current devmap build. The role/subtype taxonomy and existing gameplay action APIs remain authoritative.
 
 	**The five faces of an NPC encounter:**
 
@@ -1525,7 +1525,7 @@
 
 	### Economic identity and non-negotiable boundaries — established
 
-	RPGGAME has a **single-player, NPC-agent-driven living economy**, not a static NPC shop list or an actual multiplayer exchange. Producers, artisans, merchants, guilds, workers, transporters, factions, and consumers have **their own goals, stocks, funds, skill limits, commitments, and willingness to trade**. They act when the player is absent, compete for scarce opportunities, and react to the same regional conditions as the player. The player is one economic participant, not the economy's exclusive customer, employer, or source of change. Authored disruptions can enter the simulation, but routine shortages and opportunities should arise from existing actions and state.
+	SHADOWVEIL has a **single-player, NPC-agent-driven living economy**, not a static NPC shop list or an actual multiplayer exchange. Producers, artisans, merchants, guilds, workers, transporters, factions, and consumers have **their own goals, stocks, funds, skill limits, commitments, and willingness to trade**. They act when the player is absent, compete for scarce opportunities, and react to the same regional conditions as the player. The player is one economic participant, not the economy's exclusive customer, employer, or source of change. Authored disruptions can enter the simulation, but routine shortages and opportunities should arise from existing actions and state.
 
 	**Currency enters** through quests, wages, bounties, heists, and NPC loot purchases. **Currency leaves** through taxes, property costs/upkeep, bribes, transport, ammunition, consumables, and repairs. Shops react to local stock and regional conditions; reputation and haggling may affect prices. Player and NPC actions can interrupt shipments, change supply, and create opportunities.
 

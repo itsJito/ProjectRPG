@@ -31,7 +31,7 @@ public final class AstrattoNative {
     public static final int CHEM_FLAMMABLE = 1, CHEM_CONDUCTIVE = 2, CHEM_FREEZABLE = 4, CHEM_WIND_SENSITIVE = 8;
     public static final int CHEM_FIRE = 1, CHEM_WATER = 2, CHEM_ICE = 3, CHEM_WIND = 4, CHEM_ELECTRIC = 5;
     public static final int CHEM_WET = 1, CHEM_BURNING = 2, CHEM_FROZEN = 4, CHEM_CHARGED = 8, CHEM_BURNT = 16;
-    public static final int API_MAJOR = 2, API_MINOR = 5, API_VERSION = API_MAJOR << 16 | API_MINOR;
+    public static final int API_MAJOR = 2, API_MINOR = 6, API_VERSION = API_MAJOR << 16 | API_MINOR;
 
     // ---- status
     public static final int OK = 0, ERR_ARGUMENT = -1, ERR_VERSION = -2, ERR_STATE = -3, ERR_MEMORY = -4, ERR_STREAM = -5, ERR_INTERNAL = -6,
@@ -143,7 +143,7 @@ public final class AstrattoNative {
     public static final int LIGHT_SHADOW = 1, LIGHT_SPOT = 2, LIGHT_STATIC = 4;
     /** GPU flame particles that follow a stable emitter, while ordinary fire and smoke stay in world space. */
     public static final int EMITTER_ATTACHED_FIRE = 16;
-    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16, MODEL_FOLIAGE = 32;
+    public static final int MODEL_SHADOW_ONLY = 1, MODEL_NO_SHADOW = 2, MODEL_FORWARD = 4, MODEL_ADDITIVE = 8, MODEL_VIEWMODEL = 16, MODEL_FOLIAGE = 32, MODEL_DISSOLVE = 64;
 
     // ---- structure sizes (bytes) on a 64-bit machine; every one is checked against the library when it loads
     static final int SIZEOF_CONFIG = 24, SIZEOF_BLOCK_DEF = 12, SIZEOF_BLOCK_TABLE = 16, SIZEOF_WORLD_DESC = 56, SIZEOF_WORLD_VIEW = 64,
@@ -170,7 +170,7 @@ public final class AstrattoNative {
             {"astratto_cmd_agent_force", 24}, {"astratto_cmd_noise", 32}, {"astratto_evt_agent", 32}, {"astratto_sound_desc", 24},
             {"astratto_cmd_listener", 24}, {"astratto_cmd_voice_play", 72}, {"astratto_cmd_voice_set", 48}, {"astratto_cmd_voice_stop", 24},
             {"astratto_cmd_audio_mix", 40}, {"astratto_cmd_audio_pause", 16}, {"astratto_stream_io", 32}, {"astratto_frame_io", 40}, {"astratto_stats", 176}, {"astratto_snap_mover", 48}, {"astratto_snap_ragdoll", 624},
-            {"astratto_snap_softbody", 40}, {"astratto_snap_vehicle", 176}, {"astratto_snap_agent", 72}, {"astratto_audio_stats", 72},
+            {"astratto_snap_softbody", 40}, {"astratto_snap_vehicle", 176}, {"astratto_snap_agent", 104}, {"astratto_audio_stats", 72},
             {"astratto_snapshot_io", 24}, {"astratto_evt_module_log", 24}, {"astratto_render_block", 12}, {"astratto_shape_def", 12},
             {"astratto_render_table", 48}, {"astratto_mesh_io", 72}, {"astratto_renderer_desc", 32}, {"astratto_texture_desc", 40}, {"astratto_texture_update", 24},
             {"astratto_world_look", 48}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 112}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},

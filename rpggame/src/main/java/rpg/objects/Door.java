@@ -119,7 +119,7 @@ public final class Door extends WorldObject {
         inSide = in; this.line = line;
         gate = plus == 0 && minus == 0;
         // a house door hangs on the inside face of its wall (a gate on the fence line)
-        float inset = gate ? 0 : 0.5f - HALF_THICK;
+        float inset = gate || cellDoor ? 0 : 0.5f - HALF_THICK;
         float leafW = cells.length >= 2 ? (maxA - minA + 1) / 2f : 1f;
         leafWidth = leafW;
         float h = height - 0.04f, y = DevMap.FLOOR + 0.02f + h / 2;

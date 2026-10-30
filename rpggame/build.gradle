@@ -1,4 +1,4 @@
-// RPGGAME - devmap prototype (GDD 4.2).
+// SHADOWVEIL - devmap prototype (GDD 4.2).
 //   ./gradlew run          play: character creator, then the devmap
 //   ./gradlew acceptance   the devmap off-screen with the scripted end-to-end flows and invariant checks (GDD 4.2)
 //   ./gradlew test         rule-level tests (XP table, inventory, equipment, combat formulas, transactions)

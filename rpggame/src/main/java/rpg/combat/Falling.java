@@ -26,7 +26,7 @@ public final class Falling {
             boolean grounded = physical != null ? physical.grounded != 0 : mover != null && mover.grounded;
             if (!grounded) {
                 f.active = true; f.top = Math.max(f.top, y);
-                if (f.top - y > 8 && !actor.reacting) { g.reactions.falling(actor, dt > 0 ? Math.min(-1, (y-f.last)/dt) : -8); }
+                if (f.top - y >= 7 && !actor.reacting) { g.reactions.falling(actor, dt > 0 ? Math.min(-1, (y-f.last)/dt) : -8); }
             } else {
                 float distance = f.top - y;
                 if (f.active && !f.paid && damage(distance) > 0) { f.paid = true; g.combat.environmentalDamage(actor, damage(distance), "fall"); }

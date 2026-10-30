@@ -130,7 +130,7 @@ public final class AiSystem {
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
-                // the Bank of Gameworld's one teller (Civic Services): keeps the counter by day, sleeps in the back
+                // the Bank of ASHENWRATH's one teller (Civic Services): keeps the counter by day, sleeps in the back
                 Npc wren = npc(Ids.TELLER, "Wren", Npc.Role.CIVIC, "Bank teller", DevMap.BANK_TELLER[0], DevMap.BANK_TELLER[1], 151);
                 wren.postX = DevMap.BANK_TELLER[0]; wren.postZ = DevMap.BANK_TELLER[1]; wren.homeJurisdiction = DevMap.BETA;
                 if (g.objects.bankBed != null) { wren.homeX = g.objects.bankBed.x; wren.homeZ = g.objects.bankBed.z; }
@@ -419,6 +419,7 @@ public final class AiSystem {
     }
     /** Walks an NPC (or a monster) toward a point by the travel graph; true once there. */
     public boolean walkTo(Npc n, float x, float z, boolean run, float within) { return brain.goTo(n, x, z, run, within); }
+    public boolean walkToAtHeight(Npc n,float x,float y,float z,boolean run,float within){return brain.goTo(n,x,y,z,run,within); }
     /** A monster's eyes and ears (the stealth system's sight and hearing, as for anyone). */
     public void monsterSenses(Npc n, float dt) { stealth.update(n, dt); }
     /** Turns a body toward where it means to face (or where it is going). */
@@ -644,6 +645,7 @@ public final class AiSystem {
         Npc n = byAgent(agent);
         if (n == null) return;
         stuckEvents++;
+        n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));
         if (g.scripted) System.out.printf("      [stuck] %s %s at (%.2f, %.2f, %.2f) -> (%.1f, %.1f), %s, v (%.2f, %.2f) ground %s route %d facts %s%n", n.name, n.goal, n.x, n.y, n.z, n.gx, n.gz, n.nativeAction, n.vx, n.vz, n.grounded, n.routeCells, java.util.Arrays.toString(n.facts));
         n.lastOutcome = "route blocked while " + n.goal.toString().toLowerCase() + "; replanning";
         // no way to the one they meant to talk with: someone else, or back to the day, rather than the same wall again
@@ -659,7 +661,7 @@ public final class AiSystem {
         // (0.2.2, gamefixes: NPCs teleported while in a fight) in a fight it is a step to the very next cell at most, and
         // not at all for a moment after a blow - a knock-back that ends at a wall settles where it lies
         boolean fighting = n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || g.time - n.cs.lastHurt < 1.5;
-        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && !standable(bx, bz) && !(fighting && g.time - n.cs.lastHurt < 1.5)) {
+        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && (!Float.isFinite(g.vox.standY(n.x,n.y,n.z)) || Math.abs(g.vox.standY(n.x,n.y,n.z)-n.y)>1.2f) && !(fighting && g.time - n.cs.lastHurt < 1.5)) {
             for (int ring = 1; ring <= (fighting ? 1 : 3); ring++) {
                 float best = Float.MAX_VALUE; int cx = 0, cz = 0;
                 for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
@@ -752,7 +754,7 @@ public final class AiSystem {
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
         if(law) {
             long subject=n.fightTarget!=0?n.fightTarget:n.hunt!=null?n.hunt.target:0;
-            if(subject!=0 && g.law.fineDeferred(subject,n.homeJurisdiction) && !g.law.resisting(subject)
+            if(subject!=0 && g.law.fineDeferred(subject,n.homeJurisdiction) && !g.law.resisting(subject,n.homeJurisdiction)
                     && !(n.cs.lastAttacker==subject && g.time-n.cs.lastHurt<12)) {
                 n.fightTarget=0;if(n.hunt!=null && n.hunt.target==subject)n.hunt=null;n.cs.cancel();n.cs.blocking=false;
             }
@@ -1085,6 +1087,7 @@ public final class AiSystem {
     /** Passes news through the same hearing, evidence and feedback rules as street gossip. */
     public int share(Npc from, Npc to) {
         int n = g.law.posses.tell(from, to) ? 1 : 0;
+        if(from.alive && to.alive && from.loaded && to.loaded && from.distTo(to)<4 && g.vox.sight(from.x,from.eyeY(),from.z,to.x,to.eyeY(),to.z))n+=from.routeBook.tell(to.routeBook,g.time);
         for (Memory m : new ArrayList<>(from.memories)) {
             if (rumors.tell(from, to, m, false)) n++;
         }

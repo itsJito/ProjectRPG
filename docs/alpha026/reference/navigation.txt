@@ -1,0 +1,7 @@
+Picked up JAVA_TOOL_OPTIONS: -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080
+pocket pointAgentLowerBound=12.77s arrivalRatio=1.049
+pocket reached=1/1 stuck=0 events=1 requests=2 rawExpansions=439 partials=-1 capHits=-1 repaths=-1 yields=-1 travel=45.70m lastArrival=13.40s gridReference=13.94s ratioToGrid=0.96
+door pointAgentLowerBound=10.96s arrivalRatio=1.641
+door reached=20/20 stuck=0 events=20 requests=31 rawExpansions=161 partials=-1 capHits=-1 repaths=-1 yields=-1 travel=787.83m lastArrival=17.98s gridReference=11.58s ratioToGrid=0.00
+wall pointAgentLowerBound=11.71s arrivalRatio=1.050
+wall reached=1/1 stuck=0 events=1 requests=3 rawExpansions=39 partials=-1 capHits=-1 repaths=-1 yields=-1 travel=42.36m lastArrival=12.30s gridReference=10.86s ratioToGrid=1.13

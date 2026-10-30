@@ -111,7 +111,8 @@ public final class Snapshots {
     public static final class Agent {
         public long handle, target;
         public float x, y, z, yaw, tx, ty, tz;
-        public int action, routeCells;
+        public int action, routeCells,repaths,expansions,partialPaths,capHits,yields;
+        public boolean partial,capped;
         public boolean sees, moving, stuck;
     }
 
@@ -263,6 +264,7 @@ public final class Snapshots {
                     a.tx = b.getFloat(at + 40); a.ty = b.getFloat(at + 44); a.tz = b.getFloat(at + 48);
                     a.action = b.getInt(at + 52); a.sees = b.getInt(at + 56) != 0; a.moving = b.getInt(at + 60) != 0; a.stuck = b.getInt(at + 64) != 0;
                     a.routeCells = b.getInt(at + 68);
+                    if(size>=104){a.partial=b.getInt(at+72)!=0;a.capped=b.getInt(at+76)!=0;a.repaths=b.getInt(at+80);a.expansions=b.getInt(at+84);a.partialPaths=b.getInt(at+88);a.capHits=b.getInt(at+92);a.yields=b.getInt(at+96);}
                     out.agents.add(a);
                 }
                 at += size;

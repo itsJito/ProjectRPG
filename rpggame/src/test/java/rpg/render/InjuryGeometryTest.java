@@ -38,4 +38,12 @@ class InjuryGeometryTest {
         assertNotEquals(figure.body.vox().get(10,5,13),damaged.vox().get(10,5,13));
     }
 
+    @Test void animalScorchesDarkenOnlyTheAffectedSurfaceOfAPrivateMesh() {
+        VoxModel vox=new VoxModel(8,8,8);vox.box(0,0,0,7,7,7,0xff807060);var original=new ItemModels.Model(vox,4,0,4);
+        var marks=java.util.List.of(new Blood.Mark(Blood.TORSO,Blood.FRONT,.5f,.5f,3,false,37,0,true));
+        var charred=VoxelInjuries.scorch(original,Gore.Part.TORSO,marks);
+        assertNotSame(original,charred);assertEquals(0xff807060,vox.get(4,4,0));assertNotEquals(vox.get(4,4,0),charred.vox().get(4,4,0));assertEquals(vox.get(4,4,7),charred.vox().get(4,4,7));
+        assertSame(original,VoxelInjuries.scorch(original,Gore.Part.HEAD,marks));
+    }
+
 }

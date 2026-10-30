@@ -71,9 +71,10 @@ extern "C" {
  * 2.0: worlds are the engine's (created, viewed, edited; no longer copied in and mirrored), handles, the simulation
  * services (physics, AI, audio), the renderer and gameplay modules. 2.1: the renderer's layers - foliage, props, decals.
  * 2.4: Sydney 3 - a muscle-driven rigid-body body: intents and traits for ragdolls, their impacts, their segments in the
- * snapshot; the renderer's sun shafts, smoke volumes, leaf cards, soft shadows, motion blur and depth of field. */
+ * snapshot; the renderer's sun shafts, smoke volumes, leaf cards, soft shadows, motion blur and depth of field.
+ * 2.6: appended agent navigation telemetry and local-voxel model dissolution. */
 #define ASTRATTO_API_MAJOR 2
-#define ASTRATTO_API_MINOR 5
+#define ASTRATTO_API_MINOR 6
 #define ASTRATTO_API_VERSION ((uint32_t)((ASTRATTO_API_MAJOR << 16) | ASTRATTO_API_MINOR))
 
 /* ------------------------------------------------------------------ status */
@@ -1129,6 +1130,8 @@ typedef struct astratto_snap_agent {
     float tx, ty, tz;                  /* where its target was last seen */
     int32_t action;                    /* the id of the action it is doing (-1 none) */
     uint32_t sees, moving, stuck, route_cells;
+    /* Optional tail: cumulative route diagnostics, with partial paths distinct from arrival. */
+    uint32_t partial,capped,repaths,expansions,partial_paths,cap_hits,yields,reserved;
 } astratto_snap_agent;
 /* RIGIDS: a run of these, one a body, and one astratto_snap_joint a joint. The pose is blended between the last two
  * fixed steps by how far the frame got into the next, so a body drawn from it moves smoothly at any frame rate. */
@@ -1402,7 +1405,7 @@ typedef struct astratto_rcmd_light {
     uint32_t flags;
     float dx, dy, dz, cos_outer;
 } astratto_rcmd_light;
-enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32 };
+enum { ASTRATTO_MODEL_SHADOW_ONLY = 1, ASTRATTO_MODEL_NO_SHADOW = 2, ASTRATTO_MODEL_FORWARD = 4, ASTRATTO_MODEL_ADDITIVE = 8, ASTRATTO_MODEL_VIEWMODEL = 16, ASTRATTO_MODEL_FOLIAGE = 32, ASTRATTO_MODEL_DISSOLVE = 64 };
 typedef struct astratto_rcmd_model {
     astratto_record head;
     uint32_t mesh, flags;               /* ASTRATTO_MODEL_* */

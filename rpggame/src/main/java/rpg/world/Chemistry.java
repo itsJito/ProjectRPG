@@ -177,7 +177,7 @@ public final class Chemistry {
      * stays on it. A handful of marks a second at most, painted into the figure's own skin - nothing per frame.
      */
     private void scorch(Actor a) {
-        if (a instanceof rpg.animal.Animal || g.time < a.scorchAt) return;
+        if (g.time < a.scorchAt) return;
         a.scorchAt = g.time + 0.3;
         long k = (long) (g.time * 10);
         double r0 = g.roll(a.id, k), r1 = g.roll(a.id, k + 1), r2 = g.roll(a.id, k + 2), r3 = g.roll(a.id, k + 3);
@@ -196,6 +196,7 @@ public final class Chemistry {
         out[0]=actor.x;out[1]=actor.chestY();out[2]=actor.z;
         long ragdoll=actor==g.player && g.death!=null && g.death.active?g.death.ragdoll:actor.ragdoll;
         if(ragdoll!=0) {var body=g.lastBodies.ragdoll(ragdoll);if(body!=null){out[0]=body.comX;out[1]=body.comY;out[2]=body.comZ;}}
+        if(!actor.alive && actor instanceof Npc npc && npc.ragdoll==0 && g.objects.get(npc.corpse) instanceof rpg.objects.Corpse corpse){out[0]=corpse.x;out[1]=corpse.y;out[2]=corpse.z;}
         if(actor instanceof Animal animal && animal.ragdoll!=null) {var trunk=g.lastRigids.body(animal.ragdoll.trunk().body());if(trunk!=null){out[0]=trunk.x;out[1]=trunk.y;out[2]=trunk.z;}}
     }
     public void register(Actor actor) {
@@ -204,7 +205,7 @@ public final class Chemistry {
         if(g.time<smothered.getOrDefault(actor.id,-1.0))tags &= ~CHEM_FLAMMABLE;
         if(cleansed.containsKey(actor.id))tags=0;
         center(actor,receiverCenter);registered.add(actor.id);
-        g.game.commands().chemSensor(actor.id,0,receiverCenter[0],receiverCenter[1],receiverCenter[2],actor.radius,tags,0,10,0,0,false);
+        g.game.commands().chemSensor(actor.id,0,receiverCenter[0],receiverCenter[1],receiverCenter[2],Math.max(actor.radius,Math.min(0.75f,actor.height*0.45f)),tags,0,10,0,0,false);
     }
     public int state(long id) { return states.getOrDefault(id, 0); }
     /** Death ends attribution for this life, not the fire itself. Reset after native command read-back. */
@@ -249,10 +250,15 @@ public final class Chemistry {
             if(g.vox.block(x,y,z)==Blocks.ICE)changed(id,x,y,z,Blocks.WATER,Blocks.WATER);g.game.commands().chemRemove(id);thaw.remove();
         }
         Set<Long> live = new HashSet<>();
-        for (Actor a : g.actors()) {
-            boolean present = a == g.player || a instanceof Npc n && n.loaded && (a.alive || n.ragdoll != 0) || a instanceof Animal an && an.loaded && !an.butchered;
+        var receivers=new java.util.ArrayList<Actor>(g.actors());
+        for(var npc:g.npcs)if(!npc.alive)receivers.add(npc);
+        if(g.animals!=null)for(var animal:g.animals.all())if(!animal.alive)receivers.add(animal);
+        if(g.monsters!=null)for(var monster:g.monsters.all())if(!monster.alive)receivers.add(monster);
+        for (Actor a : receivers) {
+            boolean present = a == g.player || a instanceof Npc n && (n.loaded && a.alive || !a.alive && (n.ragdoll!=0 || n.corpse!=0 && g.objects.get(n.corpse) instanceof rpg.objects.Corpse corpse && !corpse.removed)) || a instanceof Animal an && (an.loaded || an.carcass()) && !an.butchered;
             if (!present || a.dummy) continue;
             live.add(a.id);
+            if(!a.alive)a.blood.age(g.time);
             register(a);
             if (g.vox.block((int) a.x, (int) (a.y + 0.1f), (int) a.z) == Blocks.WATER) {
                 emit(null, CHEM_WATER, a.x, a.chestY(), a.z, a.radius, 2, 0.3f);

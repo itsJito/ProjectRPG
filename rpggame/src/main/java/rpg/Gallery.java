@@ -1062,7 +1062,7 @@ final class Gallery {
         view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"unfilled-gravestone");stone.buried=true;
         view(stone.x+1.4f,DevMap.FLOOR+1.2f,stone.z-2,stone.x,DevMap.FLOOR+0.4f,stone.z,"filled-gravestone");
     }
-    /** The Bank of Gameworld: from the road, inside at the counter, and a vault open beside the inventory. */
+    /** The Bank of ASHENWRATH: from the road, inside at the counter, and a vault open beside the inventory. */
     /** Repeatable close views of hand casting, attached fire lights and electrical collapse. */
     private void requestedFixesReview() {
         g.cfg.quality=astratto.bridge.AstrattoNative.QUALITY_LOW;g.cfg.renderScale=0.6f;g.cfg.autoScale=false;

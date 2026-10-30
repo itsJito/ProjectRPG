@@ -1413,7 +1413,9 @@ void Renderer::shadowPass(VoxelWorld*) {
                 if (ddx * ddx + ddy * ddy + ddz * ddz - along * along > r2) continue;
                 if (!visibleModel(m, lightFrustum)) continue;
                 sModel_.mat4("uModel", m.m);
+                sModel_.f1("uDissolve", (m.flags & ASTRATTO_MODEL_DISSOLVE) ? 1.0f-m.par[3] : 0.0f);
                 const ModelMesh& mm = meshes_[m.mesh];
+                sModel_.f3("uVoxelOrigin", (mm.extent[0]-mm.center[0])*64, (mm.extent[1]-mm.center[1])*64, (mm.extent[2]-mm.center[2])*64);
                 g_.BindVertexArray(mm.vao);
                 g_.DrawArrays(TRIANGLES, 0, static_cast<GLsizei>(mm.count));
             }
@@ -1531,9 +1533,11 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
         }
         s.f4("uTint", m.par[0], m.par[1], m.par[2], m.par[3]);
         s.f1("uEmissive", m.par[4]);
+        s.f1("uDissolve", (m.flags & ASTRATTO_MODEL_DISSOLVE) ? 1.0f-m.par[3] : 0.0f);
         s.f1("uFlag", m.par[4] > 0.5f ? 2.0f : (viewmodel ? 1.0f : 0.0f));
         s.f4("uMatParams", m.par[6], m.par[7], sky, blk);
         const ModelMesh& mm = meshes_[m.mesh];
+        s.f3("uVoxelOrigin", (mm.extent[0]-mm.center[0])*64, (mm.extent[1]-mm.center[1])*64, (mm.extent[2]-mm.center[2])*64);
         g_.BindVertexArray(mm.vao);
         g_.DrawArrays(TRIANGLES, 0, static_cast<GLsizei>(mm.count));
         modelsDrawn_++;
@@ -1880,7 +1884,9 @@ void Renderer::forwardPass(VoxelWorld* world) {
             fModel_.mat4("uModel", m.m);
             fModel_.f4("uTint", m.par[0], m.par[1], m.par[2], m.par[3]);
             fModel_.f1("uEmissive", m.par[4]);
+            fModel_.f1("uDissolve", (m.flags & ASTRATTO_MODEL_DISSOLVE) ? 1.0f-m.par[3] : 0.0f);
             const ModelMesh& mm = meshes_[m.mesh];
+            fModel_.f3("uVoxelOrigin", (mm.extent[0]-mm.center[0])*64, (mm.extent[1]-mm.center[1])*64, (mm.extent[2]-mm.center[2])*64);
             g_.BindVertexArray(mm.vao);
             g_.DrawArrays(TRIANGLES, 0, static_cast<GLsizei>(mm.count));
             modelsDrawn_++;

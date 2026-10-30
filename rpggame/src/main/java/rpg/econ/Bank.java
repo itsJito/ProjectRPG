@@ -17,7 +17,7 @@ import rpg.ui.Dialog;
 import rpg.world.DevMap;
 
 /**
- * The Bank of Gameworld, in DevTown (gamefixes): one teller at one counter, and an account for anyone who opens one -
+ * The Bank of ASHENWRATH, in DevTown (gamefixes): one teller at one counter, and an account for anyone who opens one -
  * the player or any NPC. An account owns one expandable vault. Its initial capacity is twice a person's inventory;
  * four expansions each append another inventory of space. A vault
  * is a real container in the bank's strongroom, so what is in it is held exactly once, kept in saves and counted by

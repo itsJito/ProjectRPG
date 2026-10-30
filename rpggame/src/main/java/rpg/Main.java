@@ -21,7 +21,7 @@ import rpg.world.DevMap;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
- * RPGGAME's devmap prototype on the Astratto Engine.
+ * SHADOWVEIL's devmap prototype on the Astratto Engine.
  * <pre>
  *   ./gradlew run          the character creator, then the devmap
  *   ./gradlew acceptance   off-screen: every GDD 4.2 end-to-end flow, scripted and checked, with screenshots
@@ -54,12 +54,12 @@ public final class Main {
     static boolean bench;
 
     static int run(boolean acceptance, boolean gallery, boolean female, boolean hidden, String shots) {
-        System.out.println(Astratto.NAME + " " + Astratto.VERSION + " - RPGGAME devmap" + (Astratto.javaFallbackAllowed() ? "" : " (Java fallbacks disabled)"));
+        System.out.println(Astratto.NAME + " " + Astratto.VERSION + " - SHADOWVEIL devmap" + (Astratto.javaFallbackAllowed() ? "" : " (Java fallbacks disabled)"));
         // the recordings decode on background threads while the window, the engine and the intro come up
         rpg.audio.Sfx.warm();
         Window win = new Window();
         win.show = !hidden;
-        if (bench) win.create("RPGGAME - bench", 1920, 1080); else win.create("RPGGAME", 1600, 900);
+        if (bench) win.create("SHADOWVEIL - bench", 1920, 1080); else win.create("SHADOWVEIL", 1600, 900);
         if (!win.gl45) { System.err.println("the native renderer needs OpenGL 4.5: " + win.glInfo); return 1; }
         int status;
         // play goes round from the title screen to a session and back: each session a fresh engine and world in the one window
@@ -438,7 +438,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.2.5";
+    public static final String VERSION = "Alpha 0.2.6";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

@@ -14,7 +14,7 @@ import rpg.world.DevMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** The Bank of Gameworld (gamefixes): accounts twice the inventory, up to four more vaults bought, NPCs banking their coin. */
+/** The Bank of ASHENWRATH (gamefixes): accounts twice the inventory, up to four more vaults bought, NPCs banking their coin. */
 class BankTest {
     private static void settle(Game game, Rpg g, Npc teller, int frames) {
         for (int i = 0; i < frames; i++) { teller.goal = rpg.ai.Brain.Goal.WORK; assertTrue(game.tick(1f / 60)); }

@@ -27,10 +27,25 @@ public final class Voxels {
 
     public long navigationRevision;
     private boolean navigationPending;
+    private final java.util.Map<Long,Long> chunkVersions=new java.util.HashMap<>();
+    private final java.util.Set<Long> pendingChunks=new java.util.HashSet<>();
+    private static long chunk(float x,float z){return ((long)Math.floorDiv((int)Math.floor(x),16)<<32) ^ (Math.floorDiv((int)Math.floor(z),16)&0xffffffffL);}
+    public long chunkVersion(float x,float z){return chunkVersions.getOrDefault(chunk(x,z),0L);}
+    public void edited(int x,int y,int z,int before,int after){
+        long revision=navigationRevision;edited(before,after);
+        if(revision!=navigationRevision){long key=chunk(x,z);chunkVersions.merge(key,1L,Long::sum);pendingChunks.add(key);}
+    }
+    /** Closest supported, two-cell-high surface; preserves separate floors in stacked interiors. */
+    public float standY(float x,float near,float z){
+        int bx=(int)Math.floor(x),bz=(int)Math.floor(z),mid=(int)Math.floor(near);
+        for(int d=0;d<=12;d++)for(int y:new int[]{mid-d,mid+d})
+            if(y>0 && y+1<DevMap.SY && solid(bx,y-1,bz) && !solid(bx,y,bz) && !solid(bx,y+1,bz))return y;
+        return Float.NaN;
+    }
     public void edited(int before,int after) {
         if(solid[before]!=solid[after] || door(before)!=door(after) || before!=after && (door(before)||door(after))) {navigationRevision++;navigationPending=true;}
     }
-    public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;}}
+    public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;for(long key:pendingChunks)chunkVersions.merge(key,1L,Long::sum);pendingChunks.clear();}}
 
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
     public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }

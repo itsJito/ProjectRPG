@@ -4,6 +4,47 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 17: Ash and Order (Version Alpha 0.2.6) — Shadow
+
+Continues the main-based Alpha 0.2.5 polish tree; publication remains on `polish`. Earlier release entries are preserved. Player notes continue in `patchnotes.md` by request. Classic-era World of Warcraft remains the reference for readable silhouettes and restrained effects; townsfolk jobs and reactions remain the AI priority.
+
+### Law, witnesses, and persistent identity
+- Explicit refusal of a serious arrest records jurisdiction-scoped defiance. Payment and further halt conversations are unavailable for that case; the watch no longer substitutes arrest for a killing blow. Unanswered serious challenges retain their previous nonlethal enforcement path. Petty “Not now” retains the existing grace period. Defiance persists through saving, remains effective after loading, and clears on settlement or death.
+- Payments validate the recipient, sufficient real Gold, capacity, and duplicate request before mutation. Existing coin stacks transfer into the officer's ownership; the case closes once. Wanted display caches refresh on state revision, reminders clear, and a payment grants 2 Honor through an incident-specific restitution event. Officers distinguish theft, assault, arson, murder, property damage, trespass, livestock offences, and disturbances in their response.
+- Crime creation checks fresh culprit exposure and visibility of the affected actor or object surface. Personal evidence records its witness. Reports reject hearsay, relayed evidence, another witness's account, withheld evidence, civilians as recipients, and conversations through walls or beyond range. Existing legacy personal memories remain compatible.
+- Contextual persuade/threaten/bribe actions are available while a witness is reporting or hiding. The attempt belongs to one witness and one incident, validates actual conversational reach, and persists with the memory. Success withholds only that witness's report. Role, opinion, Honor, severity, and relative combat levels affect reactions without granting NPC XP. Principled witnesses reject bribery; refusal of bribery or threats records a separately witnessed offence. Accepted bribes transfer actual Gold; refused offers do not debit the player.
+- A bounded, saved name registry retains identities used by crime memories after their actor disappears; unknown identities use a natural-language fallback instead of numeric dialogue.
+
+### Repairs and physical persistence
+- Shared block edits record damage to built timber, glass, cloth, thatch, and masonry, including fences and eligible dual-material walls. Map fixture construction is excluded. Repair saves include the remaining block state, not only the original material, so ordinary structural destruction survives a rebuilt map.
+- Carpenters retain up to four supplies for known repairs before the settling period elapses. Ordinary sales and unloading preserve the reservation. Missing Hammers, planks, or Stone Blocks can be purchased through actual local stock, funds, capacity, and counter interactions. A full pack falls through to unloading instead of repeatedly attempting a purchase that cannot fit.
+- Masonry repair consumes an existing Stone Block; timber still consumes timber, and glass requires a Hammer. Existing witnessed reports, 40-second settling, interruptible work, claims, reach, fire exclusion, and payment-on-completion remain in force. Lawman commissions cost 3 Gold for glass, 5 for timber, and 6 for masonry.
+- Chemistry registers dead residents, monster remains, and unbutchered animal carcasses independently of the living-combat actor list. A parked corpse's receiver follows its resting body. Spherical receiver coverage accounts for tall bodies. Animal scorch marks are generated, cooled, saved, and applied to private surface meshes without modifying shared species assets; the bounded asynchronous injury-mesh cache is reused.
+- Physical falling begins at seven blocks of unsupported descent. Landing damage remains separately measured and charged once.
+
+### Navigation groundwork for the next update
+- Measured the unchanged native pocket, twenty-agent doorway, and changing-wall course first. Final arrivals and travel distances match that baseline. The doorway succeeds for all twenty agents, so a new crowd simulation was not justified by this course.
+- Native API minor version advances to 2.6 with matching Java bindings. Native A* flags partial/capped results and exposes cumulative per-agent searches, expansions, partial paths, cap hits, and a reserved yield counter in an appended snapshot tail. Java validates the new structure size while the decoder retains support for older record lengths. Raw search ordering, costs, and bounded work budgets are unchanged.
+- Partial endpoints no longer emit successful arrival. Repeated partials back off and produce BLOCKED/stuck feedback; empty searches retry within a bound. Changing the actual goal resets the partial streak.
+- Native topology versions are tracked per horizontal chunk, including raw edits, fills, columns, seals, and pristine restoration. A global revision prompts a cheap comparison, but only a route touching changed chunks is rescheduled.
+- Java targets query actual supported heights; explicit-height destinations preserve distinct floors. Interaction range remains separate from the top surface of furniture. Elevated travel delegates directly to the native height-aware search instead of forcing the ground-floor designer graph.
+- Each resident has a bounded ground-route RouteBook seeded with home/work landmarks. Completed trips store route coordinates, observed cost, confidence, last use, and relevant chunk versions. Planning checks that personal book first and validates geometry and door permissions. Failure reduces confidence, persists retry penalties, and produces a visible pause/look response. The visible pause is capped at two seconds independently of a longer destination penalty. Unrelated arrivals and teleports cannot verify an interrupted journey. Disuse decays confidence. Physical nearby conversations can transfer verified routes with reduced confidence. Saved coordinates are remapped to current graph indices and revalidated.
+- This is groundwork, as scoped in the updated request. Fully automatic chunk-region/portal graph replacement, learned native edge costs, broader landmark seeding, explicit chokepoint yielding, and per-person cost noise remain for the next navigation update. Designer routes remain the fallback for ground-level long-distance journeys. No claim is made that the complete adaptive navigation vision ships in this release. Elevated raw trips do not contaminate the ground-route book, and height-only goal changes reschedule the native target.
+
+### Presentation and developer tools
+- Cell door physics and visuals share the bars' centre plane. DevPalace's slab moves fully inside the cell, its side partition becomes bars, and its enclosing material matches the basilica's limestone.
+- The shared Crossbow voxel mesh is 1.5 times larger about its grip, preserving the same model for held gear, display, dropped equipment, and physical bounds.
+- Monster dissolution uses a stable local-voxel threshold in opaque and forward rendering, with the same cutoff in shadows. Mesh-relative grid origins handle half-voxel grips. A first capture exposed an overbright central particle cloud; it was replaced by small, restrained ash motes. Frames 1, 4, 7 through 58 are captured for review.
+- Overhead human speech is selected before drawing: at most six distinct normalized lines, ordered by conversation/focus, combat, crime, investigation/damage, then nearby routine speech. Names, health, and awareness retain their independent display rules.
+- Console invisibility suppresses the player model, equipment, and shadow and uses the existing sensory exclusion for humans, animals, and monsters. Direct exposure queries also respect it. `reset [player|skills|bounty <kingdom|all>]` restores the selected state without deleting a save. `bounty set <kingdom> <amount>`, `bounty reset <kingdom|all>`, `bounty list`, and the legacy clear alias validate input and use shared case closure.
+- Active title, window, welcome, bank, and design-document references use SHADOWVEIL and ASHENWRATH. Technical module paths and historical release text retain compatibility.
+
+### Verification
+- Full gameplay verification passes 311 cases, with one deliberately disabled profiling probe and no failures. The final affected navigation/world/morning-routine run passes 12 checks. Engine verification passes 121 native and 29 Java/GL checks with API 2.6. The distribution build, standalone runners, registered console checks, and repeatable navigation course pass
+- Final results and reviewed captures are recorded in `docs/alpha026-review.md`; reproducible native course, gallery, and console runners are under `rpggame/tools/alpha026`.
+
+---
+
 ## Pass 16: Pane Relief (Version Alpha 0.2.5) — Shadow
 
 Continues the main-based polish tree from Alpha 0.2.4; publication remains on `polish`. Earlier entries are preserved. Player notes continue in `patchnotes.md` by request.

@@ -155,6 +155,7 @@ final class HudFragments {
         @Override public float width() { return hud.ui == null ? 360 : Math.max(320, hud.ui.width(hud.g.law.reminder, 14) + 64); }
         @Override public float height() { return 58; }
         @Override public void draw(Ui2D ui, float x, float y) {
+            if(hud.g.law.reminder.isBlank())return;
             float w = width();
             Style.card(ui, x, y, w, 58);
             ui.rect(x, y, w, 3, Style.BAD);
@@ -279,6 +280,14 @@ final class HudFragments {
                 ui.text(t, p2[0] - tw / 2, p2[1], 13, Style.fade(Style.ACCENT, a));
             }
             Dialog talk = hud.dialog;
+            var lines=new java.util.ArrayList<SpeechBudget.Line>();
+            for(Npc n:g.npcs)if(n.alive && n.loaded && n.distTo(g.player)<=18 && gfx.project(n.x,n.y+n.height+.35f,n.z,p2)) {
+                boolean speaking=talk!=null && talk.npc==n.id;
+                String words=speaking?talk.text:hud.settings.values.subtitles?n.speech:null;
+                int priority=speaking?1000:g.interact.focus==n?700:switch(n.goal){case FIGHT,FLEE->400;case REPORT_CRIME,HIDE->350;case REPORT_DAMAGE,INVESTIGATE->250;default->0;};
+                lines.add(new SpeechBudget.Line(n.id,words,priority,n.distTo(g.player)));
+            }
+            var audible=SpeechBudget.select(lines);
             for (Npc n : g.npcs) {
                 if (!n.alive || !n.loaded) continue;
                 float d = n.distTo(g.player);
@@ -300,7 +309,7 @@ final class HudFragments {
                     }
                     if (g.time - n.cs.lastHurt < 6 || n.goal == Brain.Goal.FIGHT) { bar(ui, p2[0], p2[1], n.hp / n.maxHp()); }
                 }
-                if (says != null && d <= 18) {
+                if (says != null && d <= 18 && audible.contains(n.id)) {
                     // talking: the words in the bubble, and how they are (if anything) at the bubble's side
                     float bw = bubble(ui, says, p2[0], top - 4, d);
                     mood(ui, n, Math.max(14, p2[0] - bw / 2 - 14), top - 20, d);
@@ -978,6 +987,7 @@ final class HudFragments {
         private boolean spotted, hunted;
         private float searchLeft = -1, searchTotal = 1;
         private double builtAt = -1;
+        private long lawRevision=-1;
         Wanted(Hud h) { super("wanted"); h.events.listen((type, detail) -> { if (type.equals("law")) builtAt = -1; }); }
         @Override protected boolean active() { refresh(); return !rows.isEmpty() || heat > 0 || searchLeft > 0 || spotted; }
         @Override public float width() { return W; }
@@ -985,8 +995,8 @@ final class HudFragments {
 
         private void refresh() {
             Rpg g = hud.g;
-            if (g.time - builtAt < 0.2) return;
-            builtAt = g.time;
+            if (g.time - builtAt < 0.2 && lawRevision==g.state.revision) return;
+            builtAt = g.time;lawRevision=g.state.revision;
             rows.clear();
             long me = g.player.id;
             int total = 0;

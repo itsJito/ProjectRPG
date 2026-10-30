@@ -33,6 +33,9 @@ public:
     /** Cells {x, y, z, ...} from the first step to the goal (or the nearest approach to it). False when boxed in. */
     bool path(const VoxelWorld& w, const NavTuning& tune, const PathQuery& q, std::vector<int32_t>& out, uint32_t& expansions);
 
+    bool partial() const { return partial_; }
+    bool capped() const { return capped_; }
+
     // walkability: what the search is made of, and what a caller may ask on its own
     static bool pass(const VoxelWorld& w, int x, int y, int z, bool doors);
     static bool stand(const VoxelWorld& w, int x, int y, int z, bool doors);
@@ -57,6 +60,7 @@ private:
     std::vector<int> nk_, parent_, heap_, slot_, slotGen_;
     std::vector<float> ng_, nf_;
     std::vector<uint8_t> closed_;
+    bool partial_ = false, capped_ = false;
     int count_ = 0, heapN_ = 0, gen_ = 0;
 };
 
