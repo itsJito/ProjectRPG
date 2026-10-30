@@ -132,7 +132,10 @@ public final class Monsters {
     }
     private void equip(Monster m, ItemDef d, int n) {
         ItemStack s = new ItemStack(d, n);
-        if (d.slot == ItemDef.Slot.OFF) m.eq.set(ItemDef.Slot.OFF, s); else m.eq.set(ItemDef.Slot.MAIN, s);
+        ItemDef.Slot slot = d.slot == ItemDef.Slot.OFF ? ItemDef.Slot.OFF : ItemDef.Slot.MAIN;
+        ItemStack previous = m.eq.get(slot);
+        if (previous != null && !previous.def.natural && !m.store(previous)) g.objects.drop(previous,m.x,m.y,m.z);
+        m.eq.set(slot,s);
         if (!d.natural) g.state.mint(d, n);
     }
     private void give(Monster m, ItemDef d, int n) { if (m.store(new ItemStack(d, n))) g.state.mint(d, n); }
@@ -332,6 +335,12 @@ public final class Monsters {
         for (Monster m : new ArrayList<>(monsters)) {
             if (!m.alive || !m.loaded || m.body == 0) continue;
             if (m.reacting) continue;
+            if (m.windup != null && g.time >= m.windupUntil) {
+                Actor victim = g.actor(m.strikeTarget);
+                m.strikeAt = g.time;
+                if (victim != null && victim.alive) strike(m,victim,m.windup);
+                m.windup = null; m.strikeTarget = 0;
+            }
             if (m.puppet) {
                 if (m.kind.flies()) fly(m, dt);
                 else g.game.commands().moverInput(m.body, 0, 0, 0, 0, 30, MOVER_STANCE_ONLY);
@@ -444,6 +453,7 @@ public final class Monsters {
     // ------------------------------------------------------------------ striking (the creatures' own blows) and ranged attacks
     /** A telegraphed creature strike lands - if the target is still where the blow goes (it may have stepped away). */
     void strike(Monster m, Actor t, String what) {
+        m.strikeAt = g.time;
         float reach = m.kind.reach * Math.max(0.6f, m.kind.scale()) + (what.equals("tail") ? 1.6f : 0);
         float d = m.distTo(t) - t.radius - m.radius;
         float facing = Math.abs(Actor.wrap(MonsterMind.yawTo(m, t.x, t.z) - m.yaw));
@@ -598,6 +608,7 @@ public final class Monsters {
             Monster m = new Monster(astratto.util.Json.lng(r, "id", 0), kind, astratto.util.Json.integer(r, "level", kind.minLevel), (float) astratto.util.Json.num(r, "x", 0), (float) astratto.util.Json.num(r, "z", 0));
             m.look = rpg.actor.Appearance.monster(kind, m.id);
             apply.accept(m, r);
+            m.sheathed = false;
             m.alive = astratto.util.Json.bool(r, "alive", true);
             m.stats();
             m.lair = astratto.util.Json.lng(r, "lair", 0); m.lairX = (float) astratto.util.Json.num(r, "lairX", m.x); m.lairZ = (float) astratto.util.Json.num(r, "lairZ", m.z);

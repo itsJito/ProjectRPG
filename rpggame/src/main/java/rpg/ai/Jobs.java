@@ -137,7 +137,7 @@ final class Jobs {
         int minimum=n.profession.family==Npc.Role.CRAFTSMAN?1:3;
         boolean joinery=n.profession==Profession.CARPENTER && joineryPending(n);
         for(ItemStack item:n.inv.stacks())if(n.count(item.def)>=minimum && !item.stolen && product(n.profession,item.def)
-                && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery && g.econ.buys(g.econ.shopA,item.def))return item.def;
+                && !(n.profession==Profession.TAILOR && item.def==Items.CLOTH) && !joinery && g.econ.buys(g.econ.localShop(n),item.def))return item.def;
         return null;
     }
     /** A craftsman's own finished pieces not yet sold: past a few, more of them is waste (a forge is not a warehouse). */
@@ -184,8 +184,8 @@ final class Jobs {
         };
     }
     private Behavior.Node<Npc> sell(Npc n,ItemDef product) {
-        float[] counter=g.econ.counterSpot(g.econ.shopA);
-        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f), person->g.econ.sellToShop(person,g.econ.shopA,product,person.count(product))>0?SUCCESS:FAILURE));
+        var shop=g.econ.localShop(n);float[] counter=g.econ.counterSpot(shop);
+        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f), person->g.econ.sellToShop(person,shop,product,person.count(product))>0?SUCCESS:FAILURE));
     }
     private boolean mineral(Profession p,ItemDef item) {
         return switch(p) {
@@ -198,6 +198,7 @@ final class Jobs {
         };
     }
     private boolean safe(Node node,Npc n) {
+        if (n.unreachable.getOrDefault(node.id,-1.0) > g.time) return false;
         if(node.owner!=0 && node.owner!=n.id || node.depleted())return false;
         if((g.chemistry.state(node.id)&astratto.bridge.AstrattoNative.CHEM_BURNING)!=0)return false;
         if(n.profession==Profession.COAL_MINER) {

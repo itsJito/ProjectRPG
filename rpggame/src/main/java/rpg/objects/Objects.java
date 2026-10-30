@@ -184,12 +184,29 @@ public final class Objects {
         expanse(f);
         // 0.2.2 (after every older fixture, so their ids hold): the unfinished casket where the dead buy back their things
         casket = add(new Fixtures.Casket(fid(), DevMap.CASKET[0], f, DevMap.CASKET[1])).solid(g);
+        supportBeds();
+        Furniture cityStall=add(new Furniture(fid(),Furniture.Kind.COUNTER,76,29,78,29,1,0,Ids.TRADER_CITY,true));
+        furniture.add(cityStall);cityStall.place(g,true);
+        Furniture palaceStall=add(new Furniture(fid(),Furniture.Kind.COUNTER,181,97,183,97,1,0,Ids.TRADER_PALACE,true));
+        furniture.add(palaceStall);palaceStall.place(g,true);
         g.vox.doors(doors);
         rpg.ai.Waypoints.doors(g.vox, doors);
     }
 
+    /** New beds append after established fixture ids; spare beds retain their identities. */
+    public void supportBeds() {
+        for (var p : DevMap.SUPPORT_BEDS) {
+            Furniture bed = furnitureAt(p.x0(),DevMap.FLOOR,p.z0());
+            if (bed == null) {
+                bed=add(new Furniture(fid(),Furniture.Kind.BED,p.x0(),p.z0(),p.x1(),p.z1(),1,p.facing(),p.owner(),true));
+                furniture.add(bed);bed.place(g,true);
+            }
+            if (bed.owner==0 || bed.owner==p.owner()) {bed.owner=p.owner();bed.name=g.nameOf(p.owner())+"'s bed";}
+        }
+    }
+
     private void jailCell(rpg.world.Jails.Cell cell) {
-        Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
+        Door door = add(Door.cellDoor(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}));
         door.spawn(g); jailDoors.add(door);
         var p = cell.slab();
         Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));

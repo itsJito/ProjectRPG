@@ -628,7 +628,7 @@ public final class Rig {
             } else if (looting > 0.001f) {
                 target = lerp(rest, toFigure(a, a.reachX + (float) Math.cos(a.yaw) * side * 0.12f, a.reachY, a.reachZ - (float) Math.sin(a.yaw) * side * 0.12f), looting);
                 dir = new float[]{0, -1, -0.2f};
-            } else if (fishing(a) != null) {
+            } else if (fishing(a) != null && (isMain || a.off() == null)) {
                 float[][] fp = fishPose(a, st, shoulder, side, isMain, time, b);
                 target = fp[0]; dir = fp[1];
             } else if (cooking(a) != null) {
@@ -759,7 +759,17 @@ public final class Rig {
     private float[][] fishPose(Actor a, State st, float[] shoulder, int side, boolean isMain, double time, Body b) {
         ItemDef tool = fishing(a);
         var w = a.working;
-        float t = w.t, left = w.duration - w.t;
+        float t = Math.max(0, w.t), left = w.duration - t;
+        float haul = smooth(Math.clamp(1 - left / 0.8f, 0, 1));
+        if (firstPerson) {
+            float[] aim = norm(new float[]{-(float)Math.sin(st.headYaw)*(float)Math.cos(a.pitch), (float)Math.sin(a.pitch), -(float)Math.cos(st.headYaw)*(float)Math.cos(a.pitch)});
+            float cast = smooth(Math.clamp(t / (tool == Items.FISHING_ROD ? 0.55f : 0.8f), 0, 1));
+            float ahead = tool == Items.FISHING_ROD ? 5 + cast * 5 - haul * 2 : 6 + cast * 5 - haul * 5;
+            float down = tool == Items.FISHING_ROD ? 3 + cast * 1.5f - haul : 4 + cast * 3 - haul * 4;
+            float[] hand = view(aim, isMain ? 3 : 2, side, down, ahead);
+            if (!isMain && tool == Items.FISHING_ROD && haul > 0) hand = add(hand,torsoUp,(float)Math.sin(time*9)*haul*0.7f);
+            return new float[][]{hand, norm(viewDirection(aim,0,tool == Items.FISHING_ROD ? 0.65f : -0.6f,1))};
+        }
         if (tool == Items.FISHING_ROD) {
             float cast = Math.min(1, t / 0.55f), e = cast * cast * (3 - 2 * cast);
             float[] back = torsoPoint(shoulder, side * 0.8f, 2.8f, 2.6f), out = torsoPoint(shoulder, side * 0.4f, -4.0f, -7.2f);
@@ -767,7 +777,7 @@ public final class Rig {
             float[] dirBack = norm(torsoDir(0, 0.6f, 0.8f)), dirOut = norm(torsoDir(0, 0.62f + bob, -0.78f));
             float[] main = cast < 1 ? lerp(back, out, e) : out;
             float[] mdir = cast < 1 ? norm(lerp(dirBack, dirOut, e)) : dirOut;
-            if (isMain) return new float[][]{main, mdir};
+            if (isMain) return new float[][]{lerp(main,back,haul*0.45f), mdir};
             // the other hand on the reel, a hand's width down the butt; it winds as the catch comes in
             float[] reel = add(main, mdir, -3.2f);
             if (left < 0.8f) { float r = (float) (time * 9); reel = add(add(reel, torsoRight, (float) Math.cos(r) * 0.7f), torsoUp, (float) Math.sin(r) * 0.7f); }
@@ -777,13 +787,15 @@ public final class Rig {
             float fling = Math.min(1, t / 0.5f), e = (float) Math.sin(Math.PI * 0.5f * fling);
             float[] chest = torsoPoint(shoulder, -side * 1.2f, -3.5f, -2.0f), flung = torsoPoint(shoulder, side * 0.8f, -6.0f, -8.0f), held = torsoPoint(shoulder, side * 0.5f, -7.8f, -5.0f);
             float[] p = fling < 1 ? lerp(chest, flung, e) : lerp(flung, held, Math.min(1, (t - 0.5f) / 0.6f));
-            return new float[][]{p, norm(torsoDir(0, -0.6f, -0.8f))};
+            return new float[][]{lerp(p,chest,haul), norm(torsoDir(0, -0.6f, -0.8f))};
         }
         // a crab cage, lowered to arm's length and held there
         float lower = Math.min(1, t / 0.9f), e = lower * lower * (3 - 2 * lower);
         float[] carried = torsoPoint(shoulder, side * 0.9f, -6.0f, -3.5f), down = torsoPoint(shoulder, side * 1.4f, -9.5f, -7.0f);
-        return new float[][]{lerp(carried, down, e), new float[]{0, -1, 0}};
+        return new float[][]{lerp(lerp(carried, down, e),carried,haul), new float[]{0, -1, 0}};
     }
+
+    private static float smooth(float t) { return t*t*(3-2*t); }
 
     private static void liftOff(State st, int k, float swingTime) {
         st.stance[k] = false;

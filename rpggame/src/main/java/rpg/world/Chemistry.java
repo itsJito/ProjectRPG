@@ -268,7 +268,7 @@ public final class Chemistry {
             if(object instanceof Foliage.Patch || object instanceof rpg.objects.Trap || object instanceof rpg.objects.Corpse || object instanceof rpg.objects.Fire)continue;
             boolean physical=object instanceof rpg.objects.Furniture || object instanceof rpg.objects.Door || object instanceof rpg.objects.Station || object instanceof rpg.objects.GroundItem || object instanceof rpg.objects.Container container && !container.kind.equals("claim") && !container.kind.equals("escrow") && !container.kind.equals("vault") && !container.kind.equals("grave") && !container.kind.equals("memorial");
             if(!physical)continue;
-            boolean wood=object instanceof rpg.objects.Door || object instanceof rpg.objects.Container || object instanceof rpg.objects.Furniture furniture && furniture.kind!=rpg.objects.Furniture.Kind.HEADSTONE
+            boolean wood=object instanceof rpg.objects.Door door && !door.cellDoor || object instanceof rpg.objects.Container || object instanceof rpg.objects.Furniture furniture && furniture.kind!=rpg.objects.Furniture.Kind.HEADSTONE
                     || object instanceof rpg.objects.GroundItem item && !item.stack.def.conductive;
             int tags=wood?CHEM_FLAMMABLE:CHEM_CONDUCTIVE;
             objects.add(object.id);g.game.commands().chemSensor(object.id,0,object.x,object.y+0.25f,object.z,0.45f,tags,0,wood?6:0,0,0,false);

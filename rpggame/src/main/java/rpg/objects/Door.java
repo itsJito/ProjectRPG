@@ -36,6 +36,7 @@ public final class Door extends WorldObject {
     public final int height;
     /** (0.2.2, gamefixes) A fence-gate: one block high, rails and a brace in the fence's own boards, in a fence's line. */
     public final boolean fenceGate;
+    public boolean cellDoor;
     /** open: unlatched (swung, or free to swing); locked: latched and locked. */
     public boolean open, locked;
     public final ItemDef key;
@@ -79,6 +80,11 @@ public final class Door extends WorldObject {
     }
     /** A gate in a fence, as high as the fence (one block): it swings either way and can be climbed over. */
     public static Door fenceGate(long id, String name, int[][] cells, long owner) { return new Door(id, name, cells, false, null, 1, owner, 1, true); }
+    public static Door cellDoor(long id, String name, int[][] cells) {
+        Door door = new Door(id, name, cells, true, null, 100, 0);
+        door.cellDoor = true;
+        return door;
+    }
 
     private static float cx(int[][] c) { float s = 0; for (int[] p : c) s += p[0] + 0.5f; return s / c.length; }
     private static float cz(int[][] c) { float s = 0; for (int[] p : c) s += p[1] + 0.5f; return s / c.length; }

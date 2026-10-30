@@ -309,6 +309,7 @@ final class HudFragments {
             for (Actor d : g.dummies) if (g.time - d.cs.lastHurt < 4 && gfx.project(d.x, d.y + 2.1f, d.z, p2)) ui.centered(d.name, p2[0], p2[1] - 16, 12, Style.NPC);
             for (Fx.Floating f : g.fx.floating) {
                 float t = (float) (g.time - f.born());
+                if (!f.near(g.player.x, g.player.y, g.player.z)) continue;
                 if (!gfx.project(f.x(), f.y() + t * f.rise(), f.z(), p2)) continue;
                 float a = Math.max(0, Math.min(1, (1.6f - t) / 0.5f));
                 boolean number = f.text().chars().allMatch(Character::isDigit);
@@ -470,6 +471,7 @@ final class HudFragments {
                 boolean ranged = held != null && (held.family == ItemDef.Family.BOW || held.family == ItemDef.Family.CROSSBOW);
                 float gap = ranged ? 6 + 10 * (1 - p.cs.draw) : 4;
                 int aimColor = p.cs.reload > 0 ? Style.DIM : 0xD0FFFFFF;
+                if (g.controller.softTarget != 0) aimColor = Style.GOLD;
                 ui.rect(cx - 1, cy - 1, 2, 2, aimColor);
                 if (ranged) {
                     if (held.family == ItemDef.Family.CROSSBOW && p.cs.reload <= 0) gap = 6;

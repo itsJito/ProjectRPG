@@ -34,9 +34,16 @@ public final class Player extends Actor {
         for (int i = 0; i < quick.length; i++) {
             QuickSlot q = quick[i];
             if (q == null) continue;
-            int n = count(q.item());
+            int n = quickCount(q.item());
             quick[i] = n <= 0 ? null : n == q.count() ? q : new QuickSlot(q.item(), n);
         }
+    }
+
+    /** Quick slots follow an owned item between the pack and the equipment. */
+    public int quickCount(rpg.item.ItemDef item) {
+        int total = count(item);
+        for (var worn : eq.stacks()) if (worn.def == item) total += worn.amount;
+        return total;
     }
 
 }

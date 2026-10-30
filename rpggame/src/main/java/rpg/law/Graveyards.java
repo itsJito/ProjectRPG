@@ -63,6 +63,9 @@ public final class Graveyards {
             body.contents.clear(); dead.eq.clear();
             if (dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
             dead.corpse = 0; body.removed = true; corpse.delivered = true; stone.buried = true;
+            for (var witness : g.npcs) if (witness.hunt != null && witness.hunt.target == 0 && witness.hunt.source == dead.id) {
+                witness.hunt = null; witness.nextThink = 0;
+            }
         } else {
             g.carrying.drop(carrier, false);
             body.x = stone.x; body.y = stone.y; body.z = stone.z; body.heldBy = 0;

@@ -38,12 +38,17 @@ class MonsterTest {
             // (the camp's quarrel with the player alone: no lion or miner wandering by to take them off it)
             for (var a : g.animals.all()) { a.loaded = false; g.animals.despawnBody(a); }
             for (var n : g.npcs) g.ai.unload(n);
-            for (var m : g.monsters.all()) if (m.kind != MonsterKind.GOBLIN) g.monsters.despawnBody(m);
+            for (var m : g.monsters.all()) if (m.kind != MonsterKind.GOBLIN) { m.loaded=false; g.monsters.despawnBody(m); }
             // far from the camp the goblins are about their own business, not after the player
             g.teleport(g.player, 64.5f, DevMap.FLOOR, 66.5f);
             for (int f = 0; f < 60 * 10; f++) assertTrue(game.tick(1f / 60));
             for (Monster m : g.monsters.all()) if (m.kind == MonsterKind.GOBLIN) assertNotEquals(g.player.id, m.target, "no free aggro across the map");
             // walk into the camp: noticed, called, attacked
+            int campMember=0;
+            for(var m:g.monsters.all())if(m.kind==MonsterKind.GOBLIN && !rpg.world.DungeonLayout.inDungeonRegion(m.x)) {
+                g.teleport(m,m.lairX+(campMember%2)*2.4f-1.2f,DevMap.FLOOR,m.lairZ+(campMember/2)*2.4f-1.2f);
+                m.state=Monster.State.IDLE;m.nextThink=0;campMember++;
+            }
             g.teleport(g.player, DevMap.GOBLIN_CAMP[0] + 1, DevMap.FLOOR, DevMap.GOBLIN_CAMP[1] + 3);
             float hp = g.player.hp;
             boolean engaged = false;

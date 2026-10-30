@@ -12,7 +12,7 @@ import rpg.world.Voxels;
 /**
  * The player's body and hands. Intent comes from the keyboard and mouse - or, in an automated run, from a script -
  * and becomes: movement for the engine's mover (walk, sprint on stamina, jump, dodge, quick turn), the camera (first or
- * third person, free aim, no lock-on), and independent hands: the main hand on the left button (tap a light swing, hold
+ * third person, free aim with gentle ranged targeting assistance), and independent hands: the main hand on the left button (tap a light swing, hold
  * for a heavy one, draw a bow, cast from a staff) and the off hand on the right (raise a shield or guard, swing an
  * off-hand weapon, cast from a wand, bless with a symbol).
  *
@@ -45,6 +45,8 @@ public final class PlayerController {
     /** The camera, as last placed, and the aim ray through the crosshair. */
     public float cx, cy, cz, fx, fy, fz;
     public float aimYaw, aimPitch;
+    /** A visible target retained only while the player aims a ranged weapon. */
+    public long softTarget;
     private boolean mainWas, offWas;
     private float mainHeld;
     /** One near-ready melee release, retained briefly so a recovery frame does not swallow the click. */
@@ -79,6 +81,7 @@ public final class PlayerController {
         }
         if (in.toggleCamera && p.morphT <= 0) { p.firstPerson = !p.firstPerson; g.chat.say(p.firstPerson ? "First-person camera." : "Third-person camera."); }
         placeCamera(p);
+        assistAim(p, dt);
         if (!p.alive) {
             queuedMelee = null;
             if (g.death.active) { g.death.camera(this); g.game.commands().listener(cx, cy, cz, (float) Math.atan2(-fx, -fz)); }
@@ -182,6 +185,34 @@ public final class PlayerController {
             if (dx == 0 && dz == 0) { dx = -fx; dz = -fz; }
             g.combat.dodge(p, dx, dz);
         }
+    }
+
+    private void assistAim(Player p, float dt) {
+        ItemDef weapon = p.main(), off = p.off();
+        boolean ranged = weapon != null && (weapon.family == Family.BOW || weapon.family == Family.CROSSBOW || weapon.family == Family.THROWN || weapon.family == Family.STAFF)
+                || off != null && off.family == Family.WAND;
+        if (!p.alive || p.reacting || p.sheathed || !ranged || !(in.mainDown || in.offDown || p.cs.draw > 0.01f || p.cs.aim > 0.1f)) { softTarget = 0; return; }
+        Actor best = null; float bestScore = Float.MAX_VALUE;
+        for (Actor candidate : g.actors()) {
+            if (candidate == p || !candidate.alive || candidate.summonOwner == p.id || candidate.team != 0 && candidate.team == p.team) continue;
+            float dx = candidate.x - cx, dy = candidate.chestY() - cy, dz = candidate.z - cz;
+            float distance = (float)Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (distance < 1 || distance > 32) continue;
+            float dot = (dx * fx + dy * fy + dz * fz) / distance;
+            float cone = candidate.id == softTarget ? 0.985f : 0.995f;
+            if (dot < cone || !g.vox.sight(cx, cy, cz, candidate.x, candidate.chestY(), candidate.z)
+                    || !g.vox.sight(p.x, p.eyeY(), p.z, candidate.x, candidate.chestY(), candidate.z)) continue;
+            float score = 1 - dot + distance * 0.00001f - (candidate.id == softTarget ? 0.002f : 0);
+            if (score < bestScore) { best = candidate; bestScore = score; }
+        }
+        softTarget = best == null ? 0 : best.id;
+        if (best == null) return;
+        float dx = best.x - cx, dy = best.chestY() - cy, dz = best.z - cz;
+        float yaw = (float)Math.atan2(-dx, -dz), pitch = (float)Math.atan2(dy, Math.hypot(dx, dz));
+        float limit = dt * 0.45f;
+        camYaw = Actor.wrap(camYaw + Math.clamp(Actor.wrap(yaw - camYaw) * dt * 5, -limit, limit));
+        camPitch += Math.clamp((pitch - camPitch) * dt * 5, -limit, limit);
+        placeCamera(p, true);
     }
 
     /** noclip: the body flies where the camera looks, through everything (Space up, Ctrl down, Shift fast). */

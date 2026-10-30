@@ -76,11 +76,18 @@ public final class Repairs {
 
     /** The next thing this person could mend now: theirs to do, settled, not smoking, nobody else on it - the nearest. */
     public Damage claim(Npc n) {
+        for (var entry : new ArrayList<>(claimedBy.entrySet())) {
+            var actor = g.actor(entry.getValue());
+            if (!(actor instanceof Npc worker) || !worker.alive || !worker.loaded || worker.goal != rpg.ai.Brain.Goal.WORK) {
+                claimedBy.remove(entry.getKey()); spots.remove(entry.getKey());
+            }
+        }
         Long mine = null;
         for (var e : claimedBy.entrySet()) if (e.getValue() == n.id) mine = e.getKey();
         if (mine != null && open.containsKey(mine)) return open.get(mine);
         Damage best = null; float nearest = Float.MAX_VALUE;
         for (Damage d : open.values()) {
+            if (n.unreachable.getOrDefault(d.key,-1.0) > g.time) continue;
             if (!trade(n, d) || g.time - d.at < SETTLE || claimedBy.containsKey(d.key) && claimedBy.get(d.key) != n.id) continue;
             if (smoking(d)) continue;
             if (d.timber() && material(n, d) == null) continue;
@@ -91,6 +98,10 @@ public final class Repairs {
         return best;
     }
     public void release(Npc n) { for (var e : new ArrayList<>(claimedBy.entrySet())) if (e.getValue() == n.id) { claimedBy.remove(e.getKey()); spots.remove(e.getKey()); } }
+    public void abandon(Npc n) {
+        for (var entry : claimedBy.entrySet()) if (entry.getValue() == n.id) n.unreachable.put(entry.getKey(),g.time+45);
+        release(n);
+    }
     private boolean smoking(Damage d) {
         for (var c : g.chemistry.active) if ((c.state() & astratto.bridge.AstrattoNative.CHEM_BURNING) != 0 && Math.hypot(c.x() - d.x - 0.5, c.z() - d.z - 0.5) < 3) return true;
         return false;
@@ -110,7 +121,8 @@ public final class Repairs {
             float dist = (float) Math.hypot(x + 0.5 - n.x, z + 0.5 - n.z) + (roofed ? 40 : 0);
             if (dist < nearest) { nearest = dist; best = new float[]{x + 0.5f, z + 0.5f}; }
         }
-        float[] spot = best != null ? best : new float[]{d.x + 0.5f, d.z + 1.5f};
+        if (best == null) return null;
+        float[] spot = best;
         spots.put(d.key, spot);
         return spot;
     }

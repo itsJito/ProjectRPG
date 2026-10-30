@@ -413,7 +413,6 @@ public final class MonsterMind {
         m.wantAltitude = m.kind.flies() ? Math.max(0, t.y - m.y + (m.kind == MonsterKind.DRAGON ? 6 : 1.4f)) : 0;
         boolean busy = m.cs.busy() || g.time < m.windupUntil;
         // a telegraphed strike under way (the creatures' wind-ups): it lands when the wind-up ends
-        if (m.windup != null && g.time >= m.windupUntil) { sys.strike(m, t, m.windup); m.windup = null; return; }
         if (busy) { hold(m); return; }
         float reach = m.kind.reach * m.kind.scale() + (m.main() != null && !m.main().natural ? m.main().reach : 0);
         boolean ranged = m.kind.ranged != null && g.time >= m.nextRanged && d > Math.max(3, reach + 1) && d < m.kind.rangedRange && g.vox.sight(m.x, m.eyeY(), m.z, t.x, t.chestY(), t.z);
@@ -571,7 +570,7 @@ public final class MonsterMind {
                 default -> null;
             };
             if (move == null) move = rpg.combat.CombatSystem.lightMove(m, false);
-            g.combat.attack(m, false, move);
+            if (!g.combat.attack(m, false, move)) m.nextStrike = g.time + 0.1;
         } else {
             // the creatures: a visible, audible wind-up first (heavier = longer and clearer), then the strike
             String what = switch (m.kind) {
@@ -581,6 +580,8 @@ public final class MonsterMind {
                 default -> "bite";
             };
             m.windup = what;
+            m.windupStart = g.time;
+            m.strikeTarget = t.id;
             m.windupUntil = g.time + switch (m.kind) { case DRAGON -> 0.9; case GIANT_SPIDER -> 0.45; default -> 0.25; };
             sys.sound(m, m.kind.alarmSound, 0.6f);
         }

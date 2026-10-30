@@ -137,6 +137,8 @@ public final class Animal extends Actor implements Interactable {
 
     /** Dangerous to people now: hunting, defending, or already in a fight. */
     public boolean dangerous() { return alive && menacing; }
+    /** A warning is directed at its subject; an actual attack also endangers nearby bystanders. */
+    public boolean threatens(Actor observer) { return dangerous() && (goal != Goal.WARN || other == observer.id); }
 
     // ------------------------------------------------------------------ Interactable
     @Override public long id() { return id; }

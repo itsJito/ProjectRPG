@@ -135,6 +135,7 @@ public class Npc extends Actor implements Interactable {
     public int routeCells;
     public boolean stuck;
     public long fightTarget, socialPartner, aidTarget;
+    public float socialSide;
     /** People they set out to talk with but could find no way to (a fence, a pen, a locked door between): until when they stop trying. */
     public final java.util.Map<Long, Double> unreachable = new java.util.HashMap<>();
     public int conversations;

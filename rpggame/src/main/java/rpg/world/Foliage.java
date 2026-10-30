@@ -19,7 +19,7 @@ import static astratto.bridge.AstrattoNative.*;
  * a menu option.
  */
 public final class Foliage {
-    public enum Kind { FERN,TALL_GRASS,CLOVER,REED,BRAMBLE,WILDFLOWER,IVY,MOSS,MUSHROOM,SAPLING,SHRUB,THISTLE,DAISY,BLUEBELL,CATTAIL,HEATHER,DOCK,BRACKEN }
+    public enum Kind { FERN,TALL_GRASS,CLOVER,REED,BRAMBLE,WILDFLOWER,IVY,MOSS,MUSHROOM,SAPLING,SHRUB,THISTLE,DAISY,BLUEBELL,CATTAIL,HEATHER,DOCK,BRACKEN,BUSH }
     public static final class Chunk {
         public final int key,x,z;
         public int version;
@@ -44,6 +44,7 @@ public final class Foliage {
     private final Map<Long,Double> trailAt=new HashMap<>(), rustleAt=new HashMap<>();
     private static final double RECOVER=2.2;
     private final float[] push=new float[32];
+    private static final int CHUNKS_X = (DevMap.SX + 15) / 16, CHUNKS_Z = (DevMap.SZ + 15) / 16;
     private final Rpg g;
     public final Map<Integer,Chunk> chunks=new HashMap<>();
     private final Map<Long,Double> depleted=new HashMap<>();
@@ -65,7 +66,7 @@ public final class Foliage {
             case FERN,MUSHROOM,BRACKEN->sky<0.65f;
             case REED,CATTAIL->nearWater(x,y,z);
             case BLUEBELL->sky<0.8f;
-            case BRAMBLE,SAPLING,SHRUB->sky>0.3f && g.vox.block(x,y+2,z)==Blocks.AIR;
+            case BRAMBLE,SAPLING,SHRUB,BUSH->sky>0.3f && g.vox.block(x,y+2,z)==Blocks.AIR;
             default->sky>0.35f;
         };
     }
@@ -74,13 +75,15 @@ public final class Foliage {
     private static final int[][] SIDES={{1,0},{-1,0},{0,1},{0,-1}};
     private boolean nearWater(int x,int y,int z){for(int[] direction:SIDES)for(int step=1;step<=4;step++)if(g.vox.block(x+direction[0]*step,y-1,z+direction[1]*step)==Blocks.WATER)return true;return false;}
     private Chunk generate(int cx,int cz) {
-        int key=cx+cz*8;Chunk chunk=new Chunk(key,cx*16,cz*16);
+        int key=cx+cz*CHUNKS_X;Chunk chunk=new Chunk(key,cx*16,cz*16);
         // every other cell is a candidate; half of them grow something (gamefixes: more foliage), and a plant that does
         // not suit its spot gives way to the next kind that does, so the shade, the water's edge and the open each fill
         for(int x=chunk.x+1;x<chunk.x+16;x+=2)for(int z=chunk.z+1;z<chunk.z+16;z+=2) {
             int seed=hash(x,z);if((seed&1)!=0)continue;int y=DevMap.FLOOR;
-            int first=Math.floorMod(seed>>>3,Kind.values().length);Kind kind=null;
-            for(int k=0;k<4 && kind==null;k++){Kind trial=Kind.values()[(first+k*5)%Kind.values().length];if(suitable(trial,x,y,z))kind=trial;}
+            // Preserve the established species distribution, varying some shrubs into fuller bushes.
+            int established=Kind.BUSH.ordinal(),first=Math.floorMod(seed>>>3,established);Kind kind=null;
+            for(int k=0;k<4 && kind==null;k++){Kind trial=Kind.values()[(first+k*5)%established];if(suitable(trial,x,y,z))kind=trial;}
+            if(kind==Kind.SHRUB && ((seed>>>10)&3)==0)kind=Kind.BUSH;
             if(kind==null)continue;
             float facing=(seed>>>16)*0.00009587f;
             if(kind==Kind.IVY || kind==Kind.MOSS)for(int[] direction:SIDES) {
@@ -98,10 +101,10 @@ public final class Foliage {
     public void update() {
         trail();
         if(g.time<next)return;next=g.time+0.25;
-        int centerX=Math.clamp((int)g.player.x/16,0,7),centerZ=Math.clamp((int)g.player.z/16,0,7);
+        int centerX=Math.clamp((int)g.player.x/16,0,CHUNKS_X-1),centerZ=Math.clamp((int)g.player.z/16,0,CHUNKS_Z-1);
         boolean generated=false;
         for(int ring=0;ring<=2 && !generated;ring++)for(int dz=-ring;dz<=ring && !generated;dz++)for(int dx=-ring;dx<=ring;dx++) {
-            int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=8 || z>=8 || chunks.containsKey(x+z*8))continue;generate(x,z);generated=true;break;
+            int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated=true;break;
         }
         for(Chunk chunk:chunks.values())for(Patch plant:chunk.plants) {
             if(plant.removed) {
@@ -140,7 +143,7 @@ public final class Foliage {
     }
     /** The live plant nearest a point within a reach, or null. */
     public Patch plantAt(float x,float z,float reach) {
-        Chunk chunk=chunks.get(Math.clamp((int)x/16,0,7)+Math.clamp((int)z/16,0,7)*8);
+        Chunk chunk=chunks.get(Math.clamp((int)x/16,0,CHUNKS_X-1)+Math.clamp((int)z/16,0,CHUNKS_Z-1)*CHUNKS_X);
         if(chunk==null)return null;
         Patch best=null;float bestD=reach;
         for(Patch p:chunk.plants)if(!p.removed && p.kind!=Kind.IVY && p.kind!=Kind.MOSS){float d=(float)Math.hypot(p.x-x,p.z-z);if(d<bestD){bestD=d;best=p;}}

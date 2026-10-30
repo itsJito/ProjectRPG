@@ -46,6 +46,7 @@ public final class Law {
     private double sentenceUntil = -1;
     private String sentenceJurisdiction = "";
     private int jailAdmissions;
+    private int sentenceBounty;
     private record RoofKey(long actor,String jurisdiction) {}
     private static final class RoofWarning { long guard; double at,lastSeen,nextCharge; }
     private final Map<RoofKey,RoofWarning> roofWarnings=new HashMap<>();
@@ -87,6 +88,10 @@ public final class Law {
         borders();
         posses.update();
         if (sentenceUntil >= 0 && g.state.minutes >= sentenceUntil) releasePlayer();
+        else if (sentenceUntil >= 0 && g.player.alive) {
+            var cell = rpg.world.Jails.forJurisdiction(sentenceJurisdiction);
+            if (cell != null && !cell.contains(g.player.x, g.player.y, g.player.z)) escapePlayer();
+        }
         for (Npc npc : g.npcs) if (npc.arrestedUntil >= 0 && (!npc.alive || g.state.minutes >= npc.arrestedUntil)) {
             String jurisdiction = npc.arrestJurisdiction.isEmpty() ? DevMap.jurisdiction(npc.x, npc.z) : npc.arrestJurisdiction;
             npc.arrestedUntil = -1; npc.arrestJurisdiction = "";
@@ -113,6 +118,7 @@ public final class Law {
     private void releasePlayer() {
         var cell = rpg.world.Jails.forJurisdiction(sentenceJurisdiction);
         sentenceUntil = -1;
+        sentenceBounty = 0;
         returnPossessions(g.player);
         openEmptyCell(sentenceJurisdiction);
         if (cell != null) g.player.poseReset = true;
@@ -120,6 +126,18 @@ public final class Law {
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
         g.state.commit("SentenceServed", g.player.id, 0, sentenceJurisdiction, 0, "admission " + jailAdmissions);
         sentenceJurisdiction = "";
+    }
+
+    private void escapePlayer() {
+        String jurisdiction = sentenceJurisdiction;
+        int before = bounty(g.player.id, jurisdiction);
+        int restored = (int)Math.min(Integer.MAX_VALUE, (long)before + sentenceBounty + 75);
+        sentenceUntil = -1; sentenceJurisdiction = ""; sentenceBounty = 0;
+        bounties.computeIfAbsent(jurisdiction, k -> new HashMap<>()).put(g.player.id, restored);
+        var event = g.state.commit("Jailbreak", g.player.id, 0, jurisdiction, 0, "bounty " + before + " -> " + restored);
+        g.state.commit("BountyChanged", 0, g.player.id, jurisdiction, event.id(), before + " -> " + restored);
+        g.chat.add("You escaped before serving your sentence. Your previous bounty is restored, plus 75 Gold.", Chat.Kind.CRIME);
+        openEmptyCell(jurisdiction);
     }
 
     /**
@@ -169,8 +187,11 @@ public final class Law {
             // (gamefixes: after a lie that landed, the whole watch still came after the player) the matter is closed for
             // every officer, not just those on it: what they know of where the player is stays known, marked looked into,
             // so the player standing among them is not a fresh mystery to go and see about
-            var known = n.aware.get(a.id);
-            if (known != null) known.settledAt = g.time;
+            var known = n.aware.computeIfAbsent(a.id, id -> new rpg.ai.Stealth.Aware());
+            known.settledAt = g.time;
+            known.bloodQuestionUntil = -99;
+            known.bloodQuestionAgain = g.time + 90;
+            known.bloodSeen = a.bloodied;
             if (n.investigation != null && n.investigation.subject == a.id) { n.investigation = null; if (n.goal == rpg.ai.Brain.Goal.INVESTIGATE) { n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = 0; } }
             boolean involved = n.fightTarget == a.id || n.cs.lastAttacker == a.id || n.watchTarget == a.id
                     || n.hunt != null && n.hunt.target == a.id || n.investigation != null && n.investigation.subject == a.id;
@@ -391,6 +412,7 @@ public final class Law {
                 n.hunt = h; n.nextThink = 0;
             }
             g.state.commit("EvidenceReported", witness.id, 0, m.jurisdiction, m.eventId, m.detail + " reported to " + lawman.name);
+            g.ai.say(witness, m.detail.contains("body") ? "I found a dead body. Please send someone." : "I found " + m.detail.replaceFirst("^found ", "") + ". Please send someone.");
             g.ai.say(lawman, "I'll send the guards.");
             return Result.ok();
         }
@@ -598,6 +620,7 @@ public final class Law {
             if (g.ui != null) g.ui.closeDialog();
             sentenceUntil = g.state.minutes + duration;
             sentenceJurisdiction = jur;
+            sentenceBounty = b;
             jailAdmissions++;
             var incident = g.state.commit("JailAdmission", a.id, by == null ? 0 : by.id, jur, 0, "admission " + jailAdmissions);
             if (by != null && !witnesses.contains(by)) witnesses.add(by);
@@ -640,7 +663,7 @@ public final class Law {
     public Map<String, Object> save() {
         Map<String, Object> m = new HashMap<>();
         m.put("_reported", new ArrayList<Object>(reportedCrimes));
-        m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions));
+        m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions, "bounty", sentenceBounty));
         for (var e : bounties.entrySet()) {
             Map<String, Object> j = new HashMap<>();
             for (var b : e.getValue().entrySet()) j.put(String.valueOf(b.getKey()), b.getValue());
@@ -659,6 +682,22 @@ public final class Law {
                 sentenceUntil = astratto.util.Json.num(custody, "until", -1);
                 sentenceJurisdiction = astratto.util.Json.str(custody, "jur", "");
                 jailAdmissions = astratto.util.Json.integer(custody, "admissions", 0);
+                sentenceBounty = Math.max(0, astratto.util.Json.integer(custody, "bounty", 0));
+                // Older saves kept the original amount in the arrest event, before custody stored it directly.
+                if (!custody.containsKey("bounty") && sentenceUntil >= 0) {
+                    var events = g.state.all();
+                    for (int i = events.size() - 1; i >= 0; i--) {
+                        var event = events.get(i);
+                        if (!event.type().equals("Arrested") || event.subject() != g.player.id || !sentenceJurisdiction.equals(event.jurisdiction())) continue;
+                        String payload = event.payload();
+                        if (payload.startsWith("bounty ")) {
+                            int end = payload.indexOf(' ', 7);
+                            try { sentenceBounty = Math.max(0, Integer.parseInt(payload.substring(7, end < 0 ? payload.length() : end))); }
+                            catch (NumberFormatException ignored) { }
+                        }
+                        break;
+                    }
+                }
                 continue;
             }
             if (e.getKey().equals("_reported")) { for (Object o : (List<Object>) e.getValue()) reportedCrimes.add(((Number) o).longValue()); continue; }
@@ -668,7 +707,7 @@ public final class Law {
         }
     }
 
-    public void clear() { confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; }
+    public void clear() { confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
 
     /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
     public static final int FORFEIT_FROM = 25;
@@ -724,7 +763,7 @@ public final class Law {
     public void playerRespawned() {
         roofWarnings.keySet().removeIf(key->key.actor==g.player.id);
         String heldIn = sentenceJurisdiction;
-        sentenceUntil = -1; sentenceJurisdiction = "";
+        sentenceUntil = -1; sentenceJurisdiction = ""; sentenceBounty = 0;
         if (!heldIn.isEmpty()) openEmptyCell(heldIn);
         long id = g.player.id;
         for (var charges : bounties.values()) charges.remove(id);

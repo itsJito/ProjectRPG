@@ -56,6 +56,7 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
         if ("release-systems".equals(System.getenv("RPG_GALLERY_ONLY"))) { releaseSystemsShots(); return 0; }
@@ -572,6 +573,74 @@ final class Gallery {
         for (int i = 0; i < 60 * 8 && g.player.working != null; i++) step();
         int after = g.player.count(rpg.item.Items.SHRIMP) + g.player.count(rpg.item.Items.get("burnt_fish"));
         System.out.println("[cooking] cooked " + (after - before) + " of 3; raw left " + g.player.count(rpg.item.Items.RAW_SHRIMP) + " (5 before)");
+    }
+
+    /** Repeatable review of the Alpha 0.2.4 changes, using real game actions and the shared renderer. */
+    private void polish024Shots() {
+        String part=System.getenv("RPG_024_REVIEW");
+        if ("fishing".equals(part)) { polish024Fishing(); return; }
+        if ("foliage".equals(part)) { gamefixesFoliage(); return; }
+        if ("jail".equals(part)) {
+            var cell=rpg.world.Jails.forJurisdiction(DevMap.PALACE);
+            g.law.arrest(g.player,DevMap.PALACE,(rpg.ai.Npc)g.actor(Ids.PRAETOR));
+            frames(50);reviewUi("palace-cell-inside");
+            float[] cam={138,DevMap.FLOOR+2.1f,114,137.5f,DevMap.FLOOR+1.2f,120};
+            for(int frame=0;frame<30;frame++)draw(cam,1f/60);
+            Main.shot(gfx,win.width,win.height,new File(shots,"palace-iron-door.png"));
+            return;
+        }
+        radialShots();
+        for(int page=0;page<rpg.ui.SettingsPanel.controlPageCount(win.width,win.height);page++) {
+            hud.settings.showControls(page);reviewUi("controls-"+(page+1));hud.settings.escape();
+        }
+    }
+
+    private void polish024Fishing() {
+        for(var animal:g.animals.all()){animal.loaded=false;g.animals.despawnBody(animal);}
+        for(var monster:g.monsters.all()){monster.loaded=false;g.monsters.despawnBody(monster);}
+        var player=g.player;player.skills.setLevel(rpg.skill.Skill.FISHING,50);g.state.minutes=12*60;
+        if(player.eq.get(rpg.item.ItemDef.Slot.OFF)!=null) {
+            var result=g.items.unequip(player,rpg.item.ItemDef.Slot.OFF);
+            if(result.rejected())throw new IllegalStateException(result.reason());
+        }
+        for(var tool:new rpg.item.ItemDef[]{rpg.item.Items.FISHING_ROD,rpg.item.Items.FISHING_NET,rpg.item.Items.CRAB_CAGE}) {
+            // Each tool's capture starts with room for its catch, rather than inheriting the previous review's haul.
+            for(var grid:player.grids())for(var stack:new ArrayList<>(grid.stacks()))if(stack.def==rpg.item.Items.RAW_TROUT || stack.def==rpg.item.Items.RAW_SHRIMP || stack.def==rpg.item.Items.RAW_CRAB){int slot=grid.first(stack.def);var caught=grid.take(slot,stack.amount);g.objects.drop(caught,player.x,player.y,player.z);}
+            var node=g.objects.nodes.stream().filter(n->n.kind==rpg.objects.Node.Kind.FISH && n.needs==tool).findFirst().orElseThrow();
+            var bank=g.ai.standSpot((rpg.ai.Npc)g.actor(Ids.FISHERMAN),node);
+            for(boolean eyes:new boolean[]{false,true}) {
+                g.interact.cancel(player,"review reset");g.teleport(player,bank[0],DevMap.FLOOR,bank[1]);
+                player.eq.set(rpg.item.ItemDef.Slot.MAIN,new rpg.item.ItemStack(tool,1));player.sheathed=false;player.sheatheAt=-99;
+                player.firstPerson=eyes;float yaw=(float)Math.atan2(-(node.x-player.x),-(node.z-player.z));g.controller.snapTo(yaw);g.controller.camPitch=-0.22f;
+                player.yaw=player.aimYaw=yaw;player.poseReset=true;game.tick(0);
+                var result=node.perform(g,player,"gather",g.state.newRequestId());
+                if(result.rejected())throw new IllegalStateException("Fishing review: "+result.reason());
+                var work=player.working;int count=(int)Math.ceil(work.duration*60);
+                float[] cam={player.x+(float)Math.cos(yaw)*2.7f,player.y+1.7f,player.z-(float)Math.sin(yaw)*2.7f,player.x,player.y+0.9f,player.z};
+                List<BufferedImage> tiles=new ArrayList<>();List<String> labels=new ArrayList<>();
+                for(int frame=0;frame<count;frame++) {
+                    game.tick(1f/60);
+                    if(frame%3==0){
+                        float dt=frame==0?1f/60:3f/60;
+                        if(eyes){var c=g.controller;gfx.camera(c.cx,c.cy,c.cz,c.fx,c.fy,c.fz,win.width,win.height,dt);gfx.scene(g,true,dt,g.state.hourOfDay());ui.begin(gfx.cmd);ui.end();gfx.frame(win.width,win.height);}
+                        else draw(cam,dt);
+                        tiles.add(reviewFullFrame());labels.add("f"+(frame+1)+"  "+String.format(java.util.Locale.ROOT,"%.2fs",frame/60f));
+                    }
+                }
+                sheet("fishing-"+tool.id+(eyes?"-first":"-third"),tiles,labels,4);
+            }
+        }
+        g.interact.cancel(player,"review finished");
+    }
+
+    private BufferedImage reviewFullFrame() {
+        ByteBuffer pixels=gfx.pixels(win.width,win.height);
+        BufferedImage image=new BufferedImage(480,270,BufferedImage.TYPE_INT_RGB);
+        for(int y=0;y<270;y++)for(int x=0;x<480;x++) {
+            int sx=x*win.width/480,sy=y*win.height/270,i=((win.height-1-sy)*win.width+sx)*4;
+            image.setRGB(x,y,(pixels.get(i)&255)<<16|(pixels.get(i+1)&255)<<8|(pixels.get(i+2)&255));
+        }
+        MemoryUtil.memFree(pixels);return image;
     }
 
     private void radialShots() {
@@ -2169,6 +2238,7 @@ final class Gallery {
         List<String> labels = new ArrayList<>();
         float x0 = 64.5f, z0 = 61.5f;
         for (var kind : rpg.monster.MonsterKind.values()) {
+            if (pick != null && !pick.contains(kind.name())) continue;
             int breeds = kind == rpg.monster.MonsterKind.DRAGON ? rpg.monster.MonsterKind.Breed.values().length : 1;
             for (int b = 0; b < breeds; b++) {
                 var mo = sys.display(kind, (kind.minLevel + kind.maxLevel) / 2, x0, z0, (float) Math.PI * 0.8f);
@@ -2187,6 +2257,7 @@ final class Gallery {
             if (pick != null && !pick.contains(kind.name())) continue;
             float size = Math.max(kind.mh, Math.max(kind.mw, kind.md)), d = Math.max(2.2f, size * 2.2f);
             for (int mode = 0; mode < (kind.flies() ? 4 : 3); mode++) {
+                if ("attack".equals(System.getenv("RPG_MONSTER_MODE")) && mode != 2) continue;
                 var mo = sys.display(kind, (kind.minLevel + kind.maxLevel) / 2, 50.5f, 70.5f, (float) -Math.PI / 2);
                 // mode 3: a flyer aloft, flying past (taken from below and to the side, so the wings read)
                 boolean aloft = mode == 3;
@@ -2202,7 +2273,7 @@ final class Gallery {
                     else if (i == 0) {
                         // the attack: a person's swing through the combat system for the humanoids, a creature's wind-up and strike for the beasts
                         if (kind.form == rpg.monster.MonsterKind.Form.HUMANOID) g.combat.attack(mo, false, kind == rpg.monster.MonsterKind.TROLL ? Actor.Combat.Move.HEAVY : rpg.combat.CombatSystem.lightMove(mo, false));
-                        else { mo.windup = "bite"; mo.windupUntil = g.time + 0.5; }
+                        else { mo.windup = "bite"; mo.windupStart = g.time; mo.windupUntil = g.time + 0.5; }
                     }
                     step();
                     if (i % 3 == 0) {

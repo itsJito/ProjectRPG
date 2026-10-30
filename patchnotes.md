@@ -1,3 +1,73 @@
+# Patch Notes Version Alpha 0.2.4: Cell Service
+
+More hands at work, fewer interruptions, and doors on the cells.
+
+_Developer: Shadow_
+
+## New Features
+
+### NPC's
+- Added ten residents who now help with construction, woodcutting, mining, and material trading
+- Added material traders who now sell construction supplies in the city and palace
+
+### Gameplay
+- Added gentle aiming assistance that now follows nearby visible targets while aiming ranged weapons
+- Added controls pages where players can now remap gameplay actions, interface shortcuts, mouse buttons, and key combinations
+- Added fishing motions so players now see Fishing Rods, Fishing Nets, and Crab Cages cast and retrieved in first and third person
+
+### Blocks
+- Added iron cell doors that now swing on hinges in every jail
+- Added bushes and increased the height of tall grass across the expanded map
+
+## Changes
+
+### Gameplay
+- Changed escaping before a sentence ends to now restore the original bounty and add 75 Gold
+- Changed sunlight and skylight so shaded surfaces now receive softer transitions and more even indirect light
+- Changed the palace jail so its cell now has complete walls and a roof
+
+### NPC's
+- Changed repair workers to now release interrupted jobs and leave unreachable work for another attempt
+- Changed social approaches so townsfolk now keep a chosen conversation partner and approach side
+- Changed investigations so identifying a nearby resident now resolves ordinary footsteps and glimpses sooner
+- Changed animal warnings so bystanders now distinguish a warning at someone else from an active attack
+- Changed Giant Spiders to now be smaller
+
+## Technical Changes
+
+### Gameplay
+- Changed older saves to now gain the additional residents and material markets without duplicating them on later loads
+- Changed material markets to now retain their actual stock through saving and loading
+
+## Fixed Bugs
+
+### Gameplay
+- AE-2050 - Fixed bug where damage numbers from distant fights appeared on the player's screen
+- AE-2051 - Fixed bug where the player kept limping after their wounds were fully healed
+- AE-2052 - Fixed bug where the turn-around key combination could not be remapped
+- AE-2053 - Fixed bug where item menus could pass clicks through to the inventory beneath them
+
+### Items
+- AE-2054 - Fixed bug where equipping an item from the Quick Wheel removed its assignment
+- AE-2055 - Fixed bug where hovering another Quick Wheel slot changed the selected assignment slot
+- AE-2056 - Fixed bug where Shields and Bread could not be dropped reliably
+- AE-2057 - Fixed bug where Shift-clicking equipment assigned it to the Quick Wheel instead of equipping it
+
+### NPC's
+- AE-2058 - Fixed bug where monsters remained still when attempting attacks with sheathed weapons
+- AE-2059 - Fixed bug where witnesses named nobody as a murderer instead of reacting to an unidentified body
+- AE-2060 - Fixed bug where interrupted repair claims and changing social approaches caused repeated backtracking
+- AE-2061 - Fixed bug where dismissed charges could cause guards to reopen the same suspicion
+- AE-2062 - Fixed bug where a search for an unidentified culprit remained active after the body was buried
+- AE-2063 - Fixed bug where replacing a monster's carried weapon discarded the previous weapon
+
+### Blocks
+- AE-2064 - Fixed bug where some leaves, berry bushes, and hedges blocked movement
+- AE-2065 - Fixed bug where regrowing foliage could replace tree trunks
+- AE-2066 - Fixed bug where hedges lost their leaf rendering and wind movement
+
+---
+
 # Patch Notes Version Alpha 0.2.3: Fog of Wardrobe
 
 A smoother-running build, a moodier title screen and livelier legs.

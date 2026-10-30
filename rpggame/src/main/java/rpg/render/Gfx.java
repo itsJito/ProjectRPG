@@ -1588,7 +1588,10 @@ public final class Gfx implements AutoCloseable {
         if (speed > 0.05f) st.phase += speed / (f.legALen * vs * 0.9f) * (float) Math.PI * dt;
         st.amp += ((speed < 0.05f ? 0 : Math.min(1, speed / Math.max(0.2f, mo.kind.walk))) - st.amp) * Math.min(1, dt * 8);
         boolean rearing = !dead && mo.windup != null && clock < mo.windupUntil;
-        float rear = rearing ? 0.35f : 0;
+        float progress = (float)Math.clamp((clock - mo.windupStart) / Math.max(0.01, mo.windupUntil - mo.windupStart), 0, 1);
+        float strike = (float)(clock - mo.strikeAt);
+        float recovery = strike >= 0 && strike < 0.4f ? 1 - strike / 0.4f : 0;
+        float rear = rearing ? 0.45f * smooth(progress) : -0.22f * (float)Math.sin(recovery * Math.PI);
         float raise = 0.55f, down = 1.35f;
         float bodyY = -(2 + f.legALen * (float) Math.sin(raise) - f.legBLen * (float) Math.sin(down)) + 0.6f;
         float bob = Math.abs((float) Math.sin(st.phase * 2)) * st.amp * 0.4f + 0.15f * (float) Math.sin(t * 1.5);
@@ -2601,7 +2604,7 @@ public final class Gfx implements AutoCloseable {
      * leaf model runs from its hinge edge (x = 0) to its free edge, so it is drawn half a leaf back from the body's middle.
      */
     private void doorLeaves(Rpg g, Door d, float dt) {
-        String key = d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked;
+        String key = d.cellDoor ? "cell-door:" + d.height : d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked;
         for (int i = 0; i < d.leaf.length; i++) {
             Snapshots.Rigid r = g.lastRigids.body(d.leaf[i]);
             if (r == null) continue;
@@ -2609,7 +2612,7 @@ public final class Gfx implements AutoCloseable {
             System.arraycopy(m16, 0, m.m, 0, 16);
             float leafW = d.leafWidth, h = d.height - 0.04f;
             m.translate(-leafW / 2, -h / 2 - 0.02f, 0).scale(leafW, 1, 1);
-            drawLayers(key, () -> d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked));
+            drawLayers(key, () -> d.cellDoor ? Props.cellDoorLeaf(d.height) : d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked));
         }
     }
 

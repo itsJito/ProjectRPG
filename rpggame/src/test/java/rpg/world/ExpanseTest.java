@@ -26,7 +26,7 @@ class ExpanseTest {
             assertEquals(20, palace, "DevPalace's own twenty");
             for (Npc n : g.npcs) if (n.id >= Ids.EMPEROR && n.id <= Ids.CENTURION) assertEquals(DevMap.PALACE, n.homeJurisdiction, n.name);
             java.util.Set<rpg.ai.Profession> others = new java.util.HashSet<>();
-            for (Npc n : g.npcs) if (n.profession != null && (n.id < Ids.ARTHUR || n.id > Ids.MERLIN)) others.add(n.profession);
+            for (Npc n : g.npcs) if (n.profession != null && n.id < Ids.CARPENTER_CITY && (n.id < Ids.ARTHUR || n.id > Ids.MERLIN)) others.add(n.profession);
             java.util.Set<rpg.ai.Profession> six = new java.util.HashSet<>();
             for (long id = Ids.ARTHUR; id <= Ids.MERLIN; id++) {
                 Npc n = (Npc) g.actor(id);

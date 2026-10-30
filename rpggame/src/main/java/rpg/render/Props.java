@@ -526,6 +526,17 @@ public final class Props {
     }
 
     // ------------------------------------------------------------------ doors
+    /** Iron bars, a braced frame, strap hinges and a visible lock, at the ordinary hinge's exact dimensions. */
+    public static Layer[] cellDoorLeaf(int height) {
+        Meshes.Boxes bars = new Meshes.Boxes();
+        for (float x : new float[]{0.045f, 0.955f}) bars.span(x - 0.045f, 0.02f, -0.055f, x + 0.045f, height - 0.02f, 0.055f, 0x454B52);
+        for (float y : new float[]{0.08f, height * 0.45f, height - 0.08f}) bars.span(0, y - 0.04f, -0.045f, 1, y + 0.04f, 0.045f, 0x58616A);
+        for (int i = 1; i < 6; i++) bars.span(i / 6f - 0.025f, 0.1f, -0.025f, i / 6f + 0.025f, height - 0.1f, 0.025f, 0x65717B);
+        for (float y : new float[]{0.3f, height - 0.3f}) bars.span(0, y - 0.075f, -0.075f, 0.22f, y + 0.075f, 0.075f, 0x353B43);
+        bars.span(0.8f, 1.05f, -0.09f, 0.98f, 1.3f, 0.09f, 0x353B43);
+        bars.span(0.87f, 1.13f, -0.101f, 0.9f, 1.2f, -0.09f, 0x11151A);
+        return new Layer[]{metal(bars)};
+    }
     /** A door leaf from its hinge (at the origin) along +x, one metre wide and as tall as the doorway. */
     /**
      * (0.2.2, gamefixes) A fence-gate leaf (x 0..1 from the hinge, y up from the ground, a block high): a stile at

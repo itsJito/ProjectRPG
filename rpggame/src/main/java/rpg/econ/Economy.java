@@ -57,9 +57,13 @@ public final class Economy {
      */
     public Shop forge;
     /** DevPalace's market hall (0.2.0): the trader Flavia's counter. */
-    public Shop macellum;
+    public Shop macellum, materialsCity, materialsPalace;
     /** Where someone of a town sells what they gather: their own kingdom's market. */
-    public Shop localShop(Npc n) { return DevMap.PALACE.equals(n.homeJurisdiction) ? macellum : DevMap.BETA.equals(n.homeJurisdiction) ? shopB : shopA; }
+    public Shop localShop(Npc n) {
+        Shop usual = DevMap.PALACE.equals(n.homeJurisdiction) ? macellum : DevMap.BETA.equals(n.homeJurisdiction) ? shopB : shopA;
+        Shop materials = DevMap.PALACE.equals(n.homeJurisdiction) ? materialsPalace : materialsCity;
+        return materials != null && Math.hypot(n.postX-materials.counterX,n.postZ-materials.counterZ) < Math.hypot(n.postX-usual.counterX,n.postZ-usual.counterZ) ? materials : usual;
+    }
     public final List<Shipment> shipments = new ArrayList<>();
     public long sales, purchases, deliveries, losses;
 
@@ -72,6 +76,12 @@ public final class Economy {
         macellum = new Shop(Ids.MACELLUM, "The Macellum", DevMap.PALACE, rpg.world.Expanse.MERCHANT_POST[0] - 1.6f, rpg.world.Expanse.MERCHANT_POST[1]);
         stock(macellum, Items.BREAD, 6, 10); stock(macellum, Items.RELIGIOUS_WINE, 4, 6); stock(macellum, Items.TROUT, 4, 8); stock(macellum, Items.BERRIES, 3, 8);
         stock(macellum, Items.get("iron_sword"), 1, 1); stock(macellum, Items.get("iron_shield"), 1, 1); stock(macellum, Items.FISHING_ROD, 1, 2); stock(macellum, Items.get("gold_ring"), 1, 1);
+        materialsCity = new Shop(Ids.TRADER_CITY,"Materials stall",DevMap.jurisdiction(76.5f,28.5f),76.5f,30.8f);
+        materialsPalace = new Shop(Ids.TRADER_PALACE,"Palace materials stall",DevMap.PALACE,182.5f,98.8f);
+        for (Shop market : new Shop[]{materialsCity,materialsPalace}) {
+            for (ItemDef item : new ItemDef[]{Items.PLANK,Items.OAK_PLANK,Items.LOGS,Items.COPPER_ORE,Items.TIN_ORE,Items.HAMMER}) market.target.put(item.id,12);
+            seedMaterials(market);
+        }
         forge = new Shop(Ids.CRAFTSMAN, "The forge rack", DevMap.jurisdiction(DevMap.ANVIL_AT[0], DevMap.ANVIL_AT[1]), DevMap.ANVIL_AT[0] + 0.5f, DevMap.ANVIL_AT[1] + 1.7f);
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
@@ -89,12 +99,24 @@ public final class Economy {
         stock(fence, Items.LOCKPICK, 2, 2); stock(fence, Items.get("dodgy_necklace"), 1, 1); stock(fence, Items.TOBACCO, 3, 3); stock(fence, Items.ALE, 4, 4); stock(shopB, Items.LOCKPICK, 3, 3); stock(shopB, Items.HOLY_SYMBOL, 1, 1); stock(shopB, Items.STAFF, 1, 1);
     }
 
+    /** Startup goods transfer from the trader's real inventory, including during an old-save migration. */
+    private void seedMaterials(Shop shop) {
+        Npc trader = merchant(shop); if (trader == null) return;
+        for (ItemDef item : new ItemDef[]{Items.PLANK,Items.LOGS,Items.HAMMER}) {
+            int slot;
+            while ((slot=trader.inv.first(item)) >= 0) {
+                ItemStack stack=trader.inv.get(slot); if (!shop.stock.canAdd(stack)) break;
+                shop.stock.add(trader.inv.take(slot,stack.amount));
+            }
+        }
+    }
+
     private void stock(Shop s, ItemDef d, int n, int target) {
         s.target.put(d.id, target);
         if (n > 0 && s.stock.add(new ItemStack(d, n, s.merchant, false, s.merchant))) g.state.mint(d, n);
     }
 
-    public Shop shopOf(Npc merchant) { return merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
+    public Shop shopOf(Npc merchant) { return merchant.id == Ids.TRADER_CITY ? materialsCity : merchant.id == Ids.TRADER_PALACE ? materialsPalace : merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
     /** Whether this shop is a craftsman's own rack (sold from where they work, not a counter they keep all day). */
     public boolean rack(Shop s) { return s == forge; }
     public Npc merchant(Shop s) { return g.actor(s.merchant) instanceof Npc n ? n : null; }
@@ -333,6 +355,7 @@ public final class Economy {
         m.put("fence", ItemIO.inventory(fence.stock));
         m.put("forge", ItemIO.inventory(forge.stock));
         m.put("macellum", ItemIO.inventory(macellum.stock));
+        m.put("materialsCity",ItemIO.inventory(materialsCity.stock));m.put("materialsPalace",ItemIO.inventory(materialsPalace.stock));
         List<Object> sh = new ArrayList<>();
         for (Shipment s : shipments) {
             Map<String, Object> o = new HashMap<>();
@@ -346,6 +369,9 @@ public final class Economy {
 
     @SuppressWarnings("unchecked")
     public void load(Map<String, Object> m) {
+        materialsCity.stock.clear();materialsPalace.stock.clear();
+        if (m.containsKey("materialsCity")) ItemIO.inventory(materialsCity.stock,astratto.util.Json.list(m,"materialsCity")); else seedMaterials(materialsCity);
+        if (m.containsKey("materialsPalace")) ItemIO.inventory(materialsPalace.stock,astratto.util.Json.list(m,"materialsPalace")); else seedMaterials(materialsPalace);
         ItemIO.inventory(shopA.stock, astratto.util.Json.list(m, "a"));
         ItemIO.inventory(shopB.stock, astratto.util.Json.list(m, "b"));
         if (astratto.util.Json.list(m, "fence") != null) ItemIO.inventory(fence.stock, astratto.util.Json.list(m, "fence"));

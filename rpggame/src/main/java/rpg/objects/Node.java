@@ -149,7 +149,10 @@ public final class Node extends WorldObject {
         }
         if (a == g.player) g.chat.say(switch (kind) { case FISH -> "You cast out your " + needs.name.toLowerCase().replace("small ", "") + "."; default -> "You start picking."; });
         if (a == g.player && kind == Kind.FISH && g.sfx != null) g.sfx.ui("FishingHooked", 0.5f);
-        g.interact.begin(new Work(a, this, "gather", working(), duration(a), true, g.time, () -> commit(g, a)));
+        if (kind == Kind.FISH && a.sheathed) g.combat.sheathe(a, false);
+        Work work = new Work(a, this, "gather", working(), duration(a), true, g.time, () -> commit(g, a));
+        if (kind == Kind.FISH) work.t = -(float)Math.max(0, Actor.SHEATHE_TIME - (g.time - a.sheatheAt));
+        g.interact.begin(work);
         return Result.started();
     }
 
@@ -247,6 +250,7 @@ public final class Node extends WorldObject {
 
     public void update(Rpg g) {
         if (depleted() && regrowAt >= 0 && g.state.minutes >= regrowAt) {
+            if (kind == Kind.PATCH && g.vox.block(bx,DevMap.FLOOR,bz) != Blocks.AIR && g.vox.block(bx,DevMap.FLOOR,bz) != block) return;
             stock = stockMax;
             regrowAt = -1;
             setBlocks(g, true);
@@ -266,11 +270,16 @@ public final class Node extends WorldObject {
                     if (top && (Math.abs(dx) > 1 || Math.abs(dz) > 1)) continue;
                     if (corner && y == f + height + 1) continue;
                     if (dx == 0 && dz == 0 && y <= f + height) continue;
+                    if (Blocks.isTreeLog(g.vox.block(bx+dx,y,bz+dz))) continue;
                     g.setBlock(bx + dx, y, bz + dz, whole ? leaves : Blocks.AIR);
                 }
             }
             case ROCK -> g.setBlock(bx, f, bz, whole ? block : Blocks.SPENT_ROCK);
-            case PATCH -> { g.setBlock(bx, f, bz, whole ? block : Blocks.AIR); g.setBlock(bx, f - 1, bz, whole ? Blocks.DIRT : Blocks.BARE_PATCH); }
+            case PATCH -> {
+                int current=g.vox.block(bx,f,bz);
+                if (current != Blocks.AIR && current != block) return;
+                g.setBlock(bx, f, bz, whole ? block : Blocks.AIR); g.setBlock(bx, f - 1, bz, whole ? Blocks.DIRT : Blocks.BARE_PATCH);
+            }
             case FISH -> { }
         }
     }

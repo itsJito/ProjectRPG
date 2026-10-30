@@ -206,7 +206,6 @@ public final class SaveSystem {
         for(Npc old:new ArrayList<>(g.npcs))if(old.summonOwner!=0 || old.posse)g.magic.dismiss(old);
         var savedNpcIds=new java.util.HashSet<Long>();
         for(Object record:Json.list(root,"npcs"))savedNpcIds.add(Json.lng((Map<String,Object>)record,"id",-1));
-        var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         // NPCs: life and death, bodies, minds, memories
         for (Object o : Json.list(root, "npcs")) {
             Map<String, Object> m = (Map<String, Object>) o;
@@ -295,6 +294,8 @@ public final class SaveSystem {
         }
         for (Npc dead : g.npcs) if (!dead.alive && dead.corpse == 0 && dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
         g.bank.migrateAccounts();
+        // Create newly authored residents after restoring dynamic objects: starter overflow drops must survive migration.
+        var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         g.econ.load(Json.obj(root, "econ"));
         g.repairs.load(Json.list(root, "repairs"));
         g.animals.load(Json.obj(root, "animals"));
@@ -308,6 +309,7 @@ public final class SaveSystem {
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
         for(Npc resident:addedResidents)g.invariants.rebase(resident);
+        g.objects.supportBeds();
         g.ai.syncAbstractClock();
         g.mapDirty = true;
         g.mapColumns.clear();   // (a load redraws the whole map)

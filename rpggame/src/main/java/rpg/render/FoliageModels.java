@@ -23,7 +23,7 @@ public final class FoliageModels {
             }
             case TALL_GRASS -> {
                 for(int blade=0;blade<9;blade++) {
-                    float x=((seed>>>(blade%7))&7)*0.035f-0.12f,z=((seed>>>(blade%11+3))&7)*0.035f-0.12f,h=0.28f+blade%4*0.085f;
+                    float x=((seed>>>(blade%7))&7)*0.035f-0.12f,z=((seed>>>(blade%11+3))&7)*0.035f-0.12f,h=0.45f+blade%4*0.14f;
                     for(int step=0;step<4;step++)boxes.rgb(x+step*0.018f,h*(step+0.5f)/4,z,0.028f,h/4,0.025f,blade%2==0?light:green);
                 }
             }
@@ -65,12 +65,13 @@ public final class FoliageModels {
                 for(int stem=0;stem<4;stem++){float x=stem*0.08f-0.12f,z=(stem%2)*0.13f-0.06f,h=0.06f+stem%3*0.035f;
                     boxes.rgb(x,h/2,z,0.025f,h,0.025f,0xC7B99B);boxes.rgb(x,h,z,0.11f,0.035f,0.1f,0x9A6A45);boxes.rgb(x,h+0.025f,z,0.07f,0.025f,0.065f,0xB08B63);}
             }
-            case SHRUB -> {
-                // a low rounded bush: a woody base, then clumps of leaf in three greens stacked into a dome
-                for(int stem=0;stem<3;stem++){double a=stem*2.1;boxes.rgb((float)Math.cos(a)*0.05f,0.08f,(float)Math.sin(a)*0.05f,0.03f,0.16f,0.03f,0x5E4A30);}
+            case SHRUB,BUSH -> {
+                // A woody base supports both the low shrub and the taller bush's rounded leaf clusters.
+                float scale=kind==Foliage.Kind.BUSH?1.8f:1;
+                for(int stem=0;stem<3;stem++){double a=stem*2.1;boxes.rgb((float)Math.cos(a)*0.05f*scale,0.08f*scale,(float)Math.sin(a)*0.05f*scale,0.03f,0.16f*scale,0.03f,0x5E4A30);}
                 for(int clump=0;clump<11;clump++){
-                    double a=clump*2.39+seed%5;float r=clump<6?0.2f:0.1f,y=clump<6?0.2f:0.36f+(clump%3)*0.03f;
-                    boxes.rgb((float)Math.cos(a)*r,y,(float)Math.sin(a)*r,0.17f,0.13f,0.16f,clump%3==0?light:clump%3==1?green:dark);
+                    double a=clump*2.39+seed%5;float r=(clump<6?0.2f:0.1f)*scale,y=(clump<6?0.2f:0.36f+(clump%3)*0.03f)*scale;
+                    boxes.rgb((float)Math.cos(a)*r,y,(float)Math.sin(a)*r,0.17f*scale,0.13f*scale,0.16f*scale,clump%3==0?light:clump%3==1?green:dark);
                 }
             }
             case THISTLE -> {

@@ -183,7 +183,7 @@ public final class Brain {
         boolean exposed = culprit != null && culprit.alive && n.distTo(culprit) < 15 && ai.canSee(n, culprit) && !n.combatant();
         if (unreported != null && exposed) s.add(new Score(Goal.HIDE, 0.82f, "keeping out of " + culprit.name + "'s sight before reporting"));
         if (unreported != null && !exposed && ai.lawmanFor(unreported.jurisdiction) != null && unreported.subject != n.id)
-            s.add(new Score(Goal.REPORT_CRIME, 0.78f, "saw " + g.nameOf(unreported.subject) + " commit " + unreported.kind.toLowerCase() + "; must tell the law"));
+            s.add(new Score(Goal.REPORT_CRIME, 0.78f, unreported.subject == 0 ? "discovered " + unreported.detail + "; must tell the law" : "saw " + g.nameOf(unreported.subject) + " commit " + unreported.kind.toLowerCase() + "; must tell the law"));
         // a wanted player seen in town by someone who knows it: the watch is told where (gamefixes)
         Npc tellWatch = threat == null ? tipFor(n) : null;
         if (tellWatch != null) s.add(new Score(Goal.TIP_OFF, 0.74f, String.format("saw %s (wanted) at (%.0f, %.0f); telling %s", g.player.name, n.tip.x(), n.tip.z(), tellWatch.name)));
@@ -274,6 +274,7 @@ public final class Brain {
         n.scores.clear();
         for (int i = 0; i < Math.min(6, s.size()); i++) n.scores.add(String.format("%.2f %s - %s", s.get(i).value, s.get(i).goal, s.get(i).reason));
         if (best.goal != n.goal) {
+            if (n.goal == Goal.SOCIALIZE) { n.socialPartner = 0; n.socialSide = 0; }
             g.state.commit("NpcGoal", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, n.goal + " -> " + best.goal + " (" + best.reason + ")");
             n.goal = best.goal;
             n.goalSince = g.time;
@@ -722,7 +723,14 @@ public final class Brain {
         }
         // Continue the original lead, not whichever unrelated sound happens to rank highest now.
         w = n.aware.get(v.subject);
-        if (g.time - v.startedAt > 50) v.stage(Investigation.Stage.DONE, g.time);
+        double patience = v.stimulus == Investigation.Stimulus.VIOLENCE || v.plan == Investigation.Plan.HIDE ? 50 : 20;
+        if (g.time - v.startedAt > patience) v.stage(Investigation.Stage.DONE, g.time);
+        // A nearby figure identified in clear sight settles an ordinary glimpse or footstep, rather than a full search.
+        Actor identified = g.actor(v.subject);
+        Memory charge = identified == null ? null : n.crimeKnown(identified.id);
+        if (v.stimulus != Investigation.Stimulus.VIOLENCE && w != null && w.exposure >= Stealth.CLEAR && w.seenAt >= w.heardAt
+                && identified instanceof Npc person && !person.hostileToPlayer && !person.sneaking && n.distTo(person) < 6
+                && (charge == null || charge.settled)) v.stage(Investigation.Stage.DONE, g.time);
         // a fresh clue moves the spot; heard again, a timid plan gives way to fetching help
         if (w != null && Math.max(w.heardAt, w.seenAt) > v.lastClue + 0.05) {
             v.x = w.x; v.z = w.z; v.lastClue = Math.max(w.heardAt, w.seenAt); v.repeats++;
@@ -827,6 +835,7 @@ public final class Brain {
 
     /** A guard given a lead by someone who came to him: it is his to look into now (his own search, in his own way). */
     private void handOver(Npc guard, Investigation from) {
+        if (g.law.settled(from.subject, from.startedAt) && g.law.bounty(from.subject, guard.homeJurisdiction) == 0) return;
         if (guard.investigation != null) { g.ai.reply(guard, "I heard it too. I'm on it."); return; }
         Stealth.Aware w = guard.aware.computeIfAbsent(from.subject, k -> new Stealth.Aware());
         w.level = Math.max(w.level, Stealth.INVESTIGATING + 0.1f);
@@ -982,7 +991,7 @@ public final class Brain {
     }
 
     /** A beast that kills: a hunter, or a bear (people keep away from one whatever it is doing). */
-    static boolean predator(rpg.animal.Animal an) { return !an.baby && (an.species.diet == rpg.animal.Species.Diet.HUNTER || an.species == rpg.animal.Species.BROWN_BEAR); }
+    static boolean predator(rpg.animal.Animal an) { return !an.baby && (an.species.diet == rpg.animal.Species.Diet.HUNTER && an.species != rpg.animal.Species.FOX || an.species == rpg.animal.Species.BROWN_BEAR); }
 
     /** What this NPC fears and is close enough to run from (not to fight): a known killer of theirs, or a beast. */
     private Actor fearFor(Npc n) {
@@ -993,7 +1002,7 @@ public final class Brain {
         Actor p = g.player;
         if (p.alive && n.distTo(p) < 12 && ai.rumors.afraid(n) && ai.canSee(n, p)) return p;
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all())
-            if (an.alive && an.loaded && (an.dangerous() || predator(an) && n.distTo(an) < 11) && n.distTo(an) < 16 && ai.canSee(n, an)) return an;
+            if (an.alive && an.loaded && (an.threatens(n) || predator(an) && n.distTo(an) < 11) && n.distTo(an) < 16 && ai.canSee(n, an)) return an;
         return null;
     }
 
@@ -1163,7 +1172,7 @@ public final class Brain {
         return true;
     }
 
-    public void resetJob(Npc n) { if(n.job!=null)n.job.cancel();n.job=null; }
+    public void resetJob(Npc n) { if(n.job!=null)n.job.cancel();n.job=null; if (g.repairs != null) g.repairs.release(n); }
 
     /**
      * Mending (gamefixes: broken fences, windows and the like put back by the people whose trade it is): the next thing
@@ -1174,6 +1183,7 @@ public final class Brain {
         var d = g.repairs.claim(n);
         if (d == null) return false;
         float[] at = g.repairs.standSpot(n, d);
+        if (at == null) { g.repairs.abandon(n); return false; }
         if (!goTo(n, at[0], at[1], false, 0.6f)) { n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; n.lootUntil = -99; return true; }
         n.wantYaw = (float) Math.atan2(-(d.x() + 0.5f - n.x), -(d.z() + 0.5f - n.z));
         ai.desire(n, AiSystem.A_HOLD);
@@ -1435,8 +1445,9 @@ public final class Brain {
     private void socialize(Npc n) {
         Npc p = ai.partnerFor(n);
         if (p == null) { n.lastOutcome = "no one to talk to"; n.social = 0.3f; return; }
+        if (n.socialPartner != p.id || n.socialSide == 0) n.socialSide = n.x > p.x ? 1.4f : -1.4f;
         n.socialPartner = p.id;
-        if (!goTo(n, p.x + (n.x > p.x ? 1.4f : -1.4f), p.z, false, 0.9f)) return;
+        if (!goTo(n, p.x + n.socialSide, p.z, false, 0.9f)) return;
         if (n.chatUntil < g.time - 1) { n.chatUntil = g.time + 4; g.ai.say(n, ai.smallTalk(n, p)); }
         n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
         if (g.time >= n.chatUntil) {

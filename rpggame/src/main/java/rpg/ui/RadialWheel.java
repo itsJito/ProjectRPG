@@ -9,7 +9,7 @@ import rpg.item.ItemStack;
  * direction from the centre, as a polar angle snapped to one of eight, picks a slot - a small ring in the middle picks
  * none - and letting TAB go uses it (its item's first action, as the action bar does).
  *
- * <p>Edit mode: with the inventory open, the Quick Wheel button docks the wheel beside it. Hovering a slice arms it;
+ * <p>Edit mode: with the inventory open, the Quick Wheel button docks the wheel beside it. Clicking a slice arms it;
  * clicking an item then puts it in the armed slice, and an item dragged onto a slice goes there (by the angle where it
  * is let go). A right click on a slice empties it. The slots belong to the player ({@link Player#quick}) and are saved.
  */
@@ -60,7 +60,7 @@ public final class RadialWheel extends Fragment {
     void assign(int slot, rpg.item.ItemDef def) {
         Player p = hud.g.player;
         for (int i = 0; i < SLOTS; i++) if (p.quick[i] != null && p.quick[i].item() == def) p.quick[i] = null;   // one slot an item
-        p.quick[slot] = new Player.QuickSlot(def, p.count(def));
+        p.quick[slot] = new Player.QuickSlot(def, p.quickCount(def));
         hud.sound("UI_select", 0.35f);
     }
 
@@ -72,7 +72,7 @@ public final class RadialWheel extends Fragment {
         if (edit) { px = ui.mx - cx; py = ui.my - cy; }
         hovered = slice(px, py, edit ? INNER : DEAD);
         if (edit && Math.hypot(px, py) > R + 6) hovered = -1;
-        if (edit && hovered >= 0) armed = hovered;
+        if (edit && live && hovered >= 0 && ui.click && !ui.consumed) { armed = hovered; ui.consumed = true; }
         float grow = Math.min(1, (float) (hud.now - openedAt) / 0.1f);
         float r = edit ? R : R * (0.85f + 0.15f * grow);
         // in play the world behind is dimmed (it is held still while the wheel is up)
@@ -111,12 +111,13 @@ public final class RadialWheel extends Fragment {
         ui.flatCentered(name, cx, cy - 7, ts, pick != null ? Style.TEXT : Style.DIM);
         if (edit) {
             ui.centered("Click an item to put it in slot " + (armed + 1), cx, cy + r + 14, 12, Style.TEXT);
-            ui.centered("Drag items onto a slice; right-click to clear", cx, cy + r + 30, 11, Style.DIM);
+            ui.centered("Click a slot to select; Shift-click equips; right-click clears", cx, cy + r + 30, 11, Style.DIM);
         } else {
             // the pointer's direction
             // the pointer's direction: a notch on the hub's rim
             if (hovered >= 0) { float l = Math.max(1, (float) Math.hypot(px, py)); ui.line(cx + px / l * (INNER - 6), cy + py / l * (INNER - 6), cx + px / l * (INNER + 6), cy + py / l * (INNER + 6), 3, Style.GOLD); }
-            ui.centered(hovered >= 0 && pick != null ? "Release TAB to use" : "Release TAB to close", cx, cy + r + 16, 13, Style.TEXT);
+            String key = hud.settings.values.label(rpg.Preferences.Action.QUICK_WHEEL);
+            ui.centered("Release " + key + (hovered >= 0 && pick != null ? " to use" : " to close"), cx, cy + r + 16, 13, Style.TEXT);
         }
     }
 }

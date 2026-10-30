@@ -21,7 +21,7 @@ public enum MonsterKind {
     SKELETON("Skeleton", 15, 140, 0.7f, 2.0f, 0.7f, 0.6f, 1.95f, 0.6f, Form.HUMANOID, Move.WALK, Archetype.BOUND_DEAD),
     WEREWOLF("Werewolf", 20, 100, 1.1f, 2.3f, 1.1f, 0.9f, 2.1f, 0.9f, Form.HUMANOID, Move.WALK, Archetype.APEX_HUNTER),
     DRAGON("Dragon", 70, 350, 5.0f, 4.0f, 8.0f, 4.0f, 3.5f, 6.0f, Form.DRAGON, Move.FLY, Archetype.APEX_SOVEREIGN),
-    GIANT_SPIDER("Giant spider", 1, 70, 3.0f, 1.5f, 3.5f, 2.5f, 1.2f, 2.8f, Form.SPIDER, Move.CLIMB, Archetype.AMBUSH_PREDATOR);
+    GIANT_SPIDER("Giant spider", 1, 70, 1.95f, 0.975f, 2.275f, 1.625f, 0.78f, 1.82f, Form.SPIDER, Move.CLIMB, Archetype.AMBUSH_PREDATOR);
 
     /** How the body is built: a person's skeleton (head, torso, two arms, two legs), a bat, a dragon, a spider. */
     public enum Form { HUMANOID, BAT, DRAGON, SPIDER }

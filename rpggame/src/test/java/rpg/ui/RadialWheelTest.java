@@ -54,4 +54,20 @@ class RadialWheelTest {
             assertNotNull(p.quick[3]);
         }
     }
+    @Test void equippedItemsStayInTheirQuickSlotAcrossSaveAndLoad(@TempDir Path dir) {
+        var cfg=new NativeEngine.Config();cfg.deterministic=true;
+        try(Game game=Game.create(cfg)) {
+            game.activate(DevMap.build(game.engine()));var g=game.add(new Rpg(game,"Wheel equip",new Appearance(),true));
+            var item=Items.get("wooden_shield");g.give(g.player,item,1);
+            int expected=g.player.count(item)+(g.player.eq.def(rpg.item.ItemDef.Slot.OFF)==item?1:0);
+            g.player.quick[2]=new Player.QuickSlot(item,1);
+            assertTrue(g.items.equipFirst(g.player,item,rpg.item.ItemDef.Slot.OFF,g.state.newRequestId()).committed());
+            g.player.refreshQuick();assertNotNull(g.player.quick[2]);assertEquals(expected,g.player.quick[2].count());
+            var saves=new SaveSystem(g);var file=dir.resolve("equipped.json");assertTrue(saves.save(file));assertTrue(saves.load(file));
+            assertNotNull(g.player.quick[2]);assertEquals(item,g.player.quick[2].item());
+            assertTrue(g.items.dropEquipped(g.player,rpg.item.ItemDef.Slot.OFF).committed());
+            for (var grid:g.player.grids()) { int slot=grid.first(item);if(slot>=0)g.items.perform(g.player,grid,slot,"drop"); }
+            g.player.refreshQuick();assertNull(g.player.quick[2]);
+        }
+    }
 }

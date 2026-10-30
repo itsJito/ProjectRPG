@@ -4,6 +4,64 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 15: Cell Service (Version Alpha 0.2.4) — Shadow
+
+Built from main `85a17791d3dcb9e1db7fa50ad9426895544b71c9`. The previous polish tip is retained as history without importing its source changes. Classic-era World of Warcraft is the visual reference; townsfolk jobs and reactions are the AI priority. Player notes continue in `patchnotes.md` by request. Earlier entries below are preserved.
+
+### Controls and inventory
+- Expanded the existing preferences action table to cover movement, quick turn (Alt+S), jog, casting, the wheel, panels, quick slots, save/load, screenshots, display, developer tools, and contextual interface actions. Existing integer bindings remain readable; modifier chords use the upper bits. Conflicts swap only within an input context. The capture UI handles modifier-only bindings, mouse chords, cancel, and paginated/responsive controls.
+- Routed game and UI actions through the action table and updated relevant shortcut hints. Standard text entry and Escape-to-cancel binding capture retain their interface semantics.
+- Quick Wheel assignments count both carried and worn stacks, survive equip/save/load, and clear when no owned copy remains. Edit slots are explicitly clicked rather than armed by hover. Shift-click equipment takes priority over wheel assignment.
+- Context menus consume clicks ahead of covered fragments. Equipped items can be dropped directly, retaining their contents and provenance even with a full inventory.
+- Floating combat text is limited to 18 metres in three dimensions.
+
+### Combat, animation, and health
+- Added bounded, damped ranged aiming assistance with separate acquisition/retention cones, a 32-metre limit, camera and eye visibility checks, friendly/summon exclusion, and release on looking away, lowering the weapon, obstruction, or changing to melee. The crosshair indicates a retained target.
+- Monsters start with usable drawn weapons, including after loading. Natural weapons cannot be sheathed. Failed humanoid attacks retry shortly instead of spending a full attack cooldown without striking.
+- Natural attack wind-up and strike timestamps now drive spider anticipation and recovery, with shared resolution independent of the gallery puppet state. Spider mesh and hit dimensions are reduced together to 65 percent.
+- Full healing clears soft injury penalties and bleeding; severed limbs remain severed. Restore clears regional injury values.
+- A shield in the off hand stays in its normal carried pose during fishing instead of being pulled across the first-person camera. Fishing waits for the existing tool draw before work progresses. Rod, net, and cage poses cover casting/lowering, waiting, and retrieval in both camera views using the existing rig.
+- Replacing a monster's equipment preserves a previously minted weapon in inventory or the world instead of silently deleting it.
+
+### Law and cells
+- All three authored cells have complete walls and roofs and dedicated barred iron hinged doors. Existing fixture IDs, locks, interaction, and physical targeting remain in place. Cell doors register as conductive metal rather than wood fuel.
+- Custody stores the original bounty. Leaving the cell before expiry records one jailbreak, restores that bounty, adds 75 coins, and retains held possessions for later lawful release. Sentence expiry takes precedence over escape detection. Older custody records recover the amount from a retained arrest event when available; if that event has already left the bounded log, the missing original amount cannot be reconstructed.
+- Unidentified deaths produce a body-discovery report rather than naming a nonexistent murderer.
+- Settled legal memories no longer qualify as an open charge when judging a suspicious figure. Burial clears searches for an unidentified culprit tied to that body; evidence belonging to a buried resident remains in lawful care. A known offender's live pursuit is retained.
+
+### Residents, jobs, and persistence
+- Added stable resident IDs 586-595: four Carpenters, two Woodcutters, two Ore Miners, and two Materials Traders. They use existing professions, tools, supplies, fixed skill profiles, beds, schedules, and law/economy systems. Added six beds; reused four available beds without renumbering fixtures.
+- Material counters in the city and palace use existing furniture. Their persistent shops receive actual starter materials, participate in the item ledger, and are selected by local workers using stable counter positions.
+- Repair claims are released on interruption/death/unload. Inaccessible sites are deferred for 45 seconds, and missing stand locations are rejected rather than replaced by a position inside an obstruction. Stuck workers defer affected resources and release jobs.
+- Ordinary nonviolent investigations are bounded at 20 seconds; violence and hiding retain their 50-second bound. Nearby, clearly identified residents resolve ordinary glimpse/footstep investigations promptly; violence and unresolved charges remain actionable. A warning from an animal is directed at its subject, while an actual attack still threatens bystanders. A passive fox does not provoke the same flight response as a wolf, coyote, mountain lion, or bear.
+- Social routines retain a valid partner and a consistent approach side, reducing target/side oscillation. Route feedback reports resumed movement once a blocked route is actually moving again.
+- Additional residents are created after restoring saved world objects, preventing overflow supplies from being deleted during old-save migration. Repeated loads retain a single roster and conserve stock.
+
+### Foliage and lighting
+- Removed solid collision from all foliage materials while retaining their cutout/sky shading and flammable material registration. Fixed the dual-face definition loop overwriting HEDGE's leaf/wind definition.
+- Patch regrowth cannot replace trunks or other occupied materials; tree canopies do not replace neighboring logs. Expanded foliage chunk addressing from the old 128-square extent to the full 192-square map.
+- Increased tall-grass height and added a bush form to existing seeded shrub populations. Existing species ordinals/distribution remain stable; new bushes use the shared contact bending, fire, depletion, and regrowth systems.
+- Increased sun penumbra growth/minimum width, broadened sky fallback irradiance according to sky visibility, and softened double attenuation of indirect illumination by ambient occlusion. The existing probe lighting and weather remain authoritative; no blanket exposure, saturation, or fog increase.
+
+### Review and regression tooling
+- Added repeatable `RPG_GALLERY_ONLY=polish024` captures for controls, wheel, cells, foliage, and fishing. Fishing records actual work cycles at 60 Hz and captures frames 1, 4, 7, etc. Monster attack filters avoid unrelated walk/run catalogs.
+- Added regressions for custody escape/save/expiry and legacy records, ranged acquisition/occlusion/manual release, full healing versus severing, monster attack start, passable foliage, cell construction, roster/market persistence, quick-wheel ownership, and chord/context preferences.
+- Corrected stale test fixtures: the awareness test preserves the unrelated lead's actual sentinel rather than assuming -99; projectile/mechanical tests explicitly draw the archer's weapon or isolate passing monsters as appropriate. The charge-dismissal probe puts away the player’s sword so a fresh weapons warning cannot be mistaken for pursuit. The movement probe allows a short, measured braking interval after an urgent task.
+- Removed unreachable duplicate monster injury handling and updated stale free-aim/control comments in touched code.
+
+### Final validation
+- Distribution build passed; engine build passed with 121 native checks and 29 Java tests
+- Unchanged-main baseline: 271 tests, eight failures. Complete modified-suite run: 283 tests, eight failures, one skipped. The full run exposed both regressions and stale fixtures; these were corrected and the affected classes rerun
+- 47 distinct affected regression checks passed across the final follow-up runs, including 24 passing checks in the last run. The entire suite was not repeated after the last corrections
+- Final old-main save migration loads twice into 70 residents with zero invariant discrepancies
+- Corrected all new lodge bed heads to face walls, left its entrance clear, and moved the added Ore Miner out of a solid resource block
+- Completed all six fishing contact sheets, all five requested monster attack sheets, controls/wheel captures, foliage contact/recovery captures, and matched clear/dawn/overcast/cell lighting views
+- Visual judgments remain review evidence rather than a claimed perfect match to the reference artwork. Hardware performance and the full acceptance tour were not certified by this software-rendered run
+
+Validation details and compatibility limitations are recorded in `docs/alpha024-review.md`.
+
+---
+
 ## Pass 14: the 0.2.3 gamefixes list - stutter, title shot, sheathe/run/jog animation, AI choices (Version Alpha 0.2.3)
 
 Version is now Alpha 0.2.3 (`Main.VERSION`). Passes 11-13 still uncommitted underneath. Written as work lands (low budget).

@@ -56,6 +56,8 @@ public final class Monster extends Npc {
     /** The cadence of its own attacks (natural strikes, ranged): next allowed, and the telegraph under way (a creature's wind-up). */
     public double nextStrike, nextRanged, windupUntil;
     public String windup;
+    public double strikeAt = -99, windupStart = -99;
+    public long strikeTarget;
     /** A carcass it is feeding on. */
     public long feedOn;
     /** Morale's share in this one: when its group's leader is the one the group follows. */
@@ -84,6 +86,7 @@ public final class Monster extends Npc {
         this.domain = astratto.ai.AgentDomain.MONSTER;
         this.team = 40 + kind.ordinal();
         this.hostileToPlayer = false;          // hostility is a state, never a label
+        this.sheathed = false;
         this.homeJurisdiction = rpg.world.DevMap.WILDS;
         stats();
         fit();
