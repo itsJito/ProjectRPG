@@ -10,7 +10,7 @@ public final class SettingsPanel {
     private Runnable beforeShow = () -> {};
     public Preferences values;
     public boolean open;
-    private int tab;
+    private int tab, controlsPage, modifierCandidate = -1;
     private Preferences.Action binding;
     private static final java.nio.file.Path PATH = java.nio.file.Path.of("saves", "preferences.json");
     public Runnable displayChanged = () -> {};
@@ -26,23 +26,39 @@ public final class SettingsPanel {
     public boolean capturingKey() { return binding != null; }
     public void keyInput(astratto.platform.Input input) {
         if (binding == null) return;
-        if (input.keyPressed(GLFW_KEY_ESCAPE)) { binding = null; return; }
-        for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; button++) if (input.mousePressed(button) && values.bind(binding, astratto.platform.Input.MOUSE_OFFSET + button)) { binding = null; changed(); return; }
-        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) if (input.keyPressed(key) && values.bind(binding, key)) { binding = null; changed(); return; }
+        if (input.keyPressed(GLFW_KEY_ESCAPE)) { binding = null; modifierCandidate = -1; return; }
+        int mods = Preferences.modifiers(input);
+        for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; button++) if (input.mousePressed(button)
+                && values.bind(binding, astratto.platform.Input.MOUSE_OFFSET + button | mods << 16)) { binding = null; modifierCandidate = -1; changed(); return; }
+        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) if (input.keyPressed(key)) {
+            if (Preferences.modifier(key)) { modifierCandidate = key; continue; }
+            if (values.bind(binding, key | mods << 16)) { binding = null; modifierCandidate = -1; changed(); return; }
+        }
+        if (modifierCandidate >= 0 && input.keyReleased(modifierCandidate) && values.bind(binding, modifierCandidate)) {
+            binding = null; modifierCandidate = -1; changed();
+        }
     }
     public void show() { beforeShow.run(); open = true; }
+    public void showControls(int page) { show(); tab = 2; controlsPage = Math.max(0,page); }
+    private static int controlColumns(float width) { return width < 800 ? 1 : 2; }
+    private static int controlsPerPage(float width, float height) { return Math.max(1, (int)((height - (height < 500 ? 240 : 310)) / 39)) * controlColumns(width); }
+    public static int controlPageCount(int width, int height) {
+        int perPage=controlsPerPage(Math.min(920,width-40),Math.min(650,height-40));
+        return (Preferences.Action.values().length+perPage-1)/perPage;
+    }
     public boolean escape() { if (!open) return false; binding = null; open = false; changed(); return true; }
     private void apply() { applier.accept(values); }
     private void changed() { apply(); displayChanged.run(); if (persistent) values.save(PATH); }
 
     public void draw(Ui2D ui, int width, int height) {
         float w = Math.min(920, width - 40), h = Math.min(650, height - 40), x = (width - w) / 2, y = (height - h) / 2;
+        boolean compact = tab == 2 && h < 500;
         ui.rect(0, 0, width, height, 0xB5101418); ui.rectTex(ui.parchment, x, y, w, h, 0, 0, w / 128, h / 128, 0xFFFFFFFF); ui.border(x, y, w, h, 1, Style.ACCENT);
         ui.text(ui.body, "SETTINGS", x + 28, y + 18, 32, 0xFFFFD15E);
-        ui.text("Tune your display, sound and controls", x + 28, y + 57, 13, Style.DIM);
+        if (!compact) ui.text("Tune your display, sound and controls", x + 28, y + 57, 13, Style.DIM);
         String[] tabs = {"Display", "Audio", "Controls", "Accessibility"};
-        for (int i = 0; i < tabs.length; i++) { float tx = x + 28 + i * (w - 56) / 4; if (ui.button(tabs[i], tx, y + 88, (w - 64) / 4, 32, true)) { tab = i; binding = null; } if (i == tab) ui.rect(tx, y + 122, (w - 64) / 4, 2, Style.ACCENT); }
-        float lx = x + 36, rx = x + w - 290, yy = y + 146;
+        for (int i = 0; i < tabs.length; i++) { float tx = x + 28 + i * (w - 56) / 4; if (ui.button(tabs[i], tx, y + (compact ? 52 : 88), (w - 64) / 4, 32, true)) { tab = i; binding = null; } if (i == tab) ui.rect(tx, y + (compact ? 86 : 122), (w - 64) / 4, 2, Style.ACCENT); }
+        float lx = x + 36, rx = x + w - 290, yy = y + (compact ? 96 : 146);
         if (tab == 0) {
             if (row(ui, "Display mode", values.fullscreen ? "Fullscreen" : "Windowed", lx, rx, yy)) { values.fullscreen = !values.fullscreen; changed(); } yy += 45;
             if (row(ui, "Vertical sync", yes(values.vsync), lx, rx, yy)) { values.vsync = !values.vsync; changed(); } yy += 45;
@@ -60,14 +76,22 @@ public final class SettingsPanel {
             values.ui = slider(ui, "Interface", values.ui, 0, 1, lx, rx, yy); yy += 48;
             ui.text("Output: system default device / stereo", lx, yy, 13, Style.DIM);
         } else if (tab == 2) {
-            values.sensitivity = slider(ui, "Mouse sensitivity", values.sensitivity, 0.1f, 4, lx, rx, yy); yy += 46;
-            for (int i = 0; i < Preferences.Action.values().length; i++) {
-                var a = Preferences.Action.values()[i]; float col = i % 2 * (w - 72) / 2, cy = yy + i / 2 * 39;
-                ui.text(a.title, lx + col, cy + 7, 13, Style.TEXT);
-                int key = values.keys.get(a); String name = key >= astratto.platform.Input.MOUSE_OFFSET ? "Mouse " + (key - astratto.platform.Input.MOUSE_OFFSET + 1) : glfwGetKeyName(key, 0); if (name == null) name = key == GLFW_KEY_LEFT_CONTROL ? "Ctrl" : key == GLFW_KEY_LEFT_SHIFT ? "Shift" : key == GLFW_KEY_SPACE ? "Space" : "Key " + key;
-                if (ui.button(binding == a ? "Press a key..." : name.toUpperCase(java.util.Locale.ROOT), lx + col + (w - 72) / 2 - 165, cy, 145, 30, true)) binding = a;
+            values.sensitivity = slider(ui, "Mouse sensitivity", values.sensitivity, 0.1f, 4, lx, rx, yy); yy += compact ? 40 : 46;
+            int columns=controlColumns(w), perPage = controlsPerPage(w,h);
+            int pages = (Preferences.Action.values().length + perPage - 1) / perPage;
+            controlsPage = Math.clamp(controlsPage, 0, pages - 1);
+            int first = controlsPage * perPage, end = Math.min(first + perPage, Preferences.Action.values().length);
+            for (int i = first; i < end; i++) {
+                var a = Preferences.Action.values()[i]; int row = i - first;
+                float col = row % columns * (w - 72) / columns, cy = yy + row / columns * 39;
+                ui.text(a.title, lx + col, cy + 7, 12, Style.TEXT);
+                if (ui.button(binding == a ? "Key or chord..." : values.label(a), lx + col + (w - 72) / columns - 165, cy, 145, 30, true)) { binding = a; modifierCandidate = -1; }
             }
-            ui.text("F5 quicksave  /  F6 quickload  /  Escape cancels rebinding", lx, y + h - 114, 12, Style.DIM);
+            float py = y + h - (compact ? 106 : 144);
+            if (ui.button("Previous", lx, py, 120, 28, controlsPage > 0)) { controlsPage--; binding = null; }
+            ui.centered("Page " + (controlsPage + 1) + " / " + pages, x + w / 2, py + 6, 13, Style.DIM);
+            if (ui.button("Next", x + w - 156, py, 120, 28, controlsPage + 1 < pages)) { controlsPage++; binding = null; }
+            ui.text("Hold modifiers, then press a key or mouse button. Escape cancels capture.", lx, y + h - (compact ? 70 : 106), 12, Style.DIM);
         } else {
             if (row(ui, "Reduced camera motion", yes(values.reducedMotion), lx, rx, yy)) { values.reducedMotion = !values.reducedMotion; changed(); } yy += 45;
             if (row(ui, "World speech captions", yes(values.subtitles), lx, rx, yy)) { values.subtitles = !values.subtitles; changed(); } yy += 45;
@@ -75,7 +99,7 @@ public final class SettingsPanel {
             if (row(ui, "Crouch input", values.toggleCrouch ? "Toggle" : "Hold", lx, rx, yy)) { values.toggleCrouch = !values.toggleCrouch; changed(); } yy += 45;
             if (row(ui, "Sprint input", values.toggleSprint ? "Toggle" : "Hold", lx, rx, yy)) { values.toggleSprint = !values.toggleSprint; changed(); }
         }
-        ui.text("Changes apply immediately", lx, y + h - 76, 12, Style.DIM);
+        if (!compact) ui.text("Changes apply immediately", lx, y + h - 76, 12, Style.DIM);
         if (ui.button("Restore defaults", lx, y + h - 50, 180, 31, true)) { values = new Preferences(); binding = null; changed(); }
         if (ui.button("Done", x + w - 190, y + h - 50, 154, 31, true)) escape();
     }

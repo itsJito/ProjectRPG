@@ -90,7 +90,7 @@ public final class DevMap {
     public static final int CONTACT_X0 = 44, CONTACT_Z0 = 108, CONTACT_X1 = 52, CONTACT_Z1 = 116;
     public static final int KIOSK_X0 = 58, KIOSK_Z0 = 100, KIOSK_X1 = 64, KIOSK_Z1 = 106;
     public static final float[] CARAVAN_A = {91.5f, 64.5f}, CARAVAN_B = {27.5f, 108.5f};
-    /** The Bank of Gameworld (gamefixes), DevTown: its walls, its doorway in the north wall, the counter across the hall, where the teller stands. */
+    /** The Bank of ASHENWRATH (gamefixes), DevTown: its walls, its doorway in the north wall, the counter across the hall, where the teller stands. */
     public static final int BANK_X0 = 66, BANK_Z0 = 104, BANK_X1 = 78, BANK_Z1 = 116, BANK_COUNTER_Z = 110;
     public static final int[][] BANK_DOOR = {{71, BANK_Z0}, {72, BANK_Z0}};
     public static final float[] BANK_TELLER = {72.0f, 111.4f};
@@ -187,8 +187,16 @@ public final class DevMap {
     /** Where a piece's owner sleeps: the middle of their bed (NPC homes come from here). */
     private static Piece[] concat(Piece[] a, Piece[] b) { Piece[] r = java.util.Arrays.copyOf(a, a.length + b.length); System.arraycopy(b, 0, r, a.length, b.length); return r; }
 
+    public static final Piece[] SUPPORT_BEDS = {
+        new Piece("BED",106,92,106,93,1,0,rpg.Ids.CARPENTER_CITY), new Piece("BED",107,92,107,93,1,0,rpg.Ids.CARPENTER_TOWN),
+        new Piece("BED",86,133,86,134,1,2,rpg.Ids.CARPENTER_WOOD), new Piece("BED",179,43,179,44,1,2,rpg.Ids.CARPENTER_PALACE),
+        new Piece("BED",88,133,88,134,1,2,rpg.Ids.WOODCUTTER_CITY), new Piece("BED",90,133,90,134,1,2,rpg.Ids.WOODCUTTER_TOWN),
+        new Piece("BED",92,133,92,134,1,2,rpg.Ids.MINER_CITY), new Piece("BED",94,133,94,134,1,2,rpg.Ids.MINER_PALACE),
+        new Piece("BED",85,137,86,137,1,3,rpg.Ids.TRADER_CITY), new Piece("BED",182,43,182,44,1,2,rpg.Ids.TRADER_PALACE)
+    };
+
     public static float[] bedOf(long owner) {
-        for (Piece p : concat(concat(FURNITURE, GRAVEYARD_PIECES), Expanse.PIECES)) if (p.kind.equals("BED") && p.owner == owner) return new float[]{(p.x0 + p.x1 + 1) / 2f, (p.z0 + p.z1 + 1) / 2f};
+        for (Piece p : concat(SUPPORT_BEDS, concat(concat(FURNITURE, GRAVEYARD_PIECES), Expanse.PIECES))) if (p.kind.equals("BED") && p.owner == owner) return new float[]{(p.x0 + p.x1 + 1) / 2f, (p.z0 + p.z1 + 1) / 2f};
         return null;
     }
 
@@ -246,7 +254,11 @@ public final class DevMap {
             farm();
             graveyard();
             for (Jails.Cell cell : Jails.CELLS) {
-                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), BRICK);
+                int wallMaterial=cell.jurisdiction().equals(ALPHA)?PLASTER:cell.jurisdiction().equals(PALACE)?LIMESTONE_BRICKS:BRICK;
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), !cell.jurisdiction().equals(BETA)?FENCE:wallMaterial);
+                fill(cell.endX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
+                fill(cell.wallX(), FLOOR, cell.backZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
+                fill(cell.wallX(), FLOOR + 3, cell.frontZ(), cell.endX(), FLOOR + 3, cell.backZ(), wallMaterial);
                 fill(cell.wallX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.frontZ(), FENCE);
                 fill(cell.gateX(), FLOOR, cell.frontZ(), cell.gateX(), FLOOR + DOOR_HEIGHT - 1, cell.frontZ(), LOCKED_DOOR);
                 Piece slab = cell.slab();
@@ -405,7 +417,7 @@ public final class DevMap {
         }
 
         /**
-         * The Bank of Gameworld: a stone-brick hall with a marble floor, entered from the road through a door in its north
+         * The Bank of ASHENWRATH: a stone-brick hall with a marble floor, entered from the road through a door in its north
          * wall; a counter runs across it, the teller's place behind and the strongroom's wall at the back.
          */
         void bank() {

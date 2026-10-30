@@ -15,7 +15,12 @@ public final class Fx {
         float x, y, z, vx, vy, vz, size, r, g, b, a, life, age, gravity, drag, seed;
         int kind;
     }
-    public record Floating(String text, float x, float y, float z, int color, double born, float rise) {}
+    public record Floating(String text, float x, float y, float z, int color, double born, float rise) {
+        public boolean near(float px, float py, float pz) {
+            float dx = x - px, dy = y - py, dz = z - pz;
+            return dx * dx + dy * dy + dz * dz <= 18 * 18;
+        }
+    }
 
     private final List<P> ps = new ArrayList<>();
     public final List<Floating> floating = new ArrayList<>();

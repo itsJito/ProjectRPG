@@ -281,6 +281,18 @@ public final class ItemActions {
         return Result.ok();
     }
 
+    /** Drops the original equipped stack, including any contents, without requiring free pack space. */
+    public Result dropEquipped(Actor a, Slot where) {
+        ItemStack item = a.eq.get(where);
+        if (item == null) return Result.no("Nothing there.");
+        if (a.cs.busy()) return Result.no("You can't change equipment mid-swing.");
+        a.eq.set(where, null);
+        float x = a.x - (float)Math.sin(a.yaw) * 0.7f, z = a.z - (float)Math.cos(a.yaw) * 0.7f;
+        g.objects.drop(item, x, g.vox.groundY(x, a.y + 1, z) + 0.05f, z);
+        g.state.commit("ItemDropped", a.id, 0, DevMap.jurisdiction(a.x, a.z), 0, item.toString());
+        return Result.ok();
+    }
+
     /** Work needs a target that exists for as long as the actor does. */
     private Interactable selfTarget(Actor a) {
         return new Interactable() {

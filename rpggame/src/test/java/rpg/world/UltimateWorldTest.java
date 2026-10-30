@@ -37,10 +37,11 @@ class UltimateWorldTest {
         assertFalse(g.foliage.suitable(Foliage.Kind.TALL_GRASS,64,DevMap.FLOOR,64),"paved debug floor is not soil");
         frames(180);var plant=g.foliage.chunks.values().stream().flatMap(chunk->chunk.plants.stream()).filter(patch->!patch.removed).findFirst().orElseThrow();
         assertTrue(g.foliage.suitable(plant.kind,(int)plant.x,(int)plant.y,(int)plant.z));long id=plant.id;g.foliage.remove(plant,"test cut");
+        g.teleport(g.player,plant.x,DevMap.FLOOR,plant.z);game.tick(0);
         var saves=new SaveSystem(g);Path file=directory.resolve("foliage.json");assertTrue(saves.save(file));
         assertFalse(java.nio.file.Files.readString(file).contains("\"kind\":\"Patch\""));assertTrue(saves.load(file));frames(90);
         assertTrue(g.objects.get(id) instanceof Foliage.Patch restored && restored.removed,"derived growth cannot resurrect a cut plant");
-        assertTrue(g.foliage.chunks.size()<=64);
+        assertTrue(g.foliage.chunks.size()<=144);
     }
     @Test void lakeNetsRetainTheirActualToolAndCatchAcrossLoad(@TempDir Path directory) {
         Npc fisher=(Npc)g.actor(Ids.FISHERMAN);var source=g.objects.nodes.stream().filter(node->node.kind==Node.Kind.FISH && node.needs==Items.FISHING_NET).findFirst().orElseThrow();

@@ -242,9 +242,9 @@ public final class Dungeons {
         String[] gems = t >= 2.5f ? new String[]{"uncut_ruby", "uncut_diamond", "uncut_dragonstone"} : new String[]{"uncut_sapphire", "uncut_emerald", "uncut_ruby"};
         for (int i = 0; i < 1 + depth / 2; i++) { ItemDef d = Items.find(gems[r.nextInt(gems.length)]); if (d != null) out.add(new ItemStack(d, 1)); }
         String[] gear = switch (l.theme) {
-            case WARREN -> new String[]{"bronze_spear", "iron_sword", "iron_battleaxe", "goblin_mail"};
+            case WARREN -> new String[]{"bronze_spear", "iron_sword", "iron_battleaxe", "bronze_body"};
             case CAVE -> new String[]{"spider_silk", "venom_gland", "webbing"};
-            case CRYPT -> new String[]{"soul_dust", "spectral_residue", "ancient_helm", "cursed_blade"};
+            case CRYPT -> new String[]{"soul_dust", "spectral_residue", "white_helm", "black_sword"};
             case HALL -> new String[]{"troll_fat", "granite_shield", "rare_fossil", "troll_totem"};
         };
         for (int i = 0; i < 1 + (t >= 2.5f ? 2 : 0); i++) { ItemDef d = Items.find(gear[r.nextInt(gear.length)]); if (d != null) out.add(new ItemStack(d, 1)); }

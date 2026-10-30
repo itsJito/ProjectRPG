@@ -370,6 +370,14 @@ public final class Gfx implements AutoCloseable {
     public void scene(Rpg g, boolean firstPerson, float dt, double hour) {
         sceneGame = g;
         clock = g.time;
+        if(clock>=pruneFiguresAt) {
+            pruneFiguresAt=clock+2;
+            var present=new java.util.HashSet<Long>();for(Actor actor:g.actors())present.add(actor.id);
+            shown.keySet().retainAll(present);anim.keySet().retainAll(present);rebuiltAt.keySet().retainAll(present);
+            pendingFigure.keySet().retainAll(present);
+            var wanted=new java.util.HashSet<Long>(pendingFigure.values());
+            building.entrySet().removeIf(entry->{if(wanted.contains(entry.getKey()))return false;entry.getValue().cancel(false);return true;});
+        }
         gore = g.gore;
         cmd.world(g.game.world());
         float daylight = environment(hour, g.time);
@@ -444,6 +452,7 @@ public final class Gfx implements AutoCloseable {
         fences(g);
         // characters
         Actor p = g.player;
+        if(!g.notarget()) {
         shadowProxy(g,p);
         if (p.alive && p.morphT > 0) animal(g.magic.form(p),dt,g.time);
         else if (p.alive && p.reacting && p.ragdoll != 0 && g.lastBodies.ragdoll(p.ragdoll) != null) {
@@ -455,6 +464,7 @@ public final class Gfx implements AutoCloseable {
             // the player's own body, fallen (gamefixes: the death is watched), until it becomes the grave
             Snapshots.Ragdoll rd = g.lastBodies.ragdoll(g.death.ragdoll);
             if (rd != null) ragdoll(rd, p);
+        }
         }
         for (Npc n : g.npcs) {
             if (n.loaded) shadowProxy(g,n);
@@ -812,6 +822,8 @@ public final class Gfx implements AutoCloseable {
         long key = figureKey(a, look);
         int[][] f = figures.get(key);
         if (f != null) { shown.put(a.id, f); return f; }
+        Long pending=pendingFigure.get(a.id);
+        if(pending!=null && building.containsKey(pending))key=pending;
         java.util.concurrent.Future<CharModel> job = building.get(key);
         int[][] last = shown.get(a.id);
         // (gamefixes: fights lagged) a body freshly marked again and again in a fight is repainted at most a few times a
@@ -825,7 +837,7 @@ public final class Gfx implements AutoCloseable {
             var blood = a.blood.any() ? a.blood.snapshot() : null;
             var injuries=a.injuries.snapshot();int severity=a.injuries.severity(a);
             job = builder.submit(() -> { Skin skin=Skin.paint(copy,armor,blood);skin.injure(injuries,severity);return CharModel.build(skin); });
-            building.put(key, job);
+            building.put(key, job);pendingFigure.put(a.id,key);
         }
         int[][] old = last;
         if (!job.isDone() && old != null) return old;
@@ -834,23 +846,26 @@ public final class Gfx implements AutoCloseable {
         CharModel cm;
         try { cm = job.get(); }
         catch (InterruptedException | java.util.concurrent.ExecutionException e) { building.remove(key); throw new IllegalStateException("figure for " + a.name, e); }
-        building.remove(key);
+        building.remove(key);pendingFigure.remove(a.id);
         f = new int[2][CharModel.SEGS];
         for (int i = 0; i < CharModel.SEGS; i++) { f[0][i] = upload(cm.base[i]); f[1][i] = upload(cm.outer[i]); }
         figures.put(key, f);
+        shown.put(a.id,f);
         if (figures.size() > MAX_FIGURES) {
-            var eldest = figures.entrySet().iterator().next();
-            if (!shown.containsValue(eldest.getValue())) {
-                for (int[] layer : eldest.getValue()) for (int id : layer) if (id != 0) r.release(AstrattoNative.RES_MESH, id);
-                figures.remove(eldest.getKey());
+            var iterator=figures.entrySet().iterator();
+            while(figures.size()>MAX_FIGURES && iterator.hasNext()) {
+                var entry=iterator.next();if(shown.containsValue(entry.getValue()))continue;
+                for(int[] layer:entry.getValue())for(int id:layer)if(id!=0)r.release(AstrattoNative.RES_MESH,id);
+                iterator.remove();
             }
         }
-        shown.put(a.id, f);
         return f;
     }
 
+    private final java.util.Map<Long,Long> pendingFigure=new java.util.HashMap<>();
     private final java.util.Map<Long, Double> rebuiltAt = new java.util.HashMap<>();
     private int uploadsThisFrame;
+    private double pruneFiguresAt;
 
     /** Whether the figure for an actor as they look now has been built (the gallery waits on it; play shows the old one meanwhile). */
     public boolean figureReady(Actor a) { return a.look != null && figures.containsKey(figureKey(a, a.look)); }
@@ -897,13 +912,13 @@ public final class Gfx implements AutoCloseable {
     private final LinkedHashMap<DamageKey,DamageMesh> damagedParts=new LinkedHashMap<>(32,0.75f,true);
     private rpg.animal.Animal drawnAnimal;
     private ItemModels.Model injuredPart(rpg.animal.Animal animal,ItemModels.Model base,rpg.combat.Gore.Part part) {
-        if(animal==null || base==null || animal.injuries.version(animal)==0 || !animal.injuries.affects(VoxelInjuries.part(part)))return base;
+        if(animal==null || base==null || !animal.injuries.affects(VoxelInjuries.part(part)) && animal.blood.marks.stream().noneMatch(m->m.scorch() && m.part()==VoxelInjuries.part(part)))return base;
         var key=new DamageKey(animal.id,base,part);var state=damagedParts.computeIfAbsent(key,k->new DamageMesh());state.used=sceneGame.time;
-        int version=animal.injuries.version(animal);
+        int version=31*animal.injuries.version(animal)+animal.blood.version;
         if(state.version!=version) {
             if(state.pending!=null)state.pending.cancel(false);
-            var cuts=animal.injuries.snapshot();int severity=animal.injuries.severity(animal);state.version=version;
-            state.pending=builder.submit(()->{var model=VoxelInjuries.carve(base,part,cuts,severity);return new DamageBuild(model,model==base?null:VoxMesh.build(model));});
+            var cuts=animal.injuries.snapshot();var marks=animal.blood.snapshot();int severity=animal.injuries.severity(animal);state.version=version;
+            state.pending=builder.submit(()->{var model=VoxelInjuries.scorch(VoxelInjuries.carve(base,part,cuts,severity),part,marks);return new DamageBuild(model,model==base?null:VoxMesh.build(model));});
         }
         if(state.pending!=null && state.pending.isDone())try {
             var ready=state.pending.get();state.pending=null;
@@ -1191,6 +1206,7 @@ public final class Gfx implements AutoCloseable {
     private final java.util.Map<Long, MonsterPose> monsterPoses = new java.util.HashMap<>();
     private final Mat4 mf = new Mat4(), mp = new Mat4(), mq = new Mat4(), ma = new Mat4(), mb = new Mat4(), mc = new Mat4();
     private float mShade = 1, mAlpha = 1, mGlow = 0;
+    private boolean mDissolve;
 
     /** One of a monster's parts in a frame measured in its voxels (the frame carries the figure's scale). */
     /** (0.2.1) a part a monster has lost is not drawn (see {@link #lostPart}). */
@@ -1209,7 +1225,7 @@ public final class Gfx implements AutoCloseable {
         if (mesh == 0) return;
         System.arraycopy(m.m, 0, m16, 0, 16);
         float sh = mShade * charTint;
-        cmd.model(mesh, mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
+        cmd.model(mesh, mDissolve ? AstrattoNative.MODEL_DISSOLVE : mAlpha < 1 ? AstrattoNative.MODEL_FORWARD : 0, m16, sh, sh, sh, mAlpha, mGlow, 1, 0.85f, 0);
     }
     private static float[] at(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformPoint(x, y, z, o); return o; }
     private static float[] dirOf(Mat4 f, float x, float y, float z) { float[] o = new float[3]; f.transformDir(x, y, z, o); return norm(o); }
@@ -1256,13 +1272,14 @@ public final class Gfx implements AutoCloseable {
             if (!mo.alive && mo.dissolve > 0) {
                 // the remains going (gamefixes): charred to ash, a dull ember glow through it at the height of it, then
                 // fading into the motes that rise off it
-                float d = mo.dissolve, gone = smooth(Math.min(1, d * 1.15f));
+                float d = mo.dissolve;
                 charTint *= 1 - 0.75f * smooth(Math.min(1, d * 2.2f));
                 mGlow = Math.max(mGlow, 0.55f * (float) Math.sin(Math.PI * Math.min(1, d * 1.3f)));
-                mAlpha *= 1 - gone;
-                float ash = 0.62f - 0.25f * d;
-                cmd.emitter(mo.id ^ (5L << 54), 2, mo.x, mo.y + 0.25f + mo.height * 0.2f, mo.z, Math.max(0.3f, mo.radius * 1.2f), 70 * (1 - d * 0.6f), 0.05f, 1.1f,
-                        ash + 0.35f, ash + 0.1f, ash - 0.05f, 0, 0.9f, 0);
+                mDissolve=true;
+                mAlpha=1-d;
+                float ash = 0.22f - 0.08f * d;
+                cmd.emitter(mo.id ^ (5L << 54), 2, mo.x, mo.y + 0.25f + mo.height * 0.2f, mo.z, 0.012f, 24 * (1 - d), Math.max(0.2f, mo.radius * 0.9f), 0.55f,
+                        ash + 0.08f, ash + 0.035f, ash, 0, 0.35f, 0);
             }
             MonsterPose st = monsterPoses.computeIfAbsent(mo.id, k -> new MonsterPose());
             if (f.humanoid) {
@@ -1276,7 +1293,7 @@ public final class Gfx implements AutoCloseable {
                 default -> dragon(mo, f, st, dt);
             }
             if (mo.alive && !ghost) cmd.shadowBody(mo.x, mo.y, mo.z, Math.max(mo.radius, mo.kind.hw * 0.4f), mo.height);
-        } finally { charTint = previous; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; mHide = false; }
+        } finally { charTint = previous; mDissolve=false; mShade = 1; mAlpha = 1; mGlow = 0; heldScale = 1; mHide = false; }
     }
 
     private static float smooth(float x) { return x * x * (3 - 2 * x); }
@@ -1588,7 +1605,10 @@ public final class Gfx implements AutoCloseable {
         if (speed > 0.05f) st.phase += speed / (f.legALen * vs * 0.9f) * (float) Math.PI * dt;
         st.amp += ((speed < 0.05f ? 0 : Math.min(1, speed / Math.max(0.2f, mo.kind.walk))) - st.amp) * Math.min(1, dt * 8);
         boolean rearing = !dead && mo.windup != null && clock < mo.windupUntil;
-        float rear = rearing ? 0.35f : 0;
+        float progress = (float)Math.clamp((clock - mo.windupStart) / Math.max(0.01, mo.windupUntil - mo.windupStart), 0, 1);
+        float strike = (float)(clock - mo.strikeAt);
+        float recovery = strike >= 0 && strike < 0.4f ? 1 - strike / 0.4f : 0;
+        float rear = rearing ? 0.45f * smooth(progress) : -0.22f * (float)Math.sin(recovery * Math.PI);
         float raise = 0.55f, down = 1.35f;
         float bodyY = -(2 + f.legALen * (float) Math.sin(raise) - f.legBLen * (float) Math.sin(down)) + 0.6f;
         float bob = Math.abs((float) Math.sin(st.phase * 2)) * st.amp * 0.4f + 0.15f * (float) Math.sin(t * 1.5);
@@ -2440,8 +2460,16 @@ public final class Gfx implements AutoCloseable {
         float previous=charTint;charTint=1-o.charred*0.86f;
         try { objectModel(g,o,dt); } finally { charTint=previous; }
     }
+    private final java.util.Map<ItemModels.Model,int[]> itemBounds=new java.util.IdentityHashMap<>();
+    private int[] itemBounds(ItemModels.Model model){return itemBounds.computeIfAbsent(model,m->astratto.voxel.VoxRaster.bounds(m.vox()));}
+    private final Snapshots.Rigid looseItemPose=new Snapshots.Rigid();
     private void objectModel(Rpg g, WorldObject o, float dt) {
-        if (o instanceof GroundItem gi && gi.dir != null) {
+        if(o instanceof GroundItem gi && gi.rotation!=null) {
+            var model=ItemModels.of(gi.stack.def);int[] bounds=itemBounds(model);float unit=ItemModels.VOX;
+            looseItemPose.x=gi.x;looseItemPose.y=gi.y;looseItemPose.z=gi.z;looseItemPose.qw=gi.rotation[0];looseItemPose.qx=gi.rotation[1];looseItemPose.qy=gi.rotation[2];looseItemPose.qz=gi.rotation[3];looseItemPose.matrix(m.m);
+            m.translate(-((bounds[0]+bounds[3])*0.5f-model.gx())*unit,-((bounds[1]+bounds[4])*0.5f-model.gy())*unit,-((bounds[2]+bounds[5])*0.5f-model.gz())*unit);
+            drawItem(gi.stack.def,0);
+        } else if (o instanceof GroundItem gi && gi.dir != null) {
             // one arrow, bolt or thrown blade - or a weapon fallen from a dead hand - exactly as it lies: lodged where it
             // struck, or as its body came to rest
             float len = CombatSystem.lyingLength(gi.stack.def);
@@ -2450,7 +2478,7 @@ public final class Gfx implements AutoCloseable {
             // the item's own model on the ground: long things lie down, the rest stand on their base
             ItemDef d = gi.stack.def;
             ItemModels.Model md = ItemModels.of(d);
-            int[] bb = astratto.voxel.VoxRaster.bounds(md.vox());
+            int[] bb = itemBounds(md);
             float v = ItemModels.VOX, cx = (bb[0] + bb[3]) / 2f, cy = (bb[1] + bb[4]) / 2f, cz = (bb[2] + bb[5]) / 2f;
             boolean lies = (bb[4] - bb[1]) > 1.5f * Math.max(bb[3] - bb[0], bb[5] - bb[2]) || (bb[5] - bb[2]) <= 2;
             m.identity().translate(gi.x, gi.y - 0.04f, gi.z).rotateY(gi.id * 1.7f);
@@ -2601,7 +2629,7 @@ public final class Gfx implements AutoCloseable {
      * leaf model runs from its hinge edge (x = 0) to its free edge, so it is drawn half a leaf back from the body's middle.
      */
     private void doorLeaves(Rpg g, Door d, float dt) {
-        String key = d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked;
+        String key = d.cellDoor ? "cell-door:" + d.height : d.fenceGate ? "fencegate" : "door:" + d.height + ":" + d.locked;
         for (int i = 0; i < d.leaf.length; i++) {
             Snapshots.Rigid r = g.lastRigids.body(d.leaf[i]);
             if (r == null) continue;
@@ -2609,7 +2637,7 @@ public final class Gfx implements AutoCloseable {
             System.arraycopy(m16, 0, m.m, 0, 16);
             float leafW = d.leafWidth, h = d.height - 0.04f;
             m.translate(-leafW / 2, -h / 2 - 0.02f, 0).scale(leafW, 1, 1);
-            drawLayers(key, () -> d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked));
+            drawLayers(key, () -> d.cellDoor ? Props.cellDoorLeaf(d.height) : d.fenceGate ? Props.fenceGateLeaf() : Props.doorLeaf(d.height, d.locked));
         }
     }
 

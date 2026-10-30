@@ -37,10 +37,12 @@ class FullPackTest {
         Npc f = fisherman();
         fill(f, Items.RAW_SHRIMP);
         int before = f.count(Items.RAW_SHRIMP);
+        boolean[] noticed={false};
+        g.state.subscribe(event->{if(event.type().equals("PackFull") && event.actor()==f.id)noticed[0]=true;});
         boolean emptied = false;
         for (int s = 0; s < 240 && !emptied; s++) { frames(60); emptied = f.inv.freeSlots() >= 6 || f.count(Items.RAW_SHRIMP) < before - 5; }
         assertTrue(emptied, "the fisherman made room (" + f.lastOutcome + ", goal " + f.goal + ", free " + f.inv.freeSlots() + ")");
-        assertTrue(g.state.all().stream().anyMatch(e -> e.type().equals("PackFull") && e.actor() == f.id));
+        assertTrue(noticed[0], "the full-pack event must be emitted even if later activity rolls it out of the bounded log");
     }
 
     @Test void whatNoStoreBuysIsBanked() {

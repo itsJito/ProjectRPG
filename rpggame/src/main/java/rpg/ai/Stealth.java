@@ -125,13 +125,16 @@ public final class Stealth {
 
     /** The same sight for any watcher (people, animals): its eyes, its heading, how sharp they are. */
     public float exposure(Actor n, float acuity, Actor a) {
-        if (!n.alive || a == null || !a.alive || a == n) return 0;
+        return exposure(n,acuity,a,false);
+    }
+    private float exposure(Actor n,float acuity,Actor a,boolean tracking) {
+        if (!n.alive || a == null || !a.alive || a == n || a==g.player && g.notarget()) return 0;
         float dx = a.x - n.x, dz = a.z - n.z, d = (float) Math.hypot(dx, dz);
         if (d > RANGE) return 0;
         float cone = 1;
         // someone right beside you is sensed whichever way you face - unless they creep
         float close = a.sneaking ? CLOSE_CREEPING : CLOSE;
-        if (d > close) {
+        if (d > close && !tracking) {
             float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
             float cos = (fx * dx + fz * dz) / d;
             // close in, the edge of the eye (90 degrees each side); far out, only what is ahead (about 50 degrees)
@@ -185,6 +188,10 @@ public final class Stealth {
     /** Whether an NPC sees an actor now: plainly, or at all once it is already alert to them. */
     public boolean sees(Npc n, Actor a) {
         if (a == g.player && g.notarget()) return false;
+        // Turning the body or a stale perception sample cannot hide a visible opponent during an established fight.
+        boolean tracking=n.fightTarget==a.id || n instanceof rpg.monster.Monster monster && monster.target==a.id
+                || n.cs.lastAttacker==a.id && g.time-n.cs.lastHurt<4;
+        if(tracking)return exposure(n,acuity(n),a,true)>0.08f;
         Aware w = n.aware.get(a.id);
         float e = w != null && g.time - w.at < 0.25 ? w.exposure : exposure(n, a);
         return e >= CLEAR || e > 0 && w != null && w.level >= ALERT;
@@ -320,6 +327,8 @@ public final class Stealth {
             if (w.level < CURIOUS || w.exposure >= CLEAR || w.level >= ALERT && w.exposure > 0) continue;
             // a neighbour going about openly in the dusk is no mystery; a stranger, or anyone creeping, is
             Actor who = g.actor(e.getKey());
+            Memory charge = who == null ? null : n.crimeKnown(who.id);
+            boolean charged = charge != null && !charge.settled;
             // (a sound alone says nothing of who made it: only a glimpse of a familiar figure settles it)
             // (by day, though, the steps of the people one lives among are just the day going on)
             double hour = g.state.hourOfDay();
@@ -328,20 +337,20 @@ public final class Stealth {
             // by day a townsman walking openly is a townsman, whatever their trade: a thief does not take every passing
             // guard for the law closing in, nor a guard every passing thief for a prowler (gamefixes: NPCs left their
             // routines all morning - the thief hid from each guard, crouched, and the guards came to see why, and so on)
-            boolean resident = who instanceof Npc person && !person.hostileToPlayer && !ZonePolicy.outlaw(person) && person.summonOwner == 0;
+            boolean resident = who instanceof Npc person && !person.hostileToPlayer && (!ZonePolicy.outlaw(person) || person.role == Npc.Role.THIEF && !charged) && person.summonOwner == 0;
             if (resident && !who.sneaking && day) continue;
             // and so is the player, out openly by day in a town where nothing is known against them (half-seen at a
             // distance, a figure in the street is someone in the street - not something to go and look into)
-            if (who == g.player && !who.sneaking && day && !DevMap.WILDS.equals(DevMap.jurisdiction(who.x, who.z)) && n.crimeKnown(who.id) == null
+            if (who == g.player && !who.sneaking && day && !DevMap.WILDS.equals(DevMap.jurisdiction(who.x, who.z)) && !charged
                     && g.law.bounty(who.id, DevMap.jurisdiction(who.x, who.z)) <= 0) continue;
             // looked into lately: no mystery again for a while, unless they are creeping about now - and someone known by
             // sight already found creeping about, with nothing known against them, is not a fresh mystery for minutes
             if (g.time - w.settledAt < 30 && (who == null || !who.sneaking)) continue;
             boolean known = who instanceof Npc person && !person.hostileToPlayer && person.summonOwner == 0;
-            if (known && g.time - w.settledAt < 300 && n.crimeKnown(who.id) == null) continue;
+            if (known && g.time - w.settledAt < 300 && !charged) continue;
             // the player too, once looked into and found going about openly: not a fresh mystery again for minutes (a
             // border knight went back to look at the same figure standing in the same place all morning)
-            if (who == g.player && !who.sneaking && g.time - w.settledAt < 300 && n.crimeKnown(who.id) == null) continue;
+            if (who == g.player && !who.sneaking && g.time - w.settledAt < 300 && !charged) continue;
             if (who instanceof rpg.animal.Animal an && !an.dangerous()) continue;
             if (best == null || w.level > best.getValue().level) best = e;
         }

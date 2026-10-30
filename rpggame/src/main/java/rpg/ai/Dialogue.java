@@ -193,7 +193,7 @@ public final class Dialogue {
             case MINER -> pick(n, "There's ore in the hills, if you've the back for it.", "A good pick is worth more than a good friend. Some days.", "The rock gives up nothing without a fight.");
             case CRAFTSMAN -> pick(n, "Bring me the stock and I'll bring you the work.", "Every tool on this bench has a story. Most of them involve my thumbs.", "Good work outlasts the hands that made it.");
             case KNIGHT -> pick(n, "Keep your blade clean and your word cleaner.", "There's a road to watch. There always is.", "I serve. That's the whole of it.");
-            case CIVIC -> g.bank.open() ? pick(n, "Welcome to the Bank of Gameworld. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
+            case CIVIC -> g.bank.open() ? pick(n, "Welcome to the Bank of ASHENWRATH. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
                     : pick(n, "We're closed just now. Come back when I'm at the counter.", "The counter's shut. The vaults aren't going anywhere.", "Banking hours are over. Your coin is sleeping, as I'd like to be.");
             case SCHOLAR -> pick(n, "A story is only as sound as its witness.", "I collect accounts, not certainties. What have you seen?", "Everyone in this town has a version. I like to compare them.");
             case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");

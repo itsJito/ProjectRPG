@@ -68,6 +68,8 @@ class SummonStressTest {
         assertTrue(made >= 25, "allies actually called: " + made);
         // a fallen ally leaves no body behind to be fetched, searched or carried: it is gone the moment it falls
         for (Npc n : new java.util.ArrayList<>(g.npcs)) if (n.summonOwner == g.player.id) g.magic.dismiss(n);
+        // The fresh-cast assertion needs a free landing after the crowded battle above.
+        float[] lane=rpg.TestLanes.open(g);g.teleport(g.player,lane[0],DevMap.FLOOR,lane[1]);game.tick(0);
         assertEquals(1, call(1), "a fresh ally");
         Npc ally = g.npcs.stream().filter(n -> n.summonOwner == g.player.id).findFirst().orElseThrow();
         long objects = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Corpse c && !c.removed).count();

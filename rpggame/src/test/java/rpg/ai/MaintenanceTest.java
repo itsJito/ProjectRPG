@@ -39,6 +39,8 @@ class MaintenanceTest {
         assertTrue(farmer.z>barn.z+0.8,()->"farmer="+farmer.x+","+farmer.z+" door="+java.util.Arrays.toString(barn.angle)+" "+farmer.lastOutcome);
     }
     @Test void anUnlatchedLeafCanSwingToBothSidesAndCloseFromEither() {
+        // Keep the mechanical probe isolated: a passing goblin can legitimately reopen the shed.
+        for(var monster:g.monsters.all()){monster.loaded=false;g.monsters.despawnBody(monster);}
         Door door=g.objects.shedDoor;g.teleport(g.player,60.5f,DevMap.FLOOR,70.5f);
         for(float side:new float[]{1,-1}) {
             door.setOpen(g,true,null,0);

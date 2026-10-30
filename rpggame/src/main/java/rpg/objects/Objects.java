@@ -184,12 +184,29 @@ public final class Objects {
         expanse(f);
         // 0.2.2 (after every older fixture, so their ids hold): the unfinished casket where the dead buy back their things
         casket = add(new Fixtures.Casket(fid(), DevMap.CASKET[0], f, DevMap.CASKET[1])).solid(g);
+        supportBeds();
+        Furniture cityStall=add(new Furniture(fid(),Furniture.Kind.COUNTER,76,29,78,29,1,0,Ids.TRADER_CITY,true));
+        furniture.add(cityStall);cityStall.place(g,true);
+        Furniture palaceStall=add(new Furniture(fid(),Furniture.Kind.COUNTER,181,97,183,97,1,0,Ids.TRADER_PALACE,true));
+        furniture.add(palaceStall);palaceStall.place(g,true);
         g.vox.doors(doors);
         rpg.ai.Waypoints.doors(g.vox, doors);
     }
 
+    /** New beds append after established fixture ids; spare beds retain their identities. */
+    public void supportBeds() {
+        for (var p : DevMap.SUPPORT_BEDS) {
+            Furniture bed = furnitureAt(p.x0(),DevMap.FLOOR,p.z0());
+            if (bed == null) {
+                bed=add(new Furniture(fid(),Furniture.Kind.BED,p.x0(),p.z0(),p.x1(),p.z1(),1,p.facing(),p.owner(),true));
+                furniture.add(bed);bed.place(g,true);
+            }
+            if (bed.owner==0 || bed.owner==p.owner()) {bed.owner=p.owner();bed.name=g.nameOf(p.owner())+"'s bed";}
+        }
+    }
+
     private void jailCell(rpg.world.Jails.Cell cell) {
-        Door door = add(new Door(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}, true, null, 100, 0));
+        Door door = add(Door.cellDoor(fid(), cell.jurisdiction() + " cell door", new int[][]{{cell.gateX(), cell.frontZ()}}));
         door.spawn(g); jailDoors.add(door);
         var p = cell.slab();
         Furniture slab = add(new Furniture(fid(), Furniture.Kind.SLAB, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), 0, true));
@@ -275,7 +292,21 @@ public final class Objects {
 
     /** Drops a stack in the world (it keeps its owner and provenance). */
     public GroundItem drop(ItemStack s, float x, float y, float z) {
-        return add(new GroundItem(g.state.newEntityId(), s, x, y, z));
+        GroundItem item=add(new GroundItem(g.state.newEntityId(),s,x,y,z));
+        if(!s.def.natural && (s.def.slot==rpg.item.ItemDef.Slot.MAIN || s.def.slot==rpg.item.ItemDef.Slot.OFF)) {
+            item.rotation=new float[]{0.9238795f,0.3826834f,0,0};
+            item.wx=1.5f;item.wz=(Math.floorMod(item.id,7)-3)*0.3f;looseBody(item,true);
+        }
+        return item;
+    }
+    private void looseBody(GroundItem item,boolean lift) {
+        var model=rpg.render.ItemModels.of(item.stack.def);int[] b=astratto.voxel.VoxRaster.bounds(model.vox());float unit=rpg.render.ItemModels.VOX;
+        float hx=Math.max(0.025f,(b[3]-b[0])*unit/2),hy=Math.max(0.025f,(b[4]-b[1])*unit/2),hz=Math.max(0.025f,(b[5]-b[2])*unit/2);
+        if(lift)item.y=Math.max(item.y,g.vox.groundY(item.x,item.y+2,item.z)+Math.max(hx,Math.max(hy,hz))+0.04f);
+        item.rigid=g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);item.rigidSince=g.time;item.resumePhysics=false;
+        var q=item.rotation;
+        g.game.commands().rigidCreate(item.rigid,astratto.bridge.AstrattoNative.SHAPE_BOX,astratto.bridge.AstrattoNative.RIGID_DEBRIS|astratto.bridge.AstrattoNative.RIGID_NO_MOVERS,
+                hx,hy,hz,Math.max(0.1f,item.stack.def.weight),item.x,item.y,item.z,q[0],q[1],q[2],q[3],item.vx,item.vy,item.vz,item.wx,item.wy,item.wz,0.8f,0.1f,0,null);
     }
 
     /**
@@ -291,7 +322,7 @@ public final class Objects {
      * rigid body as long as the thing is, thrown on with a velocity, tumbling and settling where it will.
      */
     public GroundItem dropLong(ItemStack one, float x, float y, float z, float[] dir, boolean lodged, float vx, float vy, float vz) {
-        GroundItem gi = drop(one, x, y, z);
+        GroundItem gi = add(new GroundItem(g.state.newEntityId(),one,x,y,z));
         float l = (float) Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         gi.dir = l < 1e-5f ? new float[]{0, 0, 1} : new float[]{dir[0] / l, dir[1] / l, dir[2] / l};
         gi.lodged = lodged;
@@ -311,13 +342,17 @@ public final class Objects {
     /** Loose ammunition follows its rigid body until it settles (or a few seconds pass), then lies still where it came to rest. */
     private void settleAmmo() {
         for (WorldObject o : list) {
-            if (!(o instanceof GroundItem gi) || gi.rigid == 0 || gi.removed) continue;
+            if(!(o instanceof GroundItem gi))continue;
+            if(gi.removed){if(gi.rigid!=0){g.game.commands().release(gi.rigid);gi.rigid=0;}continue;}
+            if(gi.resumePhysics && gi.rotation!=null)looseBody(gi,false);
+            if(gi.rigid==0)continue;
             var body = g.lastRigids.body(gi.rigid);
             if (body == null) { if (g.time - gi.rigidSince > 1) { gi.rigid = 0; } continue; }
             gi.x = body.x; gi.y = body.y; gi.z = body.z;
             float qw = body.qw, qx = body.qx, qy = body.qy, qz = body.qz;
             // the body's long axis (its +y) in the world
-            gi.dir = new float[]{2 * (qx * qy - qw * qz), 1 - 2 * (qx * qx + qz * qz), 2 * (qy * qz + qw * qx)};
+            if(gi.rotation!=null){gi.rotation[0]=qw;gi.rotation[1]=qx;gi.rotation[2]=qy;gi.rotation[3]=qz;gi.vx=body.vx;gi.vy=body.vy;gi.vz=body.vz;gi.wx=body.wx;gi.wy=body.wy;gi.wz=body.wz;}
+            else gi.dir = new float[]{2 * (qx * qy - qw * qz), 1 - 2 * (qx * qx + qz * qz), 2 * (qy * qz + qw * qx)};
             if (body.asleep || g.time - gi.rigidSince > 8 || gi.y < DevMap.FLOOR - 8) {
                 g.game.commands().release(gi.rigid); gi.rigid = 0;
                 if (gi.y < DevMap.FLOOR - 8) gi.y = g.vox.groundY(gi.x, DevMap.FLOOR + 2, gi.z) + 0.03f;

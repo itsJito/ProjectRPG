@@ -61,7 +61,7 @@ float cascadeShadow(int c, vec3 P, vec3 N, float ndl, float baked) {
     // than the real disc, as the eye reads shadows in a game), in shadow-map texels
     float gap = (s.z - blockers / nb) * uCascadeDepth[c];
     // (0.2.1) a softer sun: the penumbra grows faster with the gap and is never pin-sharp, as the eye reads a sunlit day
-    float width = clamp(gap * 0.06 / texel, 1.6, 14.0);
+    float width = clamp(gap * 0.09 / texel, 1.9, 14.0);
     // deep inside the umbra (every search sample blocked, a narrow penumbra): no filtering would find light
     if (nb > 8.5 && width < 2.5) return 0.0;
     // a narrow penumbra is resolved by half the taps (the comparison sampler filters each one bilinearly)
@@ -196,8 +196,8 @@ void main() {
         // scattering). The shadow is the sun's at that point, so a leaf deep in the crown is not lit through.
         float sh = sunShadow(P, N, max(ndl, 0.3), viewZ, skyVis);
         float wrap = max(0.0, (dot(N, uSunDir) + 0.45) / 1.45);
-        float through = pow(max(dot(-V, uSunDir), 0.0), 5.0) * 1.6 + 0.28;
-        col += albedo * uSunCol * (wrap * 0.85 + through * vec3(0.95, 1.05, 0.55) * 0.75) * sh;
+        float through = pow(max(dot(-V, uSunDir), 0.0), 5.0) * 0.5 + 0.08;
+        col += albedo * uSunCol * (wrap * 0.85 + through * vec3(1.0, 0.98, 0.82) * 0.45) * sh;
     } else if (ndl > 0.0 && dot(uSunCol, vec3(1.0)) > 1e-4) {
         float sh = sunShadow(P, N, ndl, flag == 1 ? 0.5 : viewZ, skyVis);
         if (sh > 0.0) col += shade(albedo, f0, rough, metal, N, V, uSunDir, uSunCol) * sh;
@@ -206,11 +206,14 @@ void main() {
     // ---- indirect diffuse from the irradiance probes
     float conf;
     vec3 irr = probeIrradiance(P, N, conf);
-    vec3 fallback = skyBase(N) * skyVis * skyVis * 0.5;
+    // Broad sky illumination reaches shaded outdoor surfaces without adding light to sealed rooms.
+    vec3 hemisphere = mix(skyBase(N), skyBase(vec3(0.0, 1.0, 0.0)) * 0.65, 0.25);
+    vec3 fallback = hemisphere * pow(skyVis, 1.5) * 0.5;
     // (0.2.1, gamefixes: dark hard-edged shadows) the bounce and the sky fill the shade more: the probes' light, a little
     // stronger and a little cooler where the sun does not reach, so shadow is gently lit, never a black hole
-    irr = (mix(fallback, irr, conf) + vec3(uAmbientFloor)) * vec3(1.22, 1.26, 1.34);
-    col += albedo * (1.0 - metal) * irr * occl;
+    irr = (mix(fallback, irr, conf) + vec3(uAmbientFloor)) * vec3(1.18, 1.22, 1.28);
+    // Keep contact occlusion, while preventing it from crushing broad indirect illumination twice.
+    col += albedo * (1.0 - metal) * irr * mix(occl, sqrt(occl), 0.25);
 
     // ---- indirect specular: screen-space reflection where it found one, probe / sky lobe elsewhere
     vec3 R = reflect(-V, N);

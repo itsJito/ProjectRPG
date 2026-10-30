@@ -82,6 +82,8 @@ public final class Invariants {
         for (ItemStack s : g.econ.fence.stock.stacks()) at.accept(s, "the fence's stock");
         for (ItemStack s : g.econ.forge.stock.stacks()) at.accept(s, "the forge rack");
         for (ItemStack s : g.econ.macellum.stock.stacks()) at.accept(s, "the Macellum's stock");
+        for (ItemStack s : g.econ.materialsCity.stock.stacks()) at.accept(s,"materials stall stock");
+        for (ItemStack s : g.econ.materialsPalace.stock.stacks()) at.accept(s,"palace materials stock");
         for (CombatSystem.Projectile p : g.combat.projectiles) at.accept(p.ammo, "arrow in flight");
         Map<String, Long> ledger = g.state.ledger();
         java.util.Set<String> ids = new java.util.HashSet<>(ledger.keySet());

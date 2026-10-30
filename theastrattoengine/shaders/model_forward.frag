@@ -1,4 +1,5 @@
 #include "include/head.glsl"
+#include "include/dissolve.glsl"
 #include "include/sky.glsl"
 #include "include/bank.glsl"
 in vec4 vCol;
@@ -10,6 +11,7 @@ uniform vec3 uCam, uFogCol, uAmbient;
 uniform sampler3D uProbeR, uProbeG, uProbeB;
 layout(location=0) out vec4 oColor;
 void main() {
+    float edge = dissolveEdge();
     vec3 n = normalize(vN);
     vec3 albedo = pow(vCol.rgb * uTint.rgb, vec3(2.2));
     vec3 uvw = (vWorld + n) / (vec3(WORLD_X, WORLD_Y, WORLD_Z));

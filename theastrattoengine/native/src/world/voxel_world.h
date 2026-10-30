@@ -79,12 +79,16 @@ public:
     bool restorePristine();
 
     void seal(int x, int y, int z, bool sealed);
-    void unsealAll() { if (!sealed_.empty()) { sealed_.clear(); navVersion_++; } }
+    void unsealAll() { if (!sealed_.empty()) { sealed_.clear(); navTouched(); } }
     bool sealed(int x, int y, int z) const { return !sealed_.empty() && sealed_.count(key(x, y, z)) != 0; }
     uint32_t sealedCount() const { return static_cast<uint32_t>(sealed_.size()); }
 
     uint32_t navVersion() const { return navVersion_; }
-    void navTouched() { navVersion_++; }
+    void navTouched() { navVersion_++; for(auto& version:navColumns_)version++; }
+    uint32_t navColumnVersion(int cx,int cz) const {
+        return cx<0 || cz<0 || cx>=columnsX() || cz>=columnsZ()?0:navColumns_[static_cast<size_t>(cx)*columnsZ()+cz];
+    }
+    void touchNavColumn(int x,int z) {int cx=x>>4,cz=z>>4;if(cx>=0 && cz>=0 && cx<columnsX() && cz<columnsZ())navColumns_[static_cast<size_t>(cx)*columnsZ()+cz]++;}
 
     const uint8_t* blocks() const { return blocks_.data(); }
     const uint8_t* light() const { return light_.data(); }
@@ -119,7 +123,7 @@ private:
     std::vector<uint32_t> queue_;
     size_t head_ = 0;
     std::vector<uint8_t> dirty_;
-    std::vector<uint32_t> columnVersion_;
+    std::vector<uint32_t> columnVersion_,navColumns_;
 };
 
 }  // namespace astratto

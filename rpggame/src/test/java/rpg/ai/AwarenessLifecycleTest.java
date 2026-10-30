@@ -50,10 +50,26 @@ class AwarenessLifecycleTest {
             Stealth.Aware original = new Stealth.Aware(); original.level = 0.7f;
             cole.aware.put(g.player.id, original);
             Stealth.Aware other = new Stealth.Aware(); other.level = 0.9f;
+            double untouchedAt = other.settledAt;
             cole.aware.put(Ids.THIEF, other);
             g.time = 51; g.ai.brain.act(cole, 1f / 60);
             assertNull(cole.investigation); assertEquals(51, original.settledAt);
-            assertEquals(-99, other.settledAt);
+            assertEquals(untouchedAt, other.settledAt);
+        }
+    }
+    @Test void identifyingAnInnocentNeighborSettlesAGlimpseButNotViolence() {
+        try (Game game = game()) {
+            Rpg g = game.add(new Rpg(game,"Identified",new Appearance(),true));
+            Npc guard=(Npc)g.actor(Ids.GUARD), neighbor=(Npc)g.actor(Ids.VILLAGER);
+            g.teleport(neighbor,guard.x+2,DevMap.FLOOR,guard.z);neighbor.sneaking=false;
+            Stealth.Aware known=new Stealth.Aware();known.level=0.9f;known.exposure=1;known.seenAt=2;known.heardAt=1;guard.aware.put(neighbor.id,known);
+            g.time=2;
+            for(var stimulus:new Investigation.Stimulus[]{Investigation.Stimulus.GLIMPSE,Investigation.Stimulus.VIOLENCE}) {
+                guard.goal=Brain.Goal.INVESTIGATE;guard.investigation=new Investigation(neighbor.id,neighbor.x,neighbor.z,stimulus,g.time);
+                guard.investigation.plan=Investigation.Plan.CHECK;g.ai.brain.act(guard,1f/60);
+                if(stimulus==Investigation.Stimulus.GLIMPSE)assertNull(guard.investigation);
+                else assertNotNull(guard.investigation,"seeing a neighbor does not explain violence");
+            }
         }
     }
     @Test void aThiefReachesIntoAnActualNpcCorpseAndTransfersWornGearExactlyOnce() {

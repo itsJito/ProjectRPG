@@ -31,6 +31,9 @@ public class Actor {
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
+    public rpg.world.FireSafety.Hazard observedFire;
+    public double fireObservedAt=-99;
+    public float fireEscapeX,fireEscapeZ;
     public float eatenMinutes;
     public float charred;
     /** When the fire on this body next chars a patch of it (Chemistry). */
@@ -81,7 +84,7 @@ public class Actor {
     /** Whether the hands hold what is equipped now: drawn, or still on its way to or from its place on the body. */
     public boolean inHand(double time) { float s = (float) ((time - sheatheAt) / SHEATHE_TIME); return sheathed ? s < 0.5f : s >= 0.5f; }
     /** Whether anything equipped in the hands could be put away. */
-    public boolean sheathable() { return main() != null || off() != null; }
+    public boolean sheathable() { return main() != null && !main().natural || off() != null && !off().natural; }
     /** The throwing hand in the world, as last posed (and when); the throw being aimed; the root held still after a release. */
     public final float[] hand = new float[3];
     /**
@@ -191,7 +194,7 @@ public class Actor {
     public long summonOwner;
     public double summonUntil;
     public float actionRate() { return chronoT > 0 ? 0.45f : 1; }
-    public void restore() { injuries.clear(); hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
+    public void restore() { injuries.clear(); if (injury != null) java.util.Arrays.fill(injury, 0); hp = maxHp(); stamina = maxStamina(); faith = maxFaith(); mana = maxMana(); }
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }

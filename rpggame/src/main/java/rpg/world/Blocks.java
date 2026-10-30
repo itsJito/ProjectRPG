@@ -208,7 +208,7 @@ public final class Blocks {
         for (int i = 1; i < COUNT; i++) if (glass(i)) { d[i] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_LIGHT_PASS); d[i].material = AstrattoNative.MATERIAL_GLASS; }
         d[LAMP].emission = 15;
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, BERRY_BUSH}) {
-            d[leaves] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT | AstrattoNative.BLOCK_SKY_DIM);
+            d[leaves] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_CUTOUT | AstrattoNative.BLOCK_SKY_DIM);
             d[leaves].material = AstrattoNative.MATERIAL_FOLIAGE;
         }
         d[EMBERS] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_HAZARD | AstrattoNative.BLOCK_LIGHT_PASS);
@@ -237,7 +237,8 @@ public final class Blocks {
         r[ICE] = def(FACES[ICE],AstrattoNative.RB_SOLID|AstrattoNative.RB_TRANSLUCENT);
         r[WATER] = def(FACES[WATER], AstrattoNative.RB_LIQUID | AstrattoNative.RB_TRANSLUCENT);
         r[LAMP] = def(FACES[LAMP], cube | AstrattoNative.RB_EMISSIVE);
-        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
+        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
+        r[HEDGE]=def(FACES[HEDGE],AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID); r[FENCE].shape = SHAPE_HIDDEN;   // the game draws fences as models (Props.fences)
         r[DOOR] = def(FACES[DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
         r[DOOR].shape = SHAPE_HIDDEN;
@@ -246,7 +247,7 @@ public final class Blocks {
         r[EMBERS] = def(FACES[EMBERS], 0); r[EMBERS].shape = SHAPE_HIDDEN;
         for (int i = 0; i < COUNT; i++) if (objectCell(i)) { r[i] = def(FACES[i], AstrattoNative.RB_SOLID); r[i].shape = SHAPE_HIDDEN; }   // the game draws these
         for (int i = 0; i < COUNT; i++) if (plant(i)) r[i] = def(FACES[i], AstrattoNative.RB_CROSS | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
-        for (int i = DUAL0; i < COUNT; i++) r[i] = def(FACES[i], cube | (innerDir(i) + 1) << AstrattoNative.RB_INNER_SHIFT);
+        for (int i = DUAL0; i < COUNT; i++) if (dual(i)) r[i] = def(FACES[i], cube | (innerDir(i) + 1) << AstrattoNative.RB_INNER_SHIFT);
         return r;
     }
 

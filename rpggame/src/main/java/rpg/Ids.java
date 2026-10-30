@@ -19,6 +19,9 @@ public final class Ids {
             CITIZEN_3 = 575, FISHER_P = 576, HUNTRESS = 577, CITIZEN_4 = 578, CENTURION = 579;
     /** The six newcomers at the forester's lodge (0.2.0), each of a calling no one on the devmap held. */
     public static final long ARTHUR = 580, LANCELOT = 581, GAWAIN = 582, TRISTAN = 583, PERCIVAL = 584, MERLIN = 585;
+    /** Alpha 0.2.4 support trades; stable across new games and migrations. */
+    public static final long CARPENTER_CITY=586, CARPENTER_TOWN=587, CARPENTER_WOOD=588, CARPENTER_PALACE=589,
+            WOODCUTTER_CITY=590, WOODCUTTER_TOWN=591, MINER_CITY=592, MINER_PALACE=593, TRADER_CITY=594, TRADER_PALACE=595;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
     /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */

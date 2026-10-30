@@ -26,5 +26,5 @@ public final class Work {
         this.repeat = repeat; this.commit = commit; this.startX = actor.x; this.startZ = actor.z; this.startedAt = now;
     }
 
-    public float progress() { return Math.min(1, t / duration); }
+    public float progress() { return Math.clamp(t / duration, 0, 1); }
 }

@@ -233,6 +233,9 @@ final class InventoryPanel extends Fragment {
             case SHOP -> { }
             default -> {
                 // the wheel docked for editing: a click puts the item in its armed slice
+                if (hud.shift && s.def.equippable() && hud.win == Hud.Win.NONE) {
+                    g.items.equip(g.player, inv, slot, s.def.slot, g.state.newRequestId()); return;
+                }
                 if (hud.radial.editing && hud.win == Hud.Win.NONE) { hud.radial.assign(hud.radial.armed, s.def); return; }
                 int gi = g.player.grids().indexOf(inv);
                 if (hud.win == Hud.Win.SHOP) { Result r = g.econ.sell(g.player, inv, hud.shop, slot, 1, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); return; }

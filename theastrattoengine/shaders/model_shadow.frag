@@ -1,2 +1,4 @@
 #include "include/head.glsl"
-void main() {}
+#include "include/dissolve.glsl"
+void main() {
+    float edge = dissolveEdge();}

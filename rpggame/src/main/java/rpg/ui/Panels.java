@@ -79,7 +79,10 @@ final class Panels {
                 if (Style.tab(ui, "", tx, y + 8, tw, 34, on)) { hud.go(s); hud.sound("UIbutton1", 0.4f); }
                 ui.img((String) TABS[i][2], tx + 8, y + 12, 24, on ? 0xFFFFFFFF : 0xB0FFFFFF);
                 ui.text((String) TABS[i][1], tx + 38, y + 17, 14, on ? 0xFFFFD15E : Style.DIM);
-                if (ui.hover(tx, y + 8, tw, 34)) hud.tooltip(TABS[i][1] + "\nKey " + TABS[i][3]);
+                if (ui.hover(tx, y + 8, tw, 34)) {
+                    var action = rpg.Preferences.Action.valueOf(s.name());
+                    hud.tooltip(TABS[i][1] + "\nKey " + hud.settings.values.label(action));
+                }
             }
             Style.rule(ui, x + 6, y + 44, pw - 12);
             if (Style.button(ui, "x", x + pw - 36, y + 12, 26, 26, true)) hud.go(Hud.Scene.WORLD);
@@ -113,6 +116,9 @@ final class Panels {
                 if (it != null) hud.itemIcon(ui, it, cx + 2, cy + 2, cs - 4, cs - 4, 1);
                 if (hv && it != null) hud.tooltip(hud.describe(it) + "\nClick to remove");
                 if (it != null && live && ui.clicked(cx, cy, cs, cs)) { Result r = g.items.unequip(p, s); if (r.rejected()) g.chat.warn(r.reason()); else hud.sound("UI_Trading_ItemSelect", 0.4f); }
+                if (it != null && live && ui.rclicked(cx, cy, cs, cs)) hud.openMenu(it.def.name, ui.mx, ui.my, java.util.List.of(
+                        new Hud.MenuItem("Remove", true, null, () -> g.items.unequip(p, s)),
+                        new Hud.MenuItem("Drop", true, null, () -> g.items.dropEquipped(p, s))));
                 hud.inventory.zone(cx, cy, cs, cs, d -> hud.inventory.equipFromDrag(d, s));
                 hud.named.put("slot:" + s.name(), new float[]{cx + cs / 2, cy + cs / 2});
             }

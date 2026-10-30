@@ -50,6 +50,15 @@ public final class Console {
         print("Developer console. 'help' for a start, 'commands' and 'vars' for everything, Tab to complete.", DIM);
     }
 
+    private static List<String> kingdoms(){return List.of(DevMap.ALPHA,DevMap.BETA,DevMap.PALACE);}
+    private static String kingdom(String word){for(String name:kingdoms())if(name.equalsIgnoreCase(word))return name;return null;}
+    private void bountyReset(String word){
+        String jurisdiction=kingdom(word);
+        if(jurisdiction==null && !word.equalsIgnoreCase("all")){print("Choose DevCity, DevTown, DevPalace or all.",ERR);return;}
+        for(String name:kingdoms())if(jurisdiction==null || jurisdiction.equals(name))g.law.setBounty(g.player,name,0);
+        print("Bounty reset: "+(jurisdiction==null?"all kingdoms":jurisdiction),GOOD);
+    }
+
     private static String nativeInfo() { try { return astratto.bridge.AstrattoNative.buildInfo(); } catch (Throwable t) { return null; } }
 
     // ------------------------------------------------------------------ the engine console's surface, as the game uses it
@@ -103,6 +112,21 @@ public final class Console {
         cmd("load", "load <name>: loads saves/<name>.json.", a -> { String n = a.length > 1 ? a[1] : "quick"; if (new SaveSystem(g).load(SaveSystem.slot(n))) print("Loaded " + SaveSystem.slot(n), GOOD); });
         cmd("screenshot", "Saves a screenshot to shots/.", a -> hud.screenshotRequested = true);
         cmd("restart", "Puts you back at the start of the devmap, healed.", a -> { g.player.restore(); g.teleport(g.player, DevMap.SPAWN_X, DevMap.FLOOR, DevMap.SPAWN_Z); });
+        cmd("reset","reset [player|skills|bounty <kingdom|all>]: restores the player, skills, or selected legal case.",a->{
+            String target=a.length>1?a[1].toLowerCase(Locale.ROOT):"player";
+            switch(target){
+                case "player"->{
+                    if(!g.player.alive)g.death.proceed(false);
+                    g.interact.cancel(g.player,"developer reset");g.carrying.dropAll();g.traversal.cancel(g.player);g.reactions.cancel(g.player);g.falling.reset(g.player);
+                    g.player.restore();g.chemistry.cleanse(g.player);g.gore.healed(g.player);g.controller.cancelHandInput();
+                    god=immortal=noclip=false;core.set("ai_ignore_player","0");
+                    g.teleport(g.player,DevMap.SPAWN_X,DevMap.FLOOR,DevMap.SPAWN_Z);print("Player restored at the starting point.",GOOD);
+                }
+                case "skills"->{for(Skill skill:Skill.ALL)hud.debugSetLevel(skill,skill==Skill.HEALTH?10:1);print("Skills reset.",GOOD);}
+                case "bounty"->{if(a.length<3){print("reset bounty <kingdom|all>",WARN);return;}bountyReset(a[2]);}
+                default->print("reset [player|skills|bounty <kingdom|all>]",WARN);
+            }
+        });
         cmd("where", "Where you are and which way you look (as 'goto' and 'face' would take them).", a -> print(String.format("goto %.2f %.2f %.2f; face %.2f %.2f", g.player.x, g.player.y, g.player.z, Math.toDegrees(g.controller.camPitch), Math.toDegrees(g.controller.camYaw)), TEXT));
         cmd("thirdperson", "The camera behind you.", a -> g.player.firstPerson = false);
         cmd("firstperson", "The camera at your eyes.", a -> g.player.firstPerson = true);
@@ -136,7 +160,7 @@ public final class Console {
         cmd("god", "Toggles god mode: nothing hurts you.", a -> { god = !god; print("god mode " + (god ? "ON" : "OFF"), TEXT); });
         cmd("immortal", "Toggles immortality: you are hurt, but never below 1 HP.", a -> { immortal = !immortal; print("immortal " + (immortal ? "ON" : "OFF"), TEXT); });
         cmd("noclip", "Toggles flying through everything (WASD, Space up, Ctrl down, Shift fast).", a -> { noclip = !noclip; print("noclip " + (noclip ? "ON" : "OFF"), TEXT); });
-        cmd("invisible", "Toggles invisibility to NPCs and animals (the ai_ignore_player variable).", a -> { core.set("ai_ignore_player", invisible ? "0" : "1"); print("invisible " + (invisible ? "ON" : "OFF"), TEXT); });
+        cmd("invisible", "Toggles visible body, equipment and shadow, and detection by creatures.", a -> { core.set("ai_ignore_player", invisible ? "0" : "1"); print("invisible " + (invisible ? "ON" : "OFF"), TEXT); });
         cmd("hurt", "hurt <hp>: hurts you (a negative amount heals).", a -> { float d = a.length > 1 ? DevConsole.num(a[1], 1) : 1; g.player.hp = Math.max(1, Math.min(g.player.maxHp(), g.player.hp - d)); });
         cmd("kill", "Kills you (no one is to blame).", a -> g.combat.bleedOutNow(g.player));
         cmd("heal", "Restores all resources and clears burning, shock, frost and bleeding.", a -> { g.player.restore(); g.chemistry.cleanse(g.player); if (g.gore != null) g.gore.healed(g.player); });
@@ -281,9 +305,17 @@ public final class Console {
         cmd("revive", "revive [all|<npc>]: brings the dead back.", a -> {
             for (Npc n : g.npcs) if (!n.alive && (a.length < 2 || a[1].equalsIgnoreCase("all") || n.name.equalsIgnoreCase(a[1]))) { g.ai.revive(n, true); print("revived " + n.name, GOOD); }
         });
-        cmd("bounty", "bounty clear | list: the law's books on you (clear also wipes what people know of your crimes).", a -> {
-            if (a.length > 1 && a[1].equalsIgnoreCase("clear")) { g.law.clear(); for (Npc n : g.npcs) n.memories.removeIf(m -> m.subject == g.player.id); print("Bounties cleared.", GOOD); }
-            else for (String j : new String[]{DevMap.ALPHA, DevMap.BETA}) print(j + ": " + g.law.bounty(g.player.id, j) + " G", TEXT);
+        cmd("bounty","bounty list | set <kingdom> <amount> | reset <kingdom|all>",a->{
+            if(a.length==1 || a.length==2 && a[1].equalsIgnoreCase("list")){for(String jurisdiction:kingdoms())print(jurisdiction+": "+g.law.bounty(g.player.id,jurisdiction)+" G",TEXT);return;}
+            if(a.length==2 && a[1].equalsIgnoreCase("clear")){bountyReset("all");return;}
+            if(a.length==3 && a[1].equalsIgnoreCase("reset")){bountyReset(a[2]);return;}
+            if(a.length==4 && a[1].equalsIgnoreCase("set")){
+                String jurisdiction=kingdom(a[2]);int amount;
+                try{amount=Integer.parseInt(a[3]);}catch(NumberFormatException invalid){print("Amount must be a whole number of Gold.",ERR);return;}
+                if(jurisdiction==null || amount<0){print("Choose DevCity, DevTown or DevPalace and a nonnegative amount.",ERR);return;}
+                g.law.setBounty(g.player,jurisdiction,amount);print(jurisdiction+": "+amount+" G",GOOD);return;
+            }
+            print("bounty list | set <kingdom> <amount> | reset <kingdom|all>",WARN);
         });
         cmd("rumors", "rumors [npc]: what people know of you (or what one person knows of everyone), and what they think of you.", a -> {
             for (Npc n : g.npcs) {

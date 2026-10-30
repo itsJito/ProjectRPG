@@ -85,6 +85,16 @@ public final class CharModel {
     private void seg(Seg seg, Skin s, Part p, Part over, float puff, float x0, float y0, float z0, float x1, float y1, float z1,
                      float rowOffset, boolean topFace, boolean bottomFace, float lap, float cutDepth) {
         base[seg.ordinal()] = box(s, p, 0, x0, y0, z0, x1, y1, z1, (int) rowOffset, topFace, bottomFace, lap, cutDepth);
+        // Recess the underlying joint beneath the overlapping armor cuff. Straight box corners otherwise
+        // emerge through the neighboring plate when the elbow or knee folds.
+        if(!topFace || !bottomFace) {
+            float[] vertices=base[seg.ordinal()];
+            for(int i=0;i<vertices.length;i+=10) {
+                float distance=!bottomFace?vertices[i+1]-y0:y1-vertices[i+1];
+                float inset=1-0.18f*Math.clamp(1-distance/0.9f,0,1);
+                vertices[i]*=inset;vertices[i+2]*=inset;
+            }
+        }
         float py0 = bottomFace ? y0 - puff : y0, py1 = topFace ? y1 + puff : y1;
         outer[seg.ordinal()] = box(s, over, puff, x0 - puff, py0, z0 - puff, x1 + puff, py1, z1 + puff, (int) rowOffset, topFace, bottomFace, lap, cutDepth);
     }

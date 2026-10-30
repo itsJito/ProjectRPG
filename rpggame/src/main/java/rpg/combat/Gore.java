@@ -454,7 +454,6 @@ public final class Gore {
         if (g.sfx != null) {
             g.sfx.play("soft.heavy", lx, ly, lz, 0.9f);
             if (part != Part.HEAD && v.alive && v instanceof rpg.monster.Monster m) g.sfx.creature(m, m.kind.hurtSound, 1f);
-            else if (part != Part.HEAD && v.alive && v instanceof rpg.monster.Monster mo) g.sfx.creature(mo, mo.kind.hurtSound, 1f);   // its own scream, never a man's
             else if (part != Part.HEAD && v.alive && !(v instanceof rpg.animal.Animal)) g.sfx.voice(v.look.female ? "hurt.female" : "hurt.male", v.x, v.y + 1.6f, v.z, 1f, 0.9f);
         }
         // what it can no longer do
@@ -566,6 +565,10 @@ public final class Gore {
             Actor a = g.actor(e.getKey());
             Wounds w = e.getValue();
             if (a == null) { it.remove(); continue; }
+            if (a.alive && a.hp >= a.maxHp() && !w.any()) {
+                java.util.Arrays.fill(w.hurt, 0);
+                w.bleed = 0; w.spurtUntil = 0; a.injuries.clear();
+            }
             if (w.bleed <= 0.005f) { w.bleed = 0; continue; }
             if (a.alive && g.law != null && g.law.inCustody(a)) { w.bleed = 0; w.spurtUntil = 0; continue; }   // held: dressed
             if (a.alive && !a.dummy) {
@@ -710,6 +713,7 @@ public final class Gore {
      */
     private boolean inLawfulCare(Evidence e) {
         if (!(g.actor(e.source) instanceof Npc dead)) return false;
+        if (!dead.alive && dead.corpse == 0 && g.objects.everything().stream().anyMatch(object -> object instanceof rpg.objects.Container grave && grave.buried && grave.owner == dead.id)) return true;
         if (g.actor(dead.carriedBy) instanceof Npc carrier && (carrier.role == Npc.Role.GUARD || carrier.role == Npc.Role.LAWMAN || carrier.role == Npc.Role.UNDERTAKER)) return true;
         return e.x >= DevMap.GRAVE_X0 && e.x <= DevMap.GRAVE_X1 + 1 && e.z >= DevMap.GRAVE_Z0 - 1 && e.z <= DevMap.GRAVE_Z1 + 1;
     }
@@ -784,7 +788,7 @@ public final class Gore {
         // to the law about - only a body found where only blood was known is news
         for (Memory m : n.memories)
             if (m.kind.equals("MURDER") && m.subject == 0 && m.victim == e.source && (e.kind != Kind.BODY || m.detail.endsWith("a body")) && g.state.minutes - m.minutes < 240) return;
-        g.ai.say(n, e.kind == Kind.BODY ? "Murder! Somebody fetch the guards!" : "Help! Guards!");
+        g.ai.say(n, e.kind == Kind.BODY ? "There's a body here! Somebody fetch the guards!" : "Help! Guards!");
         n.remember(new Memory("MURDER", 0, e.source, jur, g.state.minutes, 0.8f, "witnessed", e.id, 0, "found " + what), 24);
         n.nextThink = 0;
         n.cs.lastHurt = Math.max(n.cs.lastHurt, g.time - 10);

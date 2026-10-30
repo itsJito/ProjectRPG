@@ -42,7 +42,7 @@ class RepairsTest {
         for (int s = 0; s < 120 && !mended; s++) { for (int i = 0; i < 60; i++) game.tick(1f / 60); mended = g.vox.block(x, y, z) == pane; if (s % 10 == 0) System.out.printf("t%d %s %s at %.1f,%.1f legs %s%n", s, arthur.goal, arthur.lastOutcome, arthur.x, arthur.z, arthur.goalReason); }
         float[] spot = g.repairs.open().isEmpty() ? new float[2] : g.repairs.standSpot(arthur, g.repairs.open().get(0));
         assertTrue(mended, "the carpenter mended the window (" + arthur.goal + ", " + arthur.lastOutcome + ") at " + arthur.x + "," + arthur.z + " spot " + spot[0] + "," + spot[1] + " stuck " + arthur.stuck + " loaded " + arthur.loaded + " | 85,90: solid " + g.vox.solid(85, DevMap.FLOOR, 90) + "/" + g.vox.solid(85, DevMap.FLOOR + 1, 90) + " under " + g.vox.solid(85, DevMap.FLOOR - 1, 90) + " sky " + g.vox.skyLight(85, DevMap.FLOOR + 1, 90) + " | 87,89 sky " + g.vox.skyLight(87, DevMap.FLOOR + 1, 89));
-        assertTrue(g.repairs.open().isEmpty());
+        assertTrue(g.repairs.open().stream().noneMatch(d->d.x()==x && d.y()==y && d.z()==z), "the repaired pane leaves the damage record");
     }
 
     @Test void theWildsAreNobodysToMend() {

@@ -63,6 +63,7 @@ public final class Hud {
     /** Typed text, backspace and the rotate key this frame (from the window). */
     String typed = "";
     boolean backspace, rotate;
+    public boolean shift;
 
     public final UiEvents events;
     final Map<String, Fragment> fragments = new LinkedHashMap<>();
@@ -256,6 +257,10 @@ public final class Hud {
 
     /** Uses an item of a kind the player carries by its first action (eat, wield, light...): the action bar's and the wheel's way. */
     void useItem(rpg.item.ItemDef def) {
+        for (var worn : g.player.eq.stacks()) if (worn.def == def) {
+            if (g.player.sheathed) g.combat.sheathe(g.player, false);
+            return;
+        }
         for (rpg.item.Inventory grid : g.player.grids()) {
             int slot = grid.first(def);
             if (slot < 0) continue;
@@ -330,8 +335,9 @@ public final class Hud {
             f.alpha = want ? Math.min(1, f.alpha + dt / f.fadeIn) : Math.max(0, f.alpha - dt / f.fadeOut);
             if (f.alpha <= 0.01f) continue;
             Placement p = f.moved != null ? f.moved : at.get(id);
-            if (!want) { ui.click = false; ui.rclick = false; }
-            paint(ui, f, p, want);
+            boolean covered = menu != null && !id.equals("menu");
+            if (!want || covered) { ui.click = false; ui.rclick = false; }
+            paint(ui, f, p, want && !covered);
             ui.click = click && !ui.consumed; ui.rclick = rclick && !ui.consumed;
             f.last = p;
         }

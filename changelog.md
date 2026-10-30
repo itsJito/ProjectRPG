@@ -4,6 +4,141 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 17: Ash and Order (Version Alpha 0.2.6) — Shadow
+
+Continues the main-based Alpha 0.2.5 polish tree; publication remains on `polish`. Earlier release entries are preserved. Player notes continue in `patchnotes.md` by request. Classic-era World of Warcraft remains the reference for readable silhouettes and restrained effects; townsfolk jobs and reactions remain the AI priority.
+
+### Law, witnesses, and persistent identity
+- Explicit refusal of a serious arrest records jurisdiction-scoped defiance. Payment and further halt conversations are unavailable for that case; the watch no longer substitutes arrest for a killing blow. Unanswered serious challenges retain their previous nonlethal enforcement path. Petty “Not now” retains the existing grace period. Defiance persists through saving, remains effective after loading, and clears on settlement or death.
+- Payments validate the recipient, sufficient real Gold, capacity, and duplicate request before mutation. Existing coin stacks transfer into the officer's ownership; the case closes once. Wanted display caches refresh on state revision, reminders clear, and a payment grants 2 Honor through an incident-specific restitution event. Officers distinguish theft, assault, arson, murder, property damage, trespass, livestock offences, and disturbances in their response.
+- Crime creation checks fresh culprit exposure and visibility of the affected actor or object surface. Personal evidence records its witness. Reports reject hearsay, relayed evidence, another witness's account, withheld evidence, civilians as recipients, and conversations through walls or beyond range. Existing legacy personal memories remain compatible.
+- Contextual persuade/threaten/bribe actions are available while a witness is reporting or hiding. The attempt belongs to one witness and one incident, validates actual conversational reach, and persists with the memory. Success withholds only that witness's report. Role, opinion, Honor, severity, and relative combat levels affect reactions without granting NPC XP. Principled witnesses reject bribery; refusal of bribery or threats records a separately witnessed offence. Accepted bribes transfer actual Gold; refused offers do not debit the player.
+- A bounded, saved name registry retains identities used by crime memories after their actor disappears; unknown identities use a natural-language fallback instead of numeric dialogue.
+
+### Repairs and physical persistence
+- Shared block edits record damage to built timber, glass, cloth, thatch, and masonry, including fences and eligible dual-material walls. Map fixture construction is excluded. Repair saves include the remaining block state, not only the original material, so ordinary structural destruction survives a rebuilt map.
+- Carpenters retain up to four supplies for known repairs before the settling period elapses. Ordinary sales and unloading preserve the reservation. Missing Hammers, planks, or Stone Blocks can be purchased through actual local stock, funds, capacity, and counter interactions. A full pack falls through to unloading instead of repeatedly attempting a purchase that cannot fit.
+- Masonry repair consumes an existing Stone Block; timber still consumes timber, and glass requires a Hammer. Existing witnessed reports, 40-second settling, interruptible work, claims, reach, fire exclusion, and payment-on-completion remain in force. Lawman commissions cost 3 Gold for glass, 5 for timber, and 6 for masonry.
+- Chemistry registers dead residents, monster remains, and unbutchered animal carcasses independently of the living-combat actor list. A parked corpse's receiver follows its resting body. Spherical receiver coverage accounts for tall bodies. Animal scorch marks are generated, cooled, saved, and applied to private surface meshes without modifying shared species assets; the bounded asynchronous injury-mesh cache is reused.
+- Physical falling begins at seven blocks of unsupported descent. Landing damage remains separately measured and charged once.
+
+### Navigation groundwork for the next update
+- Measured the unchanged native pocket, twenty-agent doorway, and changing-wall course first. Final arrivals and travel distances match that baseline. The doorway succeeds for all twenty agents, so a new crowd simulation was not justified by this course.
+- Native API minor version advances to 2.6 with matching Java bindings. Native A* flags partial/capped results and exposes cumulative per-agent searches, expansions, partial paths, cap hits, and a reserved yield counter in an appended snapshot tail. Java validates the new structure size while the decoder retains support for older record lengths. Raw search ordering, costs, and bounded work budgets are unchanged.
+- Partial endpoints no longer emit successful arrival. Repeated partials back off and produce BLOCKED/stuck feedback; empty searches retry within a bound. Changing the actual goal resets the partial streak.
+- Native topology versions are tracked per horizontal chunk, including raw edits, fills, columns, seals, and pristine restoration. A global revision prompts a cheap comparison, but only a route touching changed chunks is rescheduled.
+- Java targets query actual supported heights; explicit-height destinations preserve distinct floors. Interaction range remains separate from the top surface of furniture. Elevated travel delegates directly to the native height-aware search instead of forcing the ground-floor designer graph.
+- Each resident has a bounded ground-route RouteBook seeded with home/work landmarks. Completed trips store route coordinates, observed cost, confidence, last use, and relevant chunk versions. Planning checks that personal book first and validates geometry and door permissions. Failure reduces confidence, persists retry penalties, and produces a visible pause/look response. The visible pause is capped at two seconds independently of a longer destination penalty. Unrelated arrivals and teleports cannot verify an interrupted journey. Disuse decays confidence. Physical nearby conversations can transfer verified routes with reduced confidence. Saved coordinates are remapped to current graph indices and revalidated.
+- This is groundwork, as scoped in the updated request. Fully automatic chunk-region/portal graph replacement, learned native edge costs, broader landmark seeding, explicit chokepoint yielding, and per-person cost noise remain for the next navigation update. Designer routes remain the fallback for ground-level long-distance journeys. No claim is made that the complete adaptive navigation vision ships in this release. Elevated raw trips do not contaminate the ground-route book, and height-only goal changes reschedule the native target.
+
+### Presentation and developer tools
+- Cell door physics and visuals share the bars' centre plane. DevPalace's slab moves fully inside the cell, its side partition becomes bars, and its enclosing material matches the basilica's limestone.
+- The shared Crossbow voxel mesh is 1.5 times larger about its grip, preserving the same model for held gear, display, dropped equipment, and physical bounds.
+- Monster dissolution uses a stable local-voxel threshold in opaque and forward rendering, with the same cutoff in shadows. Mesh-relative grid origins handle half-voxel grips. A first capture exposed an overbright central particle cloud; it was replaced by small, restrained ash motes. Frames 1, 4, 7 through 58 are captured for review.
+- Overhead human speech is selected before drawing: at most six distinct normalized lines, ordered by conversation/focus, combat, crime, investigation/damage, then nearby routine speech. Names, health, and awareness retain their independent display rules.
+- Console invisibility suppresses the player model, equipment, and shadow and uses the existing sensory exclusion for humans, animals, and monsters. Direct exposure queries also respect it. `reset [player|skills|bounty <kingdom|all>]` restores the selected state without deleting a save. `bounty set <kingdom> <amount>`, `bounty reset <kingdom|all>`, `bounty list`, and the legacy clear alias validate input and use shared case closure.
+- Active title, window, welcome, bank, and design-document references use SHADOWVEIL and ASHENWRATH. Technical module paths and historical release text retain compatibility.
+
+### Verification
+- Full gameplay verification passes 311 cases, with one deliberately disabled profiling probe and no failures. The final affected navigation/world/morning-routine run passes 12 checks. Engine verification passes 121 native and 29 Java/GL checks with API 2.6. The distribution build, standalone runners, registered console checks, and repeatable navigation course pass
+- Final results and reviewed captures are recorded in `docs/alpha026-review.md`; reproducible native course, gallery, and console runners are under `rpggame/tools/alpha026`.
+
+---
+
+## Pass 16: Pane Relief (Version Alpha 0.2.5) — Shadow
+
+Continues the main-based polish tree from Alpha 0.2.4; publication remains on `polish`. Earlier entries are preserved. Player notes continue in `patchnotes.md` by request.
+
+### Townsfolk, reports, and repairs
+- Weapon displays produce cautionary ARMS memories instead of good-deed memories. They spread as news, affect opinion negatively, and use warning replies rather than praise or theft accusations.
+- Damage knowledge is acquired through actual nearby sight, sampled across residents, or delivered in person with a visibility and distance check. Reports select living, loaded Lawmen in the affected jurisdiction or appropriate builders. Recipient choice is retained during the approach. Builders may work across jurisdiction boundaries; Lawmen may leave their routine patrol boundary to deliver a report.
+- Persisted repair orders record reporter, assigned worker, payer, and fee. A Lawman commissions glass repair for 3 Gold and timber repair for 5 Gold. Civilian reports are free; an officer may subsequently commission that repair. Funds are checked and transferred from the officer's actual inventory only on successful completion, with ownership transferred and a payment event recorded. No money is created.
+- Repair claims require known damage, a suitable trade, a Hammer, timber where required, elapsed settling time, available funds when commissioned, and a site clear of active burning. Interrupted, invalid, dead, unloaded, and inaccessible workers release or defer claims.
+- Mending uses the shared interruptible Work system for 3.5 seconds, a stable approach location, and a distance check at completion. It precedes ordinary Carpenter unloading/crafting. Timber consumption now updates the item ledger. Surviving halves of dual-material walls can be restored. Knowledge is cleared when a repair finishes.
+- Damage and fire observations target the near surface of a voxel cell so a solid burning wall or the surviving half of a damaged wall does not occlude itself; intervening walls still block observation.
+- Added role-specific uncontrolled-fire utility decisions and visible hazard queries that exclude lamps and campfires. Lawmen warn people clear, Carpenters wait for cooling before repair, and Woodcutters warn about burning timber. Routine work is interrupted by nearby danger. Animal needs are cancelled for escape; babies perceive heat over a wider distance. Susceptible monsters avoid nearby fires; undead react at closer range, while Dragons, Imps, and Ghosts retain their distinct behaviour. This changes decisions, not damage immunity or skill levels.
+- IDs 586–595 retain their professions and inventories under the names Aeldric, Brannoc, Corren, Deryn, Eirwen, Fennric, Garron, Haldren, Istren, and Maerwyn.
+
+### Travel, combat, and resident continuity
+- Replaced linear waypoint selection with a priority-queue A* search attaching start and goal to several visible graph nodes. Geometry edge checks are cached per world/navigation revision. Access permissions apply to all crossed doorway cells, including attachments and path trimming, independently of cached geometry.
+- Changed solid geometry or doorway state invalidates relevant cached geometry. Residents reconsider an obstructed current leg without restarting all travel on every edit. Native agents continue to handle local movement and avoidance.
+- An established opponent is tracked using fresh range, illumination, smoke, and occlusion checks while the fighter turns. Routine perception retains its existing facing cone and cache; walls still break combat sight.
+- Unanswered petty-fine conversations expire from the law update after ten seconds, even when the officer cannot reach the offender again. The existing fine grace remains in effect, and an associated search is cleared so improved combat tracking does not prolong administrative pursuit. Self-defense and serious warrants retain their existing rules.
+- A loaded, living resident whose mover is absent for more than 0.75 seconds is given a replacement mover/agent without replacing the resident record, inventory, skills, or health. Dead, unloaded, and articulated reaction bodies are excluded.
+
+### Cells and physical equipment
+- Sentence release clears stale automatic-close/relock intent before opening an empty cell. When another prisoner still occupies the cell, the released player is moved to the authored release point instead of unlocking the occupied cell.
+- Moved the DevCity slab inside the back wall, continued its internal partition with bars, and matched the enclosing walls/roof to the building's plaster. Stable fixture identities are retained.
+- Ordinary dropped hand equipment uses a native rigid box derived from its model bounds, actual mass, friction, angular velocity, and a full quaternion. Rendering follows the same body centre and orientation. Moving saves retain linear/angular velocity; settled saves retain pose. Legacy ordinary ground gear is given a physics pose when restored. Long projectiles retain their existing lodged/directional path without creating a duplicate rigid body.
+- Physics retains the existing eight-second loose-object budget and freezes the final pose afterward. Item model bounds are cached for drawing rather than rescanned every frame.
+
+### Content, visual work, and performance
+- Removed the active named monster gear variants and their special stat adjustments. Drop tables, carried gear, and crypt loot use canonical material-tier equipment. Legacy item IDs resolve to canonical definitions during load; ledger keys are merged, and quick slots use the same conversion. Stack ownership, theft/provenance, contents, and quantity continue through ItemIO.
+- Palace hedges use dense cutout cube surfaces with wind movement rather than leaf-card clusters. Bushes and shrubs use sixty closed, folded pointed leaves in a layered ellipsoid over woody stems, with lighter ridges and shaded undersides. Leaf vertices retain the existing packed plant root for contact and wind bending. This replaces the intermediate stepped-box crowns with about a third fewer triangles; colours are less saturated. Reduced the engine leaf translucency intensity and green/yellow bias.
+- Recessed the underlying elbow/knee geometry under the overlapping armour cuffs while retaining the existing skeleton, attacks, and locomotion animation.
+- Limited each actor to one pending appearance build, retained its last visible figure until the job completes, evicted unused meshes beyond the cache target, and pruned appearance/animation records for actors no longer present. This avoids queued obsolete injury appearances and the previous eviction failure when the oldest mesh was still displayed.
+- Version advanced to Alpha 0.2.5. Final affected verification passes 52 tests; the broad 294-test run had one petty-fine search failure (corrected and covered by the final law run) and one deliberately disabled profiling probe. Engine verification passes 121 native and 29 Java checks. Distribution build and native rendered review pass. Regression, visual, compatibility, and profiling evidence is recorded in `docs/alpha025-review.md`.
+
+---
+
+## Pass 15: Cell Service (Version Alpha 0.2.4) — Shadow
+
+Built from main `85a17791d3dcb9e1db7fa50ad9426895544b71c9`. The previous polish tip is retained as history without importing its source changes. Classic-era World of Warcraft is the visual reference; townsfolk jobs and reactions are the AI priority. Player notes continue in `patchnotes.md` by request. Earlier entries below are preserved.
+
+### Controls and inventory
+- Expanded the existing preferences action table to cover movement, quick turn (Alt+S), jog, casting, the wheel, panels, quick slots, save/load, screenshots, display, developer tools, and contextual interface actions. Existing integer bindings remain readable; modifier chords use the upper bits. Conflicts swap only within an input context. The capture UI handles modifier-only bindings, mouse chords, cancel, and paginated/responsive controls.
+- Routed game and UI actions through the action table and updated relevant shortcut hints. Standard text entry and Escape-to-cancel binding capture retain their interface semantics.
+- Quick Wheel assignments count both carried and worn stacks, survive equip/save/load, and clear when no owned copy remains. Edit slots are explicitly clicked rather than armed by hover. Shift-click equipment takes priority over wheel assignment.
+- Context menus consume clicks ahead of covered fragments. Equipped items can be dropped directly, retaining their contents and provenance even with a full inventory.
+- Floating combat text is limited to 18 metres in three dimensions.
+
+### Combat, animation, and health
+- Added bounded, damped ranged aiming assistance with separate acquisition/retention cones, a 32-metre limit, camera and eye visibility checks, friendly/summon exclusion, and release on looking away, lowering the weapon, obstruction, or changing to melee. The crosshair indicates a retained target.
+- Monsters start with usable drawn weapons, including after loading. Natural weapons cannot be sheathed. Failed humanoid attacks retry shortly instead of spending a full attack cooldown without striking.
+- Natural attack wind-up and strike timestamps now drive spider anticipation and recovery, with shared resolution independent of the gallery puppet state. Spider mesh and hit dimensions are reduced together to 65 percent.
+- Full healing clears soft injury penalties and bleeding; severed limbs remain severed. Restore clears regional injury values.
+- A shield in the off hand stays in its normal carried pose during fishing instead of being pulled across the first-person camera. Fishing waits for the existing tool draw before work progresses. Rod, net, and cage poses cover casting/lowering, waiting, and retrieval in both camera views using the existing rig.
+- Replacing a monster's equipment preserves a previously minted weapon in inventory or the world instead of silently deleting it.
+
+### Law and cells
+- All three authored cells have complete walls and roofs and dedicated barred iron hinged doors. Existing fixture IDs, locks, interaction, and physical targeting remain in place. Cell doors register as conductive metal rather than wood fuel.
+- Custody stores the original bounty. Leaving the cell before expiry records one jailbreak, restores that bounty, adds 75 coins, and retains held possessions for later lawful release. Sentence expiry takes precedence over escape detection. Older custody records recover the amount from a retained arrest event when available; if that event has already left the bounded log, the missing original amount cannot be reconstructed.
+- Unidentified deaths produce a body-discovery report rather than naming a nonexistent murderer.
+- Settled legal memories no longer qualify as an open charge when judging a suspicious figure. Burial clears searches for an unidentified culprit tied to that body; evidence belonging to a buried resident remains in lawful care. A known offender's live pursuit is retained.
+
+### Residents, jobs, and persistence
+- Added stable resident IDs 586-595: four Carpenters, two Woodcutters, two Ore Miners, and two Materials Traders. They use existing professions, tools, supplies, fixed skill profiles, beds, schedules, and law/economy systems. Added six beds; reused four available beds without renumbering fixtures.
+- Material counters in the city and palace use existing furniture. Their persistent shops receive actual starter materials, participate in the item ledger, and are selected by local workers using stable counter positions.
+- Repair claims are released on interruption/death/unload. Inaccessible sites are deferred for 45 seconds, and missing stand locations are rejected rather than replaced by a position inside an obstruction. Stuck workers defer affected resources and release jobs.
+- Ordinary nonviolent investigations are bounded at 20 seconds; violence and hiding retain their 50-second bound. Nearby, clearly identified residents resolve ordinary glimpse/footstep investigations promptly; violence and unresolved charges remain actionable. A warning from an animal is directed at its subject, while an actual attack still threatens bystanders. A passive fox does not provoke the same flight response as a wolf, coyote, mountain lion, or bear.
+- Social routines retain a valid partner and a consistent approach side, reducing target/side oscillation. Route feedback reports resumed movement once a blocked route is actually moving again.
+- Additional residents are created after restoring saved world objects, preventing overflow supplies from being deleted during old-save migration. Repeated loads retain a single roster and conserve stock.
+
+### Foliage and lighting
+- Removed solid collision from all foliage materials while retaining their cutout/sky shading and flammable material registration. Fixed the dual-face definition loop overwriting HEDGE's leaf/wind definition.
+- Patch regrowth cannot replace trunks or other occupied materials; tree canopies do not replace neighboring logs. Expanded foliage chunk addressing from the old 128-square extent to the full 192-square map.
+- Increased tall-grass height and added a bush form to existing seeded shrub populations. Existing species ordinals/distribution remain stable; new bushes use the shared contact bending, fire, depletion, and regrowth systems.
+- Increased sun penumbra growth/minimum width, broadened sky fallback irradiance according to sky visibility, and softened double attenuation of indirect illumination by ambient occlusion. The existing probe lighting and weather remain authoritative; no blanket exposure, saturation, or fog increase.
+
+### Review and regression tooling
+- Added repeatable `RPG_GALLERY_ONLY=polish024` captures for controls, wheel, cells, foliage, and fishing. Fishing records actual work cycles at 60 Hz and captures frames 1, 4, 7, etc. Monster attack filters avoid unrelated walk/run catalogs.
+- Added regressions for custody escape/save/expiry and legacy records, ranged acquisition/occlusion/manual release, full healing versus severing, monster attack start, passable foliage, cell construction, roster/market persistence, quick-wheel ownership, and chord/context preferences.
+- Corrected stale test fixtures: the awareness test preserves the unrelated lead's actual sentinel rather than assuming -99; projectile/mechanical tests explicitly draw the archer's weapon or isolate passing monsters as appropriate. The charge-dismissal probe puts away the player’s sword so a fresh weapons warning cannot be mistaken for pursuit. The movement probe allows a short, measured braking interval after an urgent task.
+- Removed unreachable duplicate monster injury handling and updated stale free-aim/control comments in touched code.
+
+### Final validation
+- Distribution build passed; engine build passed with 121 native checks and 29 Java tests
+- Unchanged-main baseline: 271 tests, eight failures. Complete modified-suite run: 283 tests, eight failures, one skipped. The full run exposed both regressions and stale fixtures; these were corrected and the affected classes rerun
+- 47 distinct affected regression checks passed across the final follow-up runs, including 24 passing checks in the last run. The entire suite was not repeated after the last corrections
+- Final old-main save migration loads twice into 70 residents with zero invariant discrepancies
+- Corrected all new lodge bed heads to face walls, left its entrance clear, and moved the added Ore Miner out of a solid resource block
+- Completed all six fishing contact sheets, all five requested monster attack sheets, controls/wheel captures, foliage contact/recovery captures, and matched clear/dawn/overcast/cell lighting views
+- Visual judgments remain review evidence rather than a claimed perfect match to the reference artwork. Hardware performance and the full acceptance tour were not certified by this software-rendered run
+
+Validation details and compatibility limitations are recorded in `docs/alpha024-review.md`.
+
+---
+
 ## Pass 14: the 0.2.3 gamefixes list - stutter, title shot, sheathe/run/jog animation, AI choices (Version Alpha 0.2.3)
 
 Version is now Alpha 0.2.3 (`Main.VERSION`). Passes 11-13 still uncommitted underneath. Written as work lands (low budget).

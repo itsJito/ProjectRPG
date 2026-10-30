@@ -116,7 +116,7 @@ void Pathfinder::relax(int from, int x, int y, int z, float cost, int gx, int gz
 }
 
 bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuery& q, std::vector<int32_t>& out, uint32_t& expansions) {
-    out.clear();
+    out.clear();partial_=false;capped_=false;
     expansions = 0;
     // Validate before float-to-int conversion. Leave room for neighbour offsets,
     // rounded heights and coordinate differences in the integer search math.
@@ -199,6 +199,9 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
         }
     }
     expansions = static_cast<uint32_t>(done);
+    const int bestKey=nk_[best];
+    partial_=((bestKey & 1023)!=gx || ((bestKey>>10)&1023)!=gz || (goalY>=0 && std::abs((bestKey>>20)-goalY)>1));
+    capped_=partial_ && (done>=q.maxExpand || count_>=CAP);
     if (best == s) return false;
     int len = 0;
     for (int n = best; n != s; n = parent_[n]) len++;

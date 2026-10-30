@@ -74,7 +74,9 @@ class MaterialAuditTest {
             boolean door = (physical[id].flags & AstrattoNative.BLOCK_DOOR) != 0;
             // Doors collide through their moving thin body, rather than a whole solid voxel.
             assertEquals(door, (block.flags & AstrattoNative.RB_DOOR) != 0, "door binding mismatch on block " + id);
-            if (!door) assertEquals(solid, (block.flags & AstrattoNative.RB_SOLID) != 0, "collision/render mismatch on block " + id);
+            // Leaves retain a meshed volume and cutout faces while allowing bodies through them.
+            if (Blocks.material(id)==Blocks.Material.FOLIAGE) assertFalse(solid,"foliage collision on block "+id);
+            else if (!door) assertEquals(solid, (block.flags & AstrattoNative.RB_SOLID) != 0, "collision/render mismatch on block " + id);
             csv.append(id).append(',').append(block.layerTop).append(',').append(block.layerSide).append(',').append(block.layerBottom).append(',').append(solid).append(',').append(door).append('\n');
         }
         Path out = Path.of("build/reports/materials"); Files.createDirectories(out);

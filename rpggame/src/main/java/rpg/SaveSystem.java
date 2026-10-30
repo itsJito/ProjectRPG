@@ -54,6 +54,7 @@ public final class SaveSystem {
         st.put("minutes", g.state.minutes);
         Map<String, Object> led = new HashMap<>(); for (var e : g.state.ledger().entrySet()) led.put(e.getKey(), e.getValue());
         st.put("ledger", led);
+        var names=new HashMap<String,Object>();g.rememberedNames.forEach((id,name)->names.put(Long.toString(id),name));st.put("names",names);
         List<Object> log = new ArrayList<>();
         List<DomainEvent> events = g.state.all();
         for (DomainEvent e : events.subList(Math.max(0, events.size() - 300), events.size())) {
@@ -79,6 +80,7 @@ public final class SaveSystem {
             if (n.standing != Npc.Standing.COMMON) m.put("standing", n.standing.name());
             List<Object> mem = new ArrayList<>(); for (Memory x : n.memories) mem.add(x.save());
             m.put("memories", mem);
+            m.put("routes",n.routeBook.save(g.time));
             // a body lies as it lay: its fifteen points, so a load puts it back on the ground (never standing up to fall again)
             var rd = !n.alive && n.ragdoll != 0 ? g.lastBodies.ragdoll(n.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); m.put("pose", pose); }
@@ -173,13 +175,14 @@ public final class SaveSystem {
         g.combat.projectiles.clear();
         if (g.ui != null) g.ui.closeAll();
         Map<String, Object> st = Json.obj(root, "state");
+        g.rememberedNames.clear();for(var entry:Json.obj(st,"names").entrySet())try{g.rememberName(Long.parseLong(entry.getKey()),entry.getValue().toString());}catch(NumberFormatException ignored){}
         List<Object> c = Json.list(st, "counters");
         long[] counters = new long[c.size()];
         for (int i = 0; i < counters.length; i++) counters[i] = ((Number) c.get(i)).longValue();
         g.state.loadCounters(counters);
         g.state.minutes = Json.num(st, "minutes", 480);
         Map<String, Long> led = new HashMap<>();
-        for (var e : Json.obj(st, "ledger").entrySet()) led.put(e.getKey(), ((Number) e.getValue()).longValue());
+        for (var e : Json.obj(st, "ledger").entrySet()) led.merge(rpg.item.Items.canonicalSavedId(e.getKey()), ((Number) e.getValue()).longValue(),Long::sum);
         g.state.loadLedger(led);
         List<DomainEvent> log = new ArrayList<>();
         for (Object o : Json.list(st, "log")) {
@@ -196,8 +199,8 @@ public final class SaveSystem {
         g.player.firstPerson = Json.bool(pm, "fp", false); g.player.morphCameraSaved = false;
         java.util.Arrays.fill(g.player.quick, null);
         var quick = Json.list(pm, "quick");
-        for (int i = 0; i < Math.min(8, quick.size()); i++) if (quick.get(i) instanceof String id && !id.isEmpty() && rpg.item.Items.find(id) != null)
-            g.player.quick[i] = new rpg.actor.Player.QuickSlot(rpg.item.Items.find(id), 0);
+        for (int i = 0; i < Math.min(8, quick.size()); i++) if (quick.get(i) instanceof String id && !id.isEmpty() && rpg.item.Items.saved(id) != null)
+            g.player.quick[i] = new rpg.actor.Player.QuickSlot(rpg.item.Items.saved(id), 0);
         g.player.refreshQuick();
         g.player.alive = Json.bool(pm, "alive", true);
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }
@@ -206,7 +209,6 @@ public final class SaveSystem {
         for(Npc old:new ArrayList<>(g.npcs))if(old.summonOwner!=0 || old.posse)g.magic.dismiss(old);
         var savedNpcIds=new java.util.HashSet<Long>();
         for(Object record:Json.list(root,"npcs"))savedNpcIds.add(Json.lng((Map<String,Object>)record,"id",-1));
-        var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         // NPCs: life and death, bodies, minds, memories
         for (Object o : Json.list(root, "npcs")) {
             Map<String, Object> m = (Map<String, Object>) o;
@@ -236,6 +238,7 @@ public final class SaveSystem {
             if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
             n.arrestedUntil = Json.num(m, "arrested", -1); n.arrestJurisdiction = Json.str(m, "arrestJur", DevMap.jurisdiction(n.x, n.z)); n.patrolIndex = Json.integer(m, "patrol", 0);
+            n.routeBook.load(Json.list(m,"routes"),g.time);n.navPauseUntil=0;
             n.memories.clear();
             List<Object> mem = Json.list(m, "memories");
             if (mem != null) for (Object x : mem) n.remember(Memory.load((Map<String, Object>) x), 24);
@@ -295,6 +298,8 @@ public final class SaveSystem {
         }
         for (Npc dead : g.npcs) if (!dead.alive && dead.corpse == 0 && dead.ragdoll != 0) { g.game.commands().release(dead.ragdoll); dead.ragdoll = 0; }
         g.bank.migrateAccounts();
+        // Create newly authored residents after restoring dynamic objects: starter overflow drops must survive migration.
+        var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         g.econ.load(Json.obj(root, "econ"));
         g.repairs.load(Json.list(root, "repairs"));
         g.animals.load(Json.obj(root, "animals"));
@@ -308,6 +313,7 @@ public final class SaveSystem {
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
         for(Npc resident:addedResidents)g.invariants.rebase(resident);
+        g.objects.supportBeds();
         g.ai.syncAbstractClock();
         g.mapDirty = true;
         g.mapColumns.clear();   // (a load redraws the whole map)

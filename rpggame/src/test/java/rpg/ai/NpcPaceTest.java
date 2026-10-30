@@ -80,16 +80,24 @@ class NpcPaceTest {
     }
 
     @Test void theTownGoingAboutItsMorningNeverSprints() {
+        // A quiet workday probe: predator encounters and monster alarms are tested separately.
+        for(var animal:g.animals.all()){animal.loaded=false;g.animals.despawnBody(animal);}
+        for(var monster:g.monsters.all()){monster.loaded=false;g.monsters.despawnBody(monster);}
         g.teleport(g.player, 20, DevMap.FLOOR, 20);
         String who = null;
         float fastest = 0;
+        var urgentAt=new java.util.HashMap<Long,Double>();
+        var previousSpeed=new java.util.HashMap<Long,Float>();
         for (int i = 0; i < 60 * 90; i++) {
             assertTrue(game.tick(1f / 60));
-            for (Npc n : g.npcs) if (n.alive && n.loaded && n.summonOwner == 0 && !java.util.EnumSet.of(Brain.Goal.FIGHT, Brain.Goal.FLEE, Brain.Goal.HIDE, Brain.Goal.WARN, Brain.Goal.AID).contains(n.goal)
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.summonOwner == 0) {
+                float v=(float)Math.hypot(n.vx,n.vz), previous=previousSpeed.getOrDefault(n.id,v);previousSpeed.put(n.id,v);
+                if(java.util.EnumSet.of(Brain.Goal.FIGHT, Brain.Goal.FLEE, Brain.Goal.HIDE, Brain.Goal.WARN, Brain.Goal.AID).contains(n.goal)
                     // (0.2.3) nor anything the pace rules themselves call urgent (a hunt on a fresh clue, a confrontation - left
                     // over from the chases before, in this shared world): only a sprint those rules did not ask for fails
-                    && !(n.hasGoalPos && g.ai.pace(n, n.gx, n.gz, 0) == AiSystem.A_SPRINT)) {
-                float v = (float) Math.hypot(n.vx, n.vz);
+                    || n.hasGoalPos && g.ai.pace(n, n.gx, n.gz, 0) == AiSystem.A_SPRINT) {urgentAt.put(n.id,g.time);continue;}
+                // Physical braking carries velocity briefly beyond an urgent goal; it must actually be slowing down.
+                if(g.time-urgentAt.getOrDefault(n.id,-99.0)<0.65 && v<=previous+0.03f)continue;
                 if (n.sprinting || v > g.cfg.jogSpeed + 0.6f) { fastest = Math.max(fastest, v); who = n.name + " (" + n.goal + ", " + n.lastOutcome + ")"; }
             }
         }

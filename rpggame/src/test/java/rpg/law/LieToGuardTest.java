@@ -50,6 +50,8 @@ class LieToGuardTest {
         assertTrue(g.law.denyCharge(g.player, halting, req).committed());
         assertEquals(0, g.law.bounty(g.player.id, DevMap.ALPHA));
         assertFalse(g.law.inCustody(g.player));
+        // Standing with a drawn sword can start an independent weapons warning; this probe concerns the closed charge.
+        g.combat.sheathe(g.player,true);
         // half a minute standing about: nobody of the watch pursues, searches for or squares up to the player
         int worst = 0;
         String who = "";

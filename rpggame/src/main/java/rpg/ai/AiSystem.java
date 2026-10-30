@@ -124,11 +124,13 @@ public final class AiSystem {
             // 0.2.0: DevPalace's twenty, then the six at the forester's lodge
             Ids.EMPEROR,Ids.PRAETOR,Ids.LEGIONARY_1,Ids.LEGIONARY_2,Ids.LEGIONARY_3,Ids.LEGIONARY_4,Ids.SENATOR,Ids.MACELLUM,Ids.PRIESTESS,Ids.MEDICUS,
             Ids.PHILOSOPHER,Ids.STONEMASON,Ids.PALACE_BEGGAR,Ids.CITIZEN_1,Ids.CITIZEN_2,Ids.CITIZEN_3,Ids.FISHER_P,Ids.HUNTRESS,Ids.CITIZEN_4,Ids.CENTURION,
-            Ids.ARTHUR,Ids.LANCELOT,Ids.GAWAIN,Ids.TRISTAN,Ids.PERCIVAL,Ids.MERLIN);
+            Ids.ARTHUR,Ids.LANCELOT,Ids.GAWAIN,Ids.TRISTAN,Ids.PERCIVAL,Ids.MERLIN,
+            Ids.CARPENTER_CITY,Ids.CARPENTER_TOWN,Ids.CARPENTER_WOOD,Ids.CARPENTER_PALACE,Ids.WOODCUTTER_CITY,Ids.WOODCUTTER_TOWN,
+            Ids.MINER_CITY,Ids.MINER_PALACE,Ids.TRADER_CITY,Ids.TRADER_PALACE);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
-                // the Bank of Gameworld's one teller (Civic Services): keeps the counter by day, sleeps in the back
+                // the Bank of ASHENWRATH's one teller (Civic Services): keeps the counter by day, sleeps in the back
                 Npc wren = npc(Ids.TELLER, "Wren", Npc.Role.CIVIC, "Bank teller", DevMap.BANK_TELLER[0], DevMap.BANK_TELLER[1], 151);
                 wren.postX = DevMap.BANK_TELLER[0]; wren.postZ = DevMap.BANK_TELLER[1]; wren.homeJurisdiction = DevMap.BETA;
                 if (g.objects.bankBed != null) { wren.homeX = g.objects.bankBed.x; wren.homeZ = g.objects.bankBed.z; }
@@ -222,8 +224,32 @@ public final class AiSystem {
                 Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
                 give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
             }
-            default -> { Npc n = expanse(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
+            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
         }
+    }
+
+    /** Additional ordinary workers reuse established occupations, tools and the same finite item ledger. */
+    private Npc support(long id) {
+        if (id < Ids.CARPENTER_CITY || id > Ids.TRADER_PALACE) return null;
+        int index = (int)(id - Ids.CARPENTER_CITY);
+        float[][] posts = {{74.5f,28.5f},{39.5f,108.5f},{90.5f,134.5f},{172.5f,84.5f},
+                {80.5f,20.5f},{31.5f,102.5f},{93.5f,24.5f},{140.5f,152.5f},{76.5f,28.5f},{182.5f,96.5f}};
+        Npc.Role role = index < 4 ? Npc.Role.CRAFTSMAN : index < 6 ? Npc.Role.WORKER : index < 8 ? Npc.Role.MINER : Npc.Role.MERCHANT;
+        String title = index < 4 ? "Carpenter" : index < 6 ? "Woodcutter" : index < 8 ? "Ore Miner" : "Materials Trader";
+        String[] names={"Aeldric","Brannoc","Corren","Deryn","Eirwen","Fennric","Garron","Haldren","Istren","Maerwyn"};
+        Npc n = npc(id, names[index], role, title, posts[index][0], posts[index][1], 240 + index);
+        if (index < 4) {
+            Profession.CARPENTER.assign(n); n.skills.setLevel(Skill.CONSTRUCTION,40); n.skills.setLevel(Skill.CRAFTING,30);
+            give(n,Items.HAMMER,1); give(n,Items.PLANK,6);
+        } else if (index < 6) {
+            n.skills.setLevel(Skill.WOODCUTTING,30); give(n,Items.get("bronze_axe"),1); give(n,Items.LOGS,4);
+        } else if (index < 8) {
+            Profession.ORE_MINER.assign(n); n.skills.setLevel(Skill.MINING,30); give(n,Items.get("bronze_pickaxe"),1);
+        } else { give(n,Items.PLANK,4); give(n,Items.LOGS,2); give(n,Items.HAMMER,2); }
+        give(n,Items.COINS,index < 8 ? 60 : 180); give(n,Items.BREAD,3);
+        if (index == 3 || index == 7 || index == 9) roman(n,22);
+        float[] home = DevMap.bedOf(id); if (home != null) { n.homeX=home[0];n.homeZ=home[1]; }
+        return n;
     }
 
     /**
@@ -393,6 +419,7 @@ public final class AiSystem {
     }
     /** Walks an NPC (or a monster) toward a point by the travel graph; true once there. */
     public boolean walkTo(Npc n, float x, float z, boolean run, float within) { return brain.goTo(n, x, z, run, within); }
+    public boolean walkToAtHeight(Npc n,float x,float y,float z,boolean run,float within){return brain.goTo(n,x,y,z,run,within); }
     /** A monster's eyes and ears (the stealth system's sight and hearing, as for anyone). */
     public void monsterSenses(Npc n, float dt) { stealth.update(n, dt); }
     /** Turns a body toward where it means to face (or where it is going). */
@@ -580,6 +607,14 @@ public final class AiSystem {
             }
             if (!n.alive || !n.loaded) continue;
             Snapshots.Mover m = bodies.mover(n.body);
+            if(m==null && !n.reacting && n.ragdoll==0) {
+                if(n.missingBodySince<0)n.missingBodySince=g.time;
+                if(g.time-n.missingBodySince>0.75) {
+                    n.body=0;if(n.agent!=0)g.game.commands().release(n.agent);n.agent=0;
+                    spawnBody(n);n.missingBodySince=-1;
+                    g.state.commit("NpcBodyRecovered",0,n.id,n.homeJurisdiction,0,"restored missing mover without changing resident state");
+                }
+            } else n.missingBodySince=-1;
             if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
             // a sprint costs breath as the player's does
             if (n.sprinting && Math.hypot(n.vx, n.vz) > g.cfg.jogSpeed) { n.stamina = Math.max(0, n.stamina - g.cfg.staminaSprint * (float) g.lastDt); n.cs.regenDelay = 0.6f; }
@@ -588,6 +623,7 @@ public final class AiSystem {
                 n.agentYaw = a.yaw;
                 n.routeCells = a.routeCells;
                 n.stuck = a.stuck;
+                if (!n.stuck && Math.hypot(n.vx,n.vz)>0.2f && n.lastOutcome.startsWith("route blocked")) n.lastOutcome="route resumed";
                 n.nativeAction = a.action >= 0 && a.action < ACTIONS ? ACTION_NAMES[a.action] : "-";
             }
         }
@@ -609,6 +645,7 @@ public final class AiSystem {
         Npc n = byAgent(agent);
         if (n == null) return;
         stuckEvents++;
+        n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));
         if (g.scripted) System.out.printf("      [stuck] %s %s at (%.2f, %.2f, %.2f) -> (%.1f, %.1f), %s, v (%.2f, %.2f) ground %s route %d facts %s%n", n.name, n.goal, n.x, n.y, n.z, n.gx, n.gz, n.nativeAction, n.vx, n.vz, n.grounded, n.routeCells, java.util.Arrays.toString(n.facts));
         n.lastOutcome = "route blocked while " + n.goal.toString().toLowerCase() + "; replanning";
         // no way to the one they meant to talk with: someone else, or back to the day, rather than the same wall again
@@ -624,7 +661,7 @@ public final class AiSystem {
         // (0.2.2, gamefixes: NPCs teleported while in a fight) in a fight it is a step to the very next cell at most, and
         // not at all for a moment after a blow - a knock-back that ends at a wall settles where it lies
         boolean fighting = n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || g.time - n.cs.lastHurt < 1.5;
-        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && !standable(bx, bz) && !(fighting && g.time - n.cs.lastHurt < 1.5)) {
+        if (n.alive && n.loaded && !n.reacting && n.ragdoll == 0 && n.carryBody == 0 && !g.law.inCustody(n) && (!Float.isFinite(g.vox.standY(n.x,n.y,n.z)) || Math.abs(g.vox.standY(n.x,n.y,n.z)-n.y)>1.2f) && !(fighting && g.time - n.cs.lastHurt < 1.5)) {
             for (int ring = 1; ring <= (fighting ? 1 : 3); ring++) {
                 float best = Float.MAX_VALUE; int cx = 0, cz = 0;
                 for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
@@ -636,7 +673,11 @@ public final class AiSystem {
             }
         }
         if (n.goal == Brain.Goal.PATROL) n.patrolIndex++;
-        if (n.goal == Brain.Goal.WORK) { brain.resetJob(n); g.interact.cancel(n, "stuck"); }
+        if (n.goal == Brain.Goal.WORK) {
+            g.repairs.abandon(n);
+            for (var node : g.objects.nodes) if (Math.hypot(node.x-n.legsX,node.z-n.legsZ)<3) n.unreachable.put(node.id,g.time+45);
+            brain.resetJob(n); g.interact.cancel(n, "stuck");
+        }
     }
 
 
@@ -711,6 +752,13 @@ public final class AiSystem {
         }
 
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
+        if(law) {
+            long subject=n.fightTarget!=0?n.fightTarget:n.hunt!=null?n.hunt.target:0;
+            if(subject!=0 && g.law.fineDeferred(subject,n.homeJurisdiction) && !g.law.resisting(subject,n.homeJurisdiction)
+                    && !(n.cs.lastAttacker==subject && g.time-n.cs.lastHurt<12)) {
+                n.fightTarget=0;if(n.hunt!=null && n.hunt.target==subject)n.hunt=null;n.cs.cancel();n.cs.blocking=false;
+            }
+        }
         // nobody knows where a foe is unless their senses say so: in sight (or out of it for a heartbeat, behind a post)
         // it is still the fight; lost for longer, all that is left is where they were last placed - a search (Hunt)
         // charmed (Charm Person): no lifted hand against the player while it lasts
@@ -767,7 +815,7 @@ public final class AiSystem {
         }
         // a dangerous animal close by: guards deal with it, everyone else gets away from it
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all())
-            if (an.alive && an.loaded && an.dangerous() && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
+            if (an.alive && an.loaded && an.threatens(n) && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) {
             for (Actor a : g.actors()) {
                 if (a == n || !a.alive || a.dummy || alliedWatch(n,a)) continue;
@@ -1030,6 +1078,7 @@ public final class AiSystem {
             if (o.goal == Brain.Goal.FIGHT || o.goal == Brain.Goal.FLEE || o.goal == Brain.Goal.SLEEP || o.goal == Brain.Goal.REPORT_CRIME) continue;
             if (n.unreachable.getOrDefault(o.id, -1.0) > g.time) continue;
             float d = n.distTo(o);
+            if (o.id == n.socialPartner && d < 36) return o;
             if (d < bd) { bd = d; best = o; }
         }
         return best;
@@ -1038,6 +1087,7 @@ public final class AiSystem {
     /** Passes news through the same hearing, evidence and feedback rules as street gossip. */
     public int share(Npc from, Npc to) {
         int n = g.law.posses.tell(from, to) ? 1 : 0;
+        if(from.alive && to.alive && from.loaded && to.loaded && from.distTo(to)<4 && g.vox.sight(from.x,from.eyeY(),from.z,to.x,to.eyeY(),to.z))n+=from.routeBook.tell(to.routeBook,g.time);
         for (Memory m : new ArrayList<>(from.memories)) {
             if (rumors.tell(from, to, m, false)) n++;
         }

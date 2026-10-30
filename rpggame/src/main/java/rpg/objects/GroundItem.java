@@ -25,6 +25,10 @@ public final class GroundItem extends WorldObject {
     public float[] dir;
     public long rigid;
     public double rigidSince;
+    /** Full resting orientation for broad gear such as shields; long projectile direction remains separate. */
+    public float[] rotation;
+    public float vx,vy,vz,wx,wy,wz;
+    public boolean resumePhysics;
     /** Lodged in something (a wall, a tree, the ground, a target): it stays put until taken. */
     public boolean lodged;
 
@@ -75,6 +79,7 @@ public final class GroundItem extends WorldObject {
     @Override public Map<String, Object> save() {
         Map<String, Object> m = super.save(); m.put("stack", ItemIO.stack(stack)); m.put("x", x); m.put("y", y); m.put("z", z);
         if (dir != null) { m.put("dx", dir[0]); m.put("dy", dir[1]); m.put("dz", dir[2]); m.put("lodged", lodged); }
+        if(rotation!=null){m.put("qw",rotation[0]);m.put("qx",rotation[1]);m.put("qy",rotation[2]);m.put("qz",rotation[3]);m.put("moving",rigid!=0);m.put("velocity",java.util.List.of(vx,vy,vz,wx,wy,wz));}
         return m;
     }
 
@@ -82,5 +87,13 @@ public final class GroundItem extends WorldObject {
     public void restorePose(Map<String, Object> saved) {
         if (saved.containsKey("dx")) dir = new float[]{(float) astratto.util.Json.num(saved, "dx", 0), (float) astratto.util.Json.num(saved, "dy", 0), (float) astratto.util.Json.num(saved, "dz", 1)};
         lodged = astratto.util.Json.bool(saved, "lodged", false);
+        if(!saved.containsKey("qw") && dir==null && !stack.def.natural && (stack.def.slot==rpg.item.ItemDef.Slot.MAIN || stack.def.slot==rpg.item.ItemDef.Slot.OFF)) {
+            rotation=new float[]{0.9238795f,0.3826834f,0,0};resumePhysics=true;
+        }
+        if(saved.containsKey("qw")) {
+            rotation=new float[]{(float)astratto.util.Json.num(saved,"qw",1),(float)astratto.util.Json.num(saved,"qx",0),(float)astratto.util.Json.num(saved,"qy",0),(float)astratto.util.Json.num(saved,"qz",0)};
+            resumePhysics=astratto.util.Json.bool(saved,"moving",false);
+            var velocity=astratto.util.Json.list(saved,"velocity");if(velocity.size()==6){vx=((Number)velocity.get(0)).floatValue();vy=((Number)velocity.get(1)).floatValue();vz=((Number)velocity.get(2)).floatValue();wx=((Number)velocity.get(3)).floatValue();wy=((Number)velocity.get(4)).floatValue();wz=((Number)velocity.get(5)).floatValue();}
+        }
     }
 }

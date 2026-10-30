@@ -35,6 +35,7 @@ class ArrowLineOfFireTest {
             g.teleport(g.player, lane[0], DevMap.FLOOR, lane[1] - 10);
             for (int i = 0; i < 5; i++) game.tick(1f / 60);
             assertSame(friend, g.combat.inLineOfFire(archer, g.player), "the archer sees the friend in the line");
+            archer.sheathed = false; archer.sheatheAt = -99;
             float before = g.player.hp;
             long stray = g.state.all().stream().filter(e -> e.type().equals("EnvironmentalDamage")).count();
             assertTrue(g.combat.shoot(archer, 0, (float) Math.atan2(g.player.chestY() - archer.eyeY(), 10), 1));
