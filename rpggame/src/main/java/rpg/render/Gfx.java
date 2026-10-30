@@ -370,6 +370,14 @@ public final class Gfx implements AutoCloseable {
     public void scene(Rpg g, boolean firstPerson, float dt, double hour) {
         sceneGame = g;
         clock = g.time;
+        if(clock>=pruneFiguresAt) {
+            pruneFiguresAt=clock+2;
+            var present=new java.util.HashSet<Long>();for(Actor actor:g.actors())present.add(actor.id);
+            shown.keySet().retainAll(present);anim.keySet().retainAll(present);rebuiltAt.keySet().retainAll(present);
+            pendingFigure.keySet().retainAll(present);
+            var wanted=new java.util.HashSet<Long>(pendingFigure.values());
+            building.entrySet().removeIf(entry->{if(wanted.contains(entry.getKey()))return false;entry.getValue().cancel(false);return true;});
+        }
         gore = g.gore;
         cmd.world(g.game.world());
         float daylight = environment(hour, g.time);
@@ -812,6 +820,8 @@ public final class Gfx implements AutoCloseable {
         long key = figureKey(a, look);
         int[][] f = figures.get(key);
         if (f != null) { shown.put(a.id, f); return f; }
+        Long pending=pendingFigure.get(a.id);
+        if(pending!=null && building.containsKey(pending))key=pending;
         java.util.concurrent.Future<CharModel> job = building.get(key);
         int[][] last = shown.get(a.id);
         // (gamefixes: fights lagged) a body freshly marked again and again in a fight is repainted at most a few times a
@@ -825,7 +835,7 @@ public final class Gfx implements AutoCloseable {
             var blood = a.blood.any() ? a.blood.snapshot() : null;
             var injuries=a.injuries.snapshot();int severity=a.injuries.severity(a);
             job = builder.submit(() -> { Skin skin=Skin.paint(copy,armor,blood);skin.injure(injuries,severity);return CharModel.build(skin); });
-            building.put(key, job);
+            building.put(key, job);pendingFigure.put(a.id,key);
         }
         int[][] old = last;
         if (!job.isDone() && old != null) return old;
@@ -834,23 +844,26 @@ public final class Gfx implements AutoCloseable {
         CharModel cm;
         try { cm = job.get(); }
         catch (InterruptedException | java.util.concurrent.ExecutionException e) { building.remove(key); throw new IllegalStateException("figure for " + a.name, e); }
-        building.remove(key);
+        building.remove(key);pendingFigure.remove(a.id);
         f = new int[2][CharModel.SEGS];
         for (int i = 0; i < CharModel.SEGS; i++) { f[0][i] = upload(cm.base[i]); f[1][i] = upload(cm.outer[i]); }
         figures.put(key, f);
+        shown.put(a.id,f);
         if (figures.size() > MAX_FIGURES) {
-            var eldest = figures.entrySet().iterator().next();
-            if (!shown.containsValue(eldest.getValue())) {
-                for (int[] layer : eldest.getValue()) for (int id : layer) if (id != 0) r.release(AstrattoNative.RES_MESH, id);
-                figures.remove(eldest.getKey());
+            var iterator=figures.entrySet().iterator();
+            while(figures.size()>MAX_FIGURES && iterator.hasNext()) {
+                var entry=iterator.next();if(shown.containsValue(entry.getValue()))continue;
+                for(int[] layer:entry.getValue())for(int id:layer)if(id!=0)r.release(AstrattoNative.RES_MESH,id);
+                iterator.remove();
             }
         }
-        shown.put(a.id, f);
         return f;
     }
 
+    private final java.util.Map<Long,Long> pendingFigure=new java.util.HashMap<>();
     private final java.util.Map<Long, Double> rebuiltAt = new java.util.HashMap<>();
     private int uploadsThisFrame;
+    private double pruneFiguresAt;
 
     /** Whether the figure for an actor as they look now has been built (the gallery waits on it; play shows the old one meanwhile). */
     public boolean figureReady(Actor a) { return a.look != null && figures.containsKey(figureKey(a, a.look)); }
@@ -2443,8 +2456,16 @@ public final class Gfx implements AutoCloseable {
         float previous=charTint;charTint=1-o.charred*0.86f;
         try { objectModel(g,o,dt); } finally { charTint=previous; }
     }
+    private final java.util.Map<ItemModels.Model,int[]> itemBounds=new java.util.IdentityHashMap<>();
+    private int[] itemBounds(ItemModels.Model model){return itemBounds.computeIfAbsent(model,m->astratto.voxel.VoxRaster.bounds(m.vox()));}
+    private final Snapshots.Rigid looseItemPose=new Snapshots.Rigid();
     private void objectModel(Rpg g, WorldObject o, float dt) {
-        if (o instanceof GroundItem gi && gi.dir != null) {
+        if(o instanceof GroundItem gi && gi.rotation!=null) {
+            var model=ItemModels.of(gi.stack.def);int[] bounds=itemBounds(model);float unit=ItemModels.VOX;
+            looseItemPose.x=gi.x;looseItemPose.y=gi.y;looseItemPose.z=gi.z;looseItemPose.qw=gi.rotation[0];looseItemPose.qx=gi.rotation[1];looseItemPose.qy=gi.rotation[2];looseItemPose.qz=gi.rotation[3];looseItemPose.matrix(m.m);
+            m.translate(-((bounds[0]+bounds[3])*0.5f-model.gx())*unit,-((bounds[1]+bounds[4])*0.5f-model.gy())*unit,-((bounds[2]+bounds[5])*0.5f-model.gz())*unit);
+            drawItem(gi.stack.def,0);
+        } else if (o instanceof GroundItem gi && gi.dir != null) {
             // one arrow, bolt or thrown blade - or a weapon fallen from a dead hand - exactly as it lies: lodged where it
             // struck, or as its body came to rest
             float len = CombatSystem.lyingLength(gi.stack.def);
@@ -2453,7 +2474,7 @@ public final class Gfx implements AutoCloseable {
             // the item's own model on the ground: long things lie down, the rest stand on their base
             ItemDef d = gi.stack.def;
             ItemModels.Model md = ItemModels.of(d);
-            int[] bb = astratto.voxel.VoxRaster.bounds(md.vox());
+            int[] bb = itemBounds(md);
             float v = ItemModels.VOX, cx = (bb[0] + bb[3]) / 2f, cy = (bb[1] + bb[4]) / 2f, cz = (bb[2] + bb[5]) / 2f;
             boolean lies = (bb[4] - bb[1]) > 1.5f * Math.max(bb[3] - bb[0], bb[5] - bb[2]) || (bb[5] - bb[2]) <= 2;
             m.identity().translate(gi.x, gi.y - 0.04f, gi.z).rotateY(gi.id * 1.7f);

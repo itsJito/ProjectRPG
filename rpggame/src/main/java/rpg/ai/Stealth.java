@@ -125,13 +125,16 @@ public final class Stealth {
 
     /** The same sight for any watcher (people, animals): its eyes, its heading, how sharp they are. */
     public float exposure(Actor n, float acuity, Actor a) {
+        return exposure(n,acuity,a,false);
+    }
+    private float exposure(Actor n,float acuity,Actor a,boolean tracking) {
         if (!n.alive || a == null || !a.alive || a == n) return 0;
         float dx = a.x - n.x, dz = a.z - n.z, d = (float) Math.hypot(dx, dz);
         if (d > RANGE) return 0;
         float cone = 1;
         // someone right beside you is sensed whichever way you face - unless they creep
         float close = a.sneaking ? CLOSE_CREEPING : CLOSE;
-        if (d > close) {
+        if (d > close && !tracking) {
             float fx = (float) -Math.sin(n.yaw), fz = (float) -Math.cos(n.yaw);
             float cos = (fx * dx + fz * dz) / d;
             // close in, the edge of the eye (90 degrees each side); far out, only what is ahead (about 50 degrees)
@@ -185,6 +188,10 @@ public final class Stealth {
     /** Whether an NPC sees an actor now: plainly, or at all once it is already alert to them. */
     public boolean sees(Npc n, Actor a) {
         if (a == g.player && g.notarget()) return false;
+        // Turning the body or a stale perception sample cannot hide a visible opponent during an established fight.
+        boolean tracking=n.fightTarget==a.id || n instanceof rpg.monster.Monster monster && monster.target==a.id
+                || n.cs.lastAttacker==a.id && g.time-n.cs.lastHurt<4;
+        if(tracking)return exposure(n,acuity(n),a,true)>0.08f;
         Aware w = n.aware.get(a.id);
         float e = w != null && g.time - w.at < 0.25 ? w.exposure : exposure(n, a);
         return e >= CLEAR || e > 0 && w != null && w.level >= ALERT;

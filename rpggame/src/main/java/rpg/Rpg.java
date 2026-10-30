@@ -293,7 +293,7 @@ public final class Rpg implements GameModule {
         if (PROF) mark(6);
         magic.update(dt);
         if (PROF) mark(7);
-        if (!aiDisabled()) { ai.update(dt); if (PROF) mark(8); animals.update(dt); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
+        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); animals.update(dt); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
         else if (PROF) mark(8);
         carrying.update();
         if (PROF) mark(9);
@@ -325,6 +325,7 @@ public final class Rpg implements GameModule {
 
     @Override public void afterFrame(GameContext ctx) {
         if (PROF) mark(23);
+        vox.afterCommands();
         lastBodies = ctx.bodies();
         lastRigids = ctx.rigids();
         Snapshots.Mover m = lastBodies.mover(player.body);
@@ -459,6 +460,7 @@ public final class Rpg implements GameModule {
 
     // ------------------------------------------------------------------ changing the world
     public void setBlock(int x, int y, int z, int id) {
+        vox.edited(vox.block(x,y,z),id);
         game.commands().blockSet(x, y, z, id); mapDirty = true; mapColumns.add(x << 16 | (z & 0xFFFF));
         if (chemistry != null && (id == rpg.world.Blocks.AIR || id == rpg.world.Blocks.EMBERS || id == rpg.world.Blocks.WATER)) chemistry.cleared(x, y, z);
     }

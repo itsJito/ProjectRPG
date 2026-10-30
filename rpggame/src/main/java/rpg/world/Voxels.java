@@ -25,6 +25,13 @@ public final class Voxels {
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.plant(i)) { solid[i] = false; opaque[i] = false; }
     }
 
+    public long navigationRevision;
+    private boolean navigationPending;
+    public void edited(int before,int after) {
+        if(solid[before]!=solid[after] || door(before)!=door(after) || before!=after && (door(before)||door(after))) {navigationRevision++;navigationPending=true;}
+    }
+    public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;}}
+
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
     public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }
     private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
@@ -86,6 +93,15 @@ public final class Voxels {
     }
 
     /** Whether one could see along a segment: opaque cells block, glass, leaves and fences do not. */
+    /** Look at a cell's near surface, rather than letting its own solid interior occlude it. */
+    public boolean sightCell(float ax,float ay,float az,int x,int y,int z) {
+        float cx=x+0.5f,cy=y+0.5f,cz=z+0.5f,dx=ax-cx,dy=ay-cy,dz=az-cz;
+        float largest=Math.max(Math.abs(dx),Math.max(Math.abs(dy),Math.abs(dz)));
+        if(largest<0.52f)return true;
+        float scale=0.52f/largest;
+        return sight(ax,ay,az,cx+dx*scale,cy+dy*scale,cz+dz*scale);
+    }
+
     public boolean sight(float ax, float ay, float az, float bx, float by, float bz) {
         float dx = bx - ax, dy = by - ay, dz = bz - az, d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         int steps = (int) Math.ceil(d / 0.25f);

@@ -27,7 +27,7 @@ import rpg.world.DevMap;
  * policy scores them (with its own sight and hearing in the mix) and walks the body along routes it searches itself.
  */
 public final class Brain {
-    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK, TIP_OFF, SHELTER, PRAY }
+    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK, TIP_OFF, SHELTER, PRAY, REPORT_DAMAGE, FIRE_RESPONSE }
 
     private final Rpg g;
     private final AiSystem ai;
@@ -63,6 +63,10 @@ public final class Brain {
             n.scores.clear(); n.scores.add("1.00 " + next + " - " + n.goalReason);
             return;
         }
+        n.observedFire=rpg.world.FireSafety.observe(g,n,n.combatant()?7:11);
+        if(n.observedFire!=null) {
+            var retreat=rpg.world.FireSafety.refuge(g,n,n.observedFire);n.fireEscapeX=retreat[0];n.fireEscapeZ=retreat[1];
+        }
         n.perceived = perceive(n);
         // blood, bodies and limbs in sight (Gore): each noticed once, and reacted to
         if (g.gore != null) g.gore.perceive(n);
@@ -70,6 +74,10 @@ public final class Brain {
         double hour = g.state.hourOfDay();
         boolean night = hour >= 22 || hour < 6;
         boolean civilian = !n.combatant();
+        if(n.observedFire!=null && n.arrestedUntil<=g.state.minutes) {
+            float distance=n.distTo(n.observedFire.x(),n.observedFire.z());
+            s.add(new Score(Goal.FIRE_RESPONSE,distance<4?1.1f:0.91f,n.role==Npc.Role.LAWMAN?"keeping a burning building clear":n.profession==Profession.CARPENTER?"waiting for heat to clear before repairs":"getting clear of an uncontrolled fire"));
+        }
 
         if (n.arrestedUntil > g.state.minutes) s.add(new Score(Goal.HELD, 2f, "in custody until minute " + (int) n.arrestedUntil));
         // maimed: whoever has lost a limb tries only to get away (and, legless, can barely move)
@@ -214,6 +222,8 @@ public final class Brain {
             if (injured != null) { n.aidTarget = injured.id; s.add(new Score(Goal.AID, n.role == Npc.Role.HEALER ? 0.76f : civilian ? 0.64f : 0.58f, "food to help " + injured.name + ", visibly wounded")); }
         }
         // needs
+        if(threat==null && g.repairs.reportFor(n)!=null)s.add(new Score(Goal.REPORT_DAMAGE,n.role==Npc.Role.LAWMAN?0.76f:0.63f,"reporting witnessed building damage"));
+        if(threat==null && g.repairs.hasWork(n))s.add(new Score(Goal.WORK,0.72f,"committed repair work"));
         if (n.hunger > 0.45f) s.add(new Score(Goal.EAT, 0.25f + n.hunger * 0.6f, String.format("hunger %.0f%%", n.hunger * 100)));
         if (night && n.role != Npc.Role.GUARD && !n.combatant() && n.role != Npc.Role.THIEF) s.add(new Score(Goal.SLEEP, 0.7f, String.format("night (%02d:00)", (int) hour)));
         else if (n.fatigue > 0.8f) s.add(new Score(Goal.SLEEP, 0.55f, String.format("fatigue %.0f%%", n.fatigue * 100)));
@@ -269,7 +279,7 @@ public final class Brain {
         // a little inertia: keep the current goal unless another beats it clearly
         Score best = s.get(0);
         // Safety decisions interrupt routine goals as soon as they outscore them.
-        boolean urgent = best.goal == Goal.FIGHT || best.goal == Goal.FLEE || best.goal == Goal.INVESTIGATE;
+        boolean urgent = best.goal == Goal.FIGHT || best.goal == Goal.FLEE || best.goal == Goal.INVESTIGATE || best.goal == Goal.FIRE_RESPONSE;
         if (!urgent) for (Score c : s) if (c.goal == n.goal && c.value >= best.value - 0.06f) { best = c; break; }
         n.scores.clear();
         for (int i = 0; i < Math.min(6, s.size()); i++) n.scores.add(String.format("%.2f %s - %s", s.get(i).value, s.get(i).goal, s.get(i).reason));
@@ -327,6 +337,15 @@ public final class Brain {
         // a leg gone: it cannot walk off (it lies where it fell, calling out)
         if (g.gore != null && g.gore.legs(n) < 0.2f) { ai.desire(n, AiSystem.A_IDLE); n.sneaking = true; if (n.speech == null && (n.id + (long) g.time) % 7 == 0) g.ai.say(n, "Help me..."); return; }
         switch (n.goal) {
+            case FIRE_RESPONSE -> {
+                g.interact.cancel(n,"uncontrolled fire nearby");g.combat.setBlock(n,false);
+                if(g.time-n.fireObservedAt>12) {
+                    n.fireObservedAt=g.time;
+                    ai.say(n,n.role==Npc.Role.LAWMAN?"Keep clear of the fire! Give the workers room.":n.profession==Profession.CARPENTER?"Let it cool. Then I can mend the damage.":n.role==Npc.Role.WORKER?"The timber's alight! Stand back.":"Fire! Get clear of the building!");
+                    g.state.commit("FireResponse",n.id,0,n.homeJurisdiction,0,n.goalReason);
+                }
+                goTo(n,n.fireEscapeX,n.fireEscapeZ,true,0.8f);n.lastOutcome=n.goalReason;
+            }
             case EVICT -> {
                 Actor other = g.actor(n.watchTarget);
                 if (!(other instanceof Npc outlaw) || !other.alive || !n.homeJurisdiction.equals(DevMap.jurisdiction(other.x, other.z)) || !ai.canSee(n, other)) { n.nextThink = 0; ai.desire(n, AiSystem.A_HOLD); break; }
@@ -353,6 +372,11 @@ public final class Brain {
             case SLEEP -> { if (goTo(n, n.homeX, n.homeZ, false, 1.2f)) ai.desire(n, AiSystem.A_IDLE); }
             case SOCIALIZE -> socialize(n);
             case REPORT_CRIME -> report(n);
+            case REPORT_DAMAGE -> {
+                var report=g.repairs.reportFor(n);
+                if(report==null){ai.desire(n,AiSystem.A_HOLD);n.nextThink=0;}
+                else if(goTo(n,report.recipient().x,report.recipient().z,false,2.3f)){g.repairs.report(n,report.damage(),report.recipient());n.nextThink=0;}
+            }
             case LOOK -> { Stealth.Aware w = lead(n); ai.desire(n, AiSystem.A_IDLE); if (w != null) n.wantYaw = (float) Math.atan2(-(w.x - n.x), -(w.z - n.z)); }
             case INVESTIGATE -> investigate(n);
             case SEARCH -> search(n);
@@ -632,8 +656,12 @@ public final class Brain {
      * waypoints (each leg a short search for the engine); the navigation target the inspector shows is the current leg's.
      */
     boolean goTo(Npc n, float x, float z, boolean run, float within) {
-        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
+        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
         if (Math.hypot(n.x - x, n.z - z) <= within) { ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
+        if(n.navRevision!=g.vox.navigationRevision) {
+            n.navRevision=g.vox.navigationRevision;
+            if(n.legs!=null && n.hasGoalPos && !Waypoints.walkable(g.vox,n.x,n.z,n.gx,n.gz,d->!d.locked || d.owner==n.id || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
+        }
         if (n.legs == null || Math.hypot(n.legsX - x, n.legsZ - z) > 0.5) { n.legs = Waypoints.route(g.vox, n.x, n.z, x, z, n instanceof rpg.monster.Monster mo && mo.kind.form != rpg.monster.MonsterKind.Form.HUMANOID ? d -> d.open && !d.locked
                 : d -> !d.locked || d.owner == n.id || d.key != null && n.has(d.key, 1)); n.legAt = 0; n.legsX = x; n.legsZ = z; }
         float tx = x, tz = z;
@@ -1184,12 +1212,22 @@ public final class Brain {
         if (d == null) return false;
         float[] at = g.repairs.standSpot(n, d);
         if (at == null) { g.repairs.abandon(n); return false; }
-        if (!goTo(n, at[0], at[1], false, 0.6f)) { n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; n.lootUntil = -99; return true; }
+        if (!goTo(n, at[0], at[1], false, 0.9f)) { n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; return true; }
         n.wantYaw = (float) Math.atan2(-(d.x() + 0.5f - n.x), -(d.z() + 0.5f - n.z));
         ai.desire(n, AiSystem.A_HOLD);
-        if (n.lootUntil < g.time - 1) { n.lootStarted = g.time; n.lootUntil = g.time + 3.5; n.reachX = d.x() + 0.5f; n.reachY = d.y() + 0.5f; n.reachZ = d.z() + 0.5f; }
-        if (g.time >= n.lootUntil) { boolean done = g.repairs.mend(n, d); n.lootUntil = -99; n.lastOutcome = done ? "mended the " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")" : "could not mend it"; if (!done) g.repairs.release(n); }
-        else { n.lastOutcome = "mending the " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; if (g.sfx != null && g.time - n.mendKnock > 0.7) { g.sfx.play(d.glass() ? "glass.light" : "wood.light", n.reachX, n.reachY, n.reachZ, 0.45f); n.mendKnock = g.time; } }
+        n.lootStarted=g.time;n.lootUntil=g.time+3.5;n.reachX=d.x()+0.5f;n.reachY=d.y()+0.5f;n.reachZ=d.z()+0.5f;
+        var site=new rpg.interact.WorldObject(d.key()^(1L<<62),"repair_site","Damaged building",n.reachX,n.reachY,n.reachZ) {
+            public java.util.List<rpg.interact.Option> options(Rpg world,Actor actor){return java.util.List.of();}
+            public rpg.interact.Result perform(Rpg world,Actor actor,String action,long request){return rpg.interact.Result.no("Repair work is already assigned.");}
+            public boolean exists(){return g.repairs.contains(d.key());}
+        };
+        g.interact.begin(new rpg.interact.Work(n,site,"repair","Repairing",3.5f,false,g.time,()->{
+            boolean done=g.repairs.mend(n,d);n.lootUntil=-99;n.nextThink=0;
+            if(!done)g.repairs.abandon(n);
+            n.lastOutcome=done?"completed a repair":"repair interrupted";
+            return done?rpg.interact.Result.ok():rpg.interact.Result.no("The repair is no longer available.");
+        }));
+        n.lastOutcome="mending the "+(d.glass()?"window":"timber");
         return true;
     }
 

@@ -1,3 +1,70 @@
+# Patch Notes Version Alpha 0.2.5: Pane Relief
+
+Townsfolk now have someone to tell when the neighbourhood needs mending.
+
+_Developer: Shadow_
+
+## New Features
+
+### NPC's
+- Added witnessed damage reports that townsfolk can now deliver to a Lawman or a suitable builder
+- Added repair commissions so Lawmen now pay builders from their own Gold when the work is finished
+- Added original names for the ten additional workers and traders, who now retain their existing jobs
+
+## Changes
+
+### NPC's
+- Changed builders to now prioritise known repairs over ordinary crafting and unloading
+- Changed Lawmen to now seek builders whose workshops are outside their town when reporting damage
+- Changed townsfolk to now warn others and move clear of uncontrolled fires, with different responses from Lawmen, Carpenters, and Woodcutters
+- Changed animals to now abandon feeding and other routines when nearby uncontrolled fire is visible
+- Changed monsters to now avoid visible fire according to their kind, with the undead reacting only at close range
+- Changed travel to now consider several nearby doorways and reconsider blocked routes when the world changes
+
+### Blocks
+- Changed palace hedges to now retain a continuous clipped shape
+- Changed bushes and shrubs to now have folded pointed leaves, woody stems, and quieter leaf colours
+- Changed leaf backlighting to now reduce the bright green fringe around sunlit foliage
+- Changed the DevCity cell partition to now continue the prison bars, with its outer walls matching the room's plaster
+
+### Items
+- Changed dropped weapons and Shields to now tumble and settle under physics
+- Removed named weapon variants outside the established material tiers, which now use standard tier equipment
+
+## Technical Changes
+
+### Gameplay
+- Changed old saves to now convert retired equipment while preserving ownership and item totals
+- Changed saved repairs to now retain who knows about the damage and who commissioned the work
+- Changed dropped equipment to now retain its resting orientation and resume unfinished falls after loading
+- Changed character appearance updates so wounded fighters now show their latest appearance sooner
+
+## Fixed Bugs
+
+### NPC's
+- AE-2067 - Fixed bug where townsfolk described sword swinging as a decent deed
+- AE-2068 - Fixed bug where reporting damage rejected builders whose workshops were outside the town
+- AE-2069 - Fixed bug where shifting position repeatedly restarted repair work
+- AE-2070 - Fixed bug where a missing movement body could leave a living resident absent indefinitely
+- AE-2071 - Fixed bug where turning during a fight made combatants lose a fully visible opponent
+
+### Gameplay
+- AE-2072 - Fixed bug where a jail door could lock again after the player's sentence ended
+- AE-2073 - Fixed bug where release could leave the player trapped in a cell still holding another prisoner
+- AE-2074 - Fixed bug where route shortcuts could ignore a locked doorway's access restrictions
+- AE-2075 - Fixed bug where repair materials were removed without updating the world's item totals
+- AE-2080 - Fixed bug where guards could keep following an unanswered petty-fine request
+
+### Blocks
+- AE-2076 - Fixed bug where the DevCity prison slab intersected the back wall
+- AE-2077 - Fixed bug where palace hedges appeared as scattered floating leaves
+
+### Items
+- AE-2078 - Fixed bug where broad dropped equipment remained standing upright
+- AE-2079 - Fixed bug where underlying elbow and knee corners could show through bent armour
+
+---
+
 # Patch Notes Version Alpha 0.2.4: Cell Service
 
 More hands at work, fewer interruptions, and doors on the cells.

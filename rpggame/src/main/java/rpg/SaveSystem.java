@@ -179,7 +179,7 @@ public final class SaveSystem {
         g.state.loadCounters(counters);
         g.state.minutes = Json.num(st, "minutes", 480);
         Map<String, Long> led = new HashMap<>();
-        for (var e : Json.obj(st, "ledger").entrySet()) led.put(e.getKey(), ((Number) e.getValue()).longValue());
+        for (var e : Json.obj(st, "ledger").entrySet()) led.merge(rpg.item.Items.canonicalSavedId(e.getKey()), ((Number) e.getValue()).longValue(),Long::sum);
         g.state.loadLedger(led);
         List<DomainEvent> log = new ArrayList<>();
         for (Object o : Json.list(st, "log")) {
@@ -196,8 +196,8 @@ public final class SaveSystem {
         g.player.firstPerson = Json.bool(pm, "fp", false); g.player.morphCameraSaved = false;
         java.util.Arrays.fill(g.player.quick, null);
         var quick = Json.list(pm, "quick");
-        for (int i = 0; i < Math.min(8, quick.size()); i++) if (quick.get(i) instanceof String id && !id.isEmpty() && rpg.item.Items.find(id) != null)
-            g.player.quick[i] = new rpg.actor.Player.QuickSlot(rpg.item.Items.find(id), 0);
+        for (int i = 0; i < Math.min(8, quick.size()); i++) if (quick.get(i) instanceof String id && !id.isEmpty() && rpg.item.Items.saved(id) != null)
+            g.player.quick[i] = new rpg.actor.Player.QuickSlot(rpg.item.Items.saved(id), 0);
         g.player.refreshQuick();
         g.player.alive = Json.bool(pm, "alive", true);
         if (!g.player.alive) { g.player.alive = true; g.player.restore(); }

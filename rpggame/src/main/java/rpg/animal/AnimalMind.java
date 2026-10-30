@@ -55,6 +55,7 @@ final class AnimalMind {
 
     /** Looks and listens (five times a second): the worst threat in reach, and the fear it builds or sheds. */
     void sense(Animal a, float step) {
+        a.observedFire=rpg.world.FireSafety.observe(g,a,a.baby?10:8);
         Actor worst = null;
         float worstScore = 0;
         float reach = Math.max(18, a.species.wary * 2.2f);
@@ -236,6 +237,11 @@ final class AnimalMind {
         Actor o = a.other != 0 ? g.actor(a.other) : null;
         a.atRest = false; a.headDown = false; a.rearing = false;
         if (a.goal != Goal.DEFEND && a.goal != Goal.HUNT && a.cs.phase == rpg.actor.Actor.Combat.Phase.IDLE) a.wantYaw = Float.NaN;
+        if(a.observedFire!=null) {
+            if(g.time-a.fireObservedAt>1 || a.distTo(a.fireEscapeX,a.fireEscapeZ)<0.8f){var retreat=rpg.world.FireSafety.refuge(g,a,a.observedFire);a.fireEscapeX=retreat[0];a.fireEscapeZ=retreat[1];a.fireObservedAt=g.time;}
+            if(a.needs!=null)a.needs.cancel();a.fear=Math.max(a.fear,0.65f);a.goal=Goal.FLEE;a.reason=a.baby?"young animal escaping heat":"avoiding uncontrolled fire";
+            sys.goTo(a,a.fireEscapeX,a.fireEscapeZ,true,0.8f);return;
+        }
         switch (a.goal) {
             case IDLE -> sys.desire(a, A_HOLD);
             case GROOM -> {

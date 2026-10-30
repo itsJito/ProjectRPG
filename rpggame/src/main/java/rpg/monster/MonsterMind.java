@@ -67,6 +67,7 @@ public final class MonsterMind {
     // ------------------------------------------------------------------ senses
     /** Looks, listens and smells (four times a second): what it knows is refreshed, and what it no longer does is forgotten in time. */
     void sense(Monster m, float step) {
+        m.observedFire=m.kind==MonsterKind.DRAGON || m.kind==MonsterKind.IMP || m.kind==MonsterKind.GHOST?null:rpg.world.FireSafety.observe(g,m,m.kind.undead()?3:7);
         boolean night = night();
         float sight = m.kind.sight * (m.state == State.DORMANT ? 0.4f : 1) * (dayBlind(m) && !night ? 0.7f : 1) * (nightSighted(m) && night ? 1.2f : 1);
         float smell = m.kind.smell * (g.timeSystem.weather.rain > 0.3f ? 0.5f : 1);
@@ -299,6 +300,10 @@ public final class MonsterMind {
 
     // ------------------------------------------------------------------ doing
     void act(Monster m, float dt) {
+        if(m.observedFire!=null) {
+            if(g.time-m.fireObservedAt>1 || m.distTo(m.fireEscapeX,m.fireEscapeZ)<0.8f){var retreat=rpg.world.FireSafety.refuge(g,m,m.observedFire);m.fireEscapeX=retreat[0];m.fireEscapeZ=retreat[1];m.fireObservedAt=g.time;}
+            m.state=State.FLEE;m.lastOutcome="avoiding uncontrolled fire";sys.moveTo(m,m.fireEscapeX,m.fireEscapeZ,true,0.8f);return;
+        }
         switch (m.state) {
             case DORMANT, REST -> { home(m, 0.6f); m.wantAltitude = roost(m); if (m.state == State.REST && m.kind.regen > 0) m.hp = Math.min(m.maxHp(), m.hp + m.kind.regen * 3 * dt); }
             case IDLE -> { if (home(m, 3)) wanderNear(m, m.lairX, m.lairZ, 3); m.wantAltitude = m.kind.flies() ? 1.2f : 0; }

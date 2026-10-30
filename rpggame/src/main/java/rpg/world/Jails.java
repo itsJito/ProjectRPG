@@ -15,7 +15,7 @@ public final class Jails {
     }
     public static final Cell[] CELLS = {
         new Cell(DevMap.ALPHA, 115, 56, 119, 53, 118, 116.5f, 54.5f, 118.5f, 58.5f,
-                new DevMap.Piece("SLAB", 118, 53, 118, 54, 1, 0, 0)),
+                new DevMap.Piece("SLAB", 117, 54, 117, 55, 1, 2, 0)),
         new Cell(DevMap.BETA, 36, 119, 39, 121, 38, 37.5f, 120.5f, 38.5f, 116.5f,
                 new DevMap.Piece("SLAB", 38, 120, 38, 121, 1, 2, 0)),
         // DevPalace's cell, in the back of the basilica behind the praetor's bench (0.2.0)

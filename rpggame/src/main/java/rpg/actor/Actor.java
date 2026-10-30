@@ -31,6 +31,9 @@ public class Actor {
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
+    public rpg.world.FireSafety.Hazard observedFire;
+    public double fireObservedAt=-99;
+    public float fireEscapeX,fireEscapeZ;
     public float eatenMinutes;
     public float charred;
     /** When the fire on this body next chars a patch of it (Chemistry). */

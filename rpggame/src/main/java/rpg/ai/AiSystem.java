@@ -236,7 +236,8 @@ public final class AiSystem {
                 {80.5f,20.5f},{31.5f,102.5f},{93.5f,24.5f},{140.5f,152.5f},{76.5f,28.5f},{182.5f,96.5f}};
         Npc.Role role = index < 4 ? Npc.Role.CRAFTSMAN : index < 6 ? Npc.Role.WORKER : index < 8 ? Npc.Role.MINER : Npc.Role.MERCHANT;
         String title = index < 4 ? "Carpenter" : index < 6 ? "Woodcutter" : index < 8 ? "Ore Miner" : "Materials Trader";
-        Npc n = npc(id, title, role, title, posts[index][0], posts[index][1], 240 + index);
+        String[] names={"Aeldric","Brannoc","Corren","Deryn","Eirwen","Fennric","Garron","Haldren","Istren","Maerwyn"};
+        Npc n = npc(id, names[index], role, title, posts[index][0], posts[index][1], 240 + index);
         if (index < 4) {
             Profession.CARPENTER.assign(n); n.skills.setLevel(Skill.CONSTRUCTION,40); n.skills.setLevel(Skill.CRAFTING,30);
             give(n,Items.HAMMER,1); give(n,Items.PLANK,6);
@@ -605,6 +606,14 @@ public final class AiSystem {
             }
             if (!n.alive || !n.loaded) continue;
             Snapshots.Mover m = bodies.mover(n.body);
+            if(m==null && !n.reacting && n.ragdoll==0) {
+                if(n.missingBodySince<0)n.missingBodySince=g.time;
+                if(g.time-n.missingBodySince>0.75) {
+                    n.body=0;if(n.agent!=0)g.game.commands().release(n.agent);n.agent=0;
+                    spawnBody(n);n.missingBodySince=-1;
+                    g.state.commit("NpcBodyRecovered",0,n.id,n.homeJurisdiction,0,"restored missing mover without changing resident state");
+                }
+            } else n.missingBodySince=-1;
             if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
             // a sprint costs breath as the player's does
             if (n.sprinting && Math.hypot(n.vx, n.vz) > g.cfg.jogSpeed) { n.stamina = Math.max(0, n.stamina - g.cfg.staminaSprint * (float) g.lastDt); n.cs.regenDelay = 0.6f; }
@@ -741,6 +750,13 @@ public final class AiSystem {
         }
 
         boolean law = n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN;
+        if(law) {
+            long subject=n.fightTarget!=0?n.fightTarget:n.hunt!=null?n.hunt.target:0;
+            if(subject!=0 && g.law.fineDeferred(subject,n.homeJurisdiction) && !g.law.resisting(subject)
+                    && !(n.cs.lastAttacker==subject && g.time-n.cs.lastHurt<12)) {
+                n.fightTarget=0;if(n.hunt!=null && n.hunt.target==subject)n.hunt=null;n.cs.cancel();n.cs.blocking=false;
+            }
+        }
         // nobody knows where a foe is unless their senses say so: in sight (or out of it for a heartbeat, behind a post)
         // it is still the fight; lost for longer, all that is left is where they were last placed - a search (Hunt)
         // charmed (Charm Person): no lifted hand against the player while it lasts

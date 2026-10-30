@@ -364,36 +364,6 @@ public final class Items {
         }
         get("wolf_bones").buryXp = 8;
         get("rotting_remains").buryXp = 3;
-        // the gear among the drops: pieces of a tier, each with its own name
-        Object[][] gear = {
-                // id, name, tier, kind (as the tier's own: body, helm, spear ...), value, examine
-                {"goblin_mail", "Goblin mail", Tier.BRONZE, "body", 900, "Rings and scraps of plate laced together by goblin hands."},
-                {"orcish_platebody", "Orcish platebody", Tier.IRON, "body", 4200, "Heavy, crude, and very hard to get through."},
-                {"warlord_helm", "Warlord's helm", Tier.BLACK, "helm", 21000, "An orc warlord's horned war helm."},
-                {"forgotten_helm", "Forgotten helm", Tier.IRON, "helm", 700, "An old helm in a style nobody makes any more."},
-                {"commanders_helm", "Undead commander's helm", Tier.BLACK, "helm", 18000, "It still bears the marks of the battle that made its wearer."},
-                {"ancient_helm", "Ancient skeleton helm", Tier.WHITE, "helm", 16000, "Bleached bone-white steel from a forgotten kingdom."},
-                {"champions_spear", "Champion's spear", Tier.BLACK, "spear", 6000, "A goblin champion's spear, balanced better than it has any right to be."},
-                {"chieftains_axe", "Chieftain's axe", Tier.STEEL, "battleaxe", 9000, "An orc chieftain's axe. Notched by every challenge it answered."},
-                {"troll_club", "Troll club", Tier.GRANITE, "warhammer", 7000, "A tree trunk studded with flint. It takes both hands - yours, anyway."},
-                {"rusty_sword", "Rusty sword", Tier.IRON, "sword", 60, "It has seen better centuries."},
-                {"bone_club", "Bone club", Tier.WHITE, "mace", 2400, "A thighbone, enormous, bound with iron at the head."},
-                {"cursed_blade", "Cursed blade", Tier.BLACK, "sword", 3300, "Cold to hold, and it does not want to be put down."},
-                {"spectral_blade", "Spectral blade", Tier.WHITE, "longsword", 4000, "A blade you can almost see through."}};
-        for (Object[] r : gear) {
-            ItemDef base = tierItem((Tier) r[2], (String) r[3]);
-            ItemDef d = def((String) r[0], (String) r[1], (int) r[4], base.color, (String) r[5]);
-            d.slot = base.slot; d.family = base.family; d.tier = base.tier; d.reqSkill = base.reqSkill; d.reqLevel = base.reqLevel;
-            d.armor = base.armor; d.damage = base.damage; d.impact = base.impact; d.reach = base.reach; d.speed = base.speed; d.damageType = base.damageType;
-            d.strengthBonus = base.strengthBonus; d.attackBonus = base.attackBonus; d.guard = base.guard; d.twoHand = base.twoHand || r[0].equals("troll_club");
-            d.gw = base.gw; d.gh = base.gh; d.weight = base.weight;
-        }
-        // a rusty sword is a poor one; the cursed and spectral blades are a cut above their tier
-        get("rusty_sword").damage *= 0.75f; get("cursed_blade").strengthBonus += 3; get("spectral_blade").damageType = DamageType.MAGIC;
-        get("troll_club").impact *= 1.4f; get("troll_club").weight *= 1.8f;
-        ItemDef staff = def("shaman_staff", "Goblin high-shaman's staff", 12000, 0x5A7A2A, "Feathers, fetishes and a skull on a gnarled stave. It hums with stolen magic.");
-        staff.slot = Slot.MAIN; staff.family = Family.STAFF; staff.reqSkill = Skill.MAGIC; staff.reqLevel = 40; staff.damage = 7 * rpg.combat.CombatMath.HP_SCALE; staff.impact = 12; staff.reach = 1.3f; staff.speed = 1.1f;
-        staff.damageType = DamageType.BLUNT; staff.magicDamageBonusPct = 22; staff.gw = 1; staff.gh = 5; staff.weight = 1.8f;
         ItemDef cloak = def("wing_cloak", "Wing cloak", 9000, 0x3A3036, "A cloak of stitched giant-bat wing. It whispers as you walk.");
         cloak.slot = Slot.CAPE; cloak.family = Family.ARMOR; cloak.armor = 2; cloak.reqSkill = Skill.DEFENSE; cloak.reqLevel = 30; cloak.gw = 2; cloak.gh = 3; cloak.weight = 1f;
         ItemDef robe = def("silk_robe", "Silk robe", 14000, 0xE8E4D8, "A robe of giant-spider silk: light as air, and nothing cuts it easily.");
@@ -472,8 +442,28 @@ public final class Items {
 
     public static final ItemDef WOODEN_SWORD = get("wooden_sword");
 
-    /** Ids from saves made before Stone replaced Leather as a tier (gamefixes): a leather helm is a stone one now. */
+    /** Retired gear names resolve only during save conversion; they are not active catalog entries. */
+    public static String canonicalSavedId(String id) {
+        return switch(id) {
+            case "goblin_mail" -> "bronze_body";
+            case "orcish_platebody" -> "iron_body";
+            case "warlord_helm" -> "black_helm";
+            case "forgotten_helm" -> "iron_helm";
+            case "commanders_helm" -> "black_helm";
+            case "ancient_helm" -> "white_helm";
+            case "champions_spear" -> "black_spear";
+            case "chieftains_axe" -> "steel_battleaxe";
+            case "troll_club" -> "granite_warhammer";
+            case "rusty_sword" -> "iron_sword";
+            case "bone_club" -> "white_mace";
+            case "cursed_blade" -> "black_sword";
+            case "spectral_blade" -> "white_longsword";
+            case "shaman_staff" -> "fire_staff";
+            default -> id;
+        };
+    }
     public static ItemDef saved(String id) {
+        id=canonicalSavedId(id);
         ItemDef d = find(id);
         if (d == null && id.startsWith("leather_")) d = find("stone_" + id.substring(8));
         return d;

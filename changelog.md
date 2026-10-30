@@ -4,6 +4,42 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 16: Pane Relief (Version Alpha 0.2.5) — Shadow
+
+Continues the main-based polish tree from Alpha 0.2.4; publication remains on `polish`. Earlier entries are preserved. Player notes continue in `patchnotes.md` by request.
+
+### Townsfolk, reports, and repairs
+- Weapon displays produce cautionary ARMS memories instead of good-deed memories. They spread as news, affect opinion negatively, and use warning replies rather than praise or theft accusations.
+- Damage knowledge is acquired through actual nearby sight, sampled across residents, or delivered in person with a visibility and distance check. Reports select living, loaded Lawmen in the affected jurisdiction or appropriate builders. Recipient choice is retained during the approach. Builders may work across jurisdiction boundaries; Lawmen may leave their routine patrol boundary to deliver a report.
+- Persisted repair orders record reporter, assigned worker, payer, and fee. A Lawman commissions glass repair for 3 Gold and timber repair for 5 Gold. Civilian reports are free; an officer may subsequently commission that repair. Funds are checked and transferred from the officer's actual inventory only on successful completion, with ownership transferred and a payment event recorded. No money is created.
+- Repair claims require known damage, a suitable trade, a Hammer, timber where required, elapsed settling time, available funds when commissioned, and a site clear of active burning. Interrupted, invalid, dead, unloaded, and inaccessible workers release or defer claims.
+- Mending uses the shared interruptible Work system for 3.5 seconds, a stable approach location, and a distance check at completion. It precedes ordinary Carpenter unloading/crafting. Timber consumption now updates the item ledger. Surviving halves of dual-material walls can be restored. Knowledge is cleared when a repair finishes.
+- Damage and fire observations target the near surface of a voxel cell so a solid burning wall or the surviving half of a damaged wall does not occlude itself; intervening walls still block observation.
+- Added role-specific uncontrolled-fire utility decisions and visible hazard queries that exclude lamps and campfires. Lawmen warn people clear, Carpenters wait for cooling before repair, and Woodcutters warn about burning timber. Routine work is interrupted by nearby danger. Animal needs are cancelled for escape; babies perceive heat over a wider distance. Susceptible monsters avoid nearby fires; undead react at closer range, while Dragons, Imps, and Ghosts retain their distinct behaviour. This changes decisions, not damage immunity or skill levels.
+- IDs 586–595 retain their professions and inventories under the names Aeldric, Brannoc, Corren, Deryn, Eirwen, Fennric, Garron, Haldren, Istren, and Maerwyn.
+
+### Travel, combat, and resident continuity
+- Replaced linear waypoint selection with a priority-queue A* search attaching start and goal to several visible graph nodes. Geometry edge checks are cached per world/navigation revision. Access permissions apply to all crossed doorway cells, including attachments and path trimming, independently of cached geometry.
+- Changed solid geometry or doorway state invalidates relevant cached geometry. Residents reconsider an obstructed current leg without restarting all travel on every edit. Native agents continue to handle local movement and avoidance.
+- An established opponent is tracked using fresh range, illumination, smoke, and occlusion checks while the fighter turns. Routine perception retains its existing facing cone and cache; walls still break combat sight.
+- Unanswered petty-fine conversations expire from the law update after ten seconds, even when the officer cannot reach the offender again. The existing fine grace remains in effect, and an associated search is cleared so improved combat tracking does not prolong administrative pursuit. Self-defense and serious warrants retain their existing rules.
+- A loaded, living resident whose mover is absent for more than 0.75 seconds is given a replacement mover/agent without replacing the resident record, inventory, skills, or health. Dead, unloaded, and articulated reaction bodies are excluded.
+
+### Cells and physical equipment
+- Sentence release clears stale automatic-close/relock intent before opening an empty cell. When another prisoner still occupies the cell, the released player is moved to the authored release point instead of unlocking the occupied cell.
+- Moved the DevCity slab inside the back wall, continued its internal partition with bars, and matched the enclosing walls/roof to the building's plaster. Stable fixture identities are retained.
+- Ordinary dropped hand equipment uses a native rigid box derived from its model bounds, actual mass, friction, angular velocity, and a full quaternion. Rendering follows the same body centre and orientation. Moving saves retain linear/angular velocity; settled saves retain pose. Legacy ordinary ground gear is given a physics pose when restored. Long projectiles retain their existing lodged/directional path without creating a duplicate rigid body.
+- Physics retains the existing eight-second loose-object budget and freezes the final pose afterward. Item model bounds are cached for drawing rather than rescanned every frame.
+
+### Content, visual work, and performance
+- Removed the active named monster gear variants and their special stat adjustments. Drop tables, carried gear, and crypt loot use canonical material-tier equipment. Legacy item IDs resolve to canonical definitions during load; ledger keys are merged, and quick slots use the same conversion. Stack ownership, theft/provenance, contents, and quantity continue through ItemIO.
+- Palace hedges use dense cutout cube surfaces with wind movement rather than leaf-card clusters. Bushes and shrubs use sixty closed, folded pointed leaves in a layered ellipsoid over woody stems, with lighter ridges and shaded undersides. Leaf vertices retain the existing packed plant root for contact and wind bending. This replaces the intermediate stepped-box crowns with about a third fewer triangles; colours are less saturated. Reduced the engine leaf translucency intensity and green/yellow bias.
+- Recessed the underlying elbow/knee geometry under the overlapping armour cuffs while retaining the existing skeleton, attacks, and locomotion animation.
+- Limited each actor to one pending appearance build, retained its last visible figure until the job completes, evicted unused meshes beyond the cache target, and pruned appearance/animation records for actors no longer present. This avoids queued obsolete injury appearances and the previous eviction failure when the oldest mesh was still displayed.
+- Version advanced to Alpha 0.2.5. Final affected verification passes 52 tests; the broad 294-test run had one petty-fine search failure (corrected and covered by the final law run) and one deliberately disabled profiling probe. Engine verification passes 121 native and 29 Java checks. Distribution build and native rendered review pass. Regression, visual, compatibility, and profiling evidence is recorded in `docs/alpha025-review.md`.
+
+---
+
 ## Pass 15: Cell Service (Version Alpha 0.2.4) — Shadow
 
 Built from main `85a17791d3dcb9e1db7fa50ad9426895544b71c9`. The previous polish tip is retained as history without importing its source changes. Classic-era World of Warcraft is the visual reference; townsfolk jobs and reactions are the AI priority. Player notes continue in `patchnotes.md` by request. Earlier entries below are preserved.

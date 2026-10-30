@@ -118,22 +118,22 @@ public enum MonsterKind {
         // Pack Raiders: tribal scavengers - cowardly alone, vicious in a mob; more aggressive at night
         GOBLIN.drives(0.7f, 0.35f, 0.55f, 0.6f, 0.4f, 0.85f, 0.45f).range(40, 3, 6, Active.ALWAYS).senses(16, 1.3f, 6, 90).gait(1.3f, 4.2f)
                 .weapon("knife", 2, 8, 0.6f, PIERCE, "bronze_spear", "bronze_dagger", "stone_spear", "wooden_spear").ranged("bronze_javelin", 14)
-                .drops(of("bones"), of("coins:2-18", "bronze_dagger", "bronze_spear", "bread", "raw_meat"), of("goblin_mail", "bronze_spear", "wooden_shield", "guam:1-3", "plank:1-2", "cloth_roll"),
-                        of("champions_spear", "goblin_banner"), of("shaman_staff")).looks(0x5E8A2E, 0x5A3A22)
+                .drops(of("bones"), of("coins:2-18", "bronze_dagger", "bronze_spear", "bread", "raw_meat"), of("bronze_body", "bronze_spear", "wooden_shield", "guam:1-3", "plank:1-2", "cloth_roll"),
+                        of("black_spear", "goblin_banner"), of("fire_staff")).looks(0x5E8A2E, 0x5A3A22)
                 .sounds("creature_misc", "creature_monster", "creature_hurt", "creature_die");
         GOBLIN.woundedAt = 0.4f;
         // organised warbands: proud, rarely flee unless the chieftain falls
         ORC.drives(0.5f, 0.15f, 0.8f, 0.8f, 0.35f, 0.6f, 0.2f).range(80, 2, 5, Active.ALWAYS).senses(22, 1.2f, 10, 300).gait(1.3f, 4.6f)
                 .weapon("fists", 4, 20, 0.7f, BLUNT, "iron_battleaxe", "iron_sword", "iron_axe", "steel_sword").ranged("iron_tomahawk", 12)
-                .drops(of("big_bones"), of("iron_sword", "iron_body", "coins:10-60", "iron_axe"), of("orcish_platebody", "iron_battleaxe", "war_paint", "steel_sword"),
-                        of("chieftains_axe", "bloodied_standard"), of("warlord_helm", "clan_relic")).looks(0x5C6E4A, 0x3A2A20)
+                .drops(of("big_bones"), of("iron_sword", "iron_body", "coins:10-60", "iron_axe"), of("iron_body", "iron_battleaxe", "war_paint", "steel_sword"),
+                        of("steel_battleaxe", "bloodied_standard"), of("black_helm", "clan_relic")).looks(0x5C6E4A, 0x3A2A20)
                 .sounds("creature_monster", "creature_roar", "creature_hurt", "creature_die");
         ORC.woundedAt = 0.12f;
         // a solitary brute: territorial ambusher, slow to anger, impossible to calm; regenerates; enraged below 30%
         TROLL.drives(0.7f, 0.08f, 0.6f, 0.95f, 0.5f, 0.1f, 0.05f).range(100, 1, 1, Active.DUSK_NIGHT).senses(12, 1.6f, 22, 600).gait(1.0f, 3.4f)
-                .weapon("fists", 9, 70, 1.4f, BLUNT, "troll_club").ranged("boulder", 16)
+                .weapon("fists", 9, 70, 1.4f, BLUNT, "granite_warhammer").ranged("boulder", 16)
                 .drops(of("big_bones", "troll_fat"), of("granite_mace", "rawhide:1-2", "guam:1-4"), of("granite_shield", "granite_warhammer", "iron_legs"),
-                        of("cobalt_warhammer", "troll_totem"), of("troll_heart", "troll_club")).looks(0x6E7268, 0x4A4A42)
+                        of("cobalt_warhammer", "troll_totem"), of("troll_heart", "granite_warhammer")).looks(0x6E7268, 0x4A4A42)
                 .sounds("creature_roar", "creature_roar", "creature_hurt", "creature_die");
         TROLL.regen = 0.6f; TROLL.woundedAt = 0.08f; TROLL.berserk = true; TROLL.weakness = Element.FIRE; TROLL.sydney = astratto.bridge.AstrattoNative.SYDNEY_GIANT;
         // harassers: mischievous tricksters, attracted to shiny things, fire and magic
@@ -151,18 +151,18 @@ public enum MonsterKind {
         // a haunter: bound to a place, does not tire or hunger; escalates the longer the living remain
         GHOST.drives(0f, 0.1f, 0.4f, 1.0f, 0f, 0.1f, 0.3f).range(25, 1, 1, Active.ALWAYS).senses(20, 1.0f, 0, 400).gait(0.8f, 2.6f)
                 .weapon("touch", 4, 6, 0.8f, MAGIC).ranged("spectral", 14)
-                .drops(of("ectoplasm"), of("spirit_dust:1-3", "spectral_residue"), of("ghostly_cloth", "soul_essence"), of("spirit_trinket", "spectral_blade"), of("bound_ghost_essence", "haunt_artifact"))
+                .drops(of("ectoplasm"), of("spirit_dust:1-3", "spectral_residue"), of("ghostly_cloth", "soul_essence"), of("spirit_trinket", "white_longsword"), of("bound_ghost_essence", "haunt_artifact"))
                 .looks(0xC8DCE8, 0x8AA0B4).sounds("creature_misc", "creature_monster", "creature_misc", "creature_misc");
         GHOST.woundedAt = 0; GHOST.weakness = Element.FIRE;
         // bound dead: a relentless horde, drawn to sound
         ZOMBIE.drives(0.2f, 0f, 0.7f, 0.3f, 0f, 0.4f, 0f).range(50, 2, 6, Active.ALWAYS).senses(10, 1.8f, 14, 30).gait(0.7f, 1.6f)
                 .weapon("claws", 4, 18, 0.7f, SLASH)
-                .drops(of("rotting_remains"), of("tattered_cloth", "bronze_sword", "soul_dust"), of("forgotten_helm", "guam:1-2", "iron_dagger"), of("cursed_blade", "undead_relic"), of("phylactery_fragment", "commanders_helm"))
+                .drops(of("rotting_remains"), of("tattered_cloth", "bronze_sword", "soul_dust"), of("iron_helm", "guam:1-2", "iron_dagger"), of("black_sword", "undead_relic"), of("phylactery_fragment", "black_helm"))
                 .looks(0x6A7E5A, 0x4A4034).sounds("creature_slime", "creature_monster", "creature_slime", "creature_die");
         ZOMBIE.woundedAt = 0; ZOMBIE.weakness = Element.FIRE; ZOMBIE.sydney = astratto.bridge.AstrattoNative.SYDNEY_INFECTED;
         SKELETON.drives(0f, 0f, 0.5f, 1.0f, 0f, 0.6f, 0f).range(25, 2, 5, Active.ALWAYS).senses(18, 1.2f, 0, 60).gait(1.1f, 3.6f)
-                .weapon("fists", 2, 10, 0.6f, BLUNT, "rusty_sword", "iron_sword", "iron_axe", "bone_club").ranged("shortbow", 18)
-                .drops(of("bones"), of("rusty_sword", "iron_body", "soul_dust"), of("iron_sword", "guam", "coins:5-40"), of("champion_scroll", "bone_club"), of("ancient_helm", "soulbound_artifact"))
+                .weapon("fists", 2, 10, 0.6f, BLUNT, "iron_sword", "iron_sword", "iron_axe", "white_mace").ranged("shortbow", 18)
+                .drops(of("bones"), of("iron_sword", "iron_body", "soul_dust"), of("iron_sword", "guam", "coins:5-40"), of("champion_scroll", "white_mace"), of("white_helm", "soulbound_artifact"))
                 .looks(0xE6DECA, 0x8A8070).sounds("stones", "creature_misc", "stones", "stones");
         SKELETON.woundedAt = 0;
         // an apex hunter: patient, cunning, stalks before it strikes; bolder under the full moon

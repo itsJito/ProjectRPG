@@ -99,6 +99,9 @@ public class Npc extends Actor implements Interactable {
     }
     /** A confirmed identification, carried only by its eyewitness and people they actually tell. */
     public record Sighting(long witness, float x, float z, float vx, float vz, double at) {}
+    public long navRevision=-1;
+    public double missingBodySince=-1;
+    public long damageReportTarget;
     public Sighting playerSighting;
     /** A tip-off (gamefixes): a sighting of a wanted player this NPC is carrying to the watch, and when it last told one. */
     public Sighting tip;

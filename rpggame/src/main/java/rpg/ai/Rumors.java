@@ -36,13 +36,13 @@ public final class Rumors {
     static float weight(Memory m) {
         return switch (m.kind) {
             case "MURDER" -> 10; case "ASSAULT" -> 5; case "LIVESTOCK" -> 3; case "THEFT" -> 2.5f; case "LOCKPICKING", "VANDALISM" -> 1.5f;
-            case "DEED" -> 1.2f; case "IMPRISONED" -> 2;
+            case "DEED" -> 1.2f; case "ARMS" -> 1.5f; case "IMPRISONED" -> 2;
             default -> 0;
         } * m.confidence;
     }
 
     /** Whether a memory is news worth telling (a crime, or a good deed). */
-    static boolean news(Memory m) { return m.crime() || m.kind.equals("DEED") || m.kind.equals("IMPRISONED"); }
+    static boolean news(Memory m) { return m.crime() || m.kind.equals("DEED") || m.kind.equals("ARMS") || m.kind.equals("IMPRISONED"); }
 
     /**
      * What an NPC makes of the player from everything they know (seen and heard), -1 (dread) .. +1 (warmth). A killing
@@ -58,7 +58,7 @@ public final class Rumors {
             o += switch (m.kind) {
                 case "MURDER" -> -0.9f * c; case "ASSAULT" -> m.victim == n.id ? -0.7f * c : -0.35f * c; case "THEFT" -> m.victim == n.id ? -0.45f * c : -0.2f * c;
                 case "LIVESTOCK" -> -0.25f * c; case "LOCKPICKING", "VANDALISM" -> -0.15f * c;
-                case "DEED" -> 0.12f * c;
+                case "DEED" -> 0.12f * c; case "ARMS" -> -0.08f * c;
                 default -> 0;
             };
         }
@@ -87,6 +87,14 @@ public final class Rumors {
         if (g.actor(beneficiary) instanceof Npc b && b.alive) {
             b.remember(new Memory("DEED", g.player.id, b.id, DevMap.jurisdiction(b.x, b.z), g.state.minutes, 1f, "witnessed", 0, 0, what), 24);
             b.knowsPlayer = true;
+        }
+    }
+
+    /** A witnessed threatening display is cautionary news, never moral credit. */
+    public void arms(String what) {
+        for(Npc witness:ai.witnesses(g.player)) {
+            witness.remember(new Memory("ARMS",g.player.id,0,DevMap.jurisdiction(witness.x,witness.z),g.state.minutes,1,"witnessed",0,0,what),24);
+            witness.knowsPlayer=true;
         }
     }
 
@@ -165,7 +173,7 @@ public final class Rumors {
         if (aboutPlayer && g.player.alive && ai.canSee(hearer, g.player) && hearer.distTo(g.player) < 18) {
             // a look over the shoulder at the one they are talking about
             hearer.wantYaw = (float) Math.atan2(-(g.player.x - hearer.x), -(g.player.z - hearer.z));
-            ai.reply(hearer, m.kind.equals("DEED") ? "Is that them? Huh." : m.kind.equals("MURDER") ? "That's them... over there." : "Them? I'll watch my purse.");
+            ai.reply(hearer, m.kind.equals("DEED") ? "Is that them? Huh." : m.kind.equals("MURDER") ? "That's them... over there." : m.kind.equals("ARMS") ? "I'll keep clear." : "Them? I'll watch my purse.");
         }
         if (newSpeech && audible(teller, g.player, shout ? 14 : 8)) {
             g.chat.add("[Overheard] " + teller.name + ": \"" + line + "\"", Chat.Kind.DIALOGUE);
@@ -190,6 +198,7 @@ public final class Rumors {
             case "LIVESTOCK" -> hedge + who + " killed one of the farm animals.";
             case "LOCKPICKING" -> hedge + who + " was picking locks.";
             case "VANDALISM" -> hedge + who + " smashed things up.";
+            case "ARMS" -> (saw ? "I saw " : "I heard ") + who + " " + m.detail + ". Keep clear of that.";
             case "DEED" -> (saw ? "I saw " : "I heard ") + who + " " + m.detail + ". Decent of them.";
             default -> "...";
         };

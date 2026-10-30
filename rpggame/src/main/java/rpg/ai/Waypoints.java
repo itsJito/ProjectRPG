@@ -36,7 +36,8 @@ public final class Waypoints {
      * the back of a shop or into a locked store room is then a route like any other.
      */
     public static void doors(Voxels vox, List<rpg.objects.Door> doors) {
-        base();
+        base();cachedWorld=null;edgeClear.clear();
+        doorCells.clear();for(var door:doors)for(int[] at:door.cells)doorCells.put(cell(at[0],at[1]),door);
         List<float[]> pts = new ArrayList<>(Arrays.asList(DevMap.WAYPOINTS));
         for (var dungeon : rpg.world.DungeonLayout.all()) pts.addAll(dungeon.waypoints());
         int first = pts.size();
@@ -117,38 +118,57 @@ public final class Waypoints {
 
     /** The same for a walker who may pass only the doors that test true (shut ones open by hand; locked ones by the key). */
     public static int[] route(Voxels vox, float sx, float sz, float tx, float tz, java.util.function.Predicate<rpg.objects.Door> mayPass) {
-        if (Math.hypot(tx - sx, tz - sz) < DIRECT && clear(vox, sx, sz, tx, tz)) return new int[0];
-        int a = nearest(vox, sx, sz), b = nearest(vox, tx, tz);
-        if (a < 0 || b < 0) return new int[0];
-        // Dijkstra over the links
-        float[] dist = new float[P.length];
-        int[] prev = new int[P.length];
-        boolean[] done = new boolean[P.length];
-        Arrays.fill(dist, Float.MAX_VALUE);
-        Arrays.fill(prev, -1);
-        dist[a] = 0;
-        for (int it = 0; it < P.length; it++) {
-            int u = -1;
-            for (int i = 0; i < P.length; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i;
-            if (u < 0 || dist[u] == Float.MAX_VALUE) break;
-            done[u] = true;
-            if (u == b) break;
-            for (int v : ADJ.get(u)) {
-                // through a doorway (its two points) only if this walker may open it
-                if (DOOR[u] != null && DOOR[u] == DOOR[v] && !mayPass.test(DOOR[u])) continue;
-                float d = dist[u] + (float) Math.hypot(P[v][0] - P[u][0], P[v][1] - P[u][1]);
-                if (d < dist[v]) { dist[v] = d; prev[v] = u; }
+        if (Math.hypot(tx - sx, tz - sz) < DIRECT && walkable(vox, sx, sz, tx, tz,mayPass)) return new int[0];
+        if(cachedWorld!=vox || cachedRevision!=(vox==null?0:vox.navigationRevision)){cachedWorld=vox;cachedRevision=vox==null?0:vox.navigationRevision;edgeClear.clear();}
+        float[] dist=new float[P.length];int[] prev=new int[P.length];
+        Arrays.fill(dist,Float.MAX_VALUE);Arrays.fill(prev,-1);
+        record Visit(int node,float cost,float estimate) {}
+        var queue=new java.util.PriorityQueue<Visit>(java.util.Comparator.comparingDouble(Visit::estimate));
+        // Attach to several visible portals; the geometrically closest point may be behind a locked door.
+        int[] starts=attachments(vox,sx,sz,mayPass), ends=attachments(vox,tx,tz,mayPass);
+        if(starts.length==0 || ends.length==0)return new int[0];
+        boolean[] goal=new boolean[P.length];for(int node:ends)goal[node]=true;
+        for(int node:starts){dist[node]=(float)Math.hypot(P[node][0]-sx,P[node][1]-sz);queue.add(new Visit(node,dist[node],dist[node]+(float)Math.hypot(P[node][0]-tx,P[node][1]-tz)));}
+        int finish=-1;float total=Float.MAX_VALUE;
+        while(!queue.isEmpty()) {
+            Visit visit=queue.remove();int u=visit.node;
+            if(visit.cost>dist[u]+0.001f || visit.estimate>=total)continue;
+            if(goal[u]){float candidate=visit.cost+(float)Math.hypot(P[u][0]-tx,P[u][1]-tz);if(candidate<total){total=candidate;finish=u;}}
+            for(int v:ADJ.get(u)) {
+                boolean passage=DOOR[u]!=null && DOOR[u]==DOOR[v];
+                if(passage ? !mayPass.test(DOOR[u]) : (!edgeVisible(vox,u,v) || !doorsAllowed(P[u][0],P[u][1],P[v][0],P[v][1],mayPass)))continue;
+                float cost=dist[u]+(float)Math.hypot(P[v][0]-P[u][0],P[v][1]-P[u][1]);
+                if(cost<dist[v]){dist[v]=cost;prev[v]=u;queue.add(new Visit(v,cost,cost+(float)Math.hypot(P[v][0]-tx,P[v][1]-tz)));}
             }
         }
-        if (dist[b] == Float.MAX_VALUE) return new int[0];
-        List<Integer> path = new ArrayList<>();
-        for (int v = b; v >= 0; v = prev[v]) path.add(0, v);
-        // skip a first waypoint that is behind the walker (already nearer the second than it is)
-        if (path.size() >= 2) {
-            float[] p0 = P[path.get(0)], p1 = P[path.get(1)];
-            if (Math.hypot(p1[0] - sx, p1[1] - sz) < Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) && clear(vox, sx, sz, p1[0], p1[1])) path.remove(0);
-        }
+        if(finish<0)return new int[0];
+        List<Integer> path=new ArrayList<>();for(int v=finish;v>=0;v=prev[v])path.add(0,v);
+        // Trim only a first leg that is currently clear, never across an unpermitted doorway.
+        while(path.size()>1 && walkable(vox,sx,sz,P[path.get(1)][0],P[path.get(1)][1],mayPass)
+                && (DOOR[path.get(0)]==null || DOOR[path.get(0)]!=DOOR[path.get(1)] || mayPass.test(DOOR[path.get(0)])))path.remove(0);
         return path.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static Voxels cachedWorld;
+    private static long cachedRevision=-1;
+    private static final java.util.Map<Long,Boolean> edgeClear=new java.util.HashMap<>();
+    private static boolean edgeVisible(Voxels vox,int a,int b){long key=((long)Math.min(a,b)<<32)|Math.max(a,b);return edgeClear.computeIfAbsent(key,k->clear(vox,P[a][0],P[a][1],P[b][0],P[b][1]));}
+    private static int[] attachments(Voxels vox,float x,float z,java.util.function.Predicate<rpg.objects.Door> mayPass) {
+        return java.util.stream.IntStream.range(0,P.length).boxed()
+                .filter(i->Math.hypot(P[i][0]-x,P[i][1]-z)<40)
+                .sorted(java.util.Comparator.comparingDouble(i->Math.hypot(P[i][0]-x,P[i][1]-z)))
+                .filter(i->walkable(vox,x,z,P[i][0],P[i][1],mayPass)).limit(4).mapToInt(Integer::intValue).toArray();
+    }
+
+    private static final java.util.Map<Long,rpg.objects.Door> doorCells=new java.util.HashMap<>();
+    private static long cell(float x,float z){return ((long)(int)Math.floor(x)<<32)|((int)Math.floor(z)&0xffffffffL);}
+    private static boolean doorsAllowed(float ax,float az,float bx,float bz,java.util.function.Predicate<rpg.objects.Door> mayPass) {
+        int steps=Math.max(1,(int)Math.ceil(Math.hypot(bx-ax,bz-az)/0.25));
+        for(int i=0;i<=steps;i++){var door=doorCells.get(cell(ax+(bx-ax)*i/steps,az+(bz-az)*i/steps));if(door!=null && !mayPass.test(door))return false;}
+        return true;
+    }
+    static boolean walkable(Voxels vox,float ax,float az,float bx,float bz,java.util.function.Predicate<rpg.objects.Door> mayPass) {
+        return clear(vox,ax,az,bx,bz) && doorsAllowed(ax,az,bx,bz,mayPass);
     }
 
     /** The nearest waypoint in plain sight of a point (or simply the nearest, when none is). */

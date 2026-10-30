@@ -16,7 +16,7 @@ import rpg.item.Items;
  * them back). Every pane smashed and every built thing burnt - a fence, a plank wall, a beam, a thatch, cloth - inside a
  * kingdom is remembered here with what stood there before. The world remembers it until someone whose trade it is comes to
  * mend it: a carpenter mends all of it, glass included; a woodcutter can put back timber. Mending wants materials - a
- * plank (or failing that a log) for anything of wood, nothing but skill for a pane - and a few seconds' work at the spot,
+ * plank (or failing that a log) for anything of wood and a Hammer to fit a pane - and a few seconds' work at the spot,
  * and is never begun while the place is still smoking. The wilds are nobody's to mend.
  */
 public final class Repairs {
@@ -30,6 +30,11 @@ public final class Repairs {
     private final Map<Long, Long> claimedBy = new HashMap<>();
     /** Where the one who took each job stands to do it (chosen once, so they do not dither between the two sides of a wall). */
     private final Map<Long, float[]> spots = new HashMap<>();
+    private final Map<Long,java.util.Set<Long>> known=new HashMap<>(), reported=new HashMap<>();
+    public record Order(long reporter,long worker,long payer,int fee) {}
+    private final Map<Long,Order> orders=new HashMap<>();
+    private int observer;
+    private double nextObserve;
     public long broken, mended;
     /** How long a breakage stands before anyone comes to see to it (seconds): the dust settles, the fire is out. */
     public static final double SETTLE = 40;
@@ -58,7 +63,73 @@ public final class Repairs {
         return block == Blocks.FENCE || m == Blocks.Material.WOOD || m == Blocks.Material.STRAW || m == Blocks.Material.CLOTH;
     }
 
+    public boolean contains(long key){return open.containsKey(key);}
     public List<Damage> open() { return new ArrayList<>(open.values()); }
+
+    /** Knowledge travels by seeing the damage, or by an actual conversation with someone who saw it. */
+    public void update() {
+        if(open.isEmpty() || g.time<nextObserve || g.npcs.isEmpty())return;
+        nextObserve=g.time+0.08;
+        Npc witness=g.npcs.get(Math.floorMod(observer++,g.npcs.size()));
+        if(!witness.alive || !witness.loaded || witness.asleep())return;
+        for(Damage damage:open.values())if(witness.distTo(damage.x+0.5f,damage.z+0.5f)<20
+                && g.vox.sightCell(witness.x,witness.eyeY(),witness.z,damage.x,damage.y,damage.z))
+            known.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
+    }
+    public record Report(Damage damage,Npc recipient) {}
+    public Report reportFor(Npc witness) {
+        if(!witness.alive || !witness.loaded || witness.summonOwner!=0 || witness.hostileToPlayer || witness.role==Npc.Role.THIEF)return null;
+        var seen=known.get(witness.id);if(seen==null)return null;
+        for(long key:seen) {
+            Damage damage=open.get(key);
+            if(damage==null || trade(witness,damage) && hammer(witness) || reported.getOrDefault(witness.id,java.util.Set.of()).contains(key))continue;
+            Npc recipient=null;float best=Float.MAX_VALUE;
+            for(Npc candidate:g.npcs) {
+                if(candidate==witness || !candidate.alive || !candidate.loaded || candidate.summonOwner!=0 || candidate.hostileToPlayer)continue;
+                boolean builder=trade(candidate,damage) && hammer(candidate), officer=candidate.role==Npc.Role.LAWMAN && candidate.homeJurisdiction.equals(damage.jurisdiction);
+                if(!builder && !officer)continue;
+                if(witness.role==Npc.Role.LAWMAN ? !builder : !builder && !officer)continue;
+                if(known.getOrDefault(candidate.id,java.util.Set.of()).contains(key) && (!builder || orders.containsKey(key) && !(witness.role==Npc.Role.LAWMAN && orders.get(key).payer==0)))continue;
+                float distance=witness.distTo(candidate)+(officer?-30:0)+(candidate.homeJurisdiction.equals(damage.jurisdiction)?0:12);
+                if(candidate.id==witness.damageReportTarget)distance-=100;
+                if(distance<best){best=distance;recipient=candidate;}
+            }
+            if(recipient!=null){witness.damageReportTarget=recipient.id;return new Report(damage,recipient);}
+        }
+        return null;
+    }
+    public boolean report(Npc witness,Damage damage,Npc recipient) {
+        if(!open.containsKey(damage.key) || !known.getOrDefault(witness.id,java.util.Set.of()).contains(damage.key)
+                || !witness.alive || !recipient.alive || witness.distTo(recipient)>3
+                || !g.vox.sight(witness.x,witness.eyeY(),witness.z,recipient.x,recipient.eyeY(),recipient.z))return false;
+        witness.damageReportTarget=0;
+        known.computeIfAbsent(recipient.id,k->new java.util.HashSet<>()).add(damage.key);
+        reported.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
+        if(trade(recipient,damage)) {
+            int fee=damage.glass()?3:5;long payer=witness.role==Npc.Role.LAWMAN?witness.id:0;
+            var previous=orders.get(damage.key);
+            if(previous==null || previous.payer==0 && payer!=0)orders.put(damage.key,new Order(witness.id,recipient.id,payer,payer==0?0:fee));
+            g.ai.say(witness,payer==0?"The building is damaged. Can you mend it?":"Please see to the damage. You'll be paid when it is mended.");
+            g.ai.reply(recipient,smoking(damage)?"Once the fire is out, I'll take a look.":"I'll see what materials it needs.");
+        } else {g.ai.say(witness,"There's damage to a building. Please send a builder.");g.ai.reply(recipient,"I'll find someone who can mend it.");}
+        g.state.commit("DamageReported",witness.id,recipient.id,damage.jurisdiction,0,Long.toString(damage.key));
+        return true;
+    }
+    public boolean hasWork(Npc worker) {
+        for(long key:known.getOrDefault(worker.id,java.util.Set.of())) {
+            Damage damage=open.get(key);
+            if(damage!=null && eligible(worker,damage))return true;
+        }
+        return false;
+    }
+    private boolean eligible(Npc worker,Damage damage) {
+        if(!trade(worker,damage) || g.time-damage.at<SETTLE || smoking(damage) || material(worker,damage)==null
+                || worker.unreachable.getOrDefault(damage.key,-1.0)>g.time)return false;
+        Order order=orders.get(damage.key);
+        if(order==null)return true;
+        if(order.worker!=worker.id && g.actor(order.worker) instanceof Npc assigned && assigned.alive && assigned.loaded)return false;
+        return order.payer==0 || g.actor(order.payer) instanceof Npc payer && payer.has(Items.COINS,order.fee) && worker.canStore(new rpg.item.ItemStack(Items.COINS,order.fee));
+    }
 
     /** Whether this person's trade covers it: a carpenter everything, a woodcutter timber. */
     public static boolean trade(Npc n, Damage d) {
@@ -66,8 +137,10 @@ public final class Repairs {
         return n.role == Npc.Role.WORKER && d.timber();
     }
     /** What mending it uses up from the mender's pack: a plank for timber (a log will do), nothing for glass. Null when they have none. */
+    private static boolean hammer(Npc n){return n.has(Items.HAMMER,1) || n.main()==Items.HAMMER;}
     public static ItemDef material(Npc n, Damage d) {
-        if (d.glass()) return Items.HAMMER;   // (a tool, not used up)
+        if(!hammer(n))return null;
+        if (d.glass()) return Items.HAMMER;
         if (n.has(Items.PLANK, 1)) return Items.PLANK;
         if (n.has(Items.OAK_PLANK, 1)) return Items.OAK_PLANK;
         if (n.has(Items.LOGS, 1)) return Items.LOGS;
@@ -84,9 +157,11 @@ public final class Repairs {
         }
         Long mine = null;
         for (var e : claimedBy.entrySet()) if (e.getValue() == n.id) mine = e.getKey();
-        if (mine != null && open.containsKey(mine)) return open.get(mine);
+        if (mine != null && open.containsKey(mine) && eligible(n,open.get(mine))) return open.get(mine);
+        if(mine!=null){claimedBy.remove(mine);spots.remove(mine);}
         Damage best = null; float nearest = Float.MAX_VALUE;
         for (Damage d : open.values()) {
+            if(!known.getOrDefault(n.id,java.util.Set.of()).contains(d.key) || !eligible(n,d))continue;
             if (n.unreachable.getOrDefault(d.key,-1.0) > g.time) continue;
             if (!trade(n, d) || g.time - d.at < SETTLE || claimedBy.containsKey(d.key) && claimedBy.get(d.key) != n.id) continue;
             if (smoking(d)) continue;
@@ -129,15 +204,22 @@ public final class Repairs {
 
     /** The work done: the material used, the block put back as it was, the world's record of the burning forgotten. */
     public boolean mend(Npc n, Damage d) {
-        if (!open.containsKey(d.key)) return false;
+        if (!open.containsKey(d.key) || !n.alive || !eligible(n,d) || n.distTo(d.x+0.5f,d.z+0.5f)>3) return false;
         ItemDef used = material(n, d);
         if (used == null) return false;
-        if (used != Items.HAMMER) n.takeItems(used, 1);
         int now = g.vox.block(d.x, d.y, d.z);
-        if (now != Blocks.AIR && !Blocks.charred(now) && now != Blocks.EMBERS) { open.remove(d.key); claimedBy.remove(d.key); spots.remove(d.key); return false; }   // something else stands there now
+        boolean partial=Blocks.dual(d.original) && (now==Blocks.outerOf(d.original) || now==Blocks.innerOf(d.original));
+        if (now != Blocks.AIR && !Blocks.charred(now) && now != Blocks.EMBERS && !partial) { open.remove(d.key); claimedBy.remove(d.key); spots.remove(d.key); orders.remove(d.key); return false; }
+        if(used!=Items.HAMMER){n.takeItems(used,1);g.state.burn(used,1);}
+        Order order=orders.remove(d.key);
+        if(order!=null && order.payer!=0 && g.actor(order.payer) instanceof Npc payer) {
+            for(var coin:payer.takeItems(Items.COINS,order.fee)){coin.owner=n.id;coin.stolen=false;n.store(coin);}
+            g.state.commit("RepairPaid",payer.id,n.id,d.jurisdiction,0,Integer.toString(order.fee));
+        }
         g.chemistry.forget(d.x, d.y, d.z);
         g.setBlock(d.x, d.y, d.z, d.original);
         open.remove(d.key); claimedBy.remove(d.key); spots.remove(d.key);
+        known.values().forEach(keys->keys.remove(d.key));reported.values().forEach(keys->keys.remove(d.key));
         mended++;
         g.state.commit("Repaired", n.id, 0, d.jurisdiction, 0, String.format("%s mended (%d, %d, %d) with %s", n.name, d.x, d.y, d.z, used == Items.HAMMER ? "new glass" : used.name.toLowerCase()));
         if (g.sfx != null) g.sfx.play(d.glass() ? "glass.light" : "wood", d.x + 0.5f, d.y + 0.5f, d.z + 0.5f, 0.6f);
@@ -147,21 +229,31 @@ public final class Repairs {
     // ------------------------------------------------------------------ persistence
     public List<Object> save() {
         List<Object> l = new ArrayList<>();
-        for (Damage d : open.values()) l.add(Map.of("x", d.x, "y", d.y, "z", d.z, "original", d.original, "cause", d.cause, "age", g.time - d.at));
+        for (Damage d : open.values()) {
+            Map<String,Object> row=new HashMap<>(Map.of("x",d.x,"y",d.y,"z",d.z,"original",d.original,"cause",d.cause,"age",g.time-d.at));
+            row.put("known",known.entrySet().stream().filter(entry->entry.getValue().contains(d.key)).map(Map.Entry::getKey).toList());
+            row.put("reported",reported.entrySet().stream().filter(entry->entry.getValue().contains(d.key)).map(Map.Entry::getKey).toList());
+            Order order=orders.get(d.key);if(order!=null)row.put("order",Map.of("reporter",order.reporter,"worker",order.worker,"payer",order.payer,"fee",order.fee));
+            l.add(row);
+        }
         return l;
     }
     @SuppressWarnings("unchecked")
     public void load(List<Object> l) {
-        open.clear(); claimedBy.clear(); spots.clear();
+        clear();
         if (l == null) return;
         for (Object o : l) {
             var m = (Map<String, Object>) o;
             int x = astratto.util.Json.integer(m, "x", 0), y = astratto.util.Json.integer(m, "y", 0), z = astratto.util.Json.integer(m, "z", 0);
             open.put(key(x, y, z), new Damage(key(x, y, z), x, y, z, astratto.util.Json.integer(m, "original", 0), astratto.util.Json.str(m, "cause", ""),
                     DevMap.jurisdiction(x + 0.5, z + 0.5), g.time - astratto.util.Json.num(m, "age", 0)));
+            long key=key(x,y,z);
+            for(Object id:astratto.util.Json.list(m,"known"))known.computeIfAbsent(((Number)id).longValue(),k->new java.util.HashSet<>()).add(key);
+            for(Object id:astratto.util.Json.list(m,"reported"))reported.computeIfAbsent(((Number)id).longValue(),k->new java.util.HashSet<>()).add(key);
+            var order=astratto.util.Json.obj(m,"order");if(order!=null && !order.isEmpty())orders.put(key,new Order(astratto.util.Json.lng(order,"reporter",0),astratto.util.Json.lng(order,"worker",0),astratto.util.Json.lng(order,"payer",0),astratto.util.Json.integer(order,"fee",0)));
             // what was broken is broken again in the world as it is loaded (the map is rebuilt whole)
             if (Blocks.glass(g.vox.block(x, y, z))) g.setBlock(x, y, z, Blocks.AIR);
         }
     }
-    public void clear() { open.clear(); claimedBy.clear(); spots.clear(); }
+    public void clear() { open.clear(); claimedBy.clear(); spots.clear();known.clear();reported.clear();orders.clear();observer=0;nextObserve=0; }
 }

@@ -55,7 +55,7 @@ public final class Arms {
         }
         if (startled > 0 && town && g.time - rumorAt > 300) {
             rumorAt = g.time;
-            ai.rumors.deed(kind == Kind.SPELL ? "throwing spells about in the street" : kind == Kind.SHOT ? "loosing arrows in the town" : "swinging a blade about in the street", 0);
+            ai.rumors.arms(kind == Kind.SPELL ? "throwing spells about in the street" : kind == Kind.SHOT ? "loosing arrows in the town" : "swinging a blade about in the street");
         }
     }
 

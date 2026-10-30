@@ -196,8 +196,8 @@ void main() {
         // scattering). The shadow is the sun's at that point, so a leaf deep in the crown is not lit through.
         float sh = sunShadow(P, N, max(ndl, 0.3), viewZ, skyVis);
         float wrap = max(0.0, (dot(N, uSunDir) + 0.45) / 1.45);
-        float through = pow(max(dot(-V, uSunDir), 0.0), 5.0) * 1.6 + 0.28;
-        col += albedo * uSunCol * (wrap * 0.85 + through * vec3(0.95, 1.05, 0.55) * 0.75) * sh;
+        float through = pow(max(dot(-V, uSunDir), 0.0), 5.0) * 0.5 + 0.08;
+        col += albedo * uSunCol * (wrap * 0.85 + through * vec3(1.0, 0.98, 0.82) * 0.45) * sh;
     } else if (ndl > 0.0 && dot(uSunCol, vec3(1.0)) > 1e-4) {
         float sh = sunShadow(P, N, ndl, flag == 1 ? 0.5 : viewZ, skyVis);
         if (sh > 0.0) col += shade(albedo, f0, rough, metal, N, V, uSunDir, uSunCol) * sh;

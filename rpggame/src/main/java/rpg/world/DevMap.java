@@ -254,10 +254,11 @@ public final class DevMap {
             farm();
             graveyard();
             for (Jails.Cell cell : Jails.CELLS) {
-                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), BRICK);
-                fill(cell.endX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.backZ(), BRICK);
-                fill(cell.wallX(), FLOOR, cell.backZ(), cell.endX(), FLOOR + 2, cell.backZ(), BRICK);
-                fill(cell.wallX(), FLOOR + 3, cell.frontZ(), cell.endX(), FLOOR + 3, cell.backZ(), BRICK);
+                int wallMaterial=cell.jurisdiction().equals(ALPHA)?PLASTER:BRICK;
+                fill(cell.wallX(), FLOOR, cell.frontZ(), cell.wallX(), FLOOR + 2, cell.backZ(), cell.jurisdiction().equals(ALPHA)?FENCE:wallMaterial);
+                fill(cell.endX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
+                fill(cell.wallX(), FLOOR, cell.backZ(), cell.endX(), FLOOR + 2, cell.backZ(), wallMaterial);
+                fill(cell.wallX(), FLOOR + 3, cell.frontZ(), cell.endX(), FLOOR + 3, cell.backZ(), wallMaterial);
                 fill(cell.wallX(), FLOOR, cell.frontZ(), cell.endX(), FLOOR + 2, cell.frontZ(), FENCE);
                 fill(cell.gateX(), FLOOR, cell.frontZ(), cell.gateX(), FLOOR + DOOR_HEIGHT - 1, cell.frontZ(), LOCKED_DOOR);
                 Piece slab = cell.slab();

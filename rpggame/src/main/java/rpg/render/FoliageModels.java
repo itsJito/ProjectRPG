@@ -2,7 +2,7 @@ package rpg.render;
 
 import rpg.world.Foliage;
 
-/** Eighteen reusable voxel silhouettes, combined into chunk meshes. Shapes use real thickness and several leaf colors. */
+/** Reusable plant silhouettes combined into chunks; shrubs have folded leaf geometry over a woody base. */
 public final class FoliageModels {
     private FoliageModels() {}
     public static Meshes.Boxes model(Foliage.Kind kind,int seed) {
@@ -66,13 +66,10 @@ public final class FoliageModels {
                     boxes.rgb(x,h/2,z,0.025f,h,0.025f,0xC7B99B);boxes.rgb(x,h,z,0.11f,0.035f,0.1f,0x9A6A45);boxes.rgb(x,h+0.025f,z,0.07f,0.025f,0.065f,0xB08B63);}
             }
             case SHRUB,BUSH -> {
-                // A woody base supports both the low shrub and the taller bush's rounded leaf clusters.
-                float scale=kind==Foliage.Kind.BUSH?1.8f:1;
-                for(int stem=0;stem<3;stem++){double a=stem*2.1;boxes.rgb((float)Math.cos(a)*0.05f*scale,0.08f*scale,(float)Math.sin(a)*0.05f*scale,0.03f,0.16f*scale,0.03f,0x5E4A30);}
-                for(int clump=0;clump<11;clump++){
-                    double a=clump*2.39+seed%5;float r=(clump<6?0.2f:0.1f)*scale,y=(clump<6?0.2f:0.36f+(clump%3)*0.03f)*scale;
-                    boxes.rgb((float)Math.cos(a)*r,y,(float)Math.sin(a)*r,0.17f*scale,0.13f*scale,0.16f*scale,clump%3==0?light:clump%3==1?green:dark);
-                }
+                float scale=kind==Foliage.Kind.BUSH?1.7f:1;
+                for(int stem=0;stem<4;stem++){double a=stem*2.4;float x=(float)Math.cos(a)*0.09f*scale,z=(float)Math.sin(a)*0.09f*scale;
+                    boxes.rgb(x/2,0.13f*scale,z/2,Math.abs(x)+0.025f,0.26f*scale,Math.abs(z)+0.025f,0x66543B);}
+
             }
             case THISTLE -> {
                 for(int stem=0;stem<3;stem++){float x=stem*0.09f-0.09f,z=(stem%2)*0.08f-0.04f,h=0.38f+stem*0.07f;
@@ -123,10 +120,12 @@ public final class FoliageModels {
     }
     static float[] chunk(Foliage.Chunk chunk) {
         Meshes.Boxes merged=new Meshes.Boxes();
+        var leaves=new java.util.ArrayList<float[]>();
         for(var plant:chunk.plants)if(!plant.removed) {
             float co=(float)Math.cos(plant.facing),si=(float)Math.sin(plant.facing);
             // the plant's root, packed into the vertex alpha for the bend (model.vert): every part leans from it
             float root=2+Math.clamp(Math.round((plant.x-chunk.x)*16),0,255)+256*Math.clamp(Math.round((plant.z-chunk.z)*16),0,255);
+            if(plant.kind==Foliage.Kind.BUSH || plant.kind==Foliage.Kind.SHRUB)leaves.add(crown(plant,chunk,root));
             for(float[] box:model(plant.kind,plant.seed).list) {
                 float x=box[0],z=box[2];float wx=plant.x-chunk.x+co*x+si*z,wz=plant.z-chunk.z-si*x+co*z;
                 // Keep the tiny voxels axis aligned when rotating a bank model; thickness remains real geometry.
@@ -134,6 +133,46 @@ public final class FoliageModels {
                 merged.list.add(new float[]{wx,box[1],wz,sx,box[4],sz,box[6],box[7],box[8],root});
             }
         }
-        return merged.vertices();
+        float[] stems=merged.vertices();int size=stems.length;for(float[] part:leaves)size+=part.length;
+        float[] mesh=java.util.Arrays.copyOf(stems,size);int at=stems.length;
+        for(float[] part:leaves){System.arraycopy(part,0,mesh,at,part.length);at+=part.length;}
+        return mesh;
     }
+    /** A layered ellipsoid of closed, folded leaves: readable tips and shaded undersides, with no alpha halo. */
+    private static float[] crown(Foliage.Patch plant,Foliage.Chunk chunk,float root) {
+        float scale=plant.kind==Foliage.Kind.BUSH?1.7f:1;
+        float[] mesh=new float[60*24*10];int at=0;
+        int[] greens={0x3E6435,0x50763C,0x638547,0x74934E};
+        for(int leaf=0;leaf<60;leaf++) {
+            float level=(leaf+0.5f)/60,belly=(level-0.5f)/0.56f;
+            double angle=leaf*2.399963+Math.floorMod(plant.seed,17)-plant.facing;
+            float co=(float)Math.cos(angle),si=(float)Math.sin(angle);
+            float radius=(float)Math.sqrt(Math.max(0,1-belly*belly))*0.25f*scale;
+            float x=plant.x-chunk.x+co*radius,y=(0.12f+level*0.43f)*scale,z=plant.z-chunk.z+si*radius;
+            float length=(0.18f+(leaf%3)*0.014f)*scale,width=0.11f*scale;
+            float side=(float)Math.sqrt(Math.max(0,1-belly*belly));
+            float dx=co*belly*length*0.5f,dz=si*belly*length*0.5f,dy=-side*length*0.5f;
+            float wx=-si*width*0.5f,wz=co*width*0.5f;
+            float[][] rim={{x-dx,y-dy,z-dz},{x+wx,y,z+wz},{x+dx,y+dy,z+dz},{x-wx,y,z-wz}};
+            float[] ridge={x+co*side*0.022f*scale,y+belly*0.022f*scale,z+si*side*0.022f*scale};
+            float[] under={x-co*side*0.009f*scale,y-belly*0.009f*scale,z-si*side*0.009f*scale};
+            int color=greens[Math.clamp((int)(level*2)+(leaf%3==0?1:0),0,greens.length-1)];
+            for(int edge=0;edge<4;edge++) {
+                at=leafTriangle(mesh,at,ridge,rim[edge],rim[(edge+1)%4],color,edge%2==0?1:0.88f,root);
+                at=leafTriangle(mesh,at,under,rim[(edge+1)%4],rim[edge],color,0.67f,root);
+            }
+        }
+        return mesh;
+    }
+    private static int leafTriangle(float[] mesh,int at,float[] a,float[] b,float[] c,int color,float shade,float root) {
+        float ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+        float nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,length=(float)Math.sqrt(nx*nx+ny*ny+nz*nz);
+        for(float[] point:new float[][]{a,b,c}) {
+            mesh[at++]=point[0];mesh[at++]=point[1];mesh[at++]=point[2];
+            mesh[at++]=((color>>16)&255)/255f*shade;mesh[at++]=((color>>8)&255)/255f*shade;mesh[at++]=(color&255)/255f*shade;
+            mesh[at++]=root;mesh[at++]=nx/length;mesh[at++]=ny/length;mesh[at++]=nz/length;
+        }
+        return at;
+    }
+
 }

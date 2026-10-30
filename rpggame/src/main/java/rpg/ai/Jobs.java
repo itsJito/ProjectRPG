@@ -22,12 +22,12 @@ final class Jobs {
     Jobs(Rpg g, Brain brain) { this.g=g; this.brain=brain; }
     void tick(Npc n, float dt) {
         if(g.interact.of(n)!=null || n.cs.busy()) { g.ai.desire(n,AiSystem.A_HOLD); return; }
+        if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
         if(unload(n))return;
         if(n.profession==Profession.LAKE_NET_FISHERMAN){net(n);return;}
         if(n.profession.family==Npc.Role.KNIGHT) { knight(n); return; }
         if(n.profession.family==Npc.Role.HUNTER) { hunter(n,dt); return; }
-        // a carpenter's first work is what has been broken (Repairs): it comes before the day's orders
-        if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
+
         if(n.job==null)n.job=network(n.profession);
         if(n.job.tick(n)==FAILURE) {
             var own=g.econ.shopOf(n);

@@ -85,6 +85,17 @@ public final class Law {
     /** Clock-driven custody; sleeping on a cell slab uses the same release path. */
     public void update() {
         roofs();
+        // A fine's unanswered conversation expires even if a doorway prevents the officer catching up.
+        for(var entry:new java.util.ArrayList<>(haltedAt.entrySet()))if(g.time-entry.getValue()>10) {
+            Actor offender=g.actor(entry.getKey());
+            if(offender==null || !offender.alive){haltedAt.remove(entry.getKey());continue;}
+            for(Npc officer:g.npcs)if(officer.alive && officer.fightTarget==offender.id
+                    && (officer.role==Npc.Role.GUARD || officer.role==Npc.Role.LAWMAN)
+                    && petty(offender.id,officer.homeJurisdiction) && !resisting(offender.id)
+                    && !(officer.cs.lastAttacker==offender.id && g.time-officer.cs.lastHurt<12)) {
+                declineFine(offender,officer);break;
+            }
+        }
         borders();
         posses.update();
         if (sentenceUntil >= 0 && g.state.minutes >= sentenceUntil) releasePlayer();
@@ -108,7 +119,7 @@ public final class Law {
         if (inCustody(g.player) && sentenceJurisdiction.equals(jurisdiction)) return;
         for (Npc npc : g.npcs) if (npc.alive && npc.arrestedUntil > g.state.minutes && npc.arrestJurisdiction.equals(jurisdiction)) return;
         var door = g.objects.jailDoor(jurisdiction);
-        if (door != null) { door.setLocked(g, false); door.setOpen(g, true, g.player, g.state.newRequestId()); }
+        if (door != null) { door.relock=false; door.autoOpened=false; door.setLocked(g, false); door.setOpen(g, true, g.player, g.state.newRequestId()); }
     }
     public void sleepThroughSentence() {
         if (!inCustody(g.player)) return;
@@ -121,7 +132,7 @@ public final class Law {
         sentenceBounty = 0;
         returnPossessions(g.player);
         openEmptyCell(sentenceJurisdiction);
-        if (cell != null) g.player.poseReset = true;
+        if (cell != null) { g.player.poseReset = true; var door=g.objects.jailDoor(cell.jurisdiction()); if(door!=null && door.locked)g.teleport(g.player,cell.releaseX(),DevMap.FLOOR,cell.releaseZ()); }
         clearSlate(g.player);
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
         g.state.commit("SentenceServed", g.player.id, 0, sentenceJurisdiction, 0, "admission " + jailAdmissions);
@@ -230,6 +241,10 @@ public final class Law {
     public boolean petty(long offender, String jurisdiction) { int b = bounty(offender, jurisdiction); return b > 0 && b <= g.cfg.pursuitBounty; }
     static final double FINE_GRACE = 240;
     private final Map<Key, Double> fineDeclined = new HashMap<>();
+    public boolean fineDeferred(long offender,String jurisdiction) {
+        Double at=fineDeclined.get(new Key(offender,jurisdiction));
+        return petty(offender,jurisdiction) && at!=null && g.time-at<=FINE_GRACE;
+    }
     /** Whether an officer who sees a petty offender this close should go and ask for the fine now. */
     public boolean fineDue(Npc officer, Actor offender) {
         if (!petty(offender.id, officer.homeJurisdiction) || officer.distTo(offender) > 9) return false;
@@ -537,7 +552,10 @@ public final class Law {
         Key key = new Key(p.id, guard.homeJurisdiction);
         fineDeclined.put(key, g.time);
         confronted.remove(key); haltedAt.remove(p.id);
-        for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && n.homeJurisdiction.equals(guard.homeJurisdiction) && n.fightTarget == p.id) {
+        for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) && n.homeJurisdiction.equals(guard.homeJurisdiction)) {
+            boolean involved=n.fightTarget==p.id || n.hunt!=null && n.hunt.target==p.id;
+            if(n.hunt!=null && n.hunt.target==p.id)n.hunt=null;
+            if(!involved || n.fightTarget!=0 && n.fightTarget!=p.id)continue;
             n.fightTarget = 0; n.goal = rpg.ai.Brain.Goal.IDLE; n.hasGoalPos = false; n.nextThink = 0;
             g.combat.setBlock(n, false);
         }
