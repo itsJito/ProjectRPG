@@ -33,14 +33,15 @@ public final class WitnessInfluence {
         chance=Math.clamp(chance,0,0.85f);
         memory.influenceTried=true;
         boolean accepted=g.roll(witness.id,memory.eventId^request^method.hashCode())<chance;
+        String answer=accepted?(bribe?"Keep your voice down. I won't tell.":threat?"All right. Leave me alone.":"I'll leave this one to your conscience."):(bribe?"You cannot buy my silence. The watch will hear about this offer.":threat?"Threats won't silence me. I'm telling the watch.":"I know what I saw. You must answer for it.");
         if(accepted) {
             memory.withheld=true;
             if(bribe)for(ItemStack coin:actor.takeItems(Items.COINS,price)){coin.owner=witness.id;coin.stolen=false;witness.store(coin);}
             witness.goal=threat?Brain.Goal.HIDE:Brain.Goal.IDLE;witness.nextThink=0;witness.hasGoalPos=false;witness.legs=null;
             if(threat){witness.fearOf=actor.id;witness.fearSeenAt=g.time;witness.fearX=actor.x;witness.fearZ=actor.z;}
-            g.ai.say(witness,bribe?"Keep your voice down. I won't tell.":threat?"All right. Leave me alone.":"I'll leave this one to your conscience.");
+            g.ai.reply(witness,answer);
         } else {
-            g.ai.say(witness,bribe?"You cannot buy my silence. The watch will hear about this offer.":threat?"Threats won't silence me. I'm telling the watch.":"I know what I saw. You must answer for it.");
+            g.ai.reply(witness,answer);
             if(bribe || threat) {
                 String kind=bribe?"BRIBERY":"DISORDERLY";
                 var event=g.state.commit("CrimeCommitted",actor.id,witness.id,memory.jurisdiction,request,kind+" during an attempt to stop a witness");
@@ -52,6 +53,6 @@ public final class WitnessInfluence {
             witness.nextThink=0;
         }
         g.state.commit(request,"WitnessAppeal",actor.id,witness.id,memory.jurisdiction,memory.eventId,method+" "+(accepted?"withheld":"refused"));
-        return Result.ok(accepted?"This witness will withhold that report. Other witnesses can still report it.":"The witness refused. You cannot appeal to them again about this incident.");
+        return Result.ok(answer);
     }
 }

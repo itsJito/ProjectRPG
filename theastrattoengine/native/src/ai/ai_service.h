@@ -58,6 +58,10 @@ public:
         uint32_t navSeen = 0;
         std::vector<std::pair<uint32_t,uint32_t>> navColumns;
         bool partial=false,capped=false;
+        std::vector<std::pair<int,float>> blockedCosts;
+        double forgetBlockedAt=0;
+        float yieldTime=0, yieldWait=0, yieldCooldown=0;
+        int searchBudget=5000;
         uint32_t repaths=0,expansions=0,partialPaths=0,capHits=0,yields=0,partialStreak=0;
         float speed = 0;
         float pause = 0;                                 // a wanderer stands a moment where it got to

@@ -38,7 +38,7 @@ class ArmsReactionTest {
         g.teleport(eda, x + 6.5f, DevMap.FLOOR, z + 1.5f);
         g.controller.snapTo((float) (Math.PI / 2));   // facing away from both, -x
         frames(30);
-        for (int k = 0; k < 3; k++) { assertTrue(g.combat.attack(g.player, false, CombatSystem.lightMove(g.player, false)), "swing " + k); frames(70); }
+        for (int k = 0; k < 3; k++) { g.controller.snapTo((float)Math.atan2(-(g.player.x-eda.x),-(g.player.z-eda.z))); assertTrue(g.combat.attack(g.player, false, CombatSystem.lightMove(g.player, false)), "swing " + k); frames(70); }
         System.out.printf("eda: goal %s, fear %s, said '%s'; cole: goal %s, watching %s, %s%n", eda.goal, eda.fearOf == g.player.id, eda.speech, cole.goal, cole.watchTarget == g.player.id, cole.lastOutcome);
         assertEquals(g.player.id, eda.fearOf, "the townswoman beside the swinging blade backs away from it");
         assertEquals(g.player.id, cole.watchTarget, "the guard keeps an eye on whoever is swinging a blade");

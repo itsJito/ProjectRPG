@@ -66,7 +66,7 @@ private:
 
     void emitQuad(uint64_t k, int a, int ua, int va, int sgn, int normal, int slice, int u, int v, int wdt, int hgt);
     void shapeBox(std::vector<uint8_t>& out, const Block& b, int bx, int by, int bz, const int* box, int flags, int sky, int blk);
-    static void putVertex(std::vector<uint8_t>& o, int x, int y, int z, int normal, int s, int t, int layer, int var, int flags, int sky, int blk, int ao);
+    void putVertex(std::vector<uint8_t>& o, int x, int y, int z, int normal, int s, int t, int layer, int var, int flags, int sky, int blk, int ao);
     static void putVertexF(std::vector<uint8_t>& o, int fx, int fy, int fz, int normal, int s, int t, int layer, int var, int flags, int sky, int blk, int ao = 3);
     /** The cluster of leaf cards a leaf cell holds (sixteenths of a block; seeded by the cell's place in the world). */
     void leafCards(int x, int y, int z, const Block& b);

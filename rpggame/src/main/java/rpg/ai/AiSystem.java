@@ -412,13 +412,14 @@ public final class AiSystem {
     /** An agent for a monster's body (it walks on the engine's routes as people do): its eyes' height and how far it sees. */
     public void agentFor(Npc n, float eye, float sight) {
         n.agent = g.game.reserve(KIND_AGENT);
-        g.game.commands().agentCreate(n.agent, policy, n.body, 0, 0, 0, eye, sight, 0.25f, 24, n.team, n.domain.flags | AGENT_DOORS, (int) n.id * 7919);
+        g.game.commands().agentCreate(n.agent, policy, n.body, 0, 0, 0, eye, sight, 0.25f, 24, n.team, n.domain.flags | AGENT_DOORS | (n instanceof rpg.monster.Monster && !Brain.canUseLadders(n)?AGENT_NO_LADDERS:0), (int) n.id * 7919);
         java.util.Arrays.fill(n.facts, -1);
         n.targetBody = -1;
         desire(n, A_IDLE);
     }
     /** Walks an NPC (or a monster) toward a point by the travel graph; true once there. */
     public boolean walkTo(Npc n, float x, float z, boolean run, float within) { return brain.goTo(n, x, z, run, within); }
+    public boolean rangedPosition(Npc n,Actor target,boolean visible){return brain.rangedPosition(n,target,visible);}
     public boolean walkToAtHeight(Npc n,float x,float y,float z,boolean run,float within){return brain.goTo(n,x,y,z,run,within); }
     /** A monster's eyes and ears (the stealth system's sight and hearing, as for anyone). */
     public void monsterSenses(Npc n, float dt) { stealth.update(n, dt); }
@@ -542,6 +543,7 @@ public final class AiSystem {
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
             Actor elevated = n.goal == Brain.Goal.FIGHT ? g.actor(n.fightTarget) : null;
             if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, step)) continue;
+            g.game.commands().agentFact(n.agent,15,Brain.canUseLadders(n)?1:-1);
             brain.act(n, step);
             if (n.stuck && (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.RETURN) && n.hasGoalPos) {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
@@ -615,7 +617,7 @@ public final class AiSystem {
                     g.state.commit("NpcBodyRecovered",0,n.id,n.homeJurisdiction,0,"restored missing mover without changing resident state");
                 }
             } else n.missingBodySince=-1;
-            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; }
+            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; n.onLadder=rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); n.climbVelocity=m.vy; }
             // a sprint costs breath as the player's does
             if (n.sprinting && Math.hypot(n.vx, n.vz) > g.cfg.jogSpeed) { n.stamina = Math.max(0, n.stamina - g.cfg.staminaSprint * (float) g.lastDt); n.cs.regenDelay = 0.6f; }
             Snapshots.Agent a = agents.agent(n.agent);
@@ -650,8 +652,12 @@ public final class AiSystem {
         n.lastOutcome = "route blocked while " + n.goal.toString().toLowerCase() + "; replanning";
         // no way to the one they meant to talk with: someone else, or back to the day, rather than the same wall again
         if (n.goal == Brain.Goal.SOCIALIZE && n.socialPartner != 0) { n.unreachable.put(n.socialPartner, g.time + 150); n.socialPartner = 0; }
-        n.remember(new Memory("BLOCKED", 0, 0, DevMap.jurisdiction(n.gx, n.gz), g.state.minutes, 1, "personal", 0, 0, String.format("could not reach (%.0f, %.0f)", n.gx, n.gz)), 24);
+        var blocked=new Memory("BLOCKED",0,0,DevMap.jurisdiction(n.gx,n.gz),g.state.minutes,1,"personal",0,0,"the route is obstructed");blocked.navKnown=true;blocked.navX=n.gx;blocked.navY=n.goalY;blocked.navZ=n.gz;n.remember(blocked,24);
         g.state.commit("NpcStuck", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, n.goal + String.format(" to (%.1f, %.1f)", n.gx, n.gz));
+        for(Npc neighbour:g.npcs)if(neighbour!=n && neighbour.alive && neighbour.loaded && neighbour.distTo(n)<4 && g.vox.sight(n.x,n.eyeY(),n.z,neighbour.x,neighbour.eyeY(),neighbour.z)){
+            say(n,"Is there another way through?");int learned=share(neighbour,n);
+            reply(neighbour,learned>0?"I'll tell you the way I know.":"I don't know another way through.");break;
+        }
         n.hasGoalPos = false;
         n.legs = null;   // plan the trip again from where it stands
         n.nextThink = 0;
@@ -1096,10 +1102,10 @@ public final class AiSystem {
 
     public String smallTalk(Npc n, Npc p) { return g.dialogue.smallTalk(n, p); }
 
-    public void say(Npc n, String text) { n.speech = text; n.speechUntil = g.time + 3.5; }
+    public void say(Npc n, String text) { n.speak(text,g.time,3.5,false); }
 
     /** An answer to something said nearby: shown a beat later, so the two lines read as a conversation. */
-    public void reply(Npc n, String text) { n.speech = text; n.speechUntil = g.time + 4.5; }
+    public void reply(Npc n, String text) { n.speak(text,g.time,4.5,true); }
 
     /** Word of mouth (the rumor system). */
     public final Rumors rumors;

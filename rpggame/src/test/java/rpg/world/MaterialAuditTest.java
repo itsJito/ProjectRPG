@@ -76,6 +76,7 @@ class MaterialAuditTest {
             assertEquals(door, (block.flags & AstrattoNative.RB_DOOR) != 0, "door binding mismatch on block " + id);
             // Leaves retain a meshed volume and cutout faces while allowing bodies through them.
             if (Blocks.material(id)==Blocks.Material.FOLIAGE) assertFalse(solid,"foliage collision on block "+id);
+            else if (Blocks.ladder(id)) assertFalse(solid,"ladder must allow climbing through its rungs");
             else if (!door) assertEquals(solid, (block.flags & AstrattoNative.RB_SOLID) != 0, "collision/render mismatch on block " + id);
             csv.append(id).append(',').append(block.layerTop).append(',').append(block.layerSide).append(',').append(block.layerBottom).append(',').append(solid).append(',').append(door).append('\n');
         }

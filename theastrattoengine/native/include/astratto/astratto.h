@@ -72,9 +72,10 @@ extern "C" {
  * services (physics, AI, audio), the renderer and gameplay modules. 2.1: the renderer's layers - foliage, props, decals.
  * 2.4: Sydney 3 - a muscle-driven rigid-body body: intents and traits for ragdolls, their impacts, their segments in the
  * snapshot; the renderer's sun shafts, smoke volumes, leaf cards, soft shadows, motion blur and depth of field.
- * 2.6: appended agent navigation telemetry and local-voxel model dissolution. */
+ * 2.6: appended agent navigation telemetry and local-voxel model dissolution.
+ * 2.7: ladder exclusion flag; negative agent fact 15 temporarily forbids ladders. */
 #define ASTRATTO_API_MAJOR 2
-#define ASTRATTO_API_MINOR 6
+#define ASTRATTO_API_MINOR 7
 #define ASTRATTO_API_VERSION ((uint32_t)((ASTRATTO_API_MAJOR << 16) | ASTRATTO_API_MINOR))
 
 /* ------------------------------------------------------------------ status */
@@ -890,7 +891,7 @@ typedef struct astratto_cmd_policy_create {
     float think;                       /* seconds between decisions (0 = 0.2) */
 } astratto_cmd_policy_create;
 
-enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3 };
+enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3, ASTRATTO_AGENT_NO_LADDERS = 1u << 4 };
 /* Domain bits are orthogonal to movement flags and faction teams. Monster reserves a controller domain only. */
 enum { ASTRATTO_AGENT_DOMAIN_HUMAN = 0, ASTRATTO_AGENT_DOMAIN_ANIMAL = 1u << 16, ASTRATTO_AGENT_DOMAIN_MONSTER = 2u << 16, ASTRATTO_AGENT_DOMAIN_MASK = 3u << 16 };
 typedef struct astratto_cmd_agent_create {

@@ -27,6 +27,7 @@ public final class Memory {
     /** Original eyewitness, when known, and how many times the account has been retold. */
     public long witness;
     public int relays;
+    public boolean navKnown; public float navX,navY,navZ;
 
     public Memory(String kind, long subject, long victim, String jurisdiction, double minutes, float confidence, String source, long eventId, int value, String detail) {
         this.kind = kind; this.subject = subject; this.victim = victim; this.jurisdiction = jurisdiction; this.minutes = minutes;
@@ -46,7 +47,7 @@ public final class Memory {
     public Memory rumorFrom(Npc teller) {
         Memory m = new Memory(kind, subject, victim, jurisdiction, minutes, confidence * 0.7f, "rumor from " + teller.name, eventId, value, detail);
         m.witness = witness != 0 ? witness : witnessed() ? teller.id : 0;
-        m.relays = relays + 1;
+        m.relays = relays + 1;m.navKnown=navKnown;m.navX=navX;m.navY=navY;m.navZ=navZ;
         m.reported = true;   // a rumor is not evidence: it is never reported
         m.settled = settled;
         return m;
@@ -60,6 +61,7 @@ public final class Memory {
 
     public Map<String, Object> save() {
         Map<String, Object> m = new HashMap<>();
+        m.put("navKnown",navKnown);m.put("navX",navX);m.put("navY",navY);m.put("navZ",navZ);
         m.put("kind", kind); m.put("subject", subject); m.put("victim", victim); m.put("jur", jurisdiction); m.put("min", minutes); m.put("conf", (double) confidence);
         m.put("source", source); m.put("reported", reported); m.put("event", eventId); m.put("value", value); m.put("detail", detail);
         m.put("witness", witness); m.put("relays", relays);
@@ -71,6 +73,7 @@ public final class Memory {
         Memory r = new Memory(astratto.util.Json.str(m, "kind", "?"), astratto.util.Json.lng(m, "subject", 0), astratto.util.Json.lng(m, "victim", 0),
                 astratto.util.Json.str(m, "jur", null), astratto.util.Json.num(m, "min", 0), (float) astratto.util.Json.num(m, "conf", 1),
                 astratto.util.Json.str(m, "source", "witnessed"), astratto.util.Json.lng(m, "event", 0), astratto.util.Json.integer(m, "value", 0), astratto.util.Json.str(m, "detail", ""));
+        r.navKnown=astratto.util.Json.bool(m,"navKnown",false);r.navX=(float)astratto.util.Json.num(m,"navX",0);r.navY=(float)astratto.util.Json.num(m,"navY",0);r.navZ=(float)astratto.util.Json.num(m,"navZ",0);
         r.reported = astratto.util.Json.bool(m, "reported", false);
         r.influenceTried=astratto.util.Json.bool(m,"influenceTried",false);r.withheld=astratto.util.Json.bool(m,"withheld",false);
         r.settled = astratto.util.Json.bool(m, "settled", false);

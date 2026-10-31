@@ -415,7 +415,10 @@ public final class Monsters {
             }
             if (!m.alive || !m.loaded) continue;
             Snapshots.Mover mv = bodies.mover(m.body);
-            if (mv != null) { m.x = mv.x; m.y = mv.y; m.z = mv.z; m.vx = mv.vx; m.vz = mv.vz; m.grounded = mv.grounded; }
+            if (mv != null) { m.x = mv.x; m.y = mv.y; m.z = mv.z; m.vx = mv.vx; m.vz = mv.vz; m.grounded = mv.grounded;
+                int x=(int)Math.floor(mv.x),y=(int)Math.floor(mv.y),z=(int)Math.floor(mv.z);
+                m.onLadder=Blocks.ladder(g.vox.block(x,y,z)) || Blocks.ladder(g.vox.block(x,y-1,z));
+                m.climbVelocity=mv.vy; }
         }
     }
 

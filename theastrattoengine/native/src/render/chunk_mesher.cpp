@@ -401,6 +401,14 @@ void ChunkMesher::emitQuad(uint64_t k, int a, int ua, int va, int sgn, int norma
 }
 
 void ChunkMesher::putVertex(std::vector<uint8_t>& o, int x, int y, int z, int normal, int s, int t, int layer, int var, int flags, int sky, int blk, int ao) {
+    // Anchor the bottom edge of wind-driven cube foliage to its supporting surface.
+    // Adjacent faces share the same vertex rule, including at chunk boundaries.
+    if((flags & 2) && normal != 6) {
+        bool foliageBelow=false;
+        for(int dx=-1;dx<=0;dx++)for(int dz=-1;dz<=0;dz++)
+            foliageBelow |= (def(id(x+dx,y-1,z+dz)).flags & ASTRATTO_RB_SWAY)!=0;
+        if(!foliageBelow)flags &= ~2;
+    }
     const uint8_t d[12] = {
         static_cast<uint8_t>(x), static_cast<uint8_t>(y), static_cast<uint8_t>(z), static_cast<uint8_t>(normal),
         static_cast<uint8_t>(s), static_cast<uint8_t>(t), static_cast<uint8_t>(layer & 255), static_cast<uint8_t>(((layer >> 8) & 3) | ((var - 1) << 2) | (flags << 4)),

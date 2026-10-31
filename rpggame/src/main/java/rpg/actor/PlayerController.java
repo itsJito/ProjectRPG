@@ -396,7 +396,8 @@ public final class PlayerController {
         boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
         boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
         if (jump) { g.movementPractice.jumped(); jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
-        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
+        boolean onLadder=rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(p.x),(int)Math.floor(p.y),(int)Math.floor(p.z))) || rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(p.x),(int)Math.floor(p.y)-1,(int)Math.floor(p.z)));
+        g.game.commands().moverInput(p.body, nvx, nvz, onLadder && free ? in.forward : 0, jump && !onLadder ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {

@@ -654,36 +654,51 @@ public final class Brain {
 
     /**
      * Heads somewhere through the engine's routes; true once there. A long trip is walked leg by leg through the map's
-     * waypoints (each leg a short search for the engine); the navigation target the inspector shows is the current leg's.
+     * runtime surface portals (each leg a short search for the engine); the inspector shows the current leg.
      */
+    boolean rangedPosition(Npc n,Actor target,boolean visible){return tactics.move(n,target,visible);}
+    public static boolean canUseLadders(Npc n){
+        if(n instanceof rpg.monster.Monster m)return m.kind.form==rpg.monster.MonsterKind.Form.HUMANOID && m.kind.hw<=1 && m.kind.hh<=2.3f;
+        return n.watch() || n.goal==Goal.FIGHT || n.goal==Goal.WORK && (n.profession==Profession.CARPENTER || n.role==Npc.Role.WORKER) || DevMap.WILDS.equals(DevMap.jurisdiction(n.x,n.z));
+    }
     boolean goTo(Npc n,float x,float z,boolean run,float within){return goTo(n,x,Float.NaN,z,run,within);}
     boolean goTo(Npc n, float x, float targetY, float z, boolean run, float within) {
-        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE) { x = n.spawnX; z = n.spawnZ; }
-        float surface=g.vox.standY(x,Float.isFinite(targetY)?targetY:n.y,z);
+        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE && n.goal != Goal.HIDE) { x = n.spawnX; z = n.spawnZ; }
+        if(!Float.isFinite(targetY) && Math.hypot(n.x-x,n.z-z)<=within){ai.desire(n,AiSystem.A_HOLD);n.legs=null;n.hasGoalPos=false;if(n.lastOutcome!=null && (n.lastOutcome.contains("blocked") || n.lastOutcome.contains("no traversable")))n.lastOutcome="arrived";return true;}
+        // An interaction targets the near ground beside a solid object, not its roof.
+        if(!Float.isFinite(targetY) && !g.vox.navigation.validPoint(x,n.y,z,d->!d.locked || d.owner==n.id)){
+            float best=Float.MAX_VALUE,bx=x,bz=z;
+            for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){
+                float px=(float)Math.floor(x)+dx+.5f,pz=(float)Math.floor(z)+dz+.5f;
+                if(Math.hypot(px-x,pz-z)>within+.15f || !g.vox.navigation.validPoint(px,n.y,pz,d->!d.locked || d.owner==n.id))continue;
+                float distance=(float)Math.hypot(px-n.x,pz-n.z);if(distance<best){best=distance;bx=px;bz=pz;}
+            }within=Math.max(.15f,within-(float)Math.hypot(bx-x,bz-z));x=bx;z=bz;
+        }
+        float surface=g.vox.navigation.standY(x,Float.isFinite(targetY)?targetY:n.y,z);
         if(!Float.isFinite(surface)){ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="looking for supported ground";return false;}
         if (Math.hypot(n.x - x, n.z - z) <= within && (!Float.isFinite(targetY) || Math.abs(n.y-targetY)<1.2f)) { n.routeBook.success(g.vox,g.time,x,n.y,z);if(n.lastOutcome!=null && n.lastOutcome.contains("blocked"))n.lastOutcome="arrived";ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
         if(n.navRevision!=g.vox.navigationRevision) {
             n.navRevision=g.vox.navigationRevision;
-            if(n.legs!=null && n.hasGoalPos && !Waypoints.walkable(g.vox,n.x,n.z,n.gx,n.gz,d->!d.locked || d.owner==n.id || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
+            if(n.legs!=null && n.hasGoalPos && !g.vox.navigation.validPoint(n.gx,n.goalY,n.gz,d->!d.locked || d.owner==n.id || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
         }
-        n.routeBook.seed(n);
-        if(g.time<n.navPauseUntil || n.routeBook.avoiding(x,z,g.time)>g.time){ai.desire(n,AiSystem.A_HOLD);n.wantYaw=n.yaw+(float)Math.sin(g.time*1.2)*.35f;n.lastOutcome="paused to reconsider a blocked route";return false;}
+        n.routeBook.seed(n,g);n.routeBook.readBlocked(n,g.state.minutes,g.time);
+        if(g.time<n.navPauseUntil && Math.hypot(n.legsX-x,n.legsZ-z)<1 && Math.abs(n.legsY-surface)<1){ai.desire(n,AiSystem.A_HOLD);n.wantYaw=n.yaw+(float)Math.sin(g.time*1.2)*.35f;n.lastOutcome="paused to reconsider a blocked route";return false;}
         if (n.legs == null || Math.hypot(n.legsX-x,n.legsZ-z)>.5 || Math.abs(n.legsY-surface)>.5f) {
             java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.owner==n.id||d.key!=null&&n.has(d.key,1);
-            boolean upper=Math.abs(n.y-rpg.world.DevMap.FLOOR)>1.2 || Math.abs(surface-rpg.world.DevMap.FLOOR)>1.2;
-            n.legs=upper?new int[0]:n.routeBook.recall(n,x,z,g.vox,g.time,permission);
-            if(n.legs==null)n.legs=Waypoints.route(g.vox,n.x,n.z,x,z,permission);
-            if(upper)n.routeBook.cancel();else n.routeBook.begin(n,x,z,n.legs,g.time);
+            n.legs=n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
+            if(n.legs==null)n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time);
+            if(n.legs==null){n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";return false;}
+            n.routeBook.begin(n,x,surface,z,n.legs,g.time);
             n.legAt=0;n.legsX=x;n.legsY=surface;n.legsZ=z;
         }
-        float tx = x, tz = z;
+        float tx = x, tz = z, routeY=surface;
         while (n.legAt < n.legs.length) {
             float[] p = Waypoints.point(n.legs[n.legAt]);
-            if (Math.hypot(n.x - p[0], n.z - p[1]) < 1.8) { n.legAt++; continue; }
-            tx = p[0]; tz = p[1];
+            if (Math.hypot(n.x - p[0], n.z - p[1]) < 1.8 && (p.length<3 || Math.abs(n.y-p[2])<.65)) { n.legAt++; continue; }
+            tx = p[0]; tz = p[1];routeY=p.length>2?p[2]:surface;
             break;
         }
-        float ty=g.vox.standY(tx,Math.hypot(tx-x,tz-z)<.5f && Float.isFinite(targetY)?targetY:n.y,tz);
+        float ty=routeY;
         if (!n.hasGoalPos || Math.hypot(n.gx - tx, n.gz - tz) > 0.4 || Math.abs(n.goalY-ty)>.4f) {
             n.gx = tx; n.gz = tz; n.hasGoalPos = true;
             n.goalY=ty;
@@ -911,6 +926,8 @@ public final class Brain {
             float x = n.x + (float) (Math.cos(a) * d), z = n.z + (float) (Math.sin(a) * d);
             if (!standable(x, z)) continue;
             x = (float) Math.floor(x) + 0.5f; z = (float) Math.floor(z) + 0.5f;
+            // Cover beyond the threat is not safety: do not cross its reach to get there.
+            if (!safeRetreat(n,fx,fz,x,z)) continue;
             float score = 0;
             if (!g.vox.sight(fx, DevMap.FLOOR + 1.5f, fz, x, DevMap.FLOOR + 1.0f, z)) score += 4;
             score += (float) Math.hypot(x - fx, z - fz) * 0.25f;
@@ -926,6 +943,14 @@ public final class Brain {
      * Running from something they dread (not a fight they are in): away from it to somewhere they could stand, toward
      * town and home rather than into the wild where it can be helped, re-aimed as it moves.
      */
+    private boolean safeRetreat(Npc n,float fx,float fz,float x,float z) {
+        float dx=x-n.x,dz=z-n.z,length=dx*dx+dz*dz;
+        float t=length>0?Math.max(0,Math.min(1,((fx-n.x)*dx+(fz-n.z)*dz)/length)):0;
+        double distance=Math.hypot(n.x+dx*t-fx,n.z+dz*t-fz);
+        return distance>=Math.min(3,Math.hypot(n.x-fx,n.z-fz)-.1)
+            && g.vox.navigation.validLeg(n.x,n.y,n.z,x,n.y,z,d->d.open && !d.locked);
+    }
+
     private void runFrom(Npc n, Actor f) {
         if (n.speech == null && g.time - n.goalSince < 0.5) g.ai.say(n, f instanceof rpg.animal.Animal an ? "A " + an.kind().toLowerCase() + "! Run!" : "Stay away from me!");
         n.sneaking = false;
@@ -936,7 +961,7 @@ public final class Brain {
             double a = Math.atan2(az, ax) + i * 0.32;
             for (float d : new float[]{10, 7, 4.5f}) {
                 float x = n.x + (float) Math.cos(a) * d, z = n.z + (float) Math.sin(a) * d;
-                if (!standable(x, z)) continue;
+                if (!standable(x, z) || !safeRetreat(n,f.x,f.z,x,z)) continue;
                 float score = (float) Math.hypot(x - f.x, z - f.z) - Math.abs(i) * 0.4f;
                 if (n.homeX != 0) score -= (float) Math.hypot(x - n.homeX, z - n.homeZ) * 0.05f;
                 if (!g.vox.clear(n.x, n.eyeY(), n.z, x, DevMap.FLOOR + 1, z)) score -= 3;
@@ -1222,6 +1247,7 @@ public final class Brain {
      * spot, and put it back. Returns false when there is nothing for them to mend.
      */
     boolean mend(Npc n) {
+        if(n.working!=null && n.working.action.equals("repair")){ai.desire(n,AiSystem.A_HOLD);return true;}
         var d = g.repairs.claim(n);
         if (d == null) return false;
         float[] at = g.repairs.standSpot(n, d);
@@ -1365,7 +1391,7 @@ public final class Brain {
         for (rpg.animal.Animal a : g.animals.all()) if (a.alive && a.loaded && a.owner == n.id) mine.add(a);
         if (!mine.isEmpty()) visit = mine.get(k % mine.size());
         if (visit == null) { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); return; }
-        if (goTo(n, visit.x + 1.4f, visit.z, false, 1.0f)) {
+        if (goTo(n, visit.x, visit.z, false, 2.4f)) {
             n.wantYaw = (float) Math.atan2(-(visit.x - n.x), -(visit.z - n.z));
             n.lastOutcome = "checked on a " + visit.kind().toLowerCase();
         }
@@ -1499,7 +1525,15 @@ public final class Brain {
         if (p == null) { n.lastOutcome = "no one to talk to"; n.social = 0.3f; return; }
         if (n.socialPartner != p.id || n.socialSide == 0) n.socialSide = n.x > p.x ? 1.4f : -1.4f;
         n.socialPartner = p.id;
-        if (!goTo(n, p.x + n.socialSide, p.z, false, 0.9f)) return;
+        if (!goTo(n, p.x + n.socialSide, p.z, false, 0.9f)) {
+            if (g.time < n.navPauseUntil) {
+                n.social = 0.3f;
+                n.socialPartner = 0;
+                n.nextThink = 0;
+                n.lastOutcome = "postponed a conversation; no safe route to the partner";
+            }
+            return;
+        }
         if (n.chatUntil < g.time - 1) { n.chatUntil = g.time + 4; g.ai.say(n, ai.smallTalk(n, p)); }
         n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z));
         if (g.time >= n.chatUntil) {

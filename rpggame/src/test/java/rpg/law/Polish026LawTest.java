@@ -67,4 +67,31 @@ class Polish026LawTest {
         var save=new SaveSystem(g);assertTrue(save.save(temp.resolve("world.json")));g.rememberedNames.clear();assertTrue(save.load(temp.resolve("world.json")));assertEquals("Arthur",g.nameOf(991234));
         assertTrue(g.invariants.check().isEmpty(),g.invariants.check().toString());
     }
+
+    @Test void aFullGuardPurseAcceptsPaymentWithoutRequiringAnotherInventoryCell(){
+        officer.inv.clear();officer.eq.clear();
+        assertTrue(officer.store(new ItemStack(Items.COINS,10,0,false,0)));
+        for(int i=1;i<officer.inv.w*officer.inv.h;i++)assertTrue(officer.store(new ItemStack(Items.COINS,1,90000+i,false,0)));
+        assertFalse(officer.canStore(new ItemStack(Items.COINS,5,officer.id,false,0)));
+        g.law.setBounty(g.player,DevMap.ALPHA,25);int before=officer.count(Items.COINS);
+        assertTrue(g.law.payBounty(g.player,officer,g.state.newRequestId()).committed());assertEquals(before+25,officer.count(Items.COINS));
+    }
+    @Test void witnessAppealsAreConversationRepliesEvenWhenTheWitnessIsHiding(){
+        witness.goal=Brain.Goal.HIDE;evidence(witness,9911);
+        var options=witness.options(g,g.player);assertTrue(options.stream().anyMatch(o->o.id().equals("talk")));
+        assertFalse(options.stream().anyMatch(o->o.id().startsWith("witness_")));
+        var dialog=g.dialogue.talk(witness);assertTrue(dialog.stands(g));assertEquals(witness.id,dialog.npc);
+        assertTrue(dialog.choices.stream().anyMatch(c->c.label().contains("don't report")));
+    }
+    @Test void aLevelEarnedOnTheFatalTickWaitsUntilRespawnAndSurvivesSaving(@TempDir Path temp){
+        g.player.hp=0;g.player.alive=false;g.death.active=false;
+        g.prog.awardRaw(g.player,rpg.skill.Skill.DEFENSE,100,"fatal defence",0,0);g.time+=1;g.prog.update();
+        assertNull(g.prog.banner);assertTrue(g.prog.drops.isEmpty());assertEquals(0,g.player.hp);
+        var rows=g.prog.save();assertFalse(rows.isEmpty());g.prog.load(rows);
+        g.player.alive=true;g.player.restore();g.time+=1;g.prog.update();assertNotNull(g.prog.banner);
+    }
+    @Test void repeatedRoutineSpeechCannotRefreshTheSameBubbleEveryFrame(){
+        g.ai.say(witness,"Mind the road.");double until=witness.speechUntil;g.time+=.1;g.ai.say(witness,"Mind the road.");assertEquals(until,witness.speechUntil);
+        g.ai.reply(witness,"I heard you.");assertEquals("I heard you.",witness.speech);
+    }
 }

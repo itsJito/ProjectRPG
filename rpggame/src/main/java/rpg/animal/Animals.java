@@ -208,7 +208,7 @@ public final class Animals {
         a.fit();
         c.moverCreate(a.body, a.x, DevMap.FLOOR + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
-        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags, (int) a.id * 7919);
+        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags | astratto.bridge.AstrattoNative.AGENT_NO_LADDERS, (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
         java.util.Arrays.fill(a.facts, -1);
         a.targetBody = -1;

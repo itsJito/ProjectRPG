@@ -72,7 +72,7 @@ bool Pathfinder::climb(const VoxelWorld& w, int x, int y, int z) {
 }
 
 int Pathfinder::find(int k, bool create) {
-    int h = static_cast<int>((static_cast<uint32_t>(k) * 0x9E3779B1u) >> 18);
+    int h = static_cast<int>((static_cast<uint32_t>(k) * 0x9E3779B1u) >> 14);
     for (;;) {
         if (slotGen_[h] != gen_) {
             if (!create || count_ >= CAP) return -1;
@@ -108,15 +108,21 @@ int Pathfinder::pop() {
     return top;
 }
 
+float Pathfinder::learnedCost(int cell) const {
+    float cost=0;
+    if(query_->penalties)for(const auto& penalty:*query_->penalties)if(penalty.first==cell)cost+=penalty.second;
+    return cost;
+}
+
 void Pathfinder::relax(int from, int x, int y, int z, float cost, int gx, int gz) {
     const int m = find(key(x, y, z), true);
     if (m < 0 || closed_[m]) return;
-    const float g = ng_[from] + cost;
+    const float g = ng_[from] + cost + learnedCost(key(x,y,z));
     if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic(x, z, gx, gz); parent_[m] = from; push(m); }
 }
 
 bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuery& q, std::vector<int32_t>& out, uint32_t& expansions) {
-    out.clear();partial_=false;capped_=false;
+    out.clear();partial_=false;capped_=false;query_=&q;
     expansions = 0;
     // Validate before float-to-int conversion. Leave room for neighbour offsets,
     // rounded heights and coordinate differences in the integer search math.
@@ -158,14 +164,14 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
         if (hh < bestH) { bestH = hh; best = n; }
         if (x == gx && z == gz && (goalY < 0 || std::abs(y - goalY) <= 1)) { best = n; break; }
         // ladders: a rung column is a vertical edge. A body on a ladder needs no floor, only room.
-        if (climb(w, x, y, z) && pass(w, x, y + 1, z, doors) && pass(w, x, y + 2, z, doors)) relax(n, x, y + 1, z, tune.ladderCost, gx, gz);
-        if (climb(w, x, y - 1, z) && pass(w, x, y - 1, z, doors)) relax(n, x, y - 1, z, tune.ladderCost * 0.7f, gx, gz);
+        if (q.ladders && climb(w, x, y, z) && pass(w, x, y + 1, z, doors) && pass(w, x, y + 2, z, doors)) relax(n, x, y + 1, z, tune.ladderCost, gx, gz);
+        if (q.ladders && climb(w, x, y - 1, z) && pass(w, x, y - 1, z, doors)) relax(n, x, y - 1, z, tune.ladderCost * 0.7f, gx, gz);
         const bool hanging = !stand(w, x, y, z, doors);
         for (int d = 0; d < 8; d++) {
             const int nx = x + DIRS[d][0], nz = z + DIRS[d][1];
             int ny = hanging ? (stand(w, nx, y, nz, doors) ? y : -1) : stepY(w, nx, nz, y, doors);
             // the head of a ladder beside a roof or a landing: no floor in that cell, but rungs to hold
-            if (ny < 0 && d < 4 && climb(w, nx, y - 1, nz) && pass(w, nx, y, nz, doors) && pass(w, nx, y + 1, nz, doors)) ny = y;
+            if (q.ladders && ny < 0 && d < 4 && climb(w, nx, y - 1, nz) && pass(w, nx, y, nz, doors) && pass(w, nx, y + 1, nz, doors)) ny = y;
             // a ledge two or three blocks up, straight ahead, with room on it and nothing overhead on the way
             bool pullUp = false;
             if (ny < 0 && doors && q.mantle && d < 4 && !hanging) {
@@ -194,7 +200,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
                 if (f & ASTRATTO_BLOCK_DOOR) cost += 5.0f;                                          // opening a door takes a moment
                 else if (f & ASTRATTO_BLOCK_LIQUID) cost += 2.5f;                                   // wading is slow and loud
             }
-            const float g = ng_[n] + cost;
+            const float g = ng_[n] + cost + learnedCost(key(nx,ny,nz));
             if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic(nx, nz, gx, gz); parent_[m] = n; push(m); }
         }
     }

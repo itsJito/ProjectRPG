@@ -31,7 +31,7 @@ public final class AstrattoNative {
     public static final int CHEM_FLAMMABLE = 1, CHEM_CONDUCTIVE = 2, CHEM_FREEZABLE = 4, CHEM_WIND_SENSITIVE = 8;
     public static final int CHEM_FIRE = 1, CHEM_WATER = 2, CHEM_ICE = 3, CHEM_WIND = 4, CHEM_ELECTRIC = 5;
     public static final int CHEM_WET = 1, CHEM_BURNING = 2, CHEM_FROZEN = 4, CHEM_CHARGED = 8, CHEM_BURNT = 16;
-    public static final int API_MAJOR = 2, API_MINOR = 6, API_VERSION = API_MAJOR << 16 | API_MINOR;
+    public static final int API_MAJOR = 2, API_MINOR = 7, API_VERSION = API_MAJOR << 16 | API_MINOR;
 
     // ---- status
     public static final int OK = 0, ERR_ARGUMENT = -1, ERR_VERSION = -2, ERR_STATE = -3, ERR_MEMORY = -4, ERR_STREAM = -5, ERR_INTERNAL = -6,
@@ -92,7 +92,7 @@ public final class AstrattoNative {
     public static final int IN_FACT0 = 0, IN_TARGET_SEEN = 16, IN_TARGET_DISTANCE = 17, IN_SINCE_SEEN = 18, IN_SINCE_HEARD = 19, IN_TIME_IN_ACTION = 20,
             IN_RANDOM = 21, IN_GOAL_DISTANCE = 22, IN_HAS_TARGET = 23, IN_COUNT = 24;
     public static final int CURVE_LINEAR = 0, CURVE_INVERSE = 1, CURVE_QUADRATIC = 2, CURVE_LOGISTIC = 3, CURVE_STEP = 4;
-    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2, AGENT_EXTERNAL_TRAVERSAL = 1 << 3;
+    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2, AGENT_EXTERNAL_TRAVERSAL = 1 << 3, AGENT_NO_LADDERS = 1 << 4;
 
     // ---- audio (96-127)
     public static final int BUS_SFX = 0, BUS_MUSIC = 1, BUS_VOICE = 2, BUS_AMBIENCE = 3, BUS_UI = 4, BUSES = 5;

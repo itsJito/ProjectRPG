@@ -4,6 +4,41 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 18: Taking the High Road (Version Alpha 0.2.7) — Shadow
+
+Built from main at `7f83b1b`, for publication to `polish`. Earlier release entries are preserved. Pathfinding is the focus of this pass; the existing native locomotion, perception, jobs, inventories, law, and rumor systems remain in use.
+
+### Runtime navigation and personal knowledge
+- Added a world-owned, lazy runtime graph of standable surfaces at actual heights. Horizontal chunks retain versioned connected floor regions and door/ladder portals; region search selects a corridor, then cell search emits short native movement legs. Designer waypoints remain optional landmarks and compatibility helpers, rather than the foundation of ordinary travel.
+- Local topology edits rebuild only affected chunks. RouteBook entries retain floor coordinates, cost, confidence, last use, and traversed chunk versions. Completed journeys strengthen knowledge, interruption cannot verify a route, and disuse weakens confidence. Loaded and shared routes are checked against live geometry and door permissions.
+- BLOCKED memories now retain coordinates through saving and rumor retelling. Personal failures penalize nearby routes temporarily; nearby conversations share weaker obstruction warnings and verified journeys. Home, work, shop, and local landmarks seed books; watch and information roles receive more landmarks.
+- Native agents retain bounded, expiring obstruction costs, partial/cap telemetry, and adaptive search budgets. Stable personal cost variation applies to coarse gameplay routes; short native steering retains its established base costs. Repeated partials remain failures, not arrivals. The finite search storage and per-frame budgets remain explicit resource limits; failures are no longer retried without memory.
+- Chokepoint yielding uses distance and a stable tie break with bounded waits and a cooldown. Existing physical local avoidance remains active. Measurements and tuning history are recorded in `docs/alpha027-review.md`.
+
+### Traversal and decisions
+- Navigation surface tests now read the native block definitions, including passable foliage and shallow water. Briefly airborne starts project to their nearby supported floor. Default knight duty coordinates use the configured post; farm inspections approach stock within their existing total reach rather than requiring a fixed side in a pond.
+- Added stepped Stairs and backed Ladder geometry using existing block materials. Stair collision uses the engine's existing step/ramp support. Ladders use explicit vertical movement and height-sensitive arrival, including the transition off a top rung. The development traversal course has both a stair flight and a ladder to the same platform.
+- Ladder permission is explicit for native agents and reevaluated as human goals change. Town residents use ladders for watch duties, suitable building work, or combat; wild travel permits them. Animals do not climb ladders, and only suitably sized humanoid monsters do. Climbing poses follow actual height and movement.
+- Ranged fighters consider visible elevated surfaces and verify a reachable route before committing to high ground. Existing cover, flank, retreat, and melee decisions remain in place. NPC skills and combat levels do not gain XP.
+
+### Law, speech, progression, and presentation
+- Bounty transfers can merge into an eligible existing officer coin purse even with a full inventory. Payment still validates actual Gold, reach, officer authority, duplicate requests, and explicit serious-arrest resistance. Confrontation payment replies remain open long enough to complete.
+- Witness appeals now appear in the chatbox, with natural reply choices and the actual witness response. The interaction menu opens Talk; the existing one-attempt, evidence, influence, funds, and consequence rules remain authoritative.
+- NPC speech remembers normalized recent lines and throttles repeats. Routine remarks cannot immediately replace an active line; directed replies can respond promptly.
+- Level presentation and XP drops wait until a later living tick, so a fatal combat tick cannot heal or celebrate over death. Pending level celebrations survive saving and loading and play in order after respawn.
+- Repair work blends a hammering pose and bracing hand into the existing rig while the interruptible Work exists. The visual hammer uses the existing item. Cancelling the work removes the motion and tool immediately.
+- Hedge root vertices no longer sway; higher connected hedge blocks retain motion. The subtitle reads “A World Awaits.”, enlarged and centred under the title. Game version and native API minor version advance to 0.2.7 and 2.7 respectively.
+
+- Nearby travel validates generated connectivity before delegating the full short trip to native steering; this avoids introducing artificial stopping points beside swinging door leaves. HOLD cancels pending native path requests. Social plans that cannot safely reach their partner are postponed instead of occupying an entire routine.
+
+### Verification
+- The complete gameplay sweep finishes 324 cases with zero failures or errors and one existing disabled profiling probe. Final affected and closing runs pass 57 and 25 cases respectively. Engine verification passes 121 native and 29 Java/GL cases. Focused rendered creator/leveling/invariant acceptance passes 20/20 checks; the distribution builds successfully after the final changes.
+- Ranged monsters share the reachable-perch planner and retain commitments through a brief loss of sight, without reading a hidden target's new position. Grounded melee pursuit can retain the height of a visibly selected destination. Monster climbing poses read actual mover state. Native climbers clear the landing before releasing the rungs; a grounded-perch regression verifies physical arrival and verified route confidence.
+- Cached region invalidation compares native movement flags, including foliage-to-wall and deep-to-shallow-water changes. The acceptance creator checklist accounts for eye colors; its level presentation check follows the queued award and the current level-banner fragment. Native build information reads the version constants instead of retaining a stale label.
+- Reproducible navigation measurements, native-renderer captures, test results, and practical limits are documented in `docs/alpha027-review.md`. New regression coverage exercises runtime surface generation, local invalidation, stacked floors, ladder permissions and actual native climbing, obstruction persistence, bounty purse merging, witness chat, deferred level presentation, and speech throttling.
+
+---
+
 ## Pass 17: Ash and Order (Version Alpha 0.2.6) — Shadow
 
 Continues the main-based Alpha 0.2.5 polish tree; publication remains on `polish`. Earlier release entries are preserved. Player notes continue in `patchnotes.md` by request. Classic-era World of Warcraft remains the reference for readable silhouettes and restrained effects; townsfolk jobs and reactions remain the AI priority.

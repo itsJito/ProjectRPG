@@ -36,13 +36,13 @@ public final class Rumors {
     static float weight(Memory m) {
         return switch (m.kind) {
             case "MURDER" -> 10; case "ASSAULT" -> 5; case "LIVESTOCK" -> 3; case "THEFT" -> 2.5f; case "LOCKPICKING", "VANDALISM" -> 1.5f;
-            case "DEED" -> 1.2f; case "ARMS" -> 1.5f; case "IMPRISONED" -> 2;
+            case "BLOCKED" -> 1.1f; case "DEED" -> 1.2f; case "ARMS" -> 1.5f; case "IMPRISONED" -> 2;
             default -> 0;
         } * m.confidence;
     }
 
     /** Whether a memory is news worth telling (a crime, or a good deed). */
-    static boolean news(Memory m) { return m.crime() || m.kind.equals("DEED") || m.kind.equals("ARMS") || m.kind.equals("IMPRISONED"); }
+    static boolean news(Memory m) { return m.kind.equals("BLOCKED") && m.navKnown || m.crime() || m.kind.equals("DEED") || m.kind.equals("ARMS") || m.kind.equals("IMPRISONED"); }
 
     /**
      * What an NPC makes of the player from everything they know (seen and heard), -1 (dread) .. +1 (warmth). A killing
@@ -191,6 +191,7 @@ public final class Rumors {
         String hedge = saw ? "I saw it myself: " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
                 : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
         return switch (m.kind) {
+            case "BLOCKED" -> "That way is obstructed. Try another route for now.";
             case "IMPRISONED" -> hedge + who + " has been jailed" + (m.value > 1 ? " " + m.value + " times" : "") + ".";
             case "MURDER" -> hedge + who + " killed " + victim + "!";
             case "ASSAULT" -> hedge + who + " attacked " + victim + ".";

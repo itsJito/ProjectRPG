@@ -113,11 +113,11 @@ public final class Acceptance {
         preview.world = game.world(); preview.x = 64.5f; preview.y = DevMap.FLOOR; preview.z = 66.5f;
         // every row cycles through exactly the GDD's counts (3.18: sex, body, skin, 20 hair per sex, 10 natural hair
         // colours, 20 facial hair, 20 tops / legs / shoes, 24 garment colours) and wraps
-        int[] want = {2, 3, 12, 20, 10, 20, 10, 20, 24, 20, 24, 20, 24};
+        int[] want = {2, 3, 12, Appearance.EYE_COLORS, 20, 10, 20, 10, 20, 24, 20, 24, 20, 24};
         var rows = c.rows();
         boolean counts = rows.size() == want.length;
         for (int i = 0; counts && i < rows.size(); i++) counts = rows.get(i).count() == want[i];
-        need("creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)", counts);
+        need("creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 8 eye colours, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)", counts);
         java.util.function.BiFunction<Boolean, Integer, String> hairId = (fem, i) -> rpg.render.HairMeshes.head(fem, i).list.stream().map(java.util.Arrays::toString).reduce("", String::concat)
                 + "|" + rpg.render.HairMeshes.hang(fem, i).list.stream().map(java.util.Arrays::toString).reduce("", String::concat) + "|" + rpg.render.HairMeshes.shavedSides(fem, i);
         java.util.Set<String> hair = new java.util.HashSet<>(), fhair = new java.util.HashSet<>();
@@ -130,7 +130,8 @@ public final class Acceptance {
         for (int i = 0; i < 20; i++) { outfits.add("t" + rpg.render.Outfit.TOPS[i]); outfits.add("l" + rpg.render.Outfit.LEGS[i]); outfits.add("s" + rpg.render.Outfit.SHOES[i]); }
         need("20 distinct tops, 20 legs and 20 shoes (" + outfits.size() + " of 60)", outfits.size() == 60);
         int startingHair=c.look.hair;
-        for (int i = 0; i < 20; i++) c.step(rows.get(3), 1);
+        var hairRow=rows.stream().filter(row->row.label().equals("Hair")).findFirst().orElseThrow();
+        for (int i = 0; i < 20; i++) c.step(hairRow, 1);
         need("hairstyle row wraps after 20", c.look.hair == startingHair);
         c.step(rows.get(0), 1);
         need("choosing female removes facial hair and its row", c.look.female && c.look.beard == 0 && c.rows().size() == want.length - 2);
@@ -205,8 +206,10 @@ public final class Acceptance {
         long ups = g.prog.levelUps;
         int nextCooking=g.player.skills.level(Skill.COOKING)+1;
         g.prog.awardRaw(g.player, Skill.COOKING, XpTable.xpFor(nextCooking) - g.player.skills.xp(Skill.COOKING), "level-up test", 0, g.state.newRequestId());
-        frames(20);
-        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelup").alpha > 0 && g.chat.contains("Cooking level is now "+nextCooking));
+        // The deduplication award can queue its own celebration before this one.
+        // Wait for this specific award while the ordinary game and HUD keep updating.
+        for(int frame=0;frame<300 && !g.chat.contains("Cooking level is now "+nextCooking);frame++)frames(1);
+        need("a player level-up is celebrated (overlay and message)", g.prog.levelUps > ups && hud.fragment("levelbanner").alpha > 0 && g.prog.banner!=null && g.prog.banner.skill()==Skill.COOKING && g.prog.banner.level()==nextCooking && g.chat.contains("Cooking level is now "+nextCooking));
         shot("03-level-up");
     }
 

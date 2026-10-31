@@ -1882,7 +1882,7 @@ public final class Gfx implements AutoCloseable {
         ItemDef cookingFood = Rig.cooking(a);
         // (0.2.2) put away, the hands are empty and the weapons ride on the body (sheathed() below)
         boolean inHand = a.inHand(clock);
-        ItemDef main = cookingFood != null ? cookingFood : inHand ? a.main() : null, off = cookingFood != null || !inHand ? null : a.off();
+        ItemDef main = Rig.repairing(a)?rpg.item.Items.HAMMER:cookingFood != null ? cookingFood : inHand ? a.main() : null, off = Rig.repairing(a) || cookingFood != null || !inHand ? null : a.off();
         if (!inHand && !firstPerson) sheathedItems(a, b);
         boolean bow = main != null && main.family == Family.BOW;
         for (int k = 0; k < 2; k++) {

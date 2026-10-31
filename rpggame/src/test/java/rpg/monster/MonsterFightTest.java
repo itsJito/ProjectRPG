@@ -42,6 +42,45 @@ class MonsterFightTest {
         return m;
     }
 
+    private int[] raisedLanding() {
+        for (Npc n : g.npcs) g.ai.unload(n);
+        int bx=(int)Math.floor(lane[0]),bz=(int)Math.floor(lane[1]);
+        for(int x=bx-2;x<=bx+16;x++)for(int z=bz-4;z<=bz+4;z++) {
+            g.setBlock(x,DevMap.FLOOR-1,z,rpg.world.Blocks.STONE);
+            for(int y=DevMap.FLOOR;y<=DevMap.FLOOR+10;y++)g.setBlock(x,y,z,rpg.world.Blocks.AIR);
+        }
+        for(int x=bx+10;x<=bx+14;x++)for(int z=bz-2;z<=bz+2;z++)g.setBlock(x,DevMap.FLOOR+3,z,rpg.world.Blocks.STONE);
+        for(int y=DevMap.FLOOR;y<=DevMap.FLOOR+4;y++)g.setBlock(bx+9,y,bz,rpg.world.Blocks.LADDER);
+        game.tick(0);
+        return new int[]{bx,bz};
+    }
+    private Monster engaged(MonsterKind kind) {
+        Monster monster=spawn(kind,6,0);
+        monster.target=g.player.id;
+        monster.state=Monster.State.ENGAGE;
+        monster.nextThink=g.time+20;
+        monster.nextSwitch=g.time+20;
+        monster.nextRanged=g.time+100;
+        return monster;
+    }
+    @Test void aGroundedRangedMonsterClimbsToReachableHighGround() {
+        int[] base=raisedLanding();
+        Monster archer=engaged(MonsterKind.GOBLIN);
+        for(int frame=0;frame<600;frame++)game.tick(1f/60);
+        assertTrue(archer.grounded && archer.x>=base[0]+10 && archer.y>DevMap.FLOOR+3.5f,
+            "ranged monster stayed at "+archer.x+","+archer.y+","+archer.z+" ("+archer.state+", "+archer.lastOutcome+")");
+        assertTrue(archer.routeBook.routes.stream().anyMatch(r->r.y>DevMap.FLOOR+3 && r.confidence>0),
+            "the completed climb becomes verified travel knowledge");
+    }
+    @Test void aMeleeMonsterClimbsTowardAnElevatedVisibleOpponent() {
+        int[] base=raisedLanding();
+        g.teleport(g.player,base[0]+10.5f,DevMap.FLOOR+4,base[1]+.5f);game.tick(0);
+        Monster pursuer=engaged(MonsterKind.ZOMBIE);
+        for(int frame=0;frame<600;frame++)game.tick(1f/60);
+        assertTrue(pursuer.y>DevMap.FLOOR+2.5f && pursuer.distTo(g.player)<2.5f,
+            "melee monster stayed at "+pursuer.x+","+pursuer.y+","+pursuer.z+" ("+pursuer.lastOutcome+")");
+    }
+
     @Test void aBatCirclesOutOfReachAndSwoopsInToBite() {
         Monster bat = spawn(MonsterKind.BAT, 4, -4);
         int frames = 60 * 25, high = 0, dives = 0, wasSwoop = 0;

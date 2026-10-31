@@ -361,6 +361,8 @@ public final class Rig {
             }
         }
 
+        if(a.onLadder && !a.grounded){for(int k=0;k<2;k++){float cycle=(float)Math.sin(a.y*5+(k==0?0:Math.PI));foot[k]=new float[]{(k==0?1:-1)*hipX,2.5f+cycle*2,-3.5f};}}
+
         // ---- the hips: the planted legs' reach (an inverted pendulum: highest over the foot), on a damped spring
         float sway = 0;
         int planted = 0;
@@ -459,7 +461,7 @@ public final class Rig {
         // (0.2.2) put away, what is equipped rides on the body and the arms are free; drawing or sheathing, the hand goes
         // to the item's place on the body and back, the item changing hands with the place halfway
         boolean inHand = a.inHand(time);
-        ItemDef main = inHand ? a.main() : null, off = inHand ? a.off() : null;
+        ItemDef main = repairing(a)?Items.HAMMER:inHand ? a.main() : null, off = repairing(a)?null:inHand ? a.off() : null;
         float sheathS = (float) ((time - a.sheatheAt) / Actor.SHEATHE_TIME);
         boolean sheathing = sheathS >= 0 && sheathS < 1 && a.sheathable();
         boolean bowEquipped = a.main() != null && a.main().family == Family.BOW;
@@ -625,6 +627,15 @@ public final class Rig {
                 if (l2 > reachLen) at = add(shoulder, off2, reachLen / l2);
                 target = lerp(rest, at, grab);
                 dir = norm(lerp(dir, new float[]{0, -1, -0.3f}, grab));
+            } else if(a.onLadder && !a.grounded){
+                float cycle=(float)Math.sin(a.y*5+(isMain?Math.PI:0));target=torsoPoint(shoulder,side*.5f,2+cycle*3,-5);dir=norm(torsoDir(0,1,-.2f));
+            } else if (repairing(a)) {
+                float t=a.working.t, enter=smooth(Math.clamp(t/.3f,0,1)), leave=smooth(Math.clamp((a.working.duration-t)/.35f,0,1));
+                float tap=(float)Math.pow(Math.max(0,Math.sin(t*9)),2);
+                float[] contact=toFigure(a,a.reachX,a.reachY,a.reachZ);
+                contact=add(contact,torsoRight,side*1.8f);
+                if(isMain){contact=add(contact,torsoUp,2+tap*3);contact=add(contact,torsoDir(0,0,-1),-tap*2);}
+                target=lerp(rest,contact,enter*leave);dir=norm(torsoDir(0,.5f-tap*.8f,-1));
             } else if (looting > 0.001f) {
                 target = lerp(rest, toFigure(a, a.reachX + (float) Math.cos(a.yaw) * side * 0.12f, a.reachY, a.reachZ - (float) Math.sin(a.yaw) * side * 0.12f), looting);
                 dir = new float[]{0, -1, -0.2f};
@@ -711,6 +722,7 @@ public final class Rig {
 
     /** A foot leaves the ground: its swing starts from where it stood. */
     /** What is being cooked while cooking is under way at a range or a fire (gamefixes: cooking is animated), or null. */
+    public static boolean repairing(Actor a){return a.working!=null && a.working.action.equals("repair");}
     public static ItemDef cooking(Actor a) {
         var w = a.working;
         if (w == null || !(w.target instanceof rpg.objects.Station s) || s.kind != rpg.item.Recipes.Station.RANGE) return null;

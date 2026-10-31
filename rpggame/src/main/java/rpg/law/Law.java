@@ -488,10 +488,15 @@ public final class Law {
         if (b <= 0) return Result.no("You have no bounty in " + jur + ".");
         if (!a.has(Items.COINS, b)) return Result.no("You need " + b + " coins to pay your bounty.");
         ItemStack payment = new ItemStack(Items.COINS, b, to.id, false, a.id);
-        if (!to.canStore(payment)) return Result.no("The watch cannot receive the payment right now.");
+        if (!to.canStore(payment)) {
+            // Existing unowned purses are also legitimate recipients; try both ownership groups.
+            payment.owner = 0;
+            if (!to.canStore(payment)) return Result.no("The watch cannot receive the payment right now.");
+        }
+        long purseOwner = payment.owner;
         String paidCrime="offence";int severity=-1;
         for(Npc witness:g.npcs)for(Memory memory:witness.memories)if(memory.subject==a.id && memory.crime() && !memory.settled && jur.equals(memory.jurisdiction) && charge(memory)>severity){severity=charge(memory);paidCrime=memory.kind;}
-        for(ItemStack coin:a.takeItems(Items.COINS,b)){coin.owner=to.id;coin.stolen=false;to.store(coin);}
+        for(ItemStack coin:a.takeItems(Items.COINS,b)){coin.owner=purseOwner;coin.stolen=false;if(!to.store(coin))throw new IllegalStateException("Validated bounty payment did not fit");}
         settle(a, jur);
         g.ai.say(to,paymentComment(paidCrime));
         g.state.commit(req, "BountyPaid", a.id, to.id, jur, 0, b + " coins to " + to.name);

@@ -42,7 +42,9 @@ public final class Blocks {
             DUAL0 = 84,
             // 0.2.2 (gamefixes): a clipped hedge - small dense leaves, squared off; DevPalace's greenery
             HEDGE = 108,
-            COUNT = 109;
+            STAIRS = 109, LADDER = 110, COUNT = 111;
+    public static boolean stairs(int id) { return id == STAIRS; }
+    public static boolean ladder(int id) { return id == LADDER; }
     /** The two-faced blocks' pairs: {outside, inside}. */
     public static final int[][] DUAL_PAIRS = {{BRICK, PLASTER}, {STONE_BRICKS, PLASTER}, {PLASTER, PLANKS}, {STONE_BRICKS, PLANKS}, {LIMESTONE_BRICKS, MARBLE}, {IRON_BLOCK, PLANKS}};
     /** Inner-face directions of a two-faced block: toward +x, -x, +z, -z. */
@@ -95,7 +97,7 @@ public final class Blocks {
             case AIR, EMBERS -> Material.NONE;
             case GRASS, DIRT, BARE_PATCH, CLAY, MUD -> Material.EARTH;
             case SAND -> Material.SAND;
-            case PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
+            case LADDER, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
                  CRAFT_TABLE, SAWBENCH, TARGET, DOOR, LOCKED_DOOR, CHARRED, CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG,
                  CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF, CHARRED_STUMP -> Material.WOOD;
             case LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
@@ -164,7 +166,7 @@ public final class Blocks {
         f(WHITE_CARPET, L_WHITE_CARPET); f(BLACK_CARPET, L_BLACK_CARPET); f(BROWN_CARPET, L_BROWN_CARPET); f(RED_CARPET, L_RED_CARPET);
         f(LIMESTONE_BRICKS, L_LIMESTONE); f(IRON_BLOCK, L_IRON_BLOCK); f(GOLD_BLOCK, L_GOLD_BLOCK); f(COPPER_BLOCK, L_COPPER_BLOCK); f(COAL_BLOCK, L_COAL_BLOCK);
         f(HAY_BALE, L_HAY_TOP, L_HAY_SIDE, L_HAY_TOP); f(HEDGE, L_HEDGE);
-        f(EMBERS, L_COAL);
+        f(EMBERS, L_COAL); f(STAIRS,L_STONE_BRICKS); f(LADDER,L_PLANKS);
         // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
         int next = CHAR_LAYER0;
         int[] charOf = new int[CHAR_LAYER0];
@@ -224,6 +226,8 @@ public final class Blocks {
         d[FURNACE].emission = 9;
         d[BED] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT | AstrattoNative.BLOCK_LIGHT_PASS | AstrattoNative.BLOCK_NO_COLLIDE_AI);
         for (int i = 0; i < COUNT; i++) if (plant(i)) { d[i] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_LIGHT_PASS); d[i].material = AstrattoNative.MATERIAL_FOLIAGE; }
+        d[STAIRS] = new NativeEngine.BlockDef(solid | AstrattoNative.BLOCK_STEP); d[STAIRS].shape=2;
+        d[LADDER] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_CLIMB | AstrattoNative.BLOCK_LIGHT_PASS);
         return d;
     }
 
@@ -248,6 +252,8 @@ public final class Blocks {
         for (int i = 0; i < COUNT; i++) if (objectCell(i)) { r[i] = def(FACES[i], AstrattoNative.RB_SOLID); r[i].shape = SHAPE_HIDDEN; }   // the game draws these
         for (int i = 0; i < COUNT; i++) if (plant(i)) r[i] = def(FACES[i], AstrattoNative.RB_CROSS | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         for (int i = DUAL0; i < COUNT; i++) if (dual(i)) r[i] = def(FACES[i], cube | (innerDir(i) + 1) << AstrattoNative.RB_INNER_SHIFT);
+        r[STAIRS]=def(FACES[STAIRS],AstrattoNative.RB_SOLID | AstrattoNative.RB_STEP); r[STAIRS].shape=2;
+        r[LADDER]=def(FACES[LADDER],AstrattoNative.RB_SOLID); r[LADDER].shape=3;
         return r;
     }
 
@@ -264,7 +270,10 @@ public final class Blocks {
         NativeMesher.ShapeDef cube = new NativeMesher.ShapeDef(), hidden = new NativeMesher.ShapeDef();
         hidden.invisible = true;
         hidden.boxes = new int[][]{{0, 0, 0, 16, 16, 16, 0}};
-        return new NativeMesher.ShapeDef[]{cube, hidden};
+        NativeMesher.ShapeDef stairs=new NativeMesher.ShapeDef(), ladder=new NativeMesher.ShapeDef();
+        stairs.orient=7; stairs.boxes=new int[][]{{0,0,0,16,8,16,0},{0,8,8,16,16,16,0}};
+        ladder.orient=1; ladder.boxes=new int[][]{{2,0,1,4,16,3,0},{12,0,1,14,16,3,0},{3,2,1,13,4,3,0},{3,7,1,13,9,3,0},{3,12,1,13,14,3,0}};
+        return new NativeMesher.ShapeDef[]{cube, hidden, stairs, ladder};
     }
 
     // ------------------------------------------------------------------ painting the texture array

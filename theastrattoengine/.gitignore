@@ -7,3 +7,6 @@ templates/new-game/.gradle/
 native/bin/*-checked/
 native/bin/*-asan/
 bench-*.json
+
+# Local Linux outputs are rebuilt from the native sources
+native/bin/linux-x64/

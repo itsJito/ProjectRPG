@@ -7,11 +7,11 @@ import rpg.world.DevMap;
 
 /** Short movement commitments, chosen from visible threats, visible allies and actual incoming fire. */
 final class CombatTactics {
-    enum Kind { COVER, FLANK, ANCHOR, SUPPORT }
+    enum Kind { COVER, FLANK, ANCHOR, SUPPORT, HIGH_GROUND }
     static final class Plan {
         Kind kind;
         long target;
-        float x, z, sourceX, sourceZ;
+        float x, y=DevMap.FLOOR, z, sourceX, sourceZ;
         double until;
     }
     private final Rpg g;
@@ -20,7 +20,7 @@ final class CombatTactics {
 
     boolean move(Npc n, Actor foe, boolean visible) {
         Plan plan = n.tactic;
-        if (plan != null && (plan.target != foe.id || g.time >= plan.until || n.stuck || !standable(plan.x, plan.z))) n.tactic = plan = null;
+        if (plan != null && (plan.target != foe.id || g.time >= plan.until || n.stuck || !g.vox.navigation.validPoint(plan.x,plan.y,plan.z,d->!d.locked || d.owner==n.id))) n.tactic = plan = null;
         if (plan != null) {
             // A moving attacker can expose cover. Reconsider only when actually seen.
             if (plan.kind == Kind.COVER && visible && !covered(foe.x, foe.eyeY(), foe.z, plan.x, n.eyeY(), plan.z)) n.tactic = plan = null;
@@ -30,6 +30,7 @@ final class CombatTactics {
             int allies = allies(n, foe);
             boolean fire = incoming(n) || n.cs.lastAttacker == foe.id && g.time - n.cs.lastHurt < 2 && ranged(foe);
             if (fire && (allies == 0 || n.hp < n.maxHp() * 0.65f || n.cs.reload > 0)) plan = cover(n, foe);
+            if(plan==null && (Squads.ranged(n) || g.magic.combatSpell(n,foe)!=null || n instanceof rpg.monster.Monster m && m.kind.ranged!=null))plan=highGround(n,foe);
             if (plan == null && allies > 0 && n.stamina > 25) {
                 var order=squads.order(n,foe);
                 if(order!=null && standable(order.x(),order.z()) && !occupied(n,order.x(),order.z())) {
@@ -37,14 +38,19 @@ final class CombatTactics {
                     plan=plan(kind,foe,order.x(),order.z(),Math.max(0.2,order.until()-g.time));
                 }
             }
-            if (plan != null) { n.tactic = plan; n.say(switch(plan.kind){case COVER->"Taking cover!";case ANCHOR->"Holding the front!";case SUPPORT->"Covering from behind!";case FLANK->"Going around!";}, g.time + 2); }
+            if (plan != null) { n.tactic = plan; if(!(n instanceof rpg.monster.Monster))n.say(switch(plan.kind){case HIGH_GROUND->"Taking the high ground!";case COVER->"Taking cover!";case ANCHOR->"Holding the front!";case SUPPORT->"Covering from behind!";case FLANK->"Going around!";}, g.time + 2); }
         }
         if (plan == null) return false;
         n.wantYaw = (float) Math.atan2(-(plan.sourceX - n.x), -(plan.sourceZ - n.z));
         g.combat.setBlock(n, false);
         n.cs.draw = 0;
-        boolean arrived = Math.hypot(n.x - plan.x, n.z - plan.z) < 0.85;
+        boolean arrived = Math.hypot(n.x - plan.x, n.z - plan.z) < (plan.kind==Kind.HIGH_GROUND?.4f:.85f) && Math.abs(n.y-plan.y)<.8;
         if (arrived && plan.kind == Kind.FLANK) { n.tactic = null; n.nextTactic = g.time + 2.5; return false; }
+        if(arrived && plan.kind==Kind.HIGH_GROUND){
+            n.routeBook.success(g.vox,g.time,plan.x,n.y,plan.z);
+            if(!visible){g.ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="looking for the target from high ground";return true;}
+            return false;
+        }
         if (arrived && plan.kind==Kind.SUPPORT && Squads.ranged(n))return false;
         if (arrived && plan.kind==Kind.ANCHOR && n.distTo(foe)<3.6f)return false;
         if (arrived) {
@@ -53,12 +59,24 @@ final class CombatTactics {
             // A short stay then a fresh decision: never track a hidden foe through cover.
             plan.until = Math.min(plan.until, g.time + 0.65);
         } else {
-            g.ai.combatGoal(n, plan.x, plan.z);
-            n.lastOutcome = switch(plan.kind){case COVER->"moving into cover from incoming fire";case FLANK->"flanking with visible allies";case ANCHOR->"taking the front of the formation";case SUPPORT->"moving behind the front line";};
+            if(plan.kind==Kind.HIGH_GROUND)g.ai.brain.goTo(n,plan.x,plan.y,plan.z,false,.3f);else g.ai.combatGoal(n, plan.x, plan.z);
+            n.lastOutcome = switch(plan.kind){case HIGH_GROUND->"climbing to a clear firing position";case COVER->"moving into cover from incoming fire";case FLANK->"flanking with visible allies";case ANCHOR->"taking the front of the formation";case SUPPORT->"moving behind the front line";};
         }
         return true;
     }
 
+    private Plan highGround(Npc n,Actor foe){
+        if(n.y>foe.y+1.5f)return null;
+        record Site(float x,float y,float z,float score){} var sites=new java.util.ArrayList<Site>();
+        for(int dx=-12;dx<=12;dx+=2)for(int dz=-12;dz<=12;dz+=2)for(int dy=2;dy<=8;dy++){
+            float x=(float)Math.floor(n.x)+dx+.5f,z=(float)Math.floor(n.z)+dz+.5f,y=(float)Math.floor(n.y)+dy;
+            if(Math.hypot(dx,dz)>12 || !g.vox.navigation.validPoint(x,y,z,d->!d.locked || d.owner==n.id) || !g.vox.sight(x,y+1.5f,z,foe.x,foe.chestY(),foe.z))continue;
+            sites.add(new Site(x,y,z,(float)Math.hypot(dx,dz)+dy*.6f));
+        }
+        sites.sort(java.util.Comparator.comparingDouble(Site::score));
+        for(var site:sites.stream().limit(3).toList())if(g.vox.navigation.route(n.x,n.y,n.z,site.x,site.y,site.z,d->!d.locked || d.owner==n.id,Brain.canUseLadders(n),n.id,n.routeBook,g.time)!=null){var plan=plan(Kind.HIGH_GROUND,foe,site.x,site.z,12);plan.y=site.y;return plan;}
+        return null;
+    }
     int allies(Npc n, Actor foe) {
         int count = 0;
         for (Npc other : g.npcs) if (other != n && other.loaded && other.alive && Squads.allied(n,other) && other.combatant()

@@ -336,7 +336,7 @@ public final class Rpg implements GameModule {
         if (m != null && !player.reacting && !(ui != null && ui.console.noclip)) {
             float traveled = (float) Math.hypot(m.x - player.x, m.z - player.z);
             player.walked += traveled;
-            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched;
+            player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched; player.onLadder=rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); player.climbVelocity=m.vy;
             movementPractice.moved(traveled);
         }
         ai.afterFrame(lastBodies, ctx.agents());

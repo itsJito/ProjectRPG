@@ -18,13 +18,17 @@ struct PathQuery {
     float sx, sy, sz, tx, ty, tz;
     int maxExpand;
     bool doors, goalY, mantle;
+    bool ladders = true;
+    const std::vector<std::pair<int,float>>* penalties = nullptr;
 };
 
 /**
  * One searcher: its scratch memory is its own, so each worker thread has one and a batch of searches runs in
- * parallel over a world nobody is changing. The search is exactly the one the game ran in Java before the engine
- * was split - same neighbours, same costs, same tie-breaks - so a route asked of either comes out cell for cell
- * the same (the game's "native12" gates hold it to that).
+ * parallel over a world nobody is changing. Raw queries preserve legacy ordering and costs.
+ * Agent queries opt into expiring learned penalties; their paths are
+ * deliberately no longer cell-for-cell legacy equivalents. Verify reachability, permissions,
+ * arrival events and measured travel instead. Search work remains bounded per update; capped
+ * agents retain failure knowledge and increase their next budget instead of repeating blindly.
  */
 class Pathfinder {
 public:
@@ -49,8 +53,8 @@ public:
     static bool choke(const VoxelWorld& w, int x, int y, int z);
 
 private:
-    static constexpr int CAP = 6000;
-    static constexpr int SLOTS = 1 << 14;
+    static constexpr int CAP = 65536;
+    static constexpr int SLOTS = 1 << 18;
 
     int find(int k, bool create);
     void push(int n);
@@ -61,6 +65,8 @@ private:
     std::vector<float> ng_, nf_;
     std::vector<uint8_t> closed_;
     bool partial_ = false, capped_ = false;
+    const PathQuery* query_ = nullptr;
+    float learnedCost(int cell) const;
     int count_ = 0, heapN_ = 0, gen_ = 0;
 };
 

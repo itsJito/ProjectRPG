@@ -1,0 +1,34 @@
+[Boot] llvmpipe (LLVM 19.1.7, 256 bits)  -  OpenGL 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1
+== Character creator
+  [ ok ] creator rows have the GDD counts (2 sexes, 3 bodies, 12 skins, 8 eye colours, 20 hair, 10 hair colours, 20 facial hair, 20 tops/legs/shoes, 24 colours)
+  [ ok ] 20 distinct male and 20 distinct female hairstyles (20, 20)
+  [ ok ] 20 distinct facial-hair presets including clean-shaven and the two stubbles (20)
+  [ ok ] 20 distinct tops, 20 legs and 20 shoes (60 of 60)
+  [ ok ] hairstyle row wraps after 20
+  [ ok ] choosing female removes facial hair and its row
+[Load] first rendered frame 0.82s
+  [ ok ] male figure: 32 px tall (8 head + 12 torso + 12 legs), hitbox 1.8 x 0.6 blocks
+  [ ok ] female figure: head 8x8x8, body 6x12x3, arms 3x12x4, legs 4x12x4, its own hitbox (1.8 x 0.45)
+  [ ok ] skins are painted at 128 x 128
+  [ ok ] appearance round-trips through save data
+  [ ok ] the player stands on the devmap
+== Leveling: all 18 skills on one table
+  [ ok ] 18 skills are registered
+  [ ok ] a new character starts with every skill at 1 but Health at 10, and 10 HP (10.0)
+  [ ok ] XP table: L10 1,154, L50 101,333, L60 273,742, L80 1,986,068, L90 5,346,332, L100 14,391,160
+  [ ok ] the stored table is strictly increasing and levelFor agrees at every boundary
+  [ ok ] all eighteen skill models reach the standard milestones and cap at 14,391,160
+  [ ok ] gameplay XP cannot advance a non-player profile
+  [ ok ] a repeated request pays XP once
+  [ ok ] a player level-up is celebrated (overlay and message)
+== Invariants
+    [ ok ] item conservation: 92 item kinds, every unit in exactly one place
+    [ ok ] shipments: 0 checked (delivered once at most, never both)
+    [ ok ] report-before-bounty: 0 bounties, each from a report
+    [ ok ] XP accounting: every skill of 115 actors matches its committed awards
+    [ ok ] XP table: 60/80/90/100 thresholds exact, 14,391,160 at 100
+    [ ok ] references: 0 crime memories and the quest's NPCs resolve
+    [ ok ] animal ledger: 59 animals, every habitat's count matches its recorded births and deaths
+  [ ok ] every world-state invariant holds at the end
+
+acceptance: 20 / 20 checks passed

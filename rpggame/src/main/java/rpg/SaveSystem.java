@@ -45,6 +45,7 @@ public final class SaveSystem {
         g.combat.landAll();
         Map<String, Object> root = new HashMap<>();
         root.put("schema", SCHEMA);
+        root.put("pendingLevels",g.prog.save());
         root.put("npcTraversalProfiles", 1);
         root.put("revision", g.state.revision);
         // the world state's bookkeeping
@@ -169,6 +170,7 @@ public final class SaveSystem {
         try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
+        g.prog.load(Json.list(root,"pendingLevels"));
         g.chemistry.beforeLoad();
         migrateJurisdictions(root);
         g.interact.work.clear();

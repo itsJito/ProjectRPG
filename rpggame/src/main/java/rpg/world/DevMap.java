@@ -218,6 +218,10 @@ public final class DevMap {
         CommandBuffer b = new CommandBuffer(1 << 16);
         BuildingKit.reset();
         new Builder(b).all();
+        b.fill(164,FLOOR+3,18,169,FLOOR+3,24,STONE_BRICKS);
+        for(int i=0;i<4;i++)for(int x=164;x<=166;x++)b.blockSet(x,FLOOR+i,14+i,STAIRS);
+        b.fill(162,FLOOR,20,162,FLOOR+4,20,STONE_BRICKS);
+        for(int y=FLOOR;y<=FLOOR+4;y++)b.blockSet(163,y,20,LADDER);
         b.lightAll();
         b.pristineSave();
         if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());

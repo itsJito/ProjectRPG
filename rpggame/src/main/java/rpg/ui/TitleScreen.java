@@ -57,7 +57,7 @@ public final class TitleScreen {
         float x = w - MARGIN - MENU_W, y = 64;
         ui.text("SHADOWVEIL", x, y, 54, Style.fade(Style.ACCENT, fade));
         ui.rect(x, y + 66, 300, 2, Style.fade(0x80D8B46A, fade));
-        ui.text("A world that remembers.", x + 2, y + 76, 15, Style.fade(Style.DIM, fade));
+        ui.text("A World Awaits.", x + (ui.width("SHADOWVEIL",54)-ui.width("A World Awaits.",22))/2, y + 78, 22, Style.fade(Style.DIM, fade));
         y += 128;
 
         if (updatesOpen) { updates(ui, w, h, escape); footer(ui, w, h); return; }

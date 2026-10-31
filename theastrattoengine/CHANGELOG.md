@@ -1,5 +1,13 @@
 # Changelog
 
+## Alpha 0.2.7 — Shadow (API 2.7)
+
+- Added ladder capability flags and vertical agent steering, including top-rung exits
+- Added expiring learned obstruction costs and adaptive search budgets
+- Added brief distance-priority chokepoint yields with a cooldown
+- Added stepped and ladder render shapes; pinned grounded hedge vertices
+- Preserved raw-query base costs and legacy search ordering; agent penalties deliberately alter learned routes
+
 ## HOODIE - frame time (API 2.5)
 
 This HOODIE pass is about frame time. On the reference machine (a six-thread AMD FX-6300 with a GTX 1050 Ti), the

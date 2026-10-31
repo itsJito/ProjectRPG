@@ -166,6 +166,12 @@ public class Npc extends Actor implements Interactable {
     /** A line said aloud (shown over their head) until a time. */
     public String speech;
     public double speechUntil;
+    private final java.util.LinkedHashMap<String,Double> spoken = new java.util.LinkedHashMap<>();
+    public void speak(String text,double now,double duration,boolean reply){
+        if(text==null || text.isBlank())return;String key=text.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+"," ");
+        if(now-spoken.getOrDefault(key,-1000d)<12 || !reply && speech!=null && now<speechUntil+.75)return;
+        spoken.put(key,now);while(spoken.size()>16)spoken.remove(spoken.keySet().iterator().next());speech=text;speechUntil=now+duration;
+    }
     /** What it is aware of, by actor id (stealth: Unaware -> Curious -> Investigating -> Alert). */
     public final java.util.Map<Long, Stealth.Aware> aware = new java.util.HashMap<>();
     /** An officer's questioning on a search: who was asked about the one sought, and when (asked once a while each). */
@@ -193,7 +199,7 @@ public class Npc extends Actor implements Interactable {
         super(id, name, 28);
         this.role = role; this.title = title;
         this.x = x; this.z = z; this.y = DevMap.FLOOR;
-        this.homeX = this.postX = this.spawnX = x; this.homeZ = this.postZ = this.spawnZ = z;
+        this.homeX = this.postX = this.spawnX = this.dutyX = x; this.homeZ = this.postZ = this.spawnZ = this.dutyZ = z;
         this.homeJurisdiction = DevMap.jurisdiction(x, z);
         this.team = role == Role.BANDIT || role == Role.BRUTE ? 3 : role == Role.THIEF ? 4 : 2;
         this.hostileToPlayer = role == Role.BANDIT || role == Role.BRUTE;
@@ -204,7 +210,7 @@ public class Npc extends Actor implements Interactable {
     public static int defaultAgility(Role role) { return switch (role) { case GUARD -> 18; case BANDIT -> 16; case BRUTE -> 8; case THIEF -> 25; case WORKER, FARMER -> 6; default -> 5; }; }
 
     /** A line said aloud, over its head until a time. */
-    public void say(String text, double until) { speech = text; speechUntil = until; }
+    public void say(String text, double until) { speak(text,until-3.5,3.5,false); }
 
     public boolean combatant() { return summonOwner != 0 || role == Role.HUNTER || role == Role.KNIGHT || role == Role.SCHOLAR || watch() || role == Role.BANDIT || role == Role.BRUTE; }
 
@@ -260,13 +266,7 @@ public class Npc extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         var report=rpg.law.WitnessInfluence.pending(g,this);
-        if(a==g.player && report!=null) {
-            o.add(Option.on("witness_persuade","Ask them not to report",12,r));
-            o.add(Option.on("witness_threaten","Threaten the witness",11,r));
-            int price=rpg.law.WitnessInfluence.price(g,report);
-            o.add(Option.when(a.has(Items.COINS,price),"witness_bribe","Offer "+price+" Gold for silence",11,"You do not have enough Gold.",r));
-        }
-        if (canTalk(g)) o.add(Option.on("talk", "Talk-to", 10, r));
+        if (canTalk(g) || a==g.player && report!=null) o.add(Option.on("talk", "Talk-to", 10, r));
         if (role == Role.MERCHANT || role == Role.FENCE || g.econ.shopOf(this) != null) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
@@ -289,7 +289,7 @@ public class Npc extends Actor implements Interactable {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
-                if (!canTalk(g)) return Result.no(name + " cannot stop to talk now.");
+                if (!canTalk(g) && rpg.law.WitnessInfluence.pending(g,this)==null) return Result.no(name + " cannot stop to talk now.");
                 // a wanted player who walks up to the watch is dealt with, however small the bounty (gamefixes)
                 if (a == g.player && (role == Role.GUARD || role == Role.LAWMAN) && g.law.bounty(a.id, homeJurisdiction) > 0) {
                     g.law.confront(this, a);

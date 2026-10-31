@@ -129,8 +129,11 @@ extern "C" {
 
 uint32_t astratto_api_version(void) { return ASTRATTO_API_VERSION; }
 
+#define ASTRATTO_BUILD_TEXT_IMPL(value) #value
+#define ASTRATTO_BUILD_TEXT(value) ASTRATTO_BUILD_TEXT_IMPL(value)
 const char* astratto_build_info(void) {
-    return "Astratto Engine native core, API 2.5, built " __DATE__ " " __TIME__
+    return "Astratto Engine native core, API " ASTRATTO_BUILD_TEXT(ASTRATTO_API_MAJOR) "."
+           ASTRATTO_BUILD_TEXT(ASTRATTO_API_MINOR) ", built " __DATE__ " " __TIME__
 #if defined(_MSC_VER)
            " (MSVC)"
 #elif defined(__clang__)
@@ -140,6 +143,9 @@ const char* astratto_build_info(void) {
 #endif
         ;
 }
+
+#undef ASTRATTO_BUILD_TEXT
+#undef ASTRATTO_BUILD_TEXT_IMPL
 
 uint32_t astratto_layout(const char* name) {
     if (name == nullptr) return 0;

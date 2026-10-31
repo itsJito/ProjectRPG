@@ -107,7 +107,8 @@ public final class Waypoints {
     }
     private static void link(int a, int b) { if (!ADJ.get(a).contains(b)) { ADJ.get(a).add(b); ADJ.get(b).add(a); } }
 
-    public static float[] point(int i) { return P[i]; }
+    public static float[] point(int i) { return i<0?RuntimeNavigation.point(i):P[i]; }
+    public static int index(float x,float y,float z){return RuntimeNavigation.handle(RuntimeNavigation.key((int)Math.floor(x),Math.round(y),(int)Math.floor(z)));}
 
     /** The nearest waypoint outside every jurisdiction (out of town, by the nearest gate). */
     public static float[] nearestOutside(float x, float z) {

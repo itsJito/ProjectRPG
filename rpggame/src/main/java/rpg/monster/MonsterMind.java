@@ -407,6 +407,11 @@ public final class MonsterMind {
         boolean sees = k != null && g.time - k.at < 0.6;
         // out of its senses: to where it last placed it - never to where it really is
         if (!sees) {
+            if (!m.kind.flies() && m.kind.ranged != null && g.ai.rangedPosition(m,t,false)) return;
+            if (!m.kind.flies() && m.legs!=null && m.hasGoalPos && m.legsY>m.y+.75f) {
+                g.ai.walkToAtHeight(m,m.legsX,m.legsY,m.legsZ,true,.3f);
+                return;
+            }
             if (k == null) { m.target = 0; m.nextThink = 0; return; }
             if (sys.moveTo(m, k.x, k.z, true, 1.2f)) { m.state = State.INVESTIGATE; m.stateSince = g.time; }
             return;
@@ -421,6 +426,18 @@ public final class MonsterMind {
         if (busy) { hold(m); return; }
         float reach = m.kind.reach * m.kind.scale() + (m.main() != null && !m.main().natural ? m.main().reach : 0);
         boolean ranged = m.kind.ranged != null && g.time >= m.nextRanged && d > Math.max(3, reach + 1) && d < m.kind.rangedRange && g.vox.sight(m.x, m.eyeY(), m.z, t.x, t.chestY(), t.z);
+        if (!m.kind.flies() && m.kind.ranged != null) {
+            if (g.ai.rangedPosition(m,t,true)) return;
+            // Keep a useful firing perch while the next ranged attack becomes ready.
+            if (m.y > t.y + 1.5f && d < m.kind.rangedRange && g.vox.sight(m.x,m.eyeY(),m.z,t.x,t.chestY(),t.z)) {
+                if (ranged) sys.ranged(m,t); else hold(m);
+                return;
+            }
+        }
+        if (!m.kind.flies() && t.y>m.y+.75f && !ranged) {
+            g.ai.walkToAtHeight(m,t.x,t.y,t.z,true,.3f);
+            if(m.legs!=null && m.hasGoalPos)return;
+        }
         // the harassers keep moving: hit and run; the ranged keep their distance; the brutes close in
         if (m.kind == MonsterKind.BAT) { batFight(m, t, d, reach, ranged); return; }
         if (m.kind.archetype == Archetype.PACK_RAIDER) { packFight(m, t, d, reach, ranged, dt); return; }

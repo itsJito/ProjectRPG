@@ -438,7 +438,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.2.6";
+    public static final String VERSION = "Alpha 0.2.7";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

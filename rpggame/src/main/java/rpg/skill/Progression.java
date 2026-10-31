@@ -20,6 +20,10 @@ public final class Progression {
     /** Awards made, for the acceptance checks. */
     public long awards, levelUps;
 
+    private record Pending(Skills.Award award,int before,int after,double at) {}
+    private final ArrayDeque<Pending> pending = new ArrayDeque<>();
+    private double nextCelebration;
+    private final ArrayDeque<Drop> pendingDrops=new ArrayDeque<>();
     public Progression(Rpg g) { this.g = g; }
 
     /** Awards scaled test XP; returns what was applied. cause: the event that earned it (0 none). */
@@ -40,11 +44,11 @@ public final class Progression {
         if (w.levelledUp()) {
             levelUps++;
             g.state.commit("LevelUp", a.id, 0, null, ev.id(), s.name() + " " + w.fromLevel() + "->" + w.toLevel());
-            if (a == g.player) celebrate(w, combatBefore, a.skills.combatLevel());
+            pending.addLast(new Pending(w,combatBefore,a.skills.combatLevel(),g.time));
         }
         if (a == g.player && w.applied() > 0) {
-            drops.addLast(new Drop(s, w.applied(), g.time));
-            while (drops.size() > 8) drops.removeFirst();
+            pendingDrops.addLast(new Drop(s,w.applied(),g.time));
+            while(pendingDrops.size()>8)pendingDrops.removeFirst();
         }
         return w;
     }
@@ -95,7 +99,13 @@ public final class Progression {
 
     private static String article(Skill s) { return "AEIOU".indexOf(s.title.charAt(0)) >= 0 ? "an" : "a"; }
 
+    public List<Object> save(){List<Object> rows=new ArrayList<>();for(var p:pending)rows.add(List.of(p.award.skill().name(),p.award.requested(),p.award.applied(),p.award.fromLevel(),p.award.toLevel(),p.before,p.after));return rows;}
+    public void load(List<Object> rows){pending.clear();pendingDrops.clear();drops.clear();banner=null;nextCelebration=0;for(Object row:rows){if(!(row instanceof List<?> v) || v.size()!=7)continue;try{var award=new Skills.Award(Skill.valueOf((String)v.get(0)),((Number)v.get(1)).longValue(),((Number)v.get(2)).longValue(),((Number)v.get(3)).intValue(),((Number)v.get(4)).intValue());pending.add(new Pending(award,((Number)v.get(5)).intValue(),((Number)v.get(6)).intValue(),g.time));}catch(IllegalArgumentException ignored){}}}
     public void update() {
+        if(g.player.alive && g.player.hp>0 && !g.death.active && !pending.isEmpty() && g.time>pending.peekFirst().at && g.time>=nextCelebration){
+            var p=pending.removeFirst();celebrate(p.award,p.before,p.after);nextCelebration=g.time+4;
+        }
+        if(g.player.alive && g.player.hp>0 && !g.death.active){while(!pendingDrops.isEmpty() && g.time>pendingDrops.peekFirst().at){var d=pendingDrops.removeFirst();drops.addLast(new Drop(d.skill,d.amount,g.time));}while(drops.size()>8)drops.removeFirst();}
         while (!drops.isEmpty() && g.time - drops.peekFirst().at() > 2.4) drops.removeFirst();
     }
 }

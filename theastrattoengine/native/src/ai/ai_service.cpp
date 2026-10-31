@@ -242,7 +242,8 @@ void AiService::plan(Engine& e, Agent& a, const VoxelWorld* w) {
         a.moving = true;
     };
     switch (act.kind) {
-        case ASTRATTO_ACT_IDLE: case ASTRATTO_ACT_HOLD: a.moving = false; a.route.clear(); break;
+        case ASTRATTO_ACT_IDLE: case ASTRATTO_ACT_HOLD:
+            a.moving = false; a.wantPath = false; a.route.clear(); break;
         case ASTRATTO_ACT_CUSTOM:
             if (a.hasGoal) setDest(a.goalX, a.goalY, a.goalZ); else { a.moving = false; a.route.clear(); }
             break;
@@ -311,6 +312,15 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
     Mover* m = phys ? phys->mover(a.body) : nullptr;
     if (m && m->posed) return;
     float wantX = 0, wantZ = 0, jump = 0;
+    if(m){m->climb=false;m->wishY=0;}
+    a.yieldTime=std::max(0.f,a.yieldTime-dt);a.yieldCooldown=std::max(0.f,a.yieldCooldown-dt);
+    auto rememberBlock=[&](int x,int y,int z){
+        const int cell=x|(z<<10)|(y<<20);bool found=false;
+        for(auto& p:a.blockedCosts)if(p.first==cell){p.second=std::min(80.f,p.second+12.f);found=true;}
+        if(!found)a.blockedCosts.emplace_back(cell,12.f);
+        if(a.blockedCosts.size()>32)a.blockedCosts.erase(a.blockedCosts.begin());
+        a.forgetBlockedAt=e.time()+30;
+    };
     // Consume reached waypoints and steer toward the next one in the same frame.
     while (a.moving && w != nullptr && !a.route.empty() && a.routeAt * 3 < a.route.size()) {
         const bool doors = (a.flags & ASTRATTO_AGENT_DOORS) != 0;
@@ -329,12 +339,13 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
         float dx = cx - a.x, dz = cz - a.z;
         const float d = std::sqrt(dx * dx + dz * dz);
         const bool last = (a.routeAt + 1) * 3 >= a.route.size();
-        if (d < (last ? 0.3f : 0.45f) && std::fabs(cy - a.y) < 1.2f) {
+        if (d < (last ? 0.3f : 0.45f) && std::fabs(cy - a.y) < (Pathfinder::climb(*w,fl(a.x),fl(a.y),fl(a.z)) ? .35f : 1.2f)) {
             a.routeAt++;
             a.progressBest = 1e9f; a.progressTimer = 0;
             if (a.routeAt * 3 >= a.route.size()) {
                 a.route.clear();a.routeAt=0;
                 if(a.partial) {
+                    rememberBlock(fl(a.x),fl(a.y+.5f),fl(a.z));
                     a.arrived=false;a.partialStreak++;
                     if(a.partialStreak>=3){a.stuck=true;a.moving=false;astratto_evt_agent ev{};ev.handle=a.self;e.emit(ev,ASTRATTO_EVT_AGENT_STUCK);}
                     else {a.wantPath=true;a.repathTimer=0.4f*static_cast<float>(a.partialStreak);}
@@ -345,6 +356,13 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             }
         } else {
             dx /= std::max(d, 1e-4f); dz /= std::max(d, 1e-4f);
+            // Vertical steering is explicit; horizontal proximity alone never completes a rung.
+            if(m && ((d<.6f && std::abs(cy-a.y)>.2f) || (d<1.6f && cy>a.y-.15f)) && (Pathfinder::climb(*w,fl(a.x),fl(a.y),fl(a.z)) || Pathfinder::climb(*w,fl(a.x),fl(a.y)-1,fl(a.z)))){
+                m->climb=true;
+                // Clear the landing before releasing the rungs; chasing its exact height oscillates at the lip.
+                const bool leaving=cy>a.y-.15f && !Pathfinder::climb(*w,fl(cx),fl(cy),fl(cz));
+                m->wishY=leaving || cy>a.y?1.f:-1.f;
+            }
             const float slow = last ? std::min(1.0f, d / 0.8f + 0.25f) : 1.0f;
             wantX = dx * a.speed * slow * a.rate; wantZ = dz * a.speed * slow * a.rate;
             // a body with weight slows for a sharp turn rather than swinging wide round the cell it has to reach
@@ -352,6 +370,20 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
                 const float vl = std::sqrt(m->vx * m->vx + m->vz * m->vz);
                 if (vl > 0.5f) { const float turn = std::max(0.3f, 0.5f + 0.5f * (m->vx * dx + m->vz * dz) / vl); wantX *= turn; wantZ *= turn; }
             }
+            bool yielding=false;
+            for(size_t k=a.routeAt;k*3<a.route.size() && k<a.routeAt+5;k++){
+                const int qx=a.route[k*3],qy=a.route[k*3+1],qz=a.route[k*3+2];
+                if(!Pathfinder::choke(*w,qx,qy,qz))continue;
+                const float ax=qx+.5f-a.x,az=qz+.5f-a.z,ad=ax*ax+az*az;
+                if(ad<.36f || ad>9.f)break;
+                for(auto other:order_){const Agent* o=agents_.get(other);if(!o || o->self==a.self || !o->moving || std::abs(o->y-a.y)>1.5f)continue;
+                    const float ox=qx+.5f-o->x,oz=qz+.5f-o->z,od=ox*ox+oz*oz;
+                    if(od>9.f || ax*ox+az*oz>0)continue;
+                    if(od<ad-.05f || (std::abs(od-ad)<.05f && o->self<a.self)){yielding=true;break;}
+                }break;
+            }
+            if(yielding && (a.progressTimer>.5f || a.yieldWait>0) && a.yieldCooldown<=0){a.yieldWait+=dt;if(a.yieldWait<.15f){if(a.yieldTime<=0)a.yields++;a.yieldTime=.25f;wantX=wantZ=0;a.progressTimer=0;break;}a.yieldCooldown=1.5f;}
+            a.yieldWait=0;
             a.yaw = std::atan2(-dx, -dz);
             // a ledge on the route that is not a stair is jumped
             if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
@@ -359,6 +391,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             a.progressTimer += dt;
             if (d < a.progressBest - 0.1f) { a.progressBest = d; a.progressTimer = 0; a.fails = 0; }
             if (a.progressTimer > 1.5f) {
+                rememberBlock(fl(cx),fl(cy),fl(cz));
                 a.progressTimer = 0; a.progressBest = 1e9f;
                 if (++a.fails >= 3) {
                     a.stuck = true; a.moving = false; a.route.clear();
@@ -400,6 +433,7 @@ void AiService::step(Engine& e, float dt) {
     // ---- where everyone is (a body moves its agent)
     for (astratto_handle h : order_) {
         Agent& a = *agents_.get(h);
+        if(now>a.forgetBlockedAt)a.blockedCosts.clear();
         if (Mover* m = phys ? phys->mover(a.body) : nullptr) { a.x = m->x; a.y = m->y; a.z = m->z; }
         a.lookValid = false;
         float tp[3];
@@ -487,14 +521,17 @@ void AiService::step(Engine& e, float dt) {
             Agent& a = *agents_.get(order_[want[k]]);
             PathQuery q;
             q.sx = a.x; q.sy = a.y; q.sz = a.z; q.tx = a.destX; q.ty = a.destY; q.tz = a.destZ;
-            q.maxExpand = 5000;
+            q.maxExpand = a.searchBudget;
+            q.penalties=&a.blockedCosts;
+            q.ladders=(a.flags & ASTRATTO_AGENT_NO_LADDERS)==0 && a.facts[15]>=0;
             q.doors = (a.flags & ASTRATTO_AGENT_DOORS) != 0;
             q.goalY = true;
             q.mantle = (a.flags & ASTRATTO_AGENT_MANTLE) != 0;
             uint32_t expansions = 0;
             auto& finder=*finders_[worker];
             if (!finder.path(*w, tune, q, a.route, expansions)) a.route.clear();
-            a.partial=finder.partial();a.capped=finder.capped();a.repaths++;a.expansions+=expansions;
+            a.partial=finder.partial();a.capped=finder.capped();
+            a.searchBudget=a.capped?std::min(48000,a.searchBudget*2):5000;a.repaths++;a.expansions+=expansions;
             if(a.partial)a.partialPaths++;
             if(a.capped)a.capHits++;
             a.navColumns.clear();

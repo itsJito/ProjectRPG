@@ -18,6 +18,7 @@ public final class Dialogue {
 
     public Dialog talk(Npc n) {
         n.conversations++;
+        if(rpg.law.WitnessInfluence.pending(g,n)!=null)return witness(n);
         Memory known = n.crimeKnown(g.player.id);
         String greet = known == null ? greeting(n) : known.settled
                 ? "Your debt to the law is settled. I still remember what happened."
@@ -37,6 +38,7 @@ public final class Dialogue {
             case MERCHANT -> { if (n.working()) d.choice("Let's trade.", () -> g.interact.request(g.player, n, "trade")); }
             case LAWMAN -> {
                 int b = g.law.bounty(g.player.id, n.homeJurisdiction);
+                if (b > 0) d.standoff=true;
                 if (b > 0) d.choice("Pay my bounty (" + b + " coins).", () -> g.interact.request(g.player, n, "pay"));
                 d.choice("Any crimes reported?", () -> g.ui.dialog(new Dialog(n.name, reports(n))));
             }
@@ -88,6 +90,23 @@ public final class Dialogue {
         d.choice("What do you know?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
         d.closeChoice("Goodbye.", () -> { });
         return d;
+    }
+
+    public Dialog witness(Npc n) {
+        var memory=rpg.law.WitnessInfluence.pending(g,n);
+        Dialog d=new Dialog(n.name,"I saw what happened. Why should I keep it from the watch?");d.npc=n.id;d.standoff=true;
+        if(memory!=null){
+            d.choice("Please don't report me.",()->appeal(n,"witness_persuade"));
+            d.choice("Keep quiet, or you'll regret it.",()->appeal(n,"witness_threaten"));
+            int price=rpg.law.WitnessInfluence.price(g,memory);
+            d.choice("Would "+price+" Gold persuade you to keep quiet?",()->appeal(n,"witness_bribe"));
+        }
+        d.closeChoice("Never mind.",()->{});return d;
+    }
+    private void appeal(Npc n,String method){
+        var result=rpg.law.WitnessInfluence.attempt(g,n,g.player,method,g.state.newRequestId());
+        Dialog response=new Dialog(n.name,result.reason());response.npc=n.id;response.standoff=true;
+        response.closeChoice("Leave.",()->{});g.ui.dialog(response);
     }
 
     private void questGiver(Npc n, Dialog d) {

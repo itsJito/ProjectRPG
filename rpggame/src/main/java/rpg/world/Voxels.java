@@ -9,11 +9,21 @@ import astratto.bridge.WorldView;
  */
 public final class Voxels {
     private final WorldView v;
+    public final rpg.ai.RuntimeNavigation navigation = new rpg.ai.RuntimeNavigation(this);
+    public int sizeX(){return v.sizeX;} public int sizeY(){return v.sizeY;} public int sizeZ(){return v.sizeZ;}
     private final boolean[] solid = new boolean[256], opaque = new boolean[256], leafy = new boolean[256], glassy = new boolean[256];
+
+    private final int[] navigationType=new int[256];
 
     public Voxels(WorldView view) {
         this.v = view;
+        var physical=Blocks.engineDefs();
+        int navMask=astratto.bridge.AstrattoNative.BLOCK_SOLID | astratto.bridge.AstrattoNative.BLOCK_DOOR
+            | astratto.bridge.AstrattoNative.BLOCK_HAZARD | astratto.bridge.AstrattoNative.BLOCK_LIQUID
+            | astratto.bridge.AstrattoNative.BLOCK_CLIMB | astratto.bridge.AstrattoNative.BLOCK_STEP;
+        for(int i=0;i<physical.length;i++)navigationType[i]=physical[i].flags & navMask;
         for (int i = 1; i < Blocks.COUNT; i++) { solid[i] = true; opaque[i] = true; }
+        solid[Blocks.LADDER]=false; opaque[Blocks.LADDER]=false;
         solid[Blocks.WATER] = false; opaque[Blocks.WATER] = false;
         solid[Blocks.EMBERS] = false; opaque[Blocks.EMBERS] = false;
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.glass(i)) { opaque[i] = false; glassy[i] = true; }
@@ -39,16 +49,16 @@ public final class Voxels {
     public float standY(float x,float near,float z){
         int bx=(int)Math.floor(x),bz=(int)Math.floor(z),mid=(int)Math.floor(near);
         for(int d=0;d<=12;d++)for(int y:new int[]{mid-d,mid+d})
-            if(y>0 && y+1<DevMap.SY && solid(bx,y-1,bz) && !solid(bx,y,bz) && !solid(bx,y+1,bz))return y;
+            if(y>0 && y+1<v.sizeY && solid(bx,y-1,bz) && !solid(bx,y,bz) && !solid(bx,y+1,bz))return y;
         return Float.NaN;
     }
     public void edited(int before,int after) {
-        if(solid[before]!=solid[after] || door(before)!=door(after) || before!=after && (door(before)||door(after))) {navigationRevision++;navigationPending=true;}
+        if(navigationType[before]!=navigationType[after] || before!=after && (door(before)||door(after))) {navigationRevision++;navigationPending=true;}
     }
     public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;for(long key:pendingChunks)chunkVersions.merge(key,1L,Long::sum);pendingChunks.clear();}}
 
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
-    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; }
+    public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; navigation.doors(doors); }
     private static boolean door(int block) { return block == Blocks.DOOR || block == Blocks.LOCKED_DOOR; }
 
     public int block(int x, int y, int z) { return v.block(x, y, z); }

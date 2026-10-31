@@ -28,6 +28,7 @@ public class Actor {
     /** Where the eyes look (the head turns toward it within its reach; the body follows at its own pace). */
     public float aimYaw;
     public boolean grounded = true;
+    public boolean onLadder; public float climbVelocity;
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
