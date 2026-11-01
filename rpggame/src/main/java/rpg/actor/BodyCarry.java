@@ -105,7 +105,7 @@ public final class BodyCarry {
             if (!a.alive || a instanceof Npc n && (n.goal != rpg.ai.Brain.Goal.COLLECT && g.time - h.since > 1 || !n.loaded) || h.body.alive || a.cs.lastHurt > h.hurtAt
                     || h.body instanceof Animal animal && animal.butchered || h.body instanceof Npc gone && gone.ragdoll == 0) { drop(a, false); continue; }
             float t = Math.max(0, Math.min(1, (float) ((g.time - h.since) / 0.65))); t = t * t * (3 - 2 * t);
-            float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
+            float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
             float lower = h.lowerAt < 0 ? 0 : Math.min(1, (float) (g.time - h.lowerAt) / 0.45f);
             if (lower >= 1) { drop(a, false); continue; }
             float smoothLower = lower * lower * (3 - 2 * lower);

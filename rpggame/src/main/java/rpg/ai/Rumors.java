@@ -137,7 +137,10 @@ public final class Rumors {
     }
 
     private static boolean knows(Npc n, Memory m) {
-        for (Memory k : n.memories) if (k.sameIncident(m) && (k.witnessed() || k.confidence >= m.confidence * 0.7f)) return true;
+        for (Memory k : n.memories) if (k.sameIncident(m)) {
+            if(m.settled && !k.settled)return false;
+            if(k.witnessed() || k.confidence >= m.confidence*.7f)return true;
+        }
         return false;
     }
 
@@ -186,11 +189,11 @@ public final class Rumors {
     String line(Npc teller, Memory m) {
         String who = m.subject == g.player.id ? (teller.knowsPlayer ? g.player.name : "that stranger") : g.nameOf(m.subject);
         if (m.subject == 0) who = "someone";
-        String victim = m.victim != 0 ? g.nameOf(m.victim) : "someone";
+        String victim = m.victim == teller.id ? "me" : m.victim != 0 ? g.nameOf(m.victim) : "someone";
         boolean saw = m.witnessed();
         String hedge = saw ? "I saw it myself: " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
                 : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
-        return switch (m.kind) {
+        String account = switch (m.kind) {
             case "BLOCKED" -> "That way is obstructed. Try another route for now.";
             case "IMPRISONED" -> hedge + who + " has been jailed" + (m.value > 1 ? " " + m.value + " times" : "") + ".";
             case "MURDER" -> hedge + who + " killed " + victim + "!";
@@ -199,10 +202,15 @@ public final class Rumors {
             case "LIVESTOCK" -> hedge + who + " killed one of the farm animals.";
             case "LOCKPICKING" -> hedge + who + " was picking locks.";
             case "VANDALISM" -> hedge + who + " smashed things up.";
+            case "ARSON" -> hedge + who + " set a building alight.";
+            case "TRESPASS" -> hedge + who + " was trespassing.";
+            case "DISORDERLY" -> hedge + who + " caused a disturbance.";
+            case "BRIBERY" -> hedge + who + " offered a bribe.";
             case "ARMS" -> (saw ? "I saw " : "I heard ") + who + " " + m.detail + ". Keep clear of that.";
             case "DEED" -> (saw ? "I saw " : "I heard ") + who + " " + m.detail + ". Decent of them.";
             default -> "...";
         };
+        return account + (m.crime() && m.settled ? " That case is closed now." : "");
     }
 
     /**

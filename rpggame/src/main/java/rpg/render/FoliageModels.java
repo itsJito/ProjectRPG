@@ -53,13 +53,13 @@ public final class FoliageModels {
             case IVY -> {
                 for(int strand=0;strand<3;strand++)for(int step=0;step<8;step++) {
                     float x=(strand-1)*0.15f+(float)Math.sin(step*1.7)*0.035f,y=step*0.17f;
-                    boxes.rgb(x,y+0.08f,0.36f,0.018f,0.18f,0.018f,0x4E8A34);
-                    boxes.rgb(x+(step%2==0?0.045f:-0.045f),y+0.08f,0.34f,0.12f,0.09f,0.035f,step%3==0?light:green);
+                    boxes.rgb(x,y+0.08f,0.489f,0.018f,0.18f,0.018f,0x4E8A34);
+                    boxes.rgb(x+(step%2==0?0.045f:-0.045f),y+0.08f,0.465f,0.12f,0.09f,0.035f,step%3==0?light:green);
                 }
             }
             case MOSS -> {
                 for(int row=0;row<5;row++)for(int col=0;col<6;col++)if(((row*7+col+seed)&3)!=0)
-                    boxes.rgb((col-2.5f)*0.065f,row*0.055f+0.025f,0.43f,0.075f,0.065f,0.03f,(row+col)%2==0?0x4C7E30:0x6E9A3E);
+                    boxes.rgb((col-2.5f)*0.065f,row*0.055f+0.025f,0.48f,0.075f,0.065f,0.03f,(row+col)%2==0?0x4C7E30:0x6E9A3E);
             }
             case MUSHROOM -> {
                 for(int stem=0;stem<4;stem++){float x=stem*0.08f-0.12f,z=(stem%2)*0.13f-0.06f,h=0.06f+stem%3*0.035f;
@@ -125,6 +125,8 @@ public final class FoliageModels {
             float co=(float)Math.cos(plant.facing),si=(float)Math.sin(plant.facing);
             // the plant's root, packed into the vertex alpha for the bend (model.vert): every part leans from it
             float root=2+Math.clamp(Math.round((plant.x-chunk.x)*16),0,255)+256*Math.clamp(Math.round((plant.z-chunk.z)*16),0,255);
+            // Above the packed root range (2..65537), while remaining opaque to the mesh uploader's alpha test.
+            if(plant.kind==Foliage.Kind.IVY || plant.kind==Foliage.Kind.MOSS)root=65538;
             if(plant.kind==Foliage.Kind.BUSH || plant.kind==Foliage.Kind.SHRUB)leaves.add(crown(plant,chunk,root));
             for(float[] box:model(plant.kind,plant.seed).list) {
                 float x=box[0],z=box[2];float wx=plant.x-chunk.x+co*x+si*z,wz=plant.z-chunk.z-si*x+co*z;

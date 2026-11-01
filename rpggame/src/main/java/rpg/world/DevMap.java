@@ -206,7 +206,7 @@ public final class DevMap {
             {"ARCHERY RANGE", 14.5f, 59.5f}, {"INTERACTION SHED", 55.5f, 24f}, {"WORKSTATIONS", 68.5f, 28.5f}, {"BUILD SPOT", 77.5f, 29.5f},
             {"MINING ROCKS", 54.5f, 38.5f}, {"TREE GROVE", 96.5f, 18.5f}, {"FISHING POND", 96.5f, 42f}, {"PATCHES", 72.5f, 36.5f},
             {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
-            {"CHANCERY A", 114.5f, 63.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
+            {"CHANCERY A", 114.5f, 63.5f}, {"STAIRS / LADDER", 162.5f, 12.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
             {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}, {"BANK OF GAMEWORLD", 72f, 102.5f},
             {"DEVPALACE", 128.5f, 70.5f}, {"THE SOUTHERN WOOD", 64.5f, 130.5f}, {"THE LAKE", 159.5f, 146.5f}, {"MINING HILLS", 140.5f, 131.5f}};
 

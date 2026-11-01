@@ -18,10 +18,13 @@ public final class RuntimeNavigation {
         return Float.NaN;
     }
     private final Map<Integer,Chunk> chunks = new HashMap<>();
+    private final Map<Integer,Portals> portals = new HashMap<>();
     private final Map<Long,Door> doors = new HashMap<>();
     public long searches, expansions, rebuiltChunks, failures, regionExpansions;
     private record Chunk(long version, Set<Integer> surfaces, Map<Integer,Integer> regions, Map<Integer,List<Integer>> members) {}
     private record Visit(int cell, float cost, float estimate) {}
+    private record Portals(Chunk owner, long west, long east, long north, long south,
+                           Map<Integer,List<Integer>> walk, Map<Integer,List<Integer>> climb) {}
     private static final int[][] DIR = {{1,0},{-1,0},{0,1},{0,-1}};
     public RuntimeNavigation(Voxels vox) { this.vox=vox; }
     public static int key(int x,int y,int z) { return x | z<<10 | y<<20; }
@@ -68,11 +71,35 @@ public final class RuntimeNavigation {
     private boolean portal(int c){int b=vox.block(x(c),y(c),z(c));return b==Blocks.DOOR || b==Blocks.LOCKED_DOOR || ladder(x(c),y(c),z(c)) || ladder(x(c),y(c)-1,z(c));}
     private int region(int c){return chunk(x(c),z(c)).regions.getOrDefault(c,-1);}
     private int[] neighbours(int c,boolean climb){
+        return neighbours(c,climb,false);
+    }
+    private int[] neighbours(int c,boolean climb,boolean raw){
         int x=x(c),y=y(c),z=z(c);int[] out=new int[6];Arrays.fill(out,-1);
-        for(int i=0;i<4;i++)out[i]=step(x+DIR[i][0],y,z+DIR[i][1],climb);
-        if(climb && ladder(x,y,z) && exists(x,y+1,z))out[4]=key(x,y+1,z);
-        if(climb && ladder(x,y-1,z) && exists(x,y-1,z))out[5]=key(x,y-1,z);
+        for(int i=0;i<4;i++)out[i]=step(x+DIR[i][0],y,z+DIR[i][1],climb,raw);
+        if(climb && ladder(x,y,z) && (raw?surface(x,y+1,z):exists(x,y+1,z)))out[4]=key(x,y+1,z);
+        if(climb && ladder(x,y-1,z) && (raw?surface(x,y-1,z):exists(x,y-1,z)))out[5]=key(x,y-1,z);
         return out;
+    }
+    /** Cache only exits, rather than rescanning every floor cell on every resident's trip.
+     * Neighbour versions matter: an edit across a chunk edge can add or remove a portal. */
+    private List<Integer> exits(int zone,boolean climb) {
+        int x=x(zone),z=z(zone),id=(x>>4)<<16|(z>>4);
+        Chunk owner=chunk(x,z);Portals old=portals.get(id);
+        long west=vox.chunkVersion(x-16,z),east=vox.chunkVersion(x+16,z),north=vox.chunkVersion(x,z-16),south=vox.chunkVersion(x,z+16);
+        if(old==null || old.owner!=owner || old.west!=west || old.east!=east || old.north!=north || old.south!=south) {
+            Map<Integer,List<Integer>> walk=new HashMap<>(),ladder=new HashMap<>();
+            for(var area:owner.members.entrySet())for(boolean capability:new boolean[]{false,true}) {
+                Set<Integer> destinations=new TreeSet<>();
+                for(int c:area.getValue())for(int next:neighbours(c,capability,true))
+                    if(next>=0 && owner.regions.getOrDefault(next,-1)!=area.getKey().intValue())destinations.add(next);
+                (capability?ladder:walk).put(area.getKey(),List.copyOf(destinations));
+            }
+            old=new Portals(owner,west,east,north,south,walk,ladder);portals.put(id,old);
+        }
+        return (climb?old.climb:old.walk).getOrDefault(zone,List.of());
+    }
+    private static int regionEstimate(int from,int to) {
+        return Math.abs((x(from)>>4)-(x(to)>>4))+Math.abs((z(from)>>4)-(z(to)>>4));
     }
     private Set<Integer> corridor(int start,int goal,Predicate<Door> permission,boolean climb,RouteBook book,double now){
         int from=region(start),to=region(goal);Map<Integer,Integer> previous=new HashMap<>();Map<Integer,Float> costs=new HashMap<>();
@@ -82,11 +109,11 @@ public final class RuntimeNavigation {
             var visit=queue.remove();int zone=visit.cell;if(visit.cost>costs.getOrDefault(zone,Float.MAX_VALUE))continue;
             regionExpansions++;
             if(zone==to){Set<Integer> result=new HashSet<>();for(int c=to;;c=previous.get(c)){result.add(c);if(c==from)break;}return result;}
-            for(int c:chunk(x(zone),z(zone)).members.get(zone))for(int next:neighbours(c,climb)){
-                if(next<0 || !allowed(x(next),z(next),permission))continue;int other=region(next);if(other==zone)continue;
+            for(int next:exits(zone,climb)){
+                if(!allowed(x(next),z(next),permission))continue;int other=region(next);if(other<0 || other==zone)continue;
                 float price=visit.cost+1+(book==null?0:book.penalty(x(next)+.5f,y(next),z(next)+.5f,now));
                 if(price>=costs.getOrDefault(other,Float.MAX_VALUE))continue;
-                costs.put(other,price);previous.put(other,zone);queue.add(new Visit(other,price,price));
+                costs.put(other,price);previous.put(other,zone);queue.add(new Visit(other,price,price+regionEstimate(other,to)));
             }
         }return null;
     }
@@ -103,10 +130,10 @@ public final class RuntimeNavigation {
     private boolean allowed(int x,int z,Predicate<Door> permission) {
         Door door=doors.get(((long)x<<32)|(z&0xffffffffL));return door==null || permission.test(door);
     }
-    private int step(int x,int y,int z,boolean climb) {
+    private int step(int x,int y,int z,boolean climb,boolean raw) {
         for(int dy:new int[]{0,1,-1,-2,-3}) {
             int h=y+dy;
-            if(exists(x,h,z) && (climb || !ladder(x,h,z) && !ladder(x,h-1,z)))return key(x,h,z);
+            if((raw?surface(x,h,z):exists(x,h,z)) && (climb || !ladder(x,h,z) && !ladder(x,h-1,z)))return key(x,h,z);
             if(dy<0 && solid(x,h,z))break;
         }
         return -1;

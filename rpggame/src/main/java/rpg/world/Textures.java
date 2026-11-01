@@ -216,7 +216,7 @@ final class Textures {
         float[][] col = new float[count][];
         for (int i = 0; i < count; i++) col[i] = jitter(cv, base, vary);
         for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
-            float across = horizontal ? y : x, along = horizontal ? x : y;
+            float across = horizontal ? y : x;
             int bi = (int) (across / bw);
             float la = across - bi * bw;
             int i = y * T + x;
@@ -757,7 +757,7 @@ final class Textures {
             boolean frame = e < 5 || Math.abs(x - T / 2f + 0.5f) < 3 || Math.abs(y - T / 2f + 0.5f) < 3;
             if (frame) { cv.r[i] = iron[0]; cv.g[i] = iron[1]; cv.b[i] = iron[2]; cv.light(i, e < 1.5f ? -0.3f : (x + y) % 9 == 0 ? 0.3f : 0.1f); continue; }
             // a pane: brightest at the flame (the middle), warm amber toward the frame
-            float px = (x % 32) - 16, py = (y % 32) - 16, d = (float) Math.hypot(Math.abs(px) < 16 ? (x < 32 ? x - 32 : x - 32) : 0, y - 32) / 32;
+            float px = (x % 32) - 16, d = (float) Math.hypot(Math.abs(px) < 16 ? x - 32 : 0, y - 32) / 32;
             float[] c = mix(rgb(0xFFF4C8), rgb(0xE89A38), Math.min(1, d * 1.2f));
             cv.r[i] = c[0]; cv.g[i] = c[1]; cv.b[i] = c[2];
         }
@@ -766,7 +766,7 @@ final class Textures {
         bricks(cv, 6, 3, 0x7A7480, 0.18f, 0x2E2A32, 0.7f, 2.4f, 0.8f);
         // the mouth: an arch of fire, brightest deep in it
         for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
-            float dx = (x + 0.5f - 32) / 16f, dy = (y + 0.5f - 44) / 18f;
+            float dx = (x + 0.5f - 32) / 16f;
             boolean in = y >= 30 && y < 58 && Math.abs(dx) < 1 && (y > 44 || dx * dx + ((y - 44) / 14f) * ((y - 44) / 14f) < 1);
             int i = y * T + x;
             if (in) {

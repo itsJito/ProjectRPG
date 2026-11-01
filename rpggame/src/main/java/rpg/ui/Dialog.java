@@ -28,7 +28,9 @@ public final class Dialog {
      */
     public boolean stands(rpg.Rpg g) {
         if (!(g.actor(npc) instanceof rpg.ai.Npc speaker)) return true;
-        return standoff ? speaker.alive : speaker.canTalk(g) && (employment == null || employment == speaker.employmentState());
+        if(!g.player.alive || !speaker.alive || !speaker.loaded || speaker.distTo(g.player)>6
+                || !g.vox.sight(g.player.x,g.player.eyeY(),g.player.z,speaker.x,speaker.eyeY(),speaker.z))return false;
+        return standoff || speaker.canTalk(g) && (employment == null || employment == speaker.employmentState());
     }
     public Dialog closeChoice(String label,Runnable action) { choices.add(new Choice(label,action,true));return this; }
     public Dialog choice(String label, Runnable action) { choices.add(new Choice(label, action, false)); return this; }

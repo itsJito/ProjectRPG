@@ -63,6 +63,8 @@ public final class Rig {
     public final float[] torsoRight = new float[3], torsoUp = new float[3], torsoBack = new float[3], pelvis = new float[3];
     /** The direction each held item points (figure space). */
     public final float[][] itemDir = new float[2][3];
+    /** Across the shield face; together with itemDir this retains the wrist's complete frame. */
+    public final float[][] itemAcross = new float[2][3];
     /** The eyes, in figure space (pixels): where a first-person camera sits on this body. */
     public final float[] eye = new float[3];
     /** Review probes (the gallery's twitch dump). */
@@ -467,6 +469,7 @@ public final class Rig {
         boolean bowEquipped = a.main() != null && a.main().family == Family.BOW;
         boolean bow = main != null && main.family == Family.BOW;
         boolean crossbow = main != null && main.family == Family.CROSSBOW;
+        boolean twoGrip = main != null && main.twoHand && off == null && a.carryBody == 0 && a.traversal == null && !a.onLadder && !sheathing;
         st.bowRaise += ((bow && c.draw > 0 ? 1 : 0) - st.bowRaise) * (1 - (float) Math.exp(-18 * dt));
         st.guardRaise += ((c.blocking && main == null && off == null ? 1 : 0) - st.guardRaise) * (1 - (float) Math.exp(-22 * dt));
         float[] aim = {(float) Math.sin(st.headYaw) * -(float) Math.cos(a.pitch), (float) Math.sin(a.pitch), -(float) Math.cos(a.pitch) * (float) Math.cos(st.headYaw)};
@@ -631,11 +634,17 @@ public final class Rig {
                 float cycle=(float)Math.sin(a.y*5+(isMain?Math.PI:0));target=torsoPoint(shoulder,side*.5f,2+cycle*3,-5);dir=norm(torsoDir(0,1,-.2f));
             } else if (repairing(a)) {
                 float t=a.working.t, enter=smooth(Math.clamp(t/.3f,0,1)), leave=smooth(Math.clamp((a.working.duration-t)/.35f,0,1));
-                float tap=(float)Math.pow(Math.max(0,Math.sin(t*9)),2);
+                float phase=t/.68f%1;
+                float hammerLift=phase<.55f?smooth(phase/.55f):1-smooth(Math.clamp((phase-.55f)/.18f,0,1));
                 float[] contact=toFigure(a,a.reachX,a.reachY,a.reachZ);
                 contact=add(contact,torsoRight,side*1.8f);
-                if(isMain){contact=add(contact,torsoUp,2+tap*3);contact=add(contact,torsoDir(0,0,-1),-tap*2);}
-                target=lerp(rest,contact,enter*leave);dir=norm(torsoDir(0,.5f-tap*.8f,-1));
+                if(isMain){
+                    dir=norm(torsoDir(0,.65f+hammerLift*.3f,-.75f+hammerLift*.6f));
+                    // The head, rather than the grip, meets the surface; a slow lift precedes each short downstroke.
+                    contact=add(contact,dir,-.34f/Body.PX);
+                    contact=add(add(contact,torsoUp,hammerLift*3),torsoDir(0,0,1),hammerLift*1.5f);
+                }
+                target=lerp(rest,contact,enter*leave);
             } else if (looting > 0.001f) {
                 target = lerp(rest, toFigure(a, a.reachX + (float) Math.cos(a.yaw) * side * 0.12f, a.reachY, a.reachZ - (float) Math.sin(a.yaw) * side * 0.12f), looting);
                 dir = new float[]{0, -1, -0.2f};
@@ -680,6 +689,21 @@ public final class Rig {
             } else if (!grounded) {
                 target = torsoPoint(shoulder, side * 2.6f, -6.5f, -3.2f);
             } else target = rest;
+            if (twoGrip && isMain) {
+                if (!attacking && c.charge <= 0 && cheer <= 0.001f && grab <= 0.001f) {
+                    target = firstPerson ? view(aim, 1.2f, 1, 5.6f, 8) : torsoPoint(point(tm,0,b.shoulderY()-b.hipY(),0),1.1f,-6.1f,-4.8f);
+                    dir = firstPerson ? norm(viewDirection(aim,.15f,.8f,.7f)) : norm(torsoDir(.15f,.8f,-.6f));
+                    if (c.blocking) { target=add(target,torsoUp,3);dir=norm(torsoDir(.7f,.45f,-.4f)); }
+                }
+                // A shared grip cannot wind as far behind the right shoulder as a one-handed weapon.
+                // Keep the raised blade above the head until the forward portion of the authored cut.
+                float back=smooth(Math.clamp(dot(dir,torsoBack)/.35f,0,1));
+                dir=norm(lerp(dir,norm(torsoDir(.1f,1,-.1f)),back));
+                float[] otherShoulder=point(tm,-b.shoulderX(),b.shoulderY()-b.hipY(),0);
+                target=sharedGrip(target,dir,shoulder,otherShoulder,supportOffset(main));
+            } else if (twoGrip) {
+                target=add(hand[0],itemDir[0],supportOffset(main));dir=itemDir[0];
+            }
             float[] pole = norm(lerp(torsoDir(side * 0.45f, -0.25f, 1f), new float[]{side, 0.1f, 0.3f}, st.crouchBlend));
             if (firstPerson && bareGuard) pole = norm(new float[]{side * 0.8f, -0.7f, -0.15f});
             // aiming side-on: the drawing elbow back along the line at the shoulder's height, the bow arm's elbow turned
@@ -697,8 +721,35 @@ public final class Rig {
             bone(seg[(k == 0 ? CharModel.Seg.R_ARM_LO : CharModel.Seg.L_ARM_LO).ordinal()], elbow, grip, right);
             hand[k] = grip;
             fore[k] = norm(sub(grip, elbow));
+            if (holds != null && holds.family == Family.SHIELD) {
+                // The grip remains in the palm while the face turns with the forearm and torso.
+                dir=norm(lerp(torsoUp,add(new float[3],fore[k],-1),c.blocking?0:.2f));
+                itemAcross[k]=c.blocking || firstPerson ? torsoDir(1,0,0) : torsoDir(0,0,-1);
+            } else itemAcross[k]=torsoDir(1,0,0);
             itemDir[k] = norm(dir);
         }
+    }
+
+    /** Support hand on the same physical handle, in figure pixels. Swords grip below the lead hand. */
+    public static float supportOffset(ItemDef weapon) {
+        return (weapon.family == Family.SWORD ? -.125f : .20f) / Body.PX;
+    }
+
+    /** Both hands must be reachable before solving either arm. Intersect their equal-radius reach spheres. */
+    private static float[] sharedGrip(float[] target,float[] dir,float[] lead,float[] support,float along) {
+        float[] other=add(support,dir,-along),delta=sub(other,lead);
+        float distance=(float)Math.sqrt(dot(delta,delta)),radius=L_ARM1+L_ARM2-.05f;
+        float[] axis=norm(delta),middle=lerp(lead,other,.5f),offset=sub(target,middle);
+        float half=Math.min(radius-.01f,distance*.5f);
+        float parallel=Math.clamp(dot(offset,axis),-radius+half,radius-half);
+        float[] lateral=sub(offset,add(new float[3],axis,dot(offset,axis)));
+        float length=(float)Math.sqrt(dot(lateral,lateral));
+        float limit=(float)Math.sqrt(Math.max(0,radius*radius-(Math.abs(parallel)+half)*(Math.abs(parallel)+half)));
+        float[] result=add(add(middle,axis,parallel),lateral,length>limit?limit/length:1);
+        float inner=Math.abs(L_ARM1-L_ARM2)+.05f;
+        if(len(sub(result,lead))<inner)result=add(lead,axis,inner);
+        if(len(sub(result,other))<inner)result=add(other,axis,-inner);
+        return result;
     }
 
     /**

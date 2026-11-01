@@ -1027,7 +1027,7 @@ final class HudFragments {
                 }
                 // witnesses: on their way to the lawman, with how far they still have to go
                 Memory m = null;
-                for (Memory k : n.memories) if (k.subject == me && k.crime() && k.witnessed() && !k.reported) { m = k; break; }
+                for (Memory k : n.memories) if (k.subject == me && g.law.awaitingReport(k) && (k.witness == 0 || k.witness == n.id)) { m = k; break; }
                 if (m == null) continue;
                 Npc lawman = g.ai.lawmanFor(m.jurisdiction);
                 if (n.goal == Brain.Goal.REPORT_CRIME && lawman != null) {

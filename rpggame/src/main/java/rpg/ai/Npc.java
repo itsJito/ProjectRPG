@@ -226,6 +226,7 @@ public class Npc extends Actor implements Interactable {
             Memory old = memories.get(i);
             if (!old.sameIncident(m)) continue;
             m.influenceTried|=old.influenceTried;m.withheld|=old.withheld;
+            old.influenceTried=m.influenceTried;old.withheld=m.withheld;
             m.settled |= old.settled; old.settled = m.settled;
             if (old.witnessed() && m.witnessed()) { m.reported |= old.reported; old.reported = m.reported; }
             if (old.witnessed() && !m.witnessed() || old.witnessed() == m.witnessed() && old.confidence >= m.confidence) m = old;
@@ -262,6 +263,18 @@ public class Npc extends Actor implements Interactable {
                 && cs.staggered <= 0 && g.time - cs.lastHurt >= 3 && arrestedUntil < g.state.minutes;
     }
 
+    /** The exact carried loaf is checked, including its ownership, before a contextual gift is offered. */
+    public String breadRefusal(Rpg g, Actor giver) {
+        if (role != Role.BEGGAR || !canTalk(g)) return name + " cannot accept food now.";
+        String why = dist(g, giver, g.cfg.interactRange);
+        if (why != null) return why;
+        for (var grid : giver.grids()) for (ItemStack stack : grid.stacks()) if (stack.def == Items.BREAD) {
+            ItemStack loaf = stack.copyWhole(); loaf.amount = 1;
+            return canStore(loaf) ? null : name + " has no room to carry that loaf.";
+        }
+        return "You need a loaf to spare.";
+    }
+
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
@@ -286,6 +299,15 @@ public class Npc extends Actor implements Interactable {
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
         if(action.equals("witness_persuade") || action.equals("witness_threaten") || action.equals("witness_bribe"))return rpg.law.WitnessInfluence.attempt(g,this,a,action,req);
         switch (action) {
+            case "give_bread" -> {
+                if (g.state.alreadyCommitted(req)) return Result.no("That loaf has already been given.");
+                String why = breadRefusal(g, a);
+                if (why != null) return Result.no(why);
+                for (ItemStack loaf : a.takeItems(Items.BREAD, 1)) store(loaf);
+                g.ai.reply(this, "Bless you. A warm meal at last.");
+                g.state.commit(req, "FoodGiven", a.id, id, homeJurisdiction, 0, "bread");
+                return Result.ok();
+            }
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);

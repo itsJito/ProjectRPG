@@ -240,7 +240,7 @@ public final class Hud {
     public void choose(int n) {
         if (dialog != null && n < dialog.choices.size()) { Dialog d = dialog;
             if (!d.stands(g) && g.actor(d.npc) instanceof rpg.ai.Npc speaker) {
-                dialog = speaker.canTalk(g) ? g.dialogue.talk(speaker) : null; return;
+                dialog = speaker.canTalk(g) && speaker.distTo(g.player)<=6 && g.vox.sight(g.player.x,g.player.eyeY(),g.player.z,speaker.x,speaker.eyeY(),speaker.z) ? g.dialogue.talk(speaker) : null; return;
             }
             dialog = null; sound("UI_select", 0.4f); d.choices.get(n).action().run();
             if (dialog != null && dialog.npc == 0 && !dialog.pauseMenu && d.npc != 0) dialog.npc = d.npc;

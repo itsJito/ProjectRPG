@@ -20,7 +20,9 @@ public final class Dialogue {
         n.conversations++;
         if(rpg.law.WitnessInfluence.pending(g,n)!=null)return witness(n);
         Memory known = n.crimeKnown(g.player.id);
-        String greet = known == null ? greeting(n) : known.settled
+        int bounty = n.watch() ? g.law.bounty(g.player.id, n.homeJurisdiction) : 0;
+        String greet = bounty > 0 ? "You still owe " + bounty + " Gold in " + n.homeJurisdiction + ". We have an open charge to settle."
+                : known == null ? greeting(n) : known.settled
                 ? "Your debt to the law is settled. I still remember what happened."
                 : known.witnessed()
                 ? "I saw what you did - the " + rpg.law.Law.crimeWord(known.kind) + ". Keep your distance."
@@ -59,12 +61,10 @@ public final class Dialogue {
                         + rpg.law.Undertaker.FEE + " coins in the box to have it back, " + (rpg.law.Undertaker.FEE + rpg.law.Undertaker.OUTSIDE_SURCHARGE) + " if I had to go beyond the walls. Your own purse counts, if that's all you have. "
                         + "Can't wait? " + rpg.law.Undertaker.PROMPT + " more in the casket and I'll send for your grave straight away.")));
             }
-            case BEGGAR -> d.choice("Offer a loaf of bread.", () -> {
-                if (!g.player.has(Items.BREAD, 1) || !n.canStore(new ItemStack(Items.BREAD, 1))) { g.chat.warn("You need a loaf to spare."); return; }
-                for (ItemStack loaf : g.player.takeItems(Items.BREAD, 1)) n.store(loaf);
-                n.hunger = Math.max(0, n.hunger - 0.25f); g.ai.say(n, "Bless you. A warm meal at last.");
-                g.state.commit("FoodGiven", g.player.id, n.id, n.homeJurisdiction, 0, "bread");
-            });
+            case BEGGAR -> {
+                if (n.breadRefusal(g, g.player) == null)
+                    d.choice("Offer a loaf of bread.", () -> g.interact.request(g.player, n, "give_bread"));
+            }
             case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.")));
             case PRIEST -> d.choice("Who tends the dead?", () -> g.ui.dialog(new Dialog(n.name, "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.")));
             case SCHOLAR -> d.choice("Where can I sell questionable goods?", () -> g.ui.dialog(new Dialog(n.name, "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.")));
@@ -350,7 +350,7 @@ public final class Dialogue {
 
     private String news(Npc n) {
         StringBuilder b = new StringBuilder();
-        for (Memory m : n.memories) if (m.crime()) b.append(g.nameOf(m.subject)).append(": ").append(m.kind.toLowerCase()).append(" (").append(m.source).append("). ");
+        for (Memory m : n.memories) if (m.crime()) b.append(g.ai.rumors.line(n,m)).append(' ');
         if (b.length() == 0) b.append("Nothing worth repeating. ");
         b.append(switch (n.goal) { case WORK -> "I've my own work to see to."; case SLEEP -> "I should be getting some rest."; case REPORT_CRIME -> "I have business with the watch."; case COLLECT -> "There's a body that needs seeing to."; case AID -> "Someone nearby could use a hand."; default -> "Keep your ears open. News travels with the people who carry it."; });
         return b.toString();

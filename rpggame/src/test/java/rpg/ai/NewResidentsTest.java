@@ -23,6 +23,10 @@ class NewResidentsTest {
         try (Game game = Game.create(cfg)) {
             game.activate(DevMap.build(game.engine()));
             Rpg g = game.add(new Rpg(game, "Residents", new Appearance(), true));
+            // This contract measures ordinary trades and border attendance. Predator/monster interruptions have
+            // separate threat-response coverage; otherwise a fisherman correctly fleeing a wolf fails this check.
+            for(var animal:g.animals.all()){animal.loaded=false;g.animals.despawnBody(animal);}
+            for(var monster:g.monsters.all()){monster.loaded=false;g.monsters.despawnBody(monster);}
             g.state.minutes = 7 * 60;
             g.teleport(g.player, 64.5f, DevMap.FLOOR, 66.5f);
             Npc hilda = (Npc) g.actor(Ids.COOK), bertram = (Npc) g.actor(Ids.QUARRY_WORKER), roderic = (Npc) g.actor(Ids.BORDER_KNIGHT),

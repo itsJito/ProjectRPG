@@ -14,7 +14,8 @@ out vec3 vN;
 out vec3 vCell;
 void main() {
     vec4 w = uModel * vec4(aPos, 1.0);
-    if(uSway>0.5) {
+    // The reserved positive marker keeps wall growth rigid without making its shared mesh translucent.
+    if(uSway>0.5 && aCol.a<65538.0) {
         float height=clamp(aPos.y,0.0,1.5),phase=dot(w.xz,vec2(0.71,1.13));
         w.xz+=uFoliage.xy*height*height*(0.025+0.018*sin(uFoliage.z*1.9+phase));
         // 2.0.1: every vertex of a plant bends from the plant's root (packed in the vertex alpha by the chunk builder:

@@ -1,3 +1,49 @@
+# Patch Notes Version Alpha 0.2.8: A Helping Hand
+
+A few loose ends are now in hand.
+
+Developer: Shadow
+
+## New Features
+
+### Blocks
+- Added a DevMap marker so players can now find the Stairs and Ladder practice course
+
+## Changes
+
+### NPC's
+- Changed repairs so workers now brace the surface and lift the Hammer before each short downstroke
+- Changed mining so miners now use a downward strike and keep facing their work
+- Changed food offers so players can now offer Bread when they carry a spare loaf and the recipient can accept it
+
+### Gameplay
+- Changed fog so distant scenery now disappears closer to the player, allowing more of it to be culled
+
+## Technical Changes
+
+### NPC's
+- Changed route reuse so residents now spend less time checking the same floor connections on repeated journeys
+
+## Fixed Bugs
+
+### Items
+- AE-02801 - Fixed bug where Two-Handed Swords and Battleaxes were held with a free support hand
+- AE-02802 - Fixed bug where Shields ignored the forearm's orientation and clipped during carrying
+
+### Blocks
+- AE-02803 - Fixed bug where ground foliage and wall growth covered the first block of a tree
+- AE-02804 - Fixed bug where Ivy and Moss floated away from their supporting wall in wind or around passing bodies
+
+### NPC's
+- AE-02805 - Fixed bug where witnesses remained on the HUD after the incident had reached the watch or been settled
+- AE-02806 - Fixed bug where an officer described an old case as settled while a new bounty remained unpaid
+- AE-02807 - Fixed bug where Morrow promised to take a body's belongings to himself
+- AE-02808 - Fixed bug where remembered appeals or case closure could be lost when another account of the incident arrived
+- AE-02809 - Fixed bug where separate older crime memories without incident numbers shared one report status
+- AE-02810 - Fixed bug where stale conversation choices could be used after walking away or losing sight of the speaker
+
+---
+
 # Patch Notes Version Alpha 0.2.7: Taking the High Road
 
 Townsfolk now have more ways to get where they are going.

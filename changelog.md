@@ -4,6 +4,38 @@ A running log of what changed, in plain words. The newest pass is first; the fir
 
 ---
 
+## Pass 19: A Helping Hand (Version Alpha 0.2.8) — Shadow
+
+Continues `polish` from `da70afe` (Alpha 0.2.7). Earlier entries remain intact. The attached instructions and gamefixes define this pass; NPC progression remains fixed, and the existing game systems and procedural locomotion stay in use.
+
+### Interaction, law, and memory
+- Added one personal-evidence predicate and a law query that distinguishes pending reports from already reported incidents. The Wanted HUD and witness appeals exclude closed, withheld, relayed, and already reported evidence; corroborating eyewitnesses retain their memories without becoming permanent notices.
+- Officers' greetings read the authoritative bounty in their own jurisdiction before describing old personal memories. A 14 Gold regression covers the reported discrepancy and actual payment.
+- Older zero-event-id incidents now use a persisted composite identity containing the original kind, culprit, victim, time, jurisdiction, and details. Separate incidents no longer collapse into one shared zero report ID; historical zero entries are ignored during migration.
+- Memory merging preserves appeal/withholding flags even when an existing eyewitness account wins over weaker hearsay. Nearby conversations can carry case closure without replacing a listener's own evidence. Recollections use natural accounts, personal victim references, and closed-case context instead of exposing internal source strings.
+- Bread gifts use a contextual, request-id-checked NPC interaction. Both opening and execution validate readiness, distance, sight, the exact carried loaf and recipient capacity. One real loaf changes inventory; the recipient subsequently eats through the normal needs system. Duplicate or stale requests cannot transfer another loaf.
+- Conversation validity rechecks living/loaded participants, range and sight before executing a reply. Morrow's collection remark now describes his own task without referring the errand to himself.
+
+### Animation and foliage
+- Two-handed melee weapons solve both arm reach volumes before either hand is placed. Support hands stay on the same handle through cuts, thrusts, recovery and rest across all three bodies, both sex presets and first/third person. Rearward wind-up directions are raised to keep the shared grip's blade above the head.
+- Shield rendering retains the rig's complete wrist frame rather than rebuilding an upright frame from actor yaw. Carrying follows the forearm and torso; blocking presents the face forwards.
+- NPCs preserve a committed work swing's facing rather than turning toward residual movement or a stale native hold heading. Rock gathering uses the shared overhead physical stroke. Repairing uses a slower lift, shorter downstroke and a bracing hand; contact is on the damaged cell's near surface rather than at its centre. Work cancellation remains authoritative.
+- Living tree roots and Stumps retain a clear neighbouring ring. Ivy requires a backing surface for its full height. Ivy/Moss sit close to that surface and use rigid per-vertex metadata within the existing foliage batch, so wind and body pushers do not detach them. The reserved positive marker also preserves the native mesh uploader's opacity classification; a generated-mesh regression guards this contract.
+- Noon fog now starts at 48 metres and completes at 90 metres; weather and time bring it closer. The far plane follows the complete bank with a six-metre margin and a 40-metre minimum, replacing the previous 90-metre floor that prevented dense fog from culling nearer scenery.
+
+### Navigation and DevMap
+- Region searches cache actual chunk exits instead of rechecking every cell in each floor region on every journey. Separate walking/climbing exits preserve capability rules. Local source and cardinal-neighbour topology versions invalidate the cache; permissions are evaluated per request. A chunk-distance A* heuristic reduces broad region scans without making the existing finite graph or native steering asynchronous.
+- The existing stair flight and backed Ladder are retained and marked on the DevMap. New native travel checks use that actual course and require arrival on its upper platform; generated boundary edits and changed door permissions also have regression coverage.
+- Removed the repeated whole-region neighbour scan from route search. PMD also identified eight unused locals in the gallery, body carrying, prayer panel and texture painters; removed those and the resulting unused gallery yaw calculation. The current Java unused-code audit is clean.
+- Updated the game version and prepended player-facing notes to both gamepatches.md and packaged patchnotes.md. No native API layout changes are made.
+
+### Verification
+- The routine-work regression now removes live predators/monsters from its fixture, matching the existing quiet-workday test pattern. A trace showed Corwin correctly fleeing and hiding instead of fishing; all original work/attendance assertions remain. Dedicated threat-response tests retain live threats.
+- The full gameplay sweep passes 339 cases with one existing disabled profiling probe. The closing render/foliage run passes 35 cases, native checks pass 121, and engine Java/GL checks pass 29. The distribution, packaged startup and game Java unused-code audit pass. Three matched CPU runs reduce median simulation p99 from 80.994 to 30.564 ms and the repeated 80-route workload from 612.363 to 124.189 ms; this is a scoped CPU improvement, not a universal frame-rate guarantee.
+- Results, reproducible tools, selected before/after captures and performance limits are recorded in `docs/alpha028-review.md`.
+
+---
+
 ## Pass 18: Taking the High Road (Version Alpha 0.2.7) — Shadow
 
 Built from main at `7f83b1b`, for publication to `polish`. Earlier release entries are preserved. Pathfinding is the focus of this pass; the existing native locomotion, perception, jobs, inventories, law, and rumor systems remain in use.

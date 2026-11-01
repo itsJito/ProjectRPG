@@ -13,7 +13,7 @@ public final class WitnessInfluence {
         if(!witness.alive || !witness.loaded || witness.asleep() || witness.reacting || witness.fightTarget!=0
                 || witness.goal!=Brain.Goal.REPORT_CRIME && witness.goal!=Brain.Goal.HIDE)return null;
         for(Memory memory:witness.memories)if(memory.subject==g.player.id && memory.crime() && memory.witnessed() && (memory.witness==0 || memory.witness==witness.id) && memory.relays==0
-                && !memory.reported && !memory.settled && !memory.withheld && !memory.influenceTried)return memory;
+                && g.law.awaitingReport(memory) && !memory.influenceTried)return memory;
         return null;
     }
     public static int price(Rpg g,Memory memory){return Math.max(10,Math.min(250,g.law.charge(memory)/2));}

@@ -145,7 +145,8 @@ public final class Node extends WorldObject {
             // the button only swings: the tool has to land on the tree or the ore, like any blow
             a.yaw = (float) Math.atan2(-(x - a.x), -(z - a.z));
             a.pitch = (float) Math.atan2((kind == Kind.ROCK ? DevMap.FLOOR + 0.5f : DevMap.FLOOR + 1.2f) - a.eyeY() + 0.35f, Math.max(0.3, Math.hypot(x - a.x, z - a.z)));
-            return g.combat.attack(a, false, rpg.actor.Actor.Combat.Move.LIGHT_R) ? Result.started() : Result.no(null);
+            var move=kind==Kind.ROCK ? rpg.actor.Actor.Combat.Move.HEAVY : rpg.actor.Actor.Combat.Move.LIGHT_R;
+            return g.combat.attack(a, false, move) ? Result.started() : Result.no(null);
         }
         if (a == g.player) g.chat.say(switch (kind) { case FISH -> "You cast out your " + needs.name.toLowerCase().replace("small ", "") + "."; default -> "You start picking."; });
         if (a == g.player && kind == Kind.FISH && g.sfx != null) g.sfx.ui("FishingHooked", 0.5f);

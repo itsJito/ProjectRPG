@@ -12,6 +12,18 @@ class Navigation027Test {
     @BeforeEach void open(){var cfg=new NativeEngine.Config();cfg.audioDevice=false;cfg.deterministic=true;game=Game.create(cfg);game.engine().blockTable(Blocks.engineDefs());long world=game.engine().createWorld(64,32,64,1,null,null,0);var c=new CommandBuffer();c.fill(0,0,0,63,3,63,Blocks.STONE|SET_RAW);game.engine().edit(world,c);c.free();game.activate(world);vox=new Voxels(game.view());}
     @AfterEach void close(){game.close();}
     int[] route(float x,float y,float z,float tx,float ty,float tz,boolean ladder){return vox.navigation.route(x,y,z,tx,ty,tz,d->true,ladder,99,null,0);}
+    @Test void aCachedBoundaryDiscoversNewExitsAndDoesNotReuseLockedDoorPermission(){
+        game.commands().fill(16,4,1,16,8,62,Blocks.STONE);game.tick(0);
+        assertNull(route(10.5f,4,20.5f,45.5f,4,20.5f,false));
+        game.commands().fill(16,4,20,16,6,20,Blocks.AIR);vox.edited(16,4,20,Blocks.STONE,Blocks.AIR);game.tick(0);vox.afterCommands();
+        assertNotNull(route(10.5f,4,20.5f,45.5f,4,20.5f,false));
+        game.commands().fill(16,4,20,16,6,20,Blocks.STONE);vox.edited(16,4,20,Blocks.AIR,Blocks.STONE);game.tick(0);vox.afterCommands();
+        assertNull(route(10.5f,4,20.5f,45.5f,4,20.5f,false));
+        game.commands().fill(16,4,20,16,6,20,Blocks.DOOR);vox.edited(16,4,20,Blocks.STONE,Blocks.DOOR);game.tick(0);vox.afterCommands();
+        var door=new rpg.objects.Door(92801,"Door",new int[][]{{16,20}},false,null,1,0);vox.doors(List.of(door));
+        assertNotNull(route(10.5f,4,20.5f,45.5f,4,20.5f,false));
+        assertNull(vox.navigation.route(10.5f,4,20.5f,45.5f,4,20.5f,d->false,false,99,null,0));
+    }
     @Test void foliageAndAirborneStartsAgreeWithNativeWalkability(){
         game.commands().fill(10,4,10,15,6,15,Blocks.HEDGE);game.tick(0);
         assertTrue(vox.navigation.validPoint(12.5f,4,12.5f,d->true));

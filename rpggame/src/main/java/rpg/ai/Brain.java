@@ -310,7 +310,7 @@ public final class Brain {
     }
 
     private Memory unreportedCrime(Npc n) {
-        for (Memory m : n.memories) if (m.crime() && !m.settled && !m.withheld && m.witnessed() && !m.reported && m.subject != n.id) return m;
+        for (Memory m : n.memories) if (m.pendingReport() && (m.witness == 0 || m.witness == n.id) && m.subject != n.id) return m;
         return null;
     }
 
@@ -582,7 +582,7 @@ public final class Brain {
         if (c == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = 0; return; }
         if (c.heldBy != n.id) {
             if (goTo(n, c.x, c.z, false, 1.2f)) {
-                if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, "Poor soul. I'll see this to Morrow."); }
+                if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Poor soul. I'll see your belongings safely home." : "Poor soul. I'll see this to Morrow."); }
                 n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
                 if (g.time - n.arrivedAt > 0.5) {
                     if (c instanceof rpg.objects.Corpse && g.carrying.begin(n, c).rejected()) { n.nextThink = g.time + 1; return; }
@@ -1256,6 +1256,9 @@ public final class Brain {
         n.wantYaw = (float) Math.atan2(-(d.x() + 0.5f - n.x), -(d.z() + 0.5f - n.z));
         ai.desire(n, AiSystem.A_HOLD);
         n.lootStarted=g.time;n.lootUntil=g.time+3.5;n.reachX=d.x()+0.5f;n.reachY=d.y()+0.5f;n.reachZ=d.z()+0.5f;
+        float dx=n.x-n.reachX,dy=n.eyeY()-n.reachY,dz=n.z-n.reachZ;
+        float distance=Math.max(Math.abs(dx),Math.max(Math.abs(dy),Math.abs(dz)));
+        if(distance>.52f){n.reachX+=dx*.52f/distance;n.reachY+=dy*.52f/distance;n.reachZ+=dz*.52f/distance;}
         var site=new rpg.interact.WorldObject(d.key()^(1L<<62),"repair_site","Damaged building",n.reachX,n.reachY,n.reachZ) {
             public java.util.List<rpg.interact.Option> options(Rpg world,Actor actor){return java.util.List.of();}
             public rpg.interact.Result perform(Rpg world,Actor actor,String action,long request){return rpg.interact.Result.no("Repair work is already assigned.");}

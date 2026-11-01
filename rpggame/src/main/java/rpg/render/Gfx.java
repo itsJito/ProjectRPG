@@ -186,7 +186,7 @@ public final class Gfx implements AutoCloseable {
         view.lookAt(cx, cy, cz, cx + fx, cy + fy, cz + fz, 0, 1, 0);
         // (gamefixes: the fog should help performance) nothing is drawn past the fog bank: the far plane closes in
         // behind it, so the chunks and props beyond are culled rather than drawn and then fogged away
-        float far = Math.max(90, Math.min(400, fogFar + 10));
+        float far = Math.max(40, Math.min(400, fogFar + 6));
         proj.perspective(fov, aspect, 0.05f, far);
         viewProj.set(proj).mul(view);
         cmd.camera(view.m, proj.m, proj.m, cx, cy, cz, fx, fy, fz, fov, aspect, 0.05f, far, Math.min(160f, far), dt, first);
@@ -224,10 +224,9 @@ public final class Gfx implements AutoCloseable {
         // (0.2.1) the noon haze thinner (it washed the near world out), the depth kept by the bank further off
         float mist = 0.0022f + 0.0075f * dawn + 0.0045f * dusk + 0.0045f * night + wfog * 0.012f;
         boolean indoorsScene = sceneGame == null;
-        // (0.2.1, gamefixes: the fog should start sooner, for performance on the larger map) the bank begins ~70 m out at
-        // noon instead of 105 and closes within ~55 m more, so the far plane - and the chunks drawn - end ~125 m out
-        float bankStart = indoorsScene ? 1e9f : 70 - 28 * dawn - 14 * dusk - 18 * night - 28 * wfog;
-        float bankEnd = indoorsScene ? 2e9f : bankStart + 48 + 14 * (1 - night);
+        // A nearer complete bank also bounds chunk and prop submission, including dense weather at night.
+        float bankStart = indoorsScene ? 1e9f : Math.max(22,48 - 16*dawn - 9*dusk - 10*night - 16*wfog);
+        float bankEnd = indoorsScene ? 2e9f : bankStart + 32 + 10*(1-night);
         fogFar = indoorsScene ? 400 : bankEnd;
         // the light itself: golden while the sun is low, moonlit blue at night, white by day
         float tr = 1, tg = 1 - 0.10f * low * (1 - night), tb = 1 - 0.22f * low * (1 - night);
@@ -1893,7 +1892,11 @@ public final class Gfx implements AutoCloseable {
             if (holds != null && a.carryBody == 0 && clock - a.throwAt >= 0.45 && !(a instanceof Npc n && (n.goal == Brain.Goal.LOOT || n.goal == Brain.Goal.AID) && clock < n.lootUntil)) {
                 // a shield on the forearm: carried face-out at the side; raised in guard (or seen through the eyes) its face
                 // turned to the front, where the blows come from
-                if (holds.family == Family.SHIELD) held(holds, grip, new float[]{0, 1, 0}, yaw, !(a.cs.blocking || firstPerson));
+                if (holds.family == Family.SHIELD) {
+                    m.frame(grip,dir,worldDir(rig.itemAcross[k]));
+                    if(heldScale!=1)m.scale(heldScale,heldScale,heldScale);
+                    drawItem(holds,0);
+                }
                 else if (holds.family == Family.BOW) heldBow(holds, grip, dir, yaw, a.cs.draw, world(rig.hand[0]));
                 else held(holds, grip, dir, yaw, !firstPerson);   // show the broad face through the eyes; carry edge-forward in third person
             }

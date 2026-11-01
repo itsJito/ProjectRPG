@@ -196,7 +196,8 @@ public final class Law {
         stoodDown.add(a);
         for (Npc n : g.npcs) {
             for (Memory m : n.memories) if (m.crime() && m.subject == a.id && jur.equals(m.jurisdiction)) {
-                m.reported = true; m.settled = true; reportedCrimes.add(m.eventId);
+                m.reported = true; m.settled = true;
+                if(m.eventId!=0)reportedCrimes.add(m.eventId);else reportedLegacy.add(m.legacyIncidentKey());
             }
             if ((n.role != Npc.Role.GUARD && n.role != Npc.Role.LAWMAN) || !jur.equals(n.homeJurisdiction)) continue;
             // (gamefixes: after a lie that landed, the whole watch still came after the player) the matter is closed for
@@ -222,6 +223,12 @@ public final class Law {
     }
     /** Crime events already reported: a second witness of the same crime adds testimony, not a second bounty. */
     private final Set<Long> reportedCrimes = new HashSet<>();
+    private final Set<String> reportedLegacy = new HashSet<>();
+
+    /** A pending eyewitness is actionable only until this incident reaches the watch. */
+    public boolean awaitingReport(Memory memory) {
+        return memory.pendingReport() && !(memory.eventId == 0 ? reportedLegacy.contains(memory.legacyIncidentKey()) : reportedCrimes.contains(memory.eventId));
+    }
 
     public Law(Rpg g) { this.g = g; this.posses = new Posses(g, this); }
     public final Posses posses;
@@ -454,7 +461,7 @@ public final class Law {
             g.ai.say(lawman, "I'll send the guards.");
             return Result.ok();
         }
-        if (!reportedCrimes.add(m.eventId)) {
+        if (!(m.eventId==0?reportedLegacy.add(m.legacyIncidentKey()):reportedCrimes.add(m.eventId))) {
             m.reported = true;
             g.state.commit("TestimonyAdded", witness.id, m.subject, m.jurisdiction, m.eventId, m.kind + " already reported; " + witness.name + " confirms it");
             return Result.ok("already reported");
@@ -729,6 +736,7 @@ public final class Law {
     public Map<String, Object> save() {
         Map<String, Object> m = new HashMap<>();m.put("_defiance",new ArrayList<>(defiance));
         m.put("_reported", new ArrayList<Object>(reportedCrimes));
+        m.put("_legacyReported",new ArrayList<>(reportedLegacy));
         m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions, "bounty", sentenceBounty));
         for (var e : bounties.entrySet()) {
             Map<String, Object> j = new HashMap<>();
@@ -742,9 +750,10 @@ public final class Law {
     public void load(Map<String, Object> m) {
         clear();
         if (m == null) return;
+        for(Object key:astratto.util.Json.list(m,"_legacyReported"))reportedLegacy.add(key.toString());
         for(Object entry:astratto.util.Json.list(m,"_defiance"))defiance.add(entry.toString());
         for (var e : m.entrySet()) {
-            if(e.getKey().equals("_defiance"))continue;
+            if(e.getKey().equals("_defiance") || e.getKey().equals("_legacyReported"))continue;
             if (e.getKey().equals("_custody")) {
                 Map<String, Object> custody = (Map<String, Object>) e.getValue();
                 sentenceUntil = astratto.util.Json.num(custody, "until", -1);
@@ -768,14 +777,14 @@ public final class Law {
                 }
                 continue;
             }
-            if (e.getKey().equals("_reported")) { for (Object o : (List<Object>) e.getValue()) reportedCrimes.add(((Number) o).longValue()); continue; }
+            if (e.getKey().equals("_reported")) { for (Object o : (List<Object>) e.getValue()) if(((Number)o).longValue()!=0)reportedCrimes.add(((Number) o).longValue()); continue; }
             Map<Long, Integer> j = new HashMap<>();
             for (var b : ((Map<String, Object>) e.getValue()).entrySet()) j.put(Long.parseLong(b.getKey()), ((Number) b.getValue()).intValue());
             bounties.put(e.getKey(), j);
         }
     }
 
-    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
+    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); reportedLegacy.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
 
     /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
     public static final int FORFEIT_FROM = 25;

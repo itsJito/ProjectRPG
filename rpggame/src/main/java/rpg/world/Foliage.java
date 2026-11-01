@@ -55,11 +55,13 @@ public final class Foliage {
     public static long id(int x,int y,int z){return 0x1000000000000L|((long)x<<32)|((long)y<<16)|z;}
     public boolean suitable(Kind kind,int x,int y,int z) {
         if(x<1 || z<1 || x>=DevMap.SX-1 || z>=DevMap.SZ-1 || g.vox.block(x,y,z)!=Blocks.AIR)return false;
+        // Leave the root and first trunk block readable; wall growth must not wrap a living tree.
+        for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)
+            if(Blocks.isTreeLog(g.vox.block(x+dx,y,z+dz)) || g.vox.block(x+dx,y,z+dz)==Blocks.STUMP)return false;
         int soil=g.vox.block(x,y-1,z);boolean earth=soil==Blocks.GRASS || soil==Blocks.DIRT || soil==Blocks.BARE_PATCH;
         float sky=g.vox.skyLight(x,y+1,z);
         if(kind==Kind.IVY || kind==Kind.MOSS) {
-            boolean wall=false;for(int[] d:SIDES)if(climbable(g.vox.block(x+d[0],y,z+d[1])))wall=true;
-            return wall && (kind==Kind.IVY || sky<0.7f);
+            return backing(kind,x,y,z)!=null && (kind==Kind.IVY || sky<0.7f);
         }
         if(!earth || g.vox.block(x,y+1,z)!=Blocks.AIR)return false;
         return switch(kind){
@@ -73,6 +75,11 @@ public final class Foliage {
     /** A wall ivy and moss can climb: stone, brick or wood of any kind. */
     private static boolean climbable(int block){var m=Blocks.material(block);return block!=Blocks.GLASS && (m==Blocks.Material.STONE || m==Blocks.Material.WOOD) && Blocks.traversable(block);}
     private static final int[][] SIDES={{1,0},{-1,0},{0,1},{0,-1}};
+    private int[] backing(Kind kind,int x,int y,int z) {
+        for(int[] d:SIDES)if(climbable(g.vox.block(x+d[0],y,z+d[1]))
+                && (kind!=Kind.IVY || climbable(g.vox.block(x+d[0],y+1,z+d[1]))))return d;
+        return null;
+    }
     private boolean nearWater(int x,int y,int z){for(int[] direction:SIDES)for(int step=1;step<=4;step++)if(g.vox.block(x+direction[0]*step,y-1,z+direction[1]*step)==Blocks.WATER)return true;return false;}
     private Chunk generate(int cx,int cz) {
         int key=cx+cz*CHUNKS_X;Chunk chunk=new Chunk(key,cx*16,cz*16);
@@ -86,10 +93,7 @@ public final class Foliage {
             if(kind==Kind.SHRUB && ((seed>>>10)&3)==0)kind=Kind.BUSH;
             if(kind==null)continue;
             float facing=(seed>>>16)*0.00009587f;
-            if(kind==Kind.IVY || kind==Kind.MOSS)for(int[] direction:SIDES) {
-                int wall=g.vox.block(x+direction[0],y,z+direction[1]);
-                if(climbable(wall)){facing=(float)Math.atan2(direction[0],direction[1]);break;}
-            }
+            if(kind==Kind.IVY || kind==Kind.MOSS){int[] direction=backing(kind,x,y,z);facing=(float)Math.atan2(direction[0],direction[1]);}
             // off the cell's centre a little, so the rows of a lattice never show
             float ox=((seed>>>20)&15)/15f*0.5f-0.25f,oz=((seed>>>24)&15)/15f*0.5f-0.25f;
             if(kind==Kind.IVY || kind==Kind.MOSS){ox=0;oz=0;}

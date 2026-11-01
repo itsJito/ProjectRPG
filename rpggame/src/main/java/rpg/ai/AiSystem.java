@@ -567,9 +567,11 @@ public final class AiSystem {
         float k = 1 - (float) Math.exp(-dt / 0.12f);
         n.svx += (n.vx - n.svx) * k; n.svz += (n.vz - n.svz) * k;
         float speed = (float) Math.hypot(n.svx, n.svz);
-        if (speed > 0.8f && n.goal != Brain.Goal.FIGHT) n.wantYaw = Float.NaN;    // walking off: whatever held it is done
+        boolean committed=n.cs.busy() || n.working!=null;
+        if (!committed && speed > 0.8f && n.goal != Brain.Goal.FIGHT) n.wantYaw = Float.NaN;
         // standing with nothing to face, the body keeps its heading - unless its agent holds it facing something
-        float target = !Float.isNaN(n.wantYaw) ? n.wantYaw : speed > 0.4f ? (float) Math.atan2(-n.svx, -n.svz) : n.nativeAction.startsWith("hold") ? n.agentYaw : n.yaw;
+        float target = committed && n.goal != Brain.Goal.FIGHT ? n.cs.busy() || Float.isNaN(n.wantYaw) ? n.yaw : n.wantYaw
+                : !Float.isNaN(n.wantYaw) ? n.wantYaw : speed > 0.4f ? (float) Math.atan2(-n.svx, -n.svz) : n.nativeAction.startsWith("hold") ? n.agentYaw : n.yaw;
         // a heading within a hair of the present one is no reason to turn (an agent's facing wobbles by a degree or two)
         if (Math.abs(Actor.wrap(target - n.yaw)) < 0.03f) target = n.yaw;
         float rate = n.goal == Brain.Goal.FIGHT ? 9f : speed > 3f ? 4.5f : 6.5f;

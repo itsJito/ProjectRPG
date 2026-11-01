@@ -35,6 +35,13 @@ public final class Memory {
     }
 
     public boolean witnessed() { return source.equals("witnessed"); }
+    /** Personal evidence still awaiting a report; remembered history and withheld accounts are separate. */
+    public boolean pendingReport() { return crime() && witnessed() && !reported && !settled && !withheld && relays == 0; }
+    /** Identity for pre-event-id saves; jurisdiction and the full original account keep separate incidents separate. */
+    public String legacyIncidentKey() {
+        String jur=Objects.toString(jurisdiction,"");
+        return kind+":"+subject+":"+victim+":"+Double.toHexString(minutes)+":"+jur.length()+":"+jur+":"+detail;
+    }
     public boolean crime() { return switch (kind) { case "THEFT", "ASSAULT", "MURDER", "LOCKPICKING", "VANDALISM", "LIVESTOCK", "TRESPASS", "ARSON", "DISORDERLY", "BRIBERY" -> true; default -> false; }; }
 
     /** Stable incident identity; old saves/deeds without event ids keep their original time and details. */

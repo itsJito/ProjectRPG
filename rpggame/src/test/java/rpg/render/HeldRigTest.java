@@ -9,6 +9,21 @@ import rpg.item.Items;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HeldRigTest {
+    @Test void twoHandedMeleeGripsStayOnOneHandleAcrossBodiesAndTheEntireSwing() {
+        for(String weapon:new String[]{"bronze_2hsword","bronze_battleaxe","bronze_spear","bronze_halberd"})
+            for(boolean female:new boolean[]{false,true})for(int body=0;body<3;body++)for(boolean fp:new boolean[]{false,true}) {
+                Actor a=actor(weapon);a.look.female=female;a.look.bodyType=body;
+                Rig rig=new Rig();rig.firstPerson=fp;Rig.State state=new Rig.State();
+                for(var move:new Actor.Combat.Move[]{Actor.Combat.Move.LIGHT_R,Actor.Combat.Move.LIGHT_L,Actor.Combat.Move.HEAVY,Actor.Combat.Move.THRUST})
+                    for(int frame=0;frame<=60;frame++) {
+                        a.cs.move=move;a.cs.phase=frame==60?Actor.Combat.Phase.IDLE:Actor.Combat.Phase.ACTIVE;a.cs.sweep=frame/60f;
+                        a.pitch=(frame/60f-.5f)*1.6f;rig.pose(a,state,1f/60,frame/60f,false);
+                        float along=Rig.supportOffset(a.main());
+                        for(int axis=0;axis<3;axis++)assertEquals(rig.hand[0][axis]+rig.itemDir[0][axis]*along,rig.hand[1][axis],.03f,
+                                weapon+" "+move+" frame "+frame+" body "+body+" fp "+fp);
+                    }
+            }
+    }
     private static Actor actor(String weapon) {
         Actor a = new Actor(1, "Held pose", 1); a.grounded = true;
         a.eq.set(ItemDef.Slot.MAIN, new ItemStack(Items.get(weapon), 1));

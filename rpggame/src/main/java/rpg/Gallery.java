@@ -581,7 +581,6 @@ final class Gallery {
         if ("fishing".equals(part)) { polish024Fishing(); return; }
         if ("foliage".equals(part)) { gamefixesFoliage(); return; }
         if ("jail".equals(part)) {
-            var cell=rpg.world.Jails.forJurisdiction(DevMap.PALACE);
             g.law.arrest(g.player,DevMap.PALACE,(rpg.ai.Npc)g.actor(Ids.PRAETOR));
             frames(50);reviewUi("palace-cell-inside");
             float[] cam={138,DevMap.FLOOR+2.1f,114,137.5f,DevMap.FLOOR+1.2f,120};
@@ -2305,8 +2304,6 @@ final class Gallery {
             List<String> labels = new ArrayList<>();
             for (int i = 0; i < 156; i++) {
                 game.tick(1f / 60);
-                float yaw = g.player.yaw;
-                float[] cam = {g.player.x - (float) Math.sin(yaw) * -5.5f, g.player.y + 2.6f, g.player.z - (float) Math.cos(yaw) * -5.5f, g.player.x, g.player.y + 2.2f, g.player.z};
                 if (i == 24 || i == 60 || i == 100) { draw(null, 1f / 60); Main.shot(gfx, win.width, win.height, new File(shots, "levelup-" + (pass == 0 ? "skill" : "combat") + "-full-f" + (i + 1) + ".png")); continue; }
                 if (i % 3 == 0 && (i < 90 || i % 9 == 0)) {
                     draw(null, 1f / 60);

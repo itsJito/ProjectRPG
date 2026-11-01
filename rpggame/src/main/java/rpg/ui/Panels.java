@@ -445,7 +445,7 @@ final class Panels {
             Style.rule(ui, x, y + 76, 852);
             // the prayers: the overhead protections first, then the blessings
             float ty = y + 104;
-            int col = 0; float colY[] = {ty, ty};
+            float colY[] = {ty, ty};
             for (Spells.Category cat : new Spells.Category[]{Spells.Category.OVERHEAD, null}) {
                 for (Spells.Prayer b : Spells.Prayer.values()) {
                     boolean overhead = b.category == Spells.Category.OVERHEAD;
