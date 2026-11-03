@@ -147,6 +147,9 @@ public final class Animals {
         herd = group(wild, Species.DUCK, herd, new float[]{25, 24}, 1, 1, 1);
         Animal feral = spawnNew(Species.DOG, false, true, 30.5f, 14.5f, wild, herd++, 0);
         feral.range = 14;
+        // (0.3.0) a wild Pegasus in the wood, never ridden
+        Animal pegasus = spawnNew(Species.PEGASUS, false, true, 22.5f, 18.5f, wild, herd++, 0);
+        pegasus.range = 16;
         // a town cat, nobody's
         spawnNew(Species.CAT, false, true, 99.5f, 78.5f, null, herd++, 0).range = 9;
         for (Habitat h : habitats) h.count("starting", count(h));
@@ -249,7 +252,10 @@ public final class Animals {
         int live = 0;
         Animal oldest = null;
         for (Animal o : animals) if (o.ragdoll != null) { live++; if (!o.ragdoll.knockdown && o.carriedBy==0 && (oldest == null || o.ragdoll.since < oldest.ragdoll.since)) oldest = o; }
-        if (live >= MAX_RAGDOLLS) { if(oldest==null)return;dropRagdoll(oldest); }
+        // (0.3.0, gamefixes: a dog killed with the budget full of bodies down or carried stayed standing dead) the oldest
+        // settled carcass makes way; with none settled, a death still gets its fall (a knockdown never waits on the budget)
+        if (live >= MAX_RAGDOLLS && oldest != null) dropRagdoll(oldest);
+        else if (live >= MAX_RAGDOLLS + 4 && knockdown) return;
         a.ragdoll = AnimalRagdoll.create(g, a, jx, jy, jz, knockdown);
         if (a.ragdoll != null) ragdolls++;
     }
@@ -518,7 +524,7 @@ public final class Animals {
     private final Map<Long, Double> nextSense = new java.util.HashMap<>();
 
     public void update(float dt) {
-        float dm = dt * g.cfg.minutesPerSecond;
+        float dm = (float) (dt * g.minuteRate());
         for (Animal a : new ArrayList<>(animals)) {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
@@ -528,6 +534,8 @@ public final class Animals {
             if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
             a.trappedBy=0;
             if (a.puppet) { face(a, dt); continue; }
+            // (0.3.0) ridden: the rider's controls move it (Riding), not its own mind
+            if (a.rider != 0) { desire(a, AnimalMind.A_HOLD); continue; }
             double due = nextSense.getOrDefault(a.id, 0.0);
             if (g.time >= due) { mind.sense(a, (float) Math.min(0.5, g.time - due + 0.2)); nextSense.put(a.id, g.time + 0.2); }
             if (g.time >= a.nextThink) { mind.think(a); thinks++; }
@@ -558,7 +566,7 @@ public final class Animals {
 
     public void afterFrame(Snapshots.Bodies bodies, Snapshots.Agents agents) {
         for (Animal a : animals) {
-            if (!a.alive || !a.loaded) continue;
+            if (!a.alive || !a.loaded || a.rider != 0) continue;
             Snapshots.Mover m = bodies.mover(a.body);
             if (m != null) { a.x = m.x; a.y = m.y; a.z = m.z; a.vx = m.vx; a.vz = m.vz; a.grounded = m.grounded; }
         }
@@ -591,6 +599,11 @@ public final class Animals {
             b.bornAt = g.state.minutes; b.matureAt = b.bornAt + s.mature;
             b.homeX = mother.homeX; b.homeZ = mother.homeZ; b.range = mother.range;
             b.lastEvent = "born (event " + ev.id() + ")";
+            // (0.3.0) a foal has its parents' performance between them
+            if (s == Species.HORSE || s == Species.PEGASUS) {
+                Animal sire = byId(mother.father);
+                b.mountStats = rpg.mount.MountStats.inherit(rpg.mount.Riding.stats(mother), sire != null && sire.species == s ? rpg.mount.Riding.stats(sire) : rpg.mount.Riding.stats(mother), b.id);
+            }
         }
         births += n;
         if (mother.home != null) mother.home.count("born", n);
@@ -683,7 +696,7 @@ public final class Animals {
         if (killer instanceof Animal) kills++;
         despawnBody(a);
         // the body falls as physics has it, thrown by the blow that killed it (a body already down keeps its fall)
-        if (a.loaded && a.distTo(g.player.x, g.player.z) < 70) {
+        if (a.loaded) {
             float mass = a.species.w * a.species.w * a.species.h * 420 * a.scale() * a.scale() * a.scale();
             float j = Math.min(3.5f, 0.6f + a.blowImpact * 0.02f) * mass;
             // (knocked down and then killed: that body goes on falling, now for good)
@@ -839,6 +852,9 @@ public final class Animals {
             m.put("x", (double) a.x); m.put("z", (double) a.z); m.put("yaw", (double) a.yaw); m.put("hp", (double) a.hp);
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
             m.put("home", a.home == null ? "" : a.home.id); m.put("hx", (double) a.homeX); m.put("hz", (double) a.homeZ); m.put("range", (double) a.range);
+            if (a.mountStats != null) m.put("mountStats", a.mountStats.save());
+            m.put("tame", (double) a.tame); m.put("tamedBy", a.tamedBy); m.put("saddled", a.saddled); m.put("vigor", (double) a.vigor);
+            if (!a.bags.isEmpty()) m.put("bags", rpg.item.ItemIO.inventory(a.bags));
             m.put("variant", a.variant); m.put("hunger", (double) a.hunger); m.put("thirst", (double) a.thirst); m.put("fatigue", (double) a.fatigue);
             m.put("due", a.dueAt); m.put("father", a.father); m.put("bred", a.lastBred); m.put("egg", a.lastEgg);
             m.put("died", a.diedAt); m.put("butchered", a.butchered); m.put("killer", a.killer); m.put("eaten", (double) a.eatenMinutes);
@@ -886,6 +902,10 @@ public final class Animals {
             for (Habitat h : habitats) if (h.id.equals(home)) a.home = h;
             a.homeX = (float) astratto.util.Json.num(m, "hx", a.x); a.homeZ = (float) astratto.util.Json.num(m, "hz", a.z); a.range = (float) astratto.util.Json.num(m, "range", 10);
             a.variant = astratto.util.Json.integer(m, "variant", 0);
+            a.mountStats = rpg.mount.MountStats.load(astratto.util.Json.obj(m, "mountStats"));
+            a.tame = (float) astratto.util.Json.num(m, "tame", 0); a.tamedBy = astratto.util.Json.lng(m, "tamedBy", 0);
+            a.saddled = astratto.util.Json.bool(m, "saddled", false); a.vigor = (float) astratto.util.Json.num(m, "vigor", 100);
+            if (astratto.util.Json.list(m, "bags") != null) rpg.item.ItemIO.inventory(a.bags, astratto.util.Json.list(m, "bags"));
             a.hunger = (float) astratto.util.Json.num(m, "hunger", 0); a.thirst = (float) astratto.util.Json.num(m, "thirst", 0); a.fatigue = (float) astratto.util.Json.num(m, "fatigue", 0);
             a.dueAt = astratto.util.Json.num(m, "due", -1); a.father = astratto.util.Json.lng(m, "father", 0); a.lastBred = astratto.util.Json.num(m, "bred", -1e9); a.lastEgg = astratto.util.Json.num(m, "egg", -1e9);
             a.alive = astratto.util.Json.bool(m, "alive", true);
@@ -1045,6 +1065,7 @@ public final class Animals {
             case DOG -> a.trustOf(g.player.id) > 0.5f ? "The dog leans into your hand, tail going." : "The dog sniffs your hand, then lets you scratch its ears.";
             case CAT -> a.trustOf(g.player.id) > 0.4f ? "The cat purrs and pushes its head against you." : "The cat tolerates it - just about.";
             case HORSE -> "The horse snorts softly and noses your shoulder.";
+            case PEGASUS -> "The pegasus shakes out its wings and lowers its horn to your hand.";
             case COW -> "The cow keeps chewing, unbothered.";
             case SHEEP -> "The sheep's fleece is thick and warm.";
             case PIG -> "The pig grunts happily.";

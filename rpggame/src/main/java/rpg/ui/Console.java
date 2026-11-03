@@ -262,6 +262,31 @@ public final class Console {
             double want = DevConsole.num(a[1], 12), now = g.state.hourOfDay(), d = (want - now + 24) % 24;
             g.advanceTime(d * 60, "console");
         });
+        // (0.3.0) the Weekly System's controls
+        cmd("date", "date [year month day hour minute]: shows the date, or sets it outright (on or after March 5, 500).", a -> {
+            if (a.length >= 6) {
+                try {
+                    double t = g.state.cal().set((int) DevConsole.num(a[1], 500), (int) DevConsole.num(a[2], 3), (int) DevConsole.num(a[3], 5), (int) DevConsole.num(a[4], 8), (int) DevConsole.num(a[5], 0));
+                    if (t > g.state.minutes) g.advanceTime(t - g.state.minutes, "console date"); else g.state.minutes = t;
+                } catch (IllegalArgumentException e) { print("date: " + e.getMessage(), ERR); return; }
+            }
+            var c = g.state.cal();
+            print(g.state.dateText() + String.format(", %02d:%02d - clock %s x%.2f, %.2f s a minute now", c.hour(), c.minute(), c.mode().name().toLowerCase(Locale.ROOT), c.scale(), astratto.time.Calendar.msPerMinute(c.hourOfDay()) / 1000), TEXT);
+        });
+        cmd("clock", "clock <pause|resume|restore|scale N|distance N|until HOUR SECONDS>: the Weekly System's clock (distance: game minutes per metre walked).", a -> {
+            var c = g.state.cal();
+            if (a.length < 2) { print(c.mode().name().toLowerCase(Locale.ROOT) + " x" + c.scale(), TEXT); return; }
+            switch (a[1].toLowerCase(Locale.ROOT)) {
+                case "pause" -> c.pause();
+                case "resume" -> c.resume();
+                case "restore" -> c.restore();
+                case "scale" -> c.scale(DevConsole.num(a.length > 2 ? a[2] : "1", 1));
+                case "distance" -> c.syncToDistance(DevConsole.num(a.length > 2 ? a[2] : "0.05", 0.05f));
+                case "until" -> c.transitionToHour(DevConsole.num(a.length > 2 ? a[2] : "8", 8), DevConsole.num(a.length > 3 ? a[3] : "5", 5));
+                default -> { print("clock: pause, resume, restore, scale N, distance N, until HOUR SECONDS", ERR); return; }
+            }
+            print("Clock: " + c.mode().name().toLowerCase(Locale.ROOT) + " x" + c.scale(), GOOD);
+        });
         // 0.1.8 (gamefixes: everything in the game reachable from the console)
         cmd("weather", "weather <clear|overcast|fog|rain|storm|snow>: sets the weather at once.", a -> {
             if (a.length < 2) { print("weather: " + g.timeSystem.weather.kind().name().toLowerCase(Locale.ROOT), TEXT); return; }

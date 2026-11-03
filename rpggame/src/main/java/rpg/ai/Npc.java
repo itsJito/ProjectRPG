@@ -47,6 +47,10 @@ public class Npc extends Actor implements Interactable {
     public Profession profession;
     astratto.ai.TaskNetwork<Npc> job;
     public long dutyTarget;
+    /** (0.2.9) the node this worker is headed for or working, the cell it stands in to do it, and when it said so. */
+    public long claimNode;
+    public int claimCell = Integer.MIN_VALUE;
+    public double claimAt = -99;
     public int dutyPhase;
     public float dutyX, dutyZ;
     public double dutyUntil;
@@ -60,6 +64,9 @@ public class Npc extends Actor implements Interactable {
     public float hunger, fatigue, social;
     /** How long a flyer it fights has hung out of its reach overhead (it waits for the dive; the unarmed give up and run). */
     public float flyerWait;
+    /** (0.2.9) an archer's footing: where it has been shooting from, and how many it has loosed there. */
+    public float shotFromX, shotFromZ;
+    public int shotsHere;
     /** The terror whose alarm this one has heard (0: none), and when it last cried it. */
     public long alarmHeard;
     public double alarmCryAt = -99;
@@ -153,6 +160,18 @@ public class Npc extends Actor implements Interactable {
     /** The body to search, once dead (0: none). */
     public long corpse;
     public double collectAgain = -99, leaveUntil = -99;
+    /** (0.3.0) the undertaker laying a body on its gravestone: since when (game seconds; below 0 when not). */
+    public double layingSince = -1;
+    /** The body being laid to rest (its corpse's id; 0 when none). */
+    public long layingBody;
+    /** (0.3.0) The walk's progress watch (Brain.goTo): the target it is for, the nearest it has come, and since when. */
+    public float stallX = -1e6f, stallZ = -1e6f, stallBest;
+    public double stallSince;
+    /** (0.3.0) What they have done today, in their own words (Diary): what they talk about when asked. */
+    public final Diary diary = new Diary();
+    /** (0.3.0, gamefixes: smarter combat AI) pressing the attack on its target until (an attack token), resting out of it
+     *  until, and when its next blow may be thrown (a tempo, not a blow the instant it can). */
+    public double pressUntil = -99, pressRestUntil = -99, nextSwingAt = -99;
     /** When it reached the spot it went to look into (the investigation's clock). */
     public double arrivedAt = -99;
     /** The weapon knocked from the hand in a fall, where it lies (picked up again on getting up, if within reach). */
@@ -333,7 +352,8 @@ public class Npc extends Actor implements Interactable {
             case "pay" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
-                return g.law.payBounty(a, this, req);
+                // short of the sum: what they have, collateral and the cell (0.2.9)
+                return a.count(Items.COINS) >= g.law.bounty(a.id, homeJurisdiction) ? g.law.payBounty(a, this, req) : g.law.payWhatYouCan(a, this, req);
             }
             case "pickpocket", "pickpocket-direct" -> {
                 String why = dist(g, a, 1.6f);

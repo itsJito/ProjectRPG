@@ -96,6 +96,13 @@ public final class Animal extends Actor implements Interactable {
     /** Parked dead-body transforms retain the exact visible pose outside the physics budget. */
     public final java.util.Map<rpg.combat.Gore.Part,astratto.bridge.Snapshots.Rigid> restPose = new java.util.EnumMap<>(rpg.combat.Gore.Part.class);
     public float blowX, blowZ, blowImpact;
+    // ---- (0.3.0, gamefixes) a mount: its own performance, the taming it has had (0..1, kept), who tamed it, its saddle,
+    // its saddlebags, who rides it, a Pegasus's vigor and flight (pitch and bank, for the figure)
+    public rpg.mount.MountStats mountStats;
+    public float tame, vigor = 100, flightPitch, flightBank;
+    public long tamedBy, rider;
+    public boolean saddled, flying;
+    public final rpg.item.Inventory bags = new rpg.item.Inventory(6, 4);
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {
         super(id, s.label(baby), 0);
@@ -167,12 +174,46 @@ public final class Animal extends Actor implements Interactable {
                 o.add(Option.when(calm && full && a.has(Items.BUCKET, 1), "milk", "Milk", 8, !calm ? "It's too agitated." : !full ? "She has been milked recently." : "You need an empty bucket.", r));
             }
             o.add(Option.when(food != null && calm, "feed", "Feed" + (food == null ? "" : " (" + food.name.toLowerCase() + ")"), 7, food == null ? "You have nothing it would eat." : "It's too agitated.", r));
+            // (0.3.0) a horse or a Pegasus: ridden, saddled, its saddlebags opened
+            if (rpg.mount.Riding.mountable(this)) {
+                boolean mine = rpg.mount.Riding.tamedFor(this, a);
+                o.add(Option.when(rider == 0, "mount", "Mount" + (mine ? "" : " (untamed)"), 9, "Someone is riding it.", 2.4f));
+                if (!saddled) o.add(Option.when(mine && a.has(Items.SADDLE, 1), "saddle", "Saddle", 6, !mine ? "It won't stand for a saddle yet." : "You have no saddle.", r));
+                else {
+                    o.add(Option.when(mine && rider == 0, "unsaddle", "Remove saddle", 3, "It isn't yours to unsaddle.", r));
+                    o.add(Option.when(mine && rider == 0, "bags", "Open saddlebags", 5, "Those aren't your saddlebags.", r));
+                }
+            }
         }
         return o;
     }
 
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
         if (action.equals("carry")) return g.carrying.begin(a, this);
+        switch (action) {
+            case "mount" -> { return g.riding.mount(a, this); }
+            case "saddle" -> {
+                if (saddled || !rpg.mount.Riding.tamedFor(this, a) || a.takeItems(Items.SADDLE, 1).isEmpty()) return Result.no("You can't saddle it.");
+                saddled = true;
+                g.state.commit(req, "MountSaddled", a.id, id, DevMap.jurisdiction(x, z), 0, kind());
+                if (a == g.player) g.chat.say("You saddle the " + kind().toLowerCase() + ".");
+                return Result.ok();
+            }
+            case "unsaddle" -> {
+                if (!saddled || !rpg.mount.Riding.tamedFor(this, a)) return Result.no("You can't unsaddle it.");
+                if (!bags.isEmpty()) return Result.no("Empty the saddlebags first.");
+                if (!a.store(new rpg.item.ItemStack(Items.SADDLE, 1, a.id, false, a.id))) return Result.no("You have no room for the saddle.");
+                saddled = false;
+                g.state.commit(req, "MountUnsaddled", a.id, id, DevMap.jurisdiction(x, z), 0, kind());
+                return Result.ok();
+            }
+            case "bags" -> {
+                if (!saddled || !rpg.mount.Riding.tamedFor(this, a)) return Result.no("Those aren't your saddlebags.");
+                if (a == g.player && g.ui != null) g.ui.openContainer(new rpg.objects.Saddlebags(id + 900_000_000L, kind() + "'s saddlebags", x, y + 1, z, a.id, bags));
+                return Result.ok();
+            }
+            default -> { }
+        }
         if (carriedBy != 0) return Result.no("Put the body down first.");
         return g.animals.perform(this, a, action, req);
     }

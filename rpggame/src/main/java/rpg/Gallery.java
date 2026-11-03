@@ -56,6 +56,10 @@ final class Gallery {
         // keep the townsfolk out of the picture
         for (var n : g.npcs) g.ai.unload(n);
         String tag = female ? "f" : "m";
+        // RPG_GALLERY_ONLY=p15 RPG_REVIEW_ONLY=a,b: the 0.2.9 review shots (map, ...), each by name
+        if ("p15".equals(System.getenv("RPG_GALLERY_ONLY"))) { p15Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p16 RPG_REVIEW_ONLY=a,b: the 0.3.0 review sheets (ladder, hang, ...), each by name
+        if ("p16".equals(System.getenv("RPG_GALLERY_ONLY"))) { p16Shots(); return 0; }
         if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
@@ -285,6 +289,8 @@ final class Gallery {
             g.player.sneaking = false;
             place(54.5f, 64.5f, (float) -Math.PI / 2);
             frames(30);
+            // (an ordinary runner: below the shoulder charge's Agility, so the sprint is the sprint)
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 5);
             g.player.stamina = g.player.maxStamina();
             g.controller.jogging = gait.equals("jog");
             // The north-side view passes through the altar as the runner crosses the square.
@@ -667,6 +673,388 @@ final class Gallery {
         reviewUi("radial-edit");
         hud.radial.editing = false;
         hud.closeAll();
+    }
+
+    /** The 0.2.9 review shots; RPG_REVIEW_ONLY picks some by name (all when unset). */
+    private void p16Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        var in = g.controller.in;
+        Runnable clearYard = () -> { for (int x = 56; x <= 73; x++) for (int z = 51; z <= 70; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 8; y++) g.setBlock(x, y, z, Blocks.AIR); };
+        if (want.test("ladder")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 60f) < 22) g.ai.unload(o);
+            clearYard.run();
+            // a wall five blocks high, a ladder on its south face
+            for (int x = 60; x <= 68; x++) for (int z = 57; z <= 59; z++) for (int y = 0; y < 5; y++) g.setBlock(x, DevMap.FLOOR + y, z, Blocks.BRICK);
+            for (int y = 0; y < 5; y++) g.setBlock(64, DevMap.FLOOR + y, 60, Blocks.LADDER);
+            frames(4);
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 10); g.player.restore(); g.player.eq.clear(); g.player.firstPerson = false;
+            place(64.5f, 62.6f, 0); frames(6);
+            java.util.function.Function<Actor, float[]> side = a -> new float[]{a.x - 2.4f, a.y + 1.5f, a.z + 3.0f, a.x, a.y + 1.0f, a.z - 0.2f};
+            film("ladder-mount", 45, i -> in.forward = 1, side, 0);
+            film("ladder-climb", 60, i -> in.forward = 1, side, 0);
+            film("ladder-top", 96, i -> in.forward = 1, side, 0);
+            in.forward = 1; frames(30);
+            in.forward = 0; frames(20);
+            System.out.println("[ladder] after top-out at " + g.player.x + "," + g.player.y + "," + g.player.z + " climb " + g.player.climb);
+            // down again: turned to the edge, walked off it onto the ladder, then down and off at the bottom
+            g.controller.snapTo((float) Math.PI); frames(4);
+            film("ladder-topin", 60, i -> in.forward = i < 30 ? 1 : 0, side, 0);
+            film("ladder-down", 90, i -> in.forward = -1, side, 0);
+            film("ladder-bottom", 60, i -> in.forward = -1, side, 0);
+            in.forward = 0; frames(10);
+            System.out.println("[ladder] events: " + g.state.all().stream().map(e -> e.type()).filter(t -> t.startsWith("Ladder")).toList() + " at " + g.player.x + "," + g.player.y + "," + g.player.z);
+            // from the side (walking past it along the wall): no hold taken
+            place(62.5f, 60.5f, (float) -Math.PI / 2); frames(4);
+            film("ladder-sidepass", 36, i -> in.forward = 1, side, 0);
+            in.forward = 0;
+            System.out.println("[ladder] side pass climb=" + g.player.climb + " y=" + g.player.y);
+        }
+        p16Crossbow(want);
+        if (want.test("torch")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 60f) < 22) g.ai.unload(o);
+            clearYard.run();
+            for (int z = 54; z <= 56; z++) g.setBlock(66, DevMap.FLOOR, z, Blocks.HAY_BALE);
+            g.state.minutes = 22 * 60; frames(2);
+            g.player.eq.clear(); g.player.firstPerson = false;
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.TORCH, 1));
+            place(64.5f, 60.5f, 0); g.combat.sheathe(g.player, false); frames(60);
+            java.util.function.Function<Actor, float[]> front = a -> new float[]{a.x + 1.9f, a.y + 1.6f, a.z - 2.3f, a.x, a.y + 1.0f, a.z};
+            film("torch-light", 84, i -> in.offDown = i >= 2 && i < 6, front, 0);
+            in.offDown = false;
+            System.out.println("[torch] lit=" + g.player.torchLit);
+            adapted(new float[]{g.player.x + 3.5f, g.player.y + 2.2f, g.player.z - 3.5f, g.player.x, g.player.y + 0.8f, g.player.z}, "torch-lit-night");
+            film("torch-walk", 48, i -> in.forward = 1, front, 0);
+            in.forward = 0; frames(10);
+            // a swing at the hay beside it: the flame goes into it
+            g.teleport(g.player, 64.6f, DevMap.FLOOR, 55.5f); g.controller.snapTo((float) -Math.PI / 2); frames(10);
+            film("torch-swing", 60, i -> in.mainDown = i >= 2 && i < 5, a -> new float[]{a.x - 1.5f, a.y + 1.8f, a.z - 3.0f, a.x + 0.8f, a.y + 0.8f, a.z}, 0);
+            in.mainDown = false;
+            frames(120);
+            System.out.println("[torch] hay burning near: " + g.chemistry.active.stream().filter(c -> (c.state() & astratto.bridge.AstrattoNative.CHEM_BURNING) != 0).count());
+            view(g.player.x - 3, g.player.y + 2.4f, g.player.z - 4, 66, DevMap.FLOOR + 0.5f, 55.5f, "torch-hay-after");
+        }
+        if (want.test("riding")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 66f) < 30) g.ai.unload(o);
+            for (int x = 54; x <= 76; x++) for (int z = 44; z <= 90; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 8; y++) g.setBlock(x, y, z, Blocks.AIR);
+            // a low wall to jump and a one-block step to take in the stride
+            for (int x = 60; x <= 69; x++) g.setBlock(x, DevMap.FLOOR, 60, Blocks.BRICK);
+            for (int x = 60; x <= 69; x++) for (int z = 50; z <= 54; z++) g.setBlock(x, DevMap.FLOOR, z, Blocks.PLANKS);
+            g.player.eq.clear(); g.player.firstPerson = false;
+            for (var spc : new rpg.animal.Species[]{rpg.animal.Species.HORSE, rpg.animal.Species.PEGASUS}) {
+                place(66.5f, 84.5f, 0); frames(4);
+                var horse = g.animals.spawnNew(spc, false, true, 64.5f, 84.5f, null, 0, 0);
+                horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.saddled = true; horse.yaw = 0;
+                frames(10);
+                String n = spc.name().toLowerCase();
+                java.util.function.Function<Actor, float[]> side = a -> new float[]{a.x + 5.5f, a.y + 2.2f, a.z + 1.5f, a.x, a.y + 1.2f, a.z - 0.5f};
+                view(horse.x + 4.5f, horse.y + 2.2f, horse.z + 2.5f, horse.x, horse.y + 1.0f, horse.z, n + "-saddled");
+                var r = g.riding.mount(g.player, horse);
+                System.out.println("[riding] mount " + spc + ": " + r.status() + " " + r.reason());
+                frames(5);
+                film(n + "-walk", 48, i -> { in.forward = 1; in.sneak = true; }, side, 10);
+                in.sneak = false;
+                film(n + "-canter", 48, i -> in.forward = 1, side, 20);
+                film(n + "-gallop", 48, i -> { in.forward = 1; in.sprint = true; }, side, 30);
+                in.sprint = false; in.forward = 0; frames(60);
+                g.riding.dismount(g.player, false); frames(5);
+                g.teleport(horse, 64.5f, DevMap.FLOOR, 74.5f); horse.yaw = 0; frames(5);
+                g.teleport(g.player, 66f, DevMap.FLOOR, 74.5f); frames(3); g.riding.mount(g.player, horse); frames(5);
+                // the jump over the low wall: run at it, charge, let go at the right moment
+                film(n + "-jump", 150, i -> { in.forward = 1; in.sprint = true; in.jumpHeld = i >= 104 && i < 112; }, side, 0);
+                in.forward = 0; in.sprint = false; in.jumpHeld = false; frames(40);
+                System.out.println("[riding] " + spc + " after jump at z " + horse.z + " y " + horse.y + " events " + g.state.all().stream().map(e -> e.type()).filter(t -> t.startsWith("Mount")).toList());
+                if (spc == rpg.animal.Species.PEGASUS) {
+                    g.riding.dismount(g.player, false); frames(3);
+                    g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); horse.yaw = 0; g.teleport(g.player, 66f, DevMap.FLOOR, 88.5f); frames(3); g.riding.mount(g.player, horse); frames(3);
+                    // gallop, take off on a full jump, climb, dive, bank round
+                    film("pegasus-takeoff", 150, i -> { in.forward = i < 130 ? 1 : 0; in.sprint = i < 130; in.jumpHeld = i >= 110 && i < 119; }, a -> new float[]{a.x + 7f, a.y + 3f, a.z + 4f, a.x, a.y + 1.2f, a.z - 1f}, 0);
+                    in.sprint = false; in.jumpHeld = false;
+                    film("pegasus-climb", 60, i -> in.forward = -1, a -> new float[]{a.x + 7f, a.y + 2f, a.z + 3f, a.x, a.y + 1.2f, a.z}, 0);
+                    film("pegasus-dive", 60, i -> in.forward = 1, a -> new float[]{a.x + 7f, a.y + 3f, a.z + 3f, a.x, a.y + 1f, a.z}, 0);
+                    film("pegasus-bank", 60, i -> { in.forward = 0; in.strafe = 1; in.jumpHeld = i % 30 < 2; }, a -> new float[]{a.x - 6f, a.y + 2.5f, a.z + 6f, a.x, a.y + 1f, a.z}, 0);
+                    in.strafe = 0; in.jumpHeld = false;
+                    var ride = g.riding.of(g.player);
+                    System.out.println("[riding] pegasus flying " + (ride != null && ride.flying) + " y " + horse.y + " airspeed " + (ride == null ? 0 : ride.airspeed) + " vigor " + horse.vigor);
+                    frames(600);
+                    System.out.println("[riding] pegasus after: flying " + (ride != null && ride.flying) + " y " + horse.y);
+                }
+                if (g.player.riding != 0) g.riding.dismount(g.player, false);
+                g.animals.remove(horse);
+            }
+        }
+        if (want.test("bubbles")) {
+            rpg.ai.Npc eda = (rpg.ai.Npc) g.actor(Ids.VILLAGER), guard = (rpg.ai.Npc) g.actor(Ids.GUARD);
+            for (rpg.ai.Npc o : g.npcs) if (o != eda && o != guard) g.ai.unload(o);
+            place(64.5f, 70.5f, 0); g.player.firstPerson = false;
+            g.ai.reload(eda); g.ai.reload(guard); g.teleport(eda, 63.2f, DevMap.FLOOR, 66.5f); g.teleport(guard, 66.2f, DevMap.FLOOR, 66.8f);
+            eda.nextThink = guard.nextThink = g.time + 60; frames(10);
+            g.ai.say(eda, "Fine morning for it. The bread came in fresh from Store A.");
+            g.ai.say(guard, "Halt! In the name of the law!");
+            frames(20);
+            Main.shot(gfx, win.width, win.height, new File(shots, "bubbles-play.png"));
+        }
+        if (want.test("atmos")) {
+            // the same views through the day, in the weather, and inside: the presets judged side by side
+            g.player.firstPerson = false;
+            String[] wx = {"CLEAR", "OVERCAST", "RAIN"};
+            double[] hours = {6.4, 10, 13.5, 17.6, 19.6, 23};
+            for (String kind : wx) for (double h : hours) {
+                if (!kind.equals("CLEAR") && h != 13.5 && h != 19.6) continue;
+                g.state.minutes = h * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.valueOf(kind)); g.timeSystem.weather.snap();
+                place(97.5f, 66.5f, (float) Math.PI * 0.75f); frames(10);
+                adapted(new float[]{94f, DevMap.FLOOR + 3.2f, 70f, 104f, DevMap.FLOOR + 1.2f, 60f}, "atmos-" + kind.toLowerCase() + "-" + (int) (h * 10));
+            }
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+            // inside a lamp-lit room at night, and by day
+            for (double h : new double[]{22, 12}) {
+                g.state.minutes = h * 60;
+                float[] room = rpg.world.DevMap.BANK_TELLER;
+                adapted(new float[]{room[0] + 3.5f, DevMap.FLOOR + 2.4f, room[1] + 3.5f, room[0], DevMap.FLOOR + 1.0f, room[1]}, "atmos-inside-" + (int) h);
+            }
+        }
+        if (want.test("grass")) {
+            g.state.minutes = 11 * 60; g.player.firstPerson = false;
+            place(30.5f, 40.5f, (float) Math.PI); frames(30);
+            adapted(new float[]{30f, DevMap.FLOOR + 2.2f, 44f, 26f, DevMap.FLOOR + 0.5f, 30f}, "grass-meadow");
+            g.player.sneaking = true; frames(10);
+            adapted(new float[]{32f, DevMap.FLOOR + 1.6f, 43f, 30.5f, DevMap.FLOOR + 0.5f, 40.5f}, "grass-crouch");
+            System.out.println("[grass] crouched in tall grass: " + g.foliage.tallGrassAt(g.player.x, g.player.z));
+        }
+        if (want.test("faces")) {
+            g.state.minutes = 12 * 60;
+            rpg.ai.Npc eda = (rpg.ai.Npc) g.actor(Ids.VILLAGER);
+            for (rpg.ai.Npc o : g.npcs) if (o != eda) g.ai.unload(o);
+            g.ai.reload(eda); place(64.5f, 72.5f, 0);
+            g.teleport(eda, 64.5f, DevMap.FLOOR, 66.5f); eda.yaw = (float) Math.PI; eda.wantYaw = eda.yaw; frames(20);
+            for (var mood : rpg.render.Faces.Mood.values()) {
+                eda.nextThink = g.time + 60; eda.goal = rpg.ai.Brain.Goal.IDLE;
+                rpg.render.Faces.react(g, eda, mood, 30); eda.yaw = (float) Math.PI; frames(3);
+                view(eda.x, eda.y + 1.62f, eda.z + 1.05f, eda.x, eda.y + 1.55f, eda.z, "face-" + mood.name().toLowerCase());
+            }
+        }
+        if (want.test("repair")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 60f) < 22) g.ai.unload(o);
+            clearYard.run();
+            for (int x = 60; x <= 68; x++) for (int y = 0; y < 3; y++) g.setBlock(x, DevMap.FLOOR + y, 58, Blocks.PLANKS);
+            g.player.eq.clear(); g.player.firstPerson = false;
+            for (float h : new float[]{0.35f, 1.15f}) {
+                place(64.5f, 59.6f, 0); frames(5);
+                var target = g.objects.nodes.isEmpty() ? null : g.objects.nodes.get(0);
+                g.player.reachX = 64.5f; g.player.reachY = DevMap.FLOOR + h; g.player.reachZ = 59.0f;
+                var work = new rpg.interact.Work(g.player, target, "repair", "Mending", 3f, false, g.time, () -> rpg.interact.Result.ok());
+                g.interact.begin(work);
+                film("repair-" + (h < 0.6f ? "low" : "mid"), 72, i -> { if (g.player.working != null) { g.player.working.t = i / 60f; g.player.reachX = 64.5f; g.player.reachY = DevMap.FLOOR + h; g.player.reachZ = 59.0f; } },
+                        a -> new float[]{a.x + 2.6f, a.y + 1.4f, a.z + 1.2f, a.x, a.y + 0.8f, a.z - 0.4f}, 0);
+                g.interact.cancel(g.player, "review");
+            }
+        }
+        if (want.test("swings")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 66f) < 20) g.ai.unload(o);
+            g.player.eq.clear(); g.player.firstPerson = false;
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("bronze_sword"), 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, new rpg.item.ItemStack(rpg.item.Items.get("bronze_shield"), 1));
+            place(64.5f, 66.5f, 0); g.combat.sheathe(g.player, false); frames(60);
+            java.util.function.Function<Actor, float[]> q = a -> new float[]{a.x + 2.4f, a.y + 1.5f, a.z - 1.6f, a.x, a.y + 1.1f, a.z};
+            film("swing-light", 45, i -> in.mainDown = i < 3, q, 0);
+            in.mainDown = false; frames(20);
+            film("swing-heavy", 72, i -> in.mainDown = i < 30, q, 0);
+            in.mainDown = false; frames(20);
+            film("swing-combo", 90, i -> in.mainDown = i % 22 < 3, q, 0);
+            in.mainDown = false;
+        }
+        if (want.test("nighthead")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 66.5f) < 20) g.ai.unload(o);
+            g.player.eq.clear(); g.player.firstPerson = false;
+            for (int hour : new int[]{2, 21, 23}) {
+                g.state.minutes = hour * 60; frames(2);
+                place(66.5f, 63.0f, 0); frames(30);
+                Actor p = g.player;
+                System.out.println("[nighthead] " + hour + ":00 weather " + g.timeSystem.weather.kind() + " rain " + g.timeSystem.weather.rain + " wet " + g.timeSystem.weather.wetness + " figureReady " + gfx.figureReady(p));
+                adapted(new float[]{p.x + 0.9f, p.y + 1.75f, p.z - 1.3f, p.x, p.y + 1.55f, p.z}, "nighthead-front-" + hour);
+                System.out.println("[nighthead] after: figureReady " + gfx.figureReady(p));
+                view(p.x - 0.9f, p.y + 1.9f, p.z + 1.4f, p.x, p.y + 1.55f, p.z, "nighthead-back-" + hour);
+                // the player's own camera (third person, behind the shoulder)
+                frames(4); Main.shot(gfx, win.width, win.height, new File(shots, "nighthead-play-" + hour + ".png"));
+                // first person beside a lamp, looking down and ahead (the head is a shadow caster only, here)
+                g.player.firstPerson = true; g.player.headValid = false;
+                for (float pitch : new float[]{-0.9f, 0f, 0.6f}) { g.controller.camPitch = pitch; frames(12); Main.shot(gfx, win.width, win.height, new File(shots, "nighthead-fp-" + hour + "-" + (int) (pitch * 10) + ".png")); }
+                g.player.firstPerson = false; g.controller.camPitch = 0;
+            }
+        }
+    }
+
+    private void p16Crossbow(java.util.function.Predicate<String> want) {
+        if (!want.test("crossbow")) return;
+        var in = g.controller.in;
+        for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 66.5f) < 20) g.ai.unload(o);
+        g.player.firstPerson = false; g.player.eq.clear(); g.player.skills.setLevel(rpg.skill.Skill.ARCHERY, 99);
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("bronze_crossbow"), 1));
+        g.player.eq.set(rpg.item.ItemDef.Slot.AMMO, new rpg.item.ItemStack(rpg.item.Items.get("bronze_bolts"), 50));
+        place(64.5f, 66.5f, 0); g.combat.sheathe(g.player, true); frames(60);
+        java.util.function.Function<Actor, float[]> q = a -> new float[]{a.x + 2.0f, a.y + 1.6f, a.z - 2.4f, a.x, a.y + 1.0f, a.z};
+        java.util.function.Function<Actor, float[]> back = a -> new float[]{a.x - 1.6f, a.y + 1.7f, a.z + 2.4f, a.x, a.y + 1.1f, a.z};
+        film("xbow-sheathed", 12, i -> { }, back, 0);
+        film("xbow-draw", 48, i -> { if (i == 0) g.combat.sheathe(g.player, false); }, q, 0);
+        film("xbow-carry-walk", 36, i -> in.forward = 1, q, 0);
+        in.forward = 0; frames(20);
+        film("xbow-shoulder-shoot", 72, i -> { in.mainDown = i >= 3 && i < 6; }, q, 0);
+        in.mainDown = false;
+        film("xbow-sheathe", 48, i -> { if (i == 0) g.combat.sheathe(g.player, true); }, back, 0);
+        // a shield and a sword together, put away and drawn (the paired sheathe)
+        g.player.eq.clear();
+        g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("bronze_sword"), 1));
+        g.player.eq.set(rpg.item.ItemDef.Slot.OFF, new rpg.item.ItemStack(rpg.item.Items.get("bronze_shield"), 1));
+        g.combat.sheathe(g.player, false); frames(60);
+        film("shield-sheathe", 54, i -> { if (i == 0) g.combat.sheathe(g.player, true); }, back, 0);
+        film("shield-draw", 54, i -> { if (i == 0) g.combat.sheathe(g.player, false); }, back, 0);
+    }
+
+    private void p15Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        if (want.test("monsterfight")) {
+            // a guard and the player against an orc and a goblin in the open, not puppets: filmed on threes as it goes
+            g.state.minutes = 12 * 60;
+            for (var m : new ArrayList<>(g.monsters.all())) g.ai.unload(m);
+            rpg.ai.Npc guard = (rpg.ai.Npc) g.actor(Ids.GUARD);
+            for (rpg.ai.Npc o : g.npcs) if (o != guard) g.ai.unload(o);
+            place(60.5f, 76.5f, 0);
+            g.teleport(guard, 62.5f, DevMap.FLOOR, 72.5f);
+            g.player.skills.setLevel(rpg.skill.Skill.HEALTH, 99); g.player.restore();
+            guard.skills.setLevel(rpg.skill.Skill.HEALTH, 99); guard.restore();
+            for (var kind : new rpg.monster.MonsterKind[]{rpg.monster.MonsterKind.ORC, rpg.monster.MonsterKind.GOBLIN}) {
+                var mo = g.monsters.spawn(kind, (kind.minLevel + kind.maxLevel) / 2, 63.5f, 66.5f, null);
+                mo.hunger = 1; mo.aggression = 1; mo.target = guard.id; mo.cs.lastAttacker = guard.id; mo.cs.lastHurt = g.time;
+                mo.state = rpg.monster.Monster.State.ENGAGE; mo.stateSince = g.time;
+                g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("bronze_sword"), 1));
+                g.combat.sheathe(g.player, false);
+                frames(20);
+                for (int clip = 0; clip < 3; clip++) {
+                    if (!mo.alive) break;
+                    // the player keeps at it, beside it and facing it, so it answers: the fight is on for real
+                    film("fight-" + kind.name().toLowerCase() + "-" + clip, 60, i -> {
+                        float yaw = mo.yaw + (float) Math.PI;
+                        if (g.player.distTo(mo) > 2.2f) g.teleport(g.player, mo.x - (float) Math.sin(yaw) * -1.6f, DevMap.FLOOR, mo.z - (float) Math.cos(yaw) * -1.6f);
+                        g.controller.snapTo((float) Math.atan2(-(mo.x - g.player.x), -(mo.z - g.player.z)));
+                        g.controller.in.mainDown = i % 40 < 20;
+                    }, a -> new float[]{mo.x + 3.2f, mo.y + 2.0f, mo.z + 3.2f, mo.x, mo.y + 1.0f, mo.z}, 40, mo);
+                    g.controller.in.mainDown = false;
+                    System.out.println("[monsterfight] " + kind + " clip " + clip + ": " + mo.state + " cs " + mo.cs.phase + " reacting " + mo.reacting + " ragdoll " + mo.ragdoll + " hp " + mo.hp);
+                }
+                // a heavy blow and a knockdown on it, filmed: the body reels and gets up, never standing stiff
+                if (mo.alive) {
+                    g.controller.in.mainDown = false;
+                    film("struck-" + kind.name().toLowerCase(), 75, i -> { if (i == 3) g.reactions.struck(mo, 0, 0.1f, -1, 60, 1.5f, mo.x, mo.chestY(), mo.z + 0.2f); },
+                            a -> new float[]{mo.x + 3.2f, mo.y + 2.0f, mo.z + 3.2f, mo.x, mo.y + 1.0f, mo.z}, 0, mo);
+                    frames(90);
+                    film("knocked-" + kind.name().toLowerCase(), 90, i -> { if (i == 3) g.reactions.knockDown(mo, 0, -1, 140, mo.x, mo.chestY(), mo.z + 0.2f); },
+                            a -> new float[]{mo.x + 3.2f, mo.y + 2.0f, mo.z + 3.2f, mo.x, mo.y + 1.0f, mo.z}, 0, mo);
+                }
+                if (mo.alive) g.monsters.remove(mo);
+            }
+        }
+        if (want.test("hang") || want.test("charge")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 60f) < 20) g.ai.unload(o);
+            for (var m : new ArrayList<>(g.monsters.all())) g.ai.unload(m);
+        }
+        if (want.test("hang")) {
+            // the Agility 6 hang: taken, held, shimmied along, pulled up; lowered onto an edge; let go; leapt back from
+            var in = g.controller.in;
+            Runnable wall = () -> {
+                for (int x = 58; x <= 71; x++) for (int z = 53; z <= 66; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 7; y++) g.setBlock(x, y, z, Blocks.AIR);
+                for (int x = 61; x <= 67; x++) for (int z = 57; z <= 59; z++) for (int y = 0; y < 2; y++) g.setBlock(x, DevMap.FLOOR + y, z, Blocks.BRICK);
+            };
+            wall.run();
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 20); g.player.restore(); g.player.eq.clear(); g.player.firstPerson = false;
+            float[] side = {69.5f, DevMap.FLOOR + 1.6f, 62.5f, 64.5f, DevMap.FLOOR + 1.2f, 59.6f};
+            place(64.5f, 60.8f, 0); frames(4);
+            film("hang-take", 60, i -> { in.jump = false; if (i == 0) g.traversal.begin(g.player, 0); }, a -> side, 0);
+            film("hang-shimmy", 60, i -> { in.jump = false; in.strafe = 1; }, a -> new float[]{a.x + 4.5f, DevMap.FLOOR + 1.6f, a.z + 3.0f, a.x, DevMap.FLOOR + 1.2f, a.z - 0.4f}, 0);
+            in.strafe = 0;
+            film("hang-pullup", 60, i -> in.jump = i == 0, a -> new float[]{a.x + 4.5f, DevMap.FLOOR + 2.2f, a.z + 3.0f, a.x, DevMap.FLOOR + 1.6f, a.z - 0.4f}, 0);
+            in.jump = false;
+            // from the top: crouch-walk back off the edge to hang, then let go
+            place(64.5f, 59.5f, 0); g.teleport(g.player, 64.5f, DevMap.FLOOR + 2, 59.5f); g.controller.snapTo((float) Math.PI); frames(6);
+            film("hang-lower", 72, i -> { in.forward = i < 40 ? 1 : 0; in.sneak = i < 40; }, a -> new float[]{70f, DevMap.FLOOR + 2.4f, 63.5f, 64.5f, DevMap.FLOOR + 1.4f, 60.2f}, 0);
+            in.forward = 0;
+            film("hang-letgo", 45, i -> in.sneak = i >= 3 && i < 8, a -> new float[]{70f, DevMap.FLOOR + 1.6f, 63.5f, 64.5f, DevMap.FLOOR + 0.8f, 60.2f}, 0);
+            in.sneak = false;
+            place(64.5f, 60.8f, 0); frames(10);
+            g.traversal.begin(g.player, 0); frames(40);
+            film("hang-leapback", 54, i -> { in.forward = i < 30 ? -1 : 0; in.jump = i == 2; }, a -> new float[]{70f, DevMap.FLOOR + 1.8f, 63.5f, 64.5f, DevMap.FLOOR + 1.0f, 61.5f}, 0);
+            in.forward = 0; in.jump = false;
+            System.out.println("[hang] events: " + g.state.all().stream().map(e -> e.type()).filter(t -> t.startsWith("Ledge")).toList());
+        }
+        if (want.test("charge")) {
+            // the Agility 10 sprint, run shoulder-first, and a townsman barged off his feet
+            var in = g.controller.in;
+            for (int x = 58; x <= 71; x++) for (int z = 53; z <= 80; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 7; y++) g.setBlock(x, y, z, Blocks.AIR);
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 10); g.player.restore(); g.player.eq.clear(); g.player.firstPerson = false;
+            place(64.5f, 78.5f, 0); frames(4);
+            film("charge-sprint", 48, i -> { in.forward = 1; in.sprint = true; }, a -> new float[]{a.x + 4.0f, a.y + 1.4f, a.z - 1.0f, a.x, a.y + 1.0f, a.z - 0.5f}, 30);
+            in.forward = 0; in.sprint = false; frames(40);
+            rpg.ai.Npc eda = (rpg.ai.Npc) g.actor(Ids.VILLAGER); g.ai.reload(eda);
+            place(64.5f, 77.5f, 0); g.teleport(eda, 64.5f, DevMap.FLOOR, 65.5f); eda.nextThink = g.time + 30; frames(4);
+            System.out.println("[charge] eda loaded " + eda.loaded + " alive " + eda.alive + " at " + eda.x + "," + eda.z + " player " + g.player.x + "," + g.player.z + " yaw " + g.player.yaw);
+            film("charge-barge", 108, i -> { in.forward = 1; in.sprint = true; eda.nextThink = g.time + 30; if (!eda.reacting && eda.ragdoll == 0) { g.ai.desire(eda, rpg.ai.AiSystem.A_HOLD); eda.wantYaw = 0; if (Math.hypot(eda.x - 64.5f, eda.z - 65.5f) > 0.3f && g.player.z > 67.5f) g.teleport(eda, 64.5f, DevMap.FLOOR, 65.5f); } },
+                    a -> new float[]{a.x + 5.5f, DevMap.FLOOR + 1.8f, a.z - 2.2f, a.x, DevMap.FLOOR + 0.9f, a.z - 2.2f}, 20);
+            in.forward = 0; in.sprint = false;
+            System.out.println("[charge] events: " + g.state.all().stream().filter(e -> e.type().equals("ShoulderCharge")).count() + " eda reacting " + eda.reacting + " at " + eda.x + "," + eda.z);
+        }
+        if (want.test("ground")) {
+            // where grass meets cobbles, dirt and sand: the first such seam of each found on the ground, from a low angle
+            g.state.minutes = 11 * 60;
+            int y = DevMap.FLOOR - 1;
+            for (int other : new int[]{Blocks.COBBLE, Blocks.DIRT, Blocks.SAND, Blocks.BARE_PATCH}) {
+                int fx = -1, fz = -1;
+                for (int x = 4; x < DevMap.SX - 4 && fx < 0; x++) for (int z = 4; z < DevMap.SZ - 4 && fx < 0; z++)
+                    if (g.vox.block(x, y, z) == Blocks.GRASS && g.vox.block(x + 1, y, z) == other && g.vox.block(x, y + 1, z) == 0 && g.vox.block(x + 1, y + 1, z) == 0
+                            && g.vox.block(x, y, z + 1) == Blocks.GRASS && g.vox.block(x + 1, y, z + 1) == other) { fx = x; fz = z; }
+                if (fx < 0) { System.out.println("[ground] no grass beside " + other); continue; }
+                place(fx - 6.5f, fz + 6.5f, 0); frames(10);
+                adapted(new float[]{fx + 1 - 2.2f, DevMap.FLOOR + 1.6f, fz + 2.8f, fx + 1, DevMap.FLOOR, fz + 0.5f}, "ground-" + other);
+                System.out.println("[ground] grass beside " + other + " at " + fx + "," + fz);
+            }
+        }
+        if (want.test("climbs")) {
+            g.state.minutes = 12 * 60;
+            for (int[] f : DevMap.FLIGHTS) {
+                float x = f[0] + f[2] * f[4] / 2f, z = f[1] + f[3] * f[4] / 2f;
+                place(x - f[3] * 6 + 0.5f, z + f[2] * 6 + 0.5f, 0); frames(6);
+                adapted(new float[]{x - f[3] * 6.5f + f[2] * -3 + 0.5f, DevMap.FLOOR + 4f, z + f[2] * 6.5f + f[3] * -3 + 0.5f, x + 0.5f, DevMap.FLOOR + 2f, z + 0.5f}, "climb-flight-" + f[0] + "-" + f[1]);
+            }
+            int cx = rpg.world.Expanse.PAL_X0, cz = rpg.world.Expanse.PAL_Z0;
+            place(cx + 8.5f, cz + 8.5f, 0); frames(6);
+            adapted(new float[]{cx + 9.5f, DevMap.FLOOR + 5f, cz + 9.5f, cx + 1.5f, DevMap.FLOOR + 4f, cz + 1.5f}, "climb-tower");
+            int[] l = DevMap.LOOKOUT;
+            place(l[0] + 1.5f, l[1] + 9.5f, 0); frames(6);
+            adapted(new float[]{l[0] + 6.5f, DevMap.FLOOR + 4f, l[1] + 10.5f, l[0] + 1.5f, DevMap.FLOOR + 2.5f, l[1] + 1.5f}, "climb-lookout");
+        }
+        if (want.test("armor")) {
+            // plate at the folded joints: the guard up (elbows bent) and a crouch (knees bent), close
+            g.state.minutes = 12 * 60;
+            var p = g.player; p.firstPerson = false;
+            for (String[] piece : new String[][]{{"BODY", "iron_body"}, {"LEGS", "iron_legs"}, {"HEAD", "iron_helm"}, {"HANDS", "leather_gloves"}, {"FEET", "leather_boots"}})
+                p.eq.set(rpg.item.ItemDef.Slot.valueOf(piece[0]), new rpg.item.ItemStack(rpg.item.Items.get(piece[1]), 1));
+            p.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("iron_sword"), 1));
+            p.eq.set(rpg.item.ItemDef.Slot.OFF, null);
+            place(64.5f, 40.5f, 0); g.combat.sheathe(p, false); frames(60);
+            List<BufferedImage> tiles = new ArrayList<>(); List<String> labels = new ArrayList<>();
+            g.controller.in.offDown = true; frames(30);
+            for (float turn : new float[]{0.4f, 1.6f, 2.8f}) { float yaw = p.yaw + turn; tiles.add(capture(new float[]{p.x - (float) Math.sin(yaw) * 3.0f, p.y + 1.4f, p.z - (float) Math.cos(yaw) * 3.0f, p.x, p.y + 1.1f, p.z})); labels.add("guard " + turn); }
+            g.controller.in.offDown = false; g.controller.in.sneak = true; frames(40);
+            for (float turn : new float[]{0.4f, 1.6f, 2.8f}) { float yaw = p.yaw + turn; tiles.add(capture(new float[]{p.x - (float) Math.sin(yaw) * 3.0f, p.y + 1.1f, p.z - (float) Math.cos(yaw) * 3.0f, p.x, p.y + 0.7f, p.z})); labels.add("crouch " + turn); }
+            g.controller.in.sneak = false;
+            sheet("armor-joints", tiles, labels, 3);
+        }
+        if (want.test("map")) {
+            place(55.5f, 12.5f, (float) Math.PI); frames(20);
+            hud.go(Hud.Scene.MAP); reviewUi("map"); hud.closeAll();
+        }
     }
 
     private void gamefixesUi() {
@@ -2373,10 +2761,10 @@ final class Gallery {
             tiles = new ArrayList<>(); labels = new ArrayList<>();
             float[] cam = quarter(g.player, 3.0f);
             g.combat.sheathe(g.player, false);
-            for (int i = 0; i < 40; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("draw f" + (i + 1)); } }
+            for (int i = 0; i < 57; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("draw f" + (i + 1)); } }
             g.combat.sheathe(g.player, true);
-            for (int i = 0; i < 40; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("sheathe f" + (i + 1)); } }
-            sheet("sheathe-anim-" + lo[0], tiles, labels, 7);
+            for (int i = 0; i < 57; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (i % 3 == 0) { tiles.add(captureFrame()); labels.add("sheathe f" + (i + 1)); } }
+            sheet("sheathe-anim-" + lo[0], tiles, labels, 10);
         }
         // long hair as the head turns (gamefixes: it stayed on the back)
         g.player.look.female = true; g.player.look.hair = 13; g.player.eq.set(rpg.item.ItemDef.Slot.HEAD, null);

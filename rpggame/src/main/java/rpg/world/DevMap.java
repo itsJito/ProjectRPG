@@ -222,11 +222,57 @@ public final class DevMap {
         for(int i=0;i<4;i++)for(int x=164;x<=166;x++)b.blockSet(x,FLOOR+i,14+i,STAIRS);
         b.fill(162,FLOOR,20,162,FLOOR+4,20,STONE_BRICKS);
         for(int y=FLOOR;y<=FLOOR+4;y++)b.blockSet(163,y,20,LADDER);
+        climbs(b);
         b.lightAll();
         b.pristineSave();
         if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());
         b.free();
         return world;
+    }
+
+    /**
+     * (0.2.9, gamefixes: stairs and ladders all round the DevMap, DevCity and DevPalace) ways up to the high places the
+     * towns already have: stone steps up the inside of DevCity's wall to walk its top; a ladder up the inside face of
+     * each of DevPalace's corner towers to a lookout among merlons, and steps inside both its gatehouses to their roofs;
+     * a timber lookout in DevTown with its ladder. Ladders stand only on the inside of a wall, so none is a way round a
+     * gate. Each stair is a flight rising one block a step to the height of the top it meets, on a solid footing.
+     */
+    public static final int[][] FLIGHTS = {
+            // x, z of the bottom step, the way it rises (dx, dz), steps, width across (wx, wz), footing block
+            {104, 49, 0, -1, 3, 1, 0, STONE_BRICKS}, {86, 49, 0, -1, 3, 1, 0, STONE_BRICKS},          // DevCity, the north wall
+            {85, 78, -1, 0, 3, 0, 1, STONE_BRICKS},                                                     // DevCity, the west wall
+            {Expanse.PAL_X0 + 2, Expanse.DEC_Z0 - 8, 0, 1, 7, 1, 0, LIMESTONE_BRICKS},                // DevPalace, the west gate
+            {Expanse.CARDO_X0 - 9, Expanse.PAL_Z1 - 2, 1, 0, 7, 0, 1, LIMESTONE_BRICKS}};             // DevPalace, the south gate
+    /** DevTown's lookout: its corner, size and platform height; the ladder's cell and the face it climbs. */
+    public static final int[] LOOKOUT = {66, 116, 3, 4};
+    static void climbs(CommandBuffer b) {
+        for (int[] f : FLIGHTS) for (int i = 0; i < f[4]; i++) for (int w = 0; w <= f[5] + f[6]; w++) {
+            if (w > 0 && f[5] == 0 && f[6] == 0) break;
+            int x = f[0] + f[2] * i + f[5] * w, z = f[1] + f[3] * i + f[6] * w;
+            if (i > 0) b.fill(x, FLOOR, z, x, FLOOR + i - 1, z, f[7]);
+            b.blockSet(x, FLOOR + i, z, STAIRS);
+            b.fill(x, FLOOR + i + 1, z, x, FLOOR + i + 3, z, AIR);
+        }
+        // DevPalace's corner towers: the roof off, a lookout floor with three merlons, a ladder up the inside face
+        int[][] corners = {{Expanse.PAL_X0, Expanse.PAL_Z0, 1, 1}, {Expanse.PAL_X1, Expanse.PAL_Z0, -1, 1}, {Expanse.PAL_X0, Expanse.PAL_Z1, 1, -1}, {Expanse.PAL_X1, Expanse.PAL_Z1, -1, -1}};
+        for (int[] c : corners) {
+            int cx = c[0], cz = c[1], sx = c[2], sz = c[3];
+            b.fill(cx - 1, FLOOR + 7, cz - 1, cx + 1, FLOOR + 7, cz + 1, AIR);
+            for (int dx = -1; dx <= 1; dx += 2) for (int dz = -1; dz <= 1; dz += 2) if (!(dx == sx && dz == sz)) b.blockSet(cx + dx, FLOOR + 7, cz + dz, LIMESTONE_BRICKS);
+            b.fill(cx + 2 * sx, FLOOR, cz + sz, cx + 2 * sx, FLOOR + 8, cz + sz, AIR);
+            for (int y = FLOOR; y <= FLOOR + 6; y++) b.blockSet(cx + 2 * sx, y, cz + sz, LADDER);
+        }
+        // DevTown's lookout: four birch posts, a plank floor with a fence round it, its ladder on the south face
+        int lx = LOOKOUT[0], lz = LOOKOUT[1], n = LOOKOUT[2], h = LOOKOUT[3];
+        b.fill(lx, FLOOR, lz, lx + n - 1, FLOOR + h + 3, lz + n - 1, AIR);
+        for (int[] p : new int[][]{{lx, lz}, {lx + n - 1, lz}, {lx, lz + n - 1}, {lx + n - 1, lz + n - 1}}) b.fill(p[0], FLOOR, p[1], p[0], FLOOR + h + 1, p[1], BIRCH_LOG);
+        b.fill(lx, FLOOR + h - 1, lz, lx + n - 1, FLOOR + h - 1, lz + n - 1, PLANKS);
+        for (int x = lx; x < lx + n; x++) for (int z = lz; z < lz + n; z++)
+            if ((x == lx || x == lx + n - 1 || z == lz || z == lz + n - 1) && !(x == lx + n / 2 && z == lz + n - 1) && !((x == lx || x == lx + n - 1) && (z == lz || z == lz + n - 1)))
+                b.blockSet(x, FLOOR + h, z, FENCE);
+        b.fill(lx, FLOOR + h + 2, lz, lx + n - 1, FLOOR + h + 2, lz + n - 1, ROOF);
+        b.fill(lx + n / 2, FLOOR, lz + n - 1, lx + n / 2, FLOOR + h - 2, lz + n - 1, PLANKS);
+        for (int y = FLOOR; y <= FLOOR + h - 1; y++) b.blockSet(lx + n / 2, y, lz + n, LADDER);
     }
 
     private static final class Builder {

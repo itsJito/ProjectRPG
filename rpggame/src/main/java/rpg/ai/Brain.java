@@ -178,6 +178,10 @@ public final class Brain {
             // twice as strong, with none of its own side near enough to help, runs for help instead of throwing its life
             // away; the watch holds its ground (that is its duty); with friends at hand, anyone stands
             float odds = rpg.monster.MonsterMind.might(threat) / Math.max(1, rpg.monster.MonsterMind.might(n));
+            // (0.3.0, gamefixes: the subtype of the other matters) an outlaw counts the watch closing in as the other side's
+            // strength: in a brawl with the law coming, a bandit breaks off and runs rather than fight it out
+            Npc law = AiSystem.crook(n) ? ai.lawInSight(n, n.x, n.z, 14) : null;
+            if (law != null && law != threat) odds += rpg.monster.MonsterMind.might(law) / Math.max(1, rpg.monster.MonsterMind.might(n));
             int friends = civilian || weak || odds <= 2 ? 0 : alliesNear(n, 14);
             boolean outmatched = !civilian && !weak && !n.watch() && n.summonOwner == 0 && odds > 2 && friends == 0;
             if (civilian || weak) s.add(new Score(Goal.FLEE, weak && !civilian ? 0.95f : 0.85f, (weak ? "badly hurt" : "not a fighter") + "; fleeing " + threat.name));
@@ -201,7 +205,11 @@ public final class Brain {
         var odd = ai.stealth.unresolved(n);
         if (n.investigation != null && threat == null) {
             Investigation v = n.investigation;
-            float urgency = v.plan == Investigation.Plan.HIDE || v.plan == Investigation.Plan.FETCH_HELP ? 0.8f : n.combatant() ? 0.68f : 0.6f;
+            // (0.2.9) at night, whatever they chose to do about it keeps them from their bed until it is done (a look
+            // under way lost to sleep, so only hiding or fetching the guard was ever carried through after dark)
+            double hrNow = g.state.hourOfDay();
+            boolean dark = hrNow >= 21 || hrNow < 5.5;
+            float urgency = dark || v.plan == Investigation.Plan.HIDE || v.plan == Investigation.Plan.FETCH_HELP ? 0.8f : n.combatant() ? 0.68f : 0.6f;
             s.add(new Score(Goal.INVESTIGATE, urgency, v.plan.name().toLowerCase().replace('_', ' ') + ": " + v.label() + String.format(" at (%.0f, %.0f) - %s", v.x, v.z, v.why)));
         } else if (odd != null && threat == null) {
             Stealth.Aware w = odd.getValue();
@@ -228,13 +236,20 @@ public final class Brain {
         if (night && n.role != Npc.Role.GUARD && !n.combatant() && n.role != Npc.Role.THIEF) s.add(new Score(Goal.SLEEP, 0.7f, String.format("night (%02d:00)", (int) hour)));
         else if (n.fatigue > 0.8f) s.add(new Score(Goal.SLEEP, 0.55f, String.format("fatigue %.0f%%", n.fatigue * 100)));
         if (n.social > 0.55f && !n.combatant() && ai.partnerFor(n) != null) s.add(new Score(Goal.SOCIALIZE, 0.2f + n.social * 0.45f, String.format("lonely (%.0f%%), %s nearby", n.social * 100, ai.partnerFor(n).name)));
+        else if (restDay(n) && !night && !n.combatant() && ai.partnerFor(n) != null) s.add(new Score(Goal.SOCIALIZE, 0.32f, "Solday: visiting with " + ai.partnerFor(n).name));
         // duties
         switch (n.role) {
             case GUARD, LAWMAN -> s.add(new Score(Goal.PATROL, 0.5f, "on patrol duty"));
             case WORKER, VILLAGER, CARTER, MERCHANT, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
                 boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
-                s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : "day's work: " + workText(n)));
+                // (0.2.9) a lake net still out when the day ends is brought in before its fisher goes home
+                boolean netOut = threat == null && n.profession == Profession.LAKE_NET_FISHERMAN && jobs.lateForNets() && jobs.netOf(n) != null;
+                // (0.3.0, the Weekly System) Solday afternoon is the week's rest: ordinary trades put their work down
+                // (the healer, the undertaker, the priest and anyone with a commitment keep on)
+                boolean rest = restDay(n) && !committed;
+                if (netOut) s.add(new Score(Goal.WORK, 0.86f, "hauling the lake net in before dark"));
+                else s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : rest ? 0.18f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : rest ? "Solday: the week's rest" : "day's work: " + workText(n)));
             }
             case THIEF -> {
                 float opp = ai.stealOpportunity(n);
@@ -246,7 +261,12 @@ public final class Brain {
         if (threat == null && n.role == Npc.Role.THIEF && stolenCarried(n) >= 2 && g.econ.merchant(g.econ.fence) != null && g.econ.merchant(g.econ.fence).alive)
             s.add(new Score(Goal.FENCE, 0.58f, stolenCarried(n) + " stolen thing(s) to sell to the fence"));
         switch (n.role) {
-            case BANDIT, BRUTE -> s.add(new Score(Goal.RETURN, Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 6 ? 0.45f : 0.05f, "keep to the pen"));
+            case BANDIT, BRUTE -> {
+                // (0.3.0) and with the law about, keeps well back in the camp rather than loitering where it can be seen
+                Npc law = threat == null ? ai.lawInSight(n, n.x, n.z, 24) : null;
+                if (law != null) s.add(new Score(Goal.RETURN, 0.7f, "wary: " + law.name + " (" + law.role.name().toLowerCase() + ") in sight; keeping back"));
+                else s.add(new Score(Goal.RETURN, Math.hypot(n.x - n.spawnX, n.z - n.spawnZ) > 6 ? 0.45f : 0.05f, "keep to the pen"));
+            }
             default -> { }
         }
         // the dead's belongings (GDD 3.12): a guard carries a secured grave in to the undertaker once word of it has had
@@ -532,6 +552,8 @@ public final class Brain {
 
     /** How long a secured grave stands before word of it brings a guard (seconds). */
     static final double WORD_REACHES_WATCH = 120;
+    /** (0.3.0) how long a body lies in town before word of it reaches the undertaker (seconds), and how long he takes to lay it to rest at the stone. */
+    static final double WORD_OF_A_BODY = 45, LAYING = 2.6;
 
     /**
      * The grave this NPC has business with, or null. A guard: a secured grave in his own town that has stood long enough
@@ -541,6 +563,11 @@ public final class Brain {
     rpg.objects.Container graveFor(Npc n) {
         boolean guard = n.watch(), undertaker=n.role==Npc.Role.UNDERTAKER, collector=guard||undertaker, crook = n.role == Npc.Role.THIEF || n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE;
         if (collector && g.graveyards.nearest(n)==null)return null;
+        // (0.3.0) a body being laid on its stone stays his errand while it is set down
+        if (collector && n.layingBody != 0) {
+            if (g.objects.get(n.layingBody) instanceof rpg.objects.Container laid && !laid.removed && !laid.buried) return laid;
+            n.layingBody = 0; n.layingSince = -1;
+        }
         if (!collector && !crook || collector && g.time < n.collectAgain && !g.carrying.busy(n)) return null;
         rpg.objects.Container best = null;
         float bd = Float.MAX_VALUE;
@@ -554,7 +581,10 @@ public final class Brain {
                 if (c.heldBy != 0 && c.heldBy != n.id) continue;
                 if (c instanceof rpg.objects.Corpse corpse) {
                     if (corpse.npc(g) == null || corpse.delivered || !DevMap.jurisdiction(c.x,c.z).equals(n.homeJurisdiction) && d > 5) continue;
-                    if (c.heldBy == 0 && (d > 24 || !g.vox.sight(n.x,n.eyeY(),n.z,c.x,c.y+0.3f,c.z))) continue;
+                    // (0.3.0) the dead are not only found by chance: word of a body in his own town reaches him within a minute
+                    if (corpse.knownAt < 0) corpse.knownAt = g.time;
+                    boolean word = g.time - corpse.knownAt > WORD_OF_A_BODY;
+                    if (c.heldBy == 0 && !word && (d > 24 || !g.vox.sight(n.x,n.eyeY(),n.z,c.x,c.y+0.3f,c.z))) continue;
                 } else if (!c.kind.equals("grave") || c.secured || g.time < c.expiresAt) continue;
             } else if (guard) {
                 if ((c.heldBy != 0 && c.heldBy != n.id) || !c.kind.equals("grave") && !(c instanceof rpg.objects.Corpse) || !DevMap.jurisdiction(c.x, c.z).equals(n.homeJurisdiction) && c.heldBy != n.id) continue;
@@ -580,6 +610,7 @@ public final class Brain {
     private void collect(Npc n) {
         rpg.objects.Container c = graveFor(n);
         if (c == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = 0; return; }
+        if (n.layingBody == c.id) c.heldBy = n.id;
         if (c.heldBy != n.id) {
             if (goTo(n, c.x, c.z, false, 1.2f)) {
                 if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Poor soul. I'll see your belongings safely home." : "Poor soul. I'll see this to Morrow."); }
@@ -599,7 +630,23 @@ public final class Brain {
         float[] graveSpot = g.graveyards.destination(plot);
         if (graveSpot == null) { ai.desire(n, AiSystem.A_HOLD); return; }
         if (goTo(n, graveSpot[0], graveSpot[1], false, 1.1f)) {
+            n.wantYaw = (float) Math.atan2(-(graveSpot[0] - n.x), -(graveSpot[1] - n.z));
+            // (0.3.0, gamefixes: the dead vanished from his arms as he walked up) a body is laid on its gravestone first: set
+            // down there, then knelt over a moment - and only then is it taken into the grave, its belongings into the stone
+            if (c instanceof rpg.objects.Corpse) {
+                if (n.layingSince < 0) {
+                    n.layingSince = g.time; n.layingBody = c.id;
+                    g.carrying.putDown(n);
+                    g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Rest now. Your things stay with you." : "There. Morrow will see to the rest.");
+                    rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.SAD, LAYING + 1);
+                }
+                c.heldBy = n.id;
+                n.reachX = graveSpot[0]; n.reachY = c.y + 0.2f; n.reachZ = graveSpot[1];
+                if (g.time - n.layingSince < LAYING) { ai.desire(n, AiSystem.A_HOLD); n.nextThink = g.time + 0.2; return; }
+            }
+            n.layingSince = -1; n.layingBody = 0;
             if (!g.graveyards.bury(c, n, plot)) { g.carrying.drop(n, false); c.heldBy = 0; n.collectAgain = g.time + 15; }
+            else if (g.fx != null) for (int i = 0; i < 10; i++) g.fx.trail(graveSpot[0] + (float) Math.sin(i * 2.4f) * 0.4f, c.y + 0.2f, graveSpot[1] + (float) Math.cos(i * 2.4f) * 0.4f, 0.5f, 0.42f, 0.3f);
             n.lastOutcome = "buried the dead and protected their belongings"; n.nextThink = 0;
         }
     }
@@ -704,9 +751,33 @@ public final class Brain {
             n.goalY=ty;
             if(Float.isFinite(n.goalY))g.game.commands().agentGoal(n.agent,tx,n.goalY,tz);
         }
+        // (0.3.0, gamefixes: townsfolk stood about doing nothing) progress is watched: a body that has come no closer to
+        // where it is going for several seconds is as close as it will get when it is near (a counter, a post, a spot
+        // inside furniture) - the errand goes ahead from there - and, far off, it gives up that route and plans afresh
+        float left = (float) Math.hypot(n.x - x, n.z - z);
+        if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; }
+        else if (left < n.stallBest - 0.25f) { n.stallBest = left; n.stallSince = g.time; }
+        else if (g.time - n.stallSince > STALL) {
+            n.stallSince = g.time;
+            if (left <= Math.max(within + 2.2f, 3.2f) && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f)) {
+                ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false;
+                n.lastOutcome = "as close as I can get"; return true;
+            }
+            n.legs = null; n.hasGoalPos = false; n.lastOutcome = "no headway; finding another way";
+        }
         ai.desire(n, run ? ai.pace(n, x, z, within) : AiSystem.A_GOTO);
         return false;
     }
+    /** (0.3.0, the Weekly System) Whether it is the week's rest for this person: Solday from noon, ordinary trades only. */
+    boolean restDay(Npc n) {
+        return switch (n.role) {
+            case GUARD, LAWMAN, HEALER, UNDERTAKER, PRIEST, BEGGAR, THIEF, BANDIT, BRUTE -> false;
+            default -> g.state.cal().window(1, 12, 20);
+        };
+    }
+
+    /** (0.3.0) Seconds without coming closer before an errand's walk is taken as arrived (near) or re-planned (far). */
+    static final double STALL = 6;
 
     /** The strongest thing it is aware of but cannot place for certain. */
     private Stealth.Aware lead(Npc n) { var e = ai.stealth.unresolved(n); return e == null ? null : e.getValue(); }
@@ -721,7 +792,9 @@ public final class Brain {
         boolean dark = ai.stealth.light(w.x, DevMap.FLOOR + 1, w.z) < 0.25f;
         int company = 0;
         for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.goal != Goal.SLEEP && o.distTo(n) < 8 && bystander(o)) company++;
-        float c = ai.bravery(n) - (night ? 0.3f : 0) - (dark ? 0.12f : 0) - (st == Investigation.Stimulus.VIOLENCE ? 0.25f : 0) + Math.min(0.16f, company * 0.08f) + (g.time < n.vigilantUntil ? 0.05f : 0);
+        // (0.2.9, gamefixes: people did not look into the sounds they heard - the night alone put nearly every townsman
+        // under the line, and they all hid or stood calling) the dark weighs on them, but less than it did
+        float c = ai.bravery(n) - (night ? 0.2f : 0) - (dark ? 0.1f : 0) - (st == Investigation.Stimulus.VIOLENCE ? 0.25f : 0) + Math.min(0.16f, company * 0.08f) + (g.time < n.vigilantUntil ? 0.05f : 0);
         v.courage = c;
         StringBuilder why = new StringBuilder(String.format("courage %.2f", c));
         if (night) why.append(", night"); if (dark) why.append(", dark there"); if (st == Investigation.Stimulus.VIOLENCE) why.append(", sounds of violence"); if (company > 0) why.append(", not alone");
@@ -731,8 +804,8 @@ public final class Brain {
             case BANDIT, BRUTE -> v.plan = Investigation.Plan.CONFRONT;
             case GUARD, LAWMAN -> v.plan = Investigation.Plan.SEARCH;
             default -> {
-                if (c >= 0.45f) v.plan = night || dark ? Investigation.Plan.PEEK : Investigation.Plan.CHECK;
-                else if (c >= 0.2f) v.plan = Investigation.Plan.CALL_OUT;
+                if (c >= 0.35f) v.plan = night || dark ? Investigation.Plan.PEEK : Investigation.Plan.CHECK;
+                else if (c >= 0.1f) v.plan = Investigation.Plan.CALL_OUT;
                 else v.plan = ai.guardFor(n) != null ? Investigation.Plan.FETCH_HELP : Investigation.Plan.HIDE;
             }
         }
@@ -821,12 +894,19 @@ public final class Brain {
                 n.wantYaw = toward;
                 if (t < 0.05) g.ai.say(n, callLine(n, v));
                 if (t > (night ? 3.5 : 2.5)) {
-                    if (v.plan == Investigation.Plan.CALL_OUT) { if (v.repeats > 0 && ai.guardFor(n) != null) v.stage(Investigation.Stage.FETCHING, g.time); else v.stage(Investigation.Stage.DONE, g.time); }
+                    // no answer: heard again, the timid fetch the guard; otherwise they creep up near enough to see for
+                    // themselves what made it (they called out, and nothing came of it)
+                    if (v.plan == Investigation.Plan.CALL_OUT) {
+                        if (v.repeats > 0 && ai.guardFor(n) != null) v.stage(Investigation.Stage.FETCHING, g.time);
+                        else { v.plan = Investigation.Plan.PEEK; v.why += ", no answer"; v.stage(Investigation.Stage.APPROACHING, g.time); }
+                    }
                     else v.stage(Investigation.Stage.APPROACHING, g.time);
                 }
             }
             case APPROACHING -> {
-                float stop = v.plan == Investigation.Plan.PEEK ? 4.5f : 1.3f;
+                // the spot itself, or - placed in a wall or a hedge by an ear's guess - the nearest ground beside it
+                if (!standable(v.x, v.z)) { float[] near = nearestStandable(v.x, v.z); if (near != null) { v.x = near[0]; v.z = near[1]; } }
+                float stop = v.plan == Investigation.Plan.PEEK ? 3.5f : 1.3f;
                 boolean run = v.plan == Investigation.Plan.CONFRONT || law && v.stimulus == Investigation.Stimulus.VIOLENCE;
                 if (Math.hypot(v.x - n.x, v.z - n.z) < 6) n.wantYaw = toward;
                 // creeping up to it: a peeker keeps low; a guard at night goes carefully, weapon ready
@@ -895,6 +975,9 @@ public final class Brain {
         if (g.law.settled(from.subject, from.startedAt) && g.law.bounty(from.subject, guard.homeJurisdiction) == 0) return;
         if (guard.investigation != null) { g.ai.reply(guard, "I heard it too. I'm on it."); return; }
         Stealth.Aware w = guard.aware.computeIfAbsent(from.subject, k -> new Stealth.Aware());
+        // (0.3.0) the same lead brought again by one neighbour after another, after he has just looked into it: he says so
+        // and stays on his round (a guard spent the morning searching the same corner for every villager who came to him)
+        if (g.time - w.settledAt < 150 && from.stimulus != Investigation.Stimulus.VIOLENCE || g.time - w.settledAt < 45) { g.ai.reply(guard, "I've looked already. Nothing there."); return; }
         w.level = Math.max(w.level, Stealth.INVESTIGATING + 0.1f);
         w.x = from.x; w.z = from.z; w.heardAt = g.time; w.settledAt = -99;
         Investigation v = new Investigation(from.subject, from.x, from.z, from.stimulus, g.time);
@@ -1201,6 +1284,17 @@ public final class Brain {
     private String pickLine(Npc n, String... lines) { return lines[(int) Math.floorMod(n.id * 31 + (long) (g.time / 7), lines.length)]; }
 
     /** Whether someone could stand at a spot: open cells at body height, ground beneath, inside the map. */
+    /** The nearest ground one can stand on within three metres of a spot (rings outward), or null. */
+    private float[] nearestStandable(float x, float z) {
+        int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
+        for (int ring = 1; ring <= 3; ring++)
+            for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
+                if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) continue;
+                if (standable(bx + dx + 0.5f, bz + dz + 0.5f)) return new float[]{bx + dx + 0.5f, bz + dz + 0.5f};
+            }
+        return null;
+    }
+
     private boolean standable(float x, float z) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z), f = DevMap.FLOOR;
         if (bx < 1 || bz < 1 || bx >= DevMap.SX - 1 || bz >= DevMap.SZ - 1) return false;
@@ -1519,6 +1613,7 @@ public final class Brain {
             g.state.burn(food.def, 1);
             g.state.commit("NpcAte", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, food.def.name);
             n.lastOutcome = "ate " + food.def.name.toLowerCase();
+            rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.HAPPY, 2);
         } else n.lastOutcome = "drank from the well";
         n.hunger = 0;
     }
@@ -1639,8 +1734,11 @@ public final class Brain {
         String choice;
         if (archer) {
             n.pitch=(float)Math.atan2(targetY-n.eyeY(),Math.max(0.3f,d));
-            Actor between = d < 5 ? null : g.combat.inLineOfFire(n, t);
-            if (d < 5) { choice = "back off to shooting range"; backOff(n, t, 9); }
+            // (0.2.9) a flyer cannot be stepped away from - it follows on the wing, and the archer backed off for good
+            // without loosing a shaft: it is shot where it is
+            boolean flyer = t instanceof rpg.monster.Monster fm && fm.kind.flies();
+            Actor between = d < 5 && !flyer ? null : g.combat.inLineOfFire(n, t);
+            if (d < 5 && !flyer) { choice = "back off to shooting range"; backOff(n, t, 9); }
             else if (between != null && !ai.hostile(n, between)) {
                 // someone of no quarrel stands in the line: hold the shot and step aside to a clear one (the side away
                 // from them), rather than loose through them
@@ -1650,14 +1748,32 @@ public final class Brain {
                 float side = (between.x - n.x) * lx + (between.z - n.z) * lz > 0 ? -1 : 1;
                 goTo(n, n.x + lx / ll * side * 2.5f, n.z + lz / ll * side * 2.5f, false, 0.4f);
             }
+            else if (n.shotsHere >= 2 && n.cs.draw <= 0 && Math.hypot(n.x - n.shotFromX, n.z - n.shotFromZ) < 2.5f) {
+                // two loosed from here: a fresh angle before the next (a mark that has dodged twice from one spot will
+                // again) - round the mark at the range one has, to the side one is already moving
+                choice = "move for a fresh angle";
+                float ang = (float) Math.atan2(n.z - t.z, n.x - t.x) + ((n.id & 1) == 0 ? 0.75f : -0.75f), r = Math.max(7, Math.min(13, d));
+                float gx = t.x + (float) Math.cos(ang) * r, gz = t.z + (float) Math.sin(ang) * r;
+                if (!standable(gx, gz)) { ang -= ((n.id & 1) == 0 ? 1.5f : -1.5f); gx = t.x + (float) Math.cos(ang) * r; gz = t.z + (float) Math.sin(ang) * r; }
+                if (goTo(n, gx, gz, true, 0.8f) || !standable(gx, gz)) n.shotsHere = 0;
+            }
             else if (n.cs.draw > 0 || (!n.cs.busy() && g.vox.sight(n.x, n.eyeY(), n.z, t.x, t.chestY(), t.z))) {
                 choice = "draw and shoot";
                 ai.desire(n, AiSystem.A_HOLD);
+                // the mark led, the drop allowed for; loosed only once the body is round to it, with a hand as steady as
+                // the shooter's Archery makes it
+                float[] aim = g.combat.leadAim(n, t, targetY);
+                n.wantYaw = aim[0];
+                float wobble = (1 - Math.min(99, n.skills.level(Skill.ARCHERY)) / 99f) * 0.035f;
+                long seed = n.id * 31 + g.combat.shots;
+                float ey = ((seed * 2654435761L >>> 16) % 1000 / 1000f - 0.5f) * 2 * wobble, ep = ((seed * 40503L >>> 8) % 1000 / 1000f - 0.5f) * 2 * wobble;
+                boolean onIt = Math.abs(Actor.wrap(aim[0] - n.yaw)) < 0.12f;
+                if (Math.hypot(n.x - n.shotFromX, n.z - n.shotFromZ) > 2.5f) { n.shotFromX = n.x; n.shotFromZ = n.z; n.shotsHere = 0; }
                 if (main.family == ItemDef.Family.CROSSBOW) {
-                    if (n.cs.reload <= 0) g.combat.shootCrossbow(n, n.yaw, n.pitch + d * 0.001f);
+                    if (n.cs.reload <= 0 && onIt && g.combat.shootCrossbow(n, aim[0] + ey, aim[1] + ep)) n.shotsHere++;
                     n.cs.aim = 1;
                 } else n.cs.draw = Math.min(1, n.cs.draw + dt / 1.1f);
-                if (n.cs.draw >= 1) { g.combat.shoot(n, n.yaw, n.pitch + d * 0.004f, 1); n.cs.draw = 0; }
+                if (n.cs.draw >= 1 && onIt) { if (g.combat.shoot(n, aim[0] + ey, aim[1] + ep, 1)) n.shotsHere++; n.cs.draw = 0; }
             } else { choice = "find a line of sight"; goTo(n, t.x, t.y, t.z, false, 6); }
         } else if (t instanceof rpg.monster.Monster big && big.kind.terror() >= 20 && n.hp < n.maxHp() * 0.4f && d < 9) {
             // against a terror, the hurt fall back out of its reach and let the others hold it
@@ -1675,14 +1791,24 @@ public final class Brain {
         } else if (t instanceof rpg.monster.Monster fm && fm.kind.flies() && t.chestY() - n.y > 1.9f + Math.max(0, reach - 1) * 0.5f) {
             // (gamefixes: people stood swinging at bats in the air) a flyer up out of reach: no blow is thrown at the air -
             // guard, keep it in view a step off, and strike when it dives; the unarmed and the townsfolk give it up and run
+            // (0.2.9, gamefixes: fighters stood about under bats) a bow or a crossbow carried, with something to loose
+            // from it, is taken up; with none, nobody stands waiting under it - a moment's guard, then off to cover
+            // (home if it is near, else away from it), striking only if it dives into reach on the way
             n.flyerWait += dt;
-            boolean fighter = main != null && main.damage > 0 || n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN || n.role == Npc.Role.BRUTE;
-            if (!fighter && n.flyerWait > 6) {
-                choice = "run from the flyer";
+            ItemDef bow = rangedCarried(n);
+            if (bow != null) {
+                choice = "take up the " + bow.name.toLowerCase() + " for the flyer";
                 g.combat.setBlock(n, false);
-                ai.target(n, t.body); ai.desire(n, AiSystem.A_FLEE);
+                g.items.equipFirst(n, bow, ItemDef.Slot.MAIN, g.state.newRequestId());
+                ai.desire(n, AiSystem.A_HOLD);
+            } else if (n.flyerWait > 2.5f) {
+                choice = "run for cover from the flyer";
+                g.combat.setBlock(n, false);
+                boolean homeNear = Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 40;
+                if (homeNear && Math.hypot(n.homeX - n.x, n.homeZ - n.z) > 1.5f) goTo(n, n.homeX, n.homeZ, true, 1.0f);
+                else { ai.target(n, t.body); ai.desire(n, AiSystem.A_FLEE); }
             } else {
-                choice = "wait for it to dive";
+                choice = "guard against the flyer";
                 g.combat.setBlock(n, hasGuard);
                 if (d < 1.2f) backOff(n, t, 2.2f); else ai.desire(n, AiSystem.A_HOLD);
             }
@@ -1705,6 +1831,17 @@ public final class Brain {
             float ax = n.x - t.x, az = n.z - t.z, l = Math.max(0.01f, (float) Math.hypot(ax, az));
             float side = (n.id & 1) == 0 ? 1 : -1;
             g.combat.dodge(n, ax / l * 0.6f - az / l * side, az / l * 0.6f + ax / l * side);
+        } else if (d < reach + 4 && !opening && !ai.mayPress(n, t, reach)) {
+            // (0.3.0) two already press it: wait a turn on the ring round it, guard up, each at their own place on it
+            choice = "wait my turn on the ring";
+            g.combat.setBlock(n, hasGuard && d < reach + 2.5f);
+            float ring = reach + 2.2f, ang = (float) (Math.atan2(n.z - t.z, n.x - t.x) + Math.sin(g.time * 0.7 + n.id) * 0.35);
+            ai.combatGoal(n, t.x + (float) Math.cos(ang) * ring, t.z + (float) Math.sin(ang) * ring);
+        } else if (facing && d <= reach + 0.55f && !n.cs.busy() && !opening && g.time < n.nextSwingAt) {
+            // (0.3.0) between blows: a step to the side, guard up - not a blow the instant one is ready, nor standing still
+            choice = "measure the next blow";
+            g.combat.setBlock(n, hasGuard && t.cs.phase != Actor.Combat.Phase.IDLE);
+            circle(n, t, reach + 0.25f);
         } else if (facing && (d <= reach + 0.55f && !n.cs.busy() && n.stamina > 12 && !t.cs.blocking || opening && d <= reach + 0.55f && !n.cs.busy())) {
             boolean heavy = opening || t.cs.blocking || n.role == Npc.Role.BRUTE && (n.id + (long) (g.time * 2)) % 3 == 0;
             choice = heavy ? "heavy blow into the opening" : "quick strike";
@@ -1712,6 +1849,10 @@ public final class Brain {
             g.combat.setBlock(n, false);
             g.combat.attack(n, false, heavy ? Move.HEAVY : CombatSystem.lightMove(n, false));
             ai.desire(n, AiSystem.A_HOLD);
+            // the tempo: a beat before the next, shorter the better the fighter - and the turn passed on now and then
+            float skill = Math.min(1, n.skills.level(Skill.ATTACK) / 80f);
+            n.nextSwingAt = g.time + 0.35 + (0.55 - 0.35 * skill) * (0.5 + 0.5 * Math.abs(Math.sin(g.time * 3.1 + n.id)));
+            if (g.time + 1.2 > n.pressUntil) ai.yieldPress(n);
         } else if (n.stamina < 22) {
             choice = "back off to catch breath";
             g.combat.setBlock(n, hasGuard && d < 2.5f);
@@ -1734,6 +1875,17 @@ public final class Brain {
     private static boolean inFront(Actor body, Actor n, float half) {
         float to = (float) Math.atan2(-(n.x - body.x), -(n.z - body.z));
         return Math.abs(Actor.wrap(to - body.yaw)) < half;
+    }
+
+    /** A bow or crossbow this NPC carries with ammunition for it (worn or in the pack), or null. */
+    private ItemDef rangedCarried(Npc n) {
+        ItemStack ammo = n.eq.get(ItemDef.Slot.AMMO);
+        for (var grid : n.grids()) for (ItemStack s : grid.stacks()) {
+            if (s.def.family != ItemDef.Family.BOW && s.def.family != ItemDef.Family.CROSSBOW) continue;
+            ItemDef.Family wants = s.def.family == ItemDef.Family.BOW ? ItemDef.Family.ARROW : ItemDef.Family.BOLT;
+            if (ammo != null && ammo.def.family == wants && rpg.item.Equipment.refusal(s.def, n.skills) == null) return s.def;
+        }
+        return null;
     }
 
     private void backOff(Npc n, Actor t, float range) {
@@ -1761,5 +1913,5 @@ public final class Brain {
     }
 
     /** Whether this NPC is a witness-capable bystander (not the culprit, not a hostile). */
-    static boolean bystander(Npc n) { return n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE && n.id != Ids.PLAYER; }
+    public static boolean bystander(Npc n) { return n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE && n.id != Ids.PLAYER; }
 }

@@ -559,15 +559,21 @@ public final class Gore {
     // ------------------------------------------------------------------ each tick
     public void update(float dt) {
         slipCheck();
+        // (0.3.0) fresh blood on bodies runs down them for a few seconds before it dries
+        for (Actor a : g.actors()) if (a.blood.any()) a.blood.trickle(g.time);
         // bleeding: life runs out of a body that bleeds; it drips as it goes, and clots in time unless a part is gone
         for (Iterator<Map.Entry<Long, Wounds>> it = wounds.entrySet().iterator(); it.hasNext(); ) {
             var e = it.next();
             Actor a = g.actor(e.getKey());
             Wounds w = e.getValue();
             if (a == null) { it.remove(); continue; }
-            if (a.alive && a.hp >= a.maxHp() && !w.any()) {
-                java.util.Arrays.fill(w.hurt, 0);
-                w.bleed = 0; w.spurtUntil = 0; a.injuries.clear();
+            // (0.3.0, gamefixes: the player still walked hurt when fully healed) a wound's hold on the body heals with the
+            // body: no part stays more hurt than the health still missing allows, and whole again (to the last half
+            // point) it is gone - the hunch, the hanging arm and the limp ease off as health comes back
+            if (a.alive && !w.any()) {
+                float missing = 1 - a.hp / Math.max(1, a.maxHp());
+                if (a.hp >= a.maxHp() - 0.5f) { java.util.Arrays.fill(w.hurt, 0); w.bleed = 0; w.spurtUntil = 0; a.injuries.clear(); }
+                else for (int i = 0; i < w.hurt.length; i++) w.hurt[i] = Math.min(w.hurt[i], missing * 1.6f);
             }
             if (w.bleed <= 0.005f) { w.bleed = 0; continue; }
             if (a.alive && g.law != null && g.law.inCustody(a)) { w.bleed = 0; w.spurtUntil = 0; continue; }   // held: dressed
@@ -607,7 +613,7 @@ public final class Gore {
             var pose = g.lastBodies.ragdoll(n.ragdoll);
             if (pose != null) { e.x = pose.comX; e.z = pose.comZ; }
         }
-        evidence.removeIf(e -> e.kind == Kind.BLOOD && g.time - e.at > 1440 / Math.max(0.01, g.cfg.minutesPerSecond)
+        evidence.removeIf(e -> e.kind == Kind.BLOOD && g.time - e.at > 1440 / Math.max(0.01, 1000 / astratto.time.Calendar.BASE_MS_PER_MINUTE * g.cfg.minutesPerSecond)
                 || e.kind == Kind.BODY && !(g.actor(e.source) instanceof Npc n && !n.alive && n.ragdoll != 0)
                 || e.kind == Kind.LIMB && g.time - e.at > 1800);
         // limbs that have settled far away or too long: let go (they stay drawn until then)

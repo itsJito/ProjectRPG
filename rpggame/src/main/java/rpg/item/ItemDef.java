@@ -7,7 +7,7 @@ public final class ItemDef {
     /** Equipment slots (GDD 2.4), with BACK for a backpack and BELT for a pouch: containers worn, each its own grid. */
     public enum Slot { HEAD, BODY, LEGS, FEET, HANDS, MAIN, OFF, AMMO, CAPE, BACK, BELT, RING, NECK }
     public enum Family { NONE, SWORD, AXE, MACE, DAGGER, BOW, STAFF, WAND, SHIELD, SYMBOL, PICKAXE, ARMOR, ARROW, TOOL, BAG,
-        LONGSWORD, SCIMITAR, WARHAMMER, SPEAR, CLAWS, HALBERD, CROSSBOW, BOLT, THROWN, JEWEL }
+        LONGSWORD, SCIMITAR, WARHAMMER, SPEAR, CLAWS, HALBERD, CROSSBOW, BOLT, THROWN, JEWEL, TORCH }
     public enum DamageType { NONE, SLASH, PIERCE, BLUNT, MAGIC }
     /** What kind of thing it is, for the inventory's tabs and filters. */
     public enum Category { WEAPON, ARMOR, TOOL, RESOURCE, CONSUMABLE, CONTAINER, CURRENCY, MISC }

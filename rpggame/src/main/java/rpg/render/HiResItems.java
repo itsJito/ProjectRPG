@@ -600,6 +600,22 @@ final class HiResItems {
     }
 
     /** A crossbow: a wooden tiller with its stock, a metal prod across the front, the string drawn back to the nut. */
+    /** (0.3.0) A torch: a stout wooden haft, its grip wrapped in cord, and a head of pitch-soaked rags bound round the top, charred at the tip. */
+    static ItemModels.Model torch(ItemDef d) {
+        int w = 10, h = 52, cx = 4, cz = 4;
+        VoxModel m = new VoxModel(w, h, w);
+        for (int y = 0; y < 40; y++) for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) m.set(cx + x, y, cz + z, (y * 7 + x * 3 + z) % 9 == 0 ? mat(0x553820) : mat(0x6A4628));
+        for (int y = 4; y < 16; y++) for (int x = -1; x < 3; x++) for (int z = -1; z < 3; z++) if ((x == -1 || x == 2 || z == -1 || z == 2) && y % 3 != 0) m.set(cx + x, y, cz + z, mat(0x8A7450));
+        // the head: rags bound in three bands, darker toward the burnt tip
+        for (int y = 36; y < 50; y++) for (int x = -2; x < 4; x++) for (int z = -2; z < 4; z++) {
+            float dx = x - 0.5f, dz = z - 0.5f, rr = 2.9f - Math.max(0, y - 46) * 0.45f;
+            if (dx * dx + dz * dz > rr * rr) continue;
+            int c = y >= 46 ? 0x1E1812 : y % 4 == 0 ? 0x5A4A36 : (x + z + y) % 3 == 0 ? 0x3A2E22 : 0x4A3C2C;
+            m.set(cx + x, y, cz + z, mat(c));
+        }
+        return new ItemModels.Model(m, cx + 1, 9, cz + 1);
+    }
+
     static ItemModels.Model crossbow(ItemDef d, Tier t) {
         Kit k = kit(t);
         int w = 44, h = 40, cx = w / 2, cz = 2;

@@ -25,10 +25,34 @@ public class Actor {
     /** The engine mover this actor walks (0 when it has none - a dummy). */
     public long body;
     public float x, y, z, yaw, pitch, vx, vz;
+    /** (0.2.9) metres shimmied along edges toward the next Agility award, when one last leapt off a wall, and barged someone. */
+    public float shimmied;
+    public double leapAt = -99, chargeAt = -99;
+    /** Sprinting with the shoulder down (Agility 10): people in the way are barged aside. */
+    public boolean charging;
     /** Where the eyes look (the head turns toward it within its reach; the body follows at its own pace). */
     public float aimYaw;
     public boolean grounded = true;
     public boolean onLadder; public float climbVelocity;
+    /** (0.3.0) On a ladder (Ladders): the climb, how many rungs have been climbed (the figure's hands and feet follow it),
+     *  the ladder's front (away from its wall), and when one may next take hold of one. */
+    public Ladders.Climb climb;
+    public float climbPhase, ladderNX, ladderNZ = 1;
+    public double ladderAgain = -99;
+    /** (0.3.0) A wielded torch: whether it burns, and when it was last being lit (the lighting takes TORCH_LIGHTING seconds). */
+    public boolean torchLit;
+    /** (0.3.0) The mount this body rides (its id; 0 when on foot). */
+    public long riding;
+    /** (0.3.0) A reaction on the face (Faces.Mood ordinal, -1 none) until when, since when, and what it turns into after. */
+    public int emote = -1, emoteNext = -1;
+    public double emoteUntil, emoteSince, emoteNextFor;
+    /** In the saddle: the mount's speed (m/s) and its stride's phase, for the rider's lean and rise with the gait. */
+    public float rideSpeed, rideGait;
+    public double torchLightingAt = -99;
+    public static final float TORCH_LIGHTING = 1.2f;
+    /** Whether this body holds a torch in hand now (drawn), and whether it is being lit this moment. */
+    public boolean torchInHand() { ItemDef m = main(); return m != null && m.family == ItemDef.Family.TORCH && !sheathed; }
+    public float torchLighting(double now) { double t = (now - torchLightingAt) / TORCH_LIGHTING; return t >= 0 && t < 1 ? (float) t : -1; }
     public float hp, stamina, faith, mana;
     /** Blood on hands, clothes and blade (0 clean .. 1 soaked): from blows struck close; washed off in water (Gore). */
     public float bloodied;
@@ -82,8 +106,46 @@ public class Actor {
     public float[] injury;
     /** When a weapon was last drawn or used (an NPC keeps it out a while after). */
     public double armsUsedAt = -99;
-    /** Whether the hands hold what is equipped now: drawn, or still on its way to or from its place on the body. */
-    public boolean inHand(double time) { float s = (float) ((time - sheatheAt) / SHEATHE_TIME); return sheathed ? s < 0.5f : s >= 0.5f; }
+    /**
+     * (0.2.9, gamefixes: the sheathe and draw of a shield and weapon wanted polish) how long a draw or a sheathe takes:
+     * a weapon and a shield (or two weapons) are taken one hand after the other - drawing, the off hand's first and the
+     * weapon as it comes round; putting away, the weapon first - so a pair takes half as long again as one thing.
+     */
+    public float sheatheTime() { return SHEATHE_TIME * (paired() ? 1.5f : 1f); }
+    /** A thing in each hand to take out or put away, one after the other (a bow's two hands work it as one). */
+    public boolean paired() {
+        ItemDef m = main(), o = off();
+        return m != null && o != null && !m.natural && !o.natural && m.family != ItemDef.Family.BOW;
+    }
+    /**
+     * How far one hand is through its part of a draw or a sheathe, 0..1, or -1 when it has none going on: hand 0 is the
+     * main hand. Paired, each hand has its own stretch of the whole - drawing, the off hand over the first six tenths
+     * and the main over the last; sheathing, the other way about.
+     */
+    public float handPhase(double time, int hand) {
+        float s = (float) ((time - sheatheAt) / sheatheTime());
+        if (s < 0 || s >= 1) return -1;
+        if (!paired()) return s;
+        boolean first = sheathed ? hand == 0 : hand == 1;
+        float w0 = first ? 0 : 0.4f, w1 = first ? 0.6f : 1f;
+        return s < w0 || s >= w1 ? -1 : (s - w0) / (w1 - w0);
+    }
+    /** Whether a hand holds its thing now: drawn, or still on its way to or from its place on the body. */
+    public boolean inHand(double time, int hand) {
+        float s = (float) ((time - sheatheAt) / sheatheTime());
+        if (s >= 1) return !sheathed;
+        if (s < 0) return sheathed;
+        float h = handPhase(time, hand);
+        if (h < 0) {
+            // not yet begun this hand's part (still as it was), or finished it (as it is to be)
+            boolean first = sheathed ? hand == 0 : hand == 1;
+            boolean done = paired() && (first ? s >= 0.6f : s >= 1);
+            return done ? !sheathed : sheathed;
+        }
+        return sheathed ? h < 0.5f : h >= 0.5f;
+    }
+    /** Whether the hands hold what is equipped now (the main hand's, which a fight is read from). */
+    public boolean inHand(double time) { return inHand(time, 0); }
     /** Whether anything equipped in the hands could be put away. */
     public boolean sheathable() { return main() != null && !main().natural || off() != null && !off().natural; }
     /** The throwing hand in the world, as last posed (and when); the throw being aimed; the root held still after a release. */

@@ -1,6 +1,50 @@
 #include "include/head.glsl"
 #include "include/world_tex.glsl"
+#include "include/voxel.glsl"
 uniform sampler2D uNoise;
+// 2.8: the ground blend - per block id its rank (four to a word) and its top's layer and variants (two to a word)
+uniform uint uGroundRank[64];
+uniform uint uGroundLayer[128];
+uniform int uGroundOn;
+uint groundRank(uint id) { return (uGroundRank[id >> 2u] >> ((id & 3u) * 8u)) & 255u; }
+/**
+ * Where two kinds of ground meet on top (grass and a dirt path, dirt and cobbles), the higher-ranked one creeps over the
+ * edge onto the other in a ragged border - two scales of noise for the line, a few speckles out ahead of it - rather
+ * than the two meeting on the block's straight seam. Returns the colour to blend toward and how much (0: none).
+ */
+vec4 groundBlend(vec3 world) {
+    ivec3 c = ivec3(floor(world - vec3(0.0, 0.02, 0.0)));
+    if (!inWorld(c)) return vec4(0.0);
+    uint me = voxel(c), rMe = groundRank(me);
+    if (rMe == 0u) return vec4(0.0);
+    vec2 f = fract(world.xz);
+    // nothing to do in the middle of a cell
+    if (min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) > 0.48) return vec4(0.0);
+    float jag = (texture(uNoise, world.xz * 0.37).r - 0.5) * 0.16 + (texture(uNoise, world.xz * 1.9).g - 0.5) * 0.1;
+    float best = 0.0; uint bestId = 0u; ivec3 bestCell = c;
+    for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++) {
+        if (dx == 0 && dz == 0) continue;
+        ivec3 n = c + ivec3(dx, 0, dz);
+        if (!inWorld(n)) continue;
+        uint id = voxel(n);
+        uint r = groundRank(id);
+        if (r <= rMe || voxel(n + ivec3(0, 1, 0)) != 0u) continue;
+        float ex = dx == 0 ? 0.0 : (dx > 0 ? 1.0 - f.x : f.x), ez = dz == 0 ? 0.0 : (dz > 0 ? 1.0 - f.y : f.y);
+        float d = (dx != 0 && dz != 0) ? length(vec2(ex, ez)) : max(ex, ez);
+        // a wider reach for a bigger step in rank (grass over cobbles reaches further than grass over dirt)
+        float reach = 0.16 + 0.05 * float(min(r - rMe, 3u));
+        float w = 1.0 - smoothstep(reach * 0.72, reach, d + jag);
+        if (w > best) { best = w; bestId = id; bestCell = n; }
+    }
+    if (best <= 0.002) return vec4(0.0);
+    uint gl2 = (uGroundLayer[bestId >> 1u] >> ((bestId & 1u) * 16u)) & 0xFFFFu;
+    int layer = int(gl2 & 0x3FFFu), vars = int(gl2 >> 14u) + 1;
+    layer += min(int(hash3(vec3(bestCell)) * float(vars)), vars - 1);
+    vec3 other = texture(uAtlas, vec3(vST, float(layer))).rgb;
+    // the creeping edge breaks into tufts: a fine noise thins it where it is thin
+    float tuft = smoothstep(0.42, 0.52, texture(uNoise, world.xz * 4.7).b + best * 0.6);
+    return vec4(other, clamp(best * tuft, 0.0, 1.0));
+}
 uniform sampler2D uLayerMat;
 uniform float uRain;
 uniform float uTime;
@@ -39,6 +83,10 @@ void main() {
     else if (tex.a < uAlphaCut) discard;
     vec3 N = NORMALS[vNormal];
     vec3 col = tex.rgb;
+    if (uGroundOn != 0 && vNormal == 2 && (vFlags & 1) == 0) {
+        vec4 gb = groundBlend(vWorld);
+        col = mix(col, gb.rgb, gb.a);
+    }
     bool emissive = (vFlags & 1) != 0;
     vec4 lm = texelFetch(uLayerMat, ivec2(vLayer, 0), 0);
     float rough = lm.r, metal = lm.g;

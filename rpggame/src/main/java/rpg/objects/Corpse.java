@@ -20,6 +20,8 @@ public final class Corpse extends Container {
     /** Whose body it is. */
     public final long body;
     public boolean delivered;
+    /** (0.3.0) when the body was first known of in the world (game seconds): word of it reaches the undertaker in time, seen or not. */
+    public double knownAt = -1;
 
     public Corpse(long id, String name, long body, float x, float y, float z, long owner) {
         super(id, "corpse", name + "'s body", "corpse", x, y, z, 40, owner);

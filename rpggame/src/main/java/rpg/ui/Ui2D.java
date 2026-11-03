@@ -42,6 +42,8 @@ public final class Ui2D {
         Face(float bake, int texture, STBTTBakedChar.Buffer chars, float baseline) { this.bake = bake; this.texture = texture; this.chars = chars; this.baseline = baseline; }
     }
     public final Face body, heading, chat, combat;
+    /** (0.3.0, gamefixes) The comic face: the speech bubbles over people's heads, and only those. */
+    public final Face comic;
     private Face face;
     /** Switches the face text is set in; returns the one it replaces (put it back after). */
     public Face use(Face f) { Face was = face; face = f == null ? body : f; return was; }
@@ -75,6 +77,7 @@ public final class Ui2D {
         heading = orElse(bake(r, resource("MORPHEUS.TTF"), 34f), body);
         chat = orElse(bake(r, resource("arialnarrow.ttf"), 22f), body);
         combat = orElse(bake(r, resource("skurri.ttf"), 30f), body);
+        comic = orElse(bake(r, resource("TheLastComicOnEarth.ttf"), 30f), chat);
         face = body;
         icons = Icons.texture(r);
         atlas = new Atlas(r);
@@ -179,6 +182,24 @@ public final class Ui2D {
         if (l < 1e-3f) return;
         float nx = -dy / l * t / 2, ny = dx / l * t / 2;
         quad(0, new float[]{x0 + nx, y0 + ny, x1 + nx, y1 + ny, x1 - nx, y1 - ny, x0 - nx, y0 - ny}, new float[]{0, 0, 1, 0, 1, 1, 0, 1}, argb, 0);
+    }
+
+    /** A filled triangle. */
+    public void tri(float x0, float y0, float x1, float y1, float x2, float y2, int argb) {
+        quad(0, new float[]{x0, y0, x1, y1, x2, y2, x2, y2}, new float[]{0, 0, 0, 0, 0, 0, 0, 0}, argb, 0);
+    }
+
+    /** A filled rectangle with rounded corners of radius r. */
+    public void roundRect(float x, float y, float w, float h, float r, int argb) {
+        r = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+        rect(x + r, y, w - 2 * r, h, argb);
+        rect(x, y + r, r, h - 2 * r, argb); rect(x + w - r, y + r, r, h - 2 * r, argb);
+        float[][] corners = {{x + r, y + r, (float) Math.PI}, {x + w - r, y + r, (float) (Math.PI * 1.5)}, {x + w - r, y + h - r, 0}, {x + r, y + h - r, (float) (Math.PI * 0.5)}};
+        int seg = 6;
+        for (float[] c : corners) for (int i = 0; i < seg; i++) {
+            double a0 = c[2] + i * Math.PI / 2 / seg, a1 = c[2] + (i + 1) * Math.PI / 2 / seg;
+            tri(c[0], c[1], c[0] + (float) Math.cos(a0) * r, c[1] + (float) Math.sin(a0) * r, c[0] + (float) Math.cos(a1) * r, c[1] + (float) Math.sin(a1) * r, argb);
+        }
     }
 
     /** A filled disc (a fan of slim quads). */
@@ -314,5 +335,5 @@ public final class Ui2D {
         return enabled && clicked(x, y, w, h);
     }
 
-    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat))) f.chars.free(); }
+    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat, comic))) f.chars.free(); }
 }

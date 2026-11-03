@@ -471,7 +471,11 @@ public final class Acceptance {
         work(g.items.perform(g.player, g.player.inv.first(Items.BONES), "bury"), 200, () -> false);
         float f0 = g.player.faith;
         boolean blessed = g.combat.bless(g.player, Spells.Prayer.WARD);
-        need("Faith: bones buried and the Ward prayer raised for a point of Faith", g.player.skills.xp(Skill.FAITH) > start[Skill.FAITH.ordinal()] && blessed && g.prayers.on(g.player, Spells.Prayer.WARD) && g.player.faith == f0 - 1);
+        need("Faith: bones buried and the Ward prayer raised, its first point not yet drained", g.player.skills.xp(Skill.FAITH) > start[Skill.FAITH.ordinal()] && blessed && g.prayers.on(g.player, Spells.Prayer.WARD) && g.player.faith == f0);
+        g.prayers.update(0.5f);
+        boolean graced = g.player.faith == f0;
+        g.prayers.update(0.6f);
+        need("Faith: the first point drains one second after the prayer is raised", graced && g.player.faith == f0 - 1);
         g.combat.bless(g.player, Spells.Prayer.WARD);
         // the rest (Attack, Strength, Defense, Health, Archery, Magic) are trained by real combat below
         int trained = 0;

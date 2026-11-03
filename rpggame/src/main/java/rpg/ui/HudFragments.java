@@ -422,24 +422,60 @@ final class HudFragments {
         }
 
         /**
-         * What an NPC says, in a speech bubble over their head (dialogue is text, never a voice): dark words on a pale
-         * card, wrapped to a readable measure, with a tail down to the speaker; it fades with distance.
+         * What an NPC says, in a speech bubble over their head (dialogue is text, never a voice). (0.3.0, gamefixes: comic
+         * book style, in its own face) a white balloon with a heavy black outline and a drop shadow, its tail an outlined
+         * wedge to the speaker's head; a shout - a line ending in an exclamation - bursts out of a jagged yellow star
+         * instead. The text is the comic face, black, wrapped to a readable measure; it fades with distance.
          */
         private float bubble(Ui2D ui, String text, float x, float bottom, float dist) {
-            float size = 14, maxW = 260, pad = 8, lh = 17;
-            List<String> lines = wrap(ui, text, size, maxW);
+            boolean shout = text.endsWith("!") || text.length() > 3 && text.equals(text.toUpperCase()) && text.chars().anyMatch(Character::isLetter);
+            float size = shout ? 19 : 17, maxW = shout ? 250 : 270, pad = shout ? 16 : 11, lh = size + 2;
+            List<String> lines = wrapIn(ui, ui.comic, text, size, maxW);
             float bw = 0;
-            for (String l : lines) bw = Math.max(bw, ui.width(l, size));
+            for (String l : lines) bw = Math.max(bw, ui.width(ui.comic, l, size));
             bw += pad * 2;
-            float bh = lines.size() * lh + pad * 2 - 4;
-            float bx = Math.max(4, Math.min(hud.w - bw - 4, x - bw / 2)), by = bottom - bh - 9;
+            float bh = lines.size() * lh + pad * 2 - 2;
+            float bx = Math.max(6, Math.min(hud.w - bw - 6, x - bw / 2)), by = bottom - bh - 14;
             float a = Math.max(0.4f, Math.min(1, (18 - dist) / 6));
-            ui.rect(bx - 1, by - 1, bw + 2, bh + 2, Style.fade(0xFF2A2620, a));
-            ui.rect(bx, by, bw, bh, Style.fade(0xF8F4EEE0, a));
-            for (int i = 0; i < 7; i++) ui.rect(x - 7 + i, by + bh + i, 14 - 2 * i, 1, Style.fade(0xF8F4EEE0, a));
-            for (int i = 0; i < lines.size(); i++) ui.text(lines.get(i), bx + pad, by + pad - 3 + i * lh, size, Style.fade(0xFF1C1914, a));
+            int ink = Style.fade(0xFF111111, a), paper = Style.fade(shout ? 0xFFFFF0A0 : 0xFFFFFEF8, a), shade = Style.fade(0x50000000, a);
+            float o = 2.5f;
+            // the tail: from under the balloon, kinked toward the speaker
+            float tx = Math.max(bx + 14, Math.min(bx + bw - 14, x)), ty = by + bh - 2, tipX = x + (x < bx + bw / 2 ? -3 : 3), tipY = bottom - 2;
+            if (shout) {
+                // a burst: a star of spikes round the balloon's oval - its shadow, then black, then the colour over
+                float cx = bx + bw / 2, cy = by + bh / 2, rx = bw / 2 + 20, ry = bh / 2 + 12;
+                int spikes = Math.max(14, (int) (bw / 12));
+                for (int pass = 0; pass < 3; pass++) {
+                    float grow = pass == 2 ? 0 : o, ox = pass == 0 ? 3 : 0;
+                    int col = pass == 0 ? shade : pass == 1 ? ink : paper;
+                    for (int i = 0; i < spikes * 2; i++) {
+                        double a0 = i * Math.PI / spikes, a1 = (i + 1) * Math.PI / spikes;
+                        float r0 = i % 2 == 0 ? 1.0f : 0.8f, r1 = i % 2 == 0 ? 0.8f : 1.0f;
+                        float e0 = (i * 7 % 5) * 0.025f;
+                        ui.tri(cx + ox, cy + ox, cx + ox + (float) Math.cos(a0) * (rx * (r0 + e0) + grow), cy + ox + (float) Math.sin(a0) * (ry * (r0 + e0) + grow),
+                                cx + ox + (float) Math.cos(a1) * (rx * r1 + grow), cy + ox + (float) Math.sin(a1) * (ry * r1 + grow), col);
+                    }
+                }
+            } else {
+                ui.roundRect(bx + 3, by + 3, bw, bh, 12, shade);
+                ui.tri(tx - 9 + 3, ty + 3, tx + 9 + 3, ty + 3, tipX + 3, tipY + 3, shade);
+                ui.roundRect(bx - o, by - o, bw + 2 * o, bh + 2 * o, 12 + o, ink);
+                ui.tri(tx - 9 - o * 1.4f, ty, tx + 9 + o * 1.4f, ty, tipX, tipY + o * 1.6f, ink);
+                ui.roundRect(bx, by, bw, bh, 12, paper);
+                ui.tri(tx - 9, ty - 1, tx + 9, ty - 1, tipX, tipY, paper);
+            }
+            for (int i = 0; i < lines.size(); i++) {
+                String l = lines.get(i);
+                ui.text(ui.comic, l, bx + (bw - ui.width(ui.comic, l, size)) / 2, by + pad - 3 + i * lh, size, ink);
+            }
             return bw;
         }
+    }
+
+    /** The same wrapping in a given face (the bubbles' comic one). */
+    static List<String> wrapIn(Ui2D ui, Ui2D.Face face, String text, float size, float maxW) {
+        Ui2D.Face was = ui.use(face);
+        try { return wrap(ui, text, size, maxW); } finally { ui.use(was); }
     }
 
     static List<String> wrap(Ui2D ui, String text, float size, float maxW) {
@@ -475,6 +511,23 @@ final class HudFragments {
             Rpg g = hud.g;
             float cx = hud.w / 2f, cy = hud.h / 2f;
             Player p = g.player;
+            // (0.3.0) in the saddle: the jump's charge (its peak marked), the mount's wind, and a Pegasus's vigor in flight
+            var ride = hud.scene == Hud.Scene.WORLD ? g.riding.of(p) : null;
+            if (ride != null) {
+                var mount = ride.mount; var st = rpg.mount.Riding.stats(mount);
+                float bw = 220, bx = cx - bw / 2, by = hud.h - 150;
+                ui.rect(bx - 8, by - 8, bw + 16, st.flies ? 58 : 40, 0x90101010);
+                ui.rect(bx, by, bw, 6, 0x60000000); ui.rect(bx, by, bw * Math.max(0, Math.min(1, mount.stamina / Math.max(1, mount.maxStamina()))), 6, 0xFFC8A060);
+                ui.text("Wind", bx, by + 8, 11, Style.DIM);
+                if (ride.chargeTicks > 0) {
+                    ui.rect(bx, by + 22, bw, 6, 0x60000000); ui.rect(bx, by + 22, bw * ride.charge, 6, ride.chargeTicks <= rpg.mount.Riding.CHARGE_PEAK_TICKS + 2 ? Style.GOLD : 0xFFB0B0B0);
+                    ui.rect(bx + bw - 2, by + 20, 2, 10, 0xFFFFFFFF);
+                }
+                if (st.flies) {
+                    ui.rect(bx, by + 36, bw, 6, 0x60000000); ui.rect(bx, by + 36, bw * Math.max(0, Math.min(1, mount.vigor / st.vigor)), 6, 0xFF9AC8F0);
+                    ui.text(ride.flying ? String.format("Vigor   %.0f m/s", ride.airspeed) : "Vigor", bx, by + 44, 11, ride.flying && ride.airspeed < rpg.mount.Riding.STALL ? Style.BAD : Style.DIM);
+                }
+            }
             if (hud.scene == Hud.Scene.WORLD) {
                 ItemDef held = p.main();
                 boolean ranged = held != null && (held.family == ItemDef.Family.BOW || held.family == ItemDef.Family.CROSSBOW);
@@ -656,41 +709,92 @@ final class HudFragments {
             ui.quad(map.texFor(dungeon), new float[]{left, top, left + size, top, left + size, top + size, left, top + size},
                     new float[]{0, 0, u1, 0, u1, v1, 0, v1}, 0xFFF4E8D0, 0);
             Style.trim(ui, left - 6, top - 6, size + 12, size + 12);
+            // (0.2.9, gamefixes: the right side of the map was a mess) nothing drawn on the chart spills off it - a marker,
+            // a body or a flag outside the square is left off, the player's own dot held to the rim
+            java.util.function.Predicate<float[]> onChart = m -> m[0] >= left && m[0] <= left + size && m[1] >= top && m[1] <= top + size;
+            java.util.Set<String> shown = new java.util.HashSet<>();
             if (dungeon == null) for (Object[] marker : map.markers) {
                 float[] m = at.apply((float) marker[1], (float) marker[2]);
+                if (!onChart.test(m)) continue;
                 ui.img((String) marker[0], m[0] - 7, m[1] - 7, 14, 0xFFFFFFFF);
+                shown.add((String) marker[0]);
             }
-            for (var door : g.dungeons.doors) if ((rpg.world.DungeonLayout.at(door.x, door.z) == dungeon)) { float[] m = at.apply(door.x, door.z); ui.img("Boss_Icon", m[0] - 8, m[1] - 8, 16, 0xFFFFFFFF); }
+            for (var door : g.dungeons.doors) if ((rpg.world.DungeonLayout.at(door.x, door.z) == dungeon)) {
+                float[] m = at.apply(door.x, door.z);
+                if (onChart.test(m)) { ui.img("Boss_Icon", m[0] - 8, m[1] - 8, 16, 0xFFFFFFFF); shown.add("Boss_Icon"); }
+            }
             // Local people only: a world map is not remote knowledge of hidden actors.
             for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z)) {
-                float[] m = at.apply(n.x, n.z); ui.disc(m[0], m[1], 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
+                float[] m = at.apply(n.x, n.z); if (onChart.test(m)) ui.disc(m[0], m[1], 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
             }
             for (var mo : g.monsters.all()) if (mo.alive && mo.loaded && mo.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, mo.x, mo.chestY(), mo.z)) {
-                float[] m = at.apply(mo.x, mo.z); ui.disc(m[0], m[1], 2, Style.NPC_HOSTILE);
+                float[] m = at.apply(mo.x, mo.z); if (onChart.test(m)) ui.disc(m[0], m[1], 2, Style.NPC_HOSTILE);
             }
-            for (var grave : g.undertaker.graves()) { float[] m = at.apply(grave.x, grave.z); skull(ui, m[0], m[1], 12, Style.TEXT); }
+            for (var grave : g.undertaker.graves()) { float[] m = at.apply(grave.x, grave.z); if (onChart.test(m)) skull(ui, m[0], m[1], 12, Style.TEXT); }
             for (var contract : g.bountyBoard.carried()) {
                 float[] m = at.apply(contract.x(), contract.z());
+                if (!onChart.test(m)) continue;
                 ui.disc(m[0], m[1], 7, 0x70402010); ui.border(m[0] - 5, m[1] - 5, 10, 10, 2, 0xFFFFC05A);
             }
-            if (hud.flag != null) { float[] m = at.apply(hud.flag[0], hud.flag[1]); ui.disc(m[0], m[1], 4, Style.BAD); }
+            if (hud.flag != null) { float[] m = at.apply(hud.flag[0], hud.flag[1]); if (onChart.test(m)) ui.disc(m[0], m[1], 4, Style.BAD); }
             float[] pm = at.apply(g.player.x, g.player.z);
-            float px = pm[0], py = pm[1];
+            float px = Math.max(left, Math.min(left + size, pm[0])), py = Math.max(top, Math.min(top + size, pm[1]));
             float yaw = g.controller.camYaw;
             ui.disc(px, py, 4, Style.ACCENT);
             ui.line(px, py, px - (float) Math.sin(yaw) * 10, py - (float) Math.cos(yaw) * 10, 2, Style.ACCENT);
-            ui.text("NORTH", side, top, 14, Style.TEXT);
-            ui.text(dungeon == null ? DevMap.SX + " x " + DevMap.SZ + " m playable area" : dungeon.type.title + ", " + dungeon.threatWord() + " threat", side, top + 30, 13, Style.DIM);
-            ui.text("You", side + 20, top + 78, 13, Style.TEXT); ui.disc(side + 5, top + 85, 4, Style.ACCENT);
-            ui.text("Nearby people", side + 20, top + 110, 13, Style.TEXT); ui.disc(side + 5, top + 117, 3, Style.NPC);
-            ui.text("Nearby hostiles", side + 20, top + 142, 13, Style.TEXT); ui.disc(side + 5, top + 149, 3, Style.NPC_HOSTILE);
-            ui.text("Your grave", side + 20, top + 174, 13, Style.TEXT); skull(ui, side + 5, top + 181, 12, Style.TEXT);
-            ui.text("Gold square: warrant last sighting", side, top + 211, 12, Style.ACCENT);
-            ui.text("Click to mark a destination", side, top + 242, 13, Style.DIM);
-            ui.text("M or Esc to return", side, top + 268, 13, Style.DIM);
+            legend(ui, g, dungeon, side, top, x + width() - 8 - side, size, shown);
             if (live && ui.clicked(left, top, size, size))
                 hud.flag = new float[]{x0 + Math.max(0, Math.min(span - 1, (ui.mx - left) / size * span)), z0 + Math.max(0, Math.min(span - 1, (ui.my - top) / size * span))};
         }
+    }
+
+    /** What each map icon stands for, in the order a traveller needs them; only the ones on the chart are listed. */
+    private static final String[][] MAP_KEY = {
+            {"General_store_map_icon", "General store"}, {"Food_shop_map_icon", "Food stall"}, {"Bank_map_icon", "Chest"},
+            {"Platebody_map_icon", "Armour cabinet"}, {"Smithing_Icon", "Anvil and furnace"}, {"Cookingrange_map_icon", "Cooking range"},
+            {"Crafting_shop_map_icon", "Crafting table"}, {"Construction_Icon", "Sawbench"}, {"Estate_map_icon", "Bed"},
+            {"Shield_map_icon", "Lawman"}, {"Quest_map_icon", "Quest"}, {"Sidequest_map_icon", "Notice board"},
+            {"Gravestone_map_icon", "Undertaker"}, {"Agility_training_map_icon", "Climbing course"}, {"Water_source_map_icon", "Well"},
+            {"Fishing_spot_map_icon", "Fishing spot"}, {"Woodcutting_Icon", "Trees"}, {"Mining_Icon", "Mine"},
+            {"Harvesting_area_map_icon", "Fields"}, {"Sword_map_icon", "Training ground"}, {"Minigame_map_icon", "Where you woke"},
+            {"Boss_Icon", "Dungeon"}};
+
+    /** The world map's right-hand panel: where one stands, the key to the chart and how to use it, laid out to fit. */
+    static void legend(Ui2D ui, Rpg g, rpg.world.DungeonLayout dungeon, float x, float y, float w, float h, java.util.Set<String> shown) {
+        ui.rect(x - 12, y - 6, w + 12, h + 12, 0x60000000);
+        ui.border(x - 12, y - 6, w + 12, h + 12, 1, Style.EDGE);
+        float cy = y + 6, inner = w - 12;
+        String place = dungeon == null ? DevMap.jurisdiction(g.player.x, g.player.z) : dungeon.name;
+        ui.text(place, x, cy, 18, Style.ACCENT);
+        cy += 26;
+        ui.text(dungeon == null ? DevMap.SX + " x " + DevMap.SZ + " m, north is up" : dungeon.type.title + ", " + dungeon.threatWord() + " threat", x, cy, 12, Style.DIM);
+        cy += 18;
+        ui.text("You stand at " + (int) g.player.x + ", " + (int) g.player.z + "    " + g.state.clockText(), x, cy, 12, Style.FAINT);
+        cy += 24;
+        ui.rect(x, cy, inner, 1, 0x40D8B46A);
+        cy += 12;
+        float col = inner / 2, row = 20, stop = y + h - 52;
+        int i = 0;
+        String[] people = {"You", "Nearby people", "Nearby hostiles"};
+        int[] colours = {Style.ACCENT, Style.NPC, Style.NPC_HOSTILE};
+        for (int k = 0; k < people.length; k++, i++) {
+            float lx = x + (i % 2) * col, ly = cy + (i / 2) * row;
+            ui.disc(lx + 6, ly + 7, k == 0 ? 4 : 3, colours[k]); ui.text(people[k], lx + 20, ly, 12, Style.TEXT);
+        }
+        if (!g.undertaker.graves().isEmpty()) { float lx = x + (i % 2) * col, ly = cy + (i / 2) * row; skull(ui, lx + 6, ly + 7, 11, Style.TEXT); ui.text("Your grave", lx + 20, ly, 12, Style.TEXT); i++; }
+        if (!g.bountyBoard.carried().isEmpty()) { float lx = x + (i % 2) * col, ly = cy + (i / 2) * row; ui.border(lx + 1, ly + 2, 10, 10, 2, 0xFFFFC05A); ui.text("Warrant sighting", lx + 20, ly, 12, Style.TEXT); i++; }
+        if (i % 2 == 1) i++;
+        for (String[] key : MAP_KEY) {
+            if (!shown.contains(key[0])) continue;
+            float lx = x + (i % 2) * col, ly = cy + (i / 2) * row;
+            if (ly + row > stop) break;
+            ui.img(key[0], lx - 1, ly - 1, 15, 0xFFFFFFFF); ui.text(key[1], lx + 20, ly, 12, Style.DIM);
+            i++;
+        }
+        float by = y + h - 38;
+        ui.rect(x, by - 10, inner, 1, 0x40D8B46A);
+        ui.text("Click the chart to mark a destination", x, by, 12, Style.DIM);
+        ui.text("M or Esc to return", x, by + 18, 12, Style.FAINT);
     }
 
     // ------------------------------------------------------------------ minimap: top right, flat; the NPC colours as they always were
@@ -708,7 +812,7 @@ final class HudFragments {
         private final List<Object[]> markers = new ArrayList<>();
         Minimap(Hud h) { super("minimap"); }
         @Override public float width() { return R * 2; }
-        @Override public float height() { return R * 2 + 6 + Math.min(2, hud.g.undertaker.graves().size()) * 20; }
+        @Override public float height() { return R * 2 + 24 + Math.min(2, hud.g.undertaker.graves().size()) * 20; }
 
         private ByteBuffer px;
 
@@ -794,11 +898,11 @@ final class HudFragments {
                 else if (o instanceof Fixtures.Cabinet) icon = "Platebody_map_icon";
                 else if (o instanceof Fixtures.Climb) icon = "Agility_training_map_icon";
                 else if (o instanceof Furniture f && f.def.contains("bed")) icon = "Estate_map_icon";
-                if (icon != null) markers.add(new Object[]{icon, o.x, o.z});
+                if (icon != null && onWorld(o.x, o.z)) markers.add(new Object[]{icon, o.x, o.z});
             }
             for (Npc n : g.npcs) {
                 String icon = switch (n.role) { case MERCHANT, FENCE -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
-                if (icon != null) markers.add(new Object[]{icon, n.postX, n.postZ});
+                if (icon != null && onWorld(n.postX, n.postZ)) markers.add(new Object[]{icon, n.postX, n.postZ});
             }
             markers.add(new Object[]{"Water_source_map_icon", DevMap.WELL[0] + 0.5f, DevMap.WELL[1] + 0.5f});
             markers.add(new Object[]{"Fishing_spot_map_icon", DevMap.FISH_SPOTS[0][0], DevMap.FISH_SPOTS[0][1]});
@@ -808,6 +912,11 @@ final class HudFragments {
             markers.add(new Object[]{"Sword_map_icon", 16.5f, 47.5f});
             markers.add(new Object[]{"Minigame_map_icon", DevMap.SPAWN_X, DevMap.SPAWN_Z});
             markersAt = g.time;
+        }
+
+        /** On the world's own chart: inside its bounds and not in a dungeon's rooms (laid out beyond them). */
+        private static boolean onWorld(float x, float z) {
+            return x >= 0 && z >= 0 && x < DevMap.SX && z < DevMap.SZ && rpg.world.DungeonLayout.at(x, z) == null;
         }
 
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -864,7 +973,13 @@ final class HudFragments {
                 float pulse = gr.expiresAt - g.time < 60 ? 0.6f + 0.4f * (float) Math.abs(Math.sin(g.time * 5)) : 1;
                 skull(ui, p2[0], p2[1], on ? 12 : 10, Style.fade(0xFFF1EBDD, pulse));
             }
-            float ty = y + R * 2 + 8;
+            // (0.3.0, the Weekly System) the day of the week and the time, under the map
+            int mins = (int) (g.state.minutes % 1440);
+            String when = String.format("%s  %02d:%02d", g.state.weekdayName(), mins / 60, mins % 60);
+            float ww = ui.width(when, 12) + 14;
+            ui.rect(x + R - ww / 2, y + R * 2 + 4, ww, 17, 0xA0141518);
+            ui.flatCentered(when, x + R, y + R * 2 + 6, 12, 0xFFE9E1D2);
+            float ty = y + R * 2 + 26;
             for (int i = 0; i < Math.min(2, graves.size()); i++) {
                 var gr = graves.get(i);
                 double left = g.undertaker.left(gr);

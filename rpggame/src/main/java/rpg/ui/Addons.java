@@ -136,6 +136,10 @@ public final class Addons {
         game.set("count", fn(a -> { ItemDef d = Items.get(a.checkjstring(1)); return LuaValue.valueOf(d == null ? 0 : hud.g.player.count(d)); }));
         game.set("bounty", fn(a -> LuaValue.valueOf(hud.g.law.bounty(hud.g.player.id, a.optjstring(1, DevMap.jurisdiction(hud.g.player.x, hud.g.player.z))))));
         game.set("clock", fn(a -> LuaValue.valueOf(hud.g.state.clockText())));
+        // (0.3.0) the Weekly System, read-only to addons: the date, the weekday (0 = Solday) and its name, the hour
+        game.set("date", fn(a -> LuaValue.valueOf(hud.g.state.dateText())));
+        game.set("weekday", fn(a -> LuaValue.valueOf(hud.g.state.weekday())));
+        game.set("weekdayName", fn(a -> LuaValue.valueOf(hud.g.state.weekdayName())));
         game.set("hour", fn(a -> LuaValue.valueOf(hud.g.state.hourOfDay())));
         game.set("time", fn(a -> LuaValue.valueOf(hud.g.time)));
         game.set("jurisdiction", fn(a -> LuaValue.valueOf(DevMap.jurisdiction(hud.g.player.x, hud.g.player.z))));

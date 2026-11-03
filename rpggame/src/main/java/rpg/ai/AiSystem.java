@@ -204,7 +204,7 @@ public final class AiSystem {
             }
             case (int)Ids.QUARRY_WORKER -> {
                 Npc bertram=npc(id,"Bertram",Npc.Role.MINER,"Quarry Worker",96.5f,21.5f,152);
-                Profession.QUARRY_WORKER.assign(bertram);bertram.skills.setLevel(Skill.MINING,22);levels(bertram,8,14,8,14);
+                Profession.QUARRY_WORKER.assign(bertram);bertram.skills.setLevel(Skill.MINING,22);
                 give(bertram,Items.get("bronze_pickaxe"),1);give(bertram,Items.BREAD,2);give(bertram,Items.COINS,30);return bertram;
             }
             case (int)Ids.BORDER_KNIGHT -> {
@@ -283,7 +283,7 @@ public final class AiSystem {
                 m.postX = rpg.world.Expanse.MEDICUS_POST[0]; m.postZ = rpg.world.Expanse.MEDICUS_POST[1]; give(m, Items.TROUT, 6); give(m, Items.COINS, 40); m.skills.setLevel(Skill.MAGIC, 45); m.spellBook = rpg.combat.Spells.Book.MOON; yield m; }
             case (int) Ids.PHILOSOPHER -> { Npc p2 = roman(npc(id, "Nikias", Npc.Role.SCHOLAR, "Philosopher", 152.5f, 94.5f, 170), 22); p2.skills.setLevel(Skill.MAGIC, 35); give(p2, Items.COINS, 50); yield p2; }
             case (int) Ids.STONEMASON -> { Npc g2 = roman(npc(id, "Gaius", Npc.Role.MINER, "Stonemason", 181.5f, 141.5f, 171), 19);
-                Profession.QUARRY_WORKER.assign(g2); g2.skills.setLevel(Skill.MINING, 32); levels(g2, 10, 16, 10, 16); give(g2, Items.get("bronze_pickaxe"), 1); give(g2, Items.BREAD, 2); give(g2, Items.COINS, 30); yield g2; }
+                Profession.QUARRY_WORKER.assign(g2); g2.skills.setLevel(Skill.MINING, 32); give(g2, Items.get("bronze_pickaxe"), 1); give(g2, Items.BREAD, 2); give(g2, Items.COINS, 30); yield g2; }
             case (int) Ids.PALACE_BEGGAR -> { Npc b = roman(npc(id, "Servius", Npc.Role.BEGGAR, "Beggar", 165.5f, 103.5f, 172), 16); b.postX = 165.5f; b.postZ = 103.5f; give(b, Items.BREAD, 1); yield b; }
             case (int) Ids.CITIZEN_1 -> citizen(id, "Octavia", 146.5f, 92.5f, 173);
             case (int) Ids.CITIZEN_2 -> citizen(id, "Marcellus", 170.5f, 92.5f, 174);
@@ -306,9 +306,9 @@ public final class AiSystem {
                 Profession.MONSTER_HUNTER.assign(g3); levels(g3, 36, 36, 34, 38); g3.skills.setLevel(Skill.ARCHERY, 38);
                 wear(g3, "oak_shortbow", null, "iron_body"); give(g3, Items.get("iron_sword"), 1); g3.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.IRON_ARROWS, 40)); g.state.mint(Items.IRON_ARROWS, 40); give(g3, Items.TROUT, 3); yield g3; }
             case (int) Ids.TRISTAN -> { Npc t = npc(id, "Tristan", Npc.Role.HUNTER, "Trapper", 40.5f, 150.5f, 183);
-                Profession.TRAPPER.assign(t); t.skills.setLevel(Skill.HARVESTING, 32); levels(t, 14, 12, 12, 18); give(t, Items.SNARE, 3); give(t, Items.KNIFE, 1); give(t, Items.BREAD, 2); give(t, Items.COINS, 20); yield t; }
+                Profession.TRAPPER.assign(t); t.skills.setLevel(Skill.HARVESTING, 32); give(t, Items.SNARE, 3); give(t, Items.KNIFE, 1); give(t, Items.BREAD, 2); give(t, Items.COINS, 20); yield t; }
             case (int) Ids.PERCIVAL -> { Npc p3 = npc(id, "Percival", Npc.Role.MINER, "Coal Miner", 144.5f, 145.5f, 184);
-                Profession.COAL_MINER.assign(p3); p3.skills.setLevel(Skill.MINING, 38); levels(p3, 12, 20, 12, 20); give(p3, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(p3, Items.BREAD, 2); give(p3, Items.COINS, 25); yield p3; }
+                Profession.COAL_MINER.assign(p3); p3.skills.setLevel(Skill.MINING, 38); give(p3, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(p3, Items.BREAD, 2); give(p3, Items.COINS, 25); yield p3; }
             case (int) Ids.MERLIN -> { Npc m = npc(id, "Merlin", Npc.Role.MINER, "Gem Prospector", 139.5f, 147.5f, 185);
                 Profession.GEM_PROSPECTOR.assign(m); m.skills.setLevel(Skill.MINING, 40); m.skills.setLevel(Skill.MAGIC, 70); m.spellBook = rpg.combat.Spells.Book.MOON;
                 give(m, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(m, Items.get("chisel"), 1); give(m, Items.BREAD, 2); give(m, Items.COINS, 60); yield m; }
@@ -362,7 +362,8 @@ public final class AiSystem {
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
-        // an ordinary grown man or woman: Health 10 (10 HP), as a new player has; fighters are given more below
+        // an ordinary grown man or woman: Health 10 (10 HP), as a new player has - combat level 3 (0.3.0, gamefixes: most
+        // townsfolk are level 3, their trades in their other skills); fighters (the watch, hunters, outlaws) are given more below
         n.skills.setLevel(Skill.HEALTH, 10);
         n.look = Appearance.random(lookSeed, FEMALE_NAMES.contains(name));
         if(id>=Ids.FISHERMAN && id<=Ids.PREDATOR_HUNTER) {
@@ -545,6 +546,7 @@ public final class AiSystem {
             if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, step)) continue;
             g.game.commands().agentFact(n.agent,15,Brain.canUseLadders(n)?1:-1);
             brain.act(n, step);
+            n.diary.note(g.state.minutes, n.lastOutcome);
             if (n.stuck && (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.RETURN) && n.hasGoalPos) {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
                 if (g.traversal.begin(n, heading) && g.traversal.update(n, step)) continue;
@@ -619,7 +621,15 @@ public final class AiSystem {
                     g.state.commit("NpcBodyRecovered",0,n.id,n.homeJurisdiction,0,"restored missing mover without changing resident state");
                 }
             } else n.missingBodySince=-1;
-            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; n.onLadder=rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); n.climbVelocity=m.vy; }
+            if (m != null) { n.x = m.x; n.y = m.y; n.z = m.z; n.vx = m.vx; n.vz = m.vz; n.grounded = m.grounded; n.crouched = m.crouched; n.onLadder=rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); n.climbVelocity=m.vy;
+                // (0.3.0) on a ladder an NPC faces it and climbs it rung by rung, as the player does (Ladders)
+                if (n.onLadder && !n.grounded) {
+                    int lx=(int)Math.floor(m.x),ly=(int)Math.floor(m.y),lz=(int)Math.floor(m.z);
+                    if(!rpg.world.Blocks.ladder(g.vox.block(lx,ly,lz)))ly--;
+                    float[] front=rpg.actor.Ladders.front(g,lx,ly,lz);
+                    n.ladderNX=front[0];n.ladderNZ=front[1];n.yaw=(float)Math.atan2(front[0],front[1]);n.wantYaw=n.yaw;
+                    n.climbPhase=n.y/rpg.actor.Ladders.RUNG;
+                } }
             // a sprint costs breath as the player's does
             if (n.sprinting && Math.hypot(n.vx, n.vz) > g.cfg.jogSpeed) { n.stamina = Math.max(0, n.stamina - g.cfg.staminaSprint * (float) g.lastDt); n.cs.regenDelay = 0.6f; }
             Snapshots.Agent a = agents.agent(n.agent);
@@ -677,7 +687,13 @@ public final class AiSystem {
                     float d = (float) Math.hypot(bx + dx + 0.5f - n.x, bz + dz + 0.5f - n.z);
                     if (d < best) { best = d; cx = bx + dx; cz = bz + dz; }
                 }
-                if (best < Float.MAX_VALUE) { g.teleport(n, cx + 0.5f, DevMap.FLOOR, cz + 0.5f); g.state.commit("NpcUnstuck", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, String.format("stepped back onto (%d, %d)", cx, cz)); break; }
+                if (best < Float.MAX_VALUE) {
+                    // (0.2.9, gamefixes: NPCs still popped about mid-fight) in a fight the step is walked, not jumped
+                    if (fighting) combatGoal(n, cx + 0.5f, cz + 0.5f);
+                    else g.teleport(n, cx + 0.5f, DevMap.FLOOR, cz + 0.5f);
+                    g.state.commit("NpcUnstuck", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, String.format("%s back onto (%d, %d)", fighting ? "walked" : "stepped", cx, cz));
+                    break;
+                }
             }
         }
         if (n.goal == Brain.Goal.PATROL) n.patrolIndex++;
@@ -724,7 +740,7 @@ public final class AiSystem {
      * once there is none. The watch may go armed in town; everyone else puts theirs away there.
      */
     private void keepArms(Npc n) {
-        if (!n.sheathable() || n.reacting || n.cs.phase != Actor.Combat.Phase.IDLE || g.time - n.sheatheAt < Actor.SHEATHE_TIME * 2) return;
+        if (!n.sheathable() || n.reacting || n.cs.phase != Actor.Combat.Phase.IDLE || g.time - n.sheatheAt < n.sheatheTime() * 2) return;
         rpg.item.ItemDef m = n.main();
         boolean want = n.goal == Brain.Goal.FIGHT || n.fightTarget != 0 || n.hunt != null && n.combatant() || g.time - n.armsUsedAt < 12
                 || n.watch() && (n.goal == Brain.Goal.WATCH || n.goal == Brain.Goal.EVICT || n.goal == Brain.Goal.WARN)
@@ -782,12 +798,15 @@ public final class AiSystem {
             boolean unwelcome = t != null && !ZonePolicy.routineAllowed(n, t.x, t.z) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12);
             if (unwelcome && n.hunt != null && n.hunt.target == t.id) n.hunt = null;
             boolean stood = unwelcome || g.law.inCustody(t) || law && (t != null && g.law.settled(t.id, n.goalSince) && g.law.bounty(t.id, n.homeJurisdiction) <= 0 && !(n.cs.lastAttacker == t.id && !g.law.settled(t.id, n.cs.lastHurt)));
-            if (t != null && t.alive && n.distTo(t) < 30 && !(t == g.player && t.hp <= 0) && !stood) {
+            if (t != null && t.alive && (n.distTo(t) < 30 || placed(n, t)) && !(t == g.player && t.hp <= 0) && !stood) {
                 if (placed(n, t)) return t;
                 lose(n, t, "lost sight of " + t.name);
             }
             n.fightTarget = 0;
         }
+        // (0.2.9, gamefixes: guards did not defend the player) the watch steps in for whoever is set upon in front of it,
+        // the player as much as anyone: a beast at someone, or a person striking someone without right
+        if (law) { Actor assailant = assailant(n); if (assailant != null) { n.fightTarget = assailant.id; return assailant; } }
         Actor p = g.player;
         if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 12) {
             Actor t = g.actor(n.cs.lastAttacker);
@@ -807,7 +826,9 @@ public final class AiSystem {
             Actor t = g.actor(n.hunt.target);
             if (t != null && t.alive && !g.law.inCustody(t) && ZonePolicy.routineAllowed(n, t.x, t.z) && !(law && (g.law.settled(t.id, n.hunt.startedAt) && g.law.bounty(t.id, n.homeJurisdiction) <= 0)) && canSee(n, t)) { callOut(n, t); return t; }
         }
-        if (n.hostileToPlayer && !g.law.inCustody(p) && ZonePolicy.routineAllowed(n, p.x, p.z) && p.alive && n.distTo(p) < n.aggroRange && canSee(n, p)) return p;
+        // (0.3.0) an outlaw does not start a fight under the watch's eyes: with a guard in sight near it or its mark, it bides its time
+        boolean lawWatching = crook(n) && (lawInSight(n, n.x, n.z, 20) != null || lawInSight(n, p.x, p.z, 16) != null);
+        if (n.hostileToPlayer && !lawWatching && !g.law.inCustody(p) && ZonePolicy.routineAllowed(n, p.x, p.z) && p.alive && n.distTo(p) < n.aggroRange && canSee(n, p)) return p;
         // monsters (gamefixes: every person dislikes them, as they do people): one out for blood is dealt with or fled
         // from further off; any other in plain sight close by, a fighter goes for (in its own beat) and anyone else keeps
         // away from - a bat at its roost and a ghost at its grave included
@@ -839,6 +860,21 @@ public final class AiSystem {
             if (n.role == Npc.Role.VILLAGER && m != null && !m.settled && m.witnessed() && n.distTo(p) < 2.5f && p.alive) return p;
         }
         return null;
+    }
+
+    /** Someone in an officer's sight attacking a person this moment, unlawfully (or a beast doing it), nearest first. */
+    private Actor assailant(Npc n) {
+        Actor best = null; float bd = 22;
+        for (Actor v : g.actors()) {
+            if (v == n || !v.alive || v.dummy || !(v == g.player || v instanceof Npc vn && vn.loaded) || v.cs.lastAttacker == 0 || g.time - v.cs.lastHurt > 4) continue;
+            Actor a = g.actor(v.cs.lastAttacker);
+            if (a == null || !a.alive || a == n || a.summonOwner != 0 || alliedWatch(n, a) || g.law.inCustody(a)) continue;
+            boolean beast = a.domain != astratto.ai.AgentDomain.HUMAN;
+            if (!beast && !g.law.unlawful(a, v)) continue;
+            float d = n.distTo(a);
+            if (d < bd && n.distTo(v) < 26 && ZonePolicy.routineAllowed(n, a.x, a.z) && canSee(n, a)) { best = a; bd = d; }
+        }
+        return best;
     }
 
     // ------------------------------------------------------------------ the alarm
@@ -914,7 +950,8 @@ public final class AiSystem {
     boolean placed(Npc n, Actor t) {
         if (canSee(n, t)) return true;
         Stealth.Aware w = stealth.of(n, t);
-        return w != null && g.time - w.seenAt < 1.2;
+        // seen a heartbeat ago, or heard just now close by (footfalls, a blow, a shout: nobody vanishes into thin air)
+        return w != null && (g.time - w.seenAt < 1.2 || g.time - w.heardAt < 1.0 && n.distTo(t) < 10);
     }
 
     /** Where the NPC last placed an actor (seen or heard), or null when it never has. */
@@ -1104,7 +1141,12 @@ public final class AiSystem {
 
     public String smallTalk(Npc n, Npc p) { return g.dialogue.smallTalk(n, p); }
 
-    public void say(Npc n, String text) { n.speak(text,g.time,3.5,false); }
+    public void say(Npc n, String text) {
+        // (0.3.0) the face goes with the words: a shout is a start; a question, a thought
+        if (text != null && n.goal != Brain.Goal.FIGHT) {
+            if (text.endsWith("!")) rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.SURPRISED, 0.6);
+            else if (text.endsWith("?")) rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.THINKING, 1.2);
+        } n.speak(text,g.time,3.5,false); }
 
     /** An answer to something said nearby: shown a beat later, so the two lines read as a conversation. */
     public void reply(Npc n, String text) { n.speak(text,g.time,4.5,true); }
@@ -1125,9 +1167,51 @@ public final class AiSystem {
     }
 
     /** How good a moment it is for the thief: someone nearby who could see would spoil it. */
+    /**
+     * (0.3.0, gamefixes: people read who the others are) the nearest of the law - a guard, a lawman, a knight - this NPC can
+     * see within a reach of a spot: what makes a crook think twice. Null when there is none.
+     */
+    public Npc lawInSight(Npc n, float x, float z, float reach) {
+        Npc best = null; float bd = reach;
+        for (Npc o : g.npcs) {
+            if (o == n || !o.alive || !o.loaded || !(o.watch() || o.role == Npc.Role.KNIGHT) || g.law.inCustody(o)) continue;
+            float d = (float) Math.hypot(o.x - x, o.z - z);
+            if (d < bd && canSee(n, o)) { best = o; bd = d; }
+        }
+        return best;
+    }
+    /** How many may press one target at once; how long one presses before giving another the turn, and rests after. */
+    public static final int PRESSERS = 2;
+    public static final double PRESS_TIME = 4.0, PRESS_REST = 1.6;
+
+    /**
+     * (0.3.0, gamefixes: human and monster combat AI was not smart) the attack token: a crowd does not all swing at once -
+     * at most two press one target at a time; the rest keep a ring round it, guarding, ready, until one of the two has
+     * had its turn and steps back. People and monsters alike. True when this attacker may press now (and it takes or
+     * keeps a token).
+     */
+    public boolean mayPress(Npc attacker, Actor target, float reach) {
+        double now = g.time;
+        if (attacker.pressUntil > now) return true;
+        if (attacker.pressRestUntil > now) return false;
+        int pressing = 0;
+        for (Npc o : g.npcs) if (o != attacker && o.alive && o.loaded && o.fightTarget == target.id && o.pressUntil > now && o.distTo(target) < reach + 3) pressing++;
+        if (g.monsters != null) for (rpg.monster.Monster o : g.monsters.all()) if (o != attacker && o.alive && o.loaded && o.fightTarget == target.id && o.pressUntil > now && o.distTo(target) < reach + 3) pressing++;
+        if (pressing >= PRESSERS) return false;
+        attacker.pressUntil = now + PRESS_TIME;
+        return true;
+    }
+    /** Gives up the token (its turn is over): a short rest out of the press before another. */
+    public void yieldPress(Npc attacker) { if (attacker.pressUntil > g.time) { attacker.pressUntil = -99; attacker.pressRestUntil = g.time + PRESS_REST; } }
+
+    /** Whether this NPC is an outlaw or a thief - one who keeps an eye out for the law. */
+    public static boolean crook(Npc n) { return n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.role == Npc.Role.THIEF; }
+
     public float stealOpportunity(Npc thief) {
         var stall = g.objects.stall;
         if (stall.goods.isEmpty() || thief.count(Items.BREAD) >= 3) return 0;
+        // a thief does nothing stupid with the law in sight of the stall or of himself
+        if (lawInSight(thief, stall.x, stall.z, 22) != null || lawInSight(thief, thief.x, thief.z, 16) != null) return 0.02f;
         for (Npc o : g.npcs) {
             if (o == thief || !o.alive || !o.loaded || !Brain.bystander(o)) continue;
             if (Math.hypot(o.x - stall.x, o.z - stall.z) < 16 && g.vox.sight(o.x, o.eyeY(), o.z, stall.x, stall.y + 0.5f, stall.z)) return 0.1f;
@@ -1143,16 +1227,48 @@ public final class AiSystem {
             if (!node.def.equals(def) || node.depleted() || n.skills.level(node.skill) < node.level) continue;
             // the tool must be one they carry (or hold): a woodcutter takes his axe in hand when he gets there
             if (node.tool(n) == null && !carriesTool(n, node)) continue;
-            boolean busy = false;
-            for (var w : g.interact.work.values()) if (w.target == node && w.actor != n) busy = true;
-            if (busy) continue;
-            float d = (float) Math.hypot(node.x - n.x, node.z - n.z);
+            // (0.2.9, gamefixes: workers crowded one tree) a tree is felled by one person at a time; a rock or a bush
+            // takes one worker per open side, the rest going on to the next
+            int others = workersOn(node, n);
+            if (others > 0 && (node.kind == Node.Kind.TREE || others >= sides(node))) continue;
+            float d = (float) Math.hypot(node.x - n.x, node.z - n.z) + others * 6;
             if (d < bd) { bd = d; best = node; }
         }
         return best;
     }
 
-    /** A free cell beside a node to stand in while working it. */
+    /** How many others are working a node or on their way to (a fresh claim, or the work itself under way). */
+    public int workersOn(Node node, Npc except) {
+        int count = 0;
+        for (Npc o : g.npcs) {
+            if (o == except || !o.alive || !o.loaded) continue;
+            var w = g.interact.of(o);
+            if (w != null && w.target == node || o.claimNode == node.id && g.time - o.claimAt < CLAIM_FOR) count++;
+        }
+        for (var w : g.interact.work.values()) if (w.target == node && !(w.actor instanceof Npc) && w.actor != except) count++;
+        return count;
+    }
+
+    /** How many can work a node at once, each from their own side: one for a tree or a fishing spot, up to three for a rock. */
+    static int sides(Node node) { return node.kind == Node.Kind.ROCK ? 3 : node.kind == Node.Kind.PATCH ? 2 : 1; }
+
+    /** How long a worker's claim on a node and its cell holds without being renewed (seconds). */
+    static final float CLAIM_FOR = 20;
+
+    /** Whether a cell is someone else's to stand in: claimed by another worker, or with someone already in it. */
+    private boolean cellTaken(Npc n, int cx, int cz) {
+        int cell = cx << 16 | (cz & 0xFFFF);
+        float x = cx + 0.5f, z = cz + 0.5f;
+        for (Npc o : g.npcs) {
+            if (o == n || !o.alive || !o.loaded) continue;
+            if (o.claimCell == cell && g.time - o.claimAt < CLAIM_FOR) return true;
+            // someone standing there (one only walking through does not take it)
+            if (Math.abs(o.x - x) < 0.75f && Math.abs(o.z - z) < 0.75f && Math.hypot(o.vx, o.vz) < 0.4f && n.claimCell != cell) return true;
+        }
+        Actor p = g.player;
+        return p != null && p.alive && Math.abs(p.x - x) < 0.75f && Math.abs(p.z - z) < 0.75f && Math.hypot(p.vx, p.vz) < 0.4f;
+    }
+
     /** Whether an NPC carries (or holds) the tool a node is worked with. */
     static boolean carriesTool(Npc n, Node node) {
         if (node.kind == Node.Kind.PATCH) return true;
@@ -1169,6 +1285,7 @@ public final class AiSystem {
         // the nearest dry, open cell to stand on: beside the node, or - for a fishing spot out on the water - on the bank
         // within a few metres of it (gamefixes: a fisher was sent into the pond and stood stuck at its edge all day)
         float[] best = {node.x + 1, node.z};
+        int bestCell = (int) Math.floor(node.x + 1) << 16 | ((int) Math.floor(node.z) & 0xFFFF);
         float bd = Float.MAX_VALUE;
         for (int ring = 1; ring <= 4 && bd == Float.MAX_VALUE; ring++)
             for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
@@ -1183,9 +1300,26 @@ public final class AiSystem {
                     if (dx != 0 && dz != 0) d += 4;
                     else if (ring == 1 && (rockAt(node, node.bx + dz, node.bz + dx) || rockAt(node, node.bx - dz, node.bz - dx))) d += 6;
                 }
-                if (d < bd) { bd = d; best = new float[]{cx + 0.5f, cz + 0.5f}; }
+                // (0.2.9, gamefixes: two workers stood in one block at the same tree or rock) a cell someone else has
+                // taken is passed over, and one beside another worker costs a little (room to swing)
+                if (cellTaken(n, cx, cz)) continue;
+                if (crowded(n, cx, cz)) d += 1.5f;
+                // one's own cell is kept while the claim on this node holds (no shuffling between equal spots)
+                if (n.claimNode == node.id && n.claimCell == (cx << 16 | (cz & 0xFFFF)) && g.time - n.claimAt < CLAIM_FOR) d -= 2.5f;
+                if (d < bd) { bd = d; best = new float[]{cx + 0.5f, cz + 0.5f}; bestCell = cx << 16 | (cz & 0xFFFF); }
             }
+        n.claimNode = node.id; n.claimCell = bestCell; n.claimAt = g.time;
         return best;
+    }
+
+    /** Another worker's cell right beside this one (diagonals included). */
+    private boolean crowded(Npc n, int cx, int cz) {
+        for (Npc o : g.npcs) {
+            if (o == n || !o.alive || !o.loaded || o.claimCell == Integer.MIN_VALUE || g.time - o.claimAt >= CLAIM_FOR) continue;
+            int ox = o.claimCell >> 16, oz = (short) (o.claimCell & 0xFFFF);
+            if (Math.abs(ox - cx) <= 1 && Math.abs(oz - cz) <= 1) return true;
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------ death, respawn, unloading

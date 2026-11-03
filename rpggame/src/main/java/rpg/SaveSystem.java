@@ -53,6 +53,7 @@ public final class SaveSystem {
         List<Object> c = new ArrayList<>(); for (long v : g.state.counters()) c.add(v);
         st.put("counters", c);
         st.put("minutes", g.state.minutes);
+        st.put("calendar", g.state.cal().save());
         Map<String, Object> led = new HashMap<>(); for (var e : g.state.ledger().entrySet()) led.put(e.getKey(), e.getValue());
         st.put("ledger", led);
         var names=new HashMap<String,Object>();g.rememberedNames.forEach((id,name)->names.put(Long.toString(id),name));st.put("names",names);
@@ -183,6 +184,8 @@ public final class SaveSystem {
         for (int i = 0; i < counters.length; i++) counters[i] = ((Number) c.get(i)).longValue();
         g.state.loadCounters(counters);
         g.state.minutes = Json.num(st, "minutes", 480);
+        @SuppressWarnings("unchecked") java.util.Map<String, Object> cal = st.get("calendar") instanceof java.util.Map<?, ?> cm ? (java.util.Map<String, Object>) cm : null;
+        g.state.calendar.load(cal, g.state.minutes); g.state.minutes = g.state.calendar.totalMinutes();
         Map<String, Long> led = new HashMap<>();
         for (var e : Json.obj(st, "ledger").entrySet()) led.merge(rpg.item.Items.canonicalSavedId(e.getKey()), ((Number) e.getValue()).longValue(),Long::sum);
         g.state.loadLedger(led);

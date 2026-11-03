@@ -33,6 +33,38 @@ public final class Blood {
 
     public boolean any() { return !marks.isEmpty(); }
 
+    /** (0.3.0) When the wet blood last ran a step down the body, and how far each fresh splash has run (by its seed). */
+    private double ranAt = -99;
+    private final java.util.Map<Integer, Integer> runs = new java.util.HashMap<>();
+    /** How long fresh blood runs (s), how often it moves a step (s), and how many steps one splash makes at most. */
+    public static final double RUN_TIME = 14, RUN_STEP = 0.7;
+    public static final int RUN_STEPS = 4;
+
+    /**
+     * (0.3.0, gamefixes: blood on voxel models should animate) fresh blood runs: for its first seconds a wet splash on a
+     * side of the body sends a thinner trickle a step further down that face, and another, the way blood runs down cloth
+     * and skin - then it stops and dries where it got to. The figure is repainted with each step.
+     */
+    public boolean trickle(double now) {
+        if (marks.isEmpty() || now - ranAt < RUN_STEP) return false;
+        ranAt = now;
+        boolean ran = false;
+        int n = marks.size();
+        for (int i = 0; i < n; i++) {
+            Mark m = marks.get(i);
+            if (m.scorch || !m.wet || now - m.at > RUN_TIME || m.face == TOP || m.face == BOTTOM || m.radius < 1.4f) continue;
+            int done = runs.getOrDefault(m.seed, 0);
+            if (done >= RUN_STEPS || m.v > 0.92f) continue;
+            runs.put(m.seed, done + 1);
+            float wobble = (((m.seed * 31 + done * 17) & 15) / 15f - 0.5f) * 0.05f;
+            marks.add(new Mark(m.part, m.face, clamp(m.u + wobble), clamp(m.v + 0.11f + done * 0.09f), Math.max(0.7f, m.radius * (0.55f - done * 0.08f)), true, seeds++ * 0x2F6B, m.at, false));
+            ran = true;
+        }
+        if (ran) { trim(); version++; }
+        if (runs.size() > 64) runs.clear();
+        return ran;
+    }
+
     public void add(int part, int face, float u, float v, float radius, double now) {
         if (radius < 0.6f) return;
         marks.add(new Mark(part, face, clamp(u), clamp(v), Math.min(7f, radius), true, seeds++ * 0x2F6B, now, false));

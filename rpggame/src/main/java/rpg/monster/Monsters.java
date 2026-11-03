@@ -308,6 +308,7 @@ public final class Monsters {
             m.vx = vx; m.vz = vz;
         } else g.game.commands().moverInput(m.body, vx, vz, vy, 0, m.kind == MonsterKind.DRAGON ? 6 : 18, MOVER_FLY);
         m.altitude = Math.max(0, m.y - ground);
+        m.climb = vy;
     }
 
     /**

@@ -75,7 +75,7 @@ extern "C" {
  * 2.6: appended agent navigation telemetry and local-voxel model dissolution.
  * 2.7: ladder exclusion flag; negative agent fact 15 temporarily forbids ladders. */
 #define ASTRATTO_API_MAJOR 2
-#define ASTRATTO_API_MINOR 7
+#define ASTRATTO_API_MINOR 9
 #define ASTRATTO_API_VERSION ((uint32_t)((ASTRATTO_API_MAJOR << 16) | ASTRATTO_API_MINOR))
 
 /* ------------------------------------------------------------------ status */
@@ -1357,7 +1357,12 @@ typedef struct astratto_world_look {
     const uint8_t* layer_materials;    /* layers * 4 bytes */
     float ground_y;                    /* the height street-level dirt and fog bands are measured from */
     uint32_t mesh_flags;               /* ASTRATTO_MESH_* for the renderer's own meshing (doors drawn, plants left out) */
+    /* 2.8: per block id (256 bytes), how a ground's top spreads over its neighbours' tops at the cell edges: 0 never
+     * blends (floors, walls), and a higher rank overgrows a lower one (grass onto dirt, dirt onto a path). May be null. */
+    const uint8_t* ground_rank;
 } astratto_world_look;
+/* The size of a 2.7 world look (no ground_rank): still accepted. */
+#define ASTRATTO_WORLD_LOOK_V27_SIZE 48u
 ASTRATTO_API int32_t astratto_render_world_look(astratto_renderer* renderer, const astratto_world_look* look);
 
 /* Render commands. */
@@ -1380,6 +1385,7 @@ enum {
     ASTRATTO_RCMD_SMOKE = 16,
     ASTRATTO_RCMD_RIPPLE = 19,        /* astratto_rcmd_ripple: surface impulse in world x/z, radius and acceleration */
     ASTRATTO_RCMD_EMITTER = 18,       /* GPU element particles, bounded persistent pool */
+    ASTRATTO_RCMD_ATMOS = 20,         /* astratto_rcmd_atmos: the ambient cube and the colour grade of an environment preset (API 2.9) */
     ASTRATTO_RCMD_PORTRAIT = 17       /* astratto_rcmd_portrait + count * astratto_portrait_part; ordered among UI quads */
 
 };
@@ -1421,6 +1427,13 @@ typedef struct astratto_rcmd_quads { astratto_record head; uint32_t texture, cou
 typedef struct astratto_rcmd_portrait { astratto_record head; uint32_t count, reserved; float x, y, w, h; } astratto_rcmd_portrait;
 typedef struct astratto_portrait_part { uint32_t mesh; float matrix[16]; float r, g, b, a; } astratto_portrait_part;
 typedef struct astratto_rcmd_grading { astratto_record head; float death, hurt, infection, flash, bile, reserved; } astratto_rcmd_grading;
+/**
+ * API 2.9: an environment preset's light and grade. cube: the six-axis ambient colour (+x, -x, +y, -y, +z, -z; linear
+ * radiance per unit albedo), weighted on each surface by its normal and by how much of the sky it sees; exposure: a
+ * multiplier on the eye's adaptation; saturation, contrast (1 = unchanged) and a tint, applied in the grade. Kept from
+ * frame to frame until sent again.
+ */
+typedef struct astratto_rcmd_atmos { astratto_record head; float cube[18]; float exposure, saturation, contrast, tint_r, tint_g, tint_b; } astratto_rcmd_atmos;
 typedef struct astratto_rcmd_body { astratto_record head; float x, y, z, radius, height, reserved; } astratto_rcmd_body;
 typedef struct astratto_rcmd_world { astratto_record head; astratto_handle world; } astratto_rcmd_world;
 typedef struct astratto_rcmd_clear { astratto_record head; float r, g, b, a; } astratto_rcmd_clear;

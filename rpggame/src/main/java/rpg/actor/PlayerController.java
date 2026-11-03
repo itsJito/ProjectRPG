@@ -95,6 +95,14 @@ public final class PlayerController {
         }
         p.aimYaw = aimYaw;
         p.pitch = aimPitch;
+        // (0.3.0) in the saddle: the keys are the mount's (Riding) - the body rides where it is carried
+        if (p.riding != 0) {
+            g.riding.update(dt);
+            queuedMelee = null; mainWas = in.mainDown; offWas = in.offDown;
+            g.game.commands().listener(cx, cy, cz, camYaw);
+            in.clearEdges();
+            return;
+        }
         hands(p, dt);
         move(p, dt);
         face(p, dt);
@@ -127,7 +135,11 @@ public final class PlayerController {
         if (queuedMelee != null && (g.time > queuedUntil || main != queuedWeapon || in.offDown || in.dodge)) queuedMelee = null;
         boolean bow = main != null && main.family == Family.BOW, staff = main != null && main.family == Family.STAFF;
         boolean crossbow = main != null && main.family == Family.CROSSBOW;
-        float aim = crossbow && in.offDown ? 1 : 0;
+        // (0.2.9, gamefixes: a crossbow is not a bow) a crossbow is shouldered to be shot: the trigger pressed with it at
+        // the waist brings it up to the cheek first, and the bolt goes once it is there - never loosed from the hip
+        if (!crossbow) crossbowQueued = false;
+        else if (in.mainDown && !mainWas && p.cs.reload <= 0) crossbowQueued = true;
+        float aim = crossbow && (in.offDown || crossbowQueued) ? 1 : 0;
         p.cs.aim += (aim - p.cs.aim) * (1 - (float) Math.exp(-16 * dt));
         // main hand
         if (in.mainDown) mainHeld += dt;
@@ -139,7 +151,7 @@ public final class PlayerController {
             if (in.mainDown && !mainWas) g.combat.cast(p, p.spell, aimYaw, aimPitch);
         } else if (main != null && main.family == Family.CROSSBOW) {
             // a crossbow: press to loose the loaded bolt (it loads itself again)
-            if (in.mainDown && !mainWas) g.combat.shootCrossbow(p, aimYaw, aimPitch);
+            if (crossbowQueued && p.cs.aim >= 0.85f) { crossbowQueued = false; g.combat.shootCrossbow(p, aimYaw, aimPitch); }
         } else if (main != null && main.family == Family.THROWN) {
             // a throw: hold to wind up (a moment), let go to throw one from the stack
             if (in.mainDown && !p.cs.busy()) p.cs.draw = Math.min(1, p.cs.draw + dt / 0.35f);
@@ -152,8 +164,14 @@ public final class PlayerController {
             if (!in.mainDown && mainWas && !in.offDown) {
                 Move move = mainHeld >= 0.32f ? Move.HEAVY : CombatSystem.lightMove(p, false);
                 queuedMelee = null;
+                float held = Math.min(1, mainHeld / 0.45f);
                 if (!g.combat.attack(p, false, move) && p.cs.phase == Actor.Combat.Phase.RECOVER) {
                     queuedMelee = move; queuedWeapon = main; queuedUntil = g.time + MELEE_BUFFER;
+                } else if (move == Move.HEAVY && p.cs.phase == Actor.Combat.Phase.WINDUP) {
+                    // (0.3.0, gamefixes: combat animations) a blow charged and let go goes from where the charge cocked it:
+                    // the wind-up starts at its drawn-back point (it used to begin again from rest - the weapon dropped and
+                    // was raised a second time before the strike)
+                    p.cs.t = Math.max(p.cs.t, p.cs.windup * 0.63f * held);
                 }
             }
             if (queuedMelee != null && !in.mainDown && p.cs.phase == Actor.Combat.Phase.IDLE) {
@@ -165,7 +183,10 @@ public final class PlayerController {
         mainWas = in.mainDown;
         // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
         boolean guardItem = main == null && off == null || off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
-        if (guardItem) g.combat.setBlock(p, in.offDown);
+        // (0.3.0, gamefixes) a drawn torch: the guard key strikes a light to it (while it is out; a burning one guards as anything held does)
+        boolean torch = main != null && main.family == Family.TORCH && off == null;
+        if (torch && !p.torchLit) { g.combat.setBlock(p, false); if (in.offDown && !offWas) g.combat.lightTorch(p); }
+        else if (guardItem) g.combat.setBlock(p, in.offDown);
         else {
             g.combat.setBlock(p, false);
             if (in.offDown && !offWas && off != null) {
@@ -268,13 +289,24 @@ public final class PlayerController {
 
     private void move(Player p, float dt) {
         if (g.ui != null && g.ui.console.noclip) { fly(p, dt); return; }
+        // (0.2.9) hanging from an edge: the keys choose the next move (see Traversal.hang)
+        // (a leap or a letting go gives the mover its own push this frame: nothing after may overwrite it)
+        if ((g.traversal.hanging(p) || p.traversal != null && p.traversal.hold) && g.traversal.hang(p, in.strafe, in.forward, in.jump, in.sneak, in.sprint, dt)) return;
         if (!g.traversal.busy(p) && in.sprint && in.forward > 0.1f && !in.sneak) g.traversal.begin(p, camYaw);
+        // (0.3.0) a jump at a high edge ahead takes it without the sprint: the hands catch it and the body hangs to shimmy
+        else if (!g.traversal.busy(p) && in.jump && in.forward > 0.1f && !in.sneak && p.skills.level(Skill.AGILITY) >= rpg.actor.Traversal.HANG_LEVEL && g.traversal.highEdge(p, camYaw)) g.traversal.begin(p, camYaw);
+        // a controlled drop: crouch-walking over an edge with a fall beyond lowers one onto it (Agility 6)
+        else if (!g.traversal.busy(p) && in.sneak && in.forward > 0.1f && p.grounded) g.traversal.lower(p, camYaw);
         // (0.2.1) a jump into a fence or a low wall while moving toward it is a vault over it (Agility 2)
         else if (!g.traversal.busy(p) && in.jump && p.grounded && in.forward > 0.1f && !in.sneak && g.traversal.vault(p, camYaw) != null) g.traversal.begin(p, camYaw);
         if (g.traversal.update(p, dt)) return;
+        // (0.3.0) on a ladder: forward climbs, back goes down, jump pushes off (see Ladders)
+        if (g.ladders.update(p, in.forward, in.jump, dt)) return;
         float fwd = in.forward, side = in.strafe;
         float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
         float dx = fx * fwd + rx * side, dz = fz * fwd + rz * side, l = (float) Math.hypot(dx, dz);
+        // walking at a ladder's front (or off the ledge at its top) takes hold of it
+        if (l > 0.3f && !g.traversal.busy(p) && g.ladders.mount(p, dx / l, dz / l) && g.ladders.update(p, 0, false, dt)) return;
         if (l > 0.1f || in.jump) { route = null; if (g.ui != null) g.ui.flag = null; }
         else if (route != null) {
             while (routeAt * 3 < route.length && Math.hypot(route[routeAt * 3] + 0.5f - p.x, route[routeAt * 3 + 2] + 0.5f - p.z) < 0.45f) routeAt++;
@@ -355,6 +387,15 @@ public final class PlayerController {
             if (covered > 0) c.regenDelay = 0.6f;
             g.movementPractice.sprintCost(previousStamina - p.stamina);
         }
+        // (0.2.9, gamefixes) the shoulder charge: at Agility 10 a full sprint is run shoulder-first, and whoever stands in
+        // the way is barged aside rather than run into - see barge()
+        // (0.3.0, gamefixes) the charge only starts after two full seconds of sprinting, and only a charge kept up a while
+        // longer has the weight to knock someone off their feet (CHARGE_KNOCKDOWN); before that they are only sent reeling
+        p.charging = p.sprinting && sprintTime >= rpg.actor.Traversal.CHARGE_AFTER && agility >= rpg.actor.Traversal.CHARGE_LEVEL && p.grounded && !aiming(p) && !g.carrying.busy(p);
+        chargeTime = p.charging ? chargeTime + dt : 0;
+        // (the bodies' movers hold people a little apart, and check the run as they meet: the charge is read from the
+        // sprint itself, at anything over a walk, along the way the run is going)
+        if (p.charging && speedNow > g.cfg.walkSpeed * 1.1f) max *= barge(p, bvx, bvz, speedNow);
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)
@@ -396,8 +437,9 @@ public final class PlayerController {
         boolean free = c.staggered <= 0 && c.dodgeT <= 0 && (c.phase == Actor.Combat.Phase.IDLE || c.phase == Actor.Combat.Phase.RECOVER && c.t >= c.recover * 0.4f);
         boolean jump = jumpBuffer > 0 && free && (p.grounded || g.time - lastGrounded < 0.12) && g.time - lastJump > 0.3;
         if (jump) { g.movementPractice.jumped(); jumpBuffer = 0; lastJump = g.time; lastGrounded = -9; if (c.phase != Actor.Combat.Phase.IDLE) c.cancel(); }
-        boolean onLadder=rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(p.x),(int)Math.floor(p.y),(int)Math.floor(p.z))) || rpg.world.Blocks.ladder(g.vox.block((int)Math.floor(p.x),(int)Math.floor(p.y)-1,(int)Math.floor(p.z)));
-        g.game.commands().moverInput(p.body, nvx, nvz, onLadder && free ? in.forward : 0, jump && !onLadder ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
+        // (0.3.0) the engine's own climbing of a ladder cell (any way one faced) is not the player's: Ladders is
+        p.onLadder = false;
+        g.game.commands().moverInput(p.body, nvx, nvz, 0, jump ? g.cfg.jumpSpeed : 0, 80, p.sneaking ? astratto.bridge.AstrattoNative.MOVER_CROUCH : 0);
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
@@ -408,6 +450,61 @@ public final class PlayerController {
                 g.noise(p, p.x, p.y, p.z, p.sprinting ? 9 : p.sneaking ? 0.8f : speed > 3 ? 5 : 2, 0.2f);
             }
         } else stepClock = 0.5f;
+    }
+
+    /** How long the present shoulder charge has been kept up (s). */
+    private float chargeTime;
+
+    /** A crossbow's trigger pressed before it was shouldered: it fires as soon as it is up. */
+    private boolean crossbowQueued;
+
+    /** Who was barged and when (each once a second at most), so a charge through a crowd strikes each body once. */
+    private final java.util.Map<Long, Double> barged = new java.util.HashMap<>(), chargeCrime = new java.util.HashMap<>();
+
+    /**
+     * The shoulder charge's contact: anyone close ahead in the line of the run is knocked aside - an ordinary townsman
+     * off their feet, a fighter (the watch, a brute) sent reeling - the impulse along the run, the charger's stride
+     * checked a little by each. Bumping people about is disorderly conduct where it is seen. Returns the speed kept.
+     */
+    private float barge(Player p, float vx, float vz, float speed) {
+        float dx = vx / speed, dz = vz / speed, kept = 1;
+        for (Actor o : g.actors()) {
+            if (o == p || !o.alive || o.dummy || o.reacting || o instanceof rpg.animal.Animal || o instanceof rpg.monster.Monster m && m.kind.flies()) continue;
+            if (o instanceof rpg.ai.Npc n && !n.loaded) continue;
+            float ox = o.x - p.x, oz = o.z - p.z;
+            // in the corridor the run sweeps: ahead within a stride, and no further to the side than the two bodies' width
+            // (the bodies' own movers keep them a little apart, so contact is read from just short of touching)
+            float ahead = ox * dx + oz * dz, aside = Math.abs(ox * dz - oz * dx);
+            if (ahead <= 0 || ahead > p.radius + o.radius + 0.95f || aside > p.radius + o.radius + 0.3f || Math.abs(o.y - p.y) > 1.2f) continue;
+            Double last = barged.get(o.id);
+            if (last != null && g.time - last < 1.0) continue;
+            barged.put(o.id, g.time);
+            p.chargeAt = g.time;
+            // only a charge run long enough topples anyone; fresh, it jostles even a townsman aside on his feet
+            boolean sturdy = (o instanceof rpg.ai.Npc n ? n.combatant() : true) || chargeTime < rpg.actor.Traversal.CHARGE_KNOCKDOWN;
+            float heft = 0.6f + p.skills.level(Skill.STRENGTH) / 99f * 0.6f;
+            // the blow lands on their chest along the run, a little to the side the charger's shoulder leads with
+            float side = 0.25f;
+            float ix = dx + -dz * side, iz = dz + dx * side;
+            if (sturdy) g.reactions.struck(o, ix, 0.15f, iz, 70 * heft, 1.2f, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
+            else g.reactions.knockDown(o, ix, iz, 120 * heft, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
+            o.cs.cancel();
+            kept *= sturdy ? 0.72f : 0.85f;
+            p.stamina = Math.max(0, p.stamina - 4);
+            if (g.sfx != null) g.sfx.play("punch", o.x, o.chestY(), o.z, 0.7f);
+            var ev = g.state.commit("ShoulderCharge", p.id, o.id, rpg.world.DevMap.jurisdiction(o.x, o.z), 0, (sturdy ? "sent reeling: " : "knocked down: ") + o.name);
+            g.prog.award(p, Skill.AGILITY, 4, "shoulder charge", ev.id());
+            if (o instanceof rpg.ai.Npc n) {
+                g.ai.say(n, n.watch() ? "Oi! Mind where you're going!" : sturdy ? "Watch it!" : "Ow! What was that for?");
+                // an outlaw or a brute takes it as the start of a fight; the watch and the townsfolk take it up with the law
+                if (n.combatant() && !n.watch()) { n.cs.lastAttacker = p.id; n.cs.lastHurt = g.time; }
+                // knocking people about is disorderly conduct where it is seen (once in a while per person), whatever is in hand
+                Double charged = chargeCrime.get(n.id);
+                if (g.law.unlawful(p, n) && (charged == null || g.time - charged > 15)) { chargeCrime.put(n.id, g.time); g.law.crime(p, "DISORDERLY", n.id, 0, null, ev.id()); }
+            }
+        }
+        if (barged.size() > 64) barged.values().removeIf(t -> g.time - t > 5);
+        return kept;
     }
 
     /**
@@ -459,19 +556,43 @@ public final class PlayerController {
             float rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
             float px = ex + rx * 0.55f, py = ey + 0.15f, pz = ez + rz * 0.55f;
             if (!g.vox.clear(ex, ey, ez, px, py, pz)) { px = ex; py = ey + 0.15f; pz = ez; }
-            float back = p.camDist;
+            float back = p.camDist + (p.riding != 0 ? 2.0f : 0);
             Voxels.Hit h = g.vox.ray(px, py, pz, -fx, -fy, -fz, back + 0.3f, false);
             if (h.hit) back = Math.max(0.3f, h.dist - 0.3f);
             cx = px - fx * back; cy = py - fy * back; cz = pz - fz * back;
         }
-        // aim: from the eyes at whatever the crosshair falls on
+        // aim: from the eyes at whatever the crosshair falls on - the world, or a body standing in front of it (0.3.0: the
+        // bodies were left out, so with the shoulder camera a shot at someone flew past them to the wall behind)
         Voxels.Hit h = g.vox.ray(cx, cy, cz, fx, fy, fz, 80, false);
         float t = h.hit ? h.dist : 80;
+        t = Math.min(t, bodyOnRay(p, cx, cy, cz, fx, fy, fz, t));
+        p.aimPoint[0] = cx + fx * t; p.aimPoint[1] = cy + fy * t; p.aimPoint[2] = cz + fz * t; p.aimAt = g.time;
         float ax = cx + fx * t - ex, ay = cy + fy * t - ey, az = cz + fz * t - ez;
         if (Math.sqrt(ax * ax + ay * ay + az * az) < 1.5f) { ax = fx; ay = fy; az = fz; }
         aimYaw = (float) Math.atan2(-ax, -az);
         aimPitch = (float) Math.atan2(ay, Math.hypot(ax, az));
         if(focus)g.interact.computeFocus(p, cx, cy, cz, fx, fy, fz);
+    }
+
+    /** The nearest living body (an upright capsule, not the player's own) the camera's ray passes through short of max. */
+    private float bodyOnRay(Player p, float ox, float oy, float oz, float dx, float dy, float dz, float max) {
+        float best = max;
+        for (Actor o : g.actors()) {
+            if (o == p || !o.alive || o.gaseousT > 0) continue;
+            float rx = o.x - ox, rz = o.z - oz, hl = dx * dx + dz * dz;
+            if (hl < 1e-6f) continue;
+            // closest approach of the ray to the capsule's axis, in the ground plane
+            float t = (rx * dx + rz * dz) / hl;
+            if (t < 0.6f || t > best) continue;
+            float ex = ox + dx * t - o.x, ez = oz + dz * t - o.z, r = o.radius * 1.05f, d2 = ex * ex + ez * ez;
+            if (d2 > r * r) continue;
+            // the entry into the cylinder, then whether the ray is within the body's height there
+            float back = (float) Math.sqrt((r * r - d2) / hl), enter = Math.max(0.6f, t - back);
+            float y = oy + dy * enter;
+            if (y < o.y || y > o.y + o.height) { float y2 = oy + dy * t; if (y2 < o.y || y2 > o.y + o.height) continue; enter = t; }
+            best = Math.min(best, enter);
+        }
+        return best;
     }
 
     /** Menus and respawns must not turn an old held button into a new attack on release. */

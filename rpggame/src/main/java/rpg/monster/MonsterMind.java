@@ -241,8 +241,28 @@ public final class MonsterMind {
             g.state.commit("MonsterState", m.id, m.target, DevMap.jurisdiction(m.x, m.z), 0, m.state + " -> " + best.state + " (" + best.why + ")");
             m.state = best.state; m.stateSince = g.time; m.hasGoalPos = false; m.legs = null;
             enter(m);
+            if (m.state == State.ENGAGE) callKin(m);
         }
         m.why = best.why;
+    }
+
+    /**
+     * (0.3.0, gamefixes: monster AI expanded) the roar as it squares up is heard: its own kind near enough (and its lair's
+     * band) who are idle, resting or roaming learn where the foe is and come - a pack fights as a pack, a lone one alone.
+     */
+    private void callKin(Monster m) {
+        Actor foe = g.actor(m.target);
+        if (foe == null || !foe.alive) return;
+        int called = 0;
+        for (Monster o : sys.all()) {
+            if (o == m || !o.alive || !o.loaded || o.distTo(m) > 18 || (o.kind != m.kind && (m.lair == 0 || o.lair != m.lair))) continue;
+            if (o.state == State.ENGAGE || o.state == State.FLEE) continue;
+            Monster.Known k = o.known.computeIfAbsent(foe.id, Monster.Known::new);
+            k.x = foe.x; k.z = foe.z; k.at = g.time; k.sense = "heard"; k.damage = Math.max(k.damage, 1);
+            o.target = foe.id; o.nextThink = 0;
+            called++;
+        }
+        if (called > 0) g.state.commit("MonsterCalledKin", m.id, foe.id, DevMap.jurisdiction(m.x, m.z), 0, called + " answered");
     }
 
     /**
@@ -450,7 +470,25 @@ public final class MonsterMind {
             }
             default -> {
                 if (ranged && (d > reach + 4 || m.kind == MonsterKind.DRAGON && sys.rnd(m) < 0.45) && sys.rnd(m) < 0.5) { sys.ranged(m, t); return; }
-                if (d <= reach + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) attack(m, t); }
+                // (0.3.0, gamefixes: monster AI was not smart) the press: two at a time; the rest prowl the ring round it
+                if (d <= reach + 3 && !g.ai.mayPress(m, t, reach) && t.cs.phase != rpg.actor.Actor.Combat.Phase.RECOVER) {
+                    float ring = reach + 2.5f, ang = (float) (Math.atan2(m.z - t.z, m.x - t.x) + 0.4 * Math.sin(g.time * 0.6 + m.id));
+                    m.lastOutcome = "prowling, waiting for an opening on " + t.name;
+                    sys.moveTo(m, t.x + (float) Math.cos(ang) * ring, t.z + (float) Math.sin(ang) * ring, false, 0.6f);
+                    return;
+                }
+                // a blow wound up at it, read in time (its Defense makes it quicker to read): it steps off the line
+                boolean windup = t.cs.phase == rpg.actor.Actor.Combat.Phase.WINDUP && d < reach + 1.4f;
+                float read = Math.max(0.06f, 0.3f - m.skills.level(rpg.skill.Skill.DEFENSE) * 0.003f);
+                if (windup && t.cs.t >= read && sys.rnd(m) < 0.35f + m.skills.level(rpg.skill.Skill.DEFENSE) / 200f && m.kind.terror() < 20) {
+                    float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az)), side = (m.id & 1) == 0 ? 1 : -1;
+                    m.lastOutcome = "sidestepping " + t.name + "'s blow";
+                    sys.moveTo(m, m.x + ax / l * 1.4f - az / l * side * 1.2f, m.z + az / l * 1.4f + ax / l * side * 1.2f, true, 0.3f);
+                    return;
+                }
+                // a swing missed and the foe is recovering from it: in at once
+                if (t.cs.phase == rpg.actor.Actor.Combat.Phase.RECOVER && d <= reach + 0.6f && m.nextStrike - g.time < 0.5) m.nextStrike = g.time;
+                if (d <= reach + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); if (g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m); } }
                 else { float[] way = approach(m, t, d, reach); sys.moveTo(m, way[0], way[1], true, way[2]); }
                 // a target it cannot get to (up on something, behind something) - it adapts: throws, backs off, calls help
                 if (d > reach + 0.5f && Math.hypot(m.vx, m.vz) < 0.2f) m.outOfReach += dt; else m.outOfReach = Math.max(0, m.outOfReach - dt);

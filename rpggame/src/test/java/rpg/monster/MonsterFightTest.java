@@ -147,7 +147,7 @@ class MonsterFightTest {
             game.tick(1f / 60);
             if (!bat.alive) break;
             if (!swinging && guard.cs.busy() && guard.fightTarget == bat.id && bat.chestY() - guard.y > 2.4f) { wasted++; System.out.printf("swing t%.2f phase %s move %s outcome %s bat alt %.2f chestDiff %.2f target %d bat %d y %.2f%n", g.time, guard.cs.phase, guard.cs.move, guard.lastOutcome, bat.altitude, bat.chestY() - guard.y, guard.fightTarget, bat.id, bat.y); }
-            if ("wait for it to dive".equals(guard.lastOutcome)) waited++;
+            if (guard.lastOutcome != null && (guard.lastOutcome.contains("flyer") || guard.lastOutcome.contains("wait for it to dive"))) waited++;
         }
         System.out.printf("guard: %d swings at a bat out of reach, %d frames waiting for the dive%n", wasted, waited);
         assertEquals(0, wasted, "the guard swung at a bat high out of reach");

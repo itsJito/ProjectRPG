@@ -52,6 +52,25 @@ class UltimateWorldTest {
         var saves=new SaveSystem(g);Path file=directory.resolve("net.json");assertTrue(saves.save(file));assertTrue(saves.load(file));
         var restored=(FishingNet)g.objects.get(net.id);restored.update(g);assertEquals(5,restored.contents.count(source.product));assertEquals(1,restored.contents.count(Items.FISHING_NET));
     }
+    @Test void aLakeNetIsHauledInWithItsCatchBeforeDarkAndNoneIsLaidAtNight() {
+        Npc fisher=(Npc)g.actor(Ids.FISHERMAN);g.ai.reload(fisher);
+        var source=g.objects.nodes.stream().filter(node->node.kind==Node.Kind.FISH && node.needs==Items.FISHING_NET).findFirst().orElseThrow();
+        g.teleport(fisher,fisher.postX,DevMap.FLOOR,fisher.postZ);g.state.minutes=19*60+59.5;game.tick(0);
+        var net=g.objects.add(new FishingNet(g.state.newEntityId(),fisher.id,source.id,source.x,DevMap.FLOOR-0.1f,source.z,g.state.minutes+4));
+        net.laidAt=g.state.minutes;for(var tool:fisher.takeItems(Items.FISHING_NET,1))assertTrue(net.contents.add(tool));
+        assertFalse(fisher.has(Items.FISHING_NET,1));
+        for(int i=0;i<60*120 && !net.removed;i++)frames(1);
+        assertTrue(net.removed,()->"the net must come in after dark: "+fisher.goal+" / "+fisher.lastOutcome);
+        assertTrue(fisher.has(Items.FISHING_NET,1),"the hauled net returns to its fisher's pack");
+        frames(60*20);
+        assertTrue(g.objects.all().stream().noneMatch(o->o instanceof FishingNet n && !n.removed),"no lake net is laid at night");
+    }
+    @Test void aNetWhoseFisherIsGoneWashesAshore() {
+        var source=g.objects.nodes.stream().filter(node->node.kind==Node.Kind.FISH && node.needs==Items.FISHING_NET).findFirst().orElseThrow();
+        var net=g.objects.add(new FishingNet(g.state.newEntityId(),987654321L,source.id,source.x,DevMap.FLOOR-0.1f,source.z,g.state.minutes+4));
+        net.contents.add(new ItemStack(Items.FISHING_NET,1));frames(2);
+        assertTrue(net.removed);assertTrue(net.contents.isEmpty());
+    }
     @Test void aFallingRigidBodyCreatesASplashOnTheActualWaterSurface() {
         g.teleport(g.player,96.5f,DevMap.FLOOR,70.5f);game.tick(0);
         long pebble=game.reserve(KIND_RIGID);

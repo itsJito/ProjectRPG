@@ -195,7 +195,7 @@ public final class CombatSystem {
     public boolean sheathe(Actor a, boolean put) {
         if (a.sheathed == put || !a.alive || a.reacting || a.morphT > 0 || g.carrying.busy(a) || g.traversal.busy(a)) return false;
         if (!a.sheathable()) { a.sheathed = put; return false; }
-        if (a.cs.phase != Phase.IDLE || a.cs.staggered > 0 || g.time - a.sheatheAt < Actor.SHEATHE_TIME) return false;
+        if (a.cs.phase != Phase.IDLE || a.cs.staggered > 0 || g.time - a.sheatheAt < a.sheatheTime()) return false;
         a.cs.blocking = false; a.cs.draw = 0; a.cs.charge = 0; a.cs.aim = 0;
         a.sheathed = put; a.sheatheAt = g.time;
         if (!put) a.armsUsedAt = g.time;
@@ -206,7 +206,7 @@ public final class CombatSystem {
     }
 
     /** Whether the hands are ready to fight with what they hold: drawn, and not in the middle of drawing it. */
-    public boolean armsReady(Actor a) { return !(a.sheathed && a.sheathable()) && g.time - a.sheatheAt >= Actor.SHEATHE_TIME; }
+    public boolean armsReady(Actor a) { return !(a.sheathed && a.sheathable()) && g.time - a.sheatheAt >= a.sheatheTime(); }
 
     /** Whether the weapon or shield is out, in hand, where people can see it (an empty hand is no weapon). */
     public boolean drawn(Actor a) {
@@ -264,6 +264,30 @@ public final class CombatSystem {
     /** How long an arrow or a blade stays in a living body before it works loose and falls (gamefixes: a minute). */
     static final double LODGED_FOR = 60;
     static final float ARROW_GRAVITY = 9.8f, BOLT_SPEED = 58, BOLT_GRAVITY = 6f;
+
+    /**
+     * (0.2.9, gamefixes: archers loosed again and again from one spot and missed a bat every time) a shooter's aim at a
+     * moving mark: where it will be when the shaft gets there (its way and speed now, the flight time solved over three
+     * passes), raised for the drop over that time, from where the shot leaves. Returns {yaw, pitch, flight seconds}.
+     * A bow is taken at full draw.
+     */
+    public float[] leadAim(Actor a, Actor t, float aimY) {
+        ItemDef w = a.main();
+        boolean bolt = w != null && w.family == Family.CROSSBOW;
+        float speed = bolt ? BOLT_SPEED : bowSpeed(1), gravity = bolt ? BOLT_GRAVITY : ARROW_GRAVITY;
+        float ox = a.x, oy = a.eyeY() - 0.1f, oz = a.z;
+        float vy = t instanceof rpg.monster.Monster m && m.kind.flies() ? m.climb : 0;
+        float tx = t.x, ty = aimY, tz = t.z, time = 0;
+        for (int pass = 0; pass < 3; pass++) {
+            float dx = tx - ox, dz = tz - oz, dy = ty - oy;
+            time = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) / speed;
+            tx = t.x + t.vx * time; tz = t.z + t.vz * time; ty = aimY + vy * time;
+        }
+        float dx = tx - ox, dz = tz - oz, flat = (float) Math.max(0.05, Math.hypot(dx, dz));
+        float yaw = (float) Math.atan2(-dx, -dz);
+        float pitch = (float) Math.atan2(ty - oy + 0.5f * gravity * time * time, flat);
+        return new float[]{yaw, pitch, time};
+    }
     static float bowSpeed(float draw) { return 18 + 34 * Math.max(0.35f, Math.min(1, draw)); }
 
     /**
@@ -320,6 +344,29 @@ public final class CombatSystem {
         if (g.sfx != null) g.sfx.play("throw", a.x, a.eyeY(), a.z, 0.6f);
         g.state.commit("Thrown", a.id, 0, null, 0, String.format("%s potential=%.1f", held.def.name, p.potential));
         return true;
+    }
+
+    /**
+     * (0.3.0, gamefixes) Lights a wielded torch: the guard key with it drawn sets the bearer striking a light to its
+     * head; a moment later it catches. No tinderbox: it is a torch. Returns whether a lighting began.
+     */
+    public boolean lightTorch(Actor a) {
+        if (!a.torchInHand() || a.torchLit || a.torchLighting(g.time) >= 0 || a.cs.busy() || g.carrying.busy(a) || a.traversal != null || a.climb != null) return false;
+        if (!armsReady(a)) return false;
+        a.torchLightingAt = g.time;
+        g.state.commit("TorchLighting", a.id, 0, null, 0, a.name);
+        if (g.sfx != null) g.sfx.play("wood", a.x, a.chestY(), a.z, 0.25f, 1.6f, 8);
+        return true;
+    }
+    /** A torch's own state each tick: catching when the lighting is done, out when it is put away, dropped or drowned. */
+    private void torchTick(Actor a) {
+        if (!a.torchInHand()) { if (a.torchLit) a.torchLit = false; a.torchLightingAt = -99; return; }
+        if (!a.torchLit && a.torchLightingAt > 0 && g.time - a.torchLightingAt >= Actor.TORCH_LIGHTING) {
+            a.torchLit = true; a.torchLightingAt = -99;
+            g.state.commit("TorchLit", a.id, 0, null, 0, a.name);
+            if (g.sfx != null) g.sfx.play("fire", a.x, a.chestY(), a.z, 0.5f, 1.2f, 12);
+        }
+        if (a.torchLit && g.chemistry != null && g.chemistry.onWater(a.x, a.chestY() + 0.6f, a.z)) { a.torchLit = false; g.state.commit("TorchDoused", a.id, 0, null, 0, "water"); }
     }
 
     /** Looses a bolt from a loaded crossbow along an aim; the crossbow is loaded again over a second or so (Agility quickens it). */
@@ -467,6 +514,9 @@ public final class CombatSystem {
     private void spellFromHand(Projectile p, Actor a, float yaw, float pitch) {
         float dx=-(float)Math.sin(yaw)*(float)Math.cos(pitch),dy=(float)Math.sin(pitch),dz=-(float)Math.cos(yaw)*(float)Math.cos(pitch);
         float tx=a.x+dx*24,ty=a.eyeY()+dy*24,tz=a.z+dz*24;
+        // (0.3.0, gamefixes) the player's spell flies from the hand to the very point under the crosshair (the world or a
+        // body), not to a point 24 m out along the eye's line - from the shoulder camera that crossed the aim only there
+        if(a instanceof rpg.actor.Player pl){float[] at=pl.aimPointFor(g.time,new float[]{a.x,a.eyeY(),a.z},yaw,pitch);if(at!=null&&Math.abs(at[0]-a.x)+Math.abs(at[2]-a.z)>1.2f){tx=at[0];ty=at[1];tz=at[2];}}
         float[] hand=castOrigin(a,yaw,pitch);p.x=hand[0];p.y=hand[1];p.z=hand[2];
         float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz),length=(float)Math.sqrt(Math.pow(tx-p.x,2)+Math.pow(ty-p.y,2)+Math.pow(tz-p.z,2));
         p.vx=(tx-p.x)/length*speed;p.vy=(ty-p.y)/length*speed;p.vz=(tz-p.z)/length*speed;
@@ -522,7 +572,8 @@ public final class CombatSystem {
 
     private void tick(Actor a, float dt) {
         Actor.Combat c = a.cs;
-        if (!a.alive) return;
+        if (!a.alive) { a.torchLit = false; return; }
+        torchTick(a);
         c.flash = Math.max(0, c.flash - dt * 3);
         c.iframes = Math.max(0, c.iframes - dt);
         c.dodgeT = Math.max(0, c.dodgeT - dt);
@@ -558,6 +609,11 @@ public final class CombatSystem {
             if (c.phase == Phase.WINDUP) {
                 if (c.t < c.windup) return;
                 c.t -= c.windup; c.phase = Phase.ACTIVE; c.sweep = 0;
+                // (0.3.0) a burning torch swung: its flame goes where the swing goes, and what will burn there catches
+                if (a.torchLit && a.torchInHand() && c.move != Move.BASH && g.chemistry != null) {
+                    float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw), reach = a.radius + 0.75f;
+                    g.chemistry.emit(a, astratto.bridge.AstrattoNative.CHEM_FIRE, a.x + fx * reach, a.chestY() + 0.15f, a.z + fz * reach, 0.55f, c.move == Move.HEAVY ? 3 : 2, 0.35f);
+                }
                 if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.swingOf(c.move == Move.BASH ? a.off() : a.main()), a.x, a.y + 1.3f, a.z, c.move == Move.HEAVY ? 0.65f : 0.5f, c.move == Move.HEAVY ? 0.88f : 0.95f + (float) g.roll(a.id, (long) (g.time * 10)) * 0.12f, 20);
                 g.noise(a, a.x, a.y, a.z, 6, 0.3f);
             } else if (c.phase == Phase.ACTIVE) {

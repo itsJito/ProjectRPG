@@ -62,6 +62,7 @@ public final class AnimalModels {
             case SHEEP -> quad(s, v, 14, 12, 18, 8, 3, 5, 6, 6, 2, sheepCoat(v));
             case PIG -> quad(s, v, 12, 10, 18, 5, 3, 7, 7, 6, 2, pigCoat(v));
             case HORSE -> quad(s, v, 11, 11, 26, 15, 4, 5, 6, 7, 5, horseCoat(v));
+            case PEGASUS -> pegasus(v);
             case DOG -> quad(s, v, 6, 7, 13, 7, 2, 5, 5, 5, 3, dogCoat(v));
             case CAT -> quad(s, v, 5, 5, 10, 5, 2, 4, 4, 3, 1, catCoat(v));
             case FOX -> quad(s, v, 5, 6, 11, 6, 2, 5, 4, 4, 3, foxCoat());
@@ -89,7 +90,7 @@ public final class AnimalModels {
             float ex = Math.max(0, Math.abs(x + 0.5f - bw / 2f) - (bw / 2f - round)), ey = Math.max(0, Math.abs(y + 0.5f - bh / 2f) - (bh / 2f - round));
             float ez = Math.max(0, Math.abs(z + 0.5f - bl / 2f) - (bl / 2f - round * 0.8f));
             if (ex * ex + ey * ey + ez * ez * 0.6f > round * round) continue;
-            if (s == Species.HORSE || s == Species.MOUNTAIN_LION || s == Species.DOG || s == Species.WOLF || s == Species.COYOTE || s == Species.FOX || s == Species.CAT) {
+            if (horseLike(s) || s == Species.MOUNTAIN_LION || s == Species.DOG || s == Species.WOLF || s == Species.COYOTE || s == Species.FOX || s == Species.CAT) {
                 // a tucked waist: the belly rises toward the hind legs
                 float t = (z + 0.5f) / bl;
                 if (y < bh * 0.28f * Math.max(0, t - 0.45f) * 2.2f) continue;
@@ -106,8 +107,8 @@ public final class AnimalModels {
         f.legB = new float[]{inX, -bh / 2f + 2, bl / 2f - legW / 2f - 1.5f};
         // the head, on its neck
         f.head = head(s, v, hw, hh, hl, snout, coat);
-        f.headClosed = closeEyes(f.head, (s == Species.HORSE ? 7 : 1) + hh - Math.max(2, hh / 3), snout + 2, 2, hw + 1);
-        f.neck = s == Species.HORSE ? new float[]{0, bh / 2f - 1, -bl / 2f + 4} : new float[]{0, bh / 2f - hh * 0.35f + (s == Species.PIG ? -1 : 1), -bl / 2f + 1};
+        f.headClosed = closeEyes(f.head, (horseLike(s) ? 7 : 1) + hh - Math.max(2, hh / 3), snout + 2, 2, hw + 1);
+        f.neck = horseLike(s) ? new float[]{0, bh / 2f - 1, -bl / 2f + 4} : new float[]{0, bh / 2f - hh * 0.35f + (s == Species.PIG ? -1 : 1), -bl / 2f + 1};
         f.tail = tail(s, coat);
         f.tailAt = new float[]{0, bh / 2f - (s == Species.PIG ? 2 : 1.5f), bl / 2f - 0.5f};
         return f;
@@ -115,11 +116,11 @@ public final class AnimalModels {
 
     private static VoxModel leg(Species s, int legH, int legW, Coat coat, boolean front) {
         VoxModel l = new VoxModel(legW, legH, legW);
-        boolean hoof = s == Species.COW || s == Species.SHEEP || s == Species.PIG || s == Species.HORSE;
+        boolean hoof = s == Species.COW || s == Species.SHEEP || s == Species.PIG || horseLike(s);
         for (int y = 0; y < legH; y++) for (int x = 0; x < legW; x++) for (int z = 0; z < legW; z++) {
             int col = coat.at(front ? "legF" : "legB", x, y, z, legW, legH, legW);
             if (y == 0) col = hoof ? c(s == Species.PIG ? 0x6A4A40 : 0x2A2420) : c(Tex.shade(col & 0xFFFFFF, 0.75f));
-            if (hoof && y == 1) col = c(s == Species.HORSE ? 0x3A3028 : Tex.shade(col & 0xFFFFFF, 0.85f));
+            if (hoof && y == 1) col = c(horseLike(s) ? 0x3A3028 : Tex.shade(col & 0xFFFFFF, 0.85f));
             l.set(x, y, z, col);
         }
         // the haunch is thicker at the top for a big animal
@@ -128,7 +129,7 @@ public final class AnimalModels {
 
     /** The head: a block with a snout in front, eyes, a nose, and the species' ears, horns, mane. Pivot: where the neck joins (its back-bottom). */
     private static ItemModels.Model head(Species s, int v, int hw, int hh, int hl, int snout, Coat coat) {
-        boolean horse = s == Species.HORSE;
+        boolean horse = horseLike(s);
         int neckL = horse ? 6 : 0;
         int sx = hw + 4, sy = hh + (horse ? 12 : 6), sz = hl + snout + neckL + 2;
         VoxModel m = new VoxModel(sx, sy, sz);
@@ -141,11 +142,11 @@ public final class AnimalModels {
             m.set(ox + x, oy + y, oz + snout + z, coat.at("head", x, y, z, hw, hh, hl));
         }
         // the snout (narrower and lower), its nose
-        int snw = Math.max(2, hw - (s == Species.PIG ? 1 : s == Species.COW || s == Species.HORSE || s == Species.BROWN_BEAR ? 2 : 3)), snh = Math.max(2, hh - (s == Species.PIG ? 2 : hh / 2));
+        int snw = Math.max(2, hw - (s == Species.PIG ? 1 : s == Species.COW || horse || s == Species.BROWN_BEAR ? 2 : 3)), snh = Math.max(2, hh - (s == Species.PIG ? 2 : hh / 2));
         int sx0 = ox + (hw - snw) / 2;
         for (int x = 0; x < snw; x++) for (int y = 0; y < snh; y++) for (int z = 0; z < snout; z++)
             m.set(sx0 + x, oy + y, oz + z, coat.at("snout", x, y, z, snw, snh, snout));
-        int nose = switch (s) { case PIG -> 0xE89A98; case COW -> 0xE4A8A0; case SHEEP -> 0x2A2420; case HORSE -> 0x3A3430; case CAT -> 0xE08890; default -> 0x1A1614; };
+        int nose = switch (s) { case PIG -> 0xE89A98; case COW -> 0xE4A8A0; case SHEEP -> 0x2A2420; case HORSE, PEGASUS -> 0x3A3430; case CAT -> 0xE08890; default -> 0x1A1614; };
         if (snout > 0) {
             for (int x = 0; x < snw; x++) for (int y = snh - (s == Species.PIG ? snh : 1); y < snh; y++) if (s == Species.PIG || x > 0 && x < snw - 1 || snw <= 2) m.set(sx0 + x, oy + y, oz, c(nose));
             if (s == Species.PIG) { m.set(sx0 + 1, oy + snh / 2, oz, c(0x6A3A3A)); m.set(sx0 + snw - 2, oy + snh / 2, oz, c(0x6A3A3A)); }
@@ -172,8 +173,10 @@ public final class AnimalModels {
                 }
             }
             case MOUNTAIN_LION, BROWN_BEAR -> { for (int side : new int[]{ox, ox + hw - 2}) m.box(side, top, ez, side + 1, top, ez, earC); }
-            case HORSE -> {
+            case HORSE, PEGASUS -> {
                 for (int side : new int[]{ox, ox + hw - 1}) { m.set(side, top, ez, earC); m.set(side, top + 1, ez, earC); }
+                // (0.3.0) the Pegasus's horn: a pale spiral out of the forehead, forward and up
+                if (s == Species.PEGASUS) for (int i = 0; i < 6; i++) { int hc = i % 2 == 0 ? 0xF2E8C8 : 0xD8C890; m.set(ox + hw / 2, top + i, oz + snout + 1 - i / 2, c(hc)); if (i < 3) m.set(ox + hw / 2 - 1 + i % 2, top + i, oz + snout + 1 - i / 2, c(hc)); }
                 // the mane down the neck
                 int mane = coat.at("mane", 0, 0, 0, 1, 1, 1);
                 for (int z = 0; z < neckL + 3; z++) for (int y = 0; y < 2; y++) m.set(ox + hw / 2, top - z * (oy - 1) / (neckL + 3) - y + 1, ez + z, mane);
@@ -377,6 +380,42 @@ public final class AnimalModels {
         return (part, x, y, z, sx, sy, sz) -> {
             if (v == 1 && part.equals("body") && z > sz / 3 && z < sz * 2 / 3) return fur(0xE8A8A0, x, y, z, 0.05f);   // a saddleback's band
             return fur(skin, x, y, z, 0.06f);
+        };
+    }
+
+    /** A horse's anatomy (its neck and mane, hooves, tucked waist): the horse and the Pegasus built from it. */
+    static boolean horseLike(Species s) { return s == Species.HORSE || s == Species.PEGASUS; }
+
+    /**
+     * (0.3.0, gamefixes) The Pegasus: the horse's figure, brolic - a broader, deeper body, thicker legs, a heavy neck -
+     * in white with a silver mane, a horn, and a pair of great feathered wings folded along its back from the withers.
+     */
+    private static Figure pegasus(int v) {
+        Figure f = quad(Species.PEGASUS, v, 14, 13, 28, 15, 5, 6, 7, 8, 5, pegasusCoat(v));
+        // a wing: a long panel of primaries, its leading edge thick, the feathers fanned and layered (built pointing back, +z)
+        int wl = 26, ww = 3, wh = 12;
+        VoxModel w = new VoxModel(ww, wh, wl);
+        for (int z = 0; z < wl; z++) for (int y = 0; y < wh; y++) {
+            float t = z / (float) wl;
+            int depth = Math.round(wh * (1 - 0.65f * t)) - (z % 3 == 2 ? 1 : 0);
+            if (wh - 1 - y >= depth) continue;
+            int col = y == wh - 1 ? 0xE8E2D6 : (z + y) % 4 == 0 ? 0xD6D0C6 : 0xF6F2EA;
+            if (wh - 1 - y > depth - 3 && z > 6) col = 0xC8C2B8;          // the primaries' darker tips
+            for (int x = 0; x < (y == wh - 1 ? ww : 1 + (y > wh - 4 ? 1 : 0)); x++) w.set(x, y, z, c(col));
+        }
+        f.wing = new ItemModels.Model(w, 0.5f, wh - 1, 1);
+        f.wingAt = new float[]{f.bw / 2f - 1, f.bh / 2f - 1, -f.bl / 2f + 6};
+        return f;
+    }
+
+    private static Coat pegasusCoat(int v) {
+        int coat = v == 1 ? 0xE6E0D8 : 0xF4F0EA, mane = v == 2 ? 0xC8B068 : 0xC0C4CC;
+        return (part, x, y, z, sx, sy, sz) -> switch (part) {
+            case "mane", "tip", "tail" -> fur(mane, x, y, z, 0.12f);
+            case "ear" -> c(Tex.shade(coat, 0.9f));
+            case "snout" -> fur(0xD8CFC6, x, y, z, 0.05f);
+            case "legF", "legB" -> fur(y < 3 ? 0xCFC6BC : coat, x, y, z, 0.05f);
+            default -> fur(coat, x, y, z, 0.05f);
         };
     }
 

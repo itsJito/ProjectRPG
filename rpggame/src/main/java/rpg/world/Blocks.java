@@ -43,6 +43,16 @@ public final class Blocks {
             // 0.2.2 (gamefixes): a clipped hedge - small dense leaves, squared off; DevPalace's greenery
             HEDGE = 108,
             STAIRS = 109, LADDER = 110, COUNT = 111;
+    /**
+     * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
+     * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
+     * over cobbles - so a path's edge is grown over rather than ruled. Walls, floors and anything built: 0, kept crisp.
+     */
+    public static byte[] groundRanks() {
+        byte[] r = new byte[256];
+        r[GRASS] = 6; r[BARE_PATCH] = 5; r[DIRT] = 4; r[MUD] = 4; r[SAND] = 3; r[CLAY] = 3; r[COBBLE] = 2; r[STONE] = 1; r[DEBUG_FLOOR] = 1;
+        return r;
+    }
     public static boolean stairs(int id) { return id == STAIRS; }
     public static boolean ladder(int id) { return id == LADDER; }
     /** The two-faced blocks' pairs: {outside, inside}. */

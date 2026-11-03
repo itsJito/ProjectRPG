@@ -12,7 +12,8 @@ void main() {
     int kind = int(vParams.y + 0.5);
     float age = vParams.z, seed = vParams.w;
     float r = length(vQ);
-    if (r > 1.0 && kind != 5 && kind != 7) discard;
+    if (r > 1.0 && kind != 5 && kind != 7 && kind != 9) discard;
+    if (kind == 9 && r > 1.0) discard;
     // soft where the sprite cuts into geometry
     float scene = lin(texture(uDepth, gl_FragCoord.xy / uScreen).r);
     float soft = clamp((scene - vClipW) * 2.5, 0.0, 1.0);
@@ -62,6 +63,20 @@ void main() {
         col *= mix(vec3(1.0, 0.55, 0.22), vec3(1.0, 0.95, 0.8), core);
     } else if (kind == 7) {
         a = (1.0 - abs(vQ.x)) * (1.0 - vQ.y * vQ.y) * vColor.a;
+    } else if (kind == 9) {
+        // (0.3.0) a drop of blood (or any liquid): a solid round-ended body, darker at its rim, a wet highlight toward
+        // the head - it occludes like the liquid it is, never glows
+        a = (1.0 - smoothstep(0.72, 1.0, r)) * (1.0 - smoothstep(0.82, 1.0, age));
+        float rim = smoothstep(0.25, 1.0, r);
+        float spec = (1.0 - smoothstep(0.0, 0.32, length(vQ - vec2(-0.25, 0.45)))) * 0.9;
+        col = col * (1.0 - rim * 0.45) + vec3(spec) * 0.35;
+    } else if (kind == 10) {
+        // (0.3.0) a splat where a drop landed: an uneven blot with satellite specks, glossy while fresh, drying darker
+        float n = texture(uNoise, vQ * 0.45 + vec2(seed * 5.0, seed * 2.0)).r;
+        float body = 1.0 - smoothstep(0.42 + n * 0.28, 0.62 + n * 0.3, r);
+        float speck = step(0.86, texture(uNoise, vQ * 1.7 + vec2(seed * 9.0, seed)).g) * (1.0 - smoothstep(0.7, 1.0, r));
+        a = max(body, speck) * (1.0 - smoothstep(0.7, 1.0, age));
+        col *= mix(1.0, 0.55, smoothstep(0.0, 0.5, age)) * (0.85 + 0.3 * n);
     } else if (kind == 8) {
         a = (1.0 - smoothstep(0.45, 1.0, r)) * vColor.a * (1.0 - smoothstep(0.75, 1.0, age));
     } else {
@@ -70,5 +85,5 @@ void main() {
     a *= soft;
     if (a < 0.004) discard;
     // premultiplied output: additive kinds carry no alpha, smoke and dust occlude, rain is half one and half the other
-    oColor = (kind == 1 || kind == 8) ? vec4(col * a, a) : kind == 4 ? vec4(col * a, a * 0.8) : kind == 7 ? vec4(col * a * 0.55, a * 0.3) : vec4(col * a, 0.0);
+    oColor = (kind == 1 || kind == 8 || kind == 9 || kind == 10) ? vec4(col * a, a) : kind == 4 ? vec4(col * a, a * 0.8) : kind == 7 ? vec4(col * a * 0.55, a * 0.3) : vec4(col * a, 0.0);
 }

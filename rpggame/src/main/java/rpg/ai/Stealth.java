@@ -31,6 +31,8 @@ public final class Stealth {
     public static final float CURIOUS = 0.2f, INVESTIGATING = 0.5f, ALERT = 1f, CLEAR = 0.45f, MAX = 1.25f;
     /** How far eyes reach (metres) and how close a body is sensed whatever the cone. */
     public static final float RANGE = 24, CLOSE = 2.2f, CLOSE_CREEPING = 1.2f;
+    /** Within this, a foe in an established fight stays in sight whatever the light, while any line to them is clear. */
+    public static final float TRACK_NEAR = 14;
     /** Speech and other noises share the same coarse wall attenuation. */
     public static final float WALL_MUFFLE = 0.55f;
 
@@ -68,7 +70,12 @@ public final class Stealth {
      * How lit the block an actor stands in is, 0 .. 1: the sky light that reaches the cell (none indoors, in full under
      * the open sky) by the time of day, the lamp and glow light flooded into it, and any fire close by.
      */
-    public float light(Actor a) { return light(a.x, a.y + 0.2f, a.z); }
+    public float light(Actor a) {
+        float l = light(a.x, a.y + 0.2f, a.z);
+        // (0.3.0) a burning torch lights its bearer up for everyone to see
+        if (a.torchLit && a.torchInHand()) l = Math.max(l, 0.95f);
+        return l;
+    }
 
     /**
      * The fires burning this tick, gathered once (gamefixes: combat lagged - every sight line, three a look for every
@@ -156,6 +163,8 @@ public final class Stealth {
         if (seen <= 0.01f) return 0;
         float speed = (float) Math.hypot(a.vx, a.vz);
         float stance = low ? 0.42f : 1;
+        // (0.3.0) crouched in tall grass, half hidden again
+        if (low && g.foliage != null && g.foliage.tallGrassAt(a.x, a.z)) stance *= 0.6f;
         float motion = speed > 4.5f ? 1.45f : speed > 0.5f ? 1f : 0.75f;
         float lit = Math.max(0.07f, light(a));
         // near at hand a body is hard to miss in any but the darkest place: a strong, smooth bonus inside six metres
@@ -191,7 +200,12 @@ public final class Stealth {
         // Turning the body or a stale perception sample cannot hide a visible opponent during an established fight.
         boolean tracking=n.fightTarget==a.id || n instanceof rpg.monster.Monster monster && monster.target==a.id
                 || n.cs.lastAttacker==a.id && g.time-n.cs.lastHurt<4;
-        if(tracking)return exposure(n,acuity(n),a,true)>0.08f;
+        // (0.3.0, gamefixes: "where did they go?" with the player in plain view) a foe already being fought is not lost to
+        // the dark or the eye's edge while there is a clear line to them close by: the light only matters further off
+        if(tracking) {
+            float e=exposure(n,acuity(n),a,true);
+            return e>0 && (n.distTo(a)<TRACK_NEAR || e>0.05f);
+        }
         Aware w = n.aware.get(a.id);
         float e = w != null && g.time - w.at < 0.25 ? w.exposure : exposure(n, a);
         return e >= CLEAR || e > 0 && w != null && w.level >= ALERT;

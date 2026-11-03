@@ -22,9 +22,15 @@ public final class FoliageModels {
                 }
             }
             case TALL_GRASS -> {
-                for(int blade=0;blade<9;blade++) {
-                    float x=((seed>>>(blade%7))&7)*0.035f-0.12f,z=((seed>>>(blade%11+3))&7)*0.035f-0.12f,h=0.45f+blade%4*0.14f;
-                    for(int step=0;step<4;step++)boxes.rgb(x+step*0.018f,h*(step+0.5f)/4,z,0.028f,h/4,0.025f,blade%2==0?light:green);
+                // (0.3.0, gamefixes: the tall grass taller) a clump knee- to hip-high: thirteen blades of three lengths, each
+                // bowing outward as it rises, a few with seed heads
+                for(int blade=0;blade<13;blade++) {
+                    double a=blade*2.39+((seed>>>blade%9)&3)*0.4;
+                    float x=((seed>>>(blade%7))&7)*0.03f-0.1f,z=((seed>>>(blade%11+3))&7)*0.03f-0.1f,h=0.72f+blade%4*0.17f+((seed>>>(blade%5+11))&3)*0.04f;
+                    float lean=0.05f+blade%3*0.03f,lx=(float)Math.cos(a)*lean,lz=(float)Math.sin(a)*lean;
+                    for(int step=0;step<6;step++){float t=(step+0.5f)/6f,bend=t*t;
+                        boxes.rgb(x+lx*bend*3,h*t,z+lz*bend*3,0.03f-step*0.002f,h/6+0.01f,0.026f-step*0.002f,blade%3==0?light:blade%3==1?green:dark);}
+                    if(blade%4==0)boxes.rgb(x+lx*3,h+0.05f,z+lz*3,0.045f,0.12f,0.045f,0xC8B878);
                 }
             }
             case CLOVER -> {

@@ -135,6 +135,8 @@ private:
     struct Portrait { float x, y, w, h; std::vector<astratto_portrait_part> parts; };
     struct Quads { uint32_t texture = 0; int portrait = -1; std::vector<float> v; };
     struct Grading { float death = 0, hurt = 0, infection = 0, flash = 0, bile = 0; };
+    /** API 2.9: the ambient cube and grade an environment preset sets (kept until sent again). */
+    struct Atmos { float cube[18] = {}; float exposure = 1, saturation = 1, contrast = 1, tint[3] = {1, 1, 1}; };
     struct ModelMesh { gl::GLuint vao = 0, vbo = 0; uint32_t count = 0; bool translucent = false; float center[3] = {}, extent[3] = {}; };
     struct Texture { gl::GLuint id = 0; gl::GLenum target = 0; uint32_t layers = 1, width = 0, height = 0; };
 
@@ -220,6 +222,7 @@ private:
     Camera cam_;
     Env env_;
     Grading grading_;
+    Atmos atmos_;
     std::vector<float> lights_;          // 12 floats a light
     int lightCount_ = 0;
     float bodies_[MAX_BODIES * 5] = {};
@@ -295,6 +298,9 @@ private:
     static constexpr int MAX_QUADS = 1 << 20;
     gl::GLuint voxTex_ = 0, paletteTex_ = 0;
     uint32_t opaqueMask_[8] = {}, particleCollision_[8] = {};
+    /* 2.8: per block id, its ground rank (four to a word) and its top's texture layer and variants (two to a word:
+     * layer in the low 14 bits, variants - 1 above), for the ground blend at cell edges in the world G-buffer pass */
+    uint32_t groundRank_[64] = {}, groundLayer_[128] = {};
     bool voxFilled_ = false;
     std::vector<uint8_t> column_;
     std::vector<uint64_t> order_;

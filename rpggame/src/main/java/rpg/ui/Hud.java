@@ -156,6 +156,9 @@ public final class Hud {
     public void openShop(Economy.Shop s) { shop = s; win = Win.SHOP; menu = null; go(Scene.INVENTORY); }
     public void openKiosk() { win = Win.KIOSK; menu = null; go(Scene.WORLD); }
     public void openTab(int t) { go(TAB_SCENES[Math.max(0, Math.min(TAB_SCENES.length - 1, t))]); }
+    /** (0.3.0) Whether a conversation with this NPC is open now (the face shows what they make of the player). */
+    public boolean dialogWith(long npc) { return dialog != null && dialog.npc == npc; }
+
     public void dialog(Dialog d) {
         dialog = d; menu = null;
     }

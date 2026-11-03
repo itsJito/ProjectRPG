@@ -59,6 +59,8 @@ public final class Rumors {
                 case "MURDER" -> -0.9f * c; case "ASSAULT" -> m.victim == n.id ? -0.7f * c : -0.35f * c; case "THEFT" -> m.victim == n.id ? -0.45f * c : -0.2f * c;
                 case "LIVESTOCK" -> -0.25f * c; case "LOCKPICKING", "VANDALISM" -> -0.15f * c;
                 case "DEED" -> 0.12f * c; case "ARMS" -> -0.08f * c;
+                // (0.2.9) words of one's own, said to them: a kindness a little, a jibe more (it stings longer)
+                case "KIND_WORD" -> 0.05f * c; case "SLIGHT" -> -0.1f * c;
                 default -> 0;
             };
         }
@@ -191,7 +193,8 @@ public final class Rumors {
         if (m.subject == 0) who = "someone";
         String victim = m.victim == teller.id ? "me" : m.victim != 0 ? g.nameOf(m.victim) : "someone";
         boolean saw = m.witnessed();
-        String hedge = saw ? "I saw it myself: " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
+        // (0.3.0) an opinion from what they saw after, not the deed itself: said as what it is
+        String hedge = saw ? "I saw it myself: " : m.source.equals("circumstantial") ? "I didn't see it happen, but I'd swear " : m.witness != 0 ? "I heard " + g.nameOf(m.witness) + " saw it: "
                 : m.confidence > 0.55f ? "Did you hear? " : "They're saying ";
         String account = switch (m.kind) {
             case "BLOCKED" -> "That way is obstructed. Try another route for now.";

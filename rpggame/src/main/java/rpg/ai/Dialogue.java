@@ -36,12 +36,18 @@ public final class Dialogue {
             g.ai.rumors.deed("greeted " + n.name + " kindly", n.id);
             g.ai.say(n, n.role == Npc.Role.GUARD ? "And to you. Stay out of trouble." : "Oh! Good day to you, too.");
         });
+        String[] tip = null;
         switch (n.role) {
             case MERCHANT -> { if (n.working()) d.choice("Let's trade.", () -> g.interact.request(g.player, n, "trade")); }
             case LAWMAN -> {
                 int b = g.law.bounty(g.player.id, n.homeJurisdiction);
                 if (b > 0) d.standoff=true;
-                if (b > 0) d.choice("Pay my bounty (" + b + " coins).", () -> g.interact.request(g.player, n, "pay"));
+                int purse = g.player.count(Items.COINS);
+                if (b > 0 && purse >= b) d.choice("Pay my bounty (" + b + " coins).", () -> g.interact.request(g.player, n, "pay"));
+                else if (b > 0) d.choice("Pay what I have (" + purse + " of " + b + " coins; the rest is taken in goods and time).", () -> {
+                    var r = g.law.payWhatYouCan(g.player, n, g.state.newRequestId());
+                    if (r.rejected()) g.chat.warn(r.reason());
+                });
                 d.choice("Any crimes reported?", () -> g.ui.dialog(new Dialog(n.name, reports(n))));
             }
             case QUEST_GIVER -> { if(n.working()) questGiver(n, d); }
@@ -65,31 +71,238 @@ public final class Dialogue {
                 if (n.breadRefusal(g, g.player) == null)
                     d.choice("Offer a loaf of bread.", () -> g.interact.request(g.player, n, "give_bread"));
             }
-            case HEALER -> d.choice("Where can I find supplies?", () -> g.ui.dialog(new Dialog(n.name, "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.")));
-            case PRIEST -> d.choice("Who tends the dead?", () -> g.ui.dialog(new Dialog(n.name, "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.")));
-            case SCHOLAR -> d.choice("Where can I sell questionable goods?", () -> g.ui.dialog(new Dialog(n.name, "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.")));
-            case HUNTER -> d.choice("Any advice for the wilderness?", () -> g.ui.dialog(new Dialog(n.name, "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.")));
+            case HEALER -> tip = tip(n, "Where can I find supplies?", "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.");
+            case PRIEST -> tip = tip(n, "Who tends the dead?", "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.");
+            case SCHOLAR -> tip = tip(n, "Where can I sell questionable goods?", "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.");
+            case HUNTER -> tip = tip(n, "Any advice for the wilderness?", "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.");
             case CIVIC -> { if (n.id == Ids.TELLER) g.bank.choices(n, d); }
-            case THIEF -> d.choice("Got anything for me?", () -> g.ui.dialog(new Dialog(n.name, "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.")));
+            case THIEF -> tip = tip(n, "Got anything for me?", "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.");
             default -> { }
         }
         // the callings of 0.1.8: each talks of their own work, as a tip from someone who does it
         if (n.profession != null) switch (n.profession) {
-            case COOK -> d.choice("Any secret to cooking?", () -> g.ui.dialog(new Dialog(n.name, "Any fire will do, or a range. Hold it over the heat and turn it once, halfway. "
-                    + "You'll burn a few at first - everyone does. The more you cook, the surer your hands get, and one day you just stop burning things.")));
-            case QUARRY_WORKER -> d.choice("What do you cut here?", () -> g.ui.dialog(new Dialog(n.name, "Building stone, block by block. Work a face square-on, from the front. "
-                    + "Swing at it from the side and you'll take a chunk of whatever's next to it - I filled a sack with clay that way, my first week.")));
-            case BORDER_KNIGHT -> d.choice("What do you watch for?", () -> g.ui.dialog(new Dialog(n.name, "This is where the city's ground ends. Anything that comes over it - beasts, worse - "
-                    + "meets me first, and I call the watch. Past this line the city's watch can't help you. Its warrants stop here too, mind - but word travels.")));
-            case SHELLFISH_GATHERER -> d.choice("When are the crabs about?", () -> g.ui.dialog(new Dialog(n.name, "When the water's low. Set a cage in the shallows and leave it be - "
-                    + "crabs won't come to a crowd. If a bed's picked clean, give it time, or find another.")));
-            case RIVER_FISHERMAN -> d.choice("Any luck on the brook?", () -> g.ui.dialog(new Dialog(n.name, "Trout like moving water. If one spot goes quiet, try the next bend - "
-                    + "that's the whole art of it. And watch the woods behind you. Things come down to drink.")));
+            case COOK -> tip = tip(n, "Any secret to cooking?", "Any fire will do, or a range. Hold it over the heat and turn it once, halfway. "
+                    + "You'll burn a few at first - everyone does. The more you cook, the surer your hands get, and one day you just stop burning things.");
+            case QUARRY_WORKER -> tip = tip(n, "What do you cut here?", "Building stone, block by block. Work a face square-on, from the front. "
+                    + "Swing at it from the side and you'll take a chunk of whatever's next to it - I filled a sack with clay that way, my first week.");
+            case BORDER_KNIGHT -> tip = tip(n, "What do you watch for?", "This is where the city's ground ends. Anything that comes over it - beasts, worse - "
+                    + "meets me first, and I call the watch. Past this line the city's watch can't help you. Its warrants stop here too, mind - but word travels.");
+            case SHELLFISH_GATHERER -> tip = tip(n, "When are the crabs about?", "When the water's low. Set a cage in the shallows and leave it be - "
+                    + "crabs won't come to a crowd. If a bed's picked clean, give it time, or find another.");
+            case RIVER_FISHERMAN -> tip = tip(n, "Any luck on the brook?", "Trout like moving water. If one spot goes quiet, try the next bend - "
+                    + "that's the whole art of it. And watch the woods behind you. Things come down to drink.");
             default -> { }
         }
-        d.choice("What do you know?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
+        // (0.3.0, gamefixes: every answer from the NPC's own day; three or four choices, not a wall of them) how their day has
+        // been and what they have heard - always; their own work, as it has gone today; and one thing for the moment: what
+        // shook them, their hurt, their hunger - or, on a quiet day, one of the everyday questions in turn
+        if (n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE) {
+            d.choice("How's your day been?", () -> g.ui.dialog(new Dialog(n.name, day(n))));
+            d.choice("What have you heard?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
+            final String[] t = tip != null ? tip : workTip(n);
+            if (t != null) d.choice(t[0], () -> g.ui.dialog(new Dialog(n.name, t[1] + workToday(n))));
+            situational(n, d, t == null);
+        } else d.choice("What do you want?", () -> g.ui.dialog(new Dialog(n.name, day(n))));
         d.closeChoice("Goodbye.", () -> { });
         return d;
+    }
+
+    // ------------------------------------------------------------------ (0.3.0) the day, told from the Diary
+    private static String[] tip(Npc n, String question, String answer) { return new String[]{question, answer}; }
+
+    /** A calling with no role tip of its own: asked about their work. */
+    private String[] workTip(Npc n) {
+        if (n.profession == null && n.role != Npc.Role.WORKER && n.role != Npc.Role.FARMER && n.role != Npc.Role.MERCHANT && n.role != Npc.Role.GUARD
+                && n.role != Npc.Role.LAWMAN && n.role != Npc.Role.CARTER && n.role != Npc.Role.UNDERTAKER && n.role != Npc.Role.VILLAGER) return null;
+        return new String[]{n.watch() ? "How's the watch?" : "How's work?", n.watch() ? pick(n, "Same streets, same faces. ", "Long hours on these stones. ") : pick(n, "It keeps me fed. ", "Honest work, mostly. ", "It's work. ")};
+    }
+
+    /** What of their work they did today, said after the tip (empty when nothing of it). */
+    private String workToday(Npc n) {
+        var done = n.diary.today(g.state.minutes);
+        for (int i = done.size() - 1; i >= 0; i--) {
+            String w = done.get(i).what();
+            if (w.startsWith("sold") || w.startsWith("worked") || w.startsWith("cut") || w.startsWith("walked my round") || w.startsWith("laid") || w.startsWith("mended")
+                    || w.contains("eggs") || w.contains("trough") || w.startsWith("set my snares"))
+                return " Today I " + w + (done.get(i).times() > 1 ? ", a few times over" : "") + ".";
+        }
+        return n.goal == Brain.Goal.WORK ? " I'm only just getting to it today." : "";
+    }
+
+    /** How their day has been: a mood, what they did (in order, with the time of day), and how they are now. */
+    String day(Npc n) {
+        double now = g.state.minutes, hour = g.state.hourOfDay();
+        var done = n.diary.today(now);
+        boolean hurt = n.hp < n.maxHp() * 0.8f, shaken = shook(n) != null, hungry = n.hunger > 0.6f, tired = n.fatigue > 0.7f || hour >= 21;
+        boolean rain = g.timeSystem != null && g.timeSystem.weather.rain > 0.4f;
+        StringBuilder b = new StringBuilder();
+        b.append(hurt || shaken ? pick(n, "Rough, if I'm honest. ", "Not my best. ", "Could have been better. ")
+                : done.size() >= 3 ? pick(n, "Busy. ", "Long one. ", "Full, I'd say. ") : done.isEmpty() ? (hour < 9 ? pick(n, "Only just begun. ", "Early yet. ") : pick(n, "Quiet. ", "Slow, so far. "))
+                : pick(n, "Not bad at all. ", "Can't complain. ", "Fair enough. "));
+        if (g.state.weekday() == 0 && hour >= 12 && hour < 20 && !n.watch()) b.append("It's Solday - the week's rest. ");
+        // up to three things, earliest first, each with the time of day it happened
+        int from = Math.max(0, done.size() - 3);
+        String lastWhen = "";
+        for (int i = from; i < done.size(); i++) {
+            var e = done.get(i);
+            double h = (e.minutes() % 1440) / 60.0;
+            String when = h < 12 ? "this morning" : h < 17 ? "this afternoon" : "this evening";
+            String part = (i == from ? (when.equals(lastWhen) ? "" : capital(when) + " ") : i == done.size() - 1 ? (when.equals(lastWhen) ? "and then " : "and " + when + " ") : (when.equals(lastWhen) ? "then " : when + " "));
+            b.append(i == from ? part + "I " : part + "I ").append(e.what()).append(e.times() > 1 ? " a few times" : "").append(i == done.size() - 1 ? ". " : ", ");
+            lastWhen = when;
+        }
+        if (shaken) b.append(shook(n)).append(' ');
+        if (hurt) b.append(n.cs.lastAttacker != 0 && g.actor(n.cs.lastAttacker) != null ? "Got hurt, too - " + g.nameOf(n.cs.lastAttacker) + " saw to that. " : "Took a knock, too. ");
+        if (rain) b.append(pick(n, "And this rain doesn't help. ", "Wet through, besides. "));
+        if (hungry) b.append(pick(n, "I could eat a horse.", "I haven't eaten in too long.", "Starving, truth be told."));
+        else if (tired) b.append(pick(n, "I'll sleep well tonight.", "Nearly done, thank the stones.", "Ready for my bed."));
+        return b.toString().trim();
+    }
+
+    /** What shook them today (a crime or a beast they saw themselves), in their words; null when nothing did. */
+    private String shook(Npc n) {
+        double since = g.state.minutes - ((g.state.minutes - 5 * 60) % 1440 + 1440) % 1440;
+        for (int i = n.memories.size() - 1; i >= 0; i--) {
+            Memory m = n.memories.get(i);
+            if (m.minutes < since || !m.witnessed()) continue;
+            if (m.kind.equals("BEAST_ATTACK")) return "I saw a creature go for " + g.nameOf(m.victim) + ". Still shaking.";
+            if (m.crime()) return "I saw " + (m.subject == g.player.id ? "you" : g.nameOf(m.subject)) + " - " + rpg.law.Law.crimeWord(m.kind) + ", with my own eyes.";
+        }
+        return null;
+    }
+
+    /** The fourth choice: what is on them now, or one of the everyday questions in turn. */
+    private void situational(Npc n, Dialog d, boolean twoSlots) {
+        String shaken = shook(n);
+        java.util.List<Runnable> picks = new java.util.ArrayList<>();
+        if (shaken != null) d.choice("You look shaken. What happened?", () -> g.ui.dialog(new Dialog(n.name, shaken + " " + pick(n, "I keep seeing it.", "I told the watch, for what that's worth.", "You'd best be careful about."))));
+        else if (n.hp < n.maxHp() * 0.7f) d.choice("You're hurt. Are you all right?", () -> g.ui.dialog(new Dialog(n.name, (n.cs.lastAttacker != 0 ? g.nameOf(n.cs.lastAttacker) + " did this. " : "") + pick(n, "I'll mend. The healer will see to it.", "It looks worse than it is.", "Nothing a meal and a night won't fix."))));
+        else if (n.hunger > 0.65f) d.choice("You look hungry.", () -> g.ui.dialog(new Dialog(n.name, "I am. " + (n.diary.did(g.state.minutes, "had some") ? "I've had a bite today, but not enough." : "I've not eaten all day.") + " If you've bread to spare, I'd not say no.")));
+        else picks.add(null);
+        if (picks.isEmpty() && !twoSlots) return;
+        // a quiet day: one (or, with no work to ask about, two) of the everyday questions, turned about day by day
+        int seed = Math.floorMod((int) (g.state.minutes / 1440) * 7 + (int) n.id, 6);
+        int count = (picks.isEmpty() ? 0 : 1) + (twoSlots ? 1 : 0);
+        for (int k = 0; k < count; k++) switch ((seed + k) % 6) {
+            case 0 -> d.choice("Could you point me somewhere?", () -> g.ui.dialog(directions(n)));
+            case 1 -> d.choice("Is it safe around here?", () -> g.ui.dialog(new Dialog(n.name, dangers(n))));
+            case 2 -> d.choice("What do you make of me?", () -> g.ui.dialog(new Dialog(n.name, standing(n))));
+            case 3 -> d.choice("Is anything in short supply?", () -> g.ui.dialog(new Dialog(n.name, shortages(n))));
+            case 4 -> d.choice("You do good work here. (compliment them)", () -> word(n, true));
+            default -> d.choice("You look like you've never done a day's work. (mock them)", () -> word(n, false));
+        }
+    }
+    private static String capital(String s) { return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1); }
+
+    // ------------------------------------------------------------------ the universal choices (0.2.9)
+    /** The places one asks the way to, by name and where they are (the nearest of each kind is given). */
+    private java.util.List<Object[]> places(Npc n) {
+        java.util.List<Object[]> l = new java.util.ArrayList<>();
+        if (g.econ.shopA != null) l.add(new Object[]{"the store", g.econ.shopA.counterX, g.econ.shopA.counterZ});
+        if (g.econ.shopB != null) l.add(new Object[]{"the store", g.econ.shopB.counterX, g.econ.shopB.counterZ});
+        l.add(new Object[]{"the bank", rpg.world.DevMap.BANK_TELLER[0], rpg.world.DevMap.BANK_TELLER[1]});
+        l.add(new Object[]{"an altar", rpg.world.DevMap.ALTAR[0] + 0.5f, rpg.world.DevMap.ALTAR[1] + 0.5f});
+        l.add(new Object[]{"an altar", rpg.world.Expanse.ALTAR[0], rpg.world.Expanse.ALTAR[1]});
+        l.add(new Object[]{"the well", rpg.world.DevMap.WELL[0] + 0.5f, rpg.world.DevMap.WELL[1] + 0.5f});
+        for (Npc o : g.npcs) {
+            if (!o.alive) continue;
+            if (o.role == Npc.Role.LAWMAN) l.add(new Object[]{"the watch", o.postX, o.postZ});
+            if (o.role == Npc.Role.UNDERTAKER) l.add(new Object[]{"the undertaker", o.postX, o.postZ});
+            if (o.role == Npc.Role.HEALER) l.add(new Object[]{"the healer", o.postX, o.postZ});
+        }
+        return l;
+    }
+
+    /** The way to each kind of place from where they stand: a compass point and how far. */
+    private Dialog directions(Npc n) {
+        Dialog d = new Dialog(n.name, pick(n, "Where to?", "Lost, are you? Where are you headed?", "I know the place well enough. Where do you want to go?"));
+        d.npc = n.id;
+        java.util.Map<String, Object[]> nearest = new java.util.LinkedHashMap<>();
+        for (Object[] p : places(n)) {
+            float px = (float) p[1], pz = (float) p[2];
+            Object[] had = nearest.get((String) p[0]);
+            if (had == null || Math.hypot(px - n.x, pz - n.z) < Math.hypot((float) had[1] - n.x, (float) had[2] - n.z)) nearest.put((String) p[0], p);
+        }
+        for (Object[] p : nearest.values()) {
+            String where = (String) p[0];
+            float px = (float) p[1], pz = (float) p[2];
+            d.choice("To " + where + ".", () -> g.ui.dialog(new Dialog(n.name, way(n, where, px, pz))));
+        }
+        d.closeChoice("Never mind.", () -> { });
+        return d;
+    }
+
+    /** "The store's north-east of here, a short walk" - a direction (north is up the map) and a distance in plain words. */
+    String way(Npc n, String where, float x, float z) {
+        float dx = x - n.x, dz = z - n.z, d = (float) Math.hypot(dx, dz);
+        if (d < 6) return pick(n, "You're standing by " + where + ".", "Look about you - " + where + "'s right here.");
+        String[] points = {"north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"};
+        int i = Math.floorMod(Math.round((float) Math.toDegrees(Math.atan2(dx, -dz)) / 45f), 8);
+        String far = d < 25 ? "just a short walk" : d < 60 ? "a fair walk" : d < 110 ? "a long walk" : "a good way off";
+        String town = rpg.world.DevMap.jurisdiction(x, z);
+        String in = town.equals(rpg.world.DevMap.jurisdiction(n.x, n.z)) || town.equals(rpg.world.DevMap.WILDS) ? "" : ", in " + town;
+        return pick(n, "Head " + points[i] + " for " + where + in + " - " + far + ".", "That's " + points[i] + " of here" + in + ", " + far + ".",
+                Character.toUpperCase(where.charAt(0)) + where.substring(1) + "? Go " + points[i] + in + ". It's " + far + ".");
+    }
+
+    /** What they know of danger: a beast that has struck near them lately, the lairs they would keep away from. */
+    String dangers(Npc n) {
+        StringBuilder b = new StringBuilder();
+        for (Memory m : n.memories) {
+            if (!m.kind.equals("BEAST_ATTACK") || g.state.minutes - m.minutes > 1440) continue;
+            rpg.actor.Actor beast = g.actor(m.subject);
+            b.append("Not long ago I saw ").append(beast == null ? "a beast" : "a " + beast.name.toLowerCase()).append(" attack ").append(g.nameOf(m.victim)).append(". ");
+            break;
+        }
+        if (n.fearOf != 0 && g.actor(n.fearOf) != null && g.time - n.fearSeenAt < 120) b.append("There's ").append(g.actor(n.fearOf).name.toLowerCase().startsWith("a") ? "an " : "a ").append(g.actor(n.fearOf).name.toLowerCase()).append(" about - I've just seen it. ");
+        var lair = g.monsters == null ? null : g.monsters.lairs.stream().filter(l -> !l.name.isEmpty()).min(java.util.Comparator.comparingDouble(l -> Math.hypot(l.x - n.x, l.z - n.z))).orElse(null);
+        if (lair != null) b.append("Keep clear of the ").append(lair.name.toLowerCase()).append(" - ").append(way(n, "it", lair.x, lair.z).replaceFirst("^Head ", "head ").replaceFirst("^That's ", "it's ")).append(' ');
+        if (g.law.lockdown(n.homeJurisdiction)) b.append("And the town's shut up tight - the watch is looking for someone. ");
+        if (b.length() == 0) b.append(pick(n, "Quiet enough, these days. ", "Nothing I've seen. Touch wood. "));
+        return b.toString().trim();
+    }
+
+    /** What they make of the player: their opinion from all they know, said as they would say it. */
+    String standing(Npc n) {
+        float o = g.ai.rumors.opinion(n);
+        Memory bad = n.crimeKnown(g.player.id);
+        if (o <= -0.5f) return pick(n, "I'd sooner you weren't here, if I'm honest.", "I know what you are. I'd thank you to keep your distance.");
+        if (o < -0.1f) return bad != null ? "I've heard about the " + rpg.law.Law.crimeWord(bad.kind) + ". I'll judge for myself, but you've a way to go." : pick(n, "I'm not sure about you yet.", "You've not given me much reason to trust you.");
+        if (o < 0.15f) return n.knowsPlayer ? pick(n, "You seem decent enough.", "I've no quarrel with you.") : pick(n, "I don't know you, stranger. That's not a bad thing - yet.", "A new face. We'll see.");
+        if (o < 0.45f) return pick(n, "People speak well of you. That counts for something here.", "You've done right by folk. I've noticed.");
+        return pick(n, "You're good people. If you ever need a hand, ask.", "Glad to know you. Truly.");
+    }
+
+    /** What the local store is short of (under the stock it means to keep), as a hint for someone with goods to sell. */
+    String shortages(Npc n) {
+        var shop = g.econ.localShop(n);
+        if (shop == null) return "There's no store near enough for me to say.";
+        java.util.List<String> short_ = new java.util.ArrayList<>();
+        for (var e : shop.target.entrySet()) {
+            var def = rpg.item.Items.get(e.getKey());
+            if (def != null && shop.stock.count(def) < e.getValue() / 2) short_.add(def.name.toLowerCase());
+            if (short_.size() >= 3) break;
+        }
+        if (short_.isEmpty()) return pick(n, shop.name + " is well stocked just now. Nobody's crying out for anything.", "Nothing's short that I've heard. Times are steady.");
+        return shop.name + " is running low on " + String.join(", ", short_) + ". They'd pay fair for any brought in.";
+    }
+
+    /** A word of the player's own: kindly said, they think a little better of them; a jibe, a little worse - remembered. */
+    void word(Npc n, boolean kind) {
+        // (0.3.0) the face answers first: pleased by a kind word; a jibe, a sneer from the hard, hurt from the soft
+        rpg.render.Faces.react(g, n, kind ? rpg.render.Faces.Mood.HAPPY : n.combatant() ? rpg.render.Faces.Mood.ANGRY : rpg.render.Faces.Mood.SAD, 4);
+        int day = (int) (g.state.minutes / 1440);
+        boolean already = n.memories.stream().anyMatch(m -> (m.kind.equals("KIND_WORD") || m.kind.equals("SLIGHT")) && m.subject == g.player.id && (int) (m.minutes / 1440) == day);
+        String reply;
+        if (kind) reply = already ? pick(n, "You said as much already. But thank you.", "Twice in a day? Now I'm suspicious.") : pick(n, "That's kind of you to say. It isn't often anyone does.", "Well. Thank you. That makes the day go easier.", "Hah - flattery. It works, mind.");
+        else reply = n.combatant() ? pick(n, "Say that again and see what happens.", "Careful. I've put people down for less.") : pick(n, "Well, that was uncalled for.", "And you're a charmer, aren't you.", "I'll remember that.");
+        if (!already) {
+            n.remember(new Memory(kind ? "KIND_WORD" : "SLIGHT", g.player.id, n.id, rpg.world.DevMap.jurisdiction(n.x, n.z), g.state.minutes, 1f, "witnessed", 0, 0, kind ? "was kind to me" : "mocked me"), 24);
+            n.knowsPlayer = true;
+            if (kind) g.honor.greeted(n.id);
+        }
+        g.ai.say(n, reply);
+        if (g.ui != null) g.ui.dialog(new Dialog(n.name, reply));
     }
 
     public Dialog witness(Npc n) {
@@ -348,11 +561,39 @@ public final class Dialogue {
         };
     }
 
+    /**
+     * What they have heard (0.3.0: from the world as it stands): crimes they know of, witnessed or rumoured; a beast they
+     * saw attack someone; a terror the town is alarmed about; what happened in town today that they would have heard -
+     * a body buried, a birth on the farm, a horse broken in, the store running short; and what they are about now.
+     */
     private String news(Npc n) {
         StringBuilder b = new StringBuilder();
-        for (Memory m : n.memories) if (m.crime()) b.append(g.ai.rumors.line(n,m)).append(' ');
-        if (b.length() == 0) b.append("Nothing worth repeating. ");
-        b.append(switch (n.goal) { case WORK -> "I've my own work to see to."; case SLEEP -> "I should be getting some rest."; case REPORT_CRIME -> "I have business with the watch."; case COLLECT -> "There's a body that needs seeing to."; case AID -> "Someone nearby could use a hand."; default -> "Keep your ears open. News travels with the people who carry it."; });
+        int told = 0;
+        for (Memory m : n.memories) if (m.crime() && told < 2) { b.append(g.ai.rumors.line(n, m)).append(' '); told++; }
+        var alarm = g.ai.alarmFor(n);
+        if (alarm != null && g.actor(alarm.monster) instanceof rpg.monster.Monster mo) { b.append("There's a ").append(mo.kind.title.toLowerCase()).append(" loose near ").append(alarm.place).append(". Stay indoors. "); told++; }
+        // the day's talk of the town: events heard of within earshot of the place they live
+        double since = g.state.minutes - 600;
+        java.util.List<String> heard = new java.util.ArrayList<>();
+        for (var e : g.state.recent(200)) {
+            if (e.gameMinutes() < since || heard.size() >= 2) continue;
+            String j = e.jurisdiction();
+            if (j != null && !j.equals(n.homeJurisdiction)) continue;
+            String pl = e.payload() == null ? "" : e.payload();
+            String line = switch (e.type()) {
+                case "BodyBuried" -> "Morrow laid " + pl.replace("'s body", "") + " to rest.";
+                case "AnimalBorn" -> "There's a new " + (pl.contains("foal") ? "foal" : pl.contains("calf") ? "calf" : pl.contains("lamb") ? "lamb" : "young one") + " up at the farm.";
+                case "MountTamed" -> g.nameOf(e.actor()) + " broke in a " + pl.toLowerCase() + ". Rode it right through town.";
+                case "AlarmRaised" -> "Somebody saw a " + pl.split(" sighted")[0].toLowerCase() + ".";
+                case "ShipmentDelivered" -> "The caravan came in.";
+                case "TorchLit" -> null;
+                default -> null;
+            };
+            if (line != null && !heard.contains(line)) heard.add(line);
+        }
+        for (String h : heard) { b.append(h).append(' '); told++; }
+        if (told == 0) b.append(pick(n, "Nothing worth repeating. ", "Not much. It's been an ordinary day. ", "Quiet, as days go. "));
+        b.append(switch (n.goal) { case WORK -> "I've my own work to see to."; case SLEEP -> "I should be getting some rest."; case REPORT_CRIME -> "I have business with the watch."; case COLLECT -> "There's a body that needs seeing to."; case AID -> "Someone nearby could use a hand."; default -> pick(n, "Keep your ears open. News travels with the people who carry it.", "Ask at the store - they hear everything.", "That's all I know."); });
         return b.toString();
     }
 

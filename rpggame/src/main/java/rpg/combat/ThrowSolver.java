@@ -43,6 +43,11 @@ public final class ThrowSolver {
 
     /** Where the camera's centre looks: the first thing its ray meets, or as far as a throw could reach. */
     public static void cameraTarget(Rpg g, Actor a, float[] eye, float[] out) {
+        // the player's crosshair point, where it lies along this aim: the camera's own ray, bodies included
+        if (a instanceof rpg.actor.Player pl) {
+            float[] at = pl.aimPointFor(g.time, eye, a.aimYaw, a.pitch);
+            if (at != null) { System.arraycopy(at, 0, out, 0, 3); return; }
+        }
         float cp = (float) Math.cos(a.pitch);
         float dx = (float) -Math.sin(a.aimYaw) * cp, dy = (float) Math.sin(a.pitch), dz = (float) -Math.cos(a.aimYaw) * cp;
         Voxels.Hit h = g.vox.ray(eye[0], eye[1], eye[2], dx, dy, dz, REACH, true);

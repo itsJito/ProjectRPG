@@ -78,6 +78,8 @@ public final class Rpg implements GameModule {
     public Quests quests;
     public Progression prog;
     public rpg.actor.Traversal traversal;
+    public rpg.actor.Ladders ladders;
+    public rpg.mount.Riding riding;
     public rpg.actor.BodyCarry carrying;
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
@@ -124,6 +126,7 @@ public final class Rpg implements GameModule {
     @Override public void init(GameContext ctx) {
         vox = new Voxels(ctx.view());
         fx = new Fx();
+        fx.ground = (x, y, z) -> vox.groundY(x, y, z);
         sfx = Sfx.shared(game);
         sfx.ground = a -> vox.block((int) Math.floor(a.x), (int) Math.floor(a.y - 0.05f), (int) Math.floor(a.z));
         if (!scripted) sfx.ambience("devmapambience.ogg", 0.35f);
@@ -150,6 +153,8 @@ public final class Rpg implements GameModule {
         bank = new rpg.econ.Bank(this);
         quests = new Quests(this);
         traversal = new rpg.actor.Traversal(this);
+        ladders = new rpg.actor.Ladders(this);
+        riding = new rpg.mount.Riding(this);
         carrying = new rpg.actor.BodyCarry(this);
         chemistry = new rpg.world.Chemistry(this);
         repairs = new rpg.world.Repairs(this);
@@ -275,7 +280,14 @@ public final class Rpg implements GameModule {
         time += dt;
         lastDt = dt;
         state.tick++;
-        state.minutes += dt * cfg.minutesPerSecond;
+        // (0.3.0) the Weekly System's clock: slower by day, quicker by night, paused, scaled, run by the distance the
+        // player travels or carried on to an arrival - the calendar says how far it goes this frame
+        var calendar = state.cal();
+        if (calendar.mode() == astratto.time.Calendar.Mode.DISTANCE) {
+            if (Float.isFinite(travelX)) calendar.travelled(Math.hypot(player.x - travelX, player.z - travelZ));
+        } else calendar.tick(dt * cfg.minutesPerSecond);
+        travelX = player.x; travelZ = player.z;
+        state.minutes = calendar.totalMinutes();
         timeSystem.update(state.minutes,dt,player.x,player.eyeY(),player.z);
         game.commands().chemWind(timeSystem.weather.windX,timeSystem.weather.windZ);
         game.commands().chemWeather(timeSystem.weather.rain);
@@ -333,7 +345,8 @@ public final class Rpg implements GameModule {
         lastRigids = ctx.rigids();
         Snapshots.Mover m = lastBodies.mover(player.body);
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
-        if (m != null && !player.reacting && !(ui != null && ui.console.noclip)) {
+        // (0.3.0) in the saddle the body is where the saddle is: its capsule was shoved out of the horse's and read back behind it
+        if (m != null && !player.reacting && player.riding == 0 && !(ui != null && ui.console.noclip)) {
             float traveled = (float) Math.hypot(m.x - player.x, m.z - player.z);
             player.walked += traveled;
             player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched; player.onLadder=rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); player.climbVelocity=m.vy;
@@ -496,6 +509,10 @@ public final class Rpg implements GameModule {
 
     public void teleport(Actor a, float x, float y, float z) {
         if (falling != null) falling.reset(a);
+        // a hang (or a ladder) held over a teleport re-pinned the body to the old edge the next frame: a respawn put one back on the ledge one died on
+        if (traversal != null) traversal.cancel(a);
+        if (ladders != null) ladders.cancel(a);
+        if (riding != null && a.riding != 0) riding.dismount(a, false);
         if (a == player && movementPractice != null) movementPractice.reset();
         if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);
         if (a.body != 0) game.commands().moverPlace(a.body, x, y + 0.05f, z, 0, 0, 0);
@@ -509,6 +526,9 @@ public final class Rpg implements GameModule {
     // ------------------------------------------------------------------ death and time
     public void onKilled(Actor v, Actor killer, long cause) {
         falling.reset(v);v.morphT=v.chronoT=0;
+        if (traversal != null) traversal.cancel(v);
+        if (ladders != null) ladders.cancel(v);
+        if (riding != null && v.riding != 0) riding.dismount(v, false);
         if (prayers != null) prayers.clear(v);
         law.onKilled(v, killer, cause);
         if (v instanceof rpg.monster.Monster mo) monsters.onKilled(mo, killer);
@@ -592,6 +612,10 @@ public final class Rpg implements GameModule {
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");
         chat.say("You wake among the graves, with nothing but the clothes you were born to.");
     }
+
+    private float travelX = Float.NaN, travelZ;
+    /** Game minutes passing per real second now (the Weekly System's rate at this hour, times the configured speed). */
+    public double minuteRate() { return state.cal().minutesPerSecond() * cfg.minutesPerSecond; }
 
     /** Skips game time (waiting, sentences, the debug clock): the catch-up coordinator. */
     public void advanceTime(double minutes, String why) {

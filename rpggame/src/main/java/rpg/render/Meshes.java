@@ -82,24 +82,50 @@ public final class Meshes {
      * shade darker, with the lash line along its lower edge.
      */
     /** Small cached overlays replace only brows and lips; the face's eyes, nose and skin remain its own. */
+    /**
+     * A face's overlay for a mood and a mouth (0.3.0: every mood its own): the brows (their height, and the slope from the
+     * inner end out - knit in anger, up in the middle for fear and sorrow, one raised in doubt), upper lids lowered for
+     * weariness, pain and a squint, and the mouth - its opening, its corners up or down, teeth bared in pain or anger,
+     * pursed round in surprise, a sneer pulled to one side.
+     */
     public static Boxes expression(int skin,int hair,Faces.Mood mood,int speaking,boolean female) {
-        Boxes b=new Boxes(); int brow=Skin.shade(0xFF000000|hair,0.78f)&0xFFFFFF;
+        Boxes b=new Boxes(); int brow=Skin.shade(0xFF000000|hair,0.78f)&0xFFFFFF, lid=Skin.shade(0xFF000000|skin,0.9f)&0xFFFFFF, lip=0x492024, teeth=0xDDD4BD, crease=Skin.shade(0xFF000000|skin,0.7f)&0xFFFFFF;
         float front=-0.519f;
         for(int side:new int[]{-1,1}) {
             float center=side*0.25f;
             b.span(center-0.15f,0.055f,front,center+0.15f,0.21f,-0.501f,skin);
             for(int step=0;step<3;step++) {
                 float x=center+(step-1)*0.08f;
-                float slope=switch(mood) { case ANGRY -> 0.035f*side*(step-1); case AFRAID -> -0.035f*side*(step-1); case SUSPICIOUS -> side>0?0.018f*step:0; default -> 0; };
-                float y=0.105f+(mood==Faces.Mood.AFRAID?0.055f:0)+slope;
+                // the slope: + raises the outer end (anger knits the inner ends down), - raises the inner ends
+                float slope=switch(mood) {
+                    case ANGRY, HURT -> 0.035f*side*(step-1);
+                    case AFRAID, SAD -> -0.035f*side*(step-1);
+                    case SUSPICIOUS, THINKING -> side>0?0.022f*step:0;
+                    case DISGUSTED -> side<0?-0.02f*step:0.012f*step;
+                    default -> 0;
+                };
+                float lift=switch(mood){case AFRAID->0.055f;case SURPRISED->0.075f;case HAPPY,WARM->0.015f;case SAD->0.02f;case TIRED->-0.02f;case THINKING->side>0?0.04f:0;case HURT->-0.01f;default->0;};
+                float y=0.105f+lift+slope;
                 b.span(x-0.045f,y,front-0.005f,x+0.045f,y+(female?0.025f:0.04f),front+0.005f,brow);
             }
+            // upper lids: half down when weary, a squint in pain and suspicion
+            float droop=switch(mood){case TIRED->0.07f;case HURT->0.06f;case SUSPICIOUS->0.035f;case DISGUSTED->side<0?0.045f:0.02f;case SAD->0.03f;default->0;};
+            if(droop>0)b.span(center-0.13f,0.0625f-droop,front-0.002f,center+0.13f,0.07f,-0.503f,lid);
         }
         b.span(-0.16f,-0.415f,-0.52f,0.16f,-0.26f,-0.503f,skin);
-        float opening=speaking*0.023f+(mood==Faces.Mood.AFRAID?0.03f:0);
-        b.span(-0.105f,-0.353f-opening,-0.532f,0.105f,-0.331f,-0.515f,0x492024);
-        if(mood==Faces.Mood.WARM)for(int side:new int[]{-1,1})b.span(side*0.105f-0.015f,-0.336f,-0.534f,side*0.105f+0.015f,-0.308f,-0.516f,0x693B32);
-        if(mood==Faces.Mood.ANGRY && speaking==0)b.span(-0.09f,-0.351f,-0.537f,0.09f,-0.334f,-0.521f,0xDDD4BD);
+        float opening=speaking*0.023f+switch(mood){case AFRAID->0.03f;case SURPRISED->0.055f;case HURT->0.02f;default->0;};
+        float half=mood==Faces.Mood.SURPRISED?0.06f:mood==Faces.Mood.HAPPY||mood==Faces.Mood.HURT?0.125f:0.105f;
+        float shift=mood==Faces.Mood.DISGUSTED?0.03f:mood==Faces.Mood.THINKING?-0.025f:0;
+        b.span(-half+shift,-0.353f-opening,-0.532f,half+shift,-0.331f,-0.515f,lip);
+        // the corners: up for warmth and joy, down for sorrow and weariness, one side up in a sneer
+        switch(mood){
+            case WARM,HAPPY -> { float up=mood==Faces.Mood.HAPPY?0.035f:0.025f; for(int side:new int[]{-1,1})b.span(side*half-0.015f+shift,-0.336f,-0.534f,side*half+0.015f+shift,-0.331f+up,-0.516f,mood==Faces.Mood.HAPPY?lip:0x693B32);
+                if(mood==Faces.Mood.HAPPY)for(int side:new int[]{-1,1})b.span(side*0.22f-0.04f,-0.25f,-0.522f,side*0.22f+0.04f,-0.225f,-0.504f,crease); }
+            case SAD,TIRED -> { for(int side:new int[]{-1,1})b.span(side*half-0.015f,-0.37f,-0.534f,side*half+0.015f,-0.345f,-0.516f,lip); }
+            case DISGUSTED -> b.span(half+shift-0.02f,-0.334f,-0.534f,half+shift+0.01f,-0.31f,-0.516f,lip);
+            default -> { }
+        }
+        if((mood==Faces.Mood.ANGRY||mood==Faces.Mood.HURT) && speaking==0)b.span(-0.09f,-0.351f,-0.537f,0.09f,-0.334f,-0.521f,teeth);
         return b;
     }
 

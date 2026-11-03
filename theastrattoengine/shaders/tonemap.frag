@@ -3,6 +3,9 @@ in vec2 vUV;
 layout(location=0) out vec4 oColor;
 uniform sampler2D uColor, uBloom, uExposure;
 uniform float uBloomStrength, uTime, uDeath, uGrain, uFlash, uVignette, uHurt, uInfection, uSharpen, uBile;
+// API 2.9: the environment preset's grade (1 = unchanged)
+uniform float uExposureBias, uSaturation, uContrast;
+uniform vec3 uGradeTint;
 uniform vec2 uScreen;
 vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
 // (0.2.1, gamefixes: the light was harsh and washed out, the greens oversaturated) a gentler shoulder than ACES alone -
@@ -40,10 +43,15 @@ void main() {
         }
         col = mix(col, acc / 13.0, min(1.0, uBile * 1.15));
     }
-    col *= texelFetch(uExposure, ivec2(0), 0).r;
+    col *= texelFetch(uExposure, ivec2(0), 0).r * uExposureBias;
     col += texture(uBloom, vUV).rgb * uBloomStrength;
+    col *= uGradeTint;
     col = aces(col * 0.92) * 1.02;
     col = clamp(grade(col), 0.0, 1.0);
+    // the preset's saturation and contrast, about mid-grey (in display space, where they read as the eye expects)
+    float gl = dot(col, vec3(0.2126, 0.7152, 0.0722));
+    col = mix(vec3(gl), col, uSaturation);
+    col = clamp((col - 0.5) * uContrast + 0.5, 0.0, 1.0);
     col = pow(col, vec3(1.0 / 2.2));
     vec2 q = vUV - 0.5;
     float vig = dot(q, q);

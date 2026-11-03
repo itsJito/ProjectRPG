@@ -97,6 +97,19 @@ public final class CharModel {
         }
         float py0 = bottomFace ? y0 - puff : y0, py1 = topFace ? y1 + puff : y1;
         outer[seg.ordinal()] = box(s, over, puff, x0 - puff, py0, z0 - puff, x1 + puff, py1, z1 + puff, (int) rowOffset, topFace, bottomFace, lap, cutDepth);
+        // (0.2.9, gamefixes: armour clipped at the elbows and knees) the outer layer rounds in toward a bending joint as
+        // well: the plate's square corners met edge to edge when the limb folded and stood out through each other. The
+        // lower piece (it laps into the upper) draws in more, sliding under the upper's rim like a couter or a poleyn.
+        if (!topFace || !bottomFace) {
+            float[] vertices = outer[seg.ordinal()];
+            boolean lower = !topFace;
+            float span = lower ? 1.4f : 1.1f, depth = lower ? 0.24f : 0.12f;
+            for (int i = 0; i < vertices.length; i += 10) {
+                float distance = !bottomFace ? vertices[i + 1] - py0 : py1 - vertices[i + 1];
+                float inset = 1 - depth * Math.clamp(1 - distance / span, 0, 1);
+                vertices[i] *= inset; vertices[i + 2] *= inset;
+            }
+        }
     }
 
     private static float[] box(Skin s, Part p, float puff, float x0, float y0, float z0, float x1, float y1, float z1, int rowOffset,

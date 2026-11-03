@@ -75,17 +75,34 @@ public final class Foliage {
     /** A wall ivy and moss can climb: stone, brick or wood of any kind. */
     private static boolean climbable(int block){var m=Blocks.material(block);return block!=Blocks.GLASS && (m==Blocks.Material.STONE || m==Blocks.Material.WOOD) && Blocks.traversable(block);}
     private static final int[][] SIDES={{1,0},{-1,0},{0,1},{0,-1}};
+    /**
+     * The wall growth climbs: a face of climbable blocks beside the cell - for Ivy two high - that goes on to at least
+     * one side (0.2.9, gamefixes: Ivy stood alone on a single post or pillar, a strand with nothing around it).
+     */
     private int[] backing(Kind kind,int x,int y,int z) {
         for(int[] d:SIDES)if(climbable(g.vox.block(x+d[0],y,z+d[1]))
-                && (kind!=Kind.IVY || climbable(g.vox.block(x+d[0],y+1,z+d[1]))))return d;
+                && (kind!=Kind.IVY || climbable(g.vox.block(x+d[0],y+1,z+d[1])))
+                && (climbable(g.vox.block(x+d[0]+d[1],y,z+d[1]-d[0])) || climbable(g.vox.block(x+d[0]-d[1],y,z+d[1]+d[0]))))return d;
         return null;
     }
     private boolean nearWater(int x,int y,int z){for(int[] direction:SIDES)for(int step=1;step<=4;step++)if(g.vox.block(x+direction[0]*step,y-1,z+direction[1]*step)==Blocks.WATER)return true;return false;}
     private Chunk generate(int cx,int cz) {
         int key=cx+cz*CHUNKS_X;Chunk chunk=new Chunk(key,cx*16,cz*16);
-        // every other cell is a candidate; half of them grow something (gamefixes: more foliage), and a plant that does
-        // not suit its spot gives way to the next kind that does, so the shade, the water's edge and the open each fill
-        for(int x=chunk.x+1;x<chunk.x+16;x+=2)for(int z=chunk.z+1;z<chunk.z+16;z+=2) {
+        // half the cells are candidates - a checkerboard, every row (0.2.9, gamefixes: more foliage - it was one cell in
+        // four) - and half of those grow something; a plant that does not suit its spot gives way to the next kind that
+        // does, so the shade, the water's edge and the open each fill
+        for(int x=chunk.x+1;x<chunk.x+16;x++)for(int z=chunk.z+1;z<chunk.z+16;z++) {
+            // (0.3.0, gamefixes: more tall grass, and taller) the other half of the cells may carry tall grass alone - in
+            // drifts in the open (a slow noise gates it, so it gathers in meadows rather than evenly everywhere)
+            if(((x+z)&1)!=0) {
+                int s2=hash(x*7+3,z*5+1);
+                float drift=(float)(Math.sin(x*0.19+Math.cos(z*0.13)*1.7)+Math.sin(z*0.23+x*0.07));
+                if(drift<-0.1f || (s2&3)==0 || !suitable(Kind.TALL_GRASS,x,DevMap.FLOOR,z))continue;
+                float gx=((s2>>>20)&15)/15f*0.6f-0.3f,gz=((s2>>>24)&15)/15f*0.6f-0.3f;
+                long gid=id(x,DevMap.FLOOR,z);Patch grass=new Patch(gid,Kind.TALL_GRASS,s2,key,x+0.5f+gx,DevMap.FLOOR,z+0.5f+gz,(s2>>>16)*0.00009587f);
+                grass.removed=depleted.getOrDefault(gid,-1.0)>g.state.minutes;chunk.plants.add(grass);g.objects.add(grass);
+                continue;
+            }
             int seed=hash(x,z);if((seed&1)!=0)continue;int y=DevMap.FLOOR;
             // Preserve the established species distribution, varying some shrubs into fuller bushes.
             int established=Kind.BUSH.ordinal(),first=Math.floorMod(seed>>>3,established);Kind kind=null;
@@ -144,6 +161,14 @@ public final class Foliage {
             }
             if(actor!=g.player)g.noise(actor,actor.x,actor.y,actor.z,actor.sneaking?1.5f:3+speed,0.15f);
         }
+    }
+    /** (0.3.0) Whether tall grass stands about a point (someone crouched in it is half hidden). */
+    public boolean tallGrassAt(float x, float z) {
+        Chunk chunk=chunks.get(Math.clamp((int)x/16,0,CHUNKS_X-1)+Math.clamp((int)z/16,0,CHUNKS_Z-1)*CHUNKS_X);
+        if(chunk==null)return false;
+        int near=0;
+        for(Patch p:chunk.plants)if(!p.removed && (p.kind==Kind.TALL_GRASS || p.kind==Kind.REED || p.kind==Kind.BRACKEN) && Math.abs(p.x-x)<1.1f && Math.abs(p.z-z)<1.1f && ++near>=2)return true;
+        return false;
     }
     /** The live plant nearest a point within a reach, or null. */
     public Patch plantAt(float x,float z,float reach) {

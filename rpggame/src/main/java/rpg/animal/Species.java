@@ -25,7 +25,9 @@ public enum Species {
     COW("Cow", "Calf", 0.9f, 1.4f, 0.5f, Plan.QUAD, 1.0f, 4.2f, Diet.GRAZER, Group.HERD, 2, 6, true, false),
     SHEEP("Sheep", "Lamb", 0.9f, 1.3f, 0.5f, Plan.QUAD, 1.0f, 4.4f, Diet.GRAZER, Group.FLOCK, 3, 8, true, false),
     DOG("Dog", "Puppy", 0.7f, 0.9f, 0.5f, Plan.QUAD, 1.5f, 6.0f, Diet.SCAVENGER, Group.SOLO, 1, 3, true, false),
-    CAT("Cat", "Kitten", 0.5f, 0.6f, 0.5f, Plan.QUAD, 1.0f, 5.0f, Diet.SCAVENGER, Group.SOLO, 1, 1, true, true);
+    CAT("Cat", "Kitten", 0.5f, 0.6f, 0.5f, Plan.QUAD, 1.0f, 5.0f, Diet.SCAVENGER, Group.SOLO, 1, 1, true, true),
+    /** (0.3.0, gamefixes) the Pegasus: a horse built like a war horse - broad, deep-chested, heavy-legged - with a horn and great wings: it flies. */
+    PEGASUS("Pegasus", "Foal", 1.62f, 1.85f, 0.6f, Plan.QUAD, 1.7f, 8.4f, Diet.GRAZER, Group.HERD, 1, 2, false, false);
 
     /** Body plan: how the model is built and how it walks. */
     public enum Plan { QUAD, BIRD, HOPPER }
@@ -131,6 +133,8 @@ public enum Species {
         DOG.prey.addAll(EnumSet.of(RABBIT));
         CAT.skills(6, 3, 6, 6, 28).weapon("claw", 2, 4, 0.35f, DamageType.SLASH).senses(1.4f, 1.7f, 2.5f, 1.4f).breeds(420, 2, 4, 1440, 1440).yields(1, 1, false, 0).sounds("animal.cat", "animal.cat.growl", "animal.cat.growl", "animal.cat.growl");
         CAT.prey.addAll(EnumSet.of(RABBIT));
+        PEGASUS.skills(30, 40, 30, 50, 45).weapon("kick", 10, 90, 0.8f, DamageType.BLUNT).senses(1.4f, 1.4f, 7, 3).breeds(1440, 1, 1, 5760, 2880).yields(8, 3, true, 6).sounds("animal.horse", "animal.horse.alarm", "animal.horse.alarm", "animal.horse.alarm");
+        PEGASUS.defends = true; PEGASUS.wades = 0.15f;
     }
 
     /** A wild hunter: has prey and is not kept by people. */

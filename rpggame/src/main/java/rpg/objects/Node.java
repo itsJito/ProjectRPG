@@ -152,7 +152,7 @@ public final class Node extends WorldObject {
         if (a == g.player && kind == Kind.FISH && g.sfx != null) g.sfx.ui("FishingHooked", 0.5f);
         if (kind == Kind.FISH && a.sheathed) g.combat.sheathe(a, false);
         Work work = new Work(a, this, "gather", working(), duration(a), true, g.time, () -> commit(g, a));
-        if (kind == Kind.FISH) work.t = -(float)Math.max(0, Actor.SHEATHE_TIME - (g.time - a.sheatheAt));
+        if (kind == Kind.FISH) work.t = -(float)Math.max(0, a.sheatheTime() - (g.time - a.sheatheAt));
         g.interact.begin(work);
         return Result.started();
     }

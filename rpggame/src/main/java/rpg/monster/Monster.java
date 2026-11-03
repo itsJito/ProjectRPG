@@ -51,6 +51,8 @@ public final class Monster extends Npc {
     public float tx, tz, ty;
     /** Where it is roosting/perched (flyers), its flight height now, and where it means to be up to. */
     public float altitude, wantAltitude;
+    /** How fast it is rising (+) or falling (-) in the air now, m/s (a shooter leads a diving bat by it). */
+    public float climb;
     /** A dead one's remains going to ash and mist (0 whole .. 1 gone): see {@link Monsters#CORPSE_SECONDS}. */
     public float dissolve;
     /** The cadence of its own attacks (natural strikes, ranged): next allowed, and the telegraph under way (a creature's wind-up). */

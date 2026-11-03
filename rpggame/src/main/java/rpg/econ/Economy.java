@@ -84,7 +84,7 @@ public final class Economy {
         }
         forge = new Shop(Ids.CRAFTSMAN, "The forge rack", DevMap.jurisdiction(DevMap.ANVIL_AT[0], DevMap.ANVIL_AT[1]), DevMap.ANVIL_AT[0] + 0.5f, DevMap.ANVIL_AT[1] + 1.7f);
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
-        stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
+        stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
         stock(shopA, Items.get("wooden_axe"), 2, 2); stock(shopA, Items.get("wooden_pickaxe"), 2, 2); stock(shopA, Items.get("stone_axe"), 1, 1); stock(shopA, Items.get("stone_pickaxe"), 1, 1); stock(shopA, Items.FISHING_NET, 2, 2); stock(shopA, Items.CRAB_CAGE, 1, 1);
         stock(shopA, Items.RELIGIOUS_WINE, 6, 6); stock(shopB, Items.RESTORATIVE, 3, 3);

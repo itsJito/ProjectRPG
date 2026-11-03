@@ -362,8 +362,14 @@ public final class Law {
         seen.removeIf(w -> g.ai.stealth.exposure(w,culprit)<=0 || (where!=null
                 ? !g.vox.sightCell(w.x,w.eyeY(),w.z,(int)Math.floor(where.x),(int)Math.floor(where.y),(int)Math.floor(where.z))
                 : affected!=null && affected!=culprit && !g.vox.sight(w.x,w.eyeY(),w.z,affected.x,affected.chestY(),affected.z)));
+        // (0.3.0, gamefixes: a combat crime is only credibly linked by someone who saw the attack itself) for violence, an
+        // eyewitness must have had the blow in view - the culprit plainly seen, the victim before their eyes - not merely
+        // have glimpsed the culprit about; everyone else near enough forms an opinion on what they saw and heard after
+        boolean violent = kind.equals("ASSAULT") || kind.equals("MURDER") || kind.equals("DISORDERLY");
+        if (violent && affected != null && affected != culprit) seen.removeIf(w -> !sawBlow(w, culprit, affected));
         // under Disguise Self, the witnesses saw a stranger: the crime is known, the culprit is not (no bounty comes of it)
         long who = culprit.disguiseT > 0 ? 0 : culprit.id;
+        if (violent && affected != null && affected != culprit && who != 0) circumstantial(culprit, affected, kind, victim, jur, ev.id(), seen);
         // under Friends, a friend saw nothing they will tell
         seen.removeIf(w -> w.friendUntil > g.time && culprit == g.player);
         for (Npc w : seen) {
@@ -378,7 +384,13 @@ public final class Law {
                 default -> "Leave that alone! Someone fetch the watch.";
             } : kind.equals("THEFT") ? "Thief!" : kind.equals("MURDER") ? "Murder!" : "Guards!";
             w.wantYaw=(float)Math.atan2(-(culprit.x-w.x),-(culprit.z-w.z)); g.ai.say(w,protest);
+            // (0.3.0) a start at it, then fear - or, for the watch and the hard, anger
+            rpg.render.Faces.startle(g, w, w.combatant() ? rpg.render.Faces.Mood.ANGRY : kind.equals("MURDER") || kind.equals("ASSAULT") ? rpg.render.Faces.Mood.AFRAID : rpg.render.Faces.Mood.DISGUSTED, 4);
             w.nextThink = 0;
+            // (0.2.9, gamefixes: the guards stood by while the player was set upon) violence done before an officer of
+            // the place is on the books at once - his own word is the report - whoever did it and to whomever
+            if (who != 0 && w.watch() && w.homeJurisdiction.equals(jur) && (kind.equals("ASSAULT") || kind.equals("MURDER") || kind.equals("DISORDERLY")))
+                report(w, w.memories.get(w.memories.size() - 1), w);
             // violence is shouted to everyone in earshot at once (word of mouth, not a broadcast)
             g.ai.rumors.alarm(w, w.memories.get(w.memories.size() - 1));
         }
@@ -391,7 +403,44 @@ public final class Law {
 
     private void rememberName(Actor actor){g.rememberName(actor.id,actor.name);}
 
+    /** Whether a watcher had the blow itself in view: the striker plainly in sight, the struck before their eyes, near enough. */
+    private boolean sawBlow(Npc w, Actor culprit, Actor victim) {
+        if (w.distTo(victim) > 25 || g.ai.stealth.exposure(w, culprit) < rpg.ai.Stealth.CLEAR * 0.6f) return false;
+        float dx = victim.x - w.x, dz = victim.z - w.z, d = (float) Math.hypot(dx, dz);
+        if (d < 2.2f) return true;
+        float fx = (float) -Math.sin(w.yaw), fz = (float) -Math.cos(w.yaw);
+        return (fx * dx + fz * dz) / d > -0.05f;
+    }
+
+    /**
+     * Those who did not see the blow but saw what came of it - the struck or the dead with the culprit standing over them -
+     * or only heard it: they form an opinion, not an account. A suspicion is remembered (lower confidence the less they
+     * had to go on); it colours how they think of the culprit and what they say, and it spreads as talk, but it is never
+     * evidence: it cannot be reported to the watch, and no bounty comes of it.
+     */
+    private void circumstantial(Actor culprit, Actor victim, String kind, long victimId, String jur, long eventId, List<Npc> eyewitnesses) {
+        for (Npc w : g.npcs) {
+            if (w == culprit || w == victim || !w.alive || !w.loaded || eyewitnesses.contains(w) || !rpg.ai.Brain.bystander(w) || w.distTo(victim) > 22) continue;
+            boolean seesAftermath = g.vox.sight(w.x, w.eyeY(), w.z, victim.x, victim.chestY(), victim.z) && culprit.distTo(victim.x, victim.z) < 6 && g.ai.canSee(w, culprit);
+            boolean heard = w.distTo(victim) < 14;
+            if (!seesAftermath && !heard) continue;
+            float confidence = seesAftermath ? 0.45f : 0.2f;
+            String detail = seesAftermath ? "didn't see the blow, but " + culprit.name + " was standing over " + victim.name : "heard a fight near " + victim.name;
+            // a suspicion of an unseen culprit by sound alone does not name anyone
+            if (!seesAftermath) continue;
+            Memory m = new Memory(kind, culprit.id, victimId, jur, g.state.minutes, confidence, "circumstantial", eventId, 0, detail);
+            m.reported = true;   // never a report: an opinion is not testimony
+            w.remember(m, 24);
+            g.state.commit("CrimeSuspected", w.id, culprit.id, jur, eventId, kind + " (circumstantial) by " + w.name);
+            if (w.speech == null) g.ai.say(w, kind.equals("MURDER") ? "What did you do to them?" : "What's going on there?");
+            w.wantYaw = (float) Math.atan2(-(culprit.x - w.x), -(culprit.z - w.z));
+        }
+    }
+
     private static String names(List<Npc> l) { StringBuilder b = new StringBuilder(); for (Npc n : l) b.append(b.length() > 0 ? ", " : "").append(n.name); return b.toString(); }
+
+    /** Whether a blow struck by one person on another is a wrong in the law's eyes (not self-defence, an arrest, an outlaw). */
+    public boolean unlawful(Actor a, Actor v) { return !lawfulForce(a, v); }
 
     private boolean lawfulForce(Actor a, Actor v) {
         if (rpg.ai.AiSystem.alliedWatch(a,v))return true;
@@ -476,10 +525,13 @@ public final class Law {
         var ev = g.state.commit("CrimeReported", witness.id, m.subject, m.jurisdiction, m.eventId, m.kind + " reported to " + lawman.name + "; bounty " + before + " -> " + after);
         g.state.commit("BountyChanged", lawman.id, m.subject, m.jurisdiction, ev.id(), before + " -> " + after);
         // the lawman's own account, as he would tell it (the record above keeps the numbers)
-        String line = String.format("%s came to %s about %s - %s. That puts the bounty on %s at %d coins", witness.name, lawman.name,
+        boolean own = witness == lawman;
+        String line = own ? String.format("%s saw %s's %s himself. That puts the bounty on %s at %d coins", lawman.name, g.nameOf(m.subject), crimeWord(m.kind), g.nameOf(m.subject), after)
+                : String.format("%s came to %s about %s - %s. That puts the bounty on %s at %d coins", witness.name, lawman.name,
                 g.nameOf(m.subject), crimeWord(m.kind), g.nameOf(m.subject), after);
         reportsLog.add(line);
-        if (m.subject == g.player.id) g.chat.crime("reported " + m.kind, witness.name + " told " + lawman.name + " about your " + crimeWord(m.kind) + ". Your bounty in " + m.jurisdiction + " is now " + after + " coins.");
+        if (m.subject == g.player.id) g.chat.crime("reported " + m.kind, (own ? lawman.name + " saw your " + crimeWord(m.kind) + " himself"
+                : witness.name + " told " + lawman.name + " about your " + crimeWord(m.kind)) + ". Your bounty in " + m.jurisdiction + " is now " + after + " coins.");
         g.ai.say(witness, "I saw " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!");
         // everyone in the jurisdiction's force now knows to look
         for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD) && n.homeJurisdiction.equals(m.jurisdiction)) n.nextThink = 0;
@@ -508,6 +560,62 @@ public final class Law {
         g.ai.say(to,paymentComment(paidCrime));
         g.state.commit(req, "BountyPaid", a.id, to.id, jur, 0, b + " coins to " + to.name);
         if (a == g.player) { g.chat.add("You pay your bounty of " + b + " coins. You are no longer wanted in " + jur + ".", Chat.Kind.CRIME); if (g.sfx != null) g.sfx.ui("coins", 0.6f); g.honor.event("RESTITUTION",to.id,2,"bounty:"+req,false,"paid a bounty of "+b); g.ai.rumors.deed("paid their bounty in full", to.id); }
+        return Result.ok();
+    }
+
+    /**
+     * (0.2.9, gamefixes: a bounty could be "paid" without the coin for it) one who cannot meet the bounty pays what they
+     * have: the officer says so, takes every coin they carry, and seizes things from their pack - the most valuable first
+     * - as collateral against the rest, sold off through the town's store; then they are taken to jail, where whatever
+     * the coin and collateral did not cover is served as time. Nothing they wear is taken here.
+     */
+    public Result payWhatYouCan(Actor a, Npc to, long req) {
+        String jur = to.homeJurisdiction;
+        if (g.state.alreadyCommitted(req)) return Result.no("This payment has already been settled.");
+        if (!a.alive || !to.alive || (to.role != Npc.Role.GUARD && to.role != Npc.Role.LAWMAN)) return Result.no("The payment cannot be received.");
+        if (refusesPeace(a.id, jur)) return Result.no("You chose to resist arrest. The watch will not accept payment during this fight.");
+        int b = bounty(a.id, jur);
+        if (b <= 0) return Result.no("You have no bounty in " + jur + ".");
+        int coins = a.count(Items.COINS);
+        if (coins >= b) return payBounty(a, to, req);
+        g.ai.say(to, coins == 0 ? "Not a coin on you, and you owe " + b + "? Then you'll answer for it another way."
+                : coins + " coins? You owe " + b + ". That won't cover it.");
+        // the coin they have goes to the watch
+        int taken = 0;
+        for (ItemStack coin : a.takeItems(Items.COINS, coins)) {
+            coin.owner = to.id; coin.stolen = false; taken += coin.amount;
+            if (!to.store(coin)) { coin.owner = 0; if (!to.store(coin)) g.objects.drop(coin, to.x, DevMap.FLOOR + 0.1f, to.z); }
+        }
+        // collateral against the rest: the dearest things in the pack until they cover it (stolen goods are left for the
+        // arrest, which returns them to their owners)
+        int owed = b - taken, seized = 0;
+        var pack = new ArrayList<>(a.inv.stacks());
+        pack.removeIf(item -> item.stolen || item.def.value <= 0 || item.def == Items.COINS);
+        pack.sort(java.util.Comparator.comparingInt((ItemStack item) -> item.def.value * item.amount).reversed());
+        var shop = g.econ.localShop(to);
+        StringBuilder names = new StringBuilder();
+        for (ItemStack item : pack) {
+            if (seized >= owed) break;
+            int worth = item.def.value * item.amount;
+            for (int i = 0; i < a.inv.size(); i++) if (a.inv.get(i) == item) { a.inv.set(i, null); break; }
+            item.owner = shop == null ? 0 : shop.merchant; item.stolen = false;
+            if (shop == null || !shop.stock.add(item)) g.state.burn(item.def, item.amount);
+            seized += worth;
+            if (names.length() > 0) names.append(", ");
+            names.append(item.amount > 1 ? item.amount + " " + item.def.name : item.def.name);
+        }
+        int left = Math.max(0, owed - seized);
+        g.state.commit(req, "BountyShortPaid", a.id, to.id, jur, 0, b + " owed; " + taken + " coins, " + seized + " in collateral, " + left + " to serve");
+        if (a == g.player) {
+            g.chat.add("You can't cover your bounty of " + b + " coins. " + to.name + " takes your " + taken + " coins"
+                    + (names.length() > 0 ? " and seizes " + names + " as collateral" : "") + ".", Chat.Kind.CRIME);
+            if (g.sfx != null) g.sfx.ui("coins", 0.5f);
+        }
+        // what is left of the bounty is what the sentence answers for
+        bounties.computeIfAbsent(jur, k -> new HashMap<>()).put(a.id, left);
+        if (left == 0) g.ai.say(to, "That covers it, but you'll still spend the night in a cell for wasting the watch's time.");
+        else g.ai.say(to, "The rest you'll serve behind bars. Come along.");
+        arrest(a, jur, to);
         return Result.ok();
     }
 
@@ -592,7 +700,9 @@ public final class Law {
         Dialog d = new Dialog(guard.name, petty ? charge + "It's a small matter: a fine of " + b + " coins in " + jur + ". Pay it and we're done."
                 : charge + "You are wanted in " + jur + " for " + b + " coins. Pay, explain yourself, or come quietly.");
         d.npc = guard.id; d.standoff = true;
-        d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) { g.chat.warn(r.reason()); if (petty) declineFine(p, guard); } });
+        int purse = p.count(Items.COINS);
+        if (purse >= b) d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) { g.chat.warn(r.reason()); if (petty) declineFine(p, guard); } });
+        else d.choice("Pay what I have (" + purse + " of " + b + " coins; the rest is taken in goods and time).", () -> { Result r = payWhatYouCan(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
         d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
         if (petty) d.closeChoice("Not now. (it stays on your record)", () -> declineFine(p, guard));
         else {

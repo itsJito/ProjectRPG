@@ -13,8 +13,9 @@ import rpg.skill.Skill;
 
 /**
  * Faith's prayers at work (GDD 2.5): toggled on and off, each charging its own Faith point per drain interval - the
- * first point paid as it is raised, the next at each full interval after; ending one early refunds nothing, and raising
- * it again pays again (no toggling for free). The interval is six seconds, lengthened 3.33% for each point of equipped
+ * first point falls due one second after it is raised (0.2.9, gamefixes: Faith began draining the instant a prayer
+ * went up), the next at each full interval after; ending one early refunds nothing, lowering one before its first
+ * point is paid still pays it, and raising it again pays again (no toggling for free). The interval is six seconds, lengthened 3.33% for each point of equipped
  * Faith bonus. When a point falls due and there is none, the prayer goes out, with word of it. At most one overhead
  * protection, and one Strength prayer, at a time: raising another of the kind lowers the first.
  */
@@ -22,6 +23,10 @@ public final class Prayers {
     private final Rpg g;
     /** Each actor's raised prayers and how far through its current paid interval each is (seconds). */
     private final Map<Long, EnumMap<Prayer, Float>> active = new java.util.HashMap<>();
+    /** The prayers raised whose first point is not yet paid (it falls due {@link #FIRST_POINT} seconds in). */
+    private final Map<Long, java.util.EnumSet<Prayer>> unpaid = new java.util.HashMap<>();
+    /** How long a prayer runs before its first Faith point drains (seconds). */
+    public static final float FIRST_POINT = 1f;
     public long pointsPaid, toggles;
 
     public Prayers(Rpg g) { this.g = g; }
@@ -45,12 +50,14 @@ public final class Prayers {
         return null;
     }
 
-    /** Raises a prayer (paying its first point) or lowers it. True when the prayer is now on. */
+    /** Raises a prayer (its first point due a second later) or lowers it. True when the prayer is now on. */
     public boolean toggle(Actor a, Prayer p) {
         var m = active.computeIfAbsent(a.id, k -> new EnumMap<>(Prayer.class));
         toggles++;
         if (m.containsKey(p)) {
             m.remove(p);
+            var owed = unpaid.get(a.id);
+            if (owed != null && owed.remove(p) && a.faith >= 1) { a.faith -= 1; pointsPaid++; }
             g.state.commit("PrayerEnded", a.id, 0, null, 0, p.title);
             if (a == g.player && g.sfx != null) g.sfx.ui("SpellBookCloseA", 0.4f);
             return false;
@@ -58,10 +65,18 @@ public final class Prayers {
         String no = refusal(a, p);
         if (no != null) { if (a == g.player) g.chat.add(no, Chat.Kind.WARN); return false; }
         // one of a kind: another overhead (or Strength prayer) gives way
-        if (p.category == Category.OVERHEAD || p.category == Category.STRENGTH) m.keySet().removeIf(o -> o.category == p.category);
-        a.faith -= 1;
-        pointsPaid++;
-        m.put(p, 0f);
+        if (p.category == Category.OVERHEAD || p.category == Category.STRENGTH) {
+            var owed = unpaid.get(a.id);
+            for (var it = m.keySet().iterator(); it.hasNext(); ) {
+                Prayer o = it.next();
+                if (o.category != p.category) continue;
+                it.remove();
+                if (owed != null && owed.remove(o) && a.faith >= 1) { a.faith -= 1; pointsPaid++; }
+            }
+        }
+        // the first point is not taken yet: the prayer's clock starts one second short of a full interval
+        m.put(p, interval(a) - FIRST_POINT);
+        unpaid.computeIfAbsent(a.id, k -> java.util.EnumSet.noneOf(Prayer.class)).add(p);
         g.state.commit("PrayerRaised", a.id, 0, null, 0, p.title + String.format(" (interval %.1f s)", interval(a)));
         if (g.sfx != null) g.sfx.play("bless", a.x, a.y + 1, a.z, 0.5f);
         if (g.fx != null) g.fx.ring(a.x, a.y, a.z, 1.2f, 3f, 2.6f, 1.2f);
@@ -70,19 +85,21 @@ public final class Prayers {
     }
 
     /** Ends every prayer of an actor (death, arrest): nothing refunded. */
-    public void clear(Actor a) { active.remove(a.id); }
+    public void clear(Actor a) { active.remove(a.id); unpaid.remove(a.id); }
 
     /** Each tick: the time on each prayer's paid interval; a point due is paid, or the prayer fails. */
     public void update(float dt) {
         for (var e : active.entrySet()) {
             Actor a = g.actor(e.getKey());
             var m = e.getValue();
-            if (a == null || !a.alive) { m.clear(); continue; }
+            if (a == null || !a.alive) { m.clear(); unpaid.remove(e.getKey()); continue; }
             float iv = interval(a);
+            var owed = unpaid.get(e.getKey());
             for (var it = m.entrySet().iterator(); it.hasNext(); ) {
                 var pe = it.next();
                 float t = pe.getValue() + dt;
                 if (t >= iv) {
+                    if (owed != null) owed.remove(pe.getKey());
                     if (a.faith < 1) {
                         it.remove();
                         g.state.commit("PrayerFailed", a.id, 0, null, 0, pe.getKey().title + ": out of Faith");

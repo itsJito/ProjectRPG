@@ -99,7 +99,7 @@ public final class Gfx implements AutoCloseable {
                             | AstrattoNative.TEX_MIPMAP | AstrattoNative.TEX_REPEAT | AstrattoNative.texMaxLevel(5), atlas);
             noiseTex = r.texture(AstrattoNative.TEX_2D, 256, 256, 1, AstrattoNative.TEX_MIPMAP | AstrattoNative.TEX_MIP_LINEAR | AstrattoNative.TEX_REPEAT, noise);
         } finally { MemoryUtil.memFree(atlas); MemoryUtil.memFree(noise); }
-        if (!r.worldLook(atlasTex, noiseTex, Blocks.LAYERS, Blocks.renderDefs(), Blocks.renderShapes(), Blocks.STONE, Blocks.palette(), Blocks.layerMaterials(), DevMap.FLOOR, 0))
+        if (!r.worldLook(atlasTex, noiseTex, Blocks.LAYERS, Blocks.renderDefs(), Blocks.renderShapes(), Blocks.STONE, Blocks.palette(), Blocks.layerMaterials(), DevMap.FLOOR, 0, "0".equals(System.getenv("RPG_GROUND_BLEND")) ? null : Blocks.groundRanks()))
             throw new IllegalStateException("world look refused: " + r.lastError());
         box = r.mesh(Meshes.unitBox(), 36);
         // a ball of voxels, a unit across (the spells' orbs), white so a tint colours it
@@ -232,10 +232,18 @@ public final class Gfx implements AutoCloseable {
         float tr = 1, tg = 1 - 0.10f * low * (1 - night), tb = 1 - 0.22f * low * (1 - night);
         tr -= 0.18f * night; tg -= 0.08f * night;
         cmd.env(sx, sy, sz, daylight, (float) time, weather==null?0:weather.rain, weather==null?0:weather.wetness, weather==null?0:weather.snowCover, weather==null?0.1f:weather.overcast, weather==null?0:weather.lightning, fogR, fogG, fogB, indoorsScene ? 1f / 300f : mist, bankStart, bankEnd, indoorsScene ? 0 : 0.62f, 0, tr * (sceneGame==null?1:sceneGame.timeSystem.tintR), tg * (sceneGame==null?1:sceneGame.timeSystem.tintG), tb * (sceneGame==null?1:sceneGame.timeSystem.tintB), (0.004f + 0.006f * night + wfog * 0.012f) * (sceneGame==null?1:sceneGame.timeSystem.fogScale), Float.NaN, 0, 0, 0.05f + 0.03f * low);
+        // (0.3.0, gamefixes) the environment preset of the hour, the weather and the roof over the camera: the ambient cube
+        // and the grade move with the sky and the fog in one blend
+        boolean roofed = !indoorsScene && sceneGame != null && !sceneGame.vox.sight(camX, camY + 0.2f, camZ, camX, camY + 14, camZ);
+        atmosphere.apply(cmd, hour, sx, weather, new float[]{fogR, fogG, fogB}, roofed, (float) Math.max(0.001, time - atmosAt));
+        atmosAt = time;
         return daylight;
     }
 
     private static float clamp01(float v) { return Math.max(0, Math.min(1, v)); }
+    /** (0.3.0) The environment presets, and when they were last sent (the blend's clock). */
+    public final Atmosphere atmosphere = new Atmosphere();
+    private double atmosAt;
 
     private final float[] smoke = new float[32 * 12];
 
@@ -727,11 +735,39 @@ public final class Gfx implements AutoCloseable {
         drawItem(d, 0);
     }
 
+    /**
+     * (0.3.0, gamefixes) A torch's flame: a real light at its head - warm, flickering, the player's casting shadows - and
+     * the fire itself rising off the rags; while it is being lit, sparks struck at the head and a first small flame.
+     */
+    private void torchFlame(Actor a, float[] grip, float[] dir) {
+        float hx = grip[0] + dir[0] * 0.58f, hy = grip[1] + dir[1] * 0.58f, hz = grip[2] + dir[2] * 0.58f;
+        float lighting = a.torchLighting(clock);
+        if (!a.torchLit && lighting < 0) return;
+        if (!a.torchLit) {
+            // striking a light: a spark now and then, and the rags catching over the last third
+            if (lighting > 0.25f && ((long) (clock * 30) + a.id) % 7 == 0 && sceneGame != null) sceneGame.fx.trail(hx, hy, hz, 3.5f, 2.4f, 0.8f);
+            if (lighting > 0.66f) {
+                float k = (lighting - 0.66f) / 0.34f;
+                cmd.pointLight(hx, hy + 0.1f, hz, 3 + 5 * k, 3.2f * k, 1.7f * k, 0.5f * k, 0);
+                cmd.emitter(a.id ^ 0x70C40000L, AstrattoNative.EMITTER_ATTACHED_FIRE, hx, hy + 0.02f, hz, 0.04f, 12 * k, 0.04f, 0.28f, 5, 1.8f, 0.3f, 0, 0.45f, 0);
+            }
+            return;
+        }
+        // a flame's flicker: two slow waves and a fast one, never steady, never strobing
+        double t = clock + a.id * 0.37;
+        float flick = 0.86f + 0.08f * (float) Math.sin(t * 7.1) + 0.05f * (float) Math.sin(t * 13.7 + 1.3) + 0.03f * (float) Math.sin(t * 29.3);
+        int flags = sceneGame != null && a == sceneGame.player ? AstrattoNative.LIGHT_SHADOW : 0;
+        // (a little above the flame, so the bearer's own face is lit warmly, not burnt out)
+        cmd.pointLight(hx, hy + 0.3f, hz, 9.5f, 2.9f * flick, 1.65f * flick, 0.55f * flick, flags);
+        // (attached: the flame rides the torch head - free particles were left hanging in the air behind a walking bearer)
+        cmd.emitter(a.id ^ 0x70C40000L, AstrattoNative.EMITTER_ATTACHED_FIRE, hx, hy + 0.02f, hz, 0.06f, 30, 0.05f, 0.32f, 5, 1.8f, 0.3f, 0, 0.55f, 0);
+    }
+
     /** (0.2.2) What is equipped but put away, where it rides on the body (Rig.sheathPlace). */
-    private void sheathedItems(Actor a, Body b) {
+    private void sheathedItems(Actor a, Body b, boolean mainAway, boolean offAway) {
         float[] tm = rig.seg[Seg.TORSO.ordinal()];
         boolean pack = a.eq.def(Slot.BACK) != null, cape = a.eq.def(Slot.CAPE) != null;
-        ItemDef main = a.main(), off = a.off();
+        ItemDef main = mainAway ? a.main() : null, off = offAway ? a.off() : null;
         for (int k = 0; k < 2; k++) {
             ItemDef d = k == 0 ? main : off;
             if (d == null) continue;
@@ -972,6 +1008,26 @@ public final class Gfx implements AutoCloseable {
     }
 
     /** Draws one part at the body's frame: moved to its joint (figure voxels), turned, scaled from mesh units to the figure's. */
+    /** (0.3.0) A leg's angle through its cycle: a long sweep back on the ground, a quicker swing forward through the air. */
+    private static float stride(double phase) {
+        double u = ((phase / (Math.PI * 2)) % 1 + 1) % 1;
+        // stance (the hoof on the ground, the leg sweeping back) takes six tenths of the cycle, the swing four
+        return (float) (u < 0.6 ? Math.cos(u / 0.6 * Math.PI) : -Math.cos((u - 0.6) / 0.4 * Math.PI));
+    }
+
+    /** (0.3.0) A saddle on a horse's back: the seat, pommel and cantle, the flaps, the stirrups, and the saddlebags behind. */
+    private void saddle(AnimalModels.Figure f, float vs) {
+        float top = f.bh / 2f, sz = -f.bl * 0.06f;
+        m.set(body).translate(0, (top + 0.35f) * vs, sz * vs).scale((f.bw + 0.8f) * vs, 0.9f * vs, 8f * vs); put(box, 0x6A3E22, 1, 0.75f, 0);
+        m.set(body).translate(0, (top + 1.1f) * vs, (sz - 3.6f) * vs).scale(3f * vs, 1.4f * vs, 1.2f * vs); put(box, 0x5A3218, 1, 0.75f, 0);
+        m.set(body).translate(0, (top + 1.0f) * vs, (sz + 3.6f) * vs).scale((f.bw - 2f) * vs, 1.2f * vs, 1.2f * vs); put(box, 0x5A3218, 1, 0.75f, 0);
+        for (int side = -1; side <= 1; side += 2) {
+            m.set(body).translate(side * (f.bw / 2f + 0.25f) * vs, (top - 2.4f) * vs, sz * vs).scale(0.4f * vs, 5f * vs, 5.5f * vs); put(box, 0x7A4A2A, 1, 0.8f, 0);
+            m.set(body).translate(side * (f.bw / 2f + 0.5f) * vs, (top - 6.2f) * vs, (sz - 1f) * vs).scale(0.35f * vs, 1.6f * vs, 1.4f * vs); put(box, 0x8A8A90, 1, 0.4f, 0.8f);
+            m.set(body).translate(side * (f.bw / 2f + 0.9f) * vs, (top - 2.2f) * vs, (sz + 7f) * vs).scale(1.6f * vs, 3.6f * vs, 3.6f * vs); put(box, 0x5E3A20, 1, 0.85f, 0);
+        }
+    }
+
     private void part(ItemModels.Model p, float vs, float jx, float jy, float jz, float rx, float ry, float rz) {
         if (p == null) return;
         float k = vs / ItemModels.VOX;
@@ -1013,9 +1069,14 @@ public final class Gfx implements AutoCloseable {
         // the gait: one cycle per two strides, its swing growing with speed
         float legM = Math.max(2, f.legH) * vs;
         float cadence = f.hopper ? Math.min(2, 1.3f + speed * 0.12f) : Math.min(3.2f, speed / (legM * 2.4f) * (f.bird ? 1.6f : 1));
-        if (speed > 0.06f) a.gait += cadence * (float) Math.PI * 2 * dt;
         boolean running = speed > sp.walk * 1.5f * (a.baby ? 0.6f : 1);
         float wantAmp = speed < 0.06f ? 0 : Math.min(running ? 0.62f : 0.42f, speed / (sp.walk * (a.baby ? 0.6f : 1)) * 0.34f);
+        // (0.3.0, gamefixes: polished horse animations) a horse's four gaits, each its own footfall pattern and reach
+        boolean horseLike = sp == Species.HORSE || sp == Species.PEGASUS;
+        int hg = !horseLike || speed < 0.06f ? 0 : speed < sp.walk * 1.6f ? 1 : speed < 4.6f ? 2 : speed < 7.6f ? 3 : 4;
+        if (horseLike && hg > 0) wantAmp = switch (hg) { case 1 -> Math.min(0.4f, speed / sp.walk * 0.3f); case 2 -> 0.52f; case 3 -> 0.66f; default -> 0.8f; };
+        if (horseLike && hg > 0) cadence = switch (hg) { case 1 -> Math.min(1.1f, 0.55f + speed * 0.3f); case 2 -> 1.35f + speed * 0.08f; case 3 -> 1.6f + speed * 0.05f; default -> Math.min(2.6f, 1.8f + speed * 0.06f); };
+        if (speed > 0.06f) a.gait += cadence * (float) Math.PI * 2 * dt;
         a.amp += (wantAmp - a.amp) * Math.min(1, dt * 8);
         float lieWant = dead ? 1 : a.atRest && speed < 0.2f ? 1 : 0;
         a.lieT += (lieWant - a.lieT) * Math.min(1, dt * (dead ? 6 : 2.2f));
@@ -1044,13 +1105,22 @@ public final class Gfx implements AutoCloseable {
         // the body's frame
         float hop = f.hopper ? Math.max(0, (float) Math.sin(ph)) : 0;
         float bob = f.hopper ? hop * hop * 2.6f * Math.min(1, amp * 2.5f) : Math.abs((float) Math.sin(ph)) * 0.6f * amp;
+        float gaitPitch = 0;
+        if (horseLike && hg > 0) switch (hg) {
+            case 1 -> bob = Math.abs((float) Math.sin(ph * 2)) * 0.25f * amp;
+            case 2 -> bob = Math.abs((float) Math.sin(ph * 2)) * 1.1f * amp;                       // the trot: two beats, two bounces
+            case 3 -> { bob = (0.5f + 0.5f * (float) Math.sin(ph)) * 1.2f * amp; gaitPitch = 0.07f * (float) Math.sin(ph + 0.6f); }   // the canter's rocking-horse
+            default -> { bob = (0.5f + 0.5f * (float) Math.sin(ph)) * 1.6f * amp; gaitPitch = 0.05f * (float) Math.sin(ph + 0.9f); }   // the gallop: up in the moment of suspension
+        }
         // a straight leg swung through an arc is shorter at its ends: the body rides down to keep the feet on the ground
         float reachDrop = f.bird || f.hopper ? 0 : f.legH * (1 - (float) Math.cos(amp * 0.95f)) * 0.8f;
         float standY = f.bodyY - crouch * 1.2f + bob - reachDrop;
         float lyingY = dead ? f.bw * 0.5f : f.bird ? f.bh * 0.45f : f.bh * 0.5f;
         float y = standY + (lyingY - standY) * lie;
         if (a.goal == rpg.animal.Animal.Goal.GROOM && !dead) { a.headYaw = 0.6f * (float) Math.sin(time * 7); a.headPitch = 0.35f + 0.12f * (float) Math.sin(time * 14); }
-        float pitch = (f.bird ? 0.05f * (float) Math.sin(ph * 2) * amp : running ? 0.08f * (float) Math.sin(ph) : 0) - crouch * 0.08f + lunge * 0.12f;
+        float pitch = (f.bird ? 0.05f * (float) Math.sin(ph * 2) * amp : horseLike ? gaitPitch : running ? 0.08f * (float) Math.sin(ph) : 0) - crouch * 0.08f + lunge * 0.12f;
+        // (0.3.0) in flight a Pegasus's body follows its climb and dive, and leans into its bank
+        if (sp == Species.PEGASUS && a.flying) pitch -= a.flightPitch * 0.8f;
         if (f.hopper && amp > 0.05f) pitch += 0.12f * (float) Math.sin(ph) * Math.min(1, amp * 3);
         body.identity().translate(a.x, a.y, a.z).rotateY(a.yaw);
         if (rear > 0) {
@@ -1058,6 +1128,7 @@ public final class Gfx implements AutoCloseable {
             body.translate(0, f.bodyY * vs, f.legB[2] * vs).rotateX(rear * (sp == Species.BROWN_BEAR ? 1.05f : 0.7f)).translate(0, (y - f.bodyY) * vs, -f.legB[2] * vs);
         } else body.translate(0, y * vs, -lunge * sp.reach * 0.6f);
         body.rotateX(pitch);
+        if (sp == Species.PEGASUS && a.flying) body.rotateZ(-a.flightBank * 0.9f);
         if (dead) body.rotateZ(1.45f * lie);
         part(injuredPart(a,f.body,rpg.combat.Gore.Part.TORSO), vs, 0, 0, 0, 0, 0, 0);
         // a part taken off (Gore) is not drawn: a raw stump where it joined
@@ -1087,6 +1158,19 @@ public final class Gfx implements AutoCloseable {
             if (f.hopper) {
                 float push = Math.max(0, (float) Math.sin(ph)) * Math.min(1, amp * 3);
                 fl = fr = 0.5f * push; bl = br = -1.0f * push;
+            } else if (horseLike && hg > 0) {
+                // footfall offsets (fractions of a cycle): walk four even beats (left hind, left fore, right hind, right
+                // fore), trot diagonal pairs, canter three beats (right hind; left hind with right fore; left fore), the
+                // gallop four beats close-paired with a moment of suspension
+                float[] off = switch (hg) {
+                    case 1 -> new float[]{0.25f, 0.75f, 0f, 0.5f};          // fl, fr, bl, br
+                    case 2 -> new float[]{0f, 0.5f, 0.5f, 0f};
+                    case 3 -> new float[]{0.66f, 0.33f, 0.33f, 0f};
+                    default -> new float[]{0.55f, 0.45f, 0.1f, 0f};
+                };
+                float tau = (float) Math.PI * 2;
+                fl = stride(ph + off[0] * tau) * swing; fr = stride(ph + off[1] * tau) * swing;
+                bl = stride(ph + off[2] * tau) * swing; br = stride(ph + off[3] * tau) * swing;
             } else if (running) {
                 fl = (float) Math.sin(ph) * swing; fr = (float) Math.sin(ph + 0.5f) * swing;
                 bl = (float) Math.sin(ph + Math.PI) * swing; br = (float) Math.sin(ph + Math.PI + 0.5f) * swing;
@@ -1098,12 +1182,16 @@ public final class Gfx implements AutoCloseable {
             fl = fl * (1 - fold) + 1.45f * fold; fr = fr * (1 - fold) + 1.45f * fold;
             bl = bl * (1 - fold) - 1.35f * fold; br = br * (1 - fold) - 1.35f * fold;
             if (rear > 0) { fl += rear * 0.9f; fr += rear * 0.7f; bl -= rear * 0.6f; br -= rear * 0.6f; }
+            // (0.3.0) in the air: a jump folds the forelegs up and trails the hind; flying, all four are tucked
+            if (horseLike && !dead && !a.grounded && a.rider != 0) { float k = a.flying ? 1 : 0.8f; fl = fl * (1 - k) + 1.2f * k; fr = fr * (1 - k) + 1.1f * k; bl = bl * (1 - k) - 0.7f * k; br = br * (1 - k) - 0.8f * k; }
             // a lame animal carries the leg it lost the use of: the other three take the step
             limb(rpg.combat.Gore.Part.ARM_L, f.legFront, vs, -f.legF[0], f.legF[1], f.legF[2], fl, 0, 0);
             limb(rpg.combat.Gore.Part.ARM_R, f.legFront, vs, f.legF[0], f.legF[1], f.legF[2], fr, 0, 0);
             limb(rpg.combat.Gore.Part.LEG_L, f.legBack, vs, -f.legB[0], f.legB[1], f.legB[2], bl, 0, 0);
             limb(rpg.combat.Gore.Part.LEG_R, f.legBack, vs, f.legB[0], f.legB[1], f.legB[2], br, 0, 0);
             float headP = a.headPitch + (rear > 0 ? -0.4f * rear : 0) - lie * (dead ? 0.1f : 0.25f) + (float) Math.sin(ph * 2) * 0.05f * amp;
+            // a horse's head nods with its walk, holds steady at the trot, and swings down and up with each canter and gallop stride
+            if (horseLike && hg > 0) headP += switch (hg) { case 1 -> 0.07f * (float) Math.sin(ph * 2); case 2 -> 0.015f * (float) Math.sin(ph * 2); default -> 0.13f * (float) Math.sin(ph + 1.2f); } + (hg >= 3 ? 0.12f : 0);
             limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1], f.neck[2], headP, a.headYaw, 0);
             // the tail: a dog's wag, a cow's switch, a cat's slow curl, a fox's brush streaming when it runs
             float wag = 0, droop = 0.35f;
@@ -1116,6 +1204,20 @@ public final class Gfx implements AutoCloseable {
                 default -> { }
             }
             limb(rpg.combat.Gore.Part.TAIL, f.tail, vs, f.tailAt[0], f.tailAt[1], f.tailAt[2], droop * (1 - lie * 0.5f), dead ? 0 : wag, 0);
+            if (horseLike && a.saddled && !dead) saddle(f, vs);
+            if (sp == Species.PEGASUS && f.wing != null && !dead) {
+                // the wings: folded along the back at rest, half open at the gallop, spread in flight - beating when it
+                // climbs or surges, held out in a glide, swept back in a dive
+                float open = a.flying ? 1 : hg >= 4 ? 0.35f : hg == 3 ? 0.15f : 0;
+                a.flap += (open - a.flap) * Math.min(1, dt * 4);
+                float climb = a.flying ? Math.max(0, a.flightPitch) : 0, dive = a.flying ? Math.max(0, -a.flightPitch) : 0;
+                float beat = a.flying ? (0.25f + 0.55f * Math.min(1, climb * 2)) * (float) Math.sin(time * 6.5 + a.id) : 0.06f * (float) Math.sin(time * 1.3);
+                // (the panel hangs from its root at the withers: rolled out past level it spreads a touch above the horizontal)
+                float spread = 0.2f + a.flap * (1.55f - dive * 0.7f) + beat * a.flap;
+                float sweep = a.flap * dive * 0.5f;
+                limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep, 0, spread);
+                limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep, 0, -spread);
+            }
         }
         if (!dead && lie < 0.5f) cmd.shadowBody(a.x, a.y, a.z, a.radius, a.height * (1 - lie * 0.5f));
     }
@@ -1282,10 +1384,11 @@ public final class Gfx implements AutoCloseable {
             }
             MonsterPose st = monsterPoses.computeIfAbsent(mo.id, k -> new MonsterPose());
             if (f.humanoid) {
-                if (!mo.alive) {
-                    var rd = sceneGame == null ? null : sceneGame.lastBodies.ragdoll(mo.ragdoll);
-                    if (rd != null) monsterRagdoll(mo, f, rd);
-                } else humanoidMonster(mo, f, st, dt);
+                // (0.2.9, gamefixes: orcs and goblins stood stiff mid-fight) a living one reeling from a blow or knocked
+                // down is its body in Sydney's hands, as a person's is - drawn from it, not from the standing pose
+                var rd = sceneGame == null || mo.ragdoll == 0 || mo.alive && !mo.reacting ? null : sceneGame.lastBodies.ragdoll(mo.ragdoll);
+                if (rd != null) monsterRagdoll(mo, f, rd);
+                else if (mo.alive) humanoidMonster(mo, f, st, dt);
             } else switch (mo.kind) {
                 case BAT -> bat(mo, f, st, dt);
                 case GIANT_SPIDER -> spider(mo, f, st, dt);
@@ -1338,6 +1441,23 @@ public final class Gfx implements AutoCloseable {
                 lean = run ? 1.0f : 0.4f; kneeBase = 0; thighBase = 0; armFwd = run ? 1.2f : 0.3f; spread = 0.18f; elbowBase = 0.45f; headX = run ? -0.15f : 0.05f; }
         }
         if (dormant && !airborne) { lean += 0.2f; headX += 0.3f; armFwd *= 0.5f; }
+        // (0.3.0, gamefixes: monster animations expanded) a roar as it first squares up to a foe - head thrown up, arms
+        // flung out, chest open; then a fighting crouch while it stands its ground (knees bent, weight forward, arms up,
+        // swaying on its feet); left alone, it shifts its weight and looks about rather than standing frozen
+        boolean engaged = mo.state == rpg.monster.Monster.State.ENGAGE && !ghost && !airborne;
+        boolean swinging = mo.cs.phase != Actor.Combat.Phase.IDLE;
+        float sinceEngage = (float) (clock - mo.stateSince);
+        if (engaged && sinceEngage >= 0 && sinceEngage < 0.9f && !swinging) {
+            float r = (float) Math.sin(Math.PI * sinceEngage / 0.9f);
+            headX -= 0.55f * r; lean -= 0.22f * r; spread += 0.55f * r; armFwd += 0.35f * r; elbowBase += 0.3f * r;
+        } else if (engaged && amp < 0.3f && !swinging && !dormant) {
+            float stance = 1 - amp / 0.3f;
+            kneeBase += 0.32f * stance; thighBase += 0.18f * stance; lean += 0.1f * stance; armFwd += 0.3f * stance; elbowBase += 0.35f * stance;
+            roll += 0.045f * stance * (float) Math.sin(t * 2.1);
+        } else if (!engaged && amp < 0.05f && !dormant && !ghost) {
+            roll += 0.035f * (float) Math.sin(t * 0.45);
+            headZ += 0.18f * (float) Math.sin(t * 0.23 + 1.1);
+        }
         // the attack: the stroke the combat system is sweeping (the same path its hit test follows)
         float u = phaseU(mo);
         boolean striking = mo.cs.phase != Actor.Combat.Phase.IDLE && mo.cs.move != null;
@@ -1853,7 +1973,7 @@ public final class Gfx implements AutoCloseable {
             boolean headless = gone[Seg.HEAD.ordinal()];
             if (!headless) {
                 System.arraycopy(hm, 0, seg.m, 0, 16); headBase.set(root).mul(seg);
-                headUnits(a, look, b, eyesShut(a, bed != null), firstPerson);
+                headUnits(a, look, b, eyesShut(a, bed != null) || a.alive && !firstPerson && Faces.blinking(a, clock, Faces.mood(sceneGame, a)), firstPerson);
             }
             garments(a, look, b, firstPerson);
             ItemDef cape = a.eq.def(Slot.CAPE);
@@ -1880,9 +2000,9 @@ public final class Gfx implements AutoCloseable {
         // what the hands hold (cooking: the food in the hand over the fire, the arms put away)
         ItemDef cookingFood = Rig.cooking(a);
         // (0.2.2) put away, the hands are empty and the weapons ride on the body (sheathed() below)
-        boolean inHand = a.inHand(clock);
-        ItemDef main = Rig.repairing(a)?rpg.item.Items.HAMMER:cookingFood != null ? cookingFood : inHand ? a.main() : null, off = Rig.repairing(a) || cookingFood != null || !inHand ? null : a.off();
-        if (!inHand && !firstPerson) sheathedItems(a, b);
+        boolean inHand = a.inHand(clock), offInHand = a.inHand(clock, 1);
+        ItemDef main = Rig.repairing(a)?rpg.item.Items.HAMMER:cookingFood != null ? cookingFood : inHand ? a.main() : null, off = Rig.repairing(a) || cookingFood != null || !offInHand ? null : a.off();
+        if ((!inHand || !offInHand) && !firstPerson) sheathedItems(a, b, !inHand, !offInHand);
         boolean bow = main != null && main.family == Family.BOW;
         for (int k = 0; k < 2; k++) {
             ItemDef holds = bow ? (k == 1 ? main : null) : k == 0 ? main : off;
@@ -1898,7 +2018,18 @@ public final class Gfx implements AutoCloseable {
                     drawItem(holds,0);
                 }
                 else if (holds.family == Family.BOW) heldBow(holds, grip, dir, yaw, a.cs.draw, world(rig.hand[0]));
+                else if (holds.family == Family.CROSSBOW) {
+                    // (0.3.0, gamefixes: crossbows did not display in third person) the prod lies level across the stock
+                    // whichever way it points: framed against the body's forward, a crossbow carried pointing ahead had no
+                    // side to lie along and was drawn edge-on, a stick in the hands
+                    float ax = dir[2], az = -dir[0], al = (float) Math.hypot(ax, az);
+                    float[] across = al > 1e-3f ? new float[]{ax / al, 0, az / al} : right(yaw);
+                    m.frame(grip, dir, across);
+                    if (heldScale != 1) m.scale(heldScale, heldScale, heldScale);
+                    drawItem(holds, 0);
+                }
                 else held(holds, grip, dir, yaw, !firstPerson);   // show the broad face through the eyes; carry edge-forward in third person
+                if (holds.family == Family.TORCH) torchFlame(a, grip, dir);
             }
             ItemDef ammo = a.eq.def(Slot.AMMO);
             if (k == 0 && ammo != null) {
@@ -2145,9 +2276,9 @@ public final class Gfx implements AutoCloseable {
         portraitHead.set(portraitRoot).translate(0, 4, 0).scale(b.head[0], b.head[1], b.head[2]);
         portraitPart(mesh("hair:" + look.female + ":" + look.hair, () -> Meshes.hair(look.female, look.hair)), portraitHead, Appearance.hairColor(look.hairColor));
         if (!look.female && look.beard > 0) portraitPart(mesh("beard:" + look.beard, () -> Meshes.beard(look.beard)), portraitHead, Appearance.hairColor(look.beardColor));
-        var mood=Faces.mood(sceneGame,npc); int mouth=Faces.speech(now,true);
+        var mood=Faces.mood(sceneGame,npc); int mouth=npc.speechUntil>clock?Faces.speech(now,npc.speech):0;
         portraitPart(expression(look,mood,mouth),portraitHead,0xFFFFFF);
-        if(eyesShut(npc,false))portraitPart(mesh("lids:"+look.skinRgb()+":"+look.female,()->Meshes.eyelids(look.skinRgb(),look.female)),portraitHead,0xFFFFFF);
+        if(eyesShut(npc,false)||Faces.blinking(npc,now,mood))portraitPart(mesh("lids:"+look.skinRgb()+":"+look.female,()->Meshes.eyelids(look.skinRgb(),look.female)),portraitHead,0xFFFFFF);
         cmd.portrait(x, y, w, h, portraitMeshes, portraitMatrices, portraitColors, portraitCount, alpha);
     }
 
@@ -2186,7 +2317,7 @@ public final class Gfx implements AutoCloseable {
         if (!look.female && look.beard > 0) unit(headBase, b.head[1] / 2f, b, mesh("beard:" + look.beard, () -> Meshes.beard(look.beard)), Appearance.hairColor(look.beardColor), shadowOnly);
         if (a.alive && !shadowOnly && a.morphT<=0) {
             Faces.Mood mood=Faces.mood(sceneGame,a);
-            int mouth=Faces.speech(clock,a instanceof Npc npc && npc.speechUntil>clock);
+            int mouth=a instanceof Npc npc && npc.speechUntil>clock ? Faces.speech(clock, npc.speech) : 0;
             if(mood!=Faces.Mood.NEUTRAL || mouth>0)unit(headBase,b.head[1]/2f,b,expression(look,mood,mouth),0xFFFFFF,false);
         }
         if (shut && !shadowOnly) {

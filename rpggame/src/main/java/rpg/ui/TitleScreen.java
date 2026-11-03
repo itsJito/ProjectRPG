@@ -66,8 +66,8 @@ public final class TitleScreen {
             ui.text("Welcome. There are no profiles yet.", x, y, 15, Style.TEXT);
             ui.text("Create your first character to begin.", x, y + 24, 13, Style.DIM);
             if (bigButton(ui, "Create a new profile", x, y + 64, MENU_W, 52, true) || enter) { choice = Choice.NEW; click("NewProfileButton"); }
-            if (Style.button(ui, "Settings", x, y + 128, MENU_W, 36, true)) { settings.run(); click("UIbutton1"); }
-            if (Style.button(ui, "Quit", x, y + 172, MENU_W, 36, true)) choice = Choice.QUIT;
+            if (redButton(ui, "Settings", x, y + 128, MENU_W, BUTTON_H, true)) { settings.run(); click("UIbutton1"); }
+            if (redButton(ui, "Quit", x, y + 128 + BUTTON_H + 8, MENU_W, BUTTON_H, true)) choice = Choice.QUIT;
             footer(ui, w, h);
             return;
         }
@@ -90,12 +90,12 @@ public final class TitleScreen {
         if (bigButton(ui, selected != null && selected.hasSave() ? "Continue as " + selected.name : "Begin as " + (selected == null ? "..." : selected.name), x, y, MENU_W, 50, any) || enter && any) { choice = Choice.CONTINUE; click("UI_select"); }
         y += 60;
         boolean room = profiles.size() < Profiles.MAX;
-        if (Style.button(ui, room ? "New profile" : "New profile (all five slots are taken)", x, y, 206, 36, room)) { choice = Choice.NEW; click("NewProfileButton"); }
-        if (Style.button(ui, "Delete profile", x + 214, y, 206, 36, any)) { confirmDelete = selected; click("UIbutton2"); }
-        y += 44;
-        if (Style.button(ui, "Settings", x, y, MENU_W, 36, true)) { settings.run(); click("UIbutton1"); }
-        y += 44;
-        if (Style.button(ui, "Quit", x, y, MENU_W, 36, true)) choice = Choice.QUIT;
+        if (redButton(ui, room ? "New Profile" : "All Slots Taken", x, y, 206, BUTTON_H, room)) { choice = Choice.NEW; click("NewProfileButton"); }
+        if (redButton(ui, "Delete Profile", x + 214, y, 206, BUTTON_H, any)) { confirmDelete = selected; click("UIbutton2"); }
+        y += BUTTON_H + 8;
+        if (redButton(ui, "Settings", x, y, MENU_W, BUTTON_H, true)) { settings.run(); click("UIbutton1"); }
+        y += BUTTON_H + 8;
+        if (redButton(ui, "Quit", x, y, MENU_W, BUTTON_H, true)) choice = Choice.QUIT;
         footer(ui, w, h);
     }
 
@@ -169,6 +169,29 @@ public final class TitleScreen {
             deletion = java.util.concurrent.CompletableFuture.runAsync(() -> Profiles.delete(slot));
             click("LogoutProfileButton");
         } else if (Style.button(ui, "Keep", x + 220, y + 110, 180, 38, true) || escape) { confirmDelete = null; click("UIbutton1"); }
+    }
+
+    /** The title's menu buttons (0.2.9): taller than the in-game ones, a deep red face with a gold bevel and yellow lettering. */
+    private static final float BUTTON_H = 44;
+
+    private static boolean redButton(Ui2D ui, String label, float x, float y, float w, float h, boolean enabled) {
+        boolean hv = enabled && ui.hover(x, y, w, h), down = hv && ui.down;
+        int top = !enabled ? 0xFF3A2422 : hv ? 0xFFB02A22 : 0xFF8E1A16, bottom = !enabled ? 0xFF241614 : hv ? 0xFF6E1410 : 0xFF520C0A;
+        int bands = 8;
+        for (int i = 0; i < bands; i++) ui.rect(x, y + h * i / bands, w, h / bands + 1, mix(top, bottom, i / (float) (bands - 1)));
+        ui.border(x, y, w, h, 2, !enabled ? 0xFF4A3A2A : hv ? 0xFFFFD86A : 0xFFB8903E);
+        ui.border(x + 2, y + 2, w - 4, h - 4, 1, 0x50000000);
+        ui.rect(x + 3, y + 3, w - 6, 1, enabled ? 0x50FFC8A0 : 0x20FFFFFF);
+        float ts = Math.min(20, h - 18), lift = down ? 1 : 0;
+        ui.flatCentered(label, x + w / 2 + 1, y + (h - ts * 1.15f) / 2 + 1 + lift, ts, enabled ? 0xC0000000 : 0x60000000);
+        ui.flatCentered(label, x + w / 2, y + (h - ts * 1.15f) / 2 + lift, ts, !enabled ? 0xFF8A7A50 : hv ? 0xFFFFF27A : 0xFFFFD100);
+        return enabled && ui.clicked(x, y, w, h);
+    }
+
+    private static int mix(int a, int b, float t) {
+        int r = 0xFF000000;
+        for (int shift = 0; shift <= 16; shift += 8) r |= Math.round(((a >> shift) & 255) * (1 - t) + ((b >> shift) & 255) * t) << shift;
+        return r;
     }
 
     private boolean bigButton(Ui2D ui, String label, float x, float y, float w, float h, boolean enabled) {

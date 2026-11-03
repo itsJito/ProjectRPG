@@ -520,6 +520,15 @@ int32_t Renderer::worldLook(const astratto_world_look& look) {
     std::memset(particleCollision_,0,sizeof particleCollision_);
     for(uint32_t id=0;id<t.block_count;id++)if(t.blocks[id].flags&(ASTRATTO_RB_SOLID|ASTRATTO_RB_LIQUID))particleCollision_[id>>5]|=1u<<(id&31);
     for (uint32_t id = 0; id < t.block_count; id++) if (t.blocks[id].flags & ASTRATTO_RB_OCCLUDES) opaqueMask_[id >> 5] |= 1u << (id & 31);
+    // 2.8: the ground blend's tables - each block's rank, and the layer its top is drawn with
+    std::memset(groundRank_, 0, sizeof groundRank_);
+    std::memset(groundLayer_, 0, sizeof groundLayer_);
+    for (uint32_t id = 0; id < t.block_count && id < 256; id++) {
+        uint32_t rank = look.ground_rank ? look.ground_rank[id] : 0u;
+        groundRank_[id >> 2] |= (rank & 255u) << ((id & 3u) * 8u);
+        uint32_t packed = (t.blocks[id].layer_top & 0x3FFFu) | (static_cast<uint32_t>(std::max<int>(1, t.blocks[id].var_top) - 1) & 3u) << 14;
+        groundLayer_[id >> 1] |= packed << ((id & 1u) * 16u);
+    }
     const float ground = look.ground_y;
     // per atlas layer: roughness, metalness, emission
     if (layerMat_) g_.DeleteTextures(1, &layerMat_);
@@ -1090,6 +1099,17 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 grading_.death = c.death; grading_.hurt = c.hurt; grading_.infection = c.infection; grading_.flash = c.flash; grading_.bile = c.bile;
                 break;
             }
+            case ASTRATTO_RCMD_ATMOS: {
+                astratto_rcmd_atmos c;
+                if (!readRecord(r, head.bytes, c)) { error_ = "short atmos record"; return false; }
+                bool ok = std::isfinite(c.exposure) && std::isfinite(c.saturation) && std::isfinite(c.contrast);
+                for (int i = 0; i < 18 && ok; i++) ok = std::isfinite(c.cube[i]) && c.cube[i] >= 0 && c.cube[i] < 64;
+                if (!ok) break;
+                for (int i = 0; i < 18; i++) atmos_.cube[i] = c.cube[i];
+                atmos_.exposure = std::clamp(c.exposure, 0.1f, 8.0f); atmos_.saturation = std::clamp(c.saturation, 0.0f, 2.0f); atmos_.contrast = std::clamp(c.contrast, 0.5f, 1.6f);
+                atmos_.tint[0] = std::clamp(c.tint_r, 0.2f, 2.0f); atmos_.tint[1] = std::clamp(c.tint_g, 0.2f, 2.0f); atmos_.tint[2] = std::clamp(c.tint_b, 0.2f, 2.0f);
+                break;
+            }
             case ASTRATTO_RCMD_SHADOW_BODY: {
                 astratto_rcmd_body c;
                 if (!readRecord(r, head.bytes, c)) { error_ = "short body record"; return false; }
@@ -1451,6 +1471,11 @@ void Renderer::gbufferPass(VoxelWorld* w) {
     gWorld_.tex("uNoise", 1, TEXTURE_2D, textures_.count(noiseTex_) ? textures_[noiseTex_].id : white_);
     gWorld_.tex("uLayerMat", 2, TEXTURE_2D, layerMat_);
     gWorld_.tex("uLeaves", 5, TEXTURE_2D_ARRAY, leafTex_);
+    // 2.8: the ground blend reads the voxel volume (what lies beside a top) and the ground tables
+    gWorld_.tex("uVox", 7, TEXTURE_3D, voxTex_);
+    gWorld_.uiv("uGroundRank", groundRank_, 64);
+    gWorld_.uiv("uGroundLayer", groundLayer_, 128);
+    gWorld_.i1("uGroundOn", voxFilled_ ? 1 : 0);
     gWorld_.f1("uAlphaCut", 0.5f);
     columnsDrawn_ = static_cast<uint32_t>(drawOpaque(gWorld_, frustum_, cam_.x, cam_.z, cam_.viewDistance, true));
     // the solid part of every pane - the casement - goes into the G-buffer too, so that it has depth (see forwardPass)
@@ -1660,6 +1685,8 @@ void Renderer::lightingPass() {
     s.f3("uTint", 0.6f + 0.4f * env_.tint[0], 0.6f + 0.4f * env_.tint[1], 0.6f + 0.4f * env_.tint[2]);
     s.f1("uShadowRes", static_cast<float>(shadowRes_));
     s.f1("uAmbientFloor", env_.ambientFloor);
+    // API 2.9: the preset's six-axis ambient
+    for (int i = 0; i < 6; i++) { char name[16]; std::snprintf(name, sizeof name, "uAmbCube[%d]", i); s.f3(name, atmos_.cube[i * 3], atmos_.cube[i * 3 + 1], atmos_.cube[i * 3 + 2]); }
     s.tex("uExposure", 12, TEXTURE_2D, expoTex_[expoIdx_]);
     skyUniforms(s);
     fullscreen();
@@ -2062,6 +2089,10 @@ void Renderer::resolve(int windowW, int windowH) {
     tonemap_.f1("uInfection", grading_.infection);
     tonemap_.f1("uBile", grading_.bile);
     tonemap_.f1("uSharpen", q_.taa ? 0.35f : 0.0f);
+    tonemap_.f1("uExposureBias", atmos_.exposure);
+    tonemap_.f1("uSaturation", atmos_.saturation);
+    tonemap_.f1("uContrast", atmos_.contrast);
+    tonemap_.f3("uGradeTint", atmos_.tint[0], atmos_.tint[1], atmos_.tint[2]);
     tonemap_.f2("uScreen", static_cast<float>(ow_), static_cast<float>(oh_));
     fullscreen();
     mark(4);

@@ -18,6 +18,23 @@ public final class Player extends Actor {
     /** Where the posed figure's eyes were last drawn (the first-person camera rides them). */
     public float headX, headY, headZ, headYaw;
     public boolean headValid;
+    /**
+     * (0.3.0, gamefixes: third-person arrows, bolts and spells did not go where the crosshair was) the point the camera's
+     * centre ray meets - the world or a body, whichever is first - and when it was found. Shots from the hand are solved
+     * to pass through it, so the shoulder camera's offset no longer throws them wide of what the crosshair is on.
+     */
+    public final float[] aimPoint = new float[3];
+    public double aimAt = -99;
+    /** The fresh crosshair point if it lies along this aim (within about a degree of it, as seen from this eye), else null. */
+    public float[] aimPointFor(double now, float[] eye, float yaw, float pitch) {
+        if (now - aimAt > 0.12) return null;
+        float dx = aimPoint[0] - eye[0], dy = aimPoint[1] - eye[1], dz = aimPoint[2] - eye[2];
+        float l = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (l < 0.5f) return null;
+        float cp = (float) Math.cos(pitch);
+        float ux = (float) -Math.sin(yaw) * cp, uy = (float) Math.sin(pitch), uz = (float) -Math.cos(yaw) * cp;
+        return (dx * ux + dy * uy + dz * uz) / l > 0.9997f ? aimPoint : null;
+    }
 
     public Player(long id, String name) { super(id, name, 28); team = 1; }
 

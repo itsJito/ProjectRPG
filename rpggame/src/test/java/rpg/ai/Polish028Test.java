@@ -92,7 +92,9 @@ class Polish028Test {
         g.setBlock(106,4,82,Blocks.OAK_LOG);g.setBlock(105,3,82,Blocks.GRASS);game.tick(0);
         for(var kind:rpg.world.Foliage.Kind.values())assertFalse(g.foliage.suitable(kind,105,4,82),kind.toString());
         g.setBlock(106,4,82,Blocks.STONE);game.tick(0);assertFalse(g.foliage.suitable(Foliage.Kind.IVY,105,4,82));
-        g.setBlock(106,5,82,Blocks.STONE);game.tick(0);assertTrue(g.foliage.suitable(Foliage.Kind.IVY,105,4,82));
+        // (0.2.9) a lone post is not a wall: Ivy needs the face to go on to a side
+        g.setBlock(106,5,82,Blocks.STONE);game.tick(0);assertFalse(g.foliage.suitable(Foliage.Kind.IVY,105,4,82));
+        g.setBlock(106,4,83,Blocks.STONE);g.setBlock(106,5,83,Blocks.STONE);game.tick(0);assertTrue(g.foliage.suitable(Foliage.Kind.IVY,105,4,82));
     }
     @Test void aWorkingSwingDoesNotTurnBackTowardTheStaleNativeHeading() {
         witness.goal=Brain.Goal.WORK;witness.yaw=0;witness.wantYaw=Float.NaN;witness.agentYaw=(float)Math.PI;witness.nativeAction="hold";

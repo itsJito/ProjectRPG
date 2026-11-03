@@ -31,7 +31,7 @@ public final class AstrattoNative {
     public static final int CHEM_FLAMMABLE = 1, CHEM_CONDUCTIVE = 2, CHEM_FREEZABLE = 4, CHEM_WIND_SENSITIVE = 8;
     public static final int CHEM_FIRE = 1, CHEM_WATER = 2, CHEM_ICE = 3, CHEM_WIND = 4, CHEM_ELECTRIC = 5;
     public static final int CHEM_WET = 1, CHEM_BURNING = 2, CHEM_FROZEN = 4, CHEM_CHARGED = 8, CHEM_BURNT = 16;
-    public static final int API_MAJOR = 2, API_MINOR = 7, API_VERSION = API_MAJOR << 16 | API_MINOR;
+    public static final int API_MAJOR = 2, API_MINOR = 9, API_VERSION = API_MAJOR << 16 | API_MINOR;
 
     // ---- status
     public static final int OK = 0, ERR_ARGUMENT = -1, ERR_VERSION = -2, ERR_STATE = -3, ERR_MEMORY = -4, ERR_STREAM = -5, ERR_INTERNAL = -6,
@@ -135,7 +135,7 @@ public final class AstrattoNative {
     /** Stops a texture's mip chain at level n (OR it into the flags). */
     public static int texMaxLevel(int n) { return ((n + 1) & 15) << 8; }
     public static final int RES_TEXTURE = 1, RES_MESH = 2;
-    public static final int RCMD_CAMERA = 1, RCMD_ENV = 2, RCMD_LIGHT = 3, RCMD_MODEL = 4, RCMD_PARTICLES = 5, RCMD_QUADS = 6, RCMD_GRADING = 7,
+    public static final int RCMD_CAMERA = 1, RCMD_ENV = 2, RCMD_LIGHT = 3, RCMD_MODEL = 4, RCMD_PARTICLES = 5, RCMD_QUADS = 6, RCMD_GRADING = 7, RCMD_ATMOS = 20,
             RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17, RCMD_EMITTER = 18, RCMD_RIPPLE = 19;
     /** 2.1: the renderer's layers. */
     public static final int LAYER_FOLIAGE = 1, LAYER_PROP = 2, LAYER_DECAL = 3, INSTANCES_SHADOW = 1;
@@ -149,7 +149,7 @@ public final class AstrattoNative {
     static final int SIZEOF_CONFIG = 24, SIZEOF_BLOCK_DEF = 12, SIZEOF_BLOCK_TABLE = 16, SIZEOF_WORLD_DESC = 56, SIZEOF_WORLD_VIEW = 64,
             SIZEOF_FRAME = 40, SIZEOF_SNAPSHOT = 24, SIZEOF_STATS = 176, SIZEOF_AUDIO_STATS = 72, SIZEOF_SOUND_DESC = 24;
     static final int SIZEOF_RENDER_BLOCK = 12, SIZEOF_SHAPE_DEF = 12, SIZEOF_RENDER_TABLE = 48, SIZEOF_MESH_IO = 72;
-    static final int SIZEOF_RENDERER_DESC = 32, SIZEOF_TEXTURE_DESC = 40, SIZEOF_WORLD_LOOK = 48, SIZEOF_RENDER_IO = 120;
+    static final int SIZEOF_RENDERER_DESC = 32, SIZEOF_TEXTURE_DESC = 40, SIZEOF_WORLD_LOOK = 56, SIZEOF_RENDER_IO = 120;
 
     /** Every structure these bindings lay out by hand, and the size they lay it out at. */
     static final Object[][] LAYOUTS = {
@@ -173,7 +173,7 @@ public final class AstrattoNative {
             {"astratto_snap_softbody", 40}, {"astratto_snap_vehicle", 176}, {"astratto_snap_agent", 104}, {"astratto_audio_stats", 72},
             {"astratto_snapshot_io", 24}, {"astratto_evt_module_log", 24}, {"astratto_render_block", 12}, {"astratto_shape_def", 12},
             {"astratto_render_table", 48}, {"astratto_mesh_io", 72}, {"astratto_renderer_desc", 32}, {"astratto_texture_desc", 40}, {"astratto_texture_update", 24},
-            {"astratto_world_look", 48}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 112}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},
+            {"astratto_world_look", 56}, {"astratto_rcmd_camera", 256}, {"astratto_rcmd_env", 112}, {"astratto_rcmd_light", 56}, {"astratto_rcmd_model", 112},
             {"astratto_rcmd_particles", 16}, {"astratto_rcmd_quads", 16}, {"astratto_rcmd_grading", 32}, {"astratto_rcmd_body", 32},
             {"astratto_rcmd_world", 16}, {"astratto_rcmd_clear", 24}, {"astratto_rcmd_quality", 24}, {"astratto_rcmd_lens", 24}, {"astratto_rcmd_smoke", 16}, {"astratto_render_io", 120},
             {"astratto_rcmd_foliage", 168}, {"astratto_rcmd_props", 16}, {"astratto_rcmd_decals", 32},

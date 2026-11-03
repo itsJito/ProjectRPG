@@ -127,6 +127,16 @@ public final class RenderCommands {
         head(AstrattoNative.RCMD_GRADING, 32).buf.putFloat(death).putFloat(hurt).putFloat(infection).putFloat(flash).putFloat(bile).putFloat(0);
     }
 
+    /**
+     * API 2.9: an environment preset's light and grade - the six-axis ambient (+x, -x, +y, -y, +z, -z, linear rgb each,
+     * 18 floats), the exposure multiplier, saturation and contrast (1 = unchanged) and a tint. Kept until sent again.
+     */
+    public void atmos(float[] cube, float exposure, float saturation, float contrast, float tintR, float tintG, float tintB) {
+        head(AstrattoNative.RCMD_ATMOS, 8 + 24 * 4);
+        for (int i = 0; i < 18; i++) buf.putFloat(i < cube.length ? cube[i] : 0);
+        buf.putFloat(exposure).putFloat(saturation).putFloat(contrast).putFloat(tintR).putFloat(tintG).putFloat(tintB);
+    }
+
     /** An upright capsule that shadows local lights (a person in a car's headlights). */
     public void shadowBody(float x, float y, float z, float radius, float height) { head(AstrattoNative.RCMD_SHADOW_BODY, 32).buf.putFloat(x).putFloat(y).putFloat(z).putFloat(radius).putFloat(height).putFloat(0); }
 

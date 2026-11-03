@@ -29,16 +29,34 @@ public final class Fx {
     public double now;
     private float[] data = new float[12 * 1024];
 
+    /** (0.3.0) Where the ground is under a point (the game sets it): liquid drops land there and leave a splat. */
+    public interface Ground { float below(float x, float y, float z); }
+    public Ground ground;
+    private int splats;
+    /** Blood's colour in flight and once it lies: a deep red, darker when it has dried. */
+    static final float BR = 0.32f, BG = 0.012f, BB = 0.016f;
+
     public void update(float dt) {
+        java.util.List<P> landed = null;
         for (Iterator<P> it = ps.iterator(); it.hasNext(); ) {
             P p = it.next();
             p.age += dt;
-            if (p.age >= p.life) { it.remove(); continue; }
+            if (p.age >= p.life) { if (p.kind == 10) splats--; it.remove(); continue; }
             p.vy -= p.gravity * dt;
             float k = (float) Math.exp(-p.drag * dt);
             p.vx *= k; p.vy *= k; p.vz *= k;
             p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+            // (0.3.0, gamefixes: blood should look better and more fluid) a drop that meets the ground bursts into a splat
+            if (p.kind == 9 && p.vy < 0 && ground != null) {
+                float gy = ground.below(p.x, p.y + 0.3f, p.z);
+                if (Float.isFinite(gy) && p.y <= gy + 0.01f) {
+                    it.remove();
+                    if (landed == null) landed = new java.util.ArrayList<>();
+                    p.y = gy; landed.add(p);
+                }
+            }
         }
+        if (landed != null) for (P p : landed) splat(p);
         floating.removeIf(f -> now - f.born() > 1.6);
         lightUpdate(dt);
         shake = Math.max(0, shake - dt * 3f);
@@ -55,6 +73,9 @@ public final class Fx {
             data[o] = p.x; data[o + 1] = p.y; data[o + 2] = p.z; data[o + 3] = p.size * (p.kind == 1 ? 1 + t * 1.5f : 1);
             data[o + 4] = p.r; data[o + 5] = p.g; data[o + 6] = p.b; data[o + 7] = p.a;
             data[o + 8] = p.seed * 6.28f; data[o + 9] = p.kind; data[o + 10] = t; data[o + 11] = p.seed;
+            // (0.3.0) a liquid drop carries its velocity instead (the shader draws it along it): x in the rotation, y in
+            // the alpha, z in the seed
+            if (p.kind == 9) { data[o + 8] = p.vx; data[o + 7] = p.vy; data[o + 11] = p.vz; }
         }
         return n;
     }
@@ -160,31 +181,53 @@ public final class Fx {
         for (int i = 0; i < n; i++) add(2, x, y, z, s() * 3, 1 + rnd.nextFloat() * 2.5f, s() * 3, 0.05f, 0.85f, 0.62f, 0.38f, 1, 0.5f + rnd.nextFloat() * 0.4f, 16, 0.6f);
     }
 
+    /**
+     * (0.3.0, gamefixes: blood should look better, more fluid in its splashes) a splash of blood from a blow: a few heavy
+     * gouts and a spray of smaller drops, each a liquid drop stretched along its flight (it occludes, it does not glow),
+     * thinning as they spread; they fall, and where they land they splat.
+     */
     public void blood(float x, float y, float z, float dx, float dz) {
-        for (int i = 0; i < 22; i++) {
-            boolean gout = i < 4;
-            add(2, x, y, z, dx * (gout ? 1.4f : 2.2f) + s() * 1.6f, rnd.nextFloat() * (gout ? 1.6f : 2.8f), dz * (gout ? 1.4f : 2.2f) + s() * 1.6f, gout ? 0.09f : 0.055f, 0.35f, 0.02f, 0.02f, 1, 0.5f + rnd.nextFloat() * 0.35f, 14, 0.5f);
+        for (int i = 0; i < 26; i++) {
+            boolean gout = i < 5;
+            float spread = gout ? 0.8f : 1.7f, speed = gout ? 1.6f : 2.4f + rnd.nextFloat() * 1.2f;
+            liquid(x + s() * 0.04f, y + s() * 0.04f, z + s() * 0.04f, dx * speed + s() * spread, 0.6f + rnd.nextFloat() * (gout ? 1.4f : 2.6f), dz * speed + s() * spread,
+                    gout ? 0.04f + rnd.nextFloat() * 0.02f : 0.016f + rnd.nextFloat() * 0.016f, 1.4f + rnd.nextFloat() * 0.6f);
         }
     }
 
-    /** A fine mist of blood hanging a moment in the air where a heavy blow landed. */
+    /** A fine mist of blood hanging a moment in the air where a heavy blow landed (soft, occluding, quickly gone). */
     public void bloodMist(float x, float y, float z, float dx, float dz, float amount) {
         int n = 6 + (int) (amount * 18);
-        for (int i = 0; i < n; i++) add(2, x + s() * 0.1f, y + s() * 0.1f, z + s() * 0.1f, dx * 1.2f + s() * 0.9f, 0.4f + rnd.nextFloat() * 0.8f, dz * 1.2f + s() * 0.9f, 0.025f, 0.45f, 0.03f, 0.03f, 1, 0.35f + rnd.nextFloat() * 0.25f, 4, 0.35f);
+        for (int i = 0; i < n; i++) add(8, x + s() * 0.1f, y + s() * 0.1f, z + s() * 0.1f, dx * 1.2f + s() * 0.9f, 0.4f + rnd.nextFloat() * 0.8f, dz * 1.2f + s() * 0.9f, 0.03f + rnd.nextFloat() * 0.02f, BR * 1.1f, BG, BB, 0.55f, 0.35f + rnd.nextFloat() * 0.25f, 3, 0.8f);
     }
 
-    /** An arterial gout: a jet of heavier drops thrown up and out in an arc. */
+    /** An arterial gout: a jet of heavier drops thrown up and out in an arc, joined into a stream by their stretch. */
     public void spurt(float x, float y, float z, float dx, float dz, float strength) {
-        int n = 10 + (int) (strength * 16);
+        int n = 12 + (int) (strength * 18);
         for (int i = 0; i < n; i++) {
             float t = rnd.nextFloat();
-            add(2, x, y, z, dx * (2.2f + t * 2.4f) * strength + s() * 0.3f, (1.6f + t * 1.8f) * strength, dz * (2.2f + t * 2.4f) * strength + s() * 0.3f, 0.055f, 0.33f, 0.015f, 0.015f, 1, 0.6f + rnd.nextFloat() * 0.3f, 14, 0.55f);
+            liquid(x, y, z, dx * (2.2f + t * 2.4f) * strength + s() * 0.25f, (1.6f + t * 1.8f) * strength, dz * (2.2f + t * 2.4f) * strength + s() * 0.25f, 0.024f + t * 0.016f, 1.6f);
         }
     }
 
-    /** One drop falling from a wound: the same square droplet the rain and splashes use, dark red. */
+    /** One drop falling from a wound: a drop of blood, lengthening as it falls, splatting where it lands. */
     public void drip(float x, float y, float z) {
-        add(2, x + s() * 0.12f, y, z + s() * 0.12f, s() * 0.1f, -0.4f, s() * 0.1f, 0.045f, 0.32f, 0.015f, 0.015f, 1, 0.5f, 14, 0.2f);
+        liquid(x + s() * 0.1f, y, z + s() * 0.1f, s() * 0.1f, -0.3f, s() * 0.1f, 0.02f + rnd.nextFloat() * 0.01f, 2.5f);
+    }
+
+    /** A drop of liquid in flight (blood's colour), its velocity carried to the renderer so it is drawn along it. */
+    private P liquid(float x, float y, float z, float vx, float vy, float vz, float size, float life) {
+        float shade = 0.85f + rnd.nextFloat() * 0.3f;
+        return add(9, x, y, z, vx, vy, vz, size, BR * shade, BG * shade, BB * shade, 1, life, 11, 0.3f);
+    }
+
+    /** A drop landed: a splat on the ground, bigger for a bigger or faster drop, a few specks thrown round it. */
+    private void splat(P p) {
+        if (splats >= 260) return;
+        float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+        float size = Math.min(0.22f, p.size * (1.6f + speed * 0.25f));
+        P s = add(10, p.x, p.y + 0.012f + rnd.nextFloat() * 0.004f, p.z, 0, 0, 0, size, BR * 0.9f, BG, BB, 1, 9 + rnd.nextFloat() * 5, 0, 0);
+        if (s != null) splats++;
     }
 
 

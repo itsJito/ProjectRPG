@@ -51,17 +51,18 @@ final class Jobs {
         ItemDef haul=batch(n);
         if(haul!=null) {if(n.job==null)n.job=new TaskNetwork<>(List.of(new TaskNetwork.Method<Npc>("sell the lake catch",person->person.count(haul)>0,person->sell(person,haul))));n.job.tick(n);return;}
 
-        for(var object:g.objects.all())if(object instanceof rpg.objects.FishingNet net && net.owner==n.id && !net.removed) {
-            if(!(g.objects.get(net.source) instanceof Node site))return;
-            if(net.contents.count(site.product)==0){brain.goTo(n,n.postX,n.postZ,false,1);n.lastOutcome="net deployed; waiting for a real catch";return;}
-            // the net is out on the water: hauled in from the bank, within arm's and rope's reach
+        var out=netOf(n);
+        if(out!=null) {
+            if(!(g.objects.get(out.source) instanceof Node site)){haul(n,out);return;}
+            boolean late=lateForNets();
+            if(!late && !out.due(g)){brain.goTo(n,n.postX,n.postZ,false,1);n.lastOutcome="net soaking; "+out.contents.count(site.product)+" in it so far";return;}
+            // the net is out on the water: hauled in from the bank, within arm's and rope's reach - catch, net and all
             float[] bank=g.ai.standSpot(n,site);
-            if(brain.goTo(n,bank[0],bank[1],false,0.8f) && Math.hypot(n.x-net.x,n.z-net.z)<3.5f) {
-                for(int i=0;i<net.contents.size();i++){ItemStack item=net.contents.get(i);if(item==null || item.def!=site.product || !n.canStore(item))continue;n.store(item);net.contents.set(i,null);}
-                n.lootStarted=g.time;n.lootUntil=g.time+0.9;n.reachX=net.x;n.reachY=net.y;n.reachZ=net.z;
-            }
+            if(brain.goTo(n,bank[0],bank[1],false,0.8f) && Math.hypot(n.x-out.x,n.z-out.z)<3.5f) haul(n,out);
+            else n.lastOutcome=late?"hauling the net in before dark":"going to haul in a full net";
             return;
         }
+        if(lateForNets()){brain.goTo(n,n.postX,n.postZ,false,1);n.lastOutcome="no net out after dark";return;}
         Node site=site(n);
         if(site==null){g.ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no eligible lake and net";return;}
         float[] bank=g.ai.standSpot(n,site);
@@ -70,8 +71,31 @@ final class Jobs {
             if(tools.isEmpty() && n.main()==Items.FISHING_NET){tools=List.of(n.eq.get(ItemDef.Slot.MAIN));n.eq.set(ItemDef.Slot.MAIN,null);}
             if(tools.isEmpty())return;
             var net=new rpg.objects.FishingNet(g.state.newEntityId(),n.id,site.id,site.x,DevMap.FLOOR-0.1f,site.z,g.state.minutes+4);
+            net.laidAt=g.state.minutes;
             for(var tool:tools)net.contents.add(tool);g.objects.add(net);n.dutyTarget=net.id;
         }
+    }
+
+    /** The lake net this fisher has out on the water, if any. */
+    rpg.objects.FishingNet netOf(Npc n) {
+        for(var object:g.objects.all())if(object instanceof rpg.objects.FishingNet net && net.owner==n.id && !net.removed)return net;
+        return null;
+    }
+
+    /** Evening and night: nets come in and none go out (they were left soaking in the spot for good). */
+    boolean lateForNets() {
+        double hour=g.state.hourOfDay();
+        return hour>=20 || hour<6;
+    }
+
+    /** Takes in a net: what was caught and the net itself go to the fisher's pack (what will not fit lands at their feet). */
+    private void haul(Npc n,rpg.objects.FishingNet net) {
+        for(var item:net.contents.stacks()){if(n.canStore(item))n.store(item);else g.objects.drop(item,n.x,n.y+0.4f,n.z);}
+        net.contents.clear();net.removed=true;
+        if(n.dutyTarget==net.id)n.dutyTarget=0;
+        n.lootStarted=g.time;n.lootUntil=g.time+0.9;n.reachX=net.x;n.reachY=net.y;n.reachZ=net.z;
+        n.lastOutcome="hauled the lake net in";
+        g.state.commit("NetHauled",n.id,0,DevMap.jurisdiction(n.x,n.z),0,n.name+" hauls in the lake net");
     }
 
     /**
@@ -222,7 +246,10 @@ final class Jobs {
             boolean eligible=n.profession.family==Npc.Role.MINER && node.kind==Node.Kind.ROCK && mineral(n.profession,node.product)
                     || n.profession.family==Npc.Role.FISHERMAN && fishing(n,node);
             if(!eligible || n.skills.level(node.skill)<node.level)continue;
-            float distance=n.distTo(node.x,node.z);
+            // (0.2.9) others already at a deposit or a spot send this worker to the next one, or another side of it
+            int others=g.ai.workersOn(node,n);
+            if(node.kind==Node.Kind.FISH && others>0 || others>=3)continue;
+            float distance=n.distTo(node.x,node.z)+others*6;
             if(n.profession==Profession.GEM_PROSPECTOR)distance-=Math.min(4,node.stock)*0.4f; // survey promising, undepleted deposits
             if(distance<score){score=distance;best=node;}
         }

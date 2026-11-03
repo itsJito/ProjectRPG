@@ -49,6 +49,12 @@ public final class Items {
         d.damage = 0.2f; d.impact = 4; d.damageType = DamageType.BLUNT;
         return d;
     }
+    private static ItemDef torch() {
+        ItemDef d = def("torch", "Torch", 6, 0x6A4628, "A pitch-soaked torch. Wield it and raise it (the guard key) to light it.");
+        d.slot = Slot.MAIN; d.family = Family.TORCH; d.reach = 0.9f; d.speed = 1f;
+        d.damage = 1.5f * rpg.combat.CombatMath.HP_SCALE; d.impact = 8; d.damageType = DamageType.BLUNT;
+        return d;
+    }
     private static ItemDef garment(String id, String name, Slot slot) {
         ItemDef item=def(id,name,25,0xA89476,"A fitted linen garment."); item.slot=slot;item.family=Family.ARMOR;
         item.reqSkill=Skill.DEFENSE;item.reqLevel=1;item.armor=0.5f;return item;
@@ -112,6 +118,10 @@ public final class Items {
     public static final ItemDef ARROW_SHAFT = stack("arrow_shaft", "Arrow shaft", 1, 0xA88050, "Needs a head.");
     public static final ItemDef TINDERBOX = def("tinderbox", "Tinderbox", 2, 0x806040, "Lights fires.");
     public static final ItemDef HAMMER = def("hammer", "Hammer", 4, 0x707070, "For smithing and building.");
+    /** (0.3.0, gamefixes) a torch: wielded, lit with the guard button (no tinderbox needed), it lights the way - and sets light to what it strikes. */
+    public static final ItemDef TORCH = torch();
+    /** (0.3.0) a saddle: put on a tamed horse (or Pegasus), it can be steered - and it carries saddlebags. */
+    public static final ItemDef SADDLE = def("saddle", "Saddle", 60, 0x6A3E22, "A leather riding saddle with saddlebags. Put it on a tamed horse to ride it properly.");
     public static final ItemDef SNARE = def("snare", "Rabbit snare", 12, 0x8D7852, "A reusable snare for real wildlife crossings.");
     public static final ItemDef KNIFE = def("knife", "Knife", 3, 0xB0B0B8, "For crafting.");
     public static final ItemDef FISHING_ROD = tool("fishing_rod", "Fishing rod", 5, 0x806040, "Wield it and cast at a fishing spot for trout.", Skill.FISHING);
@@ -392,7 +402,7 @@ public final class Items {
                 {"raw_shrimp", 1, 1, 0.1f}, {"shrimp", 1, 1, 0.1f}, {"raw_trout", 2, 1, 0.5f}, {"trout", 2, 1, 0.4f}, {"burnt_fish", 2, 1, 0.3f},
                 {"bread", 2, 1, 0.4f}, {"berries", 1, 1, 0.1f}, {"guam", 1, 1, 0.05f}, {"flax", 1, 2, 0.1f}, {"bowstring", 1, 1, 0.02f},
                 {"plank", 4, 1, 3f}, {"oak_plank", 4, 1, 4f}, {"bones", 2, 1, 0.5f}, {"big_bones", 3, 1, 1.5f}, {"arrow_shaft", 1, 2, 0.01f},
-                {"tinderbox", 1, 1, 0.2f}, {"hammer", 1, 2, 0.8f}, {"knife", 1, 2, 0.3f}, {"fishing_rod", 1, 5, 0.6f}, {"small_fishing_net", 2, 2, 0.5f}, {"crab_cage", 2, 2, 1.6f},
+                {"tinderbox", 1, 1, 0.2f}, {"torch", 1, 2, 0.7f}, {"saddle", 3, 2, 6f}, {"hammer", 1, 2, 0.8f}, {"knife", 1, 2, 0.3f}, {"fishing_rod", 1, 5, 0.6f}, {"small_fishing_net", 2, 2, 0.5f}, {"crab_cage", 2, 2, 1.6f},
                 {"raw_crab", 1, 1, 0.4f}, {"crab", 1, 1, 0.3f}, {"religious_wine", 1, 2, 0.8f}, {"restorative_potion", 1, 1, 0.3f}, {"lockpick", 1, 1, 0.05f},
                 {"sealed_letter", 1, 1, 0.02f}, {"xp_lamp", 2, 1, 0.8f}, {"chancery_key", 1, 1, 0.1f},
                 {"shortbow", 1, 4, 0.9f}, {"oak_shortbow", 1, 4, 1f}, {"willow_shortbow", 1, 4, 1f}, {"bronze_arrows", 1, 3, 0.03f}, {"iron_arrows", 1, 3, 0.03f},

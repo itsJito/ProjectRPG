@@ -152,18 +152,31 @@ public final class NativeRenderer implements AutoCloseable {
      */
     public boolean worldLook(int atlas, int noise, int layers, NativeMesher.BlockDef[] blocks, NativeMesher.ShapeDef[] shapes, int belowFloorBlock,
                              float[] palette, byte[] layerMaterials, float groundY, int meshFlags) {
+        return worldLook(atlas, noise, layers, blocks, shapes, belowFloorBlock, palette, layerMaterials, groundY, meshFlags, null);
+    }
+
+    /**
+     * (2.8) As above, with each block's ground rank (256 bytes, or null): a ground top of a higher rank spreads over its
+     * lower-ranked neighbours' tops at the cell edges, in a ragged blend (grass onto dirt, dirt onto a path); 0 never blends.
+     */
+    public boolean worldLook(int atlas, int noise, int layers, NativeMesher.BlockDef[] blocks, NativeMesher.ShapeDef[] shapes, int belowFloorBlock,
+                             float[] palette, byte[] layerMaterials, float groundY, int meshFlags, byte[] groundRank) {
         live();
+        if (groundRank != null && groundRank.length < 256) throw new IllegalArgumentException("ground ranks are 256 bytes");
         if (palette.length < 256 * 8) throw new IllegalArgumentException("a palette is 256 x 8 floats");
         java.nio.FloatBuffer pal = MemoryUtil.memAllocFloat(256 * 8);
         ByteBuffer lm = layerMaterials == null ? null : MemoryUtil.memAlloc(layerMaterials.length);
+        ByteBuffer gr = groundRank == null ? null : MemoryUtil.memAlloc(256);
         try {
             pal.put(0, palette, 0, 256 * 8);
             if (lm != null) lm.put(0, layerMaterials);
+            if (gr != null) gr.put(0, groundRank, 0, 256);
             long st = NativeMesher.withTable(blocks, shapes, belowFloorBlock, table -> {
                 try (MemoryStack stack = MemoryStack.stackPush()) {
                     ByteBuffer look = stack.calloc(AstrattoNative.SIZEOF_WORLD_LOOK).order(ByteOrder.nativeOrder());
                     look.putInt(0, AstrattoNative.SIZEOF_WORLD_LOOK).putInt(4, atlas).putInt(8, noise).putInt(12, layers).putLong(16, MemoryUtil.memAddress(table))
-                            .putLong(24, MemoryUtil.memAddress(pal)).putLong(32, lm == null ? 0 : MemoryUtil.memAddress(lm)).putFloat(40, groundY).putInt(44, meshFlags);
+                            .putLong(24, MemoryUtil.memAddress(pal)).putLong(32, lm == null ? 0 : MemoryUtil.memAddress(lm)).putFloat(40, groundY).putInt(44, meshFlags)
+                            .putLong(48, gr == null ? 0 : MemoryUtil.memAddress(gr));
                     return AstrattoNative.renderWorldLook(handle, look);
                 }
             });
@@ -171,6 +184,7 @@ public final class NativeRenderer implements AutoCloseable {
         } finally {
             MemoryUtil.memFree(pal);
             if (lm != null) MemoryUtil.memFree(lm);
+            if (gr != null) MemoryUtil.memFree(gr);
         }
     }
 

@@ -2,6 +2,83 @@
 
 A running log of what changed, in plain words. The newest pass is first; the first pass on `gamefixes.md` follows below it.
 
+## Pass 21 - Alpha 0.3.0 "Saddle Up" (Hoodie)
+
+- Ledge respawn: Rpg.teleport and onKilled now cancel traversal, ladder climbs and rides.
+- Third-person aim: Player.aimPoint/aimPointFor, PlayerController.bodyOnRay (camera ray hits bodies too); ThrowSolver.cameraTarget and CombatSystem.spellFromHand fly to it.
+- Hang: Traversal.HANG_MIN_RISE 1.6 (no one-block hangs); sprint held when the hands reach the edge pulls up (Motion.decided), otherwise hold; jump at a high edge hangs (highEdge); eased shimmy speed (shimmyV); HUD hang hint removed. Charge: Traversal.CHARGE_AFTER 2 s, CHARGE_KNOCKDOWN 0.75 s.
+- Ladders: new rpg.actor.Ladders (MOUNT, TOP_IN, CLIMB, TOP_OUT, STEP_OFF; front from the backing wall, corners from any backed side); Rig.ladderLimb diagonal rung cycle; NPCs face ladders.
+- Undertaker: lays the body down at the stone (Npc.layingSince/layingBody, Brain.LAYING), word of a body in town after 45 s (Corpse.knownAt).
+- NPC routines: Brain.goTo stall watchdog (6 s no headway: arrive if near, replan if far); guards ignore repeated stale leads (handOver).
+- Stealth: tracked foes stay seen within 14 m with any clear line (Stealth.TRACK_NEAR); placed() counts fresh footfalls.
+- Wounds: Gore caps the injury pose by missing health; clears at full health.
+- Animal ragdolls: budget eviction no longer refuses deaths; no distance cut-off. RagdollProbeTest covers every species.
+- Shield sheathe: a waiting hand holds still. Crossbow: prod framed across the stock; slung prod-up.
+- Weekly System: engine astratto.time.Calendar (rate 1 s at midnight to 3 s at noon per minute, pause/scale/distance/transition, date set); WorldState.cal/WEEKDAYS/dateText; console date/clock; Lua date/weekday/weekdayName; minimap weekday clock; Brain.restDay (Solday 12-20). WeeklySystemTest.
+- Torch: Family.TORCH, Items.TORCH (1x2), Actor.torchLit/torchLighting, CombatSystem.lightTorch/torchTick and fire on the swing, Gfx.torchFlame (attached flame, flickering shadowed light), Rig carry/lighting poses, Stealth.light.
+- Mounts: rpg.mount.MountStats/MountController/Riding (wild, tame, saddled; charge peak 10 ticks sagging to 80%; step-up with clearance; Pegasus flight model), Species.PEGASUS (AnimalModels.pegasus horn and wings), Animal mount options, Items.SADDLE, Saddlebags, saves, foal inheritance, wild Pegasus in the wood; Gfx horse gaits (walk/trot/canter/gallop footfalls, stride()), saddle and wings; Rig rider pose; riding HUD.
+- Bubbles: Ui2D.comic (The Last Comic On Earth), roundRect/tri; comic bubbles with bursts for shouts.
+- Townsfolk: quarry workers, coal miner and trapper back to combat level 3.
+- Dialogue: rpg.ai.Diary (outcomes in first person, per day); Dialogue.day/news/workTip/situational, three or four talk choices.
+- Subtype awareness: AiSystem.lawInSight/crook; bandits hold back with the watch in sight; law counted in an outlaw's odds; thieves won't steal near the law.
+- Witnesses: Law.sawBlow (an eyewitness must see the blow), Law.circumstantial (suspicions, source "circumstantial", never reportable).
+- Combat AI: attack tokens (AiSystem.mayPress/yieldPress), swing tempo and sidesteps (Npc.nextSwingAt), monster sidestep/punish.
+- Blood: Fx liquid drops (kind 9) and ground splats (kind 10) with Fx.ground, mist occluding; Blood.trickle runs fresh blood down bodies.
+- Lighting: engine API 2.9 RCMD_ATMOS (ambient cube, exposure, saturation, contrast, tint; lighting.frag, tonemap.frag), native rebuilt; rpg.render.Atmosphere presets by hour, weather and roof.
+- Faces: Faces moods extended, reactions/startle, blinking, text lip-sync; Meshes.expression for every mood; Chatbox portraits lip-sync to the line and blink (old Faces.speech(time, talking) removed).
+- Animations: run and jog taller with knee drive and arm pump; whole-body repairs; fishing body motion; shimmy reach and sway; charged heavy blows launch from the cocked pose.
+- Tests: Gamefixes030Test (14), WeeklySystemTest, RagdollProbeTest; Gamefixes029Test and MonsterFightTest updated. Gallery mode p16 for review sheets.
+- Monsters: roar on engaging (Gfx.humanoidMonster), fighting crouch while squared up, idle weight shifts; MonsterMind.callKin brings nearby kin and lair-mates on engaging.
+- Not done this pass: full test suite (the run was stopped when the machine ran low on memory), acceptance run and bench; further combat animation polish.
+
+---
+
+## Pass 20: Hang in There (Version Alpha 0.2.9) — Hoodie
+
+Continues `polish` from `b966a9b` (Alpha 0.2.8). Earlier entries remain intact. Items of the gamefixes list already shipped and covered by 0.2.8's regressions (two-handed grips, shield wrist frame, tree-root clearance, witness HUD, Morrow's line, memory merging, the 14 Gold bounty, repair pose, nearer fog, the DevMap stair course) were rechecked by the full suite rather than reworked.
+
+### Traversal (Agility 6 and 10)
+- `Traversal.HANG_LEVEL` 6: a player's ledge climb is held at the hang (`Motion.hold`) until Jump is pressed again. While hanging, `Traversal.hang()` reads the keys: strafe shimmies along the edge (`shimmy()`, 0.95 m/s, validated against the edge block, the cell above it and the body's room, two metres per Agility award), a Crouch press lets go (`letGo()`, eased off the wall), Back + Jump leaps away (`leapBack()`, launched through `moverPlace` with velocity because the mover ignores a jump input while airborne). A hang costs stamina (3/s, less with Agility); at zero the grip fails. Level 5 keeps the one-press climb; NPC climbs never hold.
+- Controlled drop: `Traversal.lower()` - crouch-walking off a rim with two open blocks below turns the body and lowers it onto the edge's outer face to hang. The lowering path goes over the rim first, then down; the hands take the edge before the body descends.
+- `Traversal.CHARGE_LEVEL` 10: `PlayerController.barge()` - sprinting (any speed over a walk, since movers check the run on contact) knocks people in the run's corridor aside: townsfolk knocked down (`Reactions.knockDown`), fighters sent reeling (`struck`), the charger slowed per body and charged 4 stamina, each body once a second. Disorderly conduct through `Law.crime` when unlawful (once in 15 s per person), whatever is in hand. Outlaws and brutes take it as the start of a fight.
+- Rig: hand-over-hand shimmy (each hand lifts and reaches in turn), feet scuffing after, a slight loose sway while held; the charge carriage (`State.charge`): deeper lean, left shoulder brought round, shorter pump with bent elbows, lead arm tucked. Leap back turns at the body's own rate (the instant flip read as a pop). HUD hang guide with a grip bar (`HudFragments.Prompt`).
+
+### Law and the watch
+- `Law.payWhatYouCan`: short of the bounty, the officer remarks on it, takes every coin carried, seizes pack items dearest first as collateral up to the shortfall (sold into the local shop's stock, burnt if no room; stolen goods left for the arrest's confiscation), records `BountyShortPaid`, leaves the remainder as the bounty and arrests. Offered from the halt dialogue and the lawman's conversation as "Pay what I have"; the `pay` interaction routes to it when short. `payBounty` still refuses a short purse.
+- Officers' eyewitness accounts of ASSAULT, MURDER or DISORDERLY in their own jurisdiction are reported on the spot (`report(w, m, w)`), for anyone; the chat says the officer saw it himself. `AiSystem.assailant` gives the watch a threat whenever someone in sight is striking a person without right (`Law.unlawful`) or a beast is on someone - the player included. Applied equally: striking a townsman in front of a guard brings the same response.
+
+### Human AI
+- Flyers: `CombatSystem.leadAim` solves the shot's lead (target velocity and a flyer's climb, `Monster.climb`) and drop over three passes; archers turn to the solution before releasing, scatter by Archery, and after two shots from one spot move round the mark for a fresh angle (`Npc.shotFromX/Z`, `shotsHere`). Archers no longer back off from flyers (a bat followed them for good and no shaft was loosed). Melee fighters under an out-of-reach flyer take up a carried bow or crossbow with ammunition (`Brain.rangedCarried`); with none, after 2.5 s they run home or away. Probe: 8 shots kill a level 40 bat, archer unhurt.
+- Sound: `Brain.choose` night penalty 0.3 -> 0.2, dark 0.12 -> 0.1; CHECK/PEEK from 0.35, CALL_OUT from 0.1; an unanswered call becomes a peek; the approach target snaps to standable ground (`nearestStandable`); an investigation under way at night scores 0.8 (sleep's 0.7 cut every look short). Probe: villagers and workers now end within 3.5 m of the source; timid merchants still hide or fetch a guard.
+- Work spots: `Npc.claimNode/claimCell/claimAt`; `AiSystem.workersOn/sides/cellTaken/crowded`. A tree takes one feller, a rock three (one per side), a fishing spot one; claimed or occupied cells are skipped, adjacent ones cost a little, one's own claim is kept. `Jobs.site` spreads miners across deposits.
+- Lake nets: `FishingNet.laidAt/SOAK/due`; `Jobs.netOf/lateForNets/haul` - catch and net come in together after 75 minutes, when full, or from 20:00; no net is laid at night; a WORK score of 0.86 keeps the fisher until it is in. A net whose owner is dead or gone washes ashore. Saves keep `laidAt` (old saves are due at once).
+- Teleports: a jump probe across a minute of guards and the player brawling with monsters and a bandit found no frame jumps; the one remaining instant move in a fight (the stuck-route step) now walks there (`combatGoal`).
+
+### Monsters
+- `Gfx.monster`: a living humanoid monster in a hit reaction or knockdown (`reacting` with a ragdoll) is drawn from its Sydney body like a dead one, instead of the standing procedural pose frozen at its mover. Reviewed: orc knocked down, lies, rises.
+
+### Items and animation
+- Sheathe: `Actor.sheatheTime/paired/handPhase/inHand(time, hand)`. A pair (weapon and shield, two weapons) is handled one hand after the other over 1.5x the time - drawing the off hand first, sheathing the main first - each item changing hands at its own hand's midpoint. Back-slung items swing wide to the hand's side. `CombatSystem`, `AiSystem`, `Node` read `sheatheTime()`.
+- Crossbow: the trigger shoulders it before firing (`PlayerController.crossbowQueued`, fires at aim 0.85), a bladed 0.55 rad stance (was 1.2, bow-like) and a cheek weld (head tipped onto the stock).
+- Armour: `CharModel.seg` tapers the outer layer toward the elbow and knee cuts (the lower piece more, sliding under the upper's rim).
+
+### World, foliage and rendering
+- Ground blend (engine API 2.8): `astratto_world_look.ground_rank` (256 bytes; struct 56 bytes; 2.7's 48-byte look still accepted). The renderer packs each block's rank and top layer/variants and binds the voxel volume to the world G-buffer pass; `world_gbuffer.frag` `groundBlend()` blends a higher-ranked neighbour's top over a ground top's edge with a two-scale ragged line and tufted fringe. `Blocks.groundRanks()`: grass 6, bare patch 5, dirt/mud 4, sand/clay 3, cobble 2, stone/debug floor 1; built surfaces 0 stay crisp. `RPG_GROUND_BLEND=0` turns it off for comparison. Native rebuilt (`build.bat game`).
+- Foliage: candidates on a checkerboard every row (twice the old density); Ivy/Moss need a wall face continuing to a side (seven lone-post patches gone).
+- `DevMap.climbs()`: stair flights up DevCity's north and west walls and inside both DevPalace gatehouses (`FLIGHTS`), ladders up the inside of each palace corner tower to a merlon-ringed lookout, and a DevTown timber lookout (`LOOKOUT`). Ladders only on the inside of walls. Every one climbed in tests.
+
+### Interface
+- Title: `TitleScreen.redButton` - 44 px red buttons with gold bevels and 20 px yellow lettering for New Profile, Delete Profile, Settings and Quit.
+- World map: everything on the chart is clipped to it; markers outside the world or inside dungeon layouts are dropped (dungeon chests were drawn over the legend); a new right panel (`HudFragments.legend`, `MAP_KEY`) shows the place, coordinates, time and a key for the icons on the chart.
+- Faith: a prayer's first point falls due one second after raising (`Prayers.unpaid`, `FIRST_POINT`); lowering it before then still pays it.
+
+### Dialogue
+- Universal choices: directions (nearest store, bank, altar, well, watch, undertaker, healer; compass point and distance), dangers (recent beast attacks seen, a fear in sight, the nearest lair, a lockdown), standing (from `Rumors.opinion`), shortages (local shop under half its target), and a daily compliment or jibe remembered as `KIND_WORD` (+0.05) or `SLIGHT` (-0.1) in the opinion.
+
+### Tooling and cleanup
+- Gallery mode `p15` (`RPG_REVIEW_ONLY=map,monsterfight,hang,charge,ground,climbs,armor`). Probes gated on `RPG_PROBE=1`: `SoundProbeTest`, `FlyerProbeTest`, `JumpProbeTest`, `IvyProbeTest` (write `build/probe.txt`). `Main` prints the renderer's error when a frame is refused.
+- PMD unused-code audit clean (one unused local removed). Version Alpha 0.2.9.
+
 ---
 
 ## Pass 19: A Helping Hand (Version Alpha 0.2.8) — Shadow

@@ -60,6 +60,7 @@ public final class ItemModels {
             case CLAWS: return HiResItems.claws(d, t);
             case HALBERD: return HiResItems.halberd(d, t);
             case CROSSBOW: return HiResItems.crossbow(d, t);
+            case TORCH: return HiResItems.torch(d);
             case THROWN: return HiResItems.thrown(d, t);
             case BOLT: return HiResItems.bolts(d, t);
             case ARROW: if (d.id.contains("brutal")) return HiResItems.bolts(d, t); break;

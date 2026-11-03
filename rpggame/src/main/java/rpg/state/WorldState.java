@@ -77,9 +77,27 @@ public final class WorldState {
     // ------------------------------------------------------------------ time
     public int day() { return (int) (minutes / 1440) + 1; }
     public double hourOfDay() { return (minutes % 1440) / 60.0; }
+
+    /**
+     * (0.3.0, gamefixes: the Weekly System) the engine's calendar, kept on the same clock as {@link #minutes}: minutes
+     * is what every system reads; the calendar is the date, the weekday and the rate the clock runs at. A direct change
+     * of minutes (a sleep, a skip, a load, the debug clock) is taken up by the calendar the next time it is read.
+     */
+    public final astratto.time.Calendar calendar = new astratto.time.Calendar();
+    /** The days of the week in Ashenwrath, weekday 0 first. */
+    public static final String[] WEEKDAYS = {"Solday", "Lunday", "Marday", "Merday", "Iovday", "Highday", "Sterday"};
+    public static final String[] MONTHS = {"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    public astratto.time.Calendar cal() {
+        double t = calendar.totalMinutes();
+        if (Math.abs(t - minutes) > 1e-6) { if (minutes > t) calendar.advance(minutes - t); else calendar.setTotal(minutes); }
+        return calendar;
+    }
+    public int weekday() { return cal().weekday(); }
+    public String weekdayName() { return WEEKDAYS[weekday()]; }
+    public String dateText() { var c = cal(); return String.format("%s, %s %d, %d", WEEKDAYS[c.weekday()], MONTHS[c.month()], c.day(), c.year()); }
     public String clockText() {
         int m = (int) (minutes % 1440);
-        return String.format("Day %d, %02d:%02d", day(), m / 60, m % 60);
+        return String.format("%s %02d:%02d (Day %d)", weekdayName(), m / 60, m % 60, day());
     }
 
     // ------------------------------------------------------------------ persistence

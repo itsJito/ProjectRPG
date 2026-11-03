@@ -397,8 +397,12 @@ int32_t astratto_render_release(astratto_renderer* renderer, uint32_t kind, uint
 
 int32_t astratto_render_world_look(astratto_renderer* renderer, const astratto_world_look* look) {
     return rguarded(renderer, [&](astratto::Renderer& r) -> int32_t {
-        if (look == nullptr || look->struct_size < sizeof(astratto_world_look)) { r.fail("bad world look"); return ASTRATTO_ERR_ARGUMENT; }
-        return r.worldLook(*look);
+        if (look == nullptr || look->struct_size < ASTRATTO_WORLD_LOOK_V27_SIZE) { r.fail("bad world look"); return ASTRATTO_ERR_ARGUMENT; }
+        // a 2.7 caller's look ends before ground_rank: read what it gave, the rest left empty
+        astratto_world_look full{};
+        std::memcpy(&full, look, look->struct_size < sizeof full ? look->struct_size : sizeof full);
+        if (look->struct_size < sizeof full) full.ground_rank = nullptr;
+        return r.worldLook(full);
     });
 }
 

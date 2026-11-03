@@ -21,6 +21,7 @@ uniform float uBodies[120];
 uniform ivec2 uTiles;
 uniform vec3 uCam, uCamFwd, uTint;
 uniform float uShadowRes, uAmbientFloor;
+uniform vec3 uAmbCube[6];
 uniform sampler2D uExposure;
 
 vec3 worldPos(vec2 uv, float d) { vec4 c = uInvPV * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); return c.xyz / c.w; }
@@ -214,6 +215,12 @@ void main() {
     irr = (mix(fallback, irr, conf) + vec3(uAmbientFloor)) * vec3(1.18, 1.22, 1.28);
     // Keep contact occlusion, while preventing it from crushing broad indirect illumination twice.
     col += albedo * (1.0 - metal) * irr * mix(occl, sqrt(occl), 0.25);
+    // ---- API 2.9: the environment preset's six-axis ambient, weighted by the surface's normal (an ambient cube) and by
+    // the sky it sees - the sky's colour from above, the ground's bounce from below, the sun's side warmer than the
+    // shade's - so form reads in the shade; in a sealed room little of it reaches, leaving the dark gaps between lamps
+    vec3 n2 = N * N;
+    vec3 cube = n2.x * (N.x >= 0.0 ? uAmbCube[0] : uAmbCube[1]) + n2.y * (N.y >= 0.0 ? uAmbCube[2] : uAmbCube[3]) + n2.z * (N.z >= 0.0 ? uAmbCube[4] : uAmbCube[5]);
+    col += albedo * (1.0 - metal) * cube * mix(0.12, 1.0, skyVis) * occl;
 
     // ---- indirect specular: screen-space reflection where it found one, probe / sky lobe elsewhere
     vec3 R = reflect(-V, N);

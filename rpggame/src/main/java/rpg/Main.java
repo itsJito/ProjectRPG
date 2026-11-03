@@ -438,7 +438,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.2.8";
+    public static final String VERSION = "Alpha 0.3.0";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {
@@ -475,7 +475,7 @@ public final class Main {
         ui.begin(gfx.cmd);
         hud.draw(ui, w, h, cursorFree, dt);
         ui.end();
-        if (gfx.frame(w, h) == null) System.err.println("frame refused");
+        if (gfx.frame(w, h) == null) System.err.println("frame refused: " + gfx.renderer().lastError());
     }
 
     static void shot(Gfx gfx, int w, int h, File out) {
