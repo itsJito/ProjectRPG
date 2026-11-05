@@ -52,7 +52,11 @@ public final class Gait {
         // little over the leg, a light run with a short flight instead of a split on bent knees
         float run = 2.6f + (speed - 4f) * 0.35f;
         float k = runShare(speed);
-        return Math.min(2.85f + 0.65f * sprintShare(speed), Math.max(0.6f, walk * (1 - k) + Math.max(1.6f, run) * k));
+        // (0.3.2, gamefixes: the sprint's legs cycled too fast) a sprint no longer quickens the legs past a jog's: at 3.5
+        // cycles a second (seven steps) the legs blurred like a cartoon's. It holds at the jog's beat - 2.8 at full pace,
+        // under six steps a second - and gains its speed in the stride, a step a little over four legs long with a real
+        // flight between (kept under three metres a cycle: longer, and the sprint floats)
+        return Math.min(2.85f - 0.05f * sprintShare(speed), Math.max(0.6f, walk * (1 - k) + Math.max(1.6f, run) * k));
     }
 
     /** 0 at a jog, 1 at a full sprint: how far past the half-second loop the legs may go. */

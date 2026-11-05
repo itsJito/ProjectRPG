@@ -22,6 +22,50 @@ public final class FoliageModels {
                 }
             }
             case TALL_GRASS -> {
+                // (0.3.1, gamefixes: more tall grass variety) five forms of meadow grass, picked by the clump's seed: the
+                // plain meadow clump, wild oats, foxtail, feather grass and a low blue-green tussock - so a drift of grass
+                // is a mix of shapes, heights and colours, never one clump stamped over and over
+                int form=Math.floorMod(seed>>>27,5);
+                if(form==1) {
+                    // wild oats: a few tall fine stems, the top third hung with drooping pale spikelets
+                    for(int stem=0;stem<7;stem++){double a=stem*2.39;float x=(float)Math.cos(a)*0.08f,z=(float)Math.sin(a)*0.08f,h=0.85f+stem%3*0.14f;
+                        float lx=(float)Math.cos(a)*0.06f,lz=(float)Math.sin(a)*0.06f;
+                        for(int step=0;step<6;step++){float t=(step+0.5f)/6f;boxes.rgb(x+lx*t*t*2,h*t,z+lz*t*t*2,0.02f,h/6+0.01f,0.02f,step<3?green:0x9AAE58);}
+                        for(int k=0;k<5;k++){float t=0.68f+k*0.065f,side=(k%2==0?1:-1)*0.05f;
+                            boxes.rgb(x+lx*t*t*2+side*(float)Math.sin(a),h*t-0.05f,z+lz*t*t*2-side*(float)Math.cos(a),0.03f,0.08f,0.03f,k%2==0?0xD8CC8C:0xC4B474);}
+                        boxes.rgb(x+(float)Math.cos(a)*0.16f*0.4f,0.12f,z+(float)Math.sin(a)*0.06f,0.16f,0.02f,0.03f,dark);}
+                    break;
+                }
+                if(form==2) {
+                    // foxtail: arching stems, each ending in a soft cylindrical head, green going to straw
+                    for(int stem=0;stem<9;stem++){double a=stem*2.39+0.3;float x=((seed>>>stem)&3)*0.04f-0.06f,z=((seed>>>(stem+4))&3)*0.04f-0.06f,h=0.5f+stem%3*0.1f;
+                        float lx=(float)Math.cos(a)*0.09f,lz=(float)Math.sin(a)*0.09f;
+                        for(int step=0;step<5;step++){float t=(step+0.5f)/5f;boxes.rgb(x+lx*t*t*2,h*t,z+lz*t*t*2,0.022f,h/5+0.01f,0.022f,step%2==0?green:light);}
+                        int head=stem%3==0?0xD6C27A:stem%3==1?0xA9BC62:0xC7C88A;
+                        boxes.rgb(x+lx*2.1f,h+0.04f,z+lz*2.1f,0.06f,0.15f,0.06f,head);
+                        boxes.rgb(x+lx*2.1f,h+0.04f,z+lz*2.1f,0.075f,0.1f,0.075f,head);}
+                    for(int blade=0;blade<6;blade++){double a=blade*1.05;boxes.rgb((float)Math.cos(a)*0.09f,0.1f,(float)Math.sin(a)*0.09f,0.03f,0.2f,0.03f,blade%2==0?dark:green);}
+                    break;
+                }
+                if(form==3) {
+                    // feather grass: many fine blades arching over from a tight base, the tallest trailing a long silvery awn
+                    for(int blade=0;blade<16;blade++){double a=blade*2.39;float h=0.55f+blade%4*0.11f,reach=0.16f+blade%3*0.07f;
+                        float px=0,py=0,pz=0;
+                        for(int step=1;step<=8;step++){float t=step/8f,x=(float)Math.cos(a)*reach*t*t,z=(float)Math.sin(a)*reach*t*t,y=h*(float)Math.sin(t*Math.PI*0.6);
+                            boxes.rgb((x+px)/2,(y+py)/2,(z+pz)/2,Math.abs(x-px)+0.014f,Math.abs(y-py)+0.016f,Math.abs(z-pz)+0.014f,blade%3==0?0x8CAE52:blade%3==1?green:light);px=x;py=y;pz=z;}
+                        if(blade%4==0)for(int k=1;k<=3;k++)boxes.rgb(px+(float)Math.cos(a)*0.035f*k,py-0.045f*k,pz+(float)Math.sin(a)*0.035f*k,0.018f,0.055f,0.018f,k==3?0xD8D6C8:0xEAE8DC);}
+                    break;
+                }
+                if(form==4) {
+                    // tussock: a dense low mound of fine blue-green blades, the outer ones splaying out (each blade one
+                    // continuous run of overlapping segments)
+                    for(int blade=0;blade<26;blade++){double a=blade*2.39;float r=0.02f+(blade%4)*0.03f,h=0.3f+(blade%5)*0.05f;
+                        float x=(float)Math.cos(a)*r,z=(float)Math.sin(a)*r,lx=(float)Math.cos(a)*(0.03f+r*0.5f),lz=(float)Math.sin(a)*(0.03f+r*0.5f);
+                        float px=x,py=0,pz=z;
+                        for(int step=1;step<=5;step++){float t=step/5f,nx=x+lx*t*t*2,ny=h*t,nz=z+lz*t*t*2;
+                            boxes.rgb((nx+px)/2,(ny+py)/2,(nz+pz)/2,Math.abs(nx-px)+0.02f,Math.abs(ny-py)+0.02f,Math.abs(nz-pz)+0.02f,blade%3==0?0x78A07A:blade%3==1?0x668E6C:0x92AE84);px=nx;py=ny;pz=nz;}}
+                    break;
+                }
                 // (0.3.0, gamefixes: the tall grass taller) a clump knee- to hip-high: thirteen blades of three lengths, each
                 // bowing outward as it rises, a few with seed heads
                 for(int blade=0;blade<13;blade++) {

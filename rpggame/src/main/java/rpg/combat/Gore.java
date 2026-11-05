@@ -589,7 +589,13 @@ public final class Gore {
             if (g.time >= w.nextDrip) {
                 // a drip: the faster the bleeding the more often, a pool where it falls (a trail behind someone walking)
                 w.nextDrip = g.time + Math.max(0.25, 2.2 / (0.2 + w.bleed * 3));
-                if (g.fx != null) g.fx.drip(a.x, a.y + (a.alive ? 0.9f : 0.2f), a.z);
+                // (0.3.1, gamefixes: the bleeding) the drop leaves from the wound - off the brow, down the shirt front, off
+                // the fingers of a cut arm - at the wound's own height, on the body's front, not from the middle of the body
+                if (g.fx != null) {
+                    float h = !a.alive ? 0.2f : switch (bloodPart(w.last)) { case rpg.actor.Blood.HEAD -> 0.86f; case rpg.actor.Blood.TORSO -> 0.62f; case rpg.actor.Blood.R_ARM, rpg.actor.Blood.L_ARM -> 0.42f; default -> 0.3f; };
+                    float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw), ahead = a.alive ? a.radius * 0.9f : 0;
+                    g.fx.drip(a.x + fx * ahead, a.y + a.height * h, a.z + fz * ahead);
+                }
                 pool(a.x, a.z, a.alive ? 0.12f + w.bleed * 0.1f : 0.25f + w.bleed * 0.3f, a.id, a.cs.lastAttacker);
                 // and on the body: it runs down from the wound (a person's; an animal's coat is not painted)
                 if (a.alive && !(a instanceof rpg.animal.Animal) && w.bleed > 0.08f) a.blood.run(bloodPart(w.last), g.time);

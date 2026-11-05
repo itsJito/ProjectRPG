@@ -15,11 +15,14 @@ public final class Falling {
     private final Rpg g;
     public Falling(Rpg g) { this.g = g; }
     public void reset(Actor actor) { flights.remove(actor.id); }
+    /** (0.3.3) A fall already under way when this body was handed over (a rider thrown off a falling mount): counted from that height. */
+    public void carry(Actor actor, float top) { Flight f = new Flight(); f.top = f.last = top; f.active = true; flights.put(actor.id, f); }
     public static int damage(float blocks) { return blocks > 5 ? 2 + Math.max(0, (int)Math.floor(blocks - 5)) : 0; }
     public void afterFrame(Snapshots.Bodies bodies, float dt) {
         for (Actor actor : g.actors()) {
             if (!(actor == g.player || actor instanceof Npc n && n.loaded) || !actor.alive || actor.dummy) { flights.remove(actor.id); continue; }
-            if (g.traversal.busy(actor) || actor.gaseousT > 0 || actor == g.player && g.ui != null && g.ui.console.noclip) { reset(actor); continue; }
+            // (0.3.3) in the saddle the mount's fall is the ride's to judge (Riding.unseat): the two go down together
+            if (g.traversal.busy(actor) || actor.gaseousT > 0 || actor.riding != 0 || actor == g.player && g.ui != null && g.ui.console.noclip) { reset(actor); continue; }
             Flight f = flights.computeIfAbsent(actor.id, id -> { Flight start = new Flight(); start.top = start.last = actor.y; return start; });
             var mover = bodies.mover(actor.body); var physical = actor.reacting ? bodies.ragdoll(actor.ragdoll) : null;
             float y = physical != null ? Math.min(physical.p[RD_L_ANKLE*3+1], physical.p[RD_R_ANKLE*3+1]) : mover == null ? actor.y : mover.y;

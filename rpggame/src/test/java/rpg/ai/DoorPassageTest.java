@@ -48,6 +48,8 @@ class DoorPassageTest {
             Rpg g = game.add(new Rpg(game, "Locked door", new Appearance(), true));
             Npc ada = (Npc) g.actor(Ids.MERCHANT_A);
             for (Npc n : g.npcs) if (n != ada) g.ai.unload(n);
+            // (the devmap's imps roost about the yard and can stand in the doorway: this is about the shopkeeper's door)
+            for (var m : new java.util.ArrayList<>(g.monsters.all())) g.ai.unload(m);
             g.teleport(g.player, 70, DevMap.FLOOR, 70);
             Door store = door(g, DevMap.STORE_DOOR[0][0], DevMap.STORE_DOOR[0][1]);
             assertTrue(store.locked && store.owner == ada.id);
@@ -62,7 +64,7 @@ class DoorPassageTest {
             assertTrue(unlocked, "she unlocked her store room");
             assertTrue(Math.hypot(ada.x - ada.spawnX, ada.z - ada.spawnZ) <= 2, () -> String.format("Ada got into the store room (at %.2f, %.2f; %s)", ada.x, ada.z, ada.lastOutcome));
             for (int frame = 0; frame < 60 * 12 && !store.locked; frame++) { ada.goal = Brain.Goal.RETURN; ada.nextThink = g.time + 5; assertTrue(game.tick(1f / 60)); }
-            assertTrue(store.locked && !store.open, "locked again behind her");
+            assertTrue(store.locked && !store.open, String.format("locked again behind her: open %s locked %s relock %s auto %s blocked %s door (%.1f,%.1f) ada (%.2f,%.2f) %s", store.open, store.locked, store.relock, store.autoOpened, store.blocked(g), store.x, store.z, ada.x, ada.z, ada.lastOutcome) + g.actors().stream().filter(o -> Math.hypot(o.x - store.x, o.z - store.z) < 2.5).map(o -> o.name + "@" + o.x + "," + o.z).toList());
         }
     }
 

@@ -150,7 +150,7 @@ public enum MonsterKind {
         BAT.woundedAt = 0.45f; BAT.weakness = Element.FIRE;
         // a haunter: bound to a place, does not tire or hunger; escalates the longer the living remain
         GHOST.drives(0f, 0.1f, 0.4f, 1.0f, 0f, 0.1f, 0.3f).range(25, 1, 1, Active.ALWAYS).senses(20, 1.0f, 0, 400).gait(0.8f, 2.6f)
-                .weapon("touch", 4, 6, 0.8f, MAGIC).ranged("spectral", 14)
+                .weapon("touch", 4, 6, 1.1f, MAGIC).ranged("spectral", 14)
                 .drops(of("ectoplasm"), of("spirit_dust:1-3", "spectral_residue"), of("ghostly_cloth", "soul_essence"), of("spirit_trinket", "white_longsword"), of("bound_ghost_essence", "haunt_artifact"))
                 .looks(0xC8DCE8, 0x8AA0B4).sounds("creature_misc", "creature_monster", "creature_misc", "creature_misc");
         GHOST.woundedAt = 0; GHOST.weakness = Element.FIRE;
@@ -195,6 +195,8 @@ public enum MonsterKind {
     /** How much bigger than a person's figure (1.8 m) its own is (the humanoids' skeletons are a person's, scaled). */
     public float scale() { return mh / 1.8f; }
     public boolean flies() { return move == Move.FLY || move == Move.HOVER; }
+    /** (0.3.1, GDD: ghosts see the living regardless of light, imps have sharp night sight, bats read the dark by sound) */
+    public boolean seesInDark() { return this == GHOST || this == IMP || this == BAT || this == WEREWOLF; }
     /**
      * How far off the sight of one throws people into fear (gamefixes: a dragon in the city should cause a genuine panic):
      * within it, whoever sees it raises the alarm, the townsfolk run for shelter and the city's fighters turn out against

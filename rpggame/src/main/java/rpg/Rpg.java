@@ -88,7 +88,13 @@ public final class Rpg implements GameModule {
     public rpg.world.Repairs repairs;
     public rpg.ai.Traps traps;
     public rpg.world.Foliage foliage;
+    /** (0.3.2) The kitchen gardens and orchards; the inns. */
+    public rpg.world.Farming farming;
+    public rpg.econ.Inns inns;
     public rpg.world.WaterContacts waterContacts;
+    /** (0.3.4) The water system: volumes, surfaces, depths and currents; and the swimming that moves bodies through it. */
+    public rpg.world.Fluids fluids;
+    public rpg.actor.Swimming swimming;
     public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     public Fx fx;
     public Sfx sfx;
@@ -125,6 +131,8 @@ public final class Rpg implements GameModule {
 
     @Override public void init(GameContext ctx) {
         vox = new Voxels(ctx.view());
+        fluids = new rpg.world.Fluids(vox);
+        DevMap.currents(fluids);
         fx = new Fx();
         fx.ground = (x, y, z) -> vox.groundY(x, y, z);
         sfx = Sfx.shared(game);
@@ -154,12 +162,15 @@ public final class Rpg implements GameModule {
         quests = new Quests(this);
         traversal = new rpg.actor.Traversal(this);
         ladders = new rpg.actor.Ladders(this);
+        swimming = new rpg.actor.Swimming(this);
         riding = new rpg.mount.Riding(this);
         carrying = new rpg.actor.BodyCarry(this);
         chemistry = new rpg.world.Chemistry(this);
         repairs = new rpg.world.Repairs(this);
         traps = new rpg.ai.Traps(this);
         foliage = new rpg.world.Foliage(this);
+        farming = new rpg.world.Farming(this);
+        inns = new rpg.econ.Inns(this);
         waterContacts = new rpg.world.WaterContacts(this);
         timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
         timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
@@ -183,6 +194,8 @@ public final class Rpg implements GameModule {
         controller.snapTo((float) Math.PI);
         // fixtures, agents, shops, dummies
         objects.buildFixtures();
+        // (0.3.2) the gardens' plots and trees, the inns' fixtures: after every older fixture, so their ids hold
+        objects.reserveAfter(id -> inns.init(farming.build(id)));
         ai.init();
         animals = new rpg.animal.Animals(this);
         animals.init();
@@ -192,6 +205,8 @@ public final class Rpg implements GameModule {
         dungeons.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
         econ.init();
+        inns.shops(econ);
+        for (var inn : inns.all) for (var bed : inn.guestBeds) bed.name = "Guest bed";
         for (int i = 0; i < DevMap.DUMMIES.length; i++) {
             Actor d = new Actor(Ids.DUMMY_0 + i, "Target dummy", 0);
             d.dummy = true; d.team = 0;
@@ -308,7 +323,7 @@ public final class Rpg implements GameModule {
         if (PROF) mark(6);
         magic.update(dt);
         if (PROF) mark(7);
-        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); animals.update(dt); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
+        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); animals.update(dt); riding.landings(); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
         else if (PROF) mark(8);
         carrying.update();
         if (PROF) mark(9);
@@ -319,6 +334,8 @@ public final class Rpg implements GameModule {
         dungeons.update();
         if (PROF) mark(12);
         foliage.update();
+        farming.update();
+        inns.update();
         if (PROF) mark(13);
         objects.update(dt);
         if (PROF) mark(14);
@@ -335,6 +352,10 @@ public final class Rpg implements GameModule {
         fx.update(dt);
         if (PROF) mark(20);
         for (Actor d : dummies) { d.hp = d.maxHp(); d.cs.staggered = 0; }
+        // (0.3.4) what a drink lent ebbs away
+        float ebb = 1f / rpg.interact.ItemActions.ALE_EBB_SECONDS;
+        player.skills.ebb(dt, ebb);
+        for (Npc n : npcs) n.skills.ebb(dt, ebb);
         if (audioOnRequest) game.engine().renderAudio(mix, Math.min(4096, Math.max(1, Math.round(dt * 44100))));
     }
 
@@ -346,7 +367,7 @@ public final class Rpg implements GameModule {
         Snapshots.Mover m = lastBodies.mover(player.body);
         // noclip: the body is where the flight put it, through whatever is in the way (the mover's own step is ignored)
         // (0.3.0) in the saddle the body is where the saddle is: its capsule was shoved out of the horse's and read back behind it
-        if (m != null && !player.reacting && player.riding == 0 && !(ui != null && ui.console.noclip)) {
+        if (m != null && !player.reacting && player.riding == 0 && !swimming.active(player) && !(ui != null && ui.console.noclip)) {
             float traveled = (float) Math.hypot(m.x - player.x, m.z - player.z);
             player.walked += traveled;
             player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched; player.onLadder=rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); player.climbVelocity=m.vy;
@@ -357,6 +378,7 @@ public final class Rpg implements GameModule {
         reactions.afterFrame(lastBodies);
         animals.afterFrame(lastBodies, ctx.agents());
         monsters.afterFrame(lastBodies);
+        swimming.others((float) lastDt);
         controller.syncCamera();
         waterContacts.update();
         if (PROF) mark(24);
@@ -424,14 +446,34 @@ public final class Rpg implements GameModule {
 
     // ------------------------------------------------------------------ queries
     /** Everyone who can be hit: the player, living loaded NPCs, the dummies. */
+    /**
+     * Everyone who can act (the player, living loaded people, dummies, animals and monsters). (0.3.3, aggressive
+     * optimization) it was a fresh list on every one of its many calls - several per person per frame; now one list a
+     * tick, rebuilt whenever someone has died, gone or come since (a rebuild is a new list, so a loop over the old one
+     * is never disturbed). Read-only: callers copy it if they keep it.
+     */
     public List<Actor> actors() {
-        List<Actor> l = new ArrayList<>();
+        int sizes = npcs.size() * 31 + dummies.size() * 7 + (animals == null ? 0 : animals.all().size() * 131) + (monsters == null ? 0 : monsters.all().size() * 1009);
+        if (actorsCache != null && actorsAt == time && actorsSizes == sizes && actorsLive == liveCount()) return actorsCache;
+        List<Actor> l = new ArrayList<>(actorsCache == null ? 64 : actorsCache.size() + 8);
         l.add(player);
         for (Npc n : npcs) if (n.alive && n.loaded) l.add(n);
         l.addAll(dummies);
         if (animals != null) for (rpg.animal.Animal a : animals.all()) if (a.alive && a.loaded) l.add(a);
         if (monsters != null) for (rpg.monster.Monster m : monsters.all()) if (m.alive && m.loaded) l.add(m);
-        return l;
+        actorsCache = java.util.Collections.unmodifiableList(l); actorsAt = time; actorsSizes = sizes; actorsLive = liveCount();
+        return actorsCache;
+    }
+    private List<Actor> actorsCache;
+    private double actorsAt = -1;
+    private int actorsSizes, actorsLive;
+    /** How many of the listed kinds are alive and loaded now (a cheap check that the tick's list still holds). */
+    private int liveCount() {
+        int c = 0;
+        for (Npc n : npcs) if (n.alive && n.loaded) c++;
+        if (animals != null) for (rpg.animal.Animal a : animals.all()) if (a.alive && a.loaded) c += 1 << 10;
+        if (monsters != null) for (rpg.monster.Monster m : monsters.all()) if (m.alive && m.loaded) c += 1 << 20;
+        return c;
     }
 
     public Actor actor(long id) {
@@ -505,6 +547,24 @@ public final class Rpg implements GameModule {
         noise(x, y, z, radius, loudness, source == null ? 0 : source.team);
         if (source != null) ai.stealth.hear(source, x, y, z, radius, loudness);
         if (source != null && animals != null) animals.hear(source, x, y, z, radius);
+        if (source != null && monsters != null) monsters.hear(source, x, y, z, radius);
+    }
+
+    /**
+     * (0.3.1) A footfall's mark on the world, for anyone near enough the player to see it: dust off dry earth and sand,
+     * a spatter off soaked open ground in the rain, a powder of snow where it lies (see Fx.footfall).
+     */
+    public void footfall(Actor a, float force) {
+        if (fx == null || a == null || !a.grounded || Math.hypot(a.x - player.x, a.z - player.z) > 32) return;
+        int bx = (int) Math.floor(a.x), by = (int) Math.floor(a.y - 0.05f), bz = (int) Math.floor(a.z);
+        int below = vox.block(bx, by, bz);
+        var w = timeSystem.weather;
+        boolean open = vox.skyLight(bx, by + 1, bz) > 0.7f;
+        if (open && w.snowCover > 0.25f) { fx.footfall(a.x, a.y, a.z, 2, 0.92f, 0.94f, 0.98f, force); return; }
+        if (open && (w.rain > 0.25f || w.wetness > 0.5f) && below != rpg.world.Blocks.AIR) { fx.footfall(a.x, a.y, a.z, 1, 0, 0, 0, force * Math.max(w.rain, w.wetness * 0.6f)); return; }
+        var m = rpg.world.Blocks.material(below);
+        if (below == rpg.world.Blocks.SAND) fx.footfall(a.x, a.y, a.z, 0, 0.82f, 0.74f, 0.55f, force * 1.2f);
+        else if (m == rpg.world.Blocks.Material.EARTH && below != rpg.world.Blocks.GRASS && below != rpg.world.Blocks.MUD && force > 0.45f) fx.footfall(a.x, a.y, a.z, 0, 0.55f, 0.45f, 0.34f, force);
     }
 
     public void teleport(Actor a, float x, float y, float z) {
@@ -512,6 +572,7 @@ public final class Rpg implements GameModule {
         // a hang (or a ladder) held over a teleport re-pinned the body to the old edge the next frame: a respawn put one back on the ledge one died on
         if (traversal != null) traversal.cancel(a);
         if (ladders != null) ladders.cancel(a);
+        if (swimming != null) swimming.cancel(a);
         if (riding != null && a.riding != 0) riding.dismount(a, false);
         if (a == player && movementPractice != null) movementPractice.reset();
         if (reactions != null && !(a instanceof rpg.animal.Animal)) reactions.cancel(a);

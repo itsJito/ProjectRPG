@@ -38,7 +38,7 @@ public final class Traps {
         Trap mine=null;
         for(var object:g.objects.all())if(object instanceof Trap trap && trap.owner==hunter.id && trap.contents.has(Items.SNARE,1)){mine=trap;break;}
         if(mine!=null) {
-            if(!g.ai.brain.goTo(hunter,mine.x,mine.z,false,1.1f))return;
+            if(!g.ai.brain.goTo(hunter, mine.x, mine.y, mine.z,false,1.1f))return;
             Animal animal=g.animals.byId(mine.caught);
             if(animal!=null && animal.alive) {
                 hunter.wantYaw=(float)Math.atan2(-(animal.x-hunter.x),-(animal.z-hunter.z));

@@ -42,8 +42,11 @@ public final class Ui2D {
         Face(float bake, int texture, STBTTBakedChar.Buffer chars, float baseline) { this.bake = bake; this.texture = texture; this.chars = chars; this.baseline = baseline; }
     }
     public final Face body, heading, chat, combat;
-    /** (0.3.0, gamefixes) The comic face: the speech bubbles over people's heads, and only those. */
-    public final Face comic;
+    /**
+     * (0.3.0, gamefixes) The comic face: the speech bubbles over people's heads, and only those. (0.3.2, gamefixes: the
+     * Comic Book set) Comic Book for what is said, its bold for what is shouted.
+     */
+    public final Face comic, comicBold;
     private Face face;
     /** Switches the face text is set in; returns the one it replaces (put it back after). */
     public Face use(Face f) { Face was = face; face = f == null ? body : f; return was; }
@@ -77,7 +80,8 @@ public final class Ui2D {
         heading = orElse(bake(r, resource("MORPHEUS.TTF"), 34f), body);
         chat = orElse(bake(r, resource("arialnarrow.ttf"), 22f), body);
         combat = orElse(bake(r, resource("skurri.ttf"), 30f), body);
-        comic = orElse(bake(r, resource("TheLastComicOnEarth.ttf"), 30f), chat);
+        comic = orElse(bake(r, resource("ComicBook.otf"), 30f), chat);
+        comicBold = orElse(bake(r, resource("ComicBook-Bold.otf"), 30f), comic);
         face = body;
         icons = Icons.texture(r);
         atlas = new Atlas(r);
@@ -335,5 +339,5 @@ public final class Ui2D {
         return enabled && clicked(x, y, w, h);
     }
 
-    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat, comic))) f.chars.free(); }
+    public void free() { for (Face f : new java.util.LinkedHashSet<>(java.util.List.of(body, heading, chat, combat, comic, comicBold))) f.chars.free(); }
 }

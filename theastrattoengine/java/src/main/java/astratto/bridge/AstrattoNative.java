@@ -92,7 +92,7 @@ public final class AstrattoNative {
     public static final int IN_FACT0 = 0, IN_TARGET_SEEN = 16, IN_TARGET_DISTANCE = 17, IN_SINCE_SEEN = 18, IN_SINCE_HEARD = 19, IN_TIME_IN_ACTION = 20,
             IN_RANDOM = 21, IN_GOAL_DISTANCE = 22, IN_HAS_TARGET = 23, IN_COUNT = 24;
     public static final int CURVE_LINEAR = 0, CURVE_INVERSE = 1, CURVE_QUADRATIC = 2, CURVE_LOGISTIC = 3, CURVE_STEP = 4;
-    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2, AGENT_EXTERNAL_TRAVERSAL = 1 << 3, AGENT_NO_LADDERS = 1 << 4;
+    public static final int AGENT_DOORS = 1, AGENT_MANTLE = 1 << 1, AGENT_BLIND = 1 << 2, AGENT_EXTERNAL_TRAVERSAL = 1 << 3, AGENT_NO_LADDERS = 1 << 4, AGENT_SWIMS = 1 << 5;
 
     // ---- audio (96-127)
     public static final int BUS_SFX = 0, BUS_MUSIC = 1, BUS_VOICE = 2, BUS_AMBIENCE = 3, BUS_UI = 4, BUSES = 5;

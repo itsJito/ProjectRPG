@@ -22,6 +22,8 @@ final class Jobs {
     Jobs(Rpg g, Brain brain) { this.g=g; this.brain=brain; }
     void tick(Npc n, float dt) {
         if(g.interact.of(n)!=null || n.cs.busy()) { g.ai.desire(n,AiSystem.A_HOLD); return; }
+        // (0.3.2) the farms' and the inns' callings have their own day (Livelihoods)
+        if(brain.livelihoods.covers(n)) { brain.livelihoods.tick(n); return; }
         if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
         if(n.profession==Profession.CARPENTER) {
             ItemDef needed=g.repairs.missingSupply(n);var shop=g.econ.localShop(n);
@@ -330,7 +332,7 @@ final class Jobs {
     private static boolean stock(Recipes.Recipe recipe) { return !recipe.outputs.isEmpty() && recipe.outputs.get(0).item().id.endsWith("_bar"); }
     private Behavior.Node<Npc> fetch(Npc n,Npc from) {
         return Behavior.sequence(List.of(
-            person->from.alive && from.loaded?(brain.goTo(person,from.x+0.9f,from.z+0.9f,false,1.6f)?SUCCESS:RUNNING):FAILURE,
+            person->from.alive && from.loaded?(brain.goTo(person, from.x+0.9f, from.y, from.z+0.9f,false,1.6f)?SUCCESS:RUNNING):FAILURE,
             person->{
                 int got=0;
                 for(var recipe:Recipes.ALL) if(accepts(person,recipe)) for(var input:recipe.inputs)
@@ -360,12 +362,12 @@ final class Jobs {
                     if(brain.goTo(n,n.dutyX,n.dutyZ,false,1.1f))n.dutyPhase=1;
                     n.lastOutcome="inspecting the commander's assigned site";
                 } else if(n.dutyPhase==1) {
-                    if(brain.goTo(n,principal.x,principal.z,false,2)) {
+                    if(brain.goTo(n, principal.x, principal.y, principal.z,false,2)) {
                         n.dutyPhase=2;g.ai.say(n,"The assigned site has been inspected.");
                         g.state.commit("KnightDutyReported",n.id,principal.id,n.homeJurisdiction,0,"inspected "+n.dutyX+","+n.dutyZ);
                     }
                     n.lastOutcome="returning the inspection report to "+principal.name;
-                } else {brain.goTo(n,principal.x,principal.z,false,3);n.lastOutcome="reported; awaiting a new institutional assignment";}
+                } else {brain.goTo(n, principal.x, principal.y, principal.z,false,3);n.lastOutcome="reported; awaiting a new institutional assignment";}
                 return;
             }
             if(n.profession==Profession.HOUSEHOLD_KNIGHT && principal instanceof Npc patron) {

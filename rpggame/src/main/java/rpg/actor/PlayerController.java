@@ -7,6 +7,7 @@ import rpg.combat.Spells;
 import rpg.item.ItemDef;
 import rpg.item.ItemDef.Family;
 import rpg.skill.Skill;
+import rpg.world.DevMap;
 import rpg.world.Voxels;
 
 /**
@@ -302,10 +303,13 @@ public final class PlayerController {
         if (g.traversal.update(p, dt)) return;
         // (0.3.0) on a ladder: forward climbs, back goes down, jump pushes off (see Ladders)
         if (g.ladders.update(p, in.forward, in.jump, dt)) return;
+        // (0.3.4) in water: the swimming owns the body (its own fixed step), the keys are its strokes
+        if (g.swimming.update(p, in.forward, in.strafe, in.sprint, in.jumpHeld || in.jump, in.sneak, camYaw, camPitch, dt)) { p.yaw = Actor.wrap(p.yaw + Actor.wrap(camYaw - p.yaw) * Math.min(1, dt * (p.swimMode == rpg.actor.Swimming.SWIM ? 6 : 3))); return; }
         float fwd = in.forward, side = in.strafe;
         float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
         float dx = fx * fwd + rx * side, dz = fz * fwd + rz * side, l = (float) Math.hypot(dx, dz);
         // walking at a ladder's front (or off the ledge at its top) takes hold of it
+        if (l <= 0.3f) p.ladderLatch = false;
         if (l > 0.3f && !g.traversal.busy(p) && g.ladders.mount(p, dx / l, dz / l) && g.ladders.update(p, 0, false, dt)) return;
         if (l > 0.1f || in.jump) { route = null; if (g.ui != null) g.ui.flag = null; }
         else if (route != null) {
@@ -396,6 +400,7 @@ public final class PlayerController {
         // (the bodies' movers hold people a little apart, and check the run as they meet: the charge is read from the
         // sprint itself, at anything over a walk, along the way the run is going)
         if (p.charging && speedNow > g.cfg.walkSpeed * 1.1f) max *= barge(p, bvx, bvz, speedNow);
+        if (p.charging && speedNow > g.cfg.walkSpeed * 1.3f) max *= burst(p, bvx, bvz);
         float want = moving ? max : 0;
         // a body gathers speed over a few strides and sheds it in a step or two: weight without the slide (it used to coast
         // a metre or more after a sprint at 7 m/s per second of braking)
@@ -446,7 +451,9 @@ public final class PlayerController {
             stepClock += dt * Gait.steps(speed, p.sneaking);
             if (stepClock >= 1) {
                 stepClock -= 1;
-                if (g.sfx != null) g.sfx.footstep(p, p.sprinting ? 1f : 0.3f + 0.5f * Math.min(1, speed / g.cfg.runSpeed));
+                float force = p.sprinting ? 1f : 0.3f + 0.5f * Math.min(1, speed / g.cfg.runSpeed);
+                if (g.sfx != null) g.sfx.footstep(p, force);
+                g.footfall(p, force);
                 g.noise(p, p.x, p.y, p.z, p.sprinting ? 9 : p.sneaking ? 0.8f : speed > 3 ? 5 : 2, 0.2f);
             }
         } else stepClock = 0.5f;
@@ -457,6 +464,45 @@ public final class PlayerController {
 
     /** A crossbow's trigger pressed before it was shouldered: it fires as soon as it is up. */
     private boolean crossbowQueued;
+
+    /**
+     * (0.3.1, gamefixes: a charge should barge through doors and bust through glass) what stands in the charge's way a
+     * stride ahead: a pane of glass at body height is burst through (shards out the far side, the law's for a pane in
+     * town); a shut door is shouldered open - flung wide, a latch or a lock torn - and a door barged in someone else's
+     * house is forced entry. Each slows the charge a little. Returns the speed kept.
+     */
+    private float burst(Player p, float vx, float vz) {
+        float sp = (float) Math.hypot(vx, vz);
+        if (sp < 0.1f) return 1;
+        float dx = vx / sp, dz = vz / sp, keep = 1;
+        float ax = p.x + dx * (p.radius + 0.45f), az = p.z + dz * (p.radius + 0.45f);
+        int bx = (int) Math.floor(ax), bz = (int) Math.floor(az);
+        // glass: every pane at the body's height in that column goes
+        for (int y = (int) Math.floor(p.y + 0.2f); y <= (int) Math.floor(p.y + p.height - 0.1f); y++) {
+            if (!g.glass.isGlass(bx, y, bz)) continue;
+            g.glass.shatter(bx, y, bz, ax, y + 0.5f, az, dx, 0.1f, dz, 1.8f, p);
+            keep = Math.min(keep, 0.85f);
+            if (p.hp > 2) g.combat.environmentalDamage(p, 1, "broken glass");
+        }
+        // a door: shouldered open
+        for (var o : g.objects.all()) {
+            if (!(o instanceof rpg.objects.Door d) || d.open || d.removed) continue;
+            boolean here = false;
+            for (int[] c : d.cells) if (c[0] == bx && c[1] == bz) { here = true; break; }
+            if (!here || Math.abs(p.y - DevMap.FLOOR) > 1.5f && Math.abs(p.y - d.y) > 1.5f) continue;
+            boolean forced = d.locked;
+            if (forced) d.setLocked(g, false);
+            d.setOpen(g, true, p, g.state.newRequestId());
+            d.knock(g, ax, az, dx, dz);
+            keep = Math.min(keep, forced ? 0.55f : 0.75f);
+            if (g.sfx != null) g.sfx.play("door", d.x, d.y, d.z, 1.0f, 0.7f, 24);
+            g.noise(p, d.x, d.y, d.z, 16, forced ? 0.85f : 0.6f);
+            var ev = g.state.commit("DoorBarged", p.id, d.id, d.jurisdiction(), 0, d.name + (forced ? " (lock forced)" : ""));
+            if (forced && d.owner() != 0 && d.owner() != p.id && !DevMap.WILDS.equals(d.jurisdiction())) g.law.crime(p, "VANDALISM", d.owner(), 10, null, ev.id());
+            break;
+        }
+        return keep;
+    }
 
     /** Who was barged and when (each once a second at most), so a charge through a crowd strikes each body once. */
     private final java.util.Map<Long, Double> barged = new java.util.HashMap<>(), chargeCrime = new java.util.HashMap<>();
@@ -567,6 +613,7 @@ public final class PlayerController {
         float t = h.hit ? h.dist : 80;
         t = Math.min(t, bodyOnRay(p, cx, cy, cz, fx, fy, fz, t));
         p.aimPoint[0] = cx + fx * t; p.aimPoint[1] = cy + fy * t; p.aimPoint[2] = cz + fz * t; p.aimAt = g.time;
+        p.aimEye[0] = ex; p.aimEye[1] = ey; p.aimEye[2] = ez;
         float ax = cx + fx * t - ex, ay = cy + fy * t - ey, az = cz + fz * t - ez;
         if (Math.sqrt(ax * ax + ay * ay + az * az) < 1.5f) { ax = fx; ay = fy; az = fz; }
         aimYaw = (float) Math.atan2(-ax, -az);

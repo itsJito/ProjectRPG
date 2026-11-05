@@ -119,10 +119,28 @@ public final class Foliage {
         }
         chunk.version++;chunks.put(key,chunk);return chunk;
     }
+    /**
+     * (0.3.2, gamefixes: foliage loaded before the player spawns in) every chunk of growth within rings of a point made
+     * now, at once - the load does this about the spawn before the first frame, so the player never steps into bare
+     * ground that fills in around them a chunk at a time.
+     */
+    public int preload(float x,float z,int rings) {
+        int centerX=Math.clamp((int)x/16,0,CHUNKS_X-1),centerZ=Math.clamp((int)z/16,0,CHUNKS_Z-1),made=0;
+        for(int dz=-rings;dz<=rings;dz++)for(int dx=-rings;dx<=rings;dx++) {
+            int cx=centerX+dx,cz=centerZ+dz;
+            if(cx<0 || cz<0 || cx>=CHUNKS_X || cz>=CHUNKS_Z || chunks.containsKey(cx+cz*CHUNKS_X))continue;
+            generate(cx,cz);made++;
+        }
+        return made;
+    }
     public void update() {
         trail();
+        // (0.3.2) the ground under the player is never left bare: arriving somewhere new (a respawn, a long ride, a
+        // teleport) the chunk they stand in and those about it come up at once, the rest a chunk a tick
+        int hereX=Math.clamp((int)g.player.x/16,0,CHUNKS_X-1),hereZ=Math.clamp((int)g.player.z/16,0,CHUNKS_Z-1);
+        if(!chunks.containsKey(hereX+hereZ*CHUNKS_X)){preload(g.player.x,g.player.z,1);next=0;}
         if(g.time<next)return;next=g.time+0.25;
-        int centerX=Math.clamp((int)g.player.x/16,0,CHUNKS_X-1),centerZ=Math.clamp((int)g.player.z/16,0,CHUNKS_Z-1);
+        int centerX=hereX,centerZ=hereZ;
         boolean generated=false;
         for(int ring=0;ring<=2 && !generated;ring++)for(int dz=-ring;dz<=ring && !generated;dz++)for(int dx=-ring;dx<=ring;dx++) {
             int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated=true;break;
@@ -133,10 +151,17 @@ public final class Foliage {
                 else continue;
             }
             if(!suitable(plant.kind,(int)plant.x,(int)plant.y,(int)plant.z)){remove(plant,"lost its growing surface");continue;}
-            if(Math.hypot(plant.x-g.player.x,plant.z-g.player.z)>32)continue;
-            g.game.commands().chemSensor(plant.id,0,plant.x,plant.y+0.25f,plant.z,0.3f,CHEM_FLAMMABLE|CHEM_WIND_SENSITIVE,0,2.5f,0,0,false);
+            // (0.3.2, gamefixes: fire spells still did not burn the plants) a plant is fire's to catch while the player is
+            // near it - registered once as they come within 32 m and let go past 44 m (unless it is alight or warm). Every
+            // plant ever passed used to stay registered with the chemistry for good, so after a walk round the map the
+            // receivers were full and the plants by the player were never taken on: nothing near them could burn
+            float d=(float)Math.hypot(plant.x-g.player.x,plant.z-g.player.z);
+            if(d<=32 && sensed.add(plant.id))g.game.commands().chemSensor(plant.id,0,plant.x,plant.y+0.25f,plant.z,0.3f,CHEM_FLAMMABLE|CHEM_WIND_SENSITIVE,0,2.5f,0,0,false);
+            else if(d>44 && g.chemistry.state(plant.id)==0 && sensed.remove(plant.id))g.game.commands().chemRemove(plant.id);
         }
     }
+    /** The plants the chemistry is watching now (those near the player). */
+    private final java.util.Set<Long> sensed=new java.util.HashSet<>();
     /**
      * Bodies pushing through plants: the player's, the people's and the animals' near the player leave trail points
      * where the stems were pressed (one every fifth of a second each), and a rustle as they go.
@@ -179,31 +204,63 @@ public final class Foliage {
         return best;
     }
     /**
-     * This frame's pushers for the renderer (x, z, radius, y each; up to 8): the freshest trail points nearest the eye,
-     * each shrinking as the plants recover. Returns how many.
+     * This frame's pushers for the renderer (x, z, radius, y each; up to 8). (0.3.1, gamefixes: plants glitched when
+     * stepped in) First the bodies standing or moving in the growth now, nearest the eye - live, so a plant bends over
+     * smoothly as a foot comes to it, instead of standing untouched until a trail point was dropped on it and then
+     * snapping flat in a frame - then the freshest trail points behind them, each easing back as its plants recover.
+     * The shader caps the plants' combined lean, so a point and the body beside it never bend a stem twice over.
      */
     public int pushers(float camX,float camZ,float[] out) {
         int n=0;
+        live.clear();
+        for(Actor actor:g.actors()) {
+            if(!actor.alive || actor.dummy || Math.hypot(actor.x-camX,actor.z-camZ)>36)continue;
+            if(actor instanceof rpg.ai.Npc npc && !npc.loaded || actor instanceof rpg.animal.Animal a && !a.loaded)continue;
+            if(plantAt(actor.x,actor.z,actor.radius+0.6f)==null)continue;
+            live.add(actor);
+        }
+        live.sort(java.util.Comparator.comparingDouble(a->Math.hypot(a.x-camX,a.z-camZ)));
+        for(Actor actor:live) {
+            if(n>=5)break;
+            // a body's reach into the stems: its own girth and a little more for the legs' stride
+            out[n*4]=actor.x;out[n*4+1]=actor.z;out[n*4+2]=actor.radius+0.18f;out[n*4+3]=actor.y;n++;
+        }
         var it=trail.descendingIterator();
         while(it.hasNext() && n<8) {
             Trail t=it.next();
             if(Math.hypot(t.x()-camX,t.z()-camZ)>48)continue;
             float left=(float)(1-(g.time-t.at())/RECOVER);
             if(left<=0)continue;
-            out[n*4]=t.x();out[n*4+1]=t.z();out[n*4+2]=t.radius()*left*left;out[n*4+3]=t.y();n++;
+            // the stems spring back quickly at first, then settle the last of the way slowly
+            float k=left*left*(3-2*left);
+            out[n*4]=t.x();out[n*4+1]=t.z();out[n*4+2]=(t.radius()+0.18f)*k;out[n*4+3]=t.y();n++;
         }
         return n;
     }
+    private final List<Actor> live=new ArrayList<>();
     public float[] pushBuffer(){return push;}
 
+    /** (0.3.1) When each burning plant last flared (it throws its own flame to its neighbours while it burns). */
+    private final Map<Long,Double> flaredAt=new HashMap<>();
     public void chemical(Snapshots.Chemical sensor) {
-        if((sensor.state()&CHEM_BURNT)==0 || (sensor.id()&0x1000000000000L)==0)return;
+        if((sensor.id()&0x1000000000000L)==0)return;
+        // (0.3.1, gamefixes: the grass would not burn) dry growth flares as it burns - tall grass, reeds, bracken and
+        // heather most, a bush or bramble long, a moss bed barely - throwing flame to the plants about it, so a fire runs
+        // through a meadow (wind carries it; rain and wet growth stop it, as the chemistry has it)
+        if((sensor.state()&CHEM_BURNING)!=0 && g.time>=flaredAt.getOrDefault(sensor.id(),-1.0) && g.objects.get(sensor.id()) instanceof Patch patch && !patch.removed) {
+            float flare=switch(patch.kind){case TALL_GRASS,REED,BRACKEN,HEATHER,CATTAIL,THISTLE,DOCK->1f;case BRAMBLE,SHRUB,BUSH,FERN,SAPLING,IVY->0.75f;case MOSS,MUSHROOM,CLOVER->0.3f;default->0.6f;};
+            flaredAt.put(sensor.id(),g.time+0.4);
+            Actor owner=g.actor(sensor.owner());
+            g.chemistry.emit(owner,CHEM_FIRE,patch.x,patch.y+0.3f,patch.z,0.55f+0.45f*flare,0.9f*flare,0.3f);
+        }
+        if(flaredAt.size()>512)flaredAt.entrySet().removeIf(e->g.time>e.getValue()+5);
+        if((sensor.state()&CHEM_BURNT)==0)return;
         var object=g.objects.get(sensor.id());if(object instanceof Patch patch && !patch.removed)remove(patch,"burned");
     }
     public void remove(Patch plant,String why) {
         if(plant.removed)return;plant.removed=true;depleted.put(plant.id,g.state.minutes+60);chunks.get(plant.chunk).version++;
-        g.game.commands().chemRemove(plant.id);g.state.commit("FoliageRemoved",0,plant.id,plant.jurisdiction(),0,why);
+        g.game.commands().chemRemove(plant.id);sensed.remove(plant.id);g.state.commit("FoliageRemoved",0,plant.id,plant.jurisdiction(),0,why);
     }
     public Map<String,Object> save(){Map<String,Object> saved=new HashMap<>();for(var entry:depleted.entrySet())saved.put(Long.toString(entry.getKey()),entry.getValue());return saved;}
-    public void load(Map<String,Object> saved){epoch++;chunks.clear();depleted.clear();trail.clear();trailAt.clear();rustleAt.clear();if(saved!=null)for(var entry:saved.entrySet())if(entry.getValue() instanceof Number time)depleted.put(Long.parseLong(entry.getKey()),time.doubleValue());next=0;}
+    public void load(Map<String,Object> saved){epoch++;sensed.clear();chunks.clear();depleted.clear();trail.clear();trailAt.clear();rustleAt.clear();if(saved!=null)for(var entry:saved.entrySet())if(entry.getValue() instanceof Number time)depleted.put(Long.parseLong(entry.getKey()),time.doubleValue());next=0;}
 }

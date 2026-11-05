@@ -35,6 +35,8 @@ public final class DevMap {
         String palace = Expanse.jurisdiction(x, z);
         if (palace != null) return palace;
         if (x >= 82 && x < 128 && z >= 46 && z < 128) return ALPHA;
+        // (0.3.2) the DevCity Inn, built east of the square against the palace road
+        if (x >= 121 && x < 131 && z >= 47 && z < 70) return ALPHA;
         if (z >= 92 && z < 128 && x < 82) return BETA;
         return WILDS;
     }
@@ -99,6 +101,14 @@ public final class DevMap {
     public static final int WILD_POND_X0 = 22, WILD_POND_Z0 = 17, WILD_POND_X1 = 28, WILD_POND_Z1 = 22;
     /** The brook running south out of the wild pond (0.1.8: a river for a river fisherman), and its two rod spots. */
     public static final int STREAM_X0 = 25, STREAM_X1 = 26, STREAM_Z0 = 23, STREAM_Z1 = 44;
+    /**
+     * (0.3.4) Where the devmap's water runs (Fluids): the stream south out of the wild pond, and the woodland brook south
+     * under its bridge. Every other water on the map lies still. The new map gives its own.
+     */
+    public static void currents(Fluids f) {
+        f.current(STREAM_X0, STREAM_Z0, STREAM_X1, STREAM_Z1, 0, 1, 0.8f);
+        f.current(Expanse.BROOK_X0, Expanse.BROOK_Z0, Expanse.BROOK_X1, Expanse.BROOK_Z1, 0, 1, 0.9f);
+    }
     public static final float[][] STREAM_SPOTS = {{25.5f, 29.5f}, {26.5f, 39.5f}};
     /**
      * 0.1.9 (gamefixes: the devmap's missing objects, its people's needs first): what the new residents' work wanted
@@ -223,6 +233,9 @@ public final class DevMap {
         b.fill(162,FLOOR,20,162,FLOOR+4,20,STONE_BRICKS);
         for(int y=FLOOR;y<=FLOOR+4;y++)b.blockSet(163,y,20,LADDER);
         climbs(b);
+        // (0.3.2) the kitchen gardens and orchards, the inns
+        Farming.build(b);
+        rpg.econ.Inns.build(b);
         b.lightAll();
         b.pristineSave();
         if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());

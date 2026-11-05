@@ -250,7 +250,23 @@ public final class Props {
             case BED -> new Layer[]{wood(bedFrame()), new Layer(bedding(seed), 0.95f, 0, 0)};
             case TARGET -> new Layer[]{wood(targetStand(w)), new Layer(targetFace(), 0.95f, 0, 0)};
             case HEADSTONE -> new Layer[]{stone(headstone(seed)), new Layer(graveMound(seed), 0.97f, 0, 0)};
+            case BENCH -> new Layer[]{wood(bench(w, d))};
         };
+    }
+
+    /** (0.3.2) A plain plank bench: a thick seat on two splayed trestle legs with a stretcher between them. */
+    private static Meshes.Boxes bench(float w, float d) {
+        Meshes.Boxes b = new Meshes.Boxes();
+        boolean alongX = w >= d;
+        float len = Math.max(w, d) - 0.12f, wide = 0.34f, top = Furniture.SEAT;
+        if (alongX) b.rgb(0, top - 0.03f, 0, len, 0.06f, wide, 0x9A6E40); else b.rgb(0, top - 0.03f, 0, wide, 0.06f, len, 0x9A6E40);
+        for (float end : new float[]{-len / 2 + 0.16f, len / 2 - 0.16f}) {
+            float ex = alongX ? end : 0, ez = alongX ? 0 : end;
+            if (alongX) b.rgb(ex, (top - 0.06f) / 2, ez, 0.07f, top - 0.06f, wide - 0.06f, 0x7A5432);
+            else b.rgb(ex, (top - 0.06f) / 2, ez, wide - 0.06f, top - 0.06f, 0.07f, 0x7A5432);
+        }
+        if (alongX) b.rgb(0, 0.14f, 0, len - 0.36f, 0.05f, 0.05f, 0x6A4A2A); else b.rgb(0, 0.14f, 0, 0.05f, 0.05f, len - 0.36f, 0x6A4A2A);
+        return b;
     }
 
     private static Meshes.Boxes cellSlab(float w, float d) {

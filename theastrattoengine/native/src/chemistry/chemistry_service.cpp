@@ -109,6 +109,10 @@ void ChemistryService::publish(Engine& e, Sensor& s, uint32_t previous) {
 }
 void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
     const float d2 = square(s.x - v.x) + square(s.y - v.y) + square(s.z - v.z); if (d2 > square(v.radius + s.radius) || (s.state & BURNT)) return;
+    // (gamefixes: a torch swung or a fire spell cast set its own wielder alight) an emission made directly by
+    // someone - no burning cell as its source - never acts on that someone's own body. A fire it starts in the world
+    // (grass, a floor) is the world's fire and burns them like anyone else if they stand in it.
+    if (v.source == 0 && v.owner != 0 && s.id == v.owner && !s.cell && (v.type == FIRE || v.type == ELECTRIC || v.type == ICE)) return;
     const uint32_t previous = s.state;
     if (v.type == WATER) { s.wet = std::min(1.0f, s.wet + v.power * 0.35f); s.heat = std::max(0.0f, s.heat - v.power); s.state = (s.state | WET) & ~BURNING; }
     if (v.type == FIRE) {

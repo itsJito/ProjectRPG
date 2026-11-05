@@ -70,6 +70,13 @@ public final class Recipes {
         r("cook_shrimp", "Shrimp", Station.RANGE, Skill.COOKING, 1, 300, 1.8f).in(Items.RAW_SHRIMP, 1).out(Items.SHRIMP, 1).burn(20);
         r("cook_meat", "Cooked meat", Station.RANGE, Skill.COOKING, 1, 300, 2f).in(Items.RAW_MEAT, 1).out(Items.COOKED_MEAT, 1).burn(25).burnt(Items.BURNT_MEAT);
         r("cook_trout", "Trout", Station.RANGE, Skill.COOKING, 20, 700, 1.8f).in(Items.RAW_TROUT, 1).out(Items.TROUT, 1).burn(45);
+        // (0.3.2) what the farms grow, cooked: a stew of carrot and cabbage, and apples mulled into hot cider (the inns' fare)
+        r("cook_stew", "Vegetable stew", Station.RANGE, Skill.COOKING, 8, 450, 2.4f).in(Items.CARROT, 1).in(Items.CABBAGE, 1).out(Items.VEGETABLE_STEW, 1).burn(30);
+        r("mull_cider", "Hot cider", Station.RANGE, Skill.COOKING, 3, 260, 2f).in(Items.APPLE, 2).out(Items.HOT_CIDER, 1);
+        // (0.3.4) ale brewed from barley and hops in a bottle of water; venison and duck cooked like any meat
+        r("brew_ale", "Ale", Station.RANGE, Skill.COOKING, 10, 420, 2.6f).in(Items.BARLEY, 1).in(Items.HOPS, 1).in(Items.WATER_BOTTLE, 1).out(Items.ALE, 1);
+        r("cook_venison", "Venison", Station.RANGE, Skill.COOKING, 12, 520, 2.2f).in(Items.RAW_VENISON, 1).out(Items.VENISON, 1).burn(40).burnt(Items.BURNT_MEAT);
+        r("roast_duck", "Roast duck", Station.RANGE, Skill.COOKING, 6, 380, 2.1f).in(Items.RAW_DUCK, 1).out(Items.ROAST_DUCK, 1).burn(32).burnt(Items.BURNT_MEAT);
         // crafting
         r("weave_linen", "Linen cloth", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 30, 1.2f).in(Items.FLAX, 2).out(Items.CLOTH, 1);
         r("sew_hood", "Linen hood", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 35, 1.2f).in(Items.CLOTH, 1).out(Items.CLOTH_HOOD, 1);

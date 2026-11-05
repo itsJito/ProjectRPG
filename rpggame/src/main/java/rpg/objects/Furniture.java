@@ -21,14 +21,16 @@ import rpg.world.DevMap;
 public final class Furniture extends WorldObject {
     public enum Kind {
         TABLE("Table", Blocks.TABLE), COUNTER("Counter", Blocks.TABLE), CRATE("Crate", Blocks.CRATE), BOOKCASE("Bookcase", Blocks.BOOKCASE),
-        BED("Bed", Blocks.BED), TARGET("Archery target", Blocks.TARGET), HEADSTONE("Headstone", Blocks.HEADSTONE), SLAB("Cell slab", Blocks.BED);
+        BED("Bed", Blocks.BED), TARGET("Archery target", Blocks.TARGET), HEADSTONE("Headstone", Blocks.HEADSTONE), SLAB("Cell slab", Blocks.BED),
+        /** (0.3.2) A bench at an inn's table: sat on, so no block - a body walks onto it and sits. */
+        BENCH("Bench", Blocks.AIR);
         public final String title;
         public final int block;
         Kind(String title, int block) { this.title = title; this.block = block; }
     }
 
     /** Surface heights above the floor (m): a table's top, a counter's top, a bed's mattress. */
-    public static final float TABLE_TOP = 0.8f, COUNTER_TOP = 1.0f, MATTRESS = 0.55f;
+    public static final float TABLE_TOP = 0.8f, COUNTER_TOP = 1.0f, MATTRESS = 0.55f, SEAT = 0.46f;
 
     public final Kind kind;
     /** The cells it stands on: x0..x1, z0..z1 from the floor up, h cells tall. */
@@ -53,7 +55,7 @@ public final class Furniture extends WorldObject {
 
     /** A long counter occupies a low box, not a head-height sphere several metres wide. */
     @Override public float focusEntry(float ox, float oy, float oz, float dx, float dy, float dz) {
-        float top = switch (kind) { case TABLE -> TABLE_TOP; case COUNTER -> COUNTER_TOP; case BED, SLAB -> 0.65f; default -> h; };
+        float top = switch (kind) { case TABLE -> TABLE_TOP; case COUNTER -> COUNTER_TOP; case BED, SLAB -> 0.65f; case BENCH -> SEAT; default -> h; };
         float enter = 0, exit = Float.POSITIVE_INFINITY;
         for (int axis = 0; axis < 3; axis++) {
             float o = axis == 0 ? ox : axis == 1 ? oy : oz, d = axis == 0 ? dx : axis == 1 ? dy : dz;
@@ -83,7 +85,10 @@ public final class Furniture extends WorldObject {
     /** Null when the actor may sleep here now, else why not. */
     public String sleepRefusal(Rpg g, Actor a) {
         if (cellSlab()) return a == g.player && g.law.inCustody(a) ? null : "This slab is reserved for prisoners.";
-        if (owner != 0 && owner != a.id) return "This is " + g.nameOf(owner) + "'s bed.";
+        // (0.3.2) an inn's guest bed is the lodger's for the night they paid for
+        var inn = g.inns == null ? null : g.inns.ofBed(this);
+        if (inn != null) { if (!inn.lodging(a.id, g.state.minutes)) return "A guest bed: ask " + g.nameOf(inn.layout.innkeeper()) + " for one (" + rpg.econ.Inns.ROOM_PRICE + " G)."; }
+        else if (owner != 0 && owner != a.id) return "This is " + g.nameOf(owner) + "'s bed.";
         for (Npc n : g.npcs) if (n.alive && n.loaded && (n.hostileToPlayer || n.fightTarget == a.id) && n.distTo(a) < 14) return "You can't sleep with enemies nearby.";
         if (a.cs.busy()) return "You're busy.";
         return null;

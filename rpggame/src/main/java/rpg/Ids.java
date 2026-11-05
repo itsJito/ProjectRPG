@@ -22,6 +22,12 @@ public final class Ids {
     /** Alpha 0.2.4 support trades; stable across new games and migrations. */
     public static final long CARPENTER_CITY=586, CARPENTER_TOWN=587, CARPENTER_WOOD=588, CARPENTER_PALACE=589,
             WOODCUTTER_CITY=590, WOODCUTTER_TOWN=591, MINER_CITY=592, MINER_PALACE=593, TRADER_CITY=594, TRADER_PALACE=595;
+    /**
+     * (0.3.2) The farms' and the inns' people: DevCity's crop farmer and orchard keeper, DevPalace's; each inn's innkeeper,
+     * bartender and cook.
+     */
+    public static final long CROP_FARMER_CITY = 960, ORCHARD_KEEPER_CITY = 961, CROP_FARMER_PALACE = 962, ORCHARD_KEEPER_PALACE = 963,
+            INNKEEPER_CITY = 964, BARTENDER_CITY = 965, COOK_CITY = 966, INNKEEPER_PALACE = 967, BARTENDER_PALACE = 968, COOK_PALACE = 969;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
     /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */

@@ -413,15 +413,19 @@ final class Textures {
             case L_SAND -> sand(cv, 0xE6CC8C, 0xC8A96A);
             case L_MUD -> mud(cv);
             case L_CLAY -> { cv.fill(0xB87E5C); cv.mottle(0.42f, 2); for (int k = 0; k < 18; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.toneStroke(x, y, x + 7 + cv.rf() * 7, y + cv.rs() * 2, 2.0f, 0.8f, cv.rf() < 0.6f ? 0.32f : -0.28f); } for (int k = 0; k < 5; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 6, 2, 0.8f, 0.4f, rgb(0x6A4232), 0.6f); }
-            case L_STONE -> { stones(cv, 7, 0x8E8C96, 0.22f, 4, 0x3B3546, 1.1f, 0.35f); cracks(cv, 5, 0x4A4452); }
+            case L_STONE -> { stones(cv, 7, 0x8E8C96, 0.18f, 3.4f, 0x544E5C, 1.0f, 0.4f); cracks(cv, 4, 0x5A5462); }
             case L_SPENT -> { stones(cv, 7, 0x6E6A70, 0.18f, 3, 0x2E2A32, 1.1f, 0.25f); pits(cv, 9); }
             case L_COPPER -> ore(cv, 0xD9783A, 0x4FB08E, 0.0f);
             case L_TIN -> ore(cv, 0xD6DCE2, 0x9AA6B4, 0.0f);
             case L_IRON -> ore(cv, 0xB8643C, 0x5A4A48, 0.0f);
             case L_COAL -> ore(cv, 0x1E1C24, 0x6A7896, 0.0f);
-            case L_BRICK -> { bricks(cv, 8, 4, 0xB24A30, 0.2f, 0x8E7C68, 0.55f, 1.6f, 0.7f); grime(cv, 0.12f); }
-            case L_COBBLE -> { stones(cv, 16, 0x8C8780, 0.25f, 3.2f, 0x2F2C2A, 1.0f, 0.55f); moss(cv, 0x4E7A2A, 10, true); }
-            case L_ROOF -> shingles(cv, 0xB4492E);
+            // (0.3.2, gamefixes: the world's textures 1/10) a fired-clay red that is not one colour: burnt and pale bricks mixed
+            // in, mortar a warm sandy grey set back in shadow, soot and damp creeping up from the foot of the wall
+            case L_BRICK -> { brickWall(cv); }
+            // (0.3.1, gamefixes: textures) fewer, larger setts with a soft bevel, bedded in a mid-grey mortar - the near-black grout
+            // and bright tops read as a harsh checker from any distance
+            case L_COBBLE -> cobbles(cv);
+            case L_ROOF -> roofTiles(cv);
             case L_PLASTER -> plaster(cv);
             case L_BEAM -> { boards(cv, 1, false, 0x664226, 0.05f, 0, false, 1f); cv.mottle(0.2f, 4); grainLines(cv, false, 0x2E1C10, 12); grainLines(cv, false, 0x8A6038, 6); for (int y = 0; y < T; y++) { cv.light(y * T, 0.45f); cv.light(y * T + 1, 0.25f); cv.light(y * T + T - 1, -0.55f); cv.light(y * T + T - 2, -0.3f); } }
             case L_PLANKS -> { boards(cv, 4, true, 0xAC7642, 0.16f, 1.6f, true, 0.4f); grainLines(cv, true, 0x6E4426, 14); }
@@ -429,8 +433,8 @@ final class Textures {
             case L_TABLE_TOP -> tableTop(cv);
             case L_DOOR -> door(cv, false);
             case L_LOCKED -> door(cv, true);
-            case L_BARK -> bark(cv, 0x6E4A2C, 6, 0.75f, 18);
-            case L_OAK_BARK -> { bark(cv, 0x6A4A30, 5, 0.85f, 14); moss(cv, 0x587A2C, 5, false); }
+            case L_BARK -> { bark(cv, 0x80583A, 6, 0.6f, 18); barkLight(cv, 0xA27A50); }
+            case L_OAK_BARK -> { bark(cv, 0x7A5A3C, 5, 0.65f, 14); barkLight(cv, 0x9E7E58); moss(cv, 0x6A8A3A, 4, false); }
             case L_WILLOW_BARK -> bark(cv, 0x7C6E58, 8, 0.6f, 30);
             case L_SPRUCE_BARK -> bark(cv, 0x5C3424, 7, 0.7f, 10);
             case L_JUNGLE_BARK -> { bark(cv, 0x6C5A3A, 6, 0.65f, 20); moss(cv, 0x4E8A30, 12, false); }
@@ -492,20 +496,31 @@ final class Textures {
 
     // ---- terrain
     static void grass(Canvas cv) {
-        cv.fill(0x4C9628);
-        cv.mottle(0.5f, 1);
-        // patches of sunlit and shaded turf
-        for (int k = 0; k < 10; k++) cv.dab(cv.rf() * T, cv.rf() * T, 6 + cv.rf() * 8, 5 + cv.rf() * 6, cv.rf() * 3, shade(rgb(0x78B634), 0.25f), 0.45f, 0.9f);
-        for (int k = 0; k < 8; k++) cv.dab(cv.rf() * T, cv.rf() * T, 5 + cv.rf() * 7, 4 + cv.rf() * 5, cv.rf() * 3, rgb(0x2E6A2C), 0.45f, 0.9f);
-        // blades: a dark root and a bright tip, leaning a little
-        for (int k = 0; k < 170; k++) {
-            float x = cv.rf() * T, y = cv.rf() * T, len = 3f + cv.rf() * 4f, lean = cv.rs() * 1.6f;
-            cv.toneStroke(x + 0.4f, y + 0.8f, x + lean + 0.4f, y - len + 0.8f, 0.8f, 0.3f, -0.5f);
-            float[] tip = shade(rgb(0x86C23E), 0.1f + cv.rf() * 0.45f);
-            cv.stroke(x, y, x + lean, y - len, 0.55f, 0.25f, tip, 0.85f);
+        // (0.3.2, gamefixes: textures 1/10, at least 7/10 wanted) painted turf: a calm mid green with broad, soft areas of
+        // warmer sunlit and cooler shaded green (large enough not to read as a pattern when the block repeats), over it an
+        // even nap of short blades leaning every way - dark at their roots, lit at their tips - so the ground has a grain
+        // and a depth without single bright pixels jumping out; a little clover, no flowers on every metre
+        cv.fill(0x5A8E36);
+        cv.mottle(0.16f, 2);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 16 + cv.rf() * 14, 12 + cv.rf() * 10, cv.rf() * 3, rgb(0x70A03E), 0.34f, 1f);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 14 + cv.rf() * 12, 10 + cv.rf() * 9, cv.rf() * 3, rgb(0x42752D), 0.36f, 1f);
+        for (int k = 0; k < 3; k++) {
+            float cx = cv.rf() * T, cy = cv.rf() * T;
+            for (int t = 0; t < 4; t++) {
+                float x = cx + cv.rs() * 3, y = cy + cv.rs() * 2.5f;
+                for (int l = 0; l < 3; l++) { double a = l * 2.09 + cv.rf(); cv.dab(x + (float) Math.cos(a) * 0.8f, y + (float) Math.sin(a) * 0.8f, 0.8f, 0.8f, 0, shade(rgb(0x4E8A48), cv.rs() * 0.15f), 0.75f, 0.45f); }
+            }
         }
-        // a rare flower
-        for (int k = 0; k < 3; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.dab(x, y, 1.1f, 1.1f, 0, rgb(k == 0 ? 0xF4E070 : 0xF2F0E6), 1, 0.3f); cv.dab(x, y, 0.4f, 0.4f, 0, rgb(0xE0A030), 1, 0.2f); }
+        // the nap: short blades evenly over the whole metre on a jittered grid (no bare patches, no rows)
+        int n = 22;
+        for (int gy = 0; gy < n; gy++) for (int gx = 0; gx < n; gx++) {
+            float x = (gx + cv.rf()) * T / n, y = (gy + cv.rf()) * T / n;
+            float lean = cv.rs() * 1.2f, len = 1.6f + cv.rf() * 2.2f;
+            cv.toneStroke(x, y + 0.5f, x + lean * 0.3f, y - len * 0.3f, 0.6f, 0.4f, -0.34f);
+            float[] tip = shade(rgb(0x82B248), (cv.rf() - 0.3f) * 0.4f);
+            cv.stroke(x + lean * 0.3f, y - len * 0.3f, x + lean, y - len, 0.42f, 0.2f, tip, 0.7f);
+        }
+        cv.mottle(0.06f, 11);
     }
     /** The grass hanging over the top of an earth face: a scalloped lip, lit along its crown, casting a soft shadow down. */
     static void grassLip(Canvas cv) {
@@ -524,12 +539,20 @@ final class Textures {
         for (int k = 0; k < 40; k++) { float x = cv.rf() * T, y = 2 + cv.rf() * 8; cv.stroke(x, y, x + cv.rs(), y - 2 - cv.rf() * 2, 0.5f, 0.25f, rgb(0x96CC4A), 0.8f); }
     }
     static void dirt(Canvas cv, int base, int stones) {
+        // (0.3.2) painted earth: broad soft areas of drier, paler soil and damper, darker soil; small clods lit on their top
+        // and shadowed beneath; a few pebbles and roots - the grain of turned ground rather than a flat brown
         cv.fill(base);
-        cv.mottle(0.35f, 2);
-        for (int k = 0; k < 9; k++) cv.dab(cv.rf() * T, cv.rf() * T, 4 + cv.rf() * 6, 3 + cv.rf() * 4, cv.rf() * 3, shade(rgb(base), -0.4f), 0.3f, 0.9f);
-        for (int k = 0; k < 7; k++) cv.dab(cv.rf() * T, cv.rf() * T, 3 + cv.rf() * 5, 2 + cv.rf() * 3, cv.rf() * 3, shade(rgb(base), 0.3f), 0.25f, 0.9f);
-        pebbles(cv, stones / 2, 0xA08466, 1.4f, 3.0f);
-        for (int k = 0; k < 4; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 4, 2.4f, 0.6f, 0.35f, rgb(0x4A2C18), 0.5f);
+        cv.mottle(0.28f, 2);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 10 + cv.rf() * 10, 7 + cv.rf() * 7, cv.rf() * 3, shade(rgb(base), 0.28f), 0.3f, 1f);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 9 + cv.rf() * 9, 6 + cv.rf() * 6, cv.rf() * 3, shade(rgb(base), -0.3f), 0.32f, 1f);
+        for (int k = 0; k < 34; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, r = 0.9f + cv.rf() * 1.6f;
+            cv.tone(x + 0.4f, y + r * 0.7f, r * 1.1f, r * 0.6f, 0, -0.4f, 0.7f);
+            cv.dab(x, y, r, r * 0.75f, cv.rf() * 3, shade(rgb(base), 0.12f + cv.rf() * 0.2f), 0.9f, 0.6f);
+            cv.tone(x - r * 0.25f, y - r * 0.3f, r * 0.5f, r * 0.35f, 0, 0.3f, 0.8f);
+        }
+        pebbles(cv, stones / 2, 0x9C8468, 1.0f, 2.2f);
+        for (int k = 0; k < 3; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 5, 2.0f, 0.7f, 0.3f, rgb(0x3E2616), 0.45f);
     }
     static void sand(Canvas cv, int base, int ripple) {
         cv.fill(base);
@@ -541,17 +564,25 @@ final class Textures {
         pebbles(cv, 5, 0xB8A890, 0.6f, 1.2f);
     }
     static void mud(Canvas cv) {
-        cv.fill(0x5C3F28);
-        cv.mottle(0.3f, 6);
-        // puddles: dark wet hollows with a cool sky sheen and a lit far rim
-        for (int k = 0; k < 4; k++) {
-            float x = cv.rf() * T, y = cv.rf() * T, rx = 5 + cv.rf() * 6, ry = 3 + cv.rf() * 3;
-            cv.dab(x, y, rx, ry, 0, rgb(0x4A3828), 0.55f, 0.6f);
-            cv.dab(x - rx * 0.2f, y - ry * 0.3f, rx * 0.6f, ry * 0.4f, 0, rgb(0x8A94A4), 0.4f, 0.9f);
-            cv.tone(x + rx * 0.2f, y + ry * 0.9f, rx * 0.8f, 1.2f, 0, 0.3f, 0.8f);
+        // (0.3.2) dark, wet earth: rich brown, glistening where it is wettest (a cool sky sheen on the tops of the ruts),
+        // churned into soft ruts and clods
+        cv.fill(0x5A3C26);
+        cv.mottle(0.25f, 6);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            float rut = (float) Math.sin((x + (cv.noise(2, x, y) - 0.5f) * 14) * Math.PI * 2 / 16.0);
+            cv.light(y * T + x, rut * 0.12f);
         }
-        for (int k = 0; k < 10; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.toneStroke(x, y, x + 5 + cv.rf() * 5, y + cv.rs(), 1.0f, 0.5f, 0.25f); }
-        pebbles(cv, 4, 0x7A6A5A, 0.8f, 1.6f);
+        for (int k = 0; k < 26; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, r = 1.0f + cv.rf() * 1.8f;
+            cv.tone(x + 0.4f, y + r * 0.6f, r, r * 0.6f, 0, -0.4f, 0.7f);
+            cv.dab(x, y, r, r * 0.7f, cv.rf() * 3, shade(rgb(0x5A3C26), 0.15f + cv.rf() * 0.15f), 0.85f, 0.6f);
+        }
+        for (int k = 0; k < 4; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, rx = 4 + cv.rf() * 5, ry = 2 + cv.rf() * 2;
+            cv.dab(x, y, rx, ry, 0, rgb(0x3E2A1C), 0.5f, 0.7f);
+            cv.dab(x - rx * 0.2f, y - ry * 0.3f, rx * 0.55f, ry * 0.35f, 0, rgb(0x8A92A0), 0.3f, 0.9f);
+        }
+        pebbles(cv, 3, 0x7A6A5A, 0.8f, 1.4f);
     }
 
     // ---- stone and masonry details
@@ -619,11 +650,141 @@ final class Textures {
             cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
         }
     }
+    /**
+     * (0.3.2) Cobbles in the hand-painted manner: many rounded setts of a size, each its own warm or cool grey (a few
+     * sandy, a few slate-blue), domed - a soft highlight toward the light, a shadowed underside - and bedded in dark earthen
+     * joints with grit in them; a little worn moss low in a joint here and there, never bright.
+     */
+    static void cobbles(Canvas cv) {
+        int n = 16;
+        float[][] site = new float[n][];
+        float[][] col = new float[n][];
+        int side = (int) Math.ceil(Math.sqrt(n));
+        int[] tones = {0x9C948A, 0x8C8A88, 0xA49A84, 0x84868E, 0x968C80, 0x7E7C80};
+        for (int i = 0; i < n; i++) {
+            float gx = (i % side + 0.5f) * T / side, gy = (i / side + 0.5f) * T / side;
+            site[i] = new float[]{gx + cv.rs() * T / side * 0.32f, gy + cv.rs() * T / side * 0.32f};
+            col[i] = jitter(cv, tones[(int) (cv.rf() * tones.length)], 0.1f);
+        }
+        float[] joint = rgb(0x463C33);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            float d1 = 1e9f, d2 = 1e9f; int best = 0; float bx = 0, by = 0;
+            for (int i = 0; i < n; i++) {
+                float dx = x + 0.5f - site[i][0], dy = y + 0.5f - site[i][1];
+                dx -= Math.round(dx / T) * T; dy -= Math.round(dy / T) * T;
+                float d = dx * dx + dy * dy;
+                if (d < d1) { d2 = d1; d1 = d; best = i; bx = dx; by = dy; } else if (d < d2) d2 = d;
+            }
+            float edge = ((float) Math.sqrt(d2) - (float) Math.sqrt(d1)) * 0.5f + (cv.noise(4, x, y) - 0.5f) * 1.2f;
+            int i = y * T + x;
+            float jw = 1.15f;
+            if (edge < jw) {
+                // the joint: earth with grit, darkest at its middle
+                float[] j2 = shade(joint, -0.25f * (1 - edge / jw) + (cv.noise(5, x, y) - 0.5f) * 0.4f);
+                cv.r[i] = j2[0]; cv.g[i] = j2[1]; cv.b[i] = j2[2];
+                continue;
+            }
+            float len = Math.max(0.01f, (float) Math.hypot(bx, by));
+            float facing = (bx * LX + by * LY) / len;
+            // a rounded sett: lit across its dome toward the light, falling into shadow on the far side, a soft rim
+            float dome = Math.min(1, len / 7.5f);
+            float k = facing * dome * 0.5f - dome * dome * 0.12f;
+            if (edge < jw + 2.2f) { float t = 1 - (edge - jw) / 2.2f; k += facing * t * 0.35f - t * 0.32f; }
+            k += (cv.broad(x * 2, y * 2) - 0.5f) * 0.22f;
+            float[] o = shade(col[best], k);
+            cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+        }
+        // wear: a pale scuff across the tops of a few, and a speck or two of moss in the joints
+        for (int k = 0; k < 6; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.tone(x, y, 2.2f, 1.2f, cv.rf() * 3, 0.18f, 0.9f); }
+        moss(cv, 0x5E7038, 3, true);
+    }
+
+    /** (0.3.2) A brick wall: courses of fired clay in several tones - most a soft red, some burnt dark, some pale - in sunk mortar, with soot at the foot. */
+    static void brickWall(Canvas cv) {
+        int rows = 8, cols = 4;
+        float bh = (float) T / rows, bw = (float) T / cols;
+        int[] tones = {0xA4513A, 0x9A4834, 0xB05E42, 0x8A3E30, 0xB86E52, 0x7C3A2E};
+        float[][] col = new float[rows * cols][];
+        for (int i = 0; i < col.length; i++) col[i] = jitter(cv, tones[(int) (cv.rf() * tones.length)], 0.08f);
+        float[] mo = rgb(0x9A8C78);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int row = (int) (y / bh);
+            float off = (row & 1) == 1 ? bw / 2 : 0;
+            float xx = Math.floorMod((int) Math.floor(x + off), T) + (x + off - (float) Math.floor(x + off));
+            int ci = (int) (xx / bw);
+            float lx = xx - ci * bw, ly = y - row * bh;
+            float ex = Math.min(lx, bw - lx), ey = Math.min(ly, bh - ly);
+            float e = Math.min(ex, ey);
+            if (ex < 1.6f && ey < 1.6f) e = 1.6f - (float) Math.hypot(1.6f - ex, 1.6f - ey);
+            e += (cv.noise(4, x, y) - 0.5f) * 0.7f;
+            int i = y * T + x;
+            if (e < 0.75f) {
+                // mortar, sunk behind the bricks: in shadow under each course, lit along the top of the one below
+                boolean underBrick = ly < bh / 2;
+                float[] m = shade(mo, (underBrick ? -0.3f : 0.05f) + (cv.noise(5, x, y) - 0.5f) * 0.35f);
+                cv.r[i] = m[0]; cv.g[i] = m[1]; cv.b[i] = m[2];
+                continue;
+            }
+            float[] c = col[(row * cols + ci) % col.length];
+            float k = 0;
+            if (e < 2.2f) { float t = 1 - (e - 0.75f) / 1.45f; boolean lit = ey < ex ? ly < bh / 2 : lx < bw / 2; k = (lit ? 0.42f : -0.5f) * t; }
+            // the brick's own face: a gentle swell, pitting, a paler streak of the clay
+            k += (cv.broad(x * 1.6f, y * 1.6f) - 0.5f) * 0.3f + (0.5f - ly / bh) * 0.12f;
+            float[] o = shade(c, k);
+            cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+        }
+        for (int k = 0; k < 14; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.tone(x, y, 0.7f, 0.7f, 0, -0.35f, 0.5f); }
+        // (the soot and damp at a wall's foot is the renderer's, by height in the world: painted here it banded every block)
+        grime(cv, 0.06f);
+    }
+
+    /** (0.3.2) Roof tiles: rounded clay tiles in overlapping courses, a dusty terracotta, some weathered paler, lichen at the lips. */
+    static void roofTiles(Canvas cv) {
+        int rows = 8; float rh = (float) T / rows, sw = 8;
+        int[] tones = {0xA8503A, 0xB45E40, 0x9C4836, 0xB86A4C, 0x92443A};
+        float[][] col = new float[rows * 8][];
+        for (int i = 0; i < col.length; i++) col[i] = jitter(cv, tones[(int) (cv.rf() * tones.length)], 0.07f);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int row = (int) (y / rh);
+            float off = (row & 1) == 1 ? sw / 2 : 0;
+            float xx = Math.floorMod((int) (x + off), T);
+            int ci = (int) (xx / sw);
+            float lx = xx - ci * sw, ly = y - row * rh;
+            float cx = (lx - sw / 2) / (sw / 2), bottom = rh - 0.6f - 3.0f * cx * cx;
+            int i = y * T + x;
+            float[] c = col[(row * 8 + ci) % col.length];
+            // the tile's curve: lit down its crown, falling away to its edges; deep shadow under the lip of the one above
+            float k = 0.3f * (1 - Math.abs(cx)) - 0.25f * Math.abs(cx) - ly / rh * 0.3f;
+            if (ly > bottom) k = -0.85f + (ly - bottom) * 0.1f;
+            else if (ly > bottom - 1.0f) k += 0.3f;
+            k += (cv.noise(4, x, y) - 0.5f) * 0.18f;
+            float[] o = shade(c, k);
+            cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+        }
+        for (int k = 0; k < 5; k++) { float x = cv.rf() * T, y = cv.rf() * T; cv.dab(x, y, 1.6f, 0.9f, 0, rgb(0xB8B08A), 0.35f, 0.8f); }
+    }
+
+    /** (0.3.2) The light catching bark's raised plates: a paler, warm skin along the plate crowns, so a trunk reads as round and rough, not as dark noise. */
+    static void barkLight(Canvas cv, int pale) {
+        float[] pc = rgb(pale);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            float lum = (cv.r[i] + cv.g[i] + cv.b[i]) / 3;
+            if (lum > 92) cv.set(i, pc, Math.min(0.45f, (lum - 92) / 60f));
+        }
+        cv.mottle(0.12f, 9);
+    }
+
     static void plaster(Canvas cv) {
-        cv.fill(0xE0C9A0);
-        cv.mottle(0.2f, 7);
-        for (int k = 0; k < 18; k++) { float x = cv.rf() * T, y = cv.rf() * T, a = cv.rs() * 0.6f; cv.toneStroke(x, y, x + (float) Math.cos(a) * 12, y + (float) Math.sin(a) * 12, 2.8f, 1.4f, cv.rf() < 0.5f ? 0.22f : -0.18f); }
-        for (int k = 0; k < 3; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 4, 2, 0.9f, 0.3f, rgb(0x9A8466), 0.6f);
+        // (0.3.2) lime plaster: a warm cream, the trowel's broad soft swirls barely there, a hairline crack or two, a
+        // little weathering darker toward the foot - it was a pale field of dark diagonal scratches
+        cv.fill(0xE4D3B0);
+        cv.mottle(0.12f, 7);
+        for (int k = 0; k < 10; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, r = 8 + cv.rf() * 8;
+            cv.tone(x, y, r, r * 0.6f, cv.rf() * 3, cv.rf() < 0.5f ? 0.08f : -0.07f, 1f);
+        }
+        for (int k = 0; k < 2; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 4, 1.8f, 0.9f, 0.22f, rgb(0xB8A482), 0.5f);
     }
     static void grainLines(Canvas cv, boolean horizontal, int col, int n) {
         for (int k = 0; k < n; k++) {

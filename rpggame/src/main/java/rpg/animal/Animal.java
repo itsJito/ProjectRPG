@@ -22,7 +22,7 @@ import rpg.world.DevMap;
  * when it has decayed.
  */
 public final class Animal extends Actor implements Interactable {
-    public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM }
+    public enum Goal { IDLE, GRAZE, DRINK, REST, WANDER, FOLLOW, ALERT, WARN, FLEE, DEFEND, HUNT, FEED, MATE, NEST, SEEK, PLAY, GROOM, STAY }
 
     public final Species species;
     public long trappedBy;
@@ -101,7 +101,35 @@ public final class Animal extends Actor implements Interactable {
     public rpg.mount.MountStats mountStats;
     public float tame, vigor = 100, flightPitch, flightBank;
     public long tamedBy, rider;
+    /**
+     * (0.3.4, gamefixes: Follow, Stay and Dismiss for a tamed animal) what its keeper last told it: nothing (its own life
+     * about its home), to come along with them, or to stay put where it was told; who told it; where it was told to stay.
+     * Dismissed, it is still tamed and still theirs.
+     */
+    public enum Command { NONE, FOLLOW, STAY }
+    public Command command = Command.NONE;
+    public long commandBy;
+    public float stayX, stayZ;
+    /** Whether this one answers to someone's word: they tamed it, own it, or it trusts them as its own. */
+    public boolean answersTo(Actor a) { return a != null && (tamedBy == a.id || owner == a.id || owned() && trustOf(a.id) > 0.6f || species.domestic && trustOf(a.id) > 0.8f); }
+    /** (0.3.1) Whose saddle it wears: a saddle can go on an untamed horse first (it gentles the taming), and stays its owner's. */
+    public long saddledBy;
+    /**
+     * (0.3.2, gamefixes: a saddle can be started however agitated the horse is) who has it by the bridle while a saddle is
+     * eased on, and until when: it is held standing (AnimalMind) and settles a little the longer it is held.
+     */
+    public long heldBy;
+    public double heldUntil = -1;
+    /** (0.3.1) When it was last fed or gentled by hand toward its taming (a little each time, a while apart). */
+    public double gentledAt = -1e9;
     public boolean saddled, flying;
+    /**
+     * (0.3.3, gamefixes: the rider clipped through a horse that rose under them) the drawn body's movement this frame
+     * against its standing pose - gait bob, rearing, the canter's rock, a Pegasus's climb and bank - as a column-major
+     * matrix the renderer fills; the rider is drawn carried by it, and when it was last filled (render clock).
+     */
+    public final float[] seatDelta = new float[16];
+    public double seatAt = -1;
     public final rpg.item.Inventory bags = new rpg.item.Inventory(6, 4);
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {
@@ -145,7 +173,16 @@ public final class Animal extends Actor implements Interactable {
     /** Dangerous to people now: hunting, defending, or already in a fight. */
     public boolean dangerous() { return alive && menacing; }
     /** A warning is directed at its subject; an actual attack also endangers nearby bystanders. */
-    public boolean threatens(Actor observer) { return dangerous() && (goal != Goal.WARN || other == observer.id); }
+    /**
+     * (0.3.3, gamefixes: everyone performing their duties) a fox or a coyote on the hunt is after hens and rabbits, not
+     * a grown man: it threatens only the one it is going for (a fisherman spent his working days running from foxes).
+     * Wolves, bears and big cats on the prowl are a danger to anyone near.
+     */
+    public boolean threatens(Actor observer) {
+        if (!dangerous() || goal == Goal.WARN && other != observer.id) return false;
+        boolean small = species == Species.FOX || species == Species.COYOTE;
+        return !small || other == observer.id || observer instanceof rpg.animal.Animal;
+    }
 
     // ------------------------------------------------------------------ Interactable
     @Override public long id() { return id; }
@@ -174,14 +211,28 @@ public final class Animal extends Actor implements Interactable {
                 o.add(Option.when(calm && full && a.has(Items.BUCKET, 1), "milk", "Milk", 8, !calm ? "It's too agitated." : !full ? "She has been milked recently." : "You need an empty bucket.", r));
             }
             o.add(Option.when(food != null && calm, "feed", "Feed" + (food == null ? "" : " (" + food.name.toLowerCase() + ")"), 7, food == null ? "You have nothing it would eat." : "It's too agitated.", r));
+            // (0.3.4) told what to do: come along, stay here, or be let go about its own business (still tame, still yours)
+            if (answersTo(a) && !baby && rider == 0) {
+                float far = Math.max(r, 12);
+                if (command != Command.FOLLOW || commandBy != a.id) o.add(Option.on("cmd_follow", "Follow", 6, far));
+                if (command != Command.STAY || commandBy != a.id) o.add(Option.on("cmd_stay", "Stay", 5, far));
+                if (command != Command.NONE) o.add(Option.on("cmd_dismiss", "Dismiss", 4, far));
+            }
             // (0.3.0) a horse or a Pegasus: ridden, saddled, its saddlebags opened
             if (rpg.mount.Riding.mountable(this)) {
-                boolean mine = rpg.mount.Riding.tamedFor(this, a);
-                o.add(Option.when(rider == 0, "mount", "Mount" + (mine ? "" : " (untamed)"), 9, "Someone is riding it.", 2.4f));
-                if (!saddled) o.add(Option.when(mine && a.has(Items.SADDLE, 1), "saddle", "Saddle", 6, !mine ? "It won't stand for a saddle yet." : "You have no saddle.", r));
-                else {
-                    o.add(Option.when(mine && rider == 0, "unsaddle", "Remove saddle", 3, "It isn't yours to unsaddle.", r));
-                    o.add(Option.when(mine && rider == 0, "bags", "Open saddlebags", 5, "Those aren't your saddlebags.", r));
+                boolean mine = rpg.mount.Riding.tamedFor(this, a), theirs = owned() && owner != a.id && !mine;
+                boolean hasSaddle = a.has(Items.SADDLE, 1);
+                // (0.3.1) the saddle goes on first when one is carried - an untamed horse too, if it stands calm
+                // (0.3.2, gamefixes) however agitated it is: an agitated one is caught by the bridle and held while it is
+                // done, which takes longer the worse it is
+                if (!saddled) o.add(Option.when(hasSaddle && rider == 0 && !theirs, "saddle", "Saddle" + (mine ? "" : calm ? " (gentles the taming)" : " (agitated: hold it steady)"), hasSaddle ? 10 : 4,
+                        theirs ? "It isn't yours to saddle." : !hasSaddle ? "You have no saddle." : "Someone is riding it.", r));
+                o.add(Option.when(rider == 0 && (calm || mine), "mount", "Mount" + (mine ? "" : theirs ? " (not yours)" : saddled ? " (saddled, untamed)" : " (untamed)"), 9,
+                        rider != 0 ? "Someone is riding it." : "It's too agitated.", 2.4f));
+                if (saddled) {
+                    boolean saddleMine = saddledBy == a.id || saddledBy == 0 && mine;
+                    o.add(Option.when((mine || saddleMine) && rider == 0 && calm, "unsaddle", "Remove saddle", 3, "It isn't yours to unsaddle.", r));
+                    o.add(Option.when((mine || saddleMine) && rider == 0, "bags", "Open saddlebags", 5, "Those aren't your saddlebags.", r));
                 }
             }
         }
@@ -193,22 +244,32 @@ public final class Animal extends Actor implements Interactable {
         switch (action) {
             case "mount" -> { return g.riding.mount(a, this); }
             case "saddle" -> {
-                if (saddled || !rpg.mount.Riding.tamedFor(this, a) || a.takeItems(Items.SADDLE, 1).isEmpty()) return Result.no("You can't saddle it.");
-                saddled = true;
-                g.state.commit(req, "MountSaddled", a.id, id, DevMap.jurisdiction(x, z), 0, kind());
-                if (a == g.player) g.chat.say("You saddle the " + kind().toLowerCase() + ".");
-                return Result.ok();
+                boolean mine = rpg.mount.Riding.tamedFor(this, a);
+                if (saddled || rider != 0) return Result.no("You can't saddle it now.");
+                if (owned() && owner != a.id && !mine) return Result.no("It isn't yours to saddle.");
+                if (!a.has(Items.SADDLE, 1)) return Result.no("You have no saddle.");
+                if (Math.hypot(a.x - x, a.z - z) > g.cfg.interactRange + radius) return Result.no("You're too far away.");
+                // a tame one stands for it at once; an untamed one is eased into it over a few seconds, held calm; an
+                // agitated one is caught by the bridle first and held while it fights it - the longer the worse it is
+                float agitation = agitation();
+                float time = (mine ? 1.2f : 2.6f) + 4.5f * agitation;
+                heldBy = a.id; heldUntil = g.time + time + 0.3;
+                goal = Goal.ALERT; nextThink = g.time;
+                if (agitation > 0.2f && a == g.player) g.chat.say("You catch the " + kind().toLowerCase() + " by the bridle and hold it steady.");
+                g.interact.begin(new rpg.interact.Work(a, this, "saddle", "Saddling", time, false, g.time, () -> saddleNow(g, a, req)));
+                return Result.started();
             }
             case "unsaddle" -> {
-                if (!saddled || !rpg.mount.Riding.tamedFor(this, a)) return Result.no("You can't unsaddle it.");
+                boolean saddleMine = saddledBy == a.id || saddledBy == 0 && rpg.mount.Riding.tamedFor(this, a);
+                if (!saddled || !(saddleMine || rpg.mount.Riding.tamedFor(this, a))) return Result.no("You can't unsaddle it.");
                 if (!bags.isEmpty()) return Result.no("Empty the saddlebags first.");
                 if (!a.store(new rpg.item.ItemStack(Items.SADDLE, 1, a.id, false, a.id))) return Result.no("You have no room for the saddle.");
-                saddled = false;
+                saddled = false; saddledBy = 0;
                 g.state.commit(req, "MountUnsaddled", a.id, id, DevMap.jurisdiction(x, z), 0, kind());
                 return Result.ok();
             }
             case "bags" -> {
-                if (!saddled || !rpg.mount.Riding.tamedFor(this, a)) return Result.no("Those aren't your saddlebags.");
+                if (!saddled || !(saddledBy == a.id || rpg.mount.Riding.tamedFor(this, a))) return Result.no("Those aren't your saddlebags.");
                 if (a == g.player && g.ui != null) g.ui.openContainer(new rpg.objects.Saddlebags(id + 900_000_000L, kind() + "'s saddlebags", x, y + 1, z, a.id, bags));
                 return Result.ok();
             }
@@ -218,6 +279,26 @@ public final class Animal extends Actor implements Interactable {
         return g.animals.perform(this, a, action, req);
     }
 
+
+    /** How worked up it is, 0 (calm) .. 1 (bolting or fighting): its fear and what it is doing about it. */
+    public float agitation() {
+        float g0 = goal == Goal.FLEE || goal == Goal.DEFEND ? 0.55f : goal == Goal.WARN ? 0.4f : goal == Goal.ALERT ? 0.15f : 0;
+        return Math.min(1, Math.max(fear, 0) * 0.6f + g0);
+    }
+
+    /** The saddle buckled on (after the work): the rider's saddle, its bags with it; an untamed horse is gentled by it. */
+    private Result saddleNow(Rpg g, Actor a, long req) {
+        heldBy = 0; heldUntil = -1;
+        if (saddled || rider != 0 || !alive) return Result.no("You can't saddle it now.");
+        if (a.takeItems(Items.SADDLE, 1).isEmpty()) return Result.no("You have no saddle.");
+        saddled = true; saddledBy = a.id;
+        boolean tamed = rpg.mount.Riding.tamedFor(this, a);
+        if (!tamed) { trust.merge(a.id, 0.1f, (p, q) -> Math.min(1, p + q)); fear = Math.max(0, fear - 0.3f); }
+        g.state.commit(req, "MountSaddled", a.id, id, DevMap.jurisdiction(x, z), 0, kind() + (tamed ? "" : " (untamed)"));
+        if (a == g.player) g.chat.say(tamed ? "You saddle the " + kind().toLowerCase() + "."
+                : "You ease the saddle onto the " + kind().toLowerCase() + ". It stamps, but lets it stay. It will be far easier to break in now.");
+        return Result.ok();
+    }
 
     @Override public String inspect(Rpg g) {
         return String.format("%s %s %s, %s; goal %s (%s); hunger %.0f%% thirst %.0f%% fear %.0f%%%s%s", kind(), female ? "female" : "male",
@@ -230,7 +311,10 @@ public final class Animal extends Actor implements Interactable {
         List<rpg.item.ItemStack> l = new ArrayList<>();
         float k = baby ? 0.5f : 1f;
         int meat = Math.max(species.meat > 0 ? 1 : 0, Math.round(species.meat * k)), hide = Math.round(species.hide * k);
-        if (meat > 0) l.add(new rpg.item.ItemStack(Items.RAW_MEAT, meat));
+        // (0.3.4) a deer gives venison and a duck its own meat; a grown buck his antlers
+        rpg.item.ItemDef cut = species == Species.DEER ? Items.RAW_VENISON : species == Species.DUCK ? Items.RAW_DUCK : Items.RAW_MEAT;
+        if (meat > 0) l.add(new rpg.item.ItemStack(cut, meat));
+        if (species == Species.DEER && !female && !baby) l.add(new rpg.item.ItemStack(Items.ANTLER, 2));
         if (hide > 0) l.add(new rpg.item.ItemStack(Items.RAWHIDE, hide));
         l.add(new rpg.item.ItemStack(species.bigBones && !baby ? Items.BIG_BONES : Items.BONES, 1));
         if (species.feathers > 0) l.add(new rpg.item.ItemStack(Items.FEATHER, Math.max(1, Math.round(species.feathers * k))));

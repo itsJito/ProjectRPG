@@ -24,6 +24,13 @@ public final class AnimalModels {
     /** A built figure: its parts and where they join the body (voxels, from the body's centre). */
     public static final class Figure {
         public ItemModels.Model body, head, headClosed, tail, legFront, legBack, wing;
+        /**
+         * (0.3.4, gamefixes: horse and Pegasus animations) a long-legged hoofed animal's legs in two: the upper leg (forearm,
+         * gaskin) and the lower (cannon, fetlock and hoof), joined at the knee (fore) and the hock (hind), so the joint can
+         * fold as the leg swings; how long the upper part is (voxels). Null for the rest.
+         */
+        public ItemModels.Model legFrontHi, legFrontLo, legBackHi, legBackLo;
+        public float kneeAt;
         /** Body size (W across, H tall, L long) and where its centre stands above the ground. */
         public float bw, bh, bl, bodyY;
         public float legH, legW;
@@ -40,7 +47,7 @@ public final class AnimalModels {
 
     /** How many coats a species has (variants beyond wrap round). */
     static int coat(Species s, int variant) {
-        int n = switch (s) { case COW, DOG, CAT, HORSE, CHICKEN -> 3; case PIG, SHEEP, DUCK -> 2; default -> 1; };
+        int n = switch (s) { case COW, DOG, CAT, HORSE, CHICKEN, DEER -> 3; case PIG, SHEEP, DUCK -> 2; default -> 1; };
         return Math.floorMod(variant, n);
     }
 
@@ -63,6 +70,7 @@ public final class AnimalModels {
             case PIG -> quad(s, v, 12, 10, 18, 5, 3, 7, 7, 6, 2, pigCoat(v));
             case HORSE -> quad(s, v, 11, 11, 26, 15, 4, 5, 6, 7, 5, horseCoat(v));
             case PEGASUS -> pegasus(v);
+            case DEER -> quad(s, v, 8, 9, 16, 14, 2, 5, 5, 6, 3, deerCoat(v));
             case DOG -> quad(s, v, 6, 7, 13, 7, 2, 5, 5, 5, 3, dogCoat(v));
             case CAT -> quad(s, v, 5, 5, 10, 5, 2, 4, 4, 3, 1, catCoat(v));
             case FOX -> quad(s, v, 5, 6, 11, 6, 2, 5, 4, 4, 3, foxCoat());
@@ -100,8 +108,17 @@ public final class AnimalModels {
         if (s == Species.BROWN_BEAR) for (int x = 3; x < bw - 3; x++) for (int z = 3; z < 9; z++) b.set(x, bh - 1, z, coat.at("body", x, bh - 1, z, bw, bh, bl));
         f.body = new ItemModels.Model(b, bw / 2f, bh / 2f, bl / 2f);
         // legs: a column, a darker hoof or paw at the foot
-        f.legFront = new ItemModels.Model(leg(s, legH, legW, coat, true), legW / 2f, legH, legW / 2f);
-        f.legBack = new ItemModels.Model(leg(s, legH, legW, coat, false), legW / 2f, legH, legW / 2f);
+        VoxModel lf = leg(s, legH, legW, coat, true), lb = leg(s, legH, legW, coat, false);
+        f.legFront = new ItemModels.Model(lf, legW / 2f, legH, legW / 2f);
+        f.legBack = new ItemModels.Model(lb, legW / 2f, legH, legW / 2f);
+        if (horseLike(s)) {
+            int knee = Math.round(legH * 0.52f);           // the joint a little above the middle: a long cannon below it
+            f.kneeAt = legH - knee;
+            f.legFrontHi = new ItemModels.Model(slice(lf, knee, legH), legW / 2f, legH - knee, legW / 2f);
+            f.legFrontLo = new ItemModels.Model(slice(lf, 0, knee), legW / 2f, knee, legW / 2f);
+            f.legBackHi = new ItemModels.Model(slice(lb, knee, legH), legW / 2f, legH - knee, legW / 2f);
+            f.legBackLo = new ItemModels.Model(slice(lb, 0, knee), legW / 2f, knee, legW / 2f);
+        }
         float inX = bw / 2f - legW / 2f - (s == Species.BROWN_BEAR ? 1 : 0.5f);
         f.legF = new float[]{inX, -bh / 2f + 2, -bl / 2f + legW / 2f + 1.5f};
         f.legB = new float[]{inX, -bh / 2f + 2, bl / 2f - legW / 2f - 1.5f};
@@ -112,6 +129,13 @@ public final class AnimalModels {
         f.tail = tail(s, coat);
         f.tailAt = new float[]{0, bh / 2f - (s == Species.PIG ? 2 : 1.5f), bl / 2f - 0.5f};
         return f;
+    }
+
+    /** Rows y0 (inclusive) to y1 (exclusive) of a part, as a part of their own. */
+    private static VoxModel slice(VoxModel src, int y0, int y1) {
+        VoxModel m = new VoxModel(src.sx, y1 - y0, src.sz);
+        for (int x = 0; x < src.sx; x++) for (int y = y0; y < y1; y++) for (int z = 0; z < src.sz; z++) m.set(x, y - y0, z, src.get(x, y, z));
+        return m;
     }
 
     private static VoxModel leg(Species s, int legH, int legW, Coat coat, boolean front) {
@@ -173,6 +197,25 @@ public final class AnimalModels {
                 }
             }
             case MOUNTAIN_LION, BROWN_BEAR -> { for (int side : new int[]{ox, ox + hw - 2}) m.box(side, top, ez, side + 1, top, ez, earC); }
+            case DEER -> {
+                // big ears set out to the sides, white within
+                for (int side : new int[]{-1, 1}) {
+                    int ex = side < 0 ? ox - 1 : ox + hw;
+                    for (int y = 0; y < 3; y++) m.set(ex + side * (y / 2), top - 1 + y, ez, y == 1 ? c(0xEEE6D8) : earC);
+                }
+                // a buck's antlers: a beam up and back off each side of the crown, out and forward tines along it
+                if (v == 1) {
+                    int an = c(0xD8C8A0), tip = c(0xF0E6CC);
+                    for (int side : new int[]{-1, 1}) {
+                        int bx = side < 0 ? ox + 1 : ox + hw - 2;
+                        for (int i = 0; i < 7; i++) {
+                            int px = bx + side * (i / 2), py = top + i, pz = ez + 1 + i / 3;
+                            m.set(px, py, pz, i == 6 ? tip : an);
+                            if (i == 2 || i == 4) { m.set(px, py + 1, pz - 1, an); m.set(px, py + 2, pz - 2, tip); }
+                        }
+                    }
+                }
+            }
             case HORSE, PEGASUS -> {
                 for (int side : new int[]{ox, ox + hw - 1}) { m.set(side, top, ez, earC); m.set(side, top + 1, ez, earC); }
                 // (0.3.0) the Pegasus's horn: a pale spiral out of the forehead, forward and up
@@ -232,6 +275,12 @@ public final class AnimalModels {
             }
             case SHEEP -> { m = new VoxModel(4, 4, 4); m.sphere(2, 2, 2, 2, tc); return new ItemModels.Model(m, 2, 2, 1); }
             case BROWN_BEAR -> { m = new VoxModel(3, 3, 3); m.box(0, 0, 0, 2, 2, 2, tc); return new ItemModels.Model(m, 1.5f, 1.5f, 0.5f); }
+            case DEER -> {
+                // the short flag of a tail: brown above, white beneath (raised when it bolts)
+                m = new VoxModel(3, 2, 4);
+                m.box(0, 1, 0, 2, 1, 3, tc); m.box(0, 0, 0, 2, 0, 3, tip);
+                return new ItemModels.Model(m, 1.5f, 1.5f, 0.5f);
+            }
             default -> { m = new VoxModel(3, 3, 3); m.sphere(1.5f, 1.5f, 1.5f, 1.6f, tc); return new ItemModels.Model(m, 1.5f, 1.5f, 0.5f); }
         }
     }
@@ -383,8 +432,31 @@ public final class AnimalModels {
         };
     }
 
-    /** A horse's anatomy (its neck and mane, hooves, tucked waist): the horse and the Pegasus built from it. */
-    static boolean horseLike(Species s) { return s == Species.HORSE || s == Species.PEGASUS; }
+    /** The long-necked, hoofed build (a horse, a Pegasus - and a deer, lighter). */
+    static boolean horseLike(Species s) { return s == Species.HORSE || s == Species.PEGASUS || s == Species.DEER; }
+
+    /**
+     * (0.3.4, gamefixes: the deer) A deer's coat by its variant (set from the animal at birth: 0 a doe, 1 a buck, 2 a
+     * fawn): warm red-brown above, a paler fawn flank, the belly, throat, the inside of the ears and the underside of the
+     * tail white, a dark muzzle; a buck is darker over the shoulders; a fawn is dappled with white spots down its back.
+     */
+    private static Coat deerCoat(int v) {
+        int back = v == 1 ? 0x7A5030 : 0x9A6A40, flank = v == 1 ? 0x9A6A40 : 0xB4844E, belly = 0xEEE6D8;
+        return (part, x, y, z, sx, sy, sz) -> switch (part) {
+            case "body" -> {
+                if (y < 2) yield fur(belly, x, y, z, 0.05f);
+                boolean spot = v == 2 && y >= sy - 3 && (x * 7 + z * 13 + y * 3) % 9 == 0 && x > 0 && x < sx - 1;
+                yield spot ? c(0xF4EEE2) : fur(y > sy * 0.6f ? back : flank, x, y, z, 0.07f);
+            }
+            case "head" -> fur(y == 0 && z >= 1 && z < 3 && x > 0 && x < sx - 1 ? belly : flank, x, y, z, 0.06f);   // a pale throat patch (the neck takes the flank)
+            case "snout" -> fur(y >= sy - 1 ? 0x2A2420 : Tex.shade(flank, 0.9f), x, y, z, 0.05f);
+            case "ear" -> c(Tex.shade(flank, 0.92f));
+            case "legF", "legB" -> fur(Tex.shade(flank, 0.9f), x, y, z, 0.06f);
+            case "tail" -> c(back);
+            case "tip" -> c(belly);
+            default -> fur(flank, x, y, z, 0.06f);
+        };
+    }
 
     /**
      * (0.3.0, gamefixes) The Pegasus: the horse's figure, brolic - a broader, deeper body, thicker legs, a heavy neck -

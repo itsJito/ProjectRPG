@@ -171,7 +171,9 @@ public final class Hud {
         long speaker = dialog == null ? 0 : dialog.npc;
         dialog = g.actor(speaker) instanceof rpg.ai.Npc n && n.alive ? g.dialogue.talk(n) : null;
     }
-    public void closeAll() { win = Win.NONE; dialog = null; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
+    public void closeAll() { dismissDialog(); win = Win.NONE; menu = null; if (scene != Scene.WORLD) go(Scene.WORLD); }
+    /** The open box closed without a reply: whatever that means to its speaker (a fine put off) is done. */
+    private void dismissDialog() { Dialog d = dialog; dialog = null; if (d != null && d.dismissed != null) d.dismissed.run(); }
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
     public void received(rpg.item.ItemDef item) { inventory.received(item); events.emit("inventory", "received " + item.id); }
 
@@ -220,7 +222,7 @@ public final class Hud {
         if (console.isOpen()) { console.close(); return true; }
         if (inventory.dragging()) { inventory.cancelDrag(); return true; }
         if (menu != null) { menu = null; return true; }
-        if (dialog != null) { dialog = null; return true; }
+        if (dialog != null) { dismissDialog(); return true; }
         if (win != Win.NONE && scene == Scene.WORLD) { win = Win.NONE; sound("UI_windowclose", 0.5f); return true; }
         if (scene != Scene.WORLD) { go(Scene.WORLD); return true; }
         return false;
@@ -233,7 +235,7 @@ public final class Hud {
         Menu m = new Menu();
         m.title = t.label();
         m.x = w / 2f + 20; m.y = h / 2f - 10;
-        for (Option o : t.options(g, g.player)) m.items.add(new MenuItem(o.label(), o.enabled(), o.reason(), () -> g.interact.request(g.player, t, o.id())));
+        for (Option o : rpg.interact.Interactions.ranked(t.options(g, g.player))) m.items.add(new MenuItem(o.label(), o.enabled(), o.reason(), () -> g.interact.request(g.player, t, o.id())));
         m.items.add(new MenuItem("Cancel", true, null, () -> { }));
         menu = m;
         sound("UIbutton2", 0.4f);
@@ -292,11 +294,11 @@ public final class Hud {
         // what closes itself: a dialogue partner who walked off or died, a window out of reach
         if (dialog != null && dialog.npc != 0) {
             var a = g.actor(dialog.npc);
-            if (a == null || !a.alive || a.distTo(g.player) > 6) dialog = null;
+            if (a == null || !a.alive || a.distTo(g.player) > 6) dismissDialog();
         }
         if (win == Win.CONTAINER && (container == null || container.removed || (container.kind.equals("vault") ? g.bank.vaultRefusal(g.player, container) != null : container.dist(g.player) > 4))) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
         if (win == Win.STATION && (station == null || station.removed || station.dist(g.player) > 4)) win = Win.NONE;
-        if (win == Win.SHOP && (shop == null || g.econ.merchant(shop) == null || g.econ.merchant(shop).distTo(g.player) > 5)) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
+        if (win == Win.SHOP && (shop == null || g.econ.merchant(shop) == null || g.econ.merchant(shop).distTo(g.player) > 5 || g.econ.merchant(shop).shunning(g, g.player))) { win = Win.NONE; if (scene == Scene.INVENTORY) go(Scene.WORLD); }
         icons.pump();
         events.poll();
         addons.frame();

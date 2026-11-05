@@ -50,13 +50,15 @@ void main() {
     float speed = length((puv - vUV) * uOut);
     float still = 1.0 - clamp(speed * 2.0, 0.0, 1.0);
     vec3 mean = m1 / 9.0, sigma = sqrt(max(m2 / 9.0 - mean * mean, vec3(0.0)));
-    float gamma = mix(1.0, 1.75, still);
+    float gamma = mix(1.0, 2.25, still);
     vec3 lo = max(mn, mean - gamma * sigma), hi = min(mx, mean + gamma * sigma);
     // (a still pixel may keep a little beyond its box: what it is clipped to is then the box's own extremes)
-    lo = mix(lo, mn, still * 0.5); hi = mix(hi, mx, still * 0.5);
+    // 1.3 (gamefixes: visual flickering - fine dark detail, a nail head or a plank seam, shimmered on a still view): a
+    // still pixel is held only to the full extremes of its neighbourhood, which the jitter cannot move off the history
+    lo = mix(lo, mn, still * 0.9); hi = mix(hi, mx, still * 0.9);
     vec3 hy = ycocg(tm(texture(uHistory, puv).rgb));
     vec3 hist = rgb(clamp(hy, lo, hi));
-    float k = mix(uBlend * mix(1.0, 0.6, still), 0.35, clamp(speed * 0.05, 0.0, 1.0));
+    float k = mix(uBlend * mix(1.0, 0.45, still), 0.35, clamp(speed * 0.05, 0.0, 1.0));
     // upscaling: each frame contributes by how squarely its sample hit this pixel
     if (up) k = clamp(k * (0.25 + 1.75 * near), 0.02, 0.6);
     float wc = k / (1.0 + c0.x), wh = (1.0 - k) / (1.0 + ycocg(hist).x);

@@ -19,6 +19,7 @@ struct PathQuery {
     int maxExpand;
     bool doors, goalY, mantle;
     bool ladders = true;
+    bool swims = false;        // deep water is a way through (a swimmer: a wolf, a dog, a deer, a duck)
     const std::vector<std::pair<int,float>>* penalties = nullptr;
 };
 
@@ -45,6 +46,8 @@ public:
     static bool stand(const VoxelWorld& w, int x, int y, int z, bool doors);
     static int stepY(const VoxelWorld& w, int x, int z, int y, bool doors);
     static bool climb(const VoxelWorld& w, int x, int y, int z);
+    /** (2.5) While one of these is alive on a thread, deep water counts as passable there (a swimmer's search or steering). */
+    struct Swimmer { bool was; explicit Swimmer(bool on); ~Swimmer(); };
     /** A body can walk the straight line from (sx, sy, sz) to (tx, tz): no walls, hazards, drops over three or steps over one that is not a stair. */
     static bool clear(const VoxelWorld& w, float sx, float sy, float sz, float tx, float tz, bool doors);
     /** The same for something with shoulders: the line and both its edges, r to either side. */
@@ -66,6 +69,7 @@ private:
     std::vector<uint8_t> closed_;
     bool partial_ = false, capped_ = false;
     const PathQuery* query_ = nullptr;
+    int goalY_ = -1;
     float learnedCost(int cell) const;
     int count_ = 0, heapN_ = 0, gen_ = 0;
 };

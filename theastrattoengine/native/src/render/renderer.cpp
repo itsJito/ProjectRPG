@@ -1573,6 +1573,23 @@ void Renderer::drawModels(Program& s, bool viewmodel, VoxelWorld* w) {
 void Renderer::cullLights() {
     g_.BindBuffer(SHADER_STORAGE_BUFFER, lightBuf_);
     g_.BufferData(SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(MAX_LIGHTS) * 48, nullptr, DYNAMIC_DRAW);
+    // (gamefixes: visual flickering) the shading gives shadows to the first few lights in the list; the lights that ask
+    // for a shadow go first, nearest the eye first, so which lamp casts one no longer hangs on the order they were sent
+    // in - a lamp's shadow came and went as the camera moved and others were sent ahead of it
+    if (lightCount_ > 1 && q_.shadowedLights > 0) {
+        std::vector<int> order(static_cast<size_t>(lightCount_));
+        for (int i = 0; i < lightCount_; i++) order[static_cast<size_t>(i)] = i;
+        auto key = [&](int i) {
+            const float* l = &lights_[static_cast<size_t>(i) * 12];
+            const bool shadow = (static_cast<int>(l[7] + 0.5f) & 1) != 0;
+            const float dx = l[0] - cam_.x, dy = l[1] - cam_.y, dz = l[2] - cam_.z;
+            return std::make_pair(shadow ? 0 : 1, shadow ? dx * dx + dy * dy + dz * dz : static_cast<float>(i));
+        };
+        std::stable_sort(order.begin(), order.end(), [&](int a, int b) { return key(a) < key(b); });
+        std::vector<float> sorted(lights_.size());
+        for (int i = 0; i < lightCount_; i++) std::memcpy(&sorted[static_cast<size_t>(i) * 12], &lights_[static_cast<size_t>(order[static_cast<size_t>(i)]) * 12], 12 * sizeof(float));
+        lights_.swap(sorted);
+    }
     if (lightCount_ > 0) g_.BufferSubData(SHADER_STORAGE_BUFFER, 0, static_cast<GLsizeiptr>(lightCount_) * 48, lights_.data());
     g_.BindBuffer(SHADER_STORAGE_BUFFER, 0);
     g_.BindBufferBase(SHADER_STORAGE_BUFFER, 0, lightBuf_);
@@ -2066,8 +2083,9 @@ void Renderer::resolve(int windowW, int windowH) {
     exposure_.tex("uPrev", 1, TEXTURE_2D, expoTex_[expoIdx_]);
     exposure_.f1("uDt", std::max(0.001f, cam_.dt * 2.0f));
     exposure_.f1("uMin", 0.55f);
-    // the eye opens a long way into a dark room by day, but night stays night: moonlit ground is dim and lamp pools stand out
-    exposure_.f1("uMax", 1.4f + 3.6f * std::max(0.0f, std::min(1.0f, env_.daylight)));
+    // the eye opens a long way into a dark room by day; (gamefixes: the whole game was too dark) by night it opens far
+    // enough that the moonlit street, the houses and the people on it read - night is blue and dim, never black
+    exposure_.f1("uMax", 3.2f + 1.8f * std::max(0.0f, std::min(1.0f, env_.daylight)));
     exposure_.f1("uReset", historyValid_ && !cam_.reset ? 0.0f : 1.0f);
     fullscreen();
     expoIdx_ = ecur;
@@ -2082,9 +2100,11 @@ void Renderer::resolve(int windowW, int windowH) {
     tonemap_.f1("uBloomStrength", q_.bloom ? env_.bloom : 0.0f);
     tonemap_.f1("uTime", env_.time);
     tonemap_.f1("uDeath", grading_.death);
-    tonemap_.f1("uGrain", 0.018f);
+    // (gamefixes: visual flickering) no film grain over play: a fresh noise every frame shimmered over the whole
+    // picture; it is kept for the death screen only (uDeath adds its own)
+    tonemap_.f1("uGrain", 0.0f);
     tonemap_.f1("uFlash", grading_.flash);
-    tonemap_.f1("uVignette", 0.55f);
+    tonemap_.f1("uVignette", 0.35f);
     tonemap_.f1("uHurt", grading_.hurt);
     tonemap_.f1("uInfection", grading_.infection);
     tonemap_.f1("uBile", grading_.bile);

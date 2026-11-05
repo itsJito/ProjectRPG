@@ -121,7 +121,6 @@ public final class Honor {
         if (++releasedCount <= 3) event("RELEASE", 0, 1, null, false, "returned a catch to the water");
     }
     public void surrendered(long guard) { event("SURRENDER", guard, 3, "incident" + (long) (g.state.minutes / 60), false, "surrendered peacefully"); }
-    public void paidBounty(int amount) { event("RESTITUTION", 0, 2, "paid" + (long) g.time, false, "paid a bounty of " + amount); }
 
     // ------------------------------------------------------------------ corpse loot
     /**

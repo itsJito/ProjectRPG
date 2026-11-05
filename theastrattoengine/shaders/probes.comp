@@ -60,6 +60,11 @@ vec3 trace(vec3 o, vec3 d, out float dist) {
         vec3 emit = texelFetch(uPalette, ivec2(int(id), 1), 0).rgb;
         if (!opq(id)) { through += emit * 0.5; continue; }       // lamps, screens, embers: light sources you can see past
         vec3 albedo = texelFetch(uPalette, ivec2(int(id), 0), 0).rgb;
+        // (0.3.3, gamefixes: interiors glowed crimson by day) light bounced round a closed room again and again was
+        // multiplied by the same surfaces' colour every time, so a room under red roof tiles converged on pure red. A
+        // bounce keeps two thirds of its tint (the first bounce still carries the colour of what it struck) and loses a
+        // little energy each time, as real plaster and timber do
+        albedo = mix(vec3(dot(albedo, vec3(0.2126, 0.7152, 0.0722))), albedo, 0.66) * 0.92;
         vec3 hp = o + d * t + n * 0.5;
         vec3 lit = bounce(hp, n);
         float ndl = dot(n, uSunDir);

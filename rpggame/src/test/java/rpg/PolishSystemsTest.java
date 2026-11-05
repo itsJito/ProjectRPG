@@ -69,9 +69,9 @@ class PolishSystemsTest {
   }
  }
  @Test void supportResidentsAndTheirMarketsSurviveRepeatedSavesWithoutDuplicates(@TempDir Path dir)throws Exception{
-  assertEquals(70,g.npcs.size());assertNotNull(g.econ.shopOf((Npc)g.actor(Ids.TRADER_CITY)));
+  assertEquals(80,g.npcs.size());assertNotNull(g.econ.shopOf((Npc)g.actor(Ids.TRADER_CITY)));
   var save=new SaveSystem(g);Path file=dir.resolve("roster.json");assertTrue(save.save(file));assertTrue(save.load(file));
-  assertEquals(70,g.npcs.size());assertTrue(g.invariants.check().isEmpty(),g.invariants.check().toString());
-  assertTrue(save.save(file));assertTrue(save.load(file));assertEquals(70,g.npcs.size());assertTrue(g.invariants.check().isEmpty(),g.invariants.check().toString());
+  assertEquals(80,g.npcs.size());assertTrue(g.invariants.check().isEmpty(),g.invariants.check().toString());
+  assertTrue(save.save(file));assertTrue(save.load(file));assertEquals(80,g.npcs.size());assertTrue(g.invariants.check().isEmpty(),g.invariants.check().toString());
  }
 }

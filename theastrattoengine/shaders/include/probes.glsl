@@ -30,7 +30,10 @@ vec3 probeIrradiance(vec3 P, vec3 N, out float confidence) {
         w *= wn * wn + 0.03;
         // visibility: the probe knows roughly how far it can see toward this point
         float free = max(0.35, vis.x + dot(vis.yzw, -dir));
-        if (dist > free + 0.6) { float r = free / dist; w *= max(0.015, r * r * r); }
+        // (0.3.3, gamefixes: rings of light on interior walls) the fall-off past what the probe can see eases in over a
+        // metre and a half; it used to switch on at a hard distance, drawing a circle round every probe on the walls
+        float r = free / max(dist, 1e-3);
+        w *= mix(1.0, max(0.015, r * r * r), smoothstep(0.0, 1.5, dist - free));
         vec4 pr = texelFetch(uProbeR, pc, 0), pg = texelFetch(uProbeG, pc, 0), pb = texelFetch(uProbeB, pc, 0);
         vec3 e = vec3(pr.x + dot(pr.yzw, N), pg.x + dot(pg.yzw, N), pb.x + dot(pb.yzw, N));
         // an L1 lobe can ring negative behind a strong light: floor it at a share of the constant term

@@ -159,12 +159,28 @@ public final class Magic {
 
     public Actor target(Actor caster, float yaw, float pitch, float range) {
         float dx=(float)(-Math.sin(yaw)*Math.cos(pitch)), dy=(float)Math.sin(pitch), dz=(float)(-Math.cos(yaw)*Math.cos(pitch));
-        Voxels.Hit wall=g.vox.ray(caster.x,caster.eyeY(),caster.z,dx,dy,dz,range,false);
+        float ox=caster.x, oy=caster.eyeY(), oz=caster.z;
+        Voxels.Hit wall=g.vox.ray(ox,oy,oz,dx,dy,dz,range,false);
         float nearest=wall.hit?wall.dist:range; Actor best=null;
         for (Actor actor : g.actors()) {
             if (actor==caster || !actor.alive || actor instanceof Npc npc && !npc.loaded) continue;
-            float distance=HitVolumes.ray(g,actor,caster.x,caster.eyeY(),caster.z,dx,dy,dz,nearest,0.12f);
+            float distance=HitVolumes.ray(g,actor,ox,oy,oz,dx,dy,dz,nearest,0.12f);
             if (distance<nearest) { nearest=distance; best=actor; }
+        }
+        if (best!=null) return best;
+        // (0.3.1, gamefixes: the lock-on missed what was plainly under the crosshair - it took a ray 12 cm wide) a little
+        // cone round the aim: the body nearest the crosshair's line within about three degrees (a touch more close by),
+        // seen from the eye, and no friend of the caster's
+        float bestCos=0;
+        for (Actor actor : g.actors()) {
+            if (actor==caster || !actor.alive || actor instanceof Npc npc && !npc.loaded || allied(caster,actor)) continue;
+            float rx=actor.x-ox, ry=actor.chestY()-oy, rz=actor.z-oz, d=(float)Math.sqrt(rx*rx+ry*ry+rz*rz);
+            if (d<0.8f || d>range) continue;
+            float c=(rx*dx+ry*dy+rz*dz)/d;
+            float cone=(float)Math.cos(Math.min(0.12f, 0.052f+actor.radius/d));
+            if (c<cone || c<=bestCos) continue;
+            if (!g.vox.sight(ox,oy,oz,actor.x,actor.chestY(),actor.z)) continue;
+            bestCos=c; best=actor;
         }
         return best;
     }

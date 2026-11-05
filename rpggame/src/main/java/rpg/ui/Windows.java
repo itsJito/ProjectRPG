@@ -185,6 +185,9 @@ final class Windows {
             x += 12; y = top - 42;
             int purse = m == null ? 0 : m.count(Items.COINS);
             ui.text((m == null ? "" : m.name + "'s purse: ") + Currency.text(purse) + " G", x, y + 20, 11, Style.DIM);
+            // (0.3.3) the posted hours, and when it shuts
+            String shuts = rpg.econ.Hours.closing(g, s);
+            ui.text("Open today " + rpg.econ.Hours.today(g, s) + (shuts != null && s != g.econ.fence ? "  (shuts " + shuts + ")" : ""), x, y + 34, 10, Style.DIM);
             // one tile per kind in stock (the storeroom is behind the counter)
             Map<ItemDef, Integer> kinds = new LinkedHashMap<>();
             Map<ItemDef, ItemStack> sample = new LinkedHashMap<>();

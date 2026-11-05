@@ -305,6 +305,10 @@ public final class Monsters {
                 if (DungeonLayout.at(m.x, m.z) != haunt || m.y > DevMap.FLOOR + 8) { nx = m.lairX; nz = m.lairZ; ny = DevMap.FLOOR + 0.8f; }
             }
             g.game.commands().moverPlace(m.body, nx, ny, nz, 0, 0, 0);
+            // (0.3.1, gamefixes: a ghost stopped at a wall like anything else) posed where it drifts: its body is not
+            // pushed back out of the stone by the mover's collision
+            g.game.commands().moverInput(m.body, 0, 0, 0, 0, 80, MOVER_POSED);
+            m.x = nx; m.y = ny; m.z = nz;
             m.vx = vx; m.vz = vz;
         } else g.game.commands().moverInput(m.body, vx, vz, vy, 0, m.kind == MonsterKind.DRAGON ? 6 : 18, MOVER_FLY);
         m.altitude = Math.max(0, m.y - ground);
@@ -544,7 +548,15 @@ public final class Monsters {
         sound(m, m.kind.deathSound, 0.9f);
         // (0.2.2, gamefixes: dragons did not ragdoll) every monster falls in Sydney's hands - one not already reeling in
         // them gets a body now where it stood (a dragon from the height it flew at), going limp as it is made
-        if (m.ragdoll == 0 && (g.reactions == null || !g.reactions.died(m))) {
+        // (0.3.2, gamefixes: giant spiders bugged out dying) a spider is no person: Sydney's figure for it was a man's,
+        // which toppled and slid metres off across the ground while the spider was drawn flipped over on the spot with its
+        // legs folded into the earth. It dies where it stands, on its own legs (Gfx.spider: the death roll and the curl)
+        if (m.kind.form == MonsterKind.Form.SPIDER) {
+            if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
+            m.reacting = false;
+            m.y = Math.max(DevMap.FLOOR, (float) Math.floor(m.y + 0.5f));
+            while (m.y > 0 && !g.vox.solid((int) Math.floor(m.x), (int) Math.floor(m.y - 0.5f), (int) Math.floor(m.z))) m.y -= 1;
+        } else if (m.ragdoll == 0 && (g.reactions == null || !g.reactions.died(m))) {
             boolean posed = m.posePts != null && g.time - m.poseAt < 0.5;
             m.ragdoll = g.game.reserve(KIND_RAGDOLL);
             g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), m.x, Math.max(DevMap.FLOOR, m.y), m.z, m.yaw, 0, 0, 0);
@@ -586,6 +598,7 @@ public final class Monsters {
             var rd = !m.alive && m.ragdoll != 0 ? g.lastBodies.ragdoll(m.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); o.put("pose", pose); }
             o.put("corpse", m.corpse);
+            if (!m.grudge.isEmpty()) { Map<String, Object> gr = new HashMap<>(); m.grudge.forEach((id, v) -> gr.put(Long.toString(id), List.of((double) v[0], (double) v[1]))); o.put("grudge", gr); }
             if (!m.alive) o.put("deadFor", g.time - m.diedAt);
             ms.add(o);
         }
@@ -619,6 +632,8 @@ public final class Monsters {
             m.homeX = m.lairX; m.homeZ = m.lairZ;
             m.hunger = (float) astratto.util.Json.num(r, "hunger", 0.3); m.fatigue = (float) astratto.util.Json.num(r, "fatigue", 0);
             if (r.containsKey("breed")) m.breed = MonsterKind.Breed.valueOf(astratto.util.Json.str(r, "breed", "FIRE"));
+            if (r.get("grudge") instanceof Map<?, ?> gr) for (var e : gr.entrySet()) if (e.getValue() instanceof List<?> v && v.size() == 2)
+                try { m.grudge.put(Long.parseLong(String.valueOf(e.getKey())), new float[]{((Number) v.get(0)).floatValue(), ((Number) v.get(1)).floatValue()}); } catch (NumberFormatException ignored) { }
             if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.FOGISH;
             monsters.add(m);
             if (m.alive && astratto.util.Json.bool(r, "loaded", true)) spawnBody(m);
@@ -630,6 +645,24 @@ public final class Monsters {
                 if (pose != null && pose.size() >= RD_PARTICLES * 3) { float[] p = new float[pose.size()]; for (int i = 0; i < p.length; i++) p[i] = ((Number) pose.get(i)).floatValue(); g.game.commands().ragdollPose(m.ragdoll, 0, 0, 0, p); }
                 g.game.commands().ragdollControl(m.ragdoll, CONTROL_DIE, 1);
                 m.corpse = astratto.util.Json.lng(r, "corpse", 0);
+            }
+        }
+    }
+
+    /**
+     * (0.3.4, gamefixes: monster AI, more interaction between systems) A monster hears what people and animals hear: a
+     * noise within its earshot is placed where it was made (a bottle smashed off to one side draws it there, not to the
+     * thrower), and a monster at its ease goes to look. One already hunting or fighting keeps to what it is doing.
+     */
+    public void hear(rpg.actor.Actor source, float x, float y, float z, float radius) {
+        for (Monster m : all()) {
+            if (!m.alive || !m.loaded || m == source || m.state == Monster.State.DORMANT) continue;
+            if (Math.hypot(m.x - x, m.z - z) > radius * 1.1f || Math.abs(m.y - y) > 8) continue;
+            Monster.Known k = m.known.computeIfAbsent(source.id, Monster.Known::new);
+            k.x = x; k.z = z; k.at = g.time; k.sense = "heard";
+            if (m.state == Monster.State.IDLE || m.state == Monster.State.PATROL || m.state == Monster.State.REST || m.state == Monster.State.RETURN) {
+                m.state = Monster.State.INVESTIGATE; m.stateSince = g.time; m.hasGoalPos = false; m.nextThink = g.time + 0.3;
+                g.state.commit("MonsterHeard", m.id, source.id, rpg.world.DevMap.jurisdiction(x, z), 0, m.kind.title + String.format(" goes to look at a noise at (%.0f, %.0f)", x, z));
             }
         }
     }

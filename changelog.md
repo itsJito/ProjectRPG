@@ -2,6 +2,305 @@
 
 A running log of what changed, in plain words. The newest pass is first; the first pass on `gamefixes.md` follows below it.
 
+## Pass 25 - Alpha 0.3.4 "Sink or Swim" (Hoodie)
+
+Continues `polish` on top of the uncommitted 0.3.1 - 0.3.3 work; this pass is committed and pushed together with them. Review sheets in `work/p20/` (gallery mode `p20`, sections `swim`, `tread`, `wade`, `haul`, `under`, `horse`, `pegasus`, `deer`, `duck`, `rain`; the foliage step was reviewed with `p17`'s `foliage` section). New tests: `rpg.ai.Gamefixes034Test` (17 cases). The native engine was rebuilt (`build.bat game`) for the pathfinder's swim flag.
+
+### Bugs
+- Bounty spree (AE-03401): `Law.crime` folds repeats of a property offence (`SPREE_KINDS`: vandalism, lock-picking, trespass) by the same culprit in the same jurisdiction within `SPREE_WINDOW` (90 s) into the first act's incident id. Witness memories merge on it (`Npc.remember`/`sameIncident`), so the watch charges the scheduled 10 G once, not 10 G a pane (a 20-pane window was 200 G). Honor is docked once per spree; repeat protests are not re-shouted.
+- Mounts in walls (AE-03402): `MountController.move` checks the whole body fits where a descent ends - point ground probes missed block edges under the round body, and it sank into them - and rests it on the block top instead. `unstick` tries straight up first (up to a step), then out to 2.5 m and a half turn, and no longer needs footing at the new spot.
+- Foliage stretch (AE-03403): engine `shaders/foliage.vert` turns a pushed plant about its root (a rotation, so lengths are kept) instead of shearing every vertex sideways by up to 0.42 m; the angle eases in over the first 12 cm of stem, goes furthest right under a foot, is scaled by the plant's flex (bushes and saplings give far less), and only pushers whose feet are within -0.6..0.9 m of the root count (no more crushing from a ledge above).
+- Fleeing trade (AE-03404): `Npc.shunning(g, a)` - fleeing or hiding, fighting/hunting the actor (not the watch), or afraid of them in the last 60 s. Used by `Npc.options` (no Talk-to), `talk`, `Economy.tradeRefusal` ("is running from you", so buying and selling in an open window fail too), `Hud` (closes the shop window) and `Dialog.stands`.
+- Mount frozen in the air (AE-03405, AE-03406): the ride poses both movers (`MOVER_POSED`), and nothing cleared it, so the native agent never drove the animal again (`ai_service` skips posed movers) - frozen mid-air if let go aloft, frozen in place on the ground. `Riding.release` hands each body back with its velocity on `dismount` and `unseat`.
+- Mid-air dismount (AE-03407): a rider stepping off in the air is placed beside the saddle at its height with the mount's way and a `Falling.carry` from the fall's top, instead of teleported to the ground.
+
+### Water and swimming
+- `rpg.world.Fluids`: water read live from the voxels as partial-height volumes (`TOP` 0.9 for a surface cell, 1 under water) - `height`, `in`, `surface`, `depth`, `submerged`/`contact` (box against partial heights), `flow` from per-map `Current` channels (strongest mid-channel and near the surface), `edge` (where to stand to dip something in water). `DevMap.currents` registers the stream (0.8 m/s south) and the brook (0.9 m/s south). The lake's middle (`d < 0.32`) is now three deep.
+- `rpg.actor.Swimming`: the player's water movement at a fixed 20 Hz (`TICK` 0.05), state kept apart in `State` (position, velocity in blocks/tick, yaw/pitch, input, sprint, swimming, water contact, eyes under, collision flags). Per tick: input normalised and turned by yaw; water sampled (box vs partial heights, eyes separately); swimming starts on a sprint with the chest under (or eyes under) and lasts while sprint + water + forward hold; the box is 0.6 cube when swimming and stands back up only where 0.6 x height fits; push 0.02/tick (x(1 + 0.6 Agility/99)); vertical: pitch steering `vy += (sin(pitch) - vy) * (0.06 | 0.085)` only when looking down, jumping or with water over the head (never out through the surface), jump +0.04 when more than 0.4 m in, crouch -0.04, buoyancy in water 2+ deep (`FLOAT_LINE` 0.84 of the body under; neutral while swimming flat out); current push 0.0175 per m/s; swept AABB y then x then z against solid cells, blocked axes zeroed; drag 0.8 (0.9 sprinting) horizontal, 0.8 vertical; gravity 0.02. Exit: against a bank with the box raised 0.6 and carried on clear of rock and water -> `vy` 0.3 (never up an underwater wall); else Agility >= `HAUL_LEVEL` (10) with sprint hauls onto a ledge up to 1.05 + 0.6 * Agility/99 m (spring computed from 22 m/s2). Engages at 0.45 m depth, lets go below 0.2 m (or no contact) with the velocity handed to the walking mover; water breaks a fall; teleport cancels it. Agility XP per 25 m swum in deep water (3 swimming, 2 otherwise), 3 for a haul.
+- Breath: `Actor.oxygen`, `Swimming.lungs` = 15 s + 0.3 s per Agility; refills in ~3 s; at zero 1 HP a second (`environmentalDamage` "drowning"). HUD: bubble row, underwater tint when the camera is in water.
+- Others: `Swimming.others` (after the physics) holds swimmers up at their floating line (ducks on any water at 0.32 of their height, other swimming animals in 2+ deep at 0.62, people and monsters at 0.84), adds the current and a bob, and runs breath. `Species.swims` for duck, wolf, dog, fox, coyote, bear, horse, Pegasus, cow, deer; the native agent flag `AGENT_SWIMS` (engine 2.5: `PathQuery.swims`, a thread-local `Pathfinder::Swimmer` guard in path searches and steering) lets them route through deep water.
+- Animation (reads only): `Actor.swimMode` (wade, tread, swim, haul), `swimStroke`, `swimTilt`, `swimPose`. Gfx tilts the figure about the hips toward horizontal (and carries it low in the swimmer's box); `Rig`: crawl arms (enter ahead of the head, pull under to the hip, high-elbow recovery), flutter kick two beats per stroke, body roll, chin up; treading: eggbeater legs, sculling hands; hauling: both hands on the lip, feet driving. `eyeY` drops to 0.44 m when swimming.
+
+### The deer and the duck
+- `Species.DEER` (0.8 x 1.45 m, walk 1.4, run 8.6, herd 2-5, wary 18/flight 11, Agility 30): built on the horse's long-necked hoofed figure (`horseLike`), `deerCoat` by variant - 0 doe, 1 buck (antlers: a beam and two tines a side), 2 fawn (dappled); set from sex/age in `spawnNew` and `mature`. White flag tail raised when it bolts. Prey of bears, wolves and mountain lions. Sounds `animal.deer`/`animal.deer.hurt` derived from the horse samples (pitched). Rag doll and dismemberment come from the figure (`AnimalRagdoll`, `Gore`) as for every animal.
+- Habitats: a deer herd in the wild wood, and a new `Animals.southWood` habitat (the southern wood) with two deer herds, a bear and rabbits.
+- Yields: `RAW_VENISON` for deer, `RAW_DUCK` for ducks (feathers as before), two `ANTLER` from a grown buck; recipes `cook_venison` (Cooking 12) and `roast_duck` (Cooking 6).
+
+### Tamed animals
+- `Animal.Command` NONE/FOLLOW/STAY (+ `commandBy`, `stayX/Z`, saved), `answersTo` (tamed by, owned by, or trusted as their own). Options Follow/Stay/Dismiss heard from 12 m (`Animals.command`). The mind scores following 0.68 and staying 0.67 (`Goal.STAY`: back to its spot, then waits facing its keeper) - below danger, its young and urgent needs. Dismissed animals keep owner and taming.
+
+### Ale and the glass bottle
+- `ALE` is now a 1 x 2 bottle with `strengthBoost` 5 (no longer a food); drinking it calls `ItemActions.drinkAle`: `Skills.boost(STRENGTH, 5)` (levels lent, read by `level()`, `baseLevel()` without them) ebbing one level per `ALE_EBB_SECONDS` (45) via `Skills.ebb` from `Rpg.update`; the empty `GLASS_BOTTLE` is granted.
+- `GLASS_BOTTLE` (1 x 2, stackable) is a thrown weapon (`thrown = "bottle"`): `CombatSystem.breaks` shatters it on the world or a body (`Glass.bottle`: shards, sound, `noise` 20 m placed at the break - NPC `Stealth.hear` puts the thrower's estimate there). Fill at water -> `WATER_BOTTLE`; empty it back. New models `HiResItems.longBottle` (brown labelled ale with a waxed cork, pale green empty, filled water).
+- Brewing: recipe `brew_ale` (barley + hops + bottle of water, Cooking 10, range). `Farming.Crop.BARLEY`/`HOPS` (models in `FarmModels`), DevCity garden rows BARLEY/CABBAGE/CARROT, DevPalace HOPS/CARROT/CABBAGE; growers sell all four (`Livelihoods.GROWN`); bars stock barley, hops, bottles; shops sell the seeds and bottles. The inn cook brews ale when the bar has under ten, taking empties to the nearest water (`Fluids.edge`, cached per inn) to fill them. Patrons who drink ale get the boost and the bottle goes back on the bar.
+
+### Animation
+- Horse, Pegasus and deer legs are split at the knee/hock (`Figure.legFrontHi/Lo`, `legBackHi/Lo`, `kneeAt`); `Gfx.jointed` draws them with `flex(phase)` folding the lower leg through the swing (fore back, hind forward; lift 0.7 walk, 1.0 trot, 0.85 canter, 0.95 gallop), a little give in stance, folded under when lying, pawing when rearing, tucked in a jump. A lost leg falls back to the whole-leg stump.
+- Rain cover: `AiSystem` raises `rainCover` fully in any real rain (a partial blend let the walk swing jitter the arm); `Rig` holds the hand flat above the brow (elbow out, palm down) with the head ducked.
+
+### Systems
+- `Monsters.hear` (from `Rpg.noise`): a monster at ease within earshot of a noise records it at the noise's place and goes to look (`MonsterHeard`).
+- `Swimming.others` skips anyone with no water at their feet before searching for a surface.
+- Version `Main.VERSION` Alpha 0.3.4.
+
+## Pass 24 - Alpha 0.3.3 "Hold Your Horses" (Hoodie)
+
+Continues `polish` on top of the uncommitted 0.3.1 and 0.3.2 work. Review sheets in `work/p19/` (gallery mode `p19`, sections `light` (`RPG_LIGHT_HOURS`), `rear`, `gallop`, `mountfall`, `glide`, `react`; `light-sheet.png` is the 4 x 3 lighting contact sheet). New probes, all behind `RPG_PROBE=1`: `StallMapProbeTest` (where routes are given up, clustered by place and door), `ReportPauseProbeTest` (`RPG_PROBE_WHO=name` traces a person's investigations), `TabernaProbeTest` (the DevPalace growers and bar, hour by hour), and `LifeProbeTest`'s trace now shows the fight target.
+
+### Mounts (AE-03301 - AE-03304)
+- Rider clipping: `Gfx.animalModel` records the drawn body's movement against its standing pose (`Animal.seatDelta`, `seatAt`: body x inverse(rest)) for a ridden animal; `humanModel` draws a rider through it (root = delta x root), so the rider rises, rocks, rears, pitches and banks with the mount. Animals are now drawn before the characters so the delta is this frame's. The rider's own pelvis bounce is halved (the horse's bob now carries them).
+- Falls: `Riding` tracks each ride's `fallTop`. A drop of `UNSEAT_DROP` (4.5 m) while airborne calls `unseat`: the ride ends where it is (no teleport), the rider gets `Reactions.falling` with the saddle's momentum and `Falling.carry` (the fall is measured from the saddle's height), and the mount is knocked down with `Animals.makeRagdoll` carrying its own momentum. `Riding.landings` (from `Rpg.update`) pays the mount's fall damage when its trunk meets the ground. Landings from 2.6 m are hard: the mount is hurt a little and slowed, the rider staggered. `Falling` ignores riders (the ride judges the fall); `dismount` of a rider already reacting parts them where they are. Cause of the old glitch: `Falling` ragdolled the rider, `Riding.update` then dismounted with a teleport, which cancelled the ragdoll.
+- Glide: a Pegasus off the ground with jump held (`Ride.gliding`) sinks at most `GLIDE_SINK` 2.1 m/s, keeps its way (bleeding toward canter), steers, spends a little vigor; drawn wings out (`a.flying` with a slight nose-down). A glide is not a fall.
+- Climbing: root cause in `MountController.ground`: a probe whose first cell is solid (the leading hoof probe pressed into a wall) reported that block's top as footing, lifting the body a block a frame, straight up walls and onto roofs. Such a probe now gives no footing. Also: no step up onto `ROOF`, `CHARRED_ROOF` or `FENCE` (`footing`), the best jump capped at `MAX_JUMP` 2.2 m (two blocks), and `unstick` eases a body that does not fit where it is (mounted across a wall's corner) out to the nearest place it fits, never through a wall (sight check).
+- `Gamefixes033Test`: mount and rider fall together; Pegasus glide; a three-block wall stops a 3 m jumper.
+
+### NPC sight above (AE-03305)
+- `Stealth.exposure`: with all three sight lines blocked and the target over 1.2 m above within 7 m, standing on something (grounded, not a flyer), the lines are tried again from 0.7 and 1.3 m back (looking up past the edge). It was first applied to everything, which let hunters see bats through foliage and fight them all day; restricted.
+
+### NPC routes in and out of buildings (AE-03306)
+- Cause: `Brain.goTo`'s stall check measured progress as straight-line distance to the destination, so any route leading away first (out by a back door, round a wall, down a street) was abandoned as "no headway" every six seconds and planned again. Moving 1.25 m along the route now counts as progress (`Npc.stallPX/PZ`); 2,766 give-ups in six game hours became 20 (`StallMapProbeTest`). Near the goal (within reach plus 2.2 m) two seconds without headway counts as arrived; a destination with no footing (a grave's stone) is reached from beside it. Counters `Npc.stalls`, `noRoutes`.
+- `Brain.meet`: reporting, warning, fetching help and tip-offs go to a free spot beside the officer (the side facing the walker, checked standable at his height) instead of a fixed corner offset that put the spot inside the lawman's office wall (the nearest footing was the roof, y 9, and every witness "reconsidered a blocked route" all morning); an officer up on the walls is called up to from below.
+- A "paused to reconsider" or "no headway" outcome is cleared once the walk resumes (it lingered on people walking normally and read as blocked).
+- An investigation put aside (to flee a wolf) expires on its own patience in `Brain.think` instead of being resumed long cold; `Stealth.unresolved`'s "looked into lately" window is 120 s (was 30).
+
+### Lighting (AE-03307 - AE-03309)
+- Daytime interiors were crimson and near black. `probes.comp`: each bounce now keeps two thirds of the surface's tint (`mix(luma, albedo, 0.66) * 0.92`); infinite bounce under red roof tiles converged on pure red. `probes.glsl`: the probe visibility fall-off eases in over 1.5 m (it switched on at a hard distance and drew rings round every probe on the walls).
+- `Gfx`: under a roof by day, a neutral daylight fill (`indoorFill`, +0.03 x daylight on the ambient floor; the floor was lower by day than at night). Interior lamps (`lampLights`, roofed) burn all day (their glass glowed and lit nothing); street lamps stay night-only; whether a lamp is roofed is cached per lamp (re-checked every ~5-7 s) instead of a sight ray per lamp per frame. The lamp's light sits at its block's centre, and `lighting.frag`'s `voxelVisibility` ignores the light's own cell (a hanging lamp blacked out the ceiling above it).
+
+### The watch and fines (AE-03310, AE-03311)
+- `Dialog.dismissed`: run by `Hud` on Escape, `closeAll` and the walk-off auto-close. A halt's petty fine sets it to `declineFine` (Escape used to leave the question hanging). `Law.fineAsked`/`fineAskedAt`: a petty fine already asked for, unchanged in amount, is not asked again inside `FINE_GRACE` by any officer of that place; cleared on settle. `declineFine(.., aloud)`.
+- `Npc.lastSaid` + `Rumors.tell`: news said aloud by the teller within 75 s is passed on without the line being spoken again.
+
+### Fire on a body (AE-03312)
+- The burning-body ash emitters were kind 8 (hard discs under gravity: gravel). Now a kind-1 smoke billow (dark, lit by sky and fire, rising) and kind-2 embers (`burn` gallery sheet).
+
+### Combat reactions (AE-03313)
+- `CombatSystem`: the stagger impulse is `12 + over x (0.75 below 1.5 x Stability, 1.45 above)`; a light cut just past someone's footing is a stumble they catch (the 1-damage blow floored a 99-Health thief for 1.5 s). `Gfx.ragdollModel` draws `garments` on a body in Sydney's hands (world-frame segments, identity root, flare clamped: `ragdollCloth`); skirts and robes vanished on any knockdown.
+- `CombatSystem.idealLine`: when the drawn (beginner) blade meets no body at a sample, the trained line at the same moment is tried for bodies only (the floor never stops it, walls do). A beginner's chop passed over a cat or a duck at the feet (MeleeAimTest, SmallTargetTest). The sweep samples per 1/60 s of the window (6-16).
+
+### Shop hours
+- New `rpg.econ.Hours`: a business's spans are its keeper's `Schedule` WORK blocks (merged); `open`, `nextOpening`, `closing`, `today`, `closedReason`. The fence keeps no hours. `Economy.tradeRefusal` returns "X is closed. It opens ..." outside them, for the player and NPC buyers alike. `ShopWin` shows today's hours; merchants answer "When are you open?".
+
+### Overhead dialogue
+- `HudFragments.bubble` rewritten: dark glass panel (`0xC4120F0C`), hair-thin warm edge, cream lettering in the Comic Book face (kept), 16.5-17.5 px shrinking 2 px with distance, balanced line breaks (binary search for the narrowest width keeping the line count), stacking without overlap, fade past 10 m, a small tail (THINK: dots). SHOUT is amber lettering in the bold face with a rust edge (no spike ring); WHISPER a fainter panel with lilac lettering.
+
+### Human contextual animation and AI
+- `AiSystem.carriage`: `warmHands` (idle by a lit fire on a cool evening or night: palms out to it, the head turned to it) and `chill` (outdoors at night or in snow, free hands, no fire: arms hugged in). `Rig` blends both; they give way to work, talk, eating and a weapon in hand.
+- `AiSystem.letBe` and `Npc.asideSince`: an archer who cannot get a clear shot for 8 s lets a quarry that is not attacking go (two minutes) or closes in on one that is; a hunter spent an afternoon stepping round a wolf.
+- `Animal.threatens`: a fox or a coyote on the hunt threatens only what it is going for.
+
+### Monster AI
+- `Monster.grudge` (saved with the monster): how much of its life someone took and whether it was beaten for it (fled, or left under a third). A grudge won adds to that person's threat while they are sensed; a grudge lost makes a cautious kind fear them outside its den's core.
+
+### The simulation (WeeklyLifeTest, NpcRoutineTest at 8x)
+- `Brain.eat` ran every frame until the next think: a farmer in from the rows ate 24 carrots in two minutes (and the inns bought no produce). It now ends the errand when fed; the home meal at mealtime needs hunger over 0.15.
+- `Livelihoods`: a full basket (10, or 4 after 14:00) goes to the buyer before the next row or tree, and anything carried is sold when the buyer is within 14 m. Inns bought 35-44 (DevCity) and 30-38 (Taberna) produce over the two days (0 before).
+- `Brain`: in working hours people work on through rain up to 0.75 (was 0.45); shelter is the nearest roofed, standable spot within 30 m (`shelterFor`, home if within 12 m more or nothing found; home if the route fails) - a miner walked two hours home in every downpour.
+
+### Ladders
+- `Ladders`: stepped off at the bottom with the move key held, the player is not put back on the ladder until the key is released (`Actor.ladderLatch`, player only); climbing down from the top with the camera turned out from the wall, the descending key walked straight back at the rungs.
+
+### Optimization
+- `Rpg.actors()`: one list per tick (unmodifiable), rebuilt when the tick, the sizes or the living-and-loaded count change (a rebuild is a new list so outer loops are never disturbed); it was a fresh list on every call (56 call sites, several per NPC per frame). `AiSystem.swinging()`: who is mid-blow gathered once per tick for everyone's carriage (was every actor per NPC per frame). Fires for carriage cached twice a second. Lamp roof checks cached.
+
+### Dead code
+- Removed `Honor.paidBounty` and `Farming.Crop.ofSeed` (no callers); removed the throwaway probes `FineSpamProbeTest` and `SightAboveProbeTest` (covered by `Gamefixes033Test`).
+
+### Tests
+- New `Gamefixes033Test` (6): a petty fine asked once and not again; someone on a ledge overhead is seen; horse and rider fall together; Pegasus glide; three-block wall; shop hours. All pass.
+- Fixed to pass: `MeleeAimTest`, `SmallTargetTest` (idealLine), `DevMapAuditTest` (apple trees stand in their own trunks, exempt like felling nodes), `NpcRoutineTest`, `SocietyRegressionTest` (window 15 s: walked, laid on the stone, knelt; holder cleared on burial), `DoorPassageTest` (the yard's imps unloaded: they stood in the storeroom doorway), `Gamefixes030Test` ladder (latch), `TraversalTest` (sprint and forward held through the reach: since 0.2.9 an edge without them is a hang).
+- `WeeklyLifeTest`: hunters and the watch fighting outside DevCity count as at work. Still failing on work attendance for some wilds workers (miners, a fisherman) whose days swing with rain and wolves from run to run; the inns' produce assertions now pass.
+- Still failing: `SprintStopTest` (a knee swings 2.5 px out on a 0.2 s sprint stop since the 0.3.2 stride; damping the knee pole's twist made it 5 px, reverted), `DoorPushTest` (the player walks through an open leaf without moving it; `Door` is unchanged this pass - native physics).
+- Version `Alpha 0.3.3`.
+
+## Pass 23 - Alpha 0.3.2 "Inn Season" (Hoodie)
+
+Continues `polish` on top of the uncommitted 0.3.1 work. Review sheets in `work/p18/` (gallery mode `p18`, sections sprint, crossbow, xbowpose, melee, spider, bubbles, farm, inn; `RPG_REVIEW_WEAPON`, `RPG_REVIEW_MOVES`, `RPG_REVIEW_DIST`, `RPG_REVIEW_KILL`).
+
+### Fire spells and foliage (AE-03201)
+- Cause: the native chemistry holds at most 4096 receivers. `Foliage.update` sent a sensor for every plant within 32 m every quarter second and never released one, and `Chemistry` registered every physical object on the whole map. After a walk round the map the table was full, and a plant by the player was refused silently (`ASTRATTO_OK` with no sensor), so nothing near the player could catch fire. The 0.3.1 test cast at the spawn, before the table filled.
+- `Foliage.sensed`: a plant is registered once on coming within 32 m and released past 44 m unless it is alight or warm; `remove` and `load` keep the set honest. `Chemistry` object receivers only within 56 m of the player or while they have a state. This also cut the command stream: about a thousand redundant sensor commands every quarter second.
+- `Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap` walks every chunk first; it failed before the fix.
+
+### Melee by skill (AE-03202)
+- `CombatSystem.NOVICE`: a beginner's own light and heavy paths (cocked beside the head, chopped down through the front, dumped low with the tip to the ground), blended toward the master paths by `style(a)` = (0.55 Attack + 0.45 Strength mastery)^0.8. The hit sweep reads the same paths.
+- `Rig`: a beginner's overshoot (`novice * overshoot`): the trunk lurches forward, the hips drop, a roll, and the lead foot stumbles a step. The free arm counterbalances back and out for a master and flails up and out for a beginner. Between blows (3.6 s after the last swing) the weapon is held in a Defense-shaped guard: high before the body, point forward, at 99; low with the point drooping at 1.
+
+### Two-handed swords (AE-03205)
+- Cause: two-handed blades used the one-handed paths, and `Rig` forced any blade pointing behind the body bolt upright, so the whole wind-up stood vertical and snapped round in the cut.
+- `CombatSystem.TWO_HAND` paths (forehand over the right shoulder to low left, backhand over the left, heavy behind the head down the centre line), used when `twoHanded(a)`. The upright clamp now applies only at rest.
+
+### Sprint and charge (AE-03203)
+- `Gait.cadence` cap 2.85 - 0.05 x sprintShare (2.8 cycles/s at a full sprint, under six steps a second; it was 3.5, seven). Speed comes from the stride and flight, kept under three metres a cycle so the sprint does not float (`GaitTest`).
+- Charge: hips 1.3 px lower, chin tucked (head -0.32 rad), a 0.07 rad dip of the trunk on each footfall.
+
+### Crossbows in third person (AE-03204)
+- Cause: the carry was built from the left shoulder with the stock up across the chest; the trigger hand sat a fist above the stock and the support forearm rose to the face; spanning tipped the bow down below hands that stayed at the chest.
+- Rewritten holds: low ready from the right shoulder (`port`, stock forward and a little across, support hand under the fore-stock), the existing cheek weld when aiming, and the span tipped nose-down before the thighs (`spanAt`). In the span the free hand reaches down the stock to the string at the prod (9 px along), draws it back to the latch (5 px), then returns. Gallery `xbowpose` sheets.
+
+### Giant spiders (AE-03206)
+- Cause: `Monster extends Npc`, so `AiSystem.onKilled` gave every dying monster a human ragdoll (as did `Reactions` on a heavy blow). The spider toppled and slid about 5 m as a man, while `Gfx.spider` drew it flipped in one frame with its legs folded into the ground.
+- Spiders never get a humanoid ragdoll (`Monsters.onKilled`, `AiSystem.onKilled`/`ensureCorpsePhysical`, `Reactions.noFigure`) and die where they stand. `Gfx.spider`: slump, a 0.55 s roll onto the back with a hop, legs twitching (decaying over 5 s) then curling over the belly. The draw gate keeps a dead spider drawn without a ragdoll.
+
+### Witnesses on the HUD (AE-03207)
+- `HudFragments.Wanted`: someone walking to report is listed while they walk; a witness who only saw it is listed for 20 s (`witnessSeen`), at most three of each, then folds into "N other witnesses know". That line shows only beside other rows, so a quiet witness no longer holds the panel up.
+
+### Overhead dialogue
+- `Ui2D.comic` = `ComicBook.otf`, `comicBold` = `ComicBook-Bold.otf` (from Asset_Queue; TrueType outlines). `TheLastComicOnEarth.ttf` removed.
+- `HudFragments.bubble` redesigned: a cream, slightly translucent paper with a thin warm-brown edge, a two-layer soft shadow and a short tail. SHOUT is pale amber with a short spike ring in the bold face; WHISPER is translucent grey with a dashed edge; THINK is a soft cloud. Lettering 15.5-21 px (the face is small caps). Each balloon eases in (a 6 px rise and fade over 0.18 s from `Npc.speechAt`) and fades over its last 0.35 s.
+
+### Mounts
+- `Animal.saddle` offered at any agitation. Starting it takes the horse by the bridle (`heldBy`/`heldUntil`): `AnimalMind.think` holds it standing (ALERT), takes 0.09 fear a think and clears the threat. Time = (1.2 tame | 2.6 untamed) + 4.5 x `agitation()`. `saddleNow` no longer refuses a frightened horse.
+- Console: `spawn horse|pegasus [tame | saddled | calm | tame=0..1 | agitation=0..1 ...]` and `mount [...]` (the focused or nearest mount within 12 m; reports tameness, agitation, owner, saddle). `Console.mountSetup`.
+- Apples and carrots are a mount's treat (first in `Animals.feedFor` for horses and Pegasi): +0.22 trust, 0.1 gentling, +18 vigor (cabbage +12, feed +6).
+
+### Preloading
+- `Foliage.preload(x, z, rings)` makes every growth chunk in rings at once. `Foliage.update` makes the player's own 3x3 immediately when they arrive somewhere new.
+- `Gfx.preloadWorld` (called from `Main` after the save loads, before the first frame) makes the chunks within three rings and uploads every plant mesh within 48 m and the fences, logged as `[Load] growth about the spawn`. Any chunk within 24 m of the camera is built the frame it is needed rather than one a frame.
+
+### Crops: apples, carrots, cabbage (new `rpg.world.Farming`)
+- `Plot` (sow by hand from seed, 1.6 s work; grows in four stages over 9 h for carrots and 13 h for cabbage, faster when wet and halted under snow; harvest 2.2 s gives 2-4 carrots or 1-2 cabbages plus 1-2 seed back; ripe for 16 h it bolts and gives only seed). `AppleTree` (an apple every 55 game minutes by day, up to 8; pick 1.3 s). Harvesting XP; taking from a plot or tree you do not own goes through `Law.theft`.
+- Fields: the DevCity kitchen garden in the farm paddock (x 88-99, z 104-112: three rows, the south row common), its orchard of four trees to the east; the DevPalace garden by the east wall (x 176-186, z 55-63) and three trees. Built by `Farming.build` (mud rows, fence, open gate, oak trunk and a low pruned crown).
+- Items: Apple, Carrot, Cabbage (food), Carrot seeds, Cabbage seeds (stackable), Vegetable stew, Hot cider; recipes `cook_stew` (carrot + cabbage) and `mull_cider` (2 apples) at a range; voxel models for each. Seeds and ale stocked at Store A and the Macellum.
+- Drawn by `FarmModels`: ridged plots and carrot fronds or cabbage leaves and heads by stage, bolted stalks with flowers, one mesh per garden rebuilt on a stage change; apples hang under or against the crown, one per fruit.
+
+### Inns (new `rpg.econ.Inns`)
+- DevCity Inn (x 121-130, z 48-68; the jurisdiction extended to it) and the DevPalace Taberna (x 134-145, z 54-69): walls, roof, partition, windows, lamps, a range hearth, a bar counter, tables with benches (new `Furniture.Kind.BENCH`, no block, sat on), guest beds, staff beds and a larder.
+- Each bar is an `Economy.Shop` kept by its bartender (`shopOf` routes the bartender), stocked with ale, hot cider, stew, bread, apples, carrots and cabbage, and buying produce at its price. `Inns.rent` lets a guest bed until noon for 15 G; `Furniture.sleepRefusal` honours it.
+- People (ids 960-969, `AiSystem.homestead`): DevCity: Tobin (Crop Farmer), Hedda (Orchard Keeper), Hamon (Innkeeper), Bess (Bartender), Wilfred (Cook). DevPalace: Rufus, Valeria, Vibius, Julia, Appius. New professions Crop Farmer, Orchard Keeper, Innkeeper, Bartender.
+- `rpg.ai.Livelihoods`: the crop farmer sows bare plots, harvests ripe ones while there is room, buys seed and sells to the inn or market. The orchard keeper picks the fullest tree and sells. The innkeeper buys bread for the bar, makes the beds of a morning and keeps the register. The bartender keeps the bar and buys ale when the cask runs low in a quiet hour. The cook takes carrots and cabbage from the shelf and cooks stew at the hearth, mulls cider and puts it back on the bar. Patrons buy at the bar, take a seat, eat or drink over a while (holding the bowl or mug), share news with a neighbour (`AiSystem.share`) and leave.
+
+### Weekly schedules (new `rpg.ai.Schedule`)
+- A plan of activities by the hour for each of the seven days, per person, from their family: TRADE, GROWER, SHOP, WATCH, CLERGY, INN, LEISURED (outlaws and monsters have none). Each person's traits are seeded by their id: rising and bed hours that move day by day, how much of an inn regular they are, their own market day and visiting day, the short day, the watch's shift rotation and moving day off. The watch has two shifts, early (6-14) and late (14-23), with Solday always early and the day off never Solday; a guard asleep at night still wakes for a fight or a noise (those outrank sleep).
+- The plan names activities (SLEEP, MORNING, WORK, MEAL, MARKET, WORSHIP, LEISURE, VISIT, INN, CHORES, REST), never places. `Brain.scheduled` turns them into scores that sit between routine wants and anything urgent. New goals INN (`Livelihoods.patron`), ERRAND (market counter; bread if short), HOME (about their own room on floor they can stand on). Sleep follows the person's own plan, including the watch's night shifts. Work and patrol score high only in the plan's work block.
+- `WeeklyLifeTest`: every scheduled person has six or more distinct days, and two simulated days at eight times the clock must show sowing, harvesting, picking, both inns serving and buying produce, and ten or more patrons, with nobody blocked a fifth of the time.
+
+### Human and monster animation and AI
+- Sitting (`Rig` `st.seat`): hips onto the bench, feet forward under the table, forearms on it, eased in and out. Eating and drinking: the fare is drawn in hand and lifted to the mouth every few seconds.
+- Talking hands: an open hand at the chest for ordinary talk (the hands take turns), a pointing arm for a shout, a hand by the mouth for a whisper, a hand to the chin for a thought.
+- `MonsterMind.thwarted`: prey up out of reach with no route. The monster paces a beat beneath, roars up every 6-8 s (calling idle kin, with a head-up roar pose from `Monster.tauntAt`), throws stones after 3 s if it has hands (`hurl` "boulder"), and gives up after 30 s.
+- Rain no longer turns someone back from an errand indoors (the bank, the inn, the market). The trace showed a banker going back and forth at the bank door between BANK and SHELTER.
+
+### Textures (the world's surfaces)
+- Grass: a calm painted turf in large warm and cool areas with an even nap of short blades on a jittered grid; no bright flecks repeating every metre.
+- Cobbles: sixteen rounded setts of mixed warm and cool greys in dark earthen joints, a moss speck or two.
+- Brick: six fired tones mixed, sunk mortar.
+- Roof: tiles in five terracotta tones with lichen.
+- Dirt: painted clods.
+- Mud: wet ruts with a sky sheen.
+- Plaster: soft cream with faint trowel swirls; its old dark diagonal strokes are gone.
+- Bark: lit crowns on the plates.
+- Gradients toward a block's foot are removed: they banded every block, and the renderer already darkens wall feet by height.
+- Probe `TextureSheetProbeTest` tiles each 3x3.
+
+### Optimization
+- AI level of detail (`Brain.thinkLod`): beyond 40 m from the player, someone about ordinary business re-decides up to three times less often. Fights, flight, investigation, reports and the watch stay at full rate.
+- The chemistry receiver churn noted under fire above.
+
+### Tools, cleanup, version
+- Probes: `MapDumpProbeTest` (the devmap as text), `LifeProbeTest` (`RPG_PROBE_START`, `RPG_PROBE_HOURS`, `RPG_PROBE_TRACE=name`), `TextureSheetProbeTest`.
+- PMD unused-code audit clean (an unused balloon overload removed). Version Alpha 0.3.2.
+
+### Test status at the end of the pass
+- Full `gradlew test`: 404 tests, 29 failing on the first run. Fixed after it:
+  - Item ledger: `Invariants` did not count the inns' bar stock (Polish025, Polish026Law, RecoveryRegression).
+  - Solday mornings are working mornings again, everyone is up by about 7, villagers are in the trades family, and the watch runs two shifts with Solday always early. These caused BlacksmithDay, NewResidents, ArmsReaction, AwarenessLifecycle, UndertakerFlow, SocietyRegression, RequestedFixes and BankTest.
+  - Tellers, officials, quest-givers and contacts keep their posts (the shop family). The bank teller had wandered, so the bank was unattended (FullPack).
+  - The DevPalace Taberna had been built over the stair up to the wall walk; it moved to x 136-145 (Gamefixes029 stairs).
+  - Bed heads were set against walls (DevMapAudit).
+  - The beginner's swing now bites at the master's own key (MeleeAim, SmallTarget).
+  - Sprint cadence 2.8 (Gait). The resident and calling counts went to 80 and 29 (PolishSystems, Profession).
+- The re-run of the failing classes was cut short: the machine ran low on memory and the run was stopped. TraversalTest (a mantle still in progress after 80 frames), DoorPassageTest (store room locked behind the shopkeeper) and FullPack banking had failed in it, before the teller fix. Still to re-run: those, the remaining classes (SprintStopTest, Gamefixes029 charge, Gamefixes030 ladder, NpcRoutineTest, WeeklyLifeTest) and the acceptance suite.
+
+## Pass 22 - Alpha 0.3.1 "Bright Lights, Bridled Nights" (Hoodie)
+
+Continues `polish` from `8e87938` (Alpha 0.3.0). Review sheets in `work/p17/` (gallery mode `p17`, sections foliage, title, world, charge, bubbles, blood, grass, melee, context, monsters).
+
+### Mounts (the 20-minute bug)
+- Cause: a tap of Interact ran the first enabled option in list order, not the highest priority - on a horse that was always Pet; farm horses are Mara's (riding one untrusted is theft and an untamed ride); a wild ride needed ~47 s on its back while a buck threw the rider every ~5 s; a saddle could not go on an untamed horse.
+- `Interactions.ranked` sorts a target's options by priority (stable); used by `primary`, the focus prompt and the hold-E menu.
+- Saddle first: `Animal` "saddle" is offered (priority 10 with a saddle carried) on any calm horse or Pegasus not someone else's, tamed or not; a timed `Work` (1.2 s tame, 2.6 s untamed) - `saddleNow` (+0.1 trust, calms it). New `Animal.saddledBy` (saved) owns the saddle and saddlebags; unsaddle/bags allowed to the saddle's owner.
+- `Riding.TAME_RATE` 0.042/s x (1 + Agility/40) x (0.7 + trust), `SADDLE_TAMING` x2.6; `throwChance` 0.13 x (1 - tame) x (1 - Agility share) x (1 - 0.6 trust) x `SADDLE_THROW` 0.3 when saddled, bucks every 1.8 s saddled (1.2 s bare). Probe: bare 33 s with 2 throws, saddled 11 s with none.
+- `Animals.gentle`: feeding (+0.07) or petting (+0.03), 12 s apart, gives an unowned mount taming up to `GENTLE_CAP` 0.35. `Animal.gentledAt`.
+- `AnimalMind.threatWeight`: a person carrying feed the mount eats (or one it has been gentled by / whose saddle it wears), not sprinting or charging, is no threat to a horse or Pegasus - it lets them walk up.
+- Mount option labels: "(untamed)", "(saddled, untamed)", "(not yours)"; chat lines point to the saddle.
+
+### Aim and the soft lock
+- Third person: `Player.aimPointFor(now, yaw, pitch)` checks the crosshair point against the aim from the eye it was taken from (`Player.aimEye`, set in `PlayerController`). It was checked from the throw plan's eye - the shoulder camera - so any point nearer than ~25 m failed and bows, crossbows and throws flew parallel to the crosshair a shoulder's width off.
+- `Magic.target`: after the 12 cm ray, a cone of ~3 deg (+ the body's angular size, max 0.12 rad) round the aim, sight-checked, allies skipped.
+- `CombatSystem.bolt`: every spell bolt gets the soft lock (`Projectile.homing` 1.4 rad/s, Spell Daggers 4); `step` steers toward the mark's chest led by its velocity, turn-rate limited, and lets go past 1.4 rad.
+
+### Fire
+- Engine (`chemistry_service.cpp`, `ChemistryService::apply`): a direct emission (no source cell) never acts on its owner's own sensor - a swung torch or a fire spell no longer sets its wielder alight. Fire it starts in the world still burns anyone in it. Native rebuilt.
+- `Foliage.chemical`: a burning plant flares every 0.4 s (`flaredAt`), emitting fire of its own by kind (grasses, reeds, heather strongest; moss weakest) - fire now runs through a meadow. `CombatSystem`: a HEAVY or crouched torch swing also emits a low flame at the feet's height (the chest-high flame never reached a plant).
+
+### Foliage underfoot
+- `Foliage.pushers`: bodies standing or moving in growth near the eye are live pushers (nearest five), then the freshest trail points with a smoothstep recovery. A plant used to sit untouched until a trail point dropped on it, then snap.
+- `shaders/foliage.vert` 1.2: pushes summed then capped at the stem's bend; the sideways lean fades to zero at the root and a crush (stem pressed down) takes over, so a plant no longer flips sides as a foot passes over it.
+
+### Multiple floors
+- `Brain.goTo` callers aimed at an actor or object now pass its height (22 sites in Brain, Jobs, Traps). Height carried through `Stealth.Aware.y`, `Investigation.y`, `Hunt.y` and `Hunt.clue(x, y, z, ...)`; `standable/nearestStandable(x, y, z)` test the floor in question (they assumed the ground floor and snapped upstairs points down).
+- Native `Pathfinder`: `heuristic3` adds 0.6 per level to the goal's floor (`goalY_`), so a search does not spend its budget under the goal before it looks for the stairs. Native rebuilt.
+
+### Ladders
+- `Rig.ladderWeight`: hands reach for the rungs through MOUNT (near hand first), feet follow, and STEP_OFF gives them back; top-out leans the chest over the ledge. `Ladders` durations: mount 0.5 s, top-out 1.05 s, step-off 0.45 s.
+
+### The watch
+- `Law.lawfulForce`: answering a blow is lawful only against whoever started it (`assaultAt` within 45 s); the initiator is never "defending themselves" once their victim hits back (a brawl used to become lawful on both sides).
+- `AiSystem.assailant`: owned livestock and pets set upon by anyone but their owner bring the watch in.
+
+### Imps and ghosts
+- `MonsterKind.seesInDark` (ghost, imp, bat, werewolf); `Stealth.exposure` lights the target at least 0.7 for them. Imps flew straight over people at night with exposure 0.04.
+- Flyers drop to strike: chest level with the foe within reach + 1.6 m; close to reach x 0.5 before swinging (from the edge of reach the blow fell short) - the ghost had landed 0 touches in 18 s.
+- Harassers: scratch, then swoop 3-5 m out at a slant and up (`swoopUntil`), and come in again at an angle.
+- Ghosts: `moverInput(... MOVER_POSED)` after placing - the mover no longer pushes them back out of walls. Reach 0.8 -> 1.1. Probe `HaunterProbeTest` (RPG_PROBE=1): imp 19 blows / 30 s; ghost 14 in the open, 11 through a wall.
+
+### Flicker
+- `Atmosphere.apply`: the ambient's sun and shade sides blend across the sky's middle (they swapped in a frame at noon).
+- Engine `Renderer::cullLights`: lights asking for a shadow go first, nearest first - the shading gives shadows to the first `shadowedLights` indices, and those were the first lamps in the map's list within 18 m. `Gfx.lampLights` flags every lamp within 24 m.
+- `tonemap` grain 0.018 -> 0 (a fresh noise every frame over the whole picture); vignette 0.55 -> 0.35.
+- `taa.frag` 1.3: a still pixel's history is clipped to (nearly) the neighbourhood's full extremes; blend for still pixels 0.6 -> 0.45 of uBlend. Interior still-view p99 measured 16-20 at scale 1 (TAA off: 5, the grain then); texel shimmer on fine dark detail remains the floor.
+
+### Light, the look and the title
+- Engine exposure: night ceiling 1.4 -> 3.2 (+1.8 x daylight); `exposure.frag` dark adaptation exponent 0.6 -> 0.78. Native rebuilt.
+- `Atmosphere` presets: moonlit night (ambient x2.4), dusk and dawn lifted, a clearer sun/shade split by day (depth), saturation trimmed (greens read neon); interiors keep half the sky's light (was 0.3).
+- Lamps radius 10 -> 13 (outdoors), 7 -> 9 (indoors), brighter.
+- Title chamber: torches radius 12, brighter; a warm wash over the chamber; the passage's spill and the figure's key and fill brighter.
+- `world_gbuffer.frag`: turf (green open tops) is tinted in broad low-frequency swathes instead of block-by-block jitter.
+- `Textures`: cobble fewer larger setts in mid-grey mortar (was near-black), stone softer grout, grass an olive base with broad soft patches and finer blades.
+
+### HUD
+- The place banner under the minimap shows the place only, on the clock's own plate (it carried a second clock).
+- Sneak meter words: Hidden, In view, Noticed, Searching, Spotted (+ "by name") - the wanted panel's vocabulary.
+- Speech: `Npc.Voice` SAY / SHOUT / WHISPER / THINK, chosen by `AiSystem.voice` (exclamation/alarm/capitals; aside, "Hmm", "..."; creeping, a thief or fence at their trade, sleepers about at night; no one within earshot). `HudFragments.bubble` draws a round balloon, a yellow burst, a dashed grey balloon and a cloud with puffs; balloons are laid out so none covers another.
+
+### Bounty hunters
+- `Posses.form`: each hunter carries a `Bounty scroll` warrant (case, the player, the kingdom, the bounty, last known place); `warrantOf`. A hunter without it gives up (`WarrantLost`) and goes home. Tracking posses form 45-75 m from the last known place and 50 m+ from the player (38 m fallback); ambushes 45-65 m ahead.
+
+### The charge
+- `PlayerController.burst`: charging, glass at body height a stride ahead is shattered (1 point of damage from it), a shut door is shouldered open (`knock` impulse), a locked one forced (VANDALISM when someone else's in a town); each slows the charge.
+- Rig: lean 0.16 -> 0.3, the lead shoulder dropped (roll) and turned in further (twist 0.34), the lead arm braced across the chest, the rear arm driving.
+
+### Melee by skill
+- `CombatSystem.mastery/commit/leanK/styled`, used by `grip` and `blade` (drawn and hit the same): Strength scales the trunk's wind and unwind (0.55-1.05), the lean (0.5-1.05) and the arc's cock and carry-through; Attack adds a per-blow wobble off the line (5 cm at level 1, none at 99). `Rig.strikeS(a, c)`: a raw wind-up hangs and jerks (curve power 1.2 -> 2.5), a master snaps through the middle (smootherstep blend); `strikeWeight(a, c)`: Defense quickens the return to guard. Step-in scaled by mastery; masters step into light cuts too.
+
+### Blood
+- `Fx.blood`: 34 finer drops (8-17 mm, gouts 22-32 mm) thrown harder; `particle.vert` liquid stretch 0.09 -> 0.17 (max 3.6). `Gore`: drips leave from the wound's own height on the body's front. Drips and spurts finer.
+
+### Grass and the ground
+- `FoliageModels` tall grass: five forms by seed - meadow, wild oats, foxtail, feather grass, tussock.
+- `Rpg.footfall` + `Fx.footfall` on every footstep (player and NPCs near the player): dust off dry earth and sand, a spatter off soaked open ground, snow powder.
+
+### People and monsters
+- `AiSystem.carriage`: `Actor.cower` (a non-combatant within 4 m of a swing, by bravery; 1 when just hurt) and `Actor.rainCover` (walking in the open in rain, hands empty), eased; `Rig` arms over the face / a hand to the brow, crouch and hunch.
+- `Gfx.humanoidMonster`: hurt below 65% - hunched, leaning to a side, laboured breathing, lurching gait; a jolt back for 0.3 s from a blow; ghosts bob and sway; airborne imps flutter.
+
+### Tests, tools, cleanup
+- `rpg.ai.Gamefixes031Test` (10): saddling and taming through the interaction path, approach with feed, bare vs saddled breaking-in, the third-person crosshair shot, the spell soft lock, fire spell on tall grass and its spread, the torch never lighting its bearer, a search climbing to an upper floor, the brawl rule, the charge through glass and a door. `rpg.law.BountyHunterWarrantTest`. Probe `rpg.monster.HaunterProbeTest`.
+- Gallery mode `p17`. PMD unused-code audit clean (an unused overload and two strike overloads removed). Version Alpha 0.3.1.
+
+---
+
 ## Pass 21 - Alpha 0.3.0 "Saddle Up" (Hoodie)
 
 - Ledge respawn: Rpg.teleport and onKilled now cancel traversal, ladder climbs and rides.

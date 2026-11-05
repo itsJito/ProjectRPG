@@ -27,14 +27,18 @@ import rpg.world.DevMap;
  * policy scores them (with its own sight and hearing in the mix) and walks the body along routes it searches itself.
  */
 public final class Brain {
-    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK, TIP_OFF, SHELTER, PRAY, REPORT_DAMAGE, FIRE_RESPONSE }
+    public enum Goal { FOLLOW, IDLE, LOOK, WANDER, WORK, EAT, SLEEP, SOCIALIZE, PATROL, REPORT_CRIME, INVESTIGATE, SEARCH, FIGHT, FLEE, STEAL, RETURN, HELD, COLLECT, LOOT, FENCE, HIDE, WARN, WATCH, AID, EVICT, BANK, TIP_OFF, SHELTER, PRAY, REPORT_DAMAGE, FIRE_RESPONSE,
+        /** (0.3.2) a meal or an evening at the town's inn; an errand to the market; time at home (chores, rest). */
+        INN, ERRAND, HOME }
 
     private final Rpg g;
     private final AiSystem ai;
     private final CombatTactics tactics;
     private final Jobs jobs;
+    /** (0.3.2) The farms' and inns' trades, and the inns' patrons. */
+    final Livelihoods livelihoods;
 
-    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; this.tactics = new CombatTactics(g); this.jobs=new Jobs(g,this); }
+    Brain(Rpg g, AiSystem ai) { this.g = g; this.ai = ai; this.tactics = new CombatTactics(g); this.jobs=new Jobs(g,this); livelihoods = new Livelihoods(g, this); }
 
     record Score(Goal goal, float value, String reason) {}
 
@@ -52,7 +56,18 @@ public final class Brain {
     // ------------------------------------------------------------------ deciding
     public void think(Npc n) {
         // (0.2.3) spread over the whole beat by a per-NPC phase, so a crowd's decisions do not land on the same frame
-        n.nextThink = g.time + (n.goal == Goal.FIGHT ? 0.35 : 0.8) * (0.8 + 0.4 * Stealth.phase(n.id + g.state.tick));
+        n.nextThink = g.time + (n.goal == Goal.FIGHT ? 0.35 : 0.8) * (0.8 + 0.4 * Stealth.phase(n.id + g.state.tick)) * thinkLod(n);
+        // (0.3.3, gamefixes: the simulation running dynamically) a lead goes stale whatever else was done meanwhile: one put
+        // aside to flee a wolf was taken up again, long cold, the moment the danger passed (only its own stage checked it)
+        if (n.investigation != null && n.goal != Goal.INVESTIGATE) {
+            var v = n.investigation;
+            double patience = v.stimulus == Investigation.Stimulus.VIOLENCE || v.plan == Investigation.Plan.HIDE ? 50 : 20;
+            if (g.time - v.startedAt > patience) {
+                Stealth.Aware w = n.aware.get(v.subject);
+                if (w != null) { w.settledAt = g.time; w.level = Math.min(w.level, Stealth.CURIOUS); }
+                n.investigation = null; n.sneaking = false;
+            }
+        }
         if (n.summonOwner != 0) {
             Actor owner = g.actor(n.summonOwner), target = ai.threatFor(n);
             Goal next = target == null ? Goal.FOLLOW : Goal.FIGHT;
@@ -72,7 +87,9 @@ public final class Brain {
         if (g.gore != null) g.gore.perceive(n);
         List<Score> s = new ArrayList<>();
         double hour = g.state.hourOfDay();
-        boolean night = hour >= 22 || hour < 6;
+        // (0.3.2, the weekly schedule) a person with a week sleeps when their own plan says so, not at one hour for all
+        Schedule.Activity plan = Schedule.now(n, g.state.weekday(), hour);
+        boolean night = plan != null ? plan == Schedule.Activity.SLEEP : hour >= 22 || hour < 6;
         boolean civilian = !n.combatant();
         if(n.observedFire!=null && n.arrestedUntil<=g.state.minutes) {
             float distance=n.distTo(n.observedFire.x(),n.observedFire.z());
@@ -233,13 +250,18 @@ public final class Brain {
         if(threat==null && g.repairs.reportFor(n)!=null)s.add(new Score(Goal.REPORT_DAMAGE,n.role==Npc.Role.LAWMAN?0.76f:0.63f,"reporting witnessed building damage"));
         if(threat==null && g.repairs.hasWork(n))s.add(new Score(Goal.WORK,0.72f,"committed repair work"));
         if (n.hunger > 0.45f) s.add(new Score(Goal.EAT, 0.25f + n.hunger * 0.6f, String.format("hunger %.0f%%", n.hunger * 100)));
-        if (night && n.role != Npc.Role.GUARD && !n.combatant() && n.role != Npc.Role.THIEF) s.add(new Score(Goal.SLEEP, 0.7f, String.format("night (%02d:00)", (int) hour)));
+        if (night && (plan != null || n.role != Npc.Role.GUARD && !n.combatant() && n.role != Npc.Role.THIEF)) s.add(new Score(Goal.SLEEP, 0.7f, plan != null ? "bedtime (" + g.state.weekdayName() + " " + String.format("%02d:%02d", (int) hour, (int) (hour % 1 * 60)) + ")" : String.format("night (%02d:00)", (int) hour)));
         else if (n.fatigue > 0.8f) s.add(new Score(Goal.SLEEP, 0.55f, String.format("fatigue %.0f%%", n.fatigue * 100)));
         if (n.social > 0.55f && !n.combatant() && ai.partnerFor(n) != null) s.add(new Score(Goal.SOCIALIZE, 0.2f + n.social * 0.45f, String.format("lonely (%.0f%%), %s nearby", n.social * 100, ai.partnerFor(n).name)));
         else if (restDay(n) && !night && !n.combatant() && ai.partnerFor(n) != null) s.add(new Score(Goal.SOCIALIZE, 0.32f, "Solday: visiting with " + ai.partnerFor(n).name));
+        // (0.3.2) the week's plan for this hour: a weight on what to do, never a command (all of the above can outweigh it)
+        if (plan != null && threat == null) scheduled(n, plan, s);
+        // a hungry person with the coin eats at their town's inn when it is serving (above eating cold at the well)
+        if (threat == null && n.hunger > 0.45f && innServes(n)) s.add(new Score(Goal.INN, 0.27f + n.hunger * 0.62f, String.format("hungry (%.0f%%); a meal at the inn", n.hunger * 100)));
+        boolean onDuty = plan == null || plan == Schedule.Activity.WORK;
         // duties
         switch (n.role) {
-            case GUARD, LAWMAN -> s.add(new Score(Goal.PATROL, 0.5f, "on patrol duty"));
+            case GUARD, LAWMAN -> s.add(new Score(Goal.PATROL, onDuty ? 0.5f : 0.21f, onDuty ? "on patrol duty" : "off duty"));
             case WORKER, VILLAGER, CARTER, MERCHANT, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
                 boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
@@ -249,6 +271,7 @@ public final class Brain {
                 // (the healer, the undertaker, the priest and anyone with a commitment keep on)
                 boolean rest = restDay(n) && !committed;
                 if (netOut) s.add(new Score(Goal.WORK, 0.86f, "hauling the lake net in before dark"));
+                else if (plan != null && !committed) s.add(new Score(Goal.WORK, onDuty ? 0.5f : 0.2f, onDuty ? "day's work: " + workText(n) : "off work (" + plan.name().toLowerCase() + ")"));
                 else s.add(new Score(Goal.WORK, committed ? 0.88f : night ? 0.2f : rest ? 0.18f : 0.5f, committed ? "a shipment to carry (" + g.econ.active().status.name().toLowerCase() + ")" : rest ? "Solday: the week's rest" : "day's work: " + workText(n)));
             }
             case THIEF -> {
@@ -287,7 +310,14 @@ public final class Brain {
         // (0.2.1, gamefixes: human AI choices expanded) a downpour sends ordinary folk out of doors home to shelter; the
         // watch keeps its round, and work under a roof goes on
         float rain = g.timeSystem.weather.rain;
-        if (threat == null && rain > 0.45f && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), DevMap.FLOOR + 1, (int) Math.floor(n.z)) > 0.9f)
+        // (0.3.2) and an errand that takes them indoors anyway - the bank, the inn, the market counter - is shelter enough:
+        // they were turned back from the bank's door by the rain and sent out to it again, round and round
+        boolean indoorErrand = n.goal == Goal.BANK || n.goal == Goal.INN || n.goal == Goal.ERRAND;
+        // (0.3.3, gamefixes: everyone performing their duties) in their working hours people work on through ordinary rain
+        // - a stall kept, a row weeded, a hood up - and go in only for a real downpour: a trader at an open-air post was
+        // indoors more than half of every working day
+        boolean working = Schedule.now(n, g.state.weekday(), g.state.hourOfDay()) == Schedule.Activity.WORK;
+        if (threat == null && rain > (working ? 0.75f : 0.45f) && !indoorErrand && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), DevMap.FLOOR + 1, (int) Math.floor(n.z)) > 0.9f)
             s.add(new Score(Goal.SHELTER, 0.45f + rain * 0.25f, String.format("rain (%.0f%%); going in out of it", rain * 100)));
         // the devout go to their town's altar of a morning, once a day
         double hr = g.state.hourOfDay();
@@ -305,6 +335,8 @@ public final class Brain {
         for (int i = 0; i < Math.min(6, s.size()); i++) n.scores.add(String.format("%.2f %s - %s", s.get(i).value, s.get(i).goal, s.get(i).reason));
         if (best.goal != n.goal) {
             if (n.goal == Goal.SOCIALIZE) { n.socialPartner = 0; n.socialSide = 0; }
+            if (n.goal == Goal.INN) livelihoods.leave(n);
+            if (best.goal == Goal.INN) n.innUntil = g.time + 50 + Schedule.trait(n.id, (int) (g.state.minutes / 1440)) * 70;
             g.state.commit("NpcGoal", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, n.goal + " -> " + best.goal + " (" + best.reason + ")");
             n.goal = best.goal;
             n.lastOutcome=""; // The prior errand's status must not describe a new one.
@@ -390,13 +422,16 @@ public final class Brain {
             case WORK -> work(n,dt);
             case PATROL -> patrol(n);
             case EAT -> eat(n);
+            case INN -> { if (!livelihoods.patron(n)) { n.nextThink = 0; n.innUntil = 0; } }
+            case ERRAND -> errand(n);
+            case HOME -> home(n);
             case SLEEP -> { if (goTo(n, n.homeX, n.homeZ, false, 1.2f)) ai.desire(n, AiSystem.A_IDLE); }
             case SOCIALIZE -> socialize(n);
             case REPORT_CRIME -> report(n);
             case REPORT_DAMAGE -> {
                 var report=g.repairs.reportFor(n);
                 if(report==null){ai.desire(n,AiSystem.A_HOLD);n.nextThink=0;}
-                else if(goTo(n,report.recipient().x,report.recipient().z,false,2.3f)){g.repairs.report(n,report.damage(),report.recipient());n.nextThink=0;}
+                else if(goTo(n, report.recipient().x, report.recipient().y, report.recipient().z,false,2.3f)){g.repairs.report(n,report.damage(),report.recipient());n.nextThink=0;}
             }
             case LOOK -> { Stealth.Aware w = lead(n); ai.desire(n, AiSystem.A_IDLE); if (w != null) n.wantYaw = (float) Math.atan2(-(w.x - n.x), -(w.z - n.z)); }
             case INVESTIGATE -> investigate(n);
@@ -433,7 +468,9 @@ public final class Brain {
             case LOOT -> loot(n);
             case AID -> aid(n);
             case BANK -> bank(n);
-            case SHELTER -> { if (goTo(n, n.homeX, n.homeZ, false, 1.4f)) { ai.desire(n, AiSystem.A_IDLE); n.lastOutcome = "sheltering from the rain"; } }
+            case SHELTER -> { float[] roof = shelterFor(n);
+                if (n.lastOutcome != null && (n.lastOutcome.startsWith("no traversable") || n.lastOutcome.startsWith("paused"))) { n.shelterX = n.homeX; n.shelterZ = n.homeZ; roof = new float[]{n.homeX, n.homeZ}; }
+                if (goTo(n, roof[0], roof[1], false, 1.2f)) { ai.desire(n, AiSystem.A_IDLE); n.lastOutcome = "sheltering from the rain"; } }
             case PRAY -> pray(n);
         }
     }
@@ -612,7 +649,7 @@ public final class Brain {
         if (c == null) { ai.desire(n, AiSystem.A_IDLE); n.nextThink = 0; return; }
         if (n.layingBody == c.id) c.heldBy = n.id;
         if (c.heldBy != n.id) {
-            if (goTo(n, c.x, c.z, false, 1.2f)) {
+            if (goTo(n, c.x, c.y, c.z, false, 1.2f)) {
                 if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Poor soul. I'll see your belongings safely home." : "Poor soul. I'll see this to Morrow."); }
                 n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
                 if (g.time - n.arrivedAt > 0.5) {
@@ -646,7 +683,8 @@ public final class Brain {
             }
             n.layingSince = -1; n.layingBody = 0;
             if (!g.graveyards.bury(c, n, plot)) { g.carrying.drop(n, false); c.heldBy = 0; n.collectAgain = g.time + 15; }
-            else if (g.fx != null) for (int i = 0; i < 10; i++) g.fx.trail(graveSpot[0] + (float) Math.sin(i * 2.4f) * 0.4f, c.y + 0.2f, graveSpot[1] + (float) Math.cos(i * 2.4f) * 0.4f, 0.5f, 0.42f, 0.3f);
+            else c.heldBy = 0;   // (0.3.3) buried: nobody holds it any more
+            if (c.removed && g.fx != null) for (int i = 0; i < 10; i++) g.fx.trail(graveSpot[0] + (float) Math.sin(i * 2.4f) * 0.4f, c.y + 0.2f, graveSpot[1] + (float) Math.cos(i * 2.4f) * 0.4f, 0.5f, 0.42f, 0.3f);
             n.lastOutcome = "buried the dead and protected their belongings"; n.nextThink = 0;
         }
     }
@@ -659,7 +697,7 @@ public final class Brain {
     private void loot(Npc n) {
         rpg.objects.Container c = graveFor(n);
         if (c == null) { n.graveSeen = 0; ai.desire(n, AiSystem.A_IDLE); n.nextThink = 0; return; }
-        if (!goTo(n, c.x, c.z, n.role != Npc.Role.THIEF, 0.75f)) return;
+        if (!goTo(n, c.x, c.y, c.z, n.role != Npc.Role.THIEF, 0.75f)) return;
         n.reachX = c.x; n.reachY = c.y + 0.15f; n.reachZ = c.z;
         if (n.arrivedAt < n.goalSince) n.arrivedAt = g.time;
         n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
@@ -722,6 +760,8 @@ public final class Brain {
             }within=Math.max(.15f,within-(float)Math.hypot(bx-x,bz-z));x=bx;z=bz;
         }
         float surface=g.vox.navigation.standY(x,Float.isFinite(targetY)?targetY:n.y,z);
+        // (0.3.3) a spot with nothing to stand on (a grave's stone, a block of furniture) is reached from beside it
+        if(!Float.isFinite(surface) && Math.hypot(n.x-x,n.z-z)<=Math.max(within+0.9f,1.8f)){ai.desire(n,AiSystem.A_HOLD);n.legs=null;n.hasGoalPos=false;return true;}
         if(!Float.isFinite(surface)){ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="looking for supported ground";return false;}
         if (Math.hypot(n.x - x, n.z - z) <= within && (!Float.isFinite(targetY) || Math.abs(n.y-targetY)<1.2f)) { n.routeBook.success(g.vox,g.time,x,n.y,z);if(n.lastOutcome!=null && n.lastOutcome.contains("blocked"))n.lastOutcome="arrived";ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true; }
         if(n.navRevision!=g.vox.navigationRevision) {
@@ -730,13 +770,17 @@ public final class Brain {
         }
         n.routeBook.seed(n,g);n.routeBook.readBlocked(n,g.state.minutes,g.time);
         if(g.time<n.navPauseUntil && Math.hypot(n.legsX-x,n.legsZ-z)<1 && Math.abs(n.legsY-surface)<1){ai.desire(n,AiSystem.A_HOLD);n.wantYaw=n.yaw+(float)Math.sin(g.time*1.2)*.35f;n.lastOutcome="paused to reconsider a blocked route";return false;}
+        // (0.3.3) the pause is over: on the way again (the word of it lingered on someone walking their route for minutes)
+        if(n.lastOutcome!=null && n.lastOutcome.startsWith("paused"))n.lastOutcome="on the way";
         if (n.legs == null || Math.hypot(n.legsX-x,n.legsZ-z)>.5 || Math.abs(n.legsY-surface)>.5f) {
             java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.owner==n.id||d.key!=null&&n.has(d.key,1);
             n.legs=n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
             if(n.legs==null)n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time);
-            if(n.legs==null){n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";return false;}
+            if(n.legs==null){n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";n.noRoutes++;return false;}
             n.routeBook.begin(n,x,surface,z,n.legs,g.time);
             n.legAt=0;n.legsX=x;n.legsY=surface;n.legsZ=z;
+            // (0.3.3) a way found: whatever was said of the last one failing is over
+            if(n.lastOutcome!=null && (n.lastOutcome.startsWith("paused") || n.lastOutcome.startsWith("no traversable") || n.lastOutcome.startsWith("no headway")))n.lastOutcome="on the way";
         }
         float tx = x, tz = z, routeY=surface;
         while (n.legAt < n.legs.length) {
@@ -754,20 +798,136 @@ public final class Brain {
         // (0.3.0, gamefixes: townsfolk stood about doing nothing) progress is watched: a body that has come no closer to
         // where it is going for several seconds is as close as it will get when it is near (a counter, a post, a spot
         // inside furniture) - the errand goes ahead from there - and, far off, it gives up that route and plans afresh
+        // (0.3.3, gamefixes: NPC pathfinding in and out of buildings) progress is the body getting somewhere, not only
+        // the crow's-flight distance shrinking: a route out through a back door, round a wall or down a street that
+        // first leads away from the goal was being thrown out as "no headway" every six seconds and planned afresh, over
+        // and over (2,766 times in a six-hour morning). A body that has covered ground along its legs is on its way;
+        // one pacing on the spot or pressed into a wall (moving less than a metre and a quarter) is not.
         float left = (float) Math.hypot(n.x - x, n.z - z);
-        if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; }
-        else if (left < n.stallBest - 0.25f) { n.stallBest = left; n.stallSince = g.time; }
-        else if (g.time - n.stallSince > STALL) {
-            n.stallSince = g.time;
+        if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
+        else if (left < n.stallBest - 0.25f || Math.hypot(n.x - n.stallPX, n.z - n.stallPZ) > 1.25f) { n.stallBest = Math.min(n.stallBest, left); n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
+        // (0.3.3) at arm's length of a spot that cannot quite be reached (a grave plot, a counter, a spot in furniture) two
+        // seconds of no headway is enough to call it there; far off, six before a new way is looked for
+        else if (g.time - n.stallSince > (left <= Math.max(within + 2.2f, 3.2f) ? 2.0 : STALL)) {
+            n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z;
             if (left <= Math.max(within + 2.2f, 3.2f) && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f)) {
                 ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false;
                 n.lastOutcome = "as close as I can get"; return true;
             }
-            n.legs = null; n.hasGoalPos = false; n.lastOutcome = "no headway; finding another way";
+            n.legs = null; n.hasGoalPos = false; n.lastOutcome = "no headway; finding another way"; n.stalls++;
         }
         ai.desire(n, run ? ai.pace(n, x, z, within) : AiSystem.A_GOTO);
         return false;
     }
+    /**
+     * (0.3.2, gamefixes: aggressive optimization that keeps the experience) AI level of detail: someone far from the player
+     * and about ordinary business re-decides less often - up to a third as often past 80 m - and anyone near, fighting,
+     * fleeing, reacting or on watch duty at full rate. Their day is the same day (the plan and the world do not change with
+     * distance); only how often the choice is weighed again does. The player never sees the difference: a decision is a
+     * second or two later where nobody is watching.
+     */
+    double thinkLod(Npc n) {
+        if (n.goal == Goal.FIGHT || n.goal == Goal.FLEE || n.goal == Goal.INVESTIGATE || n.goal == Goal.REPORT_CRIME || n.reacting || n.watch()) return 1;
+        float d = n.distTo(g.player);
+        return d < 40 ? 1 : 1 + Math.min(2, (d - 40) / 20f);
+    }
+
+    /** Whether the town's inn would serve this person now: open, and something on the bar they can pay for. */
+    boolean innServes(Npc n) {
+        if (g.inns == null || n.combatant() && n.role != Npc.Role.GUARD && n.role != Npc.Role.LAWMAN && n.role != Npc.Role.KNIGHT) return false;
+        var inn = g.inns.inJurisdiction(n.homeJurisdiction);
+        if (inn == null || g.inns.of(n) == inn) return false;
+        return inn.open(g) && g.inns.fareFor(inn, n) != null;
+    }
+
+    /**
+     * (0.3.2) The plan's activity as a score: work (left to the duty scores), a meal (the inn when it serves, else food in
+     * hand), the market, worship, an evening at the inn, a visit or a stroll, time at home, sleep (above). Values sit
+     * between routine wants and anything urgent, so a hunger, a crime or a fire still wins.
+     */
+    private void scheduled(Npc n, Schedule.Activity plan, List<Score> s) {
+        String day = g.state.weekdayName();
+        switch (plan) {
+            case MEAL -> {
+                if (innServes(n) && n.hunger > 0.1f) s.add(new Score(Goal.INN, 0.56f, day + ": a meal at the inn"));
+                else if (n.hunger > 0.15f) s.add(new Score(Goal.EAT, 0.52f, day + ": mealtime"));
+                else s.add(new Score(Goal.HOME, 0.42f, day + ": mealtime at home"));
+            }
+            case INN -> { if (innServes(n)) s.add(new Score(Goal.INN, 0.55f, day + ": an evening at the inn")); else s.add(new Score(Goal.HOME, 0.44f, day + ": an evening in (the inn not serving)")); }
+            case MARKET -> s.add(new Score(Goal.ERRAND, 0.52f, day + ": errands at the market"));
+            case WORSHIP -> {
+                int today = (int) (g.state.minutes / 1440);
+                if (altarFor(n) != null && n.prayedDay != today) s.add(new Score(Goal.PRAY, 0.57f, day + ": worship"));
+                else s.add(new Score(Goal.HOME, 0.4f, day + ": a quiet hour after worship"));
+            }
+            case VISIT, LEISURE -> {
+                Npc friend = ai.partnerFor(n);
+                if (friend != null && !n.combatant()) s.add(new Score(Goal.SOCIALIZE, plan == Schedule.Activity.VISIT ? 0.48f : 0.4f, day + ": " + (plan == Schedule.Activity.VISIT ? "visiting " : "passing the time with ") + friend.name));
+                else s.add(new Score(Goal.WANDER, 0.34f, day + ": a stroll"));
+            }
+            case MORNING, CHORES, REST -> s.add(new Score(Goal.HOME, plan == Schedule.Activity.REST ? 0.45f : 0.43f, day + ": " + (plan == Schedule.Activity.MORNING ? "getting up" : plan == Schedule.Activity.REST ? "resting at home" : "chores at home")));
+            default -> { }
+        }
+    }
+
+    /**
+     * (0.3.3, gamefixes: everyone performing their duties) out of the rain under the nearest roof - a porch, a shop, the
+     * inn, the smithy's lean-to - not home across the town: a miner walked two hours home in every downpour and back
+     * again. Home when it is near (or nothing nearer is to be had). Looked for once in a while, from where they stand.
+     */
+    private float[] shelterFor(Npc n) {
+        if (g.time - n.shelterAt < 120 && Math.hypot(n.shelterX - n.x, n.shelterZ - n.z) < 40) return new float[]{n.shelterX, n.shelterZ};
+        n.shelterAt = g.time;
+        float bx = n.homeX, bz = n.homeZ, best = (float) Math.hypot(n.homeX - n.x, n.homeZ - n.z) - 12;   // home is worth a few metres more
+        for (int r = 2; r <= 30 && best > r; r += 2)
+            for (int k = 0; k < r * 3; k++) {
+                double a = k * Math.PI * 2 / (r * 3);
+                float x = (float) Math.floor(n.x + Math.cos(a) * r) + 0.5f, z = (float) Math.floor(n.z + Math.sin(a) * r) + 0.5f;
+                if (g.vox.skyLight((int) Math.floor(x), DevMap.FLOOR + 1, (int) Math.floor(z)) > 0.35f) continue;
+                if (!standable(x, z) || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked || d.owner == n.id)) continue;
+                if (r < best) { best = r; bx = x; bz = z; }
+                break;
+            }
+        n.shelterX = bx; n.shelterZ = bz;
+        return new float[]{bx, bz};
+    }
+
+    /** Home: to their bed's room, and the chores or the rest there (a little about the room, not stock still). */
+    private void home(Npc n) {
+        // a little about the room (a step one way and another between chores), but only to a spot of floor it can stand on
+        // from its bed's side - never the far side of a counter or a wall that happens to lie within the step
+        float ox = (float) Math.sin(g.state.minutes / 11.0 + n.id) * 1.2f, oz = (float) Math.cos(g.state.minutes / 13.0 + n.id) * 0.8f;
+        float hx = n.homeX + ox, hz = n.homeZ + oz;
+        if (!g.vox.navigation.validPoint(hx, n.y, hz, d -> !d.locked || d.owner == n.id) || !g.vox.sight(n.homeX, n.y + 1, n.homeZ, hx, n.y + 1, hz)) { hx = n.homeX; hz = n.homeZ; }
+        if (goTo(n, hx, hz, false, 1.4f)) ai.desire(n, AiSystem.A_IDLE);
+        Schedule.Activity plan = Schedule.now(n, g.state.weekday(), g.state.hourOfDay());
+        n.lastOutcome = plan == Schedule.Activity.MORNING ? "getting up and dressed" : plan == Schedule.Activity.REST ? "resting at home" : plan == Schedule.Activity.MEAL ? "a meal at home" : "chores at home";
+        // (0.3.3) one meal at mealtime, not one every frame of it (a grower ate a whole basket of apples at the table)
+        if (plan == Schedule.Activity.MEAL && n.hunger > 0.15f || n.hunger > 0.5f) {
+            for (var grid : n.grids()) for (ItemStack st : grid.stacks()) if (st.def.heal > 0 && st.def != Items.ALE) {
+                n.takeItems(st.def, 1); g.state.burn(st.def, 1); n.hunger = 0; g.state.commit("NpcAte", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, st.def.name + " at home"); return;
+            }
+        }
+    }
+
+    /**
+     * The market errand: to their town's market counter, a loaf or two for the larder if the pack is short of food and the
+     * purse can stand it, a look over the stall; then on with the day.
+     */
+    private void errand(Npc n) {
+        var shop = g.econ.localShop(n);
+        if (shop == null) { n.lastOutcome = "no market to go to"; n.nextThink = 0; return; }
+        if (!goTo(n, shop.counterX + ((n.id % 3) - 1) * 0.8f, shop.counterZ + 0.4f, false, 1.4f)) { n.lastOutcome = "off to " + shop.name + " (market errand)"; return; }
+        ai.desire(n, AiSystem.A_IDLE);
+        int food = 0;
+        for (var grid : n.grids()) for (ItemStack st : grid.stacks()) if (st.def.heal > 0) food += st.amount;
+        if (food < 2 && g.state.minutes - n.errandDoneAt > 240 && shop.stock.count(Items.BREAD) > 0 && n.has(Items.COINS, g.econ.buyPrice(shop, Items.BREAD) * 2) && n.role != Npc.Role.MERCHANT) {
+            var r = g.econ.buy(n, shop, Items.BREAD, 2, g.state.newRequestId());
+            n.lastOutcome = "bought bread at " + shop.name + " -> " + r.status();
+            n.errandDoneAt = g.state.minutes;
+        } else n.lastOutcome = "looking over the stalls at " + shop.name;
+    }
+
     /** (0.3.0, the Weekly System) Whether it is the week's rest for this person: Solday from noon, ordinary trades only. */
     boolean restDay(Npc n) {
         return switch (n.role) {
@@ -787,6 +947,7 @@ public final class Brain {
     private Investigation choose(Npc n, long subject, Stealth.Aware w) {
         Investigation.Stimulus st = g.time - n.violenceHeardAt < 4 ? Investigation.Stimulus.VIOLENCE : w.seenAt >= w.heardAt ? Investigation.Stimulus.GLIMPSE : Investigation.Stimulus.SOUND;
         Investigation v = new Investigation(subject, w.x, w.z, st, g.time);
+        v.y = w.y;
         double hour = g.state.hourOfDay();
         boolean night = hour >= 21 || hour < 5.5;
         boolean dark = ai.stealth.light(w.x, DevMap.FLOOR + 1, w.z) < 0.25f;
@@ -863,7 +1024,7 @@ public final class Brain {
                 && (charge == null || charge.settled)) v.stage(Investigation.Stage.DONE, g.time);
         // a fresh clue moves the spot; heard again, a timid plan gives way to fetching help
         if (w != null && Math.max(w.heardAt, w.seenAt) > v.lastClue + 0.05) {
-            v.x = w.x; v.z = w.z; v.lastClue = Math.max(w.heardAt, w.seenAt); v.repeats++;
+            v.x = w.x; v.y = w.y; v.z = w.z; v.lastClue = Math.max(w.heardAt, w.seenAt); v.repeats++;
             if (v.repeats == 2 && (v.plan == Investigation.Plan.CALL_OUT || v.plan == Investigation.Plan.PEEK) && ai.guardFor(n) != null && !n.combatant()) {
                 v.plan = Investigation.Plan.FETCH_HELP; v.why += ", heard it again"; v.stage(Investigation.Stage.FETCHING, g.time);
                 g.ai.say(n, "There it is again... I'm getting the guard.");
@@ -905,14 +1066,14 @@ public final class Brain {
             }
             case APPROACHING -> {
                 // the spot itself, or - placed in a wall or a hedge by an ear's guess - the nearest ground beside it
-                if (!standable(v.x, v.z)) { float[] near = nearestStandable(v.x, v.z); if (near != null) { v.x = near[0]; v.z = near[1]; } }
+                if (!standable(v.x, v.y, v.z)) { float[] near = nearestStandable(v.x, v.y, v.z); if (near != null) { v.x = near[0]; v.z = near[1]; } }
                 float stop = v.plan == Investigation.Plan.PEEK ? 3.5f : 1.3f;
                 boolean run = v.plan == Investigation.Plan.CONFRONT || law && v.stimulus == Investigation.Stimulus.VIOLENCE;
                 if (Math.hypot(v.x - n.x, v.z - n.z) < 6) n.wantYaw = toward;
                 // creeping up to it: a peeker keeps low; a guard at night goes carefully, weapon ready
                 n.sneaking = v.plan == Investigation.Plan.PEEK;
                 if (law && night) g.combat.setBlock(n, false);
-                if (goTo(n, v.x, v.z, run, stop) || t > 25) { n.sneaking = false; v.stage(Investigation.Stage.LOOKING, g.time); n.arrivedAt = g.time; }
+                if (goTo(n, v.x, v.y, v.z, run, stop) || t > 25) { n.sneaking = false; v.stage(Investigation.Stage.LOOKING, g.time); n.arrivedAt = g.time; }
             }
             case LOOKING -> {
                 ai.desire(n, AiSystem.A_HOLD);
@@ -943,7 +1104,7 @@ public final class Brain {
                 Npc guard = v.helper != 0 && g.actor(v.helper) instanceof Npc h && h.alive ? h : ai.guardFor(n);
                 if (guard == null) { v.plan = Investigation.Plan.HIDE; v.stage(Investigation.Stage.HIDING, g.time); return; }
                 v.helper = guard.id;
-                if (goTo(n, guard.x + 1.1f, guard.z + 1.1f, v.stimulus == Investigation.Stimulus.VIOLENCE, 1.8f)) {
+                if (meet(n, guard, 1.1f, 1.8f)) {
                     // the lead handed over: the guard now has it, from their account (where, and what it was)
                     n.wantYaw = (float) Math.atan2(-(guard.x - n.x), -(guard.z - n.z));
                     g.ai.say(n, v.stimulus == Investigation.Stimulus.VIOLENCE ? "Come quick - fighting, by the " + place(v.x, v.z) + "!" : "I heard someone creeping about by the " + place(v.x, v.z) + ".");
@@ -981,6 +1142,7 @@ public final class Brain {
         w.level = Math.max(w.level, Stealth.INVESTIGATING + 0.1f);
         w.x = from.x; w.z = from.z; w.heardAt = g.time; w.settledAt = -99;
         Investigation v = new Investigation(from.subject, from.x, from.z, from.stimulus, g.time);
+        v.y = from.y;
         v.plan = Investigation.Plan.SEARCH; v.courage = ai.bravery(guard); v.why = "told of it";
         v.stage(Investigation.Stage.APPROACHING, g.time);
         guard.investigation = v;
@@ -1079,11 +1241,32 @@ public final class Brain {
     }
 
     /** Safe again, off to the nearest guard to tell him about the beast (he takes it up as a search for it). */
+    /**
+     * (0.3.3, gamefixes: NPC pathfinding) goes to speak to someone: beside them on the same footing, or - when they are
+     * up where this person cannot climb (an officer on the wall-walk, a ladder's top) - to the ground below them, to call
+     * up. Townsfolk spent whole mornings "reconsidering a blocked route" to a lawman five blocks up on the walls.
+     */
+    private boolean meet(Npc n, Actor other, float offset, float within) {
+        boolean above = other.y - n.y > 1.4f;
+        if (above) return goTo(n, other.x, Float.NaN, other.z, true, 2.4f);
+        // beside them where there is floor to stand on: the side facing the one coming first (a fixed corner offset put
+        // the spot inside the wall of the lawman's office, and the nearest footing to it was the roof)
+        float dx = n.x - other.x, dz = n.z - other.z, dl = (float) Math.hypot(dx, dz);
+        float[][] spots = {dl > 0.01f ? new float[]{dx / dl * offset * 1.2f, dz / dl * offset * 1.2f} : new float[]{offset, offset},
+                {offset, offset}, {-offset, offset}, {offset, -offset}, {-offset, -offset}, {offset * 1.3f, 0}, {-offset * 1.3f, 0}, {0, offset * 1.3f}, {0, -offset * 1.3f}};
+        for (float[] o : spots) {
+            float x = other.x + o[0], z = other.z + o[1];
+            if (g.vox.navigation.validPoint(x, other.y, z, d -> !d.locked || d.owner == n.id) && Math.abs(g.vox.navigation.standY(x, other.y, z) - other.y) < 0.8f)
+                return goTo(n, x, other.y, z, true, within);
+        }
+        return goTo(n, other.x, Float.NaN, other.z, true, within + 0.8f);
+    }
+
     private void warn(Npc n) {
         Npc guard = ai.guardFor(n);
         Actor beast = g.actor(n.fearOf);
         if (guard == null || beast == null || !beast.alive) { n.fearOf = 0; n.nextThink = 0; return; }
-        if (goTo(n, guard.x + 1.1f, guard.z + 1.1f, true, 1.8f)) {
+        if (meet(n, guard, 1.1f, 1.8f)) {
             g.ai.say(n, "A " + (beast instanceof rpg.animal.Animal an ? an.kind() : beast.name) + " - by the " + place(n.fearX, n.fearZ) + "! It nearly had me!");
             // a beast among the townsfolk comes before an old trail (but not before a live chase after the player)
             boolean busy = guard.hunt != null && guard.hunt.target == g.player.id && g.time - guard.hunt.clueAt < 20;
@@ -1127,7 +1310,7 @@ public final class Brain {
     private void tipOff(Npc n) {
         Npc officer = tipFor(n);
         if (officer == null) { n.tip = null; n.nextThink = 0; return; }
-        if (!goTo(n, officer.x + 1.1f, officer.z + 1.1f, true, 1.9f)) { n.lastOutcome = "hurrying to tell " + officer.name; return; }
+        if (!meet(n, officer, 1.1f, 1.9f)) { n.lastOutcome = "hurrying to tell " + officer.name; return; }
         var seen = n.tip;
         g.ai.say(n, g.player.name + " - the wanted one! I saw them by the " + place(seen.x(), seen.z()) + ".");
         Hunt h = officer.hunt != null && officer.hunt.target == g.player.id ? officer.hunt : new Hunt(g.player.id, n.name + " saw them", seen.x(), seen.z(), seen.at(), 60);
@@ -1172,9 +1355,9 @@ public final class Brain {
             float lead = (float) Math.min(2.5, Math.hypot(h.vx, h.vz) * 0.7);
             float sp = (float) Math.hypot(h.vx, h.vz);
             float lx = h.x + (sp > 0.3f ? h.vx / sp * lead : 0), lz = h.z + (sp > 0.3f ? h.vz / sp * lead : 0);
-            if (!standable(lx, lz)) { lx = h.x; lz = h.z; }
+            if (!standable(lx, h.y, lz)) { lx = h.x; lz = h.z; }
             if (Math.hypot(lx - n.x, lz - n.z) < 5) n.wantYaw = (float) Math.atan2(-(lx - n.x), -(lz - n.z));
-            if (goTo(n, lx, lz, true, 1.3f)) {
+            if (goTo(n, lx, h.y, lz, true, 1.3f)) {
                 h.reachedLkp = true;
                 h.lookYaw = n.yaw; h.lookUntil = g.time + 1.6;
                 n.lastOutcome = "reached the last known location; nobody there";
@@ -1215,7 +1398,7 @@ public final class Brain {
             if (d < bd && ai.canSee(n, w)) { bd = d; best = w; }
         }
         if (best == null) { n.askAgain = g.time + 2; return false; }
-        if (bd > 2.6f) { goTo(n, best.x, best.z, false, 2.2f); n.lastOutcome = "going to ask " + best.name + " about " + sought.name; return true; }
+        if (bd > 2.6f) { goTo(n, best.x, best.y, best.z, false, 2.2f); n.lastOutcome = "going to ask " + best.name + " about " + sought.name; return true; }
         Npc w = best;
         n.questioned.put(w.id, g.time);
         n.askAgain = g.time + 6;
@@ -1285,18 +1468,20 @@ public final class Brain {
 
     /** Whether someone could stand at a spot: open cells at body height, ground beneath, inside the map. */
     /** The nearest ground one can stand on within three metres of a spot (rings outward), or null. */
-    private float[] nearestStandable(float x, float z) {
+    /** (0.3.1) The same on a given floor (NaN: the ground floor). */
+    private float[] nearestStandable(float x, float y, float z) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
         for (int ring = 1; ring <= 3; ring++)
             for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
                 if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) continue;
-                if (standable(bx + dx + 0.5f, bz + dz + 0.5f)) return new float[]{bx + dx + 0.5f, bz + dz + 0.5f};
+                if (standable(bx + dx + 0.5f, y, bz + dz + 0.5f)) return new float[]{bx + dx + 0.5f, bz + dz + 0.5f};
             }
         return null;
     }
 
-    private boolean standable(float x, float z) {
-        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), f = DevMap.FLOOR;
+    private boolean standable(float x, float z) { return standable(x, Float.NaN, z); }
+    private boolean standable(float x, float y, float z) {
+        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), f = Float.isFinite(y) ? Math.round(y) : DevMap.FLOOR;
         if (bx < 1 || bz < 1 || bx >= DevMap.SX - 1 || bz >= DevMap.SZ - 1) return false;
         return !g.vox.solid(bx, f, bz) && !g.vox.solid(bx, f + 1, bz) && g.vox.solid(bx, f - 1, bz);
     }
@@ -1394,10 +1579,10 @@ public final class Brain {
             case HUNTER -> huntSmallGame(n,dt);
             case BEGGAR -> {
                 Npc neighbor = ai.partnerFor(n);
-                if (neighbor != null && n.hunger > 0.3f) { if (goTo(n, neighbor.x, neighbor.z, false, 1.7f)) { holdFacingPlayer(n); if (g.time - n.lastDialogAt > 30) { ai.say(n, "A little bread, if you can spare it?"); n.lastDialogAt = g.time; } } }
+                if (neighbor != null && n.hunger > 0.3f) { if (goTo(n, neighbor.x, neighbor.y, neighbor.z, false, 1.7f)) { holdFacingPlayer(n); if (g.time - n.lastDialogAt > 30) { ai.say(n, "A little bread, if you can spare it?"); n.lastDialogAt = g.time; } } }
                 else if (goTo(n, n.postX, n.postZ, false, 1)) ai.desire(n, AiSystem.A_IDLE);
             }
-            case SCHOLAR -> { Npc neighbor = ai.partnerFor(n); if (neighbor != null && goTo(n, neighbor.x, neighbor.z, false, 2)) { ai.share(n, neighbor); ai.desire(n, AiSystem.A_IDLE); } }
+            case SCHOLAR -> { Npc neighbor = ai.partnerFor(n); if (neighbor != null && goTo(n, neighbor.x, neighbor.y, neighbor.z, false, 2)) { ai.share(n, neighbor); ai.desire(n, AiSystem.A_IDLE); } }
             case PRIEST -> { if (goTo(n, n.postX, n.postZ, false, 1)) ai.desire(n, AiSystem.A_IDLE); }
             default -> { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); }
         }
@@ -1413,7 +1598,7 @@ public final class Brain {
         var chest = g.objects.farmChest;
         if (trough == null || chest == null) { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); return; }
         if (n.has(Items.ANIMAL_FEED, 1)) {
-            if (goTo(n, trough.x, trough.z - 1.2f, false, 0.9f)) {
+            if (goTo(n, trough.x, trough.y, trough.z - 1.2f, false, 0.9f)) {
                 int moved = 0;
                 for (ItemStack s : n.takeItems(Items.ANIMAL_FEED, n.count(Items.ANIMAL_FEED))) {
                     ItemStack in = new ItemStack(s.def, s.amount, n.id, false, trough.id);
@@ -1450,7 +1635,7 @@ public final class Brain {
             return;
         }
         if (n.has(Items.EGG, 1)) {
-            if (goTo(n, chest.x, chest.z - 1.1f, false, 0.9f)) {
+            if (goTo(n, chest.x, chest.y, chest.z - 1.1f, false, 0.9f)) {
                 int moved = 0;
                 for (ItemStack s : n.takeItems(Items.EGG, n.count(Items.EGG))) { if (chest.contents.add(s)) moved += s.amount; else n.store(s); }
                 n.lastOutcome = "put " + moved + " eggs in the chest";
@@ -1464,7 +1649,7 @@ public final class Brain {
         // ...but boxes filling up are not left while a hungry herd empties the trough as fast as she fills it
         boolean eggsWaiting = boxEggs >= 6 && g.time - n.lastTroughFill < 90;
         if ((feed == 0 && !eggsWaiting || feed < 3 && boxEggs < 4) && chest.contents.count(Items.ANIMAL_FEED) > 0) {
-            if (goTo(n, chest.x, chest.z - 1.1f, false, 0.9f)) {
+            if (goTo(n, chest.x, chest.y, chest.z - 1.1f, false, 0.9f)) {
                 for (ItemStack s : chest.contents.remove(Items.ANIMAL_FEED, Math.min(3, chest.contents.count(Items.ANIMAL_FEED)))) if (!n.store(s)) chest.contents.add(s);
                 n.lastOutcome = "took feed from the chest";
             }
@@ -1472,7 +1657,7 @@ public final class Brain {
         }
         for (var box : g.objects.nestBoxes) {
             if (box.contents.count(Items.EGG) == 0) continue;
-            if (goTo(n, box.x, box.z - 1.0f, false, 0.8f)) {
+            if (goTo(n, box.x, box.y, box.z - 1.0f, false, 0.8f)) {
                 int got = 0;
                 for (ItemStack s : box.contents.remove(Items.EGG, box.contents.count(Items.EGG))) { if (n.store(s)) got += s.amount; else box.contents.add(s); }
                 n.lastOutcome = "collected eggs";
@@ -1488,7 +1673,7 @@ public final class Brain {
         for (rpg.animal.Animal a : g.animals.all()) if (a.alive && a.loaded && a.owner == n.id) mine.add(a);
         if (!mine.isEmpty()) visit = mine.get(k % mine.size());
         if (visit == null) { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); return; }
-        if (goTo(n, visit.x, visit.z, false, 2.4f)) {
+        if (goTo(n, visit.x, visit.y, visit.z, false, 2.4f)) {
             n.wantYaw = (float) Math.atan2(-(visit.x - n.x), -(visit.z - n.z));
             n.lastOutcome = "checked on a " + visit.kind().toLowerCase();
         }
@@ -1511,7 +1696,7 @@ public final class Brain {
         hunter.wantYaw=(float)Math.atan2(-(quarry.x-hunter.x),-(quarry.z-hunter.z));
         if(quarry.alive) {
             if(hunter.eq.get(ItemDef.Slot.AMMO)==null) { gatherAndSell(hunter,Items.BERRIES,"berry_bush");return; }
-            if(hunter.distTo(quarry)>12) { goTo(hunter,quarry.x,quarry.z,false,10);return; }
+            if(hunter.distTo(quarry)>12) { goTo(hunter, quarry.x, quarry.y, quarry.z,false,10);return; }
             ai.desire(hunter,AiSystem.A_HOLD);
             if(g.time<hunter.busyUntil)return;
             float flight=hunter.distTo(quarry)/52;
@@ -1521,7 +1706,7 @@ public final class Brain {
             hunter.cs.draw=Math.min(1,hunter.cs.draw+dt/0.8f);
             if(hunter.cs.draw>=1 && Math.abs(Actor.wrap(hunter.yaw-hunter.wantYaw))<0.3f && g.combat.shoot(hunter,hunter.wantYaw,hunter.pitch,1)) { hunter.cs.draw=0;hunter.busyUntil=g.time+0.7; }
         }
-        else if(goTo(hunter,quarry.x,quarry.z,false,1.2f) && !g.interact.request(hunter,quarry,"butcher").rejected()) { hunter.lootStarted=g.time;hunter.lootUntil=g.time+3.2;hunter.reachX=quarry.x;hunter.reachY=quarry.y;hunter.reachZ=quarry.z; }
+        else if(goTo(hunter, quarry.x, quarry.y, quarry.z,false,1.2f) && !g.interact.request(hunter,quarry,"butcher").rejected()) { hunter.lootStarted=g.time;hunter.lootUntil=g.time+3.2;hunter.reachX=quarry.x;hunter.reachY=quarry.y;hunter.reachZ=quarry.z; }
     }
 
     private void holdFacingPlayer(Npc n) {
@@ -1582,6 +1767,9 @@ public final class Brain {
      * with neither, they walk to the well (or their post) to drink.
      */
     private void eat(Npc n) {
+        // (0.3.3, gamefixes: the simulation running dynamically) fed is fed: the meal ends the errand. This ran every frame
+        // until the next think - a farmer coming in from the rows ate twenty-four carrots in a row, and the inn bought none
+        if (n.hunger <= 0.01f) { ai.desire(n, AiSystem.A_IDLE); n.goal = Goal.IDLE; n.nextThink = 0; return; }
         ItemStack food = null;
         for (var grid : n.grids()) for (ItemStack s : grid.stacks()) if (food == null && s.def.heal > 0) food = s;
         var shop = g.econ.shopA;
@@ -1623,7 +1811,7 @@ public final class Brain {
         if (p == null) { n.lastOutcome = "no one to talk to"; n.social = 0.3f; return; }
         if (n.socialPartner != p.id || n.socialSide == 0) n.socialSide = n.x > p.x ? 1.4f : -1.4f;
         n.socialPartner = p.id;
-        if (!goTo(n, p.x + n.socialSide, p.z, false, 0.9f)) {
+        if (!goTo(n, p.x + n.socialSide, p.y, p.z, false, 0.9f)) {
             if (g.time < n.navPauseUntil) {
                 n.social = 0.3f;
                 n.socialPartner = 0;
@@ -1649,7 +1837,7 @@ public final class Brain {
         if (lawman == null) { n.lastOutcome = "no lawman in " + m.jurisdiction; return; }
         // the lawman saw it himself: his own word is the report, made where he stands
         if (lawman == n) { Result r = g.law.report(n, m, n); n.lastOutcome = "recorded " + m.kind.toLowerCase() + " he saw himself -> " + r.status(); return; }
-        if (goTo(n, lawman.x + 1.3f, lawman.z + 1.3f, true, 1.6f)) {
+        if (meet(n, lawman, 1.3f, 1.6f)) {
             Result r = g.law.report(n, m, lawman);
             n.lastOutcome = "reported " + m.kind.toLowerCase() + " by " + g.nameOf(m.subject) + " to " + lawman.name + " -> " + r.status() + (r.reason() == null ? "" : " (" + r.reason() + ")");
         }
@@ -1739,9 +1927,18 @@ public final class Brain {
             boolean flyer = t instanceof rpg.monster.Monster fm && fm.kind.flies();
             Actor between = d < 5 && !flyer ? null : g.combat.inLineOfFire(n, t);
             if (d < 5 && !flyer) { choice = "back off to shooting range"; backOff(n, t, 9); }
+            else if (between != null && !ai.hostile(n, between) && n.asideSince >= 0 && g.time - n.asideSince > 8) {
+                // (0.3.3, gamefixes: everyone performing their duties) no clear line to be had: a hunter spent a whole
+                // afternoon stepping round a wolf lying behind its packmate. A mark that is not coming for them is let be;
+                // one that is, is met at close quarters
+                n.asideSince = -1;
+                if (n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 15 || t.cs.phase != Actor.Combat.Phase.IDLE && d < 8) { choice = "close the distance"; goTo(n, t.x, t.y, t.z, true, 1.5f); }
+                else { n.fightTarget = 0; n.goal = Goal.IDLE; n.nextThink = 0; g.combat.setBlock(n, false); ai.giveUp(n, t.id); n.lastOutcome = "no clear shot; let it be"; return; }
+            }
             else if (between != null && !ai.hostile(n, between)) {
                 // someone of no quarrel stands in the line: hold the shot and step aside to a clear one (the side away
                 // from them), rather than loose through them
+                if (n.asideSince < 0) n.asideSince = g.time;
                 choice = "step aside for a clear shot";
                 n.cs.draw = Math.max(0, n.cs.draw - dt);
                 float lx = t.z - n.z, lz = -(t.x - n.x), ll = (float) Math.max(0.01, Math.hypot(lx, lz));
@@ -1758,7 +1955,7 @@ public final class Brain {
                 if (goTo(n, gx, gz, true, 0.8f) || !standable(gx, gz)) n.shotsHere = 0;
             }
             else if (n.cs.draw > 0 || (!n.cs.busy() && g.vox.sight(n.x, n.eyeY(), n.z, t.x, t.chestY(), t.z))) {
-                choice = "draw and shoot";
+                choice = "draw and shoot"; n.asideSince = -1;
                 ai.desire(n, AiSystem.A_HOLD);
                 // the mark led, the drop allowed for; loosed only once the body is round to it, with a hand as steady as
                 // the shooter's Archery makes it

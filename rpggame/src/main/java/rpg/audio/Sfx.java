@@ -361,6 +361,9 @@ public final class Sfx {
         // the mountain lion: the same feline throat, much bigger (pitched down; see pitch())
         calls("animal.lion", "animal/cat_growl.ogg", 3, 0.3f, 3f); one("animal.lion", "animal/cat_roar.ogg", 0);
         calls("animal.duck", "animal/ducks.ogg", 12, 0.12f, 1.5f);
+        // (0.3.4) the deer: an alarm snort (a horse's breath, pitched up and short), and a thin bleat when hurt
+        one("animal.deer", "animal/horse_breath.ogg", 0); one("animal.deer.hurt", "animal/horse_neigh_3.ogg", 0);
+        pitch.put("animal.deer", 1.45f); pitch.put("animal.deer.hurt", 1.75f);
         calls("animal.wolf", "animal/wolf_howls.ogg", 6, 1.0f, 7f);
         calls("animal.wolf.growl", "animal/cat_growl.ogg", 3, 0.3f, 3f);
         calls("animal.coyote", "animal/coyotes_pack.ogg", 8, 0.4f, 5f);

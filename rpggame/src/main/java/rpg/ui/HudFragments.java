@@ -288,6 +288,7 @@ final class HudFragments {
                 lines.add(new SpeechBudget.Line(n.id,words,priority,n.distTo(g.player)));
             }
             var audible=SpeechBudget.select(lines);
+            placed.clear();
             for (Npc n : g.npcs) {
                 if (!n.alive || !n.loaded) continue;
                 float d = n.distTo(g.player);
@@ -311,7 +312,9 @@ final class HudFragments {
                 }
                 if (says != null && d <= 18 && audible.contains(n.id)) {
                     // talking: the words in the bubble, and how they are (if anything) at the bubble's side
-                    float bw = bubble(ui, says, p2[0], top - 4, d);
+                    float appear = says == n.speech && n.speechAt >= 0 ? (float) Math.min(Math.min(1, (g.time - n.speechAt) / 0.18), Math.max(0, (n.speechUntil - g.time) / 0.35)) : 1;
+                    appear = Math.max(0.02f, appear * appear * (3 - 2 * appear));
+                    float bw = bubble(ui, says, p2[0], top - 4, d, talk != null && talk.npc == n.id ? Npc.Voice.SAY : n.voice, appear);
                     mood(ui, n, Math.max(14, p2[0] - bw / 2 - 14), top - 20, d);
                 } else if (!awareness(ui, n, p2[0], top - 14)) mood(ui, n, p2[0], top - 16, d);
             }
@@ -422,51 +425,74 @@ final class HudFragments {
         }
 
         /**
-         * What an NPC says, in a speech bubble over their head (dialogue is text, never a voice). (0.3.0, gamefixes: comic
-         * book style, in its own face) a white balloon with a heavy black outline and a drop shadow, its tail an outlined
-         * wedge to the speaker's head; a shout - a line ending in an exclamation - bursts out of a jagged yellow star
-         * instead. The text is the comic face, black, wrapped to a readable measure; it fades with distance.
+         * What an NPC says, in a balloon over their head (dialogue is text, never a voice). (0.3.1, gamefixes: four kinds of
+         * overhead dialogue, redesigned for readability) each kind its own shape, all in the comic face on a solid paper
+         * with a heavy outline and a soft drop shadow, the words wrapped to a short measure and kept large:
+         * SAY - a rounded white balloon, a tail kinked to the speaker; SHOUT - a jagged yellow burst, bigger lettering;
+         * WHISPER - a smaller cool-grey balloon with a broken (dashed) outline, grey lettering and a dotted tail; THINK - a
+         * scalloped cloud with a trail of three shrinking puffs down to the head, the lettering a soft charcoal.
+         * It fades with distance, never below readable.
          */
-        private float bubble(Ui2D ui, String text, float x, float bottom, float dist) {
-            boolean shout = text.endsWith("!") || text.length() > 3 && text.equals(text.toUpperCase()) && text.chars().anyMatch(Character::isLetter);
-            float size = shout ? 19 : 17, maxW = shout ? 250 : 270, pad = shout ? 16 : 11, lh = size + 2;
-            List<String> lines = wrapIn(ui, ui.comic, text, size, maxW);
+        /** The balloons laid out so far this frame (left, top, right, bottom), so none is drawn over another. */
+        private final List<float[]> placed = new ArrayList<>();
+        /**
+         * (0.3.3, gamefixes: overhead dialogue boxes redone - more pleasant, less jarring) a speech bubble in the manner of
+         * the classic MMO's: a compact dark glass panel, a hair-thin warm border, cream lettering, a small tail - quiet
+         * enough to sit over a crowd without shouting at the eye. The kinds differ only by tint: SHOUT warm amber
+         * lettering in the bold face and a rust edge (no spikes); WHISPER a fainter panel and lilac lettering; THINK grey
+         * lettering and a trail of dots instead of a tail. Lettering shrinks a little with distance and the whole bubble
+         * fades past ten metres; each eases in (a short rise and fade) and fades as the line ends - appear is that 0..1.
+         */
+        private float bubble(Ui2D ui, String text, float x, float bottom, float dist, Npc.Voice voice, float appear) {
+            boolean caps = text.length() > 3 && text.equals(text.toUpperCase()) && text.chars().anyMatch(Character::isLetter);
+            if (voice == Npc.Voice.SAY && (text.endsWith("!") || caps)) voice = Npc.Voice.SHOUT;
+            boolean shout = voice == Npc.Voice.SHOUT, whisper = voice == Npc.Voice.WHISPER, think = voice == Npc.Voice.THINK;
+            Ui2D.Face face = shout ? ui.comicBold : ui.comic;
+            float near = Math.max(0, Math.min(1, (dist - 4) / 14f));
+            float size = (shout ? 17.5f : 16.5f) - 2.0f * near, maxW = 240 - 30 * near, padX = 11, padY = 6, lh = size + 2.5f;
+            List<String> lines = wrapIn(ui, face, text, size, maxW);
+            // balanced lines: the narrowest box that keeps the same number of lines (no lone word on the last one)
+            if (lines.size() > 1) {
+                float lo = maxW * 0.45f, hi = maxW;
+                for (int k = 0; k < 7; k++) { float mid = (lo + hi) / 2; if (wrapIn(ui, face, text, size, mid).size() > lines.size()) lo = mid; else hi = mid; }
+                lines = wrapIn(ui, face, text, size, hi + 1);
+            }
             float bw = 0;
-            for (String l : lines) bw = Math.max(bw, ui.width(ui.comic, l, size));
-            bw += pad * 2;
-            float bh = lines.size() * lh + pad * 2 - 2;
-            float bx = Math.max(6, Math.min(hud.w - bw - 6, x - bw / 2)), by = bottom - bh - 14;
-            float a = Math.max(0.4f, Math.min(1, (18 - dist) / 6));
-            int ink = Style.fade(0xFF111111, a), paper = Style.fade(shout ? 0xFFFFF0A0 : 0xFFFFFEF8, a), shade = Style.fade(0x50000000, a);
-            float o = 2.5f;
-            // the tail: from under the balloon, kinked toward the speaker
-            float tx = Math.max(bx + 14, Math.min(bx + bw - 14, x)), ty = by + bh - 2, tipX = x + (x < bx + bw / 2 ? -3 : 3), tipY = bottom - 2;
-            if (shout) {
-                // a burst: a star of spikes round the balloon's oval - its shadow, then black, then the colour over
-                float cx = bx + bw / 2, cy = by + bh / 2, rx = bw / 2 + 20, ry = bh / 2 + 12;
-                int spikes = Math.max(14, (int) (bw / 12));
-                for (int pass = 0; pass < 3; pass++) {
-                    float grow = pass == 2 ? 0 : o, ox = pass == 0 ? 3 : 0;
-                    int col = pass == 0 ? shade : pass == 1 ? ink : paper;
-                    for (int i = 0; i < spikes * 2; i++) {
-                        double a0 = i * Math.PI / spikes, a1 = (i + 1) * Math.PI / spikes;
-                        float r0 = i % 2 == 0 ? 1.0f : 0.8f, r1 = i % 2 == 0 ? 0.8f : 1.0f;
-                        float e0 = (i * 7 % 5) * 0.025f;
-                        ui.tri(cx + ox, cy + ox, cx + ox + (float) Math.cos(a0) * (rx * (r0 + e0) + grow), cy + ox + (float) Math.sin(a0) * (ry * (r0 + e0) + grow),
-                                cx + ox + (float) Math.cos(a1) * (rx * r1 + grow), cy + ox + (float) Math.sin(a1) * (ry * r1 + grow), col);
-                    }
-                }
+            for (String l : lines) bw = Math.max(bw, ui.width(face, l, size));
+            bw += padX * 2;
+            float bh = lines.size() * lh + padY * 2;
+            float rise = (1 - appear) * 5;
+            float lift = (think ? 16 : 9) + rise;
+            float bx = Math.max(6, Math.min(hud.w - bw - 6, x - bw / 2)), by = bottom - bh - lift;
+            // stacked, never overlapping: a later (farther) bubble steps up over the ones already placed
+            for (int guard = 0; guard < 8; guard++) {
+                boolean moved = false;
+                for (float[] r : placed) if (bx - 3 < r[2] && bx + bw + 3 > r[0] && by - 3 < r[3] && by + bh + 3 > r[1]) { by = r[1] - bh - 4; moved = true; }
+                if (!moved) break;
+            }
+            placed.add(new float[]{bx - 3, by - 3, bx + bw + 3, by + bh + 3});
+            float a = Math.max(0.5f, Math.min(1, 1 - (dist - 10) / 16f)) * appear * (whisper ? 0.85f : 1);
+            int panel = Style.fade(whisper ? 0xA8141218 : 0xC4120F0C, a);
+            int edge = Style.fade(shout ? 0xD0B0603A : whisper ? 0x907A6A8A : 0xB0B89C64, a);
+            int letters = Style.fade(shout ? 0xFFFFB46A : whisper ? 0xFFD9C2EC : think ? 0xFFC9C6BE : 0xFFF2EBDA, a);
+            float round = 5;
+            float tx = Math.max(bx + 10, Math.min(bx + bw - 10, x)), ty = by + bh, tipY = Math.min(bottom - 2, ty + 7);
+            // a soft drop shadow, the border, the panel, and a faint sheen along the top
+            ui.roundRect(bx + 1, by + 2, bw, bh, round, Style.fade(0x30000000, a));
+            ui.roundRect(bx - 1, by - 1, bw + 2, bh + 2, round + 1, edge);
+            ui.roundRect(bx, by, bw, bh, round, panel);
+            ui.rect(bx + round, by + 1, bw - 2 * round, 1, Style.fade(0x22FFFFFF, a));
+            if (think) {
+                for (int i = 0; i < 3; i++) { float k = (i + 1) / 4f, r = 3.2f - i * 0.8f; ui.disc(tx, ty + 4 + (bottom - 2 - ty - 4) * k, r + 1, edge); ui.disc(tx, ty + 4 + (bottom - 2 - ty - 4) * k, r, panel); }
             } else {
-                ui.roundRect(bx + 3, by + 3, bw, bh, 12, shade);
-                ui.tri(tx - 9 + 3, ty + 3, tx + 9 + 3, ty + 3, tipX + 3, tipY + 3, shade);
-                ui.roundRect(bx - o, by - o, bw + 2 * o, bh + 2 * o, 12 + o, ink);
-                ui.tri(tx - 9 - o * 1.4f, ty, tx + 9 + o * 1.4f, ty, tipX, tipY + o * 1.6f, ink);
-                ui.roundRect(bx, by, bw, bh, 12, paper);
-                ui.tri(tx - 9, ty - 1, tx + 9, ty - 1, tipX, tipY, paper);
+                ui.tri(tx - 6, ty, tx + 6, ty, tx, tipY + 1, edge);
+                ui.tri(tx - 5, ty - 1, tx + 5, ty - 1, tx, tipY, panel);
             }
             for (int i = 0; i < lines.size(); i++) {
                 String l = lines.get(i);
-                ui.text(ui.comic, l, bx + (bw - ui.width(ui.comic, l, size)) / 2, by + pad - 3 + i * lh, size, ink);
+                float lx = bx + (bw - ui.width(face, l, size)) / 2, ly = by + padY - 1 + i * lh;
+                ui.text(face, l, lx + 1, ly + 1, size, Style.fade(0x90000000, a));
+                ui.text(face, l, lx, ly, size, letters);
             }
             return bw;
         }
@@ -511,6 +537,24 @@ final class HudFragments {
             Rpg g = hud.g;
             float cx = hud.w / 2f, cy = hud.h / 2f;
             Player p = g.player;
+            // (0.3.4) under water: the view goes green-blue and dim, and the breath left shows as a row of bubbles that
+            // burst one by one as it runs out (flashing red with none left)
+            if (hud.scene == Hud.Scene.WORLD && g.fluids != null && g.fluids.in(g.controller.cx, g.controller.cy, g.controller.cz))
+                ui.rect(0, 0, hud.w, hud.h, 0x5A0E4250);
+            float lungs = rpg.actor.Swimming.lungs(p);
+            if (hud.scene == Hud.Scene.WORLD && p.oxygen >= 0 && p.oxygen < lungs - 0.05f) {
+                int n = 10;
+                float left = p.oxygen / lungs * n, bx = cx - n * 9 + 9, by = hud.h - 178;
+                boolean out = p.oxygen <= 0;
+                for (int i = 0; i < n; i++) {
+                    float fill = Math.max(0, Math.min(1, left - i));
+                    float bxx = bx + i * 18;
+                    if (fill > 0) {
+                        float r = 4 + 3 * fill;
+                        ui.disc(bxx, by, r, 0xC0A8E4F4); ui.ring(bxx, by, r, 1.2f, 0xE0FFFFFF); ui.disc(bxx - r * 0.35f, by - r * 0.35f, r * 0.25f, 0xE0FFFFFF);
+                    } else ui.ring(bxx, by, 3, 1, out && (int) (g.time * 4) % 2 == 0 ? 0xC0E04030 : 0x40FFFFFF);
+                }
+            }
             // (0.3.0) in the saddle: the jump's charge (its peak marked), the mount's wind, and a Pegasus's vigor in flight
             var ride = hud.scene == Hud.Scene.WORLD ? g.riding.of(p) : null;
             if (ride != null) {
@@ -656,14 +700,17 @@ final class HudFragments {
             shown += (Math.min(1, seen / Stealth.CLEAR) - shown) * 0.2f;
             Npc who = g.ai.stealth.mostAware(p);
             Stealth.Level lv = who == null ? Stealth.Level.UNAWARE : g.ai.stealth.level(who, p);
-            String word = lv == Stealth.Level.ALERT ? "Detected" : lv == Stealth.Level.INVESTIGATING ? "Searched for" : lv == Stealth.Level.CURIOUS ? "Noticed" : shown > 0.5f ? "Exposed" : shown > 0.05f ? "Glimpsed" : "Hidden";
+            // (0.3.1, gamefixes: detection wording) one ladder, the same words the wanted panel uses: Hidden (unseen),
+            // In view (seen, not yet noticed), Noticed (someone is curious), Searching (they are looking), Spotted
+            String word = lv == Stealth.Level.ALERT ? "Spotted" : lv == Stealth.Level.INVESTIGATING ? "Searching" : lv == Stealth.Level.CURIOUS ? "Noticed" : shown > 0.25f ? "In view" : "Hidden";
+            if (who != null && (lv == Stealth.Level.ALERT || lv == Stealth.Level.INVESTIGATING || lv == Stealth.Level.CURIOUS)) word += " by " + who.name;
             int c = lv == Stealth.Level.ALERT ? 0xFFE0573C : lv == Stealth.Level.INVESTIGATING ? 0xFFE8B84A : Style.TEXT;
             Style.card(ui, x, y, 260, 22);
             ui.img("Thieving_Icon", x + 5, y + 4, 14, 0xE0FFFFFF);
             ui.text(word, x + 24, y + 4, 12, c);
             // how exposed, and under it how lit the ground is
-            Style.bar(ui, x + 110, y + 6, 140, 5, shown, lv == Stealth.Level.ALERT ? 0xFFE0573C : 0xFFD8CFB8);
-            Style.bar(ui, x + 110, y + 14, 140, 2, light, 0xFF8C8670);
+            Style.bar(ui, x + 150, y + 6, 100, 5, shown, lv == Stealth.Level.ALERT ? 0xFFE0573C : 0xFFD8CFB8);
+            Style.bar(ui, x + 150, y + 14, 100, 2, light, 0xFF8C8670);
             if (ui.hover(x, y, 260, 22)) hud.tooltip(String.format("Light here %.0f%%. Creeping halves how easily you are seen and quietens your steps.", light * 100));
         }
     }
@@ -1077,12 +1124,15 @@ final class HudFragments {
         Area(Hud h) { super("area"); }
         @Override protected boolean active() { return false; }
         @Override public float width() { return 152; }
-        @Override public float height() { return 34; }
+        @Override public float height() { return 22; }
         @Override public void draw(Ui2D ui, float x, float y) {
             Rpg g = hud.g;
             String jur = DevMap.jurisdiction(g.player.x, g.player.z);
-            ui.flatCentered(jur, x + 76, y, 13, jur.equals(DevMap.WILDS) ? Style.DIM : Style.ACCENT);
-            ui.flatCentered(g.state.clockText(), x + 76, y + 16, 12, Style.DIM);
+            // (0.3.1, gamefixes: duplicate clock, competing HUD styles) the place only - the time is the minimap's, once -
+            // on the same dark plate and in the same lettering as the minimap's clock just above it
+            float ww = ui.width(jur, 12) + 14;
+            ui.rect(x + 76 - ww / 2, y + 2, ww, 17, 0xA0141518);
+            ui.flatCentered(jur, x + 76, y + 4, 12, jur.equals(DevMap.WILDS) ? 0xFFB8B0A2 : 0xFFE9D9A8);
         }
     }
 
@@ -1103,6 +1153,10 @@ final class HudFragments {
         private float searchLeft = -1, searchTotal = 1;
         private double builtAt = -1;
         private long lawRevision=-1;
+        /** When each witness's sighting was first listed; how long a passive one stays; how many of each kind are named. */
+        private final java.util.Map<Memory, Double> witnessSeen = new java.util.IdentityHashMap<>();
+        private static final double WITNESS_SHOWN = 20;
+        private static final int MAX_WITNESS_ROWS = 3;
         Wanted(Hud h) { super("wanted"); h.events.listen((type, detail) -> { if (type.equals("law")) builtAt = -1; }); }
         @Override protected boolean active() { refresh(); return !rows.isEmpty() || heat > 0 || searchLeft > 0 || spotted; }
         @Override public float width() { return W; }
@@ -1125,6 +1179,8 @@ final class HudFragments {
             heat = total <= 0 ? 0 : total <= g.cfg.pursuitBounty ? 1 : total < g.cfg.ambushBounty ? 2 : total < g.cfg.lockdownBounty ? 3 : total <= g.cfg.posseBounty ? 4 : 5;
             int closing = 0, searchers = 0, outlaws = 0;
             String outlawKind = "";
+            int reporting = 0, seen = 0, quiet = 0;
+            java.util.Set<Memory> live = new java.util.HashSet<>();
             searchLeft = -1;
             for (Npc n : g.npcs) {
                 if (!n.alive || !n.loaded) continue;
@@ -1145,12 +1201,22 @@ final class HudFragments {
                 for (Memory k : n.memories) if (k.subject == me && g.law.awaitingReport(k) && (k.witness == 0 || k.witness == n.id)) { m = k; break; }
                 if (m == null) continue;
                 Npc lawman = g.ai.lawmanFor(m.jurisdiction);
+                // (0.3.2, gamefixes: witnesses stayed on the HUD too long) one on the way to the watch is shown for as long
+                // as the walk lasts; one who only saw it is news for a little while (WITNESS_SHOWN seconds), then folds
+                // into a count - it used to stay listed for as long as they kept it to themselves, for good
+                double first = witnessSeen.computeIfAbsent(m, k -> g.time);
                 if (n.goal == Brain.Goal.REPORT_CRIME && lawman != null) {
                     float d = n.distTo(lawman);
-                    rows.add(new Row("Quest_map_icon", String.format("%s is going to report your %s - %.0f m to go", n.name, m.kind.toLowerCase(), d), Style.ACCENT,
+                    if (reporting++ < MAX_WITNESS_ROWS) rows.add(new Row("Quest_map_icon", String.format("%s is going to report your %s - %.0f m to go", n.name, m.kind.toLowerCase(), d), Style.ACCENT,
                             1 - Math.min(1, d / 60f), Style.ACCENT));
-                } else rows.add(new Row("questionmark_UI", n.name + " saw your " + m.kind.toLowerCase(), Style.DIM, -1, 0));
+                    else quiet++;
+                } else if (g.time - first < WITNESS_SHOWN && seen++ < MAX_WITNESS_ROWS) rows.add(new Row("questionmark_UI", n.name + " saw your " + m.kind.toLowerCase(), Style.DIM, -1, 0));
+                else quiet++;
+                live.add(m);
             }
+            witnessSeen.keySet().retainAll(live);
+            // (only beside something else worth the panel: alone, a quiet witness no longer keeps it up)
+            if (quiet > 0 && (!rows.isEmpty() || total > 0)) rows.add(new Row("questionmark_UI", quiet == 1 ? "1 other witness knows" : quiet + " other witnesses know", Style.FAINT, -1, 0));
             if (g.law.resisting(me)) rows.add(new Row("Boss_Icon", "Resisting arrest", Style.BAD, -1, 0));
             if (outlaws > 0) rows.add(new Row("Boss_Icon", outlaws == 1 ? "A " + outlawKind + " is looking for you" : outlaws + " " + plural(outlawKind) + " are looking for you", Style.WARN, -1, 0));
             hunted = outlaws > 0 && heat == 0 && searchers == 0 && closing == 0;

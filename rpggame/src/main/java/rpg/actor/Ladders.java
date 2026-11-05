@@ -85,7 +85,7 @@ public final class Ladders {
      * direction, world, unit. True when the body is now on it.
      */
     public boolean mount(Actor a, float mx, float mz) {
-        if (a.climb != null || !free(a)) return false;
+        if (a.climb != null || !free(a) || a.ladderLatch) return false;
         int fy = (int) Math.floor(a.y + 0.05f);
         // from below or level: a ladder in the cell ahead (or this one), at the feet or the knees
         for (float reach : new float[]{0f, 0.45f, 0.8f}) {
@@ -125,7 +125,7 @@ public final class Ladders {
         float[] at = cling(a, x, z, c.nx, c.nz);
         c.fx = a.x; c.fy = a.y; c.fz = a.z; c.tx = at[0]; c.ty = y; c.tz = at[1];
         c.phase = phase; c.t = 0; c.startYaw = a.yaw;
-        c.duration = phase == Phase.TOP_IN ? 0.85f : 0.28f;
+        c.duration = phase == Phase.TOP_IN ? 0.85f : 0.5f;
         a.climb = c; a.onLadder = true; a.climbPhase = (y - s[0]) / RUNG;
         a.ladderNX = c.nx; a.ladderNZ = c.nz;
         a.cs.cancel(); a.cs.blocking = false; a.cs.draw = 0;
@@ -176,7 +176,7 @@ public final class Ladders {
                 float floor = c.bottom;
                 if (g.vox.solid(c.cx, c.bottom - 1, c.cz) && y <= floor) {
                     y = floor;
-                    if (want < 0) { c.phase = Phase.STEP_OFF; c.t = 0; c.duration = 0.3f; c.fx = x; c.fy = y; c.fz = z; c.tx = x + c.nx * 0.35f; c.ty = y; c.tz = z + c.nz * 0.35f; }
+                    if (want < 0) { c.phase = Phase.STEP_OFF; c.t = 0; c.duration = 0.45f; c.fx = x; c.fy = y; c.fz = z; c.tx = x + c.nx * 0.35f; c.ty = y; c.tz = z + c.nz * 0.35f; }
                 }
                 if (y < floor - 0.02f && !g.vox.solid(c.cx, c.bottom - 1, c.cz)) { a.y = y; off(a, 0, "ran out of ladder"); return false; }
                 // the top: the hands on the last rung, the body climbs out over the edge onto what it leads to
@@ -184,7 +184,7 @@ public final class Ladders {
                 if (y >= lastHold) {
                     y = lastHold;
                     float[] out = want > 0 ? exit(a, c) : null;
-                    if (out != null) { c.phase = Phase.TOP_OUT; c.t = 0; c.duration = 0.8f; c.fx = x; c.fy = y; c.fz = z; c.ox = out[0]; c.oy = out[1]; c.oz = out[2]; }
+                    if (out != null) { c.phase = Phase.TOP_OUT; c.t = 0; c.duration = 1.05f; c.fx = x; c.fy = y; c.fz = z; c.ox = out[0]; c.oy = out[1]; c.oz = out[2]; }
                     else if (c.speed > 0) c.speed = 0;
                 }
                 a.climbPhase += (y - a.y) / RUNG;
@@ -193,7 +193,7 @@ public final class Ladders {
             }
             case TOP_OUT -> {
                 // up the last rungs until the hips are over the edge, then a knee on the top and the body over it
-                float up = smooth(Math.min(1, k / 0.55f)), over = smooth(Math.max(0, (k - 0.35f) / 0.65f));
+                float up = smooth(Math.min(1, k / 0.5f)), over = smooth(Math.max(0, (k - 0.3f) / 0.7f));
                 x = mix(c.fx, c.ox, over); z = mix(c.fz, c.oz, over);
                 y = mix(c.fy, c.oy + 0.1f, up) + (c.oy - (c.oy + 0.1f)) * over;
                 a.climbPhase += dt * 3.2f * (1 - over);
@@ -222,6 +222,9 @@ public final class Ladders {
         a.climb = null; a.onLadder = false; a.ladderAgain = g.time + 0.35;
         a.x = x; a.y = y; a.z = z; a.grounded = true;
         if (a.body != 0) { g.game.commands().moverPlace(a.body, x, y + 0.02f, z, 0, 0, 0); g.game.commands().moverInput(a.body, 0, 0, 0, 0, 80, 0); }
+        // (0.3.3) climbed down with the camera turned out from the wall, the key that took them down walks them back at
+        // the rungs on the ground: the ladder is not taken again until that key has been let go
+        if (why.contains("bottom") && a == g.player) a.ladderLatch = true;
         var e = g.state.commit("LadderLeft", a.id, 0, null, 0, why);
         if (why.contains("top")) g.prog.award(a, Skill.AGILITY, 3, "ladder climb", e.id());
     }

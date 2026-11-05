@@ -46,8 +46,8 @@ class SocietyRegressionTest {
         dead.alive = false; dead.hp = 0; g.ai.onKilled(dead, g.player);
         for (int i = 0; i < 90; i++) game.tick(1f / 60);
         Corpse corpse = (Corpse) g.objects.get(dead.corpse); guard.yaw = (float) Math.PI / 2; guard.nextThink = 0;
-        for (int i = 0; i < 600 && !corpse.delivered; i++) game.tick(1f / 60);
-        assertTrue(corpse.delivered, guard.goal + ": " + guard.lastOutcome + " / " + guard.goalReason);
+        for (int i = 0; i < 900 && !corpse.delivered; i++) game.tick(1f / 60);   // (walked, laid on the stone, knelt over: 15 s)
+        assertTrue(corpse.delivered, guard.goal + ": " + guard.lastOutcome + " / " + guard.goalReason + String.format(" at (%.1f,%.1f) to (%.1f,%.1f) legs %s", guard.x, guard.z, guard.gx, guard.gz, guard.legs == null ? "-" : guard.legs.length + "@" + guard.legAt) + " busy " + g.carrying.busy(guard) + " ready " + g.carrying.ready(guard) + " heldBy " + corpse.heldBy + " plot " + g.graveyards.nearest(guard) + " dest " + java.util.Arrays.toString(g.graveyards.nearest(guard) == null ? null : g.graveyards.destination(g.graveyards.nearest(guard))) + " laying " + guard.layingSince);
         assertEquals(0, guard.carryBody); assertEquals(0, corpse.heldBy); assertNull(dead.eq.get(ItemDef.Slot.MAIN));
         var memorial = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Container c && c.kind.equals("memorial") && c.buried && c.burialPlot.equals("test plot")).map(o -> (rpg.objects.Container)o).findFirst().orElseThrow();
         var recovered = memorial.contents.stacks().stream().filter(item -> item.origin == 929).findFirst().orElseThrow();

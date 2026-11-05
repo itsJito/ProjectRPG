@@ -21,8 +21,28 @@ public final class Skills {
         public boolean levelledUp() { return toLevel > fromLevel; }
     }
 
+    /**
+     * (0.3.4, gamefixes: ale) Levels lent for a while (a drink of ale: five of Strength), ebbing a level at a time: the
+     * level read everywhere is the earned one plus what is left of the loan. It is never XP, and never kept.
+     */
+    private final float[] boost = new float[Skill.COUNT];
+    private boolean boosted;
+
     public long xp(Skill s) { return xp[s.ordinal()]; }
-    public int level(Skill s) { return XpTable.levelFor(xp[s.ordinal()]) + beyond[s.ordinal()]; }
+    public int level(Skill s) { return XpTable.levelFor(xp[s.ordinal()]) + beyond[s.ordinal()] + (boosted ? (int) Math.ceil(boost[s.ordinal()] - 1e-4f) : 0); }
+    /** The level earned, without anything lent. */
+    public int baseLevel(Skill s) { return XpTable.levelFor(xp[s.ordinal()]) + beyond[s.ordinal()]; }
+    /** Lends levels: a second drink tops the loan back up rather than stacking past it. */
+    public void boost(Skill s, float levels) { boost[s.ordinal()] = Math.max(boost[s.ordinal()], levels); boosted = true; }
+    public float boost(Skill s) { return boost[s.ordinal()]; }
+    public boolean boosted() { return boosted; }
+    /** The loan ebbs: so many levels a second. */
+    public void ebb(float dt, float perSecond) {
+        if (!boosted) return;
+        boolean any = false;
+        for (int i = 0; i < boost.length; i++) if (boost[i] > 0) { boost[i] = Math.max(0, boost[i] - dt * perSecond); any |= boost[i] > 0; }
+        boosted = any;
+    }
     /** A monster's stat: its level, however high (over 100, the excess rides beyond the XP table). */
     public void setStat(Skill s, int level) { setLevel(s, Math.min(XpTable.MAX_LEVEL, level)); beyond[s.ordinal()] = Math.max(0, level - XpTable.MAX_LEVEL); }
 

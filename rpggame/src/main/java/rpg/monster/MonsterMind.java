@@ -117,7 +117,13 @@ public final class MonsterMind {
         float intrusion = m.lair != 0 ? Math.max(0, 1 - lairD / Math.max(6, m.kind.range)) * m.kind.territory : 0;
         // (0.2.2, AI choices) whoever stands in the heart of the lair is dealt with before anyone passing at its edge
         if (lairD < m.kind.core) intrusion += 0.5f * Math.max(0.3f, m.kind.territory);
-        float score = (proximity + noise + damage + armed + intrusion) * fresh * Math.abs(regard);
+        // (0.3.3) an old score: someone who hurt it before is known again on sight - hated if it gave as good as it got,
+        // dreaded if it was beaten
+        float[] old = m.grudge.get(t.id);
+        float hate = old == null ? 0 : Math.min(0.6f, old[0] * 0.8f) * (old[1] > 0.5f ? 0 : 1);
+        // (it weighs only what is sensed now: a grudge makes someone in sight more hated, never a stale trace a pursuit)
+        float score = (proximity + noise + damage + armed + intrusion + hate * fresh) * fresh * Math.abs(regard);
+        if (old != null && old[1] > 0.5f && m.kind.woundedAt > 0 && lairD >= m.kind.core) return -score * (1 + old[0]);
         // how strong it looks against this monster and its fellows near it: a cautious kind keeps clear of something much
         // stronger (it becomes a thing to fear); brutes, the bound dead and the apex kinds do not weigh it so
         float caution = switch (m.kind.archetype) { case SOLITARY_BRUTE, BOUND_DEAD, APEX_SOVEREIGN -> 0; case APEX_HUNTER -> 0.4f; default -> 1; };
@@ -301,6 +307,37 @@ public final class MonsterMind {
         return true;
     }
 
+    /**
+     * (0.3.2, gamefixes: monster AI and animations expanded) its prey up where it cannot follow - on a roof, a wall, a
+     * ledge: it paces back and forth beneath, looking up; every few seconds it roars up at it (heard by its kin, who come);
+     * anything with hands to throw with picks up a stone and hurls it; and after a long while of it, it gives up and goes
+     * back to watching. All of it real: the stones fly and strike by the same rules as any throw, the roar is a call.
+     */
+    private void thwarted(Monster m, Actor t) {
+        if (m.thwartedSince < 0 || g.time - m.thwartedSince > 40) m.thwartedSince = g.time;
+        float since = (float) (g.time - m.thwartedSince);
+        if (since > 30) { m.thwartedSince = -1; m.state = State.ALERT; m.nextThink = g.time + 4; m.lastOutcome = "gave up on " + t.name + " out of reach"; return; }
+        // pacing: back and forth along a short beat under it
+        float beat = (float) Math.sin(g.time * 0.7 + m.id) * 2.2f, side = (float) Math.cos(g.time * 0.31 + m.id) * 0.8f;
+        float fx = (float) Math.sin(m.yaw), fz = (float) Math.cos(m.yaw);
+        sys.moveTo(m, t.x + fz * beat + fx * side, t.z - fx * beat + fz * side, false, 0.6f);
+        m.wantYaw = yawTo(m, t.x, t.z);
+        m.pitch = (float) Math.atan2(t.chestY() - m.chestY(), Math.max(0.3f, m.distTo(t)));
+        if (g.time >= m.tauntAt + 6 + (m.id % 3)) {
+            m.tauntAt = g.time;
+            sys.sound(m, m.kind.alarmSound, 1f);
+            for (Monster o : sys.kin(m, 22)) if (o.target == 0 && o.state != State.ENGAGE) { o.target = t.id; o.nextThink = g.time + 0.3; }
+            m.lastOutcome = "roaring up at " + t.name;
+        }
+        boolean hands = m.kind.form == MonsterKind.Form.HUMANOID && m.kind != MonsterKind.GHOST && m.kind != MonsterKind.ZOMBIE;
+        if (hands && since > 3 && g.time >= m.nextRanged && Math.hypot(t.x - m.x, t.z - m.z) > 1.0f) {
+            m.nextRanged = g.time + 3.5 + (m.id % 4) * 0.4;
+            m.throwAt = g.time;
+            g.combat.hurl(m, null, "boulder", t.x, t.chestY(), t.z, 15, 9.8f, Math.max(1, m.kind.damage * 0.35f), m.kind.impact * 0.4f, rpg.item.ItemDef.DamageType.BLUNT);
+            m.lastOutcome = "throwing stones up at " + t.name;
+        } else if (m.lastOutcome == null || !m.lastOutcome.startsWith("roaring")) m.lastOutcome = "pacing beneath " + t.name + ", out of reach";
+    }
+
     /** What a state does as it begins: a call to the pack, a roar, a hush. */
     private void enter(Monster m) {
         switch (m.state) {
@@ -313,7 +350,12 @@ public final class MonsterMind {
                 } else sys.sound(m, m.kind.alarmSound, 0.8f);
             }
             case ALERT -> sys.sound(m, m.kind.idleSound, 0.5f);
-            case FLEE -> { m.target = 0; m.cs.cancel(); }
+            case FLEE -> {
+                // (0.3.3) put to flight by the one who hurt it: that is remembered as a beating
+                float[] gr = m.cs.lastAttacker != 0 && g.time - m.cs.lastHurt < 20 ? m.grudge.get(m.cs.lastAttacker) : null;
+                if (gr != null) gr[1] = 1;
+                m.target = 0; m.cs.cancel();
+            }
             default -> { }
         }
     }
@@ -441,6 +483,11 @@ public final class MonsterMind {
         m.wantYaw = yawTo(m, t.x, t.z);
         m.pitch = (float) Math.atan2(t.chestY() - m.chestY(), Math.max(0.3f, m.distTo(t)));
         m.wantAltitude = m.kind.flies() ? Math.max(0, t.y - m.y + (m.kind == MonsterKind.DRAGON ? 6 : 1.4f)) : 0;
+        // (0.3.1, gamefixes: a ghost hovering at someone swung over their head and never landed a touch) close in, a flyer
+        // drops to strike: its chest level with its foe's (the ground under it is its foe's floor)
+        float edge = m.distTo(t) - t.radius - m.radius;
+        if (m.kind.flies() && m.kind != MonsterKind.DRAGON && edge < m.kind.reach * m.kind.scale() + 1.6f)
+            m.wantAltitude = Math.max(0.05f, (t.y + (t.chestY() - t.y)) - (m.chestY() - m.y) - (m.y - m.altitude) + (m.kind == MonsterKind.IMP ? 0.2f : 0));
         boolean busy = m.cs.busy() || g.time < m.windupUntil;
         // a telegraphed strike under way (the creatures' wind-ups): it lands when the wind-up ends
         if (busy) { hold(m); return; }
@@ -457,6 +504,8 @@ public final class MonsterMind {
         if (!m.kind.flies() && t.y>m.y+.75f && !ranged) {
             g.ai.walkToAtHeight(m,t.x,t.y,t.z,true,.3f);
             if(m.legs!=null && m.hasGoalPos)return;
+            // (0.3.2) no way up to it at all: it does not stand frozen below nor wander off at once
+            if (t.y > m.y + 1.6f || d > reach + 0.6f) { thwarted(m, t); return; }
         }
         // the harassers keep moving: hit and run; the ranged keep their distance; the brutes close in
         if (m.kind == MonsterKind.BAT) { batFight(m, t, d, reach, ranged); return; }
@@ -464,9 +513,21 @@ public final class MonsterMind {
         switch (m.kind.archetype) {
             case HARASSER -> {
                 if (ranged && sys.rnd(m) < 0.6) { sys.ranged(m, t); return; }
-                if (d < reach + 0.3f && g.time >= m.nextStrike) { attack(m, t); m.tx = m.x + (m.x - t.x) * 1.5f; m.tz = m.z + (m.z - t.z) * 1.5f; return; }
-                if (g.time - m.nextStrike < 1.2 && d < 4) { sys.moveTo(m, m.tx, m.tz, true, 0.8f); return; }   // flit out, then back in
-                sys.moveTo(m, t.x, t.z, true, reach);
+                // (0.3.1, gamefixes: imps hung on their mark instead of hitting and running) scratch, then swoop out three
+                // to five metres at a slant and up, and come back in from another side - never still, never where a
+                // swing was aimed a moment ago
+                if (d < reach + 0.3f && g.time >= m.nextStrike) {
+                    attack(m, t);
+                    double side = (m.id + (long) (g.time * 3)) % 2 == 0 ? 1 : -1, away = Math.atan2(m.z - t.z, m.x - t.x) + side * (0.6 + sys.rnd(m) * 0.7);
+                    float out = 3f + (float) sys.rnd(m) * 2f;
+                    float[] open = sys.open(m, t.x + (float) Math.cos(away) * out, t.z + (float) Math.sin(away) * out);
+                    m.tx = open[0]; m.tz = open[1]; m.swoopUntil = g.time + 1.1 + sys.rnd(m) * 0.6;
+                    return;
+                }
+                if (g.time < m.swoopUntil) { sys.moveTo(m, m.tx, m.tz, true, 0.6f); m.wantAltitude = Math.max(m.wantAltitude, 2.2f); return; }
+                // coming in: at an angle round the mark rather than straight down its line
+                float in = (float) (Math.atan2(m.z - t.z, m.x - t.x) + 0.35 * Math.sin(g.time * 1.7 + m.id));
+                sys.moveTo(m, t.x + (float) Math.cos(in) * (reach * 0.6f + t.radius + m.radius), t.z + (float) Math.sin(in) * (reach * 0.6f + t.radius + m.radius), true, 0.25f);
             }
             default -> {
                 if (ranged && (d > reach + 4 || m.kind == MonsterKind.DRAGON && sys.rnd(m) < 0.45) && sys.rnd(m) < 0.5) { sys.ranged(m, t); return; }
@@ -488,8 +549,9 @@ public final class MonsterMind {
                 }
                 // a swing missed and the foe is recovering from it: in at once
                 if (t.cs.phase == rpg.actor.Actor.Combat.Phase.RECOVER && d <= reach + 0.6f && m.nextStrike - g.time < 0.5) m.nextStrike = g.time;
-                if (d <= reach + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); if (g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m); } }
-                else { float[] way = approach(m, t, d, reach); sys.moveTo(m, way[0], way[1], true, way[2]); }
+                // (0.3.1) a hovering body closes right in before it strikes: from the edge of its reach its blow fell short
+                if (d <= reach * (m.kind.flies() ? 0.5f : 1f) + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); if (g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m); } }
+                else { float[] way = approach(m, t, d, m.kind.flies() ? reach * 0.4f : reach); sys.moveTo(m, way[0], way[1], true, way[2]); }
                 // a target it cannot get to (up on something, behind something) - it adapts: throws, backs off, calls help
                 if (d > reach + 0.5f && Math.hypot(m.vx, m.vz) < 0.2f) m.outOfReach += dt; else m.outOfReach = Math.max(0, m.outOfReach - dt);
                 if (m.outOfReach > 4) { m.outOfReach = 0; if (m.kind.ranged != null) m.nextRanged = 0; else { m.state = State.ALERT; m.nextThink = g.time + 3; } }
@@ -660,6 +722,10 @@ public final class MonsterMind {
         if (by == null) return;
         Known k = m.known.computeIfAbsent(by.id, Known::new);
         k.damage += damage; k.x = by.x; k.z = by.z; k.at = g.time; k.sense = "struck";
+        // (0.3.3) the grudge: how much of its life they have taken, and whether they beat it
+        float[] gr = m.grudge.computeIfAbsent(by.id, id -> new float[2]);
+        gr[0] = Math.min(3, gr[0] + damage / Math.max(1, m.maxHp()));
+        if (m.hp / Math.max(1, m.maxHp()) < 0.33f) gr[1] = 1;
         k.threat = threat(m, k);
         m.fear = Math.min(1.5f, m.fear + damage / Math.max(1, m.maxHp()) * 1.2f * (m.kind.woundedAt > 0 ? 1 : 0));
         m.nextThink = Math.min(m.nextThink, g.time + 0.1);

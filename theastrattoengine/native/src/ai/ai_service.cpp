@@ -311,6 +311,7 @@ void AiService::plan(Engine& e, Agent& a, const VoxelWorld* w) {
 void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, PhysicsService* phys) {
     Mover* m = phys ? phys->mover(a.body) : nullptr;
     if (m && m->posed) return;
+    Pathfinder::Swimmer swimmer((a.flags & ASTRATTO_AGENT_SWIMS) != 0);
     float wantX = 0, wantZ = 0, jump = 0;
     if(m){m->climb=false;m->wishY=0;}
     a.yieldTime=std::max(0.f,a.yieldTime-dt);a.yieldCooldown=std::max(0.f,a.yieldCooldown-dt);
@@ -527,6 +528,7 @@ void AiService::step(Engine& e, float dt) {
             q.doors = (a.flags & ASTRATTO_AGENT_DOORS) != 0;
             q.goalY = true;
             q.mantle = (a.flags & ASTRATTO_AGENT_MANTLE) != 0;
+            q.swims = (a.flags & ASTRATTO_AGENT_SWIMS) != 0;
             uint32_t expansions = 0;
             auto& finder=*finders_[worker];
             if (!finder.path(*w, tune, q, a.route, expansions)) a.route.clear();

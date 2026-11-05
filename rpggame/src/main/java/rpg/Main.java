@@ -194,6 +194,7 @@ public final class Main {
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
         if (!fresh && profile.hasSave() && !new SaveSystem(g).load(profile.save())) g.chat.warn("The save for " + profile.name + " could not be loaded: a fresh start.");
         if (fresh) new SaveSystem(g).save(profile.save());
+        gfx.preloadWorld(g, g.player.x, g.player.z);
         System.out.printf("[Load] session, audio, figures and save %.2fs%n", (System.nanoTime() - loadStarted) / 1e9);
         boolean[] toTitle = {false};
         hud.onTitle = () -> { toTitle[0] = true; win.requestClose(); };
@@ -438,7 +439,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.3.0";
+    public static final String VERSION = "Alpha 0.3.4";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

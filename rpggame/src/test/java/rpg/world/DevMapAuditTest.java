@@ -42,7 +42,8 @@ class DevMapAuditTest {
             }
             for (WorldObject o : g.objects.all()) {
                 if (o.removed || o.y < F - 1 || o.x >= DevMap.SX) continue;
-                if (o.def.equals("climb") || o instanceof rpg.objects.Door || o instanceof rpg.objects.Furniture || o instanceof rpg.objects.Node || o instanceof rpg.objects.BuildSpot || o instanceof rpg.dungeon.Dungeons.Door || o instanceof rpg.objects.Fixtures.Board) continue;
+                // (an orchard's apple tree stands in its own trunk, as a felling tree's node does)
+                if (o.def.equals("climb") || o.def.equals("apple_tree") || o instanceof rpg.objects.Door || o instanceof rpg.objects.Furniture || o instanceof rpg.objects.Node || o instanceof rpg.objects.BuildSpot || o instanceof rpg.dungeon.Dungeons.Door || o instanceof rpg.objects.Fixtures.Board) continue;
                 int bx = (int) Math.floor(o.x), by = (int) Math.floor(o.y + 0.05f), bz = (int) Math.floor(o.z);
                 int b = g.vox.block(bx, by, bz);
                 if (b != Blocks.AIR && !Blocks.objectCell(b) && !Blocks.plant(b) && b != Blocks.WATER && b != Blocks.EMBERS && b != Blocks.FENCE) buried.add(o.def + " '" + o.name + "' at " + bx + "," + by + "," + bz + " in block " + b);

@@ -30,6 +30,18 @@ public class Actor {
     public double leapAt = -99, chargeAt = -99;
     /** Sprinting with the shoulder down (Agility 10): people in the way are barged aside. */
     public boolean charging;
+    /** (0.3.1) Contextual carriage, eased 0..1 by the game: cowering from a blow close by; a hand over the brow in rain. */
+    public float cower, rainCover;
+    /**
+     * (0.3.4) In water (Swimming): the mode the rig draws (wading, treading water, swimming, hauling out), the stroke's
+     * phase, the body's tilt toward the horizontal and the eased swim pose; the breath left (seconds, -1: full) and when
+     * the water next takes a point of health from a body out of breath. Animation only reads these.
+     */
+    public int swimMode;
+    public float swimStroke, swimTilt, swimPose, oxygen = -1;
+    public double drownAt;
+    /** (0.3.3) Hands held out to a fire's warmth (eased 0..1); the arms hugged round against the night's cold (0..1). */
+    public float warmHands, chill;
     /** Where the eyes look (the head turns toward it within its reach; the body follows at its own pace). */
     public float aimYaw;
     public boolean grounded = true;
@@ -39,6 +51,8 @@ public class Actor {
     public Ladders.Climb climb;
     public float climbPhase, ladderNX, ladderNZ = 1;
     public double ladderAgain = -99;
+    /** (0.3.3) Just stepped off a ladder's foot with the key still held: not taken again until it is let go. */
+    public boolean ladderLatch;
     /** (0.3.0) A wielded torch: whether it burns, and when it was last being lit (the lighting takes TORCH_LIGHTING seconds). */
     public boolean torchLit;
     /** (0.3.0) The mount this body rides (its id; 0 when on foot). */
@@ -261,7 +275,7 @@ public class Actor {
 
     public ItemDef main() { return eq.def(ItemDef.Slot.MAIN); }
     public ItemDef off() { return eq.def(ItemDef.Slot.OFF); }
-    public float eyeY() { return y + plan().eyeY() * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
+    public float eyeY() { if (swimMode == Swimming.SWIM) return y + 0.44f; return y + plan().eyeY() * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
     public float chestY() { return y + (Body.LEGS + Body.TORSO * 0.6f) * Body.PX * (sneaking || crouched ? Body.CROUCH_HEIGHT : 1); }
 
     public float distTo(float px, float pz) { return (float) Math.hypot(px - x, pz - z); }

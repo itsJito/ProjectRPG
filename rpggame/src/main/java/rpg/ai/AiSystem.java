@@ -126,7 +126,10 @@ public final class AiSystem {
             Ids.PHILOSOPHER,Ids.STONEMASON,Ids.PALACE_BEGGAR,Ids.CITIZEN_1,Ids.CITIZEN_2,Ids.CITIZEN_3,Ids.FISHER_P,Ids.HUNTRESS,Ids.CITIZEN_4,Ids.CENTURION,
             Ids.ARTHUR,Ids.LANCELOT,Ids.GAWAIN,Ids.TRISTAN,Ids.PERCIVAL,Ids.MERLIN,
             Ids.CARPENTER_CITY,Ids.CARPENTER_TOWN,Ids.CARPENTER_WOOD,Ids.CARPENTER_PALACE,Ids.WOODCUTTER_CITY,Ids.WOODCUTTER_TOWN,
-            Ids.MINER_CITY,Ids.MINER_PALACE,Ids.TRADER_CITY,Ids.TRADER_PALACE);
+            Ids.MINER_CITY,Ids.MINER_PALACE,Ids.TRADER_CITY,Ids.TRADER_PALACE,
+            // 0.3.2: the farms' and the inns' people
+            Ids.CROP_FARMER_CITY,Ids.ORCHARD_KEEPER_CITY,Ids.CROP_FARMER_PALACE,Ids.ORCHARD_KEEPER_PALACE,
+            Ids.INNKEEPER_CITY,Ids.BARTENDER_CITY,Ids.COOK_CITY,Ids.INNKEEPER_PALACE,Ids.BARTENDER_PALACE,Ids.COOK_PALACE);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
@@ -224,7 +227,7 @@ public final class AiSystem {
                 Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
                 give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
             }
-            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
+            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) n = homestead(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
         }
     }
 
@@ -319,6 +322,51 @@ public final class AiSystem {
         if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; }
         return n;
     }
+    /**
+     * 0.3.2's residents (gamefixes: apples, carrots and cabbage grown; an inn in DevCity and one in DevPalace, fully staffed
+     * with named people): in each town a crop farmer for the kitchen garden and an orchard keeper for the apple trees, and
+     * at each inn its innkeeper, bartender and cook. Their beds are where they live: the inn's people over their inn, the
+     * DevCity growers in the town's two houses, DevPalace's lodging at the taberna.
+     */
+    private Npc homestead(long id) {
+        var inns = rpg.econ.Inns.LAYOUTS;
+        Npc n = switch ((int) id) {
+            case (int) Ids.CROP_FARMER_CITY -> { Npc t = npc(id, "Tobin", Npc.Role.FARMER, "Crop Farmer", 100.5f, 108.5f, 190); Profession.CROP_FARMER.assign(t);
+                t.skills.setLevel(Skill.HARVESTING, 24); give(t, Items.CARROT_SEEDS, 6); give(t, Items.CABBAGE_SEEDS, 4); give(t, Items.COINS, 30); give(t, Items.BREAD, 1); yield t; }
+            case (int) Ids.ORCHARD_KEEPER_CITY -> { Npc h = npc(id, "Hedda", Npc.Role.FARMER, "Orchard Keeper", 115.5f, 107.5f, 191); Profession.ORCHARD_KEEPER.assign(h);
+                h.skills.setLevel(Skill.HARVESTING, 20); give(h, Items.COINS, 25); give(h, Items.BREAD, 1); yield h; }
+            case (int) Ids.CROP_FARMER_PALACE -> { Npc r = roman(npc(id, "Rufus", Npc.Role.FARMER, "Crop Farmer", 177.5f, 58.5f, 192), 6); Profession.CROP_FARMER.assign(r);
+                r.skills.setLevel(Skill.HARVESTING, 26); give(r, Items.CARROT_SEEDS, 5); give(r, Items.CABBAGE_SEEDS, 5); give(r, Items.COINS, 30); yield r; }
+            case (int) Ids.ORCHARD_KEEPER_PALACE -> { Npc v = roman(npc(id, "Valeria", Npc.Role.FARMER, "Orchard Keeper", 180.5f, 64.5f, 193), 22); Profession.ORCHARD_KEEPER.assign(v);
+                v.skills.setLevel(Skill.HARVESTING, 22); give(v, Items.COINS, 25); yield v; }
+            case (int) Ids.INNKEEPER_CITY -> { float[] at = inns[0].deskSpot(); Npc k = npc(id, "Hamon", Npc.Role.CIVIC, "Innkeeper", at[0], at[1], 194); Profession.INNKEEPER.assign(k);
+                give(k, Items.COINS, 160); k.pickpocketLevel = 12; yield k; }
+            case (int) Ids.BARTENDER_CITY -> { float[] at = inns[0].barSpot(); Npc b = npc(id, "Bess", Npc.Role.MERCHANT, "Bartender", at[0], at[1], 195); Profession.BARTENDER.assign(b);
+                give(b, Items.COINS, 220); b.pickpocketLevel = 8; yield b; }
+            case (int) Ids.COOK_CITY -> { float[] at = inns[0].hearthSpot(); Npc c = npc(id, "Wilfred", Npc.Role.CRAFTSMAN, "Cook", at[0], at[1], 196); Profession.COOK.assign(c);
+                c.skills.setLevel(Skill.COOKING, 34); give(c, Items.COINS, 40); yield c; }
+            case (int) Ids.INNKEEPER_PALACE -> { float[] at = inns[1].deskSpot(); Npc k = roman(npc(id, "Vibius", Npc.Role.CIVIC, "Innkeeper", at[0], at[1], 197), 18); Profession.INNKEEPER.assign(k);
+                give(k, Items.COINS, 180); k.pickpocketLevel = 12; yield k; }
+            case (int) Ids.BARTENDER_PALACE -> { float[] at = inns[1].barSpot(); Npc b = roman(npc(id, "Julia", Npc.Role.MERCHANT, "Bartender", at[0], at[1], 198), 20); Profession.BARTENDER.assign(b);
+                give(b, Items.COINS, 220); b.pickpocketLevel = 8; yield b; }
+            case (int) Ids.COOK_PALACE -> { float[] at = inns[1].hearthSpot(); Npc c = roman(npc(id, "Appius", Npc.Role.CRAFTSMAN, "Cook", at[0], at[1], 199), 15); Profession.COOK.assign(c);
+                c.skills.setLevel(Skill.COOKING, 36); give(c, Items.COINS, 40); yield c; }
+            default -> null;
+        };
+        if (n == null) return null;
+        n.postX = n.x; n.postZ = n.z;
+        if (id == Ids.CROP_FARMER_CITY || id == Ids.ORCHARD_KEEPER_CITY) n.homeJurisdiction = DevMap.ALPHA;
+        float[] bed = homesteadBed(id);
+        if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; }
+        return n;
+    }
+    /** Where a 0.3.2 resident sleeps: a bed of theirs in an inn's plan, or in the extra beds for the growers. */
+    public static float[] homesteadBed(long id) {
+        for (var l : rpg.econ.Inns.LAYOUTS) for (DevMap.Piece p : l.pieces()) if (p.kind().equals("BED") && p.owner() == id) return new float[]{(p.x0() + p.x1() + 1) / 2f, (p.z0() + p.z1() + 1) / 2f};
+        for (DevMap.Piece p : rpg.world.Farming.GROWER_BEDS) if (p.owner() == id) return new float[]{(p.x0() + p.x1() + 1) / 2f, (p.z0() + p.z1() + 1) / 2f};
+        return null;
+    }
+
     /** A citizen of DevPalace: picks what grows and sells it at the market hall. */
     private Npc citizen(long id, String name, float x, float z, long seed) {
         Npc c = roman(npc(id, name, Npc.Role.VILLAGER, "Citizen of DevPalace", x, z, seed), 22);
@@ -358,7 +406,7 @@ public final class AiSystem {
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
     private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
-            "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta");
+            "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
@@ -494,9 +542,15 @@ public final class AiSystem {
      * marked looked into and any look-about for them dropped - so it walks home instead of turning back to every
      * glimpse and turning home again (gamefixes: AI choices flip-flopping each second).
      */
+    /** (0.3.3) A beast given up on lately (no clear shot at it) that is not coming for them now: let be for two minutes. */
+    private boolean letBe(Npc n, Actor an) {
+        Stealth.Aware w = n.aware.get(an.id);
+        return w != null && g.time - w.settledAt < 120 && !(n.cs.lastAttacker == an.id && g.time - n.cs.lastHurt < 15) && an.cs.phase == Actor.Combat.Phase.IDLE;
+    }
+
     void giveUp(Npc n, long quarry) {
-        Stealth.Aware w = n.aware.get(quarry);
-        if (w != null) w.settledAt = g.time;
+        Stealth.Aware w = n.aware.computeIfAbsent(quarry, k -> new Stealth.Aware());
+        w.settledAt = g.time;
         if (n.investigation != null && n.investigation.subject == quarry) n.investigation = null;
     }
 
@@ -554,7 +608,7 @@ public final class AiSystem {
             g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking && n.goal != Brain.Goal.COLLECT ? MOVER_CROUCH : 0));
             face(n, step);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
-            if (!far) footsteps(n, step);
+            if (!far) { footsteps(n, step); carriage(n, step); }
         }
         rumors.update();
         abstractSim();
@@ -584,12 +638,72 @@ public final class AiSystem {
         n.aimYaw = n.yaw + Math.max(-1.1f, Math.min(1.1f, Actor.wrap(look - n.yaw)));
     }
 
+    /**
+     * (0.3.1, gamefixes: human contextual animation and AI) the carriage the moment asks for: someone not in the fight
+     * with a blade swung or a blow landing within a few metres flinches and covers up (the more timid, the more); out
+     * under an open sky in the rain, walking about their business, a hand goes up over the brow. Eased both ways.
+     */
+    void carriage(Npc n, float dt) {
+        float cower = 0;
+        if (!n.combatant() && n.goal != Brain.Goal.FIGHT && !n.reacting) {
+            for (Actor o : swinging()) {
+                if (o == n || !o.alive) continue;
+                float d = n.distTo(o);
+                if (d < 4f) cower = Math.max(cower, (float) Math.sqrt(1 - d / 4f) * (1.5f - bravery(n)) * (o.cs.move == rpg.actor.Actor.Combat.Move.HEAVY ? 1.15f : 1f));
+            }
+            if (g.time - n.cs.lastHurt < 0.8) cower = 1;
+        }
+        n.cower += (Math.min(1, cower) - n.cower) * Math.min(1, dt * (cower > n.cower ? 12 : 3));
+        var w = g.timeSystem.weather;
+        boolean rain = w.rain > 0.35f && n.goal != Brain.Goal.FIGHT && n.goal != Brain.Goal.FLEE && n.main() == null
+                && g.vox.skyLight((int) Math.floor(n.x), (int) Math.floor(n.eyeY() + 1), (int) Math.floor(n.z)) > 0.6f && Math.hypot(n.vx, n.vz) > 0.4f;
+        // (0.3.4, gamefixes: polish the rain cover) any real rain puts the whole hand up (a half-raised arm read as a
+        // fidget), raised briskly and lowered a moment after coming in under cover
+        n.rainCover += ((rain ? 1 : 0) - n.rainCover) * Math.min(1, dt * (rain ? 5 : 2.5f));
+        // (0.3.3, gamefixes: human contextual dynamic animations) standing idle by a fire in the cool of the evening or the
+        // night, the hands go out to it; out under the open sky at night (or in the snow) with nothing in the hands and no
+        // fire near, the arms are hugged in against the cold. Both give way to anything the body is busy with.
+        double hour = g.state.hourOfDay();
+        float cold = Math.max(hour >= 19 || hour < 6.5 ? 1f : hour >= 17.5 ? (float) (hour - 17.5) / 1.5f : 0f, Math.min(1, w.snowCover * 1.5f));
+        boolean idleHands = n.main() == null && n.goal != Brain.Goal.FIGHT && n.goal != Brain.Goal.FLEE && n.goal != Brain.Goal.SLEEP && !n.reacting
+                && n.cower < 0.05f && (n.speech == null || g.time > n.speechUntil) && n.holdingFare == null;
+        float still = (float) Math.hypot(n.vx, n.vz);
+        float warm = 0;
+        if (idleHands && cold > 0.2f && still < 0.3f) for (float[] f : fires()) {
+            float d = (float) Math.hypot(f[0] - n.x, f[1] - n.z);
+            if (d < 3.2f && d > 0.6f) { warm = Math.max(warm, Math.min(1, (3.2f - d) / 1.2f) * cold); n.aimYaw = (float) Math.atan2(-(f[0] - n.x), -(f[1] - n.z)); }
+        }
+        boolean outside = g.vox.skyLight((int) Math.floor(n.x), (int) Math.floor(n.eyeY() + 1), (int) Math.floor(n.z)) > 0.6f;
+        float chill = idleHands && warm < 0.1f && outside && still < 1.6f && n.goal != Brain.Goal.WORK ? cold * 0.9f : 0;
+        n.warmHands += (warm - n.warmHands) * Math.min(1, dt * 2.5f);
+        n.chill += (chill - n.chill) * Math.min(1, dt * 1.5f);
+    }
+
+    /** (0.3.3, optimization) Who is mid-blow this tick, gathered once for everyone's carriage (it was every actor, per NPC, per frame). */
+    private final java.util.List<Actor> swingingNow = new java.util.ArrayList<>();
+    private double swingingAt = -1;
+    private java.util.List<Actor> swinging() {
+        if (swingingAt == g.time) return swingingNow;
+        swingingAt = g.time; swingingNow.clear();
+        for (Actor o : g.actors()) if (o.alive && o.cs.phase != rpg.actor.Actor.Combat.Phase.IDLE && o.cs.move != null) swingingNow.add(o);
+        return swingingNow;
+    }
+    /** Where fires burn now (x, z), refreshed twice a second for everyone's carriage. */
+    private final java.util.List<float[]> fireSpots = new java.util.ArrayList<>();
+    private double fireSpotsAt = -1;
+    private java.util.List<float[]> fires() {
+        if (g.time - fireSpotsAt < 0.5 && fireSpotsAt >= 0) return fireSpots;
+        fireSpotsAt = g.time; fireSpots.clear();
+        for (var o : g.objects.all()) if (o instanceof rpg.objects.Fire f && !f.removed) fireSpots.add(new float[]{f.x, f.z});
+        return fireSpots;
+    }
+
     /** Footfalls near the player, one per planted foot, in time with the gait the figure is drawn walking. */
     private void footsteps(Npc n, float dt) {
         float speed = (float) Math.hypot(n.vx, n.vz);
         if (!n.grounded || speed < rpg.actor.Gait.STILL || g.sfx == null || n.distTo(g.player) > 16) { n.stepClock = 0.5f; return; }
         n.stepClock += dt * rpg.actor.Gait.steps(speed, n.sneaking);
-        if (n.stepClock >= 1) { n.stepClock -= 1; g.sfx.footstep(n, Math.min(1, speed / 5f)); }
+        if (n.stepClock >= 1) { n.stepClock -= 1; g.sfx.footstep(n, Math.min(1, speed / 5f)); g.footfall(n, Math.min(1, speed / 5f)); }
     }
 
     /** After the frame: where the engine put each body, what its agent is doing. */
@@ -833,7 +947,7 @@ public final class AiSystem {
         // from further off; any other in plain sight close by, a fighter goes for (in its own beat) and anyone else keeps
         // away from - a bat at its roost and a ghost at its grave included
         if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) {
-            if (!mo.alive || !mo.loaded || !canSee(n, mo)) continue;
+            if (!mo.alive || !mo.loaded || !canSee(n, mo) || letBe(n, mo)) continue;
             boolean hunting = mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK || n.cs.lastAttacker == mo.id;
             float reach = hunting ? (n.combatant() ? 18 : 12) : (n.combatant() ? 12 : 7);
             // a terror (a dragon over the roofs): seen from far off, it is the alarm raised and the town's business
@@ -844,7 +958,7 @@ public final class AiSystem {
         }
         // a dangerous animal close by: guards deal with it, everyone else gets away from it
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all())
-            if (an.alive && an.loaded && an.threatens(n) && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an)) return an;
+            if (an.alive && an.loaded && an.threatens(n) && n.distTo(an) < (n.combatant() ? 14 : 8) && canSee(n, an) && !letBe(n, an)) return an;
         if (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN) {
             for (Actor a : g.actors()) {
                 if (a == n || !a.alive || a.dummy || alliedWatch(n,a)) continue;
@@ -866,11 +980,14 @@ public final class AiSystem {
     private Actor assailant(Npc n) {
         Actor best = null; float bd = 22;
         for (Actor v : g.actors()) {
-            if (v == n || !v.alive || v.dummy || !(v == g.player || v instanceof Npc vn && vn.loaded) || v.cs.lastAttacker == 0 || g.time - v.cs.lastHurt > 4) continue;
+            // (0.3.1) someone's livestock or dog set upon in front of the watch counts too
+            boolean stock = v instanceof rpg.animal.Animal an && an.owned() && an.loaded;
+            if (v == n || !v.alive || v.dummy || !(v == g.player || v instanceof Npc vn && vn.loaded || stock) || v.cs.lastAttacker == 0 || g.time - v.cs.lastHurt > 4) continue;
             Actor a = g.actor(v.cs.lastAttacker);
             if (a == null || !a.alive || a == n || a.summonOwner != 0 || alliedWatch(n, a) || g.law.inCustody(a)) continue;
             boolean beast = a.domain != astratto.ai.AgentDomain.HUMAN;
-            if (!beast && !g.law.unlawful(a, v)) continue;
+            if (stock && (beast || a.id == ((rpg.animal.Animal) v).owner)) continue;
+            if (!beast && !stock && !g.law.unlawful(a, v)) continue;
             float d = n.distTo(a);
             if (d < bd && n.distTo(v) < 26 && ZonePolicy.routineAllowed(n, a.x, a.z) && canSee(n, a)) { best = a; bd = d; }
         }
@@ -977,6 +1094,7 @@ public final class AiSystem {
         double clue = w == null ? g.time : Math.max(w.seenAt, w.heardAt);
         float patience = n.watch() ? 55 : 22;
         Hunt h = new Hunt(t.id, why, x, z, g.time, patience);
+        h.y = w != null ? w.y : t.y;
         h.clueAt = Math.min(g.time, clue);
         h.vx = t.vx; h.vz = t.vz;
         if (w == null || g.time - w.seenAt > 2.0) { h.vx = 0; h.vz = 0; }   // where they were going is only known from watching them go
@@ -989,7 +1107,7 @@ public final class AiSystem {
             if (o == n || o == t || !o.alive || !o.loaded || o.hunt != null || o.goal == Brain.Goal.FIGHT) continue;
             if (!o.watch() || !o.homeJurisdiction.equals(n.homeJurisdiction) || o.distTo(n) > 35) continue;
             Hunt j = new Hunt(t.id, n.name + " lost " + t.name, x, z, g.time, 55);
-            j.clueAt = h.clueAt; j.vx = h.vx; j.vz = h.vz; j.joined = true;
+            j.clueAt = h.clueAt; j.vx = h.vx; j.vz = h.vz; j.y = h.y; j.joined = true;
             o.hunt = j;
             o.nextThink = 0;
             g.state.commit("SearchJoined", o.id, t.id, DevMap.jurisdiction(x, z), 0, "with " + n.name);
@@ -1007,7 +1125,7 @@ public final class AiSystem {
         g.noise(n, n.x, n.eyeY(), n.z, 20, 0.8f);
         for (Npc o : g.npcs) {
             if (o == n || o.hunt == null || o.hunt.target != t.id || o.distTo(n) > 30) continue;
-            o.hunt.clue(t.x, t.z, t.vx, t.vz, g.time);
+            o.hunt.clue(t.x, t.y, t.z, t.vx, t.vz, g.time);
             o.nextThink = 0;
         }
     }
@@ -1025,7 +1143,7 @@ public final class AiSystem {
                 || law && g.law.inCustody(t))) { n.hunt = null; return; }
         if (t != null) {
             Stealth.Aware w = stealth.of(n, t);
-            if (w != null && Math.max(w.seenAt, w.heardAt) > h.clueAt + 0.05) h.clue(w.x, w.z, w.seenAt >= w.heardAt ? t.vx : 0, w.seenAt >= w.heardAt ? t.vz : 0, Math.max(w.seenAt, w.heardAt));
+            if (w != null && Math.max(w.seenAt, w.heardAt) > h.clueAt + 0.05) h.clue(w.x, w.y, w.z, w.seenAt >= w.heardAt ? t.vx : 0, w.seenAt >= w.heardAt ? t.vz : 0, Math.max(w.seenAt, w.heardAt));
         }
         // Outlaws keep to their camp; the watch shares one pursuit policy.
         boolean leash = n.hostileToPlayer && Math.hypot(h.x - n.spawnX, h.z - n.spawnZ) > 26;
@@ -1146,10 +1264,31 @@ public final class AiSystem {
         if (text != null && n.goal != Brain.Goal.FIGHT) {
             if (text.endsWith("!")) rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.SURPRISED, 0.6);
             else if (text.endsWith("?")) rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.THINKING, 1.2);
-        } n.speak(text,g.time,3.5,false); }
+        } String was = n.speech; n.speak(text,g.time,3.5,false); if (text != null && !text.equals(was) && text.equals(n.speech)) n.voice = voice(n, text); }
+
+    /**
+     * (0.3.1) How a line comes out, from the words and the speaker's moment: an exclamation, an alarm or a line in
+     * capitals is called out; a speaker creeping, a thief or fence at their trade, or anyone by a sleeper at night says it
+     * low; with nobody within earshot to say it to (or an aside in brackets, a trailing-off "...") it is thought aloud.
+     */
+    Npc.Voice voice(Npc n, String text) {
+        String t = text.trim();
+        boolean caps = t.length() > 3 && t.equals(t.toUpperCase()) && t.chars().anyMatch(Character::isLetter);
+        if (t.endsWith("!") || caps || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.WARN) return Npc.Voice.SHOUT;
+        if (t.startsWith("(") || t.startsWith("*") || t.startsWith("Hmm") || t.endsWith("...")) return Npc.Voice.THINK;
+        boolean hushed = n.sneaking || (n.role == Npc.Role.THIEF || n.role == Npc.Role.FENCE) && n.distTo(g.player) < 4;
+        if (!hushed) {
+            double h = g.state.hourOfDay();
+            if (h >= 22 || h < 5.5) for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.asleep() && o.distTo(n) < 8) { hushed = true; break; }
+        }
+        if (hushed) return Npc.Voice.WHISPER;
+        boolean anyone = g.player.alive && n.distTo(g.player) < 9;
+        if (!anyone) for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && !o.asleep() && o.distTo(n) < 9) { anyone = true; break; }
+        return anyone ? Npc.Voice.SAY : Npc.Voice.THINK;
+    }
 
     /** An answer to something said nearby: shown a beat later, so the two lines read as a conversation. */
-    public void reply(Npc n, String text) { n.speak(text,g.time,4.5,true); }
+    public void reply(Npc n, String text) { n.speak(text,g.time,4.5,true); if (text != null && text.equals(n.speech)) n.voice = voice(n, text); }
 
     /** Word of mouth (the rumor system). */
     public final Rumors rumors;
@@ -1325,6 +1464,7 @@ public final class AiSystem {
     // ------------------------------------------------------------------ death, respawn, unloading
     public boolean ensureCorpsePhysical(Npc dead) {
         if(dead.alive || dead.corpse==0 || !(g.objects.get(dead.corpse) instanceof rpg.objects.Corpse corpse) || corpse.removed)return false;
+        if(dead instanceof rpg.monster.Monster mo && mo.kind.form==rpg.monster.MonsterKind.Form.SPIDER)return false;
         if(dead.ragdoll!=0 && g.lastBodies.ragdoll(dead.ragdoll)==null && g.time-dead.reactSince>0.5)dead.ragdoll=0;
         if(dead.ragdoll!=0)return true;
         dead.ragdoll=g.game.reserve(KIND_RAGDOLL);dead.reactSince=g.time;
@@ -1342,6 +1482,8 @@ public final class AiSystem {
         // the body falls as a ragdoll; the mind and the mover are let go. A body already reeling in Sydney's hands is the
         // same body, going limp; otherwise one is made in the pose the figure was last drawn in, moving as it was
         float dx = killer == null ? 0 : n.x - killer.x, dz = killer == null ? 0 : n.z - killer.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
+        // (0.3.2) a spider has no man's body to fall in: it dies on its own legs (Monsters.onKilled, Gfx.spider)
+        if (n instanceof rpg.monster.Monster mo && mo.kind.form == rpg.monster.MonsterKind.Form.SPIDER) return;
         if (g.reactions == null || !g.reactions.died(n)) {
             n.ragdoll = g.game.reserve(KIND_RAGDOLL);
             boolean posed = n.posePts != null && g.time - n.poseAt < 0.5;

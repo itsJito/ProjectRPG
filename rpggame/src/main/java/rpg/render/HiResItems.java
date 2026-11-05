@@ -680,8 +680,44 @@ final class HiResItems {
         }
     }
 
+    /** (0.3.4) The bottles: ale, the empty glass bottle, a bottle of water. */
+    static boolean bottled(ItemDef d) { return d.id.equals("ale") || d.id.equals("glass_bottle") || d.id.equals("bottle_of_water"); }
+
+    /**
+     * (0.3.4) A tall glass bottle with a long neck and a cork: ale in brown glass with a paper label and a sealed stopper;
+     * the empty one clear and pale green, light through it; water in clear glass, filled to the shoulder.
+     */
+    private static ItemModels.Model longBottle(ItemDef d) {
+        boolean ale = d.id.equals("ale"), water = d.id.equals("bottle_of_water");
+        VoxModel m = new VoxModel(12, 32, 12);
+        int glass = mat(ale ? 0x5A3618 : 0xA8D8C0), glassHi = mat(ale ? 0x8A5A2A : 0xE2F6EC), glassLo = mat(ale ? 0x3A220E : 0x78A890);
+        int liquid = mat(ale ? 0x6A3A12 : 0x5AA8D8), liqHi = mat(ale ? 0x9A6020 : 0x9AD4F0);
+        int label = mat(0xE8DCB8), labelInk = mat(0x8A2A1A), cork = mat(0xB08458), corkLo = mat(0x86603A), wax = mat(0x8A1A14);
+        for (int y = 0; y < 32; y++) for (int x = 0; x < 12; x++) for (int z = 0; z < 12; z++) {
+            float dx = x - 5.5f, dz = z - 5.5f, r = (float) Math.sqrt(dx * dx + dz * dz);
+            // the body, a rounded shoulder, a long neck, a lip at the mouth
+            float want = y < 17 ? 4.9f : y < 21 ? 4.9f - (y - 17) * 0.85f : y < 28 ? 1.55f : y < 29 ? 2.0f : y < 31 ? 1.6f : 0;
+            if (want <= 0 || r > want) continue;
+            boolean shell = r > want - 1.05f || y == 0;
+            boolean hi = dx < -1.5f && dz > 0;
+            int c;
+            if (y >= 29) c = ale && y == 30 ? wax : (r > 1.0f ? corkLo : cork);          // the cork (sealed with wax on ale)
+            else if (!shell) {
+                // inside: the liquid up to its line, the rest left hollow
+                boolean full = ale ? y < 25 : water && y < 16;
+                if (!full) continue;
+                c = hi ? liqHi : liquid;
+            } else if (ale && y >= 6 && y <= 13 && dz > -1.5f) c = y == 6 || y == 13 ? labelInk : (y == 9 && dx > -1 && dx < 2 ? labelInk : label);
+            else if (y == 0) c = glassLo;
+            else c = hi ? glassHi : (dx > 2 && dz < 0 ? glassLo : glass);
+            m.set(x, y, z, c);
+        }
+        return new ItemModels.Model(m, 6, 0.5f, 6);
+    }
+
     /** A drink in its vessel: wine in a dark bottle, a restorative in a round flask of pale glass. */
     static ItemModels.Model bottle(ItemDef d) {
+        if (bottled(d)) return longBottle(d);
         boolean wine = d.id.equals("religious_wine");
         VoxModel m = new VoxModel(14, 30, 14);
         int glass = mat(wine ? 0x3A1824 : 0xBFE6EC), glassHi = mat(wine ? 0x5C2A3A : 0xE6F6F8), liquid = mat(wine ? 0x5A0E22 : 0x2EB8D0),

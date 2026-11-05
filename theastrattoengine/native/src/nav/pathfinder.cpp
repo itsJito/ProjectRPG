@@ -25,11 +25,21 @@ inline float heuristic(int x, int z, int gx, int gz) {
     const int hi = dx > dz ? dx : dz, lo = dx > dz ? dz : dx;
     return static_cast<float>(hi) + 0.414f * static_cast<float>(lo);
 }
+/** (gamefixes: people could not find their way to another floor) a goal a floor up or down is that much farther: each
+ *  level costs at least a stair's step, so a search no longer spends its whole budget on the floor under the goal
+ *  before it looks for the stairs. */
+inline float heuristic3(int x, int y, int z, int gx, int gy, int gz) {
+    return heuristic(x, z, gx, gz) + (gy < 0 ? 0.0f : 0.6f * static_cast<float>(std::abs(y - gy)));
+}
 
 }  // namespace
 
 Pathfinder::Pathfinder()
     : nk_(CAP), parent_(CAP), heap_(CAP + 1), slot_(SLOTS), slotGen_(SLOTS, 0), ng_(CAP), nf_(CAP), closed_(CAP) {}
+
+namespace { thread_local bool tSwim = false; }
+Pathfinder::Swimmer::Swimmer(bool on) : was(tSwim) { tSwim = on; }
+Pathfinder::Swimmer::~Swimmer() { tSwim = was; }
 
 bool Pathfinder::pass(const VoxelWorld& w, int x, int y, int z, bool doors) {
     const int id = w.get(x, y, z);
@@ -42,6 +52,7 @@ bool Pathfinder::pass(const VoxelWorld& w, int x, int y, int z, bool doors) {
     // shallow water is waded (a cow into the duck pond, a person across a brook; the cost of it is in the search):
     // liquid with no more liquid over it. Deeper water, over a body's head, stays out of bounds
     if (f & ASTRATTO_BLOCK_LIQUID) {
+        if (tSwim) return true;   // (2.5) a swimmer goes through deep water too
         const int above = w.get(x, y + 1, z);
         return above == 0 || (w.defOf(above).flags & ASTRATTO_BLOCK_LIQUID) == 0;
     }
@@ -118,11 +129,12 @@ void Pathfinder::relax(int from, int x, int y, int z, float cost, int gx, int gz
     const int m = find(key(x, y, z), true);
     if (m < 0 || closed_[m]) return;
     const float g = ng_[from] + cost + learnedCost(key(x,y,z));
-    if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic(x, z, gx, gz); parent_[m] = from; push(m); }
+    if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic3(x, y, z, gx, goalY_, gz); parent_[m] = from; push(m); }
 }
 
 bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuery& q, std::vector<int32_t>& out, uint32_t& expansions) {
     out.clear();partial_=false;capped_=false;query_=&q;
+    Swimmer swimmer(q.swims);
     expansions = 0;
     // Validate before float-to-int conversion. Leave room for neighbour offsets,
     // rounded heights and coordinate differences in the integer search math.
@@ -134,6 +146,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
         !safeCoordinate(q.tx) || !safeCoordinate(q.tz) || (q.goalY && !safeCoordinate(q.ty))) return false;
     const bool doors = q.doors;
     const int goalY = q.goalY ? roundInt(q.ty) : -1;
+    goalY_ = goalY;
     // a new generation of the hash: every slot of the last search is stale without being cleared
     if (++gen_ == 0) { std::fill(slotGen_.begin(), slotGen_.end(), 0); gen_ = 1; }
     count_ = 0; heapN_ = 0;
@@ -149,7 +162,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
     }
     const int gx = floorInt(q.tx), gz = floorInt(q.tz);
     const int s = find(key(x0, y0, z0), true);
-    ng_[s] = 0; nf_[s] = heuristic(x0, z0, gx, gz);
+    ng_[s] = 0; nf_[s] = heuristic3(x0, y0, z0, gx, goalY, gz);
     push(s);
     int best = s;
     float bestH = nf_[s] + (goalY < 0 ? 0.0f : static_cast<float>(std::abs(y0 - goalY)) * 2.0f);
@@ -201,7 +214,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
                 else if (f & ASTRATTO_BLOCK_LIQUID) cost += 2.5f;                                   // wading is slow and loud
             }
             const float g = ng_[n] + cost + learnedCost(key(nx,ny,nz));
-            if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic(nx, nz, gx, gz); parent_[m] = n; push(m); }
+            if (g < ng_[m]) { ng_[m] = g; nf_[m] = g + heuristic3(nx, ny, nz, gx, goalY, gz); parent_[m] = n; push(m); }
         }
     }
     expansions = static_cast<uint32_t>(done);

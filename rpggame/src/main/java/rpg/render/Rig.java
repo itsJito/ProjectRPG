@@ -10,6 +10,7 @@ import static rpg.actor.Gait.PENDULUM;
 import static rpg.actor.Gait.SNEAK_CROUCH;
 import static rpg.actor.Gait.WALK_BEND;
 import rpg.combat.CombatSystem;
+import rpg.skill.Skill;
 import rpg.item.ItemDef;
 import rpg.item.ItemDef.Family;
 import rpg.item.Items;
@@ -48,7 +49,7 @@ public final class Rig {
         float lastYaw, turnRate, turnSign = 1;
         /** How far into the side-on archer's stance the body has turned (0..1). */
         float aimSide;
-        float headYaw, bowRaise, guardRaise, crouchBlend;
+        float headYaw, bowRaise, guardRaise, crouchBlend, seat;
         /** The bow: how drawn it was last frame, when it was loosed, how long it has been held at full draw. */
         float lastDraw, heldFull; double loosedAt = -9;
         final float[] armSwing = new float[2];
@@ -289,6 +290,10 @@ public final class Rig {
         }
         st.crouchBlend += ((a.sneaking || a.crouched ? 1 : 0) - st.crouchBlend) * (1 - (float) Math.exp(-16 * dt));
         crouch += SNEAK_CROUCH * st.crouchBlend;
+        // (0.3.2, gamefixes: human contextual animation) sat on a bench at an inn's table: the hips down onto the seat, the
+        // back easing forward over the table, eased in and out as they sit and rise
+        st.seat += ((a instanceof rpg.ai.Npc sitter && sitter.seated ? 1 : 0) - st.seat) * (1 - (float) Math.exp(-6 * dt));
+        if (st.seat > 0.001f) { crouch += st.seat * (b.hipY() - rpg.objects.Furniture.SEAT / Body.PX - 0.55f); extraLean += 0.12f * st.seat; }
         // (0.2.0, gamefixes: sneaking looked wrong - folded flat with the head thrust out) a sneak is knees bent and hips
         // down, the back leaning in a little, the head held level and watchful
         extraLean += 0.36f * st.crouchBlend;
@@ -373,24 +378,53 @@ public final class Rig {
         if (a.riding != 0) extraLean += 0.05f + 0.24f * clamp01(a.rideSpeed / 11f);
         crouch += 1.2f * hurtBody;
         roll += 0.06f * hurtHead * (float) Math.sin(time * 1.3 + a.id) + 0.05f * (hurtLegR - hurtLegL);
+        // (0.3.1) hunched into the rain; shrunk down from a blow passing close
+        extraLean += 0.1f * a.rainCover + 0.16f * a.cower;
+        crouch += 1.4f * a.cower;
+        // (0.3.2, gamefixes: polish the charge) carried low through the knees, a body driving under a door's height
+        crouch += 1.3f * st.charge;
         Move mv = c.move;
-        float strike = strikeS(c);
-        float strikeW = strikeWeight(c);
+        float strike = strikeS(a, c);
+        float strikeW = strikeWeight(a, c);
+        // (0.3.1) the fighter's own skill in the body's part of the blow (CombatSystem.commit/leanK: Strength)
+        float mastery = (CombatSystem.mastery(a, Skill.ATTACK) + CombatSystem.mastery(a, Skill.STRENGTH) + CombatSystem.mastery(a, Skill.DEFENSE)) / 3;
         if (mv != null && c.phase != Phase.IDLE) {
-            extraTwist += CombatSystem.twist(mv, c.offHand, strike) * strikeW;
-            extraLean += CombatSystem.lean(mv, strike) * strikeW;
-            crouch += (mv == Move.HEAVY ? 1.1f : 0.5f) * strikeW;
+            extraTwist += CombatSystem.twist(mv, c.offHand, strike) * strikeW * CombatSystem.commit(a);
+            extraLean += CombatSystem.lean(mv, strike) * strikeW * CombatSystem.leanK(a);
+            crouch += (mv == Move.HEAVY ? 1.1f : 0.5f) * strikeW * (0.55f + 0.6f * CombatSystem.mastery(a, Skill.STRENGTH));
         } else if (c.charge > 0 && a.carryBody == 0) {
             extraTwist += CombatSystem.twist(Move.HEAVY, false, -0.3f * c.charge) * c.charge;
             extraLean += CombatSystem.lean(Move.HEAVY, -0.3f * c.charge) * c.charge;
             crouch += 0.8f * c.charge;
         }
+        // (0.3.2, gamefixes: melee by skill) a beginner's blow carries them past it: as the cut ends the body lurches on
+        // after the blade, the weight tipping forward over the front foot, which stumbles a short step to catch it, while
+        // the free arm flies out for balance; a master's ends square and balanced, the free arm thrown back against the cut
+        float novice = 1 - CombatSystem.style(a);
+        float overshoot = mv == null || mv == Move.PUNCH || mv == Move.BASH ? 0 : switch (c.phase) {
+            case ACTIVE -> smooth(clamp01((c.sweep - 0.55f) / 0.45f));
+            case RECOVER -> 1 - smooth(clamp01(c.t / Math.max(1e-3f, c.recover) / 0.75f));
+            default -> 0f;
+        };
+        float lurch = novice * overshoot;
+        if (lurch > 0) {
+            extraLean += (mv == Move.HEAVY ? 0.34f : 0.24f) * lurch;
+            crouch += 1.1f * lurch;
+            roll += (c.offHand ? 0.09f : -0.09f) * lurch;
+            if (grounded && st.stance[0] && st.stance[1]) { int lead = c.offHand ? 1 : 0; foot[lead][2] -= 2.2f * lurch; foot[lead][0] += (lead == 0 ? -0.6f : 0.6f) * lurch; }
+        }
         // stepping into heavy blows and thrusts: the leading foot is carried forward through the strike
-        if (mv != null && (mv == Move.HEAVY || mv == Move.THRUST) && grounded && st.stance[0] && st.stance[1]) {
+        // (0.3.1) a master steps into every blow - a light cut too, a short pivot on the lead foot - and the step is as
+        // long as the commitment; a beginner shuffles a little, late, and only into the big ones
+        if (mv != null && (mv == Move.HEAVY || mv == Move.THRUST || mastery > 0.45f && (mv == Move.LIGHT_R || mv == Move.LIGHT_L)) && grounded && st.stance[0] && st.stance[1]) {
             float k = strikeW * (c.phase == Phase.WINDUP ? 0 : c.phase == Phase.ACTIVE ? CombatSystem.ease(c.sweep) : 1);
             int lead = c.offHand ? 1 : 0;
-            foot[lead][2] -= 3.5f * k; foot[1 - lead][2] += 1.0f * k;
+            boolean light = mv == Move.LIGHT_R || mv == Move.LIGHT_L;
+            float step = (light ? 1.6f * (mastery - 0.45f) / 0.55f : 3.5f) * (0.45f + 0.75f * mastery);
+            foot[lead][2] -= step * k; foot[1 - lead][2] += step * 0.3f * k;
         }
+        // seated: the feet set forward under the table, the knees bent over the bench's edge
+        if (st.seat > 0.001f && grounded) for (int k = 0; k < 2; k++) foot[k] = lerp(foot[k], new float[]{(k == 0 ? 1 : -1) * (hipX + 0.4f), 0, -5.2f}, st.seat);
         if (!grounded) {   // tucked in the air
             float t = Math.min(1, st.airT * 5);
             foot[0] = new float[]{hipX, 4.5f * t, -2.5f * t};
@@ -421,8 +455,23 @@ public final class Rig {
         // then lifted (heel out, knee up) two rungs on - the right foot with the left hand, the left with the right
         // (0.3.0, gamefixes: riding) astride: the knees out round the barrel, the feet down in the stirrups a little ahead
         if (a.riding != 0) for (int k = 0; k < 2; k++) foot[k] = new float[]{(k == 0 ? 1 : -1) * (hipX + 3.4f), 3.2f, -1.4f};
-        if (onLadder(a)) for (int k = 0; k < 2; k++) {
-            foot[k] = ladderLimb(a, k == 0 ? 1 : -1, false, hipX);
+        // (0.3.4, gamefixes: swimming) in deep water the legs work: flat out, a flutter kick from the hips (two beats to
+        // each arm's stroke, the legs long and close); afloat, an eggbeater - each foot circling under the body, knees bent,
+        // the two half a turn apart; hauling out, both feet kick down hard for the push. The whole figure is laid down by
+        // the drawing (Gfx, Actor.swimTilt), so these are the strokes in the body's own frame.
+        if (a.swimMode >= rpg.actor.Swimming.TREAD) {
+            float ph = (float) (a.swimStroke * 2 * Math.PI);
+            for (int k = 0; k < 2; k++) {
+                float sgn = k == 0 ? 1 : -1, opp = k == 0 ? 0 : (float) Math.PI;
+                float[] tread = {sgn * (hipX + 1.2f + 1.3f * (float) Math.cos(ph + opp)), 3.6f + 1.4f * (float) Math.sin(ph + opp), -0.8f + 1.8f * (float) Math.sin(ph + opp + 1.2f)};
+                float beat = (float) Math.sin(ph * 2 + opp);
+                float[] kick = {sgn * (hipX * 0.8f), 1.1f + 0.9f * Math.max(0, beat), 1.2f + 3.6f * beat};
+                float[] haul = {sgn * (hipX + 0.5f), 1.5f + 2.5f * (float) Math.max(0, Math.sin(ph * 3 + opp)), 2.5f};
+                foot[k] = a.swimMode == rpg.actor.Swimming.HAUL ? haul : lerp(tread, kick, a.swimPose);
+            }
+        }
+        if (onLadder(a) || a.climb != null) for (int k = 0; k < 2; k++) {
+            foot[k] = lerp(foot[k], ladderLimb(a, k == 0 ? 1 : -1, false, hipX), ladderWeight(a, false, k == 0 ? 1 : -1));
             // climbing out at the top: a knee comes up onto the ledge, then the other foot follows it over
             var climbing = a.climb;
             if (climbing != null && climbing.phase == rpg.actor.Ladders.Phase.TOP_OUT) {
@@ -474,7 +523,7 @@ public final class Rig {
         st.hipV = (st.hipV - w0 * j * dt) * decay;
         pelvis[0] = st.sway; pelvis[1] = st.hipH; pelvis[2] = 0;
         // (0.3.0) the rider rises and settles with the mount's stride (posting at the trot, rocking at the canter and gallop)
-        if (a.riding != 0) { float ride = clamp01(a.rideSpeed / 3f); pelvis[1] += ride * (0.35f + 0.25f * clamp01(a.rideSpeed / 9f)) * (float) Math.abs(Math.sin(a.rideGait)); pelvis[0] = 0; }
+        if (a.riding != 0) { float ride = clamp01(a.rideSpeed / 3f); pelvis[1] += ride * 0.5f * (0.35f + 0.25f * clamp01(a.rideSpeed / 9f)) * (float) Math.abs(Math.sin(a.rideGait)); pelvis[0] = 0; }
         debugA = want; debugB = (st.stance[0] ? 1 : 0) + (st.stance[1] ? 2 : 0) + (walking ? 4 : 0) + st.land * 10;
 
         // ---- the torso: lean with speed and acceleration, roll into turns, counter-turn against the stride, breathe
@@ -495,8 +544,22 @@ public final class Rig {
         // trunk pitched further over the hips, the left shoulder brought round to lead, the arms pumping short and tight
         st.charge += ((a.charging ? sprintF : 0) - st.charge) * Math.min(1, dt * 6);
         float chargeF = st.charge;
-        lean += 0.16f * chargeF;
-        extraTwist += 0.22f * chargeF;
+        // (0.3.1, gamefixes: the charge's carriage) further over - the trunk driving low into the run like a shoulder
+        // going into a door - and the leading shoulder dropped and brought round
+        lean += 0.3f * chargeF;
+        roll -= 0.1f * chargeF;
+        // (0.3.2, gamefixes: polish the charge) each footfall drives the shoulder on: the trunk dips a little further over
+        // the planted foot and comes up through the push-off, twice a stride, so the run reads as pushing, not floating
+        lean += 0.07f * chargeF * (float) Math.max(0, Math.sin(st.phase * Math.PI * 4));
+        // (0.3.1) climbing out at the top of a ladder: the chest goes forward over the ledge as the hands push down on
+        // it, and straightens as the body stands up on it
+        if (a.climb != null && a.climb.phase == rpg.actor.Ladders.Phase.TOP_OUT) {
+            float u = a.climb.t / a.climb.duration;
+            lean += 0.55f * (float) Math.sin(Math.PI * clamp01((u - 0.1f) / 0.85f));
+        }
+        extraTwist += 0.34f * chargeF;
+        // (0.3.4) a swimmer's body rolls toward each stroking arm
+        if (a.swimPose > 0.01f) extraTwist += 0.42f * a.swimPose * (float) Math.sin(a.swimStroke * 2 * Math.PI);
         float twist = gaitTwist + extraTwist + sideTurn;
         float[] tm = seg[CharModel.Seg.TORSO.ordinal()];
         identity(tm);
@@ -514,8 +577,14 @@ public final class Rig {
         translate(hm, 0, b.neckY() - b.hipY(), 0);
         rotZ(hm, -(roll - st.sway * 0.03f) * 0.8f);
         rotX(hm, lean * (0.7f + 0.3f * st.crouchBlend));
+        // (0.3.2) charging, the chin is tucked behind the shoulder but the eyes stay up on what is ahead
+        rotX(hm, -0.32f * st.charge);
         rotY(hm, -twist * 0.9f + st.headYaw);
         rotX(hm, clamp(a.pitch * 0.7f, -0.7f, 0.7f));
+        // (0.3.4) in the rain the head is ducked a little under the hand
+        if (a.rainCover > 0.01f) rotX(hm, -0.18f * a.rainCover);
+        // (0.3.4) laid flat in the water, the chin comes up so the eyes look ahead along the stroke
+        if (a.swimPose > 0.01f) rotX(hm, a.swimPose * (0.95f - clamp(a.pitch * 0.7f, -0.7f, 0.7f)));
         // (0.2.9) sighting a shouldered crossbow, the cheek goes down onto the stock: the head tips forward and leans to it
         if (!firstPerson && held != null && held.family == Family.CROSSBOW && a.cs.aim > 0.01f) {
             float weld = Math.min(1, a.cs.aim) * (a.cs.reload > 0 ? 0.3f : 1);
@@ -578,6 +647,7 @@ public final class Rig {
             int k = bow ? 1 - h : h;
             int side = k == 0 ? 1 : -1;
             boolean isMain = k == 0;
+            float rainArm = 0;
             // The bow is in the support hand; the main hand draws its string. Crossbows keep their trigger grip.
             ItemDef holds = main != null && main.family == Family.BOW ? (isMain ? null : main) : isMain ? main : off;
             float[] shoulder = point(tm, side * b.shoulderX(), b.shoulderY() - b.hipY(), 0);
@@ -605,7 +675,7 @@ public final class Rig {
             // (0.2.1) a runner's arms pump: the old run swing (0.5 rad forward) left the forearm parked across the chest
             // (0.2.3) at a jog the forward swing stops at the ribs, the hand never out past the chest like a guard
             // (0.3.0, gamefixes: the runs) a fuller pump: the hand rises to the chin in front and drives back past the hip
-            float fAmp = (0.5f + 0.18f * runF + 0.28f * sprintF) * st.amp * (1 - 0.35f * chargeF), bAmp = (0.46f + 0.58f * runF + 0.32f * sprintF) * st.amp * (1 - 0.3f * chargeF);
+            float fAmp = (0.5f + 0.18f * runF + 0.28f * sprintF) * st.amp * (1 - 0.35f * chargeF), bAmp = (0.46f + 0.58f * runF + 0.32f * sprintF) * st.amp * (1 + 0.15f * chargeF);
             // (taken against the torso's lean, so a sprinter's forward swing stays a forward swing in the world, not a
             // reach up past the chin)
             float phi = (opp >= 0 ? opp * fAmp : opp * bAmp) - lean * 0.8f;
@@ -617,14 +687,30 @@ public final class Rig {
             float hx = side * (0.75f + 0.25f * (1 - runF) - 0.45f * runF * Math.max(0, opp));
             float[] rest = torsoPoint(shoulder, hx, hy, hz);
             // charging, the leading (left) arm is tucked in across the chest behind the shoulder that takes the contact
-            if (k == 1 && chargeF > 0.01f && holds == null) rest = lerp(rest, torsoPoint(shoulder, -side * 1.1f, -5.2f, -3.4f), 0.65f * chargeF);
+            // (0.3.1) braced: the elbow out, the forearm level across the front of the chest, the fist by the other shoulder
+            if (k == 1 && chargeF > 0.01f && holds == null) rest = lerp(rest, torsoPoint(shoulder, -side * 2.4f, -3.0f, -4.2f), 0.85f * chargeF);
             // a hurt arm swings less, and a badly hurt one is held in against the body; so is the hand over a body wound
             float armHurt = k == 0 ? hurtArmR : hurtArmL;
             if (holds == null && armHurt > 0) rest = lerp(rest, torsoPoint(shoulder, -side * 1.6f, -7.2f, -3.6f), Math.min(1, armHurt * 1.2f));
             else if (holds == null && k == 1 && hurtBody > 0.3f) rest = lerp(rest, torsoPoint(shoulder, -side * 2.6f, -6.4f, -3.4f), (hurtBody - 0.3f) * 1.4f);
             if (holds == null) rest = lerp(rest, new float[]{side * (b.shoulderX() + 0.6f), 4.8f, -8.5f + opp * 0.5f}, st.crouchBlend);
-            if (holds != null && holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.STAFF)
+            // seated at a table: the forearms rest on it, a little apart
+            if (holds == null && st.seat > 0.001f) rest = lerp(rest, torsoPoint(shoulder, -side * 0.9f, -6.2f, -5.8f), st.seat);
+            if (holds != null && holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.STAFF) {
                 rest = torsoPoint(shoulder, side * 0.5f, -7.4f + 1.0f * (float) Math.cos(theta), -3.8f - 3.0f * (float) Math.sin(theta));
+                // (0.3.2, gamefixes: melee by skill) between blows, in a fight, the weapon is held ready as well as the
+                // fighter knows how: high Defense brings it up before the body, the point toward the foe and the hand at
+                // the waist; a beginner holds it out low, the point drooping toward the ground
+                float engaged = holds.family == Family.TORCH || holds.family == Family.CROSSBOW || !isMain ? 0
+                        : smooth(clamp01((3.6f - (float) (time - c.lastAttack)) / 0.8f)) * (1 - 0.7f * runF);
+                if (engaged > 0.001f) {
+                    float def = CombatSystem.mastery(a, Skill.DEFENSE);
+                    float[] high = torsoPoint(shoulder, -side * 1.0f, -5.4f, -5.2f), low = torsoPoint(shoulder, side * 0.9f, -8.4f, -4.6f);
+                    float[] hDir = norm(torsoDir(-0.18f * side, 0.82f, -0.55f)), lDir = norm(torsoDir(0.15f * side, -0.45f, -0.88f));
+                    rest = lerp(rest, lerp(low, high, def), engaged);
+                    dir = norm(lerp(dir, lerp(lDir, hDir, def), engaged));
+                }
+            }
             else if (holds != null && holds.family == Family.SHIELD) rest = torsoPoint(shoulder, side * 0.4f, -7.6f, -2.6f);
             // through the eyes: what the hands hold is carried up and out in front, low in the view (the shield at the left,
             // the weapon at the right), swaying with the stride
@@ -639,12 +725,22 @@ public final class Rig {
                 // the blade carried up and forward into the view, not back over the shoulder
                 if (holds.family != Family.SHIELD) dir = holds.family == Family.CROSSBOW ? aim : norm(viewDirection(aim, side * 0.3f, 0.8f, 0.9f));
             }
+            boolean freeInSwing = !attacking && mv != null && c.phase != Phase.IDLE && mv != Move.BASH && strikeW > 0.01f
+                    && (holds == null || holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.CROSSBOW) && !firstPerson && a.riding == 0;
             if (attacking) {
                 float[] gr = CombatSystem.grip(a, mv, strike);
                 float[] hl = toFigure(a, gr[0], gr[1], gr[2]);
                 float[] dl2 = toFigureDir(a, gr[3], gr[4], gr[5]);
                 target = lerp(rest, hl, strikeW);
                 dir = norm(lerp(dir, dl2, strikeW));
+            } else if (freeInSwing) {
+                // (0.3.2) the other arm in a blow: a trained fighter draws it back and out against the cut, low and
+                // balanced; a beginner's flies up and out to the side as the blow carries them over
+                float through = c.phase == Phase.WINDUP ? 0.35f : c.phase == Phase.ACTIVE ? 0.35f + 0.65f * CombatSystem.ease(c.sweep) : 1;
+                float[] counter = torsoPoint(shoulder, side * 2.8f, -5.6f, 2.6f + 1.4f * through);
+                float[] flail = torsoPoint(shoulder, side * 6.2f, -0.8f + 1.6f * overshoot, -1.4f);
+                float[] freeAt = lerp(counter, flail, Math.min(1, novice * (0.35f + 0.65f * overshoot)));
+                target = lerp(rest, freeAt, strikeW * (0.55f + 0.45f * through));
             } else if (sheathing && (bowEquipped ? (k == 1 ? a.main() : null) : isMain ? a.main() : a.off()) != null) {
                 ItemDef it = bowEquipped ? a.main() : isMain ? a.main() : a.off();
                 float[][] pl = sheathPlace(it, bowEquipped || isMain, b, a.eq.def(ItemDef.Slot.BACK) != null, a.eq.def(ItemDef.Slot.CAPE) != null);
@@ -701,24 +797,37 @@ public final class Rig {
                 float raise = firstPerson ? 0.35f + c.aim * 0.65f : c.aim;
                 float spent = clamp01(1 - c.reload / 1.25f), reloading = c.reload > 0 ? 1 : 0;
                 float xkick = c.reload > 0 ? (float) Math.sin(Math.PI * clamp01(spent / 0.12f)) : 0;
-                float span = c.reload > 0 && spent > 0.15f ? (float) Math.sin(Math.PI * clamp01((spent - 0.15f) / 0.8f)) : 0;
-                float[] port = torsoPoint(point(tm, -b.shoulderX(), b.shoulderY() - b.hipY(), 0), 1.2f, -6.8f, -3.4f);
-                float[] portDir = norm(torsoDir(0.5f, 0.35f, -0.8f)), lowDir = norm(torsoDir(0.1f, -0.75f, -0.65f));
+                // (0.3.2, gamefixes: crossbows still not held in the hands in third person) at low ready: the trigger hand
+                // on the grip at the right hip, the stock angled forward and a little across the body, the other hand
+                // under the fore-stock - both hands on the weapon (it was carried up at the chest with the trigger hand a
+                // fist above the stock and the other forearm raised to the face). Spanning, it is tipped nose-down before
+                // the thighs, the free hand reaches down the stock to the string at the prod and draws it back to the
+                // latch, then returns to the fore-stock as it comes up again
+                float[] mainShoulder = point(tm, b.shoulderX(), b.shoulderY() - b.hipY(), 0);
+                float[] port = torsoPoint(mainShoulder, -1.4f, -8.2f, -3.8f);
+                float[] portDir = norm(torsoDir(-0.42f, 0.14f, -0.9f)), lowDir = norm(torsoDir(-0.14f, -0.68f, -0.72f));
+                float[] spanAt = torsoPoint(mainShoulder, -2.8f, -6.4f, -4.8f);
+                float u = c.reload > 0 ? clamp01((spent - 0.12f) / 0.8f) : 0;
+                float tip = c.reload > 0 ? smooth(clamp01((spent - 0.08f) / 0.14f)) * (1 - smooth(clamp01((spent - 0.86f) / 0.14f))) : 0;
                 if (isMain) {
                     // the grip under the cheek, the stock against the shoulder, the bolt on the line of the eye
                     float[] up = firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : add(add(add(cheek, aim, 2.6f), new float[]{0, 1, 0}, -2.6f), perp, -1.2f);
-                    target = firstPerson ? lerp(rest, up, raise) : lerp(port, up, raise * (1 - span));
-                    dir = firstPerson ? norm(lerp(dir, aim, raise)) : norm(lerp(lerp(portDir, aim, raise), lowDir, span));
+                    target = firstPerson ? lerp(rest, up, raise) : lerp(port, up, raise);
+                    dir = firstPerson ? norm(lerp(dir, aim, raise)) : norm(lerp(portDir, aim, raise));
                     target = add(add(target, aim, -1.4f * xkick), new float[]{0, 1, 0}, 0.9f * xkick);
                     dir = norm(add(dir, new float[]{0, 1, 0}, 0.5f * xkick));
-                    if (!firstPerson && reloading > 0) target = lerp(target, add(port, new float[]{0, 1, 0}, -0.6f), span);
+                    if (!firstPerson && reloading > 0) { target = lerp(target, spanAt, tip); dir = norm(lerp(dir, lowDir, tip)); }
                 } else if (firstPerson) {
                     target = add(add(hand[0], itemDir[0], 2.5f), torsoRight, -0.8f);
                     target = add(target, torsoUp, -0.6f);
                 } else {
-                    // under the fore-stock; spanning, back along the stock to the latch and forward again
-                    float along = 5.2f - 3.6f * span;
-                    target = add(add(hand[0], itemDir[0], along), new float[]{0, 1, 0}, -0.6f + 0.8f * span);
+                    // under the fore-stock; spanning, down to the string at the prod (9 px along), back to the latch (5)
+                    float reach = u < 0.3f ? smooth(u / 0.3f) : u < 0.75f ? 1 : 1 - smooth((u - 0.75f) / 0.25f);
+                    float pull = u < 0.3f ? 0 : u < 0.75f ? smooth((u - 0.3f) / 0.45f) : 1;
+                    float along = 4.4f + (9.0f - 4.4f) * reach * (1 - pull) + (5.0f - 4.4f) * reach * pull;
+                    // the palm under the stock: below it while it is carried level, behind it (toward the body) tipped down
+                    float[] under = norm(lerp(new float[]{0, -1, 0}, torsoBack, tip));
+                    target = add(add(hand[0], itemDir[0], along), under, 0.9f);
                 }
             } else if (isMain && c.charge > 0 && !bow && a.carryBody == 0) {
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
@@ -764,9 +873,10 @@ public final class Rig {
                 if (l2 > reachLen) at = add(shoulder, off2, reachLen / l2);
                 target = lerp(rest, at, grab);
                 dir = norm(lerp(dir, new float[]{0, -1, -0.3f}, grab));
-            } else if (onLadder(a)) {
+            } else if (onLadder(a) || a.climb != null) {
                 // the hands on the rungs above the head, hand over hand; climbing out at the top they go to the ledge
-                target = ladderLimb(a, side, true, hipX); dir = new float[]{0, 0.35f, -1};
+                float lw = ladderWeight(a, true, side);
+                target = lerp(rest, ladderLimb(a, side, true, hipX), lw); dir = norm(lerp(dir, new float[]{0, 0.35f, -1}, lw));
                 var climbing = a.climb;
                 if (climbing != null && climbing.phase == rpg.actor.Ladders.Phase.TOP_OUT) {
                     float over = clamp((climbing.t / climbing.duration - 0.15f) / 0.5f, 0, 1);
@@ -838,14 +948,89 @@ public final class Rig {
                 }
                 // A shared grip cannot wind as far behind the right shoulder as a one-handed weapon.
                 // Keep the raised blade above the head until the forward portion of the authored cut.
-                float back=smooth(Math.clamp(dot(dir,torsoBack)/.35f,0,1));
-                dir=norm(lerp(dir,norm(torsoDir(.1f,1,-.1f)),back));
+                // (0.3.2) only at rest: a swing's own two-handed path winds the blade back over the shoulder on purpose
+                if (!attacking) { float back=smooth(Math.clamp(dot(dir,torsoBack)/.35f,0,1)); dir=norm(lerp(dir,norm(torsoDir(.1f,1,-.1f)),back)); }
                 float[] otherShoulder=point(tm,-b.shoulderX(),b.shoulderY()-b.hipY(),0);
                 target=sharedGrip(target,dir,shoulder,otherShoulder,supportOffset(main));
             } else if (twoGrip) {
                 target=add(hand[0],itemDir[0],supportOffset(main));dir=itemDir[0];
             }
+            // (0.3.1, gamefixes: human contextual animation) a bystander caught near a blow throws the forearms up across
+            // the face; walking out in the rain, a hand goes up over the brow (the other arm keeps its swing). Both are
+            // eased in and out by the game (Actor.cower, Actor.rainCover) and give way to anything the hands are doing.
+            if (!attacking && !firstPerson && a.carryBody == 0 && a.climb == null && a.traversal == null) {
+                if (a.cower > 0.01f) {
+                    float[] cover = torsoPoint(shoulder, -side * 1.4f, 7.6f + (k == 0 ? 0.8f : 0), -6.2f);
+                    target = lerp(target, cover, a.cower); dir = norm(lerp(dir, new float[]{-side, 0.3f, 0}, a.cower));
+                }
+                // (0.3.3) by a fire, both palms held out to it at the waist; in the night's cold, the arms folded in
+                // across the body, each hand tucked to the other arm
+                if (a.warmHands > 0.01f && holds == null) {
+                    float[] palms = torsoPoint(shoulder, -side * 1.6f, -2.2f, -7.4f);
+                    target = lerp(target, palms, a.warmHands); dir = norm(lerp(dir, new float[]{0, 0.55f, -1}, a.warmHands));
+                }
+                if (a.chill > 0.01f && holds == null && a.warmHands < 0.5f) {
+                    float[] hug = torsoPoint(shoulder, -side * 5.4f, -3.0f + (k == 0 ? 0.7f : 0), -2.6f - (k == 0 ? 0.5f : 0));
+                    target = lerp(target, hug, a.chill); dir = norm(lerp(dir, new float[]{-side, 0.15f, -0.2f}, a.chill));
+                }
+                if (a.rainCover > 0.01f && k == 0 && holds == null) {
+                    // (0.3.4, gamefixes: polish the rain cover) the hand held flat over the forehead like the brim of a hat,
+                    // palm down and fingers forward, the elbow out to the side - steady, with only the walk's small bounce
+                    float rc = smooth(a.rainCover);
+                    float[] brim = torsoPoint(shoulder, -side * 2.4f, 12.4f + 0.25f * (float) Math.sin(st.phase * Math.PI * 4), -4.4f);
+                    target = lerp(target, brim, rc); dir = norm(lerp(dir, torsoDir(-side * 0.25f, 0.05f, -1), rc));
+                    rainArm = rc;
+                }
+                // (0.3.2, gamefixes: human contextual animation) at an inn's table: the mug or the spoon lifted to the mouth
+                // every few seconds, set down again between
+                if (a instanceof rpg.ai.Npc diner && st.seat > 0.3f && diner.holdingFare != null && k == 0) {
+                    float ph = (float) ((time * 0.23 + diner.id * 0.17) % 1.0), sip = ph < 0.3f ? (float) Math.sin(Math.PI * ph / 0.3f) : 0;
+                    float[] mouth = torsoPoint(shoulder, -side * 1.6f, 4.2f, -3.2f);
+                    target = lerp(target, mouth, sip * st.seat); dir = norm(lerp(dir, new float[]{0, 1, -0.2f}, sip));
+                }
+                // (0.3.2) talking: the hands move with the words - an open hand turning out at the chest for ordinary talk
+                // (the hands taking turns), a pointing arm for a shout, a hand by the mouth for a whisper; eased in as the line
+                // begins and out as it ends
+                if (a instanceof rpg.ai.Npc talker && talker.speech != null && time < talker.speechUntil && holds == null && a.climb == null && a.riding == 0
+                        && !(st.seat > 0.3f && talker.holdingFare != null && k == 0) && a.cower < 0.05f && c.phase == Phase.IDLE) {
+                    float since = (float) Math.max(0, time - talker.speechAt), env = smooth(clamp01(since / 0.35f)) * smooth(clamp01((float) (talker.speechUntil - time) / 0.5f));
+                    int turn = (int) ((talker.id + (long) (since / 2.4f)) & 1);
+                    var voice = talker.voice;
+                    if (voice == rpg.ai.Npc.Voice.SHOUT && k == 0) {
+                        float[] point = torsoPoint(shoulder, side * 0.4f, 2.4f + 0.6f * (float) Math.sin(since * 7), -8.2f);
+                        target = lerp(target, point, env); dir = norm(lerp(dir, new float[]{0, 0.2f, -1}, env));
+                    } else if (voice == rpg.ai.Npc.Voice.WHISPER && k == 1) {
+                        target = lerp(target, torsoPoint(shoulder, -side * 2.6f, 4.8f, -2.8f), env * 0.9f);
+                    } else if ((voice == rpg.ai.Npc.Voice.SAY || voice == rpg.ai.Npc.Voice.THINK) && k == turn) {
+                        float beat = (float) Math.sin(since * 4.2f + k), talkLift = 0.5f + 0.5f * (float) Math.sin(since * 2.3f);
+                        float[] open = voice == rpg.ai.Npc.Voice.THINK ? torsoPoint(shoulder, -side * 1.6f, 3.6f, -3.0f)   // a hand to the chin, thinking
+                                : torsoPoint(shoulder, side * (1.2f + 0.9f * beat), -4.6f + 1.6f * talkLift, -5.4f - 0.6f * talkLift);
+                        target = lerp(target, open, env * 0.85f); dir = norm(lerp(dir, new float[]{side * 0.5f, 0.6f, -0.6f}, env * 0.6f));
+                    }
+                }
+            }
+            // (0.3.4, gamefixes: swimming) the arms in the water: flat out, a crawl - the hand enters ahead of the head,
+            // pulls down under the chest to the hip, and comes back over the water with the elbow high, the arms half a
+            // stroke apart; afloat, a sculling sweep in front of the chest, in and out; hauling out, both hands up on the lip
+            boolean swimArm = a.swimMode >= rpg.actor.Swimming.TREAD && c.phase == Phase.IDLE && a.carryBody == 0;
+            if (swimArm) {
+                float ph = (float) ((a.swimStroke + (k == 0 ? 0 : 0.5f)) % 1.0);
+                float[] crawl;
+                if (ph < 0.55f) {
+                    float u = smooth(ph / 0.55f), arc = (float) Math.sin(Math.PI * u);
+                    crawl = torsoPoint(shoulder, -side * (1.2f + 1.6f * arc), 14f - 20f * u, -1.5f - 4.5f * arc);
+                } else {
+                    float u = smooth((ph - 0.55f) / 0.45f), arc = (float) Math.sin(Math.PI * u);
+                    crawl = torsoPoint(shoulder, side * (1.5f + 2.5f * arc) - side * 2.7f * u, -6f + 20f * u, 1.0f + 5.5f * arc - 2.5f * u);
+                }
+                float sweep = (float) Math.sin(ph * 2 * Math.PI);
+                float[] scull = torsoPoint(shoulder, side * (1.2f + 2.4f * (0.5f + 0.5f * sweep)), -5.5f + 0.6f * sweep, -5.2f);
+                float[] lip = torsoPoint(shoulder, -side * 1.5f, 9.5f, -5.5f);
+                target = a.swimMode == rpg.actor.Swimming.HAUL ? lip : lerp(scull, crawl, a.swimPose); dir = norm(lerp(torsoDir(0, 0, -1), torsoDir(0, 1, 0), a.swimPose));
+            }
             float[] pole = norm(lerp(torsoDir(side * 0.45f, -0.25f, 1f), new float[]{side, 0.1f, 0.3f}, st.crouchBlend));
+            if (rainArm > 0 && k == 0) pole = norm(lerp(pole, torsoDir(side, 0.35f, 0.15f), rainArm));
+            if (swimArm) pole = norm(lerp(torsoDir(side, -0.5f, 0.3f), torsoDir(side * 0.7f, -0.1f, 0.8f), a.swimPose));
             if (firstPerson && bareGuard) pole = norm(new float[]{side * 0.8f, -0.7f, -0.15f});
             // aiming side-on: the drawing elbow back along the line at the shoulder's height, the bow arm's elbow turned
             // down and out of the string's way; a crossbow's elbows down either side of the stock
@@ -1043,21 +1228,28 @@ public final class Rig {
     }
 
     /** s through the move as the arm should show it: the wind-up draws back (from the rest pose) and comes forward to meet the strike. */
-    static float strikeS(Actor.Combat c) {
+    /**
+     * (0.3.1) The same, with the fighter's own timing: a raw fighter's wind-up hangs back and then jerks (the cock comes
+     * late), a trained one draws back smoothly and early; through the cut a master snaps through the middle.
+     */
+    static float strikeS(Actor a, Actor.Combat c) {
+        float atk = CombatSystem.mastery(a, Skill.ATTACK);
         return switch (c.phase) {
-            case WINDUP -> { float u = Math.min(1, c.t / Math.max(1e-3f, c.windup)); yield -0.3f * (float) Math.sin(Math.PI * Math.pow(u, 1.5)); }
-            case ACTIVE -> c.sweep;
+            case WINDUP -> { float u = Math.min(1, c.t / Math.max(1e-3f, c.windup)); yield -0.3f * (float) Math.sin(Math.PI * Math.pow(u, 1.2 + 1.3 * (1 - atk))); }
+            case ACTIVE -> { float sw = c.sweep, snap = sw * sw * sw * (sw * (sw * 6 - 15) + 10); yield sw + (snap - sw) * 0.6f * atk; }
             case RECOVER -> 1f;
             default -> 0f;
         };
     }
 
     /** How much of the strike's pose is showing: easing in from rest through the wind-up, back out through the recovery. */
-    static float strikeWeight(Actor.Combat c) {
+    /** (0.3.1) The same, with Defense in the recovery: a guarded fighter is back behind the weapon early and cleanly. */
+    static float strikeWeight(Actor a, Actor.Combat c) {
+        float def = CombatSystem.mastery(a, Skill.DEFENSE);
         return switch (c.phase) {
             case WINDUP -> { float u = Math.min(1, c.t / Math.max(1e-3f, c.windup)); yield 1 - (float) Math.pow(1 - u, 2.2); }   // drawn back, slowing as it cocks
             case ACTIVE -> 1f;
-            case RECOVER -> { float u = Math.min(1, c.t / Math.max(1e-3f, c.recover)); yield 1 - u * u * (3 - 2 * u); }
+            case RECOVER -> { float u = Math.min(1, c.t / Math.max(1e-3f, c.recover) * (0.8f + 0.55f * def)); yield 1 - u * u * (3 - 2 * u); }
             default -> 0f;
         };
     }
@@ -1182,6 +1374,23 @@ public final class Rig {
     static float clamp01(float v) { return Math.max(0, Math.min(1, v)); }
     static float clamp(float v, float lo, float hi) { return Math.max(lo, Math.min(hi, v)); }
     static float wrap(float a) { while (a > Math.PI) a -= (float) (2 * Math.PI); while (a < -Math.PI) a += (float) (2 * Math.PI); return a; }
+
+    /**
+     * (0.3.1, gamefixes: getting on and off a ladder looked unnatural - the arms snapped up to the rungs in a frame and the
+     * feet were simply there) how far the limbs have gone over to the ladder: the hands reach up for the rungs through
+     * the mount (the near hand first), the feet follow a moment after, and stepping off at the bottom gives them back.
+     */
+    static float ladderWeight(Actor a, boolean hand, int side) {
+        var c = a.climb;
+        if (c == null) return 1;
+        float k = c.t / Math.max(0.01f, c.duration);
+        float lag = hand ? (side > 0 ? 0f : 0.15f) : (side > 0 ? 0.3f : 0.5f);
+        return switch (c.phase) {
+            case MOUNT -> smooth(clamp01((k - lag) / 0.5f));
+            case STEP_OFF -> 1 - smooth(clamp01((k - (hand ? 0.35f : 0f)) / 0.6f));
+            default -> 1;
+        };
+    }
 
     /** (0.3.0) Whether the figure is drawn climbing a ladder (the player's Ladders climb, or an NPC on a ladder off the ground). */
     static boolean onLadder(Actor a) {

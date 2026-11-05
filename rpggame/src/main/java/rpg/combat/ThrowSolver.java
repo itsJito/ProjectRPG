@@ -45,7 +45,7 @@ public final class ThrowSolver {
     public static void cameraTarget(Rpg g, Actor a, float[] eye, float[] out) {
         // the player's crosshair point, where it lies along this aim: the camera's own ray, bodies included
         if (a instanceof rpg.actor.Player pl) {
-            float[] at = pl.aimPointFor(g.time, eye, a.aimYaw, a.pitch);
+            float[] at = pl.aimPointFor(g.time, a.aimYaw, a.pitch);
             if (at != null) { System.arraycopy(at, 0, out, 0, 3); return; }
         }
         float cp = (float) Math.cos(a.pitch);

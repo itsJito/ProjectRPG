@@ -169,8 +169,11 @@ public final class Rumors {
         g.state.commit("RumorShared", teller.id, hearer.id, DevMap.jurisdiction(hearer.x, hearer.z), m.eventId, m.kind + " by " + g.nameOf(m.subject) + (shout ? " (shouted)" : ""));
         ai.shared++;
         String line = line(teller, m);
-        boolean newSpeech = !line.equals(teller.speech) || g.time >= teller.speechUntil;
-        ai.say(teller, line);
+        // (0.3.3, gamefixes: the watch repeated the same news to everyone who passed) news told aloud a moment ago is
+        // passed on in a word, not announced again: the hearer learns it, nobody near hears the line a second time
+        boolean retold = g.time - teller.lastSaid(line) < 75;
+        boolean newSpeech = !retold && (!line.equals(teller.speech) || g.time >= teller.speechUntil);
+        if (!retold) ai.say(teller, line);
         teller.gossipUntil = g.time + 3.5; hearer.gossipUntil = g.time + 3.5;
         hearer.wantYaw = (float) Math.atan2(-(teller.x - hearer.x), -(teller.z - hearer.z));
         teller.wantYaw = (float) Math.atan2(-(hearer.x - teller.x), -(hearer.z - teller.z));

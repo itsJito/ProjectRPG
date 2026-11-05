@@ -39,6 +39,8 @@ public final class Stealth {
     /** One NPC's awareness of one actor: how much, where it last placed them, and when. */
     public static final class Aware {
         public float level, x, z, exposure;
+        /** (0.3.1) The height it was placed at (a floor up or down; NaN when only a direction was heard). */
+        public float y = Float.NaN;
         public double seenAt = -99, heardAt = -99, at = -99, changedAt = -99;
         /** When it was looked into and settled (an investigation that found the spot, and them or nobody, there). */
         public double settledAt = -1e9;   // (0.2.2: -99 read as "settled lately" for the first minutes of a game)
@@ -160,6 +162,23 @@ public final class Stealth {
             if (t > 0) t *= smoke(n.x, ey, n.z, a.x, a.y + at[i], a.z);
             seen += weight[i] * t;
         }
+        // (0.3.3, gamefixes: NPCs lost sight of anyone right above them) someone up on a ledge, a roof edge or a ladder
+        // just overhead is hidden from the eye by the very edge they stand on: a person looks up past it - leaning back,
+        // a half step away - so the sight lines are tried again from there before they are given up
+        if (seen <= 0.01f && a.y > n.y + 1.2f && d < 7 && a.grounded && !(a instanceof rpg.monster.Monster fm && fm.kind.flies())) {
+            float ux = d > 0.05f ? dx / d : (float) Math.sin(n.yaw), uz = d > 0.05f ? dz / d : (float) Math.cos(n.yaw);
+            for (float back : new float[]{0.7f, 1.3f}) {
+                float bx = n.x - ux * back, bz = n.z - uz * back;
+                if (g.vox.solid((int) Math.floor(bx), (int) Math.floor(ey), (int) Math.floor(bz))) break;
+                float s2 = 0;
+                for (int i = 0; i < 3; i++) {
+                    rays++;
+                    float t = g.vox.seeThrough(bx, ey, bz, a.x, a.y + at[i], a.z, GLASS_REACH);
+                    s2 += weight[i] * t;
+                }
+                if (s2 > 0.01f) { seen = s2 * 0.85f; break; }
+            }
+        }
         if (seen <= 0.01f) return 0;
         float speed = (float) Math.hypot(a.vx, a.vz);
         float stance = low ? 0.42f : 1;
@@ -167,6 +186,8 @@ public final class Stealth {
         if (low && g.foliage != null && g.foliage.tallGrassAt(a.x, a.z)) stance *= 0.6f;
         float motion = speed > 4.5f ? 1.45f : speed > 0.5f ? 1f : 0.75f;
         float lit = Math.max(0.07f, light(a));
+        // (0.3.1, gamefixes: imps flew straight over people at night without noticing them) the creatures of the night see in it
+        if (n instanceof rpg.monster.Monster mo && mo.kind.seesInDark()) lit = Math.max(lit, 0.7f);
         // near at hand a body is hard to miss in any but the darkest place: a strong, smooth bonus inside six metres
         float dist = d <= close ? 2f : Math.max(0.1f, 1.1f - d / RANGE) + Math.max(0, (6 - d) / 6f) * 0.9f;
         // past the recognising range a figure is a shape, not a face: less sure the farther it is
@@ -244,7 +265,7 @@ public final class Stealth {
                 // a clear sighting makes it certain at once; a glimpse adds up
                 w.level = Math.min(MAX, w.level + e * 2.4f * step);
                 if (e >= CLEAR * 1.6f) w.level = Math.max(w.level, ALERT);
-                w.x = a.x; w.z = a.z; w.seenAt = g.time;
+                w.x = a.x; w.y = a.y; w.z = a.z; w.seenAt = g.time;
                 if (a == g.player && (e >= CLEAR || w.level >= ALERT))
                     n.playerSighting = new Npc.Sighting(n.id, a.x, a.z, a.vx, a.vz, g.time);
             } else {
@@ -290,7 +311,7 @@ public final class Stealth {
             if (w.level < cap) w.level = Math.min(cap, w.level + gain);
             float err = Math.max(0.6f, d * 0.25f * (1.2f - loud));
             double ang = (g.time * 7.3 + n.id) % (2 * Math.PI);
-            if (g.time - w.seenAt > 0.5) { w.x = x + (float) Math.cos(ang) * err; w.z = z + (float) Math.sin(ang) * err; }
+            if (g.time - w.seenAt > 0.5) { w.x = x + (float) Math.cos(ang) * err; w.y = y; w.z = z + (float) Math.sin(ang) * err; }
             w.heardAt = g.time;
             changed(n, source, w);
         }
@@ -359,7 +380,9 @@ public final class Stealth {
                     && g.law.bounty(who.id, DevMap.jurisdiction(who.x, who.z)) <= 0) continue;
             // looked into lately: no mystery again for a while, unless they are creeping about now - and someone known by
             // sight already found creeping about, with nothing known against them, is not a fresh mystery for minutes
-            if (g.time - w.settledAt < 30 && (who == null || !who.sneaking)) continue;
+            // (0.3.3, gamefixes: the simulation running dynamically) two minutes, not half of one: a hunter went to look at
+            // the bandit camp's comings and goings over his hunting ground all morning, one glimpse after another
+            if (g.time - w.settledAt < 120 && (who == null || !who.sneaking)) continue;
             boolean known = who instanceof Npc person && !person.hostileToPlayer && person.summonOwner == 0;
             if (known && g.time - w.settledAt < 300 && !charged) continue;
             // the player too, once looked into and found going about openly: not a fresh mystery again for minutes (a

@@ -79,6 +79,39 @@ public final class Console {
     private void var(String name, String def, String help, Consumer<DevConsole.Var> changed) { core.var(name, def, help, changed); }
     private void cmd(String name, String help, Consumer<String[]> run) { core.cmd(name, help, run); }
 
+    /**
+     * (0.3.2) A horse's or Pegasus's state from words: tame (broken in to you, yours), untame, saddled, unsaddled, calm,
+     * tame=0..1 (how far broken in), agitation=0..1 (how frightened: high bolts). Returns what was set, for the report.
+     */
+    private String mountSetup(rpg.animal.Animal an, String[] words) {
+        StringBuilder done = new StringBuilder();
+        for (String w0 : words) {
+            String w = w0.toLowerCase(Locale.ROOT);
+            String[] kv = w.split("=", 2);
+            float v = kv.length > 1 ? Math.max(0, Math.min(1, DevConsole.num(kv[1], 0))) : 1;
+            switch (kv[0]) {
+                case "tame", "tamed" -> {
+                    if (kv.length > 1 && v < 1) { an.tame = v; if (an.tamedBy == g.player.id) { an.tamedBy = 0; } }
+                    else { an.tame = 1; an.tamedBy = g.player.id; an.owner = g.player.id; an.home = null; an.trust.merge(g.player.id, 0.7f, Math::max); an.fear = 0; }
+                }
+                case "untame", "wild" -> { an.tame = 0; an.tamedBy = 0; if (an.owner == g.player.id) an.owner = 0; an.trust.remove(g.player.id); }
+                case "saddled", "saddle" -> { an.saddled = true; an.saddledBy = g.player.id; }
+                case "unsaddled", "unsaddle" -> { an.saddled = false; an.saddledBy = 0; }
+                case "calm" -> { an.fear = 0; an.threat = 0; an.goal = rpg.animal.Animal.Goal.IDLE; an.nextThink = g.time; }
+                case "agitation", "agitated", "fear" -> {
+                    an.fear = v; an.nextThink = g.time;
+                    // frightened of the one who set it so: the player
+                    if (v >= 0.3f) { an.threat = g.player.id; an.threatX = g.player.x; an.threatZ = g.player.z; an.threatSeen = g.time; an.threatSince = g.time; }
+                    else an.threat = 0;
+                }
+                case "baby" -> { }
+                default -> { done.append(" (unknown '").append(w0).append("')"); continue; }
+            }
+            done.append(' ').append(w);
+        }
+        return done.length() == 0 ? "" : " -" + done;
+    }
+
     // ------------------------------------------------------------------ the game's commands and variables
     private void register() {
         var("developer", "0", "Developer readouts (1: notices; 2: the inspectors too).", c -> { hud.stateInspector = c.f() >= 2; hud.aiInspector = c.f() >= 2; });
@@ -198,7 +231,10 @@ public final class Console {
             String want = norm(a[1]), extra = a.length > 2 ? a[2] : "";
             for (var s : rpg.animal.Species.values()) if (norm(s.name()).equals(want) || norm(s.label).equals(want)) {
                 var an = g.animals.release(s, extra.equalsIgnoreCase("baby"), (g.state.tick & 1) == 0, x, z);
-                print("spawned " + an.kind() + " #" + an.id, GOOD);
+                // (0.3.2, gamefixes: developer commands for spawning horses and Pegasi) the rest of the words set the mount
+                // up: spawn horse tame | saddled | tame=0.5 | agitation=0.8 | calm
+                String setup = rpg.mount.Riding.mountable(an) && a.length > 2 ? mountSetup(an, java.util.Arrays.copyOfRange(a, 2, a.length)) : "";
+                print("spawned " + an.kind() + " #" + an.id + setup, GOOD);
                 return;
             }
             for (var k : rpg.monster.MonsterKind.values()) if (norm(k.name()).equals(want) || norm(k.title).equals(want)) {
@@ -213,6 +249,14 @@ public final class Console {
             print("spawn: no such creature or person '" + a[1] + "' (spawnlist names them all)", ERR);
         });
         core.completer("spawn", t -> spawnable().stream().filter(n -> n.startsWith(t)).toList());
+        cmd("mount", "mount [tame | untame | saddled | unsaddled | calm | tame=0..1 | agitation=0..1 ...]: sets up the horse or Pegasus you are looking at (or the nearest), and reports how tame and how agitated it is.", a -> {
+            rpg.animal.Animal an = g.interact.focus instanceof rpg.animal.Animal f && rpg.mount.Riding.mountable(f) ? f : null;
+            if (an == null) { float best = 12; for (var o : g.animals.all()) if (rpg.mount.Riding.mountable(o) && o.distTo(g.player) < best) { best = o.distTo(g.player); an = o; } }
+            if (an == null) { print("mount: no horse or Pegasus within 12 m (spawn horse, spawn pegasus)", WARN); return; }
+            String setup = a.length > 1 ? mountSetup(an, java.util.Arrays.copyOfRange(a, 1, a.length)) : "";
+            print(String.format("%s #%d%s: tame %.2f, agitation %.2f, %s, %s%s", an.kind(), an.id, setup, an.tame, an.agitation(), an.tamedBy == g.player.id ? "yours" : an.owned() ? "owned" : "wild",
+                    an.saddled ? "saddled" : "no saddle", an.goal == rpg.animal.Animal.Goal.FLEE ? " (bolting)" : ""), TEXT);
+        });
         cmd("spawnlist", "Every animal, monster and kind of person 'spawn' can make.", a -> {
             List<String> animals = new ArrayList<>(), monsters = new ArrayList<>(), people = new ArrayList<>();
             for (var s : rpg.animal.Species.values()) animals.add(s.name().toLowerCase(Locale.ROOT));

@@ -31,6 +31,8 @@ public final class ItemDef {
     public float magicDamageBonusPct;
     /** Faith bonus (GDD 2.5: each point lengthens a prayer's drain interval by 3.33%); Faith restored when drunk; charges a stack is made with. */
     public int faithBonus, restoresFaith, maxCharges;
+    /** (0.3.4) Levels of Strength lent for a while by drinking it (ale). */
+    public int strengthBoost;
     /** An elemental staff's element: that element's Sun spells cost very little with it in hand (null: none). */
     public rpg.combat.Spells.Element staffElement;
     public DamageType damageType = DamageType.NONE;
@@ -66,7 +68,7 @@ public final class ItemDef {
     public Category category() {
         if (bagW > 0) return Category.CONTAINER;
         if (id.equals("coins")) return Category.CURRENCY;
-        if (heal > 0 || restoresFaith > 0 || id.startsWith("raw_") || id.equals("xp_lamp")) return Category.CONSUMABLE;
+        if (heal > 0 || restoresFaith > 0 || strengthBoost > 0 || id.startsWith("raw_") || id.equals("xp_lamp")) return Category.CONSUMABLE;
         return switch (family) {
             case SWORD, AXE, MACE, DAGGER, BOW, STAFF, WAND, ARROW, LONGSWORD, SCIMITAR, WARHAMMER, SPEAR, CLAWS, HALBERD, CROSSBOW, BOLT, THROWN -> Category.WEAPON;
             case SHIELD, ARMOR, SYMBOL -> Category.ARMOR;

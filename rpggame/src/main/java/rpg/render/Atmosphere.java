@@ -25,11 +25,14 @@ public final class Atmosphere {
     private static float[] v(float r, float g, float b) { return new float[]{r, g, b}; }
     private static float[] lerp(float[] a, float[] b, float t) { return new float[]{a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t}; }
 
-    public static final Preset NIGHT = new Preset("night", v(0.035f, 0.05f, 0.10f), v(0.010f, 0.010f, 0.016f), v(0.04f, 0.05f, 0.09f), v(0.022f, 0.028f, 0.05f), 0.95f, 0.82f, 1.08f, v(0.93f, 0.97f, 1.07f));
-    public static final Preset DAWN = new Preset("dawn", v(0.11f, 0.12f, 0.17f), v(0.05f, 0.04f, 0.035f), v(0.20f, 0.13f, 0.08f), v(0.06f, 0.07f, 0.11f), 1.03f, 1.04f, 1.05f, v(1.05f, 0.99f, 0.93f));
-    public static final Preset DAY = new Preset("day", v(0.12f, 0.15f, 0.21f), v(0.06f, 0.06f, 0.04f), v(0.11f, 0.10f, 0.08f), v(0.07f, 0.08f, 0.11f), 1.0f, 1.0f, 1.05f, v(1.0f, 1.0f, 1.0f));
-    public static final Preset GOLDEN = new Preset("golden", v(0.10f, 0.10f, 0.14f), v(0.06f, 0.045f, 0.03f), v(0.24f, 0.14f, 0.07f), v(0.05f, 0.06f, 0.10f), 1.02f, 1.07f, 1.07f, v(1.07f, 0.99f, 0.90f));
-    public static final Preset DUSK = new Preset("dusk", v(0.07f, 0.065f, 0.12f), v(0.025f, 0.02f, 0.025f), v(0.13f, 0.07f, 0.08f), v(0.035f, 0.04f, 0.075f), 0.98f, 0.96f, 1.07f, v(1.03f, 0.96f, 1.02f));
+    // (0.3.1, gamefixes: the whole game was too dark, and the blocks had no weight) a moonlit night that reads - blue, dim,
+    // the houses and people plain against it - and a clearer split between the sun's side and the shade's by day, so
+    // every block shows its lit face and its shadowed one; greens a little calmer (they read neon)
+    public static final Preset NIGHT = new Preset("night", v(0.085f, 0.11f, 0.19f), v(0.026f, 0.028f, 0.04f), v(0.09f, 0.11f, 0.18f), v(0.05f, 0.062f, 0.105f), 1.12f, 0.78f, 1.04f, v(0.92f, 0.97f, 1.08f));
+    public static final Preset DAWN = new Preset("dawn", v(0.14f, 0.15f, 0.20f), v(0.06f, 0.05f, 0.045f), v(0.24f, 0.16f, 0.10f), v(0.07f, 0.08f, 0.12f), 1.06f, 0.98f, 1.04f, v(1.05f, 0.99f, 0.93f));
+    public static final Preset DAY = new Preset("day", v(0.13f, 0.16f, 0.22f), v(0.065f, 0.06f, 0.042f), v(0.15f, 0.13f, 0.10f), v(0.055f, 0.065f, 0.095f), 0.97f, 0.97f, 1.09f, v(1.0f, 0.99f, 0.97f));
+    public static final Preset GOLDEN = new Preset("golden", v(0.13f, 0.12f, 0.16f), v(0.07f, 0.055f, 0.04f), v(0.28f, 0.17f, 0.09f), v(0.06f, 0.07f, 0.11f), 1.06f, 1.0f, 1.06f, v(1.07f, 0.99f, 0.90f));
+    public static final Preset DUSK = new Preset("dusk", v(0.11f, 0.10f, 0.16f), v(0.04f, 0.035f, 0.04f), v(0.17f, 0.10f, 0.10f), v(0.06f, 0.065f, 0.11f), 1.08f, 0.9f, 1.05f, v(1.02f, 0.97f, 1.03f));
 
     /** The keys of the day: an hour and its preset, blended between neighbours. */
     private static final Object[][] DAYKEYS = {
@@ -73,10 +76,10 @@ public final class Atmosphere {
     /** Under a roof: the sky's ambient mostly shut out (dark gaps), the grade warmed and the contrast raised a touch. */
     public static Preset interior(Preset p, float k) {
         if (k <= 0) return p;
-        float keep = 1 - 0.7f * k;
+        float keep = 1 - 0.5f * k;   // (0.3.1) rooms were black between the lamps
         float[] cool = v(0.85f, 0.92f, 1.1f);
         return new Preset(p.name + "+indoors", mul(scale(p.sky, keep), cool, k), mul(scale(p.ground, keep), cool, k), mul(scale(p.sun, keep * 0.8f), cool, k), mul(scale(p.shade, keep), cool, k),
-                p.exposure * (1 + 0.08f * k), p.saturation * (1 + 0.04f * k), p.contrast * (1 + 0.06f * k), lerp(p.tint, v(p.tint[0] * 1.05f, p.tint[1], p.tint[2] * 0.94f), k));
+                p.exposure * (1 + 0.14f * k), p.saturation * (1 + 0.04f * k), p.contrast * (1 + 0.06f * k), lerp(p.tint, v(p.tint[0] * 1.05f, p.tint[1], p.tint[2] * 0.94f), k));
     }
     private static float[] scale(float[] a, float k) { return v(a[0] * k, a[1] * k, a[2] * k); }
     private static float[] mul(float[] a, float[] m, float k) { return v(a[0] * (1 + (m[0] - 1) * k), a[1] * (1 + (m[1] - 1) * k), a[2] * (1 + (m[2] - 1) * k)); }
@@ -95,8 +98,11 @@ public final class Atmosphere {
         Preset want = interior(weather(forHour(hour), w, fog), indoors);
         current = current == null ? want : current.mix(want, Math.min(1, dt * 1.5f));
         Preset p = current;
-        boolean east = sunX >= 0;
-        float[] px = east ? p.sun : p.shade, nx = east ? p.shade : p.sun, side = lerp(p.sun, p.shade, 0.55f);
+        // (0.3.1, gamefixes: visual flickering) the sun's side of the ambient turns over smoothly as the sun crosses the
+        // sky's middle - it used to swap sides in a frame at noon (and back and forth while the sun stood near it)
+        float east = Math.max(0, Math.min(1, 0.5f + sunX * 2.5f));
+        east = east * east * (3 - 2 * east);
+        float[] px = lerp(p.shade, p.sun, east), nx = lerp(p.sun, p.shade, east), side = lerp(p.sun, p.shade, 0.55f);
         float[] cube = {px[0], px[1], px[2], nx[0], nx[1], nx[2], p.sky[0], p.sky[1], p.sky[2], p.ground[0], p.ground[1], p.ground[2], side[0], side[1], side[2], side[0], side[1], side[2]};
         cmd.atmos(cube, p.exposure, p.saturation, p.contrast, p.tint[0], p.tint[1], p.tint[2]);
         return p;

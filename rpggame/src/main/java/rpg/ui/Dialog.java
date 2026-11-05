@@ -16,6 +16,11 @@ public final class Dialog {
     public boolean pauseMenu;
     /** Spoken in a standoff (the watch halting someone wanted): the speaker is squared up to the player, not free to chat, and the replies still stand. */
     public boolean standoff;
+    /**
+     * (0.3.3, gamefixes: the watch asked about the same small fine over and over) what a box closed without a reply
+     * means - Escape, or walking off: a halting officer's fine put off is that answer, not a question left hanging.
+     */
+    public Runnable dismissed;
     public int focusedChoice, choiceOffset, textOffset;
     /** An item held out to the player (gamefixes): the box becomes the offer card, Accept or Decline. */
     public rpg.item.ItemStack offer;
@@ -30,7 +35,7 @@ public final class Dialog {
         if (!(g.actor(npc) instanceof rpg.ai.Npc speaker)) return true;
         if(!g.player.alive || !speaker.alive || !speaker.loaded || speaker.distTo(g.player)>6
                 || !g.vox.sight(g.player.x,g.player.eyeY(),g.player.z,speaker.x,speaker.eyeY(),speaker.z))return false;
-        return standoff || speaker.canTalk(g) && (employment == null || employment == speaker.employmentState());
+        return standoff || speaker.canTalk(g) && !speaker.shunning(g, g.player) && (employment == null || employment == speaker.employmentState());
     }
     public Dialog closeChoice(String label,Runnable action) { choices.add(new Choice(label,action,true));return this; }
     public Dialog choice(String label, Runnable action) { choices.add(new Choice(label, action, false)); return this; }

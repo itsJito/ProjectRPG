@@ -28,6 +28,15 @@ public class Npc extends Actor implements Interactable {
     /** The day the player last spoke with them (Dialogue's 'you again'). */
     public int talkedDay = -1;
     public float lodDt;
+    /**
+     * (0.3.2) Seated on a bench (at an inn's table): the figure sits; and the inn visit's own clock - when the fare was
+     * bought, until when they stay, when they next talk with the table; when the last market errand was done (game minutes).
+     */
+    public boolean seated;
+    public float seat, seatYaw;
+    public double innFareAt, innUntil, innTalkAt, errandDoneAt = -1e9;
+    /** What they hold at the inn's table (the bowl or the mug, drawn in hand) until it is finished. */
+    public rpg.item.ItemDef holdingFare;
     public enum Role { MERCHANT, LAWMAN, GUARD, WORKER, VILLAGER, THIEF, CARTER, QUEST_GIVER, CONTACT, BANDIT, BRUTE, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC, MONSTER }
 
     public final Role role;
@@ -166,6 +175,14 @@ public class Npc extends Actor implements Interactable {
     public long layingBody;
     /** (0.3.0) The walk's progress watch (Brain.goTo): the target it is for, the nearest it has come, and since when. */
     public float stallX = -1e6f, stallZ = -1e6f, stallBest;
+    /** (0.3.3) Where the body stood when the present stall window opened: real movement along a winding route is progress too. */
+    public float stallPX = -1e6f, stallPZ = -1e6f;
+    /** Routes given up for want of headway, and found missing altogether (counts, for the probes and the inspector). */
+    public int stalls, noRoutes;
+    /** (0.3.3) Since when an archer has been stepping aside for a clear shot without one (-1: not). */
+    public double asideSince = -1;
+    /** (0.3.3) The nearest roof found to shelter under from the rain, and when it was looked for. */
+    public float shelterX, shelterZ; public double shelterAt = -1e9;
     public double stallSince;
     /** (0.3.0) What they have done today, in their own words (Diary): what they talk about when asked. */
     public final Diary diary = new Diary();
@@ -184,13 +201,22 @@ public class Npc extends Actor implements Interactable {
     public float spawnX, spawnZ;
     /** A line said aloud (shown over their head) until a time. */
     public String speech;
-    public double speechUntil;
+    /** (0.3.2) When the line was begun (its balloon eases in from then) and until when it is shown. */
+    public double speechAt = -99, speechUntil;
+    /**
+     * (0.3.1, gamefixes: four kinds of overhead dialogue) how the line is said, which sets its balloon: said to someone
+     * (SAY), called out (SHOUT), said low (WHISPER), or thought aloud to no one (THINK).
+     */
+    public enum Voice { SAY, SHOUT, WHISPER, THINK }
+    public Voice voice = Voice.SAY;
     private final java.util.LinkedHashMap<String,Double> spoken = new java.util.LinkedHashMap<>();
     public void speak(String text,double now,double duration,boolean reply){
         if(text==null || text.isBlank())return;String key=text.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+"," ");
         if(now-spoken.getOrDefault(key,-1000d)<12 || !reply && speech!=null && now<speechUntil+.75)return;
-        spoken.put(key,now);while(spoken.size()>16)spoken.remove(spoken.keySet().iterator().next());speech=text;speechUntil=now+duration;
+        spoken.put(key,now);while(spoken.size()>16)spoken.remove(spoken.keySet().iterator().next());speech=text;speechAt=now;speechUntil=now+duration;
     }
+    /** (0.3.3) When this was last said aloud (game seconds; long ago if never or forgotten). */
+    public double lastSaid(String text){ if(text==null)return -1000; return spoken.getOrDefault(text.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+"," "),-1000d); }
     /** What it is aware of, by actor id (stealth: Unaware -> Curious -> Investigating -> Alert). */
     public final java.util.Map<Long, Stealth.Aware> aware = new java.util.HashMap<>();
     /** An officer's questioning on a search: who was asked about the one sought, and when (asked once a while each). */
@@ -282,6 +308,18 @@ public class Npc extends Actor implements Interactable {
                 && cs.staggered <= 0 && g.time - cs.lastHurt >= 3 && arrestedUntil < g.state.minutes;
     }
 
+    /**
+     * (0.3.4, gamefixes: the player could still buy from someone running from them) whether this person wants nothing to do
+     * with someone right now: running or hiding, fighting them, or still frightened of them. Nobody stops to haggle, talk
+     * or let a bed to the one they are getting away from.
+     */
+    public boolean shunning(Rpg g, Actor a) {
+        if (goal == Brain.Goal.FLEE || goal == Brain.Goal.HIDE || reacting && fearOf != 0) return true;
+        if (a == null) return false;
+        if (!watch() && (fightTarget == a.id || hunt != null && hunt.target == a.id && goal == Brain.Goal.FIGHT)) return true;
+        return fearOf == a.id && g.time - fearSeenAt < 60;
+    }
+
     /** The exact carried loaf is checked, including its ownership, before a contextual gift is offered. */
     public String breadRefusal(Rpg g, Actor giver) {
         if (role != Role.BEGGAR || !canTalk(g)) return name + " cannot accept food now.";
@@ -298,10 +336,18 @@ public class Npc extends Actor implements Interactable {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
         var report=rpg.law.WitnessInfluence.pending(g,this);
-        if (canTalk(g) || a==g.player && report!=null) o.add(Option.on("talk", "Talk-to", 10, r));
+        boolean shuns = shunning(g, a);
+        if (!shuns && (canTalk(g) || a==g.player && report!=null)) o.add(Option.on("talk", "Talk-to", 10, r));
         if (role == Role.MERCHANT || role == Role.FENCE || g.econ.shopOf(this) != null) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
+        }
+        // (0.3.2) an innkeeper lets a guest bed for the night
+        if (!shuns && profession == Profession.INNKEEPER && g.inns != null) {
+            var inn = g.inns.of(this);
+            boolean have = inn != null && inn.lodging(a.id, g.state.minutes);
+            o.add(Option.when(!have && a.has(Items.COINS, rpg.econ.Inns.ROOM_PRICE), "rent", "Rent a bed for the night (" + rpg.econ.Inns.ROOM_PRICE + " G)", 8,
+                    have ? "You already have a bed here tonight." : "A bed is " + rpg.econ.Inns.ROOM_PRICE + " G a night.", r));
         }
         if ((role == Role.LAWMAN || role == Role.GUARD) && !g.law.refusesPeace(a.id,homeJurisdiction)) {
             int b = g.law.bounty(a.id, homeJurisdiction);
@@ -330,7 +376,7 @@ public class Npc extends Actor implements Interactable {
             case "talk" -> {
                 String why = dist(g, a, g.cfg.interactRange);
                 if (why != null) return Result.no(why);
-                if (!canTalk(g) && rpg.law.WitnessInfluence.pending(g,this)==null) return Result.no(name + " cannot stop to talk now.");
+                if (shunning(g, a) || !canTalk(g) && rpg.law.WitnessInfluence.pending(g,this)==null) return Result.no(name + " cannot stop to talk now.");
                 // a wanted player who walks up to the watch is dealt with, however small the bounty (gamefixes)
                 if (a == g.player && (role == Role.GUARD || role == Role.LAWMAN) && g.law.bounty(a.id, homeJurisdiction) > 0) {
                     g.law.confront(this, a);
@@ -341,6 +387,13 @@ public class Npc extends Actor implements Interactable {
                 g.state.commit(req, "Talked", a.id, id, DevMap.jurisdiction(x, z), 0, name);
                 lastDialogAt = g.time;
                 return Result.ok();
+            }
+            case "rent" -> {
+                String why = dist(g, a, g.cfg.interactRange);
+                if (why != null) return Result.no(why);
+                Result r = g.inns.rent(a, this, req);
+                if (a == g.player && !r.rejected()) { g.ai.reply(this, "There you are. Sleep well."); g.chat.say(r.reason()); }
+                return r;
             }
             case "trade" -> {
                 String why = dist(g, a, g.cfg.interactRange);

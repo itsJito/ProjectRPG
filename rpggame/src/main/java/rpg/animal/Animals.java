@@ -33,7 +33,7 @@ public final class Animals {
     final AnimalMind mind;
     private final List<Animal> animals = new ArrayList<>();
     public final List<Habitat> habitats = new ArrayList<>();
-    public Habitat wild, farm;
+    public Habitat wild, farm, southWood;
     public final List<Nest> nests = new ArrayList<>();
     public Trough trough;
     /** Engine policies per species, adult [0] and baby [1]: the same actions at the species' own speeds. */
@@ -104,13 +104,19 @@ public final class Animals {
         float[][] wildRest = {{(DevMap.DEN_X0 + DevMap.DEN_X1) / 2f + 1, (DevMap.DEN_Z0 + DevMap.DEN_Z1) / 2f + 0.5f}, {12.5f, 20.5f}, {33.5f, 28f}, {20.5f, 32f}, {36.5f, 16f}};
         wild = new Habitat("wild_wood", "the wild wood", DevMap.WILD_X0 + 1, DevMap.WILD_Z0 + 1, DevMap.WILD_X1 - 1, DevMap.WILD_Z1 - 1, 0, wildWater, wildRest)
                 .cap(Species.RABBIT, 12).cap(Species.FOX, 3).cap(Species.COYOTE, 4).cap(Species.WOLF, 6).cap(Species.MOUNTAIN_LION, 2)
-                .cap(Species.BROWN_BEAR, 3).cap(Species.DUCK, 7).cap(Species.DOG, 3).cap(Species.CAT, 2);
+                .cap(Species.BROWN_BEAR, 3).cap(Species.DUCK, 7).cap(Species.DOG, 3).cap(Species.CAT, 2).cap(Species.DEER, 5);
         float[][] farmWater = edge(DevMap.DUCK_POND_X0, DevMap.DUCK_POND_Z0, DevMap.DUCK_POND_X1, DevMap.DUCK_POND_Z1);
         float[][] farmRest = {{113.5f, 119.5f}, {116.5f, 119.5f}, {119.5f, 119f}, {112.5f, 121f}};
         farm = new Habitat("farm", "Mara's farm", DevMap.FARM_X0 + 1, DevMap.FARM_Z0 + 1, DevMap.FARM_X1 - 1, DevMap.FARM_Z1 - 1, Ids.FARMER, farmWater, farmRest)
                 .cap(Species.CHICKEN, 12).cap(Species.DUCK, 8).cap(Species.COW, 6).cap(Species.SHEEP, 9).cap(Species.PIG, 6).cap(Species.HORSE, 4)
                 .cap(Species.DOG, 2).cap(Species.CAT, 3);
-        habitats.add(wild); habitats.add(farm);
+        // (0.3.4) the great southern wood: its deer, browsing either side of the brook, and a bear that hunts them
+        float[][] brook = {{rpg.world.Expanse.BROOK_X0 - 1.5f, 150.5f, (float) (Math.PI / 2)}, {rpg.world.Expanse.BROOK_X1 + 2f, 162.5f, (float) (-Math.PI / 2)},
+                {rpg.world.Expanse.BROOK_X0 - 1.5f, 174.5f, (float) (Math.PI / 2)}, {rpg.world.Expanse.BROOK_X1 + 2f, 182.5f, (float) (-Math.PI / 2)}};
+        float[][] glades = {{30.5f, 150.5f}, {44.5f, 176.5f}, {76.5f, 166.5f}, {108.5f, 178.5f}, {18.5f, 180.5f}};
+        southWood = new Habitat("south_wood", "the southern wood", rpg.world.Expanse.WOOD_X0 + 2, rpg.world.Expanse.WOOD_Z0 + 2, rpg.world.Expanse.WOOD_X1 - 2, rpg.world.Expanse.WOOD_Z1 - 2, 0, brook, glades)
+                .cap(Species.DEER, 12).cap(Species.BROWN_BEAR, 2).cap(Species.RABBIT, 8).cap(Species.FOX, 2);
+        habitats.add(wild); habitats.add(farm); habitats.add(southWood);
     }
 
     /** Drinking spots round a pond: on the bank, facing the water (x, z, yaw). */
@@ -145,6 +151,12 @@ public final class Animals {
         herd = group(wild, Species.MOUNTAIN_LION, herd, new float[]{40, 22}, 1, 0, 1);
         herd = group(wild, Species.BROWN_BEAR, herd, new float[]{9, 10}, 1, 0, 1);
         herd = group(wild, Species.DUCK, herd, new float[]{25, 24}, 1, 1, 1);
+        herd = group(wild, Species.DEER, herd, new float[]{18, 30}, 2, 1, 1);
+        // the southern wood
+        herd = group(southWood, Species.DEER, herd, new float[]{38, 156}, 3, 1, 1);
+        herd = group(southWood, Species.DEER, herd, new float[]{88, 170}, 2, 1, 1);
+        herd = group(southWood, Species.BROWN_BEAR, herd, new float[]{20, 178}, 1, 0, 0);
+        herd = group(southWood, Species.RABBIT, herd, new float[]{70, 152}, 1, 1, 1);
         Animal feral = spawnNew(Species.DOG, false, true, 30.5f, 14.5f, wild, herd++, 0);
         feral.range = 14;
         // (0.3.0) a wild Pegasus in the wood, never ridden
@@ -191,6 +203,7 @@ public final class Animals {
         a.bornAt = g.state.minutes - (baby ? s.mature * 0.3f : s.mature * 2);
         a.matureAt = baby ? a.bornAt + s.mature : a.bornAt;
         a.variant = (int) (a.id * 2654435761L >>> 7) & 7;
+        if (s == Species.DEER) a.variant = baby ? 2 : female ? 0 : 1;   // (0.3.4) a doe, a buck (antlered), a dappled fawn
         a.careAgain = g.time + 15 + a.id % 30;
         a.hunger = 0.1f + (a.id % 5) * 0.06f; a.thirst = (a.id % 7) * 0.05f; a.fatigue = (a.id % 3) * 0.1f;
         a.restOx = ((a.id % 5) - 2) * 0.6f; a.restOz = ((a.id / 5 % 3) - 1) * 0.7f;
@@ -211,7 +224,7 @@ public final class Animals {
         a.fit();
         c.moverCreate(a.body, a.x, DevMap.FLOOR + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
-        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags | astratto.bridge.AstrattoNative.AGENT_NO_LADDERS, (int) a.id * 7919);
+        c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags | astratto.bridge.AstrattoNative.AGENT_NO_LADDERS | (a.species.swims ? astratto.bridge.AstrattoNative.AGENT_SWIMS : 0), (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
         java.util.Arrays.fill(a.facts, -1);
         a.targetBody = -1;
@@ -635,6 +648,7 @@ public final class Animals {
         if (a.home != null) a.home.count("matured", 1);
         g.state.commit("AnimalMatured", a.id, a.mother, DevMap.jurisdiction(a.x, a.z), 0, a.species.label);
         a.restore();
+        if (a.species == Species.DEER) a.variant = a.female ? 0 : 1;
         if (a.loaded) { despawnBody(a); spawnBody(a); }
         a.lastEvent = "grew up";
     }
@@ -853,7 +867,8 @@ public final class Animals {
             m.put("born", a.bornAt); m.put("mature", a.matureAt); m.put("mother", a.mother); m.put("owner", a.owner); m.put("group", a.group);
             m.put("home", a.home == null ? "" : a.home.id); m.put("hx", (double) a.homeX); m.put("hz", (double) a.homeZ); m.put("range", (double) a.range);
             if (a.mountStats != null) m.put("mountStats", a.mountStats.save());
-            m.put("tame", (double) a.tame); m.put("tamedBy", a.tamedBy); m.put("saddled", a.saddled); m.put("vigor", (double) a.vigor);
+            m.put("command", a.command.name()); m.put("commandBy", a.commandBy); m.put("stayX", (double) a.stayX); m.put("stayZ", (double) a.stayZ);
+            m.put("tame", (double) a.tame); m.put("tamedBy", a.tamedBy); m.put("saddled", a.saddled); m.put("saddledBy", a.saddledBy); m.put("vigor", (double) a.vigor);
             if (!a.bags.isEmpty()) m.put("bags", rpg.item.ItemIO.inventory(a.bags));
             m.put("variant", a.variant); m.put("hunger", (double) a.hunger); m.put("thirst", (double) a.thirst); m.put("fatigue", (double) a.fatigue);
             m.put("due", a.dueAt); m.put("father", a.father); m.put("bred", a.lastBred); m.put("egg", a.lastEgg);
@@ -904,7 +919,9 @@ public final class Animals {
             a.variant = astratto.util.Json.integer(m, "variant", 0);
             a.mountStats = rpg.mount.MountStats.load(astratto.util.Json.obj(m, "mountStats"));
             a.tame = (float) astratto.util.Json.num(m, "tame", 0); a.tamedBy = astratto.util.Json.lng(m, "tamedBy", 0);
-            a.saddled = astratto.util.Json.bool(m, "saddled", false); a.vigor = (float) astratto.util.Json.num(m, "vigor", 100);
+            try { a.command = Animal.Command.valueOf(String.valueOf(m.getOrDefault("command", "NONE"))); } catch (IllegalArgumentException e) { a.command = Animal.Command.NONE; }
+            a.commandBy = astratto.util.Json.lng(m, "commandBy", 0); a.stayX = (float) astratto.util.Json.num(m, "stayX", a.x); a.stayZ = (float) astratto.util.Json.num(m, "stayZ", a.z);
+            a.saddled = astratto.util.Json.bool(m, "saddled", false); a.saddledBy = astratto.util.Json.lng(m, "saddledBy", 0); a.vigor = (float) astratto.util.Json.num(m, "vigor", 100);
             if (astratto.util.Json.list(m, "bags") != null) rpg.item.ItemIO.inventory(a.bags, astratto.util.Json.list(m, "bags"));
             a.hunger = (float) astratto.util.Json.num(m, "hunger", 0); a.thirst = (float) astratto.util.Json.num(m, "thirst", 0); a.fatigue = (float) astratto.util.Json.num(m, "fatigue", 0);
             a.dueAt = astratto.util.Json.num(m, "due", -1); a.father = astratto.util.Json.lng(m, "father", 0); a.lastBred = astratto.util.Json.num(m, "bred", -1e9); a.lastEgg = astratto.util.Json.num(m, "egg", -1e9);
@@ -969,8 +986,34 @@ public final class Animals {
         return null;
     }
 
+    /**
+     * (0.3.4, gamefixes: Follow, Stay, Dismiss) A tamed animal told what to do by its keeper - heard from a dozen metres,
+     * as a call or a whistle is. It does it as long as nothing worse comes first (a threat, its young, its thirst); a
+     * dismissed one goes back to its own life about its home, still tame and still the keeper's.
+     */
+    public Result command(Animal a, Actor who, String what, long req) {
+        if (!a.alive) return Result.no("It's dead.");
+        if (!a.answersTo(who)) return Result.no("It doesn't answer to you.");
+        if (a.distTo(who) > 14) return Result.no("It's too far away to hear you.");
+        if (g.state.alreadyCommitted(req)) return Result.no("Already told.");
+        String line;
+        switch (what) {
+            case "follow" -> { a.command = Animal.Command.FOLLOW; line = "comes to your side"; }
+            case "stay" -> { a.command = Animal.Command.STAY; a.stayX = a.x; a.stayZ = a.z; line = "stops where it is and waits"; }
+            case "dismiss" -> { a.command = Animal.Command.NONE; line = "wanders off about its own business"; }
+            default -> { return Result.no("It doesn't know that."); }
+        }
+        a.commandBy = who.id; a.nextThink = 0; a.hasGoal = false;
+        a.trust.merge(who.id, 0.01f, (x, y) -> Math.min(1, x + y));
+        g.state.commit(req, "AnimalCommanded", who.id, a.id, rpg.world.DevMap.jurisdiction(a.x, a.z), 0, a.kind() + ": " + what);
+        if (who == g.player) g.chat.say("The " + a.kind().toLowerCase() + " " + line + ".");
+        if (g.sfx != null && a.species.idleSound != null) sound(a, a.species.idleSound, 0.5f);
+        return Result.ok();
+    }
+
     // ------------------------------------------------------------------ people and animals
     public Result perform(Animal a, Actor who, String action, long req) {
+        if (action.startsWith("cmd_")) return command(a, who, action.substring(4), req);
         switch (action) {
             case "pet" -> {
                 if (Math.hypot(who.x - a.x, who.z - a.z) > g.cfg.interactRange + a.radius) return Result.no("You're too far away.");
@@ -981,6 +1024,7 @@ public final class Animals {
                 double last = a.pettedAt.getOrDefault(who.id, -1e9);
                 if (g.time - last > 20) a.trust.merge(who.id, 0.08f, (x, y) -> Math.min(1, x + y));
                 a.pettedAt.put(who.id, g.time);
+                gentle(a, who, 0.03f);
                 a.fear = Math.max(0, a.fear - 0.3f);
                 a.wantYaw = (float) Math.atan2(-(who.x - a.x), -(who.z - a.z));
                 g.state.commit(req, "AnimalPetted", who.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind());
@@ -996,8 +1040,13 @@ public final class Animals {
                 who.takeItems(food, 1);
                 g.state.burn(food, 1);
                 a.hunger = Math.max(0, a.hunger - 0.5f);
-                a.trust.merge(who.id, 0.15f, (x, y) -> Math.min(1, x + y));
+                // (0.3.2) an apple or a carrot to a horse or a Pegasus is a treat: more trust, more gentling, and its
+                // vigor (a mount's wind for the gallop and the flight) comes back the faster for it
+                boolean treat = rpg.mount.Riding.mountable(a) && (food == Items.APPLE || food == Items.CARROT);
+                a.trust.merge(who.id, treat ? 0.22f : 0.15f, (x, y) -> Math.min(1, x + y));
                 a.fear = 0;
+                gentle(a, who, treat ? 0.1f : 0.07f);
+                if (rpg.mount.Riding.mountable(a)) a.vigor = Math.min(100, a.vigor + (treat ? 18 : food == Items.CABBAGE ? 12 : 6));
                 g.state.commit(req, "AnimalFed", who.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind() + " ate " + food.name.toLowerCase());
                 if (who == g.player) g.chat.say("The " + a.kind().toLowerCase() + " eats the " + food.name.toLowerCase() + ".");
                 return Result.ok();
@@ -1020,6 +1069,19 @@ public final class Animals {
             default -> { return Result.no("You can't do that."); }
         }
     }
+
+    /**
+     * (0.3.1) Gentling a wild mount by hand: fed or handled, a horse or Pegasus not yet anyone's takes a little of its
+     * taming (kept, as the riding is) - a while apart, and only so far: the last of it is won on its back.
+     */
+    void gentle(Animal a, Actor who, float amount) {
+        if (!rpg.mount.Riding.mountable(a) || a.owned() || a.tame >= 1 || g.time - a.gentledAt < 12) return;
+        a.gentledAt = g.time;
+        float before = a.tame;
+        a.tame = Math.max(a.tame, Math.min(GENTLE_CAP, a.tame + amount));
+        if (who == g.player && a.tame > before && a.tame >= GENTLE_CAP) g.chat.say("The " + a.kind().toLowerCase() + " trusts your hand now. The rest is won in the saddle.");
+    }
+    static final float GENTLE_CAP = 0.35f;
 
     /** Game minutes a cow takes to give a full bucket again. */
     public static final double MILK_REFILL = 240;
@@ -1077,14 +1139,19 @@ public final class Animals {
             case WOLF -> "The wolf holds still, ears tilted back, testing your scent.";
             case MOUNTAIN_LION -> "The cat follows your hand with its eyes. You keep the touch brief.";
             case BROWN_BEAR -> "The bear huffs and shifts its weight. You give it room.";
+            case DEER -> "The deer trembles under your hand, ears swivelling, ready to bolt.";
         };
     }
 
     /** What, of what someone carries, this animal would eat. */
     public static ItemDef feedFor(Animal a, Actor who) {
         ItemDef[] menu = switch (a.species.diet) {
-            case GRAZER -> new ItemDef[]{Items.ANIMAL_FEED, Items.BERRIES};
-            case FORAGER -> new ItemDef[]{Items.ANIMAL_FEED, Items.BREAD, Items.BERRIES};
+            // (0.3.2, gamefixes) a horse or a Pegasus takes an apple or a carrot first (a treat it trusts the hand for), then
+            // cabbage, then feed; the other grazers take the feed first
+            case GRAZER -> a.species == Species.HORSE || a.species == Species.PEGASUS
+                    ? new ItemDef[]{Items.APPLE, Items.CARROT, Items.CABBAGE, Items.ANIMAL_FEED, Items.BERRIES}
+                    : new ItemDef[]{Items.ANIMAL_FEED, Items.CABBAGE, Items.CARROT, Items.APPLE, Items.BERRIES};
+            case FORAGER -> new ItemDef[]{Items.ANIMAL_FEED, Items.BREAD, Items.CABBAGE, Items.CARROT, Items.APPLE, Items.BERRIES};
             case HUNTER -> new ItemDef[]{Items.RAW_MEAT, Items.COOKED_MEAT};
             case OMNIVORE -> new ItemDef[]{Items.RAW_MEAT, Items.BERRIES, Items.BREAD, Items.RAW_TROUT};
             case SCAVENGER -> a.species == Species.CAT ? new ItemDef[]{Items.RAW_TROUT, Items.TROUT, Items.RAW_SHRIMP, Items.COOKED_MEAT, Items.RAW_MEAT} : new ItemDef[]{Items.COOKED_MEAT, Items.RAW_MEAT, Items.BREAD};

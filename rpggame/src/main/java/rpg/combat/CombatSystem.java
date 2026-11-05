@@ -56,6 +56,8 @@ public final class CombatSystem {
         public long id, rigid;
         public Actor owner;
         public float x, y, z, vx, vy, vz, gravity, life, potential, impact;
+        /** (0.3.1) A spell's soft lock: how fast it may bend toward its mark (radians a second; 0, flies straight). */
+        public float homing;
         /** A creature's own magic (weaker effects than the learned spell's). */
         public boolean innate;
         public DamageType type;
@@ -451,10 +453,9 @@ public final class CombatSystem {
         a.cs.castCooldown = 0.7f;
         Projectile p = bolt(a, s, yaw, pitch, 1);
         if (s == Spell.SPELLDAGGERS) {
-            Actor target = g.magic.target(a,yaw,pitch,24); p.target = target == null ? 0 : target.id;
             for (float offset : new float[]{-0.11f,0.11f}) {
                 Projectile blade=launch(a,yaw+offset,pitch,s.speed,0);
-                spellFromHand(blade,a,yaw+offset,pitch); blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target;
+                spellFromHand(blade,a,yaw+offset,pitch); blade.spell=s; blade.type=DamageType.MAGIC; blade.skill=Skill.MAGIC; blade.potential=p.potential; blade.impact=p.impact; blade.target=p.target; blade.homing=p.homing;
             }
         }
         casts++;
@@ -485,6 +486,10 @@ public final class CombatSystem {
         p.potential = CombatMath.magicMax(base, magicBonus);
         p.impact = 12 + base * 0.6f;
         p.innate = share < 1;
+        // (0.3.1, gamefixes: the lock-on did not lock on) a modest soft lock - whoever is under or just beside the
+        // crosshair, in sight, is the mark; the spell bends gently toward where they will be, never round corners
+        Actor mark = g.magic.target(a, yaw, pitch, 30);
+        if (mark != null) { p.target = mark.id; p.homing = s == Spell.SPELLDAGGERS ? 4f : 1.4f; }
         return p;
     }
 
@@ -516,7 +521,7 @@ public final class CombatSystem {
         float tx=a.x+dx*24,ty=a.eyeY()+dy*24,tz=a.z+dz*24;
         // (0.3.0, gamefixes) the player's spell flies from the hand to the very point under the crosshair (the world or a
         // body), not to a point 24 m out along the eye's line - from the shoulder camera that crossed the aim only there
-        if(a instanceof rpg.actor.Player pl){float[] at=pl.aimPointFor(g.time,new float[]{a.x,a.eyeY(),a.z},yaw,pitch);if(at!=null&&Math.abs(at[0]-a.x)+Math.abs(at[2]-a.z)>1.2f){tx=at[0];ty=at[1];tz=at[2];}}
+        if(a instanceof rpg.actor.Player pl){float[] at=pl.aimPointFor(g.time,yaw,pitch);if(at!=null&&Math.abs(at[0]-a.x)+Math.abs(at[2]-a.z)>1.2f){tx=at[0];ty=at[1];tz=at[2];}}
         float[] hand=castOrigin(a,yaw,pitch);p.x=hand[0];p.y=hand[1];p.z=hand[2];
         float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz),length=(float)Math.sqrt(Math.pow(tx-p.x,2)+Math.pow(ty-p.y,2)+Math.pow(tz-p.z,2));
         p.vx=(tx-p.x)/length*speed;p.vy=(ty-p.y)/length*speed;p.vz=(tz-p.z)/length*speed;
@@ -613,6 +618,10 @@ public final class CombatSystem {
                 if (a.torchLit && a.torchInHand() && c.move != Move.BASH && g.chemistry != null) {
                     float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw), reach = a.radius + 0.75f;
                     g.chemistry.emit(a, astratto.bridge.AstrattoNative.CHEM_FIRE, a.x + fx * reach, a.chestY() + 0.15f, a.z + fz * reach, 0.55f, c.move == Move.HEAVY ? 3 : 2, 0.35f);
+                    // (0.3.1, gamefixes: a torch never lit the grass - its flame stayed at chest height) a heavy blow
+                    // comes down through the plants at the end of its arc; crouched, the torch is swept along the ground
+                    if (c.move == Move.HEAVY || a.crouched)
+                        g.chemistry.emit(a, astratto.bridge.AstrattoNative.CHEM_FIRE, a.x + fx * (reach + 0.2f), a.y + 0.3f, a.z + fz * (reach + 0.2f), 0.6f, 2, 0.35f);
                 }
                 if (g.sfx != null) g.sfx.play(rpg.audio.Sfx.swingOf(c.move == Move.BASH ? a.off() : a.main()), a.x, a.y + 1.3f, a.z, c.move == Move.HEAVY ? 0.65f : 0.5f, c.move == Move.HEAVY ? 0.88f : 0.95f + (float) g.roll(a.id, (long) (g.time * 10)) * 0.12f, 20);
                 g.noise(a, a.x, a.y, a.z, 6, 0.3f);
@@ -663,12 +672,68 @@ public final class CombatSystem {
                 {-0.06f, 0.03f, 0.42f, 0.0f, 1f, 0.0f}, {-0.06f, 0.02f, 0.40f, 0.0f, 1f, 0.0f}};
     }
 
+    /**
+     * (0.3.2, gamefixes: melee did not look different by skill) the raw beginner's own blows, a different shape from the
+     * master's, not a smaller copy of it: the light cuts are a hack - the hand cocked up beside the head, the blade chopped
+     * down through the front and dumped low past the body, tip toward the ground - where the trained cut is a wide level
+     * sweep across; the heavy blow is raised less high and buried low. Between the two the paths blend by skill
+     * (style()), so every level reads a little cleaner than the one before. The middle key - where the blade bites - is
+     * the master's own: a beginner's blow reaches what a master's reaches; it gets there clumsily.
+     */
+    private static final float[][][] NOVICE = new float[6][][];
+    static {
+        NOVICE[Move.LIGHT_R.ordinal()] = new float[][]{
+                {0.20f, 0.34f, -0.04f, 0.12f, 0.88f, -0.46f}, {0.16f, 0.26f, 0.18f, 0.16f, 0.72f, 0.66f}, {0.06f, -0.02f, 0.48f, 0.05f, 0.02f, 1f},
+                {-0.04f, -0.24f, 0.34f, -0.16f, -0.82f, 0.52f}, {-0.06f, -0.38f, 0.18f, -0.22f, -0.96f, 0.12f}};
+        NOVICE[Move.LIGHT_L.ordinal()] = new float[][]{
+                {-0.16f, 0.32f, 0.0f, -0.12f, 0.86f, -0.48f}, {-0.12f, 0.24f, 0.2f, -0.16f, 0.7f, 0.68f}, {0.02f, -0.04f, 0.48f, -0.02f, 0.0f, 1f},
+                {0.08f, -0.22f, 0.32f, 0.16f, -0.82f, 0.5f}, {0.1f, -0.36f, 0.16f, 0.2f, -0.96f, 0.1f}};
+        NOVICE[Move.HEAVY.ordinal()] = new float[][]{
+                {0.12f, 0.26f, -0.02f, 0.1f, 0.8f, -0.58f}, {0.1f, 0.3f, 0.2f, 0.05f, 0.95f, 0.3f}, {0.04f, 0.16f, 0.45f, 0.0f, 0.25f, 0.97f},
+                {0.02f, -0.24f, 0.4f, 0.0f, -0.8f, 0.6f}, {0.0f, -0.44f, 0.24f, -0.02f, -0.99f, 0.12f}};
+    }
+    /**
+     * (0.3.2, gamefixes: two-handed sword swings were bugged) a two-handed blade's own cuts. Both hands on the hilt keep
+     * the grip near the body's middle, and the blade is wound back over a shoulder - not straight up - for the diagonal
+     * cuts: from over the right shoulder down across to the low left (forehand), from over the left to the low right
+     * (backhand), and the heavy blow raised behind the head and brought down the centre line. They were drawn with the
+     * one-handed paths, the blade then forced upright all through the wind-up and snapping round only in the cut.
+     */
+    private static final float[][][] TWO_HAND = new float[6][][];
+    static {
+        TWO_HAND[Move.LIGHT_R.ordinal()] = new float[][]{
+                {0.02f, 0.14f, -0.02f, 0.5f, 0.55f, -0.67f}, {0.02f, 0.11f, 0.2f, 0.85f, 0.45f, 0.25f}, {-0.12f, 0.0f, 0.42f, 0.2f, 0.05f, 1f},
+                {-0.3f, -0.12f, 0.32f, -0.8f, -0.25f, 0.5f}, {-0.34f, -0.28f, 0.1f, -0.6f, -0.5f, -0.6f}};
+        TWO_HAND[Move.LIGHT_L.ordinal()] = new float[][]{
+                {-0.3f, 0.12f, 0.0f, -0.5f, 0.55f, -0.67f}, {-0.28f, 0.07f, 0.24f, -0.85f, 0.4f, 0.3f}, {-0.1f, -0.02f, 0.42f, -0.15f, 0.0f, 1f},
+                {0.1f, -0.12f, 0.34f, 0.85f, -0.2f, 0.45f}, {0.14f, -0.26f, 0.1f, 0.6f, -0.5f, -0.6f}};
+        TWO_HAND[Move.HEAVY.ordinal()] = new float[][]{
+                {-0.08f, 0.4f, -0.12f, 0.05f, 0.4f, -0.92f}, {-0.08f, 0.42f, 0.12f, 0.0f, 1f, 0.1f}, {-0.1f, 0.12f, 0.45f, 0.0f, 0.2f, 1f},
+                {-0.1f, -0.16f, 0.42f, 0.0f, -0.65f, 0.75f}, {-0.1f, -0.34f, 0.26f, 0.0f, -0.95f, 0.3f}};
+    }
+    /** Whether a swing is made with both hands on a two-handed weapon. */
+    public static boolean twoHanded(Actor a) {
+        if (a == null || a.cs.offHand) return false;
+        ItemDef w = a.main();
+        return w != null && w.twoHanded() && a.off() == null;
+    }
+
+    /**
+     * How near a fighter's blows come to the master's shape, 0 .. 1 (Attack for the line, Strength for the body in it).
+     * Eased, so the first levels already move a beginner off the hack and the last ones polish the master's sweep.
+     */
+    public static float style(Actor a) {
+        if (a == null) return 1;
+        float m = 0.55f * mastery(a, Skill.ATTACK) + 0.45f * mastery(a, Skill.STRENGTH);
+        return (float) Math.pow(m, 0.8);
+    }
+
     /** s (0..1 through the active window; below 0 is the cocked wind-up) to the path's key parameter (-1..1). */
     private static float key(float s) { return s <= 0 ? -1 : -1 + 2 * ease(Math.min(1, s)); }
 
     /** A point of a path at k (-1..1): Catmull-Rom through its five keys. */
-    private static float[] path(Move m, float k) {
-        float[][] p = PATHS[m.ordinal()];
+    private static float[] path(Move m, float k) { return path(PATHS[m.ordinal()], k); }
+    private static float[] path(float[][] p, float k) {
         float f = (Math.max(-1, Math.min(1, k)) + 1) * 2;      // 0..4 over the keys
         int i = Math.min(3, (int) f);
         float t = f - i;
@@ -735,15 +800,67 @@ public final class CombatSystem {
 
     /** The gripping hand and the blade's direction at s through the move: {hand x, y, z, dir x, y, z}. */
     public static float[] grip(Actor a, Move m, float s) {
-        float[] sh = shoulder(a, a.cs.offHand, twist(m, a.cs.offHand, s), lean(m, s));
-        float[] w = toWorld(a, path(m, key(s)), a.cs.offHand);
+        float[] sh = shoulder(a, a.cs.offHand, twist(m, a.cs.offHand, s) * commit(a), lean(m, s) * leanK(a));
+        float[] w = toWorld(a, styled(a, m, key(s)), a.cs.offHand);
         return new float[]{sh[0] + w[0], sh[1] + w[1], sh[2] + w[2], w[3], w[4], w[5]};
     }
 
+    // ------------------------------------------------------------------ (0.3.1) the swing shaped by skill
+    /*
+     * (0.3.1, gamefixes: melee should show how good the fighter is) one ideal swing per move - the paths above are the
+     * level-99 blow - and each fighter's own skills shape how near to it they come, every frame, for anyone who swings
+     * (the player, people, monsters):
+     *   Strength - commitment: how far the hips and shoulders wind and unwind, how far the weight goes into it, how far
+     *              the blade is cocked and carried through. A weak fighter swings from the arm.
+     *   Attack   - precision: a raw swing wavers off its line and comes late out of a hesitant wind-up; a trained one
+     *              runs the line clean and snaps through the middle.
+     *   Defense  - recovery: how quickly and tightly the weapon comes back to guard after the blow.
+     * What is drawn is what strikes: the hit sweep reads these same paths.
+     */
+    /** A skill as a share of mastery (level 99 is the ideal, 1 the raw beginner). */
+    public static float mastery(Actor a, Skill sk) { return a == null ? 1 : Math.max(0, Math.min(1, (a.skills.level(sk) - 1) / 98f)); }
+    /** How far the trunk winds and unwinds (Strength): an arm swing at level 1, a full turn of the body at 99. */
+    public static float commit(Actor a) { return 0.55f + 0.5f * mastery(a, Skill.STRENGTH); }
+    /** How far the weight goes into the blow (Strength). */
+    public static float leanK(Actor a) { return 0.5f + 0.55f * mastery(a, Skill.STRENGTH); }
+    /** A path at k with the fighter's own cock, carry-through and line. */
+    static float[] styled(Actor a, Move m, float k) {
+        float str = mastery(a, Skill.STRENGTH), atk = mastery(a, Skill.ATTACK);
+        // a weak fighter neither draws back so far nor follows through so far (the arc is shorter at both ends)
+        float kk = k <= 0 ? k * (0.62f + 0.38f * str) : k * (0.7f + 0.3f * str);
+        boolean both = twoHanded(a) && TWO_HAND[m.ordinal()] != null;
+        float[] p = both ? path(TWO_HAND[m.ordinal()], kk) : path(m, kk);
+        float[][] raw = NOVICE[m.ordinal()];
+        if (idealLine) return p;
+        if (raw != null && a != null && (!both || m == Move.HEAVY)) {
+            float st = style(a);
+            if (st < 0.999f) { float[] q = path(raw, kk); for (int j = 0; j < 6; j++) p[j] = q[j] + (p[j] - q[j]) * st; }
+        }
+        // a raw swing wavers: a slow wobble across and up the line, different every blow, gone at Attack 99
+        float wob = 0.05f * (float) Math.pow(1 - atk, 1.4);
+        if (wob > 1e-4f && a != null) {
+            double ph = a.cs.lastAttack * 7.13 + a.id;
+            p[0] += wob * (float) Math.sin(k * 4.6 + ph);
+            p[1] += wob * 0.7f * (float) Math.cos(k * 3.3 + ph * 1.7);
+            // and the edge does not quite stay true to the cut
+            p[3] += wob * 2.2f * (float) Math.sin(k * 3.1 + ph * 0.6);
+            p[4] += wob * 1.6f * (float) Math.cos(k * 2.7 + ph);
+        }
+        return p;
+    }
+
+    /**
+     * (0.3.3, gamefixes: combat polish - a beginner's chop passed over a cat or a hen at the feet) while set, the paths
+     * are the trained line, without the beginner's hack or the wobble: the sweep tries it for bodies only when the drawn
+     * blade found none, so a clumsy blow still reaches what a trained one would (the blade's world contact is the drawn
+     * one's alone).
+     */
+    private static boolean idealLine;
+
     /** A point on the blade: s through the swing (0..1; below 0 in the wind-up), u along the blade (0 hand .. 1 tip); then the shoulder. */
     public static float[] blade(Actor a, Move m, float s, float u, float reach) {
-        float[] sh = shoulder(a, a.cs.offHand, twist(m, a.cs.offHand, s), lean(m, s));
-        float[] w = toWorld(a, path(m, key(s)), a.cs.offHand);
+        float[] sh = shoulder(a, a.cs.offHand, twist(m, a.cs.offHand, s) * commit(a), lean(m, s) * leanK(a));
+        float[] w = toWorld(a, styled(a, m, key(s)), a.cs.offHand);
         float dist = (0.06f + u * reach) * Math.max(1, a.figureScale());
         return new float[]{sh[0] + w[0] + w[3] * dist, sh[1] + w[1] + w[4] * dist, sh[2] + w[2] + w[5] * dist, sh[0], sh[1], sh[2]};
     }
@@ -758,8 +875,11 @@ public final class CombatSystem {
     private void sweep(Actor a, float from, float to) {
         if (a instanceof rpg.animal.Animal an) { bite(an, from, to); return; }
         Move m = a.cs.move; float reach = reach(a);
-        for (int i = 1; i <= 6; i++) {
-            float s = from + (to - from) * i / 6;
+        // (0.3.3) sampled finely enough that a beginner's chop - which turns the blade through a steep arc in the middle
+        // of the stroke - cannot step over something small at the feet between two samples
+        int steps = Math.max(6, Math.min(16, (int) Math.ceil((to - from) * 60)));
+        for (int i = 1; i <= steps; i++) {
+            float s = from + (to - from) * i / steps;
             float[] tip = blade(a, m, s, 1, reach), grip = grip(a, m, s);
             float dx = tip[0] - grip[0], dy = tip[1] - grip[1], dz = tip[2] - grip[2];
             float length = Math.max(0.001f, (float) Math.sqrt(dx * dx + dy * dy + dz * dz)); dx /= length; dy /= length; dz /= length;
@@ -773,16 +893,35 @@ public final class CombatSystem {
             boolean hard = wall.hit && !Blocks.glass(wall.block) && !Blocks.isLeaves(wall.block);
             float limit = hard ? wall.dist : length;
             if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2], false)) limit = 0;
-            if (limit > 0) for (Actor v : g.actors()) {
-                if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
-                float contact = HitVolumes.ray(g, v, grip[0], grip[1], grip[2], dx, dy, dz, limit, 0.06f);
-                if (!Float.isFinite(contact)) continue;
-                a.cs.struck.add(v.id); meleeContact(a, v, m, grip[0] + dx * contact, grip[1] + dy * contact, grip[2] + dz * contact);
-                if (a.cs.phase != Phase.ACTIVE) return;
+            int struckBefore = a.cs.struck.size();
+            if (limit > 0 && bodies(a, m, grip, dx, dy, dz, limit)) return;
+            if (a.cs.struck.size() == struckBefore && style(a) < 0.999f) {
+                // the trained line at the same moment, for bodies only, stopped by whatever solid stands in its way
+                float[] itip, igrip;
+                idealLine = true;
+                try { itip = blade(a, m, s, 1, reach); igrip = grip(a, m, s); } finally { idealLine = false; }
+                float ex = itip[0] - igrip[0], ey = itip[1] - igrip[1], ez = itip[2] - igrip[2];
+                float il = Math.max(0.001f, (float) Math.sqrt(ex * ex + ey * ey + ez * ez)); ex /= il; ey /= il; ez /= il;
+                Voxels.Hit iw = g.vox.ray(igrip[0], igrip[1], igrip[2], ex, ey, ez, il, false);
+                // the floor is no bar to it: a low cut skims along it (strikeWorld), so only walls and the like stop it
+                float ilimit = iw.hit && iw.ny <= 0 && !Blocks.glass(iw.block) && !Blocks.isLeaves(iw.block) ? iw.dist : il;
+                if (g.vox.clear(itip[3], itip[4], itip[5], igrip[0], igrip[1], igrip[2], false) && bodies(a, m, igrip, ex, ey, ez, ilimit)) return;
             }
             if (wall.hit) strikeWorld(a, m, reach, s, tip, wall);
             if (a.cs.phase != Phase.ACTIVE) return;
         }
+    }
+
+    /** Bodies the blade's line meets within limit: each struck once a swing; true when the swing is over (stopped by a guard...). */
+    private boolean bodies(Actor a, Move m, float[] grip, float dx, float dy, float dz, float limit) {
+        for (Actor v : g.actors()) {
+            if (v == a || !v.alive || a.cs.struck.contains(v.id) || (v.team != 0 && v.team == a.team && !hostileTo(a, v))) continue;
+            float contact = HitVolumes.ray(g, v, grip[0], grip[1], grip[2], dx, dy, dz, limit, 0.06f);
+            if (!Float.isFinite(contact)) continue;
+            a.cs.struck.add(v.id); meleeContact(a, v, m, grip[0] + dx * contact, grip[1] + dy * contact, grip[2] + dz * contact);
+            if (a.cs.phase != Phase.ACTIVE) return true;
+        }
+        return false;
     }
 
     private void strikeWorld(Actor a, Move m, float reach, float s, float[] tip, Voxels.Hit h) {
@@ -1030,8 +1169,11 @@ public final class CombatSystem {
         // a blow that knocks a person off balance (or lands on one already reeling) moves the body itself: Sydney takes it,
         // by the blow's momentum - how far past their Stability it struck, or a fraction of it on someone already reeling
         if (v instanceof rpg.ai.Npc vn && vn.alive && v.hp > 0 && g.reactions != null && (stagger || vn.reacting) && !guarding) {
-            float over = Math.max(0, impact - stab * 0.6f);
-            float J = Math.max(14f, Math.min(170f, 14f + over * 1.6f));
+            // (0.3.3, gamefixes: combat reactions need more polish) a blow just past someone's footing is a stumble they
+            // catch with a step or two - a light cut that drew a drop of blood was flooring people for a second and a half;
+            // only a blow well past it (half again their Stability and more) carries the momentum to put them down
+            float over = Math.max(0, impact - stab * 0.6f), ratio = impact / Math.max(1f, stab);
+            float J = Math.max(12f, Math.min(170f, 12f + over * (ratio < 1.5f ? 0.75f : 1.45f)));
             g.reactions.struck(vn, -tx / tl, 0.12f, -tz / tl, J, J * 0.3f, px, py, pz);
         }
         // the ground heaving under them: an Earth spell of the great tiers that strikes past their footing throws them down
@@ -1222,10 +1364,25 @@ public final class CombatSystem {
     private void step(Projectile p, float dt) {
         if (p.target!=0) {
             Actor target=g.actor(p.target);
-            if(target!=null && target.alive && g.vox.sight(p.x,p.y,p.z,target.x,target.chestY(),target.z)) {
-                float x=target.x-p.x,y=target.chestY()-p.y,z=target.z-p.z,len=(float)Math.sqrt(x*x+y*y+z*z);
-                float blend=Math.min(1,dt*3), speed=p.spell.speed;
-                if(len>0.1f) { p.vx+=(x/len*speed-p.vx)*blend;p.vy+=(y/len*speed-p.vy)*blend;p.vz+=(z/len*speed-p.vz)*blend; }
+            float aimY=target==null?0:target.chestY();
+            if(target!=null && target.alive && p.homing>0 && g.vox.sight(p.x,p.y,p.z,target.x,aimY,target.z)) {
+                // (0.3.1) toward where the mark will be when it gets there, turning no faster than its lock allows - it
+                // was steered at the chest as it stood (a moving mark was always behind) and snapped round at once
+                float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz);
+                float x=target.x-p.x,y=aimY-p.y,z=target.z-p.z,len=(float)Math.sqrt(x*x+y*y+z*z);
+                float lead=speed>0.1f?len/speed:0;
+                x+=target.vx*lead; z+=target.vz*lead; len=(float)Math.sqrt(x*x+y*y+z*z);
+                if(len>0.1f && speed>0.1f) {
+                    float cx=p.vx/speed,cy=p.vy/speed,cz=p.vz/speed, wx=x/len,wy=y/len,wz=z/len;
+                    float dot=Math.max(-1,Math.min(1,cx*wx+cy*wy+cz*wz)), angle=(float)Math.acos(dot);
+                    // behind it (passed, or dodged wide): the lock lets go
+                    if(angle>1.4f) p.target=0;
+                    else if(angle>1e-4f) {
+                        float k=Math.min(1,p.homing*dt/angle);
+                        float nx=cx+(wx-cx)*k,ny=cy+(wy-cy)*k,nz=cz+(wz-cz)*k,nl=(float)Math.sqrt(nx*nx+ny*ny+nz*nz);
+                        p.vx=nx/nl*speed;p.vy=ny/nl*speed;p.vz=nz/nl*speed;
+                    }
+                }
             } else p.target=0;
         }
         // (gamefixes: the arc shown was not where a throw went) the exact step of pos = start + v t - g t^2 / 2, the
@@ -1263,6 +1420,7 @@ public final class CombatSystem {
         if (struck != null) {
             float qx = p.x + sx * inv * nearest, qy = p.y + sy * inv * nearest, qz = p.z + sz * inv * nearest;
             p.done = true;
+            if (breaks(p)) { g.glass.bottle(p.owner, qx, qy, qz, sx, sy, sz); p.ammo = null; }
             if (p.ammo != null) lodgeInBody(p, struck, qx, qy, qz, sx * inv, sy * inv, sz * inv);
             if (struck.alive && friendly(p.owner, struck)) {
                 // a stray: it hurts, but it was no one's blow - no grudge, no crime, no fight started
@@ -1292,6 +1450,8 @@ public final class CombatSystem {
                 if (h.block == Blocks.WATER) { p.x = h.x; p.y = h.y + 0.5f; p.z = h.z; if (g.chemistry != null) g.chemistry.splash(h.x, h.y + 1f, h.z); }
                 spellImpact(p,p.x,p.y,p.z,null); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return;
             }
+            // (0.3.4) a thrown bottle breaks on whatever it meets
+            if (breaks(p)) { g.glass.bottle(p.owner, p.x, p.y, p.z, sx, sy, sz); p.ammo = null; return; }
             // a thrown thing glances off what it strikes (restitution 0.3) and comes to rest after a bounce or two
             if (p.ammo != null && p.ammo.def.family == Family.THROWN && p.bounces < 2 && !bites(p, h, sx / len, sy / len, sz / len, false)) {
                 float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
@@ -1357,6 +1517,9 @@ public final class CombatSystem {
     }
 
     /** A shot that never struck anything (its flight cut short): it falls where it is, as a loose thing tumbling down. */
+    /** (0.3.4) Whether this shot is a bottle (it breaks where it lands rather than lying there to be picked up). */
+    private static boolean breaks(Projectile p) { return p.ammo != null && "bottle".equals(p.ammo.def.thrown); }
+
     private void dropArrow(Projectile p) {
         releasePhysical(p);
         if (p.ammo == null) return;

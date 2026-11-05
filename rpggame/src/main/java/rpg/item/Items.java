@@ -151,7 +151,39 @@ public final class Items {
     /** Faith restored by drinking (GDD 2.5): religious wine, and the restorative potion. */
     public static final ItemDef RELIGIOUS_WINE = drink("religious_wine", "Religious wine", 40, 6, 0x7A1E3A, "Consecrated wine: drinking it restores 6 Faith points.");
     /** Alcohol and tobacco (GDD 3.5: content tags for low-Honor corpse loot; their effects are open): an ale warms, a pipe's worth of tobacco is a trade good. */
-    public static final ItemDef ALE = food("ale", "Ale", 6, 2, 0xB07A2A);
+    /**
+     * (0.3.4, gamefixes: ale and the glass bottle) Ale comes in a stoppered glass bottle: drunk, it lends the drinker five
+     * levels of Strength that ebb away over a few minutes (Skills.boost), and leaves the bottle. The inns brew it from
+     * barley and hops with a bottle of water; an empty bottle is filled at any water's edge, or thrown - it breaks where
+     * it lands, and the crash draws whoever hears it to look.
+     */
+    public static final ItemDef ALE = def("ale", "Ale", 8, 0xB07A2A, "A stoppered bottle of brown ale. It puts some strength in the arm for a while.");
+    public static final ItemDef GLASS_BOTTLE = stack("glass_bottle", "Glass bottle", 3, 0x9AC8B0, "An empty glass bottle. Fill it at water, or throw it: it breaks loudly where it lands.");
+    public static final ItemDef WATER_BOTTLE = def("bottle_of_water", "Bottle of water", 4, 0x7AB8D8, "A glass bottle of clear water, for brewing.");
+    static { GLASS_BOTTLE.slot = Slot.MAIN; GLASS_BOTTLE.family = Family.THROWN; GLASS_BOTTLE.thrown = "bottle"; GLASS_BOTTLE.reqSkill = Skill.ARCHERY; GLASS_BOTTLE.reqLevel = 1;
+        GLASS_BOTTLE.damage = 1.2f * rpg.combat.CombatMath.HP_SCALE; GLASS_BOTTLE.impact = 6; GLASS_BOTTLE.damageType = DamageType.BLUNT; GLASS_BOTTLE.speed = 0.8f; ALE.strengthBoost = 5; }
+    public static final ItemDef BARLEY = stack("barley", "Barley", 3, 0xD8B860, "A sheaf of ripe barley, for the brewer.");
+    public static final ItemDef HOPS = stack("hops", "Hops", 4, 0x9AC060, "Green hop cones, bitter and sticky. They flavour ale.");
+    public static final ItemDef BARLEY_SEEDS = stack("barley_seeds", "Barley seeds", 2, 0xC8B070, "A twist of barley seed. Sow it in a tilled plot.");
+    public static final ItemDef HOP_SEEDS = stack("hop_seeds", "Hop seeds", 3, 0x7A9050, "A twist of hop seed. Sow it in a tilled plot.");
+    /** (0.3.4, gamefixes: the duck and the deer) what they give when butchered: their own meat, a buck's antlers. */
+    public static final ItemDef RAW_VENISON = def("raw_venison", "Raw venison", 48, 0xA0342E, "Needs cooking.");
+    public static final ItemDef VENISON = food("venison", "Venison", 70, 8, 0x7A3A22);
+    public static final ItemDef RAW_DUCK = def("raw_duck", "Raw duck", 30, 0xD88A7A, "Needs cooking.");
+    public static final ItemDef ROAST_DUCK = food("roast_duck", "Roast duck", 44, 6, 0xA8622A);
+    public static final ItemDef ANTLER = def("antler", "Antler", 60, 0xD8C8A8, "A deer's antler, branched and hard as bone.");
+    /**
+     * (0.3.2, gamefixes: apples, carrots and cabbage) what the farms and orchards grow: eaten raw they restore a little,
+     * fed to a horse or a Pegasus they are a treat; the seeds go back into a tilled plot; the inns cook them into a stew
+     * and mull apples into hot cider.
+     */
+    public static final ItemDef APPLE = food("apple", "Apple", 4, 2, 0xC8302A);
+    public static final ItemDef CARROT = food("carrot", "Carrot", 3, 2, 0xE87A22);
+    public static final ItemDef CABBAGE = food("cabbage", "Cabbage", 6, 3, 0x7AAA4A);
+    public static final ItemDef CARROT_SEEDS = stack("carrot_seeds", "Carrot seeds", 2, 0xC8A060, "A twist of carrot seed. Sow it in a tilled plot.");
+    public static final ItemDef CABBAGE_SEEDS = stack("cabbage_seeds", "Cabbage seeds", 3, 0x8A7050, "A twist of cabbage seed. Sow it in a tilled plot.");
+    public static final ItemDef VEGETABLE_STEW = food("vegetable_stew", "Vegetable stew", 16, 7, 0xA8702A);
+    public static final ItemDef HOT_CIDER = food("hot_cider", "Hot cider", 9, 3, 0xD89A3A);
     public static final ItemDef TOBACCO = def("pipe_tobacco", "Pipe tobacco", 18, 0x6A4A28, "A twist of dark pipe tobacco. Worth something to the right buyer.");
     public static final ItemDef RESTORATIVE = drink("restorative_potion", "Restorative potion", 140, 20, 0x5AB8C8, "A restorative: it restores 20 Faith points.");
 
@@ -409,6 +441,8 @@ public final class Items {
                 {"apprentice_staff", 1, 5, 1.6f}, {"fire_staff", 1, 5, 1.8f}, {"air_staff", 1, 5, 1.8f}, {"water_staff", 1, 5, 1.8f}, {"electric_staff", 1, 5, 1.8f}, {"earth_staff", 1, 5, 1.8f}, {"wand", 1, 2, 0.3f}, {"holy_symbol", 1, 1, 0.3f}, {"blessed_symbol", 1, 1, 0.3f},
                 {"leather_boots", 2, 2, 1.2f}, {"leather_gloves", 2, 1, 0.4f},
                 {"basic_backpack", 3, 3, 1.4f}, {"leather_pouch", 2, 1, 0.3f}, {"sack", 2, 2, 0.4f},
+                {"ale", 1, 2, 0.6f}, {"glass_bottle", 1, 2, 0.35f}, {"bottle_of_water", 1, 2, 0.8f}, {"barley", 1, 2, 0.2f}, {"hops", 1, 1, 0.1f},
+                {"raw_venison", 2, 1, 0.7f}, {"venison", 2, 1, 0.6f}, {"raw_duck", 2, 1, 0.6f}, {"roast_duck", 2, 1, 0.5f}, {"antler", 2, 2, 0.8f},
                 {"raw_meat", 2, 1, 0.5f}, {"cooked_meat", 2, 1, 0.4f}, {"burnt_meat", 2, 1, 0.3f}, {"rawhide", 2, 2, 2.5f}, {"wool", 1, 1, 0.3f},
                 {"egg", 1, 1, 0.06f}, {"milk", 2, 2, 2f}, {"feather", 1, 1, 0.005f}, {"animal_feed", 2, 2, 5f},
                 {"pot", 2, 2, 0.6f}, {"bucket", 2, 2, 0.9f}, {"bucket_of_water", 2, 2, 2.4f},

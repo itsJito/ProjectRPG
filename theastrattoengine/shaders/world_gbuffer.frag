@@ -92,7 +92,16 @@ void main() {
     float rough = lm.r, metal = lm.g;
     float sky = vLight.x, blk = vLight.y, ao = vLight.z;
     // material wear: per-block tone jitter, grime blotches, rain streaks, street-level dirt band
-    col *= 0.92 + 0.16 * hash3(bp + vec3(13.1, 7.7, 3.3));
+    // (gamefixes: the landscape was hard to read) turf - a green top open to the sky - is not jittered block by block (it
+    // made a checkerboard of the meadows) but tinted in broad swathes: sunlit, yellower grass where the low-frequency
+    // noise rises, deeper and cooler green in the hollows between, with a finer mottle inside them - the ground reads
+    // as rolling meadow at any distance and its shape is easy to follow
+    bool turf = N.y > 0.5 && !emissive && col.g > col.r * 1.12 && col.g > col.b * 1.35;
+    if (turf) {
+        float m = texture(uNoise, vWorld.xz / 31.0).g * 0.6 + texture(uNoise, vWorld.xz / 8.5).r * 0.3 + texture(uNoise, vWorld.xz / 2.3).b * 0.1;
+        col *= mix(vec3(0.66, 0.80, 0.70), vec3(1.10, 1.05, 0.78), smoothstep(0.3, 0.7, m));
+        col *= 0.97 + 0.06 * hash3(bp + vec3(13.1, 7.7, 3.3));
+    } else col *= 0.92 + 0.16 * hash3(bp + vec3(13.1, 7.7, 3.3));
     if (!emissive) {
         vec2 np = (abs(N.y) > 0.5) ? vWorld.xz : (abs(N.x) > 0.5 ? vWorld.zy : vWorld.xy);
         vec4 nz = texture(uNoise, np / 40.0);

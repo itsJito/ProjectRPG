@@ -146,6 +146,9 @@ float voxelVisibility(vec3 a, vec3 b) {
         else { t = tm.z; c.z += st.z; tm.z += inv.z; }
         if (t >= len - 0.6) return 1.0;
         if (!inWorld(c)) return 1.0;
+        // (0.3.3) the light's own cell (a lantern's glass round its flame) never shadows what that light falls on: a
+        // hanging lamp blacked out the ceiling over it
+        if (all(equal(c, ivec3(floor(b))))) return 1.0;
         if (opq(voxel(c))) return 0.0;
     }
     return 1.0;

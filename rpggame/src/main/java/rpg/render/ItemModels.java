@@ -45,6 +45,7 @@ public final class ItemModels {
         // wooden gear keeps the wood designs (planked shield, a wooden blade)
         Tier t = d.tier == Tier.WOODEN ? null : d.tier;
         if (d.id.startsWith("cape_")) return HiResItems.skillcape(Skill.valueOf(d.id.substring(5).toUpperCase()));
+        if (HiResItems.bottled(d)) return HiResItems.bottle(d);
         switch (d.family) {
             case SWORD: return HiResItems.sword(d, t);
             case DAGGER: return HiResItems.dagger(d, t);
@@ -214,6 +215,12 @@ public final class ItemModels {
             case "feather" -> feather();
             case "animal_feed" -> feedSack();
             case "berries" -> berries();
+            case "apple" -> apple();
+            case "carrot" -> carrot();
+            case "cabbage" -> cabbage();
+            case "carrot_seeds", "cabbage_seeds" -> seedTwist(d);
+            case "vegetable_stew" -> stew();
+            case "hot_cider" -> mug(d);
             case "guam" -> leaf();
             case "flax" -> flax();
             case "bowstring" -> bowstring();
@@ -788,6 +795,94 @@ public final class ItemModels {
         for (int[] p : b) m.sphere(p[0] + 0.5f, p[1] + 0.5f, p[2] + 0.5f, 1.7f, mat(0xC02030));
         for (int[] p : b) m.set(p[0], p[1] + 1, p[2] + 1, mat(0xF06070));
         m.box(4, 6, 4, 4, 7, 4, mat(0x3A6A2A));
+        return new Model(m, 4.5f, 0.5f, 4.5f);
+    }
+
+    /** (0.3.2) An apple: round, red blushed over yellow-green at the shoulder, a short stalk and a leaf. */
+    private static Model apple() {
+        VoxModel m = new VoxModel(11, 13, 11);
+        int red = mat(0xC8302A), deep = mat(0x9A2020), blush = mat(0xD8A040);
+        for (int x = 0; x < 11; x++) for (int y = 0; y < 11; y++) for (int z = 0; z < 11; z++) {
+            float dx = (x - 5) / 5f, dy = (y - 5) / 4.8f, dz = (z - 5) / 5f;
+            // a little flattened, a dimple at the top where the stalk goes in
+            float r = dx * dx + dy * dy + dz * dz + (y > 8 && Math.abs(x - 5) < 2 && Math.abs(z - 5) < 2 ? 0.6f : 0);
+            if (r > 1) continue;
+            m.set(x, y, z, y > 7 && (x + z) % 3 == 0 ? blush : (x + y + z) % 5 == 0 ? deep : red);
+        }
+        m.box(5, 10, 5, 5, 12, 5, mat(0x5A3A1A));
+        m.box(6, 11, 5, 8, 11, 5, mat(0x4A8A2A)); m.set(7, 12, 5, mat(0x5A9A32));
+        return new Model(m, 5.5f, 0.5f, 5.5f);
+    }
+
+    /** (0.3.2) A carrot: a long orange taper with growth rings, its feathery green top. */
+    private static Model carrot() {
+        VoxModel m = new VoxModel(7, 24, 7);
+        int orange = mat(0xE87A22), ring = mat(0xC85E16);
+        for (int y = 0; y < 16; y++) {
+            float r = 0.6f + y * 0.17f;
+            for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) if (Math.hypot(x - 3, z - 3) <= r) m.set(x, y, z, y % 4 == 1 ? ring : orange);
+        }
+        int green = mat(0x4A9A32), light = mat(0x6ABA44);
+        for (int k = 0; k < 5; k++) {
+            int bx = 1 + k + (k % 2), bz = 2 + (k * 2) % 3;
+            for (int y = 16; y < 21 + k % 3; y++) m.set(bx + (y - 16) / 3 * (k < 2 ? -1 : k > 2 ? 1 : 0), y, bz, y % 2 == 0 ? green : light);
+        }
+        return new Model(m, 3.5f, 0.5f, 3.5f);
+    }
+
+    /** (0.3.2) A cabbage: a tight pale-green heart wrapped in broad, veined darker leaves. */
+    private static Model cabbage() {
+        VoxModel m = new VoxModel(15, 13, 15);
+        int heart = mat(0xB8D88A), leaf = mat(0x6A9A44), vein = mat(0xD0E8B0), outer = mat(0x4E7E34);
+        for (int x = 0; x < 15; x++) for (int y = 0; y < 13; y++) for (int z = 0; z < 15; z++) {
+            float dx = (x - 7) / 7f, dy = (y - 5.5f) / 6f, dz = (z - 7) / 7f, r = dx * dx + dy * dy + dz * dz;
+            if (r > 1) continue;
+            float a = (float) Math.atan2(z - 7, x - 7);
+            boolean veinHere = Math.abs(Math.sin(a * 3)) < 0.12f && r > 0.5f;
+            m.set(x, y, z, r < 0.42f && y > 4 ? heart : veinHere ? vein : r > 0.82f ? outer : leaf);
+        }
+        return new Model(m, 7.5f, 0.5f, 7.5f);
+    }
+
+    /** (0.3.2) Seed in a twist of paper: a small folded packet, its seed showing at the top. */
+    private static Model seedTwist(ItemDef d) {
+        VoxModel m = new VoxModel(7, 9, 5);
+        int paper = mat(0xD8C8A0), fold = mat(0xB8A880), seed = mat(d.id.startsWith("carrot") ? 0xC8A060 : 0x5A4030);
+        m.box(0, 0, 0, 6, 6, 4, paper); m.box(0, 6, 0, 6, 6, 4, fold);
+        for (int x = 1; x <= 5; x += 2) m.set(x, 7, 2, seed);
+        m.box(2, 7, 1, 4, 8, 3, fold);
+        return new Model(m, 3.5f, 0.5f, 2.5f);
+    }
+
+    /** (0.3.2) A bowl of stew: a turned wooden bowl, brown broth, orange and green pieces in it, steam's worth of shine. */
+    private static Model stew() {
+        VoxModel m = new VoxModel(15, 8, 15);
+        int wood = mat(0x8A5E34), rim = mat(0xA87444), broth = mat(0x8A5A22), carrot = mat(0xE87A22), green = mat(0x6A9A44);
+        for (int y = 0; y < 7; y++) {
+            float r = 4.2f + y * 0.55f;
+            for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) {
+                float d = (float) Math.hypot(x - 7, z - 7);
+                if (d > r) continue;
+                if (d > r - 1.1f || y == 0) m.set(x, y, z, y == 6 ? rim : wood);
+                else if (y == 5) m.set(x, y, z, (x * 7 + z * 3) % 11 == 0 ? carrot : (x * 5 + z) % 13 == 0 ? green : broth);
+            }
+        }
+        return new Model(m, 7.5f, 0.5f, 7.5f);
+    }
+
+    /** (0.3.2) A tankard: staved wood bound with iron, a handle, filled near the brim (amber cider, brown ale with a head). */
+    private static Model mug(ItemDef d) {
+        VoxModel m = new VoxModel(13, 13, 10);
+        int wood = mat(0x8A6038), hoop = metal(0x5A5A60);
+        int drink = d.id.equals("ale") ? mat(0x7A4A1A) : mat(0xD89A3A), head = d.id.equals("ale") ? mat(0xEEE2C8) : mat(0xE8B860);
+        for (int y = 0; y < 12; y++) for (int x = 0; x < 10; x++) for (int z = 0; z < 10; z++) {
+            float dd = (float) Math.hypot(x - 4.5f, z - 4.5f);
+            if (dd > 4.6f) continue;
+            if (dd > 3.6f || y == 0) m.set(x, y, z, y == 2 || y == 9 ? hoop : (Math.round(Math.atan2(z - 4.5, x - 4.5) * 3) % 2 == 0 ? wood : sh(wood, 0.86f)));
+            else if (y == 10) m.set(x, y, z, head); else if (y == 9) m.set(x, y, z, drink);
+        }
+        for (int y = 3; y <= 9; y++) m.set(11, y, 4, wood);
+        m.box(9, 3, 4, 11, 3, 4, wood); m.box(9, 9, 4, 11, 9, 4, wood);
         return new Model(m, 4.5f, 0.5f, 4.5f);
     }
 

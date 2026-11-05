@@ -27,7 +27,9 @@ public enum Species {
     DOG("Dog", "Puppy", 0.7f, 0.9f, 0.5f, Plan.QUAD, 1.5f, 6.0f, Diet.SCAVENGER, Group.SOLO, 1, 3, true, false),
     CAT("Cat", "Kitten", 0.5f, 0.6f, 0.5f, Plan.QUAD, 1.0f, 5.0f, Diet.SCAVENGER, Group.SOLO, 1, 1, true, true),
     /** (0.3.0, gamefixes) the Pegasus: a horse built like a war horse - broad, deep-chested, heavy-legged - with a horn and great wings: it flies. */
-    PEGASUS("Pegasus", "Foal", 1.62f, 1.85f, 0.6f, Plan.QUAD, 1.7f, 8.4f, Diet.GRAZER, Group.HERD, 1, 2, false, false);
+    PEGASUS("Pegasus", "Foal", 1.62f, 1.85f, 0.6f, Plan.QUAD, 1.7f, 8.4f, Diet.GRAZER, Group.HERD, 1, 2, false, false),
+    /** (0.3.4, gamefixes) the Deer: a light, long-legged grazer of the woods - wary, quick to bolt, the bears' and wolves' prey; a buck carries antlers. */
+    DEER("Deer", "Fawn", 0.8f, 1.45f, 0.5f, Plan.QUAD, 1.4f, 8.6f, Diet.GRAZER, Group.HERD, 2, 5, false, false);
 
     /** Body plan: how the model is built and how it walks. */
     public enum Plan { QUAD, BIRD, HOPPER }
@@ -87,9 +89,12 @@ public enum Species {
      * cool off; the rest only cross water when it is the way.
      */
     public float wades;
+    /** (0.3.4) Whether it swims: crosses deep water, held up at the surface (a duck sits on any water). */
+    public boolean swims;
     static {
         // the weaknesses on record: fur and fire
         for (Species s : new Species[]{BROWN_BEAR, WOLF, COYOTE, FOX, MOUNTAIN_LION}) s.weakness = rpg.combat.Spells.Element.FIRE;
+        for (Species s : new Species[]{DUCK, WOLF, DOG, FOX, COYOTE, BROWN_BEAR, HORSE, PEGASUS, COW, DEER}) s.swims = true;
         DUCK.wades = 0.55f; COW.wades = 0.2f; HORSE.wades = 0.15f; BROWN_BEAR.wades = 0.2f; PIG.wades = 0.12f; DOG.wades = 0.1f; SHEEP.wades = 0.04f;
     }
 
@@ -118,12 +123,12 @@ public enum Species {
         COYOTE.skills(12, 10, 8, 12, 18).weapon("bite", 4, 14, 0.45f, DamageType.PIERCE).senses(1.25f, 1.4f, 12, 7).breeds(480, 2, 4, 1440, 1440).yields(2, 1, false, 0).sounds("animal.coyote", "animal.coyote", "animal.dog.hurt", "animal.dog.hurt");
         COYOTE.prey.addAll(EnumSet.of(RABBIT, CHICKEN, DUCK, SHEEP, CAT));
         WOLF.skills(25, 22, 18, 25, 22).weapon("bite", 6, 26, 0.5f, DamageType.PIERCE).senses(1.3f, 1.5f, 14, 0).breeds(540, 2, 4, 2160, 1800).yields(3, 1, true, 0).sounds("animal.wolf", "animal.wolf.growl", "animal.dog.hurt", "animal.dog.hurt");
-        WOLF.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, CHICKEN, DUCK, COW, HORSE));
+        WOLF.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, CHICKEN, DUCK, COW, HORSE, DEER));
         MOUNTAIN_LION.skills(32, 30, 20, 30, 30).weapon("claw", 8, 40, 0.55f, DamageType.SLASH).senses(1.35f, 1.4f, 10, 0).breeds(600, 1, 2, 2160, 2160).yields(3, 1, true, 0).sounds("animal.lion", "animal.lion", "animal.lion", "animal.lion");
-        MOUNTAIN_LION.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, DUCK, CHICKEN, DOG, COYOTE, FOX));
+        MOUNTAIN_LION.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, DUCK, CHICKEN, DOG, COYOTE, FOX, DEER));
         BROWN_BEAR.skills(26, 28, 20, 35, 12).weapon("swipe", 6, 70, 0.75f, DamageType.SLASH).senses(1.0f, 1.2f, 9, 0).breeds(900, 1, 2, 2880, 2880).yields(8, 2, true, 0).sounds("animal.bear", "animal.bear", "animal.bear", "animal.bear");
         BROWN_BEAR.defends = true;
-        BROWN_BEAR.prey.addAll(EnumSet.of(RABBIT, PIG, SHEEP));
+        BROWN_BEAR.prey.addAll(EnumSet.of(RABBIT, PIG, SHEEP, DEER));
         DUCK.skills(1, 1, 1, 3, 6).weapon("peck", 1, 2, 0.3f, DamageType.PIERCE).senses(1.25f, 1.2f, 3, 1.6f).breeds(480, 3, 6, 1440, 960).yields(1, 0, false, 5).sounds("animal.duck", "animal.duck", "animal.duck", "animal.duck");
         DUCK.lays = true;
         COW.skills(6, 18, 10, 22, 4).weapon("butt", 5, 60, 0.6f, DamageType.BLUNT).senses(1.0f, 1.0f, 2.5f, 1.4f).breeds(900, 1, 1, 2880, 2160).yields(6, 2, true, 0).sounds("animal.cow", "animal.cow", "animal.cow", "animal.cow");
@@ -135,6 +140,8 @@ public enum Species {
         CAT.prey.addAll(EnumSet.of(RABBIT));
         PEGASUS.skills(30, 40, 30, 50, 45).weapon("kick", 10, 90, 0.8f, DamageType.BLUNT).senses(1.4f, 1.4f, 7, 3).breeds(1440, 1, 1, 5760, 2880).yields(8, 3, true, 6).sounds("animal.horse", "animal.horse.alarm", "animal.horse.alarm", "animal.horse.alarm");
         PEGASUS.defends = true; PEGASUS.wades = 0.15f;
+        DEER.skills(6, 8, 6, 14, 30).weapon("kick", 4, 34, 0.55f, DamageType.BLUNT).senses(1.45f, 1.8f, 18, 11).breeds(1200, 1, 2, 4320, 2880).yields(4, 1, true, 0).sounds(null, "animal.deer", "animal.deer.hurt", "animal.deer.hurt");
+        DEER.wades = 0.12f;
     }
 
     /** A wild hunter: has prey and is not kept by people. */

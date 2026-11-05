@@ -187,11 +187,13 @@ public final class Fx {
      * thinning as they spread; they fall, and where they land they splat.
      */
     public void blood(float x, float y, float z, float dx, float dz) {
-        for (int i = 0; i < 26; i++) {
-            boolean gout = i < 5;
-            float spread = gout ? 0.8f : 1.7f, speed = gout ? 1.6f : 2.4f + rnd.nextFloat() * 1.2f;
-            liquid(x + s() * 0.04f, y + s() * 0.04f, z + s() * 0.04f, dx * speed + s() * spread, 0.6f + rnd.nextFloat() * (gout ? 1.4f : 2.6f), dz * speed + s() * spread,
-                    gout ? 0.04f + rnd.nextFloat() * 0.02f : 0.016f + rnd.nextFloat() * 0.016f, 1.4f + rnd.nextFloat() * 0.6f);
+        // (0.3.1, gamefixes: the blood) fine: a few heavier drops and many small ones, thrown hard so they draw out into
+        // streaks - the old drops were the size of cherries and read as red balls
+        for (int i = 0; i < 34; i++) {
+            boolean gout = i < 4;
+            float spread = gout ? 0.7f : 1.5f, speed = gout ? 2.2f : 3.0f + rnd.nextFloat() * 1.8f;
+            liquid(x + s() * 0.04f, y + s() * 0.04f, z + s() * 0.04f, dx * speed + s() * spread, 0.5f + rnd.nextFloat() * (gout ? 1.2f : 2.2f), dz * speed + s() * spread,
+                    gout ? 0.022f + rnd.nextFloat() * 0.01f : 0.008f + rnd.nextFloat() * 0.009f, 1.4f + rnd.nextFloat() * 0.6f);
         }
     }
 
@@ -206,13 +208,13 @@ public final class Fx {
         int n = 12 + (int) (strength * 18);
         for (int i = 0; i < n; i++) {
             float t = rnd.nextFloat();
-            liquid(x, y, z, dx * (2.2f + t * 2.4f) * strength + s() * 0.25f, (1.6f + t * 1.8f) * strength, dz * (2.2f + t * 2.4f) * strength + s() * 0.25f, 0.024f + t * 0.016f, 1.6f);
+            liquid(x, y, z, dx * (2.2f + t * 2.4f) * strength + s() * 0.25f, (1.6f + t * 1.8f) * strength, dz * (2.2f + t * 2.4f) * strength + s() * 0.25f, 0.014f + t * 0.01f, 1.6f);
         }
     }
 
     /** One drop falling from a wound: a drop of blood, lengthening as it falls, splatting where it lands. */
     public void drip(float x, float y, float z) {
-        liquid(x + s() * 0.1f, y, z + s() * 0.1f, s() * 0.1f, -0.3f, s() * 0.1f, 0.02f + rnd.nextFloat() * 0.01f, 2.5f);
+        liquid(x + s() * 0.05f, y, z + s() * 0.05f, s() * 0.06f, -0.4f, s() * 0.06f, 0.011f + rnd.nextFloat() * 0.006f, 2.5f);
     }
 
     /** A drop of liquid in flight (blood's colour), its velocity carried to the renderer so it is drawn along it. */
@@ -234,6 +236,22 @@ public final class Fx {
     public void ring(float x, float y, float z, float size, float r, float g, float b) { add(4, x, y + 0.05f, z, 0, 0, 0, size, r, g, b, 1, 0.7f, 0, 0); }
 
     public void trail(float x, float y, float z, float r, float g, float b) { add(2, x, y, z, s() * 0.3f, s() * 0.3f, s() * 0.3f, 0.12f, r, g, b, 1, 0.35f, 0, 2); }
+
+    /**
+     * (0.3.1, gamefixes: the environment should visibly answer movement and weather) what a footfall throws up from the
+     * ground it lands on: a low curl of dust off dry earth or sand (more for a run), a spatter of water off soaked open
+     * ground in the rain, a powder of snow where it lies - each in the ground's own colour, hugging the ground and quickly
+     * gone. kind 0 dust, 1 wet, 2 snow; force 0..1.
+     */
+    public void footfall(float x, float y, float z, int kind, float r, float g, float b, float force) {
+        int n = (int) (2 + force * (kind == 1 ? 7 : 6));
+        for (int i = 0; i < n; i++) {
+            if (kind == 1) add(8, x + s() * 0.15f, y + 0.02f, z + s() * 0.15f, s() * 0.9f * force, 0.8f + rnd.nextFloat() * 1.1f * force, s() * 0.9f * force,
+                    0.012f + rnd.nextFloat() * 0.01f, 0.62f, 0.72f, 0.82f, 0.85f, 0.35f + rnd.nextFloat() * 0.2f, 9.8f, 0.2f);
+            else add(1, x + s() * 0.18f, y + 0.04f, z + s() * 0.18f, s() * 0.6f * force, 0.18f + rnd.nextFloat() * 0.35f * force, s() * 0.6f * force,
+                    (kind == 2 ? 0.07f : 0.09f) + rnd.nextFloat() * 0.07f * force, r, g, b, kind == 2 ? 0.75f : 0.38f, 0.7f + rnd.nextFloat() * 0.6f, kind == 2 ? 0.8f : 0.05f, 1.2f);
+        }
+    }
 
     public void puff(float x, float y, float z) {
         for (int i = 0; i < 8; i++) add(1, x + s() * 0.3f, y, z + s() * 0.3f, s() * 0.5f, 0.6f, s() * 0.5f, 0.4f, 0.55f, 0.52f, 0.48f, 0.5f, 1.4f, 0, 0.8f);

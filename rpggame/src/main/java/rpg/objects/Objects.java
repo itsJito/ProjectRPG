@@ -46,6 +46,8 @@ public final class Objects {
         return o;
     }
     private long fid() { return nextFixture++; }
+    /** (0.3.2) Fixtures made by another system from the next free fixture id: it takes the first and returns the next. */
+    public void reserveAfter(java.util.function.LongUnaryOperator make) { nextFixture = make.applyAsLong(nextFixture); }
 
     /** The authored fixtures, in a fixed order. */
     public void buildFixtures() {

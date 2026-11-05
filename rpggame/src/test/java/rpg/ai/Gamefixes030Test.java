@@ -72,7 +72,7 @@ class Gamefixes030Test {
         keys(1, 0, false, 40);
         assertNotNull(g.player.climb, "onto the ladder from the ledge");
         keys(-1, 0, false, 60 * 5);
-        assertNull(g.player.climb, "stepped off at the bottom");
+        assertNull(g.player.climb, () -> "stepped off at the bottom: phase " + g.player.climb.phase + " y " + (g.player.y - DevMap.FLOOR) + " bottom " + (g.player.climb.bottom - DevMap.FLOOR) + " speed " + g.player.climb.speed + " at (" + g.player.x + ", " + g.player.z + ")");
         assertTrue(g.player.y < DevMap.FLOOR + 0.3f);
     }
 

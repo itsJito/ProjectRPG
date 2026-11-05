@@ -8,7 +8,8 @@ void main() {
     // below the daylight key the scene is brought up to 0.16 * (avg / 0.16)^0.6, so a dim room stays dim, a dark
     // night stays dark, and the lamps' pools of light read against it
     float a = max(avg, 1e-4);
-    float want = a < 0.16 ? 0.16 * pow(a / 0.16, 0.6) : 0.16;
+    // (gamefixes: too dark) the eye now goes further toward the key in the dark (0.6 -> 0.78): a dim room is dim but read
+    float want = a < 0.16 ? 0.16 * pow(a / 0.16, 0.78) : 0.16;
     float target = clamp(want / a, uMin, uMax);
     float prev = texelFetch(uPrev, ivec2(0), 0).r;
     if (uReset > 0.5 || !(prev > 0.0)) prev = target;

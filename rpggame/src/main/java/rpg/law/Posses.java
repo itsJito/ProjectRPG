@@ -141,6 +141,13 @@ public final class Posses {
             else if (melee) wear(n, Items.get("iron_sword"));
             else { wear(n, Items.get("iron_crossbow")); wear(n, Items.get("iron_bolts"), 20); }
             wear(n, Items.get("stone_body"));
+            // (0.3.1, gamefixes: bounty hunters should physically have the player's bounty) a signed warrant in the pack:
+            // the quarry, the sum and the last known place - the hunter's authority. Lost (picked from the pack) it ends
+            // their hunt; taken from the body, it is the player's own warrant to read
+            ItemStack warrant = new ItemStack(Items.BOUNTY_SCROLL, 1, n.id, false, officer.id);
+            warrant.contract = new ItemStack.Contract(caseOf(p.id, kingdom), p.id, kingdom, bounty, known[0], known[1]);
+            g.state.mint(Items.BOUNTY_SCROLL, 1);
+            if (!n.store(warrant)) g.state.burn(Items.BOUNTY_SCROLL, 1);
             n.fitBody(); n.restore(); n.yaw = (float) Math.atan2(-(known[0] - n.x), -(known[1] - n.z));
             g.npcs.add(n); g.ai.spawnBody(n);
             n.hunt = new Hunt(p.id, "a bounty of " + bounty + " G in " + kingdom, known[0], known[1], known[2], ambush ? 240 : 600);
@@ -171,6 +178,12 @@ public final class Posses {
                 if (!wanted && (d > 30 || !g.ai.canSee(n, p)) || g.time - since > 90) { disband(n); continue; }
             } else lostSince.remove(n.id);
             if (!wanted) { n.hunt = null; n.fightTarget = 0; continue; }
+            // no warrant, no hunt: a hunter whose scroll is gone (lifted from the pack) has no lawful business with anyone
+            if (warrantOf(n) == null) {
+                n.hunt = null; n.fightTarget = 0;
+                if (!g.ai.canSee(n, p) || d > 20) { g.state.commit("WarrantLost", n.id, p.id, n.homeJurisdiction, 0, "the hunter gives up"); disband(n); }
+                continue;
+            }
             boolean sees = g.ai.canSee(n, p);
             // Ask people actually met on the search. An isolated witness cannot update this hunter.
             for (Npc neighbor : g.npcs) tell(neighbor, n);
@@ -182,7 +195,7 @@ public final class Posses {
             }
             if (sees) {
                 n.playerSighting = new Npc.Sighting(n.id, p.x, p.z, p.vx, p.vz, g.time);
-                n.hunt.source = n.id; n.hunt.clue(p.x, p.z, p.vx, p.vz, g.time);
+                n.hunt.source = n.id; n.hunt.clue(p.x, p.y, p.z, p.vx, p.vz, g.time);
                 if (d < 28) { n.fightTarget = p.id; n.nextThink = 0; }
             } else if (word != null && word.at() > n.hunt.clueAt) {
                 n.hunt.source = word.witness();
@@ -190,6 +203,18 @@ public final class Posses {
             }
 
         }
+    }
+
+    /** The signed warrant a hunter carries for the player, or null. */
+    public ItemStack warrantOf(Npc n) {
+        for (var grid : n.grids()) for (ItemStack s : grid.stacks()) if (s.def == Items.BOUNTY_SCROLL && s.contract != null && s.contract.target() == g.player.id) return s;
+        return null;
+    }
+    /** The newest sworn report against someone in a kingdom (the warrant's case), or 0. */
+    private long caseOf(long target, String kingdom) {
+        long id = 0;
+        for (var e : g.state.all()) if (e.type().equals("CrimeReported") && e.subject() == target && kingdom.equals(e.jurisdiction())) id = e.id();
+        return id;
     }
 
     /** A hunter leaves the world (alive): what they carried goes with them, and their dogs follow. */
@@ -207,12 +232,15 @@ public final class Posses {
     private void wear(Npc n, ItemDef d) { wear(n, d, 1); }
     private void wear(Npc n, ItemDef d, int amount) { n.eq.set(d.slot, new ItemStack(d, amount)); g.state.mint(d, amount); }
 
-    /** Out of the player's sight and on open ground, 25-45 m from where the quarry was last known to be. */
+    /** Out of the player's sight and on open ground, 45-75 m from where the quarry was last known to be (50 m or more from them). */
     private float[] trackingPoint(rpg.actor.Actor p, float[] known) {
-        for (int tries = 0; tries < 40; tries++) {
-            double a = unit() * Math.PI * 2; float r = 25 + unit() * 20;
+        for (int tries = 0; tries < 60; tries++) {
+            // (0.3.1, gamefixes: bounty hunters spawned too close) well out - 45 to 75 m from the last known place and
+            // never under 50 m from the quarry (relaxed to 38 m only if nowhere further will do); they walk the rest
+            double a = unit() * Math.PI * 2; float r = 45 + unit() * 30;
             float x = known[0] + (float) Math.sin(a) * r, z = known[1] + (float) Math.cos(a) * r;
-            if (!open(x, z) || seen(p, x, z)) continue;
+            float min = tries < 30 ? 50 : 38;
+            if (!open(x, z) || seen(p, x, z) || Math.hypot(x - p.x, z - p.z) < min) continue;
             return new float[]{x, z};
         }
         return null;
@@ -221,10 +249,10 @@ public final class Posses {
     /** Just over the border ahead of a fleeing player, a little off their line. */
     private float[] ambushPoint(Npc.Sighting p) {
         float speed = (float) Math.max(0.01, Math.hypot(p.vx(), p.vz())), dx = p.vx() / speed, dz = p.vz() / speed;
-        for (int tries = 0; tries < 24; tries++) {
-            float ahead = 18 + unit() * 10, side = (unit() - 0.5f) * 10;
+        for (int tries = 0; tries < 40; tries++) {
+            float ahead = 45 + unit() * 20, side = (unit() - 0.5f) * 14;
             float x = p.x() + dx * ahead - dz * side, z = p.z() + dz * ahead + dx * side;
-            if (open(x, z) && !seen(g.player, x, z)) return new float[]{x, z};
+            if (open(x, z) && !seen(g.player, x, z) && Math.hypot(x - g.player.x, z - g.player.z) >= 45) return new float[]{x, z};
         }
         return null;
     }

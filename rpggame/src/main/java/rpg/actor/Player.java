@@ -25,16 +25,23 @@ public final class Player extends Actor {
      */
     public final float[] aimPoint = new float[3];
     public double aimAt = -99;
-    /** The fresh crosshair point if it lies along this aim (within about a degree of it, as seen from this eye), else null. */
-    public float[] aimPointFor(double now, float[] eye, float yaw, float pitch) {
+    /**
+     * The fresh crosshair point if it lies along this aim (within about a degree), else null. (0.3.1, gamefixes: shots
+     * did not go where the crosshair was) the aim's yaw and pitch are the eye's - so the line is checked from the eye,
+     * whatever point the shot's plan is drawn from; checked from the shoulder camera, every point nearer than about 25 m
+     * failed and the shot flew parallel to the crosshair, a shoulder's width off.
+     */
+    public float[] aimPointFor(double now, float yaw, float pitch) {
         if (now - aimAt > 0.12) return null;
-        float dx = aimPoint[0] - eye[0], dy = aimPoint[1] - eye[1], dz = aimPoint[2] - eye[2];
+        float dx = aimPoint[0] - aimEye[0], dy = aimPoint[1] - aimEye[1], dz = aimPoint[2] - aimEye[2];
         float l = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (l < 0.5f) return null;
         float cp = (float) Math.cos(pitch);
         float ux = (float) -Math.sin(yaw) * cp, uy = (float) Math.sin(pitch), uz = (float) -Math.cos(yaw) * cp;
         return (dx * ux + dy * uy + dz * uz) / l > 0.9997f ? aimPoint : null;
     }
+    /** The eye the aim's yaw and pitch were taken from when the crosshair point was found. */
+    public final float[] aimEye = new float[3];
 
     public Player(long id, String name) { super(id, name, 28); team = 1; }
 

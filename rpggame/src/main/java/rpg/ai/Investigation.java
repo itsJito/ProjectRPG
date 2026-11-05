@@ -21,6 +21,8 @@ public final class Investigation {
 
     public final long subject;
     public float x, z;
+    /** (0.3.1) The floor it came from, when known (NaN: wherever is level with the one looking). */
+    public float y = Float.NaN;
     public final Stimulus stimulus;
     public Plan plan;
     public Stage stage = Stage.NOTICED;

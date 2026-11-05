@@ -34,6 +34,12 @@ public final class Monster extends Npc {
 
     /** The drives, live (0..1), and this one's nudge of its species' weights (+-15%: no two goblins alike). */
     public float fear, aggression, territorial, curiosityNow;
+    /**
+     * (0.3.3, gamefixes: monster AI expanded - the world remembers) who has hurt this one and lived, by id: how much of
+     * its life they took (0..), and whether it was beaten for it (it fled, or was left under a third of its life). Kept
+     * through saves. A grudge it won makes it come at them harder and sooner; one it lost makes it keep its distance.
+     */
+    public final java.util.Map<Long, float[]> grudge = new java.util.HashMap<>();
     public final float[] nudge = new float[7];
 
     /** What it knows about one thing near it: where it was last sensed, when, by which sense, how much damage it has done, the threat it poses. */
@@ -68,6 +74,8 @@ public final class Monster extends Npc {
     public float disturbed;
     /** Stuck patterns (cheese protection): how long its target has been out of reach while in sight. */
     public float outOfReach;
+    /** (0.3.2) Since when its prey has been out of its reach above it (-1: not), and when it last roared up at it. */
+    public double thwartedSince = -1, tauntAt = -99;
     /** Running (its faster gait), and when it next makes a noise of its own. */
     public boolean running;
     public double nextVoice;

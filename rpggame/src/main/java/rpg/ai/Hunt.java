@@ -36,7 +36,12 @@ public final class Hunt {
     public float radius(double now) { return (float) Math.min(16, 3 + (now - clueAt) * 0.55); }
 
     /** A new clue: the search moves to it (and the spot being checked is dropped if it is now far off). */
+    /** (0.3.1) The height of the last clue (a floor up or down; NaN when not known). */
+    public float y = Float.NaN;
+    /** A clue with its height. */
+    public void clue(float cx, float cy, float cz, float cvx, float cvz, double now) { clue(cx, cz, cvx, cvz, now); y = cy; }
     public void clue(float cx, float cz, float cvx, float cvz, double now) {
+        y = Float.NaN;
         x = cx; z = cz; vx = cvx; vz = cvz; clueAt = now;
         if (hasPoint && Math.hypot(px - cx, pz - cz) > radius(now) + 2) hasPoint = false;
         reachedLkp = false;

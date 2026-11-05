@@ -30,12 +30,15 @@ public final class Reactions {
 
     public boolean reacting(Actor a) { return a.reacting; }
 
+    /** (0.3.2) A body Sydney has no figure for: a spider's eight legs are drawn by the renderer, never a man's ragdoll. */
+    static boolean noFigure(Actor a) { return a instanceof rpg.monster.Monster m && m.kind.form == rpg.monster.MonsterKind.Form.SPIDER; }
+
     /**
      * A blow to a living person: impulse in newton seconds along (dx, dy, dz), at the world point (px, py, pz); force how
      * hard it was felt (how long it shakes them). Starts a reaction if they are not in one.
      */
     public void struck(Actor n, float dx, float dy, float dz, float impulse, float force, float px, float py, float pz) {
-        if (!n.alive || n instanceof Npc npc && !npc.loaded) return;
+        if (!n.alive || n instanceof Npc npc && !npc.loaded || noFigure(n)) return;
         if (n.ragdoll == 0) {
             if (n.posePts == null || g.time - n.poseAt > 0.5) return;      // never drawn lately (far off): no reaction to show
             n.ragdoll = g.game.reserve(KIND_RAGDOLL);
@@ -58,7 +61,7 @@ public final class Reactions {
      * fall does. A body not drawn lately still falls (as a long fall does), standing up into it.
      */
     public void knockDown(Actor a, float dx, float dz, float impulse, float px, float py, float pz) {
-        if (!a.alive || a.dummy || a instanceof rpg.animal.Animal || a instanceof Npc npc && !npc.loaded) return;
+        if (!a.alive || a.dummy || a instanceof rpg.animal.Animal || a instanceof Npc npc && !npc.loaded || noFigure(a)) return;
         if (a.ragdoll == 0) {
             if (a.posePts != null && g.time - a.poseAt <= 0.5) struck(a, dx, 0.35f, dz, impulse, impulse * 0.4f, px, py, pz);
             else { falling(a, 0); if (a.ragdoll != 0) g.game.commands().ragdollHit(a.ragdoll, nearestPoint(a, px, py, pz), dx, 0.35f, dz, impulse, impulse * 0.4f); }
@@ -71,7 +74,7 @@ public final class Reactions {
 
     /** A long fall hands the existing body to Sydney even outside the renderer's view. */
     public void falling(Actor a, float verticalSpeed) {
-        if (!a.alive || a.reacting || a instanceof rpg.animal.Animal) return;
+        if (!a.alive || a.reacting || a instanceof rpg.animal.Animal || noFigure(a)) return;
         g.carrying.drop(a, false); g.traversal.cancel(a); a.cs.cancel(); a.cs.blocking = false;
         a.ragdoll = g.game.reserve(KIND_RAGDOLL);
         boolean posed = a.posePts != null && g.time - a.poseAt < 0.5;

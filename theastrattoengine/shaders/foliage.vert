@@ -31,16 +31,37 @@ void main() {
     float wave = sin(uWind.z * 1.9 - ph) * 0.6 + sin(uWind.z * 4.3 - ph * 1.7 + root.x) * 0.25 + sin(uWind.z * 8.1 + iRot.z * 5.0 + p.y * 5.0) * 0.15;
     vec2 off = dir * sway * (strength * 0.020 * (1.0 + 0.5 * uWind.w) + wave * (0.012 + strength * 0.010));
     // anything wading through bends what it touches over, away from itself. (1.1: the whole plant leans one way, from
-    // its root, by how high up the stem a point is. It used to be worked out a vertex at a time from where each
-    // vertex stood - so a plant with a boot in the middle of it was pushed outward on every side at once: it grew.)
+    // its root. 1.2: the pushes are summed and capped, so a body and the trail point it has just left never fold a plant
+    // twice.) (1.3, the game's 0.3.4: plants looked stretched when bumped or stood in) the lean used to be a sideways
+    // shove of every point by up to 0.42 m - a shear, which drew a low fern or a bush out like taffy and squashed a stem
+    // underfoot flat in height only. Now the plant is turned over about its root: a rotation, which keeps every leaf the
+    // length it was. The angle grows over the first hand's breadth of the stem (a curve, not a hinge), right under a foot
+    // it goes furthest (the stem pressed down to the ground rather than shoved aside), and a stiff plant - a bush, a
+    // sapling - gives far less than grass. Only a body down among the stems presses them: one standing a block above (on
+    // a step, a wall top) leaves the plants below alone.
+    vec2 lean = vec2(0.0);
+    float crush = 0.0;
+    float pliant = step(0.01, aColSway.a);
     for (int i = 0; i < uPushN; i++) {
         vec2 d = root.xz - uPush[i].xy;
         float l = length(d), r = uPush[i].z;
-        if (l < r && abs(root.y - uPush[i].w) < 1.6) {
-            vec2 away = l > 0.03 ? d / l : vec2(cos(iRot.z), sin(iRot.z));
-            float k = 1.0 - l / r;
-            off += away * (k * k * (3.0 - 2.0 * k)) * min(max(p.y, 0.0) * 0.85, 0.42) * step(0.01, aColSway.a);
+        float feet = uPush[i].w - root.y;
+        if (r > 0.01 && l < r && feet > -0.6 && feet < 0.9) {
+            float s = l / r;
+            vec2 away = l > 1e-3 ? d / l : vec2(cos(iRot.x), -sin(iRot.x));
+            lean += away * (1.0 - smoothstep(0.4, 1.0, s));
+            crush = max(crush, 1.0 - smoothstep(0.0, 0.6, s));
         }
+    }
+    float ll = length(lean);
+    if (ll > 1e-4 && pliant > 0.0) {
+        vec2 ld = lean / ll;
+        float give = mix(0.35, 1.0, clamp(iRot.w, 0.0, 1.0));
+        float theta = min(ll, 1.0) * (0.70 + 0.55 * crush) * give * smoothstep(0.0, 0.12, max(p.y, 0.0) + 0.02);
+        float h = dot(p.xz, ld), cs = cos(theta), sn = sin(theta);
+        float h2 = h * cs + p.y * sn, y2 = p.y * cs - h * sn;
+        p.xz += ld * (h2 - h);
+        p.y = max(y2, 0.02 * iPosScale.w);
     }
     p.xz += off;
     p.y -= min(p.y * 0.7, dot(off, off) / max(p.y * 1.4, 0.10));

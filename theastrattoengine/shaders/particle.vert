@@ -30,7 +30,7 @@ void main() {
         vec3 view = normalize(cross(uRight, uUp));
         vec3 side = cross(dir, view);
         side = length(side) > 1e-3 ? normalize(side) : uRight;
-        float stretch = 1.0 + min(speed * 0.09, 2.2);
+        float stretch = 1.0 + min(speed * 0.17, 3.6);   // (gamefixes: blood) streaks, not beads
         p = iPosSize.xyz + (dir * q.y * stretch + side * q.x) * iPosSize.w;
     }
     vQ = q; vColor = iColor; vParams = iParams;

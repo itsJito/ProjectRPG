@@ -28,7 +28,12 @@ public enum Profession {
     TRAPPER("Trapper", Npc.Role.HUNTER, Skill.HARVESTING),
     MONSTER_HUNTER("Monster Hunter", Npc.Role.HUNTER, Skill.ARCHERY),
     BOUNTY_HUNTER("Bounty Hunter", Npc.Role.HUNTER, Skill.THIEVING),
-    PREDATOR_HUNTER("Predator Hunter", Npc.Role.HUNTER, Skill.ARCHERY);
+    PREDATOR_HUNTER("Predator Hunter", Npc.Role.HUNTER, Skill.ARCHERY),
+    // (0.3.2) the farms and the inns (GDD: Crop Farmer, Orchard Keeper, Innkeeper, Bartender)
+    CROP_FARMER("Crop Farmer", Npc.Role.FARMER, Skill.HARVESTING),
+    ORCHARD_KEEPER("Orchard Keeper", Npc.Role.FARMER, Skill.HARVESTING),
+    INNKEEPER("Innkeeper", Npc.Role.CIVIC, Skill.COOKING),
+    BARTENDER("Bartender", Npc.Role.MERCHANT, Skill.COOKING);
 
     public final String title;
     public final Npc.Role family;

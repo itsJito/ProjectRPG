@@ -35,8 +35,12 @@ class TraversalTest {
         game.tick(0); g.player.skills.setLevel(Skill.AGILITY, 5); assertFalse(g.traversal.begin(g.player, 0));
         g.player.skills.setLevel(Skill.AGILITY, 100); assertTrue(g.traversal.begin(g.player, 0));
         assertTrue(g.player.traversal.duration <= 1.2f);
+        // (the sprint key held through the reach goes straight on up; let go, the hands would hang at the edge - 0.2.9)
+        g.controller.in.sprint = true; g.controller.in.forward = 1;
         for (int i = 0; i < 80; i++) game.tick(1f / 60);
-        assertNull(g.player.traversal); assertTrue(g.player.y > DevMap.FLOOR + 3.9f);
+        g.controller.in.sprint = false; g.controller.in.forward = 0;
+        var tm = g.player.traversal;
+        assertNull(tm, () -> "still in " + tm.phase + " progress " + tm.progress + " of " + tm.duration + " hold " + tm.hold + " y " + (g.player.y - DevMap.FLOOR)); assertTrue(g.player.y > DevMap.FLOOR + 3.9f);
     }
     @Test void anNpcUsesTheSameMantleToPursueAnElevatedTargetWithoutGainingXp() {
         for (int x = 63; x <= 65; x++) for (int z = 57; z <= 59; z++) for (int y = 0; y < 2; y++) g.setBlock(x, DevMap.FLOOR + y, z, Blocks.BRICK);

@@ -48,6 +48,10 @@ final class AnimalMind {
         }
         // people
         if (a.owner == t.id || a.trustOf(t.id) > 0.5f) return 0;
+        // (0.3.1) a horse or Pegasus lets a calm person come to it with feed held out (or once it has been gentled):
+        // walking or creeping up, not running at it
+        if (rpg.mount.Riding.mountable(a) && !(t instanceof Player p0 && (p0.sprinting || p0.charging))
+                && (Animals.feedFor(a, t) != null || a.tame > 0.1f || a.saddledBy == t.id)) return 0;
         if (a.owned() && t instanceof Npc n && n.homeJurisdiction.equals(DevMap.jurisdiction(a.homeX, a.homeZ))) return 0;   // the household and the neighbours
         if (a.species.domestic) return t instanceof Player p && p.sprinting ? 0.6f : 0.25f;
         return a.species.predator() || a.species == Species.BROWN_BEAR ? 0.5f : 1f;
@@ -116,6 +120,15 @@ final class AnimalMind {
         boolean night = hour >= 21 || hour < 6;
         Animal mother = a.mother != 0 && sys.byId(a.mother) instanceof Animal m && m.alive ? m : null;
 
+        // (0.3.2) held by the bridle (a saddle going on): it stands and is steadied, fighting it less the longer it is held
+        if (g.time < a.heldUntil && g.actor(a.heldBy) instanceof Actor holder && holder.alive && a.distTo(holder) < 3.5f) {
+            a.fear = Math.max(0, a.fear - 0.09f);
+            a.threat = 0;
+            a.nextThink = g.time + 0.3;
+            if (a.goal != Goal.ALERT) { a.goal = Goal.ALERT; a.goalSince = g.time; }
+            a.other = holder.id;
+            return;
+        }
         // (1) danger and its young
         if (threat != null && a.fear >= 0.3f) {
             float d = a.distTo(threat);
@@ -139,6 +152,12 @@ final class AnimalMind {
             if (carcass != null) s.add(new Score(Goal.FEED, 0.5f + a.hunger * 0.35f, carcass.id, "hungry; feeding on a " + carcass.name.toLowerCase() + " carcass"));
             else if (prey != null) s.add(new Score(Goal.HUNT, 0.5f + a.hunger * 0.35f, prey.id, "hungry; hunting a " + prey.kind().toLowerCase() + String.format(" %.0f m off", a.distTo(prey))));
             else if (sp.diet != Species.Diet.HUNTER) s.add(new Score(Goal.GRAZE, 0.45f + a.hunger * 0.3f, 0, String.format("hungry (%.0f%%); %s", a.hunger * 100, sys.troughFor(a) != null ? "to the trough" : "foraging")));
+        }
+        // (0.3.4) what its keeper told it: come along (close behind, and quickly if left far back), or stay where it was put
+        Actor keeper = a.command != Animal.Command.NONE ? g.actor(a.commandBy) : null;
+        if (keeper != null && keeper.alive && !a.baby) {
+            if (a.command == Animal.Command.FOLLOW && a.distTo(keeper) > 3.2f) s.add(new Score(Goal.SEEK, 0.68f, keeper.id, "following " + keeper.name + ", as told"));
+            else if (a.command == Animal.Command.STAY) s.add(new Score(Goal.STAY, 0.67f, keeper.id, "staying where " + keeper.name + " told it to"));
         }
         // (3) young: follow the mother; a mother keeps by her young
         if (mother != null && a.distTo(mother) > 2.6f) s.add(new Score(Goal.FOLLOW, 0.72f, mother.id, "keeping close to its mother"));
@@ -244,6 +263,12 @@ final class AnimalMind {
         }
         switch (a.goal) {
             case IDLE -> sys.desire(a, A_HOLD);
+            case STAY -> {
+                // back to its spot if it was pushed off it, then sit tight, turned toward whoever told it
+                if (Math.hypot(a.x - a.stayX, a.z - a.stayZ) > 1.3f) { if (sys.goTo(a, a.stayX, a.stayZ, false, 0.8f)) sys.desire(a, A_HOLD); }
+                else { sys.desire(a, A_HOLD); a.atRest = g.time - a.goalSince > 6; if (o != null) a.wantYaw = (float) Math.atan2(-(o.x - a.x), -(o.z - a.z)); }
+                a.nextThink = Math.min(a.nextThink, g.time + 1.0);
+            }
             case GROOM -> {
                 sys.desire(a, A_HOLD); a.headDown = true;
                 if (g.time - a.goalSince > 3) { a.careAgain = g.time + 45 + a.id % 30; a.nextThink = 0; }

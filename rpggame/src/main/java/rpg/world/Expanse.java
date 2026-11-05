@@ -367,7 +367,8 @@ public final class Expanse {
                 double edge = 1 + 0.16 * Math.sin(a * 3 + 0.7) + 0.09 * Math.sin(a * 7 + 2.1);
                 double d = Math.hypot((x - cx) / rx, (z - cz) / rz) / edge;
                 if (d < 1.0) {
-                    int depth = d < 0.6 ? 2 : 1;
+                    // (0.3.4) the middle of it three deep: room to dive, and to run out of breath
+                    int depth = d < 0.32 ? 3 : d < 0.6 ? 2 : 1;
                     fill(x, FLOOR - depth - 1, z, x, FLOOR - 1, z, AIR);
                     set(x, FLOOR - depth - 1, z, d < 0.6 ? SAND : x % 3 == 0 ? CLAY : SAND);
                     fill(x, FLOOR - depth, z, x, FLOOR - 1, z, WATER);

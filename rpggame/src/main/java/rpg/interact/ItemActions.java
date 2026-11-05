@@ -43,7 +43,9 @@ public final class ItemActions {
         ItemDef d = s.def;
         if (s.contract != null) o.add(Option.on("read_warrant", "Read warrant", 10, 0));
         if (d.heal > 0) o.add(Option.on("eat", "Eat", 10, 0));
-        if (d.restoresFaith > 0) o.add(Option.on("drink", "Drink", 10, 0));
+        if (d.restoresFaith > 0 || d.strengthBoost > 0) o.add(Option.on("drink", "Drink", 10, 0));
+        if (d == Items.GLASS_BOTTLE) o.add(Option.when(nearWater(a), "fill_bottle", "Fill", 9, "You need to be at the water's edge.", 0));
+        if (d == Items.WATER_BOTTLE) o.add(Option.on("empty_bottle", "Empty", 5, 0));
         if (d.maxCharges > 0) o.add(Option.when(a.has(Items.COAL, 1) && s.charges < d.maxCharges, "recharge", "Recharge (coal)", 6, s.charges >= d.maxCharges ? "It is fully charged." : "You need coal.", 0));
         if (d.buryXp > 0) o.add(Option.on("bury", "Bury", 10, 0));
         if (d == Items.XP_LAMP) o.add(Option.on("rub", "Rub", 10, 0));
@@ -66,6 +68,21 @@ public final class ItemActions {
         return o;
     }
 
+    /** Seconds for one lent level of Strength to ebb away (five from a bottle of ale: a little under four minutes). */
+    public static final float ALE_EBB_SECONDS = 45;
+
+    /**
+     * (0.3.4, gamefixes: ale) A bottle of ale drunk: five levels of Strength lent to the drinker, ebbing away a level at a
+     * time; the empty bottle is theirs to keep, fill or throw. The same for anyone who drinks one (a patron at the inn too).
+     */
+    public void drinkAle(Actor a, ItemDef d, long req) {
+        int before = a.skills.level(Skill.STRENGTH);
+        a.skills.boost(Skill.STRENGTH, d.strengthBoost);
+        g.grant(a, new ItemStack(Items.GLASS_BOTTLE, 1));
+        g.state.commit(req, "Drank", a.id, 0, null, 0, d.name + " strength " + before + " -> " + a.skills.level(Skill.STRENGTH));
+        if (a == g.player) { g.chat.say("You drink the " + d.name.toLowerCase() + ". You feel stronger for it (+" + d.strengthBoost + " Strength for a while)."); if (g.sfx != null) g.sfx.ui("eat", 0.5f); }
+    }
+
     public static boolean offHandable(ItemDef d) {
         return d.slot == Slot.MAIN && !d.twoHanded() && (d.family == Family.SWORD || d.family == Family.AXE || d.family == Family.MACE || d.family == Family.DAGGER);
     }
@@ -82,6 +99,7 @@ public final class ItemActions {
         Result r = switch (action) {
             case "eat" -> eat(a, grid, slot, req);
             case "drink" -> {
+                if (d.strengthBoost > 0) { grid.take(slot, 1); g.state.burn(d, 1); drinkAle(a, d, req); yield Result.ok(); }
                 grid.take(slot, 1);
                 g.state.burn(d, 1);
                 float before = a.faith;
@@ -132,6 +150,21 @@ public final class ItemActions {
                 yield Result.ok();
             }
             case "empty" -> empty(a, grid, slot, req);
+            case "fill_bottle" -> {
+                if (!nearWater(a)) yield Result.no("You need to be at the water's edge.");
+                grid.take(slot, 1); g.state.burn(d, 1);
+                g.grant(a, new ItemStack(Items.WATER_BOTTLE, 1));
+                g.state.commit(req, "BottleFilled", a.id, 0, null, 0, "water");
+                if (a == g.player) g.chat.say("You fill the bottle with water.");
+                yield Result.ok();
+            }
+            case "empty_bottle" -> {
+                grid.take(slot, 1); g.state.burn(d, 1);
+                g.grant(a, new ItemStack(Items.GLASS_BOTTLE, 1));
+                g.state.commit(req, "BottleEmptied", a.id, 0, null, 0, "water");
+                if (a == g.player) g.chat.say("You pour the water out.");
+                yield Result.ok();
+            }
             case "read_warrant" -> {
                 if (s.contract == null) yield Result.no("There is no signed warrant on this scroll.");
                 if (a == g.player) g.ui.dialog(new rpg.ui.Dialog("Signed warrant", "Wanted: " + g.nameOf(s.contract.target()) + ". Reward: " + s.contract.reward() + " gold from " + s.contract.jurisdiction() + ". Return this scroll after bringing them down. The map records the watch's last sighting."));

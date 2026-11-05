@@ -86,6 +86,11 @@ public final class Economy {
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
+        // (0.3.2) seed for the gardens, and casks of ale for the inns to buy in
+        stock(shopA, Items.CARROT_SEEDS, 10, 10); stock(shopA, Items.CABBAGE_SEEDS, 8, 8); stock(shopA, Items.ALE, 12, 16);
+        stock(macellum, Items.CARROT_SEEDS, 6, 8); stock(macellum, Items.CABBAGE_SEEDS, 6, 8); stock(macellum, Items.ALE, 10, 14);
+        stock(shopA, Items.BARLEY_SEEDS, 8, 8); stock(shopA, Items.GLASS_BOTTLE, 6, 10);
+        stock(macellum, Items.HOP_SEEDS, 6, 8); stock(macellum, Items.BARLEY_SEEDS, 4, 6); stock(macellum, Items.GLASS_BOTTLE, 6, 10);
         stock(shopA, Items.get("wooden_axe"), 2, 2); stock(shopA, Items.get("wooden_pickaxe"), 2, 2); stock(shopA, Items.get("stone_axe"), 1, 1); stock(shopA, Items.get("stone_pickaxe"), 1, 1); stock(shopA, Items.FISHING_NET, 2, 2); stock(shopA, Items.CRAB_CAGE, 1, 1);
         stock(shopA, Items.RELIGIOUS_WINE, 6, 6); stock(shopB, Items.RESTORATIVE, 3, 3);
         stock(shopA, Items.get("bronze_axe"), 2, 2); stock(shopA, Items.get("bronze_pickaxe"), 2, 2); stock(shopA, Items.BRONZE_ARROWS, 200, 200);
@@ -111,12 +116,21 @@ public final class Economy {
         }
     }
 
+    /** (0.3.2) Opening stock and a standing target for a shop made elsewhere (the inns' bars). */
+    public void stockShop(Shop s, ItemDef d, int n, int target) { stock(s, d, n, target); }
+    /** A shop's stock for a save, and back. */
+    public static Object saveStock(Shop s) { return ItemIO.inventory(s.stock); }
+    public static void loadStock(Shop s, Object saved) { s.stock.clear(); if (saved instanceof List<?> list) { @SuppressWarnings("unchecked") List<Object> l = (List<Object>) list; ItemIO.inventory(s.stock, l); } }
+
     private void stock(Shop s, ItemDef d, int n, int target) {
         s.target.put(d.id, target);
         if (n > 0 && s.stock.add(new ItemStack(d, n, s.merchant, false, s.merchant))) g.state.mint(d, n);
     }
 
-    public Shop shopOf(Npc merchant) { return merchant.id == Ids.TRADER_CITY ? materialsCity : merchant.id == Ids.TRADER_PALACE ? materialsPalace : merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
+    public Shop shopOf(Npc merchant) {
+        // (0.3.2) an inn's bartender keeps its bar
+        if (g.inns != null) for (var inn : g.inns.all) if (inn.layout.bartender() == merchant.id) return inn.bar;
+        return merchant.id == Ids.TRADER_CITY ? materialsCity : merchant.id == Ids.TRADER_PALACE ? materialsPalace : merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
     /** Whether this shop is a craftsman's own rack (sold from where they work, not a counter they keep all day). */
     public boolean rack(Shop s) { return s == forge; }
     public Npc merchant(Shop s) { return g.actor(s.merchant) instanceof Npc n ? n : null; }
@@ -155,6 +169,10 @@ public final class Economy {
         Shop s = shopOf(merchant);
         if (s == null) return "They have nothing to trade.";
         if (!merchant.alive) return "They're dead.";
+        if (merchant.shunning(g, a)) return merchant.name + " is running from you.";
+        // (0.3.3) a business keeps its hours: shut is shut, to everyone
+        String shut = Hours.closedReason(g, s);
+        if (shut != null) return shut;
         if (rack(s) ? !merchant.working() || Math.hypot(merchant.x - s.counterX, merchant.z - s.counterZ) > 9
                 : !merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
             return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work." : " is off duty. Come back when they're working.");

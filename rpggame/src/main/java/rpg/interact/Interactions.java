@@ -57,10 +57,18 @@ public final class Interactions {
         return r;
     }
 
+    /** (0.3.1) A target's options, highest priority first (the order they were listed in breaks ties). */
+    public static List<Option> ranked(List<Option> opts) {
+        if (opts.size() < 2) return opts;
+        List<Option> l = new ArrayList<>(opts);
+        l.sort((p, q) -> Integer.compare(q.priority(), p.priority()));
+        return l;
+    }
+
     /** The primary button: the highest-priority enabled option, or the reason none is. */
     public Result primary(Actor a, Interactable t) {
         if (t == null) return Result.no(null);
-        List<Option> opts = t.options(g, a);
+        List<Option> opts = ranked(t.options(g, a));
         for (Option o : opts) if (o.enabled()) return request(a, t, o.id());
         if (!opts.isEmpty()) { Option o = opts.get(0); return request(a, t, o.id()); }
         return Result.no(null);
@@ -147,6 +155,6 @@ public final class Interactions {
         }
         focus = best;
         focusDist = best == null ? 0 : (float) Math.hypot(best.ax() - a.x, best.az() - a.z);
-        focusOptions = best == null ? List.of() : best.options(g, a);
+        focusOptions = best == null ? List.of() : ranked(best.options(g, a));
     }
 }

@@ -70,6 +70,26 @@ public final class Glass {
         if (who != null && !DevMap.WILDS.equals(DevMap.jurisdiction(px, pz))) g.law.crime(who, "VANDALISM", 0, 6, null, ev.id());
     }
 
+    /**
+     * (0.3.4, gamefixes: the glass bottle) A thrown bottle breaks where it lands: a spray of small shards, the crash of it,
+     * and a noise loud enough to turn heads twenty metres off - heard as coming from where it broke, so those who hear it
+     * go to look there, not at whoever threw it. Nobody owns a bottle in the street: it is no crime.
+     */
+    public void bottle(Actor who, float px, float py, float pz, float dx, float dy, float dz) {
+        float dl = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dl < 1e-4f) { dx = 0; dy = -1; dz = 0; dl = 1; }
+        dx /= dl; dy /= dl; dz /= dl;
+        for (int i = 0; i < 9; i++) {
+            float vx = -dx * 1.2f + (rnd.nextFloat() - 0.5f) * 3f, vy = 1.2f + rnd.nextFloat() * 1.8f, vz = -dz * 1.2f + (rnd.nextFloat() - 0.5f) * 3f;
+            spawn(px + (rnd.nextFloat() - 0.5f) * 0.1f, py + 0.05f, pz + (rnd.nextFloat() - 0.5f) * 0.1f, vx, vy, vz, 0.05f + rnd.nextFloat() * 0.07f);
+        }
+        while (shards.size() > MAX_SHARDS) remove(shards.pollFirst());
+        if (g.sfx != null) g.sfx.play("glass.break", px, py, pz, 0.85f, 1.1f + rnd.nextFloat() * 0.15f, 36);
+        if (g.fx != null) g.fx.sparks(px, py, pz, 4);
+        g.noise(who, px, py, pz, 20, 0.9f);
+        g.state.commit("BottleBroken", who == null ? 0 : who.id, 0, DevMap.jurisdiction(px, pz), 0, String.format("at (%.1f, %.1f, %.1f)", px, py, pz));
+    }
+
     /** One shard: a triangle of glass (three random corners round a centre), 5 mm thick, as a convex hull. */
     private void spawn(float x, float y, float z, float vx, float vy, float vz, float size) {
         float[] hull = new float[18];

@@ -38,7 +38,14 @@ public final class Dialogue {
         });
         String[] tip = null;
         switch (n.role) {
-            case MERCHANT -> { if (n.working()) d.choice("Let's trade.", () -> g.interact.request(g.player, n, "trade")); }
+            case MERCHANT -> {
+                if (n.working()) d.choice("Let's trade.", () -> g.interact.request(g.player, n, "trade"));
+                var shop = g.econ.shopOf(n);
+                // (0.3.3) the hours, asked
+                if (shop != null) d.choice("When are you open?", () -> g.ui.dialog(new Dialog(n.name, rpg.econ.Hours.open(g, shop)
+                        ? "We're open " + rpg.econ.Hours.today(g, shop) + " today. We shut at " + rpg.econ.Hours.closing(g, shop) + "."
+                        : "We're shut just now. We open " + rpg.econ.Hours.nextOpening(g, shop) + ". Today's hours were " + rpg.econ.Hours.today(g, shop) + ".")));
+            }
             case LAWMAN -> {
                 int b = g.law.bounty(g.player.id, n.homeJurisdiction);
                 if (b > 0) d.standoff=true;

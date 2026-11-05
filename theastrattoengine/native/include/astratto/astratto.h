@@ -891,7 +891,7 @@ typedef struct astratto_cmd_policy_create {
     float think;                       /* seconds between decisions (0 = 0.2) */
 } astratto_cmd_policy_create;
 
-enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3, ASTRATTO_AGENT_NO_LADDERS = 1u << 4 };
+enum { ASTRATTO_AGENT_DOORS = 1u << 0, ASTRATTO_AGENT_MANTLE = 1u << 1, ASTRATTO_AGENT_BLIND = 1u << 2, ASTRATTO_AGENT_EXTERNAL_TRAVERSAL = 1u << 3, ASTRATTO_AGENT_NO_LADDERS = 1u << 4, ASTRATTO_AGENT_SWIMS = 1u << 5 };
 /* Domain bits are orthogonal to movement flags and faction teams. Monster reserves a controller domain only. */
 enum { ASTRATTO_AGENT_DOMAIN_HUMAN = 0, ASTRATTO_AGENT_DOMAIN_ANIMAL = 1u << 16, ASTRATTO_AGENT_DOMAIN_MONSTER = 2u << 16, ASTRATTO_AGENT_DOMAIN_MASK = 3u << 16 };
 typedef struct astratto_cmd_agent_create {
