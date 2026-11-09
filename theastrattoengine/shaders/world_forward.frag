@@ -60,6 +60,19 @@ void main() {
         grad*=edge.x*edge.y;
         vec2 first=texture(uWaterNoise,vWorld.xz*0.09+vec2(uTime*0.018,uTime*0.011)).rg*2.0-1.0;
         vec2 second=texture(uWaterNoise,vWorld.xz*0.17+vec2(-uTime*0.013,uTime*0.021)).gb*2.0-1.0;
+        // 2.10: running water carries its surface along: the texture drifts with the flow (two phases, crossfaded, so
+        // it never stretches), and a quick stretch shows a little streaked broken water
+        vec2 flow=texture(uWaves,uv).ba*edge.x*edge.y;
+        float fl=length(flow);
+        if(fl>0.02) {
+            float t0=fract(uTime*0.25),t1=fract(uTime*0.25+0.5),blend=abs(t0*2.0-1.0);
+            vec2 a0=texture(uWaterNoise,vWorld.xz*0.21-flow*t0*0.84).rg*2.0-1.0, a1=texture(uWaterNoise,vWorld.xz*0.21-flow*t1*0.84+0.37).rg*2.0-1.0;
+            vec2 b0=texture(uWaterNoise,vWorld.xz*0.43-flow*t0*1.72+0.11).gb*2.0-1.0, b1=texture(uWaterNoise,vWorld.xz*0.43-flow*t1*1.72+0.63).gb*2.0-1.0;
+            vec2 running=mix(a0,a1,blend)*1.6+mix(b0,b1,blend)*0.8;
+            float k=smoothstep(0.02,0.5,fl);
+            first=mix(first,running,k);second=mix(second,running*0.6,k);
+            crest+=k*0.004*max(0.0,running.x+running.y-0.6)*min(fl,1.5);
+        }
         N=normalize(vec3(-grad.x*0.8+(first.x+second.x)*0.035,1.0,-grad.y*0.8+(first.y+second.y)*0.035));
         ripple=clamp(length(grad),0.0,1.5);
         // how much more (or less) of the light a ring's slope faces than the flat water does: the rings read as bands

@@ -358,20 +358,27 @@ public final class Sfx {
         calls("animal.dog.hurt", "animal/dog_bark_2.ogg", 2, 0.08f, 0.6f);
         one("animal.cat", "animal/cat_meow_1.ogg", 0); one("animal.cat", "animal/cat_meow_2.ogg", 0); calls("animal.cat", "animal/cat_meow_3.ogg", 4, 0.2f, 2f);
         calls("animal.cat.growl", "animal/cat_growl.ogg", 3, 0.3f, 3f); one("animal.cat.growl", "animal/cat_roar.ogg", 0);
-        // the mountain lion: the same feline throat, much bigger (pitched down; see pitch())
-        calls("animal.lion", "animal/cat_growl.ogg", 3, 0.3f, 3f); one("animal.lion", "animal/cat_roar.ogg", 0);
-        calls("animal.duck", "animal/ducks.ogg", 12, 0.12f, 1.5f);
+        // (0.3.6, gamefixes: the cougar's sound was the word spoken, not the animal) the mountain lion's yowl is a cat's, from a
+        // bigger throat (house-cat yowls recorded at night, pitched down); its warning and its pain a big cat's snarling growl
+        for (int i = 1; i <= 5; i++) one("animal.lion", "animal/lion_call_" + i + ".ogg", 0);
+        for (int i = 1; i <= 4; i++) one("animal.lion.growl", "animal/lion_growl_" + i + ".ogg", 0);
+        // (0.3.5, gamefixes: ducks and deer their own sound) mallard quacks (xeno-canto XC62258; British Library W1CDR0001518)
+        one("animal.duck", "animal/duck_quack_1.ogg", 0);
+        for (int i = 1; i <= 6; i++) one("animal.duck", "animal/duck_call_" + i + ".ogg", 0);
         // (0.3.4) the deer: an alarm snort (a horse's breath, pitched up and short), and a thin bleat when hurt
-        one("animal.deer", "animal/horse_breath.ogg", 0); one("animal.deer.hurt", "animal/horse_neigh_3.ogg", 0);
-        pitch.put("animal.deer", 1.45f); pitch.put("animal.deer.hurt", 1.75f);
+        // a deer's alarm is the roe buck's bark; hurt, the red deer's call (both recorded in the wild)
+        for (int i = 1; i <= 4; i++) one("animal.deer", "animal/deer_bark_" + i + ".ogg", 0);
+        for (int i = 1; i <= 4; i++) one("animal.deer.hurt", "animal/deer_call_" + i + ".ogg", 0);
+        // the whale's blow at the surface; the mountain lion's own call; the fox's bark; a canid's growl for the wolf
+        for (int i = 1; i <= 2; i++) one("animal.whale", "animal/whale_blow_" + i + ".ogg", 0);
         calls("animal.wolf", "animal/wolf_howls.ogg", 6, 1.0f, 7f);
-        calls("animal.wolf.growl", "animal/cat_growl.ogg", 3, 0.3f, 3f);
+        for (int i = 1; i <= 2; i++) one("animal.wolf.growl", "animal/wolf_growl_" + i + ".ogg", 0);
         calls("animal.coyote", "animal/coyotes_pack.ogg", 8, 0.4f, 5f);
         calls("animal.bear", "animal/bear_vocal.mp3", 10, 0.3f, 4f); calls("animal.bear", "animal/bear_roar.mp3", 3, 0.4f, 4f);
         calls("animal.rabbit.hurt", "animal/cat_meow_2.ogg", 1, 0.05f, 1f);
         for (int i = 1; i <= 3; i++) one("animal.fox.death", "animal/fox_death" + i + ".ogg", 0);
-        calls("animal.fox", "animal/fox_death1.ogg", 2, 0.1f, 0.8f);
-        pitch.put("animal.lion", 0.58f); pitch.put("animal.wolf.growl", 0.62f); pitch.put("animal.rabbit.hurt", 1.7f); pitch.put("animal.dog.hurt", 1.25f); pitch.put("animal.fox", 1.15f);
+        for (int i = 1; i <= 3; i++) one("animal.fox", "animal/fox_bark_" + i + ".ogg", 0);
+        pitch.put("animal.rabbit.hurt", 1.7f); pitch.put("animal.dog.hurt", 1.25f); 
         // ---- recorded: voices (death cries only; hurt is the first moment of one)
         for (HumanVoice voice : HumanVoice.values()) for (String recording : voice.recordings) {
             one(voice.deathBank, recording, 0);

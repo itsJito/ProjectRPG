@@ -1,0 +1,366 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 15760). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-15760.out.log
+Starting 75th build in daemon [uptime: 3 hrs 1 mins 14.256 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 17% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#3558,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#3560,Execution worker Thread 2,5,main]) started.
+destroyer locations for task group 0 (Thread[#3557,included builds,5,main]) started.
+:processResources (Thread[#3558,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#3560,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#3560,Execution worker Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#3557,included builds,5,main]) started.
+:theastrattoengine:buildNative (Thread[#3557,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#3557,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#3557,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#3557,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#3557,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#3557,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#3557,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#3557,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#3557,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#3560,Execution worker Thread 2,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#3563,Execution worker Thread 5,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#3560,Execution worker Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#3558,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#3558,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#3558,included builds Thread 2,5,main]) started.
+:classes (Thread[#3558,included builds Thread 2,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#3558,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#3558,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#3558,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#3558,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#3558,included builds Thread 2,5,main]) started.
+:testClasses (Thread[#3558,included builds Thread 2,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#3558,included builds Thread 2,5,main]) started.
+:test (Thread[#3558,included builds Thread 2,5,main]) started.
+Gradle Test Executor 46 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 46'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath4647682613369490491txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 46'
+Successfully started process 'Gradle Test Executor 46'
+
+LifeProbeTest > probe() STANDARD_OUT
+
+    === life probe ===
+    crimes reported: {}
+    farms: sown 5 harvested 5 apples 3
+    DevCity Inn: meals 2 drinks 0 produce 0
+    DevPalace Taberna: meals 5 drinks 3 produce 0
+    Ada          MERCHANT  34/155  home (91.5,93.0) post (91.5,55.0) at (87.8,81.2)
+         32  SHELTER / rain (#%); going in out of it
+         2  WORK [blocked] paused to reconsider a blocked route / day's work: mind the shop
+    Dag          WORKER    45/155  home (92.5,93.0) post (89.5,21.5) at (92.4,91.3)
+         45  SHELTER / rain (#%); going in out of it
+    Eda          VILLAGER  51/155  home (105.5,93.0) post (101.5,75.5) at (116.7,63.7)
+         51  SHELTER / rain (#%); going in out of it
+    Finn         THIEF     140/155  home (96.5,74.5) post (96.5,74.5) at (96.8,73.6)
+         90  SHELTER / rain (#%); going in out of it
+         48  INVESTIGATE / hide: hiding at (#, #) - courage #, night
+         1  INVESTIGATE / glimpsed someone at (#, #); deciding what to do
+         1  INVESTIGATE / hide: noticed something at (#, #) - courage #, night
+    Ivo          CARTER    48/155  home (93.5,93.0) post (89.5,64.5) at (90.5,85.9)
+         35  SHELTER / rain (#%); going in out of it
+         7  INVESTIGATE / check: going to look at (#, #) - courage #
+         2  EAT [blocked] paused to reconsider a blocked route / hunger #%
+         2  INVESTIGATE / check: looking round the spot at (#, #) - courage #
+    Kit          CONTACT   21/155  home (48.5,112.5) post (48.5,112.5) at (48.4,112.0)
+         21  SHELTER / rain (#%); going in out of it
+    Mara         FARMER    45/155  home (117.5,119.5) post (104.5,107.5) at (126.5,98.8)
+         45  SHELTER / rain (#%); going in out of it
+    Morrow       UNDERTAKER 36/155  home (124.5,96.0) post (117.6,96.5) at (122.7,64.6)
+         36  SHELTER / rain (#%); going in out of it
+    Silas        FENCE     82/155  home (11.5,117.5) post (11.5,117.5) at (11.9,116.4)
+         82  SHELTER / rain (#%); going in out of it
+    Bobwin       GUARD     15/155  home (105.5,77.5) post (105.5,77.5) at (105.1,77.0)
+         8  INVESTIGATE / search: searching nearby (#) at (#, #) - courage #, not alone
+         3  INVESTIGATE / search: looking round the spot at (#, #) - courage #, not alone
+         3  INVESTIGATE / search: calling out at (#, #) - courage #, not alone
+         1  INVESTIGATE / search: going to look at (#, #) - courage #, not alone
+    Oswin        BEGGAR    28/155  home (100.5,85.5) post (100.5,85.5) at (99.8,84.9)
+         20  SHELTER / rain (#%); going in out of it
+         5  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         2  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+         1  INVESTIGATE / check: noticed something at (#, #) - courage #, not alone
+    Maud         HEALER    94/155  home (108.5,82.5) post (108.5,82.5) at (107.9,81.7)
+         88  SHELTER / rain (#%); going in out of it
+         2  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+         2  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         1  INVESTIGATE / check: noticed something at (#, #) - courage #, not alone
+    Alric        PRIEST    98/155  home (110.5,88.5) post (110.5,88.5) at (110.1,88.0)
+         89  SHELTER / rain (#%); going in out of it
+         5  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         3  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+         1  INVESTIGATE / glimpsed someone at (#, #); deciding what to do
+    Godric       HUNTER    34/155  home (70.5,80.5) post (70.5,80.5) at (72.5,59.2)
+         14  INVESTIGATE / peek: creeping closer to look at (#, #) - courage #, sounds of violence, not alone, no answer
+         6  INVESTIGATE / peek: creeping closer to look at (#, #) - courage #, no answer
+         5  INVESTIGATE / call out: calling out at (#, #) - courage #
+         3  INVESTIGATE / peek: looking round the spot at (#, #) - courage #, sounds of violence, not alone, no answer
+    Elowen       FISHERMAN 89/155  home (93.5,41.5) post (93.5,41.5) at (94.1,42.4)
+         89  SHELTER / rain (#%); going in out of it
+    Oren         MINER     89/155  home (92.5,22.5) post (92.5,22.5) at (91.5,22.7)
+         89  SHELTER / rain (#%); going in out of it
+    Tamsin       CRAFTSMAN 90/155  home (81.5,22.5) post (81.5,22.5) at (80.4,22.6)
+         90  SHELTER / rain (#%); going in out of it
+    Hilda        CRAFTSMAN 89/155  home (68.5,27.8) post (68.5,27.8) at (69.5,28.0)
+         89  SHELTER / rain (#%); going in out of it
+    Bertram      MINER     89/155  home (96.5,21.5) post (96.5,21.5) at (95.6,21.9)
+         89  SHELTER / rain (#%); going in out of it
+    Wynn         FISHERMAN 90/155  home (96.0,42.0) post (96.0,42.0) at (95.9,41.9)
+         90  SHELTER / rain (#%); going in out of it
+    Corwin       FISHERMAN 108/155  home (23.5,33.5) post (23.5,33.5) at (23.7,34.6)
+         80  SHELTER / rain (#%); going in out of it
+         27  HIDE / hiding from Wolf (last seen #s ago)
+         1  INVESTIGATE / glimpsed someone at (#, #); deciding what to do
+    Severinus    CIVIC     34/155  home (151.5,28.0) post (159.5,30.7) at (125.1,72.0)
+         34  SHELTER / rain (#%); going in out of it
+    Lucilla      CIVIC     54/155  home (136.5,28.0) post (150.5,84.5) at (146.5,46.1)
+         54  SHELTER / rain (#%); going in out of it
+    Flavia       MERCHANT  52/155  home (177.5,28.0) post (181.0,90.5) at (149.2,62.6)
+         52  SHELTER / rain (#%); going in out of it
+    Philon       HEALER    40/155  home (136.5,44.0) post (172.5,108.5) at (137.5,45.2)
+         40  SHELTER / rain (#%); going in out of it
+    Gaius        MINER     55/155  home (141.5,44.0) post (181.5,141.5) at (146.5,69.8)
+         53  SHELTER / rain (#%); going in out of it
+         2  SHELTER [blocked] paused to reconsider a blocked route / rain (#%); going in out of it
+    Servius      BEGGAR    88/155  home (165.5,103.5) post (165.5,103.5) at (164.2,103.7)
+         88  SHELTER / rain (#%); going in out of it
+    Octavia      VILLAGER  41/155  home (138.5,28.0) post (146.5,92.5) at (146.7,64.6)
+         41  SHELTER / rain (#%); going in out of it
+    Marcellus    VILLAGER  38/155  home (141.5,28.0) post (170.5,92.5) at (143.1,30.5)
+         38  SHELTER / rain (#%); going in out of it
+    Cornelia     VILLAGER  58/155  home (143.5,44.0) post (150.5,76.5) at (146.3,63.0)
+         58  SHELTER / rain (#%); going in out of it
+    Lucius       FISHERMAN 87/155  home (182.5,28.0) post (58.5,150.5) at (149.1,57.5)
+         87  SHELTER / rain (#%); going in out of it
+    Livia        VILLAGER  55/155  home (179.5,28.0) post (168.5,76.5) at (163.5,53.8)
+         53  SHELTER / rain (#%); going in out of it
+         2  WORK [blocked] paused to reconsider a blocked route / day's work: pick berries, sell them to Store A
+    Arthur       CRAFTSMAN 61/155  home (86.5,141.0) post (72.5,27.8) at (89.1,139.2)
+         60  SHELTER / rain (#%); going in out of it
+         1  INVESTIGATE / heard something at (#, #); deciding what to do
+    Sir Gawain   HUNTER    47/155  home (90.5,141.0) post (44.5,44.5) at (39.7,46.5)
+         17  INVESTIGATE / check: going to look at (#, #) - courage #
+         12  INVESTIGATE / hide: hiding at (#, #) - courage -#, night, dark there, sounds of violence
+         6  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         3  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+    Percival     MINER     44/155  home (94.5,141.0) post (144.5,145.5) at (95.4,135.3)
+         44  SHELTER / rain (#%); going in out of it
+    Merlin       MINER     52/155  home (96.5,141.0) post (139.5,147.5) at (96.9,138.4)
+         52  SHELTER / rain (#%); going in out of it
+    Aeldric      CRAFTSMAN 37/155  home (106.5,93.0) post (74.5,28.5) at (104.7,87.1)
+         37  SHELTER / rain (#%); going in out of it
+    Brannoc      CRAFTSMAN 63/155  home (107.5,93.0) post (39.5,108.5) at (104.7,87.7)
+         63  SHELTER / rain (#%); going in out of it
+    Corren       CRAFTSMAN 49/155  home (86.5,134.0) post (90.5,134.5) at (85.8,135.3)
+         49  SHELTER / rain (#%); going in out of it
+    Deryn        CRAFTSMAN 33/155  home (179.5,44.0) post (172.5,84.5) at (163.7,53.2)
+         33  SHELTER / rain (#%); going in out of it
+    Eirwen       WORKER    84/155  home (88.5,134.0) post (80.5,20.5) at (90.5,136.3)
+         64  SHELTER / rain (#%); going in out of it
+         17  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         2  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+         1  INVESTIGATE / glimpsed someone at (#, #); deciding what to do
+    Fennric      WORKER    55/155  home (90.5,134.0) post (31.5,102.5) at (96.3,132.1)
+         55  SHELTER / rain (#%); going in out of it
+    Garron       MINER     75/155  home (92.5,134.0) post (93.5,24.5) at (93.9,135.3)
+         69  SHELTER / rain (#%); going in out of it
+         4  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         1  INVESTIGATE / check: noticed something at (#, #) - courage #, not alone
+         1  INVESTIGATE / glimpsed someone at (#, #); deciding what to do
+    Haldren      MINER     59/155  home (94.5,134.0) post (140.5,152.5) at (118.1,127.3)
+         57  SHELTER / rain (#%); going in out of it
+         2  SHELTER [blocked] paused to reconsider a blocked route / rain (#%); going in out of it
+    Istren       MERCHANT  63/155  home (86.0,137.5) post (76.5,28.5) at (95.3,134.7)
+         63  SHELTER / rain (#%); going in out of it
+    Maerwyn      MERCHANT  49/155  home (182.5,44.0) post (182.5,96.5) at (171.6,53.3)
+         49  SHELTER / rain (#%); going in out of it
+    Tobin        FARMER    50/155  home (87.5,88.0) post (100.5,108.5) at (106.4,63.6)
+         50  SHELTER / rain (#%); going in out of it
+    Hedda        FARMER    53/155  home (101.5,88.0) post (115.5,107.5) at (124.4,62.6)
+         45  SHELTER / rain (#%); going in out of it
+         3  INVESTIGATE / check: looking round the spot at (#, #) - courage #, not alone
+         3  INVESTIGATE / check: going to look at (#, #) - courage #, not alone
+         1  INVESTIGATE / check: noticed something at (#, #) - courage #, not alone
+    Rufus        FARMER    61/155  home (138.0,58.5) post (177.5,58.5) at (141.4,65.1)
+         61  SHELTER / rain (#%); going in out of it
+    Valeria      FARMER    49/155  home (144.0,58.5) post (180.5,64.5) at (141.2,65.8)
+         49  SHELTER / rain (#%); going in out of it
+    Hamon        CIVIC     43/155  home (129.0,53.5) post (123.5,66.5) at (105.1,70.8)
+         43  SHELTER / rain (#%); going in out of it
+    Wilfred      CRAFTSMAN 26/155  home (129.5,50.0) post (128.5,57.5) at (128.2,57.5)
+         26  SHELTER / rain (#%); going in out of it
+    Appius       CRAFTSMAN 16/155  home (143.5,56.0) post (143.5,61.4) at (132.6,73.0)
+         16  SHELTER / rain (#%); going in out of it
+
+
+LifeProbeTest > trace() STANDARD_OUT
+          [stuck] Merlin SOCIALIZE at (91.34, 4.00, 136.92) -> (91.0, 136.0), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    === trace Rufus ===
+    Lunday 09:00 (Day 2) 9.00 at (177.50,4.05,58.50) goal IDLE goalpos (0.00,0.00) legs null legsTo (0.00,0.00) stall 0.0 -> 
+    Lunday 09:05 (Day 2) 9.10 at (179.05,4.00,60.05) goal WORK goalpos (181.50,62.50) legs 1@0 legsTo (181.50,62.50) stall 3.7 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:11 (Day 2) 9.20 at (181.37,4.00,59.58) goal WORK goalpos (185.50,58.50) legs 1@0 legsTo (185.50,58.50) stall 4.4 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:17 (Day 2) 9.29 at (183.75,4.00,60.08) goal WORK goalpos (185.50,60.50) legs 1@0 legsTo (185.50,60.50) stall 1.9 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:23 (Day 2) 9.39 at (185.12,4.00,61.91) goal WORK goalpos (185.50,62.50) legs null legsTo (185.50,62.50) stall 0.9 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:29 (Day 2) 9.49 at (183.23,4.00,61.07) goal WORK goalpos (177.50,58.50) legs 1@0 legsTo (177.50,58.50) stall 6.4 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:34 (Day 2) 9.58 at (180.83,4.00,60.74) goal WORK goalpos (177.50,60.50) legs 1@0 legsTo (177.50,60.50) stall 3.4 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:40 (Day 2) 9.68 at (178.69,4.00,61.73) goal WORK goalpos (177.50,62.50) legs 1@1 legsTo (177.50,62.50) stall 1.7 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:46 (Day 2) 9.77 at (179.18,4.00,60.95) goal WORK goalpos (181.50,58.50) legs 1@0 legsTo (181.50,58.50) stall 3.6 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:51 (Day 2) 9.86 at (180.86,4.00,60.43) goal WORK goalpos (181.50,60.50) legs null legsTo (181.50,60.50) stall 1.1 -> Crop Farmer: weeding and watering the rows
+    Lunday 09:57 (Day 2) 9.96 at (180.24,4.00,60.83) goal SHELTER goalpos (177.50,60.50) legs 23@0 legsTo (138.00,58.50) stall 42.4 -> 
+    Lunday 10:03 (Day 2) 10.05 at (177.95,4.00,60.08) goal SHELTER goalpos (175.50,59.50) legs 23@2 legsTo (138.00,58.50) stall 40.2 -> 
+    Lunday 10:08 (Day 2) 10.14 at (176.08,4.00,59.55) goal SHELTER goalpos (174.50,58.50) legs 23@4 legsTo (138.00,58.50) stall 38.4 -> 
+    Lunday 10:14 (Day 2) 10.24 at (173.71,4.00,59.07) goal SHELTER goalpos (169.50,58.50) legs 23@5 legsTo (138.00,58.50) stall 35.9 -> 
+    Lunday 10:19 (Day 2) 10.33 at (171.28,4.00,58.74) goal SHELTER goalpos (169.50,58.50) legs 23@5 legsTo (138.00,58.50) stall 33.6 -> 
+    Lunday 10:25 (Day 2) 10.42 at (170.10,4.00,56.63) goal SHELTER goalpos (161.50,55.50) legs 23@7 legsTo (138.00,58.50) stall 32.2 -> 
+    Lunday 10:30 (Day 2) 10.51 at (168.84,4.00,55.69) goal SHELTER goalpos (161.50,55.50) legs 23@7 legsTo (138.00,58.50) stall 31.0 -> 
+    Lunday 10:36 (Day 2) 10.60 at (166.39,4.00,55.62) goal SHELTER goalpos (161.50,55.50) legs 23@7 legsTo (138.00,58.50) stall 28.8 -> 
+    Lunday 10:41 (Day 2) 10.69 at (163.94,4.00,55.56) goal SHELTER goalpos (161.50,55.50) legs 23@7 legsTo (138.00,58.50) stall 26.2 -> 
+    Lunday 10:46 (Day 2) 10.78 at (161.49,4.00,55.52) goal SHELTER goalpos (159.50,55.50) legs 23@8 legsTo (138.00,58.50) stall 23.9 -> 
+    Lunday 10:52 (Day 2) 10.87 at (159.04,4.00,55.52) goal SHELTER goalpos (151.50,55.50) legs 23@9 legsTo (138.00,58.50) stall 21.3 -> 
+    Lunday 10:57 (Day 2) 10.96 at (157.12,4.00,55.35) goal SHELTER goalpos (151.50,55.50) legs 23@9 legsTo (138.00,58.50) stall 19.4 -> 
+    Lunday 11:03 (Day 2) 11.05 at (154.77,4.00,55.35) goal SHELTER goalpos (151.50,55.50) legs 23@9 legsTo (138.00,58.50) stall 17.2 -> 
+    Lunday 11:08 (Day 2) 11.14 at (152.71,4.00,55.29) goal SHELTER goalpos (148.50,55.50) legs 23@10 legsTo (138.00,58.50) stall 15.4 -> 
+    Lunday 11:13 (Day 2) 11.23 at (150.27,4.00,55.41) goal SHELTER goalpos (148.50,55.50) legs 23@10 legsTo (138.00,58.50) stall 12.8 -> 
+    Lunday 11:19 (Day 2) 11.32 at (148.08,4.00,56.25) goal SHELTER goalpos (146.50,64.50) legs 23@13 legsTo (138.00,58.50) stall 10.6 -> 
+    Lunday 11:24 (Day 2) 11.41 at (147.62,4.00,58.66) goal SHELTER goalpos (146.50,64.50) legs 23@13 legsTo (138.00,58.50) stall 9.8 -> 
+    Lunday 11:29 (Day 2) 11.50 at (147.16,4.00,61.06) goal SHELTER goalpos (146.50,64.50) legs 23@13 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 11:35 (Day 2) 11.59 at (146.80,4.00,63.48) goal SHELTER goalpos (146.50,71.50) legs 23@14 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 11:40 (Day 2) 11.68 at (146.71,4.00,65.93) goal SHELTER goalpos (146.50,71.50) legs 23@14 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 11:46 (Day 2) 11.77 at (146.62,4.00,68.38) goal SHELTER goalpos (146.50,71.50) legs 23@14 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 11:51 (Day 2) 11.86 at (146.29,4.00,70.32) goal SHELTER goalpos (143.50,71.50) legs 23@15 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 11:56 (Day 2) 11.94 at (143.99,4.00,71.09) goal SHELTER goalpos (140.50,71.50) legs 23@16 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 12:02 (Day 2) 12.03 at (142.36,4.00,71.37) goal SHELTER goalpos (140.50,71.50) legs 23@16 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 12:07 (Day 2) 12.12 at (141.28,4.00,69.99) goal SHELTER goalpos (140.50,67.50) legs 23@17 legsTo (138.00,58.50) stall 9.5 -> 
+    Lunday 12:12 (Day 2) 12.21 at (141.37,4.00,67.62) goal INN goalpos (142.50,63.50) legs 1@0 legsTo (142.50,63.90) stall 4.0 -> going to the bar at DevPalace Taberna
+    Lunday 12:18 (Day 2) 12.30 at (142.02,4.00,65.26) goal INN goalpos (142.50,63.50) legs 1@0 legsTo (142.50,63.90) stall 1.7 -> going to the bar at DevPalace Taberna
+    Lunday 12:23 (Day 2) 12.39 at (141.61,4.00,66.19) goal INN goalpos (141.50,66.50) legs 1@1 legsTo (141.50,66.50) stall 0.4 -> to a seat at DevPalace Taberna
+    Lunday 12:28 (Day 2) 12.48 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 12:34 (Day 2) 12.57 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 12:39 (Day 2) 12.66 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 12:44 (Day 2) 12.75 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 12:50 (Day 2) 12.84 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 12:55 (Day 2) 12.93 at (141.60,4.00,66.24) goal INN goalpos (141.50,66.50) legs null legsTo (141.50,66.50) stall 0.4 -> sitting at DevPalace Taberna
+    Lunday 13:00 (Day 2) 13.02 at (141.48,4.00,66.82) goal WORK goalpos (140.50,71.50) legs 18@2 legsTo (177.50,59.50) stall 36.5 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:06 (Day 2) 13.11 at (140.98,4.00,69.22) goal WORK goalpos (140.50,71.50) legs 18@2 legsTo (177.50,59.50) stall 36.5 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:11 (Day 2) 13.20 at (141.70,4.00,71.13) goal WORK goalpos (144.50,71.50) legs 18@3 legsTo (177.50,59.50) stall 36.5 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:17 (Day 2) 13.29 at (143.47,4.00,71.40) goal WORK goalpos (146.50,71.50) legs 18@4 legsTo (177.50,59.50) stall 36.2 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:22 (Day 2) 13.38 at (145.78,4.00,70.91) goal WORK goalpos (146.50,63.50) legs 18@5 legsTo (177.50,59.50) stall 34.0 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:28 (Day 2) 13.47 at (146.33,4.00,69.30) goal WORK goalpos (146.50,63.50) legs 18@5 legsTo (177.50,59.50) stall 32.9 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:33 (Day 2) 13.56 at (146.30,4.00,67.25) goal WORK goalpos (146.50,63.50) legs 18@5 legsTo (177.50,59.50) stall 32.1 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:39 (Day 2) 13.65 at (146.37,4.00,65.14) goal WORK goalpos (146.50,56.50) legs 18@6 legsTo (177.50,59.50) stall 31.9 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:44 (Day 2) 13.74 at (146.34,4.00,63.15) goal WORK goalpos (146.50,56.50) legs 18@6 legsTo (177.50,59.50) stall 31.5 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:50 (Day 2) 13.83 at (146.40,4.00,60.70) goal WORK goalpos (146.50,56.50) legs 18@6 legsTo (177.50,59.50) stall 31.2 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 13:55 (Day 2) 13.93 at (146.46,4.00,58.25) goal WORK goalpos (146.50,56.50) legs 18@6 legsTo (177.50,59.50) stall 31.1 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 14:01 (Day 2) 14.02 at (148.20,4.00,56.64) goal WORK goalpos (156.50,55.50) legs 18@9 legsTo (177.50,59.50) stall 29.6 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 14:06 (Day 2) 14.11 at (149.70,4.00,55.70) goal WORK goalpos (156.50,55.50) legs 18@9 legsTo (177.50,59.50) stall 28.3 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 14:12 (Day 2) 14.21 at (152.12,4.00,55.63) goal WORK goalpos (156.50,55.50) legs 18@9 legsTo (177.50,59.50) stall 25.8 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 14:18 (Day 2) 14.30 at (154.57,4.00,55.56) goal WORK goalpos (156.50,55.50) legs 18@9 legsTo (177.50,59.50) stall 23.5 -> Crop Farmer: going to a ripe row of carrots
+    Lunday 14:23 (Day 2) 14.40 at (157.02,4.00,55.53) goal WORK goalpos (160.50,55.50) legs 18@10 legsTo (177.50,59.50) stall 20.9 -> Crop Farmer: going to a ripe row of carrots
+
+
+Gradle Test Executor 46 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.004 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.01 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 6s
+9 actionable tasks: 1 executed, 8 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

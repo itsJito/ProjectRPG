@@ -1,3 +1,139 @@
+# Patch Notes Version Alpha 0.3.6: Rein Check
+
+Mounts, fish and the insides of houses get a good going-over.
+
+Developer: Hoodie
+
+## New Features
+### NPC's
+- Added health bars, names and combat levels over fish that are hurt, fighting or being looked at
+- Added whales that turn on swimmers who hurt them, and dive away from anyone they cannot reach
+### Gameplay
+- Added falls for mounts. A horse galloping or a Pegasus flying fast into a wall now goes down and throws its rider
+- Added fish to the console's 'spawn' command. Spawning a fish puts it into the nearest water deep enough for it
+
+## Changes
+### NPC's
+- Changed guards and lawmen to chase trespassers a short way past their borders before turning back
+- Changed townsfolk to walk around dead bodies and react when they pass one
+- Changed tamed animals to bear a blow from their owner rather than fight back
+- Changed residents far from the player to go about their errands at their usual pace
+- Changed the Fence to keep trading with customers who have a weapon drawn
+- Changed the mountain lion to have real big cat calls and growls
+### Gameplay
+- Changed Pegasus steering so pushing forward climbs and pulling back dives, with even turning both ways
+- Changed horses and Pegasi to push through leaves and bushes, slowing a little
+- Changed riders to sit properly in the saddle with their feet in the stirrups
+- Changed deer and other animals to slow down in water. Nothing now runs faster wading or swimming than on land
+
+## Technical Changes
+- Changed house interiors to light smoothly, without bands or patches across the walls
+- Changed shadows close to the camera to update every frame
+- Changed busy fights and crowded areas to run more smoothly
+- Changed fish to only check the fish around them, which keeps large shoals cheap
+
+## Fixed Bugs
+- AE-03601 - Fixed bug where deer could sprint extremely fast, especially in water
+- AE-03602 - Fixed bug where fish had no collision or health bars
+- AE-03603 - Fixed bug where whales did not protect themselves
+- AE-03604 - Fixed bug where the 'slay' command did not work on fish
+- AE-03605 - Fixed bug where the 'spawn' command did not work with fish such as sharks
+- AE-03606 - Fixed bug where townsfolk did not react to or avoid dead bodies
+- AE-03607 - Fixed bug where interiors were badly glitched, especially on lamp-lit walls as the lamp moved out of view
+- AE-03608 - Fixed bug where climbing out of the fountain in DevPalace or the well in DevTown glitched the player
+- AE-03609 - Fixed bug where players and NPC's did not sit properly on horses and Pegasi
+- AE-03610 - Fixed bug where riding a mount caused visual flickering
+- AE-03611 - Fixed bug where mounts did not fall when hitting a wall at speed
+- AE-03612 - Fixed bug where walking backwards on a horse or Pegasus looked like moonwalking
+- AE-03613 - Fixed bug where horses and Pegasi got stuck on foliage
+- AE-03614 - Fixed bug where Pegasus steering in the air was lopsided and its climb and dive were the wrong way round
+- AE-03615 - Fixed bug where a Pegasus played footstep sounds while flying
+- AE-03616 - Fixed bug where tamed animals defended themselves against their owner
+- AE-03617 - Fixed bug where the game stuttered in areas with many NPC's
+- AE-03618 - Fixed bug where NPC routines stalled away from the player
+- AE-03619 - Fixed bug where a head under water was not counted as under water
+- AE-03620 - Fixed bug where fire spells passed through foliage without setting it alight
+- AE-03621 - Fixed bug where shadows lagged behind and flickered
+- AE-03622 - Fixed bug where the mountain lion's sound was a person saying the word
+- AE-03623 - Fixed bug where players could not trade with the Fence
+
+# Patch Notes Version Alpha 0.3.5: Hook, Line and Guilder
+
+The brook now runs into a sea full of fish, and the trades have organised themselves into guilds.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added the sea along the south of the map, where the woodland brook runs out. A sand beach leads down to a wading strip, a shelf and open water deep enough to dive in
+- Added a timber pier running out over the deep water, with lamps at its head, and a rocky islet off the western shore
+- Added Guild Row, a street of halls along the seafront: the halls of the seven guilds, the Armory and the outworkers' cottage
+- Added the carding bench, spinning wheel, loom, fulling tub and dye vat
+### Items
+- Added 20 new kinds of catch, each with a cooked dish: Sardine, Guppy, Herring, Mackerel, Cod, Salmon, Tuna, Lobster, Bass, Catfish, Swordfish, Squid, Haddock, Shark, Electric eel, Anglerfish, Blue marlin, Whale steak and Black marlin, plus the Starfish
+- Added the Harpoon, Lobster pot and Fishing bait
+- Added Shears, Cotton and Cotton seeds
+- Added Clean wool, Clean cotton, Woollen yarn, Cotton thread, Linen thread, Loom-state cloth, Fulled cloth, Dyed cloth and Fine cloth
+- Added cooking recipes for every new fish, and for crab, which had none
+- Added casting a Pot from a bronze bar and a Bucket from an iron bar at the furnace
+### NPC's
+- Added real fish. Every pond, stream, the brook, the lake and the sea now hold their own fish, which swim, shoal, keep to their depth, scatter from splashes and swimmers, hunt smaller fish and come to a line they can be caught with
+- Added sharks that circle and bite swimmers in the deep, electric eels that shock anyone who swims too close, and whales that surface to blow
+- Added the seven guilds: the Metallists, Foresters, Artisans, Farmers, Provisioners, Arcanists and Mariners, each with a guildmaster and a hall
+- Added fourteen people to Guild Row: the guildmasters, the Armory's keeper, a carder and a spinner, a fuller, a dyer, a smelter and a coastal fisher
+- Added the Carder, Spinner, Weaver, Fuller, Dyer and Smelter trades
+### Gameplay
+- Added fishing levels for every catch, from Shrimp at level 1 to Black marlin at level 100
+- Players can now catch a tuna with their bare hands by punching it, with Fishing 55 and Strength 35
+- Added fighting fish. A blow, an arrow or a spell can kill a fish, and it trains your fighting skills rather than Fishing. A dead fish floats up to be picked from the water
+- Added guild membership. Players can join a guild once one of its skills is high enough and the dues are paid
+- Members now work a quarter quicker at their own guild hall's stations, and the guild store pays them more for their goods and sells to them for less
+- Added the textile trade. Wool and cotton are sorted and carded, spun, woven, fulled, dyed and finished into cloth, each step at its own station
+- Added shearing. Sheep can be shorn with shears, and their fleece grows back over a few days
+- Added the metal trade on Guild Row. The miners' ore is smelted at the hall's furnaces, forged at its anvil and sold at the Armory
+- Added evidence to the watch's questioning. Witnesses remember the weapon, the clothes, the hair or helmet, any blood, any wounds, the build and any stolen goods, and the watch now tells you what fits
+- Added naming someone else who fits the witness's description when the watch stops you. If they fit as well, they are taken in instead
+- Added signs along Guild Row and at the sea and the pier
+
+## Changes
+### Blocks
+- Changed the brook to run on across the beach into the sea
+### Items
+- Changed Linen cloth to Cloth. It is now finished from fulled cloth rather than woven straight from flax
+- Changed fishing gear so any net, rod, harpoon or pot can be tried at any fishing spot. What it catches depends on the fish there
+- Changed fishing rods to use Fishing bait when you carry it, which draws fish from further away
+### NPC's
+- Changed deer to look less like horses: a slimmer upright neck, a short pointed head with a dark nose, longer thinner legs and a white rump
+- Changed ducks on the water to sit low, paddle with their feet and tip up to feed
+- Changed ducks, deer, mountain lions, foxes and wolves to have their own recorded calls
+- Changed some dead bodies to float in water. Plate and mail drag a body under
+- Changed searching guards and townsfolk to give up on places they cannot reach, check bushes, tall grass and doorways first, and call out while they look
+- Changed people in a guild to greet members of the same guild
+- Changed people to talk more about what is around them: your catch, fine cloth, a harpoon, being soaked, the sea and recent arrests
+### Gameplay
+- Changed Talk-to to be the main thing pressing at a person does. While sneaking up close, it picks their pocket instead
+- Changed eating, drinking and filling a bucket or bottle to take a moment, with their own movements. Moving away or being hit stops them
+- Changed every crafting station to have its own working movements
+- Changed running water to visibly flow downstream
+- Changed water to ripple around swimmers and anyone wading, with a wake and splashes from each stroke
+
+## Technical Changes
+- Changed the map to 192 by 256 blocks to make room for the sea
+- Changed the world map to show the whole map, sea included
+- Changed fish to only swim as live fish near the player. Elsewhere the waters keep count of their fish
+- Changed lookups of people, animals, monsters and objects to be much faster
+- Removed unused code
+
+## Fixed Bugs
+- AE-03501 - Fixed bug where garden crops swayed and wobbled like loose leaves
+- AE-03502 - Fixed bug where water did not move or react when someone swam or waded through it
+- AE-03503 - Fixed bug where skirts and long tunics flared out wildly on someone sneaking or on a body being carried
+- AE-03504 - Fixed bug where the watch could talk to you from across a room, through a wall or from below a roof
+- AE-03505 - Fixed bug where people searching for someone sometimes stood still in one place
+- AE-03506 - Fixed bug where falling into water could kill you. Water now breaks a fall
+- AE-03507 - Fixed bug where plants snapped back upright behind you or stretched when stepped on
+- AE-03508 - Fixed bug where a finished music track caused errors in the log
+
 # Patch Notes Version Alpha 0.3.4: Sink or Swim
 
 The water is deep enough to swim in now, the woods have deer and the inns brew their own ale.

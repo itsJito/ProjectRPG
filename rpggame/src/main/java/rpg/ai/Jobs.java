@@ -142,9 +142,38 @@ final class Jobs {
             new TaskNetwork.Method<>("set wares out on the rack", n->n.profession==occupation && shelve(n)!=null, n->rack(n,shelve(n))),
             new TaskNetwork.Method<>("make the selected order", n->n.profession==occupation && recipe(n)!=null, n->craft(n,recipe(n))),
             new TaskNetwork.Method<>("gather at a suitable site", n->n.profession==occupation && site(n)!=null, n->gather(n,site(n))),
+            // (0.3.5) the carder's own raw stuff: the cotton field by the cottage, and the farm's flock (the fleece bought off its keeper)
+            new TaskNetwork.Method<>("tend the cotton field", n->n.profession==occupation && occupation==Profession.CARDER && cottonPlot(n)!=null, n->tend(n,cottonPlot(n))),
+            new TaskNetwork.Method<>("shear a sheep", n->n.profession==occupation && occupation==Profession.CARDER && n.count(Items.WOOL)<1 && n.count(Items.COTTON)<1 && sheep(n)!=null, n->shear(n,sheep(n))),
             new TaskNetwork.Method<>("buy missing inputs", n->n.profession==occupation && purchase(n)!=null, n->buy(n,purchase(n))),
             new TaskNetwork.Method<>("fetch supplies from the producer", n->n.profession==occupation && supplier(n)!=null, n->fetch(n,supplier(n)))
         ));
+    }
+    /** (0.3.5) A plot of the carder's cotton field that wants them: ripe to pick, or bare with seed in hand to sow. */
+    private rpg.world.Farming.Plot cottonPlot(Npc n) {
+        var ripe=g.farming.ripeFor(n.id,n.x,n.z);
+        if(ripe!=null && n.canStore(new ItemStack(Items.COTTON,4)))return ripe;
+        var empty=g.farming.emptyFor(n.id,n.x,n.z);
+        return empty!=null && n.has(Items.COTTON_SEEDS,1)?empty:null;
+    }
+    private Behavior.Node<Npc> tend(Npc n,rpg.world.Farming.Plot plot) {
+        return Behavior.sequence(List.of(approach(plot.x,plot.z,1.0f),person->{
+            person.wantYaw=(float)Math.atan2(-(plot.x-person.x),-(plot.z-person.z));
+            String act=plot.crop!=null?"harvest":"sow_cotton";
+            return g.interact.request(person,plot,act).rejected()?FAILURE:SUCCESS;}));
+    }
+    /** (0.3.5) The nearest grown sheep with its fleece on (shears in hand). */
+    private rpg.animal.Animal sheep(Npc n) {
+        if(!n.has(Items.SHEARS,1) && n.main()!=Items.SHEARS)return null;
+        rpg.animal.Animal best=null;float bd=80;
+        for(var a:g.animals.all())if(a.alive && a.loaded && a.species==rpg.animal.Species.SHEEP && !a.baby && g.state.minutes-a.lastShorn>rpg.animal.Animals.FLEECE_REGROW){float d=n.distTo(a);if(d<bd){bd=d;best=a;}}
+        return best;
+    }
+    private Behavior.Node<Npc> shear(Npc n,rpg.animal.Animal a) {
+        return Behavior.sequence(List.of(person->brain.goTo(person,a.x,a.z,false,1.2f)?SUCCESS:RUNNING,person->{
+            if(person.main()!=Items.SHEARS)g.items.equipFirst(person,Items.SHEARS,ItemDef.Slot.MAIN,g.state.newRequestId());
+            person.wantYaw=(float)Math.atan2(-(a.x-person.x),-(a.z-person.z));
+            return g.interact.request(person,a,"shear").rejected()?FAILURE:SUCCESS;}));
     }
     private Behavior.Node<Npc> approach(float x,float z,float range) { return n->brain.goTo(n,x,z,false,range)?SUCCESS:RUNNING; }
     private Behavior.Node<Npc> gather(Npc n,Node node) {
@@ -276,7 +305,13 @@ final class Jobs {
             case ARMORER -> item.family==ItemDef.Family.ARMOR || item.family==ItemDef.Family.SHIELD;
             case CARPENTER -> item==Items.PLANK || item==Items.OAK_PLANK;
             case COOK -> item.heal>0;
-            case TAILOR -> item.id.startsWith("cloth_");
+            case TAILOR -> item.id.startsWith("cloth_") && item != Items.CLOTH;
+            case CARDER -> item == Items.CLEAN_WOOL || item == Items.CLEAN_COTTON;
+            case SPINNER -> item == Items.YARN || item == Items.COTTON_THREAD || item == Items.LINEN_THREAD;
+            case WEAVER -> item == Items.LOOM_CLOTH;
+            case FULLER -> item == Items.FULLED_CLOTH || item == Items.CLOTH;
+            case DYER -> item == Items.DYED_CLOTH || item == Items.FINE_CLOTH;
+            case SMELTER -> item.id.endsWith("_bar") && item != Items.get("gold_bar") || item == Items.POT || item == Items.BUCKET;
             default -> false;
         };
     }
@@ -293,11 +328,19 @@ final class Jobs {
         for(var object:g.objects.all())if(object instanceof Station station && station.kind==recipe.station){stations.put(recipe.station,station);return station;}
         return null;
     }
+    /** (0.3.5) The station of a recipe's kind nearest where this worker works (their post): a guild hall's own, not the first in the world. */
+    private Station station(Npc n,Recipes.Recipe recipe) {
+        if(recipe.station==Recipes.Station.BUILD_SPOT)return station(recipe);
+        Station best=null;float bd=Float.MAX_VALUE;
+        float px=n.postX!=0?n.postX:n.x,pz=n.postZ!=0?n.postZ:n.z;
+        for(Station s:g.objects.stations())if(s.kind==recipe.station && !s.removed){float d=(float)Math.hypot(s.x-px,s.z-pz);if(d<bd){bd=d;best=s;}}
+        return best!=null?best:station(recipe);
+    }
     private Recipes.Recipe recipe(Npc n) {
         Recipes.Recipe selected=null;int fewest=Integer.MAX_VALUE;
         boolean stocked=wares(n)>=WARES;
         for(var recipe:Recipes.ALL)if(accepts(n,recipe)) {
-            Station station=station(recipe);
+            Station station=station(n,recipe);
             if(station==null || station.refusal(recipe,n)!=null)continue;
             ItemDef out=recipe.outputs.isEmpty()?null:recipe.outputs.get(0).item();
             boolean stockOnly=stock(recipe);
@@ -313,9 +356,18 @@ final class Jobs {
     }
     private ItemDef purchase(Npc n) {
         if(n.profession.family!=Npc.Role.CRAFTSMAN)return null;
-        for(var recipe:Recipes.ALL) if(accepts(n,recipe)) for(var input:recipe.inputs)
-            if(n.count(input.item())<input.amount() && g.econ.shopA.stock.count(input.item())>0 && n.has(Items.COINS,g.econ.buyPrice(g.econ.shopA,input.item())))return input.item();
+        for(var recipe:Recipes.ALL) if(accepts(n,recipe)) for(var input:recipe.inputs) {
+            if(n.count(input.item())>=input.amount())continue;
+            var shop=supplyShop(n,input.item());
+            if(shop!=null && n.has(Items.COINS,g.econ.buyPrice(shop,input.item())))return input.item();
+        }
         return null;
+    }
+    /** (0.3.5) Where a worker buys an input: their own guild's store or local market if it has some, else Store A. */
+    rpg.econ.Economy.Shop supplyShop(Npc n,ItemDef item) {
+        var local=g.econ.localShop(n);
+        if(local!=null && local.stock.count(item)>0)return local;
+        return g.econ.shopA.stock.count(item)>0?g.econ.shopA:null;
     }
     /** Who makes what this craftsman lacks and has some to spare (a miner with ore), when the shop has none: the one nearest. */
     private Npc supplier(Npc n) {
@@ -344,11 +396,14 @@ final class Jobs {
         ));
     }
     private Behavior.Node<Npc> buy(Npc n,ItemDef item) {
-        float[] counter=g.econ.counterSpot(g.econ.shopA);
-        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f),person->g.econ.buy(person,g.econ.shopA,item,1,g.state.newRequestId()).rejected()?FAILURE:SUCCESS));
+        var shop=supplyShop(n,item);
+        if(shop==null)shop=g.econ.shopA;
+        final var from=shop;
+        float[] counter=g.econ.counterSpot(from);
+        return Behavior.sequence(List.of(approach(counter[0],counter[1],1.2f),person->g.econ.buy(person,from,item,1,g.state.newRequestId()).rejected()?FAILURE:SUCCESS));
     }
     private Behavior.Node<Npc> craft(Npc n,Recipes.Recipe recipe) {
-        Station station=station(recipe);
+        Station station=station(n,recipe);
         return Behavior.sequence(List.of(Behavior.condition(person->station!=null && !station.removed),approach(station.x,station.z,1.6f),person->g.interact.request(person,station,"make:"+recipe.id).rejected()?FAILURE:SUCCESS));
     }
     private void knight(Npc n) {

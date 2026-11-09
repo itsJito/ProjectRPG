@@ -237,6 +237,13 @@ public final class Console {
                 print("spawned " + an.kind() + " #" + an.id + setup, GOOD);
                 return;
             }
+            // (0.3.6, gamefixes: 'spawn' did not work with fish such as sharks) a fish goes into the water nearest the spot
+            for (var k : rpg.fishing.FishKind.values()) if (norm(k.name()).equals(want) || norm(k.title).equals(want)) {
+                var f = g.fishery == null ? null : g.fishery.release(k, x, z);
+                if (f == null) { print("spawn: a " + k.title.toLowerCase() + " needs water - look toward a pond, the lake, a river or the sea (within 12 m)", WARN); return; }
+                print("spawned " + f.label() + " in " + f.water.name, GOOD);
+                return;
+            }
             for (var k : rpg.monster.MonsterKind.values()) if (norm(k.name()).equals(want) || norm(k.title).equals(want)) {
                 int level = (int) Math.max(k.minLevel, Math.min(k.maxLevel, DevConsole.num(extra, (k.minLevel + k.maxLevel) / 2f)));
                 var m = g.monsters.spawn(k, level, x, z, null);
@@ -263,7 +270,10 @@ public final class Console {
             for (var k : rpg.monster.MonsterKind.values()) monsters.add(k.name().toLowerCase(Locale.ROOT));
             for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER) people.add(r.name().toLowerCase(Locale.ROOT));
             for (rpg.ai.Profession pr : rpg.ai.Profession.values()) people.add(pr.name().toLowerCase(Locale.ROOT));
+            List<String> fish = new ArrayList<>();
+            for (var k : rpg.fishing.FishKind.values()) fish.add(k.name().toLowerCase(Locale.ROOT));
             print("Animals: " + String.join(", ", animals), TEXT);
+            print("Fish (into the water you face): " + String.join(", ", fish), TEXT);
             print("Monsters (spawn <kind> [level]; dragons take a breed): " + String.join(", ", monsters), TEXT);
             print("People (spawn <role or calling> [level]): " + String.join(", ", people), TEXT);
         });
@@ -273,11 +283,16 @@ public final class Console {
             else if (f instanceof rpg.animal.Animal an) { g.animals.remove(an); print("removed " + an.kind(), TEXT); }
             else if (f instanceof rpg.monster.Monster mo) { g.monsters.remove(mo); print("removed " + mo.label(), TEXT); }
             else if (f instanceof Npc n && spawned.contains(n.id)) { g.ai.despawnBody(n); g.npcs.remove(n); spawned.remove(n.id); print("removed " + n.title, TEXT); }
+            else if (f instanceof rpg.fishing.Fish fi && g.fishery != null) { g.fishery.discard(fi); print("removed " + fi.kind.title.toLowerCase(), TEXT); }
             else print("remove: look at an item, an animal, a monster or someone you spawned", WARN);
         });
-        cmd("slay", "Kills what you are looking at (a person, an animal or a monster).", a -> {
-            Actor v = g.interact.focus instanceof Actor f && f.alive && !f.dummy ? f : sighted(40);
-            if (v != null) { g.combat.bleedOutNow(v); print("slay: " + v.name, GOOD); } else print("slay: look at someone", WARN);
+        cmd("slay", "Kills what you are looking at (a person, an animal, a monster or a fish).", a -> {
+            // (0.3.6, gamefixes: 'slay' did not work on fish) a fish in the sights dies as one struck dead would
+            rpg.fishing.Fish fish = g.interact.focus instanceof rpg.fishing.Fish f && f.alive ? f : null;
+            Actor v = fish != null ? null : g.interact.focus instanceof Actor f && f.alive && !f.dummy ? f : sighted(40);
+            if (fish == null && v == null) fish = sightedFish(40);
+            if (fish != null) { g.fishery.slay(fish, g.player); print("slay: " + fish.kind.title.toLowerCase(), GOOD); }
+            else if (v != null) { g.combat.bleedOutNow(v); print("slay: " + v.name, GOOD); } else print("slay: look at someone", WARN);
         });
 
         // ---- the world and the character
@@ -404,6 +419,7 @@ public final class Console {
         for (var k : rpg.monster.MonsterKind.values()) l.add(k.name().toLowerCase(Locale.ROOT));
         for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER) l.add(r.name().toLowerCase(Locale.ROOT));
         for (rpg.ai.Profession pr : rpg.ai.Profession.values()) l.add(pr.name().toLowerCase(Locale.ROOT));
+        for (var k : rpg.fishing.FishKind.values()) l.add(k.name().toLowerCase(Locale.ROOT));
         return l;
     }
 
@@ -535,5 +551,13 @@ public final class Console {
             if (c > bestCos) { bestCos = c; best = v; }
         }
         return best;
+    }
+
+    /** The fish nearest the line of sight within range (through the water's surface), or null. */
+    private rpg.fishing.Fish sightedFish(float range) {
+        if (g.fishery == null) return null;
+        float yaw = g.controller.camYaw, pitch = g.controller.camPitch;
+        float dx = (float) (-Math.sin(yaw) * Math.cos(pitch)), dy = (float) Math.sin(pitch), dz = (float) (-Math.cos(yaw) * Math.cos(pitch));
+        return g.fishery.ray(g.controller.cx, g.controller.cy, g.controller.cz, dx, dy, dz, range, 0.6f, null);
     }
 }

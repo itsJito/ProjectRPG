@@ -136,6 +136,18 @@ public class Npc extends Actor implements Interactable {
     }
     public boolean working() { return employmentState() == EmploymentState.WORKING; }
     public boolean watch() { return role == Role.GUARD || role == Role.LAWMAN; }
+    /**
+     * (0.3.6, gamefixes: the watch should chase people off past its borders before going back) whom this watchman is
+     * chasing out of its territory, since when, and from where it set off after them past the border.
+     */
+    /** (0.3.6) Until when, and from about where, a search for high ground that found none is not made again. */
+    public double highGroundAt = -99;
+    public float highGroundX, highGroundZ;
+    public long chaseOffOf;
+    public double chaseOffSince = -99;
+    public float chaseOffX, chaseOffZ;
+    /** The chase-off is over (they were seen off): not taken up again until they come back in. */
+    public boolean chaseOffDone;
     public int lootTaken;
     public final List<Memory> memories = new ArrayList<>();
     // the mind's current state, for the inspector
@@ -156,6 +168,10 @@ public class Npc extends Actor implements Interactable {
     public boolean sprinting;
     public int routeCells;
     public boolean stuck;
+    /** (0.3.5) The walk being watched for a stall: its goal (keyed), the nearest it has come, and when it last gained ground. */
+    public int searchKey = Integer.MIN_VALUE;
+    public float searchBest;
+    public double searchAt, barkAt = -99;
     public long fightTarget, socialPartner, aidTarget;
     public float socialSide;
     /** People they set out to talk with but could find no way to (a fence, a pen, a locked door between): until when they stop trying. */
@@ -298,7 +314,7 @@ public class Npc extends Actor implements Interactable {
 
     public String dist(Rpg g, Actor a, float range) {
         if (!alive) return "They're dead.";
-        if (Math.hypot(a.x - x, a.z - z) > range + 0.6f) return "You're too far away.";
+        if (Math.hypot(a.x - x, a.z - z) > range + 0.6f || Math.abs(a.y - y) > 2.0f) return "You're too far away.";
         if (!g.vox.sight(a.x, a.eyeY(), a.z, x, y + 1.5f, z)) return "You can't reach them from here.";
         return null;
     }
@@ -337,7 +353,10 @@ public class Npc extends Actor implements Interactable {
         float r = g.cfg.interactRange;
         var report=rpg.law.WitnessInfluence.pending(g,this);
         boolean shuns = shunning(g, a);
+        // (0.3.5, gamefixes) Talk-to is what pressing at a person does; one who cannot talk says why rather than the
+        // press falling through to their pockets
         if (!shuns && (canTalk(g) || a==g.player && report!=null)) o.add(Option.on("talk", "Talk-to", 10, r));
+        else if (alive && !hostileToPlayer) o.add(Option.off("talk", "Talk-to", 10, shuns ? name + " wants nothing to do with you." : asleep() ? name + " is asleep." : name + " cannot stop to talk now.", r));
         if (role == Role.MERCHANT || role == Role.FENCE || g.econ.shopOf(this) != null) {
             String why = g.econ.tradeRefusal(this, a);
             o.add(Option.when(why == null, "trade", "Trade", 9, why, r));
@@ -355,8 +374,10 @@ public class Npc extends Actor implements Interactable {
         }
         if (!hostileToPlayer) {
             boolean lvl = a.skills.level(Skill.THIEVING) >= pickpocketLevel, room = a.canStore(new ItemStack(Items.COINS, 1));
-            o.add(Option.when(lvl, "pickpocket", "Inspect pockets", 3, "You need Thieving level " + pickpocketLevel + ".", 1.6f));
-            o.add(Option.when(lvl && room,"pickpocket-direct","Quick pickpocket",2,!lvl?"Your Thieving level is too low.":"Your inventory is too full.",1.6f));
+            // (0.3.5, gamefixes) sneaking up on someone, a press picks their pocket; otherwise it is only on the menu
+            boolean sneak = (a.sneaking || a.crouched) && Math.hypot(a.x - x, a.z - z) <= 1.6f + 0.6f;
+            o.add(Option.when(lvl && room,"pickpocket-direct","Pickpocket",sneak ? 12 : -1,!lvl?"Your Thieving level is too low.":"Your inventory is too full.",1.6f));
+            o.add(Option.when(lvl, "pickpocket", "Inspect pockets", sneak ? 11 : -2, "You need Thieving level " + pickpocketLevel + ".", 1.6f));
         }
         return o;
     }

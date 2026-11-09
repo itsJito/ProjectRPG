@@ -191,6 +191,8 @@ public final class CommandBuffer {
     public void ragdollTraits(long handle, float strength, float agility, float toughness, float endurance) {
         head(AstrattoNative.CMD_RAGDOLL_TRAITS, 32).h(handle).f(strength).f(agility).f(toughness).f(endurance);
     }
+    /** (2.10) How a body takes to water: lift as a share of its weight when wholly under (0 sinks, above 1 floats), and the drag per second. */
+    public void ragdollBuoyancy(long handle, float buoyancy, float drag) { head(AstrattoNative.CMD_RAGDOLL_BUOYANCY, 24).h(handle).f(buoyancy).f(drag); }
     public void ragdollCarry(long handle, float vx, float vy, float vz, float share) { head(AstrattoNative.CMD_RAGDOLL_CARRY, 32).h(handle).f(vx).f(vy).f(vz).f(share); }
     /** Replaces one of Sydney's sixteen profiles: the 50 floats of {@code astratto_sydney_profile} in its order, then its 4 integers. */
     public void sydneyProfile(int index, float[] floats, int maxSteps, int getUpTries, int holdWound, int style) {
@@ -272,6 +274,8 @@ public final class CommandBuffer {
     public void agentForce(long handle, int action) { head(AstrattoNative.CMD_AGENT_FORCE, 24).h(handle).i(action).i(0); }
     /** Something was heard: where, how far it carries, how loud, and the team that made it (agents do not react to their own). */
     public void noise(float x, float y, float z, float radius, float loudness, int team) { head(AstrattoNative.CMD_NOISE, 32).f(x).f(y).f(z).f(radius).f(loudness).i(team); }
+    /** (2.10) A place walking agents steer round for life seconds (unless where they are going is inside it): a body in the street. */
+    public void avoid(float x, float y, float z, float radius, float life) { head(AstrattoNative.CMD_AVOID, 32).f(x).f(y).f(z).f(radius).f(life).i(0); }
 
     // ------------------------------------------------------------------ audio (96-127)
     public void listener(float x, float y, float z, float yaw) { head(AstrattoNative.CMD_LISTENER, 24).f(x).f(y).f(z).f(yaw); }

@@ -73,9 +73,10 @@ extern "C" {
  * 2.4: Sydney 3 - a muscle-driven rigid-body body: intents and traits for ragdolls, their impacts, their segments in the
  * snapshot; the renderer's sun shafts, smoke volumes, leaf cards, soft shadows, motion blur and depth of field.
  * 2.6: appended agent navigation telemetry and local-voxel model dissolution.
- * 2.7: ladder exclusion flag; negative agent fact 15 temporarily forbids ladders. */
+ * 2.7: ladder exclusion flag; negative agent fact 15 temporarily forbids ladders.
+ * 2.10: avoid discs - places walking agents steer round (a body lying in the street). */
 #define ASTRATTO_API_MAJOR 2
-#define ASTRATTO_API_MINOR 9
+#define ASTRATTO_API_MINOR 10
 #define ASTRATTO_API_VERSION ((uint32_t)((ASTRATTO_API_MAJOR << 16) | ASTRATTO_API_MINOR))
 
 /* ------------------------------------------------------------------ status */
@@ -429,7 +430,8 @@ enum {
     ASTRATTO_CMD_VEHICLE_PLACE = 49,    /* astratto_cmd_body_place (yaw in vx) */
     ASTRATTO_CMD_BODY_IMPULSE = 50,     /* astratto_cmd_body_impulse: a mover or a vehicle struck at a point */
     ASTRATTO_CMD_RAGDOLL_INTENT = 51,   /* astratto_cmd_ragdoll_intent (2.4): what Sydney should try to do */
-    ASTRATTO_CMD_RAGDOLL_TRAITS = 52    /* astratto_cmd_ragdoll_traits (2.4): how strong, quick and tough this body is */
+    ASTRATTO_CMD_RAGDOLL_TRAITS = 52,   /* astratto_cmd_ragdoll_traits (2.4): how strong, quick and tough this body is */
+    ASTRATTO_CMD_RAGDOLL_BUOYANCY = 53  /* astratto_cmd_ragdoll_buoyancy (2.10): how the body takes to water (0 sinks, 1 neutral, >1 floats) */
 };
 enum {
     ASTRATTO_EVT_LANDED = 32,           /* astratto_evt_body: a mover or a car came down (value = speed) */
@@ -605,6 +607,12 @@ typedef struct astratto_cmd_ragdoll_traits {
     astratto_handle handle;
     float strength, agility, toughness, endurance;
 } astratto_cmd_ragdoll_traits;
+
+typedef struct astratto_cmd_ragdoll_buoyancy {
+    astratto_record head;
+    astratto_handle handle;
+    float buoyancy, drag;              /* lift as a share of its weight when wholly under; drag per second in water */
+} astratto_cmd_ragdoll_buoyancy;
 
 typedef struct astratto_cmd_sydney_profile {
     astratto_record head;
@@ -838,7 +846,8 @@ enum {
     ASTRATTO_CMD_AGENT_POLICY = 69,     /* astratto_cmd_agent_policy: a different mind */
     ASTRATTO_CMD_NOISE = 70,            /* astratto_cmd_noise: something was heard */
     ASTRATTO_CMD_AGENT_RATE = 72,       /* astratto_cmd_agent_fact: index ignored, value scales navigation speed (0..2) */
-    ASTRATTO_CMD_AGENT_FORCE = 71       /* astratto_cmd_agent_force: this action, now, whatever the scores say (or -1 to stop) */
+    ASTRATTO_CMD_AGENT_FORCE = 71,      /* astratto_cmd_agent_force: this action, now, whatever the scores say (or -1 to stop) */
+    ASTRATTO_CMD_AVOID = 73             /* astratto_cmd_avoid: a place walkers keep clear of for a while (2.10) */
 };
 enum {
     ASTRATTO_EVT_AGENT_ACTION = 64,     /* astratto_evt_agent: value = the action chosen, extra = the one before */
@@ -921,6 +930,8 @@ typedef struct astratto_cmd_agent_policy { astratto_record head; astratto_handle
 typedef struct astratto_cmd_agent_force { astratto_record head; astratto_handle handle; int32_t action; uint32_t reserved; } astratto_cmd_agent_force;
 /* A body that can be seen by agents of other teams (movers and agents are seen anyway: this marks a body as one). */
 typedef struct astratto_cmd_noise { astratto_record head; float x, y, z, radius, loudness; uint32_t team; } astratto_cmd_noise;
+/* (2.10) A disc walkers steer round (unless where they are going is inside it), for life seconds: x, y, z, its radius. */
+typedef struct astratto_cmd_avoid { astratto_record head; float x, y, z, radius, life; uint32_t reserved; } astratto_cmd_avoid;
 
 typedef struct astratto_evt_agent {
     astratto_record head;
@@ -1386,6 +1397,7 @@ enum {
     ASTRATTO_RCMD_RIPPLE = 19,        /* astratto_rcmd_ripple: surface impulse in world x/z, radius and acceleration */
     ASTRATTO_RCMD_EMITTER = 18,       /* GPU element particles, bounded persistent pool */
     ASTRATTO_RCMD_ATMOS = 20,         /* astratto_rcmd_atmos: the ambient cube and the colour grade of an environment preset (API 2.9) */
+    ASTRATTO_RCMD_WATER_FLOW = 21,    /* astratto_rcmd_water_flow: a stretch of water moving (x/z rect, m/s); this frame (API 2.10) */
     ASTRATTO_RCMD_PORTRAIT = 17       /* astratto_rcmd_portrait + count * astratto_portrait_part; ordered among UI quads */
 
 };
@@ -1420,6 +1432,7 @@ typedef struct astratto_rcmd_model {
     float r, g, b, a, emissive, light, roughness, metallic;
 } astratto_rcmd_model;
 typedef struct astratto_rcmd_ripple { astratto_record head; float x,z,radius,strength; } astratto_rcmd_ripple;
+typedef struct astratto_rcmd_water_flow { astratto_record head; float x0,z0,x1,z1,vx,vz; } astratto_rcmd_water_flow;
 typedef struct astratto_rcmd_emitter { astratto_record head; uint64_t id; float position[4], color[4], motion[4], params[4]; } astratto_rcmd_emitter;
 typedef struct astratto_rcmd_particles { astratto_record head; uint32_t count, reserved; } astratto_rcmd_particles;
 /* 2D: quads in pixels from the top-left; a vertex is x y u v r g b a mode (0 colour, 1 texture, 2 text: alpha from red). */

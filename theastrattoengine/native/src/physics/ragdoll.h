@@ -65,6 +65,9 @@ public:
     explicit Ragdoll(float scale);
 
     float gravity = 22.0f;                     // m/s^2: the physics service's ragdoll gravity
+    // 2.10: how the body takes to water - lift as a share of its weight when a part is wholly under (0: it sinks, as
+    // before; above 1 it comes up and floats), and the drag water puts on each part (per second)
+    float buoyancy = 0.0f, waterDrag = 2.4f;
     float unit;                                // metres per rig voxel for this body
     float scale;
     float age = 0, quiet = 0;
@@ -100,6 +103,7 @@ public:
     void strike(int seg, impulsis::V3 point, impulsis::V3 J, float maxDv);
     /** The same velocity change for every segment. */
     void kickAll(float vx, float vy, float vz);
+    void water(const VoxelWorld* w, float h);
     void wake();
     int disturb(float wx, float wy, float wz, float radius, float vx, float vy, float vz);
     /** Advances by a frame's worth of fixed steps. Returns the steps run. */

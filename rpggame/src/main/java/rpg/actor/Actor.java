@@ -62,6 +62,8 @@ public class Actor {
     public double emoteUntil, emoteSince, emoteNextFor;
     /** In the saddle: the mount's speed (m/s) and its stride's phase, for the rider's lean and rise with the gait. */
     public float rideSpeed, rideGait;
+    /** (0.3.6) In the saddle: where the stirrups hang, in the figure's own pixels (x out to each side, y up, z forward negative). */
+    public float stirrupX, stirrupY, stirrupZ;
     public double torchLightingAt = -99;
     public static final float TORCH_LIGHTING = 1.2f;
     /** Whether this body holds a torch in hand now (drawn), and whether it is being lit this moment. */

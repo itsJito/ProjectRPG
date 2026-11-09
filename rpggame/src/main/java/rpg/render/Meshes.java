@@ -14,11 +14,17 @@ public final class Meshes {
     /** A box set: {cx, cy, cz, sx, sy, sz, shade} each (shade multiplies the tint: 1 = full), or with a colour of its own. */
     public static final class Boxes {
         public final List<float[]> list = new ArrayList<>();
+        /**
+         * (0.3.5) The vertex alpha given to the boxes added from now on: 1 for an ordinary model; for a plant mesh drawn as
+         * foliage, the packed root its parts bend from (model.vert), or the rigid marker.
+         */
+        public float alpha = 1;
         public Boxes add(float cx, float cy, float cz, float sx, float sy, float sz, float shade) { list.add(new float[]{cx, cy, cz, sx, sy, sz, shade}); return this; }
         public Boxes add(float cx, float cy, float cz, float sx, float sy, float sz) { return add(cx, cy, cz, sx, sy, sz, 1); }
         /** A box in a colour (RGB), for models drawn untinted. */
         public Boxes rgb(float cx, float cy, float cz, float sx, float sy, float sz, int rgb) {
-            list.add(new float[]{cx, cy, cz, sx, sy, sz, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f});
+            if (alpha != 1) list.add(new float[]{cx, cy, cz, sx, sy, sz, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, alpha});
+            else list.add(new float[]{cx, cy, cz, sx, sy, sz, ((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f});
             return this;
         }
         /** A box from corner to corner (x0, y0, z0)-(x1, y1, z1), in a colour. */

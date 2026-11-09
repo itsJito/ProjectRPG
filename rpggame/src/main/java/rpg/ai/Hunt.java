@@ -13,6 +13,8 @@ public final class Hunt {
     public long target;
     public long source, lastTrail;
     public float lookYaw;
+    /** (0.3.5) Which way the cover beside the spot being checked lies (0: none), looked into first on arriving. */
+    public float coverYaw;
     public String why;
     /** The last known location: where the last clue put them, and when; where the search is centred. */
     public float x, z;
@@ -48,4 +50,13 @@ public final class Hunt {
     }
 
     public boolean expired(double now) { return now - clueAt > patience; }
+
+    /** (0.3.5) Spots already looked at or found out of reach on this search ({x, z} pairs, the latest eight): not gone to again. */
+    public final float[] tried = new float[16];
+    public int triedN;
+    public void tried(float x, float z) { int i = (triedN++ % 8) * 2; tried[i] = x; tried[i + 1] = z; }
+    public boolean triedNear(float x, float z, float r) {
+        for (int i = 0; i < Math.min(triedN, 8); i++) if (Math.hypot(tried[i * 2] - x, tried[i * 2 + 1] - z) < r) return true;
+        return false;
+    }
 }

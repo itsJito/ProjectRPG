@@ -32,6 +32,8 @@ final class AnimalMind {
     /** How much an actor worries this animal (0: not at all): its enemies, strangers, whoever hurt it. */
     float threatWeight(Animal a, Actor t) {
         if (t == a || !t.alive || t.dummy) return 0;
+        // (0.3.6) tamed to them: never a threat - not even after a blow (it shies and cries out, and bears it)
+        if (a.tamedTo(t.id)) return 0;
         if (a.cs.lastAttacker == t.id && g.time - a.cs.lastHurt < 20) return 2f;
         // a monster: something to be afraid of, the more so the bigger it is (and the dragon above all)
         if (t instanceof rpg.monster.Monster m) {

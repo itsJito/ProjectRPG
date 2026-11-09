@@ -20,7 +20,7 @@ import java.util.Random;
  * game's thread, and a fourteen-minute track costs a four-second ring. The music carries on through the pause menu.
  * The clock here is wall time, so it keeps running while the world is paused.
  */
-public final class Music {
+public final class Music implements astratto.game.GameModule {
     /** What the moment feels like, most urgent first. */
     public enum Mood { COMBAT, HUNTED, MENU, DUNGEON, SACRED, PALACE_DAY, PALACE_NIGHT, WOOD_DAY, WOOD_NIGHT, TOWN_DAY, TOWN_NIGHT, OPEN_DAY, OPEN_NIGHT, NONE }
 
@@ -62,6 +62,10 @@ public final class Music {
         final Mood mood;
         float age, fadeLeft = -1;
         boolean started;
+        /** The mixer has let the voice go (it played out, or a stall ran its buffer dry): it takes no more commands. */
+        boolean ended;
+        /** The gain last sent, so a steady level is not re-sent every frame. */
+        float sent = -1;
         Playing(MusicStream s, long v, Mood m) { stream = s; voice = v; mood = m; }
     }
 
@@ -89,9 +93,12 @@ public final class Music {
                 now.started = true;
             } else if (now.started) {
                 now.age += dt;
-                game.commands().voiceSet(now.voice, AstrattoNative.SET_GAIN, gain * duck, 1, 0, 0, 0, 0, 0);
-                // played through: the decoder has handed it all over and the mixer has had time to play it
-                if (now.stream.decoded() && now.age > now.stream.buffered() + 0.5) {
+                // (0.3.5) only a live voice is spoken to, and only when its level moves: a voice the mixer had already
+                // ended was still sent a gain every frame ("command 98 refused: bad handle")
+                float level = gain * duck;
+                if (!now.ended && Math.abs(level - now.sent) > 0.002f) { game.commands().voiceSet(now.voice, AstrattoNative.SET_GAIN, level, 1, 0, 0, 0, 0, 0); now.sent = level; }
+                // played through: the decoder has handed it all over and the mixer has had time to play it (or let it go)
+                if (now.ended || now.stream.decoded() && now.age > now.stream.buffered() + 0.5) {
                     if (now.stream.failure() != null) System.err.println("[music] " + now.stream.name() + ": " + now.stream.failure());
                     now.stream.close();
                     now = null;
@@ -147,8 +154,9 @@ public final class Music {
     }
 
     private void fadeOut(Playing p, float seconds) {
-        if (p.started) game.commands().voiceStop(p.voice, seconds);
-        p.fadeLeft = p.started ? seconds : 0;
+        boolean live = p.started && !p.ended;
+        if (live) game.commands().voiceStop(p.voice, seconds);
+        p.fadeLeft = live ? seconds : 0;
         fading.add(p);
     }
 
@@ -178,7 +186,7 @@ public final class Music {
                 p.started = true;
             } else if (p.started) {
                 p.age += dt;
-                if (p.stream.decoded() && p.age > p.stream.buffered() + 0.5) { p.stream.close(); stingers.remove(i); }
+                if (p.ended || p.stream.decoded() && p.age > p.stream.buffered() + 0.5) { p.stream.close(); stingers.remove(i); }
             }
         }
         duckUntil = Math.max(0, duckUntil - dt);
@@ -194,6 +202,13 @@ public final class Music {
 
     public Mood mood() { return mood; }
     public String playing() { return now == null ? "" : now.stream.name() + (now.started ? "" : " (buffering)"); }
+
+    /** The engine's word that a voice is over: whichever piece it was takes no more commands. */
+    @Override public void voiceEnded(long voice) {
+        if (now != null && now.voice == voice) now.ended = true;
+        for (Playing p : fading) if (p.voice == voice) p.ended = true;
+        for (Playing p : stingers) if (p.voice == voice) p.ended = true;
+    }
 
     /** Everything stops (the window is closing). */
     public void close() {

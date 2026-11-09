@@ -75,7 +75,7 @@ void main() {
         vec4 lmL = texelFetch(uLayerMat, ivec2(vLayer, 0), 0);
         oAlbedo = vec4(c, 0.0);
         oNormal = vec4(Nl * 0.5 + 0.5, 1.0);
-        oMat = vec4(max(lmL.r, 0.62), 0.0, vLight.z, (floor(vLight.x * 15.0 + 0.5) * 16.0 + floor(vLight.y * 15.0 + 0.5)) / 255.0);
+        oMat = vec4(max(lmL.r, 0.62), 0.0, vLight.z, packLight(vLight.x, vLight.y));
         return;
     }
     vec4 tex = atlasTexel(bp);
@@ -101,7 +101,17 @@ void main() {
         float m = texture(uNoise, vWorld.xz / 31.0).g * 0.6 + texture(uNoise, vWorld.xz / 8.5).r * 0.3 + texture(uNoise, vWorld.xz / 2.3).b * 0.1;
         col *= mix(vec3(0.66, 0.80, 0.70), vec3(1.10, 1.05, 0.78), smoothstep(0.3, 0.7, m));
         col *= 0.97 + 0.06 * hash3(bp + vec3(13.1, 7.7, 3.3));
-    } else col *= 0.92 + 0.16 * hash3(bp + vec3(13.1, 7.7, 3.3));
+    } else {
+        // (0.3.6 game, gamefixes: interiors were badly glitched) a wall's blocks are not toned one by one: every block of
+        // a plastered room a different shade, with a hard edge between, read as a patchwork of seams across the walls
+        // (worst lit by a lamp close by). On a wall the tone drifts gently across the surface, each block only a shade off
+        // its neighbours; a top (a paving stone, a plank of floor) keeps its own
+        float perBlock = hash3(bp + vec3(13.1, 7.7, 3.3));
+        if (abs(N.y) < 0.5) {
+            vec2 tp = abs(N.x) > 0.5 ? vWorld.zy : vWorld.xy;
+            col *= 0.95 + 0.08 * texture(uNoise, tp / 6.5 + vec2(0.37, 0.71)).g + 0.03 * (perBlock - 0.5);
+        } else col *= 0.92 + 0.16 * perBlock;
+    }
     if (!emissive) {
         vec2 np = (abs(N.y) > 0.5) ? vWorld.xz : (abs(N.x) > 0.5 ? vWorld.zy : vWorld.xy);
         vec4 nz = texture(uNoise, np / 40.0);
@@ -149,5 +159,5 @@ void main() {
     }
     oAlbedo = vec4(col, emissive ? lm.b : 0.0);
     oNormal = vec4(N * 0.5 + 0.5, 0.0);
-    oMat = vec4(rough, metal, ao, (floor(sky * 15.0 + 0.5) * 16.0 + floor(blk * 15.0 + 0.5)) / 255.0);
+    oMat = vec4(rough, metal, ao, packLight(sky, blk));
 }

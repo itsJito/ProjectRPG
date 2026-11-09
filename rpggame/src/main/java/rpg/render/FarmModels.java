@@ -12,13 +12,35 @@ import rpg.world.Farming;
 final class FarmModels {
     private FarmModels() {}
 
+    /** (0.3.5) The vertex alpha that keeps a part still (model.vert's rigid marker), and the flag on a stiff plant's root. */
+    static final float RIGID = 65538, STIFF = 131072;
+    /** The garden being built's corner: its mesh is local to it, drawn there (see {@link #origin}). */
+    private static float ox, oz;
+
+    /** Where a garden's mesh is drawn from: its corner on the ground. */
+    static float[] origin(int field) { var f = Farming.FIELDS[field]; return new float[]{f.x0(), DevMap.FLOOR, f.z0()}; }
+
+    /** (0.3.5) The parts added next bend in the wind and under a body from this root as one stiff plant. */
+    private static void root(Meshes.Boxes b, float x, float z) {
+        b.alpha = STIFF + 2 + Math.clamp(Math.round((x - ox) * 16), 0, 255) + 256 * Math.clamp(Math.round((z - oz) * 16), 0, 255);
+    }
+
+    /**
+     * One garden's mesh, local to its corner on the ground ({@link #origin}). (0.3.5, gamefixes: farmable plants swayed
+     * like leaves) it was built in world coordinates and drawn from the world's origin, so the plant shader took every
+     * part for the top of a 1.5 m plant and shook each on its own: now the earth is still, and each crop leans as one
+     * stiff plant from its own root.
+     */
     static Meshes.Boxes field(Farming farming, int field) {
         Meshes.Boxes b = new Meshes.Boxes();
+        float[] o = origin(field);
+        ox = o[0]; oz = o[2];
         float y0 = DevMap.FLOOR;
         for (Farming.Plot p : farming.plots) {
             if (p.field != field) continue;
             float cx = p.bx + 0.5f, cz = p.bz + 0.5f;
             long h = p.id * 0x9E3779B97F4A7C15L;
+            b.alpha = RIGID;
             // the ridge: turned earth, a shade lighter on its crown, two furrow lines along it
             b.rgb(cx, y0 + 0.03f, cz, 0.86f, 0.06f, 0.86f, 0x4A3424);
             b.rgb(cx, y0 + 0.065f, cz, 0.7f, 0.012f, 0.6f, 0x5A4230);
@@ -29,8 +51,10 @@ final class FarmModels {
             if (p.crop == Farming.Crop.CARROT) carrots(b, cx, top, cz, stage, h);
             else if (p.crop == Farming.Crop.BARLEY) barley(b, cx, top, cz, stage, h);
             else if (p.crop == Farming.Crop.HOPS) hops(b, cx, top, cz, stage, h);
+            else if (p.crop == Farming.Crop.COTTON) cotton(b, cx, top, cz, stage, h);
             else cabbage(b, cx, top, cz, stage, h);
         }
+        for (float[] box : b.list) { box[0] -= o[0]; box[1] -= o[1]; box[2] -= o[2]; }
         return b;
     }
 
@@ -47,6 +71,7 @@ final class FarmModels {
             float x = cx - 0.3f + i * 0.2f + jit(k, 1) * 0.05f, z = cz - 0.22f + row * 0.22f + jit(k, 2) * 0.05f;
             float hh = ht * (0.88f + 0.24f * (jit(k, 3) + 0.5f));
             float lean = stage == 5 ? 0.18f : 0.02f * stage * (jit(k, 4) + 0.5f);
+            root(b, x, z);
             b.rgb(x + lean * 0.5f, y + hh * 0.5f, z, 0.025f, hh, 0.025f, stalk[stage]);
             if (stage >= 3) {
                 int ear = stage == 3 ? 0xA8B850 : stage == 4 ? 0xE0C060 : 0xB8A070;
@@ -62,6 +87,7 @@ final class FarmModels {
      */
     private static void hops(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
         float pole = 1.2f;
+        b.alpha = RIGID;   // the bine is tied to its pole, and the pole stands
         b.rgb(cx, y + pole / 2, cz, 0.05f, pole, 0.05f, 0x7A5A38);
         float[] reach = {0, 0.2f, 0.5f, 0.85f, 1.1f, 1.1f};
         float up = reach[stage];
@@ -79,6 +105,28 @@ final class FarmModels {
 
     private static float jit(long h, int k) { return (((h >>> (k * 5)) & 31) / 31f - 0.5f); }
 
+    /**
+     * (0.3.5) Cotton: two bushy plants to a plot, branching and leafy, green buds as they grow, then the bolls split open
+     * white; gone over, the leaves brown and the bolls straggling.
+     */
+    private static void cotton(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
+        float[] heights = {0, 0.14f, 0.3f, 0.48f, 0.6f, 0.58f};
+        int leaf = stage == 5 ? 0x8A7A3A : 0x4A7A2E, leafHi = stage == 5 ? 0xA08A48 : 0x5C9036;
+        for (int i = 0; i < 2; i++) {
+            float x = cx + (i == 0 ? -0.2f : 0.2f) + jit(h, 1 + i) * 0.06f, z = cz + jit(h, 3 + i) * 0.08f, ht = heights[stage] * (0.9f + 0.2f * (jit(h, 5 + i) + 0.5f));
+            root(b, x, z);
+            b.rgb(x, y + ht * 0.45f, z, 0.03f, ht * 0.9f, 0.03f, 0x5A6A30);
+            for (int k = 0; k < 5; k++) {
+                double a = k * 2.2 + i;
+                float r = 0.06f + 0.03f * (k % 2), ky = y + ht * (0.35f + k * 0.13f);
+                float lx = x + (float) Math.cos(a) * r, lz = z + (float) Math.sin(a) * r;
+                b.rgb(lx, ky, lz, 0.1f, 0.03f, 0.1f, k % 2 == 0 ? leaf : leafHi);
+                if (stage == 3) b.rgb(lx, ky + 0.04f, lz, 0.04f, 0.04f, 0.04f, 0x6E9A3C);                                   // the green bolls
+                if (stage >= 4) b.rgb(lx + (float) Math.cos(a) * 0.03f, ky + 0.05f, lz + (float) Math.sin(a) * 0.03f, 0.075f, 0.065f, 0.075f, stage == 5 ? 0xD8D0C0 : 0xF6F4EE);   // open and white
+            }
+        }
+    }
+
     private static void carrots(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
         float[] heights = {0, 0.07f, 0.15f, 0.23f, 0.29f, 0.3f};
         float ht = heights[stage];
@@ -86,6 +134,7 @@ final class FarmModels {
             long k = h + row * 7 + i * 13;
             float x = cx - 0.27f + i * 0.27f + jit(k, 1) * 0.06f, z = cz + (row == 0 ? -0.2f : 0.2f) + jit(k, 2) * 0.05f;
             float hh = ht * (0.85f + 0.3f * (jit(k, 3) + 0.5f));
+            root(b, x, z);
             if (stage == 5) {
                 // bolted: a tall stalk, a flat white umbel of flowers going to seed
                 b.rgb(x, y + 0.36f, z, 0.025f, 0.72f, 0.025f, 0x6A8A3A);
@@ -110,6 +159,7 @@ final class FarmModels {
 
     private static void cabbage(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
         float x = cx + jit(h, 1) * 0.06f, z = cz + jit(h, 2) * 0.06f;
+        root(b, x, z);
         if (stage == 5) {
             // bolted: the head split by a tall stalk of yellow flowers
             b.rgb(x, y + 0.08f, z, 0.32f, 0.16f, 0.32f, 0x5E8E3C);

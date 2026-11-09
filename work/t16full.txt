@@ -1,0 +1,69 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :processResources UP-TO-DATE
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+BodyCarryTest > savingWhileHoldingReleasesTheOriginalBodyWithoutCopyingItsInventory(Path) FAILED
+    java.lang.NoClassDefFoundError: rpg/actor/BodyCarry$Hold
+        at rpg.actor.BodyCarry.begin(BodyCarry.java:56)
+        at rpg.actor.BodyCarryTest.savingWhileHoldingReleasesTheOriginalBodyWithoutCopyingItsInventory(BodyCarryTest.java:54)
+
+        Caused by:
+        java.lang.ClassNotFoundException: rpg.actor.BodyCarry$Hold
+            at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+            at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+            at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+            ... 2 more
+
+BodyCarryTest > theSameOwnershipFlowCarriesAnArticulatedAnimalCarcass() FAILED
+    java.lang.NoClassDefFoundError: rpg/animal/AnimalRagdoll
+        at rpg.animal.Animals.makeRagdoll(Animals.java:259)
+        at rpg.animal.Animals.onKilled(Animals.java:704)
+        at rpg.actor.BodyCarryTest.theSameOwnershipFlowCarriesAnArticulatedAnimalCarcass(BodyCarryTest.java:66)
+
+        Caused by:
+        java.lang.ClassNotFoundException: rpg.animal.AnimalRagdoll
+            at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+            at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+            at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+            ... 3 more
+
+BodyCarryTest > pickingUpPreservesOriginalItemsDisablesWeaponsAndTapPutsItDown() FAILED
+    java.lang.NoClassDefFoundError: rpg/actor/BodyCarry$Hold
+        at rpg.actor.BodyCarry.begin(BodyCarry.java:56)
+        at rpg.actor.BodyCarryTest.pickingUpPreservesOriginalItemsDisablesWeaponsAndTapPutsItDown(BodyCarryTest.java:30)
+
+        Caused by:
+        java.lang.ClassNotFoundException: rpg.actor.BodyCarry$Hold
+            at rpg.actor.BodyCarry.begin(BodyCarry.java:56)
+            ... 1 more
+
+BodyCarryTest > holdingAttackThrowsAndSavingDropsWithoutDuplicatingOwnership(Path) FAILED
+    java.lang.NoClassDefFoundError: rpg/actor/BodyCarry$Hold
+        at rpg.actor.BodyCarry.begin(BodyCarry.java:56)
+        at rpg.actor.BodyCarryTest.holdingAttackThrowsAndSavingDropsWithoutDuplicatingOwnership(BodyCarryTest.java:45)
+
+        Caused by:
+        java.lang.ClassNotFoundException: rpg.actor.BodyCarry$Hold
+            at rpg.actor.BodyCarry.begin(BodyCarry.java:56)
+            ... 1 more
+
+TraversalTest > fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt() FAILED
+    org.opentest4j.AssertionFailedError: expected: <null> but was: <rpg.actor.Traversal$Motion@450794b4>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:30)
+        at app//org.junit.jupiter.api.Assertions.assertNull(Assertions.java:279)
+        at app//rpg.actor.TraversalTest.fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt(TraversalTest.java:39)

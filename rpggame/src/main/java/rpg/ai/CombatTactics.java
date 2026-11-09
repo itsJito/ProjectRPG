@@ -65,8 +65,21 @@ final class CombatTactics {
         return true;
     }
 
+    /**
+     * (0.3.6, gamefixes: stutter in busy places) a search for high ground that found none is not made again for a while,
+     * nor from about the same place: each was ~1,200 sight-checked points and up to three full route searches, repeated
+     * every decision by every ranged fighter on flat ground where there is none - 30-40 ms hitches in a street fight.
+     */
+    static final double HIGH_GROUND_RETRY = 6;
+    static final float HIGH_GROUND_MOVED = 4;
     private Plan highGround(Npc n,Actor foe){
         if(n.y>foe.y+1.5f)return null;
+        if(g.time<n.highGroundAt && Math.hypot(n.x-n.highGroundX,n.z-n.highGroundZ)<HIGH_GROUND_MOVED)return null;
+        Plan found=highGroundSearch(n,foe);
+        if(found==null){n.highGroundAt=g.time+HIGH_GROUND_RETRY+(n.id%5)*0.4;n.highGroundX=n.x;n.highGroundZ=n.z;}
+        return found;
+    }
+    private Plan highGroundSearch(Npc n,Actor foe){
         record Site(float x,float y,float z,float score){} var sites=new java.util.ArrayList<Site>();
         for(int dx=-12;dx<=12;dx+=2)for(int dz=-12;dz<=12;dz+=2)for(int dy=2;dy<=8;dy++){
             float x=(float)Math.floor(n.x)+dx+.5f,z=(float)Math.floor(n.z)+dz+.5f,y=(float)Math.floor(n.y)+dy;
@@ -74,7 +87,7 @@ final class CombatTactics {
             sites.add(new Site(x,y,z,(float)Math.hypot(dx,dz)+dy*.6f));
         }
         sites.sort(java.util.Comparator.comparingDouble(Site::score));
-        for(var site:sites.stream().limit(3).toList())if(g.vox.navigation.route(n.x,n.y,n.z,site.x,site.y,site.z,d->!d.locked || d.owner==n.id,Brain.canUseLadders(n),n.id,n.routeBook,g.time)!=null){var plan=plan(Kind.HIGH_GROUND,foe,site.x,site.z,12);plan.y=site.y;return plan;}
+        for(var site:sites.stream().limit(2).toList())if(g.vox.navigation.route(n.x,n.y,n.z,site.x,site.y,site.z,d->!d.locked || d.owner==n.id,Brain.canUseLadders(n),n.id,n.routeBook,g.time)!=null){var plan=plan(Kind.HIGH_GROUND,foe,site.x,site.z,12);plan.y=site.y;return plan;}
         return null;
     }
     int allies(Npc n, Actor foe) {

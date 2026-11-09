@@ -38,14 +38,34 @@ public final class Objects {
 
     public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
     public List<WorldObject> everything() { return list; }
-    public WorldObject get(long id) { for (WorldObject o : list) if (o.id == id) return o; return null; }
+    /**
+     * An object by id. (0.3.5, optimization) from an index kept beside the list - rebuilt whenever the list has changed
+     * size, since things are taken out of it from outside - instead of a walk of every object in the world per call.
+     */
+    public WorldObject get(long id) {
+        if (list.size() != indexed) { byId.clear(); for (WorldObject o : list) byId.put(o.id, o); indexed = list.size(); }
+        WorldObject o = byId.get(id);
+        return o != null && o.id == id ? o : null;
+    }
+    private final java.util.Map<Long, WorldObject> byId = new java.util.HashMap<>();
+    private int indexed = -1;
     public <T extends WorldObject> T add(T o) {
         list.add(o);
+        if (indexed == list.size() - 1) { byId.put(o.id, o); indexed = list.size(); }
         if (o instanceof Door door) doors.add(door);
         if (o instanceof Container c && c.kind.equals("chest")) c.solid(g);
         return o;
     }
     private long fid() { return nextFixture++; }
+    /** (0.3.5) A gathering node made by another system (the sea's fishing spots), from its own reserved id. */
+    public Node addNode(Node n) { nodes.add(add(n)); return n; }
+    /** (0.3.5) Every workstation in the world (furnaces, anvils, ranges, tables, looms...), kept as they are added. */
+    public List<Station> stations() {
+        if (stationList.size() != stationSeen || list.size() != listSeen) { stationList.clear(); for (WorldObject o : list) if (o instanceof Station s) stationList.add(s); stationSeen = stationList.size(); listSeen = list.size(); }
+        return stationList;
+    }
+    private final List<Station> stationList = new ArrayList<>();
+    private int stationSeen = -1, listSeen = -1;
     /** (0.3.2) Fixtures made by another system from the next free fixture id: it takes the first and returns the next. */
     public void reserveAfter(java.util.function.LongUnaryOperator make) { nextFixture = make.applyAsLong(nextFixture); }
 

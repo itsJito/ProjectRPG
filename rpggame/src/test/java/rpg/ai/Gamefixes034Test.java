@@ -64,7 +64,7 @@ class Gamefixes034Test {
         ada.fearOf = g.player.id; ada.fearSeenAt = g.time; ada.goal = Brain.Goal.FLEE;
         assertTrue(ada.shunning(g, g.player));
         assertNotNull(g.econ.tradeRefusal(ada, g.player), "a fleeing merchant refuses trade");
-        assertTrue(ada.options(g, g.player).stream().noneMatch(o -> o.id().equals("talk")), "nor stops to talk");
+        assertTrue(ada.options(g, g.player).stream().noneMatch(o -> o.id().equals("talk") && o.enabled()), "nor stops to talk");   // (0.3.5: the option stays, disabled with its reason)
     }
 
     // ------------------------------------------------------------------ a mount let go of in the air falls; one landing on an edge does not sink in
@@ -273,7 +273,8 @@ class Gamefixes034Test {
         int slot = -1;
         for (int i = 0; i < g.player.inv.size(); i++) if (g.player.inv.get(i) != null && g.player.inv.get(i).def == Items.ALE) slot = i;
         assertTrue(slot >= 0);
-        assertTrue(g.items.perform(g.player, slot, "drink").committed());
+        assertFalse(g.items.perform(g.player, slot, "drink").rejected());
+        for (int i = 0; i < 120 && g.player.working != null; i++) game.tick(1f / 60);   // (0.3.5) drunk over a moment
         assertEquals(base + 5, g.player.skills.level(Skill.STRENGTH), "five levels lent");
         assertTrue(g.player.has(Items.GLASS_BOTTLE, 1), "the empty bottle is kept");
         ticks(60 * 60);

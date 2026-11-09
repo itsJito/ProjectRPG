@@ -88,7 +88,8 @@ public final class Node extends WorldObject {
         if (kind == Kind.PATCH) return Items.COINS;
         ItemDef held = a.main();
         if (held == null) return null;
-        if (kind == Kind.FISH) return held == needs ? held : null;
+        // (0.3.5) any fishing gear works a spot; what it can take there is the fish's say (Fishery)
+        if (kind == Kind.FISH) return rpg.fishing.FishKind.methodOf(held) != null ? held : null;
         if (held.toolSkill != skill || held.twoHanded() && kind == Kind.TREE) return null;
         return a.skills.level(skill) >= toolLevel(held) ? held : null;
     }
@@ -99,6 +100,7 @@ public final class Node extends WorldObject {
     /** Why the actor cannot work this node with what they hold (null: they can). */
     public String refusal(Actor a) {
         if (depleted()) return kind == Kind.TREE ? "This tree has been cut down." : kind == Kind.ROCK ? (product != null && product.id.endsWith("_ore") || product == rpg.item.Items.COAL ? "There is no ore left in this rock." : "There's nothing left to dig here for now.") : "There's nothing left to pick.";
+        if (kind == Kind.FISH) return fishRefusal(a);
         if (a.skills.level(skill) < level) return "You need " + skill.title + " level " + level + " to " + verb().toLowerCase() + " this.";
         if (tool(a) == null) {
             ItemDef held = a.main();
@@ -112,6 +114,26 @@ public final class Node extends WorldObject {
             };
         }
         if (!a.canStore(new ItemStack(product, 1)) && kind != Kind.TREE) return "Your inventory is too full to hold any more.";
+        return null;
+    }
+
+    /** (0.3.5) The waters' fish, for a fishing spot (set when the fishery is made). */
+    public rpg.fishing.Fishery fishery;
+
+    /**
+     * (0.3.5, gamefixes: fishing involves real fish) why a fisher cannot work this spot: no fishing gear in hand, gear
+     * nothing in these waters is taken with, or a Fishing level below every fish here that gear takes. A spot's gear of
+     * old ({@link #needs}) is what the people who fish it for a living bring; any gear can be tried.
+     */
+    private String fishRefusal(Actor a) {
+        ItemDef held = tool(a);
+        if (held == null) return "You need to wield fishing gear to fish here (" + (needs == null ? "a net, a rod, a harpoon or a pot" : "a " + needs.name.toLowerCase() + " suits this spot") + ").";
+        if (fishery == null) return held == needs ? null : "You need to wield a " + needs.name.toLowerCase() + " to fish here.";
+        var kinds = fishery.takenHere(x, z, held);
+        if (kinds.isEmpty()) return "Nothing in these waters is taken with a " + held.name.toLowerCase() + ".";
+        int lowest = kinds.get(0).level;
+        if (a.skills.level(skill) < lowest) return "You need " + skill.title + " level " + lowest + " to catch anything here with a " + held.name.toLowerCase() + ".";
+        if (!a.canStore(new ItemStack(kinds.get(0).raw(), 1))) return "Your inventory is too full to hold any more.";
         return null;
     }
 
@@ -148,10 +170,12 @@ public final class Node extends WorldObject {
             var move=kind==Kind.ROCK ? rpg.actor.Actor.Combat.Move.HEAVY : rpg.actor.Actor.Combat.Move.LIGHT_R;
             return g.combat.attack(a, false, move) ? Result.started() : Result.no(null);
         }
-        if (a == g.player) g.chat.say(switch (kind) { case FISH -> "You cast out your " + needs.name.toLowerCase().replace("small ", "") + "."; default -> "You start picking."; });
+        ItemDef gear = kind == Kind.FISH ? tool(a) : null;
+        if (a == g.player) g.chat.say(switch (kind) { case FISH -> rpg.fishing.FishKind.methodOf(gear) == rpg.fishing.FishKind.Method.POT ? "You set your " + gear.name.toLowerCase() + " on the bed." : "You cast out your " + gear.name.toLowerCase().replace("small ", "") + "."; default -> "You start picking."; });
+        if (kind == Kind.FISH && g.fishery != null) g.fishery.cast(a, this, gear, x, z);
         if (a == g.player && kind == Kind.FISH && g.sfx != null) g.sfx.ui("FishingHooked", 0.5f);
         if (kind == Kind.FISH && a.sheathed) g.combat.sheathe(a, false);
-        Work work = new Work(a, this, "gather", working(), duration(a), true, g.time, () -> commit(g, a));
+        Work work = new Work(a, this, "gather", working(), duration(a), true, g.time, () -> kind == Kind.FISH && g.fishery != null ? fish(g, a) : commit(g, a));
         if (kind == Kind.FISH) work.t = -(float)Math.max(0, a.sheatheTime() - (g.time - a.sheatheAt));
         g.interact.begin(work);
         return Result.started();
@@ -223,22 +247,31 @@ public final class Node extends WorldObject {
         if (stockMax > 0) stock--;
         var ev = g.state.commit(req, "ResourceGathered", a.id, id, jurisdiction(), 0, product.name + " (" + stock + " left)");
         g.prog.award(a, skill, xp, "gathered " + product.name, ev.id());
-        if (g.sfx != null) g.sfx.play(kind == Kind.FISH ? "splash" : "pickup", x, y, z, 0.7f);
-        if (kind == Kind.FISH && g.fx != null) g.chemistry.splash(x, y + 0.3f, z);
-        if (kind == Kind.FISH && a == g.player && g.sfx != null) g.sfx.ui("FishReelIn", 0.55f);
-        if (a == g.player) g.chat.say(kind == Kind.FISH ? "You catch " + (product == Items.RAW_SHRIMP ? "some shrimp" : "a " + product.name.toLowerCase().replace("raw ", "")) + "." : "You get some " + product.name.toLowerCase() + ".");
+        if (g.sfx != null) g.sfx.play("pickup", x, y, z, 0.7f);
+        if (a == g.player) g.chat.say("You get some " + product.name.toLowerCase() + ".");
         if (stockMax > 0 && stock <= 0) deplete(g, ev.id());
         return Result.ok();
+    }
+
+    /** (0.3.5) A wait at a fishing spot ends: the fish on the line is landed (Fishery), or the wait goes on. */
+    private Result fish(Rpg g, Actor a) {
+        String why = reach(g, a, g.cfg.interactRange + 1.5f);
+        if (why == null) why = refusal(a);
+        if (why != null) return Result.no(why);
+        return g.fishery.land(a, this, tool(a), x, z, g.state.newRequestId());
     }
 
     /** The same resource source, harvested by an actual deployed matching tool rather than an actor's hand. */
     public boolean catchInNet(Rpg g,FishingNet net) {
         if(kind!=Kind.FISH || waters!=Waters.LAKE || needs!=Items.FISHING_NET || !net.contents.has(needs,1) || depleted())return false;
         Actor fisher=g.actor(net.owner);if(fisher==null || fisher.skills.level(skill)<level)return false;
-        ItemStack catchItem=new ItemStack(product,1,net.owner,false,id);
+        // (0.3.5) a set net takes what is in the water: one fish of a kind a net holds, out of the lake's own stock
+        ItemDef caught=product;
+        if(g.fishery!=null){caught=g.fishery.netCatch(x,z,fisher,product);if(caught==null)return false;}
+        ItemStack catchItem=new ItemStack(caught,1,net.owner,false,id);
         if(!net.contents.canAdd(catchItem))return false;
-        net.contents.add(catchItem);g.state.mint(product,1);
-        var event=g.state.commit("ResourceGathered",net.owner,id,jurisdiction(),0,product.name+" caught in deployed net "+net.id);
+        net.contents.add(catchItem);g.state.mint(caught,1);
+        var event=g.state.commit("ResourceGathered",net.owner,id,jurisdiction(),0,caught.name+" caught in deployed net "+net.id);
         if(stockMax>0 && --stock<=0)deplete(g,event.id());
         return true;
     }

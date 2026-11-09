@@ -16,7 +16,7 @@ sfx/
 swish/
     "Swishes Sound Pack" (opengameart.org/content/swishes-sound-pack) - Creative Commons Zero (CC0).
 
-animal/ (cow_*, cow_field, hens_lay, henhouse, hen_lays, hen_annoyed, rooster_*, pig_*, horse_*, sheep_*, dog_*, cat_*, ducks)
+animal/ (cow_*, cow_field, hens_lay, henhouse, hen_lays, hen_annoyed, rooster_*, pig_*, horse_*, sheep_*, dog_*, cat_*)
     BigSoundBank by Joseph Sardin (bigsoundbank.com) - Creative Commons Zero (CC0), public domain. Sound numbers 2386, 2383,
     2385, 2382, 0546, 0978, 0282, 0976, 0453, 0283, 0440, 1659, 1658, 1691, 1692, 1693, 1543, 1215, 0863, 0284, 1542, 1541,
     0460, 2343, 2344, 2345, 2348, 2349, 2955, 0682, 0288, 1890, 0494, 1901, 1887, 1881, 0276.
@@ -104,3 +104,25 @@ creature/jalastram_001.mp3 .. 010.mp3
     Jesus Lastra (jalastram), "Monster and Creatures Sound Effects PACK 001", CC BY 3.0.
     https://opengameart.org/content/monster-and-creatures-sound-effects-pack-001
     Copied unchanged (renamed). License: https://creativecommons.org/licenses/by/3.0/
+
+animal/duck_quack_1.ogg
+    "Anas platyrhynchos - Mallard" (xeno-canto XC62258, via Wikimedia Commons) - CC BY-SA 3.0. Trimmed and normalised.
+animal/duck_call_1-6.ogg
+    "Mallard (Anas platyrhynchos)" (W1CDR0001518 BD17, via Wikimedia Commons) - CC BY-SA 4.0. Calls cut out and normalised.
+animal/deer_bark_1-4.ogg
+    "Male roe deer growl" (Wikimedia Commons, File:Male_roe_deer_growl.ogg) - CC BY-SA 4.0. Barks cut out and normalised.
+animal/deer_call_1-4.ogg
+    "Red Deer (Cervus elaphus)" (W1CDR0001424 BD3, via Wikimedia Commons) - CC BY-SA 4.0. Calls cut out and normalised.
+animal/lion_call_1-5.ogg
+    "Felis silvestris catus, aggressie, 2023-08-19 02h06, a" by JMK (Wikimedia Commons) - CC BY-SA 4.0. Yowls cut out,
+    pitched down and normalised.
+animal/lion_growl_1-4.ogg
+    "439280 schots angry-tiger" by schots (Wikimedia Commons, File:439280_schots_angry-tiger.wav) - CC0. Growls cut out,
+    pitched up and normalised.
+animal/fox_bark_1-3.ogg
+    "Bellender Fuchs" (Wikimedia Commons, File:Bellender_Fuchs.ogg) - CC BY-SA 3.0. Barks cut out and normalised.
+animal/whale_blow_1-2.ogg
+    "Humpback whale wheezeblow" (NOAA, Wikimedia Commons) - public domain. Trimmed and normalised.
+animal/wolf_growl_1-2.ogg
+    "Dogs' Expectation about Signalers' Body Size by Virtue of Their Growls" (PLoS ONE 0015175, supplementary s006/s007,
+    via Wikimedia Commons) - CC BY 2.5. Normalised. Used for the wolf's growl.

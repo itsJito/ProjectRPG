@@ -380,6 +380,8 @@ public final class PlayerController {
         // (0.2.2, gamefixes) a hurt leg changes how the player walks (Rig's injured gaits), never how fast: only a blow
         // being taken this moment checks the stride (a stun stops it outright, below)
         if (g.time - c.lastHurt < 0.4) max *= 0.7f;
+        // (0.3.6) wading: the water holds the legs back, more the deeper it is
+        max *= g.swimming.wadePace(p);
         if (c.staggered > 0) max = 0;
         // (0.2.2, gamefixes: Shift held against a wall still drained stamina) the sprint is paid for in ground actually
         // covered at a sprint: the share of the way from a walk to a full run the body is really making - nothing while
@@ -435,6 +437,12 @@ public final class PlayerController {
             if (el <= a) { nvx = wx; nvz = wz; } else { nvx = bvx + ex / el * a; nvz = bvz + ez / el * a; }
         }
         if (c.dodgeT > 0) { nvx = c.dodgeX * g.cfg.dodgeSpeed; nvz = c.dodgeZ * g.cfg.dodgeSpeed; }
+        // (0.3.6) wading in running water: the current leans on the legs, the more the deeper they stand in it
+        if (p.swimMode == rpg.actor.Swimming.WADE) {
+            float[] flow = g.fluids.flow(p.x, p.y + 0.3f, p.z);
+            float share = g.swimming.wadeShare(p) * rpg.actor.Swimming.WADE_FLOW;
+            nvx += flow[0] * share; nvz += flow[1] * share;
+        }
         // a jump press is held for a moment (pressed just before landing, or while a swing finishes, it still jumps), and
         // the feet count as planted a moment after leaving an edge; the late part of a swing's recovery may be jumped out of
         if (in.jump) jumpBuffer = 0.18f; else jumpBuffer = Math.max(0, jumpBuffer - dt);

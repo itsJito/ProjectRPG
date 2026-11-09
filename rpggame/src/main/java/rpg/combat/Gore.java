@@ -624,6 +624,77 @@ public final class Gore {
                 || e.kind == Kind.LIMB && g.time - e.at > 1800);
         // limbs that have settled far away or too long: let go (they stay drawn until then)
         while (limbs.size() > 24) { g.game.commands().release(limbs.get(0).body); limbs.remove(0); }
+        keepClear();
+    }
+
+    /** (0.3.6) How wide a berth the living give a body (m beyond its middle), how often the places are renewed (s). */
+    public static final float BERTH_PERSON = 1.0f, BERTH_LIMB = 0.45f;
+    private static final double BERTH_EVERY = 0.5;
+    private double berthAt;
+    /**
+     * (0.3.6, gamefixes: townsfolk did not avoid dead bodies) every body lying in the open - a person's, a beast's, a
+     * monster's, a severed limb - is a place the living walk round (the engine steers them; one who has come for the
+     * body itself, the undertaker or the watch, still goes to it). Renewed as long as it lies there.
+     */
+    private void keepClear() {
+        if (g.time < berthAt) return;
+        berthAt = g.time + BERTH_EVERY;
+        float life = (float) BERTH_EVERY * 2.5f, px = g.player.x, pz = g.player.z;
+        var cmd = g.game.commands();
+        for (Npc n : g.npcs) {
+            if (n.alive || n.ragdoll == 0 || n.carriedBy != 0) continue;
+            var pose = g.lastBodies.ragdoll(n.ragdoll);
+            float x = pose != null ? pose.comX : n.x, y = pose != null ? pose.comY - 0.3f : n.y, z = pose != null ? pose.comZ : n.z;
+            if (Math.abs(x - px) < 96 && Math.abs(z - pz) < 96) cmd.avoid(x, y, z, BERTH_PERSON, life);
+        }
+        if (g.animals != null) for (rpg.animal.Animal a : g.animals.all())
+            if (a.loaded && a.carcass() && !a.butchered && a.carriedBy == 0 && Math.abs(a.x - px) < 96 && Math.abs(a.z - pz) < 96)
+                cmd.avoid(a.x, a.y, a.z, Math.max(0.5f, a.species.h * 0.55f * a.scale()), life);
+        if (g.monsters != null) for (rpg.monster.Monster m : g.monsters.all())
+            if (!m.alive && m.ragdoll != 0 && Math.abs(m.x - px) < 96 && Math.abs(m.z - pz) < 96) cmd.avoid(m.x, m.y, m.z, Math.max(0.6f, m.height * 0.5f), life);
+        for (Evidence e : evidence) if (e.kind == Kind.LIMB && Math.abs(e.x - px) < 96 && Math.abs(e.z - pz) < 96) cmd.avoid(e.x, e.y, e.z, BERTH_LIMB, life);
+    }
+
+    /** (0.3.6) When each person last reacted to passing a body (once a while, not at every step). */
+    private final Map<Long, Double> uneasyAt = new HashMap<>();
+    /** How near a body brings a reaction when walking by it (m), and how long before the same person reacts again (s). */
+    public static final float UNEASY_NEAR = 5.5f;
+    public static final double UNEASY_AGAIN = 50;
+
+    /**
+     * (0.3.6, gamefixes: townsfolk did not react to dead bodies) a body already known still troubles those who pass it:
+     * they look at it, their face shows it (fear for a fresh murder, disgust at an old body or a beast's carcass) and
+     * they say so - and they hurry past, rather than strolling on as if it were not there. The watch and the undertaker
+     * have their own business with it; fighters and outlaws care less.
+     */
+    private void passing(Npc n) {
+        if (n.watch() || n.role == Npc.Role.UNDERTAKER || n.hostileToPlayer || n.goal == rpg.ai.Brain.Goal.FIGHT || n.goal == rpg.ai.Brain.Goal.FLEE) return;
+        if (g.time < uneasyAt.getOrDefault(n.id, -99.0)) return;
+        float bestD = UNEASY_NEAR; float bx = 0, bz = 0; boolean person = false, fresh = false, found = false;
+        for (Npc d : g.npcs) {
+            if (d.alive || d.ragdoll == 0 || d.carriedBy != 0) continue;
+            float dist = (float) Math.hypot(d.x - n.x, d.z - n.z);
+            if (dist >= bestD) continue;
+            bestD = dist; bx = d.x; bz = d.z; person = true; fresh = g.time - d.cs.lastHurt < 600; found = true;
+        }
+        if (g.animals != null) for (rpg.animal.Animal a : g.animals.all()) {
+            if (!a.loaded || !a.carcass() || a.butchered || a.carriedBy != 0) continue;
+            float dist = (float) Math.hypot(a.x - n.x, a.z - n.z);
+            if (dist >= bestD) continue;
+            bestD = dist; bx = a.x; bz = a.z; person = false; fresh = false; found = true;
+        }
+        if (!found || !g.vox.sight(n.x, n.eyeY(), n.z, bx, DevMap.FLOOR + 0.3f, bz)) return;
+        uneasyAt.put(n.id, g.time + UNEASY_AGAIN);
+        if (uneasyAt.size() > 400) uneasyAt.entrySet().removeIf(en -> g.time > en.getValue());
+        n.wantYaw = (float) Math.atan2(-(bx - n.x), -(bz - n.z));
+        rpg.render.Faces.react(g, n, person && fresh ? rpg.render.Faces.Mood.AFRAID : rpg.render.Faces.Mood.DISGUSTED, 4);
+        if (n.speech == null) g.ai.say(n, person
+                ? fresh ? pick(n, "Gods... someone fetch the undertaker.", "Don't look at it. Just keep walking.", "That poor soul. Who could do such a thing?", "I can't bear to look.")
+                        : pick(n, "Is nobody going to take that body away?", "The smell... it's been lying there for hours.", "Someone should see them buried.", "Gods, it's still there.")
+                : pick(n, "Ugh, the flies on that carcass.", "Somebody ought to drag that off the road.", "Poor beast. What got to it?"));
+        g.state.commit("BodyPassed", n.id, 0, DevMap.jurisdiction(bx, bz), 0, String.format("%s %.1f m off", person ? fresh ? "a fresh body" : "a body" : "a carcass", bestD));
+        // a fresh killing nearby, out in the open: the timid make themselves scarce
+        if (person && fresh && !n.combatant()) n.cs.lastHurt = Math.max(n.cs.lastHurt, g.time - 20);
     }
 
     private double nextAge;
@@ -674,7 +745,7 @@ public final class Gore {
             seen.add(e.id);
             if (best == null || e.kind.ordinal() > best.kind.ordinal()) best = e;
         }
-        if (best == null) return;
+        if (best == null) { passing(n); return; }
         found++;
         // (0.2.2, gamefixes) its own work: the one who struck the blow does not discover it - it stands by why it did it,
         // or it is sorry. Blood it saw spilled (a beast mauling someone before its eyes) is no mystery to look into.

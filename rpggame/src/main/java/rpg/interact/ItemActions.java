@@ -99,14 +99,20 @@ public final class ItemActions {
         Result r = switch (action) {
             case "eat" -> eat(a, grid, slot, req);
             case "drink" -> {
-                if (d.strengthBoost > 0) { grid.take(slot, 1); g.state.burn(d, 1); drinkAle(a, d, req); yield Result.ok(); }
-                grid.take(slot, 1);
-                g.state.burn(d, 1);
-                float before = a.faith;
-                a.faith = Math.min(a.maxFaith(), a.faith + d.restoresFaith);
-                g.state.commit(req, "Drank", a.id, 0, null, 0, d.name + String.format(" faith %.0f -> %.0f", before, a.faith));
-                if (a == g.player) { g.chat.say("You drink the " + d.name.toLowerCase() + ". You feel your faith renewed."); if (g.sfx != null) g.sfx.ui("eat", 0.5f); }
-                yield Result.ok();
+                // (0.3.5, gamefixes: nothing done instantly) the drink is raised and drunk down over a moment; moving
+                // off or being struck stops it with the drink still in hand
+                g.interact.begin(new Work(a, selfTarget(a), "drink", "Drinking", 1.5f, false, g.time, () -> {
+                    if (!a.has(d, 1)) return Result.no("The " + d.name.toLowerCase() + " is gone.");
+                    a.takeItems(d, 1);
+                    g.state.burn(d, 1);
+                    if (d.strengthBoost > 0) { drinkAle(a, d, req); return Result.ok(); }
+                    float before = a.faith;
+                    a.faith = Math.min(a.maxFaith(), a.faith + d.restoresFaith);
+                    g.state.commit(req, "Drank", a.id, 0, null, 0, d.name + String.format(" faith %.0f -> %.0f", before, a.faith));
+                    if (a == g.player) { g.chat.say("You drink the " + d.name.toLowerCase() + ". You feel your faith renewed."); if (g.sfx != null) g.sfx.ui("eat", 0.5f); }
+                    return Result.ok();
+                }));
+                yield Result.started();
             }
             case "recharge" -> {
                 var coal = a.takeItems(Items.COAL, 1);
@@ -141,22 +147,33 @@ public final class ItemActions {
             }
             case "fill" -> {
                 if (!nearWater(a)) yield Result.no("You need to be at the water's edge.");
-                grid.take(slot, 1);
-                g.state.burn(d, 1);
-                g.grant(a, new ItemStack(Items.BUCKET_OF_WATER, 1));
-                g.state.commit(req, "BucketFilled", a.id, 0, null, 0, "water");
-                if (a == g.player) g.chat.say("You fill the bucket with water.");
-                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
-                yield Result.ok();
+                // stooped to the water, the bucket dipped and held under while it fills
+                g.interact.begin(new Work(a, selfTarget(a), "fill", "Filling the bucket", 1.4f, false, g.time, () -> {
+                    if (!nearWater(a)) return Result.no("You need to be at the water's edge.");
+                    if (!a.has(d, 1)) return Result.no("The bucket is gone.");
+                    a.takeItems(d, 1);
+                    g.state.burn(d, 1);
+                    g.grant(a, new ItemStack(Items.BUCKET_OF_WATER, 1));
+                    g.state.commit(req, "BucketFilled", a.id, 0, null, 0, "water");
+                    if (a == g.player) g.chat.say("You fill the bucket with water.");
+                    if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                    return Result.ok();
+                }));
+                yield Result.started();
             }
             case "empty" -> empty(a, grid, slot, req);
             case "fill_bottle" -> {
                 if (!nearWater(a)) yield Result.no("You need to be at the water's edge.");
-                grid.take(slot, 1); g.state.burn(d, 1);
-                g.grant(a, new ItemStack(Items.WATER_BOTTLE, 1));
-                g.state.commit(req, "BottleFilled", a.id, 0, null, 0, "water");
-                if (a == g.player) g.chat.say("You fill the bottle with water.");
-                yield Result.ok();
+                g.interact.begin(new Work(a, selfTarget(a), "fill", "Filling the bottle", 1.2f, false, g.time, () -> {
+                    if (!nearWater(a)) return Result.no("You need to be at the water's edge.");
+                    if (!a.has(d, 1)) return Result.no("The bottle is gone.");
+                    a.takeItems(d, 1); g.state.burn(d, 1);
+                    g.grant(a, new ItemStack(Items.WATER_BOTTLE, 1));
+                    g.state.commit(req, "BottleFilled", a.id, 0, null, 0, "water");
+                    if (a == g.player) g.chat.say("You fill the bottle with water.");
+                    return Result.ok();
+                }));
+                yield Result.started();
             }
             case "empty_bottle" -> {
                 grid.take(slot, 1); g.state.burn(d, 1);
@@ -191,15 +208,22 @@ public final class ItemActions {
     private Result eat(Actor a, Inventory grid, int slot, long req) {
         ItemStack s = grid.get(slot);
         if (a.cs.castCooldown > 0) return Result.no(null);
-        if (a.hp >= a.maxHp()) { if (a == g.player) g.chat.say("You're not hungry... but you eat it anyway."); }
-        grid.take(slot, 1);
-        g.state.burn(s.def, 1);
-        float before = a.hp;
-        a.hp = Math.min(a.maxHp(), a.hp + s.def.heal);
-        a.cs.castCooldown = 1.2f;
-        g.state.commit(req, "Ate", a.id, 0, null, 0, s.def.name + String.format(" hp %.0f -> %.0f", before, a.hp));
-        if (a == g.player) { g.chat.say("You eat the " + s.def.name.toLowerCase() + ". It heals some health."); g.sfx.ui("eat", 0.6f); }
-        return Result.ok();
+        ItemDef food = s.def;
+        // (0.3.5, gamefixes: nothing done instantly) eaten bite by bite (Rig: the hand to the mouth): the health comes
+        // with the last bite; moving off or being struck stops the meal with the food still in hand
+        g.interact.begin(new Work(a, selfTarget(a), "eat", "Eating", 1.4f, false, g.time, () -> {
+            if (!a.has(food, 1)) return Result.no("The " + food.name.toLowerCase() + " is gone.");
+            if (a.hp >= a.maxHp() && a == g.player) g.chat.say("You're not hungry... but you eat it anyway.");
+            a.takeItems(food, 1);
+            g.state.burn(food, 1);
+            float before = a.hp;
+            a.hp = Math.min(a.maxHp(), a.hp + food.heal);
+            a.cs.castCooldown = 0.4f;
+            g.state.commit(req, "Ate", a.id, 0, null, 0, food.name + String.format(" hp %.0f -> %.0f", before, a.hp));
+            if (a == g.player) { g.chat.say("You eat the " + food.name.toLowerCase() + ". It heals some health."); if (g.sfx != null) g.sfx.ui("eat", 0.6f); }
+            return Result.ok();
+        }));
+        return Result.started();
     }
 
     private Result light(Actor a, Inventory grid, int slot, ItemDef logs) {

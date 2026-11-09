@@ -68,6 +68,8 @@ final class Gallery {
         if ("p19".equals(System.getenv("RPG_GALLERY_ONLY"))) { p19Shots(); return 0; }
         // RPG_GALLERY_ONLY=p20 RPG_REVIEW_ONLY=a,b: the 0.3.4 review sheets (swim, tread, wade, haul, under, ...), each by name
         if ("p20".equals(System.getenv("RPG_GALLERY_ONLY"))) { p20Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p22 RPG_REVIEW_ONLY=a,b: the 0.3.6 review sheets (ride, fly, interior, well, fish), each by name
+        if ("p22".equals(System.getenv("RPG_GALLERY_ONLY"))) { p22Shots(); return 0; }
         if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
@@ -175,6 +177,9 @@ final class Gallery {
         if ("daycycle".equals(System.getenv("RPG_GALLERY_ONLY"))) { dayCycle(); return 0; }
         // RPG_GALLERY_ONLY=interiorlight: a still view inside a house by night, dusk and day, measured for flicker
         if ("interiorlight".equals(System.getenv("RPG_GALLERY_ONLY"))) { interiorLight(); return 0; }
+        // RPG_GALLERY_ONLY=lampsweep: a room's wall held in the middle of the frame while the eye swings so the lamp leaves
+        // the frame and comes back; the wall's brightness logged frame by frame (it should not move)
+        if ("lampsweep".equals(System.getenv("RPG_GALLERY_ONLY"))) { lampSweep(); return 0; }
         // RPG_GALLERY_ONLY=wallflicker: DevCity's buildings from outside, the camera still and then drifting, measured frame to frame
         if ("wallflicker".equals(System.getenv("RPG_GALLERY_ONLY"))) { wallFlicker(); return 0; }
         if ("creator".equals(System.getenv("RPG_GALLERY_ONLY"))) { creatorShots(); return 0; }
@@ -782,6 +787,110 @@ final class Gallery {
     }
 
     /** The 0.3.4 review: swimming and the water, on threes. */
+    /** (0.3.6) The review sheets of this pass: mounts (seat, backing up, the game's own camera), flight, interiors, the well, fish. */
+    private void p22Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        var in = g.controller.in;
+        Runnable keysOff = () -> { in.forward = 0; in.strafe = 0; in.sprint = false; in.jumpHeld = false; in.jump = false; in.sneak = false; };
+        if (want.test("ride") || want.test("fly")) {
+            for (rpg.ai.Npc o : g.npcs) if (o.distTo(64.5f, 66f) < 34) g.ai.unload(o);
+            for (int x = 40; x <= 90; x++) for (int z = 30; z <= 100; z++) { for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 14; y++) g.setBlock(x, y, z, Blocks.AIR); g.setBlock(x, DevMap.FLOOR - 1, z, Blocks.GRASS); }
+            g.player.eq.clear(); g.player.firstPerson = false;
+        }
+        java.util.function.Function<Actor, float[]> flank = a -> new float[]{a.x + 5.2f, a.y + 1.4f, a.z + 0.3f, a.x, a.y + 0.9f, a.z};
+        java.util.function.Function<Actor, float[]> seat = a -> new float[]{a.x + 3.4f, a.y + 2.2f, a.z - 2.6f, a.x, a.y + 1.3f, a.z};
+        java.util.function.Function<Actor, float[]> front = a -> new float[]{a.x, a.y + 1.7f, a.z - 4.6f, a.x, a.y + 1.3f, a.z};
+        java.util.function.Function<Actor, float[]> broadside = a -> new float[]{a.x + 4.6f, a.y + 1.5f, a.z, a.x, a.y + 1.3f, a.z};
+        java.util.function.Function<Actor, float[]> gameCam = a -> null;
+        for (String kind : new String[]{"horse", "pegasus"}) if (want.test("ride")) {
+            place(66.5f, 88.5f, 0); frames(4);
+            var mount = g.animals.spawnNew(kind.equals("horse") ? rpg.animal.Species.HORSE : rpg.animal.Species.PEGASUS, false, true, 64.5f, 88.5f, null, 0, 0);
+            mount.tamedBy = g.player.id; mount.owner = g.player.id; mount.saddled = true; mount.yaw = 0; mount.variant = 0; frames(10);
+            g.riding.mount(g.player, mount); frames(5);
+            film(kind + "-seat", 4, i -> { }, seat, 30, mount);
+            film(kind + "-front", 4, i -> { }, front, 2, mount);
+            film(kind + "-side", 4, i -> { }, broadside, 2, mount);
+            film(kind + "-back", 48, i -> in.forward = -1, flank, 20, mount);
+            keysOff.run(); frames(30);
+            g.teleport(mount, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, mount); frames(5);
+            // the game's own camera behind the rider: the rider's place against the saddle is measured every frame (in the
+            // mount's own frame it must hold still), and the frames side by side show any flicker
+            g.controller.snapTo(0); g.controller.camPitch = -0.15f;
+            float worst = 0;
+            float[] last = null;
+            for (int i = 0; i < 120; i++) {
+                in.forward = 1; in.sprint = i > 40;
+                game.tick(1f / 60); draw(null, 1f / 60);
+                float c = (float) Math.cos(mount.yaw), s = (float) Math.sin(mount.yaw);
+                float rx = g.player.x - mount.x, rz = g.player.z - mount.z;
+                float[] local = {rx * c - rz * s, g.player.y - mount.y, rx * s + rz * c};
+                if (last != null) worst = Math.max(worst, (float) Math.sqrt((local[0] - last[0]) * (local[0] - last[0]) + (local[1] - last[1]) * (local[1] - last[1]) + (local[2] - last[2]) * (local[2] - last[2])));
+                last = local;
+            }
+            System.out.println("[ride] " + kind + " rider-in-saddle frame-to-frame drift (m): " + worst);
+            film(kind + "-game-gallop", 48, i -> { in.forward = 1; in.sprint = true; }, gameCam, 0, mount);
+            keysOff.run(); frames(60);
+            if (g.player.riding != 0) g.riding.dismount(g.player, false);
+            g.animals.remove(mount); frames(5);
+        }
+        if (want.test("fly")) {
+            place(66.5f, 88.5f, 0); frames(4);
+            var peg = g.animals.spawnNew(rpg.animal.Species.PEGASUS, false, true, 64.5f, 88.5f, null, 0, 0);
+            peg.tamedBy = g.player.id; peg.owner = g.player.id; peg.saddled = true; peg.yaw = 0; frames(10);
+            g.riding.mount(g.player, peg); frames(5);
+            var r = g.riding.of(g.player);
+            r.flying = true; r.airspeed = 14; r.body.y = DevMap.FLOOR + 14; r.body.grounded = false;
+            java.util.function.Function<Actor, float[]> behind = a -> new float[]{a.x + (float) Math.sin(a.yaw) * 7, a.y + 3.2f, a.z + (float) Math.cos(a.yaw) * 7, a.x, a.y + 1.2f, a.z};
+            film("fly-climb", 36, i -> { in.forward = 1; in.strafe = 0; }, behind, 0, peg);
+            film("fly-bank-right", 36, i -> { in.forward = 0; in.strafe = 1; }, behind, 0, peg);
+            film("fly-dive-left", 36, i -> { in.forward = -1; in.strafe = -1; }, behind, 0, peg);
+            keysOff.run();
+            if (g.player.riding != 0) g.riding.dismount(g.player, false);
+            g.animals.remove(peg); frames(5);
+        }
+        if (want.test("interior")) {
+            // a lamp on a room's wall, the camera turned across it so the lamp goes out of the frame and back, by night and by day
+            float[] lamp = null;
+            for (int x = DevMap.SHOP_A_X0; x <= DevMap.SHOP_A_X1 && lamp == null; x++) for (int z = DevMap.SHOP_A_Z0; z <= DevMap.SHOP_A_Z1 && lamp == null; z++)
+                for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 5; y++) if (g.vox.block(x, y, z) == Blocks.LAMP) { lamp = new float[]{x + 0.5f, y + 0.5f, z + 0.5f}; break; }
+            if (lamp == null) lamp = new float[]{(DevMap.SHOP_A_X0 + DevMap.SHOP_A_X1) / 2f, DevMap.FLOOR + 2.5f, DevMap.SHOP_A_Z0 + 1.5f};
+            final float[] l = lamp;
+            float cx = (DevMap.SHOP_A_X0 + DevMap.SHOP_A_X1) / 2f + 0.5f, cz = (DevMap.SHOP_A_Z0 + DevMap.SHOP_A_Z1) / 2f + 0.5f;
+            g.teleport(g.player, cx, DevMap.FLOOR, cz + 2);
+            System.out.println("[interior] lamp at " + l[0] + ", " + l[1] + ", " + l[2] + "; eye at " + cx + ", " + cz);
+            for (float hour : new float[]{22, 13}) {
+                g.state.minutes = hour * 60; frames(30);
+                float base = (float) Math.atan2(l[0] - cx, l[2] - cz);
+                int[] k = {0};
+                film("interior-" + (int) hour, 96, i -> { }, a -> {
+                    float yaw = base + (float) Math.sin(k[0]++ / 96.0 * Math.PI * 2) * 1.4f;
+                    return new float[]{cx, DevMap.FLOOR + 1.6f, cz, cx + (float) Math.sin(yaw) * 4, DevMap.FLOOR + 1.9f, cz + (float) Math.cos(yaw) * 4};
+                }, 120);
+            }
+            g.state.minutes = 13 * 60;
+        }
+        if (want.test("well")) {
+            g.teleport(g.player, DevMap.WELL[0] + 0.5f, DevMap.FLOOR, DevMap.WELL[1] + 0.5f); g.controller.snapTo(0); frames(20);
+            java.util.function.Function<Actor, float[]> side = a -> new float[]{DevMap.WELL[0] + 4.5f, DevMap.FLOOR + 1.8f, DevMap.WELL[1] - 0.5f, DevMap.WELL[0] + 0.5f, DevMap.FLOOR + 0.6f, DevMap.WELL[1] - 0.5f};
+            film("well-climb-out", 60, i -> { in.forward = 1; in.jump = i < 20; in.jumpHeld = i < 20; }, side, 0);
+            keysOff.run();
+            System.out.println("[well] out at " + g.player.x + ", " + g.player.y + ", " + g.player.z + " swim " + g.player.swimMode + " active " + g.swimming.active(g.player));
+        }
+        if (want.test("fish")) {
+            g.teleport(g.player, 128.5f, DevMap.FLOOR, 226.5f); g.controller.snapTo((float) Math.PI); g.controller.camPitch = -0.35f; frames(30);
+            var whale = g.fishery.release(rpg.fishing.FishKind.WHALE, 128.5f, 236.5f);
+            if (whale != null) {
+                whale.x = 128.5f; whale.z = 234.5f;
+                g.fishery.struck(g.player, whale, 6, false, false, rpg.skill.Skill.ARCHERY, whale.x, whale.y, whale.z);
+                film("fish-whale-hurt", 24, i -> { }, gameCam, 4);
+            }
+        }
+        keysOff.run();
+    }
+
     private void p20Shots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
@@ -862,12 +971,77 @@ final class Gallery {
             for (var d : new rpg.animal.Animal[]{buck, doe, fawn}) g.animals.remove(d);
             frames(5);
         }
+        if (want.test("deerpro")) {
+            // (0.3.5) the deer in still profile, a buck, a doe and a fawn side by side: the build read at a glance
+            place(70.5f, 60.5f, 0); frames(4);
+            var buck = g.animals.spawnNew(rpg.animal.Species.DEER, false, false, 62.5f, 84.5f, null, 0, 0);
+            var doe = g.animals.spawnNew(rpg.animal.Species.DEER, false, true, 64.5f, 84.5f, null, 0, 0);
+            var fawn = g.animals.spawnNew(rpg.animal.Species.DEER, true, true, 66.3f, 84.5f, null, 0, 0);
+            frames(10);
+            for (var d : new rpg.animal.Animal[]{buck, doe, fawn}) { d.puppet = true; d.vx = d.vz = 0; }
+            film("deer-profile", 12, i -> { for (var d : new rpg.animal.Animal[]{buck, doe, fawn}) { d.yaw = (float) Math.PI / 2; d.wantYaw = d.yaw; d.vx = d.vz = 0; } },
+                    a -> new float[]{64.5f, DevMap.FLOOR + 1.1f, 89.8f, 64.5f, DevMap.FLOOR + 0.9f, 84.5f}, 4, buck);
+            film("deer-quarter", 12, i -> { for (var d : new rpg.animal.Animal[]{buck, doe, fawn}) { d.yaw = (float) Math.PI / 2; d.wantYaw = d.yaw; d.vx = d.vz = 0; } },
+                    a -> new float[]{59.5f, DevMap.FLOOR + 1.4f, 88.5f, 64.5f, DevMap.FLOOR + 0.9f, 84.5f}, 4, buck);
+            for (var d : new rpg.animal.Animal[]{buck, doe, fawn}) g.animals.remove(d);
+            frames(5);
+        }
+        if (want.test("row")) {
+            // (0.3.5) Guild Row from the beach, and the halls' insides
+            g.state.minutes = 11 * 60;
+            for (int[] cam : new int[][]{{20, 203, 10, 190}, {96, 204, 96, 191}, {138, 205, 120, 190}}) {
+                for (int w = 0; w < 30; w++) { game.tick(1f / 60); draw(new float[]{cam[0], DevMap.FLOOR + 2.4f, cam[1], cam[2], DevMap.FLOOR + 1.2f, cam[3]}, 1f / 60); }
+                Main.shot(gfx, win.width, win.height, new File(shots, "row-" + cam[0] + ".png"));
+            }
+            for (int w = 0; w < 30; w++) { game.tick(1f / 60); draw(new float[]{96.5f, DevMap.FLOOR + 2.6f, 190.4f, 96.5f, DevMap.FLOOR + 0.6f, 195f}, 1f / 60); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "row-workshop.png"));
+        }
+        if (want.test("craft")) {
+            // (0.3.5) the player at work at each station, filmed from the side through a work cycle
+            g.player.skills.setLevel(rpg.skill.Skill.CRAFTING, 40); g.player.skills.setLevel(rpg.skill.Skill.SMITHING, 40);
+            Object[][] jobs = {{rpg.item.Recipes.Station.CARDING_BENCH, "card_wool", rpg.item.Items.WOOL}, {rpg.item.Recipes.Station.SPINNING_WHEEL, "spin_yarn", rpg.item.Items.CLEAN_WOOL},
+                    {rpg.item.Recipes.Station.LOOM, "weave_wool", rpg.item.Items.YARN}, {rpg.item.Recipes.Station.FULLING_TUB, "full_cloth", rpg.item.Items.LOOM_CLOTH},
+                    {rpg.item.Recipes.Station.DYE_VAT, "dye_cloth", rpg.item.Items.FULLED_CLOTH}, {rpg.item.Recipes.Station.ANVIL, "smith_bronze_sword", rpg.item.Items.get("bronze_bar")},
+                    {rpg.item.Recipes.Station.FURNACE, "cast_pot", rpg.item.Items.get("bronze_bar")}};
+            for (Object[] j : jobs) {
+                rpg.objects.Station st = null;
+                for (var o : g.objects.stations()) if (o.kind == j[0] && o.z > rpg.world.Coast.Z0) st = o;
+                if (st == null) continue;
+                for (var grid : g.player.grids()) grid.clear();
+                g.give(g.player, (rpg.item.ItemDef) j[2], 6); g.give(g.player, rpg.item.Items.HAMMER, 1); g.give(g.player, rpg.item.Items.BUCKET_OF_WATER, 2); g.give(g.player, rpg.item.Items.BERRIES, 4);
+                g.teleport(g.player, st.x, DevMap.FLOOR, st.z - 1.2f); g.player.yaw = (float) Math.PI; g.controller.camYaw = (float) Math.PI;
+                frames(5);
+                var r = g.interact.request(g.player, st, "make:" + j[1]);
+                System.out.println("[craft] " + j[0] + " " + r.status() + " " + r.reason());
+                final rpg.objects.Station at = st;
+                film("craft-" + j[0].toString().toLowerCase(), 96, i -> { }, a -> new float[]{at.x + 2.6f, DevMap.FLOOR + 1.9f, at.z - 1.0f, at.x, DevMap.FLOOR + 0.9f, at.z - 0.8f}, 12);
+                g.interact.cancel(g.player, "next");
+            }
+        }
+        if (want.test("fish")) {
+            // (0.3.5) the sea's fish by the pier, each kind close to, in the water
+            g.teleport(g.player, rpg.world.Coast.PIER_X1, DevMap.FLOOR, rpg.world.Coast.PIER_Z1 - 1); frames(90);
+            int k = 0;
+            for (rpg.fishing.FishKind kind : rpg.fishing.FishKind.values()) {
+                rpg.fishing.Fish f = null;
+                for (rpg.fishing.Fish o : g.fishery.live) if (o.kind == kind) { f = o; break; }
+                if (f == null) continue;
+                float back = Math.max(0.6f, f.length() * 1.5f);
+                for (int w = 0; w < 3; w++) { game.tick(1f / 60); draw(new float[]{f.x + back, f.y + 0.1f, f.z + back * 0.3f, f.x, f.y, f.z}, 1f / 60); }
+                Main.shot(gfx, win.width, win.height, new File(shots, "fish-" + kind.name().toLowerCase() + ".png"));
+                k++;
+            }
+            System.out.println("[fish] shots " + k);
+        }
         if (want.test("duck")) {
             for (int x = 58; x <= 70; x++) for (int z = 70; z <= 80; z++) g.setBlock(x, DevMap.FLOOR - 1, z, Blocks.WATER);
             place(70.5f, 84.5f, 0); frames(4);
             var duck = g.animals.spawnNew(rpg.animal.Species.DUCK, false, true, 64.5f, 75.5f, null, 0, 0);
             g.teleport(duck, 64.5f, DevMap.FLOOR - 1, 75.5f); frames(60);
-            film("duck-swim", 48, i -> { }, a -> new float[]{a.x + 2.4f, DevMap.FLOOR + 0.7f, a.z + 0.4f, a.x, a.y + 0.2f, a.z}, 10, duck);
+            duck.puppet = true; duck.yaw = (float) Math.PI / 2;
+            // paddling across (frames 1-30), then up-ending to feed
+            film("duck-swim", 48, i -> { duck.yaw = (float) Math.PI / 2; duck.wantYaw = duck.yaw; boolean feed = i >= 30; duck.headDown = feed; duck.vx = feed ? 0 : -0.35f; duck.vz = 0; if (!feed) duck.x -= 0.35f / 60; },
+                    a -> new float[]{a.x + 0.3f, DevMap.FLOOR + 0.6f, a.z + 2.2f, a.x, a.y + 0.2f, a.z}, 10, duck);
             System.out.println("[duck] y " + duck.y + " mode " + duck.swimMode);
             g.animals.remove(duck);
             for (int x = 58; x <= 70; x++) for (int z = 70; z <= 80; z++) g.setBlock(x, DevMap.FLOOR - 1, z, Blocks.STONE);
@@ -2983,6 +3157,47 @@ final class Gallery {
             tiles.add(map); labels.add(String.format("%s x6 p99 %.1f", drift == 0 ? "still" : "drift", p99));
         }
         sheet("wallflicker", tiles, labels, 3);
+    }
+
+    /** (0.3.6, gamefixes: interiors glitched as a lamp left the frame) a fixed spot of wall, the lamp swung in and out of view. */
+    private void lampSweep() {
+        float f = DevMap.FLOOR;
+        float cx = (DevMap.SHOP_A_X0 + DevMap.SHOP_A_X1) / 2f + 0.5f, wz = DevMap.SHOP_A_Z0 + 1.02f, wy = f + 1.4f;
+        place(cx, DevMap.SHOP_A_Z1 - 1.5f, 0);
+        List<BufferedImage> tiles = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (float hour : new float[]{22f, 13f}) {
+            double now = g.state.hourOfDay();
+            g.advanceTime(((hour - now) % 24 + 24) % 24 * 60, "lamp sweep");
+            int n = 96;
+            java.util.function.IntFunction<float[]> camAt = k -> {
+                float e = 0.15f + 0.75f * (float) (0.5 - 0.5 * Math.cos(k / (double) n * Math.PI * 2));   // up toward the lamp and back
+                float a = 0.55f * (float) Math.sin(k / (double) n * Math.PI * 4);
+                float d = 3.2f;
+                return new float[]{cx + (float) (Math.sin(a) * Math.cos(e)) * d, wy + (float) Math.sin(e) * d, wz + (float) (Math.cos(a) * Math.cos(e)) * d, cx, wy, wz};
+            };
+            for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(camAt.apply(0), 1 / 60f); }
+            float lo = Float.MAX_VALUE, hi = 0;
+            for (int k = 0; k < n; k++) {
+                float[] cam = camAt.apply(k);
+                game.tick(1 / 60f); draw(cam, 1 / 60f);
+                BufferedImage img = captureFrame();
+                float m = 0; int c = 0;
+                for (int y = TILE / 2 - 20; y < TILE / 2 + 20; y++) for (int x = TILE / 2 - 20; x < TILE / 2 + 20; x++) { int p = img.getRGB(x, y); m += 0.2126f * (p >> 16 & 255) + 0.7152f * (p >> 8 & 255) + 0.0722f * (p & 255); c++; }
+                m /= c; lo = Math.min(lo, m); hi = Math.max(hi, m);
+                if (k % 12 == 0) { tiles.add(img); labels.add(String.format("%02.0fh k%d wall %.1f", hour, k, m)); }
+                if (k == 36 || k == 60) {   // the whole frame, as seen
+                    int w = win.width, h = win.height;
+                    ByteBuffer px = gfx.pixels(w, h);
+                    BufferedImage full = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+                    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) { int i = ((h - 1 - y) * w + x) * 4; full.setRGB(x, y, (px.get(i) & 255) << 16 | (px.get(i + 1) & 255) << 8 | (px.get(i + 2) & 255)); }
+                    MemoryUtil.memFree(px);
+                    try { new File(shots).mkdirs(); javax.imageio.ImageIO.write(full, "png", new File(shots, String.format("lampsweep-%02.0f-k%d.png", hour, k))); } catch (java.io.IOException e) { System.err.println(e); }
+                }
+            }
+            System.out.printf("[lampsweep] %02.0fh: wall %.1f..%.1f (swing %.1f%%)%n", hour, lo, hi, (hi - lo) / Math.max(1, (hi + lo) / 2) * 100);
+        }
+        sheet("lampsweep", tiles, labels, 8);
     }
 
     private void interiorLight() {

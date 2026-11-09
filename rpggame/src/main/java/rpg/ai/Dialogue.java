@@ -109,6 +109,7 @@ public final class Dialogue {
             final String[] t = tip != null ? tip : workTip(n);
             if (t != null) d.choice(t[0], () -> g.ui.dialog(new Dialog(n.name, t[1] + workToday(n))));
             situational(n, d, t == null);
+            if (g.guilds != null) g.guilds.talk(d, n);
         } else d.choice("What do you want?", () -> g.ui.dialog(new Dialog(n.name, day(n))));
         d.closeChoice("Goodbye.", () -> { });
         return d;
@@ -399,7 +400,16 @@ public final class Dialogue {
         return switch (n.profession.family) {
             case FISHERMAN -> pick(n, "The fish bite at first light, or not at all.", "Mind the nets. They take an age to mend.", "Quiet water today. Good for the line, bad for the talk.", "A " + t.toLowerCase(java.util.Locale.ROOT) + "'s day is mostly waiting, and a little cursing.");
             case MINER -> pick(n, "Rock doesn't move itself. Neither does ore.", "Mind the spoil heap. It shifts.", "Every seam runs out. You just hope it's tomorrow.", "Dust in the lungs and coin in the purse. Fair trade, mostly.");
-            case CRAFTSMAN -> pick(n, "Good work takes good stock, and I'm short of both.", "Measure twice. That's the whole of the trade.", "If you've an order, I'll hear it. If you've materials, even better.", "The " + t.toLowerCase(java.util.Locale.ROOT) + " before me left a mess. I'm still putting it right.");
+            // (0.3.5) the textile and metal hands, each of their own work
+            case CRAFTSMAN -> switch (n.profession) {
+                case CARDER -> pick(n, "Burrs, dung and grease. Every fleece is a fight before it's fit to spin.", "Card it till it's a cloud. Lumpy wool makes lumpy yarn.", "The cotton's picked by hand. Seeds and all.", "My hands smell of sheep. Always.");
+                case SPINNER -> pick(n, "Draw it out, let it twist. Too fast and it snaps.", "A good wheel hums. A bad one argues.", "Three skeins by dark, if nobody talks to me.", "Even thread or the weaver sends it back.");
+                case WEAVER -> pick(n, "Throw, beat, change the shed. All day long.", "A slack warp ruins a week's work.", "The loom eats yarn faster than they can spin it.", "Count the picks. Lose count, lose the pattern.");
+                case FULLER -> pick(n, "I tread cloth till my legs give out. Then a bit more.", "Fulling shrinks it tight. Nobody wants loose cloth.", "Wet to the knees, every day of the year.", "Tease the nap, shear it down, press it flat. Then it's cloth.");
+                case DYER -> pick(n, "Red to the elbows. Comes with the trade.", "Berries for red. Mind it doesn't run.", "Too long in the vat and it's brown, not red.", "Dye fades. Good dyeing doesn't.");
+                case SMELTER -> pick(n, "Copper and tin, in the right measure. That's bronze.", "Keep the bellows going or the iron won't run.", "Slag's what's left when the honest metal's out.", "Hot work. Hot enough to cook on.");
+                default -> pick(n, "Good work takes good stock, and I'm short of both.", "Measure twice. That's the whole of the trade.", "If you've an order, I'll hear it. If you've materials, even better.", "The " + t.toLowerCase(java.util.Locale.ROOT) + " before me left a mess. I'm still putting it right.");
+            };
             case KNIGHT -> pick(n, "I keep my oath and my edge. Both need tending.", "State your business. Plainly, if you please.", "The road is safer for those who ride it armed.", "My duty is my duty. What is yours?");
             case HUNTER -> n.profession == Profession.MONSTER_HUNTER
                     ? pick(n, "Goblins in the north woods, bats under the den rock. Leave them to someone who knows their habits.", "A monster's lair tells you everything, if you can read it.", "Fire for trolls and spiders. Remember that, it might save you.")
@@ -473,9 +483,36 @@ public final class Dialogue {
         if (watch && p.skills.combatLevel() >= 60 && (n.conversations + n.id) % 4 == 0) return "You carry yourself like a fighter. Don't make me find out.";
         if (n.conversations == 1) return pick(n, "I don't believe we've met.", "New face. Welcome, I suppose.", "You're not from around here.");
         if (n.conversations > 6 && (n.conversations + n.id) % 4 == 0) return pick(n, "Back again? You're becoming a regular.", "You again. Good to see you.", "We keep meeting like this.");
+        // (0.3.5, gamefixes: dialogue denser and more of the moment) what the player carries and is, the guilds, the
+        // sea, and what has happened lately - a short word each, chosen in turn
+        String more = moment(n, p, watch, outlaw);
+        if (more != null && (n.conversations + n.id) % 2 == 1) return more;
         String weather = weatherTalk(n);
         if (weather != null && (n.conversations + n.id) % 2 == 0) return weather;
-        return (n.conversations + n.id) % 3 == 0 ? hourTalk(n) : null;
+        return (n.conversations + n.id) % 3 == 0 ? hourTalk(n) : more;
+    }
+
+    /** (0.3.5) A word on the moment: a catch or fine cloth carried, a harpoon in hand, a fellow guild member, the sea, the town's news. */
+    private String moment(Npc n, rpg.actor.Actor p, boolean watch, boolean outlaw) {
+        java.util.List<String> said = new java.util.ArrayList<>();
+        // what the player has with them
+        for (var grid : p.grids()) for (var st : grid.stacks()) {
+            var kind = rpg.fishing.FishKind.ofItem(st.def.id);
+            if (kind != null && kind.level >= 35 && st.def.id.startsWith("raw_")) said.add(outlaw ? "That " + kind.title.toLowerCase() + " would fetch a fair price. Just saying." : pick(n, "Is that a " + kind.title.toLowerCase() + "? You landed that?", "Fine catch. The Provisioners would pay well for it.", "That's no pond fish."));
+            if (st.def == Items.FINE_CLOTH) said.add(pick(n, "That's guild cloth. Dear stuff.", "Fine red cloth! Someone's dressing well."));
+            if (st.def == Items.WOOL || st.def == Items.CLEAN_WOOL) said.add(pick(n, "You smell of sheep.", "Taking wool to the carder?"));
+        }
+        if (p.main() == Items.HARPOON) said.add(pick(n, "Going after the big ones with that?", "Mind that harpoon. It's not a walking stick."));
+        if (p.swimMode != 0 || p.bloodied < 0.1f && g.fluids != null && g.fluids.submerged(p.x - 0.3, p.y, p.z - 0.3, p.x + 0.3, p.y + 1.6, p.z + 0.3) > 0.4f) said.add(pick(n, "You're dripping all over the place.", "Been swimming, have you?", "Wet as a fish."));
+        // the guilds: a fellow member is greeted as one
+        if (g.guilds != null) for (var k : rpg.econ.Guilds.Kind.values()) if (g.guilds.member(n, k) && g.guilds.member(p, k)) said.add(pick(n, "Well met, fellow member of the " + k.title + ".", "The " + k.title + " looks after its own.", "Good to see one of ours."));
+        // where they are: the sea, the Row
+        if (n.z > rpg.world.Coast.Z0) said.add(pick(n, "Smell that salt.", "The tide's on the turn.", "Gulls are low today. Weather's coming.", "Sharks off the pier's head, they say. Keep your feet dry.", "The Row's busy with the guilds these days."));
+        // the town's news: someone wrongly taken in, a fish shortage
+        if (g.law != null && n.memories.stream().anyMatch(m -> m.kind.equals("SEEN_ARREST"))) said.add("They took someone in on a description. I hope they had the right one.");
+        if (g.fishery != null && g.fishery.caught > 40) said.add(pick(n, "The water's been fished hard lately.", "Fish are getting scarce near the shore."));
+        if (said.isEmpty()) return null;
+        return said.get(Math.floorMod(n.conversations + (int) n.id + (int) (g.state.minutes / 60), said.size()));
     }
 
     /**

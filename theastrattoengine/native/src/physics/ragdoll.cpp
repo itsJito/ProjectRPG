@@ -2,6 +2,7 @@
 // in the rest pose (standing, facing -z, feet on the floor), placed from an animated pose, stepped, and read back as the
 // fifteen joint points of the API and the segments' own orientations.
 #include "physics/ragdoll.h"
+#include "world/voxel_world.h"
 
 #include <algorithm>
 #include <cmath>
@@ -293,6 +294,34 @@ void Ragdoll::carry(float vx, float vy, float vz, float share) {
     age = std::min(age, 0.6f); quiet = 0; settled = false;
 }
 
+// 2.10: water lifts and slows every part that is in it. A part's depth under the surface over it (the top liquid cell's
+// top) against its own size gives how much of it is under; the lift is that share of the part's weight times the body's
+// buoyancy, so a buoyant body rises until enough of it is out to balance, and rides there. A body with no buoyancy still
+// meets the water's drag (it sinks slowly, rather than dropping through as through air).
+void Ragdoll::water(const VoxelWorld* w, float h) {
+    bool wet = false;
+    for (int p = 0; p < PARTS; p++) {
+        Body& b = body(p);
+        const int bx = static_cast<int>(std::floor(b.p.x)), bz = static_cast<int>(std::floor(b.p.z));
+        const int by = static_cast<int>(std::floor(b.p.y));
+        if (!(w->def(bx, by, bz).flags & ASTRATTO_BLOCK_LIQUID) && !(w->def(bx, by - 1, bz).flags & ASTRATTO_BLOCK_LIQUID)) continue;
+        int top = by;
+        if (!(w->def(bx, top, bz).flags & ASTRATTO_BLOCK_LIQUID)) top = by - 1;
+        while (top + 1 < by + 4 && (w->def(bx, top + 1, bz).flags & ASTRATTO_BLOCK_LIQUID)) top++;
+        const float surface = static_cast<float>(top) + 0.9f;
+        const float r = std::max(0.06f, 0.09f * scale);
+        const float under = std::max(0.0f, std::min(1.0f, (surface - (b.p.y - r)) / (2 * r)));
+        if (under <= 0) continue;
+        wet = true;
+        b.v.y += gravity * buoyancy * under * h;
+        const float k = std::max(0.0f, 1.0f - waterDrag * under * h);
+        b.v = b.v * k;
+        b.w = b.w * std::max(0.0f, 1.0f - waterDrag * 0.8f * under * h);
+    }
+    // afloat, a body never quite comes to rest: the water keeps it riding
+    if (wet && buoyancy > 0.5f) { quiet = 0; age = std::min(age, rd::ACTIVE_TIME * 2.0f); }
+}
+
 void Ragdoll::wake() {
     settled = false; quiet = 0; age = std::min(age, 1.2f);
     for (int p = 0; p < PARTS; p++) body(p).wake();
@@ -322,6 +351,7 @@ int Ragdoll::update(const VoxelWorld* w, float dt) {
         acc_ -= h;
         if (driver != nullptr) driver->drive(w, h);
         if (live) for (int p = 0; p < PARTS; p++) { Body& b = body(p); b.awake = true; b.sleepTime = 0; }
+        if (w != nullptr) water(w, h);
         space.tick(w, gravity);
         age += h;
         n++;

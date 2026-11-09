@@ -177,6 +177,8 @@ public final class FoliageModels {
             float root=2+Math.clamp(Math.round((plant.x-chunk.x)*16),0,255)+256*Math.clamp(Math.round((plant.z-chunk.z)*16),0,255);
             // Above the packed root range (2..65537), while remaining opaque to the mesh uploader's alpha test.
             if(plant.kind==Foliage.Kind.IVY || plant.kind==Foliage.Kind.MOSS)root=65538;
+            // (0.3.5) woody growth gives far less to the wind and to a body than grass and fern (model.vert's stiff flag)
+            else if(plant.kind==Foliage.Kind.BUSH || plant.kind==Foliage.Kind.SHRUB || plant.kind==Foliage.Kind.SAPLING)root+=131072;
             if(plant.kind==Foliage.Kind.BUSH || plant.kind==Foliage.Kind.SHRUB)leaves.add(crown(plant,chunk,root));
             for(float[] box:model(plant.kind,plant.seed).list) {
                 float x=box[0],z=box[2];float wx=plant.x-chunk.x+co*x+si*z,wz=plant.z-chunk.z-si*x+co*z;

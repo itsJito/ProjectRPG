@@ -131,7 +131,7 @@ public final class Main {
         preview.world = dungeon; preview.dungeon = true; preview.x = rpg.world.TitleStage.STAND_X; preview.y = DevMap.FLOOR; preview.z = rpg.world.TitleStage.STAND_Z;
         long last = System.nanoTime();
         win.setCursorLocked(false);
-        rpg.audio.Music music = new rpg.audio.Music(game);
+        rpg.audio.Music music = game.add(new rpg.audio.Music(game));
         gfx.findLamps(new rpg.world.Voxels(game.view()));
         // ---- the title screen: the profiles
         TitleScreen title = new TitleScreen(VERSION);
@@ -439,7 +439,7 @@ public final class Main {
 
     private static boolean shotNext;
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.3.4";
+    public static final String VERSION = "Alpha 0.3.6";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

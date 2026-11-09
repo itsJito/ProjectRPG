@@ -1,0 +1,715 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+TraversalTest > fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt() FAILED
+    org.opentest4j.AssertionFailedError: expected: <null> but was: <rpg.actor.Traversal$Motion@68ace111>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:30)
+        at app//org.junit.jupiter.api.Assertions.assertNull(Assertions.java:279)
+        at app//rpg.actor.TraversalTest.fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt(TraversalTest.java:39)
+
+DoorPassageTest > aShopkeeperUnlocksHerOwnStoreRoomOnTheWayInAndLocksItBehindHer() FAILED
+    org.opentest4j.AssertionFailedError: locked again behind her ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.DoorPassageTest.aShopkeeperUnlocksHerOwnStoreRoomOnTheWayInAndLocksItBehindHer(DoorPassageTest.java:65)
+
+DoorPushTest > anOpenLeafIsPushedRoundByABodyWalkingIntoIt() FAILED
+    org.opentest4j.AssertionFailedError: the open leaf did not give when walked into (0.0011837482, 0.0011838675 rad) ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.DoorPushTest.anOpenLeafIsPushedRoundByABodyWalkingIntoIt(DoorPushTest.java:55)
+
+Gamefixes030Test > aLadderIsTakenFromTheTopAndClimbedDownToTheGround() FAILED
+    org.opentest4j.AssertionFailedError: stepped off at the bottom ==> expected: <null> but was: <rpg.actor.Ladders$Climb@378bd86d>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+        at app//org.junit.jupiter.api.Assertions.assertNull(Assertions.java:287)
+        at app//rpg.ai.Gamefixes030Test.aLadderIsTakenFromTheTopAndClimbedDownToTheGround(Gamefixes030Test.java:75)
+
+NpcRoutineTest > everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() FAILED
+    org.opentest4j.AssertionFailedError: Eda spent the morning blocked:
+    === routine probe: 600 samples ===
+    Ada          MERCHANT   stuck    0 blocked    0 still-on-errand   70  at (91.3,55.6) goal WORK
+          251  WORK: no headway; finding another way
+          113  HOME: getting up and dressed
+          96  SLEEP: as close as I can get
+          48  SLEEP: 
+          37  WORK: 
+          34  BANK: 
+    Bram         LAWMAN     stuck    0 blocked    0 still-on-errand  104  at (91.8,63.3) goal PATROL
+          545  PATROL: reached patrol point #
+          27  PATROL: 
+          25  EAT: 
+          2  EAT: ate bread
+          1  BANK: the bank was shut
+    Cole         GUARD      stuck    0 blocked    0 still-on-errand  143  at (96.4,68.0) goal PATROL
+          497  PATROL: reached patrol point #
+          37    why SEARCH: searching for Wolf near (#, #), #s since the last clue
+          29  PATROL: 
+          27  SEARCH: checked a spot (#); nobody
+          17  WATCH: watching Godric; visible blood, asking questions
+          7  INVESTIGATE: going to look
+    Dag          WORKER     stuck    0 blocked    0 still-on-errand  180  at (76.4,31.3) goal WORK
+          182  HOME: getting up and dressed
+          120  WORK: sold # logs to Materials stall
+          108  WORK: gather Birch tree ## -> STARTED
+          100  SLEEP: 
+          59  WORK: 
+          19  WORK: gather Spruce tree ## -> STARTED
+    Eda          VILLAGER   stuck    0 blocked  108 still-on-errand  152  at (128.3,6.1) goal WORK
+          168  HOME: getting up and dressed
+          158  WORK: gather Redberry bush ## -> STARTED
+          108  WORK: paused to reconsider a blocked route
+          78  WORK: sold # redberries to Store A
+          61  WORK: 
+          26  SOCIALIZE: 
+    Finn         THIEF      stuck    0 blocked    0 still-on-errand  205  at (96.1,76.0) goal WANDER
+          578  WANDER: 
+          21  SOCIALIZE: 
+          1  SOCIALIZE: talked with Ivo; exchanged # pieces of news
+    Gus          MERCHANT   stuck    0 blocked    5 still-on-errand  188  at (17.5,108.8) goal WORK
+          261  WORK: 
+          249  HOME: getting up and dressed
+          62  BANK: 
+          13  EAT: 
+          8  WORK: arrived
+          5  WORK: paused to reconsider a blocked route
+    Hale         LAWMAN     stuck    0 blocked    0 still-on-errand  498  at (34.6,119.7) goal PATROL
+          484  PATROL: reached patrol point #
+          53  PATROL: 
+          48  BANK: 
+          13  PATROL: no headway; finding another way
+          1  EAT: drank from the well
+          1  EAT: 
+    Ivo          CARTER     stuck    0 blocked    0 still-on-errand   35  at (90.3,64.0) goal WORK
+          509  WORK: 
+          59  HOME: getting up and dressed
+          16  EAT: 
+          13  SOCIALIZE: 
+          2  SOCIALIZE: talked with Arthur; exchanged # pieces of news
+          1  HOME: chores at home
+    Jun          QUEST_GIVER stuck    0 blocked    0 still-on-errand  132  at (61.7,102.9) goal WORK
+          288  WORK: 
+          183  HOME: getting up and dressed
+          69  SLEEP: 
+          56  SOCIALIZE: 
+          3  SOCIALIZE: talked with Gus
+          1  HOME: chores at home
+    Kit          CONTACT    stuck    0 blocked   49 still-on-errand  231  at (48.6,112.1) goal WORK
+          289  WORK: 
+          138  HOME: getting up and dressed
+          50  PRAY: praying at the altar
+          49  INVESTIGATE: paused to reconsider a blocked route
+          43  PRAY: on the way to prayers
+          38    why INVESTIGATE: fetch help: fetching help at (#, #) - courage #, not alone, heard it again [subject Routine
+    Mara         FARMER     stuck    0 blocked    0 still-on-errand  154  at (96.9,88.5) goal EAT
+          174  HOME: getting up and dressed
+          117  WORK: checked on a duck
+          91  WORK: checked on a duckling
+          79  WORK: checked on a cow
+          70  WORK: checked on a chick
+          28  EAT: 
+    Morrow       UNDERTAKER stuck    0 blocked    0 still-on-errand  356  at (123.4,96.0) goal HOME
+          208  HOME: chores at home
+          153  HOME: getting up and dressed
+          72  PRAY: on the way to prayers
+          51  SLEEP: as close as I can get
+          50  PRAY: praying at the altar
+          28  EAT: 
+    Silas        FENCE      stuck    0 blocked    0 still-on-errand  170  at (11.0,117.2) goal WORK
+          285  WORK: 
+          205  HOME: getting up and dressed
+          65  BANK: 
+          37  EAT: 
+          4  HOME: chores at home
+          3  EAT: drank from the well
+    Bobwin       GUARD      stuck    0 blocked    0 still-on-errand  192  at (108.4,68.6) goal PATROL
+          461  PATROL: reached patrol point #
+          111    why SEARCH: searching for Wolf near (#, #), #s since the last clue
+          97  SEARCH: checked a spot (#); nobody
+          28  PATROL: 
+          5  SEARCH: asked Lucius about Wolf: not seen
+          4  SEARCH: asked Aeldric about Wolf: not seen
+    Oswin        BEGGAR     stuck    0 blocked    0 still-on-errand  402  at (99.3,85.0) goal HOME
+          243  HOME: chores at home
+          156  HOME: getting up and dressed
+          98  SLEEP: 
+          50  PRAY: praying at the altar
+          43  PRAY: on the way to prayers
+          6  INVESTIGATE: looking round the spot
+    Maud         HEALER     stuck    0 blocked    0 still-on-errand  182  at (11.4,84.2) goal HOME
+          229  INVESTIGATE: going to look
+          72  HOME: chores at home
+          66  INVESTIGATE: looking round the spot
+          64    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Bandit]
+          52  HOME: getting up and dressed
+          50  PRAY: praying at the altar
+    Alric        PRIEST     stuck    0 blocked    0 still-on-errand  394  at (110.4,89.0) goal HOME
+          249  HOME: chores at home
+          154  HOME: getting up and dressed
+          77  SLEEP: 
+          50  PRAY: praying at the altar
+          49  PRAY: on the way to prayers
+          9  SOCIALIZE: 
+    Godric       HUNTER     stuck    0 blocked    0 still-on-errand  125  at (89.4,51.6) goal WORK
+          237  WORK: sold # raw meat to Store A
+          92  HOME: getting up and dressed
+          66  INVESTIGATE: going to look
+          57  WORK: 
+          47  SLEEP: 
+          24    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Maud]
+    Isolde       SCHOLAR    stuck    0 blocked    0 still-on-errand  341  at (101.6,58.5) goal HOME
+          149  HOME: getting up and dressed
+          112  HOME: chores at home
+          97  INVESTIGATE: going to look
+          83  PRAY: praying at the altar
+          50  PRAY: on the way to prayers
+          37    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Routine probe]
+    Elowen       FISHERMAN  stuck    0 blocked    0 still-on-errand  134  at (107.5,30.9) goal WORK
+          225  WORK: hauled the lake net in
+          185  WORK: net soaking; # in it so far
+          135  HOME: getting up and dressed
+          36  WORK: going to haul in a full net
+          19  WORK: 
+    Oren         MINER      stuck    0 blocked    0 still-on-errand  217  at (60.1,40.7) goal WORK
+          186  HOME: getting up and dressed
+          122  SLEEP: 
+          116  WORK: Ore Miner: gather at a suitable site
+          81    why HIDE: hiding from Wolf (last seen #s ago)
+          81  HIDE: hiding from Wolf
+          63  SOCIALIZE: 
+    Tamsin       CRAFTSMAN  stuck    0 blocked    0 still-on-errand  179  at (126.2,77.7) goal WORK
+          180  HOME: getting up and dressed
+          131  WORK: Blacksmith: fetch supplies from the producer
+          119  WORK: Blacksmith: make the selected order
+          70  SLEEP: 
+          65  WORK: Blacksmith: buy missing inputs
+          24  WORK: Blacksmith: none
+    Sir Alden    KNIGHT     stuck    0 blocked    0 still-on-errand    0  at (92.0,66.1) goal WORK
+          599  WORK: protecting Ivo under Escort Knight duties
+          1  EAT: ate trout
+    Fenna        HUNTER     stuck    0 blocked    0 still-on-errand  177  at (85.0,91.9) goal WORK
+          368  WORK: no observed eligible target for Predator Hunter
+          180  HOME: getting up and dressed
+          51  SLEEP: 
+          1  HOME: chores at home
+    Wren         CIVIC      stuck    0 blocked    0 still-on-errand   93  at (72.7,111.6) goal WORK
+          288  WORK: 
+          132  HOME: getting up and dressed
+          97  SLEEP: as close as I can get
+          66  SOCIALIZE: 
+          16  SLEEP: 
+          1  HOME: chores at home
+    Hilda        CRAFTSMAN  stuck    0 blocked    0 still-on-errand  112  at (91.7,41.1) goal SOCIALIZE
+          184  WORK: Cook: make the selected order
+          140  HOME: getting up and dressed
+          67  WORK: Cook: buy missing inputs
+          62  SOCIALIZE: 
+          56  SLEEP: 
+          51  WORK: Cook: deliver a real batch
+    Bertram      MINER      stuck    0 blocked    0 still-on-errand  118  at (179.5,93.3) goal SOCIALIZE
+          277  WORK: Quarry Worker: gather at a suitable site
+          119  HOME: getting up and dressed
+          119  SOCIALIZE: 
+          40  WORK: Quarry Worker: deliver a real batch
+          31  WORK: Quarry Worker: none
+          8  WORK: No eligible work for Quarry Worker; waiting for supplies or a suitable site
+    Sir Roderic  KNIGHT     stuck    0 blocked    0 still-on-errand    4  at (81.5,80.8) goal WORK
+          547  WORK: inspected the assigned border
+          22  INVESTIGATE: going to look
+          20  WORK: 
+          13    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Godric]
+          10    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Routine probe]
+          6  INVESTIGATE: looking round the spot
+    Wynn         FISHERMAN  stuck    0 blocked    0 still-on-errand   81  at (90.9,40.9) goal WORK
+          458  WORK: No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+          80  HOME: getting up and dressed
+          59  SOCIALIZE: 
+          2  HOME: chores at home
+          1  SOCIALIZE: talked with Elowen
+    Corwin       FISHERMAN  stuck    0 blocked    0 still-on-errand  172  at (85.6,60.9) goal WORK
+          145  WORK: River Fisherman: none
+          128  WORK: River Fisherman: pack full, taking raw trout to sell at Store A
+          113  HOME: getting up and dressed
+          57    why HIDE: hiding from Coyote (last seen #s ago)
+          57  HIDE: hiding from Coyote
+          40  WORK: River Fisherman: gather at a suitable site
+    Severinus    CIVIC      stuck    0 blocked   13 still-on-errand    9  at (159.5,31.4) goal WORK
+          192  BANK: 
+          152  WORK: 
+          104  WORK: arrived
+          63  SLEEP: as close as I can get
+          28  SLEEP: 
+          21  HOME: getting up and dressed
+    Cassia       LAWMAN     stuck    0 blocked    0 still-on-errand   35  at (174.2,80.2) goal PATROL
+          510  PATROL: reached patrol point #
+          89  PATROL: 
+          1  IDLE: 
+    Titus        GUARD      stuck    0 blocked    0 still-on-errand   39  at (160.1,109.7) goal PATROL
+          572  PATROL: reached patrol point #
+          27  PATROL: 
+          1  EAT: ate trout
+    Decimus      GUARD      stuck    0 blocked    0 still-on-errand   39  at (146.4,103.3) goal PATROL
+          552  PATROL: reached patrol point #
+          47  PATROL: 
+          1  EAT: ate trout
+    Quintus      GUARD      stuck    0 blocked    0 still-on-errand   36  at (148.0,60.5) goal PATROL
+          547  PATROL: reached patrol point #
+          51  PATROL: 
+          1  EAT: ate trout
+          1  IDLE: 
+    Sextus       GUARD      stuck    0 blocked    0 still-on-errand   36  at (174.5,93.4) goal PATROL
+          599  PATROL: reached patrol point #
+          1  IDLE: 
+    Lucilla      CIVIC      stuck    0 blocked    0 still-on-errand  132  at (150.5,83.8) goal WORK
+          273  WORK: 
+          140  HOME: getting up and dressed
+          114  SLEEP: 
+          49  SLEEP: as close as I can get
+          19  SOCIALIZE: 
+          3  HOME: chores at home
+    Flavia       MERCHANT   stuck    0 blocked    0 still-on-errand   48  at (137.4,75.5) goal EAT
+          154  BANK: 
+          131  PRAY: on the way to prayers
+          97  EAT: 
+          67  WORK: no headway; finding another way
+          50  PRAY: praying at the altar
+          47  SLEEP: 
+    Aurelia      PRIEST     stuck    0 blocked    0 still-on-errand  306  at (144.5,28.7) goal HOME
+          221  HOME: chores at home
+          153  HOME: getting up and dressed
+          89  PRAY: on the way to prayers
+          80  SLEEP: 
+          51  PRAY: praying at the altar
+          5  EAT: ate bread
+    Philon       HEALER     stuck    0 blocked    0 still-on-errand  261  at (135.6,44.5) goal HOME
+          236  HOME: chores at home
+          145  HOME: getting up and dressed
+          82  PRAY: on the way to prayers
+          71  SLEEP: 
+          50  PRAY: praying at the altar
+          9  SOCIALIZE: 
+    Nikias       SCHOLAR    stuck    0 blocked    0 still-on-errand  324  at (137.7,44.8) goal HOME
+          244  HOME: chores at home
+          153  HOME: getting up and dressed
+          80  SLEEP: 
+          72  PRAY: on the way to prayers
+          50  PRAY: praying at the altar
+          1  IDLE: 
+    Gaius        MINER      stuck    0 blocked    0 still-on-errand   37  at (158.7,74.2) goal WORK
+          146  WORK: Quarry Worker: gather at a suitable site
+          132  SLEEP: 
+          113  WORK: Quarry Worker: deliver a real batch
+          112  HOME: getting up and dressed
+          70  SOCIALIZE: 
+          19  WORK: Quarry Worker: none
+    Servius      BEGGAR     stuck    0 blocked    0 still-on-errand  387  at (177.1,94.0) goal SOCIALIZE
+          345  HOME: chores at home
+          92  HOME: getting up and dressed
+          68  PRAY: on the way to prayers
+          50  PRAY: praying at the altar
+          37  SOCIALIZE: 
+          5  EAT: ate bread
+    Octavia      VILLAGER   stuck    0 blocked    0 still-on-errand   47  at (76.7,32.3) goal WORK
+          229  WORK: 
+          81  EAT: 
+          69  PRAY: on the way to prayers
+          60  SOCIALIZE: 
+          50  PRAY: praying at the altar
+          44  WORK: gather Redberry bush ## -> STARTED
+    Marcellus    VILLAGER   stuck    0 blocked  110 still-on-errand    0  at (168.7,78.9) goal WORK
+          177  WORK: gather Redberry bush ## -> STARTED
+          110  WORK: paused to reconsider a blocked route
+          96  HOME: getting up and dressed
+          84  WORK: 
+          83  EAT: 
+          38  SLEEP: 
+    Cornelia     VILLAGER   stuck    0 blocked    0 still-on-errand   76  at (177.7,87.8) goal SOCIALIZE
+          271  WORK: gather Redberry bush ## -> STARTED
+          160  WORK: 
+          144  HOME: getting up and dressed
+          23  SOCIALIZE: 
+          2  HOME: chores at home
+    Lucius       FISHERMAN  stuck    0 blocked   34 still-on-errand   58  at (27.9,39.5) goal WORK
+          144  WORK: River Fisherman: gather at a suitable site
+          126    why HIDE: hiding from Wolf (last seen #s ago)
+          126  HIDE: hiding from Wolf
+          102  WORK: River Fisherman: none
+          95  SOCIALIZE: 
+          55  HOME: getting up and dressed
+    Atalanta     HUNTER     stuck    0 blocked    0 still-on-errand    0  at (190.5,22.3) goal WORK
+          266  WORK: gather Redberry bush ## -> STARTED
+          114  HOME: getting up and dressed
+          107  WORK: 
+          105  WORK: sold # redberries to The Macellum
+          5  EAT: ate bread
+          2  HOME: chores at home
+    Livia        VILLAGER   stuck    0 blocked  129 still-on-errand   65  at (144.9,10.3) goal WORK
+          163  WORK: 
+          129  WORK: paused to reconsider a blocked route
+          125  HOME: getting up and dressed
+          74  EAT: 
+          55  SOCIALIZE: 
+          48  SLEEP: 
+    Maximus      KNIGHT     stuck    0 blocked    0 still-on-errand    0  at (162.4,33.6) goal WORK
+          595  WORK: protecting Severinus under Household Knight duties
+          5  EAT: ate trout
+    Arthur       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    3  at (92.0,59.5) goal WORK
+          292  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          81  HOME: getting up and dressed
+          81  WORK: Carpenter: make the selected order
+          63  WORK: Carpenter: buy missing inputs
+          41  WORK: Carpenter: pack full, taking plank to sell at Store A
+          17  INVESTIGATE: going to look
+    Sir Lancelot KNIGHT     stuck    0 blocked    0 still-on-errand    0  at (100.5,100.5) goal WORK
+          596  WORK: inspected the assigned border
+          4  WORK: 
+    Sir Gawain   HUNTER     stuck    0 blocked    0 still-on-errand   95  at (56.9,42.7) goal WORK
+          219  WORK: no observed eligible target for Monster Hunter
+          103  INVESTIGATE: going to look
+          63  HOME: getting up and dressed
+          54  INVESTIGATE: looking round the spot
+          50  FIGHT: back off to shooting range
+          49  FIGHT: draw and shoot
+    Tristan      HUNTER     stuck    0 blocked    0 still-on-errand  110  at (93.4,138.5) goal WORK
+          373  WORK: 
+          178  HOME: getting up and dressed
+          42  SLEEP: 
+          5  EAT: ate bread
+          2  HOME: chores at home
+    Percival     MINER      stuck    0 blocked    0 still-on-errand    0  at (134.8,132.5) goal WORK
+          462  WORK: Coal Miner: gather at a suitable site
+          84  WORK: Coal Miner: deliver a real batch
+          33  WORK: Coal Miner: none
+          8  SOCIALIZE: 
+          6  HOME: getting up and dressed
+          4  HOME: chores at home
+    Merlin       MINER      stuck    0 blocked    0 still-on-errand    0  at (129.5,106.1) goal SOCIALIZE
+          448  WORK: Gem Prospector: gather at a suitable site
+          81  HOME: getting up and dressed
+          54  SOCIALIZE: 
+          11  WORK: Gem Prospector: none
+          5  HOME: chores at home
+          1  IDLE: 
+    Aeldric      CRAFTSMAN  stuck    0 blocked    0 still-on-errand  177  at (73.7,27.6) goal WORK
+          179  HOME: getting up and dressed
+          163  SLEEP: 
+          141  WORK: Carpenter: make the selected order
+          61  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          44  WORK: Carpenter: buy missing inputs
+          8  SOCIALIZE: 
+    Brannoc      CRAFTSMAN  stuck    0 blocked    0 still-on-errand   87  at (91.0,59.1) goal WORK
+          153  HOME: getting up and dressed
+          140  WORK: Carpenter: none
+          127  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          82  WORK: Carpenter: make the selected order
+          62  WORK: Carpenter: buy missing inputs
+          29  SOCIALIZE: 
+    Corren       CRAFTSMAN  stuck    0 blocked    0 still-on-errand   12  at (89.3,55.6) goal WORK
+          256  WORK: Carpenter: none
+          126  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          124  WORK: Carpenter: make the selected order
+          41  WORK: Carpenter: buy missing inputs
+          29  SOCIALIZE: 
+          18  HOME: getting up and dressed
+    Deryn        CRAFTSMAN  stuck    0 blocked    0 still-on-errand  157  at (73.2,27.3) goal WORK
+          215  WORK: Carpenter: make the selected order
+          175  HOME: getting up and dressed
+          84  SLEEP: 
+          73  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          31  WORK: Carpenter: buy missing inputs
+          12  SLEEP: as close as I can get
+    Eirwen       WORKER     stuck    0 blocked   69 still-on-errand   59  at (77.1,31.0) goal WORK
+          162  WORK: sold # logs to Materials stall
+          146  HOME: getting up and dressed
+          69  WORK: paused to reconsider a blocked route
+          62  WORK: gather Birch tree ## -> STARTED
+          60  SLEEP: 
+          56  WORK: 
+    Fennric      WORKER     stuck    0 blocked    0 still-on-errand  117  at (13.1,117.1) goal SOCIALIZE
+          179  HOME: getting up and dressed
+          121  WORK: sold # logs to Store B
+          103  WORK: gather Birch tree ## -> STARTED
+          70  WORK: gather Tree ## -> STARTED
+          44  WORK: 
+          38  WORK: gather Spruce tree ## -> STARTED
+    Garron       MINER      stuck    0 blocked    0 still-on-errand   10  at (130.2,104.6) goal WORK
+          319  WORK: Ore Miner: gather at a suitable site
+          121  SOCIALIZE: 
+          98  HOME: getting up and dressed
+          22  INVESTIGATE: going to look
+          17  WORK: Ore Miner: none
+          15    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Godric]
+    Haldren      MINER      stuck    0 blocked    0 still-on-errand   31  at (158.8,122.5) goal SOCIALIZE
+          332  WORK: Ore Miner: gather at a suitable site
+          126  HOME: getting up and dressed
+          58  WORK: Ore Miner: deliver a real batch
+          51  WORK: Ore Miner: none
+          22  SOCIALIZE: 
+          4  SOCIALIZE: talked with Fennric
+    Istren       MERCHANT   stuck    0 blocked    0 still-on-errand  125  at (75.9,28.6) goal WORK
+          271  HOME: getting up and dressed
+          193  WORK: 
+          84  WORK: as close as I can get
+          21  SOCIALIZE: 
+          17  INVESTIGATE: going to look
+          12    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Godric]
+    Maerwyn      MERCHANT   stuck    0 blocked    0 still-on-errand   48  at (182.0,96.2) goal WORK
+          226  WORK: no headway; finding another way
+          112  SLEEP: 
+          95  PRAY: on the way to prayers
+          59  WORK: 
+          50  PRAY: praying at the altar
+          29  SLEEP: as close as I can get
+    Tobin        FARMER     stuck    0 blocked    0 still-on-errand    0  at (98.0,107.4) goal WORK
+          537  WORK: Crop Farmer: weeding and watering the rows
+          28  HOME: getting up and dressed
+          9  WORK: Crop Farmer: harvesting carrots -> STARTED
+          8  WORK: Crop Farmer: going to a ripe row of carrots
+          7  WORK: Crop Farmer: sowing carrots -> STARTED
+          5  WORK: Crop Farmer: harvesting cabbages -> STARTED
+    Hedda        FARMER     stuck    0 blocked    0 still-on-errand  157  at (115.0,106.5) goal WORK
+          204  WORK: Orchard Keeper: looking the trees over and pruning
+          175  HOME: getting up and dressed
+          117  WORK: Orchard Keeper: to a tree with # apples
+          64  WORK: Orchard Keeper: picking apples (# on the tree) -> STARTED
+          22  SLEEP: 
+          16  SOCIALIZE: 
+    Rufus        FARMER     stuck    0 blocked    4 still-on-errand   94  at (185.0,62.0) goal WORK
+          289  WORK: Crop Farmer: weeding and watering the rows
+          174  HOME: getting up and dressed
+          63  SOCIALIZE: 
+          33  SLEEP: 
+          12  WORK: Crop Farmer: going to a ripe row of cabbages
+          8  WORK: Crop Farmer: going to a ripe row of carrots
+    Valeria      FARMER     stuck    0 blocked    0 still-on-errand   78  at (183.1,67.2) goal WORK
+          169  WORK: Orchard Keeper: looking the trees over and pruning
+          133  WORK: Orchard Keeper: to a tree with # apples
+          88  HOME: getting up and dressed
+          59  PRAY: on the way to prayers
+          50  PRAY: praying at the altar
+          49  WORK: Orchard Keeper: picking apples (# on the tree) -> STARTED
+    Hamon        CIVIC      stuck    0 blocked    0 still-on-errand    0  at (128.3,54.5) goal SLEEP
+          575  SLEEP: as close as I can get
+          25  SLEEP: 
+    Bess         MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (126.5,50.7) goal SLEEP
+          578  SLEEP: as close as I can get
+          22  SLEEP: 
+    Wilfred      CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (128.5,50.7) goal SLEEP
+          579  SLEEP: as close as I can get
+          21  SLEEP: 
+    Vibius       CIVIC      stuck    0 blocked    0 still-on-errand    0  at (141.5,69.3) goal SOCIALIZE
+          577  SLEEP: 
+          23  SOCIALIZE: 
+    Julia        MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (141.5,56.8) goal SLEEP
+          563  SLEEP: as close as I can get
+          36  SLEEP: 
+          1  IDLE: 
+    Appius       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (142.4,56.8) goal SLEEP
+          576  SLEEP: as close as I can get
+          23  SLEEP: 
+          1  IDLE: 
+    Bandit       BANDIT     stuck    0 blocked    0 still-on-errand  203  at (12.9,80.6) goal WANDER
+          590  WANDER: 
+          10  RETURN: 
+    Bandit archer BANDIT     stuck    0 blocked    0 still-on-errand  293  at (30.1,80.0) goal WANDER
+          539  WANDER: 
+          16  INVESTIGATE: coming for a fight
+          13  INVESTIGATE: searching nearby (#)
+          13    why INVESTIGATE: confront: searching nearby (#) at (#, #) - courage #, sounds of violence [subject Sir Gawai
+          12  RETURN: 
+          8    why FLEE: outmatched by Wolf (#x) and alone; running for help
+    Brute        BRUTE      stuck    0 blocked    0 still-on-errand  287  at (20.5,81.8) goal WANDER
+          598  WANDER: 
+          1  EAT: ate trout
+          1  EAT: foraged at camp
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.ai.NpcRoutineTest.everyNpcGetsOnWithTheirMorningWithoutStandingBlocked(NpcRoutineTest.java:58)
+
+SocietyRegressionTest > guardsPhysicallyDeliverAnActualCorpseWithItsOriginalGear() FAILED
+    org.opentest4j.AssertionFailedError: COLLECT: gathered up the grave; taking it to the undertaker / carrying a body to the undertaker ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.SocietyRegressionTest.guardsPhysicallyDeliverAnActualCorpseWithItsOriginalGear(SocietyRegressionTest.java:50)
+
+WeeklyLifeTest > theTownsLiveThroughTwoDaysAtSpeed() FAILED
+    org.opentest4j.AssertionFailedError: DevCity Inn bought from the farms
+    sown 23, harvested 24, apples 88, meals eaten at an inn 29, patrons 24
+      DevCity Inn: meals 9 drinks 2 nights 0 produce bought 0; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 vegetable_stew, 1 vegetable_stew, 1 bread, 1 bread, 1 bread, 1 bread, 1 apple, 1 apple]
+      DevPalace Taberna: meals 12 drinks 6 nights 0 produce bought 0; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 apple, 1 hot_cider]
+    goals: {FIRE_RESPONSE=9, BANK=395, SLEEP=11090, HIDE=247, WANDER=1164, SEARCH=6, FLEE=82, WATCH=12, INN=1596, FIGHT=98, SOCIALIZE=2241, RETURN=4, PATROL=1942, SHELTER=9594, INVESTIGATE=947, EAT=1268, WORK=15472, ERRAND=1258, LOOK=1676, HOME=5230, PRAY=389}
+      Ada          SHOP     work 331/411 blocked   3/ 720  as close as I can get
+      Bram         WATCH    work 126/135 blocked   3/ 720  as close as I can get
+      Cole         WATCH    work 164/164 blocked   0/ 720  going to look
+      Dag          TRADE    work 271/395 blocked   5/ 720  
+      Eda          TRADE    work 251/403 blocked   0/ 720  as close as I can get
+      Gus          SHOP     work 353/405 blocked   0/ 720  
+      Hale         WATCH    work 305/307 blocked   0/ 720  
+      Ivo          TRADE    work 259/380 blocked   8/ 720  
+      Jun          SHOP     work 390/408 blocked  34/ 720  arrived
+      Kit          SHOP     work 316/415 blocked   0/ 720  
+      Mara         GROWER   work 234/361 blocked   0/ 720  
+      Morrow       CLERGY   work 251/380 blocked   7/ 720  
+      Silas        SHOP     work 121/408 blocked   0/ 720  
+      Bobwin       WATCH    work 124/140 blocked   0/ 720  
+      Oswin        LEISURED work  80/ 88 blocked   0/ 720  
+      Maud         CLERGY   work 175/402 blocked   5/ 720  
+      Alric        CLERGY   work 159/387 blocked  16/ 720  
+      Godric       TRADE    work 317/352 blocked   0/ 720  
+      Isolde       LEISURED work 196/196 blocked   0/ 720  
+      Elowen       TRADE    work 125/418 blocked 110/ 720  paused to reconsider a blocked route
+      Oren         TRADE    work 102/288 blocked   0/ 720  
+      Tamsin       TRADE    work 115/357 blocked  16/ 720  
+      Sir Alden    WATCH    work 159/162 blocked   0/ 720  
+      Fenna        TRADE    work 386/388 blocked   5/ 720  
+      Wren         SHOP     work 396/408 blocked  35/ 720  
+      Hilda        TRADE    work 115/393 blocked   0/ 720  
+      Bertram      TRADE    work 204/405 blocked   0/ 720  
+      Sir Roderic  WATCH    work 285/307 blocked   0/ 720  getting up and dressed
+      Wynn         TRADE    work 128/323 blocked   0/ 720  
+      Corwin       TRADE    work  14/284 blocked   1/ 720  hiding from Mountain lion
+      Severinus    SHOP     work 210/411 blocked  52/ 720  as close as I can get
+      Cassia       WATCH    work 301/303 blocked   0/ 720  
+      Titus        WATCH    work 307/308 blocked   0/ 720  
+      Decimus      WATCH    work 280/305 blocked   0/ 720  drank from the well
+      Quintus      WATCH    work 168/169 blocked   0/ 720  
+      Sextus       WATCH    work 165/166 blocked   0/ 720  getting up and dressed
+      Lucilla      SHOP     work 213/403 blocked  24/ 720  
+      Flavia       SHOP     work 108/410 blocked  66/ 720  as close as I can get
+      Aurelia      CLERGY   work 310/380 blocked   0/ 720  as close as I can get
+      Philon       CLERGY   work 187/385 blocked  39/ 720  as close as I can get
+      Nikias       LEISURED work   0/  0 blocked   0/ 720  
+      Gaius        TRADE    work 231/358 blocked   0/ 720  as close as I can get
+      Servius      LEISURED work   0/  0 blocked   0/ 720  
+      Octavia      TRADE    work 146/370 blocked   0/ 720  as close as I can get
+      Marcellus    TRADE    work 263/407 blocked   0/ 720  as close as I can get
+      Cornelia     TRADE    work 191/375 blocked   0/ 720  as close as I can get
+      Lucius       TRADE    work 168/385 blocked   0/ 720  as close as I can get
+      Atalanta     TRADE    work 402/408 blocked   0/ 720  as close as I can get
+      Livia        TRADE    work 175/288 blocked   5/ 720  as close as I can get
+      Maximus      WATCH    work 281/309 blocked   0/ 720  
+      Arthur       TRADE    work 304/401 blocked   2/ 720  
+      Sir Lancelot WATCH    work 159/161 blocked   0/ 720  as close as I can get
+      Sir Gawain   TRADE    work  72/377 blocked   0/ 720  as close as I can get
+      Tristan      TRADE    work 392/396 blocked   0/ 720  
+      Percival     TRADE    work 146/320 blocked   0/ 720  as close as I can get
+      Merlin       TRADE    work 207/326 blocked   0/ 720  as close as I can get
+      Aeldric      TRADE    work 257/360 blocked   0/ 720  
+      Brannoc      TRADE    work 323/408 blocked   0/ 720  
+      Corren       TRADE    work 195/305 blocked   0/ 720  
+      Deryn        TRADE    work 172/354 blocked   0/ 720  
+      Eirwen       TRADE    work 252/386 blocked  46/ 720  as close as I can get
+      Fennric      TRADE    work 274/389 blocked  61/ 720  paused to reconsider a blocked route
+      Garron       TRADE    work 114/385 blocked   0/ 720  as close as I can get
+      Haldren      TRADE    work 142/374 blocked   0/ 720  as close as I can get
+      Istren       SHOP     work 257/411 blocked   0/ 720  as close as I can get
+      Maerwyn      SHOP     work 151/408 blocked   0/ 720  as close as I can get
+      Tobin        GROWER   work 159/340 blocked   0/ 720  as close as I can get
+      Hedda        GROWER   work 264/395 blocked   0/ 720  
+      Rufus        GROWER   work 241/403 blocked   0/ 720  
+      Valeria      GROWER   work 239/394 blocked   0/ 720  
+      Hamon        INN      work 325/545 blocked   0/ 720  as close as I can get
+      Bess         INN      work 449/540 blocked   0/ 720  
+      Wilfred      INN      work 383/477 blocked   0/ 720  as close as I can get
+      Vibius       INN      work 498/543 blocked   0/ 720  
+      Julia        INN      work 441/547 blocked   0/ 720  as close as I can get
+      Appius       INN      work 363/480 blocked   0/ 720  as close as I can get
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.WeeklyLifeTest.theTownsLiveThroughTwoDaysAtSpeed(WeeklyLifeTest.java:101)
+
+MeleeAimTest > lookingDownCanStrikeASmallAnimalBeforeTheBladeMeetsTheFloor() FAILED
+    org.opentest4j.AssertionFailedError: the low target must be reachable by the actual aimed sweep ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.combat.MeleeAimTest.lookingDownCanStrikeASmallAnimalBeforeTheBladeMeetsTheFloor(MeleeAimTest.java:28)
+
+SmallTargetTest > aCatAtTheFeetCanBeStruck() FAILED
+    org.opentest4j.AssertionFailedError: swings that passed over a cat in reach ==> expected: <0> but was: <8>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+        at app//rpg.combat.SmallTargetTest.aCatAtTheFeetCanBeStruck(SmallTargetTest.java:67)
+
+SprintStopTest > stoppingASprintKeepsTheFeetUnderTheBody() FAILED
+    org.opentest4j.AssertionFailedError: a foot kicked 2.5193634 px outward stopping in 0.2 s ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.render.SprintStopTest.stoppingASprintKeepsTheFeetUnderTheBody(SprintStopTest.java:46)
+
+DevMapAuditTest > theDevmapHasNoPlacementProblems() FAILED
+    org.opentest4j.AssertionFailedError: objects sunk in blocks: [apple_tree 'Apple tree' at 113,5,105 in block 10, apple_tree 'Apple tree' at 118,5,105 in block 10, apple_tree 'Apple tree' at 113,5,110 in block 10, apple_tree 'Apple tree' at 118,5,110 in block 10, apple_tree 'Apple tree' at 178,5,66 in block 10, apple_tree 'Apple tree' at 182,5,66 in block 10, apple_tree 'Apple tree' at 186,5,66 in block 10] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.world.DevMapAuditTest.theDevmapHasNoPlacementProblems(DevMapAuditTest.java:86)
+
+407 tests completed, 11 failed, 11 skipped
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 54m 35s
+9 actionable tasks: 1 executed, 8 up-to-date
+done

@@ -28,6 +28,12 @@ public final class Ids {
      */
     public static final long CROP_FARMER_CITY = 960, ORCHARD_KEEPER_CITY = 961, CROP_FARMER_PALACE = 962, ORCHARD_KEEPER_PALACE = 963,
             INNKEEPER_CITY = 964, BARTENDER_CITY = 965, COOK_CITY = 966, INNKEEPER_PALACE = 967, BARTENDER_PALACE = 968, COOK_PALACE = 969;
+    /**
+     * (0.3.5) Guild Row's people: the seven guildmasters, the Armory's keeper, the outworkers (carder, spinner), the
+     * Artisans' workshop's fuller and dyer, the Metallists' smelter, and a coastal fisher of the Mariners.
+     */
+    public static final long GUILD_METALLISTS = 970, ARMORY = 971, GUILD_FORESTERS = 972, CARDER = 973, SPINNER = 974, GUILD_ARTISANS = 975,
+            FULLER = 976, DYER = 977, GUILD_FARMERS = 978, GUILD_PROVISIONERS = 979, GUILD_MARINERS = 980, GUILD_ARCANISTS = 981, SMELTER = 982, COASTAL_FISHER = 983;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
     /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */

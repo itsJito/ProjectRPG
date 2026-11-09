@@ -1,0 +1,42 @@
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :test
+
+TraversalTest > fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt() FAILED
+    org.opentest4j.AssertionFailedError: expected: <null> but was: <rpg.actor.Traversal$Motion@1bb9aa43>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:30)
+        at app//org.junit.jupiter.api.Assertions.assertNull(Assertions.java:279)
+        at app//rpg.actor.TraversalTest.fullAgilityUnlocksHigherGeometryWithoutLettingLevelFiveUseIt(TraversalTest.java:39)
+
+DoorPassageTest > aShopkeeperUnlocksHerOwnStoreRoomOnTheWayInAndLocksItBehindHer() FAILED
+    org.opentest4j.AssertionFailedError: locked again behind her ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.DoorPassageTest.aShopkeeperUnlocksHerOwnStoreRoomOnTheWayInAndLocksItBehindHer(DoorPassageTest.java:65)
+
+Gamefixes030Test > aLadderIsTakenFromTheTopAndClimbedDownToTheGround() FAILED
+    org.opentest4j.AssertionFailedError: stepped off at the bottom ==> expected: <null> but was: <rpg.actor.Ladders$Climb@111610e6>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertNull.failNotNull(AssertNull.java:50)
+        at app//org.junit.jupiter.api.AssertNull.assertNull(AssertNull.java:35)
+        at app//org.junit.jupiter.api.Assertions.assertNull(Assertions.java:287)
+        at app//rpg.ai.Gamefixes030Test.aLadderIsTakenFromTheTopAndClimbedDownToTheGround(Gamefixes030Test.java:75)

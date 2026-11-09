@@ -79,7 +79,10 @@ class WeeklyLifeTest {
                         planWork.merge(n.id, 1, Integer::sum);
                         // (0.3.3) a hunter's quarry fought out in the wilds is the hunter's work, as a fight is the watch's
                         if (n.goal == Brain.Goal.WORK || n.goal == Brain.Goal.PATROL || n.goal == Brain.Goal.COLLECT
-                                || n.goal == Brain.Goal.FIGHT && (n.role == Npc.Role.HUNTER || n.watch()) && !DevMap.ALPHA.equals(DevMap.jurisdiction(n.x, n.z))) atWork.merge(n.id, 1, Integer::sum);
+                                || n.goal == Brain.Goal.FIGHT && (n.role == Npc.Role.HUNTER || n.watch()) && !DevMap.ALPHA.equals(DevMap.jurisdiction(n.x, n.z))
+                                // (0.3.6) the watch's duty is its work: searching, looking into a crime, keeping an eye on someone, seeing outlaws off
+                                || n.watch() && (n.goal == Brain.Goal.SEARCH || n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.WATCH || n.goal == Brain.Goal.EVICT
+                                    || n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.RETURN)) atWork.merge(n.id, 1, Integer::sum);
                     }
                 }
             }

@@ -19,7 +19,20 @@ import static astratto.bridge.AstrattoNative.*;
  * a menu option.
  */
 public final class Foliage {
-    public enum Kind { FERN,TALL_GRASS,CLOVER,REED,BRAMBLE,WILDFLOWER,IVY,MOSS,MUSHROOM,SAPLING,SHRUB,THISTLE,DAISY,BLUEBELL,CATTAIL,HEATHER,DOCK,BRACKEN,BUSH }
+    /**
+     * Every kind of growth, with its bulk as a body meets it (0.3.6, gamefixes: fire spells passed through the plants):
+     * the radius and height of the stand of it, and whether it is dense - woody or thick enough to stop a bolt flying
+     * into it, where grass and flowers only part round it.
+     */
+    public enum Kind {
+        FERN(0.35f,0.6f,false),TALL_GRASS(0.35f,0.8f,false),CLOVER(0.3f,0.15f,false),REED(0.3f,1.3f,false),BRAMBLE(0.5f,0.9f,true),
+        WILDFLOWER(0.25f,0.4f,false),IVY(0.3f,1.2f,false),MOSS(0.3f,0.1f,false),MUSHROOM(0.15f,0.15f,false),SAPLING(0.3f,1.6f,true),
+        SHRUB(0.5f,0.9f,true),THISTLE(0.25f,0.8f,false),DAISY(0.2f,0.25f,false),BLUEBELL(0.2f,0.3f,false),CATTAIL(0.25f,1.4f,false),
+        HEATHER(0.35f,0.4f,false),DOCK(0.3f,0.6f,false),BRACKEN(0.4f,0.9f,false),BUSH(0.65f,1.3f,true);
+        public final float radius,height;
+        public final boolean dense;
+        Kind(float radius,float height,boolean dense){this.radius=radius;this.height=height;this.dense=dense;}
+    }
     public static final class Chunk {
         public final int key,x,z;
         public int version;
@@ -42,6 +55,8 @@ public final class Foliage {
     private record Trail(float x,float y,float z,float radius,double at) {}
     private final java.util.ArrayDeque<Trail> trail=new java.util.ArrayDeque<>();
     private final Map<Long,Double> trailAt=new HashMap<>(), rustleAt=new HashMap<>();
+    /** Where each body last left a trail point. */
+    private final Map<Long,float[]> lastPoint=new HashMap<>();
     private static final double RECOVER=2.2;
     private final float[] push=new float[32];
     private static final int CHUNKS_X = (DevMap.SX + 15) / 16, CHUNKS_Z = (DevMap.SZ + 15) / 16;
@@ -145,7 +160,16 @@ public final class Foliage {
         for(int ring=0;ring<=2 && !generated;ring++)for(int dz=-ring;dz<=ring && !generated;dz++)for(int dx=-ring;dx<=ring;dx++) {
             int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated=true;break;
         }
-        for(Chunk chunk:chunks.values())for(Patch plant:chunk.plants) {
+        // (0.3.6, gamefixes: stutter / aggressive optimization) the chunks about the player are looked over every pass; the
+        // rest of the map's growth a few chunks a pass in turn (every plant on the map was checked four times a second, a
+        // spike that grew with every chunk the player had walked through)
+        tended.clear();
+        for(Chunk chunk:chunks.values())if(Math.abs(chunk.x/16-centerX)<=NEAR_CHUNKS && Math.abs(chunk.z/16-centerZ)<=NEAR_CHUNKS)tended.add(chunk);
+        if(!chunks.isEmpty()) {
+            if(farOrder.size()!=chunks.size()){farOrder.clear();farOrder.addAll(chunks.keySet());java.util.Collections.sort(farOrder);}
+            for(int i=0;i<FAR_CHUNKS_A_PASS;i++){farAt=(farAt+1)%farOrder.size();Chunk c=chunks.get(farOrder.get(farAt));if(c!=null && !tended.contains(c))tended.add(c);}
+        }
+        for(Chunk chunk:tended)for(Patch plant:chunk.plants) {
             if(plant.removed) {
                 if(depleted.getOrDefault(plant.id,Double.MAX_VALUE)<=g.state.minutes && suitable(plant.kind,(int)plant.x,(int)plant.y,(int)plant.z)) {depleted.remove(plant.id);plant.removed=false;chunk.version++;}
                 else continue;
@@ -160,6 +184,11 @@ public final class Foliage {
             else if(d>44 && g.chemistry.state(plant.id)==0 && sensed.remove(plant.id))g.game.commands().chemRemove(plant.id);
         }
     }
+    /** (0.3.6) How many chunks out from the player's are tended every pass, and how many of the rest a pass in turn. */
+    static final int NEAR_CHUNKS=3, FAR_CHUNKS_A_PASS=6;
+    private final List<Chunk> tended=new ArrayList<>();
+    private final List<Integer> farOrder=new ArrayList<>();
+    private int farAt;
     /** The plants the chemistry is watching now (those near the player). */
     private final java.util.Set<Long> sensed=new java.util.HashSet<>();
     /**
@@ -173,10 +202,21 @@ public final class Foliage {
             if(actor instanceof rpg.ai.Npc n && !n.loaded || actor instanceof rpg.animal.Animal a && !a.loaded)continue;
             float speed=(float)Math.hypot(actor.vx,actor.vz);
             if(speed<0.25f || g.time<trailAt.getOrDefault(actor.id,-1.0))continue;
+            // (0.3.6, gamefixes: a Pegasus in flight made footstep noises) only a body down among the plants moves them: one
+            // flying, leaping, in a saddle or swimming over them is above the growth, and neither bends it nor rustles it
+            if(actor.riding!=0 || actor.swimMode>=rpg.actor.Swimming.TREAD || actor instanceof rpg.animal.Animal a && a.flying)continue;
+            float ground=g.vox.groundY(actor.x,actor.y+0.3f,actor.z);
+            if(!Float.isFinite(ground) || actor.y-ground>PLANT_REACH)continue;
             // a grown plant, or a planted patch (herbs, flax, a berry bush): both bend and rustle as a body goes through
             boolean patch=Blocks.plant(g.vox.block((int)Math.floor(actor.x),(int)Math.floor(actor.y+0.1f),(int)Math.floor(actor.z)));
             if(!patch && plantAt(actor.x,actor.z,actor.radius+0.35f)==null)continue;
-            trailAt.put(actor.id,g.time+0.2);
+            // (0.3.5, gamefixes: foliage still reacted badly to being stepped in) a point is left each half metre walked,
+            // not each fifth of a second: a body standing about in the growth dropped point on point where it stood, and
+            // the renderer's few slots then went to those, so the plants just behind a walker sprang up all at once
+            float[] last=lastPoint.get(actor.id);
+            if(last!=null && Math.hypot(actor.x-last[0],actor.z-last[1])<0.45f)continue;
+            lastPoint.put(actor.id,new float[]{actor.x,actor.z});
+            trailAt.put(actor.id,g.time+0.12);
             if(trail.size()>=64)trail.removeFirst();
             trail.addLast(new Trail(actor.x,actor.y,actor.z,actor.radius+0.05f,g.time));
             // the rustle: louder for a run, a hush for someone creeping
@@ -187,6 +227,8 @@ public final class Foliage {
             if(actor!=g.player)g.noise(actor,actor.x,actor.y,actor.z,actor.sneaking?1.5f:3+speed,0.15f);
         }
     }
+    /** How far above the ground a body's feet may be and still be among the plants (m). */
+    static final float PLANT_REACH=0.6f;
     /** (0.3.0) Whether tall grass stands about a point (someone crouched in it is half hidden). */
     public boolean tallGrassAt(float x, float z) {
         Chunk chunk=chunks.get(Math.clamp((int)x/16,0,CHUNKS_X-1)+Math.clamp((int)z/16,0,CHUNKS_Z-1)*CHUNKS_X);
@@ -195,6 +237,39 @@ public final class Foliage {
         for(Patch p:chunk.plants)if(!p.removed && (p.kind==Kind.TALL_GRASS || p.kind==Kind.REED || p.kind==Kind.BRACKEN) && Math.abs(p.x-x)<1.1f && Math.abs(p.z-z)<1.1f && ++near>=2)return true;
         return false;
     }
+    /**
+     * (0.3.6, gamefixes: fire spells passed through the plants without catching them) the plants a segment passes through
+     * (from (x, y, z) along the unit (dx, dy, dz) for len metres), nearest first, each as {distance along, plant}: the
+     * stand of each plant is a column of its kind's radius and height over where it grows.
+     */
+    public List<Object[]> along(float x,float y,float z,float dx,float dy,float dz,float len) {
+        List<Object[]> hits=new ArrayList<>();
+        float ex=x+dx*len,ez=z+dz*len;
+        int c0x=Math.clamp((int)(Math.min(x,ex)-1)/16,0,CHUNKS_X-1),c1x=Math.clamp((int)(Math.max(x,ex)+1)/16,0,CHUNKS_X-1);
+        int c0z=Math.clamp((int)(Math.min(z,ez)-1)/16,0,CHUNKS_Z-1),c1z=Math.clamp((int)(Math.max(z,ez)+1)/16,0,CHUNKS_Z-1);
+        for(int cx=c0x;cx<=c1x;cx++)for(int cz=c0z;cz<=c1z;cz++) {
+            Chunk chunk=chunks.get(cx+cz*CHUNKS_X);
+            if(chunk==null)continue;
+            for(Patch p:chunk.plants) {
+                if(p.removed)continue;
+                // the nearest the segment comes to the plant's stem, in plan
+                float px=p.x-x,pz=p.z-z,flat=dx*dx+dz*dz;
+                float t=flat<1e-6f?0:Math.max(0,Math.min(len,(px*dx+pz*dz)/flat));
+                float qx=x+dx*t-p.x,qz=z+dz*t-p.z;
+                float off=qx*qx+qz*qz,r2=p.kind.radius*p.kind.radius;
+                if(off>r2)continue;
+                // where the line enters the stand (in plan, along the line's own horizontal run)
+                float run=(float)Math.sqrt(flat);
+                float entry=run<1e-4f?t:Math.max(0,t-(float)Math.sqrt(r2-off)/run);
+                float hy=y+dy*entry;
+                if(hy<p.y-0.05f || hy>p.y+p.kind.height)continue;
+                hits.add(new Object[]{entry,p});
+            }
+        }
+        hits.sort((a,b)->Float.compare((float)a[0],(float)b[0]));
+        return hits;
+    }
+
     /** The live plant nearest a point within a reach, or null. */
     public Patch plantAt(float x,float z,float reach) {
         Chunk chunk=chunks.get(Math.clamp((int)x/16,0,CHUNKS_X-1)+Math.clamp((int)z/16,0,CHUNKS_Z-1)*CHUNKS_X);
@@ -229,6 +304,10 @@ public final class Foliage {
         while(it.hasNext() && n<8) {
             Trail t=it.next();
             if(Math.hypot(t.x()-camX,t.z()-camZ)>48)continue;
+            // a point under a body still standing there adds nothing the body does not (and would take a slot)
+            boolean covered=false;
+            for(int i=0;i<live.size() && i<5 && !covered;i++){Actor a=live.get(i);covered=Math.hypot(a.x-t.x(),a.z-t.z())<0.3f && Math.abs(a.y-t.y())<0.5f;}
+            if(covered)continue;
             float left=(float)(1-(g.time-t.at())/RECOVER);
             if(left<=0)continue;
             // the stems spring back quickly at first, then settle the last of the way slowly
@@ -262,5 +341,5 @@ public final class Foliage {
         g.game.commands().chemRemove(plant.id);sensed.remove(plant.id);g.state.commit("FoliageRemoved",0,plant.id,plant.jurisdiction(),0,why);
     }
     public Map<String,Object> save(){Map<String,Object> saved=new HashMap<>();for(var entry:depleted.entrySet())saved.put(Long.toString(entry.getKey()),entry.getValue());return saved;}
-    public void load(Map<String,Object> saved){epoch++;sensed.clear();chunks.clear();depleted.clear();trail.clear();trailAt.clear();rustleAt.clear();if(saved!=null)for(var entry:saved.entrySet())if(entry.getValue() instanceof Number time)depleted.put(Long.parseLong(entry.getKey()),time.doubleValue());next=0;}
+    public void load(Map<String,Object> saved){epoch++;sensed.clear();chunks.clear();depleted.clear();trail.clear();trailAt.clear();lastPoint.clear();rustleAt.clear();if(saved!=null)for(var entry:saved.entrySet())if(entry.getValue() instanceof Number time)depleted.put(Long.parseLong(entry.getKey()),time.doubleValue());next=0;}
 }

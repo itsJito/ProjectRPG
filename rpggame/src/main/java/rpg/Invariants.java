@@ -86,6 +86,8 @@ public final class Invariants {
         for (ItemStack s : g.econ.materialsPalace.stock.stacks()) at.accept(s,"palace materials stock");
         // (0.3.2) the inns' bars
         if (g.inns != null) for (var inn : g.inns.all) if (inn.bar != null) for (ItemStack s : inn.bar.stock.stacks()) at.accept(s, inn.name() + " bar");
+        // (0.3.6) Guild Row's stores (they were never counted, so every unit stocked there read as lost)
+        if (g.guilds != null) for (var shop : g.guilds.stores.values()) for (ItemStack s : shop.stock.stacks()) at.accept(s, shop.name + " stock");
         for (CombatSystem.Projectile p : g.combat.projectiles) at.accept(p.ammo, "arrow in flight");
         Map<String, Long> ledger = g.state.ledger();
         java.util.Set<String> ids = new java.util.HashSet<>(ledger.keySet());

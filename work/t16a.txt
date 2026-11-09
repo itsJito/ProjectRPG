@@ -1,0 +1,1079 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 16604). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-16604.out.log
+Starting 103rd build in daemon [uptime: 5 hrs 4 mins 39.334 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 21% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#4885,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#4884,included builds,5,main]) started.
+:processResources (Thread[#4885,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#4884,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#4886,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#4884,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#4886,Execution worker,5,main]) started.
+:theastrattoengine:buildNative (Thread[#4884,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#4884,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#4884,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#4884,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#4884,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#4884,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#4884,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#4884,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#4884,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#4890,Execution worker Thread 5,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#4887,Execution worker Thread 2,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#4890,Execution worker Thread 5,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#4885,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#4885,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#4885,included builds Thread 2,5,main]) started.
+:classes (Thread[#4885,included builds Thread 2,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#4885,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#4885,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\ai\Brain.class has changed.
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\ai\Npc.class has changed.
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\objects\Corpse.class has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.023 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Log level has changed, stopping idle worker daemon with out-of-date log level.
+Starting process 'Gradle Worker Daemon 67'. Working directory: C:\Users\John\.gradle\workers Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath7236816773153032020txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 67'
+Successfully started process 'Gradle Worker Daemon 67'
+Started Gradle worker daemon (1.156 secs) with fork options DaemonForkOptions{executable=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileTestJava
+Compiling with JDK Java compiler API.
+Incremental compilation of 117 classes completed in 9.451 secs.
+Class dependency analysis for incremental compilation took 0.059 secs.
+Resolve mutations for :processTestResources (Thread[#4885,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#4885,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#4885,included builds Thread 2,5,main]) started.
+:testClasses (Thread[#4885,included builds Thread 2,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#4885,included builds Thread 2,5,main]) started.
+:test (Thread[#4885,included builds Thread 2,5,main]) started.
+Gradle Test Executor 68 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Value of input property 'filter.commandLineIncludePatterns' has changed for task ':test'
+Starting process 'Gradle Test Executor 68'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath4943909392342330861txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 68'
+Successfully started process 'Gradle Test Executor 68'
+
+Gamefixes029Test > theShoulderChargeBargesAVillagerAsideAtAgilityTenOnly() FAILED
+    org.opentest4j.AssertionFailedError: barged at Agility 10: closest 0.9239645 fastest 8.322999 charging true eda at 71.44741,56.641247 player 70.5,54.261436 ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.ai.Gamefixes029Test.theShoulderChargeBargesAVillagerAsideAtAgilityTenOnly(Gamefixes029Test.java:212)
+
+Gamefixes029Test > theWatchDefendsThePlayerAndBooksTheAttackerOnItsOwnWord() STANDARD_OUT
+          [crime] ASSAULT by Eda against Gamefixes 0.2.9 at (101.7, 70.5), t 0.0
+          [crime] ASSAULT by Gamefixes 0.2.9 against Eda at (100.5, 70.5), t 0.0
+
+GraveyardDeliveryTest > aDeliveredBodyIsNotInvestigatedAgain() STANDARD_OUT
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-6.8, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [crime] THEFT by Brute against Sir Gawain at (1.3, 82.6), t 154.8
+          [crime] THEFT by Bandit against Sir Gawain at (1.8, 82.3), t 155.4
+          [crime] THEFT by Brute against Sir Gawain at (1.3, 82.7), t 156.7
+          [crime] THEFT by Bandit against Sir Gawain at (1.8, 82.3), t 157.3
+          [crime] THEFT by Brute against Sir Gawain at (1.3, 82.7), t 158.6
+          [crime] THEFT by Bandit against Sir Gawain at (1.8, 82.3), t 159.2
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Wren WORK at (72.76, 4.00, 111.77) -> (72.0, 111.4), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Eirwen SOCIALIZE at (76.93, 4.00, 31.00) -> (76.0, 30.7), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    collect samples 48
+    buried at 35 s
+
+
+NpcRoutineTest > everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() STANDARD_OUT
+          [crime] ASSAULT by Bandit against Sir Gawain at (19.1, 71.7), t 98.3
+
+    === routine probe: 600 samples ===
+    Ada          MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (90.2,61.7) goal WORK
+          393  WORK: 
+          130  SOCIALIZE: 
+          57  BANK: 
+          18  AID: 
+          2  SOCIALIZE: talked with Lucius; exchanged # pieces of news
+    Bram         LAWMAN     stuck    0 blocked    0 still-on-errand  130  at (108.1,68.6) goal PATROL
+          359  PATROL: reached patrol point #
+          70  PATROL: 
+          44    why SEARCH: searching for whoever did it near (#, #), #s since the last clue
+          42  INVESTIGATE: going to look
+          31  INVESTIGATE: searching nearby (#)
+          21    why INVESTIGATE: search: going to look at (#, #) - courage #, not alone [subject Finn]
+    Cole         GUARD      stuck    0 blocked    0 still-on-errand  129  at (97.1,82.5) goal PATROL
+          387  PATROL: reached patrol point #
+          80  INVESTIGATE: searching nearby (#)
+          58  PATROL: 
+          34    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, sounds of violence [subject Finn]
+          31    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, not alone [subject Finn]
+          28  INVESTIGATE: going to look
+    Dag          WORKER     stuck    0 blocked    0 still-on-errand    0  at (77.3,30.4) goal WORK
+          543  WORK: sold # logs to Materials stall
+          41  WORK: gather Tree ## -> STARTED
+          8  SOCIALIZE: 
+          6  WORK: 
+          1  SOCIALIZE: talked with Eirwen
+          1  EAT: ate bread
+    Eda          VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (91.5,58.9) goal WORK
+          267  WORK: gather Redberry bush ## -> STARTED
+          266  WORK: sold # redberries to Store A
+          48  WORK: 
+          18  SOCIALIZE: 
+          1  SOCIALIZE: talked with Maud
+    Finn         THIEF      stuck    0 blocked    0 still-on-errand  177  at (92.9,71.4) goal WANDER
+          281  STEAL: 
+          232  WANDER: 
+          32  SOCIALIZE: 
+          26  HIDE: hiding from Wolf
+          26    why HIDE: hiding from Wolf (last seen #s ago) [subject Wolf]
+          24  INVESTIGATE: hiding
+    Gus          MERCHANT   stuck    0 blocked    0 still-on-errand    1  at (17.5,108.7) goal EAT
+          482  WORK: 
+          63  BANK: 
+          29  EAT: 
+          26  SOCIALIZE: 
+    Hale         LAWMAN     stuck    0 blocked    0 still-on-errand  298  at (34.5,117.3) goal EAT
+          343  PATROL: 
+          209  EAT: 
+          48  BANK: 
+    Ivo          CARTER     stuck    0 blocked    0 still-on-errand    0  at (90.3,64.8) goal WORK
+          473  WORK: 
+          71  SOCIALIZE: 
+          55  EAT: 
+          1  SOCIALIZE: talked with Maud; exchanged # pieces of news
+    Jun          QUEST_GIVER stuck    0 blocked    0 still-on-errand    0  at (62.0,102.6) goal WORK
+          572  WORK: 
+          27  SOCIALIZE: 
+          1  SOCIALIZE: talked with Wren
+    Kit          CONTACT    stuck    0 blocked    0 still-on-errand    0  at (48.6,112.2) goal WORK
+          578  WORK: 
+          22  SOCIALIZE: 
+    Mara         FARMER     stuck    0 blocked    0 still-on-errand    0  at (109.5,88.7) goal SOCIALIZE
+          179  SOCIALIZE: 
+          163  WORK: checked on a chicken
+          88  WORK: checked on a duck
+          75  WORK: checked on a chick
+          21  WORK: 
+          20  WORK: took feed from the chest
+    Morrow       UNDERTAKER stuck    0 blocked   25 still-on-errand    0  at (117.3,96.1) goal WORK
+          543  WORK: 
+          31  SOCIALIZE: 
+          25  EAT: paused to reconsider a blocked route
+          1  EAT: drank from the well
+    Silas        FENCE      stuck    0 blocked    7 still-on-errand    0  at (12.1,117.3) goal WORK
+          286  WORK: arrived
+          233  WORK: 
+          66  BANK: 
+          7  WORK: paused to reconsider a blocked route
+          5  SOCIALIZE: 
+          1  EAT: drank from the well
+    Bobwin       GUARD      stuck    0 blocked    0 still-on-errand  145  at (110.8,82.1) goal PATROL
+          376  PATROL: reached patrol point #
+          71  PATROL: 
+          52  INVESTIGATE: searching nearby (#)
+          40  INVESTIGATE: going to look
+          36    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, not alone [subject Finn]
+          34    why INVESTIGATE: search: going to look at (#, #) - courage #, not alone [subject Finn]
+    Oswin        BEGGAR     stuck    0 blocked    0 still-on-errand    0  at (110.0,86.5) goal WORK
+          600  WORK: 
+    Maud         HEALER     stuck    0 blocked    0 still-on-errand   16  at (91.1,59.4) goal WORK
+          255  WORK: gather Herb patch ## -> STARTED
+          247  WORK: sold # guam leaf to Store A
+          69  WORK: 
+          27  HIDE: hiding from Wolf
+          27    why HIDE: hiding from Wolf (last seen #s ago)
+          1    why FLEE: afraid of Wolf; running
+    Alric        PRIEST     stuck    0 blocked    0 still-on-errand    0  at (110.2,88.0) goal WORK
+          582  WORK: 
+          16  SOCIALIZE: 
+          1  EAT: ate bread
+          1  SOCIALIZE: talked with Oswin
+    Godric       HUNTER     stuck    0 blocked    0 still-on-errand   23  at (92.2,59.4) goal WORK
+          234  WORK: gather Redberry bush ## -> STARTED
+          209  WORK: sold # redberries to Store A
+          80  WORK: 
+          37  INVESTIGATE: going to look
+          21    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Garron]
+          13    why INVESTIGATE: peek: creeping closer to look at (#, #) - courage #, no answer [subject Routine probe]
+    Isolde       SCHOLAR    stuck    0 blocked    0 still-on-errand   15  at (67.2,25.6) goal WORK
+          529  WORK: 
+          52  INVESTIGATE: going to look
+          19    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Maud]
+          16    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject someone]
+          15    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Tamsin]
+          13  INVESTIGATE: looking round the spot
+    Elowen       FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (92.9,41.5) goal WORK
+          245  WORK: hauled the lake net in
+          233  WORK: net soaking; # in it so far
+          83  WORK: going to haul in a full net
+          20  WORK: 
+          19  SOCIALIZE: 
+    Oren         MINER      stuck    0 blocked    0 still-on-errand    6  at (133.7,132.7) goal SOCIALIZE
+          355  WORK: Ore Miner: gather at a suitable site
+          179  SOCIALIZE: 
+          22  WORK: Ore Miner: none
+          19  HIDE: hiding from Wolf
+          19    why HIDE: hiding from Wolf (last seen #s ago)
+          16    why FLEE: not a fighter; fleeing Goblin
+    Tamsin       CRAFTSMAN  stuck    0 blocked    0 still-on-errand   20  at (67.2,26.9) goal WORK
+          318  WORK: Blacksmith: make the selected order
+          192  WORK: Blacksmith: minding the rack (# pieces for sale)
+          54  HIDE: hiding from Fox
+          54    why HIDE: hiding from Fox (last seen #s ago)
+          29  WORK: Blacksmith: none
+          3    why FLEE: afraid of Fox; running
+    Sir Alden    KNIGHT     stuck    0 blocked    0 still-on-errand    7  at (93.1,66.6) goal WORK
+          563  WORK: protecting Ivo under Escort Knight duties
+          24    why INVESTIGATE: check: going to look at (#, #) - courage #, sounds of violence, not alone [subject Finn]
+          24  INVESTIGATE: going to look
+          6  INVESTIGATE: looking round the spot
+          5    why INVESTIGATE: check: looking round the spot at (#, #) - courage #, sounds of violence, not alone [subject
+          2  FIGHT: close the distance
+    Fenna        HUNTER     stuck    0 blocked    0 still-on-errand   14  at (84.7,92.0) goal WORK
+          553  WORK: no observed eligible target for Predator Hunter
+          32  INVESTIGATE: going to look
+          18    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Corren]
+          12    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Finn]
+          11  INVESTIGATE: looking round the spot
+          5    why INVESTIGATE: check: looking round the spot at (#, #) - courage #, not alone [subject Finn]
+    Wren         CIVIC      stuck    0 blocked    0 still-on-errand    0  at (72.0,111.4) goal WORK
+          600  WORK: 
+    Hilda        CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (85.5,52.9) goal WORK
+          435  WORK: No eligible work for Cook; waiting for supplies or a suitable site
+          72  WORK: Cook: buy missing inputs
+          33  WORK: Cook: make the selected order
+          25  WORK: Cook: none
+          17  SOCIALIZE: 
+          14  WORK: Cook: deliver a real batch
+    Bertram      MINER      stuck    0 blocked    0 still-on-errand    0  at (181.5,137.0) goal WORK
+          277  WORK: Quarry Worker: gather at a suitable site
+          192  WORK: Quarry Worker: none
+          106  WORK: No eligible work for Quarry Worker; waiting for supplies or a suitable site
+          14  WORK: Quarry Worker: deliver a real batch
+          9  SOCIALIZE: 
+          1  SOCIALIZE: talked with Gaius
+    Sir Roderic  KNIGHT     stuck    0 blocked    0 still-on-errand   26  at (81.5,84.5) goal WORK
+          412  WORK: inspected the assigned border
+          82  WORK: 
+          64  INVESTIGATE: going to look
+          24  INVESTIGATE: looking round the spot
+          17    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Routine probe]
+          14    why INVESTIGATE: check: going to look at (#, #) - courage #, sounds of violence, not alone [subject Corren]
+    Wynn         FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (78.9,52.1) goal WORK
+          390  WORK: Shellfish Gatherer: none
+          101  WORK: Shellfish Gatherer: pack full, taking raw crab to sell at Store B
+          96  WORK: Shellfish Gatherer: gather at a suitable site
+          13  WORK: Shellfish Gatherer: pack full and no buyer; taking raw crab to the bank
+    Corwin       FISHERMAN  stuck    0 blocked    0 still-on-errand   97  at (66.3,56.9) goal WORK
+          175  WORK: River Fisherman: none
+          136  WORK: River Fisherman: gather at a suitable site
+          107    why HIDE: hiding from Wolf (last seen #s ago)
+          107  HIDE: hiding from Wolf
+          55  SOCIALIZE: 
+          46  LOOK: 
+    Severinus    CIVIC      stuck    0 blocked    0 still-on-errand    0  at (159.5,31.3) goal WORK
+          422  WORK: 
+          175  BANK: 
+          2    why LOOK: a movement at (#, #)
+          2  LOOK: 
+          1  IDLE: 
+    Cassia       LAWMAN     stuck    0 blocked    0 still-on-errand  599  at (144.5,116.0) goal BANK
+          599  BANK: 
+          1  IDLE: 
+    Titus        GUARD      stuck    0 blocked    0 still-on-errand   35  at (160.7,107.0) goal PATROL
+          597  PATROL: reached patrol point #
+          2  EAT: ate trout
+          1  PATROL: 
+    Decimus      GUARD      stuck    0 blocked    0 still-on-errand   36  at (145.6,101.2) goal PATROL
+          554  PATROL: reached patrol point #
+          44  PATROL: 
+          2  EAT: ate trout
+    Quintus      GUARD      stuck    0 blocked    0 still-on-errand   35  at (148.0,60.0) goal PATROL
+          547  PATROL: reached patrol point #
+          51  PATROL: 
+          1  EAT: ate trout
+          1  IDLE: 
+    Sextus       GUARD      stuck    0 blocked    0 still-on-errand   39  at (174.5,91.7) goal PATROL
+          599  PATROL: reached patrol point #
+          1  IDLE: 
+    Lucilla      CIVIC      stuck    0 blocked    0 still-on-errand    0  at (151.1,84.7) goal WORK
+          548  WORK: 
+          50  SOCIALIZE: 
+          1  IDLE: 
+          1  SOCIALIZE: talked with Servius
+    Flavia       MERCHANT   stuck    0 blocked    0 still-on-errand   49  at (136.7,75.6) goal EAT
+          175  BANK: 
+          129  PRAY: on the way to prayers
+          128  WORK: 
+          99  EAT: 
+          50  PRAY: praying at the altar
+          18  SOCIALIZE: 
+    Aurelia      PRIEST     stuck    0 blocked    0 still-on-errand    0  at (159.6,61.9) goal WORK
+          498  WORK: 
+          97  SOCIALIZE: 
+          2  SOCIALIZE: talked with Marcellus
+          2  EAT: ate bread
+          1  IDLE: 
+    Philon       HEALER     stuck    0 blocked    0 still-on-errand    0  at (131.7,150.6) goal WORK
+          386  WORK: 
+          175  WORK: sold # guam leaf to Palace materials stall
+          37  WORK: gather Herb patch ## -> STARTED
+          1  EAT: ate trout
+          1  IDLE: 
+    Nikias       SCHOLAR    stuck    0 blocked    0 still-on-errand    0  at (135.4,133.8) goal WORK
+          599  WORK: 
+          1  IDLE: 
+    Gaius        MINER      stuck    0 blocked    0 still-on-errand    0  at (183.1,138.2) goal WORK
+          236  WORK: Quarry Worker: none
+          209  SOCIALIZE: 
+          149  WORK: No eligible work for Quarry Worker; waiting for supplies or a suitable site
+          6  WORK: Quarry Worker: gather at a suitable site
+    Servius      BEGGAR     stuck    0 blocked    0 still-on-errand    0  at (168.0,100.6) goal WORK
+          598  WORK: 
+          1  IDLE: 
+          1  EAT: ate bread
+    Octavia      VILLAGER   stuck    0 blocked    0 still-on-errand    1  at (141.8,75.9) goal WORK
+          177  PRAY: on the way to prayers
+          173  WORK: 
+          111  WORK: gather Redberry bush ## -> STARTED
+          73  EAT: 
+          63  SOCIALIZE: 
+          1  EAT: drank from the well
+    Marcellus    VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (138.2,74.7) goal WORK
+          282  WORK: gather Redberry bush ## -> STARTED
+          222  WORK: 
+          84  WORK: sold # redberries to The Macellum
+          10  SOCIALIZE: 
+          1  IDLE: 
+          1  EAT: ate redberries
+    Cornelia     VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (164.8,75.4) goal WORK
+          267  WORK: 
+          245  WORK: gather Redberry bush ## -> STARTED
+          88  SOCIALIZE: 
+    Lucius       FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (107.3,128.5) goal WORK
+          200  WORK: River Fisherman: gather at a suitable site
+          149  WORK: River Fisherman: deliver a real batch
+          138  WORK: River Fisherman: none
+          102  WORK: River Fisherman: pack full, taking raw trout to sell at Store A
+          9  SOCIALIZE: 
+          1  SOCIALIZE: talked with Ada
+    Atalanta     HUNTER     stuck    0 blocked    0 still-on-errand    0  at (159.6,74.7) goal WORK
+          409  WORK: gather Redberry bush ## -> STARTED
+          154  WORK: sold # redberries to The Macellum
+          34  WORK: 
+          2  EAT: ate redberries
+          1  IDLE: 
+    Livia        VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (177.7,86.6) goal WORK
+          288  WORK: gather Redberry bush ## -> STARTED
+          271  WORK: 
+          31  SOCIALIZE: 
+          7  WORK: sold # redberries to The Macellum
+          1  IDLE: 
+          1  SOCIALIZE: talked with Merlin
+    Maximus      KNIGHT     stuck    0 blocked    0 still-on-errand    0  at (162.0,33.0) goal WORK
+          599  WORK: protecting Severinus under Household Knight duties
+          1  EAT: ate trout
+    Arthur       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (91.6,59.4) goal WORK
+          375  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          82  WORK: Carpenter: make the selected order
+          66  WORK: Carpenter: buy missing inputs
+          65  WORK: Carpenter: pack full, taking plank to sell at Store A
+          8  SOCIALIZE: 
+          3  WORK: Carpenter: none
+    Sir Lancelot KNIGHT     stuck    0 blocked    0 still-on-errand   10  at (97.5,100.5) goal WORK
+          553  WORK: inspected the assigned border
+          18  INVESTIGATE: going to look
+          14  WORK: 
+          14    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Corren]
+          12  INVESTIGATE: looking round the spot
+          6    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Finn]
+    Sir Gawain   HUNTER     stuck    0 blocked    0 still-on-errand  262  at (33.7,43.1) goal LOOK
+          177  LOOK: 
+          177    why LOOK: a movement at (#, #)
+          109  INVESTIGATE: going to look
+          74  FIGHT: back off to shooting range
+          66  FIGHT: draw and shoot
+          61  INVESTIGATE: creeping closer to look
+    Tristan      HUNTER     stuck    0 blocked    0 still-on-errand    0  at (40.5,149.6) goal WORK
+          599  WORK: 
+          1  EAT: ate bread
+    Percival     MINER      stuck    0 blocked    0 still-on-errand    0  at (134.5,131.9) goal WORK
+          554  WORK: Coal Miner: gather at a suitable site
+          31  WORK: Coal Miner: none
+          8  SOCIALIZE: 
+          2  SOCIALIZE: talked with Garron
+          2  WORK: Coal Miner: deliver a real batch
+          2  EAT: ate bread
+    Merlin       MINER      stuck    0 blocked    0 still-on-errand    0  at (124.2,52.8) goal WORK
+          570  WORK: Gem Prospector: gather at a suitable site
+          15  WORK: Gem Prospector: none
+          12  SOCIALIZE: 
+          1  IDLE: 
+          1  SOCIALIZE: talked with Wynn
+          1  WORK: No eligible work for Gem Prospector; waiting for supplies or a suitable site
+    Aeldric      CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (92.0,58.8) goal WORK
+          365  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          127  WORK: Carpenter: buy missing inputs
+          83  WORK: Carpenter: make the selected order
+          16  WORK: Carpenter: none
+          9  SOCIALIZE: 
+    Brannoc      CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (73.6,27.7) goal WORK
+          392  WORK: Carpenter: make the selected order
+          132  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          55  WORK: Carpenter: buy missing inputs
+          18  SOCIALIZE: 
+          2  EAT: ate bread
+          1  SOCIALIZE: talked with Deryn; exchanged # pieces of news
+    Corren       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    9  at (90.9,61.4) goal WORK
+          464  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          80  WORK: Carpenter: buy missing inputs
+          27  HIDE: hiding from Wolf
+          27    why HIDE: hiding from Wolf (last seen #s ago)
+          15  WORK: Carpenter: make the selected order
+          9  SOCIALIZE: 
+    Deryn        CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (92.2,60.2) goal WORK
+          480  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          104  WORK: Carpenter: buy missing inputs
+          14  WORK: Carpenter: make the selected order
+          1  IDLE: 
+          1  EAT: ate bread
+    Eirwen       WORKER     stuck    0 blocked    0 still-on-errand    0  at (76.6,30.3) goal WORK
+          563  WORK: sold # logs to Materials stall
+          26  WORK: gather Tree ## -> STARTED
+          11  WORK: 
+    Fennric      WORKER     stuck    0 blocked    0 still-on-errand    0  at (23.2,109.3) goal WORK
+          210  WORK: sold # logs to Store B
+          165  WORK: gather Spruce tree ## -> STARTED
+          104  WORK: gather Birch tree ## -> STARTED
+          69  WORK: 
+          51  SOCIALIZE: 
+          1  SOCIALIZE: talked with Silas
+    Garron       MINER      stuck    0 blocked    0 still-on-errand    9  at (136.7,138.0) goal WORK
+          338  WORK: Ore Miner: gather at a suitable site
+          142  WORK: Ore Miner: none
+          71  SOCIALIZE: 
+          26  HIDE: hiding from Wolf
+          26    why HIDE: hiding from Wolf (last seen #s ago)
+          18    why FLEE: not a fighter; fleeing Goblin
+    Haldren      MINER      stuck    0 blocked    0 still-on-errand    0  at (149.2,134.5) goal WORK
+          328  WORK: Ore Miner: deliver a real batch
+          213  WORK: Ore Miner: gather at a suitable site
+          46  WORK: Ore Miner: none
+          8  SOCIALIZE: 
+          2  EAT: ate bread
+          2  SOCIALIZE: talked with Servius
+    Istren       MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (76.0,28.6) goal WORK
+          589  WORK: 
+          10  SOCIALIZE: 
+          1  EAT: ate bread
+    Maerwyn      MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (182.5,96.5) goal WORK
+          592  WORK: 
+          8  SOCIALIZE: 
+    Bandit       BANDIT     stuck    0 blocked    0 still-on-errand  164  at (11.8,82.2) goal WANDER
+          380  WANDER: 
+          81    why SEARCH: searching for whoever did it near (#, #), #s since the last clue
+          71  SEARCH: checked a spot (#); nobody
+          6  SEARCH: reached the last known location; nobody there
+          4  FIGHT: close the distance
+          4  FIGHT: guard against BITE
+    Bandit archer BANDIT     stuck    0 blocked    0 still-on-errand  192  at (31.3,83.6) goal WANDER
+          506  WANDER: 
+          27  FIGHT: moving behind the front line
+          24  RETURN: 
+          17  LOOT: 
+          7  FIGHT: draw and shoot
+          6  INVESTIGATE: coming for a fight
+    Brute        BRUTE      stuck    0 blocked    0 still-on-errand  222  at (21.0,89.2) goal WANDER
+          505  WANDER: 
+          21  RETURN: 
+          16  FIGHT: close the distance
+          11  INVESTIGATE: searching nearby (#)
+          11    why INVESTIGATE: confront: searching nearby (#) at (#, #) - courage #, sounds of violence [subject Sir Gawai
+          9  INVESTIGATE: coming for a fight
+
+
+NpcRoutineTest > everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() FAILED
+    org.opentest4j.AssertionFailedError: Cole spent the morning investigating:
+    === routine probe: 600 samples ===
+    Ada          MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (90.2,61.7) goal WORK
+          393  WORK: 
+          130  SOCIALIZE: 
+          57  BANK: 
+          18  AID: 
+          2  SOCIALIZE: talked with Lucius; exchanged # pieces of news
+    Bram         LAWMAN     stuck    0 blocked    0 still-on-errand  130  at (108.1,68.6) goal PATROL
+          359  PATROL: reached patrol point #
+          70  PATROL: 
+          44    why SEARCH: searching for whoever did it near (#, #), #s since the last clue
+          42  INVESTIGATE: going to look
+          31  INVESTIGATE: searching nearby (#)
+          21    why INVESTIGATE: search: going to look at (#, #) - courage #, not alone [subject Finn]
+    Cole         GUARD      stuck    0 blocked    0 still-on-errand  129  at (97.1,82.5) goal PATROL
+          387  PATROL: reached patrol point #
+          80  INVESTIGATE: searching nearby (#)
+          58  PATROL: 
+          34    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, sounds of violence [subject Finn]
+          31    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, not alone [subject Finn]
+          28  INVESTIGATE: going to look
+    Dag          WORKER     stuck    0 blocked    0 still-on-errand    0  at (77.3,30.4) goal WORK
+          543  WORK: sold # logs to Materials stall
+          41  WORK: gather Tree ## -> STARTED
+          8  SOCIALIZE: 
+          6  WORK: 
+          1  SOCIALIZE: talked with Eirwen
+          1  EAT: ate bread
+    Eda          VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (91.5,58.9) goal WORK
+          267  WORK: gather Redberry bush ## -> STARTED
+          266  WORK: sold # redberries to Store A
+          48  WORK: 
+          18  SOCIALIZE: 
+          1  SOCIALIZE: talked with Maud
+    Finn         THIEF      stuck    0 blocked    0 still-on-errand  177  at (92.9,71.4) goal WANDER
+          281  STEAL: 
+          232  WANDER: 
+          32  SOCIALIZE: 
+          26  HIDE: hiding from Wolf
+          26    why HIDE: hiding from Wolf (last seen #s ago) [subject Wolf]
+          24  INVESTIGATE: hiding
+    Gus          MERCHANT   stuck    0 blocked    0 still-on-errand    1  at (17.5,108.7) goal EAT
+          482  WORK: 
+          63  BANK: 
+          29  EAT: 
+          26  SOCIALIZE: 
+    Hale         LAWMAN     stuck    0 blocked    0 still-on-errand  298  at (34.5,117.3) goal EAT
+          343  PATROL: 
+          209  EAT: 
+          48  BANK: 
+    Ivo          CARTER     stuck    0 blocked    0 still-on-errand    0  at (90.3,64.8) goal WORK
+          473  WORK: 
+          71  SOCIALIZE: 
+          55  EAT: 
+          1  SOCIALIZE: talked with Maud; exchanged # pieces of news
+    Jun          QUEST_GIVER stuck    0 blocked    0 still-on-errand    0  at (62.0,102.6) goal WORK
+          572  WORK: 
+          27  SOCIALIZE: 
+          1  SOCIALIZE: talked with Wren
+    Kit          CONTACT    stuck    0 blocked    0 still-on-errand    0  at (48.6,112.2) goal WORK
+          578  WORK: 
+          22  SOCIALIZE: 
+    Mara         FARMER     stuck    0 blocked    0 still-on-errand    0  at (109.5,88.7) goal SOCIALIZE
+          179  SOCIALIZE: 
+          163  WORK: checked on a chicken
+          88  WORK: checked on a duck
+          75  WORK: checked on a chick
+          21  WORK: 
+          20  WORK: took feed from the chest
+    Morrow       UNDERTAKER stuck    0 blocked   25 still-on-errand    0  at (117.3,96.1) goal WORK
+          543  WORK: 
+          31  SOCIALIZE: 
+          25  EAT: paused to reconsider a blocked route
+          1  EAT: drank from the well
+    Silas        FENCE      stuck    0 blocked    7 still-on-errand    0  at (12.1,117.3) goal WORK
+          286  WORK: arrived
+          233  WORK: 
+          66  BANK: 
+          7  WORK: paused to reconsider a blocked route
+          5  SOCIALIZE: 
+          1  EAT: drank from the well
+    Bobwin       GUARD      stuck    0 blocked    0 still-on-errand  145  at (110.8,82.1) goal PATROL
+          376  PATROL: reached patrol point #
+          71  PATROL: 
+          52  INVESTIGATE: searching nearby (#)
+          40  INVESTIGATE: going to look
+          36    why INVESTIGATE: search: searching nearby (#) at (#, #) - courage #, not alone [subject Finn]
+          34    why INVESTIGATE: search: going to look at (#, #) - courage #, not alone [subject Finn]
+    Oswin        BEGGAR     stuck    0 blocked    0 still-on-errand    0  at (110.0,86.5) goal WORK
+          600  WORK: 
+    Maud         HEALER     stuck    0 blocked    0 still-on-errand   16  at (91.1,59.4) goal WORK
+          255  WORK: gather Herb patch ## -> STARTED
+          247  WORK: sold # guam leaf to Store A
+          69  WORK: 
+          27  HIDE: hiding from Wolf
+          27    why HIDE: hiding from Wolf (last seen #s ago)
+          1    why FLEE: afraid of Wolf; running
+    Alric        PRIEST     stuck    0 blocked    0 still-on-errand    0  at (110.2,88.0) goal WORK
+          582  WORK: 
+          16  SOCIALIZE: 
+          1  EAT: ate bread
+          1  SOCIALIZE: talked with Oswin
+    Godric       HUNTER     stuck    0 blocked    0 still-on-errand   23  at (92.2,59.4) goal WORK
+          234  WORK: gather Redberry bush ## -> STARTED
+          209  WORK: sold # redberries to Store A
+          80  WORK: 
+          37  INVESTIGATE: going to look
+          21    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Garron]
+          13    why INVESTIGATE: peek: creeping closer to look at (#, #) - courage #, no answer [subject Routine probe]
+    Isolde       SCHOLAR    stuck    0 blocked    0 still-on-errand   15  at (67.2,25.6) goal WORK
+          529  WORK: 
+          52  INVESTIGATE: going to look
+          19    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Maud]
+          16    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject someone]
+          15    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Tamsin]
+          13  INVESTIGATE: looking round the spot
+    Elowen       FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (92.9,41.5) goal WORK
+          245  WORK: hauled the lake net in
+          233  WORK: net soaking; # in it so far
+          83  WORK: going to haul in a full net
+          20  WORK: 
+          19  SOCIALIZE: 
+    Oren         MINER      stuck    0 blocked    0 still-on-errand    6  at (133.7,132.7) goal SOCIALIZE
+          355  WORK: Ore Miner: gather at a suitable site
+          179  SOCIALIZE: 
+          22  WORK: Ore Miner: none
+          19  HIDE: hiding from Wolf
+          19    why HIDE: hiding from Wolf (last seen #s ago)
+          16    why FLEE: not a fighter; fleeing Goblin
+    Tamsin       CRAFTSMAN  stuck    0 blocked    0 still-on-errand   20  at (67.2,26.9) goal WORK
+          318  WORK: Blacksmith: make the selected order
+          192  WORK: Blacksmith: minding the rack (# pieces for sale)
+          54  HIDE: hiding from Fox
+          54    why HIDE: hiding from Fox (last seen #s ago)
+          29  WORK: Blacksmith: none
+          3    why FLEE: afraid of Fox; running
+    Sir Alden    KNIGHT     stuck    0 blocked    0 still-on-errand    7  at (93.1,66.6) goal WORK
+          563  WORK: protecting Ivo under Escort Knight duties
+          24    why INVESTIGATE: check: going to look at (#, #) - courage #, sounds of violence, not alone [subject Finn]
+          24  INVESTIGATE: going to look
+          6  INVESTIGATE: looking round the spot
+          5    why INVESTIGATE: check: looking round the spot at (#, #) - courage #, sounds of violence, not alone [subject
+          2  FIGHT: close the distance
+    Fenna        HUNTER     stuck    0 blocked    0 still-on-errand   14  at (84.7,92.0) goal WORK
+          553  WORK: no observed eligible target for Predator Hunter
+          32  INVESTIGATE: going to look
+          18    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Corren]
+          12    why INVESTIGATE: check: going to look at (#, #) - courage #, not alone [subject Finn]
+          11  INVESTIGATE: looking round the spot
+          5    why INVESTIGATE: check: looking round the spot at (#, #) - courage #, not alone [subject Finn]
+    Wren         CIVIC      stuck    0 blocked    0 still-on-errand    0  at (72.0,111.4) goal WORK
+          600  WORK: 
+    Hilda        CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (85.5,52.9) goal WORK
+          435  WORK: No eligible work for Cook; waiting for supplies or a suitable site
+          72  WORK: Cook: buy missing inputs
+          33  WORK: Cook: make the selected order
+          25  WORK: Cook: none
+          17  SOCIALIZE: 
+          14  WORK: Cook: deliver a real batch
+    Bertram      MINER      stuck    0 blocked    0 still-on-errand    0  at (181.5,137.0) goal WORK
+          277  WORK: Quarry Worker: gather at a suitable site
+          192  WORK: Quarry Worker: none
+          106  WORK: No eligible work for Quarry Worker; waiting for supplies or a suitable site
+          14  WORK: Quarry Worker: deliver a real batch
+          9  SOCIALIZE: 
+          1  SOCIALIZE: talked with Gaius
+    Sir Roderic  KNIGHT     stuck    0 blocked    0 still-on-errand   26  at (81.5,84.5) goal WORK
+          412  WORK: inspected the assigned border
+          82  WORK: 
+          64  INVESTIGATE: going to look
+          24  INVESTIGATE: looking round the spot
+          17    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Routine probe]
+          14    why INVESTIGATE: check: going to look at (#, #) - courage #, sounds of violence, not alone [subject Corren]
+    Wynn         FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (78.9,52.1) goal WORK
+          390  WORK: Shellfish Gatherer: none
+          101  WORK: Shellfish Gatherer: pack full, taking raw crab to sell at Store B
+          96  WORK: Shellfish Gatherer: gather at a suitable site
+          13  WORK: Shellfish Gatherer: pack full and no buyer; taking raw crab to the bank
+    Corwin       FISHERMAN  stuck    0 blocked    0 still-on-errand   97  at (66.3,56.9) goal WORK
+          175  WORK: River Fisherman: none
+          136  WORK: River Fisherman: gather at a suitable site
+          107    why HIDE: hiding from Wolf (last seen #s ago)
+          107  HIDE: hiding from Wolf
+          55  SOCIALIZE: 
+          46  LOOK: 
+    Severinus    CIVIC      stuck    0 blocked    0 still-on-errand    0  at (159.5,31.3) goal WORK
+          422  WORK: 
+          175  BANK: 
+          2    why LOOK: a movement at (#, #)
+          2  LOOK: 
+          1  IDLE: 
+    Cassia       LAWMAN     stuck    0 blocked    0 still-on-errand  599  at (144.5,116.0) goal BANK
+          599  BANK: 
+          1  IDLE: 
+    Titus        GUARD      stuck    0 blocked    0 still-on-errand   35  at (160.7,107.0) goal PATROL
+          597  PATROL: reached patrol point #
+          2  EAT: ate trout
+          1  PATROL: 
+    Decimus      GUARD      stuck    0 blocked    0 still-on-errand   36  at (145.6,101.2) goal PATROL
+          554  PATROL: reached patrol point #
+          44  PATROL: 
+          2  EAT: ate trout
+    Quintus      GUARD      stuck    0 blocked    0 still-on-errand   35  at (148.0,60.0) goal PATROL
+          547  PATROL: reached patrol point #
+          51  PATROL: 
+          1  EAT: ate trout
+          1  IDLE: 
+    Sextus       GUARD      stuck    0 blocked    0 still-on-errand   39  at (174.5,91.7) goal PATROL
+          599  PATROL: reached patrol point #
+          1  IDLE: 
+    Lucilla      CIVIC      stuck    0 blocked    0 still-on-errand    0  at (151.1,84.7) goal WORK
+          548  WORK: 
+          50  SOCIALIZE: 
+          1  IDLE: 
+          1  SOCIALIZE: talked with Servius
+    Flavia       MERCHANT   stuck    0 blocked    0 still-on-errand   49  at (136.7,75.6) goal EAT
+          175  BANK: 
+          129  PRAY: on the way to prayers
+          128  WORK: 
+          99  EAT: 
+          50  PRAY: praying at the altar
+          18  SOCIALIZE: 
+    Aurelia      PRIEST     stuck    0 blocked    0 still-on-errand    0  at (159.6,61.9) goal WORK
+          498  WORK: 
+          97  SOCIALIZE: 
+          2  SOCIALIZE: talked with Marcellus
+          2  EAT: ate bread
+          1  IDLE: 
+    Philon       HEALER     stuck    0 blocked    0 still-on-errand    0  at (131.7,150.6) goal WORK
+          386  WORK: 
+          175  WORK: sold # guam leaf to Palace materials stall
+          37  WORK: gather Herb patch ## -> STARTED
+          1  EAT: ate trout
+          1  IDLE: 
+    Nikias       SCHOLAR    stuck    0 blocked    0 still-on-errand    0  at (135.4,133.8) goal WORK
+          599  WORK: 
+          1  IDLE: 
+    Gaius        MINER      stuck    0 blocked    0 still-on-errand    0  at (183.1,138.2) goal WORK
+          236  WORK: Quarry Worker: none
+          209  SOCIALIZE: 
+          149  WORK: No eligible work for Quarry Worker; waiting for supplies or a suitable site
+          6  WORK: Quarry Worker: gather at a suitable site
+    Servius      BEGGAR     stuck    0 blocked    0 still-on-errand    0  at (168.0,100.6) goal WORK
+          598  WORK: 
+          1  IDLE: 
+          1  EAT: ate bread
+    Octavia      VILLAGER   stuck    0 blocked    0 still-on-errand    1  at (141.8,75.9) goal WORK
+          177  PRAY: on the way to prayers
+          173  WORK: 
+          111  WORK: gather Redberry bush ## -> STARTED
+          73  EAT: 
+          63  SOCIALIZE: 
+          1  EAT: drank from the well
+    Marcellus    VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (138.2,74.7) goal WORK
+          282  WORK: gather Redberry bush ## -> STARTED
+          222  WORK: 
+          84  WORK: sold # redberries to The Macellum
+          10  SOCIALIZE: 
+          1  IDLE: 
+          1  EAT: ate redberries
+    Cornelia     VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (164.8,75.4) goal WORK
+          267  WORK: 
+          245  WORK: gather Redberry bush ## -> STARTED
+          88  SOCIALIZE: 
+    Lucius       FISHERMAN  stuck    0 blocked    0 still-on-errand    0  at (107.3,128.5) goal WORK
+          200  WORK: River Fisherman: gather at a suitable site
+          149  WORK: River Fisherman: deliver a real batch
+          138  WORK: River Fisherman: none
+          102  WORK: River Fisherman: pack full, taking raw trout to sell at Store A
+          9  SOCIALIZE: 
+          1  SOCIALIZE: talked with Ada
+    Atalanta     HUNTER     stuck    0 blocked    0 still-on-errand    0  at (159.6,74.7) goal WORK
+          409  WORK: gather Redberry bush ## -> STARTED
+          154  WORK: sold # redberries to The Macellum
+          34  WORK: 
+          2  EAT: ate redberries
+          1  IDLE: 
+    Livia        VILLAGER   stuck    0 blocked    0 still-on-errand    0  at (177.7,86.6) goal WORK
+          288  WORK: gather Redberry bush ## -> STARTED
+          271  WORK: 
+          31  SOCIALIZE: 
+          7  WORK: sold # redberries to The Macellum
+          1  IDLE: 
+          1  SOCIALIZE: talked with Merlin
+    Maximus      KNIGHT     stuck    0 blocked    0 still-on-errand    0  at (162.0,33.0) goal WORK
+          599  WORK: protecting Severinus under Household Knight duties
+          1  EAT: ate trout
+    Arthur       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (91.6,59.4) goal WORK
+          375  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          82  WORK: Carpenter: make the selected order
+          66  WORK: Carpenter: buy missing inputs
+          65  WORK: Carpenter: pack full, taking plank to sell at Store A
+          8  SOCIALIZE: 
+          3  WORK: Carpenter: none
+    Sir Lancelot KNIGHT     stuck    0 blocked    0 still-on-errand   10  at (97.5,100.5) goal WORK
+          553  WORK: inspected the assigned border
+          18  INVESTIGATE: going to look
+          14  WORK: 
+          14    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Corren]
+          12  INVESTIGATE: looking round the spot
+          6    why INVESTIGATE: check: going to look at (#, #) - courage # [subject Finn]
+    Sir Gawain   HUNTER     stuck    0 blocked    0 still-on-errand  262  at (33.7,43.1) goal LOOK
+          177  LOOK: 
+          177    why LOOK: a movement at (#, #)
+          109  INVESTIGATE: going to look
+          74  FIGHT: back off to shooting range
+          66  FIGHT: draw and shoot
+          61  INVESTIGATE: creeping closer to look
+    Tristan      HUNTER     stuck    0 blocked    0 still-on-errand    0  at (40.5,149.6) goal WORK
+          599  WORK: 
+          1  EAT: ate bread
+    Percival     MINER      stuck    0 blocked    0 still-on-errand    0  at (134.5,131.9) goal WORK
+          554  WORK: Coal Miner: gather at a suitable site
+          31  WORK: Coal Miner: none
+          8  SOCIALIZE: 
+          2  SOCIALIZE: talked with Garron
+          2  WORK: Coal Miner: deliver a real batch
+          2  EAT: ate bread
+    Merlin       MINER      stuck    0 blocked    0 still-on-errand    0  at (124.2,52.8) goal WORK
+          570  WORK: Gem Prospector: gather at a suitable site
+          15  WORK: Gem Prospector: none
+          12  SOCIALIZE: 
+          1  IDLE: 
+          1  SOCIALIZE: talked with Wynn
+          1  WORK: No eligible work for Gem Prospector; waiting for supplies or a suitable site
+    Aeldric      CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (92.0,58.8) goal WORK
+          365  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          127  WORK: Carpenter: buy missing inputs
+          83  WORK: Carpenter: make the selected order
+          16  WORK: Carpenter: none
+          9  SOCIALIZE: 
+    Brannoc      CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (73.6,27.7) goal WORK
+          392  WORK: Carpenter: make the selected order
+          132  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          55  WORK: Carpenter: buy missing inputs
+          18  SOCIALIZE: 
+          2  EAT: ate bread
+          1  SOCIALIZE: talked with Deryn; exchanged # pieces of news
+    Corren       CRAFTSMAN  stuck    0 blocked    0 still-on-errand    9  at (90.9,61.4) goal WORK
+          464  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          80  WORK: Carpenter: buy missing inputs
+          27  HIDE: hiding from Wolf
+          27    why HIDE: hiding from Wolf (last seen #s ago)
+          15  WORK: Carpenter: make the selected order
+          9  SOCIALIZE: 
+    Deryn        CRAFTSMAN  stuck    0 blocked    0 still-on-errand    0  at (92.2,60.2) goal WORK
+          480  WORK: No eligible work for Carpenter; waiting for supplies or a suitable site
+          104  WORK: Carpenter: buy missing inputs
+          14  WORK: Carpenter: make the selected order
+          1  IDLE: 
+          1  EAT: ate bread
+    Eirwen       WORKER     stuck    0 blocked    0 still-on-errand    0  at (76.6,30.3) goal WORK
+          563  WORK: sold # logs to Materials stall
+          26  WORK: gather Tree ## -> STARTED
+          11  WORK: 
+    Fennric      WORKER     stuck    0 blocked    0 still-on-errand    0  at (23.2,109.3) goal WORK
+          210  WORK: sold # logs to Store B
+          165  WORK: gather Spruce tree ## -> STARTED
+          104  WORK: gather Birch tree ## -> STARTED
+          69  WORK: 
+          51  SOCIALIZE: 
+          1  SOCIALIZE: talked with Silas
+    Garron       MINER      stuck    0 blocked    0 still-on-errand    9  at (136.7,138.0) goal WORK
+          338  WORK: Ore Miner: gather at a suitable site
+          142  WORK: Ore Miner: none
+          71  SOCIALIZE: 
+          26  HIDE: hiding from Wolf
+          26    why HIDE: hiding from Wolf (last seen #s ago)
+          18    why FLEE: not a fighter; fleeing Goblin
+    Haldren      MINER      stuck    0 blocked    0 still-on-errand    0  at (149.2,134.5) goal WORK
+          328  WORK: Ore Miner: deliver a real batch
+          213  WORK: Ore Miner: gather at a suitable site
+          46  WORK: Ore Miner: none
+          8  SOCIALIZE: 
+          2  EAT: ate bread
+          2  SOCIALIZE: talked with Servius
+    Istren       MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (76.0,28.6) goal WORK
+          589  WORK: 
+          10  SOCIALIZE: 
+          1  EAT: ate bread
+    Maerwyn      MERCHANT   stuck    0 blocked    0 still-on-errand    0  at (182.5,96.5) goal WORK
+          592  WORK: 
+          8  SOCIALIZE: 
+    Bandit       BANDIT     stuck    0 blocked    0 still-on-errand  164  at (11.8,82.2) goal WANDER
+          380  WANDER: 
+          81    why SEARCH: searching for whoever did it near (#, #), #s since the last clue
+          71  SEARCH: checked a spot (#); nobody
+          6  SEARCH: reached the last known location; nobody there
+          4  FIGHT: close the distance
+          4  FIGHT: guard against BITE
+    Bandit archer BANDIT     stuck    0 blocked    0 still-on-errand  192  at (31.3,83.6) goal WANDER
+          506  WANDER: 
+          27  FIGHT: moving behind the front line
+          24  RETURN: 
+          17  LOOT: 
+          7  FIGHT: draw and shoot
+          6  INVESTIGATE: coming for a fight
+    Brute        BRUTE      stuck    0 blocked    0 still-on-errand  222  at (21.0,89.2) goal WANDER
+          505  WANDER: 
+          21  RETURN: 
+          16  FIGHT: close the distance
+          11  INVESTIGATE: searching nearby (#)
+          11    why INVESTIGATE: confront: searching nearby (#) at (#, #) - courage #, sounds of violence [subject Sir Gawai
+          9  INVESTIGATE: coming for a fight
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.ai.NpcRoutineTest.everyNpcGetsOnWithTheirMorningWithoutStandingBlocked(NpcRoutineTest.java:61)
+
+Gradle Test Executor 68 finished executing tests.
+
+> Task :test
+
+18 tests completed, 2 failed
+Finished generating test XML results (0.033 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.041 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+Invalidating in-memory cache of C:\Users\John\Documents\ProjectRPG\rpggame\.gradle\8.14.3\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\John\Documents\ProjectRPG\rpggame\.gradle\8.14.3\fileHashes\resourceHashesCache.bin
+Invalidating in-memory cache of C:\Users\John\Documents\ProjectRPG\rpggame\.gradle\8.14.3\executionHistory\executionHistory.bin
+Invalidating in-memory cache of C:\Users\John\Documents\ProjectRPG\rpggame\.gradle\buildOutputCleanup\outputFiles.bin
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 7m 45s
+9 actionable tasks: 2 executed, 7 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]
+done

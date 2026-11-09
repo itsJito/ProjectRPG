@@ -319,6 +319,16 @@ final class HudFragments {
                 } else if (!awareness(ui, n, p2[0], top - 14)) mood(ui, n, p2[0], top - 16, d);
             }
             for (Actor d : g.dummies) if (g.time - d.cs.lastHurt < 4 && gfx.project(d.x, d.y + 2.1f, d.z, p2)) ui.centered(d.name, p2[0], p2[1] - 16, 12, Style.NPC);
+            // (0.3.6, gamefixes: fish had no health bars) a fish hurt, fighting or in the sights shows its health over it
+            if (g.fishery != null) for (rpg.fishing.Fish f : g.fishery.live) {
+                if (!f.alive || g.time - f.lastHurt >= 6 && g.interact.focus != f && f.state != rpg.fishing.Fish.State.DEFEND) continue;
+                float d = (float) Math.hypot(f.x - g.player.x, f.z - g.player.z);
+                // over the fish, or over the water above it when it is deep (its damage shows just above its back)
+                float surface = g.fluids.surface(f.x, f.y + 1, f.z), over = Math.max(f.y + f.girth(), Float.isNaN(surface) ? f.y : surface) + 0.85f;
+                if (d > 26 || !gfx.project(f.x, over, f.z, p2)) continue;
+                if (g.interact.focus == f) ui.centered(f.label(), p2[0], p2[1] - 16, 12, f.kind.attacksSwimmers() || f.state == rpg.fishing.Fish.State.DEFEND ? 0xFFFF6040 : Style.NPC);
+                bar(ui, p2[0], p2[1], f.hp / f.maxHp());
+            }
             for (Fx.Floating f : g.fx.floating) {
                 float t = (float) (g.time - f.born());
                 if (!f.near(g.player.x, g.player.y, g.player.z)) continue;
@@ -602,8 +612,7 @@ final class HudFragments {
             Interactable f = g.interact.focus;
             if (f == null || hud.scene != Hud.Scene.WORLD) return;
             Option best = null;
-            for (Option o : g.interact.focusOptions) if (best == null && o.enabled()) best = o;
-            if (best == null && !g.interact.focusOptions.isEmpty()) best = g.interact.focusOptions.get(0);
+            best = rpg.interact.Interactions.primaryOf(g.interact.focusOptions);
             if (best == null) return;
             int more = Math.max(0, g.interact.focusOptions.size() - 1);
             String line = best.label() + "  " + f.label();
@@ -747,7 +756,7 @@ final class HudFragments {
             // the map one is on: the world's, or a dungeon's own (gamefixes: every dungeon is a map of its own)
             var dungeon = rpg.world.DungeonLayout.at(g.player.x, g.player.z);
             float x0 = dungeon == null ? 0 : dungeon.ox, z0 = dungeon == null ? 0 : dungeon.oz;
-            float span = dungeon == null ? DevMap.SX : Math.max(dungeon.w, dungeon.d);
+            float span = dungeon == null ? Minimap.S : Math.max(dungeon.w, dungeon.d);
             java.util.function.BiFunction<Float, Float, float[]> at = (wx, wz) -> new float[]{left + (wx - x0) / span * size, top + (wz - z0) / span * size};
             ui.text(ui.body, dungeon == null ? "World Map" : dungeon.name, left, y - 6, 22, Style.ACCENT);
             // the map as a chart pinned in a frame: a dark mount, the gold trim, the paper a little warm
@@ -862,9 +871,12 @@ final class HudFragments {
         @Override public float height() { return R * 2 + 24 + Math.min(2, hud.g.undertaker.graves().size()) * 20; }
 
         private ByteBuffer px;
+        /** (0.3.5) The chart's side in blocks: the map is no longer square (the sea runs along its south), so it is drawn in a square that holds it all. */
+        static final int S = Math.max(DevMap.SX, DevMap.SZ);
 
         /** The colour of one map column, from its top block. */
         private void column(Rpg g, int x, int z) {
+            if (x >= DevMap.SX || z >= DevMap.SZ) { int at = (z * S + x) * 4; px.put(at, (byte) 0x1A).put(at + 1, (byte) 0x16).put(at + 2, (byte) 0x12).put(at + 3, (byte) 255); return; }   // off the map: the chart's margin
             int top = 0, ty = 0;
             for (int y = DevMap.SY - 1; y >= 0; y--) { int b = g.vox.block(x, y, z); if (b != 0) { top = b; ty = y; break; } }
             int c = Blocks.mapColor(top);
@@ -876,7 +888,7 @@ final class HudFragments {
             int grey = (rr + gg + bb) / 3;
             rr = (rr * 2 + grey) / 3; gg = (gg * 2 + grey) / 3; bb = (bb * 2 + grey) / 3;
             if (wall) { rr = 196; gg = 192; bb = 184; }
-            int at = (z * DevMap.SX + x) * 4;
+            int at = (z * S + x) * 4;
             px.put(at, (byte) Math.min(255, rr)).put(at + 1, (byte) Math.min(255, gg)).put(at + 2, (byte) Math.min(255, bb)).put(at + 3, (byte) 255);
         }
 
@@ -887,7 +899,6 @@ final class HudFragments {
          */
         private void build() {
             Rpg g = hud.g;
-            int S = DevMap.SX;
             boolean all = px == null || g.mapColumns.isEmpty();
             if (px == null) px = MemoryUtil.memAlloc(S * S * 4);
             if (all) { for (int z = 0; z < S; z++) for (int x = 0; x < S; x++) column(g, x, z); }
@@ -980,7 +991,7 @@ final class HudFragments {
             float want = dungeon != null ? DUNGEON_SCALE : DevMap.WILDS.equals(DevMap.jurisdiction(p.x, p.z)) ? WILD_SCALE : TOWN_SCALE;
             float step = scaledAt < 0 ? 1 : (float) Math.min(1, (g.time - scaledAt) * 1.6);
             SCALE += (want - SCALE) * Math.max(0, step); scaledAt = g.time;
-            float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? DevMap.SX : dungeon.w, mapD = dungeon == null ? DevMap.SZ : dungeon.d;
+            float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? Minimap.S : dungeon.w, mapD = dungeon == null ? Minimap.S : dungeon.d;
             ui.disc(cx, cy, R + 3, 0x90141518);
             int seg = 48;
             for (int i = 0; i < seg; i++) {
@@ -1265,6 +1276,17 @@ final class HudFragments {
     // ------------------------------------------------------------------ combat: who you are fighting
     static final class Target extends Fragment {
         Target(Hud h) { super("target"); }
+        /** (0.3.6) What the frame shows: a body's name, combat level, health, and whether it is set on the player. */
+        private record Shown(String name, int level, float hp, float max, boolean hostile) {}
+        private Shown shown() {
+            Actor t = target();
+            if (t != null) return new Shown(t.name, t.skills.combatLevel(), t.hp, t.maxHp(), t instanceof Npc n && n.hostileToPlayer);
+            // a fish: in the sights once hurt (or a danger), or one set on the player
+            Rpg g = hud.g;
+            if (g.fishery == null) return null;
+            rpg.fishing.Fish f = g.interact.focus instanceof rpg.fishing.Fish ff && ff.alive && (g.time - ff.lastHurt < 8 || ff.kind.attacksSwimmers() || ff.kind.defends()) ? ff : g.fishery.foeOf(g.player);
+            return f == null ? null : new Shown(f.kind.title, f.combatLevel(), f.hp, f.maxHp(), f.kind.attacksSwimmers() || f.state == rpg.fishing.Fish.State.DEFEND);
+        }
         private Actor target() {
             Rpg g = hud.g;
             Actor best = null;
@@ -1275,21 +1297,21 @@ final class HudFragments {
             if (best == null && g.player.cs.lastAttacker != 0 && g.time - g.player.cs.lastHurt < 8) { Actor a = g.actor(g.player.cs.lastAttacker); if (a != null && a.alive) best = a; }
             return best;
         }
-        @Override protected boolean active() { return target() != null; }
+        @Override protected boolean active() { return shown() != null; }
         @Override public float width() { return 280; }
         @Override public float height() { return 40; }
         @Override public void draw(Ui2D ui, float x, float y) {
-            Actor t = target();
+            Shown t = shown();
             if (t == null) return;
             ui.rect(x, y, 280, 40, 0x90141518);
-            int lvl = t.skills.combatLevel(), mine = hud.g.player.skills.combatLevel();
+            int lvl = t.level(), mine = hud.g.player.skills.combatLevel();
             boolean boss = lvl >= mine + 10;
             if (boss) ui.img("Boss_Icon", x + 6, y + 6, 26, 0xFFFFFFFF);
             float tx = x + (boss ? 38 : 10);
-            ui.text(t.name, tx, y + 4, 14, t instanceof Npc n && n.hostileToPlayer ? 0xFFFF6040 : Style.NPC);
+            ui.text(t.name(), tx, y + 4, 14, t.hostile() ? 0xFFFF6040 : Style.NPC);
             ui.text("level " + lvl, x + 270 - ui.width("level " + lvl, 11), y + 6, 11, lvl > mine ? Style.BAD : Style.DIM);
-            Style.bar(ui, tx, y + 26, x + 270 - tx, 6, t.hp / t.maxHp(), Style.HP);
-            String hp = (int) Math.ceil(Math.max(0, t.hp)) + " / " + (int) t.maxHp();
+            Style.bar(ui, tx, y + 26, x + 270 - tx, 6, t.hp() / t.max(), Style.HP);
+            String hp = (int) Math.ceil(Math.max(0, t.hp())) + " / " + (int) t.max();
             ui.text(hp, x + 270 - ui.width(hp, 10), y + 19, 10, Style.DIM);
         }
     }

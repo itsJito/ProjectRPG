@@ -921,8 +921,23 @@ public final class CombatSystem {
             a.cs.struck.add(v.id); meleeContact(a, v, m, grip[0] + dx * contact, grip[1] + dy * contact, grip[2] + dz * contact);
             if (a.cs.phase != Phase.ACTIVE) return true;
         }
+        // (0.3.5) a fish the blade (or the fist) passes through in the water: struck as any creature is
+        if (g.fishery != null && !g.fishery.live.isEmpty()) {
+            float[] at = new float[3];
+            rpg.fishing.Fish f = g.fishery.ray(grip[0], grip[1], grip[2], dx, dy, dz, limit, 0.05f, at);
+            long key = FISH_KEY - (f == null ? 0 : f.id);
+            if (f != null && !a.cs.struck.contains(key)) {
+                a.cs.struck.add(key);
+                ItemDef w = a.cs.offHand ? a.off() : a.main();
+                boolean weapon = w != null && m != Move.PUNCH && m != Move.BASH;
+                float potential = (float) Math.floor(Math.max(weapon ? 2 : 1, physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0)) * CombatMath.moveDamage(m));
+                g.fishery.struck(a, f, potential, true, m == Move.PUNCH || w == null, null, at[0], at[1], at[2]);
+            }
+        }
         return false;
     }
+    /** (0.3.5) The struck-list key of a fish (fish ids are their own; kept far below any actor's). */
+    private static final long FISH_KEY = -(1L << 40);
 
     private void strikeWorld(Actor a, Move m, float reach, float s, float[] tip, Voxels.Hit h) {
         // a tool meeting what it works: an axe biting a tree (trunk or crown), a pickaxe striking the ore -
@@ -1416,6 +1431,35 @@ public final class CombatSystem {
             if (v == p.owner || !v.alive && !body || v instanceof rpg.ai.Npc npc && !npc.loaded) continue;
             float distance = HitVolumes.ray(g, v, p.x, p.y, p.z, sx * inv, sy * inv, sz * inv, wall, 0.03f);
             if (distance < nearest) { nearest = distance; struck = v; }
+        }
+        // (0.3.5) a fish in the shot's path, nearer than any body: an arrow or a spell into the water strikes it
+        if (g.fishery != null && !g.fishery.live.isEmpty() && (p.spell == null || p.spell.tier != Spells.Tier.WAVE) && p.owner != null) {
+            float[] at = new float[3];
+            rpg.fishing.Fish f = g.fishery.ray(p.x, p.y, p.z, sx * inv, sy * inv, sz * inv, Math.min(wall, nearest), 0.02f, at);
+            if (f != null) {
+                p.done = true;
+                g.fishery.struck(p.owner, f, p.potential, false, false, p.spell != null ? Skill.MAGIC : p.skill, at[0], at[1], at[2]);
+                if (p.ammo != null) { p.x = at[0]; p.y = at[1]; p.z = at[2]; dropArrow(p); }
+                return;
+            }
+        }
+        // (0.3.6, gamefixes: fire spells passed through the plants, never fully hitting them, and did not catch them) a
+        // spell meets the growth it flies into: a dense plant (a bush, a shrub, a bramble, a sapling) stops it there and
+        // takes the whole of it; grass and flowers part round it - but a fire bolt lights each one it passes through
+        if (p.spell != null && p.spell.tier != Spells.Tier.WAVE && g.foliage != null) {
+            float reach = Math.min(len, Math.min(wall, nearest));
+            for (Object[] hit : g.foliage.along(p.x, p.y, p.z, sx * inv, sy * inv, sz * inv, reach)) {
+                rpg.world.Foliage.Patch plant = (rpg.world.Foliage.Patch) hit[1];
+                float t = (float) hit[0];
+                if (p.spell.element == Spells.Element.FIRE && g.chemistry != null)
+                    g.chemistry.emit(p.owner, astratto.bridge.AstrattoNative.CHEM_FIRE, plant.x, plant.y + Math.min(0.4f, plant.kind.height * 0.5f), plant.z, plant.kind.radius + 0.35f, 3, 0.6f);
+                if (!plant.kind.dense) continue;
+                p.done = true;
+                p.x = p.x + sx * inv * t; p.y = p.y + sy * inv * t; p.z = p.z + sz * inv * t;
+                spellImpact(p, p.x, p.y, p.z, null);
+                if (g.sfx != null) { g.sfx.play("zap", p.x, p.y, p.z, 0.5f); g.sfx.play("step.grass", p.x, p.y, p.z, 0.6f); }
+                return;
+            }
         }
         if (struck != null) {
             float qx = p.x + sx * inv * nearest, qy = p.y + sy * inv * nearest, qz = p.z + sz * inv * nearest;

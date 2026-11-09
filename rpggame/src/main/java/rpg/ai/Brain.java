@@ -170,6 +170,10 @@ public final class Brain {
                     && n.homeJurisdiction.equals(DevMap.jurisdiction(other.x, other.z)) && n.distTo(other) < 18 && ai.canSee(n, other)) {
                 n.watchTarget = other.id; s.add(new Score(Goal.EVICT, 0.81f, "driving " + other.name + " out of the city")); break;
             }
+            // (0.3.6) one just driven over the border is seen off a little further
+            if (n.goal == Goal.EVICT && g.actor(n.watchTarget) instanceof Npc going && going.alive && n.chaseOffOf == going.id && !n.chaseOffDone
+                    && g.time - n.chaseOffSince < AiSystem.CHASE_OFF_TIME && ai.canSee(n, going))
+                s.add(new Score(Goal.EVICT, 0.81f, "seeing " + going.name + " off past the border"));
         }
         if (ZonePolicy.outlaw(n) && g.time < n.leaveUntil) s.add(new Score(Goal.RETURN, 0.87f, "ordered out by the watch"));
         if (threat == null && (n.role == Npc.Role.GUARD || n.role == Npc.Role.LAWMAN)) {
@@ -401,7 +405,8 @@ public final class Brain {
             }
             case EVICT -> {
                 Actor other = g.actor(n.watchTarget);
-                if (!(other instanceof Npc outlaw) || !other.alive || !n.homeJurisdiction.equals(DevMap.jurisdiction(other.x, other.z)) || !ai.canSee(n, other)) { n.nextThink = 0; ai.desire(n, AiSystem.A_HOLD); break; }
+                // (0.3.6) out past the border they are seen off a stretch further before the watchman turns back
+                if (!(other instanceof Npc outlaw) || !other.alive || !ai.chaseOff(n, other) || !ai.canSee(n, other)) { n.nextThink = 0; ai.desire(n, AiSystem.A_HOLD); break; }
                 if (n.distTo(other) < 8) {
                     outlaw.leaveUntil = g.time + 20; outlaw.nextThink = 0;
                     if (g.time - n.goalSince < 0.5 && n.speech == null) ai.say(n, "You. Out of the city. Keep moving.");
@@ -1020,7 +1025,11 @@ public final class Brain {
         Actor identified = g.actor(v.subject);
         Memory charge = identified == null ? null : n.crimeKnown(identified.id);
         if (v.stimulus != Investigation.Stimulus.VIOLENCE && w != null && w.exposure >= Stealth.CLEAR && w.seenAt >= w.heardAt
-                && identified instanceof Npc person && !person.hostileToPlayer && !person.sneaking && n.distTo(person) < 6
+                && (identified instanceof Npc person && !person.hostileToPlayer && !person.sneaking
+                    // (0.3.6, gamefixes: NPC routines) the player plainly in view, close, not creeping and not wanted here,
+                    // is as plainly harmless: townsfolk looked into an idle player all morning instead of getting on with it
+                    || identified == g.player && !g.player.sneaking && g.law.bounty(g.player.id, n.homeJurisdiction) <= 0)
+                && n.distTo(identified) < 6
                 && (charge == null || charge.settled)) v.stage(Investigation.Stage.DONE, g.time);
         // a fresh clue moves the spot; heard again, a timid plan gives way to fetching help
         if (w != null && Math.max(w.heardAt, w.seenAt) > v.lastClue + 0.05) {
@@ -1073,7 +1082,8 @@ public final class Brain {
                 // creeping up to it: a peeker keeps low; a guard at night goes carefully, weapon ready
                 n.sneaking = v.plan == Investigation.Plan.PEEK;
                 if (law && night) g.combat.setBlock(n, false);
-                if (goTo(n, v.x, v.y, v.z, run, stop) || t > 25) { n.sneaking = false; v.stage(Investigation.Stage.LOOKING, g.time); n.arrivedAt = g.time; }
+                // (0.3.5) a spot there is no way to (over a wall, up on a roof) is looked at from as near as they got
+                if (goTo(n, v.x, v.y, v.z, run, stop) || stalled(n, v.x, v.z) || t > 25) { n.sneaking = false; v.stage(Investigation.Stage.LOOKING, g.time); n.arrivedAt = g.time; }
             }
             case LOOKING -> {
                 ai.desire(n, AiSystem.A_HOLD);
@@ -1094,7 +1104,7 @@ public final class Brain {
                     }
                     if (!v.hasSpot) { v.stage(Investigation.Stage.DONE, g.time); return; }
                 }
-                if (goTo(n, v.px, v.pz, false, 0.9f) || t > 14) {
+                if (goTo(n, v.px, v.pz, false, 0.9f) || stalled(n, v.px, v.pz) || t > 14) {
                     if (n.arrivedAt < v.stageAt) { n.arrivedAt = g.time; v.lookYaw=n.yaw; }
                     n.wantYaw = v.lookYaw + (float) Math.sin((g.time - n.arrivedAt) * 2.4) * 0.65f;
                     if (g.time - n.arrivedAt > 1.4 || t > 14) { v.checked++; v.hasSpot = false; v.stage(v.checked >= (night ? 3 : 2) ? Investigation.Stage.DONE : Investigation.Stage.SEARCHING, g.time); }
@@ -1351,6 +1361,7 @@ public final class Brain {
         if (n.watch() && h.target != 0 && askAround(n, h)) return;
         if (n.posse && n.profession == Profession.BOUNTY_HUNTER && setSnare(n, h)) return;
         if (n.stuck && g.time-h.startedAt>3) { h.reachedLkp=true;h.hasPoint=false; }
+        searchBark(n, h);
         if (!h.reachedLkp) {
             float lead = (float) Math.min(2.5, Math.hypot(h.vx, h.vz) * 0.7);
             float sp = (float) Math.hypot(h.vx, h.vz);
@@ -1361,6 +1372,11 @@ public final class Brain {
                 h.reachedLkp = true;
                 h.lookYaw = n.yaw; h.lookUntil = g.time + 1.6;
                 n.lastOutcome = "reached the last known location; nobody there";
+            } else if (stalled(n, lx, lz)) {
+                // (0.3.5, gamefixes: searchers stood in place) no way to the spot itself: search round it from here
+                h.reachedLkp = true; h.tried(lx, lz);
+                h.lookYaw = (float) Math.atan2(-(lx - n.x), -(lz - n.z)); h.lookUntil = g.time + 1.2;
+                n.lastOutcome = "can't get to where they were last seen; searching round it";
             }
             return;
         }
@@ -1370,12 +1386,54 @@ public final class Brain {
             return;
         }
         if (!h.hasPoint && !pickSearchSpot(n, h)) { h.lookYaw = n.yaw; h.lookUntil = g.time + 1.0; return; }
-        if (goTo(n, h.px, h.pz, false, 0.9f)) {
+        // the spot's way: a quick walk, a jog when it is far
+        boolean far = Math.hypot(h.px - n.x, h.pz - n.z) > 9;
+        if (goTo(n, h.px, h.pz, far, 0.9f)) {
             h.hasPoint = false;
-            h.checked++;
-            h.lookYaw = n.yaw; h.lookUntil = g.time + 1.1 + (n.id % 3) * 0.3;
+            h.checked++; h.tried(h.px, h.pz);
+            // looked round from the spot: into the cover there first (the bush, the doorway, the corner)
+            h.lookYaw = h.coverYaw != 0 ? h.coverYaw : n.yaw; h.coverYaw = 0;
+            h.lookUntil = g.time + 1.3 + (n.id % 3) * 0.35;
             n.lastOutcome = "checked a spot (" + h.checked + "); nobody";
+        } else if (stalled(n, h.px, h.pz)) {
+            h.hasPoint = false; h.tried(h.px, h.pz);
+            n.lastOutcome = "couldn't reach a spot; trying another";
         }
+    }
+
+    /**
+     * (0.3.5) Whether a walk to a spot has stalled: the agent reports itself stuck, or it has not come a half metre
+     * nearer in three seconds (a spot behind a fence, on a roof, across water). A new goal starts a new watch.
+     */
+    boolean stalled(Npc n, float x, float z) {
+        float d = (float) Math.hypot(x - n.x, z - n.z);
+        int key = Math.round(x * 2) * 7919 + Math.round(z * 2);
+        if (n.searchKey != key) { n.searchKey = key; n.searchBest = d; n.searchAt = g.time; return false; }
+        if (d < n.searchBest - 0.5f) { n.searchBest = d; n.searchAt = g.time; return false; }
+        return n.stuck && g.time - n.searchAt > 1 || g.time - n.searchAt > 3.0;
+    }
+
+    /** (0.3.5) A searcher talks now and then - to the one hiding, to the others searching, to themself. */
+    private void searchBark(Npc n, Hunt h) {
+        if (g.time < n.barkAt || n.speech != null) return;
+        n.barkAt = g.time + 9 + (n.id % 5) * 1.7;
+        if (g.time - h.startedAt < 3) return;
+        Actor sought = h.target == 0 ? null : g.actor(h.target);
+        String who = sought == null ? "whoever did this" : sought.name;
+        boolean law = n.watch();
+        boolean company = false;
+        for (Npc o : g.npcs) if (o != n && o.hunt != null && o.hunt.target == h.target && o.distTo(n) < 14) { company = true; break; }
+        String line = switch ((int) Math.floorMod(n.id * 13 + h.checked * 7 + (long) (g.time / 9), 8)) {
+            case 0 -> law ? "Come out, " + who + ". You'll only make it worse." : "I know you're here somewhere.";
+            case 1 -> company ? "Check behind there - I'll take this side." : "Where did they get to?";
+            case 2 -> "They can't have gone far.";
+            case 3 -> law ? "In the name of the watch, show yourself!" : "Show yourself!";
+            case 4 -> company ? "Anything over there?" : "Nothing here...";
+            case 5 -> "Keep your eyes open.";
+            case 6 -> g.time - h.clueAt > h.patience * 0.6f ? "Gone to ground, it seems." : "Come out, come out...";
+            default -> "I heard something over this way.";
+        };
+        ai.say(n, line);
     }
 
     /**
@@ -1501,8 +1559,12 @@ public final class Brain {
             if (!standable(x, z)) continue;
             x = (float) Math.floor(x) + 0.5f; z = (float) Math.floor(z) + 0.5f;
             float score = 0;
+            if (h.triedNear(x, z, 2.5f)) continue;
             // somewhere it cannot see from here is somewhere they could be
             if (!g.vox.sight(n.x, ey, n.z, x, DevMap.FLOOR + 1.0f, z)) score += 3;
+            // (0.3.5) where someone would hide: tall grass and bushes, under a roof
+            if (g.foliage != null && (g.foliage.tallGrassAt(x, z) || g.foliage.plantAt(x, z, 0.9f) != null)) score += 2.2f;
+            if (g.vox.solid((int) Math.floor(x), DevMap.FLOOR + 3, (int) Math.floor(z)) || g.vox.solid((int) Math.floor(x), DevMap.FLOOR + 4, (int) Math.floor(z))) score += 1.4f;
             // cover: walls, bushes and trees round the spot
             int cover = 0;
             for (int ox = -1; ox <= 1; ox++) for (int oz = -1; oz <= 1; oz++) if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(x) + ox, DevMap.FLOOR, (int) Math.floor(z) + oz)) cover++;
@@ -1513,8 +1575,12 @@ public final class Brain {
             if (Math.hypot(x - n.x, z - n.z) < 2) score -= 2;
             if (score > bestScore) { bestScore = score; bx = x; bz = z; }
         }
-        if (bestScore <= -1e8f) return false;
+        if (bestScore <= -1e8f) { h.triedN = 0; return false; }   // every near spot has been tried: the next pass looks again
         h.px = bx; h.pz = bz; h.hasPoint = true;
+        // the cover beside it, to look into on arrival
+        h.coverYaw = 0;
+        for (int ox = -1; ox <= 1 && h.coverYaw == 0; ox++) for (int oz = -1; oz <= 1; oz++)
+            if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(bx) + ox, DevMap.FLOOR, (int) Math.floor(bz) + oz)) { h.coverYaw = (float) Math.atan2(-ox, -oz); if (h.coverYaw == 0) h.coverYaw = 1e-3f; break; }
         return true;
     }
 
@@ -1895,7 +1961,9 @@ public final class Brain {
                 && !g.law.lockdown(n.homeJurisdiction)
                 && !g.law.resisting(t.id,n.homeJurisdiction) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12)) {
             g.combat.setBlock(n, false);
-            if (d > 2.4f) { goTo(n, t.x, t.y, t.z, true, 2.2f); n.lastOutcome = "closing in to arrest"; return; }
+            // (0.3.5, gamefixes: the watch spoke to players nowhere near them) a halt is spoken face to face - near on the
+            // ground, on the same level, nothing between them - never across a wall, up to a roof or down from a ledge
+            if (!g.law.withinSpeech(n, t)) { goTo(n, t.x, t.y, t.z, true, 2.2f); n.lastOutcome = "closing in to arrest"; return; }
             ai.desire(n, AiSystem.A_HOLD);
             g.law.halt(n, t);
             n.lastOutcome = "ordering the player to halt";

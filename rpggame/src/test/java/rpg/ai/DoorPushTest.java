@@ -37,12 +37,14 @@ class DoorPushTest {
         frames(2);
         float sx = g.player.x, sz = g.player.z;
         g.controller.in.forward = 1;
-        frames(70);
+        // (0.3.6) the furthest it turned while walked into: a walker who carries on through the doorway shoves it open again
+        float most = 0;
+        for (int i = 0; i < 70; i++) { frames(1); most = Math.max(most, Math.abs(d.angle[0] - before)); }
         System.out.printf("  walked from (%.2f, %.2f) to (%.2f, %.2f); leaf centre (%.2f, %.2f) normal (%.2f, %.2f)%n", sx, sz, g.player.x, g.player.z, cx, cz, nx, nz);
         g.controller.in.forward = 0;
         frames(20);
-        System.out.printf("push from side %+.0f: leaf %.2f -> %.2f rad%n", side, before, d.angle[0]);
-        return Math.abs(d.angle[0] - before);
+        System.out.printf("push from side %+.0f: leaf %.2f -> %.2f rad (turned %.2f at most)%n", side, before, d.angle[0], most);
+        return most;
     }
 
     @Test void anOpenLeafIsPushedRoundByABodyWalkingIntoIt() {

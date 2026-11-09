@@ -33,7 +33,15 @@ public enum Profession {
     CROP_FARMER("Crop Farmer", Npc.Role.FARMER, Skill.HARVESTING),
     ORCHARD_KEEPER("Orchard Keeper", Npc.Role.FARMER, Skill.HARVESTING),
     INNKEEPER("Innkeeper", Npc.Role.CIVIC, Skill.COOKING),
-    BARTENDER("Bartender", Npc.Role.MERCHANT, Skill.COOKING);
+    BARTENDER("Bartender", Npc.Role.MERCHANT, Skill.COOKING),
+    // (0.3.5, gamefixes: the textile and metalworking industries) the hands of the chain: the outworkers who card and
+    // spin, the workshop's weaver, fuller and dyer; and the smelter at the furnace between the miner and the smith
+    CARDER("Carder", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
+    SPINNER("Spinner", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
+    WEAVER("Weaver", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
+    FULLER("Fuller", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
+    DYER("Dyer", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
+    SMELTER("Smelter", Npc.Role.CRAFTSMAN, Skill.SMITHING);
 
     public final String title;
     public final Npc.Role family;

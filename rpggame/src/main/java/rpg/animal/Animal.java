@@ -38,6 +38,8 @@ public final class Animal extends Actor implements Interactable {
     public int variant;
     /** Needs, 0 (met) .. 1 (pressing), and fear (0 calm .. 1 panic). */
     public float hunger, thirst, fatigue, fear;
+    /** (0.3.5) How far a duck afloat is tipped up to feed (0 .. 1), eased (drawn only). */
+    public float dabble;
     /** What it is doing, since when, why; who it is dealing with (a threat, its prey, its mate, the one it follows). */
     public Goal goal = Goal.IDLE;
     public double goalSince, nextThink;
@@ -58,6 +60,8 @@ public final class Animal extends Actor implements Interactable {
     public double lastBite = -99, nextVoice, lastEgg = -1e9;
     /** Game minutes when it was last milked: a cow gives a bucket and then needs a few hours to fill again. */
     public double lastMilked = -1e9;
+    /** (0.3.5, gamefixes: the textile industry) when a sheep was last shorn (its fleece grows back over a few days). */
+    public double lastShorn = -1e9;
     public double careAgain;
     /** The route last asked of the engine. */
     float rx, rz;
@@ -165,6 +169,13 @@ public final class Animal extends Actor implements Interactable {
     @Override public float chestY() { return y + height * 0.5f; }
 
     public boolean owned() { return owner != 0; }
+    /**
+     * (0.3.6, gamefixes: tamed animals defended themselves against their owner) whether this one is tamed to someone - its
+     * owner, the one who tamed it, or one it has come to trust fully: it never takes them for a threat, however they treat it.
+     */
+    public boolean tamedTo(long who) { return who != 0 && (owner == who || tamedBy == who || trustOf(who) >= TRUSTED); }
+    /** Trust at which an animal is as good as tamed to someone. */
+    public static final float TRUSTED = 0.9f;
     public boolean adult() { return !baby; }
     public boolean carcass() { return !alive && diedAt >= 0; }
     public float trustOf(long who) { return trust.getOrDefault(who, 0f); }
@@ -209,6 +220,10 @@ public final class Animal extends Actor implements Interactable {
             if (species == Species.COW && female && !baby) {
                 boolean full = g.state.minutes - lastMilked > Animals.MILK_REFILL;
                 o.add(Option.when(calm && full && a.has(Items.BUCKET, 1), "milk", "Milk", 8, !calm ? "It's too agitated." : !full ? "She has been milked recently." : "You need an empty bucket.", r));
+            }
+            if (species == Species.SHEEP && !baby) {
+                boolean grown = g.state.minutes - lastShorn > Animals.FLEECE_REGROW;
+                o.add(Option.when(calm && grown && (a.has(Items.SHEARS, 1) || a.main() == Items.SHEARS), "shear", "Shear", 8, !calm ? "It's too agitated." : !grown ? "It was shorn not long ago." : "You need shears.", r));
             }
             o.add(Option.when(food != null && calm, "feed", "Feed" + (food == null ? "" : " (" + food.name.toLowerCase() + ")"), 7, food == null ? "You have nothing it would eat." : "It's too agitated.", r));
             // (0.3.4) told what to do: come along, stay here, or be let go about its own business (still tame, still yours)

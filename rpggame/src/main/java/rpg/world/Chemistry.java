@@ -380,7 +380,11 @@ public final class Chemistry {
         return out;
     }
     public void load(List<Object> records) {
-        g.game.commands().chemReset(); retired.clear();registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear(); next = g.time + 0.25; // Let queued reset/restore commands replace the old native snapshot first.
+        g.game.commands().chemReset(); retired.clear();registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear();
+        // (0.3.6) the bodies are registered again on the very next pass (it waited a quarter of a second, and anything set
+        // alight in between - a fire thrown the moment after a respawn - met no one); the reset and the restores below are
+        // queued ahead of it, so they still replace the old native snapshot first
+        next = g.time;
         if(records==null)return;
         for (Object record : records) if (record instanceof Map<?, ?> raw) {
             @SuppressWarnings("unchecked") Map<String, Object> m = (Map<String, Object>) raw;

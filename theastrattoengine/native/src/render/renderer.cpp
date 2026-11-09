@@ -181,6 +181,37 @@ Renderer::~Renderer() {
     for (GLuint x : a) if (x) g_.DeleteVertexArrays(1, &x);
 }
 
+// ASTRATTO_PASS_OFF=ao,ssr,taa,vol,bloom (a developer's switch): passes left out, for finding which one draws an artefact
+static const std::string& passOffList() {
+    static const std::string o = [] {
+#ifdef _MSC_VER
+        char* v = nullptr; size_t n = 0;
+        std::string r = _dupenv_s(&v, &n, "ASTRATTO_PASS_OFF") == 0 && v != nullptr ? std::string(v) : std::string();
+        std::free(v);
+        return r;
+#else
+        const char* v = std::getenv("ASTRATTO_PASS_OFF");
+        return v != nullptr ? std::string(v) : std::string();
+#endif
+    }();
+    return o;
+}
+static void passesOff(bool& gtao, bool& ssr, bool& taa, bool& vol, bool& bloom) {
+    const std::string& o = passOffList();
+    if (o.empty()) return;
+    if (o.find("ao") != std::string::npos) gtao = false;
+    if (o.find("ssr") != std::string::npos) ssr = false;
+    if (o.find("taa") != std::string::npos) taa = false;
+    if (o.find("vol") != std::string::npos) vol = false;
+    if (o.find("bloom") != std::string::npos) bloom = false;
+}
+// ...and the lighting's own terms: 1 the sun or moon, 2 the probes' bounce, 4 the local lights, 8 the ambient cube
+static int termsOff() {
+    const std::string& o = passOffList();
+    return (o.find("sun") != std::string::npos ? 1 : 0) | (o.find("probe") != std::string::npos ? 2 : 0) | (o.find("lamp") != std::string::npos ? 4 : 0) | (o.find("cube") != std::string::npos ? 8 : 0)
+         | (o.find("showalbedo") != std::string::npos ? 16 : 0) | (o.find("showbaked") != std::string::npos ? 32 : 0) | (o.find("showspec") != std::string::npos ? 64 : 0);
+}
+
 void Renderer::preset(int level) {
     presetLevel_ = std::max(0, std::min(3, level));
     switch (presetLevel_) {
@@ -328,7 +359,8 @@ void Renderer::resize(int w, int h) {
     rw_ = std::max(16, static_cast<int>(std::lround(w * q_.renderScale))); rh_ = std::max(16, static_cast<int>(std::lround(h * q_.renderScale)));
     gAlbedo_ = tex2D(RGBA8, rw_, rh_, NEAREST, 1);
     gNormal_ = tex2D(RGB10_A2, rw_, rh_, NEAREST, 1);
-    gMat_ = tex2D(RGBA8, rw_, rh_, NEAREST, 1);
+    // (0.3.6) sixteen bits a channel: the baked sky and block light share the alpha at eight bits each (see packLight)
+    gMat_ = tex2D(RGBA16, rw_, rh_, NEAREST, 1);
     gDepth_ = tex2D(DEPTH_COMPONENT32F, rw_, rh_, NEAREST, 1);
     g_.GenFramebuffers(1, &gFbo_);
     g_.BindFramebuffer(FRAMEBUFFER, gFbo_);
@@ -977,7 +1009,7 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
     hasCamera_ = false; hasClear_ = false; grading_ = Grading();
     doFoliage_ = doProps_ = doDecals_ = false;
     decalVerts_.clear();
-    smoke_.clear(); ripples_.clear();
+    smoke_.clear(); ripples_.clear(); flows_.clear();
     astratto_handle world = worldHandle_;
     bool worldSaid = false;
     uint32_t at = 0;
@@ -1042,6 +1074,13 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 if(!readRecord(r,head.bytes,c)) { error_="short ripple record";return false; }
                 if(!std::isfinite(c.x+c.z+c.radius+c.strength) || c.radius<=0 || c.radius>8 || std::abs(c.strength)>30) { error_="invalid water ripple";return false; }
                 if(ripples_.size()<32*4)ripples_.insert(ripples_.end(),{c.x,c.z,c.radius,c.strength});
+                break;
+            }
+            case ASTRATTO_RCMD_WATER_FLOW: {
+                astratto_rcmd_water_flow c;
+                if(!readRecord(r,head.bytes,c)) { error_="short water flow record";return false; }
+                if(!std::isfinite(c.x0+c.z0+c.x1+c.z1+c.vx+c.vz) || c.x1<c.x0 || c.z1<c.z0 || std::abs(c.vx)>8 || std::abs(c.vz)>8) { error_="invalid water flow";return false; }
+                if(flows_.size()<16*8) { flows_.insert(flows_.end(),{c.x0,c.z0,c.x1,c.z1,c.vx,c.vz,0,0}); }
                 break;
             }
             case ASTRATTO_RCMD_EMITTER: {
@@ -1139,6 +1178,7 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 q_.gtao = (c.passes & ASTRATTO_PASS_GTAO) != 0; q_.ssr = (c.passes & ASTRATTO_PASS_SSR) != 0; q_.volumetrics = (c.passes & ASTRATTO_PASS_VOLUMETRICS) != 0;
                 q_.taa = (c.passes & ASTRATTO_PASS_TAA) != 0; q_.bloom = (c.passes & ASTRATTO_PASS_BLOOM) != 0;
                 q_.motionBlur = (c.passes & ASTRATTO_PASS_MOTION_BLUR) != 0; q_.dof = (c.passes & ASTRATTO_PASS_DEPTH_OF_FIELD) != 0;
+                passesOff(q_.gtao, q_.ssr, q_.taa, q_.volumetrics, q_.bloom);
                 q_.renderScale = c.render_scale > 0 ? c.render_scale : 1.0f;
                 break;
             }
@@ -1384,8 +1424,11 @@ void Renderer::shadowPass(VoxelWorld*) {
     Mat4 tmp, ortho;
     Frustum lightFrustum;
     for (int i = 0; i < n; i++) {
-        // far cascades change slowly on screen: refresh them on alternate frames
-        const bool due = cascadeAge_ < 0 || i == 0 || (i == 1 && (frameNo_ & 1) == 0) || (i == 2 && (frameNo_ & 3) == 1) || (i == 3 && (frameNo_ & 7) == 3);
+        // far cascades change slowly on screen: refresh them on alternate frames. (0.3.6 game, gamefixes: shadows lagged
+        // behind and flickered) the first two hold every shadow of someone moving near the eye - a rider at a gallop, the
+        // mount under them - and are drawn every frame: drawn every other frame, a shadow in the second stood a frame
+        // behind its body and jumped to it the next, a flicker along every shadow at the cascades' seam
+        const bool due = cascadeAge_ < 0 || i <= 1 || (i == 2 && (frameNo_ & 1) == 1) || (i == 3 && (frameNo_ & 7) == 3);
         if (!due || !lit) continue;
         const float zn = i == 0 ? nearP : splits_[i - 1], zf = splits_[i];
         // bounding sphere of the frustum slice: stable under rotation, so the map does not shimmer when the view turns
@@ -1693,6 +1736,7 @@ void Renderer::lightingPass() {
     s.i1("uTileSize", TILE);
     s.i2("uTiles", tilesX_, tilesY_);
     s.i1("uShadowedLights", q_.shadowedLights);
+    s.i1("uTermsOff", termsOff());
     s.i1("uBodyCount", bodyCount_);
     if (bodyCount_ > 0) s.fv("uBodies", bodies_, MAX_BODIES * 5);
     s.i1("uUseAO", q_.gtao ? 1 : 0);
@@ -1825,6 +1869,10 @@ void Renderer::advanceWater(VoxelWorld* world) {
     waterWaves_.f1("uImpulseScale",steps>0?1.0f/static_cast<float>(steps):0.0f);
     waterWaves_.i1("uImpulses",static_cast<int>(ripples_.size()/4));
     if(!ripples_.empty())g_.Uniform4fv(waterWaves_.loc("uImpulse"),static_cast<GLsizei>(ripples_.size()/4),ripples_.data());
+    // 2.10: where the water runs (rects and their velocity, two vec4s each): the step writes the flow beside the
+    // surface's height, and the surface's texture drifts with it
+    waterWaves_.i1("uFlows",static_cast<int>(flows_.size()/8));
+    if(!flows_.empty())g_.Uniform4fv(waterWaves_.loc("uFlow"),static_cast<GLsizei>(flows_.size()/4),flows_.data());
     for(int i=0;i<steps;i++) {
         waterClock_+=STEP;waterWaves_.f1("uTime",waterClock_);
         waterWaves_.i2("uShift",i==0?shiftX:0,i==0?shiftZ:0);

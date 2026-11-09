@@ -33,7 +33,8 @@ public final class Dialog {
      */
     public boolean stands(rpg.Rpg g) {
         if (!(g.actor(npc) instanceof rpg.ai.Npc speaker)) return true;
-        if(!g.player.alive || !speaker.alive || !speaker.loaded || speaker.distTo(g.player)>6
+        // (0.3.5) a conversation lasts while the two are within speaking distance: a few steps, and on the same level
+        if(!g.player.alive || !speaker.alive || !speaker.loaded || speaker.distTo(g.player)>4.5f || Math.abs(speaker.y-g.player.y)>2.2f
                 || !g.vox.sight(g.player.x,g.player.eyeY(),g.player.z,speaker.x,speaker.eyeY(),speaker.z))return false;
         return standoff || speaker.canTalk(g) && !speaker.shunning(g, g.player) && (employment == null || employment == speaker.employmentState());
     }

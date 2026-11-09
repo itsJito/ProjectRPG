@@ -74,7 +74,21 @@ public final class Items {
     /** (0.2.0) what DevPalace's quarry yields: the quarry worker's calling already reckoned with it. */
     public static final ItemDef MARBLE_BLOCK = def("marble_block", "Marble block", 24, 0xE8E4DC, "A block of white marble cut from the quarry face south of DevPalace.");
     public static final ItemDef CLAY = def("clay", "Clay", 5, 0x9C7258, "Workable clay from a dry bank.");
-    public static final ItemDef CLOTH = def("cloth_roll", "Linen cloth", 12, 0xB6A78C, "Woven flax for a tailor's patterns.");
+    public static final ItemDef CLOTH = def("cloth_roll", "Cloth", 12, 0xB6A78C, "A roll of finished cloth for a tailor's patterns.");
+    // (0.3.5, gamefixes: the textile industry) the fibres and every stage they pass through on their way to cloth:
+    // sorted, washed and carded; spun; woven; fulled; dyed; finished
+    public static final ItemDef SHEARS = tool("shears", "Shears", 90, 0x9A9AA0, "Wield them to shear a sheep of its fleece.", Skill.HARVESTING);
+    public static final ItemDef COTTON = def("cotton", "Cotton", 14, 0xF4F2EC, "Cotton bolls picked from the plant: seed and fibre together.");
+    public static final ItemDef COTTON_SEEDS = stack("cotton_seeds", "Cotton seeds", 3, 0xD8C8A8, "Sow them in a garden plot to grow cotton.");
+    public static final ItemDef CLEAN_WOOL = def("clean_wool", "Clean wool", 60, 0xF6F2E6, "Wool sorted, washed and carded: ready to spin.");
+    public static final ItemDef CLEAN_COTTON = def("clean_cotton", "Clean cotton", 20, 0xFAF8F2, "Cotton picked free of its seed and carded.");
+    public static final ItemDef YARN = stack("yarn", "Woollen yarn", 40, 0xE8DCC0, "Spun wool, wound for the loom.");
+    public static final ItemDef COTTON_THREAD = stack("cotton_thread", "Cotton thread", 15, 0xF0EEE6, "Spun cotton, wound for the loom.");
+    public static final ItemDef LINEN_THREAD = stack("linen_thread", "Linen thread", 8, 0xC8BC9A, "Spun flax, wound for the loom.");
+    public static final ItemDef LOOM_CLOTH = def("loom_cloth", "Loom-state cloth", 70, 0xD8CCAC, "Cloth straight off the loom: loose and oily, to be fulled.");
+    public static final ItemDef FULLED_CLOTH = def("fulled_cloth", "Fulled cloth", 90, 0xCCC0A0, "Cloth washed, trodden and shrunk tight: ready to dye or to finish.");
+    public static final ItemDef DYED_CLOTH = def("dyed_cloth", "Dyed cloth", 110, 0x9A3A3A, "Fulled cloth dyed a deep berry red. It wants finishing.");
+    public static final ItemDef FINE_CLOTH = def("fine_cloth", "Fine cloth", 160, 0xA84040, "Dyed cloth sheared and pressed: the finest cloth there is to buy.");
     public static final ItemDef CLOTH_HOOD = garment("cloth_hood", "Linen hood", Slot.HEAD);
     public static final ItemDef CLOTH_TUNIC = garment("cloth_tunic", "Linen tunic", Slot.BODY);
     public static final ItemDef IRON_ORE = def("iron_ore", "Iron ore", 17, 0x7A5A48, "Ore with iron in it.");
@@ -127,6 +141,21 @@ public final class Items {
     public static final ItemDef FISHING_ROD = tool("fishing_rod", "Fishing rod", 5, 0x806040, "Wield it and cast at a fishing spot for trout.", Skill.FISHING);
     public static final ItemDef FISHING_NET = tool("small_fishing_net", "Small fishing net", 5, 0xB8A878, "Wield it and cast it at a fishing spot for shrimp.", Skill.FISHING);
     public static final ItemDef CRAB_CAGE = tool("crab_cage", "Crab cage", 12, 0x8A6A44, "Wield it and set it at a fishing spot for crabs.", Skill.FISHING);
+    /** (0.3.5) The gear for the bigger catches (GDD 3.7 fishing methods): the harpoon for the great fish of the deep, the pot for lobster, and bait for the rod. */
+    public static final ItemDef HARPOON = tool("harpoon", "Harpoon", 460, 0x8A8A90, "Wield it at a fishing spot to take the big fish: tuna, swordfish, sharks, eels, marlin and whales.", Skill.FISHING);
+    public static final ItemDef LOBSTER_POT = tool("lobster_pot", "Lobster pot", 430, 0x7A5A3A, "Wield it and set it on the sea bed at a fishing spot for lobster.", Skill.FISHING);
+    public static final ItemDef FISHING_BAIT = stack("fishing_bait", "Fishing bait", 4, 0x9A7050, "Worms and scraps. On a rod's hook, the fish come to it sooner; one is used for each fish landed.");
+    static {
+        // (0.3.5, gamefixes: all the fish added) a raw catch and a cooked dish for every kind of fish there is (the
+        // shrimp, crab and trout were already here)
+        for (rpg.fishing.FishKind k : rpg.fishing.FishKind.values()) {
+            if (k == rpg.fishing.FishKind.STARFISH) { def("starfish", "Starfish", k.value(), k.back, "A starfish from the sea bed. Not for eating; collectors and apothecaries buy them."); continue; }
+            String raw = "raw_" + k.stem();
+            if (BY_ID.containsKey(raw)) continue;
+            def(raw, "Raw " + k.title.toLowerCase(), k.value(), k.back, "Needs cooking.");
+            food(k.stem(), k == rpg.fishing.FishKind.WHALE ? "Whale steak" : k.title, Math.round(k.value() * 1.8f), k.heal(), k.belly);
+        }
+    }
     public static final ItemDef LOCKPICK = def("lockpick", "Lockpick", 20, 0x909098, "For locks that are not yours.");
     public static final ItemDef SEALED_LETTER = def("sealed_letter", "Sealed letter", 0, 0xE8DCB0, "A test-quest delivery.");
     public static final ItemDef XP_LAMP = def("xp_lamp", "Experience lamp", 0, 0xF0C850, "Rub it for XP in a skill of your choice.");
@@ -449,6 +478,18 @@ public final class Items {
                 {"dragon_bones", 1, 2, 3f}, {"dragonhide", 2, 2, 4f}, {"dragon_egg", 2, 2, 6f}, {"rare_fossil", 2, 3, 7f},
                 {"amethyst_cluster", 1, 2, 0.12f}, {"amethyst", 1, 1, 0.05f}};
         for (Object[] r : table) { ItemDef d = find((String) r[0]); if (d == null) continue; d.gw = (int) r[1]; d.gh = (int) r[2]; d.weight = (float) r[3]; }
+        // (0.3.5) every catch by its size: a sardine one cell by two, a tuna four by two, a shark's side of meat four by three
+        for (rpg.fishing.FishKind k : rpg.fishing.FishKind.values()) {
+            if (k == rpg.fishing.FishKind.SHRIMP || k == rpg.fishing.FishKind.CRAB || k == rpg.fishing.FishKind.TROUT) continue;
+            int[] c = k.cells();
+            ItemDef raw = k.raw(), cooked = k.cooked();
+            raw.gw = c[0]; raw.gh = c[1]; raw.weight = k.weight();
+            if (cooked != null) { cooked.gw = c[0]; cooked.gh = c[1]; cooked.weight = k.weight() * 0.8f; }
+        }
+        for (Object[] r : new Object[][]{{"shears", 1, 2, 0.4f}, {"cotton", 1, 1, 0.1f}, {"cotton_seeds", 1, 1, 0.01f}, {"clean_wool", 1, 1, 0.25f}, {"clean_cotton", 1, 1, 0.08f},
+                {"yarn", 1, 1, 0.1f}, {"cotton_thread", 1, 1, 0.05f}, {"linen_thread", 1, 1, 0.05f}, {"loom_cloth", 2, 2, 1.0f}, {"fulled_cloth", 2, 2, 0.9f}, {"dyed_cloth", 2, 2, 0.9f}, {"fine_cloth", 2, 2, 0.8f}})
+            { ItemDef d = find((String) r[0]); d.gw = (int) r[1]; d.gh = (int) r[2]; d.weight = (float) r[3]; }
+        for (Object[] r : new Object[][]{{"harpoon", 1, 6, 2.2f}, {"lobster_pot", 3, 3, 2.4f}, {"fishing_bait", 1, 1, 0.02f}}) { ItemDef d = find((String) r[0]); d.gw = (int) r[1]; d.gh = (int) r[2]; d.weight = (float) r[3]; }
         for (ItemDef d : BY_ID.values()) {
             d.conductive = d.tier != null && d.tier != Tier.WOODEN && d.tier != Tier.STONE && d.tier != Tier.GRANITE || d.family == Family.JEWEL || d.family == Family.SYMBOL;
             if (d.tier == null && !d.id.startsWith("cape_")) continue;

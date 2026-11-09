@@ -247,6 +247,7 @@ private:
     std::vector<float> waterMaskData_;
     int waterCells_ = 0;
     std::vector<float> ripples_;
+    std::vector<float> flows_;   // 2.10: x0, z0, x1, z1, vx, vz, -, - per moving stretch of water
     std::vector<float> particles_;       // 12 floats a particle
     std::vector<Quads> quads_;
     std::vector<Portrait> portraits_;

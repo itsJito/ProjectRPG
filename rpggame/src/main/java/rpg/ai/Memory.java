@@ -28,6 +28,8 @@ public final class Memory {
     public long witness;
     public int relays;
     public boolean navKnown; public float navX,navY,navZ;
+    /** (0.3.5) What the witness took in of the culprit (rpg.law.Evidence): kept with the account, passed on with it. */
+    public rpg.law.Evidence.Profile evidence;
 
     public Memory(String kind, long subject, long victim, String jurisdiction, double minutes, float confidence, String source, long eventId, int value, String detail) {
         this.kind = kind; this.subject = subject; this.victim = victim; this.jurisdiction = jurisdiction; this.minutes = minutes;
@@ -54,7 +56,7 @@ public final class Memory {
     public Memory rumorFrom(Npc teller) {
         Memory m = new Memory(kind, subject, victim, jurisdiction, minutes, confidence * 0.7f, "rumor from " + teller.name, eventId, value, detail);
         m.witness = witness != 0 ? witness : witnessed() ? teller.id : 0;
-        m.relays = relays + 1;m.navKnown=navKnown;m.navX=navX;m.navY=navY;m.navZ=navZ;
+        m.relays = relays + 1;m.evidence=evidence==null?null:evidence.copy();m.navKnown=navKnown;m.navX=navX;m.navY=navY;m.navZ=navZ;
         m.reported = true;   // a rumor is not evidence: it is never reported
         m.settled = settled;
         return m;
@@ -73,6 +75,7 @@ public final class Memory {
         m.put("source", source); m.put("reported", reported); m.put("event", eventId); m.put("value", value); m.put("detail", detail);
         m.put("witness", witness); m.put("relays", relays);
         m.put("settled", settled);m.put("influenceTried",influenceTried);m.put("withheld",withheld);
+        if(evidence!=null)m.put("evidence",evidence.save());
         return m;
     }
 
@@ -86,6 +89,7 @@ public final class Memory {
         r.settled = astratto.util.Json.bool(m, "settled", false);
         r.witness = astratto.util.Json.lng(m, "witness", 0);
         r.relays = astratto.util.Json.integer(m, "relays", r.source.startsWith("rumor from ") ? 1 : 0);
+        if (m.get("evidence") instanceof java.util.Map<?, ?> ev) { @SuppressWarnings("unchecked") var em = (java.util.Map<String, Object>) ev; r.evidence = rpg.law.Evidence.Profile.load(em); }
         return r;
     }
 }

@@ -1,0 +1,30 @@
+﻿cmd : 'vswhere.exe' is not recognized as an internal or external command,
+At line:1 char:302
++ ... tch {} } }; cmd /c "cd /d C:\Users\John\Documents\ProjectRPG\theastra ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ('vswhere.exe' i...ternal command,:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp

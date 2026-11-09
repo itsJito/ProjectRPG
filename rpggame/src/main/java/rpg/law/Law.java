@@ -269,6 +269,17 @@ public final class Law {
     public boolean lockdown(String jurisdiction) {
         return !DevMap.WILDS.equals(jurisdiction) && jurisdiction.equals(DevMap.jurisdiction(g.player.x, g.player.z)) && bounty(g.player.id, jurisdiction) >= g.cfg.lockdownBounty;
     }
+    /** How near the watch must be to speak to someone: horizontally, and up or down. */
+    public static final float SPEECH_REACH = 2.6f, SPEECH_RISE = 1.4f;
+    /**
+     * (0.3.5) Whether an officer is close enough to put something to a person's face: within {@link #SPEECH_REACH} on the
+     * ground, on the same level within {@link #SPEECH_RISE}, and with a clear line from eye to eye.
+     */
+    public boolean withinSpeech(Npc officer, Actor a) {
+        return officer.distTo(a) <= SPEECH_REACH && Math.abs(a.y - officer.y) <= SPEECH_RISE
+                && g.vox.sight(officer.x, officer.eyeY(), officer.z, a.x, a.eyeY(), a.z);
+    }
+
     /** The wanted player speaks to the watch: whatever the bounty, the officer acts on it now. */
     public void confront(Npc officer, Actor offender) {
         confronted.add(new Key(offender.id, officer.homeJurisdiction));
@@ -386,6 +397,9 @@ public final class Law {
         for (Npc w : seen) {
             w.remember(new Memory(kind, who, victim, jur, g.state.minutes, 1f, "witnessed", incident, value, kind.toLowerCase() + " at " + (where == null ? "?" : where.name) + (who == 0 ? " (by a stranger)" : "")), 24);
             w.memories.get(w.memories.size()-1).witness=w.id;
+            // (0.3.5) and what they took in of the culprit, from where they stood
+            Memory account = w.memories.get(w.memories.size()-1);
+            if (account.evidence == null && account.kind.equals(kind)) account.evidence = Evidence.observe(g, w, culprit, victim, kind);
             g.state.commit("CrimeWitnessed", w.id, culprit.id, jur, ev.id(), kind + " seen by " + w.name);
             witnessed++;
             String protest=kind.equals("VANDALISM") ? switch(w.role) {
@@ -680,9 +694,66 @@ public final class Law {
     public float certainty(Npc guard, Actor offender) {
         float confidence = 0.25f;
         for (var memory : guard.memories) if (memory.subject == offender.id && memory.crime() && !memory.settled
-                && guard.homeJurisdiction.equals(memory.jurisdiction))
-            confidence = Math.max(confidence, memory.confidence * (memory.witnessed() ? 1 : 0.65f));
+                && guard.homeJurisdiction.equals(memory.jurisdiction)) {
+            // (0.3.5, gamefixes: interrogations on evidence) the account weighed against the one standing there now:
+            // the more of the description fits, the surer the officer; a changed coat, a different weapon, washed hands
+            // and an emptied pack all tell against it
+            float fits = memory.evidence == null ? 0.7f : Evidence.fit(memory.evidence, offender);
+            confidence = Math.max(confidence, memory.confidence * (memory.witnessed() ? 1 : 0.65f) * (0.4f + 0.6f * fits));
+        }
         return Math.min(1, confidence);
+    }
+
+    /** (0.3.5) The officer's account of the case against a suspect, piece by piece (the description that came to him). */
+    public Memory account(Npc guard, Actor offender) {
+        Memory best = null;
+        for (var memory : guard.memories) if (memory.subject == offender.id && memory.crime() && !memory.settled && guard.homeJurisdiction.equals(memory.jurisdiction) && memory.evidence != null)
+            if (best == null || memory.witnessed() && !best.witnessed() || memory.confidence > best.confidence) best = memory;
+        if (best == null) for (Npc n : g.npcs) if (n.alive) for (var memory : n.memories)
+            if (memory.subject == offender.id && memory.crime() && !memory.settled && guard.homeJurisdiction.equals(memory.jurisdiction) && memory.evidence != null && memory.reported) return memory;
+        return best;
+    }
+
+    /** (0.3.5) Someone else nearby who fits the account at least as well as the suspect, for the suspect to point to; or null. */
+    public Npc lookalike(Npc guard, Actor suspect, Memory account) {
+        if (account == null || account.evidence == null) return null;
+        float mine = Evidence.fit(account.evidence, suspect);
+        Npc best = null; float bf = Math.max(0.5f, mine * 0.9f);
+        for (Npc n : g.npcs) {
+            if (n == guard || !n.alive || !n.loaded || n.watch() || n.id == account.victim || n.distTo(guard) > 30 || inCustody(n)) continue;
+            float f = Evidence.fit(account.evidence, n);
+            if (f >= bf) { bf = f; best = n; }
+        }
+        return best;
+    }
+
+    /**
+     * (0.3.5) The suspect points to someone else who fits the description. If the other fits it as well, the officer
+     * takes them in for it instead - the suspect's charge for this case is dropped, and the other is held; if not, it
+     * is a lie in front of the watch, and the suspect is taken.
+     */
+    public Result accuse(Actor suspect, Npc guard, Npc other, long request) {
+        if (g.state.alreadyCommitted(request)) return Result.no("Already answered.");
+        Memory account = account(guard, suspect);
+        if (account == null) return Result.no("There is nothing to compare.");
+        float mine = Evidence.fit(account.evidence, suspect), theirs = Evidence.fit(account.evidence, other);
+        g.state.commit(request, "SuspectAccused", suspect.id, other.id, guard.homeJurisdiction, 0, String.format("%s pointed to %s (fit %.2f against %.2f)", suspect.name, other.name, theirs, mine));
+        if (theirs >= mine && theirs >= 0.5f) {
+            g.ai.say(guard, "...Now that you mention it. " + other.name + " fits the description as well as you do. Better, even.");
+            g.ai.say(other, "What? I never - this is madness!");
+            other.arrestedUntil = g.state.minutes + 240;
+            other.goal = rpg.ai.Brain.Goal.HELD;
+            g.state.commit("WrongfulArrest", guard.id, other.id, guard.homeJurisdiction, 0, other.name + " held on the account of " + account.kind.toLowerCase());
+            for (Npc w : g.npcs) if (w != other && w.alive && w.loaded && w.distTo(other) < 14)
+                w.remember(new Memory("SEEN_ARREST", other.id, guard.id, guard.homeJurisdiction, g.state.minutes, 1f, "witnessed", 0, 0, "saw " + other.name + " taken in on a description"), 24);
+            settle(suspect, guard.homeJurisdiction);
+            if (g.ui != null) g.ui.closeDialog();
+            if (suspect == g.player) g.chat.say(other.name + " is taken in for it. The witness's account fit them as well as you.");
+            return Result.ok();
+        }
+        g.ai.say(guard, "Nice try. " + other.name + " looks nothing like what the witness saw. You're coming with me.");
+        arrest(suspect, guard.homeJurisdiction, guard);
+        return Result.ok();
     }
 
     public Result denyCharge(Actor offender, Npc guard, long request) {
@@ -706,6 +777,8 @@ public final class Law {
     public Dialog halt(Npc guard, Actor p) {
         String jur = guard.homeJurisdiction;
         if(refusesPeace(p.id,jur))return null;
+        // whoever calls for it, the challenge is put face to face (the player's own Talk-to reaches a little further)
+        if (!withinSpeech(guard, p) && !(guard.distTo(p) <= g.cfg.interactRange + 0.6f && Math.abs(p.y - guard.y) <= SPEECH_RISE)) return null;
         boolean petty = petty(p.id, jur);
         Double at = haltedAt.get(p.id);
         if (at != null && g.time - at < 14) {
@@ -732,6 +805,14 @@ public final class Law {
         g.ai.say(guard, petty ? "A word with you." : "Halt!");
         float evidence = certainty(guard, p);
         String charge = evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ";
+        // (0.3.5, gamefixes: interrogations) the account, piece by piece, against the one standing there
+        Memory account = account(guard, p);
+        if (account != null && !petty) {
+            StringBuilder said = new StringBuilder();
+            int n = 0;
+            for (var clue : Evidence.compare(account.evidence, p)) if (clue.kind() != Evidence.Kind.BUILD && n++ < 3) said.append(clue.line()).append(' ');
+            if (said.length() > 0) charge += said;
+        }
         Dialog d = new Dialog(guard.name, petty ? charge + "It's a small matter: a fine of " + b + " coins in " + jur + ". Pay it and we're done."
                 : charge + "You are wanted in " + jur + " for " + b + " coins. Pay, explain yourself, or come quietly.");
         d.npc = guard.id; d.standoff = true;
@@ -739,6 +820,9 @@ public final class Law {
         if (purse >= b) d.choice("Pay " + b + " coins.", () -> { Result r = payBounty(p, guard, g.state.newRequestId()); if (r.rejected()) { g.chat.warn(r.reason()); if (petty) declineFine(p, guard); } });
         else d.choice("Pay what I have (" + purse + " of " + b + " coins; the rest is taken in goods and time).", () -> { Result r = payWhatYouCan(p, guard, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); });
         d.choice("You have the wrong person. (lie; risk jail)", () -> denyCharge(p, guard, g.state.newRequestId()));
+        // (0.3.5) someone else here fits the account: they can be named
+        Npc other = petty ? null : lookalike(guard, p, account);
+        if (other != null) d.choice("It was " + other.name + " - look at them. (point the finger)", () -> accuse(p, guard, other, g.state.newRequestId()));
         if (petty) { d.closeChoice("Not now. (it stays on your record)", () -> declineFine(p, guard)); d.dismissed = () -> declineFine(p, guard); }
         else {
             d.choice("I'll come quietly.", () -> { g.honor.surrendered(guard.id); arrest(p, jur, guard); });

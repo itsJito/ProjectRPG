@@ -236,7 +236,12 @@ public final class ItemModels {
             case "bounty_scroll" -> warrant();
             case "xp_lamp" -> lamp();
             case "chancery_key" -> key();
-            default -> lump(d);
+            case "harpoon" -> harpoon();
+            case "lobster_pot" -> lobsterPot();
+            default -> {
+                rpg.fishing.FishKind k = rpg.fishing.FishKind.ofItem(d.id);
+                yield k != null ? catchModel(d, k) : lump(d);
+            }
         };
     }
 
@@ -681,6 +686,80 @@ public final class ItemModels {
         for (int k = 0; k < 4; k++) { m.set(4 - k, 3 - k, 2, body); m.set(4 + k, 3 - k, 2, body); }   // the tail
         m.set(5, 18, 3, mat(0x101010));   // the eye
         return new Model(m, 4.5f, 0.5f, 2.5f);
+    }
+
+    /**
+     * (0.3.5) A catch, raw or cooked, in its kind's colours and build: a fish lying on its side (a long thin eel, a
+     * deep-bodied tuna, a billfish with its bill), a lobster, a squid with its arms, a starfish, a steak of whale; cooked,
+     * the skin browned over.
+     */
+    private static Model catchModel(ItemDef d, rpg.fishing.FishKind k) {
+        boolean raw = d.id.startsWith("raw_") || d.id.equals("starfish");
+        int back = mat(raw ? k.back : 0xA86A3A), belly = mat(raw ? k.belly : 0xD8A060), fin = mat(raw ? k.fin : 0x8A5428), eye = mat(0x101010);
+        switch (k.shape) {
+            case STARFISH -> {
+                VoxModel m = new VoxModel(17, 17, 3);
+                for (int a = 0; a < 5; a++) for (int i = 0; i <= 8; i++) { double ang = a * Math.PI * 2 / 5 - Math.PI / 2; int x = 8 + (int) Math.round(Math.cos(ang) * i), y = 8 + (int) Math.round(Math.sin(ang) * i); int r = i < 4 ? 1 : 0; for (int dx = -r; dx <= r; dx++) for (int dy = -r; dy <= r; dy++) m.set(x + dx, y + dy, 1, (i + dx) % 3 == 0 ? fin : back); }
+                return new Model(m, 8.5f, 8.5f, 1.5f);
+            }
+            case WHALE -> { return meat(Items.get(raw ? "raw_meat" : "cooked_meat")); }
+            case LOBSTER, CRAB -> {
+                VoxModel m = new VoxModel(13, 22, 5);
+                for (int y = 2; y < 18; y++) { int half = y < 8 ? 3 : 2; for (int x = 6 - half; x <= 6 + half; x++) for (int z = 1; z <= 3; z++) m.set(x, y, z, (y % 3 == 0) ? fin : back); }
+                for (int x = 3; x <= 9; x++) m.set(x, 19, 2, back);
+                for (int sd = -1; sd <= 1; sd += 2) for (int y = 0; y < 6; y++) m.set(6 + sd * (3 + y / 2), y, 2, fin);
+                return new Model(m, 6.5f, 0.5f, 2.5f);
+            }
+            case SQUID -> {
+                VoxModel m = new VoxModel(9, 26, 5);
+                for (int y = 8; y < 24; y++) { int half = y > 20 ? 1 : 3; for (int x = 4 - half; x <= 4 + half; x++) for (int z = 1; z <= 3; z++) m.set(x, y, z, back); }
+                for (int a = 0; a < 5; a++) for (int y = 0; y < 8; y++) m.set(1 + a * 2 - (y % 2), y, 2, belly);
+                m.set(2, 9, 3, eye); m.set(6, 9, 3, eye);
+                return new Model(m, 4.5f, 0.5f, 2.5f);
+            }
+            case SHRIMP -> { return shrimp(d); }
+            default -> { }
+        }
+        // a fish on its side: the length by the kind (a guppy a few cells, a marlin a long one), the depth by its build
+        boolean eel = k.shape == rpg.fishing.FishKind.Shape.EEL, bill = k.shape == rpg.fishing.FishKind.Shape.BILLFISH;
+        int len = eel ? 40 : (int) Math.max(12, Math.min(34, 10 + k.length * 9)), deep = eel ? 2 : k.shape == rpg.fishing.FishKind.Shape.TUNA || k.shape == rpg.fishing.FishKind.Shape.ANGLER ? 5 : 4;
+        VoxModel m = new VoxModel(deep * 2 + 3, len + (bill ? 8 : 0) + 6, 5);
+        int c0 = deep + 1;
+        for (int y = 0; y < len; y++) {
+            float u = (y - len * 0.55f) / (len * 0.55f);
+            int half = Math.max(0, (int) Math.round(deep * Math.sqrt(Math.max(0, 1 - u * u))));
+            for (int x = -half; x <= half; x++) for (int z = 1; z <= 3; z++) m.set(c0 + x, y + 4, z, x < -half / 2 ? belly : raw && k.shape == rpg.fishing.FishKind.Shape.SPOTTED && (x + y) % 4 == 0 ? fin : raw && k.shape == rpg.fishing.FishKind.Shape.STRIPED && y % 4 == 0 && x > 0 ? fin : back);
+        }
+        for (int i = 0; i < 4; i++) { m.set(c0 - i, 3 - i, 2, fin); m.set(c0 + i, 3 - i, 2, fin); }   // the tail
+        if (bill) for (int y = len + 4; y < len + 12; y++) m.set(c0, y, 2, back);
+        m.set(c0 + 1, len, 3, eye);
+        return new Model(m, c0 + 0.5f, 0.5f, 2.5f);
+    }
+
+    /** A harpoon: a long ash shaft, a barbed iron head, a coil of line at the butt. (1/32 m, doubled.) */
+    private static Model harpoon() {
+        VoxModel m = new VoxModel(7, 64, 3);
+        for (int y = 0; y < 52; y++) m.set(3, y, 1, y < 6 ? mat(0x5A4028) : mat(0xA8885A));
+        int iron = metal(0x8A8A92);
+        for (int y = 52; y < 62; y++) m.set(3, y, 1, iron);
+        for (int k = 0; k < 3; k++) { m.set(2 - k, 56 - k, 1, iron); m.set(4 + k, 56 - k, 1, iron); }
+        m.set(3, 63, 1, iron);
+        for (int x = 1; x <= 5; x++) for (int y = 2; y <= 4; y++) if (x == 1 || x == 5 || y == 2 || y == 4) m.set(x, y, 1, mat(0xC8B48A));
+        return new Model(m, 3.5f, 0.5f, 1.5f);
+    }
+
+    /** A lobster pot: a round-topped creel of withies with a funnel mouth, a rope and a cork float. */
+    private static Model lobsterPot() {
+        VoxModel m = new VoxModel(15, 12, 11);
+        for (int x = 0; x < 15; x++) for (int y = 0; y < 10; y++) for (int z = 0; z < 11; z++) {
+            float dz = (z - 5) / 5.5f, dy = y / 9.5f;
+            boolean shell = y == 0 || dz * dz + dy * dy > 0.82f && dz * dz + dy * dy <= 1.0f || x == 0 || x == 14;
+            if (!shell) continue;
+            if ((x + y) % 2 == 0 || y == 0) m.set(x, y, z, (x + z) % 5 == 0 ? mat(0x5A3E22) : mat(0x7A5A3A));
+        }
+        for (int y = 3; y < 7; y++) for (int z = 3; z < 8; z++) m.set(0, y, z, 0);   // the mouth
+        m.set(7, 10, 5, mat(0xC8B48A)); m.set(7, 11, 5, mat(0xD86A30));
+        return new Model(m, 7.5f, 0.5f, 5.5f);
     }
 
     private static Model bread() {

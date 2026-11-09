@@ -81,6 +81,10 @@ private:
     HandleTable<Agent> agents_{ASTRATTO_KIND_AGENT};
     HandleTable<Policy> policies_{ASTRATTO_KIND_POLICY};
     std::vector<astratto_cmd_noise> noises_;
+    /** (2.10) The places walkers steer round now: x, y, z, radius, and the time each lapses. */
+    struct Avoid { float x, y, z, radius; double until; };
+    std::vector<Avoid> avoids_;
+    void steerClear(const Agent& a, float goalX, float goalZ, float& wantX, float& wantZ) const;
     std::vector<astratto_handle> order_;
     std::vector<std::unique_ptr<class Pathfinder>> finders_;
     std::vector<uint8_t> clear_;

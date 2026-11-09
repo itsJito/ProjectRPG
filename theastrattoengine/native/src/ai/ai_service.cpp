@@ -149,6 +149,17 @@ int AiService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32_t by
             noises_.push_back(c);
             return ASTRATTO_OK;
         }
+        case ASTRATTO_CMD_AVOID: {
+            astratto_cmd_avoid c;
+            if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
+            if (!std::isfinite(c.x + c.y + c.z + c.radius + c.life) || c.radius <= 0 || c.radius > 8 || c.life <= 0 || c.life > 60) return ASTRATTO_ERR_ARGUMENT;
+            // the same place again (a disc renewed) keeps one entry; a crowded street keeps the 64 newest
+            const double until = e.time() + c.life;
+            for (Avoid& v : avoids_) if (std::fabs(v.x - c.x) < 0.25f && std::fabs(v.z - c.z) < 0.25f && std::fabs(v.y - c.y) < 1.0f) { v.radius = c.radius; v.until = until; v.y = c.y; return ASTRATTO_OK; }
+            if (avoids_.size() >= 64) avoids_.erase(avoids_.begin());
+            avoids_.push_back(Avoid{c.x, c.y, c.z, c.radius, until});
+            return ASTRATTO_OK;
+        }
         default: return -1;
     }
 }
@@ -366,6 +377,8 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             }
             const float slow = last ? std::min(1.0f, d / 0.8f + 0.25f) : 1.0f;
             wantX = dx * a.speed * slow * a.rate; wantZ = dz * a.speed * slow * a.rate;
+            // (2.10) round what the game asks walkers to keep clear of, toward the end of the route as well as along it
+            if (!avoids_.empty()) { const size_t last3 = a.route.size() >= 3 ? a.route.size() - 3 : 0; steerClear(a, a.route.empty() ? a.destX : static_cast<float>(a.route[last3]) + 0.5f, a.route.empty() ? a.destZ : static_cast<float>(a.route[last3 + 2]) + 0.5f, wantX, wantZ); }
             // a body with weight slows for a sharp turn rather than swinging wide round the cell it has to reach
             if (m) {
                 const float vl = std::sqrt(m->vx * m->vx + m->vz * m->vz);
@@ -420,7 +433,40 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
     }
 }
 
+/*
+ * (2.10) Steering clear: a walker whose way passes close by an avoid disc bears off to the side away from it - harder the
+ * nearer it comes, out of it if it is already inside - and keeps its pace. One going to a place inside the disc (the one
+ * who has come for what lies there) is not turned away from it.
+ */
+void AiService::steerClear(const Agent& a, float goalX, float goalZ, float& wantX, float& wantZ) const {
+    const float sp = std::sqrt(wantX * wantX + wantZ * wantZ);
+    if (avoids_.empty() || sp < 0.05f) return;
+    const float dx = wantX / sp, dz = wantZ / sp;
+    float sx = 0, sz = 0;
+    for (const Avoid& v : avoids_) {
+        if (std::fabs(v.y - a.y) > 1.6f) continue;
+        const float ox = v.x - a.x, oz = v.z - a.z, reach = v.radius + 0.9f, d2 = ox * ox + oz * oz;
+        if (d2 > reach * reach) continue;
+        const float gx = goalX - v.x, gz = goalZ - v.z;
+        if (gx * gx + gz * gz < (v.radius + 0.6f) * (v.radius + 0.6f)) continue;
+        const float d = std::sqrt(d2), ahead = ox * dx + oz * dz;
+        if (ahead < -0.4f && d > v.radius) continue;
+        // to the side, away from it; and straight out of it from inside
+        float px = -dz, pz = dx;
+        if (px * ox + pz * oz > 0) { px = -px; pz = -pz; }
+        const float w = 1.0f - d / reach;
+        sx += px * w * 1.4f; sz += pz * w * 1.4f;
+        if (d < v.radius && d > 1e-3f) { sx -= ox / d * (1 - d / v.radius) * 1.2f; sz -= oz / d * (1 - d / v.radius) * 1.2f; }
+    }
+    if (sx == 0 && sz == 0) return;
+    float nx = dx + sx, nz = dz + sz;
+    const float l = std::sqrt(nx * nx + nz * nz);
+    if (l < 1e-4f) return;
+    wantX = nx / l * sp; wantZ = nz / l * sp;
+}
+
 void AiService::step(Engine& e, float dt) {
+    if (!avoids_.empty()) { const double t = e.time(); avoids_.erase(std::remove_if(avoids_.begin(), avoids_.end(), [t](const Avoid& v) { return v.until <= t; }), avoids_.end()); }
     if (dt <= 0) { noises_.clear(); return; }
     const VoxelWorld* w = e.active();
     PhysicsService* phys = e.service<PhysicsService>();

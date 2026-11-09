@@ -166,7 +166,7 @@ public final class Monsters {
     public void remove(Monster m) {
         despawnBody(m);
         if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
-        monsters.remove(m);
+        monsters.remove(m); indexed = -1;
     }
 
     public void despawnBody(Monster m) {
@@ -177,7 +177,16 @@ public final class Monsters {
 
     // ------------------------------------------------------------------ queries
     public List<Monster> all() { return monsters; }
-    public Monster byId(long id) { for (Monster m : monsters) if (m.id == id) return m; return null; }
+    /** (0.3.5, optimization) by id from an index, rebuilt when the roster changes size. */
+    public Monster byId(long id) {
+        if (monsters.size() != indexed) { index.clear(); for (Monster x : monsters) index.put(x.id, x); indexed = monsters.size(); }
+        Monster x = index.get(id);
+        if (x != null && x.id == id) return x;
+        for (Monster y : monsters) if (y.id == id) { index.put(id, y); return y; }
+        return null;
+    }
+    private final java.util.Map<Long, Monster> index = new java.util.HashMap<>();
+    private int indexed = -1;
     public int living(MonsterKind k) { int n = 0; for (Monster m : monsters) if (m.alive && m.kind == k) n++; return n; }
 
     List<Monster> kin(Monster m, float within) {

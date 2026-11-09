@@ -250,6 +250,17 @@ int PhysicsService::command(Engine& e, uint32_t type, const uint8_t* rec, uint32
             if (r->sydney) { SydneyTraits& t = r->sydney->traits; t.strength = ok(c.strength); t.agility = ok(c.agility); t.toughness = ok(c.toughness); t.endurance = ok(c.endurance); }
             return ASTRATTO_OK;
         }
+        case ASTRATTO_CMD_RAGDOLL_BUOYANCY: {
+            astratto_cmd_ragdoll_buoyancy c;
+            if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;
+            RagdollBody* r = ragdolls_.get(c.handle);
+            if (!r) { e.error(type, ASTRATTO_ERR_HANDLE, c.handle); return ASTRATTO_OK; }
+            if (!std::isfinite(c.buoyancy) || !std::isfinite(c.drag)) return ASTRATTO_ERR_ARGUMENT;
+            r->body->buoyancy = std::max(0.0f, std::min(3.0f, c.buoyancy));
+            r->body->waterDrag = std::max(0.0f, std::min(20.0f, c.drag));
+            r->body->wake();
+            return ASTRATTO_OK;
+        }
         case ASTRATTO_CMD_SYDNEY_PROFILE: {
             astratto_cmd_sydney_profile c;
             if (!readRecord(rec, bytes, c)) return ASTRATTO_ERR_STREAM;

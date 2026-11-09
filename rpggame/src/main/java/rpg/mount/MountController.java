@@ -17,6 +17,12 @@ public final class MountController {
     public float halfLength, radius, height, step = 1.05f;
     /** Whether the last move was stopped (or slowed) by something solid, and whether it stepped up. */
     public boolean blocked, stepped;
+    /**
+     * (0.3.6, gamefixes: horses and Pegasi got stuck on foliage) the brush the body pushed through on the last move (cells
+     * of leaves or berry bush in its way, 0 when none): leaves are no wall to a horse's weight - it shoulders through a
+     * low canopy or a bush, slowed by it - and never footing for it either.
+     */
+    public int brush;
     public float gravity = 22f;
 
     public MountController(float halfLength, float radius, float height) { this.halfLength = halfLength; this.radius = radius; this.height = height; }
@@ -31,7 +37,7 @@ public final class MountController {
                     // the circle against the cell's square
                     float nx = Math.max(bx, Math.min(cx, bx + 1)), nz = Math.max(bz, Math.min(cz, bz + 1));
                     if ((nx - cx) * (nx - cx) + (nz - cz) * (nz - cz) > radius * radius) continue;
-                    for (int by = (int) Math.floor(py + 0.05f); by <= (int) Math.floor(py + height - 0.05f); by++) if (vox.solid(bx, by, bz)) return false;
+                    for (int by = (int) Math.floor(py + 0.05f); by <= (int) Math.floor(py + height - 0.05f); by++) if (vox.hard(bx, by, bz)) return false;
                 }
         }
         return true;
@@ -48,7 +54,7 @@ public final class MountController {
             // (0.3.3, gamefixes: mounts climbed walls and roofs) a probe whose first cell is solid is inside an obstacle,
             // not over ground: it gives no footing. It used to give the obstacle's top, so a hoof probe pressed into a
             // wall lifted the body a block, and the next frame another - straight up any wall and onto the roofs
-            for (int by = start; by >= Math.max(0, (int) Math.floor(py) - 4); by--) if (vox.solid(bx, by, bz)) { if (by < start) best = Math.max(best, by + 1); break; }
+            for (int by = start; by >= Math.max(0, (int) Math.floor(py) - 4); by--) if (vox.hard(bx, by, bz)) { if (by < start) best = Math.max(best, by + 1); break; }
         }
         return best;
     }
@@ -59,6 +65,7 @@ public final class MountController {
      */
     public float move(Voxels vox, float dx, float dz, float newYaw, float dt) {
         blocked = false; stepped = false;
+        brush = brushAt(vox, x + dx, y, z + dz, newYaw);
         unstick(vox);
         // turning in place is checked too: a long body cannot swing round inside a narrow lane
         if (fits(vox, x, y, z, newYaw)) yaw = newYaw;
@@ -92,6 +99,17 @@ public final class MountController {
             y = ny;
         } else { y = Math.max(y, floor); grounded = true; vy = 0; }
         return (float) Math.hypot(x - ox, z - oz);
+    }
+
+    /** How many cells of brush (leaves, a berry bush) the body stands in at a place. */
+    public int brushAt(Voxels vox, float px, float py, float pz, float yaw) {
+        int n = 0;
+        float fx = (float) -Math.sin(yaw), fz = (float) -Math.cos(yaw);
+        for (float along : new float[]{-halfLength, 0, halfLength}) {
+            int bx = (int) Math.floor(px + fx * along), bz = (int) Math.floor(pz + fz * along);
+            for (int by = (int) Math.floor(py + 0.05f); by <= (int) Math.floor(py + height - 0.05f); by++) if (vox.leafy(bx, by, bz)) n++;
+        }
+        return n;
     }
 
     /**

@@ -70,7 +70,9 @@ public final class AnimalModels {
             case PIG -> quad(s, v, 12, 10, 18, 5, 3, 7, 7, 6, 2, pigCoat(v));
             case HORSE -> quad(s, v, 11, 11, 26, 15, 4, 5, 6, 7, 5, horseCoat(v));
             case PEGASUS -> pegasus(v);
-            case DEER -> quad(s, v, 8, 9, 16, 14, 2, 5, 5, 6, 3, deerCoat(v));
+            // (0.3.5, gamefixes: deer looked like small horses) a compact, deep-chested body on long slender legs, a
+            // short wedge of a head carried high on a thin upright neck
+            case DEER -> quad(s, v, 7, 9, 14, 17, 2, 5, 5, 4, 3, deerCoat(v));
             case DOG -> quad(s, v, 6, 7, 13, 7, 2, 5, 5, 5, 3, dogCoat(v));
             case CAT -> quad(s, v, 5, 5, 10, 5, 2, 4, 4, 3, 1, catCoat(v));
             case FOX -> quad(s, v, 5, 6, 11, 6, 2, 5, 4, 4, 3, foxCoat());
@@ -153,11 +155,11 @@ public final class AnimalModels {
 
     /** The head: a block with a snout in front, eyes, a nose, and the species' ears, horns, mane. Pivot: where the neck joins (its back-bottom). */
     private static ItemModels.Model head(Species s, int v, int hw, int hh, int hl, int snout, Coat coat) {
-        boolean horse = horseLike(s);
-        int neckL = horse ? 6 : 0;
-        int sx = hw + 4, sy = hh + (horse ? 12 : 6), sz = hl + snout + neckL + 2;
+        boolean horse = horseLike(s), deer = s == Species.DEER;
+        int neckL = deer ? 3 : horse ? 6 : 0;
+        int sx = hw + 4, sy = hh + (horse ? 13 : 6), sz = hl + snout + neckL + 2;
         VoxModel m = new VoxModel(sx, sy, sz);
-        int ox = 2, oy = horse ? 7 : 1, oz = 1;   // where the skull's box starts (back-bottom-left)
+        int ox = 2, oy = deer ? 7 : horse ? 7 : 1, oz = 1;   // where the skull's box starts (back-bottom-left); a deer carries its head high
         int back = oz + hl + snout + neckL;      // z of the back of the skull (+z is backward)
         // the skull
         for (int x = 0; x < hw; x++) for (int y = 0; y < hh; y++) for (int z = 0; z < hl; z++) {
@@ -166,17 +168,26 @@ public final class AnimalModels {
             m.set(ox + x, oy + y, oz + snout + z, coat.at("head", x, y, z, hw, hh, hl));
         }
         // the snout (narrower and lower), its nose
-        int snw = Math.max(2, hw - (s == Species.PIG ? 1 : s == Species.COW || horse || s == Species.BROWN_BEAR ? 2 : 3)), snh = Math.max(2, hh - (s == Species.PIG ? 2 : hh / 2));
+        int snw = Math.max(2, hw - (s == Species.PIG ? 1 : deer ? 3 : s == Species.COW || horse || s == Species.BROWN_BEAR ? 2 : 3)), snh = Math.max(2, hh - (s == Species.PIG ? 2 : hh / 2));
         int sx0 = ox + (hw - snw) / 2;
-        for (int x = 0; x < snw; x++) for (int y = 0; y < snh; y++) for (int z = 0; z < snout; z++)
-            m.set(sx0 + x, oy + y, oz + z, coat.at("snout", x, y, z, snw, snh, snout));
-        int nose = switch (s) { case PIG -> 0xE89A98; case COW -> 0xE4A8A0; case SHEEP -> 0x2A2420; case HORSE, PEGASUS -> 0x3A3430; case CAT -> 0xE08890; default -> 0x1A1614; };
+        for (int x = 0; x < snw; x++) for (int y = 0; y < snh; y++) for (int z = 0; z < snout; z++) {
+            // a deer's muzzle tapers to a fine dark nose, with a pale band behind it
+            if (deer && z == 0 && y == snh - 1) continue;
+            m.set(sx0 + x, oy + y, oz + z, deer && z == 1 && y < snh - 1 ? c(0xEEE6D8) : coat.at("snout", x, y, z, snw, snh, snout));
+        }
+        if (deer) {
+            // the skull's wedge: the cheeks cut back toward the muzzle, the forehead narrowing
+            for (int y = 0; y < hh; y++) { m.set(ox, oy + y, oz + snout, 0); m.set(ox + hw - 1, oy + y, oz + snout, 0); }
+            m.set(ox + 1, oy + hh - 1, oz + snout, 0); m.set(ox + hw - 2, oy + hh - 1, oz + snout, 0);
+        }
+        int nose = deer ? 0x141210 : switch (s) { case PIG -> 0xE89A98; case COW -> 0xE4A8A0; case SHEEP -> 0x2A2420; case HORSE, PEGASUS -> 0x3A3430; case CAT -> 0xE08890; default -> 0x1A1614; };
         if (snout > 0) {
             for (int x = 0; x < snw; x++) for (int y = snh - (s == Species.PIG ? snh : 1); y < snh; y++) if (s == Species.PIG || x > 0 && x < snw - 1 || snw <= 2) m.set(sx0 + x, oy + y, oz, c(nose));
             if (s == Species.PIG) { m.set(sx0 + 1, oy + snh / 2, oz, c(0x6A3A3A)); m.set(sx0 + snw - 2, oy + snh / 2, oz, c(0x6A3A3A)); }
         } else m.set(ox + hw / 2, oy + 1, oz, c(nose));
-        // eyes: dark, a glint
+        // eyes: dark, a glint (a deer's are large and set to the side, ringed pale)
         int ey = oy + hh - Math.max(2, hh / 3);
+        if (deer) for (int side : new int[]{0, hw - 1}) { m.set(ox + side, ey, oz + snout + 2, c(0x141010)); m.set(ox + side, ey + 1, oz + snout + 2, c(0x2A2220)); m.set(ox + side, ey - 1, oz + snout + 2, c(0xEEE6D8)); }
         for (int side : new int[]{0, hw - 1}) {
             m.set(ox + side, ey, oz + snout + 1, c(s == Species.CAT || s == Species.MOUNTAIN_LION ? 0x7A8A2A : s == Species.WOLF ? 0x8A7A30 : 0x141010));
             if (hl > 4) m.set(ox + side, ey + 1, oz + snout + 1, c(Tex.shade(coat.at("head", 0, hh - 1, 1, hw, hh, hl) & 0xFFFFFF, 0.8f)));
@@ -231,7 +242,15 @@ public final class AnimalModels {
             }
             default -> { }
         }
-        if (horse) {
+        if (deer) {
+            // a deer's neck: slender (narrower than the head), rising steeply from the shoulders, a pale throat under it
+            int nc = coat.at("head", 1, 2, 2, hw, hh, hl);
+            for (int z = 0; z < neckL + 2; z++) {
+                int yTop = oy + hh - 1 - z * 2, yBot = Math.max(1, oy - z * (oy - 1) / (neckL + 1));
+                for (int x = 1; x < hw - 1; x++) for (int y = yBot; y <= Math.max(yBot, yTop); y++)
+                    m.set(ox + x, y, oz + snout + hl + z - 1, y <= yBot + 1 && z < neckL ? c(0xE4D8C4) : fur(nc & 0xFFFFFF, x, y, z, 0.07f));
+            }
+        } else if (horse) {
             // the neck: from the skull's back down and back to the shoulders
             int nc = coat.at("head", 0, 0, 0, hw, hh, hl);
             for (int z = 0; z < neckL + 1; z++) {
@@ -445,6 +464,8 @@ public final class AnimalModels {
         return (part, x, y, z, sx, sy, sz) -> switch (part) {
             case "body" -> {
                 if (y < 2) yield fur(belly, x, y, z, 0.05f);
+                // the white rump patch round the tail
+                if (z >= sz - 2 && y >= sy * 0.3f && y < sy - 1 && x > 0 && x < sx - 1) yield fur(0xF2ECE0, x, y, z, 0.04f);
                 boolean spot = v == 2 && y >= sy - 3 && (x * 7 + z * 13 + y * 3) % 9 == 0 && x > 0 && x < sx - 1;
                 yield spot ? c(0xF4EEE2) : fur(y > sy * 0.6f ? back : flank, x, y, z, 0.07f);
             }

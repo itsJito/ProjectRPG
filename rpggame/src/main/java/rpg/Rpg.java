@@ -95,6 +95,10 @@ public final class Rpg implements GameModule {
     /** (0.3.4) The water system: volumes, surfaces, depths and currents; and the swimming that moves bodies through it. */
     public rpg.world.Fluids fluids;
     public rpg.actor.Swimming swimming;
+    /** (0.3.5) The fish of every water: their stocks, and the live fish near the player. */
+    public rpg.fishing.Fishery fishery;
+    /** (0.3.5) The guilds, their halls on Guild Row, the Armory. */
+    public rpg.econ.Guilds guilds;
     public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
     public Fx fx;
     public Sfx sfx;
@@ -196,6 +200,13 @@ public final class Rpg implements GameModule {
         objects.buildFixtures();
         // (0.3.2) the gardens' plots and trees, the inns' fixtures: after every older fixture, so their ids hold
         objects.reserveAfter(id -> inns.init(farming.build(id)));
+        // (0.3.5) the fish, and the sea's fishing spots (after every older fixture, so their ids hold)
+        fishery = new rpg.fishing.Fishery(this);
+        objects.reserveAfter(this::seaSpots);
+        // (0.3.5) Guild Row's fixtures, then the cotton field's plots
+        guilds = new rpg.econ.Guilds(this);
+        objects.reserveAfter(id -> farming.buildLate(guilds.init(id)));
+        for (rpg.objects.Node n : objects.nodes) if (n.kind == rpg.objects.Node.Kind.FISH) n.fishery = fishery;
         ai.init();
         animals = new rpg.animal.Animals(this);
         animals.init();
@@ -206,6 +217,7 @@ public final class Rpg implements GameModule {
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
         econ.init();
         inns.shops(econ);
+        guilds.shops(econ);
         for (var inn : inns.all) for (var bed : inn.guestBeds) bed.name = "Guest bed";
         for (int i = 0; i < DevMap.DUMMIES.length; i++) {
             Actor d = new Actor(Ids.DUMMY_0 + i, "Target dummy", 0);
@@ -272,6 +284,21 @@ public final class Rpg implements GameModule {
     }
 
     public void give(Actor a, rpg.item.ItemDef d, int n) { grant(a, new ItemStack(d, n)); }
+
+    /** (0.3.5) The sea's fishing spots: the wading strip (nets and pots), the islet's rocks, along the pier (rods) and its head over the deep (harpoons). */
+    private long seaSpots(long id) {
+        float[][] at = rpg.world.Coast.spots();
+        rpg.item.ItemDef[] gear = {Items.FISHING_NET, Items.LOBSTER_POT, Items.FISHING_NET, Items.FISHING_ROD, Items.FISHING_ROD, Items.FISHING_ROD, Items.HARPOON, Items.HARPOON};
+        for (int i = 0; i < at.length; i++) {
+            rpg.item.ItemDef g = gear[i];
+            String what = g == Items.HARPOON ? "harpoon, deep sea" : g == Items.LOBSTER_POT ? "pot, sea" : g == Items.FISHING_ROD ? "rod, sea" : "net, sea";
+            var spot = new rpg.objects.Node(id++, "sea_spot", "Fishing spot (" + what + ")", rpg.objects.Node.Kind.FISH, Skill.FISHING, 1, Items.RAW_SHRIMP, 10, g == Items.HARPOON ? 5.5f : 4f, 0, 0, 0, (int) at[i][0], (int) at[i][1], 0, 0);
+            spot.needs = g; spot.waters = i < 3 ? rpg.objects.Node.Waters.SHORE : i == 3 ? rpg.objects.Node.Waters.COAST : rpg.objects.Node.Waters.OFFSHORE;
+            spot.y = DevMap.FLOOR - 0.1f;
+            objects.addNode(spot);
+        }
+        return id;
+    }
 
     // ------------------------------------------------------------------ the tick
     /** RPG_PROF set: each system's share of the update, summed (nanoseconds) - see {@link #profile()}. */
@@ -381,6 +408,7 @@ public final class Rpg implements GameModule {
         swimming.others((float) lastDt);
         controller.syncCamera();
         waterContacts.update();
+        if (fishery != null) fishery.update((float) lastDt);
         if (PROF) mark(24);
     }
 
@@ -478,13 +506,19 @@ public final class Rpg implements GameModule {
 
     public Actor actor(long id) {
         if (id == player.id) return player;
-        for (Npc n : npcs) if (n.id == id) return n;
+        // (0.3.5, optimization) the people by id: looked up thousands of times a frame, it was a walk of the whole roster
+        if (npcs.size() != npcIndexed) { npcIndex.clear(); for (Npc n : npcs) npcIndex.put(n.id, n); npcIndexed = npcs.size(); }
+        Npc known = npcIndex.get(id);
+        if (known != null && known.id == id && (known.alive || npcs.contains(known))) return known;
+        for (Npc n : npcs) if (n.id == id) { npcIndex.put(id, n); return n; }
         for (Actor d : dummies) if (d.id == id) return d;
         if (monsters != null) { Actor m = monsters.byId(id); if (m != null) return m; }
         if (animals != null) return animals.byId(id);
         return null;
     }
 
+    private final java.util.Map<Long, Npc> npcIndex = new java.util.HashMap<>();
+    private int npcIndexed = -1;
     public final java.util.Map<Long,String> rememberedNames=new java.util.LinkedHashMap<>();
     public void rememberName(long id,String name) {
         if(id==0 || name==null || name.isBlank())return;

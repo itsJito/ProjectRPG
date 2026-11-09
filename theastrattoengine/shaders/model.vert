@@ -14,20 +14,30 @@ out vec3 vN;
 out vec3 vCell;
 void main() {
     vec4 w = uModel * vec4(aPos, 1.0);
-    // The reserved positive marker keeps wall growth rigid without making its shared mesh translucent.
-    if(uSway>0.5 && aCol.a<65538.0) {
-        float height=clamp(aPos.y,0.0,1.5),phase=dot(w.xz,vec2(0.71,1.13));
-        w.xz+=uFoliage.xy*height*height*(0.025+0.018*sin(uFoliage.z*1.9+phase));
-        // 2.0.1: every vertex of a plant bends from the plant's root (packed in the vertex alpha by the chunk builder:
-        // 2 + x * 16 + z * 16 * 256, chunk-local, 1/16 m), so the whole plant leans away from a body as one. Worked out
-        // from each vertex's own position, a plant with someone standing in it was pushed outward on every side: it grew.
+    // The reserved marker (65538) keeps wall growth rigid without making its shared mesh translucent.
+    // 2.7 (the game's 0.3.5): a root code at or above 131072 marks a stiff plant - a bush, a sapling, a garden crop -
+    // which gives far less to the wind and to a body than grass and fern do.
+    bool rigid = aCol.a >= 65538.0 && aCol.a < 131072.0;
+    if(uSway>0.5 && !rigid) {
+        float stiff = aCol.a >= 131072.0 ? 1.0 : 0.0;
+        float code = aCol.a - stiff * 131072.0;
+        // 2.0.1: every vertex of a plant bends from the plant's root (packed in the vertex alpha by the mesh builder:
+        // 2 + x * 16 + z * 16 * 256, mesh-local, 1/16 m), so the whole plant moves as one.
         vec2 root=w.xz;
-        if(aCol.a>=1.5) {
-            float code=aCol.a-2.0, rz=floor(code/256.0), rx=code-rz*256.0;
+        if(code>=1.5) {
+            float c=code-2.0, rz=floor(c/256.0), rx=c-rz*256.0;
             root=(uModel*vec4(rx/16.0,0.0,rz/16.0,1.0)).xz;
         }
-        vec2 off=vec2(0);
         float rise=max(aPos.y,0.0);
+        // the wind: (2.7) the phase is the plant's, not each vertex's, so a stalk sways as a stalk rather than its
+        // leaves shivering apart; a stiff plant barely moves
+        float height=clamp(rise,0.0,1.5),phase=dot(root,vec2(0.71,1.13));
+        w.xz+=uFoliage.xy*height*height*(0.025+0.018*sin(uFoliage.z*1.9+phase))*mix(1.0,0.3,stiff);
+        // a body among the stems turns the plant over about its root (2.7, as foliage.vert does since 1.3): a rotation,
+        // so every leaf keeps its length - the old sideways shove of each vertex by its height sheared a plant out of
+        // shape and pressed it into the ground in steps as a foot came and went
+        vec2 lean=vec2(0);
+        float crush=0.0;
         for(int i=0;i<uBendCount;i++) {
             vec2 away=root-uBenders[i].xz;
             float distance=length(away), reach=uBenders[i].w+0.45;
@@ -37,13 +47,20 @@ void main() {
             float hold=min(1.0,uBenders[i].w/0.25);
             vec2 dir=distance>0.03?away/distance:vec2(0.7071,0.7071);
             float k=1.0-distance/reach;
-            off+=dir*(k*k*(3.0-2.0*k))*level*hold*min(rise*0.85,0.42);
+            lean+=dir*(k*k*(3.0-2.0*k))*level*hold;
+            crush=max(crush,(1.0-smoothstep(0.0,0.6,distance/reach))*level*hold);
         }
-        // pressed over, not stretched: what moves sideways comes down, so a stem keeps its length
-        float lean=length(off);
-        if(lean>0.42)off*=0.42/lean;
-        w.xz+=off;
-        w.y-=min(rise*0.7,dot(off,off)/max(rise*1.4,0.10));
+        float ll=length(lean);
+        if(ll>1e-4) {
+            vec2 ld=lean/ll;
+            float give=mix(1.0,0.32,stiff);
+            float theta=min(ll,1.0)*(0.62+0.5*crush)*give*smoothstep(0.0,0.12,rise+0.02);
+            vec2 rel=w.xz-root;
+            float h=dot(rel,ld), cs=cos(theta), sn=sin(theta);
+            float h2=h*cs+rise*sn, y2=rise*cs-h*sn;
+            w.xz+=ld*(h2-h);
+            w.y+=max(y2,0.015)-rise;
+        }
     }
     vCell = aPos * 64.0 + uVoxelOrigin - aNormal * 0.01;
     vWorld = w.xyz;

@@ -11,13 +11,13 @@ import rpg.actor.Appearance;
 import rpg.ai.Npc;
 
 /**
- * Gamefixes 0.2.0: the devmap is the real map's size (192 x 192 blocks, 12 x 12 chunks, 100 high), with DevPalace and
+ * Gamefixes 0.2.0: the devmap is the real map's size (192 x 256 blocks since 0.3.5 with the sea along the south, 12 x 16 chunks, 100 high), with DevPalace and
  * its twenty residents, and six newcomers of callings nobody else holds. Everyone stands on open ground in the world.
  */
 class ExpanseTest {
     @Test void theMapIsTheRealSizeAndDevPalaceIsPeopled() {
-        assertEquals(192, DevMap.SX); assertEquals(192, DevMap.SZ); assertEquals(100, DevMap.SY);
-        assertEquals(36_864, DevMap.SX * DevMap.SZ);
+        assertEquals(192, DevMap.SX); assertEquals(256, DevMap.SZ); assertEquals(100, DevMap.SY);
+        assertEquals(49_152, DevMap.SX * DevMap.SZ);
         var cfg = new NativeEngine.Config(); cfg.deterministic = true;
         try (Game game = Game.create(cfg)) {
             game.activate(DevMap.build(game.engine()));

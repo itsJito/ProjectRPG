@@ -330,6 +330,36 @@ public final class Rig {
                 crouch += 5.5f * lower; extraLean += 0.25f * lower;
             }
         }
+        // (0.3.5, gamefixes: every action animated) at a station the whole body works: bent to the bench, sat low at the
+        // wheel and the loom, swaying with each pick, treading in the tub, leaning into the hammer and the saw, stirring
+        rpg.objects.Station ws = stationWork(a);
+        if (ws != null && !firstPerson) {
+            float wt = a.working.t, on = smooth(clamp01(wt / 0.35f)) * smooth(clamp01((a.working.duration - wt) / 0.3f));
+            switch (ws.kind) {
+                case ANVIL -> { float ph = wt / 0.62f % 1, strike = ph >= 0.55f && ph < 0.8f ? (float) Math.sin(Math.PI * (ph - 0.55f) / 0.25f) : 0, raise = ph < 0.55f ? smooth(ph / 0.55f) : 0;
+                    extraLean += on * (0.22f + 0.12f * strike - 0.05f * raise); extraTwist += on * (0.18f * raise - 0.1f * strike); crouch += on * (0.6f * strike); }
+                case FURNACE -> { float pump = (float) Math.sin(wt * 2.6f); extraLean += on * (0.16f + 0.08f * pump); crouch += on * (0.8f + 0.4f * pump); }
+                case CRAFT_TABLE -> { extraLean += on * (0.3f + 0.03f * (float) Math.sin(wt * 3.1f)); extraTwist += on * 0.05f * (float) Math.sin(wt * 1.4f); }
+                case SAWBENCH -> { float stroke = (float) Math.sin(wt * 4.4f); extraLean += on * (0.32f + 0.06f * stroke); extraTwist += on * 0.12f * stroke; }
+                case CARDING_BENCH -> { crouch += on * 4.2f; extraLean += on * (0.26f + 0.04f * (float) Math.sin(wt * 6.5f)); }
+                case SPINNING_WHEEL -> { crouch += on * 3.8f; extraLean += on * (0.12f + 0.03f * (float) Math.sin(wt * 4.2f)); extraTwist += on * 0.06f * (float) Math.sin(wt * 1.1f); }
+                case LOOM -> { float pick = (float) Math.pow(Math.max(0, Math.sin(wt * 2.4f)), 3); crouch += on * 3.2f; extraLean += on * (0.1f + 0.12f * pick); extraTwist += on * 0.1f * (float) Math.sin(wt * 1.2f); }
+                case FULLING_TUB -> { float tread = Math.abs((float) Math.sin(wt * 3.2f)); crouch += on * (1.4f * tread); extraLean += on * 0.22f; roll += on * 0.06f * (float) Math.sin(wt * 3.2f); }
+                case DYE_VAT -> { double stir = wt * 1.7; extraLean += on * (0.22f + 0.06f * (float) Math.sin(stir)); extraTwist += on * 0.14f * (float) Math.cos(stir); }
+                default -> { }
+            }
+        }
+        // eating and drinking: the head bows to each bite, tips back to drink; filling a vessel: stooped to the water
+        float bite = eating(a);
+        if (bite >= 0 && !firstPerson) {
+            boolean drinkNow = a.working != null && a.working.action.equals("drink");
+            float k = smooth(clamp01(a.working.t / 0.3f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.3f));
+            extraLean += k * (drinkNow ? -0.12f : 0.06f + 0.05f * bite);
+        }
+        if (a.working != null && a.working.action.equals("fill") && !firstPerson) {
+            float k = smooth(clamp01(a.working.t / 0.4f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.35f));
+            crouch += 6.5f * k; extraLean += 0.4f * k;
+        }
         // (0.3.0, gamefixes: the builders' mending animated with the whole body) at work on a repair: down on the knees to
         // a low mend, bent to a waist-high one, upright to one overhead; each stroke the shoulders turn into it and the
         // back dips through the blow, the hips sinking a touch as the hammer lands and rising with the lift
@@ -454,7 +484,8 @@ public final class Rig {
         // (0.3.0, gamefixes: ladders) on a ladder the feet stand on its rungs: each held on one while the body rises past it,
         // then lifted (heel out, knee up) two rungs on - the right foot with the left hand, the left with the right
         // (0.3.0, gamefixes: riding) astride: the knees out round the barrel, the feet down in the stirrups a little ahead
-        if (a.riding != 0) for (int k = 0; k < 2; k++) foot[k] = new float[]{(k == 0 ? 1 : -1) * (hipX + 3.4f), 3.2f, -1.4f};
+        // (0.3.6) in this mount's own stirrups, hung outside its barrel (Riding.place), so the legs go round it, not through it
+        if (a.riding != 0) for (int k = 0; k < 2; k++) foot[k] = a.stirrupX > 0 ? new float[]{(k == 0 ? 1 : -1) * a.stirrupX, a.stirrupY, a.stirrupZ} : new float[]{(k == 0 ? 1 : -1) * (hipX + 3.4f), 3.2f, -1.4f};
         // (0.3.4, gamefixes: swimming) in deep water the legs work: flat out, a flutter kick from the hips (two beats to
         // each arm's stroke, the legs long and close); afloat, an eggbeater - each foot circling under the body, knees bent,
         // the two half a turn apart; hauling out, both feet kick down hard for the push. The whole figure is laid down by
@@ -606,6 +637,11 @@ public final class Rig {
             // kicked up behind left the leg's line nearly opposite a level pole, so only its small outward lean survived the
             // projection and the knee swung out to the side as a sprint braked (SprintStopTest)
             float[] pole = norm(new float[]{side * 0.06f + sn * -1, -0.6f, -cs});
+            // (0.3.6, SprintStopTest) a leg folded tight with the foot ahead and below (braking a sprint, the swing foot came
+            // through high) has the pole almost along its own line; what was left of it was its small outward lean, and the
+            // knee swung out to the side. Then the knee bends forward, in the leg's own plane
+            float[] axis = norm(sub(target, hip));
+            if (Math.abs(pole[0] * axis[0] + pole[1] * axis[1] + pole[2] * axis[2]) > POLE_ALONG) pole = norm(new float[]{-sn, 0, -cs});
             float[] knee = ik(hip, target, L_LEG1, L_LEG2, pole);
             float[] right = {cs, 0, -sn};
             bone(seg[(k == 0 ? CharModel.Seg.R_LEG_UP : CharModel.Seg.L_LEG_UP).ordinal()], hip, knee, right);
@@ -896,6 +932,23 @@ public final class Rig {
                     contact=add(add(contact,torsoUp,hammerLift*3),torsoDir(0,0,1),hammerLift*1.5f);
                 }
                 target=lerp(rest,contact,enter*leave);
+            } else if (stationWork(a) != null) {
+                float[][] sp = stationPose(a, stationWork(a), side, isMain, time);
+                target = lerp(rest, sp[0], sp[2][0]); dir = norm(lerp(dir, sp[1], sp[2][0]));
+            } else if (eating(a) >= 0 && isMain) {
+                // the food (the cup, the bottle) brought up to the mouth, a bite, back down a little to chew, and again
+                var w = a.working;
+                float eatK = smooth(clamp01(w.t / 0.3f)) * smooth(clamp01((w.duration - w.t) / 0.3f)), toMouth = eating(a);
+                float[] mouth = torsoPoint(shoulder, -side * 1.6f, 3.2f, -2.8f), low = torsoPoint(shoulder, -side * 1.0f, -2.0f, -4.4f);
+                target = lerp(rest, lerp(low, mouth, toMouth), eatK);
+                dir = norm(lerp(dir, torsoDir(-side * 0.6f, 0.9f, -0.2f), eatK));
+            } else if (a.working != null && a.working.action.equals("fill")) {
+                // a hand dipped down to the water ahead, held there while it fills
+                var w = a.working;
+                float fillK = smooth(clamp01(w.t / 0.4f)) * smooth(clamp01((w.duration - w.t) / 0.35f));
+                float[] dip = toFigure(a, a.x - (float) Math.sin(a.yaw) * 0.75f + (float) Math.cos(a.yaw) * side * 0.12f, rpg.world.DevMap.FLOOR - 0.15f, a.z - (float) Math.cos(a.yaw) * 0.75f - (float) Math.sin(a.yaw) * side * 0.12f);
+                target = lerp(rest, dip, fillK * (isMain ? 1 : 0.6f));
+                dir = norm(lerp(dir, new float[]{0, -1, -0.3f}, fillK));
             } else if (looting > 0.001f) {
                 target = lerp(rest, toFigure(a, a.reachX + (float) Math.cos(a.yaw) * side * 0.12f, a.reachY, a.reachZ - (float) Math.sin(a.yaw) * side * 0.12f), looting);
                 dir = new float[]{0, -1, -0.2f};
@@ -1100,6 +1153,91 @@ public final class Rig {
     /** A foot leaves the ground: its swing starts from where it stood. */
     /** What is being cooked while cooking is under way at a range or a fire (gamefixes: cooking is animated), or null. */
     public static boolean repairing(Actor a){return a.working!=null && a.working.action.equals("repair");}
+
+    /** (0.3.5) The station someone is at work on (not a range, which cooking draws), or null. */
+    static rpg.objects.Station stationWork(Actor a) {
+        var w = a.working;
+        if (w == null || !(w.target instanceof rpg.objects.Station s) || s.kind == rpg.item.Recipes.Station.RANGE || s.kind == rpg.item.Recipes.Station.BUILD_SPOT) return null;
+        return s;
+    }
+    /** (0.3.5) How far up toward the mouth the hand is while eating or drinking (0 .. 1), or -1 when not. */
+    static float eating(Actor a) {
+        var w = a.working;
+        if (w == null || !(w.action.equals("eat") || w.action.equals("drink"))) return -1;
+        if (w.action.equals("drink")) return smoothS(clamp01(w.t / 0.45f));
+        float ph = w.t / 0.7f % 1;   // a bite each 0.7 s: up, a moment there, down to chew
+        return ph < 0.35f ? smoothS(ph / 0.35f) : ph < 0.55f ? 1 : 1 - smoothS((ph - 0.55f) / 0.45f) * 0.7f;
+    }
+    private static float smoothS(float x) { return x * x * (3 - 2 * x); }
+
+    /**
+     * (0.3.5) The hands at a station, in the world and drawn into the figure: the hammer lifted and brought down on the
+     * anvil's face with the other hand on the tongs; the bellows worked at the furnace; the saw drawn along the bench;
+     * the hand cards stroked against each other; one hand turning the spinning wheel, the other drawing out the fibre;
+     * the shuttle thrown from hand to hand and the beater pulled; hands pressing the cloth down in the tub; both hands
+     * on the dyer's pole. Returns the target, the hand's direction and {weight}.
+     */
+    private float[][] stationPose(Actor a, rpg.objects.Station s, int side, boolean isMain, double time) {
+        var w = a.working;
+        float t = w.t, on = smooth(clamp01(t / 0.35f)) * smooth(clamp01((w.duration - t) / 0.3f));
+        float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
+        float f = rpg.world.DevMap.FLOOR, sx = s.x, sz = s.z, hx = sx, hy = f + 0.95f, hz = sz;
+        float[] dir = torsoDir(0, -0.3f, -1f);
+        // the near edge of the station, toward the worker
+        float nx = sx - fx * 0.35f, nz = sz - fz * 0.35f;
+        switch (s.kind) {
+            case ANVIL -> {
+                float ph = t / 0.62f % 1, lift = ph < 0.55f ? smooth(ph / 0.55f) : 1 - smooth(clamp01((ph - 0.55f) / 0.18f));
+                if (isMain) { hx = nx + rx * 0.08f; hz = nz + rz * 0.08f; hy = f + 0.86f + lift * 0.5f; dir = torsoDir(0, 0.5f + lift * 0.4f, -0.8f + lift * 0.6f); }
+                else { hx = nx - rx * 0.22f; hz = nz - rz * 0.22f; hy = f + 0.84f; dir = torsoDir(side * 0.3f, -0.2f, -1f); }
+            }
+            case FURNACE -> {
+                float pump = (float) Math.sin(t * 2.6f);
+                hx = nx + rx * side * 0.18f - fx * 0.12f * pump; hz = nz + rz * side * 0.18f - fz * 0.12f * pump; hy = f + 0.8f + 0.06f * pump;
+                dir = torsoDir(0, -0.1f, -1f);
+            }
+            case CRAFT_TABLE -> {
+                float tap = Math.max(0, (float) Math.sin(t * 3.1f + (isMain ? 0 : 1.6f)));
+                hx = nx + rx * side * 0.2f + fx * 0.1f; hz = nz + rz * side * 0.2f + fz * 0.1f; hy = f + 1.0f + 0.07f * tap;
+                dir = torsoDir(0, -0.7f, -0.7f);
+            }
+            case SAWBENCH -> {
+                float stroke = (float) Math.sin(t * 4.4f);
+                if (isMain) { hx = nx + rx * 0.12f + fx * 0.22f * stroke; hz = nz + rz * 0.12f + fz * 0.22f * stroke; hy = f + 0.95f; dir = torsoDir(0, -0.4f, -1f); }
+                else { hx = nx - rx * 0.3f + fx * 0.1f; hz = nz - rz * 0.3f + fz * 0.1f; hy = f + 0.9f; dir = torsoDir(0, -1f, -0.2f); }
+            }
+            case CARDING_BENCH -> {
+                float stroke = (float) Math.sin(t * 6.5f) * (isMain ? 1 : -1);
+                hx = sx - 0.05f - fx * 0.15f + rx * (side * 0.1f + stroke * 0.07f); hz = sz - 0.08f - fz * 0.15f + rz * (side * 0.1f + stroke * 0.07f); hy = f + 0.55f;
+                dir = torsoDir(-side * 0.5f, -0.6f, -0.6f);
+            }
+            case SPINNING_WHEEL -> {
+                if (isMain) { double c = t * 4.2; hx = sx + rx * 0.12f - fx * 0.05f; hz = sz + rz * 0.12f - fz * 0.05f; hy = f + 0.82f + 0.22f * (float) Math.sin(c); hx += fx * 0.22f * (float) Math.cos(c); hz += fz * 0.22f * (float) Math.cos(c); dir = torsoDir(0.4f, 0, -1f); }
+                else { float draw = 0.5f + 0.5f * (float) Math.sin(t * 1.6f); hx = sx - rx * 0.05f - fx * (0.3f + draw * 0.25f); hz = sz - rz * 0.05f - fz * (0.3f + draw * 0.25f); hy = f + 0.82f; dir = torsoDir(0.3f, 0.1f, -1f); }
+            }
+            case LOOM -> {
+                float cyc = t * 2.4f / (float) (Math.PI * 2) % 1;
+                // throw (the shuttle across the shed, hand to hand), then both hands on the beater, pulled in
+                boolean beat = cyc > 0.6f;
+                float across = (float) Math.cos(cyc / 0.6f * Math.PI);
+                if (!beat) { hx = sx + rx * (isMain ? 0.45f * across : -0.45f * across) - fx * 0.25f; hz = sz + rz * (isMain ? 0.45f * across : -0.45f * across) - fz * 0.25f; hy = f + 0.95f; }
+                else { float pull = (float) Math.sin((cyc - 0.6f) / 0.4f * Math.PI); hx = sx + rx * side * 0.35f - fx * (0.2f + 0.2f * pull); hz = sz + rz * side * 0.35f - fz * (0.2f + 0.2f * pull); hy = f + 0.86f; }
+                dir = torsoDir(0, -0.2f, -1f);
+            }
+            case FULLING_TUB -> {
+                float press = Math.abs((float) Math.sin(t * 3.2f + (isMain ? 0 : Math.PI / 2)));
+                hx = sx + rx * side * 0.22f - fx * 0.05f; hz = sz + rz * side * 0.22f - fz * 0.05f; hy = f + 0.62f - 0.12f * press;
+                dir = torsoDir(0, -1f, -0.3f);
+            }
+            case DYE_VAT -> {
+                double c = t * 1.7;
+                hx = sx + 0.18f * (float) Math.cos(c) - fx * 0.05f; hz = sz + 0.18f * (float) Math.sin(c) - fz * 0.05f; hy = f + (isMain ? 1.2f : 0.98f);
+                dir = torsoDir(0, -1f, 0);
+            }
+            default -> { }
+        }
+        return new float[][]{toFigure(a, hx, hy, hz), norm(dir), {on}};
+    }
     public static ItemDef cooking(Actor a) {
         var w = a.working;
         if (w == null || !(w.target instanceof rpg.objects.Station s) || s.kind != rpg.item.Recipes.Station.RANGE) return null;
@@ -1371,6 +1509,8 @@ public final class Rig {
     static float len(float[] a) { return (float) Math.sqrt(dot(a, a)); }
     static float[] norm(float[] a) { float l = len(a); return l < 1e-6f ? new float[]{0, -1, 0} : new float[]{a[0] / l, a[1] / l, a[2] / l}; }
     static float[] cross(float[] a, float[] b) { return new float[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]}; }
+    /** (0.3.6) How nearly the knee's pole may lie along the leg's own line before the knee bends straight forward instead. */
+    static final float POLE_ALONG = 0.9f;
     static float clamp01(float v) { return Math.max(0, Math.min(1, v)); }
     static float clamp(float v, float lo, float hi) { return Math.max(lo, Math.min(hi, v)); }
     static float wrap(float a) { while (a > Math.PI) a -= (float) (2 * Math.PI); while (a < -Math.PI) a += (float) (2 * Math.PI); return a; }

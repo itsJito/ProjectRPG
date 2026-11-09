@@ -15,6 +15,7 @@ uniform mat4 uInvPV;
 uniform mat4 uShadowVP[4];
 uniform vec4 uSplits, uCascadeTexel;
 uniform int uCascades, uTileSize, uShadowedLights, uUseAO, uUseSSR;
+uniform int uTermsOff;                  // a developer's switch (ASTRATTO_PASS_OFF): 1 sun, 2 probes, 4 local lights, 8 ambient cube
 // 1.1: the bodies that stand in the way of a local light - five floats each: the feet (xyz), the radius, the height
 uniform int uBodyCount;
 uniform float uBodies[120];
@@ -183,8 +184,8 @@ void main() {
     vec3 V = -viewDir;
     vec3 albedo = pow(ga.rgb, vec3(2.2));
     float rough = gm.r, metal = gm.g, bakedAO = gm.b;
-    int pk = int(gm.a * 255.0 + 0.5);
-    float skyVis = float(pk >> 4) / 15.0, blk = float(pk & 15) / 15.0;
+    vec2 baked = unpackLight(gm.a);
+    float skyVis = baked.x, blk = baked.y;
     vec3 f0 = mix(vec3(0.04), albedo, metal);
     float viewZ = dot(P - uCam, uCamFwd);
 
@@ -202,7 +203,7 @@ void main() {
         float wrap = max(0.0, (dot(N, uSunDir) + 0.45) / 1.45);
         float through = pow(max(dot(-V, uSunDir), 0.0), 5.0) * 0.5 + 0.08;
         col += albedo * uSunCol * (wrap * 0.85 + through * vec3(1.0, 0.98, 0.82) * 0.45) * sh;
-    } else if (ndl > 0.0 && dot(uSunCol, vec3(1.0)) > 1e-4) {
+    } else if (ndl > 0.0 && dot(uSunCol, vec3(1.0)) > 1e-4 && (uTermsOff & 1) == 0) {
         float sh = sunShadow(P, N, ndl, flag == 1 ? 0.5 : viewZ, skyVis);
         if (sh > 0.0) col += shade(albedo, f0, rough, metal, N, V, uSunDir, uSunCol) * sh;
     }
@@ -217,13 +218,13 @@ void main() {
     // stronger and a little cooler where the sun does not reach, so shadow is gently lit, never a black hole
     irr = (mix(fallback, irr, conf) + vec3(uAmbientFloor)) * vec3(1.18, 1.22, 1.28);
     // Keep contact occlusion, while preventing it from crushing broad indirect illumination twice.
-    col += albedo * (1.0 - metal) * irr * mix(occl, sqrt(occl), 0.25);
+    if ((uTermsOff & 2) == 0) col += albedo * (1.0 - metal) * irr * mix(occl, sqrt(occl), 0.25);
     // ---- API 2.9: the environment preset's six-axis ambient, weighted by the surface's normal (an ambient cube) and by
     // the sky it sees - the sky's colour from above, the ground's bounce from below, the sun's side warmer than the
     // shade's - so form reads in the shade; in a sealed room little of it reaches, leaving the dark gaps between lamps
     vec3 n2 = N * N;
     vec3 cube = n2.x * (N.x >= 0.0 ? uAmbCube[0] : uAmbCube[1]) + n2.y * (N.y >= 0.0 ? uAmbCube[2] : uAmbCube[3]) + n2.z * (N.z >= 0.0 ? uAmbCube[4] : uAmbCube[5]);
-    col += albedo * (1.0 - metal) * cube * mix(0.12, 1.0, skyVis) * occl;
+    if ((uTermsOff & 8) == 0) col += albedo * (1.0 - metal) * cube * mix(0.12, 1.0, skyVis) * occl;
 
     // ---- indirect specular: screen-space reflection where it found one, probe / sky lobe elsewhere
     vec3 R = reflect(-V, N);
@@ -236,7 +237,7 @@ void main() {
     // ---- local lights of this tile
     ivec2 t = min(ivec2(gl_FragCoord.xy) / uTileSize, uTiles - 1);
     uint base = uint(t.y * uTiles.x + t.x) * 32u;
-    uint n = min(tile[base], 31u), bodyLights = 0u;
+    uint n = (uTermsOff & 4) != 0 ? 0u : min(tile[base], 31u), bodyLights = 0u;
     for (uint i = 0u; i < n; i++) {
         uint li = tile[base + 1u + i];
         Light l = lights[li];
@@ -269,5 +270,8 @@ void main() {
     float expo = clamp(texelFetch(uExposure, ivec2(0), 0).r, 0.5, 8.0);
     col += albedo * ga.a * (3.0 / expo + 1.2);
     if (flag == 2) col = albedo * (1.0 + ga.a * (2.6 / expo + 1.0));
+    if ((uTermsOff & 16) != 0) col = albedo;
+    if ((uTermsOff & 32) != 0) col = vec3(bakedAO, skyVis, blk);
+    if ((uTermsOff & 64) != 0) col = envSpec * Fenv * 4.0;
     oColor = vec4(col * uTint, 1.0);
 }

@@ -37,6 +37,23 @@ public final class Swimming {
     public static final float ACCEL = 0.02f, DRAG = 0.8f, DRAG_SPRINT = 0.9f, DRAG_UP = 0.8f, GRAVITY = 0.02f, RISE = 0.04f, DIVE = 0.04f, EXIT_LIFT = 0.3f;
     /** A current's push: m/s of current to blocks per tick per tick. */
     public static final float FLOW_K = 0.0175f;
+    /** (0.3.6) Water this many blocks deep or more floats a body; shallower, one standing on the bottom wades. */
+    public static final int FLOAT_DEPTH = 2;
+    /** (0.3.6) How much of its pace a body wading keeps, at the deepest wading (the water to the chest) and at the shin. */
+    public static final float WADE_DEEP = 0.5f, WADE_SHALLOW = 0.85f;
+    /** How much of the current a wading body takes (at the deepest wading; scaled by how deep it stands). */
+    public static final float WADE_FLOW = 0.8f;
+    /** The share of a walking body's pace the water it stands in leaves it (1 on dry ground). */
+    public float wadePace(Actor a) {
+        if (a.swimMode != WADE) return 1;
+        return WADE_SHALLOW + (WADE_DEEP - WADE_SHALLOW) * wadeShare(a);
+    }
+    /** How deep a wading body stands, 0 (the ankles) .. 1 (the water to the chest). */
+    public float wadeShare(Actor a) {
+        float r = Math.max(0.2f, a.radius * 0.8f);
+        float sub = g.fluids.submerged(a.x - r, a.y, a.z - r, a.x + r, a.y + a.height, a.z + r);
+        return Math.max(0, Math.min(1, sub / Math.max(0.5f, a.height * 0.6f)));
+    }
     /** A swimmer's box (a cube), the depth a body must stand in for the water to take it, and the depth it lets go at. */
     public static final float SWIM_BOX = 0.6f, ENGAGE = 0.45f, LET_GO = 0.2f;
     /** The jump key lifts only a body this deep in (so a swimmer bobs at the surface rather than leaving the water). */
@@ -76,11 +93,23 @@ public final class Swimming {
      */
     public boolean update(Player p, float forward, float strafe, boolean sprint, boolean jump, boolean sneak, float yaw, float pitch, float dt) {
         State s = player;
-        if (!p.alive || p.reacting || p.riding != 0 || g.traversal.busy(p) || p.climb != null || g.ui != null && g.ui.console.noclip) { if (s.active) release(p, s); settle(p, dt); return false; }
+        if (!p.alive || p.reacting || p.riding != 0 || g.traversal.busy(p) || p.climb != null || g.ui != null && g.ui.console.noclip) {
+            if (s.active) release(p, s); settle(p, dt);
+            // (0.3.6) knocked down or climbing, the head can still be under: the breath runs out all the same
+            if (p.alive && p.riding == 0 && !(g.ui != null && g.ui.console.noclip)) breathe(p, headUnder(p, p.x, p.y, p.z), dt);
+            return false;
+        }
         if (!s.active) {
             float h = p.height, r = 0.3f;
             float sub = g.fluids.submerged(p.x - r, p.y, p.z - r, p.x + r, p.y + h, p.z + r);
-            if (sub < ENGAGE) { p.swimMode = NONE; settle(p, dt); breathe(p, false, dt); return false; }
+            // (0.3.6, gamefixes: climbing out of a well or the fountain glitched the player) water too shallow to float
+            // in is waded, on the walking body - which steps and jumps out over a rim as it would anywhere - not swum:
+            // the swimmer's lift only cleared 0.6 m, so a basin's rim could only be hauled over, and the haul handed the
+            // body back pressed into the stone
+            boolean standing = p.grounded && g.fluids.depth(p.x, p.y + h, p.z) < FLOAT_DEPTH;
+            if (sub < ENGAGE || standing) {
+                p.swimMode = sub > 0.1f ? WADE : NONE; settle(p, dt); breathe(p, headUnder(p, p.x, p.y, p.z), dt); return false;
+            }
             engage(p, s);
         }
         s.forward = forward; s.strafe = strafe; s.sprint = sprint; s.jump = jump; s.sneak = sneak; s.yaw = yaw; s.pitch = pitch;
@@ -170,9 +199,10 @@ public final class Swimming {
         s.vy -= s.inWater ? GRAVITY : 0.08;
         // 8. a bank to climb out on: pressed against it, open air above it, the water's edge right there
         if (s.hCollide && s.inWater) exit(p, s, ix, iz, agility, startY);
-        // 9. out of the water: hand the body back
+        // 9. out of the water: hand the body back - or to the walking body standing in water too shallow to float in
         sample(p, s);
-        if (!s.inWater || s.submerged < LET_GO && (s.onGround || s.vy > 0)) { if (s.height >= p.height * 0.9f || free(s.x, s.y, s.z, 0.6f, p.height, false)) s.active = false; }
+        boolean wading = s.onGround && s.depth < FLOAT_DEPTH && !s.swimming && s.vy <= 0.01;
+        if (!s.inWater || wading || s.submerged < LET_GO && (s.onGround || s.vy > 0)) { if (s.height >= p.height * 0.9f || free(s.x, s.y, s.z, 0.6f, p.height, false)) s.active = false; }
         practise(p, s);
     }
 
@@ -180,8 +210,7 @@ public final class Swimming {
         double r = s.width / 2;
         s.submerged = g.fluids.submerged(s.x - r, s.y, s.z - r, s.x + r, s.y + s.height, s.z + r);
         s.inWater = s.submerged > 0;
-        float eye = s.height >= p.height * 0.9f ? p.plan().eyeY() * Body.PX : s.height * 0.72f;
-        s.eyeUnder = g.fluids.in((float) s.x, (float) (s.y + eye), (float) s.z);
+        s.eyeUnder = headUnder(p, (float) s.x, (float) s.y, (float) s.z);
         s.depth = g.fluids.depth((float) s.x, (float) (s.y + s.height), (float) s.z);
     }
 
@@ -276,7 +305,51 @@ public final class Swimming {
     public static float lungs(Actor a) { return 15 + 0.3f * a.skills.level(Skill.AGILITY); }
 
     /**
-     * The breath: spent while the eyes are under, got back quickly in the air. With none left, the water takes a point
+     * (0.3.6, gamefixes: a head under water was not taken for under water) whether a body's head is in the water - the
+     * head itself, where it is: the ragdoll's head for a body off its feet; else the head of the figure as it was last
+     * drawn (it moves with the stroke, the tread and the dive), carried along with the body (x, y, z) since; else the
+     * eyes' height. It used to be one point at a fixed height in the swimmer's box, which a swimmer's head is often not.
+     */
+    public boolean headUnder(Actor a, float x, float y, float z) {
+        float[] h = headPoint(a, x, y, z);
+        return g.fluids.in(h[0], h[1], h[2]);
+    }
+    private final float[] head = new float[3];
+    public float[] headPoint(Actor a, float x, float y, float z) {
+        if (a.reacting && a.ragdoll != 0 && g.lastBodies != null && g.lastBodies.ragdoll(a.ragdoll) instanceof astratto.bridge.Snapshots.Ragdoll rd) {
+            int n = RD_NECK * 3, t = RD_HEAD * 3;
+            head[0] = (rd.p[n] + rd.p[t]) / 2; head[1] = (rd.p[n + 1] + rd.p[t + 1]) / 2; head[2] = (rd.p[n + 2] + rd.p[t + 2]) / 2;
+            return head;
+        }
+        if (a.posePts != null && g.time - a.poseAt < 0.3 && Float.isFinite(a.poseX)) {
+            // the middle of the head: halfway from the neck to the crown
+            int n = RD_NECK * 3, t = RD_HEAD * 3;
+            head[0] = (a.posePts[n] + a.posePts[t]) / 2 + (x - a.poseX);
+            head[1] = (a.posePts[n + 1] + a.posePts[t + 1]) / 2 + (y - a.poseY);
+            head[2] = (a.posePts[n + 2] + a.posePts[t + 2]) / 2 + (z - a.poseZ);
+            return head;
+        }
+        head[0] = x; head[1] = y + (a.eyeY() - a.y); head[2] = z;
+        return head;
+    }
+
+    /**
+     * (0.3.6, gamefixes: fish had no collision) a body in the water pushed aside by another (a fish shouldering past): the
+     * player's swimming body as far as there is room, anyone else's body likewise.
+     */
+    public void shove(Actor a, float dx, float dz) {
+        if (a == g.player && player.active) {
+            if (free(player.x + dx, player.y, player.z + dz, player.width, player.height, false)) { player.x += dx; player.z += dz; player.px += dx; player.pz += dz; }
+            return;
+        }
+        if (a.body == 0 || a.riding != 0 || a.reacting) return;
+        if (!free(a.x + dx, a.y + 0.05f, a.z + dz, Math.max(0.4f, a.radius * 2), Math.min(1.6f, a.height), false)) return;
+        a.x += dx; a.z += dz;
+        g.game.commands().moverPlace(a.body, a.x, a.y, a.z, a.vx, 0, a.vz);
+    }
+
+    /**
+     * The breath: spent while the head is under, got back quickly in the air. With none left, the water takes a point
      * of health a second until the body surfaces - or dies.
      */
     public void breathe(Actor a, boolean under, float dt) {
@@ -322,7 +395,9 @@ public final class Swimming {
      */
     public void others(float dt) {
         for (Actor a : g.actors()) {
-            if (a == g.player || !a.alive || a.dummy || a.body == 0 || a.riding != 0 || a.reacting) continue;
+            if (a == g.player || !a.alive || a.dummy || a.body == 0 || a.riding != 0) continue;
+            // (0.3.6) a body knocked off its feet is not afloat, but its head may well be in the water
+            if (a.reacting) { if (a.ragdoll != 0 && Math.abs(a.x - g.player.x) < 80 && Math.abs(a.z - g.player.z) < 80) breathe(a, headUnder(a, a.x, a.y, a.z), dt); continue; }
             if (a instanceof rpg.ai.Npc n && !n.loaded || a instanceof rpg.animal.Animal an && (!an.loaded || an.ragdoll != null || an.rider != 0)) continue;
             if (Math.abs(a.x - g.player.x) > 80 || Math.abs(a.z - g.player.z) > 80) { a.swimMode = NONE; continue; }
             // most bodies are nowhere near water: one cell look at the feet before any search
@@ -343,7 +418,7 @@ public final class Swimming {
                 a.swimMode = a instanceof rpg.animal.Animal ? SWIM : TREAD;
                 a.swimStroke += (0.9f + (float) Math.hypot(a.vx, a.vz) * 0.5f) * dt;
             } else a.swimMode = surface - a.y > 0.35f ? WADE : NONE;
-            breathe(a, g.fluids.in(a.x, a.eyeY(), a.z), dt);
+            breathe(a, headUnder(a, a.x, a.y, a.z), dt);
         }
     }
 }

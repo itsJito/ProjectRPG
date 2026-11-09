@@ -64,6 +64,10 @@ public final class Voxels {
     public int block(int x, int y, int z) { return v.block(x, y, z); }
     public boolean solid(int x, int y, int z) { return solid[v.block(x, y, z)]; }
     public boolean opaque(int x, int y, int z) { return opaque[v.block(x, y, z)]; }
+    /** (0.3.6) A cell of leaves or a berry bush: solid to a walker, brush that a mount's weight pushes through. */
+    public boolean leafy(int x, int y, int z) { return leafy[v.block(x, y, z)]; }
+    /** Solid, and not brush (what stops a ridden mount). */
+    public boolean hard(int x, int y, int z) { int b = v.block(x, y, z); return solid[b] && !leafy[b]; }
 
     /** Where a ray first enters a solid cell. */
     public static final class Hit {

@@ -1,5 +1,7 @@
 #include "chemistry/chemistry_service.h"
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <unordered_set>
 
@@ -8,7 +10,7 @@ namespace {
 constexpr uint32_t FLAMMABLE = 1, CONDUCTIVE = 2, FREEZABLE = 4, WIND_SENSITIVE = 8;
 constexpr uint32_t WET = 1, BURNING = 2, FROZEN = 4, CHARGED = 8, BURNT = 16;
 constexpr uint32_t FIRE = 1, WATER = 2, ICE = 3, WIND = 4, ELECTRIC = 5;
-constexpr size_t MAX_SENSORS = 4096, MAX_VOLUMES = 256, BUDGET = 96;
+constexpr size_t MAX_SENSORS = 4096, MAX_VOLUMES = 512, BUDGET = 96;
 float square(float x) { return x * x; }
 }
 int64_t ChemistryService::bucket(float x, float y, float z) {
@@ -24,10 +26,33 @@ void ChemistryService::index(Sensor& s, bool add) {
         if (v.empty()) buckets_.erase(it);
     }
 }
+/** ASTRATTO_CHEM_DEBUG set: owned emissions and what they meet are written to stderr (to trace a fire that did not take). */
+static bool debug() {
+#ifdef _WIN32
+    static const bool on = [] { char* v = nullptr; size_t n = 0; bool set = _dupenv_s(&v, &n, "ASTRATTO_CHEM_DEBUG") == 0 && v != nullptr; std::free(v); return set; }();
+#else
+    static const bool on = std::getenv("ASTRATTO_CHEM_DEBUG") != nullptr;
+#endif
+    return on;
+}
 void ChemistryService::wake(Sensor& s) { if (!s.queued) { s.queued = true; active_.push_back(s.id); } }
 void ChemistryService::emit(Volume v) {
-    if (pending_.size() + volumes_.size() >= MAX_VOLUMES) return;
+    // (2.10) full: something someone did (a spell, a torch, a set fire - no burning cell as its source) is never lost to
+    // the spread of what is already burning; it takes the place of the oldest passive volume. Passive spread is dropped.
+    if (pending_.size() + volumes_.size() >= MAX_VOLUMES) {
+        // what gives way: the spread of a fire, or something nobody did (rain on a body, a splash) - never an owned act
+        if (v.source != 0 || v.owner == 0) return;
+        auto yields = [](const Volume& o) { return o.source != 0 || o.owner == 0; };
+        auto old = std::find_if(volumes_.begin(), volumes_.end(), yields);
+        if (old != volumes_.end()) volumes_.erase(old);
+        else {
+            auto queued = std::find_if(pending_.begin(), pending_.end(), yields);
+            if (queued == pending_.end()) return;
+            pending_.erase(queued);
+        }
+    }
     if (v.serial == 0) v.serial = ++serial_;
+    if (v.owner != 0 && debug()) std::fprintf(stderr, "[chem] emit type %u owner %llu at %.2f %.2f %.2f r %.2f p %.2f; %zu pending %zu live\n", v.type, (unsigned long long) v.owner, v.x, v.y, v.z, v.radius, v.power, pending_.size(), volumes_.size());
     pending_.push_back(v);
 }
 void ChemistryService::worldChanged(Engine&) { sensors_.clear(); buckets_.clear(); active_.clear(); pending_.clear(); volumes_.clear(); accumulator_ = 0; }
@@ -51,6 +76,7 @@ int ChemistryService::command(Engine& e, uint32_t type, const uint8_t* data, uin
             Sensor& s = sensors_[c.id]; const bool fresh = s.id == 0;
             s.id = c.id; s.cell = (c.id >> 63) != 0; if (s.cell && e.active()) s.block = static_cast<uint32_t>(e.active()->get(static_cast<int>(c.x), static_cast<int>(c.y), static_cast<int>(c.z))); s.x = c.x; s.y = c.y; s.z = c.z; s.radius = c.radius; s.tags = c.tags & 15u;
             if (fresh || c.restore) { s.owner = c.owner; s.state = c.state & 31u; s.fuel = std::max(0.0f, c.fuel); s.wet = std::clamp(c.wet, 0.0f, 1.0f); s.heat = std::clamp(c.heat, -1.0f, 3.0f); s.last = time_; s.originalBlock=s.block; if (s.state & CHARGED) s.chargedUntil = time_ + 0.65f; }
+            if (debug() && !s.cell && c.id < 100000) std::fprintf(stderr, "[chem] sensor %llu at %.2f %.2f %.2f r %.2f tags %u fresh %d bucket %lld\n", (unsigned long long) c.id, c.x, c.y, c.z, c.radius, c.tags, fresh ? 1 : 0, (long long) bucket(c.x, c.y, c.z));
             index(s, true); if (s.state != 0 || std::fabs(s.heat) > 0.01f) wake(s); return ASTRATTO_OK;
         }
         case ASTRATTO_CMD_CHEM_EMIT: {
@@ -61,6 +87,7 @@ int ChemistryService::command(Engine& e, uint32_t type, const uint8_t* data, uin
         case ASTRATTO_CMD_CHEM_DISOWN: {
             astratto_cmd_handle c; if (!readRecord(data, bytes, c)) return ASTRATTO_ERR_STREAM;
             if (!c.handle) return ASTRATTO_ERR_ARGUMENT;
+            if (debug()) std::fprintf(stderr, "[chem] disown %llu with %zu pending %zu live\n", (unsigned long long) c.handle, pending_.size(), volumes_.size());
             for (auto& entry : sensors_) if (entry.second.owner == c.handle) entry.second.owner = 0;
             for (auto& volume : volumes_) if (volume.owner == c.handle) volume.owner = 0;
             for (auto& volume : pending_) if (volume.owner == c.handle) volume.owner = 0;
@@ -108,7 +135,9 @@ void ChemistryService::publish(Engine& e, Sensor& s, uint32_t previous) {
     astratto_evt_chem_state ev{}; ev.id = s.id; ev.owner = s.owner; ev.state = s.state; ev.previous = previous; ev.x = s.x; ev.y = s.y; ev.z = s.z; e.emit(ev, ASTRATTO_EVT_CHEM_STATE);
 }
 void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
-    const float d2 = square(s.x - v.x) + square(s.y - v.y) + square(s.z - v.z); if (d2 > square(v.radius + s.radius) || (s.state & BURNT)) return;
+    const float d2 = square(s.x - v.x) + square(s.y - v.y) + square(s.z - v.z);
+    if (v.owner != 0 && !s.cell && debug()) std::fprintf(stderr, "[chem] volume of %llu meets sensor %llu at %.2f m (reach %.2f) state %u\n", (unsigned long long) v.owner, (unsigned long long) s.id, std::sqrt(d2), v.radius + s.radius, s.state);
+    if (d2 > square(v.radius + s.radius) || (s.state & BURNT)) return;
     // (gamefixes: a torch swung or a fire spell cast set its own wielder alight) an emission made directly by
     // someone - no burning cell as its source - never acts on that someone's own body. A fire it starts in the world
     // (grass, a floor) is the world's fire and burns them like anyone else if they stand in it.
@@ -127,6 +156,10 @@ void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
             s.state |= BURNING;
             // Passive wind/water and an older unowned flame must not erase a fresh attack's source.
             if (v.owner != 0 || (previous & BURNING) == 0) s.owner = v.owner;
+        } else if ((previous & BURNING) && v.owner != 0 && v.source == 0) {
+            // (2.10) fire turned straight onto something already alight (a body rolling to smother it, briefly not catching
+            // afresh) feeds the flames that are there: whoever did it owns them from now on
+            s.owner = v.owner;
         }
     }
     if (v.type == ICE && ((s.tags & FREEZABLE) || s.wet > 0.1f)) { s.heat = -1; s.state = (s.state | FROZEN) & ~BURNING; }
@@ -140,12 +173,16 @@ void ChemistryService::apply(Engine& e, Sensor& s, const Volume& v) {
 }
 void ChemistryService::step(Engine& e, float dt) {
     time_ += dt; accumulator_ += dt; if (accumulator_ < 0.1f) return;
+    if (debug() && !pending_.empty()) std::fprintf(stderr, "[chem] step: %zu pending, first owner %llu\n", pending_.size(), (unsigned long long) pending_.front().owner);
     const float elapsed = accumulator_; accumulator_ = 0;
     // New volumes are queued: material -> element -> material, never recursive receiver-to-receiver calls.
     const size_t incoming = pending_.size();
     for (size_t i = 0; i < incoming; ++i) { volumes_.push_back(pending_.front()); pending_.pop_front(); discover(e, volumes_.back()); }
     // Element/element conversion is bounded by the small active-volume cap, not total world size.
-    for (Volume& fire : volumes_) if (fire.type == FIRE) for (const Volume& water : volumes_) if (water.type == WATER && square(fire.x-water.x)+square(fire.y-water.y)+square(fire.z-water.z) < square(fire.radius+water.radius)) fire.life = 0;
+    // (2.10) water puts out a flame it outweighs (a bucket thrown, a body in a pond); a sprinkle - rain on a body - does not
+    // cancel a stronger fire outright (a fire spell cast in the rain was erased before it touched anything): the rain wets
+    // what it falls on instead, and wet things are slow to catch
+    for (Volume& fire : volumes_) if (fire.type == FIRE) for (const Volume& water : volumes_) if (water.type == WATER && water.power >= fire.power && square(fire.x-water.x)+square(fire.y-water.y)+square(fire.z-water.z) < square(fire.radius+water.radius)) fire.life = 0;
     for (Volume& v : volumes_) {
         if (v.life <= 0) continue;
         v.life -= elapsed;
@@ -157,6 +194,7 @@ void ChemistryService::step(Engine& e, float dt) {
                     auto b = buckets_.find(bucket(x,y,z)); if (b == buckets_.end()) continue;
                     for (uint64_t id : b->second) if (touched.insert(id).second) { auto s = sensors_.find(id); if (s != sensors_.end()) apply(e,s->second,v); }
                 }
+        if (debug() && v.owner != 0) std::fprintf(stderr, "[chem] volume type %u of %llu life %.2f at %.2f %.2f %.2f touched %zu\n", v.type, (unsigned long long) v.owner, v.life, v.x, v.y, v.z, touched.size());
         if(v.type==FIRE)for(const Volume& wind:volumes_)if(wind.type==WIND && square(v.x-wind.x)+square(v.y-wind.y)+square(v.z-wind.z)<square(v.radius+wind.radius))v.y+=elapsed*wind.power*0.35f;
         if (v.type == FIRE || v.type == WIND) { v.x += windX_*elapsed*0.2f; v.z += windZ_*elapsed*0.2f; if(v.type==FIRE) v.y+=elapsed*0.25f; }
     }

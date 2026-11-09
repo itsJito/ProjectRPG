@@ -17,6 +17,8 @@ public final class Falling {
     public void reset(Actor actor) { flights.remove(actor.id); }
     /** (0.3.3) A fall already under way when this body was handed over (a rider thrown off a falling mount): counted from that height. */
     public void carry(Actor actor, float top) { Flight f = new Flight(); f.top = f.last = top; f.active = true; flights.put(actor.id, f); }
+    /** How deep in water (m) a body's feet must be for the water to have taken its fall. */
+    public static final float WATER_BREAKS = 0.25f;
     public static int damage(float blocks) { return blocks > 5 ? 2 + Math.max(0, (int)Math.floor(blocks - 5)) : 0; }
     public void afterFrame(Snapshots.Bodies bodies, float dt) {
         for (Actor actor : g.actors()) {
@@ -27,6 +29,15 @@ public final class Falling {
             var mover = bodies.mover(actor.body); var physical = actor.reacting ? bodies.ragdoll(actor.ragdoll) : null;
             float y = physical != null ? Math.min(physical.p[RD_L_ANKLE*3+1], physical.p[RD_R_ANKLE*3+1]) : mover == null ? actor.y : mover.y;
             boolean grounded = physical != null ? physical.grounded != 0 : mover != null && mover.grounded;
+            // (0.3.5, gamefixes: players fell through water and died on its bed) water breaks a fall: a body whose feet
+            // are a quarter metre into water has had its fall taken by it, whether it is still sinking or already
+            // standing on the bottom - the fall is measured afresh from there
+            float bx = physical != null ? physical.p[RD_L_ANKLE*3] : mover == null ? actor.x : mover.x, bz = physical != null ? physical.p[RD_L_ANKLE*3+2] : mover == null ? actor.z : mover.z;
+            if (g.fluids != null && g.fluids.submerged(bx - 0.3f, y, bz - 0.3f, bx + 0.3f, y + 1.2f, bz + 0.3f) >= WATER_BREAKS) {
+                if (f.active && f.top - y > 2) g.state.commit("FallBroken", actor.id, 0, rpg.world.DevMap.jurisdiction(bx, bz), 0, String.format("%.1f m into water", f.top - y));
+                f.active = f.paid = false; f.top = f.last = y;
+                continue;
+            }
             if (!grounded) {
                 f.active = true; f.top = Math.max(f.top, y);
                 if (f.top - y >= 7 && !actor.reacting) { g.reactions.falling(actor, dt > 0 ? Math.min(-1, (y-f.last)/dt) : -8); }

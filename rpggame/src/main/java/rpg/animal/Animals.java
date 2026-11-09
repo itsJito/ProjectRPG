@@ -245,7 +245,7 @@ public final class Animals {
     public void puppetHold(Animal a) { desire(a, AnimalMind.A_HOLD); }
 
     /** Takes an animal out of the world altogether (a gallery puppet). */
-    public void remove(Animal a) { despawnBody(a); dropRagdoll(a); animals.remove(a); }
+    public void remove(Animal a) { despawnBody(a); dropRagdoll(a); animals.remove(a); indexed = -1; }
 
     // ------------------------------------------------------------------ bodies in physics' hands (AnimalRagdoll)
     /** At most this many animal bodies in physics at once (the oldest settled carcass goes back to its drawn pose). */
@@ -328,7 +328,16 @@ public final class Animals {
     // ------------------------------------------------------------------ queries
     public List<Animal> all() { return animals; }
     public List<Animal> live() { List<Animal> l = new ArrayList<>(); for (Animal a : animals) if (a.alive && a.loaded) l.add(a); return l; }
-    public Animal byId(long id) { for (Animal a : animals) if (a.id == id) return a; return null; }
+    /** (0.3.5, optimization) by id from an index, rebuilt when the roster changes size. */
+    public Animal byId(long id) {
+        if (animals.size() != indexed) { index.clear(); for (Animal x : animals) index.put(x.id, x); indexed = animals.size(); }
+        Animal x = index.get(id);
+        if (x != null && x.id == id) return x;
+        for (Animal y : animals) if (y.id == id) { index.put(id, y); return y; }
+        return null;
+    }
+    private final java.util.Map<Long, Animal> index = new java.util.HashMap<>();
+    private int indexed = -1;
     public int count(Habitat h) { int n = 0; for (Animal a : animals) if (a.alive && a.home == h) n++; return n + h.cohortTotal(); }
     public int count(Habitat h, Species s) { int n = 0; for (Animal a : animals) if (a.alive && a.home == h && a.species == s) n++; for (Nest ne : nests) if (!ne.done && ne.species == s && h.contains(ne.x, ne.z)) n += 0; return n + h.cohortCount(s); }
     public int living() { int n = 0; for (Animal a : animals) if (a.alive) n++; for (Habitat h : habitats) n += h.cohortTotal(); return n; }
@@ -542,7 +551,7 @@ public final class Animals {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
             if (!a.loaded) continue;
-            g.game.commands().agentRate(a.agent,a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1));
+            g.game.commands().agentRate(a.agent,a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1)*waterPace(a));
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
             if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
             a.trappedBy=0;
@@ -564,6 +573,19 @@ public final class Animals {
         }
         if (g.time >= lifeAt) { lifeAt = g.time + 1; life(); }
         if (g.time >= tierAt) { tierAt = g.time + 2; tiers(); }
+    }
+
+    /**
+     * (0.3.6, gamefixes: deer sprinted through water, faster than on land) water holds a body back whatever it was asked
+     * to do: afloat it goes no faster than its kind swims, wading no faster than a walk and a half. The share of its
+     * present action's pace it keeps.
+     */
+    static float waterPace(Animal a) {
+        if (a.swimMode == rpg.actor.Swimming.NONE) return 1;
+        Species s = a.species;
+        float pace = a.running ? s.run : s.walk;
+        float cap = a.swimMode == rpg.actor.Swimming.WADE ? s.walk * Species.WADE_PACE : s.swim;
+        return Math.min(1, cap / Math.max(0.1f, pace));
     }
 
     /** Where the body faces: its quarry, its threat while it watches, the trough or bank it eats at, else the way it walks. */
@@ -738,7 +760,7 @@ public final class Animals {
         if (a.diedAt < 0) return;
         if (!a.butchered && g.state.minutes - a.diedAt > 1440) { a.butchered = true; a.lastEvent = "rotted away"; }
         if (a.butchered) dropRagdoll(a);
-        if (a.butchered && g.state.minutes - a.diedAt > 60) animals.remove(a);
+        if (a.butchered && g.state.minutes - a.diedAt > 60) animals.remove(a); indexed = -1;
     }
 
     /** A scavenger or predator eats at a carcass: its meat goes, and with it what a butcher could take. */
@@ -780,7 +802,7 @@ public final class Animals {
             if (a.distTo(px, pz) < 84 || a.baby || youngNear(a, 40) || a.dueAt > 0 || a.hp < a.maxHp() || clutchOf(a) != null || a.goal == Goal.HUNT || a.goal == Goal.DEFEND) continue;
             if (g.vox.sight(px, g.player.eyeY(), pz, a.x, a.y + a.height * 0.5f, a.z)) continue;   // never vanishes in plain view
             despawnBody(a);
-            animals.remove(a); nextSense.remove(a.id);
+            animals.remove(a); indexed = -1; nextSense.remove(a.id);
             a.home.cohort.computeIfAbsent(a.species, k -> new int[4])[Habitat.slot(a.baby, a.female)]++;
             a.home.count("into the cohort", 1);
             dematerialized++;
@@ -1059,6 +1081,14 @@ public final class Animals {
                 g.interact.begin(new Work(who, a, "milk", "Milking", 2.2f, false, g.time, () -> milkNow(a, who, req)));
                 return Result.started();
             }
+            case "shear" -> {
+                if (a.species != Species.SHEEP || a.baby || !a.alive) return Result.no("You can't shear that.");
+                if (!who.has(Items.SHEARS, 1) && who.main() != Items.SHEARS) return Result.no("You need shears.");
+                if (g.state.minutes - a.lastShorn <= FLEECE_REGROW) return Result.no("It was shorn not long ago.");
+                if (Math.hypot(who.x - a.x, who.z - a.z) > g.cfg.interactRange + a.radius) return Result.no("You're too far away.");
+                g.interact.begin(new Work(who, a, "shear", "Shearing", 3.2f, false, g.time, () -> shearNow(a, who, req)));
+                return Result.started();
+            }
             case "butcher" -> {
                 if (!a.carcass() || a.butchered) return Result.no("Nothing left to take.");
                 if (blade(who) == null) return Result.no("You need a knife or a blade.");
@@ -1087,6 +1117,32 @@ public final class Animals {
     public static final double MILK_REFILL = 240;
 
     /** A bucket filled from the cow: the milk is the owner's when the cow is someone else's, and taking it is theft. */
+    /** (0.3.5) How long a shorn sheep's fleece takes to grow back (game minutes): three days. */
+    public static final double FLEECE_REGROW = 3 * 24 * 60;
+
+    /**
+     * A sheep shorn: two fleeces of wool. Someone else's sheep's wool is theirs - unless the shearer is the carder, who
+     * buys the fleece off the flock's keeper there and then (the wool's worth in coin), as the trade does.
+     */
+    private Result shearNow(Animal a, Actor who, long req) {
+        if (!a.alive || a.goal == Goal.FLEE || a.goal == Goal.DEFEND) return Result.no("It won't stand still for it.");
+        a.lastShorn = g.state.minutes;
+        boolean theirs = a.owned() && a.owner != who.id;
+        boolean bought = false;
+        if (theirs && who instanceof rpg.ai.Npc n && n.profession == rpg.ai.Profession.CARDER && g.actor(a.owner) instanceof Actor keeper && keeper.alive && who.has(Items.COINS, Items.WOOL.value)) {
+            for (var coins : who.takeItems(Items.COINS, Items.WOOL.value)) keeper.store(coins);
+            bought = true;
+        }
+        boolean stolen = theirs && !bought;
+        g.grant(who, stolen ? new ItemStack(Items.WOOL, 2, a.owner, true, a.id) : new ItemStack(Items.WOOL, 2));
+        var ev = g.state.commit(req, "SheepShorn", who.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind() + (bought ? " (fleece bought)" : ""));
+        g.prog.award(who, rpg.skill.Skill.HARVESTING, 18, "shore a sheep", ev.id());
+        if (who == g.player) g.chat.say("You shear the sheep and gather its fleece.");
+        sound(a, a.species.idleSound, 0.5f);
+        if (stolen) g.law.crime(who, "THEFT", a.owner, Items.WOOL.value * 2, null, ev.id());
+        return Result.ok();
+    }
+
     private Result milkNow(Animal a, Actor who, long req) {
         if (!a.alive || a.goal == Goal.FLEE || a.goal == Goal.DEFEND) return Result.no("She won't stand for it.");
         if (who.takeItems(Items.BUCKET, 1) == null) return Result.no("You need an empty bucket.");
@@ -1209,6 +1265,8 @@ public final class Animals {
 
     /** Someone struck an animal: it knows who, at once. */
     public void onHurt(Animal a, Actor attacker) {
+        // (0.3.6) struck by the one it is tamed to: it cries out and flinches, and never turns on them
+        if (a.tamedTo(attacker.id)) { sound(a, a.species.hurtSound, 0.9f); a.fear = Math.min(1, a.fear + 0.2f); return; }
         a.fear = 1;
         a.threat = attacker.id; a.threatX = attacker.x; a.threatZ = attacker.z; a.threatSeen = g.time;
         a.nextThink = 0;

@@ -29,7 +29,8 @@ public class Station extends WorldObject {
     @Override public float focusRadius() { return 0.75f; }
 
     public String verb() {
-        return switch (kind) { case FURNACE -> "Smelt"; case ANVIL -> "Smith"; case RANGE -> "Cook"; case CRAFT_TABLE -> "Craft"; case SAWBENCH -> "Saw"; case BUILD_SPOT -> "Build"; };
+        return switch (kind) { case FURNACE -> "Smelt"; case ANVIL -> "Smith"; case RANGE -> "Cook"; case CRAFT_TABLE -> "Craft"; case SAWBENCH -> "Saw"; case BUILD_SPOT -> "Build";
+            case CARDING_BENCH -> "Card"; case SPINNING_WHEEL -> "Spin"; case LOOM -> "Weave"; case FULLING_TUB -> "Full"; case DYE_VAT -> "Dye"; };
     }
 
     /** Null when the actor may make it now, else why not. */
@@ -71,7 +72,9 @@ public class Station extends WorldObject {
             if (r == null || r.station != kind) return Result.no("You can't make that here.");
             String no = refusal(r, a);
             if (no != null) return Result.no(no);
-            Work w = new Work(a, this, action, r.station == Recipes.Station.RANGE ? "Cooking" : "Making " + r.name, r.seconds, all || times > 1, g.time, () -> make(g, a, r));
+            // (0.3.5) a guild member works a quarter quicker at their own hall's stations
+            float seconds = r.seconds * (g.guilds == null ? 1 : g.guilds.speed(a, this));
+            Work w = new Work(a, this, action, r.station == Recipes.Station.RANGE ? "Cooking" : "Making " + r.name, seconds, all || times > 1, g.time, () -> make(g, a, r));
             w.limit = times;
             g.interact.begin(w);
             return Result.started();

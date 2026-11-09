@@ -35,6 +35,8 @@ public final class Interactions {
         // monsters are in the sights too (gamefixes: the slay command could not find one; nor could Examine)
         if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded) l.add(m);
         if (g.animals != null) for (var a : g.animals.all()) if (a.exists()) l.add(a);
+        // (0.3.6, gamefixes: fish had no health bars) the fish near the player can be looked at and aimed at like any creature
+        if (g.fishery != null) for (var f : g.fishery.live) if (f.alive && Math.abs(f.x - g.player.x) < 40 && Math.abs(f.z - g.player.z) < 40) l.add(f);
         return l;
     }
 
@@ -65,13 +67,22 @@ public final class Interactions {
         return l;
     }
 
+    /**
+     * The option the primary button takes from a ranked list: the highest-priority enabled one; failing that the first
+     * (whose reason is shown). (0.3.5) An option of negative priority is offered on the menu only - it is never what a
+     * plain press does (picking a pocket is a choice, not what pressing at a person means).
+     */
+    public static Option primaryOf(List<Option> ranked) {
+        for (Option o : ranked) if (o.enabled() && o.priority() >= 0) return o;
+        for (Option o : ranked) if (o.priority() >= 0) return o;
+        return null;
+    }
+
     /** The primary button: the highest-priority enabled option, or the reason none is. */
     public Result primary(Actor a, Interactable t) {
         if (t == null) return Result.no(null);
-        List<Option> opts = ranked(t.options(g, a));
-        for (Option o : opts) if (o.enabled()) return request(a, t, o.id());
-        if (!opts.isEmpty()) { Option o = opts.get(0); return request(a, t, o.id()); }
-        return Result.no(null);
+        Option o = primaryOf(ranked(t.options(g, a)));
+        return o == null ? Result.no(null) : request(a, t, o.id());
     }
 
     // ------------------------------------------------------------------ timed work
@@ -88,6 +99,7 @@ public final class Interactions {
 
     private void interrupt(Work w, String why) {
         work.remove(w.actor.id);
+        if (g.fishery != null) g.fishery.reel(w.actor);
         if (w.actor.working == w) w.actor.working = null;
         interrupted++;
         g.state.commit("WorkInterrupted", w.actor.id, w.target.id(), null, 0, w.action + " (" + why + ") after " + w.commits + " commits");
@@ -108,6 +120,8 @@ public final class Interactions {
             w.t += dt;
             if (w.t < w.duration) continue;
             Result r = w.commit.get();
+            // (0.3.5) a wait that has not come to anything yet (a line with no fish on it): kept up, looked at again shortly
+            if (r.status() == Result.Status.STARTED) { w.t = Math.max(0, w.duration - 0.6f); continue; }
             w.commits++;
             if (r.committed()) committed++; else rejected++;
             if (r.rejected() && a == g.player && r.reason() != null) g.chat.add(r.reason(), Chat.Kind.WARN);
@@ -127,22 +141,34 @@ public final class Interactions {
         // someone standing in a doorway is not hidden by the open leaf swung beside them (gamefixes)
         var past = hit.hit && hit.door != null && hit.door.open ? g.vox.ray(ox, oy, oz, dx, dy, dz, maxRange, true, false) : hit;
         float wallForActors = past.hit ? past.dist : maxRange;
+        // a fish is seen through the water's surface (the ray above stops at it): its own wall is the first solid
+        float wallForFish = -1;
         Interactable best = null;
         float bestT = Float.MAX_VALUE;
+        // (0.3.6, optimization) what is within reach, gathered once for both looks (it was every object in the world, twice a frame)
+        float reach = g.cfg.inspectRange + (float) Math.hypot(a.x - ox, a.z - oz) + 3;
+        List<Interactable> near = new ArrayList<>();
+        for (Interactable t : all()) if (Math.abs(t.ax() - a.x) <= reach && Math.abs(t.az() - a.z) <= reach) near.add(t);
         // the ray: the nearest focus volume it passes through before the wall it strikes
-        for (Interactable t : all()) {
-            if (t == a) continue;
+        for (Interactable t : near) {
+            // (0.3.6, gamefixes: riding flickered) the mount one sits on is never in one's own sights: the marker and the
+            // prompt over it came and went as the view swung across its neck
+            if (t == a || a.riding != 0 && t instanceof rpg.animal.Animal ridden && ridden.id == a.riding) continue;
             float r = t.focusRadius();
             if (Math.hypot(t.ax() - a.x, t.az() - a.z) > g.cfg.inspectRange + r) continue;
             float entry = t.focusEntry(ox, oy, oz, dx, dy, dz);
             float limit = t instanceof Actor ? wallForActors : wall;
+            if (t instanceof rpg.fishing.Fish) {
+                if (wallForFish < 0) { var dry = g.vox.ray(ox, oy, oz, dx, dy, dz, maxRange, false); wallForFish = dry.hit ? dry.dist : maxRange; }
+                limit = wallForFish;
+            }
             if (entry <= limit + 0.35f && entry <= maxRange && entry < bestT) { bestT = entry; best = t; }
         }
         // the assist: the nearest eligible anchor in a small cone, if it can be seen
         if (best == null) {
             float bestCos = g.cfg.assistCos;
-            for (Interactable t : all()) {
-                if (t == a) continue;
+            for (Interactable t : near) {
+                if (t == a || a.riding != 0 && t instanceof rpg.animal.Animal ridden && ridden.id == a.riding) continue;
                 float rx = t.ax() - ox, ry = t.ay() - oy, rz = t.az() - oz, d = (float) Math.sqrt(rx * rx + ry * ry + rz * rz);
                 if (d < 1e-3f || Math.hypot(t.ax() - a.x, t.az() - a.z) > g.cfg.inspectRange) continue;
                 float c = (rx * dx + ry * dy + rz * dz) / d;

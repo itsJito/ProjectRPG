@@ -47,6 +47,8 @@ public final class RenderCommands {
     /** A quality preset ({@code QUALITY_*}), the passes that are on ({@code PASS_*}) and the render scale; kept until changed. */
     /** A GPU emitter, with recorded simulation state supplied by the caller, never CPU particle readback. */
     public void ripple(float x,float z,float radius,float strength) { head(AstrattoNative.RCMD_RIPPLE,24); buf.putFloat(x).putFloat(z).putFloat(radius).putFloat(strength); }
+    /** (2.10) A stretch of water running this frame: its rect in world x/z and its velocity (m/s). Up to 16 a frame. */
+    public void waterFlow(float x0,float z0,float x1,float z1,float vx,float vz) { head(AstrattoNative.RCMD_WATER_FLOW,32); buf.putFloat(x0).putFloat(z0).putFloat(x1).putFloat(z1).putFloat(vx).putFloat(vz); }
     /** Kind EMITTER_ATTACHED_FIRE retains the emitter translation for the life of each flame. */
     public void emitter(long id, int kind, float x, float y, float z, float size, float rate, float spread, float life, float r, float g, float b, float vx, float vy, float vz) {
         head(AstrattoNative.RCMD_EMITTER,80); buf.putLong(id);

@@ -58,6 +58,8 @@ public final class Riding {
         /** (0.3.3) The top of the present fall (where the mount last left the ground); a glide in progress (Pegasus). */
         public float fallTop = Float.NaN;
         public boolean gliding;
+        /** (0.3.6) When the brush it is pushing through next rustles. */
+        double rustleAt;
         Ride(Animal mount, Actor rider, MountController body, double since) { this.mount = mount; this.rider = rider; this.body = body; this.since = since; }
     }
 
@@ -77,8 +79,16 @@ public final class Riding {
     public static final float MAX_JUMP = 2.2f;
     /** Flight: below this airspeed the wings no longer hold it up (m/s); a surge's cost in vigor and its push. */
     public static final float STALL = 6.5f, SURGE_COST = 18, SURGE_PUSH = 4.5f;
+    /**
+     * (0.3.6) The saddle, in the mount's own pixels: its seat's top over the barrel's, its middle ahead of the body's (a
+     * share of the body's length), how far its stirrups hang outside the barrel, below its top and ahead of the seat; and
+     * the rider's hip joint above the seat (the rider's pixels). Gfx draws the saddle from the same numbers.
+     */
+    public static final float SADDLE_SEAT = 0.8f, SADDLE_AHEAD = 0.06f, STIRRUP_OUT = 2.6f, STIRRUP_DROP = 6.2f, STIRRUP_AHEAD = 1f, SEAT_HIP = 1.2f;
     /** A glide's sink (m/s): wings out, a Pegasus comes down about a metre for every four or five it goes. */
     public static final float GLIDE_SINK = 2.1f;
+    /** (0.3.6) Flight: the climb and dive pitch the keys ask for (rad), the full bank (rad), the turn's speed floor and limit (rad/s). */
+    public static final float FLY_CLIMB = 0.55f, FLY_DIVE = 0.75f, FLY_BANK = 0.7f, FLY_TURN_FLOOR = 6f, FLY_TURN_MAX = 1.35f;
 
     private final Rpg g;
     public final Map<Long, Ride> rides = new HashMap<>();
@@ -132,6 +142,15 @@ public final class Riding {
     public static final float UNSEAT_DROP = 4.5f;
     /** A landing from at least this high is a hard one (the mount stumbles and is hurt; the rider is shaken). */
     public static final float HARD_DROP = 2.6f;
+    /**
+     * (0.3.6, gamefixes: mounts should ragdoll hitting a wall at speed) a horse that runs into a wall at this share of its
+     * gallop or more, or a Pegasus that flies into one at this airspeed (m/s) or more, goes down - and its rider over its
+     * head. Slower, or a glancing blow along the wall, only checks it. A head-on blow is one that kept less than this share
+     * of the way it was going.
+     */
+    public static final float CRASH_GALLOP = 0.8f, CRASH_AIRSPEED = 13f, HEAD_ON = 0.4f;
+    /** (0.3.6) Brush (leaves, a bush) takes this share of the pace off for every cell of it the body is in, to at most BRUSH_MAX. */
+    public static final float BRUSH_DRAG = 0.12f, BRUSH_MAX = 0.55f;
     /** Mounts sent down by a fall, waiting to land: the height they fell from (paid as fall damage when they meet the ground). */
     private final Map<Long, Float> downed = new HashMap<>();
 
@@ -140,24 +159,53 @@ public final class Riding {
      * is knocked down with its own. Neither is moved first - the ragdolls start from the poses they were in.
      */
     public void unseat(Ride r, float vy) {
+        float speed = r.flying ? r.airspeed : r.speed;
+        part(r, speed, speed, vy, vy, "fell together");
+        if (r.rider == g.player) g.chat.add("You and the " + r.mount.kind().toLowerCase() + " go down together!", rpg.Chat.Kind.WARN);
+    }
+
+    /**
+     * Rider and mount parted in the physics' hands: the rider's body thrown along the mount's heading at riderSpeed (and
+     * riderVy up), the mount knocked down with mountSpeed along it (negative: back the way it came) - both ragdolls start
+     * from the poses they were in.
+     */
+    private void part(Ride r, float riderSpeed, float mountSpeed, float riderVy, float mountVy, String why) {
         Animal a = r.mount; Actor rider = r.rider;
         rides.remove(a.id);
         a.rider = 0; rider.riding = 0;
         float fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
-        float speed = r.flying ? r.airspeed : r.speed;
-        rider.vx = fx * speed; rider.vz = fz * speed;
+        rider.vx = fx * riderSpeed; rider.vz = fz * riderSpeed;
         if (g.falling != null) g.falling.carry(rider, Float.isFinite(r.fallTop) ? rider.y + (r.fallTop - a.y) : rider.y);
-        g.reactions.falling(rider, Math.min(-1, vy));
+        g.reactions.falling(rider, Math.min(-1, riderVy));
         float mass = Math.max(0.6f, a.species.w * a.species.w * a.species.h * 420 * a.scale() * a.scale() * a.scale());
-        a.vx = fx * speed; a.vz = fz * speed; a.rearing = false; a.flying = false;
-        release(a, a.vx, vy, a.vz, accelOf(a));
-        release(rider, rider.vx, vy, rider.vz, 80);
+        a.vx = fx * mountSpeed; a.vz = fz * mountSpeed; a.rearing = false; a.flying = false;
+        release(a, a.vx, mountVy, a.vz, accelOf(a));
+        release(rider, rider.vx, riderVy, rider.vz, 80);
         if (g.animals != null && a.alive && a.ragdoll == null) {
-            g.animals.makeRagdoll(a, fx * speed * mass * 0.5f, vy * mass * 0.5f, fz * speed * mass * 0.5f, true);
+            g.animals.makeRagdoll(a, fx * mountSpeed * mass * 0.5f, mountVy * mass * 0.5f, fz * mountSpeed * mass * 0.5f, true);
             if (a.ragdoll != null) { a.cs.cancel(); downed.put(a.id, Float.isFinite(r.fallTop) ? r.fallTop : a.y); }
         }
-        g.state.commit("Dismounted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, "fell together");
-        if (rider == g.player) g.chat.add("You and the " + a.kind().toLowerCase() + " go down together!", rpg.Chat.Kind.WARN);
+        g.state.commit("Dismounted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, why);
+    }
+
+    /**
+     * (0.3.6, gamefixes) Into a wall at speed: the mount is stopped dead and thrown back off it, hurt by the blow; the rider
+     * goes on over its head into the wall and down. How hard each is hurt grows with the speed of it.
+     */
+    void crash(Ride r, float speed) {
+        Animal a = r.mount; Actor rider = r.rider;
+        boolean flew = r.flying || r.gliding;
+        float vy = flew ? r.body.vy + speed * (float) Math.sin(r.pitch) : 0;
+        part(r, speed * 0.55f, -speed * 0.18f, Math.max(1.5f, vy + 2.2f), Math.max(0.5f, vy + 1.2f), String.format("crashed into a wall at %.1f m/s", speed));
+        // the blow itself, as hard as a fall from the height that speed is gained in (v^2 / 2g); the rider, thrown clear of
+        // the mount's weight, takes less of it (the fall that follows is paid as any fall is)
+        float riderSpeed = speed * 0.85f;
+        int mountHarm = rpg.combat.Falling.damage(speed * speed / 19.6f), riderHarm = rpg.combat.Falling.damage(riderSpeed * riderSpeed / 19.6f);
+        if (mountHarm > 0) g.combat.environmentalDamage(a, mountHarm, "a wall");
+        if (riderHarm > 0) g.combat.environmentalDamage(rider, riderHarm, "a wall");
+        g.state.commit("MountCrashed", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, String.format("%s into a wall at %.1f m/s (%d, %d harm)", flew ? "flew" : "galloped", speed, mountHarm, riderHarm));
+        if (g.sfx != null) { g.sfx.play("body.fall", a.x, a.y + 1, a.z, 1f); if (a.species.hurtSound != null) g.sfx.play(a.species.hurtSound, a.x, a.y + 1, a.z, 0.9f); }
+        if (rider == g.player) g.chat.add("The " + a.kind().toLowerCase() + " slams into the wall and you are thrown!", rpg.Chat.Kind.WARN);
     }
 
     /** A downed mount meeting the ground pays for the height it fell from. */
@@ -318,6 +366,23 @@ public final class Riding {
         }
     }
 
+    /** (0.3.6) Shouldering through brush: the pace eased down by how much of it there is, and the leaves rustle. */
+    private void brush(Ride r, float dt) {
+        if (r.body.brush <= 0) return;
+        MountStats st = stats(r.mount);
+        float cap = Math.max(st.trot, st.gallop * (1 - Math.min(BRUSH_MAX, r.body.brush * BRUSH_DRAG)));
+        if (Math.abs(r.speed) > cap) r.speed += (Math.signum(r.speed) * cap - r.speed) * Math.min(1, dt * 4);
+        rustle(r);
+    }
+    private void rustle(Ride r) {
+        if (g.sfx == null || g.time < r.rustleAt) return;
+        r.rustleAt = g.time + 0.3;
+        Animal a = r.mount;
+        // (0.3.6, gamefixes: a Pegasus in flight made footstep noises) leaves swished aside, not a foot on grass (it played a
+        // footstep for every brush of a treetop the Pegasus flew through)
+        g.sfx.play("cloth", a.x, a.y + a.height * 0.7f, a.z, Math.min(0.7f, 0.25f + Math.abs(r.flying ? r.airspeed : r.speed) * 0.04f), 1.35f, 14);
+    }
+
     /** Down from a height that does not throw them: the mount stumbles and is hurt a little, the rider is shaken in the saddle. */
     private void hardLanding(Ride r, float drop) {
         Animal a = r.mount;
@@ -358,14 +423,21 @@ public final class Riding {
         float accel = want > r.speed ? (r.speed < st.canter ? 6f : 3.2f) : 9f;
         if (!r.body.grounded) accel *= 0.1f;
         if (glide) { want = Math.max(st.canter, Math.min(r.speed, st.gallop)); accel = 1.2f; r.chargeTicks = 0; r.charge = 0; }
+        // a glide leans into the reins' turn as flight does (and levels again out of it)
+        float glideBank = glide ? c.steer() * FLY_BANK * 0.6f : 0;
+        r.bank += Math.max(-2.4f * dt, Math.min(2.4f * dt, glideBank - r.bank));
         r.speed += Math.max(-accel * dt, Math.min(accel * dt, want - r.speed));
         float fx = (float) -Math.sin(r.body.yaw), fz = (float) -Math.cos(r.body.yaw);
         if (glide) r.body.vy = Math.max(r.body.vy, -GLIDE_SINK);
-        r.body.move(g.vox, fx * r.speed * dt, fz * r.speed * dt, wantYaw, dt);
+        float asked = Math.abs(r.speed) * dt;
+        float covered = r.body.move(g.vox, fx * r.speed * dt, fz * r.speed * dt, wantYaw, dt);
         if (glide) { r.body.vy = Math.max(r.body.vy, -GLIDE_SINK); if (r.mount.vigor > 0) r.mount.vigor = Math.max(0, r.mount.vigor - 1.5f * dt); }
-        // run into something at speed: checked hard
+        // run into something at speed: head-on at a gallop it goes down (and its rider over its head); slower, or along
+        // the wall, it is checked hard
+        if (r.body.blocked && r.speed >= st.gallop * CRASH_GALLOP && covered < asked * HEAD_ON) { crash(r, r.speed); return; }
         if (r.body.blocked && Math.abs(r.speed) > st.trot) r.speed *= 0.3f;
         else if (r.body.blocked) r.speed = 0;
+        brush(r, dt);
         Animal a = r.mount;
         a.stamina = Math.min(a.maxStamina(), a.stamina + (Math.abs(r.speed) <= st.canter ? 4 : 0) * dt);
         if (st.flies) a.vigor = Math.min(st.vigor, a.vigor + 10 * dt);
@@ -379,10 +451,15 @@ public final class Riding {
      */
     private void fly(Ride r, MountStats st, Controls c, float dt) {
         Animal a = r.mount;
-        float wantPitch = c.throttle() > 0.2f ? -0.75f : c.throttle() < -0.2f ? 0.55f : c.slow() ? 0.35f : -0.06f;
+        // (0.3.6, gamefixes: the steering was lopsided and the climb and dive the wrong way round) forward climbs, back
+        // dives (crouch also pulls up, to slow it); the strafe keys bank it the way it turns - right rolls it right. The
+        // bank used to be drawn the other way from the turn, so a turn right leaned it left
+        float wantPitch = c.throttle() > 0.2f ? FLY_CLIMB : c.throttle() < -0.2f ? -FLY_DIVE : c.slow() ? 0.35f : -0.06f;
         r.pitch += Math.max(-1.6f * dt, Math.min(1.6f * dt, wantPitch - r.pitch));
-        float wantBank = -c.steer() * 0.75f;
-        r.bank += Math.max(-2.2f * dt, Math.min(2.2f * dt, wantBank - r.bank));
+        float wantBank = c.steer() * FLY_BANK;
+        // the bank eases in and out at the same rate either way, and levels quicker than it rolls in
+        float bankRate = Math.abs(wantBank) < Math.abs(r.bank) ? 2.8f : 2.0f;
+        r.bank += Math.max(-bankRate * dt, Math.min(bankRate * dt, wantBank - r.bank));
         // the surge: a wingbeat on the press of the jump key
         if (c.jumpHeld() && !r.jumpWas && a.vigor >= SURGE_COST) {
             a.vigor -= SURGE_COST; r.airspeed += SURGE_PUSH; r.body.vy = Math.max(r.body.vy, 0) + 2.5f;
@@ -392,9 +469,9 @@ public final class Riding {
         float gacc = 9.8f;
         r.airspeed += (-gacc * (float) Math.sin(r.pitch) - 0.0045f * r.airspeed * r.airspeed - (c.slow() ? 3f : 0)) * dt;
         r.airspeed = Math.max(0, Math.min(38, r.airspeed));
-        // the banked turn: tan(bank) g / v, clamped
-        float turnRate = (float) (Math.tan(r.bank) * gacc / Math.max(4, r.airspeed));
-        float newYaw = r.body.yaw + Math.max(-1.8f, Math.min(1.8f, turnRate)) * dt;
+        // the banked turn: tan(bank) g / v, clamped the same both ways (banked right, the heading turns right: yaw falls)
+        float turnRate = (float) (Math.tan(r.bank) * gacc / Math.max(FLY_TURN_FLOOR, r.airspeed));
+        float newYaw = r.body.yaw - Math.max(-FLY_TURN_MAX, Math.min(FLY_TURN_MAX, turnRate)) * dt;
         // lift: the wings hold it up above stall; below, it sinks harder the slower it goes
         float sink = r.airspeed < STALL ? (STALL - r.airspeed) / STALL * 7f : 0;
         r.body.vy += (-sink - r.body.vy) * Math.min(1, dt * 2);
@@ -414,7 +491,17 @@ public final class Riding {
             return;
         }
         if (r.body.fits(g.vox, nx, ny, nz, newYaw)) { r.body.x = nx; r.body.y = ny; r.body.z = nz; r.body.yaw = newYaw; }
-        else { r.airspeed *= 0.4f; r.body.vy = -2; }       // struck something: it loses its way
+        else {
+            // struck something: along a wall it slides and loses its way; head-on and fast, it crashes
+            boolean slideX = r.body.fits(g.vox, nx, ny, r.body.z, newYaw), slideZ = !slideX && r.body.fits(g.vox, r.body.x, ny, nz, newYaw);
+            float kept = slideX ? Math.abs(fx) : slideZ ? Math.abs(fz) : 0;
+            if (r.airspeed >= CRASH_AIRSPEED && kept < HEAD_ON) { crash(r, r.airspeed); return; }
+            if (slideX) r.body.x = nx; else if (slideZ) r.body.z = nz;
+            r.body.y = slideX || slideZ ? ny : r.body.y;
+            r.airspeed *= slideX || slideZ ? 0.75f : 0.4f; r.body.vy = Math.min(r.body.vy, -2);
+        }
+        r.body.brush = r.body.brushAt(g.vox, r.body.x, r.body.y, r.body.z, r.body.yaw);
+        if (r.body.brush > 0) { r.airspeed *= 1 - Math.min(BRUSH_MAX, r.body.brush * BRUSH_DRAG) * Math.min(1, dt * 4); rustle(r); }
         r.body.grounded = false;
         r.speed = horiz;
         // gliding rests the wings a little
@@ -432,10 +519,18 @@ public final class Riding {
         a.flightBank = r.flying ? r.bank : r.gliding ? r.bank * 0.9f + (float) Math.max(-0.5, Math.min(0.5, Actor.wrap(r.body.yaw - a.yaw) * 6)) * 0.1f : 0;
         a.wantYaw = Float.NaN;
         if (a.body != 0) { g.game.commands().moverPlace(a.body, a.x, a.y, a.z, 0, 0, 0); g.game.commands().moverInput(a.body, 0, 0, 0, 0, 80, MOVER_POSED); }
-        // the saddle: on the back, a little ahead of the middle; in flight the body pitches, and the rider with it
-        float saddleY = a.y + a.height * (a.species == Species.PEGASUS ? 0.74f : 0.76f), ahead = -0.08f;
-        float rideY = saddleY - rider.height * 0.37f;
+        // (0.3.6, gamefixes: riders did not sit properly on their mounts) in the saddle as it is drawn on this mount: the
+        // hips on the seat's top (they sat a fifth of a metre down inside the barrel, the saddle's height having been taken
+        // as a share of the hitbox), over its middle (they were behind it), the feet in stirrups hung just outside the
+        // barrel (the legs ran through the horse's sides); in flight the body pitches, and the rider with it
+        var fig = rpg.render.AnimalModels.of(a.species, a.variant);
+        float vs = rpg.render.AnimalModels.PX * a.scale(), rpx = rider.height / rpg.actor.Body.HEIGHT_PX;
+        float top = (fig.bodyY + fig.bh / 2f) * vs, seat = top + SADDLE_SEAT * vs, ahead = fig.bl * SADDLE_AHEAD * vs;
+        float rideY = a.y + seat - (rpg.actor.Body.LEGS - SEAT_HIP) * rpx;
         rider.x = a.x + fx * ahead; rider.z = a.z + fz * ahead; rider.y = rideY;
+        rider.stirrupX = (fig.bw / 2f + STIRRUP_OUT) * vs / rpx;
+        rider.stirrupY = (top - STIRRUP_DROP * vs - (seat - (rpg.actor.Body.LEGS - SEAT_HIP) * rpx)) / rpx;
+        rider.stirrupZ = -STIRRUP_AHEAD * vs / rpx;
         rider.yaw = a.yaw; rider.vx = 0; rider.vz = 0; rider.grounded = false;
         rider.rideSpeed = r.flying ? r.airspeed : Math.abs(r.speed); rider.rideGait = a.gait;
         if (rider.body != 0) { g.game.commands().moverPlace(rider.body, rider.x, rider.y, rider.z, 0, 0, 0); g.game.commands().moverInput(rider.body, 0, 0, 0, 0, 80, MOVER_POSED); }

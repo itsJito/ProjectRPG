@@ -17,9 +17,10 @@ public final class DevMap {
 
     /**
      * The devmap's size (0.2.0, gamefixes: the size the real map will be): 192 x 192 blocks of overworld - 12 x 12 chunks
-     * of 16, 36,864 blocks of ground - and 100 high. The dungeons are dug in the rock beyond its east edge.
+     * of 16, 36,864 blocks of ground - and 100 high. The dungeons are dug in the rock beyond its east edge. (0.3.5) The
+     * sea (Coast) adds 64 rows along the south: 192 x 256 in all.
      */
-    public static final int SX = 192, SY = 100, SZ = 192, FLOOR = 4;
+    public static final int SX = 192, SY = 100, SZ = 256, FLOOR = 4;
     /** Doors and doorways are two blocks (2 m) tall. */
     public static final int DOOR_HEIGHT = 2;
 
@@ -107,7 +108,8 @@ public final class DevMap {
      */
     public static void currents(Fluids f) {
         f.current(STREAM_X0, STREAM_Z0, STREAM_X1, STREAM_Z1, 0, 1, 0.8f);
-        f.current(Expanse.BROOK_X0, Expanse.BROOK_Z0, Expanse.BROOK_X1, Expanse.BROOK_Z1, 0, 1, 0.9f);
+        f.current(Expanse.BROOK_X0, Expanse.BROOK_Z0, Expanse.BROOK_X1, Coast.shore(60), 0, 1, 0.9f);
+        Coast.currents(f);
     }
     public static final float[][] STREAM_SPOTS = {{25.5f, 29.5f}, {26.5f, 39.5f}};
     /**
@@ -218,7 +220,11 @@ public final class DevMap {
             {"AGILITY COURSE", 117.5f, 5.5f}, {"NPC / SOCIAL YARD  (DevCity)", 100.5f, 64.5f}, {"STORE A", 91.5f, 63.5f},
             {"CHANCERY A", 114.5f, 63.5f}, {"STAIRS / LADDER", 162.5f, 12.5f}, {"STATE / ECONOMY BAY  (DevTown)", 40.5f, 98.5f}, {"STORE B", 27.5f, 106.5f},
             {"CHANCERY B", 35.5f, 111.5f}, {"QUEST KIOSK", 61.5f, 99f}, {"BANK OF GAMEWORLD", 72f, 102.5f},
-            {"DEVPALACE", 128.5f, 70.5f}, {"THE SOUTHERN WOOD", 64.5f, 130.5f}, {"THE LAKE", 159.5f, 146.5f}, {"MINING HILLS", 140.5f, 131.5f}};
+            {"DEVPALACE", 128.5f, 70.5f}, {"THE SOUTHERN WOOD", 64.5f, 130.5f}, {"THE LAKE", 159.5f, 146.5f}, {"MINING HILLS", 140.5f, 131.5f}, {"THE SEA", 70.5f, 199.5f}, {"THE PIER", 131.5f, 193.5f},
+            // (0.3.5) Guild Row
+            {"METALLISTS' GUILD", 10.5f, 187.5f}, {"THE ARMORY", 23.5f, 187.5f}, {"FORESTERS' GUILD", 35.5f, 187.5f}, {"OUTWORKERS' COTTAGE", 81.5f, 187.5f},
+            {"ARTISANS' GUILD", 96.5f, 187.5f}, {"FARMERS' GUILD", 109.5f, 187.5f}, {"PROVISIONERS' GUILD", 120.5f, 187.5f}, {"MARINERS' GUILD", 138.5f, 187.5f},
+            {"ARCANISTS' GUILD", 165.5f, 187.5f}, {"COTTON FIELD", 71.5f, 187.2f}};
 
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
     public static long build(NativeEngine e) {
@@ -236,6 +242,8 @@ public final class DevMap {
         // (0.3.2) the kitchen gardens and orchards, the inns
         Farming.build(b);
         rpg.econ.Inns.build(b);
+        // (0.3.5) Guild Row on the seafront
+        rpg.econ.Guilds.build(b);
         b.lightAll();
         b.pristineSave();
         if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());
@@ -304,6 +312,8 @@ public final class DevMap {
                 fill(w[0], FLOOR, w[1], w[2], FLOOR + 1, w[3], STONE);
             // the new ground (0.2.0): DevPalace, the southern wood, the lake country, the meadow, the lodge
             new Expanse.Builder(b).all();
+            // (0.3.5) the sea at the end of the brook, along the whole south of the map
+            Coast.build(b);
             debugZone();
             combatLane();
             skillLab();

@@ -1,0 +1,24 @@
+Astratto Engine 2.0 - SHADOWVEIL devmap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov  5 2026 00:49:48 (MSVC)
+[Load] native services 0.55s
+[Load] devmap 14.38s
+[Load] renderer and UI 3.52s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.09s
+[sheet] horse-seat (4 frames)
+[sheet] horse-back (16 frames)
+[ride] horse rider-in-saddle frame-to-frame drift (m): 0.0
+[sheet] horse-game-gallop (16 frames)
+[sheet] pegasus-seat (4 frames)
+[sheet] pegasus-back (16 frames)
+[ride] pegasus rider-in-saddle frame-to-frame drift (m): 0.0
+[sheet] pegasus-game-gallop (16 frames)
+[sheet] well-climb-out (20 frames)
+[well] out at 100.5, 5.001472, 70.770355 swim 0 active false
+[sheet] fish-whale-hurt (8 frames)

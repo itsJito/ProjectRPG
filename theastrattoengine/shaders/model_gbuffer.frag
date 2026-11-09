@@ -14,5 +14,5 @@ void main() {
     vec3 n = normalize(vN);
     oAlbedo = vec4(mix(vec3(0.32,0.13,0.035),vCol.rgb * uTint.rgb,edge), clamp(uEmissive, 0.0, 1.0));
     oNormal = vec4(n * 0.5 + 0.5, uFlag / 3.0);
-    oMat = vec4(uMatParams.x, uMatParams.y, 1.0, (floor(uMatParams.z * 15.0 + 0.5) * 16.0 + floor(uMatParams.w * 15.0 + 0.5)) / 255.0);
+    oMat = vec4(uMatParams.x, uMatParams.y, 1.0, packLight(uMatParams.z, uMatParams.w));
 }

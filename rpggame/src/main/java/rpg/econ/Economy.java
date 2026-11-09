@@ -60,6 +60,8 @@ public final class Economy {
     public Shop macellum, materialsCity, materialsPalace;
     /** Where someone of a town sells what they gather: their own kingdom's market. */
     public Shop localShop(Npc n) {
+        // (0.3.5) Guild Row's workers trade with their own guild's store (the smiths with the Armory)
+        if (g.guilds != null) { Shop row = g.guilds.storeFor(n); if (row != null) return row; }
         Shop usual = DevMap.PALACE.equals(n.homeJurisdiction) ? macellum : DevMap.BETA.equals(n.homeJurisdiction) ? shopB : shopA;
         Shop materials = DevMap.PALACE.equals(n.homeJurisdiction) ? materialsPalace : materialsCity;
         return materials != null && Math.hypot(n.postX-materials.counterX,n.postZ-materials.counterZ) < Math.hypot(n.postX-usual.counterX,n.postZ-usual.counterZ) ? materials : usual;
@@ -92,6 +94,8 @@ public final class Economy {
         stock(shopA, Items.BARLEY_SEEDS, 8, 8); stock(shopA, Items.GLASS_BOTTLE, 6, 10);
         stock(macellum, Items.HOP_SEEDS, 6, 8); stock(macellum, Items.BARLEY_SEEDS, 4, 6); stock(macellum, Items.GLASS_BOTTLE, 6, 10);
         stock(shopA, Items.get("wooden_axe"), 2, 2); stock(shopA, Items.get("wooden_pickaxe"), 2, 2); stock(shopA, Items.get("stone_axe"), 1, 1); stock(shopA, Items.get("stone_pickaxe"), 1, 1); stock(shopA, Items.FISHING_NET, 2, 2); stock(shopA, Items.CRAB_CAGE, 1, 1);
+        // (0.3.5) the gear for the sea's bigger fish, and bait for the rod
+        stock(shopA, Items.HARPOON, 1, 1); stock(shopA, Items.LOBSTER_POT, 1, 1); stock(shopA, Items.FISHING_BAIT, 40, 40);
         stock(shopA, Items.RELIGIOUS_WINE, 6, 6); stock(shopB, Items.RESTORATIVE, 3, 3);
         stock(shopA, Items.get("bronze_axe"), 2, 2); stock(shopA, Items.get("bronze_pickaxe"), 2, 2); stock(shopA, Items.BRONZE_ARROWS, 200, 200);
         stock(shopB, Items.LOGS, 0, 12); stock(shopB, Items.BREAD, 4, 10); stock(shopB, Items.get("iron_sword"), 1, 1); stock(shopB, Items.get("iron_shield"), 1, 1);
@@ -130,6 +134,7 @@ public final class Economy {
     public Shop shopOf(Npc merchant) {
         // (0.3.2) an inn's bartender keeps its bar
         if (g.inns != null) for (var inn : g.inns.all) if (inn.layout.bartender() == merchant.id) return inn.bar;
+        if (g.guilds != null) { Shop row = g.guilds.storeOf(merchant); if (row != null) return row; }
         return merchant.id == Ids.TRADER_CITY ? materialsCity : merchant.id == Ids.TRADER_PALACE ? materialsPalace : merchant.id == Ids.MERCHANT_A ? shopA : merchant.id == Ids.MERCHANT_B ? shopB : merchant.id == Ids.FENCE ? fence : merchant.id == Ids.CRAFTSMAN ? forge : merchant.id == Ids.MACELLUM ? macellum : null; }
     /** Whether this shop is a craftsman's own rack (sold from where they work, not a counter they keep all day). */
     public boolean rack(Shop s) { return s == forge; }
@@ -157,6 +162,8 @@ public final class Economy {
      */
     public int priceFor(Actor a, Shop s, ItemDef d) {
         int p = buyPrice(s, d);
+        // (0.3.5) a guild sells to its own members for less
+        if (g.guilds != null) p = Math.max(1, Math.round(p * g.guilds.buyShare(a, s)));
         if (a != g.player || g.honor == null || s == fence) return p;   // (Honor buys nothing in a back alley)
         float disc = g.honor.discount();
         Npc m = merchant(s);
@@ -175,7 +182,9 @@ public final class Economy {
         if (shut != null) return shut;
         if (rack(s) ? !merchant.working() || Math.hypot(merchant.x - s.counterX, merchant.z - s.counterZ) > 9
                 : !merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
-            return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work." : " is off duty. Come back when they're working.");
+            return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work."
+                    // (0.3.6) on their shift but not at the stall (on the way back to it): not "off duty"
+                    : merchant.working() ? " is away from " + s.name + ". They'll be back shortly." : " is off duty. Come back when they're working.");
         if (s == fence) {
             // a fence deals with the wanted and the known alike - but never under the eyes of the law, and never with
             // someone who has turned on him
@@ -286,6 +295,7 @@ public final class Economy {
         int sold = 0, pay = 0;
         for (int i = 0; i < n && seller.has(d, 1) && !glut(s, d); i++) {
             int p = sellPrice(s, d);
+            if (g.guilds != null) p = Math.round(p * g.guilds.sellShare(seller, s));   // (0.3.5) a guild pays its own members more
             if (!m.has(Items.COINS, pay + p)) break;
             ItemStack one = new ItemStack(d, 1, s.merchant, false, seller.id);
             if (!s.stock.canAdd(one)) break;

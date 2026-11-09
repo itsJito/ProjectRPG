@@ -113,7 +113,7 @@ public final class SaveSystem {
         root.put("law", g.law.save());
         root.put("undertaker", g.undertaker.save());
         root.put("honor", g.honor.save());
-        root.put("chemistry", g.chemistry.save());root.put("foliage",g.foliage.save());root.put("farming",g.farming.save());root.put("inns",g.inns.save());
+        root.put("chemistry", g.chemistry.save());root.put("foliage",g.foliage.save());root.put("farming",g.farming.save());root.put("inns",g.inns.save());if(g.fishery!=null)root.put("fishery",g.fishery.save());if(g.guilds!=null)root.put("guilds",g.guilds.save());
         root.put("timeSystem",g.timeSystem.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
@@ -255,6 +255,7 @@ public final class SaveSystem {
                 n.diedAt = g.time;
                 n.ragdoll = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RAGDOLL);
                 g.game.commands().ragdollCreate(n.ragdoll, n.ragdollScale(), n.sydneyProfile(), astratto.bridge.AstrattoNative.RAGDOLL_ACTIVE, n.x, DevMap.FLOOR, n.z, n.yaw, 0, 0, 0);
+                g.ai.afloat(n);
                 List<Object> pose = Json.list(m, "pose");
                 if (pose != null && pose.size() == astratto.bridge.AstrattoNative.RD_PARTICLES * 3) {
                     float[] p = new float[pose.size()];
@@ -313,7 +314,7 @@ public final class SaveSystem {
         g.law.load(Json.obj(root, "law"));
         g.undertaker.load(Json.obj(root, "undertaker"));
         g.honor.load(Json.obj(root, "honor"));
-        g.chemistry.load(Json.list(root, "chemistry"));g.foliage.load(Json.obj(root,"foliage"));g.farming.load(Json.obj(root,"farming"));g.inns.load(Json.obj(root,"inns"));g.traps.afterLoad();
+        g.chemistry.load(Json.list(root, "chemistry"));g.foliage.load(Json.obj(root,"foliage"));g.farming.load(Json.obj(root,"farming"));g.inns.load(Json.obj(root,"inns"));if(g.fishery!=null)g.fishery.load(Json.obj(root,"fishery"));if(g.guilds!=null)g.guilds.load(Json.obj(root,"guilds"));g.traps.afterLoad();
         g.timeSystem.load(Json.obj(root,"timeSystem"));
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));

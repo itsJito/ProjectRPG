@@ -12,7 +12,9 @@ import rpg.skill.Skill;
 public final class Recipes {
     private Recipes() {}
 
-    public enum Station { FURNACE, ANVIL, RANGE, CRAFT_TABLE, SAWBENCH, BUILD_SPOT }
+    public enum Station { FURNACE, ANVIL, RANGE, CRAFT_TABLE, SAWBENCH, BUILD_SPOT,
+        /** (0.3.5, gamefixes: the textile industry) the bench where fibre is sorted, washed and carded; the wheel it is spun on; the loom; the tub cloth is fulled in; the dyer's vat. */
+        CARDING_BENCH, SPINNING_WHEEL, LOOM, FULLING_TUB, DYE_VAT }
 
     public record Part(ItemDef item, int amount) {}
 
@@ -66,10 +68,20 @@ public final class Recipes {
                 r("smith_" + out.id, out.name, Station.ANVIL, Skill.SMITHING, lvl, 125 * bars * (1 + t.power / 3), 3f).in((ItemDef) m[1], bars).out(out, 1).tool(Items.HAMMER);
             }
         }
+        // (0.3.5, gamefixes: the metalworking pipeline) household goods cast at the furnace from bars
+        r("cast_pot", "Pot", Station.FURNACE, Skill.SMITHING, 5, 120, 3.2f).in(Items.get("bronze_bar"), 1).out(Items.POT, 1);
+        r("cast_bucket", "Bucket", Station.FURNACE, Skill.SMITHING, 12, 160, 3.4f).in(Items.get("iron_bar"), 1).out(Items.BUCKET, 1);
         // cooking (a range, or any fire)
         r("cook_shrimp", "Shrimp", Station.RANGE, Skill.COOKING, 1, 300, 1.8f).in(Items.RAW_SHRIMP, 1).out(Items.SHRIMP, 1).burn(20);
         r("cook_meat", "Cooked meat", Station.RANGE, Skill.COOKING, 1, 300, 2f).in(Items.RAW_MEAT, 1).out(Items.COOKED_MEAT, 1).burn(25).burnt(Items.BURNT_MEAT);
         r("cook_trout", "Trout", Station.RANGE, Skill.COOKING, 20, 700, 1.8f).in(Items.RAW_TROUT, 1).out(Items.TROUT, 1).burn(45);
+        // (0.3.5) every fish there is, cooked at the level it is caught at (a big fish takes longer over the fire)
+        for (rpg.fishing.FishKind k : rpg.fishing.FishKind.values()) {
+            if (k == rpg.fishing.FishKind.SHRIMP || k == rpg.fishing.FishKind.TROUT || k.cooked() == null) continue;   // (the crab had no recipe: now it has)
+            int level = Math.max(1, Math.min(99, k.level));
+            r("cook_" + k.stem(), k.cooked().name, Station.RANGE, Skill.COOKING, level, 300 + level * 20, Math.min(4.5f, 1.8f + k.length * 0.35f))
+                    .in(k.raw(), 1).out(k.cooked(), 1).burn(Math.min(99, level + 25));
+        }
         // (0.3.2) what the farms grow, cooked: a stew of carrot and cabbage, and apples mulled into hot cider (the inns' fare)
         r("cook_stew", "Vegetable stew", Station.RANGE, Skill.COOKING, 8, 450, 2.4f).in(Items.CARROT, 1).in(Items.CABBAGE, 1).out(Items.VEGETABLE_STEW, 1).burn(30);
         r("mull_cider", "Hot cider", Station.RANGE, Skill.COOKING, 3, 260, 2f).in(Items.APPLE, 2).out(Items.HOT_CIDER, 1);
@@ -78,7 +90,21 @@ public final class Recipes {
         r("cook_venison", "Venison", Station.RANGE, Skill.COOKING, 12, 520, 2.2f).in(Items.RAW_VENISON, 1).out(Items.VENISON, 1).burn(40).burnt(Items.BURNT_MEAT);
         r("roast_duck", "Roast duck", Station.RANGE, Skill.COOKING, 6, 380, 2.1f).in(Items.RAW_DUCK, 1).out(Items.ROAST_DUCK, 1).burn(32).burnt(Items.BURNT_MEAT);
         // crafting
-        r("weave_linen", "Linen cloth", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 30, 1.2f).in(Items.FLAX, 2).out(Items.CLOTH, 1);
+        // (0.3.5, gamefixes: the textile industry) cloth from the fibre up, each stage at its own station: wool sorted,
+        // washed and carded, cotton picked clean and carded; then spun (flax too); woven; fulled in a tub of water; dyed
+        // with berries at the vat; and finished - sheared and pressed - at the table. (Flax was woven straight into cloth.)
+        r("card_wool", "Clean wool", Station.CARDING_BENCH, Skill.CRAFTING, 1, 30, 2.4f).in(Items.WOOL, 1).out(Items.CLEAN_WOOL, 1);
+        r("card_cotton", "Clean cotton", Station.CARDING_BENCH, Skill.CRAFTING, 3, 25, 2.0f).in(Items.COTTON, 1).out(Items.CLEAN_COTTON, 1);
+        r("spin_yarn", "Woollen yarn", Station.SPINNING_WHEEL, Skill.CRAFTING, 4, 40, 3.0f).in(Items.CLEAN_WOOL, 1).out(Items.YARN, 2);
+        r("spin_cotton", "Cotton thread", Station.SPINNING_WHEEL, Skill.CRAFTING, 6, 40, 3.0f).in(Items.CLEAN_COTTON, 2).out(Items.COTTON_THREAD, 2);
+        r("spin_linen", "Linen thread", Station.SPINNING_WHEEL, Skill.CRAFTING, 1, 25, 2.6f).in(Items.FLAX, 2).out(Items.LINEN_THREAD, 1);
+        r("weave_wool", "Loom-state cloth (wool)", Station.LOOM, Skill.CRAFTING, 8, 90, 4.2f).in(Items.YARN, 3).out(Items.LOOM_CLOTH, 1);
+        r("weave_cotton", "Loom-state cloth (cotton)", Station.LOOM, Skill.CRAFTING, 10, 90, 4.2f).in(Items.COTTON_THREAD, 4).out(Items.LOOM_CLOTH, 1);
+        r("weave_linen", "Loom-state cloth (linen)", Station.LOOM, Skill.CRAFTING, 5, 70, 4.0f).in(Items.LINEN_THREAD, 3).out(Items.LOOM_CLOTH, 1);
+        r("full_cloth", "Fulled cloth", Station.FULLING_TUB, Skill.CRAFTING, 12, 80, 4.6f).in(Items.LOOM_CLOTH, 1).in(Items.BUCKET_OF_WATER, 1).out(Items.FULLED_CLOTH, 1).out(Items.BUCKET, 1);
+        r("dye_cloth", "Dyed cloth", Station.DYE_VAT, Skill.CRAFTING, 15, 90, 4.0f).in(Items.FULLED_CLOTH, 1).in(Items.BERRIES, 2).out(Items.DYED_CLOTH, 1);
+        r("finish_cloth", "Cloth", Station.CRAFT_TABLE, Skill.CRAFTING, 14, 70, 3.0f).in(Items.FULLED_CLOTH, 1).out(Items.CLOTH, 2);
+        r("finish_fine", "Fine cloth", Station.CRAFT_TABLE, Skill.CRAFTING, 20, 120, 3.4f).in(Items.DYED_CLOTH, 1).out(Items.FINE_CLOTH, 1);
         r("sew_hood", "Linen hood", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 35, 1.2f).in(Items.CLOTH, 1).out(Items.CLOTH_HOOD, 1);
         r("sew_tunic", "Linen tunic", Station.CRAFT_TABLE, Skill.CRAFTING, 5, 60, 1.5f).in(Items.CLOTH, 2).out(Items.CLOTH_TUNIC, 1);
         r("craft_snare", "Rabbit snare", Station.CRAFT_TABLE, Skill.CRAFTING, 1, 30, 1.2f).in(Items.LOGS, 1).in(Items.BOWSTRING, 1).out(Items.SNARE, 1);

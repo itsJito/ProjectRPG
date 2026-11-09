@@ -57,6 +57,7 @@ public final class PlayerDeath {
         if (!existing) g.game.commands().ragdollCreate(ragdoll, 1, SYDNEY_HUMAN, RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), p.x, p.y, p.z, p.yaw, 0, 0, 0);
         if (!existing && posed) g.game.commands().ragdollPose(ragdoll, p.vx, 0, p.vz, p.posePts);
         g.game.commands().ragdollControl(ragdoll, CONTROL_DIE, 1);
+        g.game.commands().ragdollBuoyancy(ragdoll, rpg.ai.AiSystem.buoyancy(p), 2.4f);   // (0.3.5) water takes the body as it takes anyone's
         if (by != null && by != p) {
             float dx = p.x - by.x, dz = p.z - by.z, l = Math.max(0.01f, (float) Math.hypot(dx, dz));
             g.game.commands().ragdollHit(ragdoll, RD_NECK, dx / l, 0.2f, dz / l, 110, 30);

@@ -454,6 +454,13 @@ public final class Gfx implements AutoCloseable {
         }
         for (var visual : g.chemistry.visuals) cmd.emitter(visual.id(),visual.kind(),visual.x(),visual.y(),visual.z(),visual.radius(),visual.rate(),0.08f,visual.life(),visual.r(),visual.green(),visual.b(),0,0.8f,0);
         for(var ripple:g.chemistry.ripples)cmd.ripple(ripple.x(),ripple.z(),ripple.radius(),ripple.strength());
+        // (0.3.5, gamefixes: water did not move naturally) the stretches that run - the stream, the brook, the sea's
+        // drift - drawn moving, near the eye
+        if(g.fluids!=null){int flows=0;for(var c:g.fluids.currents()){
+            if(flows>=16)break;
+            float nx=Math.max(c.x0(),Math.min(camX,c.x1()+1)),nz=Math.max(c.z0(),Math.min(camZ,c.z1()+1));
+            if(Math.hypot(nx-camX,nz-camZ)>48)continue;
+            cmd.waterFlow(c.x0(),c.z0(),c.x1()+1,c.z1()+1,c.dx()*c.speed(),c.dz()*c.speed());flows++;}}
         // charged water: a cold blue-white light jumping about over the surface (a new place and strength every few
         // frames, never steady), and sparks skittering out across it, fading as the charge spends itself
         for (var c : g.chemistry.charges) {
@@ -471,6 +478,8 @@ public final class Gfx implements AutoCloseable {
         }
         foliage(g);
         farms(g);
+        fishes(g);
+        workshops(g);
         fences(g);
         // the animals first (0.3.3): a ridden mount's drawn body is what carries its rider's figure this frame
         if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.loaded && (an.alive || an.carcass() && !an.butchered) && an.distTo(camX, camZ) < 70) animal(an, dt, g.time);
@@ -671,7 +680,8 @@ public final class Gfx implements AutoCloseable {
                 fieldMeshes.put(f, cached);
             }
             if (cached.mesh() == 0) continue;
-            m.identity();
+            float[] o = FarmModels.origin(f);
+            m.identity().translate(o[0], o[1], o[2]);
             put(cached.mesh(), AstrattoNative.MODEL_FOLIAGE, 1, 1, 1, 0, 1, 0.9f, 0);
         }
         // apples: a red fruit for each on the tree, hung through the crown where its seed puts it
@@ -686,6 +696,74 @@ public final class Gfx implements AutoCloseable {
     }
 
     private record PlantMesh(int version,int mesh) {}
+
+    // ------------------------------------------------------------------ (0.3.5) the textile workshops' stations
+    private final java.util.EnumMap<rpg.item.Recipes.Station, int[]> shopMesh = new java.util.EnumMap<>(rpg.item.Recipes.Station.class);
+    private final java.util.EnumMap<rpg.item.Recipes.Station, float[]> shopPivot = new java.util.EnumMap<>(rpg.item.Recipes.Station.class);
+    /**
+     * The carding bench, the spinning wheel, the loom, the fulling tub and the dye vat: each drawn standing on its cell,
+     * and while someone works it its moving part goes with the work - the cards stroked, the wheel turned, the beater
+     * swung back to the cloth at each pick, the cloth in the tub trodden down, the pole stirring the vat.
+     */
+    private void workshops(Rpg g) {
+        for (rpg.objects.Station st : g.objects.stations()) {
+            if (st.kind.ordinal() < rpg.item.Recipes.Station.CARDING_BENCH.ordinal() || st.removed) continue;
+            if (Math.hypot(st.x - camX, st.z - camZ) > 60) continue;
+            int[] mesh = shopMesh.computeIfAbsent(st.kind, k -> { var parts = WorkshopModels.of(k); shopPivot.put(k, parts.pivot()); return new int[]{upload(parts.fixed()), parts.moving() == null ? 0 : upload(parts.moving())}; });
+            float base = DevMap.FLOOR, t = -1;
+            for (Actor a : g.actors()) if (a.working != null && a.working.target == st) { t = a.working.t; break; }
+            m.identity().translate(st.x, base, st.z);
+            put(mesh[0], 0, 1, 1, 1, 0, 1, 0.8f, 0);
+            if (mesh[1] == 0) continue;
+            float[] pv = shopPivot.get(st.kind);
+            float k = t < 0 ? 0 : 1;
+            m.identity().translate(st.x + pv[0], base + pv[1], st.z + pv[2]);
+            switch (st.kind) {
+                case CARDING_BENCH -> m.translate(k * 0.07f * (float) Math.sin(t * 6.5f), k * 0.015f * Math.abs((float) Math.sin(t * 6.5f)), 0);
+                case SPINNING_WHEEL -> m.rotateX(t < 0 ? 0 : -t * 4.2f);
+                case LOOM -> { float pick = t < 0 ? 0 : (float) Math.pow(Math.max(0, Math.sin(t * 2.4f)), 3); m.rotateX(0.32f * pick); }
+                case FULLING_TUB -> { float tread = k * Math.abs((float) Math.sin(t * 3.2f)); m.translate(0, -0.05f * tread, 0).scale(1 + 0.04f * tread, 1 - 0.3f * tread, 1 + 0.04f * tread); }
+                case DYE_VAT -> { double a = t * 1.7; m.translate(k * 0.18f * (float) Math.cos(a), 0, k * 0.18f * (float) Math.sin(a)).rotateZ(0.18f * k * (float) Math.cos(a)).rotateX(0.18f * k * (float) Math.sin(a)); }
+                default -> { }
+            }
+            put(mesh[1], 0, 1, 1, 1, 0, 1, 0.8f, 0);
+        }
+    }
+
+    // ------------------------------------------------------------------ (0.3.5) the fish
+    private final java.util.EnumMap<rpg.fishing.FishKind, int[]> fishMesh = new java.util.EnumMap<>(rpg.fishing.FishKind.class);
+    private final java.util.EnumMap<rpg.fishing.FishKind, Float> fishHinge = new java.util.EnumMap<>(rpg.fishing.FishKind.class);
+    /**
+     * The live fish near the eye: each kind's fore-body and tail (FishModels), the body swaying a little against the
+     * tail's beat, the tail swung from its hinge by the swim cycle (harder the faster it goes; the whale's flukes beat
+     * up and down), a walker of the bed bobbing on its legs, the angler's lure glowing.
+     */
+    private void fishes(Rpg g) {
+        if (g.fishery == null) return;
+        for (rpg.fishing.Fish f : g.fishery.live) {
+            if (!f.alive) continue;
+            float dx = f.x - camX, dz = f.z - camZ;
+            if (dx * dx + dz * dz > 48 * 48) continue;
+            int[] mesh = fishMesh.computeIfAbsent(f.kind, k -> {
+                var parts = FishModels.of(k);
+                fishHinge.put(k, parts.hinge());
+                return new int[]{upload(parts.body()), parts.tail() == null ? 0 : upload(parts.tail()), parts.glow() == null ? 0 : upload(parts.glow())};
+            });
+            float len = f.length(), sp = f.speed();
+            float beat = (float) Math.sin(f.phase), swing = beat * (0.22f + Math.min(0.4f, sp / Math.max(0.2f, len) * 0.12f));
+            boolean walker = f.kind.crawler();
+            m.identity().translate(f.x, f.y, f.z).rotateY(f.yaw - (walker ? 0 : swing * 0.18f)).rotateX(f.pitch);
+            if (walker) m.translate(0, Math.abs(beat) * len * 0.02f, 0);
+            m.scale(len, len, len);
+            put(mesh[0], AstrattoNative.MODEL_NO_SHADOW, 1, 1, 1, 0, 1, 0.45f, 0.15f);
+            if (mesh[2] != 0) { float k = 0.7f + 0.3f * (float) Math.sin(g.time * 2.3 + f.id); int c = f.kind.fin; put(mesh[2], AstrattoNative.MODEL_NO_SHADOW, ((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 2.4f * k, 1, 0.4f, 0); }
+            if (mesh[1] != 0) {
+                m.translate(0, 0, fishHinge.getOrDefault(f.kind, 0.18f));
+                if (f.kind == rpg.fishing.FishKind.WHALE) m.rotateX(swing * 0.8f); else m.rotateY(swing);
+                put(mesh[1], AstrattoNative.MODEL_NO_SHADOW, 1, 1, 1, 0, 1, 0.45f, 0.15f);
+            }
+        }
+    }
     private boolean preloading;
     /**
      * (0.3.2, gamefixes: foliage, and anything else we can, loaded before the player spawns) the growth, fences and
@@ -1105,13 +1183,17 @@ public final class Gfx implements AutoCloseable {
 
     /** (0.3.0) A saddle on a horse's back: the seat, pommel and cantle, the flaps, the stirrups, and the saddlebags behind. */
     private void saddle(AnimalModels.Figure f, float vs) {
-        float top = f.bh / 2f, sz = -f.bl * 0.06f;
-        m.set(body).translate(0, (top + 0.35f) * vs, sz * vs).scale((f.bw + 0.8f) * vs, 0.9f * vs, 8f * vs); put(box, 0x6A3E22, 1, 0.75f, 0);
+        // (0.3.6) the saddle's seat, middle and stirrups are Riding's numbers: the rider sits on this very seat, feet in these irons
+        float top = f.bh / 2f, sz = -f.bl * rpg.mount.Riding.SADDLE_AHEAD, out = rpg.mount.Riding.STIRRUP_OUT, drop = rpg.mount.Riding.STIRRUP_DROP;
+        m.set(body).translate(0, (top + rpg.mount.Riding.SADDLE_SEAT - 0.45f) * vs, sz * vs).scale((f.bw + 0.8f) * vs, 0.9f * vs, 8f * vs); put(box, 0x6A3E22, 1, 0.75f, 0);
         m.set(body).translate(0, (top + 1.1f) * vs, (sz - 3.6f) * vs).scale(3f * vs, 1.4f * vs, 1.2f * vs); put(box, 0x5A3218, 1, 0.75f, 0);
         m.set(body).translate(0, (top + 1.0f) * vs, (sz + 3.6f) * vs).scale((f.bw - 2f) * vs, 1.2f * vs, 1.2f * vs); put(box, 0x5A3218, 1, 0.75f, 0);
         for (int side = -1; side <= 1; side += 2) {
             m.set(body).translate(side * (f.bw / 2f + 0.25f) * vs, (top - 2.4f) * vs, sz * vs).scale(0.4f * vs, 5f * vs, 5.5f * vs); put(box, 0x7A4A2A, 1, 0.8f, 0);
-            m.set(body).translate(side * (f.bw / 2f + 0.5f) * vs, (top - 6.2f) * vs, (sz - 1f) * vs).scale(0.35f * vs, 1.6f * vs, 1.4f * vs); put(box, 0x8A8A90, 1, 0.4f, 0.8f);
+            // the leather from the flap's edge down and out to the iron, and the iron under the foot
+            float lx = f.bw / 2f + out * 0.5f + 0.1f, ly = top - drop * 0.55f, lean = (float) Math.atan2(out - 0.5f, drop - 1.2f);
+            m.set(body).translate(side * lx * vs, ly * vs, (sz - rpg.mount.Riding.STIRRUP_AHEAD) * vs).rotateZ(side * lean).scale(0.3f * vs, (drop - 0.6f) * vs, 0.7f * vs); put(box, 0x4A2A16, 1, 0.8f, 0);
+            m.set(body).translate(side * (f.bw / 2f + out) * vs, (top - drop) * vs, (sz - rpg.mount.Riding.STIRRUP_AHEAD) * vs).scale(1.6f * vs, 0.5f * vs, 1.4f * vs); put(box, 0x8A8A90, 1, 0.4f, 0.8f);
             m.set(body).translate(side * (f.bw / 2f + 0.9f) * vs, (top - 2.2f) * vs, (sz + 7f) * vs).scale(1.6f * vs, 3.6f * vs, 3.6f * vs); put(box, 0x5E3A20, 1, 0.85f, 0);
         }
     }
@@ -1164,7 +1246,11 @@ public final class Gfx implements AutoCloseable {
         int hg = !horseLike || speed < 0.06f ? 0 : speed < sp.walk * 1.6f ? 1 : speed < 4.6f ? 2 : speed < 7.6f ? 3 : 4;
         if (horseLike && hg > 0) wantAmp = switch (hg) { case 1 -> Math.min(0.4f, speed / sp.walk * 0.3f); case 2 -> 0.52f; case 3 -> 0.66f; default -> 0.8f; };
         if (horseLike && hg > 0) cadence = switch (hg) { case 1 -> Math.min(1.1f, 0.55f + speed * 0.3f); case 2 -> 1.35f + speed * 0.08f; case 3 -> 1.6f + speed * 0.05f; default -> Math.min(2.6f, 1.8f + speed * 0.06f); };
-        if (speed > 0.06f) a.gait += cadence * (float) Math.PI * 2 * dt;
+        // (0.3.6, gamefixes: a horse backing up moonwalked) going backwards the stride runs backwards: each hoof is set
+        // down behind and swept forward under the body, the cycle turned round, rather than the forward walk's
+        float along = -(a.vx * (float) Math.sin(a.yaw) + a.vz * (float) Math.cos(a.yaw));
+        boolean backing = speed > 0.06f && along < -0.5f * speed;
+        if (speed > 0.06f) a.gait += (backing ? -1 : 1) * cadence * (float) Math.PI * 2 * dt;
         a.amp += (wantAmp - a.amp) * Math.min(1, dt * 8);
         float lieWant = dead ? 1 : a.atRest && speed < 0.2f ? 1 : 0;
         a.lieT += (lieWant - a.lieT) * Math.min(1, dt * (dead ? 6 : 2.2f));
@@ -1210,7 +1296,16 @@ public final class Gfx implements AutoCloseable {
         // (0.3.0) in flight a Pegasus's body follows its climb and dive, and leans into its bank
         if (sp == Species.PEGASUS && a.flying) pitch -= a.flightPitch * 0.8f;
         if (f.hopper && amp > 0.05f) pitch += 0.12f * (float) Math.sin(ph) * Math.min(1, amp * 3);
+        // (0.3.5, gamefixes: duck swimming polished) a duck afloat sits low in the water - the hull half under, its legs
+        // out of sight below it - riding a slow heave and roll; feeding, it up-ends: tail to the sky, head under
+        boolean paddling = sp == Species.DUCK && a.swimMode != 0 && !dead;
+        if (paddling) {
+            a.dabble += ((a.headDown ? 1 : 0) - a.dabble) * Math.min(1, dt * 3);
+            y = f.bodyY - f.legH - f.bh * 0.08f + 0.22f * (float) Math.sin(time * 1.7 + a.id) + a.dabble * f.bh * 0.25f;
+            pitch = 0.04f + 0.03f * (float) Math.sin(time * 1.3 + a.id) - a.dabble * 1.4f;
+        }
         body.identity().translate(a.x, a.y, a.z).rotateY(a.yaw);
+        if (paddling) body.rotateZ(0.05f * (float) Math.sin(time * 1.1 + a.id * 3));
         if (rear > 0) {
             // up on the hind legs: the body turns about the haunches
             body.translate(0, f.bodyY * vs, f.legB[2] * vs).rotateX(rear * (sp == Species.BROWN_BEAR ? 1.05f : 0.7f)).translate(0, (y - f.bodyY) * vs, -f.legB[2] * vs);
@@ -1237,7 +1332,15 @@ public final class Gfx implements AutoCloseable {
         if (f.bird) {
             float stepA = (float) Math.sin(ph) * 0.75f * amp;
             float hide = fold > 0.6f ? 0 : 1;
-            if (hide > 0) for (int side = -1; side <= 1; side += 2) limb(side < 0 ? rpg.combat.Gore.Part.LEG_L : rpg.combat.Gore.Part.LEG_R, f.legFront, vs, f.legF[0] * side * 0.6f, f.legF[1], f.legF[2], stepA * side, 0, 0);
+            if (paddling) {
+                // the feet paddle under the water, one then the other: swept back on the power stroke, folded forward on
+                // the return - quicker when it is going somewhere
+                double paddle = time * (2.6 + Math.min(6, speed * 9)) + a.id;
+                for (int side = -1; side <= 1; side += 2) {
+                    float k = (float) Math.sin(paddle + (side < 0 ? 0 : Math.PI));
+                    limb(side < 0 ? rpg.combat.Gore.Part.LEG_L : rpg.combat.Gore.Part.LEG_R, f.legFront, vs, f.legF[0] * side * 0.6f, f.legF[1], f.legF[2] + 0.8f, -0.9f + 0.55f * k, 0, 0);
+                }
+            } else if (hide > 0) for (int side = -1; side <= 1; side += 2) limb(side < 0 ? rpg.combat.Gore.Part.LEG_L : rpg.combat.Gore.Part.LEG_R, f.legFront, vs, f.legF[0] * side * 0.6f, f.legF[1], f.legF[2], stepA * side, 0, 0);
             // wings: tucked, beating when it runs or flees
             boolean flapping = running || a.goal == rpg.animal.Animal.Goal.FLEE && speed > 0.5f;
             a.flap += ((flapping ? 1 : 0) - a.flap) * Math.min(1, dt * 6);
@@ -1246,7 +1349,9 @@ public final class Gfx implements AutoCloseable {
             limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0, 0, -beat);
             // the head bobs with each step (a chicken's peck-walk) and dips to feed
             float bobZ = sp == Species.CHICKEN ? (float) Math.sin(ph * 2) * 0.9f * Math.min(1, amp * 3) : 0;
-            float peck = !dead && a.headDown ? 0.4f * Math.max(0, (float) Math.sin(time * 6 + a.id)) : 0;
+            float peck = !dead && a.headDown && !paddling ? 0.4f * Math.max(0, (float) Math.sin(time * 6 + a.id)) : 0;
+            // afloat the neck stays up and the head turns about (the up-ending tips the whole body, not the neck)
+            if (paddling) { a.headPitch = 0.08f + 0.05f * (float) Math.sin(time * 0.9 + a.id) - a.dabble * 0.4f; }
             limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1] - lie * 1.2f, f.neck[2] + bobZ, a.headPitch - peck, a.headYaw, 0);
         } else {
             float swing = 0.95f * amp;   // amp is already capped (0.42 walk, 0.62 run)
@@ -2556,8 +2661,7 @@ public final class Gfx implements AutoCloseable {
         // how far forward and back the thighs swing (radians), for the panels
         float fwd = 0, back = 0;
         for (Seg s : new Seg[]{Seg.R_LEG_UP, Seg.L_LEG_UP}) {
-            float[] q = rig.seg[s.ordinal()];
-            float ang = (float) Math.atan2(q[6], q[5]);   // the bone's +y runs knee to hip: forward thigh tips +y back
+            float ang = thighAngle(rig.seg[s.ordinal()], tm);   // the bone's +y runs knee to hip: forward thigh tips +y back
             fwd = Math.max(fwd, ang); back = Math.max(back, -ang);
         }
         if (ragdollCloth) { fwd = Math.min(fwd, 0.5f); back = Math.min(back, 0.5f); }
@@ -2615,7 +2719,7 @@ public final class Gfx implements AutoCloseable {
      */
     private void panels(float[] torsoLocal, float w, float d, float len, float fwd, float back, int rgb, boolean pleats, boolean splitFront, boolean firstPerson) {
         float[] qr = rig.seg[Seg.R_LEG_UP.ordinal()], ql = rig.seg[Seg.L_LEG_UP.ordinal()];
-        float angR = (float) Math.atan2(qr[6], qr[5]), angL = (float) Math.atan2(ql[6], ql[5]);   // + the thigh forward
+        float angR = thighAngle(qr, torsoLocal), angL = thighAngle(ql, torsoLocal);   // + the thigh forward
         int n = 12;
         float rx = w / 2, rz = d / 2, circ = (float) (Math.PI * (3 * (rx + rz) - Math.sqrt((3 * rx + rz) * (rx + 3 * rz))));
         float flare = 0.05f + Math.max(0, (w - 8) * 0.012f);
@@ -2630,7 +2734,7 @@ public final class Gfx implements AutoCloseable {
             float nf = -nz, leg = px >= 0 ? angR : angL;
             float out = flare + Math.max(0, leg) * Math.max(0, nf) * 1.05f + Math.max(0, -leg) * Math.max(0, -nf) * 1.05f;
             out += Math.abs(angR - angL) * 0.18f * (1 - Math.abs(nf));
-            outs[i] = out; pxs[i] = px; pzs[i] = pz; nxs[i] = nx; nzs[i] = nz;
+            outs[i] = Math.min(out, 1.05f); pxs[i] = px; pzs[i] = pz; nxs[i] = nx; nzs[i] = nz;
         }
         for (int pass = 0; pass < 3; pass++) {
             float[] t = outs.clone();
@@ -2648,6 +2752,20 @@ public final class Gfx implements AutoCloseable {
             float sh = (nf > 0 ? 1f : 0.93f) * (pleats && i % 2 == 1 ? 0.9f : 1f);
             put(box, 0, r0 * sh, g0 * sh, b0 * sh, 0, 1, 0.9f, 0);
         }
+    }
+
+    /**
+     * (0.3.5, gamefixes: cloth glitched on a sneaking figure and on a carried body) how far a thigh swings forward (+) or
+     * back (-) of the torso it hangs from, in radians - read in the torso's own frame, not the figure's: a figure bent
+     * over to sneak, or a body slung over a shoulder, had its thighs read against the world's upright, and its skirt and
+     * hem flung out flat. Held to what cloth hanging from the hips can follow (a crouch's knees drape it, not lift it).
+     */
+    private static float thighAngle(float[] thigh, float[] torso) {
+        float yl = (float) Math.sqrt(torso[4] * torso[4] + torso[5] * torso[5] + torso[6] * torso[6]), zl = (float) Math.sqrt(torso[8] * torso[8] + torso[9] * torso[9] + torso[10] * torso[10]);
+        float up = (thigh[4] * torso[4] + thigh[5] * torso[5] + thigh[6] * torso[6]) / Math.max(1e-4f, yl);
+        float back = (thigh[4] * torso[8] + thigh[5] * torso[9] + thigh[6] * torso[10]) / Math.max(1e-4f, zl);
+        float a = (float) Math.atan2(back, up);
+        return Math.max(-0.75f, Math.min(1.0f, a));
     }
 
     /** A box hung from a point on the torso frame: its top there, tilted about the frame's x, w x len x d pixels. */

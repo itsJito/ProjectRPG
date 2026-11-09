@@ -158,7 +158,10 @@ public final class Arms {
             case KNIGHT -> word = pick(n, "Steel out in the street? Hm.", "Sheathe it, friend. This isn't a battlefield.");
             case HUNTER -> word = "Expecting trouble?";
             case PRIEST, HEALER -> word = pick(n, "Put it away. Nobody here means you harm.", "This is a peaceful place. Sheathe it, please.");
-            case THIEF, FENCE -> {
+            // (0.3.6, gamefixes: the Fence could not be traded with) a fence's custom comes armed: a blade carried drawn is
+            // eyed, not run from (he hid from everyone who walked up to buy); a thief still slips away from it
+            case FENCE -> { n.wantYaw = (float) Math.atan2(-(p.x - n.x), -(p.z - n.z)); word = pick(n, "Easy with that. We're doing business, aren't we?", "Put that away before someone sees it here."); }
+            case THIEF -> {
                 n.fearOf = p.id; n.fearX = p.x; n.fearZ = p.z; n.fearSeenAt = g.time - 8; n.hideSet = false; n.nextThink = 0;
                 word = "I'm not looking for trouble.";
             }

@@ -60,6 +60,7 @@ public final class AiSystem {
         acts.add(new CommandBuffer.Action(A_COMBAT, ACT_CUSTOM).base(1).speed(3.4f).consider(IN_FACT0 + A_COMBAT, CURVE_LINEAR, 0, 1, 1));
         acts.add(new CommandBuffer.Action(A_SPRINT, ACT_MOVE_TO_GOAL).base(1).speed(g.cfg.runSpeed * 0.9f).consider(IN_FACT0 + A_SPRINT, CURVE_LINEAR, 0, 1, 1));
         c.policyCreate(policy, acts, 0.1f, 0.1f);
+        for (CommandBuffer.Action a : acts) if (a.id >= 0 && a.id < ACTIONS) actionPace[a.id] = a.speed;
         roster();
     }
 
@@ -129,7 +130,10 @@ public final class AiSystem {
             Ids.MINER_CITY,Ids.MINER_PALACE,Ids.TRADER_CITY,Ids.TRADER_PALACE,
             // 0.3.2: the farms' and the inns' people
             Ids.CROP_FARMER_CITY,Ids.ORCHARD_KEEPER_CITY,Ids.CROP_FARMER_PALACE,Ids.ORCHARD_KEEPER_PALACE,
-            Ids.INNKEEPER_CITY,Ids.BARTENDER_CITY,Ids.COOK_CITY,Ids.INNKEEPER_PALACE,Ids.BARTENDER_PALACE,Ids.COOK_PALACE);
+            Ids.INNKEEPER_CITY,Ids.BARTENDER_CITY,Ids.COOK_CITY,Ids.INNKEEPER_PALACE,Ids.BARTENDER_PALACE,Ids.COOK_PALACE,
+            // 0.3.5: Guild Row
+            Ids.GUILD_METALLISTS,Ids.ARMORY,Ids.GUILD_FORESTERS,Ids.CARDER,Ids.SPINNER,Ids.GUILD_ARTISANS,Ids.FULLER,Ids.DYER,
+            Ids.GUILD_FARMERS,Ids.GUILD_PROVISIONERS,Ids.GUILD_MARINERS,Ids.GUILD_ARCANISTS,Ids.SMELTER,Ids.COASTAL_FISHER);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
@@ -227,7 +231,7 @@ public final class AiSystem {
                 Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
                 give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
             }
-            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) n = homestead(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
+            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) n = homestead(id); if (n == null) n = guildRow(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
         }
     }
 
@@ -360,6 +364,55 @@ public final class AiSystem {
         if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; }
         return n;
     }
+    /**
+     * (0.3.5, gamefixes: guilds, the textile and metalworking industries, armories and blacksmiths) Guild Row's people,
+     * each living in their hall: the guildmasters (each of their guild's trade, at its master's level), the Armory's
+     * keeper, the outworkers who card and spin by the cotton field, the workshop's weaver (the Artisans' master), fuller
+     * and dyer, the Metallists' smelter, and a coastal fisher of the Mariners'.
+     */
+    private Npc guildRow(long id) {
+        var halls = rpg.econ.Guilds.HALLS;
+        rpg.econ.Guilds.Hall h = rpg.econ.Guilds.hallOf(id);
+        if (h == null) return null;
+        float[] at = h.post();
+        if (id != h.master()) at = new float[]{(h.x0() + h.x1()) / 2f + 0.5f, rpg.econ.Guilds.Z0 + 4.5f};
+        Npc n = switch ((int) id) {
+            case (int) Ids.GUILD_METALLISTS -> { Npc m = npc(id, "Hildric", Npc.Role.CRAFTSMAN, "Master of the Metallists' Guild", at[0], at[1], 230); Profession.BLACKSMITH.assign(m); m.title = "Master of the Metallists' Guild";
+                m.skills.setLevel(Skill.SMITHING, 62); m.skills.setLevel(Skill.MINING, 50); give(m, Items.HAMMER, 1); give(m, Items.get("iron_bar"), 4); give(m, Items.COINS, 400); yield m; }
+            case (int) Ids.ARMORY -> { Npc a = npc(id, "Odda", Npc.Role.MERCHANT, "Armourer's merchant (the Armory)", at[0], at[1], 231); give(a, Items.COINS, 900); a.pickpocketLevel = 14; yield a; }
+            case (int) Ids.GUILD_FORESTERS -> { Npc f = npc(id, "Wendel", Npc.Role.WORKER, "Master of the Foresters' Guild (Woodcutter)", at[0], at[1], 232);
+                f.skills.setLevel(Skill.WOODCUTTING, 55); f.skills.setLevel(Skill.FIREMAKING, 40); give(f, Items.get("bronze_axe"), 1); give(f, Items.COINS, 300); yield f; }
+            case (int) Ids.CARDER -> { Npc c = npc(id, "Mabyn", Npc.Role.CRAFTSMAN, "Carder", at[0], at[1], 233); Profession.CARDER.assign(c);
+                c.skills.setLevel(Skill.CRAFTING, 24); c.skills.setLevel(Skill.HARVESTING, 20); give(c, Items.SHEARS, 1); give(c, Items.WOOL, 2); give(c, Items.COTTON_SEEDS, 6); give(c, Items.COINS, 60); yield c; }
+            case (int) Ids.SPINNER -> { Npc s = npc(id, "Elsbet", Npc.Role.CRAFTSMAN, "Spinner", at[0] + 2, at[1], 234); Profession.SPINNER.assign(s);
+                s.skills.setLevel(Skill.CRAFTING, 26); give(s, Items.CLEAN_WOOL, 2); give(s, Items.COINS, 60); yield s; }
+            case (int) Ids.GUILD_ARTISANS -> { Npc w = npc(id, "Tamsyn", Npc.Role.CRAFTSMAN, "Master of the Artisans' Guild (Weaver)", at[0], at[1], 235); Profession.WEAVER.assign(w); w.title = "Master of the Artisans' Guild (Weaver)";
+                w.skills.setLevel(Skill.CRAFTING, 58); w.skills.setLevel(Skill.CONSTRUCTION, 40); give(w, Items.YARN, 6); give(w, Items.COINS, 500); yield w; }
+            case (int) Ids.FULLER -> { Npc f = npc(id, "Osric", Npc.Role.CRAFTSMAN, "Fuller", at[0] - 2, at[1], 236); Profession.FULLER.assign(f);
+                f.skills.setLevel(Skill.CRAFTING, 30); give(f, Items.BUCKET_OF_WATER, 2); give(f, Items.COINS, 80); yield f; }
+            case (int) Ids.DYER -> { Npc d = npc(id, "Rowena", Npc.Role.CRAFTSMAN, "Dyer", at[0] + 2, at[1], 237); Profession.DYER.assign(d);
+                d.skills.setLevel(Skill.CRAFTING, 32); give(d, Items.BERRIES, 4); give(d, Items.COINS, 80); yield d; }
+            case (int) Ids.GUILD_FARMERS -> { Npc a = npc(id, "Ansel", Npc.Role.FARMER, "Master of the Farmers' Guild", at[0], at[1], 238); a.skills.setLevel(Skill.HARVESTING, 55); give(a, Items.COINS, 300); yield a; }
+            case (int) Ids.GUILD_PROVISIONERS -> { Npc b = npc(id, "Beatrix", Npc.Role.CRAFTSMAN, "Master of the Provisioners' Guild (Cook)", at[0], at[1], 239); Profession.COOK.assign(b); b.title = "Master of the Provisioners' Guild (Cook)";
+                b.skills.setLevel(Skill.COOKING, 56); b.skills.setLevel(Skill.FISHING, 40); give(b, Items.RAW_TROUT, 2); give(b, Items.COINS, 300); yield b; }
+            case (int) Ids.GUILD_MARINERS -> { Npc m = npc(id, "Morwen", Npc.Role.FISHERMAN, "Master of the Mariners' Guild", at[0], at[1], 240); Profession.DEEP_WATER_FISHERMAN.assign(m); m.title = "Master of the Mariners' Guild";
+                m.skills.setLevel(Skill.FISHING, 72); levels(m, 30, 34, 28, 36); give(m, Items.HARPOON, 1); give(m, Items.BREAD, 3); give(m, Items.COINS, 400); yield m; }
+            case (int) Ids.GUILD_ARCANISTS -> { Npc i = npc(id, "Sabine", Npc.Role.SCHOLAR, "Master of the Arcanists' Guild", at[0], at[1], 241);
+                i.skills.setLevel(Skill.MAGIC, 70); i.skills.setLevel(Skill.FAITH, 50); i.spellBook = rpg.combat.Spells.Book.MOON; give(i, Items.COINS, 400); yield i; }
+            case (int) Ids.SMELTER -> { Npc s = npc(id, "Brand", Npc.Role.CRAFTSMAN, "Smelter", at[0] - 3, at[1], 242); Profession.SMELTER.assign(s);
+                s.skills.setLevel(Skill.SMITHING, 40); give(s, Items.COPPER_ORE, 2); give(s, Items.TIN_ORE, 2); give(s, Items.COINS, 80); yield s; }
+            case (int) Ids.COASTAL_FISHER -> { Npc k = npc(id, "Kerra", Npc.Role.FISHERMAN, "Coastal Fisherman", at[0], at[1], 243); Profession.COASTAL_FISHERMAN.assign(k);
+                k.skills.setLevel(Skill.FISHING, 34); give(k, Items.FISHING_ROD, 1); give(k, Items.FISHING_BAIT, 20); give(k, Items.BREAD, 2); give(k, Items.COINS, 30); yield k; }
+            default -> null;
+        };
+        if (n == null) return null;
+        n.postX = n.x; n.postZ = n.z;
+        n.homeJurisdiction = DevMap.ALPHA;
+        float[] bed = rpg.econ.Guilds.bedOf(id);
+        if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; }
+        return n;
+    }
+
     /** Where a 0.3.2 resident sleeps: a bed of theirs in an inn's plan, or in the extra beds for the growers. */
     public static float[] homesteadBed(long id) {
         for (var l : rpg.econ.Inns.LAYOUTS) for (DevMap.Piece p : l.pieces()) if (p.kind().equals("BED") && p.owner() == id) return new float[]{(p.x0() + p.x1() + 1) / 2f, (p.z0() + p.z1() + 1) / 2f};
@@ -405,7 +458,7 @@ public final class AiSystem {
     }
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
-    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
+    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Sabine", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
             "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
@@ -484,6 +537,20 @@ public final class AiSystem {
 
     // ------------------------------------------------------------------ steering the agent
     /** The one action this NPC wants now: its desire fact high, the others low (the engine chooses, with inertia). */
+    /** Each action's pace (m/s), as the policy gives it. */
+    private final float[] actionPace = new float[ACTIONS];
+    /** (0.3.6) A person afloat swims no faster than this (m/s); wading, no faster than a walk and a half. */
+    public static final float SWIM_PACE = 1.3f;
+    /** (0.3.6, gamefixes: bodies kept their land pace in water) the share of its action's pace water leaves someone. */
+    private float waterPace(Npc n) {
+        if (n.swimMode == rpg.actor.Swimming.NONE) return 1;
+        float pace = 0;
+        for (int i = 0; i < ACTIONS; i++) if (n.facts[i] >= 1) pace = Math.max(pace, actionPace[i]);
+        if (pace <= 0.1f) return 1;
+        float cap = n.swimMode == rpg.actor.Swimming.WADE ? g.cfg.walkSpeed * rpg.animal.Species.WADE_PACE : SWIM_PACE;
+        return Math.min(1, cap / pace);
+    }
+
     public void desire(Npc n, int action) {
         if (n.agent == 0) return;
         n.sprinting = action == A_SPRINT;
@@ -584,7 +651,9 @@ public final class AiSystem {
             float step = n.lodDt; n.lodDt = 0;
             // (0.2.2) an NPC with a hurt leg goes slower as well as limping (the player only limps)
             float legs = g.gore == null ? 1 : Math.max(0.35f, g.gore.legs(n));
-            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1) * (far ? 0.5f : 1) * legs);
+            // (0.3.6, gamefixes: the society only worked near the player) a resident far off is thought for less often, but
+            // walks at its own pace: its agent used to be slowed to half, so every errand away from the player took twice as long
+            g.game.commands().agentRate(n.agent, n.cs.frozenT > 0 ? 0.001f : n.actionRate() * (n.cs.slowT > 0 ? 0.6f : 1) * legs * waterPace(n));
             if (n.morphT > 0) {
                 n.cs.cancel(); n.cs.blocking = false; n.sneaking = true;
                 g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_CROUCH | MOVER_STANCE_ONLY);
@@ -701,7 +770,8 @@ public final class AiSystem {
     /** Footfalls near the player, one per planted foot, in time with the gait the figure is drawn walking. */
     private void footsteps(Npc n, float dt) {
         float speed = (float) Math.hypot(n.vx, n.vz);
-        if (!n.grounded || speed < rpg.actor.Gait.STILL || g.sfx == null || n.distTo(g.player) > 16) { n.stepClock = 0.5f; return; }
+        // (0.3.6, gamefixes: a Pegasus in flight made footstep noises) one in the saddle walks nowhere: the mount carries them
+        if (!n.grounded || n.riding != 0 || speed < rpg.actor.Gait.STILL || g.sfx == null || n.distTo(g.player) > 16) { n.stepClock = 0.5f; return; }
         n.stepClock += dt * rpg.actor.Gait.steps(speed, n.sneaking);
         if (n.stepClock >= 1) { n.stepClock -= 1; g.sfx.footstep(n, Math.min(1, speed / 5f)); g.footfall(n, Math.min(1, speed / 5f)); }
     }
@@ -875,6 +945,34 @@ public final class AiSystem {
     }
 
     /** Who this NPC must deal with now (fight or flee), or null. */
+    /** (0.3.6) How far past the border (m from where it crossed after them) and how long (s) the watch chases someone off. */
+    public static final float CHASE_OFF_REACH = 22f;
+    public static final double CHASE_OFF_TIME = 14;
+
+    /**
+     * (0.3.6, gamefixes: guards and lawmen should chase people off outside their territory before returning to it)
+     * whether this one may go on after someone where they are: anywhere in its own ground; past its border only as a
+     * chase-off - so far beyond where it crossed after them and so long, no more - then it calls after them and goes back.
+     * One driven out is not chased again until they come back in. Outlaws keep to the wilds as before.
+     */
+    boolean chaseOff(Npc n, Actor t) {
+        if (ZonePolicy.routineAllowed(n, t.x, t.z)) { if (n.chaseOffOf == t.id && n.watch()) { n.chaseOffOf = 0; n.chaseOffDone = false; } return true; }
+        if (!n.watch()) return false;
+        if (n.chaseOffOf != t.id) { n.chaseOffOf = t.id; n.chaseOffDone = false; n.chaseOffSince = g.time; n.chaseOffX = n.x; n.chaseOffZ = n.z; }
+        if (n.chaseOffDone) return false;
+        boolean on = g.time - n.chaseOffSince < CHASE_OFF_TIME && Math.hypot(n.x - n.chaseOffX, n.z - n.chaseOffZ) < CHASE_OFF_REACH;
+        if (!on) {
+            // driven off: a parting word after them, and back to its own ground
+            n.chaseOffDone = true;
+            say(n, t == g.player ? "And stay out of " + n.homeJurisdiction + "!" : "Keep walking - and don't come back!");
+            g.state.commit("ChasedOff", n.id, t.id, n.homeJurisdiction, 0, t.name + String.format(" driven %.0f m past the border", Math.hypot(n.x - n.chaseOffX, n.z - n.chaseOffZ)));
+            giveUp(n, t.id);
+            if (n.hunt != null && n.hunt.target == t.id) n.hunt = null;
+            n.goal = Brain.Goal.RETURN; n.goalSince = g.time; n.goalReason = "back to its own ground after chasing " + t.name + " off"; n.nextThink = g.time + 4;
+        }
+        return on;
+    }
+
     public Actor threatFor(Npc n) {
         if (n.summonOwner != 0) {
             Actor owner = g.actor(n.summonOwner);
@@ -909,7 +1007,7 @@ public final class AiSystem {
         }
         if (n.fightTarget != 0) {
             Actor t = g.actor(n.fightTarget);
-            boolean unwelcome = t != null && !ZonePolicy.routineAllowed(n, t.x, t.z) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12);
+            boolean unwelcome = t != null && !chaseOff(n, t) && !(n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 12);
             if (unwelcome && n.hunt != null && n.hunt.target == t.id) n.hunt = null;
             boolean stood = unwelcome || g.law.inCustody(t) || law && (t != null && g.law.settled(t.id, n.goalSince) && g.law.bounty(t.id, n.homeJurisdiction) <= 0 && !(n.cs.lastAttacker == t.id && !g.law.settled(t.id, n.cs.lastHurt)));
             if (t != null && t.alive && (n.distTo(t) < 30 || placed(n, t)) && !(t == g.player && t.hp <= 0) && !stood) {
@@ -1471,8 +1569,22 @@ public final class AiSystem {
         g.game.commands().ragdollCreate(dead.ragdoll,dead.ragdollScale(),dead.sydneyProfile(),RAGDOLL_ACTIVE,dead.x,dead.y,dead.z,dead.yaw,0,0,0);
         if(dead.posePts!=null)g.game.commands().ragdollPose(dead.ragdoll,0,0,0,dead.posePts);
         g.game.commands().ragdollControl(dead.ragdoll,CONTROL_DIE,1);
+        afloat(dead);
         if(g.gore!=null)g.gore.limbsToBody(dead);return true;
     }
+
+    /**
+     * (0.3.5, gamefixes: some dead bodies should float) how a body takes to water: flesh floats - face down, the back
+     * just breaking the surface - unless what it wears drags it under. Every kilogram of armour, weapon and kit worn takes
+     * from the lift; plate and mail sink a body, cloth and leather do not. Bones alone sink.
+     */
+    public static float buoyancy(Actor n) {
+        if (n instanceof rpg.monster.Monster mo && mo.kind.name().contains("SKELETON")) return 0;
+        float worn = 0;
+        for (ItemDef.Slot s : ItemDef.Slot.values()) { var st = n.eq.get(s); if (st != null) worn += st.def.weight * (s == ItemDef.Slot.AMMO ? 0.1f : 1); }
+        return Math.max(0, 1.32f - 0.055f * worn);
+    }
+    public void afloat(Npc n) { if (n.ragdoll != 0) g.game.commands().ragdollBuoyancy(n.ragdoll, buoyancy(n), 2.4f); }
 
     public void onKilled(Npc n, Actor killer) {
         if (n.summonOwner != 0) { g.magic.dismiss(n); return; }
@@ -1491,6 +1603,7 @@ public final class AiSystem {
             if (posed) g.game.commands().ragdollPose(n.ragdoll, n.vx, 0, n.vz, n.posePts);
             g.game.commands().ragdollControl(n.ragdoll, CONTROL_DIE, 1);
         }
+        afloat(n);
         if (g.gore != null) g.gore.limbsToBody(n);
         g.game.commands().ragdollHit(n.ragdoll, RD_NECK, dx / l, 0.2f, dz / l, 120, 30);
         despawnBody(n);

@@ -29,7 +29,7 @@ public enum Species {
     /** (0.3.0, gamefixes) the Pegasus: a horse built like a war horse - broad, deep-chested, heavy-legged - with a horn and great wings: it flies. */
     PEGASUS("Pegasus", "Foal", 1.62f, 1.85f, 0.6f, Plan.QUAD, 1.7f, 8.4f, Diet.GRAZER, Group.HERD, 1, 2, false, false),
     /** (0.3.4, gamefixes) the Deer: a light, long-legged grazer of the woods - wary, quick to bolt, the bears' and wolves' prey; a buck carries antlers. */
-    DEER("Deer", "Fawn", 0.8f, 1.45f, 0.5f, Plan.QUAD, 1.4f, 8.6f, Diet.GRAZER, Group.HERD, 2, 5, false, false);
+    DEER("Deer", "Fawn", 0.8f, 1.45f, 0.5f, Plan.QUAD, 1.4f, 7.0f, Diet.GRAZER, Group.HERD, 2, 5, false, false);
 
     /** Body plan: how the model is built and how it walks. */
     public enum Plan { QUAD, BIRD, HOPPER }
@@ -91,10 +91,19 @@ public enum Species {
     public float wades;
     /** (0.3.4) Whether it swims: crosses deep water, held up at the surface (a duck sits on any water). */
     public boolean swims;
+    /**
+     * (0.3.6, gamefixes: deer sprinted through water) how fast it swims (m/s): a body afloat goes no faster than this, and
+     * one wading no faster than a walk and a half - whatever its legs would manage on land.
+     */
+    public float swim;
+    /** How much of a walk's pace the deepest wading keeps (the water to the belly). */
+    public static final float WADE_PACE = 1.5f;
     static {
         // the weaknesses on record: fur and fire
         for (Species s : new Species[]{BROWN_BEAR, WOLF, COYOTE, FOX, MOUNTAIN_LION}) s.weakness = rpg.combat.Spells.Element.FIRE;
         for (Species s : new Species[]{DUCK, WOLF, DOG, FOX, COYOTE, BROWN_BEAR, HORSE, PEGASUS, COW, DEER}) s.swims = true;
+        for (Species s : values()) s.swim = Math.max(0.5f, Math.min(1.6f, s.run * 0.2f));
+        DUCK.swim = 0.9f;
         DUCK.wades = 0.55f; COW.wades = 0.2f; HORSE.wades = 0.15f; BROWN_BEAR.wades = 0.2f; PIG.wades = 0.12f; DOG.wades = 0.1f; SHEEP.wades = 0.04f;
     }
 
@@ -124,7 +133,7 @@ public enum Species {
         COYOTE.prey.addAll(EnumSet.of(RABBIT, CHICKEN, DUCK, SHEEP, CAT));
         WOLF.skills(25, 22, 18, 25, 22).weapon("bite", 6, 26, 0.5f, DamageType.PIERCE).senses(1.3f, 1.5f, 14, 0).breeds(540, 2, 4, 2160, 1800).yields(3, 1, true, 0).sounds("animal.wolf", "animal.wolf.growl", "animal.dog.hurt", "animal.dog.hurt");
         WOLF.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, CHICKEN, DUCK, COW, HORSE, DEER));
-        MOUNTAIN_LION.skills(32, 30, 20, 30, 30).weapon("claw", 8, 40, 0.55f, DamageType.SLASH).senses(1.35f, 1.4f, 10, 0).breeds(600, 1, 2, 2160, 2160).yields(3, 1, true, 0).sounds("animal.lion", "animal.lion", "animal.lion", "animal.lion");
+        MOUNTAIN_LION.skills(32, 30, 20, 30, 30).weapon("claw", 8, 40, 0.55f, DamageType.SLASH).senses(1.35f, 1.4f, 10, 0).breeds(600, 1, 2, 2160, 2160).yields(3, 1, true, 0).sounds("animal.lion", "animal.lion.growl", "animal.lion.growl", "animal.lion.growl");
         MOUNTAIN_LION.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, DUCK, CHICKEN, DOG, COYOTE, FOX, DEER));
         BROWN_BEAR.skills(26, 28, 20, 35, 12).weapon("swipe", 6, 70, 0.75f, DamageType.SLASH).senses(1.0f, 1.2f, 9, 0).breeds(900, 1, 2, 2880, 2880).yields(8, 2, true, 0).sounds("animal.bear", "animal.bear", "animal.bear", "animal.bear");
         BROWN_BEAR.defends = true;

@@ -37,7 +37,9 @@ public final class Farming {
         CABBAGE("Cabbages", Items.CABBAGE, Items.CABBAGE_SEEDS, 13 * 60, 1, 2, 5, 34),
         /** (0.3.4, gamefixes: ale) the brewer's crops: barley and hops, sold to the inns for their ale. */
         BARLEY("Barley", Items.BARLEY, Items.BARLEY_SEEDS, 11 * 60, 2, 4, 3, 26),
-        HOPS("Hops", Items.HOPS, Items.HOP_SEEDS, 12 * 60, 2, 3, 8, 30);
+        HOPS("Hops", Items.HOPS, Items.HOP_SEEDS, 12 * 60, 2, 3, 8, 30),
+        /** (0.3.5, gamefixes: the textile industry) cotton, grown by the outworkers for the spinning wheel. */
+        COTTON("Cotton", Items.COTTON, Items.COTTON_SEEDS, 14 * 60, 2, 4, 10, 36);
         public final String title;
         public final ItemDef produce, seed;
         /** Game minutes from sowing to ripe in ordinary weather; produce yielded (min..max); Harvesting level; XP. */
@@ -58,8 +60,13 @@ public final class Farming {
             new Field("DevCity kitchen garden", DevMap.ALPHA, Ids.CROP_FARMER_CITY, 88, 104, 99, 112, new int[]{106, 108, 110}, 110, new int[][]{{99, 107}, {99, 108}},
                     new Crop[]{Crop.BARLEY, Crop.CABBAGE, Crop.CARROT}),
             new Field("DevPalace garden", DevMap.PALACE, Ids.CROP_FARMER_PALACE, 176, 55, 186, 63, new int[]{57, 59, 61}, 61, new int[][]{{176, 58}, {176, 59}},
-                    new Crop[]{Crop.HOPS, Crop.CARROT, Crop.CABBAGE})
+                    new Crop[]{Crop.HOPS, Crop.CARROT, Crop.CABBAGE}),
+            // (0.3.5) the outworkers' cotton field on the dunes by their cottage (its plots made after every older fixture)
+            new Field("the cotton field", DevMap.WILDS, rpg.Ids.CARDER, 66, 188, 76, 195, new int[]{190, 192, 194}, -1, new int[][]{{71, 188}},
+                    new Crop[]{Crop.COTTON, Crop.COTTON, Crop.COTTON})
     };
+    /** How many of the fields were made with the old fixtures (their plots' ids come first); the rest come with Guild Row. */
+    public static final int EARLY_FIELDS = 2;
     public static final Orchard[] ORCHARDS = {
             new Orchard("DevCity orchard", Ids.ORCHARD_KEEPER_CITY, new int[][]{{113, 105}, {118, 105}, {113, 110}, {118, 110}}),
             new Orchard("DevPalace orchard", Ids.ORCHARD_KEEPER_PALACE, new int[][]{{178, 66}, {182, 66}, {186, 66}})
@@ -224,7 +231,15 @@ public final class Farming {
 
     /** The plots and the trees, made once with fixed ids from a base (after every older fixture). */
     public long build(long nextId) {
-        for (int f = 0; f < FIELDS.length; f++) {
+        nextId = plots(nextId, 0, EARLY_FIELDS);
+        for (int o = 0; o < ORCHARDS.length; o++) for (int[] t : ORCHARDS[o].trees()) trees.add(g.objects.add(new AppleTree(nextId++, o, t[0], t[1], ORCHARDS[o].owner())));
+        for (DevMap.Piece p : GROWER_BEDS) g.objects.furniture.add(g.objects.add(new rpg.objects.Furniture(nextId++, rpg.objects.Furniture.Kind.BED, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), p.owner(), true)));
+        return nextId;
+    }
+    /** (0.3.5) The later fields' plots (the cotton field), after Guild Row's fixtures. */
+    public long buildLate(long nextId) { return plots(nextId, EARLY_FIELDS, FIELDS.length); }
+    private long plots(long nextId, int from, int to) {
+        for (int f = from; f < to; f++) {
             Field field = FIELDS[f];
             for (int row = 0; row < field.rows().length; row++) {
                 int z = field.rows()[row];
@@ -236,8 +251,6 @@ public final class Farming {
                 }
             }
         }
-        for (int o = 0; o < ORCHARDS.length; o++) for (int[] t : ORCHARDS[o].trees()) trees.add(g.objects.add(new AppleTree(nextId++, o, t[0], t[1], ORCHARDS[o].owner())));
-        for (DevMap.Piece p : GROWER_BEDS) g.objects.furniture.add(g.objects.add(new rpg.objects.Furniture(nextId++, rpg.objects.Furniture.Kind.BED, p.x0(), p.z0(), p.x1(), p.z1(), 1, p.facing(), p.owner(), true)));
         return nextId;
     }
 
