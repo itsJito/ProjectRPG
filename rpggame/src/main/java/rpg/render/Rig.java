@@ -406,6 +406,8 @@ public final class Rig {
         extraLean += 0.22f * hurtBody + 0.05f * hurtHead;
         // (0.3.0) in the saddle: sat up at a walk, forward over the withers at a gallop
         if (a.riding != 0) extraLean += 0.05f + 0.24f * clamp01(a.rideSpeed / 11f);
+        // (0.3.9) climbing up: bent over the saddle as the push lifts the body, upright again settling into it
+        if (a.riding != 0 && a.mountPhase < 1) extraLean += 0.35f * (float) Math.sin(Math.PI * clamp01((a.mountPhase - 0.1f) / 0.8f));
         crouch += 1.2f * hurtBody;
         roll += 0.06f * hurtHead * (float) Math.sin(time * 1.3 + a.id) + 0.05f * (hurtLegR - hurtLegL);
         // (0.3.1) hunched into the rain; shrunk down from a blow passing close
@@ -486,6 +488,11 @@ public final class Rig {
         // (0.3.0, gamefixes: riding) astride: the knees out round the barrel, the feet down in the stirrups a little ahead
         // (0.3.6) in this mount's own stirrups, hung outside its barrel (Riding.place), so the legs go round it, not through it
         if (a.riding != 0) for (int k = 0; k < 2; k++) foot[k] = a.stirrupX > 0 ? new float[]{(k == 0 ? 1 : -1) * a.stirrupX, a.stirrupY, a.stirrupZ} : new float[]{(k == 0 ? 1 : -1) * (hipX + 3.4f), 3.2f, -1.4f};
+        // (0.3.9, gamefixes: mounting) climbing up: each foot where the climb has it (Riding.climbPose) - the near one up
+        // into its iron, the far one pushing off the ground and swung over the croup
+        // (0.3.9) and in the saddle the irons are held where they hang in the world (Riding.stirrups), so a rider turned in
+        // the saddle to strike or shoot keeps the feet in them
+        if (a.riding != 0 && (a.mountPhase < 1 || a.mountFeet[1] != 0 || a.mountFeet[4] != 0)) for (int k = 0; k < 2; k++) foot[k] = toFigure(a, a.mountFeet[k * 3], a.mountFeet[k * 3 + 1], a.mountFeet[k * 3 + 2]);
         // (0.3.4, gamefixes: swimming) in deep water the legs work: flat out, a flutter kick from the hips (two beats to
         // each arm's stroke, the legs long and close); afloat, an eggbeater - each foot circling under the body, knees bent,
         // the two half a turn apart; hauling out, both feet kick down hard for the push. The whole figure is laid down by
@@ -802,6 +809,10 @@ public final class Rig {
                 if (it.family == Family.SHIELD || pl[0][2] > 1.5f) target = add(target, torsoRight, side * 4.2f * (float) Math.sin(Math.PI * clamp01(sheathS)));
                 dir = norm(lerp(dir, torsoDir(pl[1][0], pl[1][1], pl[1][2]), reach));
                 sheathS = sheathS_;
+            } else if (a.riding != 0 && a.mountPhase < 0.85f) {
+                // (0.3.9) climbing up: both hands on the pommel, a little apart, pulling the body up by it
+                target = add(toFigure(a, a.mountHands[0], a.mountHands[1], a.mountHands[2]), torsoRight, side * 1.1f);
+                dir = norm(torsoDir(0, -0.6f, -0.8f));
             } else if (a.riding != 0) {
                 // (0.3.0) the reins: both hands low and forward over the pommel, a little apart, moving with the head
                 target = torsoPoint(shoulder, -side * 1.3f, -7.6f + 0.4f * (float) Math.sin(a.rideGait * 2), -4.8f);

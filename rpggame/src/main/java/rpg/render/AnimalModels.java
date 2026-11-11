@@ -79,6 +79,9 @@ public final class AnimalModels {
             case COYOTE -> quad(s, v, 6, 7, 13, 8, 2, 5, 5, 5, 4, coyoteCoat());
             case WOLF -> quad(s, v, 7, 8, 15, 8, 3, 6, 6, 6, 4, wolfCoat());
             case MOUNTAIN_LION -> quad(s, v, 7, 7, 16, 7, 3, 6, 5, 5, 2, lionCoat());
+            // (0.3.9) the Dire Wolf, built on the Barbary lion: broad and deep at the shoulder, a big square head, heavy
+            // forelegs, the mane over all its front half
+            case DIRE_WOLF -> quad(s, v, 12, 12, 25, 15, 5, 9, 9, 7, 3, direCoat());
             case BROWN_BEAR -> quad(s, v, 16, 13, 22, 8, 6, 9, 8, 8, 3, bearCoat());
             case RABBIT -> hopper(s, v);
             case CHICKEN, DUCK -> bird(s, v);
@@ -100,7 +103,7 @@ public final class AnimalModels {
             float ex = Math.max(0, Math.abs(x + 0.5f - bw / 2f) - (bw / 2f - round)), ey = Math.max(0, Math.abs(y + 0.5f - bh / 2f) - (bh / 2f - round));
             float ez = Math.max(0, Math.abs(z + 0.5f - bl / 2f) - (bl / 2f - round * 0.8f));
             if (ex * ex + ey * ey + ez * ez * 0.6f > round * round) continue;
-            if (horseLike(s) || s == Species.MOUNTAIN_LION || s == Species.DOG || s == Species.WOLF || s == Species.COYOTE || s == Species.FOX || s == Species.CAT) {
+            if (horseLike(s) || s == Species.MOUNTAIN_LION || s == Species.DIRE_WOLF || s == Species.DOG || s == Species.WOLF || s == Species.COYOTE || s == Species.FOX || s == Species.CAT) {
                 // a tucked waist: the belly rises toward the hind legs
                 float t = (z + 0.5f) / bl;
                 if (y < bh * 0.28f * Math.max(0, t - 0.45f) * 2.2f) continue;
@@ -108,7 +111,28 @@ public final class AnimalModels {
             b.set(x, y, z, coat.at("body", x, y, z, bw, bh, bl));
         }
         if (s == Species.BROWN_BEAR) for (int x = 3; x < bw - 3; x++) for (int z = 3; z < 9; z++) b.set(x, bh - 1, z, coat.at("body", x, bh - 1, z, bw, bh, bl));
-        f.body = new ItemModels.Model(b, bw / 2f, bh / 2f, bl / 2f);
+        // (0.3.9) the Dire Wolf's mane over its shoulders: a ruff standing out from the front of the body, and a fringe
+        // hanging under the chest and down the belly
+        if (s == Species.DIRE_WOLF) {
+            VoxModel big = new VoxModel(bw + 2, bh + 2, bl);
+            for (int x = 0; x < bw; x++) for (int y = 0; y < bh; y++) for (int z = 0; z < bl; z++) { int c0 = b.get(x, y, z); if (c0 != 0) big.set(x + 1, y + 1, z, c0); }
+            int maneZ = Math.round(bl * 0.42f);
+            for (int z = 0; z < maneZ; z++) for (int x = 0; x < bw + 2; x++) for (int y = 0; y < bh + 2; y++) {
+                if (big.get(x, y, z) != 0) continue;
+                // a voxel beside the body there: the ruff (thinning toward the back)
+                boolean touches = false;
+                for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) { int nx = x + d[0], ny = y + d[1]; if (nx > 0 && ny > 0 && nx < bw + 1 && ny < bh + 1 && b.get(nx - 1, ny - 1, z) != 0) touches = true; }
+                if (!touches || z > maneZ - 3 && ((x * 7 + y * 3 + z) % 3 == 0)) continue;
+                big.set(x, y, z, coat.at("mane", x, y, z, bw + 2, bh + 2, maneZ));
+            }
+            for (int z = 2; z < bl - 6; z++) for (int x = 2; x < bw; x++) {
+                int drop = z < maneZ ? 2 : z < bl * 0.62f ? 1 : 0;
+                if (drop > 0 && (x + z) % 4 != 0) for (int y = 0; y < drop; y++) if (big.get(x, y, z) == 0) big.set(x, y, z, coat.at("mane", x, 0, z, bw, 1, bl));
+            }
+            b = big;
+            f.body = new ItemModels.Model(b, (bw + 2) / 2f, (bh + 2) / 2f, bl / 2f);
+        }
+        if (s != Species.DIRE_WOLF) f.body = new ItemModels.Model(b, bw / 2f, bh / 2f, bl / 2f);
         // legs: a column, a darker hoof or paw at the foot
         VoxModel lf = leg(s, legH, legW, coat, true), lb = leg(s, legH, legW, coat, false);
         f.legFront = new ItemModels.Model(lf, legW / 2f, legH, legW / 2f);
@@ -189,7 +213,7 @@ public final class AnimalModels {
         int ey = oy + hh - Math.max(2, hh / 3);
         if (deer) for (int side : new int[]{0, hw - 1}) { m.set(ox + side, ey, oz + snout + 2, c(0x141010)); m.set(ox + side, ey + 1, oz + snout + 2, c(0x2A2220)); m.set(ox + side, ey - 1, oz + snout + 2, c(0xEEE6D8)); }
         for (int side : new int[]{0, hw - 1}) {
-            m.set(ox + side, ey, oz + snout + 1, c(s == Species.CAT || s == Species.MOUNTAIN_LION ? 0x7A8A2A : s == Species.WOLF ? 0x8A7A30 : 0x141010));
+            m.set(ox + side, ey, oz + snout + 1, c(s == Species.CAT || s == Species.MOUNTAIN_LION ? 0x7A8A2A : s == Species.WOLF ? 0x8A7A30 : s == Species.DIRE_WOLF ? 0xC08A20 : 0x141010));
             if (hl > 4) m.set(ox + side, ey + 1, oz + snout + 1, c(Tex.shade(coat.at("head", 0, hh - 1, 1, hw, hh, hl) & 0xFFFFFF, 0.8f)));
         }
         // ears
@@ -208,6 +232,19 @@ public final class AnimalModels {
                 }
             }
             case MOUNTAIN_LION, BROWN_BEAR -> { for (int side : new int[]{ox, ox + hw - 2}) m.box(side, top, ez, side + 1, top, ez, earC); }
+            case DIRE_WOLF -> {
+                // the mane: a great dark ruff framing the face - out round the cheeks, over the crown, down under the jaw
+                // and the throat - the ears all but lost in it
+                int maneZ0 = oz + snout + hl / 2 - 1;
+                for (int z = maneZ0; z < oz + snout + hl + 1 && z < sz; z++) for (int x = ox - 2; x < ox + hw + 2; x++) for (int y = Math.max(0, oy - 1); y < Math.min(sy, top + 3); y++) {
+                    if (x < 0 || x >= sx || m.get(x, y, z) != 0) continue;
+                    float cx = (x + 0.5f) - (ox + hw / 2f), cy = (y + 0.5f) - (oy + hh / 2f);
+                    float r = (float) Math.hypot(cx / (hw / 2f + 2.2f), cy / (hh / 2f + 2.4f));
+                    boolean rough = ((x * 31 + y * 17 + z * 7) % 5) == 0 && r > 0.85f;
+                    if (r <= 1f && !rough) m.set(x, y, z, coat.at("mane", x, y, z - maneZ0, sx, sy, hl));
+                }
+                for (int side : new int[]{ox, ox + hw - 2}) m.box(side, top + 1, ez, side + 1, top + 1, ez, earC);
+            }
             case DEER -> {
                 // big ears set out to the sides, white within
                 for (int side : new int[]{-1, 1}) {
@@ -272,6 +309,14 @@ public final class AnimalModels {
                 m = new VoxModel(w + 1, 4, len + 1);
                 for (int z = 0; z < len; z++) { float r = (float) Math.sin(Math.PI * (z + 1) / (len + 1)) * w / 2f + 0.6f; for (int x = 0; x <= w; x++) for (int y = 0; y < 4; y++) if (Math.hypot(x - w / 2f, y - 1.5f) <= r) m.set(x, y, z, z >= len - 2 ? tip : fur(tc & 0xFFFFFF, x, y, z, 0.15f)); }
                 return new ItemModels.Model(m, w / 2f + 0.5f, 2, 0.5f);
+            }
+            case DIRE_WOLF -> {
+                // (0.3.9) a long cat's tail ending in a dark tuft
+                int len = 15;
+                m = new VoxModel(4, 4, len + 1);
+                for (int z = 0; z < len - 3; z++) m.box(1, 1, z, 2, 2, z, fur(tc & 0xFFFFFF, 0, 0, z, 0.12f));
+                for (int z = len - 3; z <= len; z++) m.box(0, 0, z, 3, 3, z, fur(tip & 0xFFFFFF, 0, 0, z, 0.2f));
+                return new ItemModels.Model(m, 2f, 2f, 0.5f);
             }
             case CAT, MOUNTAIN_LION -> {
                 int len = s == Species.CAT ? 9 : 12;
@@ -592,6 +637,25 @@ public final class AnimalModels {
             case "tail" -> c(0xB08858);
             case "body" -> fur(y < 2 ? 0xE8DCC8 : 0xB8905E, x, y, z, 0.08f);
             default -> fur(0xB08858, x, y, z, 0.08f);
+        };
+    }
+
+    /** (0.3.9) The Dire Wolf's: tawny gold, paler beneath; the mane black-brown, lighter at its roots; the tail's tuft black. */
+    private static Coat direCoat() {
+        return (part, x, y, z, sx, sy, sz) -> switch (part) {
+            case "snout" -> fur(y == 0 ? 0xD8C09A : 0xC09466, x, y, z, 0.06f);
+            case "ear" -> c(0x3A2414);
+            case "tip" -> c(0x24160E);
+            case "tail" -> c(0xB88C58);
+            // the mane in locks: deep brown-black with chestnut streaks, its outer edge (the part's extent) lighter
+            case "mane" -> {
+                int h = (x * 73856093) ^ (y * 19349663) ^ (z * 83492791);
+                boolean streak = ((h >>> 9) & 7) == 0, fringe = ((h >>> 13) & 3) == 0 && (x == 0 || x == sx - 1 || y == sy - 1);
+                yield fur(fringe ? 0x9A6636 : streak ? 0x6E4628 : ((h >>> 5) & 1) == 0 ? 0x4C2E1A : 0x3A2414, x, y, z, 0.12f);
+            }
+            case "body" -> fur(y < 2 ? 0xCFB284 : 0xBC925C, x, y, z, 0.09f);
+            case "head" -> fur(y < 1 ? 0xCFB284 : 0xB48A56, x, y, z, 0.08f);
+            default -> fur(0xB48A56, x, y, z, 0.1f);
         };
     }
 

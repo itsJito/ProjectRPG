@@ -45,7 +45,18 @@ public final class Blocks {
             STAIRS = 109, LADDER = 110,
             // 0.3.7 (gamefixes: the Mining overhaul): the rest of the ladder's rocks (rpg.item.Minerals says what each holds)
             STONE_ROCK = 111, WROUGHT_ROCK = 112, MITHRIL_ROCK = 113, COBALT_ROCK = 114, DRAGONITE_ROCK = 115, MOLTENITE_ROCK = 116,
-            GODSTONE_ROCK = 117, MALEVOLENT_ROCK = 118, COUNT = 119;
+            GODSTONE_ROCK = 117, MALEVOLENT_ROCK = 118,
+            // 0.3.8 (gamefixes: the texture library expanded - more variety, more kinds of material): the fine house's
+            // finishes (papered walls, panelling, parquet, a chequered marble floor, velvet), the builder's (slate and thatch
+            // roofs, timber framing, flagstones, terracotta, mossy and dark stone, gravel), stained glass and brass
+            WALLPAPER_GREEN = 119, WALLPAPER_RED = 120, WAINSCOT = 121, PARQUET = 122, DARK_PLANKS = 123, CHECKER_TILE = 124,
+            FLAGSTONE = 125, SLATE_ROOF = 126, TIMBER_FRAME = 127, MOSSY_BRICKS = 128, TERRACOTTA = 129, VELVET_CARPET = 130,
+            THATCH = 131, BASALT = 132, STAINED_GLASS = 133, GRAVEL = 134, BRASS_BLOCK = 135, WALLPAPER_BLUE = 136,
+            // 0.3.8: the second run of two-faced wall blocks (DUAL_PAIRS from its seventh pair on), four to a pair as the first
+            DUAL1 = 137,
+            // 0.3.9 (gamefixes: chairs, settees, stools and benches had no collision): a seat's cells - solid to every body
+            // and ray, seen through like any furnishing; a sitter is set down onto it (rpg.ai.Seating), never walks onto it
+            SEAT = 209, COUNT = 210;
     /**
      * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
      * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
@@ -59,19 +70,35 @@ public final class Blocks {
     public static boolean stairs(int id) { return id == STAIRS; }
     public static boolean ladder(int id) { return id == LADDER; }
     /** The two-faced blocks' pairs: {outside, inside}. */
-    public static final int[][] DUAL_PAIRS = {{BRICK, PLASTER}, {STONE_BRICKS, PLASTER}, {PLASTER, PLANKS}, {STONE_BRICKS, PLANKS}, {LIMESTONE_BRICKS, MARBLE}, {IRON_BLOCK, PLANKS}};
+    public static final int[][] DUAL_PAIRS = {{BRICK, PLASTER}, {STONE_BRICKS, PLASTER}, {PLASTER, PLANKS}, {STONE_BRICKS, PLANKS}, {LIMESTONE_BRICKS, MARBLE}, {IRON_BLOCK, PLANKS},
+            // 0.3.8: a fine house's walls - dressed stone or timber framing outside, papered or panelled inside - and its
+            // rooms' partitions, a different paper or panelling on each side
+            {STONE_BRICKS, WALLPAPER_GREEN}, {STONE_BRICKS, WALLPAPER_RED}, {STONE_BRICKS, WAINSCOT}, {STONE_BRICKS, WALLPAPER_BLUE},
+            {TIMBER_FRAME, WALLPAPER_GREEN}, {TIMBER_FRAME, WALLPAPER_RED}, {TIMBER_FRAME, WAINSCOT}, {TIMBER_FRAME, WALLPAPER_BLUE}, {TIMBER_FRAME, PLASTER},
+            {WALLPAPER_GREEN, WALLPAPER_RED}, {WAINSCOT, WALLPAPER_GREEN}, {WAINSCOT, WALLPAPER_RED}, {WALLPAPER_BLUE, WAINSCOT}, {PLASTER, WAINSCOT},
+            {PLASTER, WALLPAPER_RED}, {PLASTER, WALLPAPER_GREEN}, {WALLPAPER_BLUE, WALLPAPER_RED}, {PLASTER, WALLPAPER_BLUE}};
+    /** How many pairs the first run of two-faced ids (DUAL0 on) holds; the rest are from DUAL1. */
+    static final int DUAL_FIRST = 6;
+    /** A pair's first id (its inside toward +x; the next three toward -x, +z, -z). */
+    static int dualBase(int pair) { return pair < DUAL_FIRST ? DUAL0 + pair * 4 : DUAL1 + (pair - DUAL_FIRST) * 4; }
+    /** The pair a two-faced id belongs to, or -1. */
+    static int pairOf(int id) {
+        if (id >= DUAL0 && id < DUAL0 + DUAL_FIRST * 4) return (id - DUAL0) / 4;
+        if (id >= DUAL1 && id < DUAL1 + (DUAL_PAIRS.length - DUAL_FIRST) * 4) return DUAL_FIRST + (id - DUAL1) / 4;
+        return -1;
+    }
     /** Inner-face directions of a two-faced block: toward +x, -x, +z, -z. */
     public static final int IN_PX = 0, IN_NX = 1, IN_PZ = 2, IN_NZ = 3;
-    public static boolean dual(int id) { return id >= DUAL0 && id < DUAL0 + DUAL_PAIRS.length * 4; }
+    public static boolean dual(int id) { return pairOf(id) >= 0; }
     /** The outside half of a two-faced block (the block itself for any other). */
-    public static int outerOf(int id) { return dual(id) ? DUAL_PAIRS[(id - DUAL0) / 4][0] : id; }
+    public static int outerOf(int id) { int p = pairOf(id); return p >= 0 ? DUAL_PAIRS[p][0] : id; }
     /** The inside half of a two-faced block (the block itself for any other). */
-    public static int innerOf(int id) { return dual(id) ? DUAL_PAIRS[(id - DUAL0) / 4][1] : id; }
+    public static int innerOf(int id) { int p = pairOf(id); return p >= 0 ? DUAL_PAIRS[p][1] : id; }
     /** Which way a two-faced block's inside faces (IN_*), or -1. */
-    public static int innerDir(int id) { return dual(id) ? (id - DUAL0) % 4 : -1; }
+    public static int innerDir(int id) { int p = pairOf(id); return p >= 0 ? id - dualBase(p) : -1; }
     /** The two-faced block of an outside and an inside material facing the given way; the outside alone if no such pair. */
     public static int dualOf(int outer, int inner, int dir) {
-        for (int i = 0; i < DUAL_PAIRS.length; i++) if (DUAL_PAIRS[i][0] == outer && DUAL_PAIRS[i][1] == inner) return DUAL0 + i * 4 + dir;
+        for (int i = 0; i < DUAL_PAIRS.length; i++) if (DUAL_PAIRS[i][0] == outer && DUAL_PAIRS[i][1] == inner) return dualBase(i) + dir;
         return outer;
     }
     /** What is left of a two-faced block when one half burns away: the half that does not burn. */
@@ -112,8 +139,14 @@ public final class Blocks {
             case AIR, EMBERS -> Material.NONE;
             case GRASS, DIRT, BARE_PATCH, CLAY, MUD -> Material.EARTH;
             case SAND -> Material.SAND;
+            case WAINSCOT, PARQUET, DARK_PLANKS -> Material.WOOD;
+            case VELVET_CARPET, WALLPAPER_GREEN, WALLPAPER_RED, WALLPAPER_BLUE -> Material.CLOTH;
+            case THATCH -> Material.STRAW;
+            case BRASS_BLOCK -> Material.METAL;
+            case STAINED_GLASS -> Material.GLASS;
+            case GRAVEL -> Material.SAND;
             case LADDER, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
-                 CRAFT_TABLE, SAWBENCH, TARGET, DOOR, LOCKED_DOOR, CHARRED, CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG,
+                 CRAFT_TABLE, SAWBENCH, TARGET, SEAT, DOOR, LOCKED_DOOR, CHARRED, CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG,
                  CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF, CHARRED_STUMP -> Material.WOOD;
             case LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
             case WHITE_CARPET, BLACK_CARPET, BROWN_CARPET, RED_CARPET, BED -> Material.CLOTH;
@@ -131,7 +164,7 @@ public final class Blocks {
 
     /** The cells of objects drawn by the game rather than meshed. */
     public static boolean objectCell(int id) {
-        return id == FURNACE || id == ANVIL || id == RANGE || id == CRAFT_TABLE || id == SAWBENCH || id == TARGET || id == CRATE || id == BOOKCASE || id == TABLE || id == BED || id == HEADSTONE;
+        return id == FURNACE || id == ANVIL || id == RANGE || id == CRAFT_TABLE || id == SAWBENCH || id == TARGET || id == CRATE || id == BOOKCASE || id == TABLE || id == BED || id == HEADSTONE || id == SEAT;
     }
     /** Full structural cells form the traversal graph; glass, gates, plants and thin props never do. */
     public static boolean traversable(int id) {
@@ -139,6 +172,8 @@ public final class Blocks {
         return switch (id) { case GRASS, DIRT, STONE, BRICK, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SAND, COBBLE, ROOF, CRATE, PLASTER, BEAM, CHARRED,
                 SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, GRANITE, STONE_BRICKS, MARBLE, CLAY, MUD, SANDSTONE, RED_SANDSTONE, WHITE_CARPET, BLACK_CARPET,
                 BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE,
+                WALLPAPER_GREEN, WALLPAPER_RED, WAINSCOT, PARQUET, DARK_PLANKS, CHECKER_TILE, FLAGSTONE, SLATE_ROOF, TIMBER_FRAME, MOSSY_BRICKS,
+                TERRACOTTA, VELVET_CARPET, THATCH, BASALT, GRAVEL, BRASS_BLOCK, WALLPAPER_BLUE,
                 CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG, CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF -> true; default -> false; };
     }
     /** Plants drawn as crossed planes that bodies walk through (gamefixes: no foliage is ever solid - the berry bush neither). */
@@ -156,9 +191,12 @@ public final class Blocks {
             L_RED_SANDSTONE_TOP = 60, L_RED_SANDSTONE = 61, L_WHITE_GLASS = 62, L_BLUE_GLASS = 63, L_WHITE_CARPET = 64,
             L_BLACK_CARPET = 65, L_BROWN_CARPET = 66, L_RED_CARPET = 67, L_LIMESTONE = 68, L_IRON_BLOCK = 69, L_GOLD_BLOCK = 70,
             L_COPPER_BLOCK = 71, L_COAL_BLOCK = 72, L_HAY_TOP = 73, L_HAY_SIDE = 74, L_HEDGE = 75,
-            L_WROUGHT = 76, L_MITHRIL = 77, L_COBALT = 78, L_DRAGONITE = 79, L_MOLTENITE = 80, L_GODSTONE = 81, L_MALEVOLENT = 82;
+            L_WROUGHT = 76, L_MITHRIL = 77, L_COBALT = 78, L_DRAGONITE = 79, L_MOLTENITE = 80, L_GODSTONE = 81, L_MALEVOLENT = 82,
+            L_PAPER_GREEN = 83, L_PAPER_RED = 84, L_WAINSCOT = 85, L_PARQUET = 86, L_DARK_PLANKS = 87, L_CHECKER = 88, L_FLAGSTONE = 89,
+            L_SLATE = 90, L_TIMBER = 91, L_MOSSY = 92, L_TERRACOTTA = 93, L_VELVET = 94, L_THATCH = 95, L_BASALT = 96, L_STAINED = 97,
+            L_GRAVEL = 98, L_BRASS = 99, L_PAPER_BLUE = 100, L_THATCH_TOP = 101, L_BASALT_TOP = 102;
     /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
-    public static final int CHAR_LAYER0 = 83, LAYERS = 96, TEX = 64;
+    public static final int CHAR_LAYER0 = 103, LAYERS = 116, TEX = 64;
     /** Per charred layer, the layer it was charred from (filled with FACES). */
     private static final int[] CHAR_FROM = new int[LAYERS - CHAR_LAYER0];
 
@@ -174,7 +212,7 @@ public final class Blocks {
         f(STUMP, L_RINGS, L_BARK, L_RINGS); f(HERB_PATCH, L_HERB); f(FLAX_PATCH, L_FLAX); f(BERRY_BUSH, L_BERRY);
         f(CRATE, L_CRATE); f(BOOKCASE, L_PLANKS, L_BOOKS, L_PLANKS); f(MARK_RED, L_RED); f(MARK_BLUE, L_BLUE); f(MARK_YELLOW, L_YELLOW);
         f(DEBUG_FLOOR, L_DEBUG); f(PLASTER, L_PLASTER); f(BEAM, L_BEAM); f(BARE_PATCH, L_BARE, L_DIRT, L_DIRT); f(MARK_GREEN, L_GREEN);
-        f(TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(BED, L_PLANKS); f(HEADSTONE, L_STONE); f(CHARRED, L_COAL); f(ICE,L_WATER);
+        f(TABLE, L_TABLE_TOP, L_TABLE_SIDE, L_PLANKS); f(SEAT, L_PLANKS); f(BED, L_PLANKS); f(HEADSTONE, L_STONE); f(CHARRED, L_COAL); f(ICE,L_WATER);
         f(SPRUCE_LOG, L_SPRUCE_TOP, L_SPRUCE_BARK, L_SPRUCE_TOP); f(JUNGLE_LOG, L_JUNGLE_TOP, L_JUNGLE_BARK, L_JUNGLE_TOP); f(BIRCH_LOG, L_BIRCH_TOP, L_BIRCH_BARK, L_BIRCH_TOP);
         f(GRANITE, L_GRANITE); f(STONE_BRICKS, L_STONE_BRICKS); f(MARBLE, L_MARBLE); f(CLAY, L_CLAY); f(MUD, L_MUD);
         f(SANDSTONE, L_SANDSTONE_TOP, L_SANDSTONE, L_SANDSTONE_TOP); f(RED_SANDSTONE, L_RED_SANDSTONE_TOP, L_RED_SANDSTONE, L_RED_SANDSTONE_TOP);
@@ -185,6 +223,11 @@ public final class Blocks {
         f(EMBERS, L_COAL); f(STAIRS,L_STONE_BRICKS); f(LADDER,L_PLANKS);
         f(STONE_ROCK, L_COBBLE); f(WROUGHT_ROCK, L_WROUGHT); f(MITHRIL_ROCK, L_MITHRIL); f(COBALT_ROCK, L_COBALT); f(DRAGONITE_ROCK, L_DRAGONITE);
         f(MOLTENITE_ROCK, L_MOLTENITE); f(GODSTONE_ROCK, L_GODSTONE); f(MALEVOLENT_ROCK, L_MALEVOLENT);
+        f(WALLPAPER_GREEN, L_PAPER_GREEN); f(WALLPAPER_RED, L_PAPER_RED); f(WALLPAPER_BLUE, L_PAPER_BLUE); f(WAINSCOT, L_DARK_PLANKS, L_WAINSCOT, L_DARK_PLANKS);
+        f(PARQUET, L_PARQUET, L_DARK_PLANKS, L_DARK_PLANKS); f(DARK_PLANKS, L_DARK_PLANKS); f(CHECKER_TILE, L_CHECKER, L_MARBLE, L_MARBLE);
+        f(FLAGSTONE, L_FLAGSTONE, L_STONE, L_STONE); f(SLATE_ROOF, L_SLATE); f(TIMBER_FRAME, L_PLASTER, L_TIMBER, L_PLASTER); f(MOSSY_BRICKS, L_MOSSY);
+        f(TERRACOTTA, L_TERRACOTTA); f(VELVET_CARPET, L_VELVET); f(THATCH, L_THATCH_TOP, L_THATCH, L_THATCH_TOP); f(BASALT, L_BASALT_TOP, L_BASALT, L_BASALT_TOP);
+        f(STAINED_GLASS, L_STAINED); f(GRAVEL, L_GRAVEL); f(BRASS_BLOCK, L_BRASS);
         // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
         int next = CHAR_LAYER0;
         int[] charOf = new int[CHAR_LAYER0];
@@ -198,7 +241,7 @@ public final class Blocks {
             FACES[CHARRED_PLANKS + i] = twin;
         }
         // two-faced blocks: the outside's top and side, the inside's side as the inner face (the mesher's bottom layer)
-        for (int id = DUAL0; id < DUAL0 + DUAL_PAIRS.length * 4; id++) FACES[id] = new int[]{FACES[outerOf(id)][0], FACES[outerOf(id)][1], FACES[innerOf(id)][1]};
+        for (int id = 0; id < COUNT; id++) if (dual(id)) FACES[id] = new int[]{FACES[outerOf(id)][0], FACES[outerOf(id)][1], FACES[innerOf(id)][1]};
         if (next != LAYERS) throw new IllegalStateException("charred layers: " + (next - CHAR_LAYER0) + ", LAYERS expects " + (LAYERS - CHAR_LAYER0));
     }
     private static void f(int id, int top, int side, int bottom) { FACES[id] = new int[]{top, side, bottom}; }
@@ -437,13 +480,20 @@ public final class Blocks {
                 {L_CLAY, 0.7f, 0f}, {L_MUD, 0.45f, 0f}, {L_SANDSTONE_TOP, 0.9f, 0f}, {L_SANDSTONE, 0.92f, 0f}, {L_RED_SANDSTONE_TOP, 0.9f, 0f}, {L_RED_SANDSTONE, 0.92f, 0f},
                 {L_WHITE_GLASS, 0.06f, 0f}, {L_BLUE_GLASS, 0.06f, 0f},
                 {L_WHITE_CARPET, 0.98f, 0f}, {L_BLACK_CARPET, 0.98f, 0f}, {L_BROWN_CARPET, 0.98f, 0f}, {L_RED_CARPET, 0.98f, 0f}, {L_HAY_TOP, 0.95f, 0f}, {L_HAY_SIDE, 0.95f, 0f}, {L_HEDGE, 0.66f, 0f},
-                {L_IRON_BLOCK, 0.34f, 1f}, {L_GOLD_BLOCK, 0.26f, 1f}, {L_COPPER_BLOCK, 0.36f, 1f}, {L_COAL_BLOCK, 0.55f, 0f}};
+                {L_IRON_BLOCK, 0.34f, 1f}, {L_GOLD_BLOCK, 0.26f, 1f}, {L_COPPER_BLOCK, 0.36f, 1f}, {L_COAL_BLOCK, 0.55f, 0f},
+                // 0.3.8: paper is dull, panelling and parquet waxed, polished marble tiles near a mirror, slate a little
+                // glossy, thatch and gravel dry, glass smooth, brass bright metal
+                {L_PAPER_GREEN, 0.88f, 0f}, {L_PAPER_RED, 0.88f, 0f}, {L_PAPER_BLUE, 0.88f, 0f}, {L_WAINSCOT, 0.42f, 0f}, {L_PARQUET, 0.36f, 0f},
+                {L_DARK_PLANKS, 0.5f, 0f}, {L_CHECKER, 0.18f, 0f}, {L_FLAGSTONE, 0.8f, 0f}, {L_SLATE, 0.5f, 0f}, {L_TIMBER, 0.86f, 0f},
+                {L_MOSSY, 0.88f, 0f}, {L_TERRACOTTA, 0.7f, 0f}, {L_VELVET, 0.97f, 0f}, {L_THATCH, 0.97f, 0f}, {L_THATCH_TOP, 0.97f, 0f},
+                {L_BASALT, 0.6f, 0f}, {L_BASALT_TOP, 0.55f, 0f}, {L_STAINED, 0.06f, 0f}, {L_GRAVEL, 0.93f, 0f}, {L_BRASS, 0.24f, 1f}};
         for (Object[] t : table) { int l = (Integer) t[0]; m[l * 4] = (byte) rough((Float) t[1]); m[l * 4 + 1] = (byte) clamp((Float) t[2] * 255); }
         for (int l = CHAR_LAYER0; l < LAYERS; l++) m[l * 4] = (byte) rough(0.97f);   // char is dry and dull
         m[L_LAMP * 4 + 2] = (byte) 255;
         m[L_FURNACE * 4 + 2] = (byte) 120;
         for (int l = 0; l < LAYERS; l++) m[l * 4 + 3] = (byte) rough((m[l * 4] & 255) / 255f * 0.55f);
-        for (int l : new int[]{L_GRASS, L_GRASS_SIDE, L_DIRT, L_SAND, L_BARE, L_LEAVES, L_OAK_LEAVES, L_WILLOW_LEAVES, L_HEDGE, L_HAY_TOP, L_HAY_SIDE, L_WHITE_CARPET, L_BLACK_CARPET, L_BROWN_CARPET, L_RED_CARPET}) m[l * 4 + 3] = (byte) rough(0.8f);
+        for (int l : new int[]{L_GRASS, L_GRASS_SIDE, L_DIRT, L_SAND, L_BARE, L_LEAVES, L_OAK_LEAVES, L_WILLOW_LEAVES, L_HEDGE, L_HAY_TOP, L_HAY_SIDE, L_WHITE_CARPET, L_BLACK_CARPET, L_BROWN_CARPET, L_RED_CARPET,
+                L_VELVET, L_THATCH, L_THATCH_TOP, L_GRAVEL, L_PAPER_GREEN, L_PAPER_RED, L_PAPER_BLUE}) m[l * 4 + 3] = (byte) rough(0.8f);
         return m;
     }
 

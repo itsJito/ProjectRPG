@@ -192,7 +192,12 @@ private:
     gl::GLuint leafTex_ = 0;                // 2.5: the baked leaf cards (64 x 64 x 16, RG: cut, midrib)
     void bakeLeaves();
     Program gWorld_, gModel_, sWorld_, sModel_, lighting_, cull_, gtao_, aoBlur_, ssr_, vol_, fogApply_, fWorld_, fModel_, particle_, taa_,
-            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_;
+            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_, rain_;
+    // (0.3.8) the rain: the height of the highest solid thing in each column of the world (R16F, x by z), kept with the
+    // voxel volume; the rain is drawn only above it
+    gl::GLuint roofTex_ = 0;
+    std::vector<float> roofCol_;
+    void rainPass();
 
     // targets
     int rw_ = 0, rh_ = 0, winW_ = 0, winH_ = 0;

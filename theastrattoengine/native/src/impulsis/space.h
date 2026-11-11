@@ -214,6 +214,8 @@ private:
     float acc_ = 0;
     float step_ = STEP;
     int iterations_ = VELOCITY_ITERATIONS;
+    /** (2.10.1) The joints with a waking end this step (the rest are skipped). */
+    std::vector<int> active_;
     uint64_t contactTotal_ = 0;
 };
 

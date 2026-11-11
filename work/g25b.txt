@@ -1,0 +1,101 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL devmap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 10 2026 20:08:19 (MSVC)
+[Load] native services 0.04s
+[Load] devmap 7.84s
+[Load] renderer and UI 1.90s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.08s
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f21.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f24.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f27.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f30.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f33.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f36.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f39.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-climb-f45.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f21.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f24.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f27.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f30.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f33.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f36.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f39.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-level-f45.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f21.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f24.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f27.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f30.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f33.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f36.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f39.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-bank-f45.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f21.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f24.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f27.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f30.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f33.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f36.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f39.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\peg-dive-f45.png
+[swim] 17.501667,4.0,19.5 afloat false riding 1146
+[swim] 18.935001,4.0,19.5 afloat false riding 1146
+[swim] 22.91422,4.0,19.5 afloat false riding 1146
+[swim] 25.143461,3.0177894,19.5 afloat true riding 1146
+[swim] 26.343489,3.0127132,19.5 afloat true riding 1146
+[swim] 27.543516,3.0045788,19.5 afloat true riding 1146
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\ride-swim.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-00-imperial-palace.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-01-basilica.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-02-market-hall.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-03-baths.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-04-domus-at-134-26.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-05-domus-at-134-42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-06-domus-at-175-26.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-07-domus-at-175-42.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-08-forester-s-lodge.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-09-building-at-86-52.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-10-building-at-108-52.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-11-building-at-86-86.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-12-building-at-100-86.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-13-building-at-16-104.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-14-building-at-30-112.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-15-building-at-44-108.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-16-building-at-66-104.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\int-17-building-at-119-94.png
+[squad] joined 3
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\squad-frames.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\squad-menu.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\squad-wheel.png
+[shot] C:\Users\John\Documents\ProjectRPG\work\p25\seats-inn.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 46s
+8 actionable tasks: 1 executed, 7 up-to-date

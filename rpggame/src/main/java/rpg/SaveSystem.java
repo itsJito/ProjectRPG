@@ -115,7 +115,7 @@ public final class SaveSystem {
         for (WorldObject o : g.objects.everything()) {
             if(o instanceof rpg.world.Foliage.Patch)continue;
             if (o.def.equals("cargo")) continue;   // the economy saves its crates
-            if (o.id >= Ids.DYNAMIC && o.removed) continue;
+            if (!Ids.fixture(o.id) && o.removed) continue;
             Map<String, Object> m = o.save();
             m.put("id", o.id); m.put("def", o.def); m.put("kind", o.getClass().getSimpleName());
             if (o instanceof Container ct) {
@@ -129,6 +129,7 @@ public final class SaveSystem {
         root.put("objects", objs);
         root.put("econ", g.econ.save());
         root.put("repairs", g.repairs.save());
+        root.put("wreckage", g.wreckage.save());
         root.put("animals", g.animals.save());
         root.put("monsters", g.monsters.save(this::actor));
         root.put("dungeons", g.dungeons.save());
@@ -167,6 +168,8 @@ public final class SaveSystem {
         m.put("manaAcc", (double) a.manaAcc);
         m.put("injuries",a.injuries.save()); m.put("charred",a.charred); m.put("eatenMinutes",a.eatenMinutes); m.put("morphT",a.morphT); m.put("chronoT",a.chronoT); m.put("summonOwner",a.summonOwner); m.put("summonLeft",Math.max(0,a.summonUntil-g.time));
         if(a instanceof Npc npc)m.put("spellBook",npc.spellBook.name());
+        // (0.3.9) a companion's bond, order and team kept
+        if (a instanceof Npc c && c.companionOf != 0) { m.put("companionOf", c.companionOf); m.put("order", c.order.name()); m.put("orderX", c.orderX); m.put("orderZ", c.orderZ); m.put("orderTarget", c.orderTarget); m.put("homeTeam", c.homeTeam); }
         if (g.prayers != null) m.put("prayers", g.prayers.save(a));
         return m;
     }
@@ -267,6 +270,9 @@ public final class SaveSystem {
             applyActor(n, m);
             if(m.containsKey("profession")) try { rpg.ai.Profession.valueOf(Json.str(m,"profession","")).assign(n); } catch(IllegalArgumentException invalid) { g.chat.warn("Ignored incompatible saved occupation for "+n.name); }
             g.ai.brain.resetJob(n);
+            n.companionOf = Json.lng(m, "companionOf", 0); n.orderTarget = Json.lng(m, "orderTarget", 0); n.orderX = (float) Json.num(m, "orderX", n.x); n.orderZ = (float) Json.num(m, "orderZ", n.z);
+            try { n.order = rpg.ai.Companions.Order.valueOf(Json.str(m, "order", "FOLLOW")); } catch (IllegalArgumentException bad) { n.order = rpg.ai.Companions.Order.FOLLOW; }
+            if (n.companionOf != 0) { n.homeTeam = Json.integer(m, "homeTeam", n.team); n.team = g.player.team; n.companionSince = g.time + n.id * 1e-6; }
             n.dutyPhase=Json.integer(m,"dutyPhase",0); n.dutyTarget=Json.lng(m,"dutyTarget",0); n.dutyX=(float)Json.num(m,"dutyX",n.postX); n.dutyZ=(float)Json.num(m,"dutyZ",n.postZ); n.dutyUntil=g.time+Json.num(m,"dutyLeft",0);
             if (Json.integer(root, "npcTraversalProfiles", 0) == 0 && n.skills.level(rpg.skill.Skill.AGILITY) == 1) n.skills.setLevel(rpg.skill.Skill.AGILITY, Npc.defaultAgility(n.role));
             n.hunger = (float) Json.num(m, "hunger", 0); n.fatigue = (float) Json.num(m, "fatigue", 0); n.social = (float) Json.num(m, "social", 0);
@@ -296,11 +302,11 @@ public final class SaveSystem {
             }
         }
         // objects: fixtures by id; things made in play recreated
-        g.objects.everything().removeIf(o -> o.id >= Ids.DYNAMIC && !o.def.equals("cargo"));
+        g.objects.everything().removeIf(o -> !Ids.fixture(o.id) && !o.def.equals("cargo"));
         for (Object o : Json.list(root, "objects")) {
             Map<String, Object> m = (Map<String, Object>) o;
             long id = Json.lng(m, "id", 0);
-            if (id < Ids.DYNAMIC) { WorldObject w = g.objects.get(id); if (w != null) w.load(g, m); continue; }
+            if (Ids.fixture(id)) { WorldObject w = g.objects.get(id); if (w != null) w.load(g, m); continue; }
             String kind = Json.str(m, "kind", "");
             float x = (float) Json.num(m, "x", 0), y = (float) Json.num(m, "y", 0), z = (float) Json.num(m, "z", 0);
             switch (kind) {
@@ -336,6 +342,7 @@ public final class SaveSystem {
         var addedResidents=g.ai.restoreMissingRoster(savedNpcIds);
         g.econ.load(Json.obj(root, "econ"));
         g.repairs.load(Json.list(root, "repairs"));
+        g.wreckage.load(Json.obj(root, "wreckage"));
         g.animals.load(Json.obj(root, "animals"));
         g.monsters.load(Json.obj(root, "monsters"), this::applyActor);
         g.dungeons.load(Json.obj(root, "dungeons"));

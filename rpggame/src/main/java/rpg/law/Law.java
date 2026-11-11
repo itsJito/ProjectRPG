@@ -101,6 +101,7 @@ public final class Law {
         }
         borders();
         posses.update();
+        homicide.update();
         if (sentenceUntil >= 0 && g.state.minutes >= sentenceUntil) releasePlayer();
         else if (sentenceUntil >= 0 && g.player.alive) {
             var cell = rpg.world.Jails.forJurisdiction(sentenceJurisdiction);
@@ -230,7 +231,9 @@ public final class Law {
         return memory.pendingReport() && !(memory.eventId == 0 ? reportedLegacy.contains(memory.legacyIncidentKey()) : reportedCrimes.contains(memory.eventId));
     }
 
-    public Law(Rpg g) { this.g = g; this.posses = new Posses(g, this); }
+    /** (0.3.9) The murder cases the watches are working (and those closed or gone cold). */
+    public final Homicide homicide;
+    public Law(Rpg g) { this.g = g; this.posses = new Posses(g, this); this.homicide = new Homicide(g, this); }
     public final Posses posses;
     /** Offenders who have walked up to the watch of a kingdom while wanted there: that watch acts on any bounty. */
     private record Key(long offender, String jurisdiction) {}
@@ -531,20 +534,26 @@ public final class Law {
         else if(m.relays!=0 || m.witness!=0 && m.witness!=witness.id || !witness.memories.stream().anyMatch(owned->owned==m || owned.sameIncident(m) && owned.witnessed()))why="not this person's eyewitness account";
         else if(lawman.role!=Npc.Role.LAWMAN && lawman.role!=Npc.Role.GUARD)why="not an officer";
         else if (!lawman.alive || !witness.alive) why = "someone is dead";
-        else if (!lawman.homeJurisdiction.equals(m.jurisdiction)) why = lawman.name + " has no authority in " + m.jurisdiction;
+        // (0.3.9, gamefixes: a crime out in the wilds is carried into town) the wilds have no watch of their own: what is
+        // done there is the business of whichever town's lawman it is brought to
+        else if (!lawman.homeJurisdiction.equals(m.jurisdiction) && g.ai.lawmanFor(m.jurisdiction) != null) why = lawman.name + " has no authority in " + m.jurisdiction;
         else if (witness.distTo(lawman) > 2.8f || !g.vox.sight(witness.x,witness.eyeY(),witness.z,lawman.x,lawman.eyeY(),lawman.z)) why = "cannot speak to the officer here";
         if (why != null) { rejectedReports++; return Result.no(why); }
+        String jur = lawman.homeJurisdiction.equals(m.jurisdiction) ? m.jurisdiction : lawman.homeJurisdiction;
         if (m.subject == 0) {
             // found, not seen done: no one to put a bounty on - the force goes to search where it was found
             m.reported = true;
             reports++;
             var found = g.gore == null ? null : g.gore.evidence.stream().filter(e -> e.id == m.eventId).findFirst().orElse(null);
             float fx = found != null ? found.x : witness.x, fz = found != null ? found.z : witness.z;
-            for (Npc n : g.npcs) if (n.alive && n.loaded && n.role == Npc.Role.GUARD && n.homeJurisdiction.equals(m.jurisdiction) && n.hunt == null) {
+            // (0.3.9, gamefixes: homicide investigations) a body is a case: one officer is put on it to work it through
+            // (the scene, the body, the neighbours); the rest of the watch searches round where it was found
+            Homicide.Case murder = m.kind.equals("MURDER") && m.victim != 0 ? homicide.open(m.victim, jur, fx, fz, witness.name + " " + m.detail.replaceFirst("^found", "found") + " and reported it to " + lawman.name + ".") : null;
+            for (Npc n : g.npcs) if (n.alive && n.loaded && n.role == Npc.Role.GUARD && n.homeJurisdiction.equals(jur) && n.hunt == null && (murder == null || murder.detective != n.id)) {
                 rpg.ai.Hunt h = new rpg.ai.Hunt(0, witness.name + " reported " + m.detail, fx, fz, g.time, 60);
                 n.hunt = h; n.nextThink = 0;
             }
-            g.state.commit("EvidenceReported", witness.id, 0, m.jurisdiction, m.eventId, m.detail + " reported to " + lawman.name);
+            g.state.commit("EvidenceReported", witness.id, 0, jur, m.eventId, m.detail + " reported to " + lawman.name);
             g.ai.say(witness, m.detail.contains("body") ? "I found a dead body. Please send someone." : "I found " + m.detail.replaceFirst("^found ", "") + ". Please send someone.");
             g.ai.say(lawman, "I'll send the guards.");
             return Result.ok();
@@ -556,13 +565,15 @@ public final class Law {
         }
         int add = charge(m);
         if (m.subject == g.player.id && g.honor != null && g.honor.high()) add = Math.max(1, add / 2);
-        int before = bounty(m.subject, m.jurisdiction);
+        int before = bounty(m.subject, jur);
         int after = before + add;
-        bounties.computeIfAbsent(m.jurisdiction, k -> new HashMap<>()).put(m.subject, after);
+        bounties.computeIfAbsent(jur, k -> new HashMap<>()).put(m.subject, after);
         m.reported = true;
         reports++;
-        var ev = g.state.commit("CrimeReported", witness.id, m.subject, m.jurisdiction, m.eventId, m.kind + " reported to " + lawman.name + "; bounty " + before + " -> " + after);
-        g.state.commit("BountyChanged", lawman.id, m.subject, m.jurisdiction, ev.id(), before + " -> " + after);
+        var ev = g.state.commit("CrimeReported", witness.id, m.subject, jur, m.eventId, m.kind + " reported to " + lawman.name + "; bounty " + before + " -> " + after);
+        g.state.commit("BountyChanged", lawman.id, m.subject, jur, ev.id(), before + " -> " + after);
+        // a named killing on a case already open: the account goes into it
+        if (m.kind.equals("MURDER") && m.victim != 0 && homicide.of(m.victim) != null) homicide.of(m.victim).suspects.merge(m.subject, m.confidence, Float::sum);
         // the lawman's own account, as he would tell it (the record above keeps the numbers)
         boolean own = witness == lawman;
         String line = own ? String.format("%s saw %s's %s himself. That puts the bounty on %s at %d coins", lawman.name, g.nameOf(m.subject), crimeWord(m.kind), g.nameOf(m.subject), after)
@@ -570,11 +581,29 @@ public final class Law {
                 g.nameOf(m.subject), crimeWord(m.kind), g.nameOf(m.subject), after);
         reportsLog.add(line);
         if (m.subject == g.player.id) g.chat.crime("reported " + m.kind, (own ? lawman.name + " saw your " + crimeWord(m.kind) + " himself"
-                : witness.name + " told " + lawman.name + " about your " + crimeWord(m.kind)) + ". Your bounty in " + m.jurisdiction + " is now " + after + " coins.");
+                : witness.name + " told " + lawman.name + " about your " + crimeWord(m.kind)) + ". Your bounty in " + jur + " is now " + after + " coins.");
         g.ai.say(witness, "I saw " + g.nameOf(m.subject) + " - " + m.kind.toLowerCase() + "!");
         // everyone in the jurisdiction's force now knows to look
-        for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD) && n.homeJurisdiction.equals(m.jurisdiction)) n.nextThink = 0;
+        for (Npc n : g.npcs) if ((n.role == Npc.Role.GUARD) && n.homeJurisdiction.equals(jur)) n.nextThink = 0;
         return Result.ok();
+    }
+
+    /**
+     * (0.3.9) A case closed on a name: the bounty for a killing on them in the case's town, as a witness's report would
+     * put it (the town's lawman's word), and the watch told to look for them.
+     */
+    int chargeFromCase(Homicide.Case c) {
+        Actor victim = g.actor(c.victim);
+        int add = victim == null ? 400 : murderCharge(victim);
+        if (c.suspect == g.player.id && g.honor != null && g.honor.high()) add = Math.max(1, add / 2);
+        int before = bounty(c.suspect, c.jurisdiction), after = before + add;
+        bounties.computeIfAbsent(c.jurisdiction, k -> new HashMap<>()).put(c.suspect, after);
+        reports++;
+        g.state.commit("BountyChanged", c.detective, c.suspect, c.jurisdiction, 0, before + " -> " + after + " (the case on " + g.nameOf(c.victim) + "'s killing)");
+        reportsLog.add(String.format("%s worked the killing of %s and named %s. That puts the bounty on %s at %d coins", g.nameOf(c.detective), g.nameOf(c.victim), g.nameOf(c.suspect), g.nameOf(c.suspect), after));
+        if (c.suspect == g.player.id) g.chat.crime("named for MURDER", g.nameOf(c.detective) + " investigated the killing of " + g.nameOf(c.victim) + " and named you. Your bounty in " + c.jurisdiction + " is now " + after + " coins.");
+        for (Npc n : g.npcs) if (n.role == Npc.Role.GUARD && n.homeJurisdiction.equals(c.jurisdiction)) n.nextThink = 0;
+        return after;
     }
 
     public Result payBounty(Actor a, Npc to, long req) {
@@ -969,6 +998,7 @@ public final class Law {
         m.put("_reported", new ArrayList<Object>(reportedCrimes));
         m.put("_legacyReported",new ArrayList<>(reportedLegacy));
         m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions, "bounty", sentenceBounty));
+        m.put("_cases", homicide.save());
         for (var e : bounties.entrySet()) {
             Map<String, Object> j = new HashMap<>();
             for (var b : e.getValue().entrySet()) j.put(String.valueOf(b.getKey()), b.getValue());
@@ -983,8 +1013,9 @@ public final class Law {
         if (m == null) return;
         for(Object key:astratto.util.Json.list(m,"_legacyReported"))reportedLegacy.add(key.toString());
         for(Object entry:astratto.util.Json.list(m,"_defiance"))defiance.add(entry.toString());
+        homicide.load(astratto.util.Json.list(m, "_cases"));
         for (var e : m.entrySet()) {
-            if(e.getKey().equals("_defiance") || e.getKey().equals("_legacyReported"))continue;
+            if(e.getKey().equals("_defiance") || e.getKey().equals("_legacyReported") || e.getKey().equals("_cases"))continue;
             if (e.getKey().equals("_custody")) {
                 Map<String, Object> custody = (Map<String, Object>) e.getValue();
                 sentenceUntil = astratto.util.Json.num(custody, "until", -1);
@@ -1015,7 +1046,7 @@ public final class Law {
         }
     }
 
-    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); fineAsked.clear(); fineAskedAt.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); reportedLegacy.clear(); bounties.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
+    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); fineAsked.clear(); fineAskedAt.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); reportedLegacy.clear(); bounties.clear(); homicide.cases.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
 
     /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
     public static final int FORFEIT_FROM = 25;

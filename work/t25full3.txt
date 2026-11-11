@@ -1,0 +1,13 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava UP-TO-DATE
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test

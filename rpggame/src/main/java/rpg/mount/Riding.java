@@ -60,7 +60,23 @@ public final class Riding {
         public boolean gliding;
         /** (0.3.6) When the brush it is pushing through next rustles. */
         double rustleAt;
+        /** (0.3.9) Afloat (swimming with its rider); when it last splashed. */
+        public boolean afloat;
+        double splashAt;
+        /**
+         * (0.3.9) The climb into the saddle: how far along (0..1, 1 = up), how long it takes, the side it is made from (-1 the
+         * mount's left, +1 its right), the spot beside the saddle it starts from and the ground there; whether an untamed
+         * mount has had its chance to shy yet.
+         */
+        public float mountT = 1, mountDur = 1;
+        /** (0.3.9) How far the rider is turned in the saddle (rad, + to the left). */
+        public float twist;
+        public int side = -1;
+        float sideX, sideZ, groundY;
+        boolean shyChecked;
         Ride(Animal mount, Actor rider, MountController body, double since) { this.mount = mount; this.rider = rider; this.body = body; this.since = since; }
+        /** Still climbing up into the saddle. */
+        public boolean mounting() { return mountT < 1; }
     }
 
     /**
@@ -87,6 +103,13 @@ public final class Riding {
     public static final float SADDLE_SEAT = 0.8f, SADDLE_AHEAD = 0.06f, STIRRUP_OUT = 2.6f, STIRRUP_DROP = 6.2f, STIRRUP_AHEAD = 1f, SEAT_HIP = 1.2f;
     /** A glide's sink (m/s): wings out, a Pegasus comes down about a metre for every four or five it goes. */
     public static final float GLIDE_SINK = 2.1f;
+    /**
+     * (0.3.9, gamefixes: a mount ridden into water sank to the bottom, the fall threw both, and the rider went through the
+     * map) water is swum, not fallen through: a mount in water deeper than this share of its height floats with the water
+     * at that line (its back and its rider above it), paddles at no more than its swimming pace, and walks out where the
+     * bottom rises to meet its hooves. A Pegasus coming down onto water lights on it and swims.
+     */
+    public static final float MOUNT_FLOAT = rpg.Tuning.f("mounts.swimFloat", 0.58f), MOUNT_SWIM_FLOOR = rpg.Tuning.f("mounts.swimPaceFloor", 1.8f);
     /** (0.3.6) Flight: the climb and dive pitch the keys ask for (rad), the full bank (rad), the turn's speed floor and limit (rad/s). */
     public static final float FLY_CLIMB = 0.55f, FLY_DIVE = 0.75f, FLY_BANK = 0.7f, FLY_TURN_FLOOR = 6f, FLY_TURN_MAX = 1.35f;
 
@@ -94,13 +117,14 @@ public final class Riding {
     public final Map<Long, Ride> rides = new HashMap<>();
     public Riding(Rpg g) { this.g = g; }
 
-    public static boolean mountable(Animal a) { return a.alive && !a.baby && (a.species == Species.HORSE || a.species == Species.PEGASUS); }
+    /** (0.3.9) Any grown animal of a riding kind (Species.mount: the horse, the Pegasus, the Dire Wolf). */
+    public static boolean mountable(Animal a) { return a.alive && !a.baby && a.species.mount; }
     public Ride of(Actor rider) { for (Ride r : rides.values()) if (r.rider == rider) return r; return null; }
     public Ride ridden(Animal a) { return rides.get(a.id); }
 
     /** The stats a mount carries (rolled the first time they are asked for, then kept with the animal). */
     public static MountStats stats(Animal a) {
-        if (a.mountStats == null) a.mountStats = a.species == Species.PEGASUS ? MountStats.pegasus(a.id) : MountStats.horse(a.id);
+        if (a.mountStats == null) a.mountStats = switch (a.species) { case PEGASUS -> MountStats.pegasus(a.id); case DIRE_WOLF -> MountStats.direWolf(a.id); default -> MountStats.horse(a.id); };
         return a.mountStats;
     }
     /** Whether this rider has this horse tamed (it was tamed by them, or it is theirs and knows them). */
@@ -118,21 +142,103 @@ public final class Riding {
         body.x = a.x; body.y = a.y; body.z = a.z; body.yaw = a.yaw; body.step = stats(a).step;
         Ride r = new Ride(a, rider, body, g.time);
         r.wildYaw = a.yaw; r.wildUntil = g.time + 0.8;
+        // (0.3.9, gamefixes) up by the stirrup from beside the saddle - its left side if there is room there, else its
+        // right - over a second or so (quicker with Agility, slower with no saddle to climb by)
+        float[] spot = mountSpot(rider, a);
+        if (spot == null) return Result.no("There's no room beside it to climb up.");
+        r.side = (int) spot[3]; r.sideX = spot[0]; r.groundY = spot[1]; r.sideZ = spot[2];
+        r.mountT = 0; r.mountDur = mountTime(rider, a);
         rides.put(a.id, r);
         a.rider = rider.id; rider.riding = a.id;
+        rider.mountPhase = 0; rider.mountNear = r.side < 0 ? 1 : 0;
         rider.cs.cancel(); rider.cs.blocking = false;
         g.interact.cancel(rider, "mounting");
+        g.state.commit("MountingStarted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, String.format("from its %s side, %.2f s", r.side < 0 ? "left" : "right", r.mountDur));
+        if (g.sfx != null) g.sfx.play("cloth", a.x, a.y + 1, a.z, 0.5f);
         if (g.ai != null && a.owner != 0 && a.owner != rider.id && !(a.trustOf(rider.id) > 0.6f)) {
             // someone else's horse taken: that is theft where it is seen
             g.law.crime(rider, "THEFT", a.owner, 0, null, 0);
         }
+        place(r);
+        return Result.ok();
+    }
+
+    /** (0.3.9) The climb's length, s: about 1.3 s, a tenth less for every 25 Agility; under half a second more bareback. */
+    public static float mountTime(Actor rider, Animal a) {
+        float base = rpg.Tuning.f("mounts.mountSeconds", 1.3f);
+        return (base - base * 0.1f * Math.min(99, rider.skills.level(Skill.AGILITY)) / 25f) + (a.saddled ? 0 : rpg.Tuning.f("mounts.barebackExtra", 0.45f));
+    }
+
+    /** (0.3.9) Where to stand to climb up: beside the saddle on the mount's left, else its right ({x, ground, z, side}); null with no room either side. */
+    private float[] mountSpot(Actor rider, Animal a) {
+        float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw);
+        for (int side : new int[]{-1, 1}) {
+            float out = a.radius + 0.42f, x = a.x + rx * side * out, z = a.z + rz * side * out;
+            float y = g.vox.groundY(x, a.y + 1.2f, z);
+            if (!Float.isFinite(y) || Math.abs(y - a.y) > 1.1f) continue;
+            if (g.traversal != null && !g.traversal.free(rider, x, y, z)) continue;
+            return new float[]{x, y, z, side};
+        }
+        return null;
+    }
+
+    /** (0.3.9) Up and settled: the ride proper begins. */
+    private void mounted(Ride r) {
+        Animal a = r.mount; Actor rider = r.rider;
+        r.mountT = 1; rider.mountPhase = 1;
         String state = tamedFor(a, rider) ? a.saddled ? "saddled" : "tame, unsaddled" : "wild";
         g.state.commit("Mounted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, a.kind() + " (" + state + ")");
         if (rider == g.player) {
             if (!tamedFor(a, rider)) g.chat.say("The " + a.kind().toLowerCase() + " has never been ridden. Hold on" + (a.saddled ? " - the saddle helps." : ". A saddle on it first would make this far easier."));
             else if (!a.saddled) g.chat.say("Without a saddle you can't steer it.");
         }
-        return Result.ok();
+    }
+
+    /** (0.3.9) Straight into the saddle with no climb (a review shot's or a test's set-up, a loaded save). */
+    public void seatNow(Actor rider) { Ride r = of(rider); if (r != null && r.mounting()) { r.mountT = 1; place(r); mounted(r); } }
+
+    /**
+     * (0.3.9) The climb cut short - a blow, the rider backing off, the mount shying or bolting: they come back down to
+     * where they started, on their feet (or left to the blow that took them off).
+     */
+    public void abortMount(Ride r, String why) {
+        Animal a = r.mount; Actor rider = r.rider;
+        rides.remove(a.id);
+        a.rider = 0; rider.riding = 0; rider.mountPhase = 1;
+        release(a, 0, 0, 0, accelOf(a));
+        a.nextThink = 0;
+        if (!rider.reacting) {
+            g.teleport(rider, r.sideX, r.groundY, r.sideZ);
+            release(rider, 0, 0, 0, 80);
+        }
+        g.state.commit("MountingAborted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, why);
+        if (rider == g.player) g.chat.add(why.substring(0, 1).toUpperCase() + why.substring(1) + ".", rpg.Chat.Kind.WARN);
+    }
+
+    /** (0.3.9) A moment of the climb: cut short by what interrupts it, else on up; the mount stands for it. */
+    private void climb(Ride r, Controls c, float dt) {
+        Animal a = r.mount; Actor rider = r.rider;
+        if (!a.alive || !rider.alive || a.ragdoll != null) { abortMount(r, "the mount went down"); return; }
+        if (rider.reacting || rider.cs.lastHurt > r.since || rider.cs.staggered > 0) { abortMount(r, "knocked from the stirrup"); return; }
+        if (rider == g.player && (c.throttle() < -0.5f || Math.abs(c.steer()) > 0.5f && r.mountT < 0.5f)) { abortMount(r, "you step back down"); return; }
+        // an untamed one may shy from the weight in the stirrup (less with a saddle on it, and the tamer it is)
+        if (!r.shyChecked && r.mountT > 0.3f) {
+            r.shyChecked = true;
+            if (!tamedFor(a, rider)) {
+                float shy = 0.35f * (1 - a.tame) * (a.saddled ? 0.6f : 1f) * (1 - 0.5f * Math.min(1, a.trustOf(rider.id)));
+                if ((((long) (g.time * 733) + a.id * 13) % 1000) / 1000f < shy) {
+                    abortMount(r, "the " + a.kind().toLowerCase() + " sidesteps and you lose the stirrup");
+                    a.rearing = true; a.goalSince = g.time; a.fear = Math.min(1, a.fear + 0.25f);
+                    return;
+                }
+            }
+        }
+        float was = r.mountT;
+        r.mountT = Math.min(1, r.mountT + dt / r.mountDur);
+        if (was < 0.55f && r.mountT >= 0.55f && g.sfx != null) g.sfx.play("cloth", a.x, a.y + 1.2f, a.z, 0.55f, 0.85f, 12);
+        r.speed = 0;
+        place(r);
+        if (r.mountT >= 1) mounted(r);
     }
 
     /**
@@ -284,18 +390,39 @@ public final class Riding {
         g.state.commit("Dismounted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, thrown ? "thrown" : "stepped down");
     }
 
+    /**
+     * (0.3.9) A person in the saddle rides toward where their errand takes them (Actor.rideTo; NaN: stand), reining round
+     * to it, at a canter (a gallop when it is far and the mount has the wind for it), slowing to a walk to come in.
+     */
+    public Controls npcControls(Ride r) {
+        Actor a = r.rider;
+        if (!Float.isFinite(a.rideToX)) return new Controls(0, 0, false, false, false, false);
+        float dx = a.rideToX - r.mount.x, dz = a.rideToZ - r.mount.z, d = (float) Math.hypot(dx, dz);
+        if (d < 1.2f) return new Controls(0, 0, false, false, false, false);
+        float want = (float) Math.atan2(-dx, -dz), off = Actor.wrap(want - r.body.yaw);
+        float steer = Math.max(-1, Math.min(1, -off * 2.2f));
+        float throttle = Math.abs(off) > 1.6f ? 0.3f : 1;
+        return new Controls(throttle, steer, d > 25 && r.mount.stamina > 20, d < 6, false, false);
+    }
+
     /** The player's keys as a mount's controls. */
     public Controls playerControls() {
         var in = g.controller.in;
         return new Controls(in.forward, in.strafe, in.sprint, in.sneak, in.jumpHeld, in.interact);
     }
 
+    /** (0.3.9) The tick the rides were last moved on (they are moved once a tick, whoever asks first: the player's controls or the world). */
+    private long movedOn = -1;
+
     public void update(float dt) {
-        if (rides.isEmpty() || dt <= 0) return;
+        if (rides.isEmpty() || dt <= 0 || g.state.tick == movedOn) return;
+        movedOn = g.state.tick;
+        lastDt = dt;
         for (Ride r : new java.util.ArrayList<>(rides.values())) {
             Animal a = r.mount; Actor rider = r.rider;
+            Controls c = rider == g.player ? playerControls() : npcControls(r);
+            if (r.mounting()) { climb(r, c, dt); continue; }
             if (!a.alive || !rider.alive || !a.loaded || rider.reacting || a.ragdoll != null) { dismount(rider, false); continue; }
-            Controls c = rider == g.player ? playerControls() : new Controls(0, 0, false, false, false, false);
             if (c.dismount() && !r.flying) { dismount(rider, false); continue; }
             MountStats st = stats(a);
             boolean tamed = tamedFor(a, rider), steerable = tamed && a.saddled;
@@ -338,7 +465,7 @@ public final class Riding {
                 else if (c.throttle() < -0.2f) want = Math.abs(r.speed) < 0.4f || r.speed < 0 ? -st.walk * 0.8f : 0;
                 if (gallop && c.throttle() > 0.2f && r.speed > st.canter) { a.stamina = Math.max(0, a.stamina - 6 * dt); a.cs.regenDelay = 0.8f; }
                 // the jump: charge over ten ticks to a peak, sagging toward 80% held longer; released, it goes
-                if (c.jumpHeld()) {
+                if (c.jumpHeld() && !r.afloat) {
                     r.chargeTicks += dt * 60;
                     r.charge = r.chargeTicks <= CHARGE_PEAK_TICKS ? r.chargeTicks / CHARGE_PEAK_TICKS : CHARGE_FLOOR + (1 - CHARGE_FLOOR) * (float) Math.exp(-(r.chargeTicks - CHARGE_PEAK_TICKS) / 12f);
                 } else if (r.jumpWas) {
@@ -364,6 +491,76 @@ public final class Riding {
             }
             place(r);
         }
+    }
+
+    /** (0.3.9) The furthest a rider turns in the saddle to fight or aim (rad); either side, or over the shoulder no further. */
+    public static final float TWIST_MAX = 1.25f;
+    private float lastDt = 1f / 60;
+    private float dt() { return lastDt; }
+
+    /** (0.3.9) Whether the rider's hands are at work (a swing, a draw, a raised guard, an aim, a spell): then they turn to it. */
+    static boolean fighting(Actor a) {
+        var c = a.cs;
+        return c.phase != Actor.Combat.Phase.IDLE || c.draw > 0 || c.aim > 0 || c.charge > 0 || c.blocking || a instanceof rpg.ai.Npc n && n.fightTarget != 0 && !a.sheathed;
+    }
+    /** (0.3.9) Where the rider means to strike or shoot: the player's aim; a person's foe. */
+    private float aimOf(Actor a) {
+        if (a == g.player) return a.aimYaw;
+        Actor t = a instanceof rpg.ai.Npc n && n.fightTarget != 0 ? g.actor(n.fightTarget) : null;
+        return t == null ? a.yaw : (float) Math.atan2(-(t.x - a.x), -(t.z - a.z));
+    }
+
+    /** (0.3.9) The irons in the world (the feet stay in them however the rider turns in the saddle): right foot, then left. */
+    private void stirrups(Ride r, float seatX, float seatY, float seatZ, float rpx) {
+        Animal a = r.mount; Actor rider = r.rider;
+        float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), bx = (float) Math.sin(a.yaw), bz = (float) Math.cos(a.yaw);
+        float sx = rider.stirrupX * rpx, sy = rider.stirrupY * rpx, sz = rider.stirrupZ * rpx;
+        rider.mountFeet[0] = seatX + rx * sx + bx * sz; rider.mountFeet[1] = seatY + sy; rider.mountFeet[2] = seatZ + rz * sx + bz * sz;
+        rider.mountFeet[3] = seatX - rx * sx + bx * sz; rider.mountFeet[4] = seatY + sy; rider.mountFeet[5] = seatZ - rz * sx + bz * sz;
+    }
+
+    private static float smooth(float t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+
+    /**
+     * (0.3.9, gamefixes: mounting) the climb, as the body and limbs follow it. From beside the saddle, facing the mount's
+     * flank: the near foot up into its stirrup (0 - 0.2), a push up off it with both hands on the pommel (0.12 - 0.55),
+     * the far leg swung high over the croup (0.5 - 0.9) as the body turns to face ahead and settles into the seat (to 1).
+     * The seat (x, y, z) is where the rider's body sits when up; the far stirrup and the near are this mount's own.
+     */
+    private void climbPose(Ride r, float seatX, float seatY, float seatZ, float rpx) {
+        Animal a = r.mount; Actor rider = r.rider;
+        float t = r.mountT;
+        float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), bx = (float) Math.sin(a.yaw), bz = (float) Math.cos(a.yaw);
+        float lateral = smooth((t - 0.2f) / 0.55f), rise = smooth((t - 0.16f) / 0.5f), settle = smooth((t - 0.55f) / 0.4f);
+        float over = 0.07f * rise * (1 - settle);   // a little above the seat at the top of the push, then down into it
+        rider.x = r.sideX + (seatX - r.sideX) * lateral;
+        rider.z = r.sideZ + (seatZ - r.sideZ) * lateral;
+        rider.y = r.groundY + (seatY - r.groundY) * rise + over;
+        rider.yaw = a.yaw + r.side * (float) (Math.PI / 2) * (1 - smooth((t - 0.45f) / 0.4f));
+        // the stirrups in the world (the seated figure's numbers, from the seat)
+        float sxN = r.side * rider.stirrupX * rpx, sy = rider.stirrupY * rpx, sz = rider.stirrupZ * rpx;
+        float[] near = {seatX + rx * sxN + bx * sz, seatY + sy, seatZ + rz * sxN + bz * sz};
+        float[] far = {seatX - rx * sxN + bx * sz, seatY + sy, seatZ - rz * sxN + bz * sz};
+        // the near foot: from the ground beside it, lifted up into the iron
+        float[] nearGround = {r.sideX + rx * r.side * 0.08f - bx * 0.12f, r.groundY, r.sideZ + rz * r.side * 0.08f - bz * 0.12f};
+        float up = smooth(t / 0.2f), lift = (float) Math.sin(Math.PI * Math.min(1, t / 0.2f)) * 0.12f;
+        float[] nf = {nearGround[0] + (near[0] - nearGround[0]) * up, nearGround[1] + (near[1] - nearGround[1]) * up + lift, nearGround[2] + (near[2] - nearGround[2]) * up};
+        // the far foot: on the ground, then the push off it, then swung high over the croup and down into its iron
+        float[] farGround = {r.sideX + rx * r.side * 0.3f + bx * 0.08f, r.groundY, r.sideZ + rz * r.side * 0.3f + bz * 0.08f};
+        float[] push = {rider.x + rx * r.side * 0.25f + bx * 0.25f, rider.y + 0.25f, rider.z + rz * r.side * 0.25f + bz * 0.25f};
+        float[] ff;
+        if (t < 0.3f) ff = farGround;
+        else if (t < 0.5f) { float k = smooth((t - 0.3f) / 0.2f); ff = new float[]{farGround[0] + (push[0] - farGround[0]) * k, farGround[1] + (push[1] - farGround[1]) * k, farGround[2] + (push[2] - farGround[2]) * k}; }
+        else {
+            float k = smooth((t - 0.5f) / 0.4f), arc = (float) Math.sin(Math.PI * k);
+            ff = new float[]{push[0] + (far[0] - push[0]) * k + bx * arc * 0.45f, push[1] + (far[1] - push[1]) * k + arc * 0.7f, push[2] + (far[2] - push[2]) * k + bz * arc * 0.45f};
+        }
+        int nearK = rider.mountNear, farK = 1 - nearK;
+        System.arraycopy(nf, 0, rider.mountFeet, nearK * 3, 3);
+        System.arraycopy(ff, 0, rider.mountFeet, farK * 3, 3);
+        // the hands on the pommel (the front of the seat) while climbing
+        rider.mountHands[0] = seatX - bx * 0.28f; rider.mountHands[1] = seatY + (rpg.actor.Body.LEGS - SEAT_HIP) * rpx + 0.32f; rider.mountHands[2] = seatZ - bz * 0.28f;
+        rider.mountPhase = t;
     }
 
     /** (0.3.6) Shouldering through brush: the pace eased down by how much of it there is, and the leaves rustle. */
@@ -417,6 +614,17 @@ public final class Riding {
         // (0.3.3, gamefixes: Pegasi should glide) a Pegasus off the ground with the jump key held spreads its wings and
         // glides: its fall is held to a slow sink, it keeps its way (bleeding toward a canter's pace) and the reins
         // still turn it. Let go, it folds them and drops. A glide is not a fall: nothing is paid for it on landing.
+        // (0.3.9) in deep water it swims: buoyed at its float line, at its swimming pace, never falling
+        float surface = waterSurface(r.body);
+        float floatY = surface - r.body.height * MOUNT_FLOAT;
+        float bottom = Float.isFinite(surface) ? r.body.ground(g.vox, r.body.x, surface, r.body.z, r.body.yaw) : Float.NEGATIVE_INFINITY;
+        boolean afloat = Float.isFinite(surface) && floatY > bottom + 0.05f && r.body.y <= floatY + 0.6f;
+        if (afloat != r.afloat) {
+            r.afloat = afloat;
+            g.state.commit(afloat ? "MountSwam" : "MountWadedOut", r.rider.id, r.mount.id, DevMap.jurisdiction(r.mount.x, r.mount.z), 0, String.format("at %.1f m/s", r.speed));
+            if (afloat) splash(r, Math.max(0.5f, Math.min(1, Math.abs(r.body.vy) * 0.15f + 0.4f)));
+        }
+        if (afloat) { swim(r, st, wantYaw, want, dt, floatY); return; }
         boolean glide = st.flies && !r.body.grounded && c.jumpHeld() && r.body.vy < 0.5f && tamedFor(r.mount, r.rider);
         if (glide && !r.gliding) g.state.commit("MountGlided", r.rider.id, r.mount.id, DevMap.jurisdiction(r.mount.x, r.mount.z), 0, String.format("from %.1f m/s", r.speed));
         r.gliding = glide;
@@ -443,6 +651,52 @@ public final class Riding {
         if (st.flies) a.vigor = Math.min(st.vigor, a.vigor + 10 * dt);
     }
 
+    /** (0.3.9) The top of the water the body's middle is in (the highest water cell's top over it), or NaN out of water. */
+    float waterSurface(MountController b) {
+        int bx = (int) Math.floor(b.x), bz = (int) Math.floor(b.z);
+        int lo = (int) Math.floor(b.y + 0.05f), hi = (int) Math.floor(b.y + b.height);
+        int wet = Integer.MIN_VALUE;
+        for (int y = lo; y <= hi; y++) if (g.vox.block(bx, y, bz) == rpg.world.Blocks.WATER) { wet = y; break; }
+        if (wet == Integer.MIN_VALUE) return Float.NaN;
+        int top = wet;
+        while (top < DevMap.SY - 1 && g.vox.block(bx, top + 1, bz) == rpg.world.Blocks.WATER) top++;
+        return top + 1;
+    }
+
+    /**
+     * (0.3.9) Swimming with its rider: the reins and the throttle still steer and drive it, at its swimming pace; it rides
+     * at its float line, rising or settling to it smoothly (a plunge in takes it under for a moment and it bobs up); the
+     * bank or a rising bottom is walked up onto as any step is.
+     */
+    private void swim(Ride r, MountStats st, float wantYaw, float want, float dt, float floatY) {
+        Animal a = r.mount;
+        float pace = Math.max(MOUNT_SWIM_FLOOR, a.species.swim), cap = Math.min(Math.abs(want), pace) * Math.signum(want);
+        r.gliding = false; r.chargeTicks = 0; r.charge = 0;
+        r.speed += Math.max(-3f * dt, Math.min(1.6f * dt, cap - r.speed));
+        if (Math.abs(r.speed) > pace) r.speed = Math.signum(r.speed) * pace;
+        float fx = (float) -Math.sin(r.body.yaw), fz = (float) -Math.cos(r.body.yaw);
+        float gravity = r.body.gravity;
+        r.body.gravity = 0; r.body.vy = 0; r.body.grounded = true;
+        r.body.move(g.vox, fx * r.speed * dt, fz * r.speed * dt, wantYaw, dt);
+        r.body.gravity = gravity;
+        if (r.body.blocked) r.speed *= 0.5f;
+        // buoyancy: to the float line (not above the water, never into the bottom)
+        float floor = r.body.ground(g.vox, r.body.x, Math.max(r.body.y, floatY) + 0.5f, r.body.z, r.body.yaw);
+        float target = Math.max(floatY + 0.04f * (float) Math.sin(g.time * 2.2 + a.id), Float.isFinite(floor) ? floor : floatY);
+        float ny = r.body.y + (target - r.body.y) * Math.min(1, dt * 3.5f);
+        if (r.body.fits(g.vox, r.body.x, ny, r.body.z, r.body.yaw)) r.body.y = ny;
+        r.body.vy = 0; r.body.grounded = false;
+        r.fallTop = r.body.y;     // water is no fall: nothing is paid for coming out of it
+        r.flying = false; r.bank += (0 - r.bank) * Math.min(1, dt * 3);
+        a.stamina = Math.max(0, a.stamina - (Math.abs(r.speed) > 0.3f ? 1.2f : 0) * dt);
+        if (Math.abs(r.speed) > 0.4f && g.time >= r.splashAt) splash(r, 0.25f + Math.abs(r.speed) * 0.08f);
+    }
+
+    private void splash(Ride r, float gain) {
+        r.splashAt = g.time + 0.55;
+        if (g.sfx != null) g.sfx.play("splash", r.mount.x, r.mount.y + r.mount.height * 0.5f, r.mount.z, gain);
+    }
+
     /**
      * Flight: momentum. Pitched down it gathers speed as it falls; pitched up it climbs and pays for it in speed; level
      * it glides, slowly losing both. The strafe keys bank it, and the bank turns it - tighter when slow. The jump key
@@ -462,7 +716,7 @@ public final class Riding {
         r.bank += Math.max(-bankRate * dt, Math.min(bankRate * dt, wantBank - r.bank));
         // the surge: a wingbeat on the press of the jump key
         if (c.jumpHeld() && !r.jumpWas && a.vigor >= SURGE_COST) {
-            a.vigor -= SURGE_COST; r.airspeed += SURGE_PUSH; r.body.vy = Math.max(r.body.vy, 0) + 2.5f;
+            a.vigor -= SURGE_COST; r.airspeed += SURGE_PUSH; r.body.vy = Math.max(r.body.vy, 0) + 2.5f; a.surgeAt = g.time;
             g.state.commit("MountSurged", r.rider.id, a.id, null, 0, String.format("vigor %.0f", a.vigor));
         }
         // energy: gravity along the flight path, drag growing with the square of speed
@@ -479,6 +733,9 @@ public final class Riding {
         float fx = (float) -Math.sin(newYaw), fz = (float) -Math.cos(newYaw);
         float nx = r.body.x + fx * horiz * dt, ny = r.body.y + vert * dt, nz = r.body.z + fz * horiz * dt;
         float floor = r.body.ground(g.vox, nx, Math.max(ny, r.body.y) + 0.5f, nz, newYaw);
+        // (0.3.9) water under it is met at its float line: it lights on the water and swims
+        float wet = waterSurface(r.body);
+        if (Float.isFinite(wet)) floor = Math.max(floor, wet - r.body.height * MOUNT_FLOAT);
         if (ny > DevMap.SY - 6) ny = DevMap.SY - 6;
         if (ny <= floor + 0.05f) {
             // the ground: a landing - soft enough, it gallops on; too fast and steep, a hard landing that checks it
@@ -515,6 +772,9 @@ public final class Riding {
         float fx = (float) -Math.sin(b.yaw), fz = (float) -Math.cos(b.yaw);
         a.x = b.x; a.y = b.y; a.z = b.z; a.yaw = b.yaw;
         a.vx = fx * r.speed; a.vz = fz * r.speed; a.grounded = b.grounded;
+        a.swimMode = r.afloat ? rpg.actor.Swimming.SWIM : rpg.actor.Swimming.NONE;
+        a.flightSpeed = r.flying ? r.airspeed : r.gliding ? Math.abs(r.speed) : 0;
+        if (a.flying || r.flying || r.gliding) { float gy = g.vox.groundY(a.x, a.y + 0.2f, a.z); a.flightHeight = Float.isFinite(gy) ? a.y - gy : 99; } else a.flightHeight = 0;
         a.flying = r.flying || r.gliding; a.flightPitch = r.flying ? r.pitch : r.gliding ? -0.12f : 0;
         a.flightBank = r.flying ? r.bank : r.gliding ? r.bank * 0.9f + (float) Math.max(-0.5, Math.min(0.5, Actor.wrap(r.body.yaw - a.yaw) * 6)) * 0.1f : 0;
         a.wantYaw = Float.NaN;
@@ -531,7 +791,17 @@ public final class Riding {
         rider.stirrupX = (fig.bw / 2f + STIRRUP_OUT) * vs / rpx;
         rider.stirrupY = (top - STIRRUP_DROP * vs - (seat - (rpg.actor.Body.LEGS - SEAT_HIP) * rpx)) / rpx;
         rider.stirrupZ = -STIRRUP_AHEAD * vs / rpx;
-        rider.yaw = a.yaw; rider.vx = 0; rider.vz = 0; rider.grounded = false;
+        if (r.mounting()) climbPose(r, rider.x, rideY, rider.z, rpx);
+        else {
+            // (0.3.9, gamefixes: attacking from the saddle) the rider turns in the saddle toward what they fight or aim at -
+            // the shoulders, so the swing, the shot and the spell go that way - while the feet stay in the irons
+            float want = 0;
+            if (fighting(rider)) want = Math.max(-TWIST_MAX, Math.min(TWIST_MAX, Actor.wrap(aimOf(rider) - a.yaw)));
+            r.twist += (want - r.twist) * Math.min(1, dt() * 8);
+            rider.yaw = a.yaw + r.twist;
+            stirrups(r, rider.x, rideY, rider.z, rpx);
+        }
+        rider.vx = 0; rider.vz = 0; rider.grounded = false;
         rider.rideSpeed = r.flying ? r.airspeed : Math.abs(r.speed); rider.rideGait = a.gait;
         if (rider.body != 0) { g.game.commands().moverPlace(rider.body, rider.x, rider.y, rider.z, 0, 0, 0); g.game.commands().moverInput(rider.body, 0, 0, 0, 0, 80, MOVER_POSED); }
     }

@@ -160,7 +160,7 @@ class Gamefixes036Test {
         a.tamedBy = g.player.id; a.owner = g.player.id; a.saddled = true; a.yaw = yaw;
         g.teleport(g.player, x + 1.5f, DevMap.FLOOR, z);
         ticks(5);
-        assertTrue(g.riding.mount(g.player, a).committed());
+        assertTrue(g.riding.mount(g.player, a).committed()); g.riding.seatNow(g.player);
         return g.riding.of(g.player);
     }
 

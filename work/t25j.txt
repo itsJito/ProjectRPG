@@ -1,0 +1,214 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 107th build in daemon [uptime: 13 hrs 6 mins 9.657 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#5846,included builds Thread 2,5,main]) started.
+:processResources (Thread[#5846,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#5847,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#5845,included builds,5,main]) started.
+:theastrattoengine:compileJava (Thread[#5847,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#5847,Execution worker,5,main]) started.
+:theastrattoengine:buildNative (Thread[#5847,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#5847,Execution worker,5,main]) started.
+:theastrattoengine:engineResources (Thread[#5847,Execution worker,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#5850,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#5847,Execution worker,5,main]) started.
+:theastrattoengine:processResources (Thread[#5847,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#5847,Execution worker,5,main]) started.
+:theastrattoengine:classes (Thread[#5847,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#5847,Execution worker,5,main]) started.
+:theastrattoengine:jar (Thread[#5847,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#5847,Execution worker,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#5848,Execution worker Thread 2,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:compileJava (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\Rpg.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.002 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Starting process 'Gradle Worker Daemon 102'. Working directory: C:\Users\John\.gradle\workers Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath7275362594805900760txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 102'
+Successfully started process 'Gradle Worker Daemon 102'
+Started Gradle worker daemon (1.34 secs) with fork options DaemonForkOptions{executable=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileJava
+Compiling with JDK Java compiler API.
+Incremental compilation of 463 classes completed in 20.664 secs.
+Class dependency analysis for incremental compilation took 0.223 secs.
+Resolve mutations for :classes (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:classes (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:compileTestJava (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\ZzDiagTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.001 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 1 classes completed in 0.576 secs.
+Class dependency analysis for incremental compilation took 0.013 secs.
+Resolve mutations for :processTestResources (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:processTestResources (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:testClasses (Thread[#5848,Execution worker Thread 2,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#5848,Execution worker Thread 2,5,main]) started.
+:test (Thread[#5848,Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 103 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Input property 'candidateClassFiles' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\test\rpg\ai\ZzDiagTest.class has changed.
+  Input property 'stableClasspath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\test\rpg\ai\ZzDiagTest.class has changed.
+  Input property 'stableClasspath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\Rpg.class has changed.
+Starting process 'Gradle Test Executor 103'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath5893674059876070566txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 103'
+Successfully started process 'Gradle Test Executor 103'
+
+ZzDiagTest > around() STANDARD_OUT
+    [diag] t 0.0 RETURN  at 124.20,4.05,57.30 goal 142.5,62.5 legs 1@0 act -
+    [diag] t 1.0 RETURN  at 124.38,4.00,58.66 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 2.0 RETURN  at 123.97,4.00,60.85 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 3.0 RETURN  at 122.69,4.00,61.71 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 4.0 RETURN  at 121.99,4.00,63.59 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 5.0 RETURN  at 121.03,4.00,64.53 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 6.0 RETURN  at 121.01,4.00,64.53 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 7.0 RETURN  at 120.62,4.00,66.10 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 8.0 RETURN  at 120.53,4.00,68.55 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 9.0 RETURN  at 121.80,4.00,69.66 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 10.0 RETURN  at 124.16,4.00,70.35 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 11.0 RETURN  at 126.51,4.00,71.04 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 12.0 RETURN  at 128.86,4.00,71.73 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 13.0 RETURN  at 130.70,4.00,72.28 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 14.0 RETURN  at 132.80,4.00,72.39 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 15.0 RETURN  at 135.12,4.00,72.38 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 16.0 RETURN  at 137.40,4.00,71.85 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 17.0 RETURN  at 139.64,4.00,70.87 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 18.0 RETURN  at 140.58,4.00,69.49 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 19.0 RETURN  at 141.22,4.00,67.30 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 20.0 RETURN  at 141.74,4.00,65.61 goal 142.5,62.5 legs 1@0 act go to goal
+    [diag] t 21.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 22.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 23.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 24.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 25.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 26.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 27.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 28.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 29.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 30.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 31.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 32.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 33.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 34.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 35.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 36.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+    [diag] t 37.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-6.9, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+    [diag] t 38.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+    [diag] t 39.0 RETURN  at 142.10,4.00,64.16 goal 142.5,62.5 legs null act hold/face
+          [stuck] Sir Gawain FIGHT at (1.30, 4.00, 30.50) -> (-7.1, 30.5), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+
+Gradle Test Executor 103 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.01 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 25s
+9 actionable tasks: 3 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

@@ -1,3 +1,109 @@
+# Patch Notes Version Alpha 0.3.9: Ride or Die
+
+Company on the road, a new beast to ride, and a watch that asks questions.
+
+Developer: Hoodie
+
+## New Features
+### NPC's
+- Added the Dire Wolf, an apex predator of the deep southern wood built like a Barbary lion, with a dark mane over its head, shoulders and belly
+- Added companions. A knight who thinks well of you will ride with you, and bandits, brutes and hunters will join you for a fee, up to four at a time
+- Added companion abilities drawn from what each companion is and carries: Power Strike, Taunt, Shield Wall, Volley, Battle Spell and Mend
+- Added homicide investigations. A guard put on a killing goes to the body, reads how the person died, asks the neighbours what they saw, and names the killer or lets the case go cold
+### Gameplay
+- Added the Dire Wolf as a mount. It is broken in like a horse, quicker off the mark and in the turn, with less wind for a long run
+- Added ally frames under your own bars, showing each companion's face, name, health, magic, what they are doing and which abilities are ready
+- Added the Companion key (Left Alt by default). A tap gives your selected companion the order that fits what you are looking at, and holding it slows the world and opens the squad menu
+- Added the squad menu, where you can pick a companion and order them to follow, rally, hold position, move, take cover or attack a marked foe
+- Added the power wheel in the squad menu, which pauses the world while you call on a companion's abilities against the marked foe
+
+## Changes
+### NPC's
+- Changed mounting to a full climb into the saddle instead of a snap. A blow, backing off, or an untamed mount shying away now interrupts it
+- Changed people to ride as well. Companions now mount a spare saddled mount of yours when you ride and get down when you do, and anyone in the saddle rides their errands and fights from it
+- Changed townsfolk out in the wilds to carry word of a crime to the nearest town's lawman
+- Changed the DevMansion's household to eat at home at mealtimes instead of walking to town for bread
+- Changed NPC's to speak in their own voice. Some are warm, some gruff, some nervous, some cheerful and some dry, and a face they know is now greeted by name
+### Gameplay
+- Changed riding so you can now attack, block, shoot, cast and sheathe from the saddle, turning in the saddle toward your aim
+- Changed mounts to swim. A horse, Pegasus or Dire Wolf ridden into deep water now floats with its rider and walks out where the bottom rises
+- Changed the Pegasus's flight to look alive. Its wingbeats follow the work of climbing, slowing and surging, it holds its wings out in a dive, works the outer wing harder in a bank, and flares to land
+- Changed every room on the devmap to be furnished for what it is, with wardrobes, bedside tables, shelves, sideboards, clocks, rugs, paintings and chandeliers
+- Changed chairs, stools, settees and benches to be solid. People now step up to a seat and sit down onto it
+- Changed spells that lock on to keep the height you aimed at, so a shot at the head still hits the head
+
+## Technical Changes
+- Changed the physics so shut doors and resting objects no longer cost time every frame
+- Changed route planning to prepare the whole map when a game starts, so fights and chases no longer stall on it
+- Changed several systems to stop copying large lists every frame, which reduces hitches
+- Changed the tuning of companions, mounts, investigations, seating and furnishing to be read from a data file
+
+## Fixed Bugs
+- AE-03901 - Fixed bug where couches, chairs, stools and candelabra could be walked through
+- AE-03902 - Fixed bug where putting a log on the DevMansion's fire crashed the game
+- AE-03903 - Fixed bug where riding into water threw both rider and mount and dropped the rider through the world
+- AE-03904 - Fixed bug where the world froze for seconds after a fire while townsfolk weighed every burnt block
+- AE-03905 - Fixed bug where a spell aimed at the head was pulled down into the body
+- AE-03906 - Fixed bug where fire on some townsfolk was credited to, or burned, a piece of furniture elsewhere
+- AE-03907 - Fixed bug where townsfolk spent their mornings investigating people who were nowhere near them
+- AE-03908 - Fixed bug where loading an earlier save could leave blocks charred by a later fire
+- AE-03909 - Fixed bug where an orc out of axes stood still below someone on a wall instead of throwing stones
+- AE-03910 - Fixed bug where some townsfolk came back from an older save without their equipment
+- AE-03911 - Fixed bug where the Household Baron left his estate to buy bread in DevCity
+- AE-03912 - Fixed bug where townsfolk who sat down at an inn stood frozen in place after getting up
+- AE-03913 - Fixed bug where a shut door could turn in its frame and jam halfway the next time it was opened
+- AE-03914 - Fixed bug where townsfolk could stand all day staring at something half-seen instead of getting back to work
+- AE-03915 - Fixed bug where craftsmen working far out of town spent their shifts walking to the inn and the bank
+
+# Patch Notes Version Alpha 0.3.8: Home Wrecker
+
+A manor in the woods, furniture worth breaking, and rain that finally looks wet.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added eighteen new building materials: green, red and blue damask wallpaper, wood panelling, herringbone parquet, dark planks, a chequered marble floor, flagstones, slate roofing, timber framing, mossy stone, terracotta tiles, velvet carpet, thatch, basalt, stained glass, gravel and brass
+- Added walls that are papered or panelled on the inside and stone or timber framing on the outside, in one block
+### Items
+- Added wooden crates, boxes, barrels and standing signs. They are physical objects that can be pushed, knocked over and thrown about, and they take damage where they are struck until they split apart board by board
+- Added furniture for fine houses: chairs, armchairs, settees, stools, dining tables, writing desks, wardrobes, chests of drawers, bedside tables, sideboards, longcase clocks, kitchen dressers, pantry shelves, wine racks, four-poster beds, bathtubs, washstands, fireplaces, chandeliers, candelabra, rugs, paintings, tapestries, mirrors, weapon trophies, pot racks, suits of armour, potted ferns and marble busts
+### NPC's
+- Added the DevMansion household: the Household Baron, his Household Knight, a Cook, a Porter, a Firewood Cutter and an Orchard Keeper
+- Added the Baron's routine. He works at his desk, looks in on each of his people, pays their wages on the first day of the week and dines at his table
+- Added the Cook, who cooks from what is in the pantry's crates and barrels and serves the Baron his dinner
+- Added the Porter, who carries in what is left at the gate and sets knocked-over crates and barrels back on their feet
+- Added the Firewood Cutter, who fells trees for logs and keeps the house's fires burning
+- Added the Orchard Keeper, who picks the estate's apple trees and leaves the apples at the gate
+### Gameplay
+- Added the DevMansion, a three-storey manor in a walled clearing of the southern wood with fifteen furnished rooms, two staircases, an orchard and a woodpile
+- Added fireplaces that burn wood. Players can lay a fire with logs and keep it going, and it lights the room while it burns
+- Added furniture that breaks. A blow knocks off the part it lands on, and enough damage brings the whole piece down
+- Added skeletons that fall apart into their bones when they die
+
+## Changes
+### NPC's
+- Changed monsters to fight with more sense, though never as well as people. They now read some of your blows in time to guard or step aside, punish a missed swing, follow up with a second strike and use heavy blows against a raised guard
+- Changed goblins and orcs fighting alone or in pairs to close in and fight instead of circling
+- Changed thieves, bandits and brutes to break open crates and barrels of goods when nobody is watching and take what spills out
+- Changed goblins and orcs on the prowl to smash crates and barrels and carry off what falls out
+- Changed NPC's to shove a crate or barrel out of their way, and to break through it when they are fighting or fleeing
+- Changed NPC's to talk about what has actually happened around them, and about how they are doing themselves, instead of fixed gossip
+### Gameplay
+- Changed rain to fall as streaks that lean with the wind and stop under roofs
+- Changed breaking someone's crate, barrel or furniture in town to count as vandalism
+
+## Technical Changes
+- Changed the drawing of furniture and props to do less work each frame
+- Removed old unused code
+
+## Fixed Bugs
+- AE-03801 - Fixed bug where a single wolf sounded like a whole pack
+- AE-03802 - Fixed bug where a javelin stuck in a player or NPC hung in the air beside their body
+- AE-03803 - Fixed bug where the program's icon showed only faintly on the window and not on the taskbar
+- AE-03804 - Fixed bug where a swimmer at the surface could not dive
+- AE-03805 - Fixed bug where a villager woken by a noise at night gave up looking before reaching it
+
 # Patch Notes Version Alpha 0.3.7: Lock, Stock and Ore
 
 Locks, ore, crops and a shrine by the graves, with a long list of fixes on top.

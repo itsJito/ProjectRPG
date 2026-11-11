@@ -34,6 +34,24 @@ public class Npc extends Actor implements Interactable {
      */
     public boolean seated;
     public float seat, seatYaw;
+    /**
+     * (0.3.9) The seat they are in (its middle, and the floor under it; NaN x when none), where they stood to sit down
+     * (and step back out to), when they sat and when their behaviour last asked for the seat (see Seating).
+     */
+    public float seatX = Float.NaN, seatY, seatZ, standX, standZ;
+    /**
+     * (0.3.9, gamefixes: recruitable allies) whose companion they are (0: their own), since when; the order they are under,
+     * its place and its foe; what their abilities wait on (game time each is ready again), and the abilities' effects
+     * pending (a power strike's heavy blow, a volley's shots left, a shield wall's end); the team they had before.
+     */
+    public long companionOf, orderTarget;
+    public double companionSince, shieldWallUntil;
+    public Companions.Order order = Companions.Order.FOLLOW;
+    public float orderX, orderZ;
+    public final double[] abilityReady = new double[Companions.Ability.values().length];
+    public boolean powerNext;
+    public int volleyLeft, homeTeam;
+    public double seatSince, seatHeld;
     public double innFareAt, innUntil, innTalkAt, errandDoneAt = -1e9;
     /** What they hold at the inn's table (the bowl or the mug, drawn in hand) until it is finished. */
     public rpg.item.ItemDef holdingFare;
@@ -107,6 +125,14 @@ public class Npc extends Actor implements Interactable {
     CombatTactics.Plan tactic;
     double nextTactic;
     public double lastLootAt, lootStarted = -99, lootUntil = -99;
+    /** (0.3.8) The crate or barrel being broken open (0: none), what has been taken from it, not again before then, and the last shove given one. */
+    public long smashTarget;
+    public int smashTaken;
+    public double smashAfter = 60, shovedAt = -99;
+    /** (0.3.8) The floor their bed is on (NaN: wherever the ground is), when they last spoke a passing word, and the day their wages were last paid. */
+    public float homeY = Float.NaN;
+    public double lastTalk = -99;
+    public int paidOn = -1;
     /** When this NPC may next hold something out to the player (an offer is not pressed again straight after an answer). */
     public double offerAgain = -99;
     public boolean asleep() {

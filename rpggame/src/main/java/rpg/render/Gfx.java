@@ -123,26 +123,30 @@ public final class Gfx implements AutoCloseable {
     }
 
     /** A model's layers as meshes (made once per key). */
+    /**
+     * A layered model's mesh ids, made once per key. (0.3.8, optimisation: every prop drawn every frame built two new
+     * strings per layer to look its meshes up, and a new array - several thousand short-lived objects a frame with the
+     * house furnished; the ids are kept with the key now, looked up once.)
+     */
     private int[] layers(String key, Supplier<Props.Layer[]> make) {
-        Integer n = meshes.get(key + "#n");
-        if (n == null) {
+        int[] ids = layerIds.get(key);
+        if (ids == null) {
             Props.Layer[] ls = make.get();
-            for (int i = 0; i < ls.length; i++) { Meshes.Boxes b = ls[i].boxes(); meshes.put(key + "#" + i, b.count() == 0 ? 0 : r.mesh(b.vertices(), b.count())); }
-            meshes.put(key + "#n", ls.length);
+            ids = new int[ls.length];
+            for (int i = 0; i < ls.length; i++) { Meshes.Boxes b = ls[i].boxes(); ids[i] = b.count() == 0 ? 0 : r.mesh(b.vertices(), b.count()); }
+            layerIds.put(key, ids);
             layerInfo.put(key, ls);
-            n = ls.length;
         }
-        int[] ids = new int[n];
-        for (int i = 0; i < n; i++) ids[i] = meshes.get(key + "#" + i);
         return ids;
     }
+    private final Map<String, int[]> layerIds = new HashMap<>();
     private final Map<String, Props.Layer[]> layerInfo = new HashMap<>();
 
     /** Draws a model's layers with the current matrix. */
     private void drawLayers(String key, Supplier<Props.Layer[]> make) {
         int[] ids = layers(key, make);
         Props.Layer[] info = layerInfo.get(key);
-        for (int i = 0; i < ids.length; i++) put(ids[i], 0, 1, 1, 1, info[i].emissive(), 1, info[i].rough(), info[i].metal());
+        for (int i = 0; i < ids.length; i++) if (ids[i] != 0) put(ids[i], 0, 1, 1, 1, info[i].emissive(), 1, info[i].rough(), info[i].metal());
     }
 
     /** Finds the lamp blocks once (for night lights). */
@@ -554,10 +558,11 @@ public final class Gfx implements AutoCloseable {
         guideCount = 0;
         throwGuide(g);
         // arrows and blades lodged in bodies, where they went in
+        // (0.3.8, gamefixes: a javelin stuck in someone hung in the air beside them) drawn from its point back, by where its
+        // own model's point is - a javelin's grip is near its middle, not at its butt
         for (Actor a : g.actors()) for (CombatSystem.Stuck st : a.stuck) {
-            float[] w = st.world(g, a);
-            float len = CombatSystem.ammoLength(st.stack().def);
-            held(st.stack().def, new float[]{w[0] - w[3] * len, w[1] - w[4] * len, w[2] - w[5] * len}, new float[]{w[3], w[4], w[5]}, a.yaw, false);
+            float[] w = st.world(g, a), dir = {w[3], w[4], w[5]};
+            held(st.stack().def, gripBehind(st.stack().def, w, dir), dir, a.yaw, false);
         }
         // clutches being sat: a ring of straw and the eggs in it
         if (g.animals != null) for (var ne : g.animals.nests) {
@@ -574,6 +579,9 @@ public final class Gfx implements AutoCloseable {
             cmd.model(sh.gpu, AstrattoNative.MODEL_FORWARD, m16, 0.78f, 0.9f, 0.95f, 0.45f, 0, 1, 0.05f, 0);
         }
         if (g.gore != null) { limbs(g); stains(g); }
+        breakableDebris(g);
+        furnitureShards(g);
+        if (g.bones != null) bones(g);
         // the frame's particles and the throw guide's points go in one list (gamefixes: sent apart, the particles replaced
         // the guide whenever anything else was in the air, so the arc vanished in a fight)
         int n = g.fx.pack();
@@ -879,6 +887,17 @@ public final class Gfx implements AutoCloseable {
     private float heldScale = 1;
 
     /** A held item: its own mesh, from the grip along a direction, flat across the body's right (or facing forward). */
+    /**
+     * Where to hold a shot so that its point lies on {@code tip}: an arrow or bolt is drawn from its tail; anything else
+     * from its own model's grip, which is as far behind the point as the model says.
+     */
+    private float[] gripBehind(ItemDef d, float[] tip, float[] dir) {
+        float back;
+        if (d.family == Family.ARROW || d.family == Family.BOLT) back = CombatSystem.ammoLength(d);
+        else { ItemModels.Model md = ItemModels.of(d); back = (itemBounds(md)[4] - md.gy()) * ItemModels.VOX; }
+        return new float[]{tip[0] - dir[0] * back, tip[1] - dir[1] * back, tip[2] - dir[2] * back};
+    }
+
     private void held(ItemDef d, float[] grip, float[] dir, float yaw, boolean flatToFace) {
         if (d == null) return;
         float[] ref = flatToFace ? fwd(yaw) : right(yaw);
@@ -1309,6 +1328,15 @@ public final class Gfx implements AutoCloseable {
         float pitch = (f.bird ? 0.05f * (float) Math.sin(ph * 2) * amp : horseLike ? gaitPitch : running ? 0.08f * (float) Math.sin(ph) : 0) - crouch * 0.08f + lunge * 0.12f;
         // (0.3.0) in flight a Pegasus's body follows its climb and dive, and leans into its bank
         if (sp == Species.PEGASUS && a.flying) pitch -= a.flightPitch * 0.8f;
+        // (0.3.9) the stroke works the whole body: it rises a touch on each downstroke and settles on the recovery; slow and
+        // low over the ground it flares - nose up, the wings thrown forward to brake - to come down
+        float heave = 0, flare = 0;
+        if (sp == Species.PEGASUS && a.flying && !dead) {
+            heave = -pegasusStroke(a, dt) * 0.9f;
+            flare = Math.max(0, Math.min(1, (rpg.mount.Riding.STALL + 3 - a.flightSpeed) / 4f)) * Math.max(0, Math.min(1, (4 - a.flightHeight) / 3f));
+            pitch += flare * 0.35f;
+            y += heave;
+        }
         if (f.hopper && amp > 0.05f) pitch += 0.12f * (float) Math.sin(ph) * Math.min(1, amp * 3);
         // (0.3.5, gamefixes: duck swimming polished) a duck afloat sits low in the water - the hull half under, its legs
         // out of sight below it - riding a slow heave and roll; feeding, it up-ends: tail to the sky, head under
@@ -1399,7 +1427,13 @@ public final class Gfx implements AutoCloseable {
             if (rear > 0) { fl += rear * 0.9f; fr += rear * 0.7f; bl -= rear * 0.6f; br -= rear * 0.6f; }
             // (0.3.0) in the air: a jump folds the forelegs up and trails the hind; flying, all four are tucked
             boolean airborne = horseLike && !dead && !a.grounded && a.rider != 0;
-            if (airborne) { float k = a.flying ? 1 : 0.8f; fl = fl * (1 - k) + 1.2f * k; fr = fr * (1 - k) + 1.1f * k; bl = bl * (1 - k) - 0.7f * k; br = br * (1 - k) - 0.8f * k; }
+            // (0.3.9) flying fast the hind legs stream out behind; slowing to land (the flare) all four reach down for the ground
+            float stream = a.flying ? Math.min(1, a.flightSpeed / 16f) : 0, reachDown = a.flying ? flare : 0;
+            if (airborne) {
+                float k = a.flying ? 1 : 0.8f;
+                fl = fl * (1 - k) + (1.2f - 0.9f * reachDown) * k; fr = fr * (1 - k) + (1.1f - 0.85f * reachDown) * k;
+                bl = bl * (1 - k) - (0.7f + 0.45f * stream - 0.5f * reachDown) * k; br = br * (1 - k) - (0.8f + 0.45f * stream - 0.5f * reachDown) * k;
+            }
             if (f.legFrontHi != null) {
                 // (0.3.4, gamefixes: horse and Pegasus animations 1/5) the legs bend: each knee (fore) folds the cannon back
                 // and up as the leg swings through, each hock (hind) folds it forward - higher at the trot and the gallop,
@@ -1419,7 +1453,11 @@ public final class Gfx implements AutoCloseable {
                 kfl = kfl * (1 - fold) - 2.35f * fold; kfr = kfr * (1 - fold) - 2.35f * fold;
                 kbl = kbl * (1 - fold) + 2.0f * fold; kbr = kbr * (1 - fold) + 2.0f * fold;
                 if (rear > 0) { float paw = (float) Math.sin(time * 7 + a.id); kfl -= rear * (1.0f + 0.5f * paw); kfr -= rear * (1.0f - 0.5f * paw); }
-                if (airborne) { float k = a.flying ? 1 : 0.8f; kfl = kfl * (1 - k) - 2.0f * k; kfr = kfr * (1 - k) - 1.9f * k; kbl = kbl * (1 - k) + 0.5f * k; kbr = kbr * (1 - k) + 0.6f * k; }
+                if (airborne) {
+                    float k = a.flying ? 1 : 0.8f;
+                    kfl = kfl * (1 - k) - (2.0f - 1.5f * reachDown) * k; kfr = kfr * (1 - k) - (1.9f - 1.4f * reachDown) * k;
+                    kbl = kbl * (1 - k) + (0.5f - 0.35f * stream) * k; kbr = kbr * (1 - k) + (0.6f - 0.35f * stream) * k;
+                }
                 jointed(rpg.combat.Gore.Part.ARM_L, f, true, vs, -f.legF[0], f.legF[1], f.legF[2], fl, kfl);
                 jointed(rpg.combat.Gore.Part.ARM_R, f, true, vs, f.legF[0], f.legF[1], f.legF[2], fr, kfr);
                 jointed(rpg.combat.Gore.Part.LEG_L, f, false, vs, -f.legB[0], f.legB[1], f.legB[2], bl, kbl);
@@ -1433,8 +1471,15 @@ public final class Gfx implements AutoCloseable {
             }
             float headP = a.headPitch + (rear > 0 ? -0.4f * rear : 0) - lie * (dead ? 0.1f : 0.25f) + (float) Math.sin(ph * 2) * 0.05f * amp;
             // a horse's head nods with its walk, holds steady at the trot, and swings down and up with each canter and gallop stride
-            if (horseLike && hg > 0) headP += switch (hg) { case 1 -> 0.07f * (float) Math.sin(ph * 2); case 2 -> 0.015f * (float) Math.sin(ph * 2); default -> 0.13f * (float) Math.sin(ph + 1.2f); } + (hg >= 3 ? 0.12f : 0);
-            limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1], f.neck[2], headP, a.headYaw, 0);
+            if (horseLike && hg > 0 && !(sp == Species.PEGASUS && a.flying)) headP += switch (hg) { case 1 -> 0.07f * (float) Math.sin(ph * 2); case 2 -> 0.015f * (float) Math.sin(ph * 2); default -> 0.13f * (float) Math.sin(ph + 1.2f); } + (hg >= 3 ? 0.12f : 0);
+            float headY = a.headYaw;
+            if (sp == Species.PEGASUS && a.flying && !dead) {
+                // (0.3.9) in flight the neck reaches out ahead, levelled against the body's climb or dive, the head turned
+                // into the bank, lifting with the flare
+                headP = a.flightPitch * 0.55f + 0.2f + 0.05f * pegasusStroke(a, dt) - flare * 0.25f;
+                headY = a.flightBank * 0.45f;
+            }
+            limb(rpg.combat.Gore.Part.HEAD, dead ? f.headClosed : f.head, vs, f.neck[0], f.neck[1], f.neck[2], headP, headY, 0);
             // the tail: a dog's wag, a cow's switch, a cat's slow curl, a fox's brush streaming when it runs
             float wag = 0, droop = 0.35f;
             switch (sp) {
@@ -1446,6 +1491,7 @@ public final class Gfx implements AutoCloseable {
                 case DEER -> { boolean bolting = a.goal == rpg.animal.Animal.Goal.FLEE; wag = (bolting ? 0.1f : 0.25f) * (float) Math.sin(time * (bolting ? 9 : 2.2) + a.id); droop = bolting ? -1.0f : 0.55f; }
                 default -> { }
             }
+            if (sp == Species.PEGASUS && a.flying && !dead) { droop = 0.05f + 0.25f * flare - 0.1f * Math.min(1, a.flightSpeed / 20f); wag = -a.flightBank * 0.3f + 0.04f * (float) Math.sin(time * 9 + a.id); }   // (0.3.9) streaming out behind, steering with the bank
             limb(rpg.combat.Gore.Part.TAIL, f.tail, vs, f.tailAt[0], f.tailAt[1], f.tailAt[2], droop * (1 - lie * 0.5f), dead ? 0 : wag, 0);
             if (horseLike && a.saddled && !dead) saddle(f, vs);
             if (sp == Species.PEGASUS && f.wing != null && !dead) {
@@ -1453,17 +1499,48 @@ public final class Gfx implements AutoCloseable {
                 // climbs or surges, held out in a glide, swept back in a dive
                 float open = a.flying ? 1 : hg >= 4 ? 0.35f : hg == 3 ? 0.15f : 0;
                 a.flap += (open - a.flap) * Math.min(1, dt * 4);
-                float climb = a.flying ? Math.max(0, a.flightPitch) : 0, dive = a.flying ? Math.max(0, -a.flightPitch) : 0;
-                float beat = a.flying ? (0.25f + 0.55f * Math.min(1, climb * 2)) * (float) Math.sin(time * 6.5 + a.id) : 0.06f * (float) Math.sin(time * 1.3);
-                // (the panel hangs from its root at the withers: rolled out past level it spreads a touch above the horizontal)
-                float spread = 0.2f + a.flap * (1.55f - dive * 0.7f) + beat * a.flap;
-                float sweep = a.flap * dive * 0.5f;
-                limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep, 0, spread);
-                limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep, 0, -spread);
+                float dive = a.flying ? Math.max(0, -a.flightPitch) : 0;
+                // (0.3.9, gamefixes: Pegasus flight animations polished and dynamic) the stroke is the work the wings are
+                // doing (Animal.wingPhase, pegasusStroke): deep and quick climbing, slow, or surging; shallow and lazy at
+                // speed; none in a dive or a glide, where they are held out (and swept back the steeper the dive). In a bank
+                // the outer wing works harder and spreads wider while the inner one is drawn in; the flare throws both
+                // forward to brake
+                float stroke = a.flying ? pegasusStroke(a, dt) : 0.06f * (float) Math.sin(time * 1.3);
+                float bank = a.flying ? a.flightBank : 0;
+                float baseSpread = 0.2f + a.flap * (1.55f - dive * 0.7f);
+                float sweep = a.flap * (dive * 0.5f - flare * 0.45f);
+                float outerR = 1 + Math.max(0, -bank) * 0.6f, outerL = 1 + Math.max(0, bank) * 0.6f;   // banked right (+), the left wing is outside
+                float spreadR = baseSpread * (1 - Math.max(0, bank) * 0.18f) + stroke * a.flap * outerR;
+                float spreadL = baseSpread * (1 - Math.max(0, -bank) * 0.18f) + stroke * a.flap * outerL;
+                // the feathering: the wing's leading edge tips down on the downstroke, up on the recovery
+                float feather = a.flying ? 0.12f * (float) Math.cos(a.wingPhase) * a.flap : 0;
+                limb(rpg.combat.Gore.Part.ARM_R, f.wing, vs, f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep + feather, 0, spreadR);
+                limb(rpg.combat.Gore.Part.ARM_L, f.wing, vs, -f.wingAt[0], f.wingAt[1], f.wingAt[2], 0.08f - sweep + feather, 0, -spreadL);
             }
         }
         if (!dead && lie < 0.5f) cmd.shadowBody(a.x, a.y, a.z, a.radius, a.height * (1 - lie * 0.5f));
     }
+
+    /**
+     * (0.3.9) A flown Pegasus's wingstroke now, -1 (the top of the recovery) .. +1 (the bottom of the downstroke), and its
+     * depth: the phase runs on by the work asked of the wings - lift wanted climbing or slow (near the stall), a surge's
+     * hard beats - and almost stops in a dive or a fast glide. The downstroke takes less of the cycle than the recovery.
+     */
+    private float pegasusStroke(rpg.animal.Animal a, float dt) {
+        float climb = Math.max(0, a.flightPitch), dive = Math.max(0, -a.flightPitch);
+        float slow = Math.max(0, Math.min(1, (rpg.mount.Riding.STALL + 5 - a.flightSpeed) / 6f));
+        float surge = (float) Math.max(0, 1 - (clock - a.surgeAt) / 0.9);
+        float need = Math.max(0, Math.min(1.4f, climb * 1.6f + slow * 0.8f + surge * 1.2f - dive * 1.4f + 0.18f));
+        if (lastStrokeId != a.id || lastStrokeAt != clock) {
+            a.wingPhase += (float) (dt * (2.6 + 5.2 * need));
+            a.wingPhase %= (float) (Math.PI * 2 * 1000);
+            lastStrokeId = a.id; lastStrokeAt = clock;
+        }
+        float ph = a.wingPhase + 0.45f * (float) Math.sin(a.wingPhase);   // quick down, slow up
+        return (float) Math.sin(ph) * (0.08f + 0.62f * Math.min(1, need));
+    }
+    private long lastStrokeId = -1;
+    private double lastStrokeAt = -1;
 
     // ------------------------------------------------------------------ dungeons: torchlight
     /**
@@ -2208,7 +2285,7 @@ public final class Gfx implements AutoCloseable {
             root.identity().translate(bed.x + fx * (len / 2 - 0.08f), DevMap.FLOOR + 0.52f + b.torso[2] * Body.PX / 2, bed.z + fz * (len / 2 - 0.08f))
                     .rotateY(yaw).rotateX((float) Math.PI / 2).scale(Body.PX, Body.PX, Body.PX);
         } else if (a.riding != 0 && sceneGame != null && sceneGame.animals != null && sceneGame.animals.byId(a.riding) instanceof rpg.animal.Animal mount
-                && clock - mount.seatAt < 0.25) {
+                && clock - mount.seatAt < 0.25 && a.mountPhase >= 1) {
             // (0.3.3) in the saddle: carried by the mount's drawn body, so the rider rises, rocks and banks with it
             System.arraycopy(mount.seatDelta, 0, root.m, 0, 16);
             root.translate(a.x, a.y, a.z).rotateY(a.yaw).scale(Body.PX, Body.PX, Body.PX);
@@ -2381,6 +2458,23 @@ public final class Gfx implements AutoCloseable {
     private int stainsLaid, sootLaid;
 
     /** Severed limbs where their rigid bodies lie, each drawn from its owner's own figure. */
+    /** (0.3.8) The loose bones of a body that came apart: each its own piece of its figure, where its rigid body lies; going to ash with the rest of the remains. */
+    private void bones(Rpg g) {
+        for (rpg.combat.Bones.Bone b : g.bones.bones) {
+            Snapshots.Rigid r = g.lastRigids.body(b.body);
+            if (r == null) continue;
+            rpg.monster.Monster owner = g.monsters.byId(b.owner);
+            float d = owner == null ? 0 : owner.dissolve;
+            if (d >= 1) continue;
+            if (d > 0) { mDissolve = true; mAlpha = 1 - d; charTint = 1 - 0.75f * smooth(Math.min(1, d * 2.2f)); mGlow = 0.55f * (float) Math.sin(Math.PI * Math.min(1, d * 1.3f)); }
+            r.matrix(m16);
+            System.arraycopy(m16, 0, body.m, 0, 16);
+            mc.set(body).scale(b.vs, b.vs, b.vs);
+            mpart(mc, b.piece.model());
+            mDissolve = false; mAlpha = 1; charTint = 1; mGlow = 0;
+        }
+    }
+
     private void limbs(Rpg g) {
         for (var l : g.gore.limbs) {
             Snapshots.Rigid r = g.lastRigids.body(l.body);
@@ -2916,10 +3010,95 @@ public final class Gfx implements AutoCloseable {
         float previous=charTint;charTint=1-o.charred*0.86f;
         try { objectModel(g,o,dt); } finally { charTint=previous; }
     }
+    /**
+     * (0.3.8) A crate, a box, a barrel or a sign as it lies (its rigid body's pose) and as it is now: its mesh is remade
+     * from its own voxels whenever a blow has taken some away.
+     */
+    private void breakable(Rpg g, rpg.objects.Breakable b) {
+        if (b.broken) return;
+        if (b.gpu == 0 && b.gpuMetal == 0 || b.gpuVersion != b.version) {
+            if (b.gpu != 0) r.release(AstrattoNative.RES_MESH, b.gpu);
+            if (b.gpuMetal != 0) r.release(AstrattoNative.RES_MESH, b.gpuMetal);
+            float[][] v = VoxMesh.build(new ItemModels.Model(b.vox, b.form.sx / 2f, b.form.sy / 2f, b.form.sz / 2f));
+            b.gpuMetal = upload(v[0]); b.gpu = upload(v[1]); b.gpuVersion = b.version;
+        }
+        Snapshots.Rigid rb = g.lastRigids.body(b.body);
+        if (rb != null) rb.matrix(m.m);
+        else { looseItemPose.x = b.x; looseItemPose.y = b.y; looseItemPose.z = b.z; looseItemPose.qw = b.qw; looseItemPose.qx = b.qx; looseItemPose.qy = b.qy; looseItemPose.qz = b.qz; looseItemPose.matrix(m.m); }
+        float k = rpg.objects.Breakable.VOXEL / ItemModels.VOX;
+        m.scale(k, k, k);
+        if (b.gpuMetal != 0) put(b.gpuMetal, 0, 1, 1, 1, 0, 1, 0.35f, 0.85f);
+        if (b.gpu != 0) put(b.gpu, 0, 1, 1, 1, 0, 1, 0.86f, 0);
+    }
+
+    /** (0.3.8) A furnishing with parts knocked off it: its own mesh of what is left, remade when a blow takes more. */
+    private void wreckedFurniture(Rpg g, Furniture fu, rpg.objects.Wreckage.State ws) {
+        Props.Layer[] ls = g.wreckage.remaining(fu);
+        if (ws.gpu == null || ws.gpuVersion != ws.version) {
+            if (ws.gpu != null) for (int id : ws.gpu) if (id != 0) r.release(AstrattoNative.RES_MESH, id);
+            ws.gpu = new int[ls.length];
+            for (int i = 0; i < ls.length; i++) { Meshes.Boxes b = ls[i].boxes(); ws.gpu[i] = b.count() == 0 ? 0 : r.mesh(b.vertices(), b.count()); }
+            ws.gpuVersion = ws.version;
+        }
+        for (int i = 0; i < ws.gpu.length; i++) if (ws.gpu[i] != 0) put(ws.gpu[i], 0, 1, 1, 1, ls[i].emissive(), 1, ls[i].rough(), ls[i].metal());
+    }
+
+    /** (0.3.8) The parts knocked off the furniture, each where its body lies. */
+    private void furnitureShards(Rpg g) {
+        if (g.wreckage == null) return;
+        for (rpg.objects.Wreckage.Shard s : g.wreckage.shards) {
+            Snapshots.Rigid rb = g.lastRigids.body(s.body);
+            if (rb == null) continue;
+            rb.matrix(m.m);
+            m.scale(s.sx, s.sy, s.sz);
+            int rgb = Math.round(s.r * 255) << 16 | Math.round(s.gr * 255) << 8 | Math.round(s.b * 255);
+            put(box, rgb, 1, s.rough, s.metal);
+        }
+    }
+
+    /** (0.3.8) The boards of the broken ones where they fell, and the meshes of the gone let go. */
+    private void breakableDebris(Rpg g) {
+        if (g.breakables == null) return;
+        for (int id : g.breakables.freed) r.release(AstrattoNative.RES_MESH, id);
+        g.breakables.freed.clear();
+        float k = rpg.objects.Breakable.VOXEL / ItemModels.VOX;
+        for (rpg.objects.Breakables.Piece p : g.breakables.debris) {
+            Snapshots.Rigid rb = g.lastRigids.body(p.body);
+            if (rb == null) continue;
+            if (p.gpu == 0 && p.gpuMetal == 0) { float[][] v = VoxMesh.build(new ItemModels.Model(p.vox, p.cx, p.cy, p.cz)); p.gpuMetal = upload(v[0]); p.gpu = upload(v[1]); }
+            rb.matrix(m.m);
+            m.scale(k, k, k);
+            if (p.gpuMetal != 0) put(p.gpuMetal, 0, 1, 1, 1, 0, 1, 0.35f, 0.85f);
+            if (p.gpu != 0) put(p.gpu, 0, 1, 1, 1, 0, 1, 0.86f, 0);
+        }
+    }
+
+    /**
+     * (0.3.8) The light a furnishing gives: candles and chandeliers burn in a room all day (as its lamps do), a fire in its
+     * grate only while it has wood - and the fire itself, flames off the logs. The nearest few cast shadows.
+     */
+    private void furnitureLight(Furniture fu) {
+        float[] l = fu.kind.light();
+        if (l == null || !inFog(fu.x, fu.z, 10)) return;
+        float y = fu.floor + (l[4] < 0 ? fu.h + l[4] : l[4]);
+        float flick = 0.9f + 0.07f * (float) Math.sin(clock * 9.1 + fu.id) + 0.03f * (float) Math.sin(clock * 23.7 + fu.id * 3);
+        if (fu.kind == Furniture.Kind.FIREPLACE) {
+            if (fu.fuel <= 0) return;
+            float k = Math.min(1, fu.fuel / 30f);
+            float fx = fu.x - (float) Math.sin(fu.yaw()) * -0.08f, fz = fu.z - (float) Math.cos(fu.yaw()) * -0.08f;
+            cmd.emitter(fu.id ^ 0x46495245L, AstrattoNative.EMITTER_ATTACHED_FIRE, fx, fu.floor + 0.22f, fz, 0.12f, 30 * k, 0.12f, 0.45f, 5, 1.8f, 0.3f, 0, 0.5f, 0);
+            flick *= 0.85f + 0.15f * (float) Math.sin(clock * 5.3 + fu.id);
+            cmd.pointLight(fx, y, fz, l[0] * (0.6f + 0.4f * k), l[1] * flick * k, l[2] * flick * k, l[3] * flick * k, (float) Math.hypot(fu.x - camX, fu.z - camZ) < 14 ? AstrattoNative.LIGHT_SHADOW : 0);
+            return;
+        }
+        cmd.pointLight(fu.x, y, fu.z, l[0], l[1] * flick, l[2] * flick, l[3] * flick, fu.kind == Furniture.Kind.CHANDELIER && (float) Math.hypot(fu.x - camX, fu.z - camZ) < 12 ? AstrattoNative.LIGHT_SHADOW : 0);
+    }
+
     private final java.util.Map<ItemModels.Model,int[]> itemBounds=new java.util.IdentityHashMap<>();
     private int[] itemBounds(ItemModels.Model model){return itemBounds.computeIfAbsent(model,m->astratto.voxel.VoxRaster.bounds(m.vox()));}
     private final Snapshots.Rigid looseItemPose=new Snapshots.Rigid();
     private void objectModel(Rpg g, WorldObject o, float dt) {
+        if (o instanceof rpg.objects.Breakable b) { breakable(g, b); return; }
         if(o instanceof GroundItem gi && gi.rotation!=null) {
             var model=ItemModels.of(gi.stack.def);int[] bounds=itemBounds(model);float unit=ItemModels.VOX;
             looseItemPose.x=gi.x;looseItemPose.y=gi.y;looseItemPose.z=gi.z;looseItemPose.qw=gi.rotation[0];looseItemPose.qx=gi.rotation[1];looseItemPose.qy=gi.rotation[2];looseItemPose.qz=gi.rotation[3];looseItemPose.matrix(m.m);
@@ -2929,7 +3108,15 @@ public final class Gfx implements AutoCloseable {
             // one arrow, bolt or thrown blade - or a weapon fallen from a dead hand - exactly as it lies: lodged where it
             // struck, or as its body came to rest
             float len = CombatSystem.lyingLength(gi.stack.def);
-            held(gi.stack.def, new float[]{gi.x - gi.dir[0] * len / 2, gi.y - gi.dir[1] * len / 2, gi.z - gi.dir[2] * len / 2}, gi.dir, gi.id * 1.7f, false);
+            ItemDef ld = gi.stack.def;
+            if (ld.family == Family.ARROW || ld.family == Family.BOLT || ld.family == Family.THROWN) held(ld, gripBehind(ld, new float[]{gi.x + gi.dir[0] * len / 2, gi.y + gi.dir[1] * len / 2, gi.z + gi.dir[2] * len / 2}, gi.dir), gi.dir, gi.id * 1.7f, false);
+            else {
+                // a fallen weapon lies centred on its own model's middle
+                ItemModels.Model md = ItemModels.of(ld);
+                int[] bb = itemBounds(md);
+                float back = ((bb[1] + bb[4]) * 0.5f - md.gy()) * ItemModels.VOX;
+                held(ld, new float[]{gi.x - gi.dir[0] * back, gi.y - gi.dir[1] * back, gi.z - gi.dir[2] * back}, gi.dir, gi.id * 1.7f, false);
+            }
         } else if (o instanceof GroundItem gi) {
             // the item's own model on the ground: long things lie down, the rest stand on their base
             ItemDef d = gi.stack.def;
@@ -2981,9 +3168,20 @@ public final class Gfx implements AutoCloseable {
             drawLayers("station:" + st.kind, () -> Props.station(st.kind));
         } else if (o instanceof Furniture fu) {
             float w = fu.facing % 2 == 0 ? fu.width() : fu.depth(), d = fu.facing % 2 == 0 ? fu.depth() : fu.width();
-            m.identity().translate(fu.x, DevMap.FLOOR, fu.z).rotateY(fu.yaw());
-            drawLayers("furn:" + fu.kind + ":" + w + "x" + d + "x" + fu.h + ":" + (fu.kind == Furniture.Kind.BED || fu.kind == Furniture.Kind.BOOKCASE || fu.kind == Furniture.Kind.HEADSTONE ? fu.id : 0),
-                    () -> Props.furniture(fu.kind, w, d, fu.h, (int) fu.id));
+            m.identity().translate(fu.x, fu.floor, fu.z).rotateY(fu.yaw());
+            // (each its own look where a seed varies it: the beds' quilts, the books, the paintings, the rugs, the chairs' cloth)
+            boolean own = fu.kind == Furniture.Kind.BED || fu.kind == Furniture.Kind.BOOKCASE || fu.kind == Furniture.Kind.HEADSTONE || fu.kind == Furniture.Kind.PAINTING
+                    || fu.kind == Furniture.Kind.RUG || fu.kind == Furniture.Kind.FOURPOSTER || fu.kind == Furniture.Kind.ARMCHAIR || fu.kind == Furniture.Kind.SOFA
+                    || fu.kind == Furniture.Kind.TAPESTRY || fu.kind == Furniture.Kind.PLANTER || fu.kind == Furniture.Kind.SHELVES || fu.kind == Furniture.Kind.WINE_RACK
+                    || fu.kind == Furniture.Kind.CUPBOARD || fu.kind == Furniture.Kind.WEAPON_RACK || fu.kind == Furniture.Kind.ARMOR_STAND;
+            var ws = g.wreckage == null ? null : g.wreckage.states.get(fu.id);
+            if (ws != null && !ws.gone.isEmpty()) wreckedFurniture(g, fu, ws);
+            // (0.3.8, optimisation) its key made once, not every frame
+            else {
+                if (fu.drawKey == null) fu.drawKey = "furn:" + fu.kind + ":" + w + "x" + d + "x" + fu.h + ":" + (own ? fu.id % 6 : 0);
+                drawLayers(fu.drawKey, () -> Props.furniture(fu.kind, w, d, fu.h, (int) (own ? fu.id % 6 : 0)));
+            }
+            furnitureLight(fu);
         } else if (o instanceof Door door) {
             doorLeaves(g, door, dt);
         } else if (o instanceof Container c && c.kind.equals("trough")) {

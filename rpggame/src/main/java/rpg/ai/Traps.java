@@ -18,10 +18,11 @@ public final class Traps {
     public void update() {
         if(g.time<next)return; next=g.time+0.25;
         for(var object:g.objects.all())if(object instanceof Trap trap) {
-            g.game.commands().chemSensor(trap.id,trap.owner,trap.x,trap.y+0.1f,trap.z,0.3f,CHEM_FLAMMABLE,0,3,0,0,false);
-            if((g.chemistry.state(trap.id)&CHEM_BURNT)!=0) {
+            long sensor=trap.id|rpg.world.Chemistry.OBJECT_SENSOR;
+            g.game.commands().chemSensor(sensor,trap.owner,trap.x,trap.y+0.1f,trap.z,0.3f,CHEM_FLAMMABLE,0,3,0,0,false);
+            if((g.chemistry.objectState(trap.id)&CHEM_BURNT)!=0) {
                 for(var item:trap.contents.stacks())g.state.burn(item.def,item.amount);
-                trap.contents.clear();trap.removed=true;g.game.commands().chemRemove(trap.id);
+                trap.contents.clear();trap.removed=true;g.game.commands().chemRemove(sensor);
             }
             Animal caught=g.animals.byId(trap.caught);
             if(caught!=null && caught.alive && !trap.removed && trap.contents.has(Items.SNARE,1))caught.trappedBy=trap.id;

@@ -1,0 +1,404 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 118th build in daemon [uptime: 16 hrs 25 mins 41.697 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#6538,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#6537,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:compileJava (Thread[#6537,included builds,5,main]) started.
+:processResources (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#6537,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:buildNative (Thread[#6537,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#6541,Execution worker Thread 3,5,main]) started.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:engineResources (Thread[#6541,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:processResources (Thread[#6541,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:classes (Thread[#6541,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#6541,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:jar (Thread[#6541,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#6541,Execution worker Thread 3,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#6541,Execution worker Thread 3,5,main]) started.
+
+> Task :processResources
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':processResources' is not up-to-date because:
+  Input property 'rootSpec$1' file C:\Users\John\Documents\ProjectRPG\patchnotes.md has changed.
+Resolve mutations for :compileJava (Thread[#6538,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#6538,included builds Thread 2,5,main]) started.
+:classes (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#6538,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\WeeklyLifeTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.015 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 1 classes completed in 2.099 secs.
+Class dependency analysis for incremental compilation took 0.01 secs.
+Resolve mutations for :processTestResources (Thread[#6538,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#6538,included builds Thread 2,5,main]) started.
+:testClasses (Thread[#6538,included builds Thread 2,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#6538,included builds Thread 2,5,main]) started.
+:test (Thread[#6538,included builds Thread 2,5,main]) started.
+Gradle Test Executor 117 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Task has failed previously.
+Starting process 'Gradle Test Executor 117'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath6772316589874010883txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 117'
+Successfully started process 'Gradle Test Executor 117'
+
+WeeklyLifeTest > theTownsLiveThroughTwoDaysAtSpeed() STANDARD_OUT
+    [hild] WORK at 10.5,4.0,194.3 goal 10.5,194.5 No eligible work for Blacksmith; waiting for supplies or a suitable site BLACKSMITH
+    [hild] BANK at 12.4,4.0,172.0 goal 12.5,167.5  BLACKSMITH
+    [hild] BANK at 19.7,4.0,103.6 goal 24.5,103.5  BLACKSMITH
+          [stuck] Oswin SOCIALIZE at (99.47, 4.00, 118.95) -> (99.7, 118.1), go to goal, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+          [stuck] Bram WANDER at (118.26, 4.00, 51.50) -> (114.5, 51.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [hild] INN at 24.1,4.0,188.9 goal 24.5,181.5 going to the bar at DevCity Inn BLACKSMITH
+    [hild] INN at 28.5,4.0,116.6 goal 28.5,111.5 going to the bar at DevCity Inn BLACKSMITH
+    [hild] EAT at 44.0,4.0,98.6 goal 44.5,95.5  BLACKSMITH
+    [hild] EAT at 97.4,4.0,73.7 goal 100.5,74.5  BLACKSMITH
+          [crime] ASSAULT by Hale against Brute at (12.8, 80.5), t 586.0
+          [crime] ASSAULT by Hale against Brute at (23.8, 73.4), t 599.9
+    [hild] SOCIALIZE at 116.5,4.0,117.2 goal 116.8,116.3  BLACKSMITH
+          [crime] ASSAULT by Bandit against Hale at (21.6, 77.5), t 609.8
+          [crime] ASSAULT by Hale against Brute at (21.5, 74.9), t 616.5
+    [hild] 48 INN|hungry (#%); a meal at the inn|going to the bar at DevCity Inn
+    [hild] 47 BANK|carrying # coins: the surplus to the bank|
+    [hild] 47 EAT|hunger #%|
+    [hild] 32 SOCIALIZE|lonely (#%), Ansel nearby|
+    [hild] 13 WORK|day's work: Blacksmith duties|Blacksmith: make the selected order
+    [hild] 13 WORK|day's work: Blacksmith duties|Blacksmith: deliver a real batch
+    [hild] 13 WORK|day's work: Blacksmith duties|No eligible work for Blacksmith; waiting for supplies or a suitable site
+    [hild] 6 WORK|day's work: Blacksmith duties|Blacksmith: none
+    [hild] 4 WARN|safe now; telling the guard about the Coyote|
+    [hild] 1 WORK|day's work: Blacksmith duties|Blacksmith: fetch supplies from the producer
+    [hild] 1 ERRAND|Marday: errands at the market|looking over the stalls at The Armory
+    [life] two days in 646s real, 43200 frames
+    sown 34, harvested 36, apples 96, meals eaten at an inn 38, patrons 38
+      DevCity Inn: meals 8 drinks 8 nights 0 produce bought 50; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 vegetable_stew, 1 apple, 1 apple, 1 apple, 1 apple, 1 bread, 1 bread, 1 potato, 1 apple, 1 hot_cider, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 15 barley, 2 hops, 7 glass_bottle, 1 bottle_of_water, 1 apple, 1 potato, 1 potato, 1 potato, 1 potato, 1 potato, 1 potato, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 bread, 1 bread, 1 bread, 1 bread]
+      DevPalace Taberna: meals 12 drinks 10 nights 0 produce bought 61; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 apple, 1 apple, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 carrot, 1 carrot, 1 potato, 1 bread, 1 bread, 1 carrot, 1 potato, 1 apple, 1 apple, 1 potato, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 barley, 16 hops, 6 glass_bottle, 1 carrot, 1 apple, 1 apple, 1 potato, 1 onion, 1 onion, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 bread, 1 bread, 1 bread, 1 bread]
+    goals: {SLEEP=12667, WANDER=1193, FLEE=190, WATCH=40, INN=2358, FIGHT=142, SOCIALIZE=2793, RETURN=14, INVESTIGATE=2869, AID=6, PRAY=658, FIRE_RESPONSE=28, BANK=581, HIDE=264, SEARCH=389, WARN=7, CASE=24, PATROL=1830, IDLE=4, SHELTER=10064, EAT=1243, WORK=22483, ERRAND=1403, REPORT_CRIME=215, LOOK=174, HOME=7481}
+      Ada          SHOP     work 386/410 blocked   0/ 720  noticed something
+      Bram         WATCH    work 135/135 blocked   7/ 720  going to look
+      Cole         WATCH    work 164/164 blocked   0/ 720  going to look
+      Dag          TRADE    work 268/294 blocked   5/ 720  noticed something
+      Eda          TRADE    work 247/293 blocked   2/ 720  
+      Gus          SHOP     work 327/369 blocked   2/ 720  
+      Hale         WATCH    work 293/307 blocked   0/ 720  
+      Ivo          TRADE    work 275/309 blocked   4/ 720  
+      Jun          SHOP     work 382/391 blocked   0/ 720  
+      Kit          SHOP     work 249/317 blocked   2/ 720  
+      Mara         GROWER   work 260/287 blocked   2/ 720  
+      Morrow       CLERGY   work 268/308 blocked   2/ 720  as close as I can get
+      Silas        SHOP     work 174/284 blocked   2/ 720  
+      Bobwin       WATCH    work 139/140 blocked   0/ 720  going to look
+      Oswin        LEISURED work  88/ 88 blocked   0/ 720  noticed something
+      Maud         CLERGY   work 263/271 blocked   2/ 720  fetching help
+      Alric        CLERGY   work 231/236 blocked   1/ 720  noticed something
+      Godric       TRADE    work 320/340 blocked   0/ 720  calling out
+      Isolde       LEISURED work 196/196 blocked   0/ 720  
+      Elowen       TRADE    work 283/284 blocked   0/ 720  
+      Oren         TRADE    work 141/161 blocked   0/ 720  
+      Tamsin       TRADE    work 221/238 blocked   0/ 720  
+      Sir Alden    WATCH    work 161/162 blocked   0/ 720  
+      Fenna        TRADE    work 386/388 blocked   0/ 720  
+      Wren         SHOP     work 375/408 blocked   3/ 720  
+      Hilda        TRADE    work 248/266 blocked   0/ 720  
+      Bertram      TRADE    work 269/274 blocked   0/ 720  
+      Sir Roderic  WATCH    work 293/307 blocked   0/ 720  getting up and dressed
+      Wynn         TRADE    work 201/202 blocked   0/ 720  
+      Corwin       TRADE    work  43/ 44 blocked   0/ 720  creeping closer to look
+      Severinus    SHOP     work 256/357 blocked   0/ 720  as close as I can get
+      Cassia       WATCH    work 301/303 blocked   0/ 720  
+      Titus        WATCH    work 308/308 blocked   0/ 720  searching nearby (2)
+      Decimus      WATCH    work 305/305 blocked   0/ 720  getting up and dressed
+      Quintus      WATCH    work 168/169 blocked   0/ 720  
+      Sextus       WATCH    work 165/166 blocked   0/ 720  getting up and dressed
+      Lucilla      SHOP     work 286/320 blocked   2/ 720  as close as I can get
+      Flavia       SHOP     work 252/344 blocked   2/ 720  
+      Aurelia      CLERGY   work 286/380 blocked   0/ 720  
+      Philon       CLERGY   work 269/311 blocked   4/ 720  as close as I can get
+      Nikias       LEISURED work   0/  0 blocked   0/ 720  as close as I can get
+      Gaius        TRADE    work 268/272 blocked   0/ 720  as close as I can get
+      Servius      LEISURED work   0/  0 blocked   0/ 720  
+      Octavia      TRADE    work 212/313 blocked   0/ 720  as close as I can get
+      Marcellus    TRADE    work 299/324 blocked   0/ 720  as close as I can get
+      Cornelia     TRADE    work 273/288 blocked   0/ 720  as close as I can get
+      Lucius       TRADE    work 295/299 blocked   0/ 720  creeping closer to look
+      Atalanta     TRADE    work 406/408 blocked   0/ 720  
+      Livia        TRADE    work 157/186 blocked   0/ 720  as close as I can get
+      Maximus      WATCH    work 309/309 blocked   0/ 720  
+      Arthur       TRADE    work 267/298 blocked   1/ 720  as close as I can get
+      Sir Lancelot WATCH    work 160/161 blocked   0/ 720  as close as I can get
+      Sir Gawain   TRADE    work 337/370 blocked   0/ 720  as close as I can get
+      Tristan      TRADE    work 391/396 blocked   0/ 720  
+      Percival     TRADE    work 227/234 blocked   0/ 720  
+      Merlin       TRADE    work 209/222 blocked   0/ 720  
+      Aeldric      TRADE    work 266/269 blocked   1/ 720  creeping closer to look
+      Brannoc      TRADE    work 316/321 blocked   0/ 720  fetching help
+      Corren       TRADE    work 182/185 blocked   0/ 720  creeping closer to look
+      Deryn        TRADE    work 229/276 blocked   2/ 720  
+      Eirwen       TRADE    work 235/276 blocked   1/ 720  
+      Fennric      TRADE    work 263/296 blocked   2/ 720  
+      Garron       TRADE    work 202/258 blocked   4/ 720  
+      Haldren      TRADE    work 253/288 blocked   0/ 720  
+      Istren       SHOP     work 253/253 blocked   7/ 720  looking round the spot
+      Maerwyn      SHOP     work 244/321 blocked   2/ 720  as close as I can get
+      Tobin        GROWER   work 234/284 blocked   0/ 720  creeping closer to look
+      Hedda        GROWER   work 306/330 blocked   0/ 720  as close as I can get
+      Rufus        GROWER   work 309/332 blocked   0/ 720  
+      Valeria      GROWER   work 253/340 blocked   0/ 720  
+      Hamon        INN      work 350/463 blocked   2/ 720  
+      Bess         INN      work 416/525 blocked   0/ 720  
+      Wilfred      INN      work 300/353 blocked   0/ 720  on the way
+      Vibius       INN      work 417/448 blocked   0/ 720  
+      Julia        INN      work 405/483 blocked   0/ 720  as close as I can get
+      Appius       INN      work 378/462 blocked   0/ 720  as close as I can get
+      Hildric      TRADE    work  46/225 blocked   0/ 720  creeping closer to look
+      Odda         SHOP     work 281/381 blocked   4/ 720  
+      Wendel       TRADE    work 187/263 blocked   4/ 720  fetching help
+      Mabyn        TRADE    work 154/290 blocked   1/ 720  
+      Elsbet       TRADE    work 302/411 blocked   0/ 720  noticed something
+      Tamsyn       TRADE    work 198/288 blocked   0/ 720  noticed something
+      Osric        TRADE    work 287/352 blocked   2/ 720  
+      Rowena       TRADE    work 377/393 blocked   0/ 720  as close as I can get
+      Ansel        GROWER   work 182/305 blocked   0/ 720  
+      Beatrix      TRADE    work 275/377 blocked   0/ 720  noticed something
+      Morwen       TRADE    work 133/234 blocked   0/ 720  
+      Sabine       LEISURED work   0/  0 blocked   0/ 720  
+      Brand        TRADE    work 211/317 blocked   0/ 720  creeping closer to look
+      Kerra        TRADE    work 231/297 blocked   0/ 720  
+      Baron Edric  SHOP     work 395/405 blocked   0/ 720  
+      Sir Roland   WATCH    work 309/311 blocked   0/ 720  on the way
+      Marta        TRADE    work 360/365 blocked   5/ 720  on the way
+      Osric        TRADE    work 364/376 blocked   0/ 720  arrived
+      Bram         TRADE    work 333/348 blocked   0/ 720  arrived
+      Elsie        GROWER   work 216/235 blocked  76/ 720  on the way
+
+
+Gradle Test Executor 117 finished executing tests.
+
+> Task :test FAILED
+
+WeeklyLifeTest > theTownsLiveThroughTwoDaysAtSpeed() FAILED
+    org.opentest4j.AssertionFailedError: Hildric was not at work when the plan said work
+    sown 34, harvested 36, apples 96, meals eaten at an inn 38, patrons 38
+      DevCity Inn: meals 8 drinks 8 nights 0 produce bought 50; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 vegetable_stew, 1 apple, 1 apple, 1 apple, 1 apple, 1 bread, 1 bread, 1 potato, 1 apple, 1 hot_cider, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 15 barley, 2 hops, 7 glass_bottle, 1 bottle_of_water, 1 apple, 1 potato, 1 potato, 1 potato, 1 potato, 1 potato, 1 potato, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 bread, 1 bread, 1 bread, 1 bread]
+      DevPalace Taberna: meals 12 drinks 10 nights 0 produce bought 61; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 apple, 1 apple, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 carrot, 1 carrot, 1 potato, 1 bread, 1 bread, 1 carrot, 1 potato, 1 apple, 1 apple, 1 potato, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 barley, 16 hops, 6 glass_bottle, 1 carrot, 1 apple, 1 apple, 1 potato, 1 onion, 1 onion, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 bread, 1 bread, 1 bread, 1 bread]
+    goals: {SLEEP=12667, WANDER=1193, FLEE=190, WATCH=40, INN=2358, FIGHT=142, SOCIALIZE=2793, RETURN=14, INVESTIGATE=2869, AID=6, PRAY=658, FIRE_RESPONSE=28, BANK=581, HIDE=264, SEARCH=389, WARN=7, CASE=24, PATROL=1830, IDLE=4, SHELTER=10064, EAT=1243, WORK=22483, ERRAND=1403, REPORT_CRIME=215, LOOK=174, HOME=7481}
+      Ada          SHOP     work 386/410 blocked   0/ 720  noticed something
+      Bram         WATCH    work 135/135 blocked   7/ 720  going to look
+      Cole         WATCH    work 164/164 blocked   0/ 720  going to look
+      Dag          TRADE    work 268/294 blocked   5/ 720  noticed something
+      Eda          TRADE    work 247/293 blocked   2/ 720  
+      Gus          SHOP     work 327/369 blocked   2/ 720  
+      Hale         WATCH    work 293/307 blocked   0/ 720  
+      Ivo          TRADE    work 275/309 blocked   4/ 720  
+      Jun          SHOP     work 382/391 blocked   0/ 720  
+      Kit          SHOP     work 249/317 blocked   2/ 720  
+      Mara         GROWER   work 260/287 blocked   2/ 720  
+      Morrow       CLERGY   work 268/308 blocked   2/ 720  as close as I can get
+      Silas        SHOP     work 174/284 blocked   2/ 720  
+      Bobwin       WATCH    work 139/140 blocked   0/ 720  going to look
+      Oswin        LEISURED work  88/ 88 blocked   0/ 720  noticed something
+      Maud         CLERGY   work 263/271 blocked   2/ 720  fetching help
+      Alric        CLERGY   work 231/236 blocked   1/ 720  noticed something
+      Godric       TRADE    work 320/340 blocked   0/ 720  calling out
+      Isolde       LEISURED work 196/196 blocked   0/ 720  
+      Elowen       TRADE    work 283/284 blocked   0/ 720  
+      Oren         TRADE    work 141/161 blocked   0/ 720  
+      Tamsin       TRADE    work 221/238 blocked   0/ 720  
+      Sir Alden    WATCH    work 161/162 blocked   0/ 720  
+      Fenna        TRADE    work 386/388 blocked   0/ 720  
+      Wren         SHOP     work 375/408 blocked   3/ 720  
+      Hilda        TRADE    work 248/266 blocked   0/ 720  
+      Bertram      TRADE    work 269/274 blocked   0/ 720  
+      Sir Roderic  WATCH    work 293/307 blocked   0/ 720  getting up and dressed
+      Wynn         TRADE    work 201/202 blocked   0/ 720  
+      Corwin       TRADE    work  43/ 44 blocked   0/ 720  creeping closer to look
+      Severinus    SHOP     work 256/357 blocked   0/ 720  as close as I can get
+      Cassia       WATCH    work 301/303 blocked   0/ 720  
+      Titus        WATCH    work 308/308 blocked   0/ 720  searching nearby (2)
+      Decimus      WATCH    work 305/305 blocked   0/ 720  getting up and dressed
+      Quintus      WATCH    work 168/169 blocked   0/ 720  
+      Sextus       WATCH    work 165/166 blocked   0/ 720  getting up and dressed
+      Lucilla      SHOP     work 286/320 blocked   2/ 720  as close as I can get
+      Flavia       SHOP     work 252/344 blocked   2/ 720  
+      Aurelia      CLERGY   work 286/380 blocked   0/ 720  
+      Philon       CLERGY   work 269/311 blocked   4/ 720  as close as I can get
+      Nikias       LEISURED work   0/  0 blocked   0/ 720  as close as I can get
+      Gaius        TRADE    work 268/272 blocked   0/ 720  as close as I can get
+      Servius      LEISURED work   0/  0 blocked   0/ 720  
+      Octavia      TRADE    work 212/313 blocked   0/ 720  as close as I can get
+      Marcellus    TRADE    work 299/324 blocked   0/ 720  as close as I can get
+      Cornelia     TRADE    work 273/288 blocked   0/ 720  as close as I can get
+      Lucius       TRADE    work 295/299 blocked   0/ 720  creeping closer to look
+      Atalanta     TRADE    work 406/408 blocked   0/ 720  
+      Livia        TRADE    work 157/186 blocked   0/ 720  as close as I can get
+      Maximus      WATCH    work 309/309 blocked   0/ 720  
+      Arthur       TRADE    work 267/298 blocked   1/ 720  as close as I can get
+      Sir Lancelot WATCH    work 160/161 blocked   0/ 720  as close as I can get
+      Sir Gawain   TRADE    work 337/370 blocked   0/ 720  as close as I can get
+      Tristan      TRADE    work 391/396 blocked   0/ 720  
+      Percival     TRADE    work 227/234 blocked   0/ 720  
+      Merlin       TRADE    work 209/222 blocked   0/ 720  
+      Aeldric      TRADE    work 266/269 blocked   1/ 720  creeping closer to look
+      Brannoc      TRADE    work 316/321 blocked   0/ 720  fetching help
+      Corren       TRADE    work 182/185 blocked   0/ 720  creeping closer to look
+      Deryn        TRADE    work 229/276 blocked   2/ 720  
+      Eirwen       TRADE    work 235/276 blocked   1/ 720  
+      Fennric      TRADE    work 263/296 blocked   2/ 720  
+      Garron       TRADE    work 202/258 blocked   4/ 720  
+      Haldren      TRADE    work 253/288 blocked   0/ 720  
+      Istren       SHOP     work 253/253 blocked   7/ 720  looking round the spot
+      Maerwyn      SHOP     work 244/321 blocked   2/ 720  as close as I can get
+      Tobin        GROWER   work 234/284 blocked   0/ 720  creeping closer to look
+      Hedda        GROWER   work 306/330 blocked   0/ 720  as close as I can get
+      Rufus        GROWER   work 309/332 blocked   0/ 720  
+      Valeria      GROWER   work 253/340 blocked   0/ 720  
+      Hamon        INN      work 350/463 blocked   2/ 720  
+      Bess         INN      work 416/525 blocked   0/ 720  
+      Wilfred      INN      work 300/353 blocked   0/ 720  on the way
+      Vibius       INN      work 417/448 blocked   0/ 720  
+      Julia        INN      work 405/483 blocked   0/ 720  as close as I can get
+      Appius       INN      work 378/462 blocked   0/ 720  as close as I can get
+      Hildric      TRADE    work  46/225 blocked   0/ 720  creeping closer to look
+      Odda         SHOP     work 281/381 blocked   4/ 720  
+      Wendel       TRADE    work 187/263 blocked   4/ 720  fetching help
+      Mabyn        TRADE    work 154/290 blocked   1/ 720  
+      Elsbet       TRADE    work 302/411 blocked   0/ 720  noticed something
+      Tamsyn       TRADE    work 198/288 blocked   0/ 720  noticed something
+      Osric        TRADE    work 287/352 blocked   2/ 720  
+      Rowena       TRADE    work 377/393 blocked   0/ 720  as close as I can get
+      Ansel        GROWER   work 182/305 blocked   0/ 720  
+      Beatrix      TRADE    work 275/377 blocked   0/ 720  noticed something
+      Morwen       TRADE    work 133/234 blocked   0/ 720  
+      Sabine       LEISURED work   0/  0 blocked   0/ 720  
+      Brand        TRADE    work 211/317 blocked   0/ 720  creeping closer to look
+      Kerra        TRADE    work 231/297 blocked   0/ 720  
+      Baron Edric  SHOP     work 395/405 blocked   0/ 720  
+      Sir Roland   WATCH    work 309/311 blocked   0/ 720  on the way
+      Marta        TRADE    work 360/365 blocked   5/ 720  on the way
+      Osric        TRADE    work 364/376 blocked   0/ 720  arrived
+      Bram         TRADE    work 333/348 blocked   0/ 720  arrived
+      Elsie        GROWER   work 216/235 blocked  76/ 720  on the way
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.WeeklyLifeTest.theTownsLiveThroughTwoDaysAtSpeed(WeeklyLifeTest.java:120)
+
+1 test completed, 1 failed
+Finished generating test XML results (0.011 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.016 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 11m 48s
+9 actionable tasks: 3 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

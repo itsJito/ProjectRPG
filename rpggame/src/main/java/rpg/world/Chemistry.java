@@ -25,8 +25,19 @@ public final class Chemistry {
     private final Map<Long,Double> cleansed=new HashMap<>();
     private final Map<Long,Double> smothered=new HashMap<>();
     private final Set<Long> objectReceivers=new HashSet<>();
+    /**
+     * (0.3.9) The bit that marks a sensor as a thing's, not a body's: the furniture, doors, stations, chests and dropped
+     * items share the engine's sensor numbers with the people, and several fixtures have the same number as someone (a
+     * bed and the villager Eda were both 505 - fire on the one burned, and was credited to, the other). Plants carry a
+     * bit of their own (Foliage).
+     */
+    public static final long OBJECT_SENSOR = 1L << 50;
+    /** A thing's chemistry state (burning, burnt, wet...) by its own id. */
+    public int objectState(long id) { return states.getOrDefault(id | OBJECT_SENSOR, 0); }
     public List<Snapshots.Chemical> active = List.of();
     private double next;
+    /** (0.3.9) Snapshots still to be passed over after a load (they predate the engine's reset). */
+    private int staleSnapshot;
     private record Edit(int x,int y,int z,int original,int block) {}
     private final Map<Long,Edit> edits=new HashMap<>();
     private void changed(long id,int x,int y,int z,int original,int block) {
@@ -305,24 +316,28 @@ public final class Chemistry {
             if(!physical)continue;
             // (0.3.2) only what is about the player, or already alight or warm: the chemistry's receivers are bounded, and
             // every chair and dropped item on the map held one for good (the plants by the player were left without)
-            if(Math.hypot(object.x-g.player.x,object.z-g.player.z)>56 && states.getOrDefault(object.id,0)==0)continue;
+            if(Math.hypot(object.x-g.player.x,object.z-g.player.z)>56 && objectState(object.id)==0)continue;
             boolean wood=object instanceof rpg.objects.Door door && !door.cellDoor || object instanceof rpg.objects.Container || object instanceof rpg.objects.Furniture furniture && furniture.kind!=rpg.objects.Furniture.Kind.HEADSTONE
                     || object instanceof rpg.objects.GroundItem item && !item.stack.def.conductive;
             int tags=wood?CHEM_FLAMMABLE:CHEM_CONDUCTIVE;
-            objects.add(object.id);g.game.commands().chemSensor(object.id,0,object.x,object.y+0.25f,object.z,0.45f,tags,0,wood?6:0,0,0,false);
+            objects.add(object.id | OBJECT_SENSOR);g.game.commands().chemSensor(object.id | OBJECT_SENSOR,0,object.x,object.y+0.25f,object.z,0.45f,tags,0,wood?6:0,0,0,false);
         }
         for(long id:objectReceivers)if(!objects.contains(id))g.game.commands().chemRemove(id);
         objectReceivers.clear();objectReceivers.addAll(objects);
         cleansed.entrySet().removeIf(entry->g.time>entry.getValue());
         smothered.entrySet().removeIf(entry->g.time>entry.getValue());
-        active = g.game.engine().chemistry().stream().filter(sensor->!cleansed.containsKey(sensor.id())).toList(); states.clear();
+        // (0.3.9) the first snapshot after a load was taken before the reset reached the engine: what it says burnt was the
+        // old world's, and acting on it charred again the cells the load had just restored
+        if (staleSnapshot > 0) { staleSnapshot--; active = List.of(); states.clear(); }
+        else active = g.game.engine().chemistry().stream().filter(sensor->!cleansed.containsKey(sensor.id())).toList(); states.clear();
         for (var sensor : active) {
             states.put(sensor.id(), sensor.state());
-            Actor a = g.actor(sensor.id());
+            boolean thing = sensor.id() >= 0 && (sensor.id() & OBJECT_SENSOR) != 0;
+            Actor a = thing ? null : g.actor(sensor.id());
             if(a==null) {
                 if(sensor.id()>=0){
                     g.foliage.chemical(sensor);
-                    var object=g.objects.get(sensor.id());
+                    var object=g.objects.get(thing ? sensor.id() & ~OBJECT_SENSOR : sensor.id());
                     if(object!=null && (sensor.state()&CHEM_BURNING)!=0 && (object instanceof rpg.objects.Door || object instanceof rpg.objects.Furniture || object instanceof rpg.objects.Container) && object.owner()!=sensor.owner())arson(sensor.owner(),sensor.x(),sensor.z());
                     if(object!=null && !(object instanceof Foliage.Patch) && sensor.heat()>0.35f)object.charred=Math.min(1,object.charred+0.025f);
                     continue;
@@ -409,7 +424,7 @@ public final class Chemistry {
         return out;
     }
     public void load(List<Object> records) {
-        g.game.commands().chemReset(); retired.clear();registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear();
+        g.game.commands().chemReset(); staleSnapshot = 1; retired.clear();registered.clear();objectReceivers.clear();cleansed.clear();smothered.clear(); states.clear(); hurtAgain.clear(); active = List.of(); thawAt.clear();
         // (0.3.6) the bodies are registered again on the very next pass (it waited a quarter of a second, and anything set
         // alight in between - a fire thrown the moment after a respawn - met no one); the reset and the restores below are
         // queued ahead of it, so they still replace the old native snapshot first

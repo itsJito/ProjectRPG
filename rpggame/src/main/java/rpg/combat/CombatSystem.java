@@ -91,7 +91,7 @@ public final class CombatSystem {
     /** How long a piece of ammunition is, tail to point (m). */
     public static float ammoLength(ItemDef d) {
         if (d.family == Family.BOLT) return 0.45f;
-        if (d.family == Family.THROWN) return switch (d.thrown) { case "javelin" -> 1.8f; case "tomahawk" -> 0.42f; case "knife" -> 0.3f; default -> 0.22f; };
+        if (d.family == Family.THROWN) return switch (d.thrown) { case "javelin" -> 1.5f; case "tomahawk" -> 0.42f; case "knife" -> 0.3f; default -> 0.22f; };
         return 0.85f;
     }
 
@@ -921,6 +921,37 @@ public final class CombatSystem {
             a.cs.struck.add(v.id); meleeContact(a, v, m, grip[0] + dx * contact, grip[1] + dy * contact, grip[2] + dz * contact);
             if (a.cs.phase != Phase.ACTIVE) return true;
         }
+        // (0.3.8) a crate, a box, a barrel or a sign the blade's line meets: struck where it lands, once a swing; a blade
+        // bites and stops in it, unless the blow burst it (then it carries on through what is left)
+        if (g.breakables != null && !g.breakables.all.isEmpty()) {
+            Object[] hit = g.breakables.ray(grip[0], grip[1], grip[2], dx, dy, dz, limit);
+            if (hit != null && !a.cs.struck.contains(BREAKABLE_KEY - ((rpg.objects.Breakable) hit[0]).id)) {
+                rpg.objects.Breakable b = (rpg.objects.Breakable) hit[0];
+                a.cs.struck.add(BREAKABLE_KEY - b.id);
+                ItemDef w = a.cs.offHand ? a.off() : a.main();
+                boolean weapon = w != null && m != Move.PUNCH && m != Move.BASH;
+                float potential = Math.max(weapon ? 2 : 1, physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0)) * CombatMath.moveDamage(m) / CombatMath.HP_SCALE;
+                ItemDef.DamageType type = !weapon ? ItemDef.DamageType.BLUNT : m == Move.THRUST ? ItemDef.DamageType.PIERCE : w.damageType;
+                g.breakables.strike(b, (int) hit[2], (int) hit[3], (int) hit[4], potential, dx, dy, dz, type, (m == Move.HEAVY ? 90 : 45) * (weapon ? 1 : 0.6f), a);
+                if (!b.broken && weapon) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return true; }
+            }
+        }
+        // (0.3.8) the furniture the blade's line meets: the part it lands on takes the blow, once a swing; a blade stops
+        // in anything stout enough to stand it
+        if (g.wreckage != null) {
+            Object[] hit = g.wreckage.ray(grip[0], grip[1], grip[2], dx, dy, dz, limit);
+            if (hit != null && !a.cs.struck.contains(FURNITURE_KEY - ((rpg.objects.Furniture) hit[0]).id)) {
+                rpg.objects.Furniture fu = (rpg.objects.Furniture) hit[0];
+                float t = (float) hit[1];
+                a.cs.struck.add(FURNITURE_KEY - fu.id);
+                ItemDef w = a.cs.offHand ? a.off() : a.main();
+                boolean weapon = w != null && m != Move.PUNCH && m != Move.BASH;
+                float potential = Math.max(weapon ? 2 : 1, physicalMax(a, Skill.STRENGTH, weapon ? w.strengthBonus : 0)) * CombatMath.moveDamage(m) / CombatMath.HP_SCALE;
+                ItemDef.DamageType type = !weapon ? ItemDef.DamageType.BLUNT : m == Move.THRUST ? ItemDef.DamageType.PIERCE : w.damageType;
+                g.wreckage.strike(fu, (int) hit[2], grip[0] + dx * t, grip[1] + dy * t, grip[2] + dz * t, potential, dx, dy, dz, type, a);
+                if (fu.exists() && weapon && fu.kind.block != rpg.world.Blocks.AIR) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return true; }
+            }
+        }
         // (0.3.5) a fish the blade (or the fist) passes through in the water: struck as any creature is
         if (g.fishery != null && !g.fishery.live.isEmpty()) {
             float[] at = new float[3];
@@ -936,6 +967,8 @@ public final class CombatSystem {
         }
         return false;
     }
+    /** (0.3.8) The struck-list key of a breakable, and of a piece of furniture (kept apart from actors' and fish's). */
+    private static final long BREAKABLE_KEY = -(1L << 44), FURNITURE_KEY = -(1L << 46);
     /** (0.3.5) The struck-list key of a fish (fish ids are their own; kept far below any actor's). */
     private static final long FISH_KEY = -(1L << 40);
 
@@ -1009,7 +1042,7 @@ public final class CombatSystem {
     /** Whether two actors on one team may still fight (a guard arresting a resisting townsperson). */
     private boolean hostileTo(Actor a, Actor v) { return g.ai != null && g.ai.hostile(a, v); }
     /** On the same side and not at odds: a shot that strikes them is a stray, not an attack. */
-    private boolean friendly(Actor a, Actor v) { return v.team != 0 && v.team == a.team && !hostileTo(a, v) || a.summonOwner == v.id || v.summonOwner == a.id; }
+    private boolean friendly(Actor a, Actor v) { return v.team != 0 && v.team == a.team && !hostileTo(a, v) || a.summonOwner == v.id || v.summonOwner == a.id || rpg.combat.Magic.companionBond(a, v); }
 
     /**
      * The first body other than the shooter and the target standing in the line from the shooter's eye to the target's
@@ -1124,6 +1157,7 @@ public final class CombatSystem {
         if(dealt>0 && (type==DamageType.SLASH || type==DamageType.PIERCE || type==DamageType.MAGIC && element!=Spells.Element.WATER))v.injuries.cut(v,px,py,pz,dealt);
         v.cs.lastHurt = g.time;
         v.cs.lastAttacker = a.id;
+        if (dealt > 0) { v.cs.lastDamageType = type; v.cs.lastRanged = proj != null; }
         v.cs.flash = 1;
         // impact against Stability, a channel of its own
         float stab = CombatMath.stability(v.skills.level(Skill.DEFENSE), v.skills.level(Skill.STRENGTH), v.eq.armor(), v.cs.stabilityBonus);
@@ -1379,23 +1413,27 @@ public final class CombatSystem {
     private void step(Projectile p, float dt) {
         if (p.target!=0) {
             Actor target=g.actor(p.target);
-            float aimY=target==null?0:target.chestY();
-            if(target!=null && target.alive && p.homing>0 && g.vox.sight(p.x,p.y,p.z,target.x,aimY,target.z)) {
-                // (0.3.1) toward where the mark will be when it gets there, turning no faster than its lock allows - it
-                // was steered at the chest as it stood (a moving mark was always behind) and snapped round at once
-                float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz);
-                float x=target.x-p.x,y=aimY-p.y,z=target.z-p.z,len=(float)Math.sqrt(x*x+y*y+z*z);
-                float lead=speed>0.1f?len/speed:0;
-                x+=target.vx*lead; z+=target.vz*lead; len=(float)Math.sqrt(x*x+y*y+z*z);
-                if(len>0.1f && speed>0.1f) {
-                    float cx=p.vx/speed,cy=p.vy/speed,cz=p.vz/speed, wx=x/len,wy=y/len,wz=z/len;
-                    float dot=Math.max(-1,Math.min(1,cx*wx+cy*wy+cz*wz)), angle=(float)Math.acos(dot);
+            if(target!=null && target.alive && p.homing>0 && g.vox.sight(p.x,p.y,p.z,target.x,Math.max(target.y+0.35f,Math.min(target.y+target.height-0.08f,p.y)),target.z)) {
+                // (0.3.1) toward where the mark will be when it gets there, turning no faster than its lock allows.
+                // (0.3.9) the lock steers the heading, round toward the mark; up and down it only brings a shot that
+                // would pass over or under back onto the body - a head shot stays a head shot (the old lock pulled every
+                // shot to the chest, so a bolt put through the head landed in the hip)
+                float speed=(float)Math.sqrt(p.vx*p.vx+p.vy*p.vy+p.vz*p.vz), hs=(float)Math.hypot(p.vx,p.vz);
+                float hx=target.x-p.x,hz=target.z-p.z,hd=(float)Math.hypot(hx,hz);
+                float lead=hs>0.1f?hd/hs:0;
+                hx+=target.vx*lead; hz+=target.vz*lead; hd=(float)Math.hypot(hx,hz);
+                if(hd>0.1f && hs>0.1f) {
+                    float heading=(float)Math.atan2(p.vx,p.vz), want=(float)Math.atan2(hx,hz), off=Actor.wrap(want-heading);
                     // behind it (passed, or dodged wide): the lock lets go
-                    if(angle>1.4f) p.target=0;
-                    else if(angle>1e-4f) {
-                        float k=Math.min(1,p.homing*dt/angle);
-                        float nx=cx+(wx-cx)*k,ny=cy+(wy-cy)*k,nz=cz+(wz-cz)*k,nl=(float)Math.sqrt(nx*nx+ny*ny+nz*nz);
-                        p.vx=nx/nl*speed;p.vy=ny/nl*speed;p.vz=nz/nl*speed;
+                    if(Math.abs(off)>1.4f) p.target=0;
+                    else {
+                        heading+=Math.max(-p.homing*dt,Math.min(p.homing*dt,off));
+                        p.vx=(float)Math.sin(heading)*hs; p.vz=(float)Math.cos(heading)*hs;
+                        float along=p.y+p.vy/hs*hd, lo=target.y+0.35f, hi=target.y+target.height-0.08f;
+                        if(along<lo || along>hi) {
+                            float wantVy=(Math.max(lo,Math.min(hi,along))-p.y)/hd*hs, most=p.homing*dt*speed;
+                            p.vy+=Math.max(-most,Math.min(most,wantVy-p.vy));
+                        }
                     }
                 }
             } else p.target=0;
@@ -1418,6 +1456,12 @@ public final class CombatSystem {
         boolean elemental = p.spell != null && (p.spell.element == Spells.Element.ICE || p.spell.element == Spells.Element.FIRE || p.spell.element == Spells.Element.ELECTRIC || p.spell.element == Spells.Element.WATER);
         Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, elemental);
         float wall = h.hit ? h.dist : len;
+        // (0.3.8) a crate, a box, a barrel or a sign in the way, nearer than any wall: what the shot meets first unless a body is nearer
+        Object[] crate = g.breakables == null || g.breakables.all.isEmpty() ? null : g.breakables.ray(p.x, p.y, p.z, sx / len, sy / len, sz / len, wall);
+        if (crate != null) wall = (float) crate[1];
+        // (0.3.8) and a piece of furniture nearer still
+        Object[] furn = g.wreckage == null ? null : g.wreckage.ray(p.x, p.y, p.z, sx / len, sy / len, sz / len, wall);
+        if (furn != null) { wall = (float) furn[1]; crate = null; }
         Actor struck = null;
         float nearest = Float.POSITIVE_INFINITY;
         float inv = 1 / Math.max(1e-6f, len);
@@ -1485,6 +1529,34 @@ public final class CombatSystem {
             g.glass.shatter(h.bx, h.by, h.bz, h.x, h.y, h.z, sx, sy, sz, p.spell != null ? 1.6f : 0.9f, p.owner);
             p.vx *= 0.7f; p.vy *= 0.7f; p.vz *= 0.7f;
             p.x = nx; p.y = ny; p.z = nz;
+            return;
+        }
+        if (furn != null) {
+            rpg.objects.Furniture fu = (rpg.objects.Furniture) furn[0];
+            float t = (float) furn[1], ux = sx / len, uy = sy / len, uz = sz / len;
+            p.done = true;
+            float hx = p.x + ux * t, hy = p.y + uy * t, hz = p.z + uz * t;
+            p.x = hx - ux * 0.05f; p.y = hy - uy * 0.05f; p.z = hz - uz * 0.05f;
+            ItemDef.DamageType type = p.spell != null ? ItemDef.DamageType.BLUNT : ItemDef.DamageType.PIERCE;
+            g.wreckage.strike(fu, (int) furn[2], hx, hy, hz, Math.max(1, p.potential) * (p.spell != null ? 1.4f : 1f), ux, uy, uz, type, p.owner);
+            if (p.spell != null) { spellImpact(p, p.x, p.y, p.z, null); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
+            if (breaks(p)) { g.glass.bottle(p.owner, p.x, p.y, p.z, sx, sy, sz); p.ammo = null; return; }
+            if (p.ammo != null) dropArrow(p);
+            return;
+        }
+        if (crate != null) {
+            // (0.3.8) into the wood: a point punches in, a spell bursts on it; the shot ends there (or falls out of a hole)
+            rpg.objects.Breakable b = (rpg.objects.Breakable) crate[0];
+            float t = (float) crate[1], ux = sx / len, uy = sy / len, uz = sz / len;
+            p.done = true;
+            p.x = p.x + ux * (t - 0.05f); p.y = p.y + uy * (t - 0.05f); p.z = p.z + uz * (t - 0.05f);
+            float speed = (float) Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+            ItemDef.DamageType type = p.spell != null ? ItemDef.DamageType.BLUNT : p.ammo != null && p.ammo.def.family == Family.THROWN && !p.ammo.def.thrown.equals("dart") && !p.ammo.def.thrown.equals("javelin") ? ItemDef.DamageType.SLASH : ItemDef.DamageType.PIERCE;
+            float damage = Math.max(1, p.potential) * (p.spell != null ? 1.4f : 1f);
+            g.breakables.strike(b, (int) crate[2], (int) crate[3], (int) crate[4], damage, ux, uy, uz, type, Math.min(60, speed * (p.spell != null ? 3 : 1.5f)), p.owner);
+            if (p.spell != null) { spellImpact(p, p.x, p.y, p.z, null); if (g.sfx != null) g.sfx.play("zap", p.x, p.y, p.z, 0.5f); return; }
+            if (breaks(p)) { g.glass.bottle(p.owner, p.x, p.y, p.z, sx, sy, sz); p.ammo = null; return; }
+            if (p.ammo != null) dropArrow(p);
             return;
         }
         if (h.hit) {

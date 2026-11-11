@@ -146,6 +146,12 @@ public final class Magic {
         }
     }
 
+    /** (0.3.9) The player's companions with the player and with each other. */
+    public static boolean companionBond(Actor a, Actor b) {
+        long la = a instanceof Npc na ? na.companionOf : 0, lb = b instanceof Npc nb ? nb.companionOf : 0;
+        return la != 0 && (la == b.id || la == lb) || lb != 0 && lb == a.id;
+    }
+
     public Spell combatSpell(Npc caster,Actor target) {
         Spell best=null;
         for(Spell spell:Spell.values()) {
@@ -190,7 +196,7 @@ public final class Magic {
         for (Actor other:g.actors()) if(other!=actor && other.alive && other.distTo(x,z)<actor.radius+other.radius && Math.abs(other.y-y)<actor.height)return false;
         return g.vox.solid((int)Math.floor(x),(int)Math.floor(y-0.1f),(int)Math.floor(z));
     }
-    public boolean allied(Actor a,Actor b) { return a==b || a.summonOwner==b.id || b.summonOwner==a.id || a.summonOwner!=0 && a.summonOwner==b.summonOwner || a.team!=0 && a.team==b.team && !g.ai.hostile(a,b); }
+    public boolean allied(Actor a,Actor b) { return a==b || a.summonOwner==b.id || b.summonOwner==a.id || a.summonOwner!=0 && a.summonOwner==b.summonOwner || companionBond(a,b) || a.team!=0 && a.team==b.team && !g.ai.hostile(a,b); }
     private void hostileEffect(Actor a,Actor target) {
         g.ai.onAttacked(target,a); g.law.onHit(a,target,0);
         target.cs.lastAttacker=a.id; target.cs.lastHurt=g.time;

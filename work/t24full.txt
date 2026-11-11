@@ -1,0 +1,41 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :test
+
+PolishSystemsTest > supportResidentsAndTheirMarketsSurviveRepeatedSavesWithoutDuplicates(Path) FAILED
+    org.opentest4j.AssertionFailedError: expected: <94> but was: <100>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+        at app//rpg.PolishSystemsTest.supportResidentsAndTheirMarketsSurviveRepeatedSavesWithoutDuplicates(PolishSystemsTest.java:72)
+
+Gamefixes031Test > aSaddledWildHorseIsBrokenInFarFasterThanABareOne() FAILED
+    org.opentest4j.AssertionFailedError: mounts ==> expected: <false> but was: <true>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+        at app//org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+        at app//rpg.ai.Gamefixes031Test.breakIn(Gamefixes031Test.java:52)
+        at app//rpg.ai.Gamefixes031Test.aSaddledWildHorseIsBrokenInFarFasterThanABareOne(Gamefixes031Test.java:92)
+
+Gamefixes032Test > anOrcBelowAPlayerOnAWallRoarsAndThrowsStonesUp() FAILED
+    org.opentest4j.AssertionFailedError: it threw stones up: striking at Isolde ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.Gamefixes032Test.anOrcBelowAPlayerOnAWallRoarsAndThrowsStonesUp(Gamefixes032Test.java:114)

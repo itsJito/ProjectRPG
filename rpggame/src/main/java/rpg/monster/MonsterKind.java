@@ -71,6 +71,14 @@ public enum MonsterKind {
     public float regen;
     /** Below this share of its HP it flees (or, for the stubborn, turns berserk instead). */
     public float woundedAt = 0.25f;
+    /**
+     * (0.3.8, gamefixes: monster AI was dumb - smarter, but not as smart as people) How much fighting sense the kind has,
+     * 0 - 1, a person's being 1: the share of blows it reads in time (to guard, step off or hop back), how often it
+     * punishes a miss, follows a blow with another and breaks a raised guard with a heavy one. Its Defense sharpens it.
+     */
+    public float cunning = 0.3f;
+    /** (0.3.8) Held together by nothing but its will: when it dies its bones come apart (Bones) rather than fall as one body. */
+    public boolean fallsApart;
     public boolean berserk;
     /** Drops (item id[:min-max] each): always, common, uncommon, rare, very rare. */
     public String[] always = {}, common = {}, uncommon = {}, rare = {}, veryRare = {};
@@ -121,28 +129,28 @@ public enum MonsterKind {
                 .drops(of("bones"), of("coins:2-18", "bronze_dagger", "bronze_spear", "bread", "raw_meat"), of("bronze_body", "bronze_spear", "wooden_shield", "guam:1-3", "plank:1-2", "cloth_roll"),
                         of("black_spear", "goblin_banner"), of("fire_staff")).looks(0x5E8A2E, 0x5A3A22)
                 .sounds("creature_misc", "creature_monster", "creature_hurt", "creature_die");
-        GOBLIN.woundedAt = 0.4f;
+        GOBLIN.woundedAt = 0.4f; GOBLIN.cunning = 0.5f;
         // organised warbands: proud, rarely flee unless the chieftain falls
         ORC.drives(0.5f, 0.15f, 0.8f, 0.8f, 0.35f, 0.6f, 0.2f).range(80, 2, 5, Active.ALWAYS).senses(22, 1.2f, 10, 300).gait(1.3f, 4.6f)
                 .weapon("fists", 4, 20, 0.7f, BLUNT, "iron_battleaxe", "iron_sword", "iron_axe", "steel_sword").ranged("iron_tomahawk", 12)
                 .drops(of("big_bones"), of("iron_sword", "iron_body", "coins:10-60", "iron_axe"), of("iron_body", "iron_battleaxe", "war_paint", "steel_sword"),
                         of("steel_battleaxe", "bloodied_standard"), of("black_helm", "clan_relic")).looks(0x5C6E4A, 0x3A2A20)
                 .sounds("creature_monster", "creature_roar", "creature_hurt", "creature_die");
-        ORC.woundedAt = 0.12f;
+        ORC.woundedAt = 0.12f; ORC.cunning = 0.55f;
         // a solitary brute: territorial ambusher, slow to anger, impossible to calm; regenerates; enraged below 30%
         TROLL.drives(0.7f, 0.08f, 0.6f, 0.95f, 0.5f, 0.1f, 0.05f).range(100, 1, 1, Active.DUSK_NIGHT).senses(12, 1.6f, 22, 600).gait(1.0f, 3.4f)
                 .weapon("fists", 9, 70, 1.4f, BLUNT, "granite_warhammer").ranged("boulder", 16)
                 .drops(of("big_bones", "troll_fat"), of("granite_mace", "rawhide:1-2", "guam:1-4"), of("granite_shield", "granite_warhammer", "iron_legs"),
                         of("cobalt_warhammer", "troll_totem"), of("troll_heart", "granite_warhammer")).looks(0x6E7268, 0x4A4A42)
                 .sounds("creature_roar", "creature_roar", "creature_hurt", "creature_die");
-        TROLL.regen = 0.6f; TROLL.woundedAt = 0.08f; TROLL.berserk = true; TROLL.weakness = Element.FIRE; TROLL.sydney = astratto.bridge.AstrattoNative.SYDNEY_GIANT;
+        TROLL.regen = 0.6f; TROLL.woundedAt = 0.08f; TROLL.cunning = 0.25f; TROLL.berserk = true; TROLL.weakness = Element.FIRE; TROLL.sydney = astratto.bridge.AstrattoNative.SYDNEY_GIANT;
         // harassers: mischievous tricksters, attracted to shiny things, fire and magic
         IMP.drives(0.4f, 0.6f, 0.5f, 0.3f, 0.3f, 0.5f, 0.95f).range(60, 2, 6, Active.DUSK_NIGHT).senses(24, 1.2f, 0, 60).gait(1.8f, 5.6f)
                 .weapon("claws", 1, 4, 0.4f, SLASH).ranged("firebolt", 16)
                 .drops(of("ashes"), of("coins:1-12", "beads", "trinket", "bread"), of("imp_charm", "uncut_sapphire", "magic_beads"),
                         of("imp_essence"), of("imp_contract")).looks(0xB0302A, 0x4A1A16)
                 .sounds("creature_misc", "creature_misc", "creature_hurt", "creature_die");
-        IMP.woundedAt = 0.5f; IMP.weakness = Element.ICE;
+        IMP.woundedAt = 0.5f; IMP.cunning = 0.4f; IMP.weakness = Element.ICE;
         BAT.drives(0.6f, 0.65f, 0.4f, 0.5f, 0.3f, 0.9f, 0.6f).range(80, 4, 8, Active.NIGHT).senses(10, 2.0f, 6, 40).gait(3.0f, 7.5f)
                 .weapon("bite", 1.5f, 4, 0.5f, PIERCE).ranged("screech", 8)
                 .drops(of("bat_wings"), of("small_fang", "guano"), of("wing_membrane", "coins:1-6"), of("giant_bat_eye", "sonic_essence"), of("vampiric_essence", "wing_cloak"))
@@ -159,18 +167,18 @@ public enum MonsterKind {
                 .weapon("claws", 4, 18, 0.7f, SLASH)
                 .drops(of("rotting_remains"), of("tattered_cloth", "bronze_sword", "soul_dust"), of("iron_helm", "guam:1-2", "iron_dagger"), of("black_sword", "undead_relic"), of("phylactery_fragment", "black_helm"))
                 .looks(0x6A7E5A, 0x4A4034).sounds("creature_slime", "creature_monster", "creature_slime", "creature_die");
-        ZOMBIE.woundedAt = 0; ZOMBIE.weakness = Element.FIRE; ZOMBIE.sydney = astratto.bridge.AstrattoNative.SYDNEY_INFECTED;
+        ZOMBIE.woundedAt = 0; ZOMBIE.cunning = 0.08f; ZOMBIE.weakness = Element.FIRE; ZOMBIE.sydney = astratto.bridge.AstrattoNative.SYDNEY_INFECTED;
         SKELETON.drives(0f, 0f, 0.5f, 1.0f, 0f, 0.6f, 0f).range(25, 2, 5, Active.ALWAYS).senses(18, 1.2f, 0, 60).gait(1.1f, 3.6f)
                 .weapon("fists", 2, 10, 0.6f, BLUNT, "iron_sword", "iron_sword", "iron_axe", "white_mace").ranged("shortbow", 18)
                 .drops(of("bones"), of("iron_sword", "iron_body", "soul_dust"), of("iron_sword", "guam", "coins:5-40"), of("champion_scroll", "white_mace"), of("white_helm", "soulbound_artifact"))
                 .looks(0xE6DECA, 0x8A8070).sounds("stones", "creature_misc", "stones", "stones");
-        SKELETON.woundedAt = 0;
+        SKELETON.woundedAt = 0; SKELETON.fallsApart = true;
         // an apex hunter: patient, cunning, stalks before it strikes; bolder under the full moon
         WEREWOLF.drives(0.8f, 0.4f, 0.8f, 0.6f, 0.35f, 0.4f, 0.7f).range(120, 1, 3, Active.NIGHT).senses(24, 1.6f, 30, 900).gait(1.6f, 7.2f)
                 .weapon("claws", 6, 30, 0.8f, SLASH)
                 .drops(of("wolf_bones", "wolf_pelt", "raw_meat"), of("claw", "fang", "bloodied_cloth"), of("silver_reagent", "quality_pelt"), of("werewolf_blood", "alpha_pelt"), of("cured_heart", "lunar_artifact"))
                 .looks(0x5A4A3A, 0x8A7A62).sounds("animal.wolf", "animal.wolf.growl", "animal.dog.hurt", "animal.dog.hurt");
-        WEREWOLF.woundedAt = 0.3f; WEREWOLF.sydney = astratto.bridge.AstrattoNative.SYDNEY_INFECTED;
+        WEREWOLF.woundedAt = 0.3f; WEREWOLF.cunning = 0.6f; WEREWOLF.sydney = astratto.bridge.AstrattoNative.SYDNEY_INFECTED;
         // the apex sovereign: rules its region; everything else reacts to it
         DRAGON.drives(0.5f, 0.05f, 0.7f, 1.0f, 0.2f, 0f, 0.4f).range(500, 1, 1, Active.ALWAYS).senses(60, 1.5f, 40, 3600).gait(2.4f, 9.0f)
                 .weapon("bite", 22, 160, 3.2f, PIERCE).ranged("breath", 22)

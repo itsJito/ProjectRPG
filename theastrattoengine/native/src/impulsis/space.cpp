@@ -7,6 +7,9 @@
 
 #include "core/job_pool.h"
 #include "impulsis/space.h"
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
 
 namespace astratto {
 namespace impulsis {
@@ -712,8 +715,28 @@ void Space::sleep(float dt) {
     }
 }
 
+// (2.10.1) ASTRATTO_PROFILE set: the step's phases timed (means over 600 steps, to stderr)
+static bool spaceProfiling() {
+#ifdef _WIN32
+    static const bool on = [] { char* v = nullptr; size_t n = 0; bool set = _dupenv_s(&v, &n, "ASTRATTO_PROFILE") == 0 && v != nullptr; std::free(v); return set; }();
+#else
+    static const bool on = std::getenv("ASTRATTO_PROFILE") != nullptr;
+#endif
+    return on;
+}
+static double phaseMs[8];
+static unsigned phaseSteps;
+static std::chrono::steady_clock::time_point phaseAt;
+static void phase(int k) {
+    const auto now = std::chrono::steady_clock::now();
+    if (k >= 0) phaseMs[k] += std::chrono::duration<double, std::milli>(now - phaseAt).count();
+    phaseAt = now;
+}
+
 void Space::step(const VoxelWorld* w, float gravity) {
     const float dt = step_;
+    const bool prof = spaceProfiling();
+    if (prof) phase(-1);
     // forces: gravity and damping (velocities first, positions after: semi-implicit Euler)
     for (Body& b : bodies_) {
         if (!b.dynamic() || !b.awake || b.proxy) continue;
@@ -725,16 +748,35 @@ void Space::step(const VoxelWorld* w, float gravity) {
         if (w2 > 3600.0f) b.w *= 60.0f / std::sqrt(w2);
     }
     for (Body& b : bodies_) if (b.proxy) b.v = b.drive;
+    if (prof) phase(0);
     broadphase();
+    if (prof) phase(1);
     narrowphase(w);
+    if (prof) phase(2);
     islands();
+    if (prof) phase(3);
     prepare(dt);
-    for (Joint& j : joints_) if (!j.broken) prepareJoint(j, dt);
+    if (prof) phase(7);
+    // (2.10.1, optimisation) a joint between bodies that are all asleep (a shut door on its hinge, a settled chain) has
+    // nothing to solve: it is passed over until something wakes one end. Every hinge in the world was prepared and solved
+    // ten times a step, asleep or not - most of the rigid bodies' time
+    active_.clear();
+    for (size_t k = 0; k < joints_.size(); k++) {
+        Joint& j = joints_[k];
+        if (j.broken) continue;
+        const Body& A = bodies_[static_cast<size_t>(j.a)];
+        const Body* B = j.b >= 0 ? &bodies_[static_cast<size_t>(j.b)] : nullptr;
+        const bool live = (A.dynamic() && A.awake) || A.proxy || (B && ((B->dynamic() && B->awake) || B->proxy));
+        if (!live) continue;
+        prepareJoint(j, dt);
+        active_.push_back(static_cast<int>(k));
+    }
     warmStart();
     for (int it = 0; it < iterations_; it++) {
-        for (Joint& j : joints_) if (!j.broken) solveJoint(j);
+        for (int k : active_) solveJoint(joints_[static_cast<size_t>(k)]);
         solveVelocities();
     }
+    if (prof) phase(4);
     for (Body& b : bodies_) if (b.proxy) { b.push += b.v - b.drive; b.pushSteps++; }
     // what the world's cells hold each body up with, and where
     for (Body& b : bodies_) { b.support = 0; b.cop = V3(); b.groundPoints = 0; }
@@ -755,9 +797,20 @@ void Space::step(const VoxelWorld* w, float gravity) {
         j.force = (len(j.Pp) + std::fabs(j.Plimit) + len(j.Pang)) / dt;
         if (j.breakForce > 0 && j.force > j.breakForce) { j.broken = true; forget(j); broken_.push_back(j.handle); if (j.a >= 0) bodies_[static_cast<size_t>(j.a)].wake(); if (j.b >= 0) bodies_[static_cast<size_t>(j.b)].wake(); }
     }
+    if (prof) phase(5);
     integrate(dt, gravity);
     sweepBullets(w, dt);
     sleep(dt);
+    if (prof) {
+        phase(6);
+        if (++phaseSteps == 600) {
+            size_t awake = 0, proxies = 0; for (const Body& b : bodies_) { if (b.proxy) proxies++; else if (b.dynamic() && b.awake) awake++; }
+            std::fprintf(stderr, "[impulsis profile] per step ms: forces %.3f broad %.3f narrow %.3f islands %.3f solve %.3f support %.3f integrate+sleep %.3f prepare %.3f; bodies %zu (awake %zu, proxies %zu) pairs %zu manifolds %zu joints %zu\n",
+                    phaseMs[0] / 600, phaseMs[1] / 600, phaseMs[2] / 600, phaseMs[3] / 600, phaseMs[4] / 600, phaseMs[5] / 600, phaseMs[6] / 600, phaseMs[7] / 600, bodies_.size(), awake, proxies, pairs_.size(), manifolds_.size(), joints_.size());
+            for (double& v : phaseMs) v = 0;
+            phaseSteps = 0;
+        }
+    }
     // impacts: the first step two things touch, at speed; and the manifolds kept for warm starting
     for (Manifold& m : manifolds_) {
         float speed = 0, pn = 0; int bi = -1;

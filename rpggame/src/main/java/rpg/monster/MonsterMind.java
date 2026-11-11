@@ -369,7 +369,10 @@ public final class MonsterMind {
         // pacing: back and forth along a short beat under it
         float beat = (float) Math.sin(g.time * 0.7 + m.id) * 2.2f, side = (float) Math.cos(g.time * 0.31 + m.id) * 0.8f;
         float fx = (float) Math.sin(m.yaw), fz = (float) Math.cos(m.yaw);
-        sys.moveTo(m, t.x + fz * beat + fx * side, t.z - fx * beat + fz * side, false, 0.6f);
+        // (0.3.9) the beat is walked at the foot of what holds its prey up: the spot under it is inside the wall, and a
+        // body sent there stood still
+        float[] pace = sys.open(m, t.x + fz * beat + fx * side, t.z - fx * beat + fz * side);
+        sys.moveTo(m, pace[0], pace[1], false, 0.6f);
         m.wantYaw = yawTo(m, t.x, t.z);
         m.pitch = (float) Math.atan2(t.chestY() - m.chestY(), Math.max(0.3f, m.distTo(t)));
         if (g.time >= m.tauntAt + 6 + (m.id % 3)) {
@@ -379,8 +382,8 @@ public final class MonsterMind {
             m.lastOutcome = "roaring up at " + t.name;
         }
         boolean hands = m.kind.form == MonsterKind.Form.HUMANOID && m.kind != MonsterKind.GHOST && m.kind != MonsterKind.ZOMBIE;
-        if (hands && since > 3 && g.time >= m.nextRanged && Math.hypot(t.x - m.x, t.z - m.z) > 1.0f) {
-            m.nextRanged = g.time + 3.5 + (m.id % 4) * 0.4;
+        if (hands && since > 3 && g.time >= m.stoneAt && Math.hypot(t.x - m.x, t.z - m.z) > 1.0f) {
+            m.stoneAt = g.time + 3.5 + (m.id % 4) * 0.4;
             m.throwAt = g.time;
             g.combat.hurl(m, null, "boulder", t.x, t.chestY(), t.z, 15, 9.8f, Math.max(1, m.kind.damage * 0.35f), m.kind.impact * 0.4f, rpg.item.ItemDef.DamageType.BLUNT);
             m.lastOutcome = "throwing stones up at " + t.name;
@@ -447,8 +450,50 @@ public final class MonsterMind {
         if (sys.moveTo(m, m.tx, m.tz, false, 0.8f)) hold(m);
     }
 
+    /**
+     * (0.3.8) A raider about its range with no foe in sight wrecks what it finds: a crate, a box or a barrel near it is
+     * smashed, and what falls out of it carried off. True while it is at it.
+     */
+    private boolean vandal(Monster m) {
+        if (m.kind.archetype != Archetype.PACK_RAIDER || g.breakables == null || g.time < m.vandalAfter) return false;
+        rpg.objects.Breakable b = g.objects.get(m.vandalTarget) instanceof rpg.objects.Breakable o && !o.broken ? o : null;
+        if (b == null && m.vandalTarget != 0) {
+            // broken: what spilled from it, into its pack
+            rpg.interact.WorldObject spot = g.objects.get(m.vandalTarget);
+            if (spot != null) for (rpg.interact.WorldObject w : g.objects.all()) {
+                if (!(w instanceof rpg.objects.GroundItem gi) || gi.removed || gi.dir != null || Math.hypot(gi.x - spot.x, gi.z - spot.z) > 2.6f) continue;
+                if (!sys.moveTo(m, gi.x, gi.z, false, 0.7f)) return true;
+                if (m.store(gi.stack.copy(gi.stack.amount))) { gi.removed = true; if (gi.rigid != 0) { g.game.commands().release(gi.rigid); gi.rigid = 0; } g.state.commit("ItemTaken", m.id, gi.id, DevMap.jurisdiction(gi.x, gi.z), 0, gi.stack + " carried off by " + m.label()); }
+                return true;
+            }
+            m.vandalTarget = 0; m.vandalAfter = g.time + 40 + sys.rnd(m) * 60;
+            return false;
+        }
+        if (b == null) {
+            float bd = 9;
+            for (rpg.objects.Breakable o : g.breakables.all) {
+                if (o.broken || o.removed) continue;
+                float d = (float) Math.hypot(o.x - m.x, o.z - m.z);
+                if (d < bd && Math.abs(o.y - m.y) < 2.5f && g.vox.sight(m.x, m.eyeY(), m.z, o.x, o.y, o.z)) { bd = d; b = o; }
+            }
+            if (b == null) { m.vandalAfter = g.time + 6; return false; }
+            m.vandalTarget = b.id;
+            sys.sound(m, m.kind.alarmSound, 0.4f);
+        }
+        if (!sys.moveTo(m, b.x, b.z, false, reachOf(m) * 0.8f + m.radius + 0.35f)) return true;
+        hold(m);
+        m.wantYaw = yawTo(m, b.x, b.z);
+        if (g.time >= m.nextStrike && !m.cs.busy() && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) {
+            m.nextStrike = g.time + 0.9 + sys.rnd(m) * 0.6;
+            g.combat.attack(m, false, sys.rnd(m) < 0.4f ? Move.HEAVY : rpg.combat.CombatSystem.lightMove(m, false));
+        }
+        m.lastOutcome = "smashing the " + b.form.title.toLowerCase();
+        return true;
+    }
+
     /** The patrol: through its range along points it returns to, the pack in its pairs and threes, looking for food and checking the borders. */
     private void patrol(Monster m) {
+        if (vandal(m)) return;
         m.wantAltitude = m.kind.flies() ? (m.kind == MonsterKind.DRAGON ? 14 : 3.5f) : 0;
         if (!m.hasGoalPos || Math.hypot(m.x - m.tx, m.z - m.tz) < 1.5f) {
             // the pack's leader picks the way; the others keep near it
@@ -578,7 +623,10 @@ public final class MonsterMind {
         }
         // the harassers keep moving: hit and run; the ranged keep their distance; the brutes close in
         if (m.kind == MonsterKind.BAT) { batFight(m, t, d, reach, ranged); return; }
-        if (m.kind.archetype == Archetype.PACK_RAIDER) { packFight(m, t, d, reach, ranged, dt); return; }
+        // (0.3.8) a raider fights as a pack only with a pack on its foe: alone or in a pair it closes and fights, rather
+        // than dance on a ring round someone with nobody else to take a turn
+        if (m.kind.archetype == Archetype.PACK_RAIDER && engagedOn(m, t) >= 3) { packFight(m, t, d, reach, ranged, dt); return; }
+        m.swoop = 0;
         switch (m.kind.archetype) {
             case HARASSER -> {
                 if (ranged && sys.rnd(m) < 0.6) { sys.ranged(m, t); return; }
@@ -610,22 +658,15 @@ public final class MonsterMind {
                     sys.fightTo(m, t.x + (float) Math.cos(ang) * ring, t.z + (float) Math.sin(ang) * ring, false, 0.6f);
                     return;
                 }
-                // a blow wound up at it, read in time (its Defense makes it quicker to read): it steps off the line
-                boolean windup = t.cs.phase == rpg.actor.Actor.Combat.Phase.WINDUP && d < reach + 1.4f;
-                float read = Math.max(0.06f, 0.3f - m.skills.level(rpg.skill.Skill.DEFENSE) * 0.003f);
-                if (windup && t.cs.t >= read && sys.rnd(m) < 0.35f + m.skills.level(rpg.skill.Skill.DEFENSE) / 200f && m.kind.terror() < 20) {
-                    float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az)), side = (m.id & 1) == 0 ? 1 : -1;
-                    m.lastOutcome = "sidestepping " + t.name + "'s blow";
-                    sys.fightTo(m, m.x + ax / l * 1.4f - az / l * side * 1.2f, m.z + az / l * 1.4f + ax / l * side * 1.2f, true, 0.3f);
-                    return;
-                }
-                // a swing missed and the foe is recovering from it: in at once
-                if (t.cs.phase == rpg.actor.Actor.Combat.Phase.RECOVER && d <= reach + 0.6f && m.nextStrike - g.time < 0.5) m.nextStrike = g.time;
+                // (0.3.8) a blow wound up at it: read in time or not, as its wits allow - guarded, stepped off, or taken
+                if (defend(m, t, d, reach)) return;
+                // a swing missed and the foe is recovering from it: in at once (if it has the sense to see it)
+                if (t.cs.phase == rpg.actor.Actor.Combat.Phase.RECOVER && d <= reach + 0.6f && m.nextStrike - g.time < 0.5 && sys.rnd(m) < 0.4f + wits(m)) m.nextStrike = g.time;
                 // (0.3.1) a hovering body closes right in before it strikes: from the edge of its reach its blow fell short
                 if (d <= reach * (m.kind.flies() ? 0.5f : 1f) + STRIKE_SLACK) {
                     hold(m);
                     if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) {
-                        attack(m, t); m.lastOutcome = "striking at " + t.name;
+                        attack(m, t); m.lastOutcome = t.cs.blocking && m.kind.form == MonsterKind.Form.HUMANOID ? "battering " + t.name + "'s guard" : "striking at " + t.name;
                         if (contested && g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m);
                     }
                 }
@@ -731,13 +772,21 @@ public final class MonsterMind {
         int k = (i + 1) / 2;
         double slot = back + (i % 2 == 0 ? 1 : -1) * k * Math.min(1.1, 2 * Math.PI / Math.max(2, n));
         float ring = reach + t.radius + m.radius + 1.3f;
-        boolean threatened = t.cs.phase == Actor.Combat.Phase.WINDUP && d < 2.4f && Math.abs(rpg.actor.Actor.wrap(yawTo(t, m.x, m.z) - t.yaw)) < 0.7f;
+        // (0.3.8) a blow wound up at it is only fled if it was read in time: a slow wit takes it
+        boolean threatened = t.cs.phase == Actor.Combat.Phase.WINDUP && d < 2.4f && Math.abs(rpg.actor.Actor.wrap(yawTo(t, m.x, m.z) - t.yaw)) < 0.7f && reads(m, t);
         if (threatened && m.swoop != 2) { m.swoop = 2; m.swoopUntil = now + 0.7; }
+        // a miss is an opening: one on the ring goes in at once
+        if (t.cs.phase == Actor.Combat.Phase.RECOVER && d <= reach + 1.6f && m.swoop == 0 && now >= m.nextStrike - 0.3 && sys.rnd(m) < wits(m) + 0.2f) { m.swoop = 1; m.swoopUntil = now + 1.5; m.flurry = 0; }
         switch (m.swoop) {
             case 1 -> {   // darting in
                 if (d <= reach + STRIKE_SLACK) {
                     hold(m);
-                    if (now >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); m.lastOutcome = "darting in at " + t.name; m.swoop = 2; m.swoopUntil = now + 0.9; }
+                    if (now >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) {
+                        attack(m, t); m.lastOutcome = "darting in at " + t.name;
+                        // (0.3.8) a second blow before it falls back, now and then, while the foe is open
+                        if (m.flurry < 1 && !t.cs.blocking && sys.rnd(m) < wits(m)) { m.flurry++; m.nextStrike = Math.min(m.nextStrike, now + 0.55); m.swoopUntil = now + 1.2; }
+                        else { m.flurry = 0; m.swoop = 2; m.swoopUntil = now + 0.9; }
+                    }
                 } else sys.fightTo(m, t.x, t.z, true, reach * 0.9f + t.radius + m.radius);
                 if (now > m.swoopUntil) { m.swoop = 2; m.swoopUntil = now + 0.6; }
             }
@@ -773,8 +822,13 @@ public final class MonsterMind {
                 case SKELETON -> sys.rnd(m) < 0.3 ? Move.HEAVY : null;
                 default -> null;
             };
+            // (0.3.8) a raised guard is battered with a heavy blow - by one with the sense to
+            if (move == null && t.cs.blocking && sys.rnd(m) < 0.3f + wits(m)) move = Move.HEAVY;
             if (move == null) move = rpg.combat.CombatSystem.lightMove(m, false);
             if (!g.combat.attack(m, false, move)) m.nextStrike = g.time + 0.1;
+            // and a quick second blow now and then while the foe stands open
+            else if (move != Move.HEAVY && !t.cs.blocking && m.flurry < 1 && m.kind.archetype != Archetype.PACK_RAIDER && sys.rnd(m) < wits(m) * 0.8f) { m.flurry++; m.nextStrike = g.time + 0.6; }
+            else if (m.kind.archetype != Archetype.PACK_RAIDER) m.flurry = 0;
         } else {
             // the creatures: a visible, audible wind-up first (heavier = longer and clearer), then the strike
             String what = switch (m.kind) {
@@ -789,6 +843,49 @@ public final class MonsterMind {
             m.windupUntil = g.time + switch (m.kind) { case DRAGON -> 0.9; case GIANT_SPIDER -> 0.45; default -> 0.25; };
             sys.sound(m, m.kind.alarmSound, 0.6f);
         }
+    }
+
+    // ------------------------------------------------------------------ fighting sense (0.3.8)
+    /** Its fighting sense now: its kind's cunning, sharpened by its Defense; never a person's. */
+    static float wits(Monster m) { return Math.min(0.8f, m.kind.cunning * (0.7f + 0.6f * Math.min(1, m.skills.level(Skill.DEFENSE) / 60f))); }
+
+    /** How many of its own are fighting this foe near it (itself among them). */
+    private int engagedOn(Monster m, Actor t) {
+        int n = 1;
+        for (Monster o : sys.kin(m, 30)) if (o.target == t.id && o.state == State.ENGAGE && o.alive && o.distTo(t) < 12) n++;
+        return n;
+    }
+
+    /** Whether it read the foe's blow now under way in time (weighed once a blow, by its wits; quicker with Defense). */
+    private boolean reads(Monster m, Actor t) {
+        if (m.swingWeighed != t.cs.lastAttack) {
+            m.swingWeighed = t.cs.lastAttack;
+            m.swingRead = sys.rnd(m) < wits(m);
+        }
+        float when = Math.max(0.06f, 0.3f - m.skills.level(Skill.DEFENSE) * 0.003f);
+        return m.swingRead && (t.cs.phase != Actor.Combat.Phase.WINDUP || t.cs.t >= when);
+    }
+
+    /**
+     * A blow coming at it: read in time, a humanoid with a weapon or a shield in hand puts it up (and lowers it when the
+     * blow is spent); without one, or against a blow too heavy to stand, it steps off the line. A blow not read is taken.
+     * True while it is busy answering the blow.
+     */
+    private boolean defend(Monster m, Actor t, float d, float reach) {
+        boolean coming = (t.cs.phase == Actor.Combat.Phase.WINDUP || t.cs.phase == Actor.Combat.Phase.ACTIVE) && d < reach + 1.6f
+                && Math.abs(rpg.actor.Actor.wrap(yawTo(t, m.x, m.z) - t.yaw)) < 0.9f;
+        if (!coming) { if (m.cs.blocking) g.combat.setBlock(m, false); return false; }
+        if (m.kind.terror() >= 20 || !reads(m, t)) return false;
+        boolean guard = m.kind.form == MonsterKind.Form.HUMANOID && (m.off() != null && m.off().family == rpg.item.ItemDef.Family.SHIELD || m.main() != null && !m.main().natural && m.main().damage > 0);
+        if (guard && t.cs.move != Move.HEAVY && m.stamina > 10) {
+            g.combat.setBlock(m, true);
+            if (m.cs.blocking) { hold(m); m.wantYaw = yawTo(m, t.x, t.z); m.lastOutcome = "guarding against " + t.name + "'s blow"; return true; }
+        }
+        if (t.cs.phase != Actor.Combat.Phase.WINDUP) return false;
+        float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az)), side = (m.id & 1) == 0 ? 1 : -1;
+        m.lastOutcome = "sidestepping " + t.name + "'s blow";
+        sys.fightTo(m, m.x + ax / l * 1.4f - az / l * side * 1.2f, m.z + az / l * 1.4f + ax / l * side * 1.2f, true, 0.3f);
+        return true;
     }
 
     // ------------------------------------------------------------------ helpers

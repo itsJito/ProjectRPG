@@ -36,6 +36,8 @@ class Gamefixes031Test {
     // ------------------------------------------------------------------ mounts: saddle first, then break it in
     private Animal wild(Species s) {
         yard();
+        // a wild horse bolts where it likes, tens of metres: nobody about (bandits it ran among set on its rider)
+        for (Npc o : new java.util.ArrayList<>(g.npcs)) g.ai.unload(o);
         Animal h = g.animals.spawnNew(s, false, true, 64.5f, 62.5f, null, 0, 0);
         h.yaw = 0;
         g.player.inv.clear();
@@ -49,7 +51,7 @@ class Gamefixes031Test {
         float seconds = 0;
         for (int tries = 0; tries < 30 && h.tamedBy != g.player.id; tries++) {
             g.teleport(g.player, h.x + 1.6f, DevMap.FLOOR, h.z); game.tick(0);
-            assertFalse(g.riding.mount(g.player, h).rejected(), "mounts");
+            var mr = g.riding.mount(g.player, h); assertFalse(mr.rejected(), "mounts: " + mr + " at " + h.x + "," + h.z + " busy " + g.player.cs.busy() + " phase " + g.player.cs.phase + " goal " + h.goal + " fear " + h.fear + " try " + tries + " s " + seconds); g.riding.seatNow(g.player);
             while (g.player.riding != 0 && h.tamedBy != g.player.id && seconds < 240) { game.tick(1f / 60); seconds += 1f / 60; }
             if (g.player.riding == 0 && h.tamedBy != g.player.id) throwsTaken++;
             if (g.player.riding == 0) { g.player.reacting = false; g.player.restore(); ticks(30); }
@@ -106,7 +108,7 @@ class Gamefixes031Test {
         assertTrue(s[0] * 2 < b[0], "the saddle makes it far easier: " + s[0] + " vs " + b[0]);
         // and once tamed, saddled, it is ridden where it is steered
         g.teleport(g.player, saddled.x + 1.6f, DevMap.FLOOR, saddled.z); game.tick(0);
-        assertTrue(g.interact.request(g.player, saddled, "mount").committed() || g.player.riding == saddled.id);
+        assertTrue(g.interact.request(g.player, saddled, "mount").committed() || g.player.riding == saddled.id); g.riding.seatNow(g.player);
         float x0 = saddled.x, z0 = saddled.z;
         for (int i = 0; i < 90; i++) { g.controller.in.forward = 1; game.tick(1f / 60); }
         g.controller.in.forward = 0;

@@ -314,9 +314,8 @@ final class Livelihoods {
         int seat = g.inns.takeSeat(inn, n);
         if (seat < 0) { n.lastOutcome = "the inn is full; drinking standing"; float[] c = inn.layout.customerSpot(); brain.goTo(n, c[0] - 1.6f, c[1] + 2f, false, 1.2f); consume(n, inn); return true; }
         float[] s = inn.seats.get(seat);
-        if (!brain.goTo(n, s[0], s[1], false, 0.35f)) { n.seat = Math.max(0, n.seat - 0.1f); n.lastOutcome = "to a seat at " + inn.name(); return true; }
-        g.ai.desire(n, AiSystem.A_IDLE);
-        n.seated = true; n.seatYaw = s[2]; n.wantYaw = s[2];
+        // (0.3.9) the bench is solid: in from its open side and down onto it
+        if (!brain.seating.sit(n, s[0], s[3], s[1], s[2])) { n.seat = Math.max(0, n.seat - 0.1f); n.lastOutcome = "to a seat at " + inn.name(); return true; }
         consume(n, inn);
         // company: whoever sits close is talked with - news goes round the table
         if (g.time >= n.innTalkAt) {
@@ -354,7 +353,7 @@ final class Livelihoods {
             n.innFareAt = 0; n.holdingFare = null;
         }
     }
-    void leave(Npc n) { n.seated = false; g.inns.leaveSeat(n); n.innFareAt = 0; n.holdingFare = null; }
+    void leave(Npc n) { brain.seating.stand(n); g.inns.leaveSeat(n); n.innFareAt = 0; n.holdingFare = null; }
 
     private String pick(Npc n, String... lines) { return lines[(int) Math.floorMod(n.id * 31 + (long) (g.time / 9), (long) lines.length)]; }
 }

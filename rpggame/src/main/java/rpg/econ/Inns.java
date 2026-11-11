@@ -161,7 +161,7 @@ public final class Inns {
                 Furniture t = null; float bd = 9;
                 for (Furniture table : inn.tables) { float d = (float) Math.hypot(table.x - (x + 0.5f), table.z - (z + 0.5f)); if (d < bd) { bd = d; t = table; } }
                 float yaw = t == null ? 0 : (float) Math.atan2(-(t.x - (x + 0.5f)), -(t.z - (z + 0.5f)));
-                inn.seats.add(new float[]{x + 0.5f, z + 0.5f, yaw});
+                inn.seats.add(new float[]{x + 0.5f, z + 0.5f, yaw, bench.floor});
             }
             inn.hearth = g.objects.add(new Station(nextId++, "range", l.name() + " hearth", Recipes.Station.RANGE, l.hearth()[0] + 0.5f, f + 0.6f, l.hearth()[1] + 0.5f));
             inn.larder = g.objects.add(new Container(nextId++, "chest", l.name() + " larder", "chest", l.larder()[0] + 0.5f, f + 0.4f, l.larder()[1] + 0.5f, 20, l.innkeeper()));

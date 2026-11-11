@@ -1,0 +1,248 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 99th build in daemon [uptime: 12 hrs 58 mins 52.234 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :theastrattoengine:compileJava (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:compileJava (Thread[#5449,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#5451,Execution worker,5,main]) started.
+Resolve mutations for :processResources (Thread[#5451,Execution worker,5,main]) started.
+:processResources (Thread[#5451,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:buildNative (Thread[#5449,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#5449,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#5449,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#5449,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#5449,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#5449,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#5453,Execution worker Thread 3,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#5453,Execution worker Thread 3,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:compileJava (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:classes (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:compileTestJava (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\WeeklyLifeTest.java has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\ZzDiagTest.java has been added.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.004 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 2 classes completed in 0.83 secs.
+Class dependency analysis for incremental compilation took 0.015 secs.
+Resolve mutations for :processTestResources (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:processTestResources (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:testClasses (Thread[#5453,Execution worker Thread 3,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#5453,Execution worker Thread 3,5,main]) started.
+:test (Thread[#5453,Execution worker Thread 3,5,main]) started.
+Gradle Test Executor 97 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Task has failed previously.
+Starting process 'Gradle Test Executor 97'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath15025032830699142715txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 97'
+Successfully started process 'Gradle Test Executor 97'
+
+ZzDiagTest > around() STANDARD_OUT
+    [diag] y=3
+     50 BBBBBHHHHHHHHHHBBBHHHEEEEEHHHHV
+     51 BBBBBHHHHHHHHHHBBBHNNNNNNNNNNHV
+     52 HHHHHHHHHHHHHHHBBBHNNNNNNNNNNHV
+     53 HHHHHHHHHHHHHHHBBBHNNNNNNNNNNHV
+     54 HHHHHHHHHHHHHHHBBBHHEEEEEEEEEEV
+     55 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     56 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     57 HHHHHHHH@HHHHHHBBBBBEEEEEEEEEEV
+     58 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     59 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     60 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     61 HHHHHHHHHHHHHHHBBBBBEEEEEEEEEEV
+     62 HHHHHHHHHHHHHHHBBBBBEEEEEEGEEEV
+     63 BBBBBHHHHHHHHHHBBBBBEEEEEEEEEEV
+     64 VVVVVHHHHHHHHHHBBBBBEEEEEEEEEEV
+     65 VVVVVHHHHHHHHHHBBBBBEEEEEEEEEEV
+     66 VVVVVHHHHHHHHHHBBBBBEEEEEEEEEEV
+
+    [diag] y=4
+     50 .....QV.V..V.VQ.P.I............
+     51 .....Q........Q.P.I............
+     52 IIIIRQ........Q.P.IB.........I.
+     53 QQQQHQ......VVQ.P.I..U..U....I.
+     54 .V.QHQ........Q.P.PIRPPPPPPPPR.
+     55 .V.QHQQQQ..QQQQ.P...PVV.V..VVP.
+     56 FFYFHQ........Q.P...PVV.V..VVP.
+     57 U...HQ..@....BQ.P...P........P.
+     58 ....HQ.U...U..Q.P...P........P.
+     59 ....HQ.U...U..Q.P...P........P.
+     60 ....HQ.....U..Q.P...PPPP..PPPP.
+     61 ....HQ.....U..Q.P...P.......BP.
+     62 JJJJRQ.U...U..Q.P...P.....GU.P.
+     63 .....X.U......Q.P...P.UU...U.P.
+     64 .....X........Q.P.FFP......U.P.
+     65 .....Q........Q.P.PPP...U..U.P.
+     66 .....QU...UU..Q.P.PPP...U..U.P.
+
+    [diag] y=5
+     50 .....Q........Q.P.O............
+     51 .....Q........Q.P.O............
+     52 IIIIRQ........Q.P.O..........P.
+     53 QQQQHQ........Q.P.O..........P.
+     54 ...QHQ........Q.P.PRRPPFPPPPPR.
+     55 ...QHQQQQ..QQQQ.P...P........P.
+     56 FFYFFQ........Q.P...P........P.
+     57 ....FQ..@.....Q.P...P........P.
+     58 ....HF........Q.P...F........F.
+     59 ....HQ........F.P...P........P.
+     60 ....HQ........Q.P...PPPP..PPPP.
+     61 ....HQ........Q.P...P........P.
+     62 JJJJRQ........F.P...P.....G..P.
+     63 .....X........Q.P...P........P.
+     64 .....X........Q.P...F........P.
+     65 .....Q........Q.P.FFP........P.
+     66 .....Q........Q.P.PPP........P.
+
+    [diag] bram 114.5,55.0 home DevCity
+    [diag] obj Door 118.5,56.5 rpg.objects.Door@d3957fe
+    [diag] obj Furniture 117.5,55.0 rpg.objects.Furniture@158a3b2e
+    [diag] obj Board 116.5,58.5 rpg.objects.Fixtures$Board@25a6944c
+    [diag] obj Furniture 138.0,58.5 rpg.objects.Furniture@5e1fa5b1
+    [diag] obj Furniture 144.0,58.5 rpg.objects.Furniture@6b00f608
+    [diag] obj Furniture 127.5,60.5 rpg.objects.Furniture@2f17e30d
+    [diag] obj Furniture 123.5,59.0 rpg.objects.Furniture@3e821657
+    [diag] obj Furniture 122.5,59.0 rpg.objects.Furniture@1d131e1b
+    [diag] obj Furniture 124.5,59.0 rpg.objects.Furniture@71cf1b07
+    [diag] obj Furniture 123.5,63.0 rpg.objects.Furniture@615091b8
+    [diag] obj Furniture 122.5,63.0 rpg.objects.Furniture@4fce136b
+    [diag] obj Furniture 124.5,63.0 rpg.objects.Furniture@4aa83f4f
+    [diag] obj Furniture 127.0,66.5 rpg.objects.Furniture@43b6123e
+    [diag] obj Furniture 127.0,65.5 rpg.objects.Furniture@260e86a1
+    [diag] obj Furniture 129.0,53.5 rpg.objects.Furniture@19648c40
+    [diag] obj Station 129.5,57.5 rpg.objects.Station@12bd8a64
+    [diag] obj Container 129.5,64.5 rpg.objects.Container@61e94def
+    [diag] obj Door 121.5,64.0 rpg.objects.Door@3300f4fd
+    [diag] obj Furniture 143.5,64.5 rpg.objects.Furniture@ebb6851
+    [diag] obj Furniture 139.0,63.5 rpg.objects.Furniture@70ab2d48
+    [diag] obj Furniture 139.0,62.5 rpg.objects.Furniture@5b068087
+    [diag] obj Furniture 139.0,64.5 rpg.objects.Furniture@6f152006
+    [diag] obj Furniture 139.0,66.5 rpg.objects.Furniture@3a393455
+    [diag] obj Furniture 140.5,66.0 rpg.objects.Furniture@13518f37
+    [diag] obj Furniture 141.5,66.0 rpg.objects.Furniture@7cbc3762
+    [diag] obj Furniture 137.5,56.0 rpg.objects.Furniture@3a6f2de3
+    [diag] obj Furniture 138.5,56.0 rpg.objects.Furniture@49872d67
+    [diag] obj Furniture 140.5,56.0 rpg.objects.Furniture@56303b57
+    [diag] obj Furniture 143.5,56.0 rpg.objects.Furniture@4b2a01d4
+    [diag] obj Furniture 144.5,56.0 rpg.objects.Furniture@8692d67
+    [diag] obj Station 144.5,61.5 rpg.objects.Station@78f5c518
+    [diag] obj Furniture 135.5,52.5 rpg.objects.Furniture@2f48b3d2
+    [diag] obj Furniture 137.5,53.5 rpg.objects.Furniture@34f7234e
+    [diag] obj Furniture 140.5,53.5 rpg.objects.Furniture@753432a2
+
+Gradle Test Executor 97 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.002 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.008 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 22s
+9 actionable tasks: 2 executed, 7 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

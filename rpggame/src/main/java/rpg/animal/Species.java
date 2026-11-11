@@ -29,7 +29,13 @@ public enum Species {
     /** (0.3.0, gamefixes) the Pegasus: a horse built like a war horse - broad, deep-chested, heavy-legged - with a horn and great wings: it flies. */
     PEGASUS("Pegasus", "Foal", 1.62f, 1.85f, 0.6f, Plan.QUAD, 1.7f, 8.4f, Diet.GRAZER, Group.HERD, 1, 2, false, false),
     /** (0.3.4, gamefixes) the Deer: a light, long-legged grazer of the woods - wary, quick to bolt, the bears' and wolves' prey; a buck carries antlers. */
-    DEER("Deer", "Fawn", 0.8f, 1.45f, 0.5f, Plan.QUAD, 1.4f, 7.0f, Diet.GRAZER, Group.HERD, 2, 5, false, false);
+    DEER("Deer", "Fawn", 0.8f, 1.45f, 0.5f, Plan.QUAD, 1.4f, 7.0f, Diet.GRAZER, Group.HERD, 2, 5, false, false),
+    /**
+     * (0.3.9, gamefixes: a new mount and apex predator) the Dire Wolf: built like a Barbary lion - a great tawny cat of a
+     * body, deep in the chest and heavy in the shoulder, under a black mane that runs down over its shoulders and belly.
+     * It hunts anything in the wood and fears nothing in it; broken in as a horse is, it carries a rider.
+     */
+    DIRE_WOLF("Dire wolf", "Cub", 1.4f, 1.75f, 0.45f, Plan.QUAD, 1.6f, 8.6f, Diet.HUNTER, Group.SOLO, 1, 1, false, true);
 
     /** Body plan: how the model is built and how it walks. */
     public enum Plan { QUAD, BIRD, HOPPER }
@@ -89,6 +95,8 @@ public enum Species {
      * cool off; the rest only cross water when it is the way.
      */
     public float wades;
+    /** (0.3.9) Whether it can be broken in and ridden (a saddle fits it, the Riding rules carry it). */
+    public boolean mount;
     /** (0.3.4) Whether it swims: crosses deep water, held up at the surface (a duck sits on any water). */
     public boolean swims;
     /**
@@ -100,8 +108,9 @@ public enum Species {
     public static final float WADE_PACE = 1.5f;
     static {
         // the weaknesses on record: fur and fire
-        for (Species s : new Species[]{BROWN_BEAR, WOLF, COYOTE, FOX, MOUNTAIN_LION}) s.weakness = rpg.combat.Spells.Element.FIRE;
-        for (Species s : new Species[]{DUCK, WOLF, DOG, FOX, COYOTE, BROWN_BEAR, HORSE, PEGASUS, COW, DEER}) s.swims = true;
+        for (Species s : new Species[]{BROWN_BEAR, WOLF, COYOTE, FOX, MOUNTAIN_LION, DIRE_WOLF}) s.weakness = rpg.combat.Spells.Element.FIRE;
+        for (Species s : new Species[]{DUCK, WOLF, DOG, FOX, COYOTE, BROWN_BEAR, HORSE, PEGASUS, COW, DEER, DIRE_WOLF}) s.swims = true;
+        for (Species s : new Species[]{HORSE, PEGASUS, DIRE_WOLF}) s.mount = true;
         for (Species s : values()) s.swim = Math.max(0.5f, Math.min(1.6f, s.run * 0.2f));
         DUCK.swim = 0.9f;
         DUCK.wades = 0.55f; COW.wades = 0.2f; HORSE.wades = 0.15f; BROWN_BEAR.wades = 0.2f; PIG.wades = 0.12f; DOG.wades = 0.1f; SHEEP.wades = 0.04f;
@@ -151,6 +160,11 @@ public enum Species {
         PEGASUS.defends = true; PEGASUS.wades = 0.15f;
         DEER.skills(6, 8, 6, 14, 30).weapon("kick", 4, 34, 0.55f, DamageType.BLUNT).senses(1.45f, 1.8f, 18, 11).breeds(1200, 1, 2, 4320, 2880).yields(4, 1, true, 0).sounds(null, "animal.deer", "animal.deer.hurt", "animal.deer.hurt");
         DEER.wades = 0.12f;
+        // (0.3.9) the apex: stronger than a bear, quicker than a lion, and it does not run from anything
+        DIRE_WOLF.skills(48, 50, 38, 60, 38).weapon("maul", 12, 95, 0.85f, DamageType.SLASH).senses(1.45f, 1.6f, 16, 0).breeds(1440, 1, 2, 5760, 4320).yields(9, 3, true, 0)
+                .sounds("animal.lion", "animal.lion.growl", "animal.lion.growl", "animal.lion.growl");
+        DIRE_WOLF.defends = true;
+        DIRE_WOLF.prey.addAll(EnumSet.of(RABBIT, SHEEP, PIG, COW, HORSE, DEER, DUCK, CHICKEN, DOG, COYOTE, FOX, WOLF, CAT, MOUNTAIN_LION));
     }
 
     /** A wild hunter: has prey and is not kept by people. */

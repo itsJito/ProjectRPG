@@ -59,7 +59,11 @@ class MagicGoreTest {
 
     @Test void aKillingSpellToTheHeadTakesItOff() {
         // aimed at the head: a little up from level at six metres
-        float head = (float) Math.atan2(foe.y + foe.height * 0.93f - g.player.eyeY(), 6);
+        // the target stands still for it (a villager who has seen a spell cast at them would rather be elsewhere)
+        foe.goal = rpg.ai.Brain.Goal.IDLE; foe.nextThink = g.time + 1e6; game.tick(1f / 60);
+        float head = (float) Math.atan2(foe.y + foe.height * 0.93f - g.player.eyeY(), (float) Math.hypot(foe.x - g.player.x, foe.z - g.player.z));
+        // the crosshair on the head, as a player lines it up (the spell flies to the point under it)
+        g.player.firstPerson = true; g.controller.camYaw = 0; g.controller.camPitch = head; game.tick(1f / 60);
         cast(Spell.WIND_BOLT, head, 10000, 0);
         for (int i = 0; i < 90 && foe.alive; i++) game.tick(1f / 60);
         assertFalse(foe.alive, "the bolt killed");

@@ -134,6 +134,13 @@ public final class Animal extends Actor implements Interactable {
      */
     public final float[] seatDelta = new float[16];
     public double seatAt = -1;
+    /**
+     * (0.3.9, gamefixes: Pegasus flight animation polished and dynamic) the wings' stroke phase (radians, run on by the
+     * work the wings are doing), the airspeed and the height over the ground under it while flown, and when its rider last
+     * called for a surge of the wings.
+     */
+    public float wingPhase, flightSpeed, flightHeight = 99;
+    public double surgeAt = -99;
     public final rpg.item.Inventory bags = new rpg.item.Inventory(6, 4);
 
     public Animal(long id, Species s, boolean baby, boolean female, float x, float z) {

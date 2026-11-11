@@ -77,15 +77,28 @@ public final class Repairs {
             known.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
     }
     public record Report(Damage damage,Npc recipient) {}
+    /** (0.3.9) How many of the damages one knows of are weighed in one think. */
+    static final int REPORT_WEIGH = 24;
     public Report reportFor(Npc witness) {
         if(!witness.alive || !witness.loaded || witness.summonOwner!=0 || witness.hostileToPlayer || witness.role==Npc.Role.THIEF)return null;
         var seen=known.get(witness.id);if(seen==null)return null;
+        // (0.3.9, optimisation: a fire's charred blocks stalled the world for seconds) who could take a report is a short
+        // list - the hands with a hammer and the lawmen - gathered once, not the whole roster for every damaged block;
+        // and a think weighs a bounded number of the damages it knows of
+        java.util.List<Npc> pool=new java.util.ArrayList<>();
+        for(Npc candidate:g.npcs) {
+            if(candidate==witness || !candidate.alive || !candidate.loaded || candidate.summonOwner!=0 || candidate.hostileToPlayer)continue;
+            if(candidate.role==Npc.Role.LAWMAN || hammer(candidate))pool.add(candidate);
+        }
+        if(pool.isEmpty())return null;
+        var mine=reported.getOrDefault(witness.id,java.util.Set.of());
+        int weighed=0;
         for(long key:seen) {
             Damage damage=open.get(key);
-            if(damage==null || trade(witness,damage) && hammer(witness) || reported.getOrDefault(witness.id,java.util.Set.of()).contains(key))continue;
+            if(damage==null || trade(witness,damage) && hammer(witness) || mine.contains(key))continue;
+            if(++weighed>REPORT_WEIGH)break;
             Npc recipient=null;float best=Float.MAX_VALUE;
-            for(Npc candidate:g.npcs) {
-                if(candidate==witness || !candidate.alive || !candidate.loaded || candidate.summonOwner!=0 || candidate.hostileToPlayer)continue;
+            for(Npc candidate:pool) {
                 boolean builder=trade(candidate,damage) && hammer(candidate), officer=candidate.role==Npc.Role.LAWMAN && candidate.homeJurisdiction.equals(damage.jurisdiction);
                 if(!builder && !officer)continue;
                 if(witness.role==Npc.Role.LAWMAN ? !builder : !builder && !officer)continue;

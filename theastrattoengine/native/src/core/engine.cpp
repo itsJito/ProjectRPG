@@ -1,6 +1,9 @@
 #include "core/engine.h"
 
 #include <chrono>
+#include <typeinfo>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include "ai/ai_service.h"
@@ -255,6 +258,16 @@ int32_t Engine::command(const uint8_t* rec, uint32_t bytes) {
     return ASTRATTO_OK;
 }
 
+/** ASTRATTO_PROFILE set: each service's step and the questions timed, the means written to stderr every 300 frames. */
+static bool profiling() {
+#ifdef _WIN32
+    static const bool on = [] { char* v = nullptr; size_t n = 0; bool set = _dupenv_s(&v, &n, "ASTRATTO_PROFILE") == 0 && v != nullptr; std::free(v); return set; }();
+#else
+    static const bool on = std::getenv("ASTRATTO_PROFILE") != nullptr;
+#endif
+    return on;
+}
+
 // ------------------------------------------------------------------ the tick
 int32_t Engine::frame(const uint8_t* commands, uint32_t bytes, float dt) {
     const auto t0 = std::chrono::steady_clock::now();
@@ -280,12 +293,43 @@ int32_t Engine::frame(const uint8_t* commands, uint32_t bytes, float dt) {
 
     // 2. + 3. modules (the first service), then the simulation, in service order
     const auto s0 = std::chrono::steady_clock::now();
-    for (const auto& s : services_) s->step(*this, dt);
+    // (2.10.1) ASTRATTO_PROFILE set: each service's step timed, the means printed every 300 frames (stderr)
+    static const bool profile = profiling();
+    if (!profile) for (const auto& s : services_) s->step(*this, dt);
+    else {
+        static double spent[16] = {};
+        static double answers = 0;
+        static unsigned counted = 0;
+        size_t i = 0;
+        for (const auto& s : services_) {
+            const auto a = std::chrono::steady_clock::now();
+            s->step(*this, dt);
+            if (i < 16) spent[i] += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count();
+            i++;
+        }
+        (void)answers;
+        if (++counted == 300) {
+            std::fprintf(stderr, "[astratto profile] mean ms per frame by service:");
+            for (size_t k = 0; k < services_.size() && k < 16; k++) { std::fprintf(stderr, " %s=%.2f", typeid(*services_[k]).name(), spent[k] / counted); spent[k] = 0; }
+            std::fprintf(stderr, "\n");
+            counted = 0;
+        }
+    }
     stats_.sim_ms = std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - s0).count();
     stats_.sim_time += dt;
 
     // 4. the questions, against the world as the batch and the step left it
-    answerQuestions(status);
+    {
+        static const bool profileQ = profiling();
+        static double q = 0, cmd = 0; static unsigned n = 0;
+        const auto a = std::chrono::steady_clock::now();
+        answerQuestions(status);
+        if (profileQ) {
+            q += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count();
+            cmd += std::chrono::duration<double, std::milli>(s0 - t0).count();
+            if (++n == 300) { std::fprintf(stderr, "[astratto profile] questions %.2f ms, commands %.2f ms per frame\n", q / n, cmd / n); q = cmd = 0; n = 0; }
+        }
+    }
 
     // 5. modules see what happened
     for (const auto& s : services_) s->frameEnd(*this);

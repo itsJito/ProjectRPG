@@ -497,9 +497,212 @@ final class Textures {
             case L_COAL_BLOCK -> { stones(cv, 18, 0x24222A, 0.25f, 2.6f, 0x0E0C10, 0.9f, 0.6f); glints(cv, 18, 0x8A9AC0); }
             case L_HAY_TOP -> { straw(cv, 0xD6AE48, false, 260); }
             case L_HAY_SIDE -> { straw(cv, 0xD2AA46, true, 240); for (float by : new float[]{16, 46}) for (int x = 0; x < T; x++) { cv.dab(x, by, 0.6f, 1.6f, 0, rgb(0x8A5E2A), 1, 0.3f); cv.light(Canvas.w((int) by - 1) * T + x, 0.3f); } }
+            // 0.3.8: the library's new materials
+            case L_PAPER_GREEN -> damask(cv, 0x2E5A3E, 0x4E8A5C, 0xC8A85A);
+            case L_PAPER_RED -> damask(cv, 0x6E1E22, 0x9A3A36, 0xD0A860);
+            case L_PAPER_BLUE -> damask(cv, 0x23365E, 0x3E5A8E, 0xD8C890);
+            case L_WAINSCOT -> wainscot(cv);
+            case L_PARQUET -> parquet(cv);
+            case L_DARK_PLANKS -> { boards(cv, 4, true, 0x5A3820, 0.12f, 1.4f, false, 0.25f); grainLines(cv, true, 0x2E1C10, 14); grainLines(cv, true, 0x7A5432, 6); }
+            case L_CHECKER -> checker(cv);
+            case L_FLAGSTONE -> { stones(cv, 6, 0x9A968A, 0.22f, 2.6f, 0x4E4A40, 1.4f, 0.15f); cracks(cv, 3, 0x5E5A50); moss(cv, 0x5A7A30, 3, false); }
+            case L_SLATE -> slate(cv);
+            case L_TIMBER -> timber(cv);
+            case L_MOSSY -> { bricks(cv, 4, 2, 0x84867A, 0.18f, 0x3A3C34, 0.8f, 3f, 1.2f); cracks(cv, 5, 0x44463C); moss(cv, 0x4E7A26, 22, false); moss(cv, 0x6E9A36, 10, true); }
+            case L_TERRACOTTA -> terracotta(cv);
+            case L_VELVET -> velvet(cv);
+            case L_THATCH -> { straw(cv, 0xB89048, true, 300); for (int y = 0; y < T; y += 16) for (int x = 0; x < T; x++) cv.light(y * T + x, -0.35f); grime(cv, 0.06f); }
+            case L_THATCH_TOP -> { straw(cv, 0xC09A50, false, 280); grime(cv, 0.05f); }
+            case L_BASALT -> basalt(cv, false);
+            case L_BASALT_TOP -> basalt(cv, true);
+            case L_STAINED -> stained(cv);
+            case L_GRAVEL -> gravel(cv);
+            case L_BRASS -> { plate(cv, 0xC8A050, false); for (int k = 0; k < 4; k++) cv.tone(cv.rf() * T, cv.rf() * T, 4, 1.5f, cv.rf() * 3, 0.4f, 0.9f); for (int y = 0; y < T; y += 21) for (int x = 0; x < T; x++) { cv.light(y * T + x, -0.4f); cv.light(Canvas.w(y + 1) * T + x, 0.35f); } }
             default -> { cv.fill(0xFF00FF); }
         }
         return cv.out();
+    }
+
+    // ---- 0.3.8: a fine house's finishes, and the builder's new materials
+    /**
+     * Damask wallpaper: a field with a printed pattern in a lighter tone of itself - a stylised flower in a pointed
+     * medallion, set on a half-drop so the repeat tiles in both directions - picked out with a thin metallic line, and the
+     * paper's own faint texture over it.
+     */
+    static void damask(Canvas cv, int field, int print, int gilt) {
+        cv.fill(field);
+        cv.mottle(0.06f, 3);
+        float[] pr = rgb(print), gd = rgb(gilt);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            // two medallions per tile: one centred, one half a step over and down (the half-drop)
+            float best = 9;
+            for (float[] c : new float[][]{{16, 16}, {48, 48}, {48, -16}, {16, 80}, {-16, 48}, {80, 48}, {48, 16 + 64}, {16 - 64, 16}}) {
+                float dx = (x + 0.5f - c[0]), dy = (y + 0.5f - c[1]);
+                // a pointed oval (the medallion), with a four-petal flower inside
+                float m = Math.abs(dx) / 11f + Math.abs(dy) / 15f;
+                best = Math.min(best, m);
+                float ang = (float) Math.atan2(dy, dx), rr = (float) Math.sqrt(dx * dx + dy * dy);
+                float petal = 4.2f + 2.0f * (float) Math.cos(ang * 4);
+                if (rr < petal) cv.set(i, pr, 0.5f);
+                if (Math.abs(rr - petal) < 0.45f) cv.set(i, gd, 0.22f);
+                if (rr < 1.2f) cv.set(i, gd, 0.35f);
+            }
+            if (Math.abs(best - 1) < 0.05f) cv.set(i, gd, 0.3f);
+            else if (best < 1 && best > 0.84f) cv.set(i, pr, 0.35f);
+            // the leaves between: small diamonds on the diagonal lattice
+            float lx = Math.abs(((x + 32) % 32) - 16f), ly = Math.abs(((y) % 32) - 16f);
+            if (lx + ly < 2.4f) cv.set(i, pr, 0.4f);
+            cv.light(i, (cv.noise(5, x, y) - 0.5f) * 0.05f);
+        }
+    }
+
+    /** Wood panelling: a rail top and bottom, two raised panels between stiles, the panels' bevels catching the light. */
+    static void wainscot(Canvas cv) {
+        cv.fill(0x6A4428);
+        cv.mottle(0.1f, 5);
+        grainLines(cv, false, 0x3A2414, 14);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            boolean rail = y < 6 || y >= T - 7, stile = x % 32 < 4;
+            if (rail || stile) { cv.light(i, rail && (y == 0 || y == T - 7) ? 0.35f : rail && (y == 5 || y == T - 1) ? -0.4f : 0.05f); continue; }
+            // inside a panel: its bevel (lit on the upper left, shadowed lower right), then the flat field raised
+            int px = x % 32 - 4, py = y - 6, pw = 28, ph = T - 13;
+            int edge = Math.min(Math.min(px, pw - 1 - px), Math.min(py, ph - 1 - py));
+            if (edge < 3) cv.light(i, (px < pw - 1 - px && py < ph - 1 - py ? (px < py ? 0.3f : 0.22f) : -0.32f) * (1 - edge / 3f));
+            else if (edge == 3) cv.light(i, -0.18f);
+            else cv.light(i, 0.06f);
+        }
+        for (int k = 0; k < 3; k++) cv.tone(cv.rf() * T, cv.rf() * T, 10, 4, 0, 0.08f, 1);
+    }
+
+    /** Herringbone parquet: short oak blocks laid at right angles in zigzag rows, each its own tone, waxed. */
+    static void parquet(Canvas cv) {
+        cv.fill(0x9A6838);
+        int n = 64;
+        float[][] tones = new float[n][];
+        for (int k = 0; k < n; k++) tones[k] = jitter(cv, 0xA87444, 0.16f);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            // a herringbone of blocks 16 x 4: which way this texel's block runs, and its index
+            int u = Math.floorMod(x + y, 32), v = Math.floorMod(x - y, 64);
+            boolean across = u < 16;
+            int along = across ? Math.floorMod(x, 16) : Math.floorMod(y, 16);
+            int row = across ? Math.floorMod(y + (x / 16) * 4, 64) / 4 : Math.floorMod(x + (y / 16) * 4, 64) / 4;
+            int block = (row * 3 + (across ? 0 : 1) + v / 16) % n;
+            cv.set(i, tones[block], 1);
+            int seamA = Math.floorMod(x + y, 16), seamB = Math.floorMod(across ? y : x, 4);
+            if (seamA == 0 || seamB == 0) cv.light(i, -0.38f);
+            else if (seamA == 1 || seamB == 1) cv.light(i, 0.12f);
+            cv.light(i, (cv.noise(5, x * (across ? 1 : 0.2f), y * (across ? 0.2f : 1)) - 0.5f) * 0.12f + (along % 7 == 3 ? -0.04f : 0));
+        }
+    }
+
+    /** A chequered floor of black and white polished marble squares, veined, the joints fine and dark. */
+    static void checker(Canvas cv) {
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            boolean white = ((x / 32) + (y / 32)) % 2 == 0;
+            float[] base = rgb(white ? 0xE8E4DA : 0x24222A);
+            cv.set(i, base, 1);
+            float vein = cv.noise(4, x * 0.6f + y * 0.4f, y * 0.9f - x * 0.2f);
+            if (Math.abs(vein - 0.5f) < 0.03f) cv.set(i, rgb(white ? 0x9A968E : 0x6A6876), 0.65f);
+            cv.light(i, (cv.broad(x, y) - 0.5f) * 0.12f);
+            if (x % 32 == 0 || y % 32 == 0) cv.set(i, rgb(0x46423E), 0.8f);
+            if (x % 32 == 1 || y % 32 == 1) cv.light(i, 0.15f);
+        }
+    }
+
+    /** Slate shingles: thin dark blue-grey slates in staggered courses, each a little ragged at its foot, a damp sheen. */
+    static void slate(Canvas cv) {
+        int rows = 6; float rh = (float) T / rows;
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            int row = (int) (y / rh);
+            float off = row % 2 == 0 ? 0 : 6;
+            int col = (int) Math.floor((x + off) / 12f);
+            float[] c = jitter(cv, 0x4A5260, 0.12f);
+            cv.set(i, mix(rgb(0x48505E), c, 0.5f), 1);
+            float inRow = y - row * rh, foot = rh - inRow;
+            float rag = 1.2f + 1.4f * cv.noise(5, x, row * 7);
+            if (foot < rag) cv.light(i, -0.5f);
+            else if (inRow < 1.5f) cv.light(i, 0.25f);
+            if (Math.floorMod((int) (x + off), 12) == 0) cv.light(i, -0.45f);
+            cv.light(i, (cv.noise(4, x + col * 13, y) - 0.5f) * 0.18f);
+        }
+        for (int k = 0; k < 4; k++) cv.dab(cv.rf() * T, cv.rf() * T, 2, 1, 0, rgb(0x6A7A5A), 0.3f, 0.9f);
+    }
+
+    /** Timber framing: cream plaster panels between dark oak posts, a rail across, and a brace on the diagonal. */
+    static void timber(Canvas cv) {
+        // (the frame itself is built of real beams round the panels; the panel is lime plaster, a shade warmer and with
+        // a little weathering under the beam above it)
+        plaster(cv);
+        for (int y = 0; y < 6; y++) for (int x = 0; x < T; x++) cv.light(y * T + x, -0.12f + y * 0.02f);
+        for (int k = 0; k < 6; k++) cv.tone(cv.rf() * T, T - 4 - cv.rf() * 8, 6, 2, 0, -0.06f, 1);
+    }
+
+    /** Terracotta: square fired-clay tiles, warm and uneven, the glaze worn off in the middle. */
+    static void terracotta(Canvas cv) {
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            int tx = x / 16, ty = y / 16;
+            float[] c = jitter(cv, 0xB0603A, 0.08f + ((tx * 7 + ty * 3) % 5) * 0.02f);
+            cv.set(i, c, 1);
+            int ex = x % 16, ey = y % 16;
+            if (ex == 0 || ey == 0) cv.set(i, rgb(0x8A7A66), 0.9f);
+            else if (ex == 1 || ey == 1) cv.light(i, 0.2f);
+            else if (ex == 15 || ey == 15) cv.light(i, -0.25f);
+            float worn = 1 - Math.min(1, (Math.abs(ex - 8f) + Math.abs(ey - 8f)) / 10f);
+            cv.light(i, worn * 0.12f + (cv.noise(4, x, y) - 0.5f) * 0.2f);
+        }
+    }
+
+    /** Velvet: a deep royal pile, its nap catching the light in soft drifts, a woven gold border. */
+    static void velvet(Canvas cv) {
+        carpet(cv, 0x2A2A6A, 0x6A1E2E, 0xD8B050);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) cv.light(y * T + x, (cv.noise(2, x * 1.3f, y) - 0.5f) * 0.35f);
+    }
+
+    /** Basalt: dark columnar stone - hexagon tops, long vertical prisms on the side. */
+    static void basalt(Canvas cv, boolean top) {
+        if (top) { stones(cv, 9, 0x3A3A42, 0.1f, 2.6f, 0x18181E, 1.2f, 0.05f); return; }
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            int col = x / 11;
+            cv.set(i, jitter(cv, 0x3C3C46, 0.06f + (col % 3) * 0.02f), 1);
+            if (x % 11 == 0) cv.light(i, -0.5f); else if (x % 11 == 1) cv.light(i, 0.25f);
+            cv.light(i, (cv.noise(3, x * 0.3f, y) - 0.5f) * 0.2f);
+            if (Math.floorMod(y + col * 17, 37) == 0) cv.light(i, -0.4f);
+        }
+    }
+
+    /** Stained glass: coloured panes in lead cames - a rose of jewel colours round a gold heart, clear quarries outside. */
+    static void stained(Canvas cv) {
+        cv.fill(0x9AB8C8);
+        int[] jewels = {0xB0283A, 0x2A4AB8, 0xE0B030, 0x2E8A4A, 0x7A3AA8};
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int i = y * T + x;
+            float dx = x + 0.5f - T / 2f, dy = y + 0.5f - T / 2f, r = (float) Math.sqrt(dx * dx + dy * dy);
+            float ang = (float) ((Math.atan2(dy, dx) + Math.PI) / (2 * Math.PI));
+            int sector = (int) (ang * 10) % 10;
+            if (r < 6) cv.set(i, rgb(0xE8C040), 1);
+            else if (r < 22) cv.set(i, rgb(jewels[(sector + (r < 14 ? 0 : 2)) % jewels.length]), 1);
+            else cv.set(i, rgb(((x / 16 + y / 16) & 1) == 0 ? 0xA8C4D2 : 0x90ACBA), 1);
+            boolean lead = Math.abs(r - 6) < 0.8f || Math.abs(r - 14) < 0.8f || Math.abs(r - 22) < 0.9f || r >= 6 && r < 22 && Math.abs(ang * 10 - Math.round(ang * 10)) * r * 0.63f < 0.6f
+                    || r >= 22 && (Math.floorMod(x + y, 16) == 0 || Math.floorMod(x - y, 16) == 0) || x == 0 || y == 0;
+            if (lead) cv.set(i, rgb(0x2A2A30), 1);
+            else cv.light(i, (cv.noise(4, x, y) - 0.5f) * 0.25f);
+        }
+    }
+
+    /** Gravel: a loose bed of small rounded stones in greys and buffs, dust between them. */
+    static void gravel(Canvas cv) {
+        cv.fill(0x8A8070);
+        cv.mottle(0.15f, 9);
+        pebbles(cv, 420, 0x9A9284, 0.8f, 2.2f);
+        pebbles(cv, 120, 0x6E6A62, 0.7f, 1.6f);
+        pebbles(cv, 80, 0xB8A888, 0.7f, 1.5f);
     }
 
     // ---- terrain

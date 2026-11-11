@@ -72,6 +72,10 @@ final class Gallery {
         if ("p22".equals(System.getenv("RPG_GALLERY_ONLY"))) { p22Shots(); return 0; }
         // RPG_GALLERY_ONLY=p23 RPG_REVIEW_ONLY=a,b: the 0.3.7 review sheets (ui, lock, fog, crops, mine, smith), each by name
         if ("p23".equals(System.getenv("RPG_GALLERY_ONLY"))) { p23Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p24 RPG_REVIEW_ONLY=a,b: the 0.3.8 review sheets (rooms, outside, rain, crates, furn, bones, spear), each by name
+        if ("p24".equals(System.getenv("RPG_GALLERY_ONLY"))) { p24Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p25 RPG_REVIEW_ONLY=a,b: the 0.3.9 review sheets (direwolf, mount, attack, pegasus, swim, interiors, squad, seats), each by name
+        if ("p25".equals(System.getenv("RPG_GALLERY_ONLY"))) { p25Shots(); return 0; }
         if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
@@ -728,7 +732,7 @@ final class Gallery {
             place(66.5f, 80.5f, 0); frames(4);
             var horse = g.animals.spawnNew(rpg.animal.Species.HORSE, false, true, 64.5f, 80.5f, null, 0, 0);
             horse.yaw = 0; frames(10);
-            g.riding.mount(g.player, horse); frames(3);
+            g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(3);
             g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 99);
             // a tame horse made to rear on the spot (the wild one's buck is the same pose, at random moments)
             horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.tame = 1;
@@ -740,7 +744,7 @@ final class Gallery {
             place(66.5f, 88.5f, 0); frames(4);
             var horse = g.animals.spawnNew(rpg.animal.Species.HORSE, false, true, 64.5f, 88.5f, null, 0, 0);
             horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.saddled = true; horse.yaw = 0; frames(10);
-            g.riding.mount(g.player, horse); frames(5);
+            g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
             film("gallop-side", 48, i -> { in.forward = 1; in.sprint = true; }, side, 40);
             film("canter-side", 48, i -> { in.forward = 1; in.sprint = false; }, side, 40);
             in.forward = 0; in.sprint = false; frames(60);
@@ -756,7 +760,7 @@ final class Gallery {
             var horse = g.animals.spawnNew(rpg.animal.Species.HORSE, false, true, 64.5f, 70.5f, null, 0, 0);
             g.teleport(horse, 64.5f, top, 70.5f);
             horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.saddled = true; horse.yaw = 0; frames(10);
-            System.out.println("[mountfall] mount " + g.riding.mount(g.player, horse).status() + " at y " + horse.y);
+            System.out.println("[mountfall] mount " + g.riding.mount(g.player, horse).status() + " at y " + horse.y); g.riding.seatNow(g.player);
             frames(5);
             java.util.function.Function<Actor, float[]> wide = a -> new float[]{75f, top + 1f, 50f, 64.5f, top - 3.5f, 60.5f};
             film("mountfall-side", 96, i -> { in.forward = 1; }, wide, 84, horse);
@@ -775,7 +779,7 @@ final class Gallery {
             var horse = g.animals.spawnNew(rpg.animal.Species.PEGASUS, false, true, 64.5f, 74.5f, null, 0, 0);
             g.teleport(horse, 64.5f, top, 74.5f);
             horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.saddled = true; horse.yaw = 0; frames(10);
-            g.riding.mount(g.player, horse); frames(5);
+            g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
             java.util.function.Function<Actor, float[]> chase = a -> new float[]{a.x + 7f, a.y + 2.5f, a.z + 3f, a.x, a.y + 1.0f, a.z - 1f};
             film("glide-side", 150, i -> { in.forward = 1; in.jumpHeld = i >= 0; }, chase, 90, horse);
             in.forward = 0; in.jumpHeld = false;
@@ -790,6 +794,253 @@ final class Gallery {
     /** The 0.3.4 review: swimming and the water, on threes. */
     /** (0.3.6) The review sheets of this pass: mounts (seat, backing up, the game's own camera), flight, interiors, the well, fish. */
     /** The 0.3.7 review: the redesigned tabs, the lock's window, the fog ring, the new crops, a rock breaking, the forge's windows. */
+    /** (0.3.8) The review sheets: every room of the DevMansion, its outside, the rain, the breakables, the furniture broken, a skeleton falling apart, a spear lodged. */
+    /** (0.3.9) The review sheets for the 0.3.9 pass. */
+    private void p25Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        for (rpg.ai.Npc n : new java.util.ArrayList<>(g.npcs)) if (n.distTo(64.5f, 62.5f) < 30) g.ai.unload(n);
+        if (want.test("direwolf")) {
+            place(66.5f, 58.5f, 0); frames(10);
+            rpg.animal.Animal w = g.animals.spawnNew(rpg.animal.Species.DIRE_WOLF, false, false, 64.5f, 62.5f, null, 0, 0);
+            w.yaw = (float) Math.PI / 2; w.nextThink = g.time + 1e6;
+            frames(30);
+            adapted(side(w, 5.5f), "direwolf-side");
+            view(quarter(w, 5)[0], quarter(w, 5)[1], quarter(w, 5)[2], w.x, w.y + 0.9f, w.z, "direwolf-quarter");
+            view(front(w, 4)[0], front(w, 4)[1], front(w, 4)[2], w.x, w.y + 1.0f, w.z, "direwolf-front");
+            w.tame = 1; w.tamedBy = g.player.id; w.owner = g.player.id; w.saddled = true;
+            g.teleport(g.player, w.x + 1.6f, DevMap.FLOOR, w.z); frames(2);
+            g.riding.mount(g.player, w); g.riding.seatNow(g.player); frames(20);
+            adapted(side(w, 6), "direwolf-ridden");
+            g.riding.dismount(g.player, false); g.animals.remove(w); frames(5);
+        }
+        if (want.test("mount")) {
+            place(66.5f, 58.5f, 0); frames(5);
+            rpg.animal.Animal h = g.animals.spawnNew(rpg.animal.Species.HORSE, false, true, 64.5f, 62.5f, null, 0, 0);
+            h.yaw = 0; h.tame = 1; h.tamedBy = g.player.id; h.owner = g.player.id; h.saddled = true; h.nextThink = g.time + 1e6;
+            g.teleport(g.player, 63.0f, DevMap.FLOOR, 62.5f); frames(20);
+            float[] cam = {60.2f, DevMap.FLOOR + 2.0f, 58.6f, 64.3f, DevMap.FLOOR + 1.3f, 62.6f};
+            for (int i = 0; i < 30; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            var r = g.riding.mount(g.player, h);
+            System.out.println("[mount] " + r.status() + " " + r.reason());
+            for (int f = 1; f <= 90 && g.riding.of(g.player) != null && g.riding.of(g.player).mounting(); f++) {
+                game.tick(1 / 60f); draw(cam, 1 / 60f);
+                if (f % 3 == 1) Main.shot(gfx, win.width, win.height, new File(shots, String.format("mount-f%02d.png", f)));
+            }
+            for (int i = 0; i < 20; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "mount-seated.png"));
+            if (want.test("attack")) {
+                g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("iron_sword"), 1)); g.player.sheathed = false;
+                g.player.aimYaw = h.yaw + 1.0f; frames(30);
+                g.combat.attack(g.player, false, rpg.combat.CombatSystem.lightMove(g.player, false));
+                for (int f = 1; f <= 30; f++) { game.tick(1 / 60f); draw(cam, 1 / 60f); if (f % 3 == 1) Main.shot(gfx, win.width, win.height, new File(shots, String.format("attack-f%02d.png", f))); }
+            }
+            g.riding.dismount(g.player, false); g.animals.remove(h); frames(5);
+        }
+        if (want.test("pegasus")) {
+            place(64.5f, 70.5f, 0); frames(5);
+            rpg.animal.Animal p = g.animals.spawnNew(rpg.animal.Species.PEGASUS, false, true, 64.5f, 66.5f, null, 0, 0);
+            p.yaw = 0; p.tame = 1; p.tamedBy = g.player.id; p.owner = g.player.id; p.saddled = true;
+            g.teleport(g.player, 66f, DevMap.FLOOR, 66.5f); frames(3);
+            g.riding.mount(g.player, p); g.riding.seatNow(g.player);
+            var ride = g.riding.of(g.player);
+            ride.body.y = DevMap.FLOOR + 14; ride.flying = true; ride.airspeed = 9; ride.pitch = 0.3f;
+            for (String phase : new String[]{"climb", "level", "bank", "dive"}) {
+                g.controller.in.forward = phase.equals("climb") ? 1 : phase.equals("dive") ? -1 : 0;
+                g.controller.in.strafe = phase.equals("bank") ? 1 : 0;
+                for (int f = 1; f <= 45; f++) {
+                    game.tick(1 / 60f);
+                    float[] cam = {p.x - 6.5f, p.y + 2.2f, p.z + 2.5f, p.x, p.y + 0.8f, p.z};
+                    draw(cam, 1 / 60f);
+                    if (f > 20 && f % 3 == 0) Main.shot(gfx, win.width, win.height, new File(shots, String.format("peg-%s-f%02d.png", phase, f)));
+                }
+            }
+            g.controller.in.forward = 0; g.controller.in.strafe = 0;
+            g.riding.dismount(g.player, false); g.animals.remove(p); frames(5);
+        }
+        if (want.test("swim")) {
+            float px = rpg.world.DevMap.WILD_POND_X0 - 4.5f, pz = (rpg.world.DevMap.WILD_POND_Z0 + rpg.world.DevMap.WILD_POND_Z1) / 2f;
+            place(px - 2, pz, 0); frames(5);
+            rpg.animal.Animal h = g.animals.spawnNew(rpg.animal.Species.HORSE, false, true, px, pz, null, 0, 0);
+            h.yaw = (float) -Math.PI / 2; h.tame = 1; h.tamedBy = g.player.id; h.owner = g.player.id; h.saddled = true;
+            g.teleport(g.player, px, DevMap.FLOOR, pz + 1.6f); frames(3);
+            g.riding.mount(g.player, h); g.riding.seatNow(g.player);
+            g.controller.in.forward = 1;
+            for (int f = 0; f < 240; f++) { game.tick(1 / 60f); if (f % 40 == 0) System.out.println("[swim] " + h.x + "," + h.y + "," + h.z + " afloat " + g.riding.of(g.player).afloat + " riding " + g.player.riding); }
+            g.controller.in.forward = 0;
+            float[] cam = {h.x - 4, h.y + 3, h.z + 5, h.x, h.y + 0.8f, h.z};
+            adapted(cam, "ride-swim");
+            g.riding.dismount(g.player, false); g.animals.remove(h); frames(5);
+        }
+        if (want.test("interiors")) {
+            int i = 0;
+            for (rpg.world.BuildingKit.Plan pl : rpg.world.BuildingKit.plans()) {
+                if (pl.name().contains("DevMansion")) continue;
+                float cx = (pl.x0() + pl.x1() + 1) / 2f, cz = (pl.z0() + pl.z1() + 1) / 2f;
+                int ix = pl.axis() == 'z' ? 0 : pl.doorX() == pl.x0() ? 1 : -1, iz = pl.axis() == 'z' ? (pl.doorZ() == pl.z0() ? 1 : -1) : 0;
+                float ex = pl.doorX() + 0.5f + ix * 1.2f, ez = pl.doorZ() + 0.5f + iz * 1.2f;
+                g.teleport(g.player, cx, DevMap.FLOOR, cz + 40); frames(2);
+                String name = String.format("int-%02d-%s", i++, pl.name().toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+                adapted(new float[]{ex, DevMap.FLOOR + 1.7f, ez, cx + (cx - ex) * 0.6f, DevMap.FLOOR + 0.6f, cz + (cz - ez) * 0.6f}, name);
+            }
+        }
+        if (want.test("squad")) {
+            place(64.5f, 62.5f, 0); frames(5);
+            g.honor.score = 60;
+            g.player.store(new rpg.item.ItemStack(rpg.item.Items.COINS, 1000));
+            var party = g.ai.brain.companions;
+            int joined = 0;
+            for (rpg.ai.Npc n : new java.util.ArrayList<>(g.npcs)) {
+                if (joined >= 3 || rpg.ai.Companions.fee(n) < 0 || !n.alive) continue;
+                g.ai.reload(n); g.teleport(n, 63.5f + joined, DevMap.FLOOR, 64.5f);
+                if (!party.recruit(n).rejected()) joined++;
+            }
+            System.out.println("[squad] joined " + joined);
+            frames(60);
+            for (rpg.ai.Npc n : party.of(g.player)) n.hp = n.maxHp() * (0.4f + 0.2f * (n.id % 3));
+            reviewUi("squad-frames");
+            hud.squadOpen(true); reviewUi("squad-menu");
+            hud.squadWheel(); reviewUi("squad-wheel");
+            hud.squadOpen(false);
+        }
+        if (want.test("seats")) {
+            var inn = g.inns.all.get(0);
+            int sat = 0;
+            for (rpg.ai.Npc n : g.npcs) {
+                if (sat >= 4 || !n.alive || n.combatant()) continue;
+                int seat = g.inns.takeSeat(inn, n); if (seat < 0) break;
+                float[] st = inn.seats.get(seat);
+                g.ai.reload(n); g.teleport(n, st[0], DevMap.FLOOR, st[1]);
+                g.ai.brain.seating.seatNow(n, st[0], st[3], st[1], st[2]); sat++;
+            }
+            float[] st = inn.seats.get(0);
+            for (int i = 0; i < 60; i++) { for (rpg.ai.Npc n : g.npcs) if (n.seated) n.seatHeld = g.time + 1; game.tick(1 / 60f); draw(new float[]{st[0] + 3, DevMap.FLOOR + 2.2f, st[1] + 3, st[0], DevMap.FLOOR + 0.7f, st[1]}, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "seats-inn.png"));
+        }
+    }
+
+    private void p24Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        for (rpg.ai.Npc n : new java.util.ArrayList<>(g.npcs)) if (rpg.world.Mansion.onEstate(n.x, n.z)) g.ai.unload(n);
+        if (want.test("outside")) {
+            place(46.5f, 160.5f, 0); frames(30);
+            adapted(new float[]{46.5f, DevMap.FLOOR + 4f, 168f, 46.5f, DevMap.FLOOR + 6f, 144f}, "mansion-front");
+            adapted(new float[]{30f, DevMap.FLOOR + 14f, 166f, 46.5f, DevMap.FLOOR + 6f, 144f}, "mansion-aerial");
+            adapted(new float[]{64f, DevMap.FLOOR + 5f, 130f, 46.5f, DevMap.FLOOR + 6f, 144f}, "mansion-back");
+        }
+        if (want.test("rooms")) {
+            for (rpg.world.Mansion.Room r : rpg.world.Mansion.ROOMS) {
+                float y = r.y() + 1.65f;
+                place(r.cx(), r.cz(), 0);
+                g.teleport(g.player, 46.5f, DevMap.FLOOR, 166.5f); frames(20);
+                String name = "room-" + r.level() + "-" + r.name().toLowerCase().replace(' ', '-').replace("'", "");
+                // from the middle of one wall looking across to the other, then from the side
+                adapted(new float[]{r.cx(), y + 0.5f, r.z1() + 0.75f, r.cx(), r.y() + 0.7f, r.z0()}, name + "-a");
+                adapted(new float[]{r.x1() + 0.75f, y + 0.5f, r.cz(), r.x0(), r.y() + 0.7f, r.cz()}, name + "-b");
+            }
+            g.state.minutes = 22 * 60;
+            rpg.world.Mansion.Room hall = rpg.world.Mansion.ROOMS[1];
+            for (rpg.objects.Furniture f : g.objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.FIREPLACE) f.fuel = 200;
+            adapted(new float[]{hall.x1() + 0.6f, hall.y() + 1.65f, hall.z1() + 0.6f, hall.x0() + 0.4f, hall.y() + 0.6f, hall.z0() + 0.4f}, "room-night-dining");
+            g.state.minutes = 13 * 60;
+        }
+        if (want.test("furn")) {
+            // every furnishing of the library on the debug plaza, in a row, each its own
+            float x = 56;
+            for (rpg.objects.Furniture.Kind k : rpg.objects.Furniture.Kind.values()) {
+                if (k == rpg.objects.Furniture.Kind.HEADSTONE || k == rpg.objects.Furniture.Kind.SLAB || k == rpg.objects.Furniture.Kind.TARGET) continue;
+                int w = switch (k) { case DINING_TABLE, SOFA, SIDEBOARD, WARDROBE, DRESSER, CUPBOARD, SHELVES, WINE_RACK, FOURPOSTER, BATHTUB, FIREPLACE, RUG, DESK, COUNTER, BOOKCASE, TAPESTRY, POT_RACK -> 2; default -> 1; };
+                int d = k == rpg.objects.Furniture.Kind.FOURPOSTER || k == rpg.objects.Furniture.Kind.DINING_TABLE || k == rpg.objects.Furniture.Kind.RUG ? 3 : 1;
+                int h = switch (k) { case CHANDELIER, PAINTING, TAPESTRY, MIRROR, WEAPON_RACK, POT_RACK -> 4; case WARDROBE, CUPBOARD, SHELVES, WINE_RACK, CLOCK, ARMOR_STAND, FIREPLACE, BOOKCASE -> 2; default -> 1; };
+                var fu = g.objects.add(new rpg.objects.Furniture(g.state.newEntityId(), k, (int) x, 60, (int) x + w - 1, 60 + d - 1, h, 2, 0, true));
+                g.objects.furniture.add(fu);
+                if (k == rpg.objects.Furniture.Kind.FIREPLACE) fu.fuel = 200;
+                x += w + 0.0f;
+                if (x > 72) break;
+            }
+            adapted(new float[]{64f, DevMap.FLOOR + 3.2f, 55f, 64f, DevMap.FLOOR + 0.8f, 61f}, "furn-row");
+        }
+        if (want.test("crates")) {
+            place(64.5f, 66.5f, 0); frames(10);
+            rpg.objects.Breakable[] bs = new rpg.objects.Breakable[4];
+            int i = 0;
+            for (rpg.objects.Breakable.Form f : rpg.objects.Breakable.Form.values()) {
+                bs[i] = g.breakables.place(new rpg.objects.Breakable(g.state.newEntityId(), f, 61.5f + i * 2, DevMap.FLOOR + f.hy() + 0.01f, 62.5f, 0.3f * i, 0));
+                if (f == rpg.objects.Breakable.Form.SIGN) bs[i].text = "DevMansion";
+                i++;
+            }
+            frames(60);
+            adapted(new float[]{65f, DevMap.FLOOR + 1.8f, 66.5f, 64f, DevMap.FLOOR + 0.5f, 62.5f}, "crates-whole");
+            for (int k = 0; k < 3; k++) for (rpg.objects.Breakable b : bs) if (!b.broken) g.breakables.strike(b, b.form.sx / 2, b.form.sy / 2, 0, 3.2f, 0, 0, 1, rpg.item.ItemDef.DamageType.SLASH, 0, g.player);
+            frames(10);
+            adapted(new float[]{65f, DevMap.FLOOR + 1.8f, 66.5f, 64f, DevMap.FLOOR + 0.5f, 62.5f}, "crates-hacked");
+            for (rpg.objects.Breakable b : bs) if (!b.broken) g.breakables.breakApart(b, b.x, b.y, b.z - 0.3f, 0, 0, 1, 1.5f, g.player);
+            for (int k = 0; k < 20; k++) { game.tick(1 / 60f); draw(new float[]{65f, DevMap.FLOOR + 1.8f, 66.5f, 64f, DevMap.FLOOR + 0.5f, 62.5f}, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "crates-burst.png"));
+            for (int k = 0; k < 120; k++) { game.tick(1 / 60f); draw(new float[]{65f, DevMap.FLOOR + 1.8f, 66.5f, 64f, DevMap.FLOOR + 0.5f, 62.5f}, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "crates-settled.png"));
+        }
+        if (want.test("wreck")) {
+            rpg.objects.Furniture table = null, chair = null;
+            for (rpg.objects.Furniture f : g.objects.furniture) {
+                if (f.kind == rpg.objects.Furniture.Kind.DINING_TABLE && table == null) table = f;
+                if (f.kind == rpg.objects.Furniture.Kind.CHAIR && chair == null && f.floor == DevMap.FLOOR) chair = f;
+            }
+            if (table != null && chair != null) {
+                rpg.world.Mansion.Room din = rpg.world.Mansion.ROOMS[1];
+                float[] cam = {din.x1() + 0.6f, din.y() + 1.8f, din.z1() + 0.6f, table.x, din.y() + 0.6f, table.z};
+                place(din.cx(), din.cz(), 0); g.teleport(g.player, din.cx() + 1.5f, din.y(), din.z1()); frames(10);
+                for (int k = 0; k < 4; k++) g.wreckage.strike(table, k * 7, table.x + 0.4f, table.floor + 0.78f, table.z, 2.5f, 0, -1, 0, rpg.item.ItemDef.DamageType.BLUNT, g.player);
+                for (int k = 0; k < 30; k++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+                Main.shot(gfx, win.width, win.height, new File(shots, "wreck-table-hit.png"));
+                for (int k = 0; k < 12; k++) g.wreckage.strike(chair, 0, chair.x, chair.floor + 0.5f, chair.z, 6, 1, 0, 0, rpg.item.ItemDef.DamageType.BLUNT, g.player);
+                for (int k = 0; k < 40; k++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+                Main.shot(gfx, win.width, win.height, new File(shots, "wreck-chair.png"));
+            }
+        }
+        if (want.test("rain")) {
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.RAIN); g.timeSystem.weather.snap();
+            place(96.5f, 72.5f, 0); frames(60);
+            adapted(new float[]{96.5f, DevMap.FLOOR + 1.7f, 74f, 96.5f, DevMap.FLOOR + 1.5f, 60f}, "rain-street");
+            adapted(new float[]{96.5f, DevMap.FLOOR + 1.7f, 74f, 110f, DevMap.FLOOR + 6f, 74f}, "rain-sky");
+            g.teleport(g.player, 46.5f, DevMap.FLOOR, 148.5f); frames(30);
+            adapted(new float[]{46.5f, DevMap.FLOOR + 1.7f, 148.5f, 46.5f, DevMap.FLOOR + 1.4f, 160f}, "rain-from-door");
+            g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        }
+        if (want.test("bones")) {
+            place(30.5f, 44.5f, 0); frames(10);
+            var sk = g.monsters.spawn(rpg.monster.MonsterKind.SKELETON, 15, 30.5f, 40.5f, null);
+            for (int k = 0; k < 40; k++) { game.tick(1 / 60f); draw(new float[]{33f, DevMap.FLOOR + 1.6f, 44f, 30.5f, DevMap.FLOOR + 1f, 40.5f}, 1 / 60f); }
+            Main.shot(gfx, win.width, win.height, new File(shots, "bones-standing.png"));
+            sk.hp = 0; sk.alive = false; g.monsters.onKilled(sk, g.player);
+            for (int f = 1; f <= 40; f++) {
+                game.tick(1 / 60f); draw(new float[]{33f, DevMap.FLOOR + 1.6f, 44f, 30.5f, DevMap.FLOOR + 0.8f, 40.5f}, 1 / 60f);
+                if (f == 1 || f == 4 || f == 7 || f == 10 || f == 16 || f == 25 || f == 40) Main.shot(gfx, win.width, win.height, new File(shots, "bones-f" + f + ".png"));
+            }
+        }
+        if (want.test("spear")) {
+            place(30.5f, 44.5f, 0); frames(10);
+            rpg.ai.Npc target = null;
+            for (rpg.ai.Npc n : g.npcs) if (n.alive && !n.combatant() && !(n instanceof rpg.monster.Monster)) { target = n; break; }
+            if (target != null) {
+                g.teleport(target, 30.5f, DevMap.FLOOR, 41.5f); target.yaw = 0; target.nextThink = Double.MAX_VALUE; frames(10);
+                rpg.item.ItemDef jav = null;
+                for (rpg.item.ItemDef d : rpg.item.Items.all()) if (d.family == rpg.item.ItemDef.Family.THROWN && "javelin".equals(d.thrown)) { jav = d; break; }
+                if (jav != null) {
+                    ((rpg.actor.Actor) target).stuck.add(new rpg.combat.CombatSystem.Stuck(new rpg.item.ItemStack(jav, 1), 0.02f, 0.05f, 0.1f, 0.2f, -0.1f, -0.97f, g.time, -1, -1));
+                    float[] cam = {32.5f, DevMap.FLOOR + 1.5f, 43f, 30.5f, DevMap.FLOOR + 1.1f, 41.5f};
+                    for (int k = 0; k < 20; k++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+                    Main.shot(gfx, win.width, win.height, new File(shots, "spear-lodged.png"));
+                }
+            }
+        }
+    }
+
     private void p23Shots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
@@ -905,13 +1156,13 @@ final class Gallery {
             place(66.5f, 88.5f, 0); frames(4);
             var mount = g.animals.spawnNew(kind.equals("horse") ? rpg.animal.Species.HORSE : rpg.animal.Species.PEGASUS, false, true, 64.5f, 88.5f, null, 0, 0);
             mount.tamedBy = g.player.id; mount.owner = g.player.id; mount.saddled = true; mount.yaw = 0; mount.variant = 0; frames(10);
-            g.riding.mount(g.player, mount); frames(5);
+            g.riding.mount(g.player, mount); g.riding.seatNow(g.player); frames(5);
             film(kind + "-seat", 4, i -> { }, seat, 30, mount);
             film(kind + "-front", 4, i -> { }, front, 2, mount);
             film(kind + "-side", 4, i -> { }, broadside, 2, mount);
             film(kind + "-back", 48, i -> in.forward = -1, flank, 20, mount);
             keysOff.run(); frames(30);
-            g.teleport(mount, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, mount); frames(5);
+            g.teleport(mount, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, mount); g.riding.seatNow(g.player); frames(5);
             // the game's own camera behind the rider: the rider's place against the saddle is measured every frame (in the
             // mount's own frame it must hold still), and the frames side by side show any flicker
             g.controller.snapTo(0); g.controller.camPitch = -0.15f;
@@ -936,7 +1187,7 @@ final class Gallery {
             place(66.5f, 88.5f, 0); frames(4);
             var peg = g.animals.spawnNew(rpg.animal.Species.PEGASUS, false, true, 64.5f, 88.5f, null, 0, 0);
             peg.tamedBy = g.player.id; peg.owner = g.player.id; peg.saddled = true; peg.yaw = 0; frames(10);
-            g.riding.mount(g.player, peg); frames(5);
+            g.riding.mount(g.player, peg); g.riding.seatNow(g.player); frames(5);
             var r = g.riding.of(g.player);
             r.flying = true; r.airspeed = 14; r.body.y = DevMap.FLOOR + 14; r.body.grounded = false;
             java.util.function.Function<Actor, float[]> behind = a -> new float[]{a.x + (float) Math.sin(a.yaw) * 7, a.y + 3.2f, a.z + (float) Math.cos(a.yaw) * 7, a.x, a.y + 1.2f, a.z};
@@ -1039,11 +1290,11 @@ final class Gallery {
             var horse = g.animals.spawnNew(kind.equals("horse") ? rpg.animal.Species.HORSE : rpg.animal.Species.PEGASUS, false, true, 64.5f, 88.5f, null, 0, 0);
             horse.tamedBy = g.player.id; horse.owner = g.player.id; horse.saddled = true; horse.yaw = 0; horse.variant = 0; frames(10);
             // unridden first: the walk and the stand, led about by its own mind (a roam point set ahead of it)
-            g.riding.mount(g.player, horse); frames(5);
+            g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
             film(kind + "-walk", 48, i -> { in.forward = 1; in.sprint = false; in.sneak = true; }, flank, 40, horse);
-            g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, horse); frames(5);
+            g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
             film(kind + "-canter", 48, i -> { in.forward = 1; in.sneak = false; in.sprint = false; }, flank, 50, horse);
-            g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, horse); frames(5);
+            g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
             film(kind + "-gallop", 48, i -> { in.forward = 1; in.sneak = false; in.sprint = true; }, flank, 70, horse);
             keysOff.run(); frames(60);
             if (g.player.riding != 0) g.riding.dismount(g.player, false);
@@ -1276,7 +1527,7 @@ final class Gallery {
                 if (seat < 0) break;
                 float[] st = inn.seats.get(seat);
                 g.ai.reload(n); g.teleport(n, st[0], DevMap.FLOOR, st[1]);
-                n.seated = true; n.seatYaw = st[2]; n.yaw = n.wantYaw = st[2]; n.goal = rpg.ai.Brain.Goal.INN; n.nextThink = g.time + 1e6; n.innUntil = g.time + 1e6;
+                g.ai.brain.seating.seatNow(n, st[0], st[3], st[1], st[2]); n.goal = rpg.ai.Brain.Goal.INN; n.nextThink = g.time + 1e6; n.innUntil = g.time + 1e6;
                 seated++;
             }
             for (long id : new long[]{inn.layout.innkeeper(), inn.layout.bartender(), inn.layout.cook()}) if (g.actor(id) instanceof rpg.ai.Npc staff) {
@@ -1287,8 +1538,8 @@ final class Gallery {
             g.teleport(g.player, 122.6f, DevMap.FLOOR, 65.5f);
             // let them settle on the benches (the pose eases in over frames that are drawn) - kept seated each frame
             java.util.List<rpg.ai.Npc> sitters = new java.util.ArrayList<>(); for (rpg.ai.Npc n : g.npcs) if (n.seated) sitters.add(n);
-            for (int i = 0; i < 90; i++) { for (rpg.ai.Npc n : sitters) { n.seated = true; n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = g.time + 1e6; n.holdingFare = n.id % 2 == 0 ? rpg.item.Items.ALE : rpg.item.Items.VEGETABLE_STEW; } game.tick(1 / 60f); draw(null, 1 / 60f); }
-            for (rpg.ai.Npc n : sitters) n.seated = true;
+            for (int i = 0; i < 90; i++) { for (rpg.ai.Npc n : sitters) { n.seatHeld = g.time + 1; n.goal = rpg.ai.Brain.Goal.IDLE; n.nextThink = g.time + 1e6; n.holdingFare = n.id % 2 == 0 ? rpg.item.Items.ALE : rpg.item.Items.VEGETABLE_STEW; } game.tick(1 / 60f); draw(null, 1 / 60f); }
+            for (rpg.ai.Npc n : sitters) n.seatHeld = g.time + 1e6;
             List<BufferedImage> tiles = new ArrayList<>(); List<String> labels = new ArrayList<>();
             tiles.add(capture(new float[]{122.4f, DevMap.FLOOR + 2.3f, 66.8f, 126f, DevMap.FLOOR + 0.8f, 60f})); labels.add("common room from the door");
             tiles.add(capture(new float[]{125.8f, DevMap.FLOOR + 1.6f, 64.6f, 123f, DevMap.FLOOR + 0.8f, 60.5f})); labels.add("tables");
@@ -1596,7 +1847,7 @@ final class Gallery {
                 String n = spc.name().toLowerCase();
                 java.util.function.Function<Actor, float[]> side = a -> new float[]{a.x + 5.5f, a.y + 2.2f, a.z + 1.5f, a.x, a.y + 1.2f, a.z - 0.5f};
                 view(horse.x + 4.5f, horse.y + 2.2f, horse.z + 2.5f, horse.x, horse.y + 1.0f, horse.z, n + "-saddled");
-                var r = g.riding.mount(g.player, horse);
+                var r = g.riding.mount(g.player, horse); g.riding.seatNow(g.player);
                 System.out.println("[riding] mount " + spc + ": " + r.status() + " " + r.reason());
                 frames(5);
                 film(n + "-walk", 48, i -> { in.forward = 1; in.sneak = true; }, side, 10);
@@ -1606,14 +1857,14 @@ final class Gallery {
                 in.sprint = false; in.forward = 0; frames(60);
                 g.riding.dismount(g.player, false); frames(5);
                 g.teleport(horse, 64.5f, DevMap.FLOOR, 74.5f); horse.yaw = 0; frames(5);
-                g.teleport(g.player, 66f, DevMap.FLOOR, 74.5f); frames(3); g.riding.mount(g.player, horse); frames(5);
+                g.teleport(g.player, 66f, DevMap.FLOOR, 74.5f); frames(3); g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(5);
                 // the jump over the low wall: run at it, charge, let go at the right moment
                 film(n + "-jump", 150, i -> { in.forward = 1; in.sprint = true; in.jumpHeld = i >= 104 && i < 112; }, side, 0);
                 in.forward = 0; in.sprint = false; in.jumpHeld = false; frames(40);
                 System.out.println("[riding] " + spc + " after jump at z " + horse.z + " y " + horse.y + " events " + g.state.all().stream().map(e -> e.type()).filter(t -> t.startsWith("Mount")).toList());
                 if (spc == rpg.animal.Species.PEGASUS) {
                     g.riding.dismount(g.player, false); frames(3);
-                    g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); horse.yaw = 0; g.teleport(g.player, 66f, DevMap.FLOOR, 88.5f); frames(3); g.riding.mount(g.player, horse); frames(3);
+                    g.teleport(horse, 64.5f, DevMap.FLOOR, 88.5f); horse.yaw = 0; g.teleport(g.player, 66f, DevMap.FLOOR, 88.5f); frames(3); g.riding.mount(g.player, horse); g.riding.seatNow(g.player); frames(3);
                     // gallop, take off on a full jump, climb, dive, bank round
                     film("pegasus-takeoff", 150, i -> { in.forward = i < 130 ? 1 : 0; in.sprint = i < 130; in.jumpHeld = i >= 110 && i < 119; }, a -> new float[]{a.x + 7f, a.y + 3f, a.z + 4f, a.x, a.y + 1.2f, a.z - 1f}, 0);
                     in.sprint = false; in.jumpHeld = false;

@@ -34,6 +34,8 @@ public final class Ids {
      */
     public static final long GUILD_METALLISTS = 970, ARMORY = 971, GUILD_FORESTERS = 972, CARDER = 973, SPINNER = 974, GUILD_ARTISANS = 975,
             FULLER = 976, DYER = 977, GUILD_FARMERS = 978, GUILD_PROVISIONERS = 979, GUILD_MARINERS = 980, GUILD_ARCANISTS = 981, SMELTER = 982, COASTAL_FISHER = 983;
+    /** (0.3.8) The DevMansion's household: the Household Baron, his Household Knight, the Cook, the Porter, the Firewood Cutter, the Orchard Keeper. */
+    public static final long BARON = 984, MANSION_KNIGHT = 985, MANSION_COOK = 986, MANSION_PORTER = 987, MANSION_WOODCUTTER = 988, MANSION_ORCHARDIST = 989;
     /** (0.3.7) The Shrines of Light (rpg.world.Shrines). */
     public static final long SHRINE_0 = 990;
     /** Fixtures are numbered from here in the order they are built. */
@@ -42,4 +44,12 @@ public final class Ids {
     public static final long DUNGEONS = 600;
     /** Ids made in play start here. */
     public static final long DYNAMIC = 1000;
+    /**
+     * (0.3.9) The estates' fixtures (the DevMansion's doors, furnishings, stores and orchard), numbered from here: a band
+     * of their own, clear of the people and of everything made in play (they were numbered on from the town's fixtures,
+     * into the people's own numbers - a bed and a villager shared one, and the fire took the one for the other).
+     */
+    public static final long ESTATE = 1L << 40, ESTATE_END = ESTATE + 1_000_000;
+    /** Whether an id is a fixture's (built with the world, kept by its id in a save) rather than made in play. */
+    public static boolean fixture(long id) { return id < DYNAMIC || id >= ESTATE && id < ESTATE_END; }
 }

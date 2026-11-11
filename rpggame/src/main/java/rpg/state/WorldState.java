@@ -60,9 +60,16 @@ public final class WorldState {
         return commit(0, type, actor, subject, jurisdiction, cause, payload);
     }
 
+    /**
+     * The last n events, oldest first. (0.3.9, optimisation) walked back from the newest: it copied the whole log (six
+     * hundred) every frame for the interface's few.
+     */
     public List<DomainEvent> recent(int n) {
-        List<DomainEvent> out = new ArrayList<>(log);
-        return out.subList(Math.max(0, out.size() - n), out.size());
+        int k = Math.min(n, log.size());
+        DomainEvent[] out = new DomainEvent[k];
+        var it = log.descendingIterator();
+        for (int i = k - 1; i >= 0 && it.hasNext(); i--) out[i] = it.next();
+        return java.util.Arrays.asList(out);
     }
     public List<DomainEvent> all() { return new ArrayList<>(log); }
     public DomainEvent event(long id) { for (DomainEvent e : log) if (e.id() == id) return e; return null; }

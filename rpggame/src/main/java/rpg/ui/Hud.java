@@ -60,7 +60,8 @@ public final class Hud {
     int inspectIndex;
     public float[] flag;
     public int w, h;
-    double now, last;
+    public double now;
+    double last;
     float dt;
     /** Typed text, backspace and the rotate key this frame (from the window). */
     String typed = "";
@@ -75,6 +76,8 @@ public final class Hud {
     final ActionBar bar;
     /** The radial wheel (TAB held in play; docked by the inventory to assign it). */
     public final RadialWheel radial;
+    /** (0.3.9) The squad's command menu and power wheel (Squad). */
+    Squad.Menu squad;
     final ItemIcons icons;
     final Addons addons;
     private String tip;
@@ -95,6 +98,7 @@ public final class Hud {
         bar = new ActionBar(this);
         radial = new RadialWheel(this);
         HudFragments.register(this);
+        Squad.register(this);
         Panels.register(this);
         Windows.register(this);
         layout();
@@ -124,7 +128,7 @@ public final class Hud {
 
     private void layout() {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
-        group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
+        group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "party", Placement.at(Anchor.TOP_LEFT, 16, 142), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
                 "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "levelbanner", Placement.at(Anchor.TOP, 0, 96), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
@@ -143,7 +147,7 @@ public final class Hud {
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
-        group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0), "radial", Placement.at(Anchor.CENTER, 0, 0));
+        group("top", "menu", Placement.at(Anchor.SCREEN, 0, 0), "radial", Placement.at(Anchor.CENTER, 0, 0), "squad", Placement.at(Anchor.CENTER, 0, -40));
         scenes.put(Scene.WORLD, new ArrayList<>(List.of("world", "hud", "vitals", "window", "talk", "inspect", "addons", "top")));
         for (Scene s : new Scene[]{Scene.INVENTORY, Scene.CHARACTER, Scene.SKILLS, Scene.JOURNAL, Scene.MAGIC, Scene.FAITH, Scene.MAP}) {
             String content = s.name().toLowerCase();
@@ -184,7 +188,7 @@ public final class Hud {
     public float[] lockCentre() { return LockpickWindow.centre(w, h); }
     public void openLockpick(rpg.interact.Lockpicking.Attempt t) { picking = t; menu = null; pickMsg = null; sound("UIbutton2", 0.4f); }
     String pickMsg; float pickMsgT, pickShake, pickClickAt;
-    public boolean captures() { return picking != null || transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
+    public boolean captures() { return squad != null && squad.open || picking != null || transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
     /**
      * Whether the world stands still (gamefixes: pausing pauses the entire game): any menu - a panel scene (inventory,
      * character, skills, journal, magic), a window (a chest, a shop, a station), a dialogue or the game menu, the hold-E
@@ -267,6 +271,16 @@ public final class Hud {
 
     /** The number keys in the world: the action bar's slots. */
     public void hotkey(int k) { bar.use(k); }
+
+    // ------------------------------------------------------------------ (0.3.9) the squad, for the input loop
+    /** The world's pace the squad's menus allow (1: as normal; the command menu slows it, the power wheel stops it). */
+    public float worldPace() { return squad == null ? 1 : squad.pace(); }
+    public boolean squadOpen() { return squad != null && squad.open; }
+    public void squadOpen(boolean open) { if (squad == null) return; if (open) squad.openMenu(); else squad.close(); }
+    public void squadQuickOrder(boolean all) { if (squad != null) squad.quickOrder(all); }
+    public void squadSelect(int i) { if (squad != null) squad.select(i); }
+    public void squadWheel() { if (squad != null) squad.toggleWheel(); }
+    public void squadCycle(int d) { if (squad != null) squad.cycleFoe(d); }
 
     /** Uses an item of a kind the player carries by its first action (eat, wield, light...): the action bar's and the wheel's way. */
     void useItem(rpg.item.ItemDef def) {

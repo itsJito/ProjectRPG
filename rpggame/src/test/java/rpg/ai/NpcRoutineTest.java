@@ -34,7 +34,9 @@ class NpcRoutineTest {
                 for (Npc n : g.npcs) {
                     if (!n.alive || !n.loaded) continue;
                     if (n.stuck) stuck.merge(n.id, 1, Integer::sum);
-                    if (n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.HIDE && n.investigation != null) looking.merge(n.id, 1, Integer::sum);
+                    // (0.3.9) an outlaw sizing up the probe itself, stood in its sight, is the outlaw's business, not a routine gone astray
+                    boolean outlawOnProbe = (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE) && n.investigation != null && n.investigation.subject == g.player.id;
+                    if ((n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.HIDE && n.investigation != null) && !outlawOnProbe) looking.merge(n.id, 1, Integer::sum);
                     String o = n.lastOutcome == null ? "" : n.lastOutcome;
                     if (o.contains("blocked") || o.contains("replanning") || o.contains("no route") || o.contains("locked")) blocked.merge(n.id, 1, Integer::sum);
                     outcomes.computeIfAbsent(n.id, k -> new HashMap<>()).merge(n.goal + ": " + o.replaceAll("[0-9.]+", "#"), 1, Integer::sum);

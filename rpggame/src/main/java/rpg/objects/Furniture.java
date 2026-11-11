@@ -22,11 +22,39 @@ public final class Furniture extends WorldObject {
     public enum Kind {
         TABLE("Table", Blocks.TABLE), COUNTER("Counter", Blocks.TABLE), CRATE("Crate", Blocks.CRATE), BOOKCASE("Bookcase", Blocks.BOOKCASE),
         BED("Bed", Blocks.BED), TARGET("Archery target", Blocks.TARGET), HEADSTONE("Headstone", Blocks.HEADSTONE), SLAB("Cell slab", Blocks.BED),
-        /** (0.3.2) A bench at an inn's table: sat on, so no block - a body walks onto it and sits. */
-        BENCH("Bench", Blocks.AIR);
+        /** (0.3.2) A bench at an inn's table; (0.3.9) solid, like every seat: a sitter is set down onto it (rpg.ai.Seating). */
+        BENCH("Bench", Blocks.SEAT),
+        // (0.3.8, gamefixes: the DevMansion - its every furnishing, each for any interior) seats, tables and case pieces
+        // (solid, see-through to light), beds, the hearth (stone), and what hangs on a wall or a ceiling or lies on the
+        // floor (no cells at all). (0.3.9, gamefixes: couches, chairs, stools and lamps had no collision) seats and the
+        // standing candelabra are solid now; only a rug, what hangs flat on a wall and what hangs from the ceiling are not
+        CHAIR("Chair", Blocks.SEAT), ARMCHAIR("Armchair", Blocks.SEAT), SOFA("Settee", Blocks.SEAT), STOOL("Stool", Blocks.SEAT),
+        DINING_TABLE("Dining table", Blocks.TABLE), DESK("Writing desk", Blocks.TABLE), WARDROBE("Wardrobe", Blocks.TABLE), DRESSER("Chest of drawers", Blocks.TABLE),
+        NIGHTSTAND("Bedside table", Blocks.TABLE), SIDEBOARD("Sideboard", Blocks.TABLE), CLOCK("Longcase clock", Blocks.TABLE), CUPBOARD("Kitchen dresser", Blocks.TABLE),
+        SHELVES("Pantry shelves", Blocks.TABLE), WINE_RACK("Wine rack", Blocks.TABLE), FOURPOSTER("Four-poster bed", Blocks.BED), BATHTUB("Bathtub", Blocks.TABLE),
+        WASHSTAND("Washstand", Blocks.TABLE), FIREPLACE("Fireplace", Blocks.HEADSTONE), CHANDELIER("Chandelier", Blocks.AIR), CANDELABRA("Candelabrum", Blocks.TABLE),
+        RUG("Rug", Blocks.AIR), PAINTING("Painting", Blocks.AIR), TAPESTRY("Tapestry", Blocks.AIR), MIRROR("Mirror", Blocks.AIR), WEAPON_RACK("Weapon trophy", Blocks.AIR),
+        POT_RACK("Pot rack", Blocks.AIR), ARMOR_STAND("Suit of armour", Blocks.TABLE), PLANTER("Potted fern", Blocks.TABLE), BUST("Marble bust", Blocks.HEADSTONE);
         public final String title;
         public final int block;
         Kind(String title, int block) { this.title = title; this.block = block; }
+        /** Slept in. */
+        public boolean bed() { return this == BED || this == FOURPOSTER; }
+        /** Sat on. */
+        public boolean seat() { return this == BENCH || this == CHAIR || this == ARMCHAIR || this == SOFA || this == STOOL; }
+        /**
+         * (0.3.8) The light it gives, if any: {radius (m), r, g, b, height above its floor}. Candles a warm small pool,
+         * a chandelier a room's light from above, a fire in the grate (only while it burns, see fuel).
+         */
+        public float[] light() {
+            return switch (this) {
+                case CHANDELIER -> new float[]{11, 4.2f, 2.9f, 1.45f, -1.05f};
+                case CANDELABRA -> new float[]{7, 3.0f, 2.05f, 0.95f, 1.7f};
+                case FIREPLACE -> new float[]{8, 3.2f, 1.6f, 0.55f, 0.5f};
+                case DESK, NIGHTSTAND -> new float[]{3.2f, 1.5f, 1.0f, 0.45f, 0.95f};
+                default -> null;
+            };
+        }
     }
 
     /** Surface heights above the floor (m): a table's top, a counter's top, a bed's mattress. */
@@ -39,11 +67,21 @@ public final class Furniture extends WorldObject {
     public final int facing;
     /** Built and standing (furniture a build spot makes is not, until it is built). */
     public boolean placed;
+    /** (0.3.8) The floor it stands on (the cell above the floor's own blocks): the ground floor's, or an upper storey's. */
+    public final int floor;
+    /** (0.3.8) The renderer's key for its model (made once). */
+    public transient String drawKey;
+    /** (0.3.8) A fireplace's fire: game minutes of wood left in the grate (0: cold). */
+    public float fuel;
 
     public Furniture(long id, Kind kind, int x0, int z0, int x1, int z1, int h, int facing, long owner, boolean placed) {
-        super(id, kind.name().toLowerCase(), kind.title, (x0 + x1 + 1) / 2f, DevMap.FLOOR + Math.min(1f, h * 0.5f), (z0 + z1 + 1) / 2f);
+        this(id, kind, x0, z0, x1, z1, h, facing, owner, placed, DevMap.FLOOR);
+    }
+    /** (0.3.8) On any floor: floor is the first cell above that floor's blocks. */
+    public Furniture(long id, Kind kind, int x0, int z0, int x1, int z1, int h, int facing, long owner, boolean placed, int floor) {
+        super(id, kind.name().toLowerCase(), kind.title, (x0 + x1 + 1) / 2f, floor + Math.min(1f, h * 0.5f), (z0 + z1 + 1) / 2f);
         this.kind = kind; this.x0 = Math.min(x0, x1); this.z0 = Math.min(z0, z1); this.x1 = Math.max(x0, x1); this.z1 = Math.max(z0, z1); this.h = h;
-        this.facing = facing; this.owner = owner; this.placed = placed;
+        this.facing = facing; this.owner = owner; this.placed = placed; this.floor = floor;
     }
 
     public float yaw() { return facing * (float) Math.PI / 2; }
@@ -59,7 +97,7 @@ public final class Furniture extends WorldObject {
         float enter = 0, exit = Float.POSITIVE_INFINITY;
         for (int axis = 0; axis < 3; axis++) {
             float o = axis == 0 ? ox : axis == 1 ? oy : oz, d = axis == 0 ? dx : axis == 1 ? dy : dz;
-            float lo = axis == 0 ? x0 : axis == 1 ? DevMap.FLOOR : z0, hi = axis == 0 ? x1 + 1 : axis == 1 ? DevMap.FLOOR + top : z1 + 1;
+            float lo = axis == 0 ? x0 : axis == 1 ? floor : z0, hi = axis == 0 ? x1 + 1 : axis == 1 ? floor + top : z1 + 1;
             if (Math.abs(d) < 1e-6f) { if (o < lo || o > hi) return Float.POSITIVE_INFINITY; continue; }
             float a = (lo - o) / d, b = (hi - o) / d;
             enter = Math.max(enter, Math.min(a, b)); exit = Math.min(exit, Math.max(a, b));
@@ -71,12 +109,15 @@ public final class Furniture extends WorldObject {
     /** Puts the collision cells in or takes them out (the model is drawn while it is placed). */
     public void place(Rpg g, boolean on) {
         placed = on;
-        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) for (int y = 0; y < h; y++) g.setBlock(x, DevMap.FLOOR + y, z, on ? kind.block : Blocks.AIR);
+        // (0.3.8) a piece with no cells (a rug, a painting, a chandelier, a chair) leaves the world's blocks as they are
+        if (kind.block == Blocks.AIR) return;
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) for (int y = 0; y < h; y++) g.setBlock(x, floor + y, z, on ? kind.block : Blocks.AIR);
     }
 
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
-        if (kind == Kind.BED || kind == Kind.SLAB) o.add(Option.when(sleepRefusal(g, a) == null, "sleep", "Sleep", 10, sleepRefusal(g, a), g.cfg.interactRange));
+        if (kind.bed() || kind == Kind.SLAB) o.add(Option.when(sleepRefusal(g, a) == null, "sleep", "Sleep", 10, sleepRefusal(g, a), g.cfg.interactRange));
+        if (kind == Kind.FIREPLACE) o.add(Option.when(a.has(rpg.item.Items.LOGS, 1), "stoke", fuel > 0 ? "Put a log on the fire" : "Lay and light a fire", 9, "You need logs.", g.cfg.interactRange));
         return o;
     }
 
@@ -97,7 +138,8 @@ public final class Furniture extends WorldObject {
     @Override public Result perform(Rpg g, Actor a, String action, long req) {
         String why = reach(g, a, g.cfg.interactRange);
         if (why != null) return Result.no(why);
-        if (action.equals("sleep") && (kind == Kind.BED || kind == Kind.SLAB)) {
+        if (action.equals("stoke") && kind == Kind.FIREPLACE) return stoke(g, a, req);
+        if (action.equals("sleep") && (kind.bed() || kind == Kind.SLAB)) {
             why = sleepRefusal(g, a);
             if (why != null) return Result.no(why);
             if (cellSlab() && a == g.player) { if (g.ui != null) g.ui.fadeThen(g.law::sleepThroughSentence); else g.law.sleepThroughSentence(); return Result.ok(); }
@@ -115,6 +157,28 @@ public final class Furniture extends WorldObject {
 
     @Override public String inspect(Rpg g) { return super.inspect(g) + String.format("\n  %s cells (%d,%d)-(%d,%d) h%d facing %d placed=%s", kind, x0, z0, x1, z1, h, facing, placed); }
 
-    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("placed", placed); return m; }
-    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); place(g, astratto.util.Json.bool(m, "placed", placed)); }
+    /** (0.3.8) A fire minutes a log keeps going in a grate. */
+    public static final float LOG_MINUTES = 90, FUEL_MAX = 360;
+
+    /** (0.3.8) A log from the hands onto the grate (a fire laid and lit if it was cold). */
+    public Result stoke(Rpg g, Actor a, long req) {
+        if (kind != Kind.FIREPLACE) return Result.no("That's no hearth.");
+        if (fuel >= FUEL_MAX - LOG_MINUTES) return Result.no("The fire has all the wood it can take.");
+        // (0.3.9, gamefixes: a log put on the DevMansion fire crashed the game) the logs are looked for before any are taken
+        if (!a.has(rpg.item.Items.LOGS, 1)) return Result.no(fuel > 0 ? "You have no logs to put on it." : "You need logs to lay a fire.");
+        if (a.takeItems(rpg.item.Items.LOGS, 1).isEmpty()) return Result.no("You need logs.");
+        boolean lit = fuel <= 0;
+        fuel = Math.min(FUEL_MAX, fuel + LOG_MINUTES);
+        g.state.burn(rpg.item.Items.LOGS, 1);
+        g.state.commit(req, lit ? "FireLit" : "FireStoked", a.id, id, jurisdiction(), 0, String.format("%.0f minutes of fire", fuel));
+        if (g.sfx != null) g.sfx.play(lit ? "crackle" : "wood.light", x, floor + 0.4f, z, 0.6f);
+        if (a == g.player) g.chat.say(lit ? "You lay a fire in the grate and light it." : "You put another log on the fire.");
+        return Result.ok();
+    }
+
+    /** (0.3.8) The fire burns down by the game minute. */
+    public void burn(float minutes) { if (fuel > 0) fuel = Math.max(0, fuel - minutes); }
+
+    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("placed", placed); if (fuel > 0) m.put("fuel", fuel); return m; }
+    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); place(g, astratto.util.Json.bool(m, "placed", placed)); fuel = (float) astratto.util.Json.num(m, "fuel", 0); }
 }

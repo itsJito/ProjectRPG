@@ -21,6 +21,13 @@ public final class Window {
     public String glInfo = "";
     /** Shown when made (false: an off-screen window for automated runs - it still has a full GL context). */
     public boolean show = true;
+    /**
+     * The program's own id for the desktop (Windows: its AppUserModelID). Without one the window's taskbar button belongs
+     * to the java runtime that hosts it and shows that program's icon; with one it is the game's own, with the game's icon.
+     */
+    public String appId;
+    /** Called with the new window's handle before it is first shown: its icon is set here, so it is there from the start. */
+    public java.util.function.LongConsumer dress;
     /** The monitor's refresh rate (Hz), and whether the window fills the monitor (borderless). */
     public int refreshRate = 60;
     public boolean fullscreen;
@@ -29,6 +36,7 @@ public final class Window {
     private static boolean env(String name) { return System.getenv("ASTRATTO_" + name) != null || System.getenv("ABS_" + name) != null; }
 
     public void create(String title, int w, int h) {
+        if (appId != null) claimAppId(appId);
         GLFWErrorCallback.createPrint(System.err).set();
         if (!glfwInit()) throw new IllegalStateException("GLFW init failed");
         glfwDefaultWindowHints();
@@ -75,8 +83,23 @@ public final class Window {
         int[] fw = new int[1], fh = new int[1];
         glfwGetFramebufferSize(handle, fw, fh);
         width = fw[0]; height = fh[0];
+        if (dress != null) dress.accept(handle);
         if (show) glfwShowWindow(handle);
         glClearColor(0.05f, 0.05f, 0.06f, 1);
+    }
+
+    /** Windows: SetCurrentProcessExplicitAppUserModelID, before any window is made. Elsewhere, and on any failure, nothing. */
+    private static void claimAppId(String id) {
+        if (!System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).startsWith("windows")) return;
+        try (org.lwjgl.system.SharedLibrary shell = org.lwjgl.system.Library.loadNative(Window.class, "org.lwjgl", "shell32")) {
+            long fn = shell.getFunctionAddress("SetCurrentProcessExplicitAppUserModelID");
+            if (fn == 0) return;
+            java.nio.ByteBuffer wide = org.lwjgl.system.MemoryUtil.memUTF16(id, true);
+            try {
+                int hr = org.lwjgl.system.JNI.callPI(org.lwjgl.system.MemoryUtil.memAddress(wide), fn);
+                if (hr != 0) System.err.println("[Boot] app id not taken: 0x" + Integer.toHexString(hr));
+            } finally { org.lwjgl.system.MemoryUtil.memFree(wide); }
+        } catch (RuntimeException | UnsatisfiedLinkError e) { System.err.println("[Boot] app id: " + e.getMessage()); }
     }
 
     /**

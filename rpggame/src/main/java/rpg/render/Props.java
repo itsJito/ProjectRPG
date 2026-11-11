@@ -294,6 +294,36 @@ public final class Props {
             case TARGET -> new Layer[]{wood(targetStand(w)), new Layer(targetFace(), 0.95f, 0, 0)};
             case HEADSTONE -> new Layer[]{stone(headstone(seed)), new Layer(graveMound(seed), 0.97f, 0, 0)};
             case BENCH -> new Layer[]{wood(bench(w, d))};
+            // (0.3.8) the house furnishings (Furnishings): h is the cells it stands in - a hung piece's room height
+            case CHAIR -> Furnishings.chair(seed);
+            case ARMCHAIR -> Furnishings.armchair(seed);
+            case SOFA -> Furnishings.sofa(w, seed);
+            case STOOL -> Furnishings.stool();
+            case DINING_TABLE -> Furnishings.diningTable(w, d, seed);
+            case DESK -> Furnishings.desk(w, seed);
+            case WARDROBE -> Furnishings.wardrobe(w, h);
+            case DRESSER -> Furnishings.dresser(w, seed);
+            case NIGHTSTAND -> Furnishings.nightstand(seed);
+            case SIDEBOARD -> Furnishings.sideboard(w, seed);
+            case CLOCK -> Furnishings.clock();
+            case CUPBOARD -> Furnishings.cupboard(w, h, seed);
+            case SHELVES -> Furnishings.shelves(w, h, seed);
+            case WINE_RACK -> Furnishings.wineRack(w, h, seed);
+            case FOURPOSTER -> Furnishings.fourPoster(w, d, seed);
+            case BATHTUB -> Furnishings.bathtub(w);
+            case WASHSTAND -> Furnishings.washstand();
+            case FIREPLACE -> Furnishings.fireplace(w, seed);
+            case CHANDELIER -> Furnishings.chandelier(h);
+            case CANDELABRA -> Furnishings.candelabra();
+            case RUG -> Furnishings.rug(w, d, seed);
+            case PAINTING -> Furnishings.painting(w, h, seed);
+            case TAPESTRY -> Furnishings.tapestry(w, h, seed);
+            case MIRROR -> Furnishings.mirror();
+            case WEAPON_RACK -> Furnishings.weaponRack(seed);
+            case POT_RACK -> Furnishings.potRack(w);
+            case ARMOR_STAND -> Furnishings.armorStand(seed);
+            case PLANTER -> Furnishings.planter(seed);
+            case BUST -> Furnishings.bust(seed);
         };
     }
 

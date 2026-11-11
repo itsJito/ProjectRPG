@@ -72,9 +72,14 @@ final class CombatTactics {
      */
     static final double HIGH_GROUND_RETRY = 6;
     static final float HIGH_GROUND_MOVED = 4;
+    private long searchedOn=-1;
     private Plan highGround(Npc n,Actor foe){
         if(n.y>foe.y+1.5f)return null;
         if(g.time<n.highGroundAt && Math.hypot(n.x-n.highGroundX,n.z-n.highGroundZ)<HIGH_GROUND_MOVED)return null;
+        // (0.3.9, optimisation: hitches in a fight) one search a tick in the whole world: a melee of archers all looking
+        // for a rise on the same frame was the long frames of a battle; the rest look on their next decision
+        if(g.state.tick==searchedOn)return null;
+        searchedOn=g.state.tick;
         Plan found=highGroundSearch(n,foe);
         if(found==null){n.highGroundAt=g.time+HIGH_GROUND_RETRY+(n.id%5)*0.4;n.highGroundX=n.x;n.highGroundZ=n.z;}
         return found;

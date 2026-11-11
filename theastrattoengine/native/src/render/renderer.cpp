@@ -167,7 +167,7 @@ Renderer::~Renderer() {
     if (decalVbo_) g_.DeleteBuffers(1, &decalVbo_);
     if (decalVao_) g_.DeleteVertexArrays(1, &decalVao_);
     Program* all[] = {&gWorld_, &gModel_, &sWorld_, &sModel_, &lighting_, &cull_, &gtao_, &aoBlur_, &ssr_, &vol_, &fogApply_, &fWorld_, &fModel_,
-                      &particle_, &chemistryParticles_, &waterWaves_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_};
+                      &particle_, &chemistryParticles_, &waterWaves_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_, &rain_};
     for (Program* p : all) p->destroy(g_);
     if (leafTex_) g_.DeleteTextures(1, &leafTex_);
     GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], layerMat_, white_, shadowTex_, paletteTex_, water_[0], water_[1], waterMask_};
@@ -250,7 +250,7 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
                       {&tonemap_, "fullscreen.vert", "tonemap.frag"}, {&copy_, "fullscreen.vert", "copy.frag"}, {&ui_, "ui2d.vert", "ui2d.frag"}, {&portrait_, "model.vert", "portrait.frag"},
                       {&folG_, "foliage.vert", "foliage_gbuffer.frag"}, {&folS_, "foliage.vert", "foliage_shadow.frag"},
                       {&propG_, "props.vert", "props_gbuffer.frag"}, {&propS_, "props.vert", "props_shadow.frag"}, {&decal_, "decal.vert", "decal.frag"},
-                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}};
+                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}, {&rain_, "fullscreen.vert", "rain.frag"}};
     for (const P& p : list) {
         if (p.p == &gWorld_ || p.p == &lighting_ || p.p == &vol_ || p.p == &fogApply_ || p.p == &fWorld_ || p.p == &fModel_) continue;
         std::string vs = src(p.vs), fs = src(p.fs);
@@ -596,9 +596,9 @@ void Renderer::freeWorld() {
     }
     vaoO_.clear(); vboO_.clear(); vaoT_.clear(); vboT_.clear(); quadsO_.clear(); quadsT_.clear();
     pending_.clear(); queued_.clear(); voxelDirty_.clear(); voxelQueued_.clear();
-    GLuint t[] = {voxTex_, probeR_, probeG_, probeB_, probeVis_, probeMeta_};
+    GLuint t[] = {voxTex_, probeR_, probeG_, probeB_, probeVis_, probeMeta_, roofTex_};
     for (GLuint x : t) if (x) g_.DeleteTextures(1, &x);
-    voxTex_ = probeR_ = probeG_ = probeB_ = probeVis_ = probeMeta_ = 0;
+    voxTex_ = probeR_ = probeG_ = probeB_ = probeVis_ = probeMeta_ = roofTex_ = 0;
     world_ = nullptr;
 }
 
@@ -652,6 +652,8 @@ void Renderer::bindWorld(Engine* e, astratto_handle h) {
     g_.TexImage3D(TEXTURE_3D, 0, static_cast<GLint>(R8UI), sizeY_, sizeZ_, sizeX_, 0, RED_INTEGER, UNSIGNED_BYTE, nullptr);
     voxFilled_ = false;
     column_.assign(static_cast<size_t>(16) * 16 * sizeY_, 0);
+    roofTex_ = tex2D(R16F, sizeX_, sizeZ_, NEAREST, 1);
+    roofCol_.assign(static_cast<size_t>(16) * 16, 0.0f);
     if (!paletteTex_) buildPalette();
     // the probes: one every four blocks, covering the whole world; the textures are also the cache
     PX_ = std::max(1, sizeX_ / SPACING); PY_ = std::max(1, sizeY_ / SPACING); PZ_ = std::max(1, sizeZ_ / SPACING);
@@ -831,6 +833,16 @@ void Renderer::voxelSync(VoxelWorld& w, int maxColumns) {
             k += static_cast<size_t>(wz) * sizeY_;
         }
         g_.TexSubImage3D(TEXTURE_3D, 0, 0, cz * 16, cx * 16, sizeY_, wz, wx, RED_INTEGER, UNSIGNED_BYTE, column_.data());
+        // the roof over each column: the top of its highest block that stops a drop (solid or liquid)
+        for (int x = 0; x < wx; x++) for (int z = 0; z < wz; z++) {
+            const uint8_t* col = column_.data() + (static_cast<size_t>(x) * wz + z) * sizeY_;
+            int top = 0;
+            for (int y = sizeY_ - 1; y >= 0; y--) { const uint8_t id = col[y]; if (particleCollision_[id >> 5] & (1u << (id & 31))) { top = y + 1; break; } }
+            roofCol_[static_cast<size_t>(z) * wx + x] = static_cast<float>(top);
+        }
+        g_.BindTexture(TEXTURE_2D, roofTex_);
+        g_.TexSubImage2D(TEXTURE_2D, 0, cx * 16, cz * 16, wx, wz, RED, FLOAT, roofCol_.data());
+        g_.BindTexture(TEXTURE_3D, voxTex_);
         probesInvalidate(cx, cz, voxFilled_);
         n++;
     }
@@ -2022,6 +2034,30 @@ void Renderer::forwardPass(VoxelWorld* world) {
     g_.DepthMask(TRUE_);
 }
 
+// (0.3.8) the falling rain over the lit scene (see rain.frag): only while it rains, only where the sky is open above
+void Renderer::rainPass() {
+    if (!(env_.rain > 0.01f) || roofTex_ == 0 || sizeX_ <= 0) return;
+    g_.BindFramebuffer(FRAMEBUFFER, lensFbo_);
+    g_.Viewport(0, 0, ow_, oh_);
+    g_.Disable(DEPTH_TEST);
+    g_.Enable(BLEND);
+    g_.BlendFunc(ONE, ONE_MINUS_SRC_ALPHA);
+    rain_.use();
+    rain_.tex("uDepth", 0, TEXTURE_2D, gDepth_);
+    rain_.tex("uRoof", 1, TEXTURE_2D, roofTex_);
+    rain_.mat4("uInvPV", invPV_.m);
+    rain_.f3("uCam", cam_.x, cam_.y, cam_.z);
+    rain_.f3("uAmbient", ambient_[0], ambient_[1], ambient_[2]);
+    rain_.f3("uFogCol", fogCol_[0], fogCol_[1], fogCol_[2]);
+    rain_.f3("uSunCol", sunCol_[0], sunCol_[1], sunCol_[2]);
+    rain_.f2("uWind", foliage_.wind_x, foliage_.wind_z);
+    rain_.f2("uWorld", static_cast<float>(sizeX_), static_cast<float>(sizeZ_));
+    rain_.f1("uRain", std::min(1.0f, env_.rain));
+    rain_.f1("uTime", std::fmod(env_.time, 2048.0f));     // the streaks scroll from it: kept small enough to stay exact
+    fullscreen();
+    g_.Disable(BLEND);
+}
+
 // ------------------------------------------------------------------ TAA, bloom, exposure, tone map
 void Renderer::resolve(int windowW, int windowH) {
     // ASTRATTO_PROFILE_RESOLVE: each step of the resolve timed (the GPU drained between steps: for measuring only)
@@ -2085,6 +2121,18 @@ void Renderer::resolve(int windowW, int windowH) {
         lens_.i1("uDof", q_.dof ? 1 : 0);
         fullscreen();
         sceneTex = lensTex_;
+    }
+    // (0.3.8) the rain over the resolved image: drawn after the temporal pass, which smeared its thin, fast streaks away
+    if (env_.rain > 0.01f && roofTex_ != 0 && sizeX_ > 0 && lensFbo_ != 0) {
+        if (sceneTex != lensTex_) {
+            g_.BindFramebuffer(FRAMEBUFFER, lensFbo_);
+            g_.Viewport(0, 0, ow_, oh_);
+            copy_.use();
+            copy_.tex("uTex", 0, TEXTURE_2D, sceneTex);
+            fullscreen();
+            sceneTex = lensTex_;
+        }
+        rainPass();
     }
     mark(1);
     // bloom: threshold on the way down, tent filter on the way back up

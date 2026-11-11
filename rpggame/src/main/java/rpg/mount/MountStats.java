@@ -18,27 +18,47 @@ public final class MountStats {
     /** A horse's: varied a little by the seed (its id). */
     public static MountStats horse(long seed) {
         MountStats s = new MountStats();
-        s.walk = 1.6f + roll(seed, 1) * 0.3f;
-        s.trot = 3.4f + roll(seed, 2) * 0.7f;
-        s.canter = 6.0f + roll(seed, 3) * 1.1f;
-        s.gallop = 9.5f + roll(seed, 4) * 3.0f;
-        s.jump = 1.15f + roll(seed, 5) * 1.15f;
+        // (0.3.9) the bases from the tuning data (data/tuning.json "mounts.horse"), each varied a little by the seed
+        s.walk = t("horse.walk", 1.6f) + roll(seed, 1) * 0.3f;
+        s.trot = t("horse.trot", 3.4f) + roll(seed, 2) * 0.7f;
+        s.canter = t("horse.canter", 6.0f) + roll(seed, 3) * 1.1f;
+        s.gallop = t("horse.gallop", 9.5f) + roll(seed, 4) * t("horse.gallopSpread", 3.0f);
+        s.jump = t("horse.jump", 1.15f) + roll(seed, 5) * t("horse.jumpSpread", 1.15f);
         s.step = 1.05f;
-        s.turn = 2.5f + roll(seed, 6) * 0.8f;
-        s.vigor = 80 + roll(seed, 7) * 40;
+        s.turn = t("horse.turn", 2.5f) + roll(seed, 6) * 0.8f;
+        s.vigor = t("horse.vigor", 80) + roll(seed, 7) * 40;
         return s;
     }
 
     /** A Pegasus's: built like a war horse, faster and springier, and it flies. */
     public static MountStats pegasus(long seed) {
         MountStats s = horse(seed);
-        s.gallop = 11f + roll(seed, 8) * 3f; s.canter += 0.8f;
-        s.jump = 2.0f + roll(seed, 9) * 1.0f;
-        s.vigor = 100 + roll(seed, 10) * 40;
+        s.gallop = t("pegasus.gallop", 11f) + roll(seed, 8) * t("pegasus.gallopSpread", 3f); s.canter += 0.8f;
+        s.jump = t("pegasus.jump", 2.0f) + roll(seed, 9) * t("pegasus.jumpSpread", 1.0f);
+        s.vigor = t("pegasus.vigor", 100) + roll(seed, 10) * 40;
         s.step = 1.1f;
         s.flies = true;
         return s;
     }
+
+    /**
+     * (0.3.9) A Dire Wolf's: a predator's sprint - slower than a horse at a walk, a deal quicker away from a standstill
+     * and at the full run, nimbler in the turn and springier; less wind for a long gallop.
+     */
+    public static MountStats direWolf(long seed) {
+        MountStats s = horse(seed);
+        s.walk = t("direWolf.walk", 1.7f) + roll(seed, 11) * 0.2f;
+        s.trot = t("direWolf.trot", 4.2f) + roll(seed, 12) * 0.6f;
+        s.canter = t("direWolf.canter", 7.2f) + roll(seed, 13) * 1.0f;
+        s.gallop = t("direWolf.gallop", 12f) + roll(seed, 14) * t("direWolf.gallopSpread", 2.2f);
+        s.jump = t("direWolf.jump", 1.8f) + roll(seed, 15) * t("direWolf.jumpSpread", 0.6f);
+        s.turn = t("direWolf.turn", 3.2f) + roll(seed, 16) * 0.6f;
+        s.vigor = t("direWolf.vigor", 60) + roll(seed, 17) * 30;
+        s.step = 1.05f;
+        return s;
+    }
+
+    private static float t(String key, float fallback) { return rpg.Tuning.f("mounts." + key, fallback); }
 
     /** A foal's: its parents' between them, each figure moved a little either way. */
     public static MountStats inherit(MountStats a, MountStats b, long seed) {

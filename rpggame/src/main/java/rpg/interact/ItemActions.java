@@ -116,7 +116,7 @@ public final class ItemActions {
             }
             case "recharge" -> {
                 var coal = a.takeItems(Items.COAL, 1);
-                if (coal == null) yield Result.no("You need coal to recharge it.");
+                if (coal.isEmpty()) yield Result.no("You need coal to recharge it.");
                 g.state.burn(Items.COAL, 1);
                 s.charges = Math.min(d.maxCharges, s.charges + 10);
                 g.state.commit(req, "Recharged", a.id, 0, null, 0, d.name + " -> " + s.charges + " charges");

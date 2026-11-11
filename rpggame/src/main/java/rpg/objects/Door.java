@@ -144,7 +144,7 @@ public final class Door extends WorldObject {
         }
         cellsOpen = false;
         applyCells(g, false);
-        if (open) swing(g, 1.6f);
+        if (open) swing(g, 1.6f); else hold(g, true);
     }
 
     /** Reads where each leaf has swung to, latches a closing door as it comes home, and says to the world whether the way is open. */
@@ -217,7 +217,31 @@ public final class Door extends WorldObject {
         motorUntil = g.time + seconds;
     }
 
-    private void unlatch(Rpg g) { for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, lo(i), hi(i)); }
+    private void unlatch(Rpg g) { hold(g, false); for (int i = 0; i < hinge.length; i++) g.game.commands().jointLimits(hinge[i], true, lo(i), hi(i)); }
+
+    /**
+     * (0.3.9, optimisation: the stutter) a shut door is held in its frame as a fixed body - it stops whoever walks into it
+     * as a wall does, and the rigid-body solver has nothing to do for it; unlatched, its leaves are free on their hinges
+     * again. Every leaf in the world used to be a live body on a live hinge, woken by everyone who walked past, and their
+     * hinges were most of the physics' time.
+     */
+    private void hold(Rpg g, boolean still) {
+        int flags = AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT | (still ? AstrattoNative.RIGID_KINEMATIC : 0);
+        for (int i = 0; i < leaf.length; i++) {
+            // held: squared in its frame and stopped dead first - a fixed body keeps whatever spin it had, and a leaf held
+            // with the last of its closing swing turned slowly on in the frame and jammed on its hinge when next opened
+            if (still) placeShut(g, i);
+            g.game.commands().rigidSet(leaf[i], flags, 0, 0, 0, Float.NaN, Float.NaN, Float.NaN);
+        }
+    }
+    /** A leaf put back shut on its hinge, at rest. */
+    private void placeShut(Rpg g, int i) {
+        boolean ax = alongX();
+        float ex = ax ? (i == 0 ? 1 : -1) : 0, ez = ax ? 0 : (i == 0 ? 1 : -1);
+        float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = leafWidth;
+        g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
+                (float) Math.cos(yaw / 2), 0, (float) Math.sin(yaw / 2), 0, 0, 0, 0, 0, 0, 0);
+    }
     /** A leaf's stops, unlatched: from shut to SWING into the room (a gate, either way). */
     private float lo(int i) { return gate ? -SWING : Math.min(inward[i] * SWING, -inward[i] * OUT); }
     private float hi(int i) { return gate ? SWING : Math.max(inward[i] * SWING, -inward[i] * OUT); }
@@ -225,6 +249,7 @@ public final class Door extends WorldObject {
     private void latch(Rpg g) {
         for (int i = 0; i < hinge.length; i++) { g.game.commands().jointLimits(hinge[i], true, 0, 0); g.game.commands().jointMotor(hinge[i], 0, 0); }
         motorUntil = 0;
+        hold(g, true);
     }
 
     /** The door's cells as the world should take them: a shut door (or a locked one), or an open way. */

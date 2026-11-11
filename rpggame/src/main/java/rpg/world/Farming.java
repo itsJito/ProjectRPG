@@ -80,6 +80,15 @@ public final class Farming {
     };
     /** How many of the fields were made with the old fixtures (their plots' ids come first); the rest come with Guild Row. */
     public static final int EARLY_FIELDS = 2;
+    /** (0.3.8) The orchards made after every older fixture (so their ids hold): the DevMansion's. */
+    public static final Orchard[] LATE_ORCHARDS = {new Orchard("DevMansion orchard", rpg.Ids.MANSION_ORCHARDIST, Mansion.ORCHARD)};
+
+    /** (0.3.8) The late orchards' trees, with fixed ids from a base. */
+    public long buildLateOrchards(long nextId) {
+        for (int o = 0; o < LATE_ORCHARDS.length; o++) for (int[] t : LATE_ORCHARDS[o].trees()) trees.add(g.objects.add(new AppleTree(nextId++, ORCHARDS.length + o, t[0], t[1], LATE_ORCHARDS[o].owner())));
+        return nextId;
+    }
+
     public static final Orchard[] ORCHARDS = {
             new Orchard("DevCity orchard", Ids.ORCHARD_KEEPER_CITY, new int[][]{{113, 105}, {118, 105}, {113, 110}, {118, 110}}),
             new Orchard("DevPalace orchard", Ids.ORCHARD_KEEPER_PALACE, new int[][]{{178, 66}, {182, 66}, {186, 66}})
@@ -242,6 +251,7 @@ public final class Farming {
     private double lastMinutes = -1;
 
     public Farming(Rpg g) { this.g = g; }
+    private static Orchard[] concat(Orchard[] a, Orchard[] b) { Orchard[] r = java.util.Arrays.copyOf(a, a.length + b.length); System.arraycopy(b, 0, r, a.length, b.length); return r; }
 
     /** The plots and the trees, made once with fixed ids from a base (after every older fixture). */
     public long build(long nextId) {
@@ -337,7 +347,7 @@ public final class Farming {
             for (int[] gate : field.gate()) b.blockSet(gate[0], f, gate[1], Blocks.AIR);
         }
         for (DevMap.Piece p : GROWER_BEDS) for (int x = p.x0(); x <= p.x1(); x++) for (int z = p.z0(); z <= p.z1(); z++) b.blockSet(x, f, z, Blocks.BED);
-        for (Orchard o : ORCHARDS) for (int[] t : o.trees()) {
+        for (Orchard o : concat(ORCHARDS, LATE_ORCHARDS)) for (int[] t : o.trees()) {
             for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int y = f; y < f + TREE_HEIGHT + 3; y++) b.blockSet(t[0] + dx, y, t[1] + dz, Blocks.AIR);
             for (int y = 0; y < TREE_HEIGHT; y++) b.blockSet(t[0], f + y, t[1], Blocks.OAK_LOG);
             // a low, round crown: an orchard tree is kept pruned within reach

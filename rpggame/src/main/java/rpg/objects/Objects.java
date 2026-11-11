@@ -18,7 +18,9 @@ import rpg.world.DevMap;
  */
 public final class Objects {
     private final Rpg g;
-    private final List<WorldObject> list = new ArrayList<>();
+    private final Counted list = new Counted();
+    /** A list that counts its own changes (for the snapshot all() reads). */
+    private static final class Counted extends ArrayList<WorldObject> { int changes() { return modCount; } }
     private long nextFixture = Ids.FIXTURES;
     private final List<Door> doors = new ArrayList<>();
     public Door shedDoor, storeDoor, farmGate;
@@ -36,7 +38,31 @@ public final class Objects {
 
     public Objects(Rpg g) { this.g = g; }
 
-    public List<WorldObject> all() { List<WorldObject> l = new ArrayList<>(); for (WorldObject o : list) if (!o.removed) l.add(o); return l; }
+    /**
+     * What is in the world (not removed). (0.3.9, optimisation: the stutter) a view over a snapshot of the list taken only
+     * when something is added or taken out, with the removed passed over as it is read: it used to copy the whole list,
+     * thousands of things, on every call - several times a frame - and the garbage of it was the collector's pauses. As
+     * before, adding to the world while walking it is safe (the walk goes over the snapshot).
+     */
+    public List<WorldObject> all() { return view; }
+    private WorldObject[] snap = new WorldObject[0];
+    private int snapAt = -1;
+    private WorldObject[] snapshot() { if (snapAt != list.changes()) { snap = list.toArray(new WorldObject[0]); snapAt = list.changes(); } return snap; }
+    private final List<WorldObject> view = new java.util.AbstractList<>() {
+        @Override public int size() { int n = 0; for (WorldObject o : snapshot()) if (!o.removed) n++; return n; }
+        @Override public WorldObject get(int i) { int k = 0; for (WorldObject o : snapshot()) if (!o.removed) { if (k == i) return o; k++; } throw new IndexOutOfBoundsException(i); }
+        @Override public java.util.Iterator<WorldObject> iterator() {
+            final WorldObject[] a = snapshot();
+            return new java.util.Iterator<>() {
+                int i = next(0);
+                private int next(int from) { while (from < a.length && a[from].removed) from++; return from; }
+                @Override public boolean hasNext() { return i < a.length; }
+                @Override public WorldObject next() { if (i >= a.length) throw new java.util.NoSuchElementException(); WorldObject o = a[i]; i = next(i + 1); return o; }
+            };
+        }
+    };
+    /** When the removed were last swept out of the list. */
+    private double sweptAt;
     public List<WorldObject> everything() { return list; }
     /**
      * An object by id. (0.3.5, optimization) from an index kept beside the list - rebuilt whenever the list has changed
@@ -212,6 +238,43 @@ public final class Objects {
         rpg.ai.Waypoints.doors(g.vox, doors);
     }
 
+    /**
+     * (0.3.8) The DevMansion's fixtures, from a base id (after every older one): its front and back doors, every
+     * furnishing in its rooms (on their own floors), the kitchen's range, and the crates, boxes and barrels of its pantry
+     * and yard with what they hold. Returns the next free id.
+     */
+    public long mansion(long id) {
+        long[] next = {id};
+        java.util.function.LongSupplier nid = () -> next[0]++;
+        Door front = add(new Door(nid.getAsLong(), "Front door", rpg.world.Mansion.FRONT_DOOR, false, null, 1, Ids.BARON));
+        Door back = add(new Door(nid.getAsLong(), "Back door", rpg.world.Mansion.BACK_DOOR, false, null, 1, Ids.BARON));
+        front.spawn(g); back.spawn(g);
+        for (rpg.world.Mansion.Fit f : rpg.world.Mansion.FITS) {
+            Furniture fu = add(new Furniture(nid.getAsLong(), Furniture.Kind.valueOf(f.kind()), f.x0(), f.z0(), f.x1(), f.z1(), f.h(), f.facing(), f.owner(), true, f.y()));
+            furniture.add(fu);
+            fu.place(g, true);
+            if (fu.kind.bed() && fu.owner != 0) fu.name = g.nameOf(fu.owner) + "'s bed";
+        }
+        add(new Station(nid.getAsLong(), "range", "Range", Recipes.Station.RANGE, rpg.world.Mansion.RANGE_AT[0], DevMap.FLOOR + 0.6f, rpg.world.Mansion.RANGE_AT[1]));
+        g.setBlock((int) Math.floor(rpg.world.Mansion.RANGE_AT[0]), DevMap.FLOOR, (int) Math.floor(rpg.world.Mansion.RANGE_AT[1]), Blocks.RANGE);
+        for (Object[] c : rpg.world.Mansion.CRATES) {
+            Breakable.Form form = Breakable.Form.valueOf((String) c[0]);
+            int level = ((Number) c[2]).intValue();
+            float y = (level < 0 ? DevMap.FLOOR : rpg.world.Mansion.LEVELS[level]) + form.hy() + 0.01f;
+            Breakable b = new Breakable(nid.getAsLong(), form, ((Number) c[1]).floatValue(), y, ((Number) c[3]).floatValue(), ((Number) c[4]).intValue() * (float) Math.PI / 2, form == Breakable.Form.SIGN ? 0 : Ids.BARON);
+            if (form == Breakable.Form.SIGN) b.text = (String) c[5];
+            else if (!((String) c[5]).isEmpty()) for (String part : ((String) c[5]).split(",")) {
+                String[] kv = part.split(":");
+                rpg.item.ItemDef d = Items.get(kv[0].trim());
+                if (d != null) put(b, new ItemStack(d, Integer.parseInt(kv[1].trim()), Ids.BARON, false, 0));
+            }
+            g.breakables.place(b);
+        }
+        g.vox.doors(doors);
+        rpg.ai.Waypoints.doors(g.vox, doors);
+        return next[0];
+    }
+
     /** New beds append after established fixture ids; spare beds retain their identities. */
     public void supportBeds() {
         for (var p : DevMap.SUPPORT_BEDS) {
@@ -299,7 +362,7 @@ public final class Objects {
     /** The standing furniture whose cells hold a block, or null. */
     public Furniture furnitureAt(int bx, int by, int bz) {
         for (Furniture f : furniture)
-            if (f.exists() && bx >= f.x0 && bx <= f.x1 && bz >= f.z0 && bz <= f.z1 && by >= DevMap.FLOOR && by < DevMap.FLOOR + f.h) return f;
+            if (f.exists() && bx >= f.x0 && bx <= f.x1 && bz >= f.z0 && bz <= f.z1 && by >= f.floor && by < f.floor + f.h) return f;
         return null;
     }
 
@@ -386,10 +449,11 @@ public final class Objects {
 
     public void update(float dt) {
         for (Node n : nodes) n.update(g);
-        for(var object:all())if(object instanceof FishingNet net)net.update(g);
+        for(var object:snapshot())if(object instanceof FishingNet net && !net.removed)net.update(g);
         stall.update(g);
-        for (WorldObject o : new ArrayList<>(list)) if (o instanceof Fire fire) fire.update(g, dt);
-        list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && gi.id >= Ids.DYNAMIC)));
+        for (WorldObject o : snapshot()) if (o instanceof Fire fire && !fire.removed) fire.update(g, dt);
+        // the burnt-out fires and the picked-up things swept out now and then, not every frame
+        if (g.time - sweptAt > 1.0) { sweptAt = g.time; list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && !Ids.fixture(gi.id)))); }
         doorsForNpcs();
         for (Door d : doors()) d.update(g, g.lastRigids);
         settleAmmo();

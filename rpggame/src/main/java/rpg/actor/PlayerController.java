@@ -99,6 +99,10 @@ public final class PlayerController {
         // (0.3.0) in the saddle: the keys are the mount's (Riding) - the body rides where it is carried
         if (p.riding != 0) {
             g.riding.update(dt);
+            // (0.3.9, gamefixes: attack and sheathe while mounted) up in the saddle the hands are the rider's own: every
+            // weapon, the bow, the spells and the sheathe work from it as on foot (the mount has the movement keys)
+            var ride = g.riding.of(p);
+            if (ride != null && !ride.mounting() && p.riding != 0) { hands(p, dt); g.game.commands().listener(cx, cy, cz, camYaw); in.clearEdges(); return; }
             queuedMelee = null; mainWas = in.mainDown; offWas = in.offDown;
             g.game.commands().listener(cx, cy, cz, camYaw);
             in.clearEdges();
@@ -201,7 +205,7 @@ public final class PlayerController {
         offWas = in.offDown;
         if (in.cast) g.combat.cast(p, p.spell, aimYaw, aimPitch);
         if (in.bless >= 0 && in.bless < Spells.Prayer.values().length) g.combat.bless(p, Spells.Prayer.values()[in.bless]);
-        if (in.dodge) {
+        if (in.dodge && p.riding == 0) {
             float fx = (float) -Math.sin(camYaw), fz = (float) -Math.cos(camYaw), rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
             float dx = fx * in.forward + rx * in.strafe, dz = fz * in.forward + rz * in.strafe;
             if (dx == 0 && dz == 0) { dx = -fx; dz = -fz; }

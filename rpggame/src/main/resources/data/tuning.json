@@ -1,0 +1,39 @@
+{
+  "companions": {
+    "max": 4,
+    "knightHonor": 25,
+    "holdLeash": 7,
+    "fee": { "BANDIT": 150, "BRUTE": 120, "HUNTER": 90, "KNIGHT": 0 },
+    "cooldown": { "POWER_STRIKE": 14, "TAUNT": 22, "SHIELD_WALL": 18, "VOLLEY": 16, "SPELL": 10, "MEND": 30 }
+  },
+  "squad": {
+    "menuPace": 0.25,
+    "wheelPace": 0,
+    "holdToOpen": 0.2
+  },
+  "homicide": {
+    "chargeAt": 0.6,
+    "canvassRadius": 42,
+    "canvassMax": 5,
+    "examineTime": 6,
+    "askPatience": 45,
+    "freshBlood": 180
+  },
+  "mounts": {
+    "horse":    { "walk": 1.6, "trot": 3.4, "canter": 6.0, "gallop": 9.5, "gallopSpread": 3.0, "jump": 1.15, "jumpSpread": 1.15, "turn": 2.5, "vigor": 80 },
+    "pegasus":  { "gallop": 11.0, "gallopSpread": 3.0, "jump": 2.0, "jumpSpread": 1.0, "vigor": 100 },
+    "direWolf": { "walk": 1.7, "trot": 4.2, "canter": 7.2, "gallop": 12.0, "gallopSpread": 2.2, "jump": 1.8, "jumpSpread": 0.6, "turn": 3.2, "vigor": 60 },
+    "swimFloat": 0.58,
+    "swimPaceFloor": 1.8,
+    "mountSeconds": 1.3,
+    "barebackExtra": 0.45
+  },
+  "seating": {
+    "ease": 0.55,
+    "approach": 1.0
+  },
+  "interiors": {
+    "cellsPerPiece": 7,
+    "mostPerRoom": 9
+  }
+}

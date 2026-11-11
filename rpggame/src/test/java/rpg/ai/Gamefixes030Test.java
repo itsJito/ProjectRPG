@@ -134,7 +134,7 @@ class Gamefixes030Test {
 
     @Test void aSaddledTameHorseIsRiddenWhereTheRiderSteers() {
         Animal h = horse(Species.HORSE, true, true);
-        assertFalse(g.riding.mount(g.player, h).rejected());
+        assertFalse(g.riding.mount(g.player, h).rejected()); g.riding.seatNow(g.player);
         assertEquals(h.id, g.player.riding);
         float z0 = h.z;
         keys(1, 0, false, 90);
@@ -146,7 +146,7 @@ class Gamefixes030Test {
 
     @Test void anUnsaddledTameHorseCarriesButIsNotSteered() {
         Animal h = horse(Species.HORSE, true, false);
-        g.riding.mount(g.player, h);
+        g.riding.mount(g.player, h); g.riding.seatNow(g.player);
         float z0 = h.z;
         keys(1, 0, true, 90);
         assertEquals(z0, h.z, 0.3f, "no saddle: the reins mean nothing");
@@ -155,7 +155,7 @@ class Gamefixes030Test {
     @Test void aWildHorseIsTamedByStayingOnItAndKeepsItsProgress() {
         Animal h = horse(Species.HORSE, false, false);
         g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 99);
-        g.riding.mount(g.player, h);
+        g.riding.mount(g.player, h); g.riding.seatNow(g.player);
         for (int i = 0; i < 60 * 8 && g.player.riding != 0; i++) game.tick(1f / 60);
         float progress = h.tame;
         assertTrue(progress > 0.15f, "taming is earned in the saddle: " + progress);
@@ -164,14 +164,14 @@ class Gamefixes030Test {
         assertEquals(progress, h.tame, 1e-6, "kept after getting off");
         h.tame = 0.999f;
         g.teleport(g.player, h.x + 1.5f, DevMap.FLOOR, h.z); game.tick(0);
-        g.riding.mount(g.player, h);
+        g.riding.mount(g.player, h); g.riding.seatNow(g.player);
         for (int i = 0; i < 30; i++) game.tick(1f / 60);
         assertEquals(g.player.id, h.tamedBy, "tamed");
     }
 
     @Test void theJumpChargePeaksAtTenTicksThenSagsTowardEightyPercent() {
         Animal h = horse(Species.HORSE, true, true);
-        g.riding.mount(g.player, h);
+        g.riding.mount(g.player, h); g.riding.seatNow(g.player);
         var ride = g.riding.of(g.player);
         g.controller.in.jumpHeld = true;
         for (int i = 0; i < 10; i++) game.tick(1f / 60);
@@ -196,7 +196,7 @@ class Gamefixes030Test {
         Animal h = horse(Species.HORSE, true, true);
         for (int x = 60; x <= 69; x++) for (int z = 55; z <= 62; z++) g.setBlock(x, DevMap.FLOOR, z, Blocks.PLANKS);
         game.tick(0);
-        g.riding.mount(g.player, h);
+        g.riding.mount(g.player, h); g.riding.seatNow(g.player);
         var ride = g.riding.of(g.player);
         float best = 0;
         for (int i = 0; i < 150; i++) { g.controller.in.forward = 1; game.tick(1f / 60); best = Math.max(best, h.y - DevMap.FLOOR);

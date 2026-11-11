@@ -1,0 +1,203 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 96th build in daemon [uptime: 12 hrs 23 mins 40.32 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#5250,Execution worker Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:compileJava (Thread[#5247,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#5251,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:buildNative (Thread[#5247,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#5251,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#5247,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#5247,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#5247,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#5247,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#5247,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#5251,Execution worker Thread 3,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#5252,Execution worker Thread 4,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#5252,Execution worker Thread 4,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:compileJava (Thread[#5250,Execution worker Thread 2,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\objects\Door.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.001 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Starting process 'Gradle Worker Daemon 92'. Working directory: C:\Users\John\.gradle\workers Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath4713199169079376134txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 92'
+Successfully started process 'Gradle Worker Daemon 92'
+Started Gradle worker daemon (0.91 secs) with fork options DaemonForkOptions{executable=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileJava
+Compiling with JDK Java compiler API.
+Incremental compilation of 463 classes completed in 18.069 secs.
+Class dependency analysis for incremental compilation took 0.182 secs.
+Resolve mutations for :classes (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:classes (Thread[#5250,Execution worker Thread 2,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:compileTestJava (Thread[#5250,Execution worker Thread 2,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\NpcPaceTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.014 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 140 classes completed in 5.686 secs.
+Class dependency analysis for incremental compilation took 0.067 secs.
+Resolve mutations for :processTestResources (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:processTestResources (Thread[#5250,Execution worker Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:testClasses (Thread[#5250,Execution worker Thread 2,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#5250,Execution worker Thread 2,5,main]) started.
+:test (Thread[#5250,Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 93 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Value of input property 'filter.commandLineIncludePatterns' has changed for task ':test'
+Starting process 'Gradle Test Executor 93'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath4359152185458103181txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 93'
+Successfully started process 'Gradle Test Executor 93'
+
+Gamefixes031Test > aSaddledWildHorseIsBrokenInFarFasterThanABareOne() STANDARD_OUT
+    [taming] bare 33.199665 s, 3 throws; saddled 11.183334 s, 0 throws
+
+Gamefixes031Test > aFireSpellCastAtTallGrassSetsItAlightAndTheCasterIsNotBurnt() STANDARD_OUT
+    [fire] neighbours 1, burned 2
+
+Gamefixes031Test > whoeverStartedABrawlIsNeverDefendingThemselvesWhenTheVictimHitsBack() STANDARD_OUT
+          [crime] ASSAULT by Gamefixes 0.3.1 against Eda at (64.5, 68.5), t 0.0
+          [crime] ASSAULT by Dag against Gamefixes 0.3.1 at (89.5, 21.5), t 0.0
+
+Gamefixes031Test > aWildMountLetsACalmPersonWithFeedApproach() STANDARD_OUT
+    [appr] d 5.99971 fear 0.0 goal IDLE hurt -99.0 by 0 feed Animal feed sprint false t 0.01666666753590107
+    [appr] d 5.366389 fear 0.0 goal GRAZE hurt -99.0 by 0 feed Animal feed sprint false t 0.35000001825392246
+    [appr] d 4.1777153 fear 0.0 goal GRAZE hurt -99.0 by 0 feed Animal feed sprint false t 0.6833333689719439
+    [appr] d 3.0645342 fear 0.0 goal GRAZE hurt -99.0 by 0 feed Animal feed sprint false t 1.0166667196899652
+    [appr] d 2.1481178 fear 0.0 goal GRAZE hurt -99.0 by 0 feed Animal feed sprint false t 1.3500000704079866
+
+MaintenanceTest > anNpcStandingInAnOpenDoorwayCanBeFocusedAndHitByAnActualArrow() STANDARD_OUT
+          [crime] ASSAULT by Maintenance against Eda at (54.5, 20.0), t 1.7
+
+MaintenanceTest > selectedPocketTheftConservesTheItemAndMarksTheActualTransferredStack() STANDARD_OUT
+          [crime] THEFT by Maintenance against Eda at (60.5, 70.5), t 1.1
+
+MaintenanceTest > savingImmediatelyAfterDeathCannotReattributeOldFireAfterLoad(Path) STANDARD_OUT
+          [crime] ASSAULT by Maintenance against Eda at (60.5, 70.5), t 0.3
+          [death] the player was killed by Maintenance at (60.5, 70.5), t 0.8
+
+MaintenanceTest > residualFireKeepsBurningAfterPlayerDeathWithoutReopeningACombatCase() STANDARD_OUT
+          [crime] ASSAULT by Maintenance against Eda at (60.5, 70.5), t 0.3
+          [death] the player was killed by Maintenance at (60.5, 70.5), t 0.8
+
+MaintenanceTest > aFreshAttackImmediatelyAfterRespawnKeepsItsOwnAttribution() STANDARD_OUT
+          [crime] ASSAULT by Maintenance against Eda at (60.5, 70.5), t 0.3
+          [death] the player was killed by Maintenance at (60.5, 70.5), t 0.8
+          [crime] ASSAULT by Maintenance against Eda at (116.5, 88.6), t 1.0
+
+Gradle Test Executor 93 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.011 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4m 36s
+9 actionable tasks: 3 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

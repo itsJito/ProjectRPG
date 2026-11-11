@@ -64,6 +64,16 @@ public class Actor {
     public float rideSpeed, rideGait;
     /** (0.3.6) In the saddle: where the stirrups hang, in the figure's own pixels (x out to each side, y up, z forward negative). */
     public float stirrupX, stirrupY, stirrupZ;
+    /**
+     * (0.3.9, gamefixes: mounting snapped the rider into the saddle) climbing up: how far along (0..1; 1 when not
+     * mounting), which foot goes in the near stirrup (0 the right, 1 the left), and where the feet (right xyz, left xyz)
+     * and the hands are to be this frame - world points, set by Riding, followed by the figure.
+     */
+    public float mountPhase = 1;
+    public int mountNear = 1;
+    public final float[] mountFeet = new float[6], mountHands = new float[3];
+    /** (0.3.9) Where a person in the saddle is riding to (NaN: nowhere - the mount stands). */
+    public float rideToX = Float.NaN, rideToZ = Float.NaN;
     public double torchLightingAt = -99;
     public static final float TORCH_LIGHTING = 1.2f;
     /** Whether this body holds a torch in hand now (drawn), and whether it is being lit this moment. */
@@ -226,9 +236,12 @@ public class Actor {
     }
     public int count(ItemDef d) { int n = 0; for (Inventory g : grids()) n += g.count(d); return n; }
     public boolean has(ItemDef d, int n) { return count(d) >= n; }
-    /** Takes n of a definition from what is carried (the bags last), or nothing at all when there are fewer. */
+    /**
+     * Takes n of a definition from what is carried (the bags last), or nothing at all when there are fewer: then the list
+     * is empty (0.3.9: it was null, and a fireplace stoked without logs crashed the game on it).
+     */
     public java.util.List<ItemStack> takeItems(ItemDef d, int n) {
-        if (count(d) < n) return null;
+        if (count(d) < n || n <= 0) return java.util.List.of();
         java.util.List<ItemStack> out = new java.util.ArrayList<>();
         int left = n;
         for (Inventory g : grids()) {
@@ -320,6 +333,9 @@ public class Actor {
         public int combo;
         public double lastHurt = -99, lastAttack = -99;
         public long lastAttacker;
+        /** (0.3.9) The kind of the last blow taken, and whether it came from afar (what a body tells an investigator). */
+        public rpg.item.ItemDef.DamageType lastDamageType;
+        public boolean lastRanged;
 
         public boolean busy() { return phase != Phase.IDLE || staggered > 0 || dodgeT > 0; }
         public void cancel() { phase = Phase.IDLE; move = null; t = 0; struck.clear(); charge = 0; draw = 0; aim = 0; gathered = false; grazed = false; }

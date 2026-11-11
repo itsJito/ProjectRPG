@@ -75,13 +75,16 @@ class WeeklyLifeTest {
                     if ((o.contains("blocked") || o.contains("no route")) && n.goal != Brain.Goal.SHELTER) blocked.merge(n.id, 1, Integer::sum);
                     if (n.goal == Brain.Goal.INN) patrons.add(n.id);
                     goals.merge(n.goal.name(), 1, Integer::sum);
-                    if (Schedule.now(n, wd, hour) == Schedule.Activity.WORK) {
+                    // (0.3.9) the plan giving way to the rain (0.3.8), to danger (a fisherman out in the wilds hiding from a
+                    // wolf) or to the law (word of a crime carried to town) is not an absence from work
+                    boolean overruled = n.goal == Brain.Goal.SHELTER || n.goal == Brain.Goal.HIDE || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.REPORT_CRIME;
+                    if (Schedule.now(n, wd, hour) == Schedule.Activity.WORK && !(overruled && !n.watch())) {
                         planWork.merge(n.id, 1, Integer::sum);
                         // (0.3.3) a hunter's quarry fought out in the wilds is the hunter's work, as a fight is the watch's
                         if (n.goal == Brain.Goal.WORK || n.goal == Brain.Goal.PATROL || n.goal == Brain.Goal.COLLECT
                                 || n.goal == Brain.Goal.FIGHT && (n.role == Npc.Role.HUNTER || n.watch()) && !DevMap.ALPHA.equals(DevMap.jurisdiction(n.x, n.z))
                                 // (0.3.6) the watch's duty is its work: searching, looking into a crime, keeping an eye on someone, seeing outlaws off
-                                || n.watch() && (n.goal == Brain.Goal.SEARCH || n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.WATCH || n.goal == Brain.Goal.EVICT
+                                || n.watch() && (n.goal == Brain.Goal.SEARCH || n.goal == Brain.Goal.INVESTIGATE || n.goal == Brain.Goal.WATCH || n.goal == Brain.Goal.EVICT || n.goal == Brain.Goal.CASE
                                     || n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.RETURN)) atWork.merge(n.id, 1, Integer::sum);
                     }
                 }

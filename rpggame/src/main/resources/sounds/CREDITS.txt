@@ -21,8 +21,9 @@ animal/ (cow_*, cow_field, hens_lay, henhouse, hen_lays, hen_annoyed, rooster_*,
     2385, 2382, 0546, 0978, 0282, 0976, 0453, 0283, 0440, 1659, 1658, 1691, 1692, 1693, 1543, 1215, 0863, 0284, 1542, 1541,
     0460, 2343, 2344, 2345, 2348, 2349, 2955, 0682, 0288, 1890, 0494, 1901, 1887, 1881, 0276.
 
-animal/wolf_howls.ogg
-    "Wolf howls" (Wikimedia Commons, File:Wolf_howls.ogg) - public domain.
+animal/wolf_howl_1-2.ogg
+    "Wolf Howls Near Passing Car" (a single wolf), Yellowstone sound library, NPS & MSU Acoustic Atlas / Jennifer Jerrett
+    (nps.gov/yell) - public domain (US National Park Service). Two howls cut out, the car's rumble filtered away.
 
 animal/bear_vocal.mp3, animal/bear_roar.mp3
     Yellowstone sound library, NPS & MSU Acoustic Atlas / Jennifer Jerrett (Wikimedia Commons) - public domain (US National Park Service).

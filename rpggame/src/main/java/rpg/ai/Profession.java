@@ -41,7 +41,11 @@ public enum Profession {
     WEAVER("Weaver", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
     FULLER("Fuller", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
     DYER("Dyer", Npc.Role.CRAFTSMAN, Skill.CRAFTING),
-    SMELTER("Smelter", Npc.Role.CRAFTSMAN, Skill.SMITHING);
+    SMELTER("Smelter", Npc.Role.CRAFTSMAN, Skill.SMITHING),
+    // (0.3.8) the DevMansion's household (GDD: Household Baron, Porter, Firewood Cutter)
+    HOUSEHOLD_BARON("Household Baron", Npc.Role.CIVIC, Skill.CRAFTING),
+    PORTER("Porter", Npc.Role.WORKER, Skill.STRENGTH),
+    FIREWOOD_CUTTER("Firewood Cutter", Npc.Role.WORKER, Skill.WOODCUTTING);
 
     public final String title;
     public final Npc.Role family;

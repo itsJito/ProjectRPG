@@ -59,8 +59,9 @@ public final class Main {
         rpg.audio.Sfx.warm();
         Window win = new Window();
         win.show = !hidden;
+        win.appId = "Hoodie.Shadowveil";
+        win.dress = Main::programIcon;
         if (bench) win.create("SHADOWVEIL - bench", 1920, 1080); else win.create("SHADOWVEIL", 1600, 900);
-        programIcon(win);
         if (!win.gl45) { System.err.println("the native renderer needs OpenGL 4.5: " + win.glInfo); return 1; }
         int status;
         // play goes round from the title screen to a session and back: each session a fresh engine and world in the one window
@@ -310,7 +311,7 @@ public final class Main {
             if (!free && in.scroll != 0) g.player.camDist = Math.max(1.6f, Math.min(8, g.player.camDist - (float) in.scroll * 0.4f));
             for (int k = 0; k < 10 && !typing; k++) if ((hud.dialog != null || hud.menuOpen() ? preferences.pressed(in, Preferences.Action.values()[Preferences.Action.CHOICE_1.ordinal() + k]) : preferences.pressed(in, Preferences.Action.values()[Preferences.Action.HOTBAR_1.ordinal() + k]))) {
                 if (hud.dialog != null || hud.menuOpen()) hud.choose(k + (hud.dialog != null && !hud.dialog.pauseMenu ? hud.dialog.choiceOffset : 0));
-                else hud.hotkey(k);
+                else if (!hud.squadOpen()) hud.hotkey(k);
             }
             if (hud.dialog != null && hud.dialog.pauseMenu) {
                 Dialog d = hud.dialog;
@@ -356,6 +357,26 @@ public final class Main {
                 if (hud.radial.open) hud.radial.release(); else if (!typing) cursorFree = !cursorFree;
                 tabAt = -1;
             }
+            // (0.3.9, gamefixes: the companion command menu) the Companion key: a tap gives the selected companion the
+            // order the crosshair suggests (Shift: the whole squad); held, the squad menu opens and the world slows. A key
+            // pressed with it held (Alt+S, Alt+Enter) makes it a chord instead: no order
+            boolean companionDown = !typing && preferences.down(in, Preferences.Action.COMPANION);
+            if (!typing && preferences.pressed(in, Preferences.Action.COMPANION)) { companionAt = hud.now; companionChord = false; }
+            if (companionAt >= 0 && companionDown && (turnBack || preferences.pressed(in, Preferences.Action.FULLSCREEN))) companionChord = true;
+            if (companionAt >= 0 && companionDown && !companionChord && hud.now - companionAt > 0.2 && hud.scene == Hud.Scene.WORLD && g.player.alive && !hud.squadOpen() && !hud.captures()) hud.squadOpen(true);
+            if (companionAt >= 0 && !companionDown) {
+                if (hud.squadOpen()) hud.squadOpen(false);
+                else if (!companionChord && hud.scene == Hud.Scene.WORLD && !hud.captures() && g.player.alive) hud.squadQuickOrder(hud.shift);
+                companionAt = -1;
+            }
+            if (hud.squadOpen()) {
+                for (int k = 0; k < 4; k++) if (preferences.pressed(in, Preferences.Action.values()[Preferences.Action.HOTBAR_1.ordinal() + k])) hud.squadSelect(k);
+                if (preferences.pressed(in, Preferences.Action.JUMP)) hud.squadWheel();
+                if (preferences.pressed(in, Preferences.Action.DODGE)) hud.squadCycle(-1);
+                if (preferences.pressed(in, Preferences.Action.INTERACT)) hud.squadCycle(1);
+                it.forward = 0; it.strafe = 0; it.lookYaw = 0; it.lookPitch = 0; it.sprint = false; it.jump = false; it.jumpHeld = false;
+                it.dodge = false; it.mainDown = false; it.offDown = false; it.cast = false; it.interact = false; it.turnBack = false;
+            }
             if (hud.radial.open) {
                 // the wheel holds the body still: no steps, no look, no hands
                 hud.radial.pointer((float) in.dx, (float) in.dy);
@@ -382,7 +403,7 @@ public final class Main {
             music.update(g.mood(), dt);
             music.updateStingers(dt);
             // host_timescale: the world's clock runs faster or slower; the interface keeps the wall clock
-            float worldDt = Math.min(0.1f, dt * Math.max(0.05f, Math.min(10f, hud.console.f("timescale"))) * g.death.timeScale());
+            float worldDt = Math.min(0.1f, dt * Math.max(0.05f, Math.min(10f, hud.console.f("timescale"))) * g.death.timeScale() * hud.worldPace());
             // (0.2.2, gamefixes: a crash punching a bandit, not reproducible here) a fault inside one frame is written to
             // saves/crash-*.txt with its stack and the frame goes on; only a fault that repeats every frame ends the game
             try {
@@ -406,6 +427,9 @@ public final class Main {
 
     private static int faultsInARow;
     private static float sheatheHeld;
+    /** (0.3.9) When the Companion key went down (interface time; -1 up), and whether another key made it a chord. */
+    private static double companionAt = -1;
+    private static boolean companionChord;
     private static boolean sheatheFired;
     private static String lastFault = "";
 
@@ -442,35 +466,51 @@ public final class Main {
     private static boolean shotNext;
     /**
      * (0.3.7, gamefixes: the program's icon) the window's icon - the title bar's and the taskbar's - from the game's own
-     * picture of it (resources ui/program_icon.png), at the sizes the desktop asks for.
+     * picture of it (resources ui/program_icon.png), at the sizes the desktop asks for. (0.3.8, gamefixes: it showed
+     * only faintly in the title bar and not at all on the taskbar) It is set before the window is first shown, the
+     * program has its own id on the taskbar (Window.appId) rather than sharing the java runtime's, every size a scaled
+     * desktop picks from is given, and each is halved down step by step from the full picture so a small one stays crisp.
      */
-    private static void programIcon(Window win) {
+    private static void programIcon(long handle) {
         try (var in = Main.class.getResourceAsStream("/ui/program_icon.png")) {
-            if (in == null || win.handle == 0) return;
+            if (in == null || handle == 0) return;
             java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(in);
-            int[] sizes = {16, 32, 48, 256};
+            int[] sizes = {16, 20, 24, 32, 40, 48, 64, 96, 128, 256};
             try (var images = org.lwjgl.glfw.GLFWImage.malloc(sizes.length)) {
                 java.util.List<java.nio.ByteBuffer> held = new java.util.ArrayList<>();
                 for (int i = 0; i < sizes.length; i++) {
                     int s = sizes[i];
-                    var scaled = new java.awt.image.BufferedImage(s, s, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                    var g2 = scaled.createGraphics();
-                    g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    g2.drawImage(src, 0, 0, s, s, null); g2.dispose();
+                    var scaled = halved(src, s);
                     java.nio.ByteBuffer px = org.lwjgl.system.MemoryUtil.memAlloc(s * s * 4);
                     for (int y = 0; y < s; y++) for (int x = 0; x < s; x++) { int c = scaled.getRGB(x, y); px.put((byte) (c >> 16)).put((byte) (c >> 8)).put((byte) c).put((byte) (c >>> 24)); }
                     px.flip(); held.add(px);
                     images.position(i).width(s).height(s).pixels(px);
                 }
                 images.position(0);
-                org.lwjgl.glfw.GLFW.glfwSetWindowIcon(win.handle, images);
+                org.lwjgl.glfw.GLFW.glfwSetWindowIcon(handle, images);
                 for (var px : held) org.lwjgl.system.MemoryUtil.memFree(px);
             }
         } catch (java.io.IOException | RuntimeException e) { System.err.println("[icon] " + e.getMessage()); }
     }
 
+    /** A picture brought down to s x s by halving it (each step bilinear), then one last step: no aliased small icon. */
+    private static java.awt.image.BufferedImage halved(java.awt.image.BufferedImage src, int s) {
+        java.awt.image.BufferedImage at = src;
+        int w = src.getWidth();
+        do {
+            int next = Math.max(s, w / 2);
+            var step = new java.awt.image.BufferedImage(next, next, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            var g2 = step.createGraphics();
+            g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+            g2.drawImage(at, 0, 0, next, next, null); g2.dispose();
+            at = step; w = next;
+        } while (w > s);
+        return at;
+    }
+
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.3.7";
+    public static final String VERSION = "Alpha 0.3.9";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {
@@ -499,7 +539,7 @@ public final class Main {
         var c = g.controller;
         float shake = paused || hud.settings.values.reducedMotion ? 0 : g.fx.shake;
         float sx = shake > 0 ? (float) Math.sin(g.time * 60) * shake * 0.05f : 0, sy = shake > 0 ? (float) Math.cos(g.time * 47) * shake * 0.05f : 0;
-        float worldDt = paused ? 0 : dt;
+        float worldDt = paused ? 0 : dt * hud.worldPace();
         gfx.camera(c.cx + sx, c.cy + sy, c.cz, c.fx, c.fy, c.fz, w, h, worldDt);
         gfx.scene(g, g.player.firstPerson, worldDt, g.state.hourOfDay());
         if (g.death.active) gfx.cmd.grading(g.death.grade(), g.death.flash(), 0, 0, 0);

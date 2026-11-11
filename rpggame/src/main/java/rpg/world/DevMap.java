@@ -320,6 +320,8 @@ public final class DevMap {
                 fill(w[0], FLOOR, w[1], w[2], FLOOR + 1, w[3], STONE);
             // the new ground (0.2.0): DevPalace, the southern wood, the lake country, the meadow, the lodge
             new Expanse.Builder(b).all();
+            // (0.3.8) the DevMansion in its clearing of the wood
+            Mansion.build(b);
             // (0.3.5) the sea at the end of the brook, along the whole south of the map
             Coast.build(b);
             debugZone();

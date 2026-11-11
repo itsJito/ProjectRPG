@@ -1,0 +1,69 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava
+> Task :classes
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL devmap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 10 2026 20:08:19 (MSVC)
+[Load] native services 0.10s
+[Load] devmap 9.08s
+[Load] renderer and UI 2.32s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.12s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\mansion-front.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\mansion-aerial.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\mansion-back.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-entrance-hall-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-entrance-hall-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-dining-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-dining-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-kitchen-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-kitchen-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-drawing-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-drawing-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-pantry-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-0-pantry-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-gallery-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-gallery-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-library-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-library-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-study-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-study-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-master-bedroom-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-master-bedroom-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-bathroom-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-1-bathroom-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-upper-landing-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-upper-landing-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-servants-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-servants-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-keepers-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-keepers-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-guest-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-guest-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-knights-room-a.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-2-knights-room-b.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\room-night-dining.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p24\spear-lodged.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 46s
+7 actionable tasks: 2 executed, 5 up-to-date

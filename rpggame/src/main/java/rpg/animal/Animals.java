@@ -115,7 +115,7 @@ public final class Animals {
                 {rpg.world.Expanse.BROOK_X0 - 1.5f, 174.5f, (float) (Math.PI / 2)}, {rpg.world.Expanse.BROOK_X1 + 2f, 182.5f, (float) (-Math.PI / 2)}};
         float[][] glades = {{30.5f, 150.5f}, {44.5f, 176.5f}, {76.5f, 166.5f}, {108.5f, 178.5f}, {18.5f, 180.5f}};
         southWood = new Habitat("south_wood", "the southern wood", rpg.world.Expanse.WOOD_X0 + 2, rpg.world.Expanse.WOOD_Z0 + 2, rpg.world.Expanse.WOOD_X1 - 2, rpg.world.Expanse.WOOD_Z1 - 2, 0, brook, glades)
-                .cap(Species.DEER, 12).cap(Species.BROWN_BEAR, 2).cap(Species.RABBIT, 8).cap(Species.FOX, 2);
+                .cap(Species.DEER, 12).cap(Species.BROWN_BEAR, 2).cap(Species.RABBIT, 8).cap(Species.FOX, 2).cap(Species.DIRE_WOLF, 2);
         habitats.add(wild); habitats.add(farm); habitats.add(southWood);
     }
 
@@ -157,6 +157,8 @@ public final class Animals {
         herd = group(southWood, Species.DEER, herd, new float[]{88, 170}, 2, 1, 1);
         herd = group(southWood, Species.BROWN_BEAR, herd, new float[]{20, 178}, 1, 0, 0);
         herd = group(southWood, Species.RABBIT, herd, new float[]{70, 152}, 1, 1, 1);
+        // (0.3.9) the wood's apex: a Dire Wolf ranging the deep south, far from the road and the manor
+        herd = group(southWood, Species.DIRE_WOLF, herd, new float[]{104, 186}, 0, 1, 0);
         Animal feral = spawnNew(Species.DOG, false, true, 30.5f, 14.5f, wild, herd++, 0);
         feral.range = 14;
         // (0.3.0) a wild Pegasus in the wood, never ridden
@@ -1145,7 +1147,7 @@ public final class Animals {
 
     private Result milkNow(Animal a, Actor who, long req) {
         if (!a.alive || a.goal == Goal.FLEE || a.goal == Goal.DEFEND) return Result.no("She won't stand for it.");
-        if (who.takeItems(Items.BUCKET, 1) == null) return Result.no("You need an empty bucket.");
+        if (who.takeItems(Items.BUCKET, 1).isEmpty()) return Result.no("You need an empty bucket.");
         g.state.burn(Items.BUCKET, 1);
         a.lastMilked = g.state.minutes;
         boolean theirs = a.owned() && a.owner != who.id;
@@ -1196,6 +1198,7 @@ public final class Animals {
             case MOUNTAIN_LION -> "The cat follows your hand with its eyes. You keep the touch brief.";
             case BROWN_BEAR -> "The bear huffs and shifts its weight. You give it room.";
             case DEER -> "The deer trembles under your hand, ears swivelling, ready to bolt.";
+            case DIRE_WOLF -> "The dire wolf's mane is coarse and warm. It rumbles low in its chest, and lets you.";
         };
     }
 

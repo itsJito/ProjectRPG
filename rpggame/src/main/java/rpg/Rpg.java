@@ -48,7 +48,13 @@ public final class Rpg implements GameModule {
     public Voxels vox;
     public Player player;
     public PlayerController controller;
-    public final List<Npc> npcs = new ArrayList<>();
+    public final Roster npcs = new Roster();
+    /**
+     * (0.3.9) The people: a list that counts its own changes, so the lookup by id knows when it is stale (it was only
+     * rebuilt when the count changed, and a person taken out and put back - a reload's roster restored - left the lookup
+     * pointing at the one taken out).
+     */
+    public static final class Roster extends ArrayList<Npc> { int changes() { return modCount; } }
     public final List<Actor> dummies = new ArrayList<>();
     public Objects objects;
     public Interactions interact;
@@ -60,6 +66,8 @@ public final class Rpg implements GameModule {
     public rpg.combat.Falling falling;
     public rpg.skill.MovementPractice movementPractice;
     public rpg.combat.Gore gore;
+    /** (0.3.8) The loose bones of the bodies that came apart. */
+    public rpg.combat.Bones bones;
     public rpg.combat.Prayers prayers;
     public rpg.combat.Magic magic;
     public AiSystem ai;
@@ -87,6 +95,10 @@ public final class Rpg implements GameModule {
     public rpg.actor.BodyCarry carrying;
     public rpg.law.BountyBoard bountyBoard;
     public rpg.objects.Glass glass;
+    /** (0.3.8) The crates, boxes, barrels and signs, and the boards of the broken ones. */
+    public rpg.objects.Breakables breakables;
+    /** (0.3.8) What blows have knocked off the furniture, and the pieces of it lying about. */
+    public rpg.objects.Wreckage wreckage;
     public rpg.world.Chemistry chemistry;
     /** What has been broken in the kingdoms and not yet mended (0.2.0). */
     public rpg.world.Repairs repairs;
@@ -149,6 +161,8 @@ public final class Rpg implements GameModule {
         prog = new Progression(this);
         objects = new Objects(this);
         glass = new rpg.objects.Glass(this);
+        breakables = new rpg.objects.Breakables(this);
+        wreckage = new rpg.objects.Wreckage(this);
         interact = new Interactions(this);
         lockpicking = new rpg.interact.Lockpicking(this);
         items = new ItemActions(this);
@@ -157,6 +171,7 @@ public final class Rpg implements GameModule {
         falling = new rpg.combat.Falling(this);
         movementPractice = new rpg.skill.MovementPractice(this);
         gore = new rpg.combat.Gore(this);
+        bones = new rpg.combat.Bones(this);
         prayers = new rpg.combat.Prayers(this);
         magic = new rpg.combat.Magic(this);
         ai = new AiSystem(this);
@@ -211,6 +226,12 @@ public final class Rpg implements GameModule {
         // (0.3.5) Guild Row's fixtures, then the cotton field's plots
         guilds = new rpg.econ.Guilds(this);
         objects.reserveAfter(id -> farming.buildLate(guilds.init(id)));
+        // (0.3.8) the DevMansion's furnishings, doors, range and stores, and its orchard (after every older fixture)
+        farming.buildLateOrchards(objects.mansion(Ids.ESTATE));
+        // (0.3.9) every other room dressed for its use (numbered in the estates' band, after the DevMansion's)
+        rpg.world.Interiors.furnish(this, rpg.world.Interiors.INTERIORS);
+        // (0.3.9, optimisation) the routing graph built up front for play (tests and review runs build it as they go)
+        if (!scripted) vox.navigation.warm();
         for (rpg.objects.Node n : objects.nodes) if (n.kind == rpg.objects.Node.Kind.FISH) n.fishery = fishery;
         ai.init();
         animals = new rpg.animal.Animals(this);
@@ -357,7 +378,7 @@ public final class Rpg implements GameModule {
         if (PROF) mark(6);
         magic.update(dt);
         if (PROF) mark(7);
-        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); animals.update(dt); riding.landings(); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
+        if (!aiDisabled()) { repairs.update(); ai.update(dt); if (PROF) mark(8); riding.update(dt); animals.update(dt); riding.landings(); if (PROF) mark(21); monsters.update(dt); if (PROF) mark(22); }
         else if (PROF) mark(8);
         carrying.update();
         if (PROF) mark(9);
@@ -378,6 +399,9 @@ public final class Rpg implements GameModule {
         spareWatch();
         if (PROF) mark(16);
         glass.update();
+        breakables.update();
+        wreckage.update();
+        bones.update();
         if (PROF) mark(17);
         econ.update();
         if (PROF) mark(18);
@@ -436,6 +460,10 @@ public final class Rpg implements GameModule {
     /** Impulsis: two things met at speed - what is heard, and a pane broken by a body flung into it. */
     @Override public void rigidImpact(long a, long b, long mover, float x, float y, float z, float nx, float ny, float nz, float speed, float impulse, int ma, int mb) {
         if (ma == rpg.objects.Glass.MATERIAL_GLASS) glass.clink(x, y, z, speed);
+        else if (ma == rpg.combat.Bones.MATERIAL_BONE) bones.clatter(x, y, z, speed);
+        else if (ma == rpg.objects.Breakables.MATERIAL_WOOD && breakables.byBody(a) != null) breakables.impact(a, x, y, z, nx, ny, nz, speed, impulse);
+        else if (mb == rpg.objects.Breakables.MATERIAL_WOOD && b != 0 && breakables.byBody(b) != null) breakables.impact(b, x, y, z, -nx, -ny, -nz, speed, impulse);
+        else if (ma == rpg.objects.Breakables.MATERIAL_WOOD) { if (sfx != null && speed > 1.3f) sfx.play("wood.light", x, y, z, Math.min(0.4f, speed * 0.07f), 1.2f, 14); }
         else if (ma == rpg.objects.Door.MATERIAL_WOOD_DOOR && speed > 1.2f && sfx != null) sfx.play(speed > 3 ? "wood" : "wood.light", x, y, z, Math.min(0.7f, speed * 0.12f));
         else if (sfx != null && speed > 1.5f) sfx.play(speed > 4 ? "wood" : "generic", x, y, z, Math.min(0.6f, speed * 0.1f));
         if (b == 0 && mover == 0 && rpg.world.Blocks.glass(mb) && speed > 4.5f && ma != rpg.objects.Glass.MATERIAL_GLASS) {
@@ -514,9 +542,9 @@ public final class Rpg implements GameModule {
     public Actor actor(long id) {
         if (id == player.id) return player;
         // (0.3.5, optimization) the people by id: looked up thousands of times a frame, it was a walk of the whole roster
-        if (npcs.size() != npcIndexed) { npcIndex.clear(); for (Npc n : npcs) npcIndex.put(n.id, n); npcIndexed = npcs.size(); }
+        if (npcs.changes() != npcIndexed) { npcIndex.clear(); for (Npc n : npcs) npcIndex.put(n.id, n); npcIndexed = npcs.changes(); }
         Npc known = npcIndex.get(id);
-        if (known != null && known.id == id && (known.alive || npcs.contains(known))) return known;
+        if (known != null && known.id == id) return known;
         for (Npc n : npcs) if (n.id == id) { npcIndex.put(id, n); return n; }
         for (Actor d : dummies) if (d.id == id) return d;
         if (monsters != null) { Actor m = monsters.byId(id); if (m != null) return m; }

@@ -86,6 +86,9 @@ public final class Expanse {
             if (Math.abs(x - BROOK_X0) < 4) continue;                                                  // the brook's banks
             if (x >= LODGE_X0 - 4 && x <= LODGE_X1 + 4 && z <= LODGE_Z1 + 5) continue;                 // the lodge's clearing
             if (x >= 20 && x <= 34 && z >= 150 && z <= 164) continue;                                   // a glade
+            // (0.3.8) the DevMansion's clearing: a tree that stood there grows further south in the wood instead (so the
+            // wood keeps its trees, and their order)
+            if (Mansion.onEstate(x, z) || Mansion.onEstate(x + 2, z + 2) || Mansion.onEstate(x - 2, z - 2)) z += 24;
             int species = r.nextInt(10) < 3 ? 1 : r.nextInt(10) < 3 ? 3 : r.nextInt(10) < 3 ? 4 : r.nextInt(10) < 2 ? 5 : r.nextInt(10) < 2 ? 2 : 0;
             l.add(new int[]{x, z, species});
         }
@@ -342,7 +345,7 @@ public final class Expanse {
             java.util.Random r = new java.util.Random(0xB05EL);
             for (int k = 0; k < 90; k++) {
                 int x = WOOD_X0 + 2 + r.nextInt(WOOD_X1 - WOOD_X0 - 4), z = WOOD_Z0 + 2 + r.nextInt(WOOD_Z1 - WOOD_Z0 - 4);
-                if (Math.abs(x - BROOK_X0) < 3 || x >= LODGE_X0 - 2 && x <= LODGE_X1 + 2 && z <= LODGE_Z1 + 2) continue;
+                if (Math.abs(x - BROOK_X0) < 3 || x >= LODGE_X0 - 2 && x <= LODGE_X1 + 2 && z <= LODGE_Z1 + 2 || Mansion.onEstate(x, z)) continue;
                 set(x, FLOOR, z, LEAVES);
             }
             // the brook: two wide, a block deep, banks of mud and sand

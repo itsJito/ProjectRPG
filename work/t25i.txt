@@ -1,0 +1,194 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 106th build in daemon [uptime: 13 hrs 5 mins 3.883 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#5790,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#5791,Execution worker Thread 2,5,main]) started.
+destroyer locations for task group 0 (Thread[#5792,Execution worker Thread 3,5,main]) started.
+:processResources (Thread[#5790,Execution worker,5,main]) started.
+:theastrattoengine:compileJava (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#5791,Execution worker Thread 2,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#5791,Execution worker Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#5791,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:buildNative (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#5791,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:engineResources (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#5791,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:processResources (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#5791,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:classes (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#5791,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:jar (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#5791,Execution worker Thread 2,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#5791,Execution worker Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#5790,Execution worker,5,main]) started.
+:compileJava (Thread[#5790,Execution worker,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\Rpg.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.001 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 463 classes completed in 12.198 secs.
+Class dependency analysis for incremental compilation took 0.272 secs.
+Resolve mutations for :classes (Thread[#5790,Execution worker,5,main]) started.
+:classes (Thread[#5790,Execution worker,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#5790,Execution worker,5,main]) started.
+:compileTestJava (Thread[#5790,Execution worker,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#5790,Execution worker,5,main]) started.
+:processTestResources (Thread[#5790,Execution worker,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#5790,Execution worker,5,main]) started.
+:testClasses (Thread[#5790,Execution worker,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#5790,Execution worker,5,main]) started.
+:test (Thread[#5790,Execution worker,5,main]) started.
+Gradle Test Executor 101 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Input property 'stableClasspath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\Rpg.class has changed.
+Starting process 'Gradle Test Executor 101'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath18445570683164079922txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 101'
+Successfully started process 'Gradle Test Executor 101'
+
+ZzDiagTest > around() STANDARD_OUT
+    [diag]  44 ........o.........o.........#.#.o.o..o.o.#..#....
+    [diag]  45 ........o.........o.........#.#..........#..#....
+    [diag]  46 #######################.....#.#..........#..#....
+    [diag]  47 ##..........................#.#..........#..#....
+    [diag]  48 oo...............##########.#.#..........#..#....
+    [diag]  49 oo...............#o.o..o.o#.#.#..........#..#....
+    [diag]  50 .................#o.o..o.o#.#.#.............#####
+    [diag]  51 .................#........#.#.#..................
+    [diag]  52 ....##############........#.#.#..........#.......
+    [diag]  53 ....#.o....#######......oo#.#.#..........#.......
+    [diag]  54 ....#.o....#.o.###........#.#.############.......
+    [diag]  55 ....#......#.o.######..####.#...#oo.o..oo#.......
+    [diag]  56 ....#......###D###........#.#...#oo.o..oo#....#oo
+    [diag]  57 ....#...ooooo...##.......o#.#...#........#....ooo
+    [diag]  58 ....#...........##.o...o..#.#...#........#....ooo
+    [diag]  59 ....#...........##.o...o..#.#...#........#....#oo
+    [diag]  60 ....#...........##.....o..#.#...####..####....ooo
+    [diag]  61 ....#...........##.....o..#.#...#.......o#....ooo
+    [diag]  62 ....#####DD#######.o...o..#.#...#......o.#....#oo
+    [diag]  63 .................D.o......#.#...#.oo...o.#....ooo
+    [diag]  64 .................D........#.#.oo#......o.#....ooo
+    [diag]  65 .................#........#.#.oo#...o..o.#....#oo
+    [diag]  66 .................#o...oo..#.#.###...o..o.#....ooo
+    [diag]  67 .................#o.......#.#.###.oo.....#....ooo
+    [diag]  68 .................##########.#.###......o.#....#oo
+    [diag]  69 ............................#.######DD####....#oo
+    [diag]  70 ...........................######.....#.....#....
+    [diag]  71 ...........................###.#.................
+    [diag]  72 .................................................
+    [diag]  73 .................................................
+    [diag]  74 .................................................
+    [diag]  75 .................................................
+    [diag]  76 ....#####..................###.#.................
+    [diag]  77 ...........................###..#.....#.....#....
+    [diag]  78 ...........#................#....................
+    [diag]  79 ............................#....................
+    [diag]  80 ............................#....................
+    [diag]  81 ............................#..........#..#..#..#
+    [diag]  82 ............................#....................
+
+Gradle Test Executor 101 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.002 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.007 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 34s
+9 actionable tasks: 2 executed, 7 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

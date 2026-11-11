@@ -15,6 +15,7 @@ public final class Preferences {
         DODGE("Dodge", GLFW_KEY_Q), INTERACT("Interact", GLFW_KEY_E), CAMERA("Camera", GLFW_KEY_V), MAP("Map", GLFW_KEY_M), INVENTORY("Inventory", GLFW_KEY_I), SHEATHE("Sheathe / draw (hold)", GLFW_KEY_F), ATTACK("Attack / carry", astratto.platform.Input.MOUSE_OFFSET), GUARD("Guard / off hand", astratto.platform.Input.MOUSE_OFFSET + 1),
         QUICK_TURN("Turn around", GLFW_KEY_S | GLFW_MOD_ALT << 16), JOG("Toggle jogging", GLFW_KEY_CAPS_LOCK),
         CAST("Cast selected spell", GLFW_KEY_R), QUICK_WHEEL("Quick Wheel / cursor", GLFW_KEY_TAB),
+        COMPANION("Companion orders (tap: order, hold: squad menu)", GLFW_KEY_LEFT_ALT),
         CHARACTER("Character", GLFW_KEY_C), SKILLS("Skills", GLFW_KEY_K), JOURNAL("Journal", GLFW_KEY_J),
         MAGIC("Magic", GLFW_KEY_B), FAITH("Faith", GLFW_KEY_P), SAVE("Quicksave", GLFW_KEY_F5), LOAD("Quickload", GLFW_KEY_F6),
         SCREENSHOT("Screenshot", GLFW_KEY_F12), FULLSCREEN("Toggle fullscreen", GLFW_KEY_ENTER | GLFW_MOD_ALT << 16),

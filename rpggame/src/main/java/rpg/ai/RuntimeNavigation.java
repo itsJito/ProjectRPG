@@ -27,6 +27,17 @@ public final class RuntimeNavigation {
                            Map<Integer,List<Integer>> walk, Map<Integer,List<Integer>> climb) {}
     private static final int[][] DIR = {{1,0},{-1,0},{0,1},{0,-1}};
     public RuntimeNavigation(Voxels vox) { this.vox=vox; }
+    /**
+     * (0.3.9, optimisation: the stutter) every chunk's surfaces, zones and exits built up front, as the world is made: they
+     * were built the first time anyone planned a way through a chunk - in a fight, a chase, a search - and that frame paid
+     * for it (tens of milliseconds). Later edits rebuild only the chunk they touch.
+     */
+    public void warm() {
+        for (int x = 0; x < vox.sizeX(); x += 16) for (int z = 0; z < vox.sizeZ(); z += 16) {
+            Chunk c = chunk(x, z);
+            for (int zone : c.members().keySet()) { exits(zone, false); exits(zone, true); }
+        }
+    }
     public static int key(int x,int y,int z) { return x | z<<10 | y<<20; }
     public static int x(int k) { return k&1023; }
     public static int y(int k) { return (k>>>20)&1023; }
@@ -51,9 +62,18 @@ public final class RuntimeNavigation {
         long version=vox.chunkVersion(x,z);Chunk old=chunks.get(id);
         if(old!=null && old.version==version)return old;
         Set<Integer> cells=new HashSet<>();
+        // (0.3.9, optimisation: the stutter) each column read once into an array and judged from it: every cell used to be
+        // tested with half a dozen lookups of its own (a chunk's rebuild was the long frames of a fight or a search)
+        int sy=vox.sizeY();int[] col=new int[sy];boolean[] solidAt=new boolean[sy];
         for(int bx=Math.max(1,cx*16);bx<Math.min(vox.sizeX()-1,cx*16+16);bx++)
-            for(int bz=Math.max(1,cz*16);bz<Math.min(vox.sizeZ()-1,cz*16+16);bz++)
-                for(int by=1;by<vox.sizeY()-2;by++)if(surface(bx,by,bz))cells.add(key(bx,by,bz));
+            for(int bz=Math.max(1,cz*16);bz<Math.min(vox.sizeZ()-1,cz*16+16);bz++) {
+                for(int by=0;by<sy;by++){int b=vox.block(bx,by,bz);col[by]=b;solidAt[by]=(PHYSICS[b].flags & astratto.bridge.AstrattoNative.BLOCK_SOLID)!=0;}
+                for(int by=1;by<sy-2;by++) {
+                    boolean under=solidAt[by-1] || Blocks.ladder(col[by]) || Blocks.ladder(col[by-1]);
+                    if(!under)continue;
+                    if(passIn(col,solidAt,by) && passIn(col,solidAt,by+1))cells.add(key(bx,by,bz));
+                }
+            }
         Map<Integer,Integer> regions=new HashMap<>();Map<Integer,List<Integer>> members=new HashMap<>();
         // A doorway, ladder or height transition is a portal; ordinary connected floor is a zone.
         for(int seed:new TreeSet<>(cells))if(!regions.containsKey(seed)){
@@ -67,6 +87,11 @@ public final class RuntimeNavigation {
             }members.put(seed,area);
         }
         var result=new Chunk(version,cells,regions,members);chunks.put(id,result);rebuiltChunks++;return result;
+    }
+    /** pass(), from a column already read. */
+    private static boolean passIn(int[] col,boolean[] solidAt,int y){
+        int b=col[y];
+        return (b==Blocks.DOOR || b==Blocks.LOCKED_DOOR || !solidAt[y]) && b!=Blocks.EMBERS && (b!=Blocks.WATER || y+1>=col.length || col[y+1]!=Blocks.WATER);
     }
     private boolean portal(int c){int b=vox.block(x(c),y(c),z(c));return b==Blocks.DOOR || b==Blocks.LOCKED_DOOR || ladder(x(c),y(c),z(c)) || ladder(x(c),y(c)-1,z(c));}
     private int region(int c){return chunk(x(c),z(c)).regions.getOrDefault(c,-1);}
@@ -90,7 +115,8 @@ public final class RuntimeNavigation {
             Map<Integer,List<Integer>> walk=new HashMap<>(),ladder=new HashMap<>();
             for(var area:owner.members.entrySet())for(boolean capability:new boolean[]{false,true}) {
                 Set<Integer> destinations=new TreeSet<>();
-                for(int c:area.getValue())for(int next:neighbours(c,capability,true))
+                // (0.3.9) from the chunks' own cells (built once), not every neighbour tested afresh
+                for(int c:area.getValue())for(int next:neighbours(c,capability,false))
                     if(next>=0 && owner.regions.getOrDefault(next,-1)!=area.getKey().intValue())destinations.add(next);
                 (capability?ladder:walk).put(area.getKey(),List.copyOf(destinations));
             }

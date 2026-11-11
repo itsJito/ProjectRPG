@@ -1,0 +1,364 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 108th build in daemon [uptime: 13 hrs 8 mins 5.188 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 19% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :theastrattoengine:compileJava (Thread[#5914,included builds,5,main]) started.
+Resolve mutations for :processResources (Thread[#5916,Execution worker,5,main]) started.
+:theastrattoengine:compileJava (Thread[#5914,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#5917,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#5914,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#5917,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:buildNative (Thread[#5914,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#5914,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#5914,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#5914,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#5914,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#5914,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#5914,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#5914,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#5914,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#5917,Execution worker Thread 2,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#5920,Execution worker Thread 5,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#5917,Execution worker Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#5916,Execution worker,5,main]) started.
+:compileJava (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#5916,Execution worker,5,main]) started.
+:classes (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#5916,Execution worker,5,main]) started.
+:compileTestJava (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\ai\ZzDiagTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.003 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 1 classes completed in 0.379 secs.
+Class dependency analysis for incremental compilation took 0.014 secs.
+Resolve mutations for :processTestResources (Thread[#5916,Execution worker,5,main]) started.
+:processTestResources (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#5916,Execution worker,5,main]) started.
+:testClasses (Thread[#5916,Execution worker,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#5916,Execution worker,5,main]) started.
+:test (Thread[#5916,Execution worker,5,main]) started.
+Gradle Test Executor 104 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Input property 'candidateClassFiles' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\test\rpg\ai\ZzDiagTest.class has changed.
+  Input property 'stableClasspath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\test\rpg\ai\ZzDiagTest.class has changed.
+Starting process 'Gradle Test Executor 104'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath12196309778725693033txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 104'
+Successfully started process 'Gradle Test Executor 104'
+
+ZzDiagTest > around() STANDARD_OUT
+    [diag] t 0.0 min 1740 GOAL null -> SLEEP (bedtime (Lunday 05:00)) at 114.50,4.05,55.00 seated false
+    [diag] t 35.0 min 1877 GOAL SLEEP -> BANK (carrying 2500 coins: the surplus to the bank) at 111.70,4.00,54.53 seated false
+    [diag] t 36.4 min 1882 GOAL BANK -> HOME (Lunday: getting up) at 113.73,4.00,55.23 seated false
+    [diag] t 53.3 min 1937 GOAL HOME -> WANDER (Lunday: a stroll) at 109.58,4.00,54.37 seated false
+    [diag] t 133.1 min 2161 GOAL WANDER -> INN (Lunday: a meal at the inn) at 116.11,4.00,49.60 seated false
+    [diag] t 155.3 min 2221 GOAL INN -> WANDER (Lunday: a stroll) at 124.76,4.05,57.86 seated false
+    [diag] t 167.2 min 2253 GOAL WANDER -> LOOK (a movement at (124, 63)) at 124.78,4.05,57.75 seated false
+    [diag] t 169.4 min 2259 GOAL LOOK -> WANDER (Lunday: a stroll) at 124.78,4.05,57.75 seated false
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+          [crime] VANDALISM by Cole against nobody at (109.8, 88.5), t 188.9
+    [diag] t 190.4 min 2318 GOAL WANDER -> SEARCH (searching for Dog near (117, 85), 0s since the last clue) at 124.74,4.05,57.15 seated false
+          [crime] LIVESTOCK by Cole against Mara at (109.5, 88.0), t 195.7
+    [diag] t 196.3 min 2335 GOAL SEARCH -> WANDER (Lunday: a stroll) at 124.74,4.05,57.15 seated false
+    [diag] t 213.3 min 2387 GOAL WANDER -> REPORT_DAMAGE (reporting witnessed building damage) at 124.74,4.05,57.15 seated false
+    [diag] t 213.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -213.5 dist 61 trav null busy false
+    [diag] t 214.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -214.0 dist 61 trav null busy false
+    [diag] t 214.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -214.5 dist 61 trav null busy false
+    [diag] t 215.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -215.0 dist 61 trav null busy false
+    [diag] t 215.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -215.5 dist 61 trav null busy false
+    [diag] t 216.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -216.0 dist 61 trav null busy false
+    [diag] t 216.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -216.5 dist 61 trav null busy false
+    [diag] t 217.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -217.0 dist 61 trav null busy false
+    [diag] t 217.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -217.5 dist 61 trav null busy false
+    [diag] t 218.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -218.0 dist 61 trav null busy false
+    [diag] t 218.5  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -218.5 dist 61 trav null busy false
+    [diag] t 219.0  at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -219.0 dist 61 trav null busy false
+    [diag] t 219.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -219.5 dist 61 trav null busy false
+    [diag] t 220.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -220.0 dist 61 trav null busy false
+    [diag] t 220.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -220.5 dist 61 trav null busy false
+    [diag] t 221.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -221.0 dist 61 trav null busy false
+    [diag] t 221.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -221.5 dist 61 trav null busy false
+    [diag] t 222.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -222.0 dist 61 trav null busy false
+    [diag] t 222.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -222.5 dist 61 trav null busy false
+    [diag] t 223.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -223.0 dist 61 trav null busy false
+    [diag] t 223.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -223.5 dist 61 trav null busy false
+    [diag] t 224.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -224.0 dist 61 trav null busy false
+    [diag] t 224.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -224.5 dist 61 trav null busy false
+    [diag] t 225.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -225.0 dist 61 trav null busy false
+    [diag] t 225.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -225.5 dist 61 trav null busy false
+    [diag] t 226.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -226.0 dist 61 trav null busy false
+    [diag] t 226.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -226.5 dist 61 trav null busy false
+    [diag] t 227.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -227.0 dist 61 trav null busy false
+    [diag] t 227.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -227.5 dist 61 trav null busy false
+    [diag] t 228.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -228.0 dist 61 trav null busy false
+    [diag] t 228.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -228.5 dist 61 trav null busy false
+    [diag] t 229.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -229.0 dist 61 trav null busy false
+    [diag] t 229.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -229.5 dist 61 trav null busy false
+    [diag] t 230.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -230.0 dist 61 trav null busy false
+    [diag] t 230.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -230.5 dist 61 trav null busy false
+    [diag] t 231.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -231.0 dist 61 trav null busy false
+    [diag] t 231.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -231.5 dist 61 trav null busy false
+    [diag] t 232.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -232.0 dist 61 trav null busy false
+    [diag] t 232.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -232.5 dist 61 trav null busy false
+    [diag] t 233.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -233.0 dist 61 trav null busy false
+    [diag] t 233.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -233.5 dist 61 trav null busy false
+    [diag] t 234.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -234.0 dist 61 trav null busy false
+    [diag] t 234.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -234.5 dist 61 trav null busy false
+    [diag] t 235.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -235.0 dist 61 trav null busy false
+    [diag] t 235.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -235.5 dist 61 trav null busy false
+    [diag] t 236.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -236.0 dist 61 trav null busy false
+    [diag] t 236.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -236.5 dist 61 trav null busy false
+    [diag] t 237.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -237.0 dist 61 trav null busy false
+    [diag] t 237.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -237.5 dist 61 trav null busy false
+    [diag] t 238.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -238.0 dist 61 trav null busy false
+    [diag] t 238.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -238.5 dist 61 trav null busy false
+    [diag] t 239.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -239.0 dist 61 trav null busy false
+    [diag] t 239.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -239.5 dist 61 trav null busy false
+    [diag] t 240.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -240.0 dist 61 trav null busy false
+    [diag] t 240.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -240.5 dist 61 trav null busy false
+    [diag] t 241.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -241.0 dist 61 trav null busy false
+    [diag] t 241.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -241.5 dist 61 trav null busy false
+    [diag] t 242.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -242.0 dist 61 trav null busy false
+    [diag] t 242.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -242.5 dist 61 trav null busy false
+    [diag] t 243.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -243.0 dist 61 trav null busy false
+    [diag] t 243.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -243.5 dist 61 trav null busy false
+    [diag] t 244.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -244.0 dist 61 trav null busy false
+    [diag] t 244.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -244.5 dist 61 trav null busy false
+    [diag] t 245.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -245.0 dist 61 trav null busy false
+    [diag] t 245.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -245.5 dist 61 trav null busy false
+    [diag] t 246.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -246.0 dist 61 trav null busy false
+    [diag] t 246.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -246.5 dist 61 trav null busy false
+    [diag] t 247.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,63.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -247.0 dist 61 trav null busy false
+    [diag] t 247.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -247.5 dist 61 trav null busy false
+    [diag] t 248.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -248.0 dist 61 trav null busy false
+    [diag] t 248.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -248.5 dist 61 trav null busy false
+    [diag] t 249.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -249.0 dist 61 trav null busy false
+    [diag] t 249.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -249.5 dist 61 trav null busy false
+    [diag] t 250.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -250.0 dist 61 trav null busy false
+    [diag] t 250.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -250.5 dist 61 trav null busy false
+    [diag] t 251.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -251.0 dist 61 trav null busy false
+    [diag] t 251.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -251.5 dist 61 trav null busy false
+    [diag] t 252.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -252.0 dist 61 trav null busy false
+    [diag] t 252.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -252.5 dist 61 trav null busy false
+    [diag] t 253.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -253.0 dist 61 trav null busy false
+    [diag] t 253.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -253.5 dist 61 trav null busy false
+    [diag] t 254.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -254.0 dist 61 trav null busy false
+    [diag] t 254.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -254.5 dist 61 trav null busy false
+    [diag] t 255.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -255.0 dist 61 trav null busy false
+    [diag] t 255.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -255.5 dist 61 trav null busy false
+    [diag] t 256.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -256.0 dist 61 trav null busy false
+    [diag] t 256.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -256.5 dist 61 trav null busy false
+    [diag] t 257.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -257.0 dist 61 trav null busy false
+    [diag] t 257.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -257.5 dist 61 trav null busy false
+    [diag] t 258.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 141.5,66.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -258.0 dist 61 trav null busy false
+    [diag] t 258.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -258.5 dist 61 trav null busy false
+    [diag] t 259.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -259.0 dist 61 trav null busy false
+    [diag] t 259.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -259.5 dist 61 trav null busy false
+    [diag] t 260.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -260.0 dist 61 trav null busy false
+    [diag] t 260.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -260.5 dist 61 trav null busy false
+    [diag] t 261.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -261.0 dist 61 trav null busy false
+    [diag] t 261.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -261.5 dist 61 trav null busy false
+    [diag] t 262.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -262.0 dist 61 trav null busy false
+    [diag] t 262.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -262.5 dist 61 trav null busy false
+    [diag] t 263.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -263.0 dist 61 trav null busy false
+    [diag] t 263.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -263.5 dist 61 trav null busy false
+    [diag] t 264.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -264.0 dist 61 trav null busy false
+    [diag] t 264.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -264.5 dist 61 trav null busy false
+    [diag] t 265.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -265.0 dist 61 trav null busy false
+    [diag] t 265.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -265.5 dist 61 trav null busy false
+    [diag] t 266.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -266.0 dist 61 trav null busy false
+    [diag] t 266.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -266.5 dist 61 trav null busy false
+    [diag] t 267.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -267.0 dist 61 trav null busy false
+    [diag] t 267.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -267.5 dist 61 trav null busy false
+    [diag] t 268.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -268.0 dist 61 trav null busy false
+    [diag] t 268.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -268.5 dist 61 trav null busy false
+    [diag] t 269.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -269.0 dist 61 trav null busy false
+    [diag] t 269.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -269.5 dist 61 trav null busy false
+    [diag] t 270.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -270.0 dist 61 trav null busy false
+    [diag] t 270.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -270.5 dist 61 trav null busy false
+    [diag] t 271.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -271.0 dist 61 trav null busy false
+    [diag] t 271.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -271.5 dist 61 trav null busy false
+    [diag] t 272.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -272.0 dist 61 trav null busy false
+    [diag] t 272.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -272.5 dist 61 trav null busy false
+    [diag] t 273.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -273.0 dist 61 trav null busy false
+    [diag] t 273.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -273.5 dist 61 trav null busy false
+    [diag] t 274.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -274.0 dist 61 trav null busy false
+    [diag] t 274.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -274.5 dist 61 trav null busy false
+    [diag] t 275.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -275.0 dist 61 trav null busy false
+    [diag] t 275.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -275.5 dist 61 trav null busy false
+    [diag] t 276.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -276.0 dist 61 trav null busy false
+    [diag] t 276.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -276.5 dist 61 trav null busy false
+    [diag] t 277.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -277.0 dist 61 trav null busy false
+    [diag] t 277.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -277.5 dist 61 trav null busy false
+    [diag] t 278.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -278.0 dist 61 trav null busy false
+    [diag] t 278.5 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -278.5 dist 61 trav null busy false
+    [diag] t 279.0 on the way at 124.74,4.05,57.15 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -279.0 dist 61 trav null busy false
+    [diag] t 279.5 on the way at 124.71,4.05,56.86 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -279.5 dist 61 trav null busy false
+    [diag] t 280.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -280.0 dist 61 trav null busy false
+    [diag] t 280.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -280.5 dist 61 trav null busy false
+    [diag] t 281.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -281.0 dist 61 trav null busy false
+    [diag] t 281.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -281.5 dist 61 trav null busy false
+    [diag] t 282.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -282.0 dist 61 trav null busy false
+    [diag] t 282.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -282.5 dist 61 trav null busy false
+    [diag] t 283.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -283.0 dist 61 trav null busy false
+    [diag] t 283.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -283.5 dist 61 trav null busy false
+    [diag] t 284.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -284.0 dist 61 trav null busy false
+    [diag] t 284.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -284.5 dist 61 trav null busy false
+    [diag] t 285.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -285.0 dist 61 trav null busy false
+    [diag] t 285.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -285.5 dist 61 trav null busy false
+    [diag] t 286.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -286.0 dist 61 trav null busy false
+    [diag] t 286.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -286.5 dist 61 trav null busy false
+    [diag] t 287.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -287.0 dist 61 trav null busy false
+    [diag] t 287.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -287.5 dist 61 trav null busy false
+    [diag] t 288.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -288.0 dist 61 trav null busy false
+    [diag] t 288.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -288.5 dist 61 trav null busy false
+    [diag] t 289.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -289.0 dist 61 trav null busy false
+    [diag] t 289.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -289.5 dist 61 trav null busy false
+    [diag] t 290.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -290.0 dist 61 trav null busy false
+    [diag] t 290.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -290.5 dist 61 trav null busy false
+    [diag] t 291.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -291.0 dist 61 trav null busy false
+    [diag] t 291.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -291.5 dist 61 trav null busy false
+    [diag] t 292.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -292.0 dist 61 trav null busy false
+    [diag] t 292.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -292.5 dist 61 trav null busy false
+    [diag] t 293.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -293.0 dist 61 trav null busy false
+    [diag] t 293.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -293.5 dist 61 trav null busy false
+    [diag] t 294.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -294.0 dist 61 trav null busy false
+    [diag] t 294.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -294.5 dist 61 trav null busy false
+    [diag] t 295.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -295.0 dist 61 trav null busy false
+    [diag] t 295.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -295.5 dist 61 trav null busy false
+    [diag] t 296.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -296.0 dist 61 trav null busy false
+    [diag] t 296.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -296.5 dist 61 trav null busy false
+    [diag] t 297.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -297.0 dist 61 trav null busy false
+    [diag] t 297.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -297.5 dist 61 trav null busy false
+    [diag] t 298.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -298.0 dist 61 trav null busy false
+    [diag] t 298.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -298.5 dist 61 trav null busy false
+    [diag] t 299.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -299.0 dist 61 trav null busy false
+    [diag] t 299.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -299.5 dist 61 trav null busy false
+    [diag] t 300.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -300.0 dist 61 trav null busy false
+    [diag] t 300.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -300.5 dist 61 trav null busy false
+    [diag] t 301.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -301.0 dist 61 trav null busy false
+    [diag] t 301.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -301.5 dist 61 trav null busy false
+    [diag] t 302.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -302.0 dist 61 trav null busy false
+    [diag] t 302.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -302.5 dist 61 trav null busy false
+    [diag] t 303.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -303.0 dist 61 trav null busy false
+    [diag] t 303.5 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -303.5 dist 61 trav null busy false
+    [diag] t 304.0 on the way at 124.73,4.05,56.76 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -304.0 dist 61 trav null busy false
+    [diag] t 304.1 min 2812 GOAL REPORT_DAMAGE -> INVESTIGATE (search: going to look at (120, 64) - told of it) at 124.73,4.05,56.76 seated false
+    [diag] t 323.4 min 2964 GOAL INVESTIGATE -> REPORT_DAMAGE (reporting witnessed building damage) at 124.76,4.05,56.66 seated false
+    [diag] t 323.5  at 124.76,4.05,56.66 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -323.5 dist 61 trav null busy false
+    [diag] t 324.0  at 124.76,4.05,56.66 v 0.28,-2.29 goal 142.5,62.5 has true seated false seatX NaN react false stuck false legs 1@0 act go to goal pause -324.0 dist 61 trav null busy false
+    [diag] t 324.1 min 2969 GOAL REPORT_DAMAGE -> INVESTIGATE (search: going to look at (124, 61) - told of it) at 124.76,4.05,56.66 seated false
+    [diag] t 330.1 min 3012 GOAL INVESTIGATE -> REPORT_DAMAGE (reporting witnessed building damage) at 124.80,4.05,56.57 seated false
+    [diag] t 330.3 min 3013 GOAL REPORT_DAMAGE -> INVESTIGATE (search: going to look at (127, 55) - told of it) at 124.80,4.05,56.57 seated false
+
+Gradle Test Executor 104 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.004 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.009 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 5m 37s
+9 actionable tasks: 2 executed, 7 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

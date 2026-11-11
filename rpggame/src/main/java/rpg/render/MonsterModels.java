@@ -3,6 +3,7 @@ package rpg.render;
 import astratto.render.Tex;
 import astratto.voxel.VoxModel;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import rpg.monster.MonsterKind;
 
@@ -48,6 +49,78 @@ public final class MonsterModels {
     }
 
     private static final Map<String, Fig> CACHE = new HashMap<>();
+
+    /** (0.3.8) Which part of a humanoid figure a piece was cut from (the frame it is placed in). */
+    public enum PartOf { TORSO, HEAD, ARM_UP, ARM_LO, LEG_UP, LEG_LO, FOOT }
+
+    /**
+     * (0.3.8) One loose piece of a figure - a bone, for a body that falls apart: its own model (pivot at its middle),
+     * the part it came from and which side (1 right, -1 left, 0 the middle), where its middle is in that part's frame
+     * (voxels), its half size (voxels) and how many voxels it has.
+     */
+    public record Piece(ItemModels.Model model, PartOf part, int side, float cx, float cy, float cz, float hx, float hy, float hz, int voxels) {}
+
+    private static final Map<Fig, List<Piece>> PIECES = new java.util.IdentityHashMap<>();
+
+    /**
+     * (0.3.8, gamefixes: a skeleton falls apart) A humanoid figure cut into its loose pieces: the torso in bands from
+     * the hips up (the pelvis, then the spine and the ribs a ring at a time), the head into the skull and the jaw, and
+     * every limb bone and foot on each side. Cut from the figure's own models, so each piece looks as it did in place.
+     */
+    public static synchronized List<Piece> pieces(Fig f) {
+        return PIECES.computeIfAbsent(f, k -> {
+            List<Piece> out = new java.util.ArrayList<>();
+            if (!f.humanoid || f.torso == null) return out;
+            VoxModel t = f.torso.vox();
+            int y0 = 0;
+            for (int band : torsoBands(t.sy)) { cut(out, f.torso, PartOf.TORSO, 0, 0, t.sx, y0, Math.min(t.sy, y0 + band), 0, t.sz); y0 += band; }
+            if (f.head != null) {
+                VoxModel h = f.head.vox();
+                int jaw = Math.max(1, h.sy / 4);
+                cut(out, f.head, PartOf.HEAD, 0, 0, h.sx, 0, jaw, 0, h.sz);
+                cut(out, f.head, PartOf.HEAD, 0, 0, h.sx, jaw, h.sy, 0, h.sz);
+            }
+            for (int side : new int[]{1, -1}) {
+                whole(out, f.armUp, PartOf.ARM_UP, side);
+                whole(out, f.armLo, PartOf.ARM_LO, side);
+                whole(out, f.legUp, PartOf.LEG_UP, side);
+                whole(out, f.legLo, PartOf.LEG_LO, side);
+                whole(out, f.foot, PartOf.FOOT, side);
+            }
+            return out;
+        });
+    }
+
+    /** The torso's bands from the bottom: the pelvis (a quarter), then two voxels at a time. */
+    private static int[] torsoBands(int h) {
+        List<Integer> b = new java.util.ArrayList<>();
+        int pelvis = Math.max(2, Math.round(h / 4f));
+        b.add(pelvis);
+        for (int y = pelvis; y < h; y += 2) b.add(Math.min(2, h - y));
+        return b.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static void whole(List<Piece> out, ItemModels.Model m, PartOf part, int side) {
+        if (m == null) return;
+        VoxModel v = m.vox();
+        cut(out, m, part, side, 0, v.sx, 0, v.sy, 0, v.sz);
+    }
+
+    /** The voxels of a part's model inside a box, as a piece of their own (nothing if the box holds none). */
+    private static void cut(List<Piece> out, ItemModels.Model m, PartOf part, int side, int x0, int x1, int y0, int y1, int z0, int z1) {
+        VoxModel v = m.vox();
+        int lx = Integer.MAX_VALUE, ly = Integer.MAX_VALUE, lz = Integer.MAX_VALUE, hx = -1, hy = -1, hz = -1, n = 0;
+        for (int x = x0; x < x1; x++) for (int y = y0; y < y1; y++) for (int z = z0; z < z1; z++) {
+            if (v.get(x, y, z) == 0) continue;
+            lx = Math.min(lx, x); ly = Math.min(ly, y); lz = Math.min(lz, z); hx = Math.max(hx, x); hy = Math.max(hy, y); hz = Math.max(hz, z); n++;
+        }
+        if (n == 0) return;
+        int sx = hx - lx + 1, sy = hy - ly + 1, sz = hz - lz + 1;
+        VoxModel q = new VoxModel(sx, sy, sz);
+        for (int x = lx; x <= hx; x++) for (int y = Math.max(ly, y0); y <= Math.min(hy, y1 - 1); y++) for (int z = lz; z <= hz; z++) q.set(x - lx, y - ly, z - lz, v.get(x, y, z));
+        float cx = lx + sx / 2f - m.gx(), cy = ly + sy / 2f - m.gy(), cz = lz + sz / 2f - m.gz();
+        out.add(new Piece(new ItemModels.Model(q, sx / 2f, sy / 2f, sz / 2f), part, side, cx, cy, cz, sx / 2f, sy / 2f, sz / 2f, n));
+    }
 
     /** The figure for a kind (a dragon by its breed's colour). */
     public static synchronized Fig of(MonsterKind kind, MonsterKind.Breed breed) {

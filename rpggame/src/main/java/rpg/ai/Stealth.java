@@ -374,6 +374,10 @@ public final class Stealth {
             // routines all morning - the thief hid from each guard, crouched, and the guards came to see why, and so on)
             boolean resident = who instanceof Npc person && !person.hostileToPlayer && (!ZonePolicy.outlaw(person) || person.role == Npc.Role.THIEF && !charged) && person.summonOwner == 0;
             if (resident && !who.sneaking && day) continue;
+            // (0.3.9) nor is an outlaw going openly about the wilds by day to anyone but the watch: everyone knows where the
+            // camp is, and a hunter does not stop his day to creep up on it every time a bandit crosses a clearing (0.3.8's
+            // southern wood took the hunters past the camp, and they spent their mornings looking into the bandits)
+            if (who instanceof Npc outlaw && ZonePolicy.outlaw(outlaw) && !n.watch() && !who.sneaking && day && DevMap.WILDS.equals(DevMap.jurisdiction(who.x, who.z)) && !charged) continue;
             // and so is the player, out openly by day in a town where nothing is known against them (half-seen at a
             // distance, a figure in the street is someone in the street - not something to go and look into)
             if (who == g.player && !who.sneaking && day && !DevMap.WILDS.equals(DevMap.jurisdiction(who.x, who.z)) && !charged

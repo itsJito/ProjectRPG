@@ -371,7 +371,8 @@ public final class Sfx {
         for (int i = 1; i <= 4; i++) one("animal.deer.hurt", "animal/deer_call_" + i + ".ogg", 0);
         // the whale's blow at the surface; the mountain lion's own call; the fox's bark; a canid's growl for the wolf
         for (int i = 1; i <= 2; i++) one("animal.whale", "animal/whale_blow_" + i + ".ogg", 0);
-        calls("animal.wolf", "animal/wolf_howls.ogg", 6, 1.0f, 7f);
+        // (0.3.8, gamefixes: one wolf sounded like a pack) each call is one wolf's howl, not slices of a pack's chorus
+        for (int i = 1; i <= 2; i++) one("animal.wolf", "animal/wolf_howl_" + i + ".ogg", 0);
         for (int i = 1; i <= 2; i++) one("animal.wolf.growl", "animal/wolf_growl_" + i + ".ogg", 0);
         calls("animal.coyote", "animal/coyotes_pack.ogg", 8, 0.4f, 5f);
         calls("animal.bear", "animal/bear_vocal.mp3", 10, 0.3f, 4f); calls("animal.bear", "animal/bear_roar.mp3", 3, 0.4f, 4f);

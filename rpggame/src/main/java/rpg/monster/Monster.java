@@ -76,6 +76,8 @@ public final class Monster extends Npc {
     public float outOfReach;
     /** (0.3.2) Since when its prey has been out of its reach above it (-1: not), and when it last roared up at it. */
     public double thwartedSince = -1, tauntAt = -99;
+    /** (0.3.9) When it may next pick up and hurl a stone at prey out of reach (its own clock: a carried throw's lockout no longer stops it). */
+    public double stoneAt;
     /** Running (its faster gait), and when it next makes a noise of its own. */
     public boolean running;
     public double nextVoice;
@@ -85,6 +87,13 @@ public final class Monster extends Npc {
      */
     public int swoop;
     public double swoopUntil;
+    /** (0.3.8) The crate or barrel it is wrecking (0: none), and not again before then. */
+    public long vandalTarget;
+    public double vandalAfter = 30;
+    /** (0.3.8) The foe's blow last weighed (its start), whether it was read in time, and the blows thrown in this flurry. */
+    public double swingWeighed = -99;
+    public boolean swingRead;
+    public int flurry;
     public float orbit = 1;
     /** A gallery puppet: moved by hand, its mind left out. */
     public boolean puppet;

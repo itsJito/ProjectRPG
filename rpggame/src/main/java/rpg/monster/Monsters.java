@@ -643,6 +643,12 @@ public final class Monsters {
             m.reacting = false;
             m.y = Math.max(DevMap.FLOOR, (float) Math.floor(m.y + 0.5f));
             while (m.y > 0 && !g.vox.solid((int) Math.floor(m.x), (int) Math.floor(m.y - 0.5f), (int) Math.floor(m.z))) m.y -= 1;
+        } else if (m.kind.fallsApart && g.bones != null) {
+            // (0.3.8, gamefixes: a skeleton's whole body should fall apart) no body to fall as one: each bone goes its own way
+            if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
+            m.reacting = false;
+            float px = killer == null ? 0 : m.x - killer.x, pz = killer == null ? 0 : m.z - killer.z, pl = (float) Math.hypot(px, pz);
+            g.bones.collapse(m, pl > 1e-3f ? px / pl : 0, pl > 1e-3f ? pz / pl : 0, killer == null ? 0.4f : 1.4f);
         } else if (m.ragdoll == 0 && (g.reactions == null || !g.reactions.died(m))) {
             boolean posed = m.posePts != null && g.time - m.poseAt < 0.5;
             m.ragdoll = g.game.reserve(KIND_RAGDOLL);
@@ -724,6 +730,12 @@ public final class Monsters {
             if (kind == MonsterKind.GHOST) m.spellBook = rpg.combat.Spells.Book.FOGISH;
             monsters.add(m);
             if (m.alive && astratto.util.Json.bool(r, "loaded", true)) spawnBody(m);
+            else if (!m.alive && kind.fallsApart && g.bones != null) {
+                // (0.3.8) its bones lie where it fell apart
+                m.diedAt = g.time - astratto.util.Json.num(r, "deadFor", 0);
+                m.corpse = astratto.util.Json.lng(r, "corpse", 0);
+                g.bones.collapse(m, 0, 0, 0);
+            }
             else if (!m.alive) {
                 m.diedAt = g.time - astratto.util.Json.num(r, "deadFor", 0);
                 m.ragdoll = g.game.reserve(KIND_RAGDOLL);

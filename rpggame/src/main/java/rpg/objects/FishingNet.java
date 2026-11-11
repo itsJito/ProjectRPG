@@ -34,7 +34,7 @@ public final class FishingNet extends Container {
         }
         if(!contents.has(Items.FISHING_NET,1))return;
         if(!(g.objects.get(source) instanceof Node node) || node.kind!=Node.Kind.FISH || node.waters!=Node.Waters.LAKE)return;
-        if((g.chemistry.state(id)&astratto.bridge.AstrattoNative.CHEM_BURNT)!=0) {
+        if((g.chemistry.objectState(id)&astratto.bridge.AstrattoNative.CHEM_BURNT)!=0) {
             int tools=contents.count(Items.FISHING_NET);contents.remove(Items.FISHING_NET,tools);g.state.burn(Items.FISHING_NET,tools);
             for(var item:contents.stacks())g.objects.drop(item,x,y,z);contents.clear();removed=true;return;
         }

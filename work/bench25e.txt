@@ -1,0 +1,1565 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :bench
+Astratto Engine 2.0 - SHADOWVEIL devmap (Java fallbacks disabled)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 11 2026 04:24:53 (MSVC)
+[Load] native services 0.26s
+[Load] devmap 7.23s
+[Load] renderer and UI 2.09s
+[addons] loaded [low_health.lua, session_gold.lua]
+bench: 1920 x 1080, 150 frames a stop, 24.0.1+9-30
+[Load] first rendered frame 0.07s
+  hitch at frame 0: 54.9 ms = sim 23.0 + draw 31.9 (renderer cpu 9.9) + swap 0.1; gpu 13.4
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 1: 26.2 ms = sim 13.7 + draw 12.4 (renderer cpu 4.0) + swap 0.1; gpu 15.1
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:724 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x animal.AnimalMind.think:204 < animal.Animals.update:565 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 6: 26.6 ms = sim 13.2 + draw 13.3 (renderer cpu 7.5) + swap 0.1; gpu 13.8
+  hitch at frame 8: 42.4 ms = sim 29.7 + draw 12.6 (renderer cpu 6.8) + swap 0.1; gpu 13.6
+  hitch at frame 10: 25.0 ms = sim 12.4 + draw 12.5 (renderer cpu 5.6) + swap 0.1; gpu 13.2
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+      1 x world.WaterContacts.update:30 < Rpg.afterFrame:439 < astratto.game.Game.tick:100 < Bench.frame:167 < 
+  hitch at frame 14: 37.7 ms = sim 17.4 + draw 20.2 (renderer cpu 12.2) + swap 0.1; gpu 12.8
+  hitch at frame 15: 53.6 ms = sim 17.2 + draw 36.3 (renderer cpu 8.8) + swap 0.1; gpu 14.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < 
+      1 x render.Rig.pose:171 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 16: 30.0 ms = sim 15.2 + draw 14.7 (renderer cpu 6.7) + swap 0.1; gpu 12.9
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.WaterContacts.update:28 < Rpg.afterFrame:439 < astratto.game.Game.tick:100 < Bench.frame:167 < 
+      1 x render.Gfx.headFace:2707 < render.Gfx.headUnits:2697 < render.Gfx.humanModel:2349 < render.Gfx.human:2264 < 
+  hitch at frame 18: 31.3 ms = sim 17.8 + draw 11.9 (renderer cpu 6.0) + swap 1.6; gpu 12.7
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Fx.update:44 < Rpg.update:408 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x ai.Jobs.lambda$accepts$27:322 < java.util.stream.MatchOps$1MatchSink.accept:90 < java.util.ArrayList$ArrayListSpliterator.tryAdvance:1693 < java.util.stream.ReferencePipeline.forEachWithCancel:147 < 
+  hitch at frame 20: 26.8 ms = sim 14.3 + draw 12.4 (renderer cpu 5.5) + swap 0.1; gpu 13.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:270 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 22: 26.2 ms = sim 12.3 + draw 13.7 (renderer cpu 7.3) + swap 0.1; gpu 13.3
+  hitch at frame 26: 25.4 ms = sim 13.1 + draw 12.3 (renderer cpu 6.2) + swap 0.1; gpu 12.6
+  hitch at frame 29: 29.2 ms = sim 16.6 + draw 12.5 (renderer cpu 4.2) + swap 0.1; gpu 13.6
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.HudFragments$Target.shown:1285 < ui.HudFragments$Target.active:1300 < ui.Fragment.wanted:48 < ui.Hud.draw:361 < 
+  hitch at frame 30: 47.4 ms = sim 20.8 + draw 26.5 (renderer cpu 8.7) + swap 0.1; gpu 13.1
+      2 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 31: 26.3 ms = sim 14.4 + draw 11.9 (renderer cpu 4.1) + swap 0.1; gpu 13.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:695 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.objectModel:3272 < render.Gfx.object:3011 < render.Gfx.scene:537 < Bench.frame:171 < 
+  hitch at frame 32: 27.9 ms = sim 12.8 + draw 15.0 (renderer cpu 7.7) + swap 0.1; gpu 12.9
+  hitch at frame 34: 28.1 ms = sim 14.2 + draw 13.8 (renderer cpu 6.1) + swap 0.1; gpu 13.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ui.Ui2D.disc:214 < ui.HudFragments$Overlays.badge:420 < ui.HudFragments$Overlays.mood:399 < ui.HudFragments$Overlays.draw:318 < 
+  hitch at frame 35: 34.8 ms = sim 24.0 + draw 10.7 (renderer cpu 4.1) + swap 0.1; gpu 13.5
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x interact.Interactions.all:33 < interact.Interactions.computeFocus:151 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+      1 x render.Gfx.panels:2846 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 36: 29.1 ms = sim 16.1 + draw 12.9 (renderer cpu 6.4) + swap 0.1; gpu 12.7
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:395 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+  hitch at frame 37: 31.2 ms = sim 20.6 + draw 10.5 (renderer cpu 4.3) + swap 0.1; gpu 13.6
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x animal.Animals.update:556 < Rpg.update:379 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 38: 26.5 ms = sim 13.4 + draw 13.0 (renderer cpu 6.2) + swap 0.1; gpu 12.7
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Stealth$Aware.level:54 < ui.HudFragments$Overlays.awareness:359 < ui.HudFragments$Overlays.draw:319 < ui.Hud.paint:439 < 
+      1 x objects.Door.ray:180 < world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < 
+  hitch at frame 39: 25.2 ms = sim 13.5 + draw 11.6 (renderer cpu 4.1) + swap 0.1; gpu 13.5
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:583 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x objects.Objects.all:39 < render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 40: 37.6 ms = sim 26.5 + draw 11.0 (renderer cpu 5.0) + swap 0.1; gpu 12.6
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x Bench.frame:165 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 42: 34.0 ms = sim 21.3 + draw 12.6 (renderer cpu 5.1) + swap 0.1; gpu 12.6
+      3 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x Rpg.liveCount:534 < Rpg.actors:518 < combat.Falling.afterFrame:24 < Rpg.afterFrame:433 < 
+  hitch at frame 43: 25.6 ms = sim 14.1 + draw 11.4 (renderer cpu 4.2) + swap 0.1; gpu 14.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+  hitch at frame 44: 31.6 ms = sim 19.5 + draw 12.1 (renderer cpu 5.3) + swap 0.1; gpu 12.7
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Gfx.inFog:188 < render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 45: 71.3 ms = sim 17.5 + draw 53.8 (renderer cpu 4.8) + swap 0.1; gpu 13.7
+      4 x render.Gfx.upload:1107 < render.Gfx.itemMesh:1006 < render.Gfx.drawItem:1013 < render.Gfx.held:912 < 
+      3 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      3 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < 
+  hitch at frame 46: 29.9 ms = sim 15.3 + draw 14.5 (renderer cpu 7.5) + swap 0.1; gpu 12.5
+  hitch at frame 48: 25.4 ms = sim 13.2 + draw 12.1 (renderer cpu 5.4) + swap 0.1; gpu 12.4
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+  hitch at frame 49: 35.4 ms = sim 23.5 + draw 11.8 (renderer cpu 4.2) + swap 0.1; gpu 14.5
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 50: 27.4 ms = sim 14.5 + draw 12.9 (renderer cpu 5.7) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.fences:854 < render.Gfx.scene:499 < Bench.frame:171 < Bench.run:128 < 
+      1 x ui.HudFragments$Inspector.active:1671 < ui.Fragment.wanted:48 < ui.Hud.draw:361 < Bench.frame:173 < 
+  hitch at frame 51: 25.1 ms = sim 14.2 + draw 10.8 (renderer cpu 4.0) + swap 0.1; gpu 13.3
+      1 x objects.Objects.all:39 < ui.HudFragments$Minimap.draw:1010 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+      1 x render.Rig.pose:1123 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 52: 26.9 ms = sim 13.6 + draw 13.2 (renderer cpu 6.0) + swap 0.1; gpu 12.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x fishing.Fishery.ray:690 < combat.CombatSystem.sweep:1482 < combat.CombatSystem.step:1447 < combat.CombatSystem.updateProjectiles:1338 < 
+  hitch at frame 53: 25.8 ms = sim 14.4 + draw 11.3 (renderer cpu 4.4) + swap 0.1; gpu 13.1
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x actor.Actor.plan:265 < combat.CombatSystem.shoulder:779 < combat.CombatSystem.grip:803 < render.Rig.pose:774 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 54: 30.8 ms = sim 14.9 + draw 15.8 (renderer cpu 7.6) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x combat.Gore.lost:118 < combat.HitVolumes.ray:122 < combat.CombatSystem.sweep:1476 < combat.CombatSystem.step:1447 < 
+  hitch at frame 55: 27.4 ms = sim 14.6 + draw 12.7 (renderer cpu 4.3) + swap 0.1; gpu 13.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.Jobs.lambda$accepts$27:322 < java.util.stream.MatchOps$1MatchSink.accept:90 < java.util.ArrayList$ArrayListSpliterator.tryAdvance:1693 < java.util.stream.ReferencePipeline.forEachWithCancel:147 < 
+      1 x item.Inventory.<init>:38 < item.Inventory.copy:279 < objects.Station.refusal:42 < ai.Jobs.recipe:346 < 
+  hitch at frame 56: 30.1 ms = sim 14.7 + draw 15.3 (renderer cpu 6.7) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.AiSystem.workersOn:1553 < ai.Jobs.site:283 < ai.Jobs.lambda$network$8:146 < astratto.ai.TaskNetwork.tick:16 < 
+  hitch at frame 57: 26.8 ms = sim 13.6 + draw 13.1 (renderer cpu 4.1) + swap 0.1; gpu 13.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x item.Inventory.count:190 < econ.Economy.glut:280 < econ.Economy.buys:273 < ai.Jobs.batch:204 < 
+      1 x ui.Hud.draw:330 < Bench.frame:173 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 58: 28.1 ms = sim 13.4 + draw 14.7 (renderer cpu 6.4) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x interact.Interactions.of:96 < ai.AiSystem.workersOn:1551 < ai.AiSystem.nearestNode:1538 < ai.Brain.gatherAndSell:1869 < 
+      1 x render.Gfx.humanModel:2329 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 59: 94.6 ms = sim 83.1 + draw 11.4 (renderer cpu 5.0) + swap 0.1; gpu 13.1
+      4 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x ai.RuntimeNavigation.exits:94 < ai.RuntimeNavigation.corridor:112 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x ai.RuntimeNavigation.exits:93 < ai.RuntimeNavigation.corridor:112 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+  hitch at frame 60: 43.8 ms = sim 29.1 + draw 14.6 (renderer cpu 5.9) + swap 0.1; gpu 12.3
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x combat.Falling.afterFrame:24 < Rpg.afterFrame:433 < astratto.game.Game.tick:100 < Bench.frame:167 < 
+  hitch at frame 61: 26.6 ms = sim 15.9 + draw 10.6 (renderer cpu 4.0) + swap 0.1; gpu 13.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.CombatSystem.update:574 < Rpg.update:371 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x render.Gfx.animalModel:1297 < render.Gfx.animal:1252 < render.Gfx.scene:501 < Bench.frame:171 < 
+  hitch at frame 62: 30.5 ms = sim 15.3 + draw 15.1 (renderer cpu 7.1) + swap 0.1; gpu 12.2
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < world.Fluids.water:39 < world.Fluids.surface:62 < fishing.Fishery.move:534 < 
+      1 x render.Rig.pose:911 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 63: 39.3 ms = sim 28.4 + draw 10.8 (renderer cpu 4.4) + swap 0.1; gpu 13.2
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x combat.HitVolumes.ray:125 < combat.CombatSystem.bodies:919 < combat.CombatSystem.sweep:897 < combat.CombatSystem.tick:630 < 
+  hitch at frame 64: 29.5 ms = sim 15.8 + draw 13.6 (renderer cpu 6.5) + swap 0.1; gpu 12.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.HitVolumes.ray:135 < combat.CombatSystem.sweep:1476 < combat.CombatSystem.step:1447 < combat.CombatSystem.updateProjectiles:1338 < 
+      1 x render.Rig.pose:611 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 65: 27.7 ms = sim 16.1 + draw 11.4 (renderer cpu 4.7) + swap 0.1; gpu 13.5
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x item.Inventory.count:190 < actor.Actor.count:237 < actor.Actor.has:238 < objects.Station.refusal:40 < 
+      1 x ui.HudFragments$Overlays.bubble:504 < ui.HudFragments$Overlays.draw:317 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+  hitch at frame 66: 27.1 ms = sim 15.6 + draw 11.4 (renderer cpu 5.2) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.spider:2114 < render.Gfx.monster:1720 < render.Gfx.scene:535 < Bench.frame:171 < 
+  hitch at frame 67: 28.0 ms = sim 16.4 + draw 11.5 (renderer cpu 4.3) + swap 0.1; gpu 13.1
+      1 x monster.MonsterMind.strongest:347 < monster.MonsterMind.think:184 < monster.Monsters.update:395 < Rpg.update:379 < 
+      1 x render.Gfx.humanoidMonster:1931 < render.Gfx.monster:1717 < render.Gfx.scene:535 < Bench.frame:171 < 
+      1 x Rpg.liveCount:535 < Rpg.actors:518 < combat.CombatSystem.bodies:917 < combat.CombatSystem.sweep:897 < 
+  hitch at frame 68: 26.3 ms = sim 13.8 + draw 12.4 (renderer cpu 5.7) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Stealth.update:255 < ai.AiSystem.update:703 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 69: 25.2 ms = sim 13.6 + draw 11.5 (renderer cpu 4.4) + swap 0.1; gpu 13.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.Jobs.lambda$accepts$27:322 < java.util.stream.MatchOps$1MatchSink.accept:90 < java.util.ArrayList$ArrayListSpliterator.tryAdvance:1693 < java.util.stream.ReferencePipeline.forEachWithCancel:147 < 
+      1 x ui.HudFragments$Milestone.height:1340 < ui.Hud.stackTop:403 < ui.Hud.draw:342 < Bench.frame:173 < 
+  hitch at frame 70: 26.9 ms = sim 14.2 + draw 12.6 (renderer cpu 6.4) + swap 0.1; gpu 12.2
+  hitch at frame 72: 25.7 ms = sim 13.4 + draw 12.2 (renderer cpu 6.0) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:730 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 74: 27.6 ms = sim 14.7 + draw 12.8 (renderer cpu 5.5) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x combat.CombatSystem.update:574 < Rpg.update:371 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 75: 28.3 ms = sim 16.8 + draw 11.4 (renderer cpu 4.2) + swap 0.1; gpu 13.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.animalModel:1287 < render.Gfx.animal:1252 < render.Gfx.scene:501 < Bench.frame:171 < 
+  hitch at frame 76: 28.3 ms = sim 15.4 + draw 12.8 (renderer cpu 6.0) + swap 0.1; gpu 12.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 78: 28.7 ms = sim 14.8 + draw 13.9 (renderer cpu 6.5) + swap 0.1; gpu 12.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:178 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 80: 27.3 ms = sim 13.2 + draw 14.0 (renderer cpu 7.0) + swap 0.1; gpu 12.1
+  hitch at frame 82: 29.3 ms = sim 15.5 + draw 13.7 (renderer cpu 5.7) + swap 0.1; gpu 12.1 (a gc ran)
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x combat.HitVolumes.ray:135 < combat.CombatSystem.sweep:1476 < combat.CombatSystem.step:1447 < combat.CombatSystem.updateProjectiles:1338 < 
+  hitch at frame 83: 26.0 ms = sim 14.3 + draw 11.5 (renderer cpu 5.4) + swap 0.1; gpu 13.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x fishing.Fishery.ray:692 < combat.CombatSystem.bodies:958 < combat.CombatSystem.sweep:897 < combat.CombatSystem.tick:630 < 
+  hitch at frame 84: 30.3 ms = sim 14.7 + draw 15.4 (renderer cpu 7.9) + swap 0.2; gpu 12.1
+  hitch at frame 85: 28.0 ms = sim 15.0 + draw 13.0 (renderer cpu 4.7) + swap 0.1; gpu 13.0 (a gc ran)
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x Rpg.liveCount:536 < Rpg.actors:518 < dungeon.Dungeons.update:369 < Rpg.update:387 < 
+  hitch at frame 86: 34.7 ms = sim 19.1 + draw 15.5 (renderer cpu 7.2) + swap 0.1; gpu 12.1 (a gc ran)
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.AnimalModels.of:45 < render.Gfx.animalModel:1257 < render.Gfx.animal:1252 < render.Gfx.scene:501 < 
+  hitch at frame 88: 27.3 ms = sim 12.9 + draw 14.2 (renderer cpu 6.7) + swap 0.1; gpu 12.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.drawLayers:149 < render.Gfx.objectModel:3182 < render.Gfx.object:3011 < render.Gfx.scene:537 < 
+  hitch at frame 89: 44.2 ms = sim 28.4 + draw 15.7 (renderer cpu 9.5) + swap 0.1; gpu 13.5
+  hitch at frame 90: 38.5 ms = sim 23.8 + draw 14.6 (renderer cpu 6.9) + swap 0.1; gpu 13.1
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Gfx.thighAngle:2881 < render.Gfx.garments:2778 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 92: 26.0 ms = sim 13.7 + draw 12.2 (renderer cpu 5.3) + swap 0.1; gpu 13.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:124 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.AiSystem.crowded:1624 < ai.AiSystem.standSpot:1612 < ai.Jobs.net:72 < ai.Jobs.tick:38 < 
+  hitch at frame 94: 35.7 ms = sim 22.2 + draw 13.5 (renderer cpu 7.1) + swap 0.1; gpu 13.2
+  hitch at frame 95: 40.8 ms = sim 24.8 + draw 15.9 (renderer cpu 8.1) + swap 0.1; gpu 13.9
+  hitch at frame 96: 27.3 ms = sim 12.9 + draw 14.3 (renderer cpu 7.8) + swap 0.1; gpu 13.3
+  hitch at frame 98: 48.6 ms = sim 32.2 + draw 16.3 (renderer cpu 8.7) + swap 0.1; gpu 19.1
+  hitch at frame 99: 35.9 ms = sim 23.9 + draw 11.9 (renderer cpu 5.1) + swap 0.1; gpu 14.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 100: 25.5 ms = sim 13.5 + draw 11.9 (renderer cpu 5.7) + swap 0.1; gpu 13.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Jobs.recipe:344 < ai.Jobs.lambda$network$6:145 < astratto.ai.TaskNetwork.tick:16 < ai.Jobs.tick:43 < 
+  hitch at frame 102: 26.1 ms = sim 12.9 + draw 13.0 (renderer cpu 6.8) + swap 0.1; gpu 13.1
+  hitch at frame 103: 33.8 ms = sim 21.3 + draw 12.4 (renderer cpu 5.0) + swap 0.1; gpu 13.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 104: 26.7 ms = sim 13.1 + draw 13.5 (renderer cpu 6.9) + swap 0.1; gpu 13.1
+  hitch at frame 105: 25.3 ms = sim 14.4 + draw 10.8 (renderer cpu 4.5) + swap 0.1; gpu 14.5
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:640 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 107: 40.6 ms = sim 26.9 + draw 13.6 (renderer cpu 4.4) + swap 0.1; gpu 14.3
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x ui.Addons.player:171 < ui.Addons.lambda$sandbox$17:133 < ui.Addons$1.invoke:272 < org.luaj.vm2.lib.VarArgFunction.call:-1 < 
+      1 x render.Rig.pose:253 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 108: 31.1 ms = sim 14.2 + draw 16.8 (renderer cpu 5.2) + swap 0.1; gpu 13.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:700 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 109: 27.3 ms = sim 13.0 + draw 14.2 (renderer cpu 5.0) + swap 0.1; gpu 14.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x render.Gfx.objectModel:3182 < render.Gfx.object:3011 < render.Gfx.scene:537 < Bench.frame:171 < 
+  hitch at frame 110: 30.4 ms = sim 14.2 + draw 16.1 (renderer cpu 9.3) + swap 0.1; gpu 13.3
+  hitch at frame 111: 27.3 ms = sim 14.9 + draw 12.4 (renderer cpu 4.6) + swap 0.1; gpu 14.2
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.HitVolumes.ray:112 < combat.CombatSystem.sweep:1476 < combat.CombatSystem.step:1447 < combat.CombatSystem.updateProjectiles:1338 < 
+      1 x render.Gfx.animalModel:1349 < render.Gfx.animal:1252 < render.Gfx.scene:501 < Bench.frame:171 < 
+  hitch at frame 112: 28.2 ms = sim 15.4 + draw 12.7 (renderer cpu 5.3) + swap 0.1; gpu 13.5
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x actor.Actor.plan:265 < actor.Actor.eyeY:293 < ai.AiSystem.carriage:787 < ai.AiSystem.update:722 < 
+  hitch at frame 115: 27.8 ms = sim 17.1 + draw 10.6 (renderer cpu 4.2) + swap 0.1; gpu 14.4
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Rig.pose:253 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 116: 30.7 ms = sim 18.7 + draw 11.8 (renderer cpu 5.1) + swap 0.1; gpu 13.4
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Brain.think:288 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 118: 26.0 ms = sim 12.0 + draw 14.0 (renderer cpu 6.8) + swap 0.1; gpu 13.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:171 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+[impulsis profile] per step ms: forces 0.005 broad 0.048 narrow 0.145 islands 0.010 solve 1.772 support 0.014 integrate+sleep 0.035 prepare 0.019; bodies 310 (awake 67, proxies 213) pairs 26 manifolds 37 joints 55
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.26 class astratto::ImpulsisService=4.23 class astratto::ChemistryService=0.00 class astratto::AiService=0.55 class astratto::AudioService=0.02
+[astratto profile] questions 0.00 ms, commands 3.47 ms per frame
+  hitch at frame 120: 28.5 ms = sim 15.2 + draw 13.2 (renderer cpu 6.1) + swap 0.1; gpu 13.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Chemistry.update:313 < Rpg.update:383 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 122: 25.4 ms = sim 12.0 + draw 13.3 (renderer cpu 6.2) + swap 0.1; gpu 13.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.scene:593 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 124: 25.4 ms = sim 12.8 + draw 12.5 (renderer cpu 5.9) + swap 0.1; gpu 13.7
+      1 x ai.Jobs.lambda$accepts$27:322 < java.util.stream.MatchOps$1MatchSink.accept:90 < java.util.ArrayList$ArrayListSpliterator.tryAdvance:1693 < java.util.stream.ReferencePipeline.forEachWithCancel:147 < 
+      1 x render.Gfx.panels:2846 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 126: 27.2 ms = sim 12.8 + draw 14.3 (renderer cpu 7.3) + swap 0.1; gpu 13.4
+  hitch at frame 132: 30.6 ms = sim 18.9 + draw 11.6 (renderer cpu 5.8) + swap 0.1; gpu 13.4
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:617 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 134: 25.8 ms = sim 11.7 + draw 14.1 (renderer cpu 7.9) + swap 0.1; gpu 13.8
+  hitch at frame 138: 25.2 ms = sim 12.4 + draw 12.8 (renderer cpu 5.7) + swap 0.1; gpu 13.5
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 142: 51.8 ms = sim 37.4 + draw 14.3 (renderer cpu 8.3) + swap 0.1; gpu 13.4
+  hitch at frame 147: 66.0 ms = sim 55.9 + draw 10.0 (renderer cpu 4.1) + swap 0.1; gpu 14.5
+      3 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x ai.RuntimeNavigation.exits:94 < ai.RuntimeNavigation.corridor:112 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+  4 gc in the stop
+
+== street, morning (people) [scale 1.00, aiming 60 fps]
+  frame  mean  28.92 ms (   35 fps)   p50  26.16   p99  71.32   worst  94.62   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim  15.85   draw  12.98 (renderer cpu   5.46)   swap   0.10   gpu  13.55 ms   quads 49552  models 745
+  gpu by pass: uploads 1.73 shadows 1.37 gbuffer 2.98 ao 1.36 ssr 0.15 lighting 2.69 fog 1.39 forward 0.07 resolve 1.68 2d 0.12
+  gpu worst:   uploads 7.83 shadows 2.30 gbuffer 3.08 ao 1.37 ssr 0.16 lighting 2.70 fog 1.39 forward 0.17 resolve 1.74 2d 0.35  (frame 19.10)
+  hitch at frame 0: 29.1 ms = sim 14.1 + draw 14.9 (renderer cpu 4.8) + swap 0.1; gpu 13.0
+      1 x render.Rig.pose:1100 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+      1 x actor.Actor.distTo:305 < ai.Rumors.update:112 < ai.AiSystem.update:724 < Rpg.update:379 < 
+  hitch at frame 1: 26.7 ms = sim 16.5 + draw 10.1 (renderer cpu 2.9) + swap 0.1; gpu 13.9
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x skill.XpTable.levelFor:39 < skill.Skills.level:32 < actor.Actor.maxStamina:276 < combat.CombatSystem.tick:599 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 15: 70.9 ms = sim 12.3 + draw 58.5 (renderer cpu 12.7) + swap 0.1; gpu 14.4
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      3 x render.Meshes$Boxes.vertices:35 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < render.Gfx.scene:495 < 
+  hitch at frame 19: 42.6 ms = sim 32.4 + draw 10.1 (renderer cpu 2.8) + swap 0.1; gpu 14.0
+      7 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.AiSystem.afterFrame:850 < Rpg.afterFrame:432 < astratto.game.Game.tick:100 < Bench.frame:167 < 
+      1 x render.Rig.pose:700 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 23: 25.7 ms = sim 16.1 + draw 9.6 (renderer cpu 3.2) + swap 0.1; gpu 14.5
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Rig.pose:159 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 26: 37.1 ms = sim 27.4 + draw 9.5 (renderer cpu 3.5) + swap 0.1; gpu 13.2
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Rig.pose:663 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+  hitch at frame 30: 70.9 ms = sim 15.2 + draw 55.6 (renderer cpu 15.0) + swap 0.1; gpu 13.1
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      2 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < 
+  hitch at frame 44: 25.3 ms = sim 13.5 + draw 11.7 (renderer cpu 4.8) + swap 0.1; gpu 12.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:169 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+  hitch at frame 45: 53.7 ms = sim 15.3 + draw 38.3 (renderer cpu 9.2) + swap 0.1; gpu 13.2
+      3 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.FoliageModels.chunk:192 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+  hitch at frame 46: 51.3 ms = sim 17.1 + draw 34.2 (renderer cpu 9.5) + swap 0.1; gpu 12.4
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+  hitch at frame 48: 26.6 ms = sim 15.2 + draw 11.3 (renderer cpu 3.9) + swap 0.1; gpu 12.4
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Bones.update:109 < Rpg.update:402 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x render.Rig.pose:1100 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 59: 67.1 ms = sim 57.7 + draw 9.3 (renderer cpu 3.3) + swap 0.1; gpu 13.3
+      2 x ai.RuntimeNavigation.exits:94 < ai.RuntimeNavigation.corridor:112 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+  hitch at frame 75: 26.7 ms = sim 17.4 + draw 9.2 (renderer cpu 3.0) + swap 0.1; gpu 13.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:75 < world.Foliage.update:177 < Rpg.update:389 < 
+  hitch at frame 78: 34.3 ms = sim 23.1 + draw 11.1 (renderer cpu 4.4) + swap 0.1; gpu 12.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 84: 26.6 ms = sim 15.2 + draw 11.4 (renderer cpu 5.0) + swap 0.1; gpu 12.5
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Waypoints.point:110 < ai.Brain.goTo:859 < ai.Brain.goTo:811 < ai.Brain.eat:1941 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+  hitch at frame 87: 26.7 ms = sim 17.9 + draw 8.8 (renderer cpu 2.8) + swap 0.1; gpu 13.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.route:167 < ai.Brain.goTo:850 < 
+[impulsis profile] per step ms: forces 0.006 broad 0.042 narrow 0.128 islands 0.008 solve 1.488 support 0.011 integrate+sleep 0.046 prepare 0.021; bodies 296 (awake 67, proxies 199) pairs 29 manifolds 39 joints 55
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.22 class astratto::ImpulsisService=3.62 class astratto::ChemistryService=0.00 class astratto::AiService=0.66 class astratto::AudioService=0.04
+[astratto profile] questions 0.00 ms, commands 0.13 ms per frame
+  hitch at frame 90: 25.3 ms = sim 13.9 + draw 11.4 (renderer cpu 4.1) + swap 0.1; gpu 12.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 100: 30.1 ms = sim 16.2 + draw 13.8 (renderer cpu 6.1) + swap 0.1; gpu 12.5 (a gc ran)
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 102: 28.0 ms = sim 12.4 + draw 15.5 (renderer cpu 7.9) + swap 0.1; gpu 12.4
+  hitch at frame 104: 35.3 ms = sim 21.2 + draw 14.0 (renderer cpu 4.6) + swap 0.1; gpu 12.5 (a gc ran)
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x Rpg.liveCount:534 < Rpg.actors:518 < render.Gfx.scene:554 < Bench.frame:171 < 
+  hitch at frame 105: 28.4 ms = sim 17.1 + draw 11.2 (renderer cpu 3.0) + swap 0.1; gpu 13.3
+      1 x ui.Ui2D.text:257 < ui.HudFragments$Prompt.draw:623 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+      1 x render.Rig.pose:779 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x Rpg.liveCount:534 < Rpg.actors:518 < combat.Falling.afterFrame:24 < Rpg.afterFrame:433 < 
+  hitch at frame 119: 26.7 ms = sim 15.0 + draw 11.4 (renderer cpu 5.5) + swap 0.3; gpu 13.8
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 120: 27.9 ms = sim 17.0 + draw 10.4 (renderer cpu 4.6) + swap 0.5; gpu 12.4
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.goneSegs:2430 < render.Gfx.humanModel:2321 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+      1 x render.Gfx.figure:1035 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 122: 28.5 ms = sim 13.2 + draw 15.2 (renderer cpu 3.8) + swap 0.1; gpu 12.4
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 129: 32.3 ms = sim 22.9 + draw 9.3 (renderer cpu 3.0) + swap 0.1; gpu 13.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:687 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.step:136 < 
+  hitch at frame 132: 25.2 ms = sim 13.1 + draw 12.0 (renderer cpu 5.1) + swap 0.1; gpu 12.4
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  4 gc in the stop
+
+== farm, livestock [scale 1.00, aiming 60 fps]
+  frame  mean  22.51 ms (   44 fps)   p50  20.08   p99  70.87   worst  70.91   over 16.7 ms: 148/150   over 6.9 ms: 150/150
+  sim  11.27   draw  11.16 (renderer cpu   3.78)   swap   0.08   gpu  13.09 ms   quads 48350  models 490
+  gpu by pass: uploads 0.23 shadows 1.79 gbuffer 2.96 ao 1.56 ssr 0.12 lighting 3.28 fog 1.35 forward 0.08 resolve 1.68 2d 0.05
+  gpu worst:   uploads 0.95 shadows 2.78 gbuffer 3.03 ao 1.58 ssr 0.14 lighting 3.31 fog 1.35 forward 0.08 resolve 1.74 2d 0.09  (frame 14.55)
+[impulsis profile] per step ms: forces 0.005 broad 0.032 narrow 0.107 islands 0.007 solve 1.058 support 0.008 integrate+sleep 0.038 prepare 0.023; bodies 312 (awake 69, proxies 213) pairs 23 manifolds 41 joints 55
+  hitch at frame 0: 26.0 ms = sim 14.0 + draw 11.8 (renderer cpu 3.4) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.smoke:284 < render.Gfx.scene:433 < Bench.frame:171 < Bench.run:128 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.012 narrow 0.059 islands 0.003 solve 0.314 support 0.003 integrate+sleep 0.012 prepare 0.008; bodies 13 (awake 13, proxies 0) pairs 25 manifolds 16 joints 12
+  hitch at frame 32: 26.1 ms = sim 17.4 + draw 8.6 (renderer cpu 3.0) + swap 0.1; gpu 12.6
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:280 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 36: 45.8 ms = sim 36.7 + draw 9.1 (renderer cpu 3.4) + swap 0.1; gpu 12.6
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.chunkVersion:43 < ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < 
+  hitch at frame 41: 26.4 ms = sim 18.5 + draw 7.8 (renderer cpu 2.9) + swap 0.1; gpu 13.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2867 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x render.Gfx.fishes:777 < render.Gfx.scene:497 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 54: 25.4 ms = sim 17.5 + draw 7.9 (renderer cpu 3.3) + swap 0.1; gpu 12.7
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      1 x render.Rig.pose:617 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.58 class astratto::ImpulsisService=3.69 class astratto::ChemistryService=0.00 class astratto::AiService=0.47 class astratto::AudioService=0.05
+[astratto profile] questions 0.00 ms, commands 0.08 ms per frame
+  hitch at frame 60: 64.8 ms = sim 55.5 + draw 9.2 (renderer cpu 3.1) + swap 0.1; gpu 12.6
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.step:136 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 64: 27.9 ms = sim 19.0 + draw 8.8 (renderer cpu 3.3) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 90: 26.9 ms = sim 16.9 + draw 10.0 (renderer cpu 4.2) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.humanModel:2297 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 93: 32.4 ms = sim 22.8 + draw 9.6 (renderer cpu 2.9) + swap 0.1; gpu 13.4
+      5 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.inFog:188 < render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 96: 25.0 ms = sim 13.5 + draw 11.5 (renderer cpu 4.7) + swap 0.1; gpu 12.5
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.Brain.think:288 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 98: 44.2 ms = sim 33.0 + draw 11.1 (renderer cpu 5.3) + swap 0.1; gpu 12.6
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x world.Repairs.update:71 < Rpg.update:379 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 100: 25.2 ms = sim 14.2 + draw 10.9 (renderer cpu 5.8) + swap 0.1; gpu 12.6
+[impulsis profile] per step ms: forces 0.003 broad 0.016 narrow 0.110 islands 0.004 solve 0.547 support 0.004 integrate+sleep 0.021 prepare 0.016; bodies 311 (awake 69, proxies 212) pairs 32 manifolds 57 joints 55
+  hitch at frame 120: 27.6 ms = sim 16.6 + draw 10.9 (renderer cpu 3.4) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.all:39 < render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:75 < world.Foliage.update:177 < Rpg.update:389 < 
+  hitch at frame 134: 28.5 ms = sim 19.5 + draw 9.0 (renderer cpu 3.6) + swap 0.1; gpu 12.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Rig.pose:954 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+
+== grove, noon (leaves) [scale 1.00, aiming 60 fps]
+  frame  mean  22.00 ms (   45 fps)   p50  21.24   p99  45.85   worst  64.80   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim  13.12   draw   8.79 (renderer cpu   3.22)   swap   0.08   gpu  13.14 ms   quads 24977  models 232
+  gpu by pass: uploads 0.20 shadows 1.47 gbuffer 2.77 ao 1.55 ssr 0.13 lighting 3.55 fog 1.35 forward 0.34 resolve 1.70 2d 0.07
+  gpu worst:   uploads 2.51 shadows 2.13 gbuffer 2.86 ao 1.60 ssr 0.17 lighting 3.61 fog 1.36 forward 0.37 resolve 1.75 2d 0.09  (frame 16.02)
+[impulsis profile] per step ms: forces 0.004 broad 0.030 narrow 0.143 islands 0.006 solve 0.978 support 0.009 integrate+sleep 0.035 prepare 0.029; bodies 309 (awake 67, proxies 212) pairs 31 manifolds 53 joints 55
+[impulsis profile] per step ms: forces 0.001 broad 0.009 narrow 0.036 islands 0.002 solve 0.262 support 0.002 integrate+sleep 0.013 prepare 0.007; bodies 311 (awake 71, proxies 210) pairs 32 manifolds 67 joints 55
+  hitch at frame 0: 31.2 ms = sim 17.5 + draw 13.5 (renderer cpu 6.4) + swap 0.1; gpu 16.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:951 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 4: 26.5 ms = sim 15.6 + draw 10.8 (renderer cpu 4.8) + swap 0.1; gpu 15.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x animal.Animals.desire:523 < animal.Animals.goTo:543 < animal.AnimalMind.lambda$needsNetwork$5:240 < astratto.ai.Behavior$1.tick:22 < 
+  hitch at frame 8: 25.8 ms = sim 14.4 + draw 11.3 (renderer cpu 5.6) + swap 0.1; gpu 15.3
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x render.Gfx.mesh:117 < render.Gfx.headFace:2704 < render.Gfx.headUnits:2697 < render.Gfx.humanModel:2349 < 
+  hitch at frame 9: 29.1 ms = sim 17.9 + draw 11.1 (renderer cpu 4.5) + swap 0.1; gpu 16.4
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:583 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.Jobs.safe:265 < ai.Jobs.site:278 < ai.Jobs.lambda$network$8:146 < astratto.ai.TaskNetwork.tick:17 < 
+  hitch at frame 14: 25.4 ms = sim 13.4 + draw 11.9 (renderer cpu 6.0) + swap 0.1; gpu 16.1
+  hitch at frame 15: 26.0 ms = sim 14.9 + draw 11.0 (renderer cpu 4.5) + swap 0.1; gpu 17.1
+      1 x render.Gfx.scene:593 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:696 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x law.Law.update:92 < Rpg.update:365 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 25: 29.2 ms = sim 19.6 + draw 9.5 (renderer cpu 4.0) + swap 0.1; gpu 16.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 28: 27.0 ms = sim 10.1 + draw 16.8 (renderer cpu 9.6) + swap 0.1; gpu 15.1
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.99 class astratto::ImpulsisService=4.06 class astratto::ChemistryService=0.00 class astratto::AiService=0.55 class astratto::AudioService=0.06
+[astratto profile] questions 0.00 ms, commands 0.08 ms per frame
+  hitch at frame 29: 26.1 ms = sim 10.1 + draw 15.8 (renderer cpu 8.4) + swap 0.1; gpu 16.2
+  hitch at frame 30: 28.8 ms = sim 16.9 + draw 11.8 (renderer cpu 4.3) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:387 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+      1 x objects.Objects.all:39 < ui.HudFragments$Minimap.draw:1010 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.009 narrow 0.035 islands 0.002 solve 0.171 support 0.002 integrate+sleep 0.008 prepare 0.007; bodies 13 (awake 13, proxies 0) pairs 13 manifolds 17 joints 12
+  hitch at frame 55: 34.0 ms = sim 24.5 + draw 9.4 (renderer cpu 3.5) + swap 0.1; gpu 16.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.pass:41 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.step:136 < 
+  hitch at frame 60: 27.8 ms = sim 15.8 + draw 12.0 (renderer cpu 5.9) + swap 0.1; gpu 14.8
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.037 islands 0.002 solve 0.182 support 0.002 integrate+sleep 0.007 prepare 0.007; bodies 13 (awake 13, proxies 0) pairs 8 manifolds 18 joints 12
+  hitch at frame 75: 36.9 ms = sim 27.7 + draw 9.2 (renderer cpu 3.8) + swap 0.1; gpu 18.0
+      5 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 77: 27.6 ms = sim 17.5 + draw 10.0 (renderer cpu 3.7) + swap 0.1; gpu 16.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x Rpg.afterFrame:435 < astratto.game.Game.tick:100 < Bench.frame:167 < Bench.run:128 < 
+      1 x animal.AnimalRagdoll.piece:116 < animal.AnimalRagdoll.create:52 < animal.Animals.makeRagdoll:274 < animal.Animals.onKilled:742 < 
+  hitch at frame 80: 25.0 ms = sim 13.0 + draw 11.9 (renderer cpu 5.7) + swap 0.1; gpu 14.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:700 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 88: 32.1 ms = sim 20.3 + draw 11.8 (renderer cpu 5.9) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.RuntimeNavigation.route:173 < ai.Brain.goTo:850 < ai.Brain.goTo:811 < ai.Jobs.lambda$approach$21:180 < 
+  hitch at frame 90: 27.9 ms = sim 16.0 + draw 11.8 (renderer cpu 4.9) + swap 0.1; gpu 15.1
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x combat.Gore.perceive:732 < ai.Brain.think:113 < ai.AiSystem.update:706 < Rpg.update:379 < 
+  hitch at frame 93: 54.1 ms = sim 43.9 + draw 10.1 (renderer cpu 4.3) + swap 0.1; gpu 16.4
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      3 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 98: 25.4 ms = sim 14.2 + draw 11.1 (renderer cpu 4.8) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.route:167 < ai.Brain.goTo:850 < ai.Brain.goTo:811 < 
+      1 x ai.Jobs.netOf:85 < ai.Jobs.net:58 < ai.Jobs.tick:38 < ai.Brain.work:1710 < 
+  hitch at frame 105: 28.7 ms = sim 19.5 + draw 9.0 (renderer cpu 3.3) + swap 0.3; gpu 16.3
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2867 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:75 < world.Foliage.update:177 < Rpg.update:389 < 
+  hitch at frame 120: 25.6 ms = sim 14.5 + draw 11.0 (renderer cpu 5.3) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:81 < world.Foliage.update:177 < Rpg.update:389 < 
+  hitch at frame 121: 26.0 ms = sim 17.1 + draw 8.9 (renderer cpu 3.6) + swap 0.1; gpu 15.3
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 129: 30.0 ms = sim 20.8 + draw 9.2 (renderer cpu 3.8) + swap 0.1; gpu 17.7
+      6 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:604 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.Brain.think:288 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 135: 25.9 ms = sim 16.7 + draw 9.1 (renderer cpu 3.7) + swap 0.1; gpu 17.7
+      1 x render.Rig.pose:724 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.Brain.goTo:865 < ai.Brain.goTo:811 < ai.Jobs.unload:121 < ai.Jobs.tick:37 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 139: 30.4 ms = sim 20.5 + draw 9.8 (renderer cpu 3.7) + swap 0.1; gpu 18.0
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:730 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+
+== pond, evening (reflections) [scale 1.00, aiming 60 fps]
+  frame  mean  22.54 ms (   44 fps)   p50  21.67   p99  36.95   worst  54.09   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim  11.85   draw  10.61 (renderer cpu   4.67)   swap   0.08   gpu  16.07 ms   quads 40713  models 418
+  gpu by pass: uploads 1.32 shadows 2.31 gbuffer 3.13 ao 1.39 ssr 0.11 lighting 3.05 fog 1.45 forward 0.73 resolve 2.48 2d 0.11
+  gpu worst:   uploads 2.69 shadows 3.34 gbuffer 3.20 ao 1.41 ssr 0.13 lighting 3.10 fog 1.45 forward 0.84 resolve 2.55 2d 0.33  (frame 18.08)
+[impulsis profile] per step ms: forces 0.003 broad 0.021 narrow 0.097 islands 0.004 solve 0.704 support 0.005 integrate+sleep 0.026 prepare 0.020; bodies 314 (awake 75, proxies 209) pairs 25 manifolds 68 joints 61
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.61 class astratto::ImpulsisService=3.61 class astratto::ChemistryService=0.10 class astratto::AiService=0.69 class astratto::AudioService=0.04
+[astratto profile] questions 0.00 ms, commands 0.07 ms per frame
+[impulsis profile] per step ms: forces 0.003 broad 0.028 narrow 0.085 islands 0.005 solve 0.751 support 0.007 integrate+sleep 0.025 prepare 0.014; bodies 13 (awake 13, proxies 0) pairs 20 manifolds 8 joints 12
+  hitch at frame 27: 40.1 ms = sim 34.1 + draw 6.0 (renderer cpu 2.5) + swap 0.1; gpu 15.4
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.011 narrow 0.055 islands 0.003 solve 0.293 support 0.003 integrate+sleep 0.010 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 28 manifolds 6 joints 12
+  hitch at frame 108: 26.3 ms = sim 19.6 + draw 6.6 (renderer cpu 3.4) + swap 0.1; gpu 14.7
+  hitch at frame 111: 25.6 ms = sim 8.1 + draw 17.4 (renderer cpu 2.9) + swap 0.1; gpu 15.6 (a gc ran)
+      1 x render.Rig.pose:640 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x combat.CombatSystem.update:574 < Rpg.update:371 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x render.Gfx.inFog:188 < render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 125: 31.1 ms = sim 25.3 + draw 5.8 (renderer cpu 2.4) + swap 0.1; gpu 14.9
+      2 x world.Voxels.chunkVersion:43 < ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x render.Rig.pose:397 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 126: 28.1 ms = sim 22.3 + draw 5.8 (renderer cpu 2.8) + swap 0.1; gpu 14.2
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x item.Inventory.stacks:237 < ai.Brain.eat:1919 < ai.Brain.act:478 < ai.AiSystem.update:710 < 
+      1 x render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 127: 26.5 ms = sim 20.8 + draw 5.6 (renderer cpu 2.1) + swap 0.1; gpu 14.9
+      1 x render.Rig.pose:687 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x audio.Sfx.pick:553 < audio.Sfx.play:563 < monster.Monsters.sound:671 < monster.MonsterMind.attack:844 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 128: 25.4 ms = sim 19.4 + draw 5.9 (renderer cpu 2.6) + swap 0.1; gpu 14.0
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+      1 x render.Rig.pose:165 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 130: 25.0 ms = sim 18.8 + draw 6.2 (renderer cpu 3.0) + swap 0.1; gpu 14.0
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 131: 30.0 ms = sim 23.5 + draw 6.4 (renderer cpu 2.6) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < 
+  hitch at frame 132: 29.5 ms = sim 22.4 + draw 7.1 (renderer cpu 3.1) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RuntimeNavigation.allowed:131 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Rig.pose:253 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 133: 27.7 ms = sim 21.2 + draw 6.4 (renderer cpu 2.7) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x ai.AiSystem.update:709 < Rpg.update:379 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 134: 33.2 ms = sim 25.4 + draw 7.7 (renderer cpu 3.5) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 135: 32.7 ms = sim 26.3 + draw 6.3 (renderer cpu 2.8) + swap 0.1; gpu 14.8
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x actor.Swimming.others:405 < Rpg.afterFrame:437 < astratto.game.Game.tick:100 < Bench.frame:167 < 
+      1 x world.Voxels.solid:65 < world.Voxels.groundY:188 < Rpg.lambda$init$0:157 < render.Fx.update:51 < 
+  hitch at frame 136: 43.3 ms = sim 36.9 + draw 6.3 (renderer cpu 2.8) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 137: 28.9 ms = sim 22.8 + draw 6.0 (renderer cpu 2.7) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x ai.Stealth.update:255 < ai.AiSystem.update:703 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 138: 26.9 ms = sim 20.9 + draw 6.0 (renderer cpu 2.8) + swap 0.1; gpu 14.0
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 139: 31.3 ms = sim 24.6 + draw 6.6 (renderer cpu 2.5) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RuntimeNavigation.allowed:131 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 140: 30.8 ms = sim 21.3 + draw 9.5 (renderer cpu 2.6) + swap 0.1; gpu 14.0
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x interact.Interactions.all:33 < interact.Interactions.computeFocus:151 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+  hitch at frame 141: 27.9 ms = sim 21.9 + draw 6.0 (renderer cpu 2.2) + swap 0.1; gpu 14.8
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x world.Voxels.block:64 < world.Fluids.water:39 < world.Fluids.surface:62 < fishing.Fishery.move:534 < 
+      1 x dungeon.Dungeons.update:370 < Rpg.update:387 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.011 narrow 0.049 islands 0.003 solve 0.199 support 0.004 integrate+sleep 0.008 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 13 manifolds 21 joints 12
+  hitch at frame 142: 29.6 ms = sim 23.0 + draw 6.6 (renderer cpu 2.8) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 143: 29.5 ms = sim 23.9 + draw 5.5 (renderer cpu 1.9) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:636 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 144: 28.8 ms = sim 22.0 + draw 6.7 (renderer cpu 3.3) + swap 0.1; gpu 14.0
+      1 x world.Voxels.solid:65 < world.Voxels.groundY:188 < Rpg.lambda$init$0:157 < render.Fx.update:51 < 
+      1 x animal.AnimalMind.think:204 < animal.Animals.update:565 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 145: 26.2 ms = sim 20.7 + draw 5.4 (renderer cpu 2.1) + swap 0.1; gpu 15.1
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 146: 25.4 ms = sim 19.6 + draw 5.7 (renderer cpu 2.5) + swap 0.1; gpu 14.0
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 148: 26.8 ms = sim 20.5 + draw 6.2 (renderer cpu 3.0) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.corridor:116 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+      1 x ai.RuntimeNavigation.allowed:131 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 149: 25.9 ms = sim 20.5 + draw 5.4 (renderer cpu 2.0) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+      1 x render.ItemModels$Model.hashCode:32 < java.util.Objects.hashCode:97 < render.Gfx$DamageKey.hashCode:1119 < java.util.HashMap.hash:338 < 
+  4 gc in the stop
+
+== campfire, night (smoke, lamps) [scale 1.00, aiming 60 fps]
+  frame  mean  18.13 ms (   55 fps)   p50  15.55   p99  40.10   worst  43.26   over 16.7 ms: 59/150   over 6.9 ms: 150/150
+  sim  11.69   draw   6.38 (renderer cpu   2.65)   swap   0.07   gpu  15.33 ms   quads 20885  models 180
+  gpu by pass: uploads 0.95 shadows 1.94 gbuffer 2.79 ao 1.52 ssr 0.14 lighting 3.23 fog 1.47 forward 0.51 resolve 2.63 2d 0.15
+  gpu worst:   uploads 1.85 shadows 2.61 gbuffer 2.87 ao 1.57 ssr 0.16 lighting 3.31 fog 1.51 forward 0.53 resolve 2.76 2d 0.19  (frame 16.53)
+[impulsis profile] per step ms: forces 0.001 broad 0.010 narrow 0.047 islands 0.002 solve 0.233 support 0.002 integrate+sleep 0.010 prepare 0.007; bodies 13 (awake 13, proxies 0) pairs 24 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.010 narrow 0.036 islands 0.002 solve 0.226 support 0.002 integrate+sleep 0.010 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 13 manifolds 17 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.008 narrow 0.029 islands 0.002 solve 0.167 support 0.002 integrate+sleep 0.007 prepare 0.004; bodies 308 (awake 11, proxies 203) pairs 5 manifolds 15 joints 61
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.028 islands 0.002 solve 0.112 support 0.003 integrate+sleep 0.006 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 25 manifolds 25 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=1.16 class astratto::ImpulsisService=2.95 class astratto::ChemistryService=0.12 class astratto::AiService=0.63 class astratto::AudioService=0.04
+[astratto profile] questions 0.00 ms, commands 0.08 ms per frame
+  hitch at frame 0: 30.0 ms = sim 14.2 + draw 15.5 (renderer cpu 8.0) + swap 0.2; gpu 16.1
+  hitch at frame 4: 25.4 ms = sim 14.2 + draw 11.1 (renderer cpu 4.8) + swap 0.1; gpu 16.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x combat.Gore.perceive:732 < ai.Brain.think:113 < ai.AiSystem.update:706 < Rpg.update:379 < 
+  hitch at frame 12: 25.1 ms = sim 12.4 + draw 12.7 (renderer cpu 5.0) + swap 0.1; gpu 14.0
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 15: 29.2 ms = sim 16.2 + draw 12.9 (renderer cpu 5.1) + swap 0.1; gpu 14.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.Stealth.update:255 < ai.AiSystem.update:703 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+      1 x render.Rig.pose:682 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 16: 26.7 ms = sim 11.1 + draw 15.5 (renderer cpu 5.2) + swap 0.1; gpu 12.8
+      1 x world.Voxels.block:64 < ai.AiSystem.afterFrame:850 < Rpg.afterFrame:432 < astratto.game.Game.tick:100 < 
+      1 x combat.CombatSystem.bodies:918 < combat.CombatSystem.sweep:897 < combat.CombatSystem.tick:630 < combat.CombatSystem.update:574 < 
+      1 x render.AnimalModels.tail:310 < render.AnimalModels.quad:155 < render.AnimalModels.build:79 < render.AnimalModels.lambda$of$0:45 < 
+  hitch at frame 18: 31.3 ms = sim 8.0 + draw 23.2 (renderer cpu 7.7) + swap 0.1; gpu 12.9
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+      1 x render.Rig.pose:583 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 20: 27.4 ms = sim 14.9 + draw 12.4 (renderer cpu 5.0) + swap 0.1; gpu 13.0
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+[impulsis profile] per step ms: forces 0.001 broad 0.012 narrow 0.053 islands 0.003 solve 0.210 support 0.004 integrate+sleep 0.008 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 25 manifolds 28 joints 12
+  hitch at frame 30: 31.5 ms = sim 15.0 + draw 16.3 (renderer cpu 5.7) + swap 0.1; gpu 13.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.figure:1036 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 45: 25.6 ms = sim 14.5 + draw 11.1 (renderer cpu 3.8) + swap 0.1; gpu 15.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:696 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.inFog:188 < render.Gfx.scene:537 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 48: 28.3 ms = sim 15.8 + draw 12.5 (renderer cpu 5.4) + swap 0.1; gpu 14.8 (a gc ran)
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x render.Gfx.humanModel:2297 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 49: 26.1 ms = sim 12.5 + draw 13.4 (renderer cpu 4.3) + swap 0.1; gpu 15.5 (a gc ran)
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.HudFragments$XpDrops.draw:741 < ui.Hud.paint:439 < ui.Hud.draw:367 < Bench.frame:173 < 
+      1 x render.Gfx.camera:206 < Bench.frame:170 < Bench.run:128 < Main.session:102 < 
+  hitch at frame 60: 74.1 ms = sim 14.7 + draw 59.4 (renderer cpu 14.9) + swap 0.1; gpu 14.9
+      5 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.FoliageModels.chunk:190 < render.Gfx.foliage:821 < 
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      4 x render.Gfx.upload:1107 < render.Gfx.foliage:821 < render.Gfx.scene:495 < Bench.frame:171 < 
+  hitch at frame 70: 25.8 ms = sim 11.8 + draw 13.9 (renderer cpu 5.2) + swap 0.1; gpu 15.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.route:162 < ai.Brain.goTo:850 < ai.Brain.goTo:811 < ai.Brain.patrol:1902 < 
+      1 x interact.Interactions.all:33 < interact.Interactions.computeFocus:151 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+  hitch at frame 72: 34.6 ms = sim 14.2 + draw 20.3 (renderer cpu 12.4) + swap 0.1; gpu 15.0
+  hitch at frame 75: 30.5 ms = sim 18.7 + draw 11.8 (renderer cpu 4.2) + swap 0.1; gpu 14.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.CombatSystem.kill:1288 < combat.CombatSystem.resolve:1240 < combat.CombatSystem.sweep:1522 < combat.CombatSystem.updateProjectiles:1334 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+  hitch at frame 76: 30.4 ms = sim 14.4 + draw 15.9 (renderer cpu 5.1) + swap 0.1; gpu 14.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:640 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 81: 28.3 ms = sim 15.7 + draw 12.5 (renderer cpu 4.3) + swap 0.1; gpu 14.9
+      1 x ui.HudFragments$Minimap.draw:1036 < ui.Hud.paint:439 < ui.Hud.draw:367 < Bench.frame:173 < 
+      1 x render.Rig.pose:1112 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Rig.pose:583 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 90: 30.8 ms = sim 17.1 + draw 13.6 (renderer cpu 5.3) + swap 0.1; gpu 14.2
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:81 < world.Foliage.update:177 < Rpg.update:389 < 
+      1 x render.Rig.pose:270 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 94: 28.2 ms = sim 16.1 + draw 12.0 (renderer cpu 4.3) + swap 0.1; gpu 14.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+  hitch at frame 106: 28.5 ms = sim 11.0 + draw 17.4 (renderer cpu 5.5) + swap 0.1; gpu 14.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < 
+      1 x render.Rig.pose:435 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 108: 25.6 ms = sim 11.0 + draw 14.5 (renderer cpu 5.8) + swap 0.1; gpu 14.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 112: 27.2 ms = sim 13.3 + draw 13.8 (renderer cpu 5.7) + swap 0.1; gpu 14.2
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.route:167 < ai.Brain.goTo:850 < 
+  hitch at frame 113: 26.8 ms = sim 11.1 + draw 15.6 (renderer cpu 3.6) + swap 0.1; gpu 15.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.partMesh:1114 < render.Gfx.mpart:1651 < render.Gfx.bat:2047 < render.Gfx.monster:1719 < 
+      1 x render.Rig.pose:696 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 114: 25.4 ms = sim 11.2 + draw 14.1 (renderer cpu 5.5) + swap 0.2; gpu 14.2
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x interact.Interactions.all:33 < interact.Interactions.computeFocus:151 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 120: 28.4 ms = sim 16.2 + draw 12.2 (renderer cpu 4.3) + swap 0.1; gpu 15.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.humanModel:2351 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+[impulsis profile] per step ms: forces 0.002 broad 0.020 narrow 0.068 islands 0.004 solve 0.501 support 0.004 integrate+sleep 0.018 prepare 0.012; bodies 13 (awake 13, proxies 0) pairs 13 manifolds 2 joints 12
+  hitch at frame 123: 25.4 ms = sim 11.3 + draw 14.0 (renderer cpu 4.2) + swap 0.1; gpu 14.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x Rpg.afterFrame:435 < astratto.game.Game.tick:100 < Bench.frame:167 < Bench.run:128 < 
+      1 x ai.Brain.think:207 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 125: 25.1 ms = sim 14.2 + draw 10.9 (renderer cpu 4.0) + swap 0.1; gpu 15.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.chunkVersion:43 < ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.exists:128 < ai.RuntimeNavigation.step:136 < 
+      1 x render.Gfx.panels:2846 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 126: 35.7 ms = sim 12.7 + draw 22.9 (renderer cpu 5.7) + swap 0.1; gpu 15.2
+      1 x ui.HudFragments$Minimap.draw:1036 < ui.Hud.paint:439 < ui.Hud.draw:367 < Bench.frame:173 < 
+      1 x render.Gfx.goneSegs:2430 < render.Gfx.humanModel:2321 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.AnimalModels.lambda$pegasusCoat$6:551 < render.AnimalModels.quad:111 < render.AnimalModels.pegasus:532 < render.AnimalModels.build:72 < 
+  hitch at frame 129: 26.1 ms = sim 15.6 + draw 10.4 (renderer cpu 3.6) + swap 0.1; gpu 15.0
+      4 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:619 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Rig.capStep:1372 < render.Rig.pose:213 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < 
+  hitch at frame 135: 25.6 ms = sim 13.6 + draw 11.9 (renderer cpu 4.1) + swap 0.1; gpu 15.4
+      1 x world.Foliage.pushers:292 < render.Gfx.scene:421 < Bench.frame:171 < Bench.run:128 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < animal.AnimalMind.sense:74 < 
+  hitch at frame 142: 26.7 ms = sim 11.7 + draw 15.0 (renderer cpu 4.9) + swap 0.1; gpu 14.3
+      1 x render.Gfx.itemMesh:1003 < render.Gfx.drawItem:1013 < render.Gfx.torsoItem:1022 < render.Gfx.humanModel:2368 < 
+      1 x world.Voxels.block:64 < world.Fluids.water:39 < actor.Swimming.others:412 < Rpg.afterFrame:437 < 
+      1 x interact.Interactions.ranked:66 < interact.Interactions.computeFocus:184 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+  hitch at frame 144: 25.2 ms = sim 13.1 + draw 12.0 (renderer cpu 4.9) + swap 0.1; gpu 14.2
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x dungeon.Dungeons.update:370 < Rpg.update:387 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x actor.Actor.distTo:296 < render.Gfx.scene:535 < Bench.frame:171 < Bench.run:128 < 
+  4 gc in the stop
+
+== sprint down the street [scale 1.00, aiming 60 fps]
+  frame  mean  23.36 ms (   43 fps)   p50  22.42   p99  35.67   worst  74.14   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim  10.67   draw  12.61 (renderer cpu   4.62)   swap   0.08   gpu  14.73 ms   quads 27123  models 591
+  gpu by pass: uploads 0.49 shadows 1.27 gbuffer 2.77 ao 1.41 ssr 0.22 lighting 4.25 fog 1.52 forward 0.08 resolve 2.64 2d 0.09
+  gpu worst:   uploads 1.82 shadows 2.39 gbuffer 4.19 ao 1.75 ssr 0.25 lighting 4.72 fog 1.87 forward 0.20 resolve 3.35 2d 0.11  (frame 17.67)
+[impulsis profile] per step ms: forces 0.001 broad 0.014 narrow 0.058 islands 0.003 solve 0.267 support 0.006 integrate+sleep 0.010 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 17 manifolds 19 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.95 class astratto::ImpulsisService=2.93 class astratto::ChemistryService=0.12 class astratto::AiService=0.65 class astratto::AudioService=0.02
+[astratto profile] questions 0.00 ms, commands 0.08 ms per frame
+[impulsis profile] per step ms: forces 0.002 broad 0.024 narrow 0.095 islands 0.004 solve 0.534 support 0.009 integrate+sleep 0.019 prepare 0.012; bodies 298 (awake 75, proxies 193) pairs 45 manifolds 74 joints 60
+  hitch at frame 4: 44.7 ms = sim 33.9 + draw 10.7 (renderer cpu 3.1) + swap 0.1; gpu 14.7
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      1 x render.Rig.pose:1084 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 76: 43.4 ms = sim 33.6 + draw 9.7 (renderer cpu 2.8) + swap 0.1; gpu 13.7
+      4 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 99: 29.0 ms = sim 20.0 + draw 8.8 (renderer cpu 1.9) + swap 0.1; gpu 14.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.block:64 < ai.RuntimeNavigation.ladder:48 < ai.RuntimeNavigation.surface:46 < ai.RuntimeNavigation.chunk:56 < 
+      1 x render.Gfx.humanModel:2340 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 120: 46.2 ms = sim 33.8 + draw 12.3 (renderer cpu 3.6) + swap 0.1; gpu 13.7
+      3 x world.Voxels.block:64 < ai.RuntimeNavigation.solid:14 < ai.RuntimeNavigation.pass:42 < ai.RuntimeNavigation.surface:46 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Rig.pose:620 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 121: 31.6 ms = sim 21.6 + draw 9.9 (renderer cpu 2.0) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 122: 31.9 ms = sim 20.7 + draw 11.2 (renderer cpu 4.2) + swap 0.1; gpu 13.7
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.humanoidMonster:1938 < render.Gfx.monster:1717 < render.Gfx.scene:535 < Bench.frame:171 < 
+  hitch at frame 123: 30.9 ms = sim 20.1 + draw 10.7 (renderer cpu 2.5) + swap 0.1; gpu 14.8
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Gore.lost:118 < combat.HitVolumes.ray:122 < combat.CombatSystem.sweep:1476 < combat.CombatSystem.step:1447 < 
+  hitch at frame 124: 32.8 ms = sim 21.7 + draw 11.1 (renderer cpu 3.5) + swap 0.1; gpu 13.7
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.injuredPart:1127 < render.Gfx.limb:1158 < render.Gfx.animalModel:1468 < render.Gfx.animal:1252 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 125: 29.9 ms = sim 20.9 + draw 8.9 (renderer cpu 2.0) + swap 0.1; gpu 15.3
+      2 x objects.Door.ray:180 < world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.chunkVersion:43 < ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.exits:87 < ai.RuntimeNavigation.corridor:112 < 
+  hitch at frame 126: 30.8 ms = sim 20.8 + draw 9.9 (renderer cpu 3.2) + swap 0.1; gpu 13.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:651 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 127: 28.9 ms = sim 19.6 + draw 9.1 (renderer cpu 2.2) + swap 0.1; gpu 14.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 128: 30.3 ms = sim 20.5 + draw 9.7 (renderer cpu 3.2) + swap 0.1; gpu 13.7
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 129: 32.2 ms = sim 23.4 + draw 8.8 (renderer cpu 2.0) + swap 0.1; gpu 14.0
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.figure:1036 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 130: 29.9 ms = sim 19.6 + draw 10.2 (renderer cpu 3.8) + swap 0.1; gpu 12.9
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.Brain.think:403 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 131: 29.2 ms = sim 20.4 + draw 8.8 (renderer cpu 2.1) + swap 0.1; gpu 14.1 (a gc ran)
+      1 x Rpg.afterFrame:435 < astratto.game.Game.tick:100 < Bench.frame:167 < Bench.run:128 < 
+      1 x ai.RouteBook.find:32 < ai.RouteBook.begin:48 < ai.Brain.goTo:852 < ai.Brain.goTo:811 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 132: 34.0 ms = sim 22.7 + draw 11.1 (renderer cpu 3.4) + swap 0.1; gpu 12.9 (a gc ran)
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.Addons$LuaFragment.active:238 < ui.Fragment.wanted:48 < ui.Hud.draw:361 < Bench.frame:173 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 133: 36.6 ms = sim 27.5 + draw 9.0 (renderer cpu 2.1) + swap 0.1; gpu 14.6
+      5 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 134: 30.6 ms = sim 20.8 + draw 9.7 (renderer cpu 3.2) + swap 0.1; gpu 12.9
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:1116 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 135: 32.8 ms = sim 23.9 + draw 8.8 (renderer cpu 2.2) + swap 0.1; gpu 14.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x law.Law.update:110 < Rpg.update:365 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 136: 29.8 ms = sim 19.9 + draw 9.8 (renderer cpu 3.4) + swap 0.1; gpu 12.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 137: 30.4 ms = sim 21.3 + draw 9.0 (renderer cpu 2.3) + swap 0.1; gpu 14.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Gore.pool:365 < combat.Gore.update:599 < Rpg.update:373 < astratto.game.Game.tick:95 < 
+      1 x render.Gfx.limbs:2491 < render.Gfx.scene:581 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 138: 30.5 ms = sim 20.0 + draw 10.5 (renderer cpu 4.1) + swap 0.1; gpu 12.9
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Gfx.humanModel:2297 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 139: 27.7 ms = sim 19.2 + draw 8.5 (renderer cpu 2.0) + swap 0.1; gpu 14.1
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x monster.MonsterMind.sense:79 < monster.Monsters.update:393 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 140: 30.3 ms = sim 20.5 + draw 9.7 (renderer cpu 3.0) + swap 0.1; gpu 12.9
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.ray:110 < world.Voxels.clear:120 < world.Voxels.clear:115 < actor.PlayerController.placeCamera:616 < 
+  hitch at frame 141: 27.1 ms = sim 18.5 + draw 8.5 (renderer cpu 1.9) + swap 0.1; gpu 14.6
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+      1 x render.Rig.pose:638 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:511 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+  hitch at frame 142: 28.2 ms = sim 18.7 + draw 9.4 (renderer cpu 3.2) + swap 0.1; gpu 13.0
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x render.Rig.pose:696 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x Bench.run:132 < Main.session:102 < Main.run:70 < Main.main:50 < 
+  hitch at frame 143: 27.9 ms = sim 18.7 + draw 9.1 (renderer cpu 2.2) + swap 0.1; gpu 14.1
+      1 x render.Rig.pose:1124 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x objects.Door.ray:180 < world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < 
+  hitch at frame 144: 27.3 ms = sim 17.9 + draw 9.3 (renderer cpu 3.1) + swap 0.1; gpu 12.9
+      1 x render.Rig.pose:1100 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+      1 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+  hitch at frame 145: 28.1 ms = sim 19.2 + draw 8.8 (renderer cpu 2.1) + swap 0.1; gpu 14.1
+      1 x render.Fx.s:92 < render.Fx.blood:195 < combat.CombatSystem.resolve:1178 < combat.CombatSystem.bite:1036 < 
+      1 x render.Gfx.put:877 < render.Gfx.limb:636 < render.Gfx.projectile:3406 < render.Gfx.scene:549 < 
+      1 x render.Rig.pose:253 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 146: 28.5 ms = sim 17.7 + draw 10.6 (renderer cpu 4.5) + swap 0.1; gpu 13.0
+      2 x ai.RuntimeNavigation.corridor:115 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < ai.AiSystem.walkToAtHeight:563 < 
+      1 x render.Gfx.bowAt:979 < render.Gfx.sheathedItems:954 < render.Gfx.humanModel:2378 < render.Gfx.human:2264 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 147: 28.2 ms = sim 19.8 + draw 8.4 (renderer cpu 1.8) + swap 0.1; gpu 14.1
+      2 x ai.RuntimeNavigation.allowed:131 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x mount.Riding.of:122 < ui.HudFragments$Prompt.draw:569 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+      1 x world.Foliage.pushers:292 < render.Gfx.scene:421 < Bench.frame:171 < Bench.run:128 < 
+  hitch at frame 148: 49.3 ms = sim 40.2 + draw 9.0 (renderer cpu 2.9) + swap 0.1; gpu 13.0
+      3 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.CombatTactics.highGroundSearch:90 < 
+      2 x ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      2 x ai.RuntimeNavigation.chunk:51 < ai.RuntimeNavigation.region:72 < ai.RuntimeNavigation.corridor:113 < ai.RuntimeNavigation.route:153 < 
+  hitch at frame 149: 26.4 ms = sim 17.8 + draw 8.5 (renderer cpu 1.8) + swap 0.1; gpu 14.6
+      2 x ai.RouteBook.penalty:17 < ai.RuntimeNavigation.corridor:114 < ai.RuntimeNavigation.route:153 < ai.Brain.goTo:850 < 
+      1 x world.Voxels.skyLight:183 < ai.Stealth.light:99 < ai.Stealth.light:76 < ai.Stealth.exposure:188 < 
+      1 x render.Gfx.panels:2846 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  4 gc in the stop
+
+== DevPalace forum, afternoon [scale 1.00, aiming 60 fps]
+  frame  mean  21.34 ms (   47 fps)   p50  18.75   p99  46.15   worst  49.31   over 16.7 ms: 130/150   over 6.9 ms: 150/150
+  sim  11.50   draw   9.75 (renderer cpu   2.86)   swap   0.09   gpu  14.40 ms   quads 77606  models 379
+  gpu by pass: uploads 0.15 shadows 1.77 gbuffer 2.02 ao 1.60 ssr 0.34 lighting 4.67 fog 1.33 forward 0.13 resolve 2.32 2d 0.05
+  gpu worst:   uploads 1.53 shadows 2.89 gbuffer 2.23 ao 1.62 ssr 0.35 lighting 4.69 fog 1.34 forward 0.15 resolve 2.49 2d 0.09  (frame 16.81)
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.27 class astratto::ImpulsisService=3.22 class astratto::ChemistryService=0.01 class astratto::AiService=0.71 class astratto::AudioService=0.03
+[astratto profile] questions 0.00 ms, commands 0.07 ms per frame
+[impulsis profile] per step ms: forces 0.005 broad 0.051 narrow 0.120 islands 0.008 solve 1.240 support 0.016 integrate+sleep 0.041 prepare 0.022; bodies 296 (awake 12, proxies 192) pairs 6 manifolds 12 joints 60
+  hitch at frame 0: 27.1 ms = sim 13.5 + draw 13.5 (renderer cpu 4.8) + swap 0.1; gpu 19.0
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x ui.Fragment.wanted:48 < ui.Hud.draw:361 < Bench.frame:173 < Bench.run:128 < 
+      1 x ai.Stealth.update:255 < ai.AiSystem.update:703 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 15: 26.0 ms = sim 14.7 + draw 11.2 (renderer cpu 2.6) + swap 0.1; gpu 20.0
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:640 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:81 < world.Foliage.update:177 < Rpg.update:389 < 
+  hitch at frame 60: 25.1 ms = sim 13.1 + draw 11.9 (renderer cpu 4.0) + swap 0.1; gpu 18.1
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:1123 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x actor.BodyCarry.busy:34 < combat.CombatSystem.attack:128 < monster.MonsterMind.attack:828 < monster.MonsterMind.engage:637 < 
+  hitch at frame 63: 26.7 ms = sim 16.4 + draw 10.2 (renderer cpu 2.7) + swap 0.1; gpu 19.1
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.Ui2D.flush:150 < ui.Ui2D.slot:161 < ui.Ui2D.quad:168 < ui.Ui2D.ring:224 < 
+      1 x combat.HitVolumes.ray:125 < combat.CombatSystem.bodies:919 < combat.CombatSystem.sweep:897 < combat.CombatSystem.tick:630 < 
+  hitch at frame 78: 26.9 ms = sim 13.4 + draw 13.4 (renderer cpu 4.9) + swap 0.1; gpu 17.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2867 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x interact.Interactions.all:33 < interact.Interactions.computeFocus:151 < actor.PlayerController.placeCamera:633 < actor.PlayerController.placeCamera:591 < 
+  hitch at frame 88: 25.8 ms = sim 9.9 + draw 15.8 (renderer cpu 5.4) + swap 0.1; gpu 17.8
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < Main.session:102 < 
+      1 x ai.AiSystem.monsterSenses:565 < monster.Monsters.update:390 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 90: 28.2 ms = sim 13.4 + draw 14.7 (renderer cpu 5.0) + swap 0.1; gpu 17.8
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:689 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 93: 26.9 ms = sim 12.0 + draw 14.8 (renderer cpu 3.7) + swap 0.1; gpu 18.9
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x Rpg.actor:546 < monster.MonsterMind.lambda$sense$0:102 < java.util.Collection.removeIf:581 < monster.MonsterMind.sense:102 < 
+  hitch at frame 94: 26.1 ms = sim 13.1 + draw 13.0 (renderer cpu 4.8) + swap 0.1; gpu 17.8
+      1 x dungeon.Dungeons.update:370 < Rpg.update:387 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x ai.Brain.innServes:909 < ai.Brain.think:303 < ai.AiSystem.update:706 < Rpg.update:379 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 95: 26.5 ms = sim 15.8 + draw 10.7 (renderer cpu 2.5) + swap 0.1; gpu 18.9
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:94 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Rig.pose:621 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 96: 27.7 ms = sim 13.5 + draw 14.1 (renderer cpu 5.9) + swap 0.1; gpu 18.5
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x fishing.Fishery.collide:329 < fishing.Fishery.update:285 < Rpg.afterFrame:440 < astratto.game.Game.tick:100 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 97: 34.2 ms = sim 23.5 + draw 10.6 (renderer cpu 2.7) + swap 0.1; gpu 18.9
+      1 x render.Rig.pose:652 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.RuntimeNavigation.exists:128 < ai.RuntimeNavigation.step:136 < ai.RuntimeNavigation.neighbours:78 < ai.RuntimeNavigation.neighbours:74 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 120: 25.2 ms = sim 11.1 + draw 14.0 (renderer cpu 4.7) + swap 0.1; gpu 17.8
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.draw:1026 < ui.Hud.paint:439 < 
+      1 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.AiSystem.partnerFor:1400 < ai.Brain.socialize:1955 < ai.Brain.act:484 < ai.AiSystem.update:710 < 
+  hitch at frame 142: 29.6 ms = sim 14.3 + draw 15.3 (renderer cpu 5.0) + swap 0.1; gpu 20.6
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+      1 x Rpg.update:365 < astratto.game.Game.tick:95 < Bench.frame:167 < Bench.run:128 < 
+  hitch at frame 143: 25.8 ms = sim 13.7 + draw 12.1 (renderer cpu 3.1) + swap 0.1; gpu 21.5
+      1 x render.Rig.pose:604 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Gfx.part:1237 < render.Gfx.limb:1158 < render.Gfx.animalModel:1495 < render.Gfx.animal:1252 < 
+      1 x ui.HudFragments$Overlays.draw:284 < ui.Hud.paint:439 < ui.Hud.draw:367 < Bench.frame:173 < 
+  hitch at frame 144: 28.6 ms = sim 12.6 + draw 15.8 (renderer cpu 6.2) + swap 0.1; gpu 20.2
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Door.ray:180 < world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < 
+  hitch at frame 146: 25.7 ms = sim 12.0 + draw 13.6 (renderer cpu 5.2) + swap 0.1; gpu 20.1
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x Rpg.liveCount:534 < Rpg.actors:518 < render.Gfx.scene:554 < Bench.frame:171 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+
+== sprint DevCity to DevPalace [scale 1.00, aiming 60 fps]
+  frame  mean  21.24 ms (   47 fps)   p50  20.85   p99  29.63   worst  34.19   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim   9.50   draw  11.67 (renderer cpu   3.84)   swap   0.07   gpu  19.12 ms   quads 66168  models 575
+  gpu by pass: uploads 0.66 shadows 1.69 gbuffer 2.31 ao 1.66 ssr 0.15 lighting 8.69 fog 1.38 forward 0.07 resolve 2.42 2d 0.08
+  gpu worst:   uploads 2.81 shadows 2.91 gbuffer 3.05 ao 1.70 ssr 0.16 lighting 8.81 fog 1.40 forward 0.10 resolve 2.49 2d 0.12  (frame 21.95)
+[impulsis profile] per step ms: forces 0.004 broad 0.042 narrow 0.100 islands 0.007 solve 0.920 support 0.011 integrate+sleep 0.030 prepare 0.015; bodies 13 (awake 13, proxies 0) pairs 18 manifolds 18 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.46 class astratto::ImpulsisService=2.96 class astratto::ChemistryService=0.09 class astratto::AiService=0.59 class astratto::AudioService=0.05
+[astratto profile] questions 0.00 ms, commands 0.08 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.017 narrow 0.055 islands 0.004 solve 0.235 support 0.005 integrate+sleep 0.012 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 10 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.010 narrow 0.031 islands 0.002 solve 0.126 support 0.003 integrate+sleep 0.008 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 12 manifolds 2 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.008 narrow 0.039 islands 0.002 solve 0.120 support 0.002 integrate+sleep 0.007 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 21 manifolds 2 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.025 islands 0.002 solve 0.131 support 0.002 integrate+sleep 0.007 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 18 manifolds 5 joints 12
+  hitch at frame 0: 47.6 ms = sim 18.9 + draw 28.4 (renderer cpu 13.5) + swap 0.3; gpu 19.1
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 1: 40.4 ms = sim 16.3 + draw 23.8 (renderer cpu 10.6) + swap 0.3; gpu 25.3
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < 
+  hitch at frame 2: 44.4 ms = sim 13.0 + draw 31.1 (renderer cpu 15.6) + swap 0.3; gpu 19.2
+  hitch at frame 3: 39.2 ms = sim 14.2 + draw 24.8 (renderer cpu 12.0) + swap 0.3; gpu 23.6
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x actor.PlayerController.bodyOnRay:640 < actor.PlayerController.placeCamera:626 < actor.PlayerController.placeCamera:591 < actor.PlayerController.update:84 < 
+  hitch at frame 4: 50.3 ms = sim 19.2 + draw 30.8 (renderer cpu 16.1) + swap 0.3; gpu 19.1
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.029 islands 0.002 solve 0.088 support 0.002 integrate+sleep 0.007 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 16 manifolds 14 joints 12
+  hitch at frame 5: 55.6 ms = sim 24.2 + draw 31.1 (renderer cpu 13.1) + swap 0.3; gpu 25.1
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Gfx.upload:1107 < render.Gfx.figure:1063 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 6: 55.8 ms = sim 23.0 + draw 32.6 (renderer cpu 16.6) + swap 0.3; gpu 19.1
+  hitch at frame 7: 52.8 ms = sim 22.9 + draw 29.5 (renderer cpu 12.7) + swap 0.3; gpu 24.1
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x animal.Animals.byId:335 < Rpg.actor:549 < ai.AiSystem.face:746 < ai.AiSystem.faceAt:567 < 
+      1 x render.Gfx.mesh:117 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+  hitch at frame 8: 49.6 ms = sim 18.5 + draw 30.8 (renderer cpu 15.8) + swap 0.3; gpu 19.0
+  hitch at frame 9: 43.3 ms = sim 16.1 + draw 26.8 (renderer cpu 12.7) + swap 0.4; gpu 26.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.HudFragments$Overlays.draw:341 < ui.Hud.paint:439 < ui.Hud.draw:367 < Bench.frame:173 < 
+  hitch at frame 10: 46.2 ms = sim 14.3 + draw 31.4 (renderer cpu 17.6) + swap 0.4; gpu 19.1
+  hitch at frame 11: 39.9 ms = sim 15.2 + draw 24.4 (renderer cpu 11.0) + swap 0.3; gpu 25.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.AiSystem.threatFor:1092 < ai.Brain.act:495 < ai.AiSystem.update:710 < Rpg.update:379 < 
+  hitch at frame 12: 35.8 ms = sim 11.5 + draw 24.0 (renderer cpu 12.2) + swap 0.3; gpu 19.0
+  hitch at frame 13: 35.9 ms = sim 12.9 + draw 22.7 (renderer cpu 10.7) + swap 0.3; gpu 25.9
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:636 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 14: 38.6 ms = sim 11.3 + draw 27.1 (renderer cpu 13.9) + swap 0.3; gpu 19.0
+  hitch at frame 15: 41.0 ms = sim 18.7 + draw 22.1 (renderer cpu 10.4) + swap 0.3; gpu 22.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x ai.AiSystem.desire:595 < ai.Brain.goTo:891 < ai.Brain.investigate:1154 < ai.Brain.act:492 < 
+      1 x world.Chemistry.update:334 < Rpg.update:383 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 16: 40.4 ms = sim 14.6 + draw 25.5 (renderer cpu 12.3) + swap 0.3; gpu 19.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 17: 42.9 ms = sim 16.8 + draw 25.7 (renderer cpu 12.2) + swap 0.3; gpu 23.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.WaterContacts.sample:51 < world.WaterContacts.update:46 < Rpg.afterFrame:439 < astratto.game.Game.tick:100 < 
+  hitch at frame 18: 39.2 ms = sim 14.8 + draw 24.1 (renderer cpu 12.9) + swap 0.3; gpu 19.0
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.017 islands 0.002 solve 0.060 support 0.002 integrate+sleep 0.006 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 19 manifolds 7 joints 12
+  hitch at frame 19: 43.6 ms = sim 17.4 + draw 25.9 (renderer cpu 11.8) + swap 0.3; gpu 22.6
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ai.Stealth.exposure:183 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < ai.Stealth.update:261 < 
+  hitch at frame 20: 57.6 ms = sim 23.6 + draw 33.7 (renderer cpu 16.3) + swap 0.3; gpu 19.0
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Door.ray:181 < world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < 
+  hitch at frame 21: 40.4 ms = sim 15.0 + draw 25.1 (renderer cpu 11.3) + swap 0.3; gpu 23.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Foliage.plantAt:278 < world.Foliage.trail:212 < world.Foliage.update:152 < Rpg.update:389 < 
+  hitch at frame 22: 40.3 ms = sim 14.1 + draw 26.0 (renderer cpu 13.9) + swap 0.3; gpu 18.9
+  hitch at frame 23: 42.7 ms = sim 17.6 + draw 24.8 (renderer cpu 11.4) + swap 0.3; gpu 23.4
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.HudFragments$Minimap.dot:1128 < ui.HudFragments$Minimap.draw:1016 < ui.Hud.paint:439 < ui.Hud.draw:367 < 
+  hitch at frame 24: 40.8 ms = sim 14.9 + draw 25.5 (renderer cpu 14.1) + swap 0.3; gpu 18.9
+  hitch at frame 25: 42.8 ms = sim 18.2 + draw 24.3 (renderer cpu 11.2) + swap 0.3; gpu 23.8
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 26: 45.6 ms = sim 16.4 + draw 28.9 (renderer cpu 15.8) + swap 0.3; gpu 19.0
+  hitch at frame 27: 43.0 ms = sim 17.4 + draw 25.1 (renderer cpu 13.7) + swap 0.4; gpu 23.8
+  hitch at frame 28: 42.0 ms = sim 14.7 + draw 27.0 (renderer cpu 13.6) + swap 0.3; gpu 19.0
+  hitch at frame 29: 41.6 ms = sim 15.8 + draw 25.6 (renderer cpu 10.4) + swap 0.3; gpu 24.6
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+  hitch at frame 30: 61.0 ms = sim 32.4 + draw 28.3 (renderer cpu 14.0) + swap 0.3; gpu 19.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.Ui2D.text:257 < ui.Ui2D.shadow:268 < ui.Ui2D.centered:271 < ui.Ui2D.centered:56 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.019 islands 0.002 solve 0.055 support 0.001 integrate+sleep 0.005 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 18 manifolds 10 joints 12
+  hitch at frame 31: 47.1 ms = sim 18.2 + draw 28.6 (renderer cpu 13.0) + swap 0.3; gpu 23.3
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 32: 47.0 ms = sim 16.6 + draw 30.0 (renderer cpu 16.2) + swap 0.4; gpu 19.0
+  hitch at frame 33: 40.9 ms = sim 15.7 + draw 24.9 (renderer cpu 11.4) + swap 0.3; gpu 24.2
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:620 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 34: 42.7 ms = sim 13.4 + draw 29.0 (renderer cpu 12.6) + swap 0.3; gpu 19.5
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+      1 x ai.Brain.think:299 < ai.AiSystem.update:706 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 35: 60.5 ms = sim 30.6 + draw 29.6 (renderer cpu 12.9) + swap 0.3; gpu 25.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:616 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 36: 62.2 ms = sim 32.0 + draw 29.9 (renderer cpu 15.2) + swap 0.3; gpu 19.0
+  hitch at frame 37: 37.7 ms = sim 15.0 + draw 22.3 (renderer cpu 11.1) + swap 0.3; gpu 22.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 38: 43.1 ms = sim 14.5 + draw 28.3 (renderer cpu 13.7) + swap 0.3; gpu 18.9
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 39: 40.4 ms = sim 15.4 + draw 24.6 (renderer cpu 12.2) + swap 0.4; gpu 23.9
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:687 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 40: 43.4 ms = sim 14.7 + draw 28.5 (renderer cpu 14.6) + swap 0.3; gpu 18.8
+  hitch at frame 41: 42.8 ms = sim 17.1 + draw 25.3 (renderer cpu 14.1) + swap 0.4; gpu 23.4
+[impulsis profile] per step ms: forces 0.001 broad 0.005 narrow 0.021 islands 0.002 solve 0.051 support 0.001 integrate+sleep 0.005 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 22 manifolds 8 joints 12
+  hitch at frame 42: 44.3 ms = sim 16.0 + draw 28.0 (renderer cpu 13.7) + swap 0.3; gpu 18.6
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Gore.lost:118 < combat.HitVolumes.ray:132 < combat.Magic.target:173 < combat.CombatSystem.bolt:491 < 
+  hitch at frame 43: 38.0 ms = sim 13.9 + draw 23.7 (renderer cpu 12.0) + swap 0.4; gpu 23.0
+  hitch at frame 44: 46.4 ms = sim 15.7 + draw 30.4 (renderer cpu 14.9) + swap 0.3; gpu 18.5
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 45: 44.5 ms = sim 20.7 + draw 23.5 (renderer cpu 10.7) + swap 0.3; gpu 22.8
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Gore.lost:118 < combat.HitVolumes.ray:129 < combat.CombatSystem.bodies:919 < combat.CombatSystem.sweep:908 < 
+  hitch at frame 46: 45.0 ms = sim 17.1 + draw 27.7 (renderer cpu 14.7) + swap 0.3; gpu 18.6
+  hitch at frame 47: 45.8 ms = sim 19.2 + draw 26.3 (renderer cpu 11.8) + swap 0.3; gpu 23.1
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.Ui2D.text:254 < ui.Ui2D.shadow:268 < ui.HudFragments$ChatLog.log:1457 < ui.HudFragments$ChatLog.draw:1434 < 
+  hitch at frame 48: 54.0 ms = sim 30.0 + draw 23.6 (renderer cpu 12.6) + swap 0.3; gpu 18.5
+  hitch at frame 49: 34.4 ms = sim 12.6 + draw 21.5 (renderer cpu 9.9) + swap 0.3; gpu 24.5
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Fx.update:53 < Rpg.update:408 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+      1 x render.Rig.pose:495 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 50: 37.8 ms = sim 14.3 + draw 23.2 (renderer cpu 12.2) + swap 0.3; gpu 18.5
+  hitch at frame 51: 40.7 ms = sim 18.0 + draw 22.4 (renderer cpu 10.7) + swap 0.3; gpu 21.9
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.unit:2724 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < render.Gfx.humanModel:2349 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.019 islands 0.002 solve 0.047 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 17 manifolds 9 joints 12
+  hitch at frame 52: 48.0 ms = sim 19.7 + draw 27.9 (renderer cpu 14.2) + swap 0.3; gpu 18.6
+  hitch at frame 53: 43.3 ms = sim 18.2 + draw 24.6 (renderer cpu 10.2) + swap 0.6; gpu 21.6
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:89 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 54: 39.7 ms = sim 14.6 + draw 24.9 (renderer cpu 13.1) + swap 0.3; gpu 18.8
+  hitch at frame 55: 41.3 ms = sim 15.0 + draw 26.1 (renderer cpu 10.5) + swap 0.3; gpu 22.3
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:724 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 56: 42.5 ms = sim 14.1 + draw 28.1 (renderer cpu 14.3) + swap 0.3; gpu 18.8
+  hitch at frame 57: 36.0 ms = sim 13.0 + draw 22.7 (renderer cpu 11.2) + swap 0.3; gpu 22.5
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.all:39 < render.Gfx.scene:468 < Bench.frame:171 < Bench.run:128 < 
+      1 x combat.Gore.perceive:738 < ai.Brain.think:113 < ai.AiSystem.update:706 < Rpg.update:379 < 
+  hitch at frame 58: 39.7 ms = sim 14.5 + draw 25.0 (renderer cpu 12.7) + swap 0.3; gpu 17.9
+  hitch at frame 59: 46.7 ms = sim 21.2 + draw 25.2 (renderer cpu 11.9) + swap 0.3; gpu 22.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x monster.MonsterMind.strongest:347 < monster.MonsterMind.think:184 < monster.Monsters.update:395 < Rpg.update:379 < 
+  hitch at frame 60: 59.3 ms = sim 19.8 + draw 39.3 (renderer cpu 14.0) + swap 0.3; gpu 17.8
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.figure:1059 < render.Gfx.ragdollModel:2950 < render.Gfx.ragdoll:2947 < render.Gfx.scene:525 < 
+  hitch at frame 61: 40.3 ms = sim 17.0 + draw 23.1 (renderer cpu 10.9) + swap 0.3; gpu 21.7
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2867 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.017 islands 0.001 solve 0.047 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 24 manifolds 8 joints 12
+  hitch at frame 62: 41.5 ms = sim 15.1 + draw 26.1 (renderer cpu 12.6) + swap 0.3; gpu 17.8
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:652 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+  hitch at frame 63: 39.2 ms = sim 16.8 + draw 22.0 (renderer cpu 10.5) + swap 0.3; gpu 21.6
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:724 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 64: 40.7 ms = sim 14.0 + draw 26.2 (renderer cpu 15.5) + swap 0.5; gpu 17.8
+  hitch at frame 65: 44.5 ms = sim 18.6 + draw 25.7 (renderer cpu 12.4) + swap 0.3; gpu 22.1
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+  hitch at frame 66: 41.4 ms = sim 17.3 + draw 23.8 (renderer cpu 12.9) + swap 0.3; gpu 17.8
+  hitch at frame 67: 36.2 ms = sim 13.5 + draw 22.4 (renderer cpu 9.9) + swap 0.3; gpu 23.6
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 68: 38.5 ms = sim 12.7 + draw 25.5 (renderer cpu 12.4) + swap 0.3; gpu 17.8
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:676 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 69: 35.7 ms = sim 12.6 + draw 22.8 (renderer cpu 11.6) + swap 0.3; gpu 21.7
+  hitch at frame 70: 38.6 ms = sim 13.0 + draw 25.4 (renderer cpu 13.9) + swap 0.3; gpu 17.8
+[impulsis profile] per step ms: forces 0.000 broad 0.004 narrow 0.017 islands 0.001 solve 0.045 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 15 manifolds 6 joints 12
+  hitch at frame 71: 34.6 ms = sim 13.4 + draw 21.0 (renderer cpu 9.8) + swap 0.2; gpu 20.6
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:651 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 72: 40.0 ms = sim 12.2 + draw 27.6 (renderer cpu 16.3) + swap 0.3; gpu 17.7
+  hitch at frame 73: 34.8 ms = sim 12.6 + draw 21.8 (renderer cpu 10.8) + swap 0.3; gpu 22.8
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x monster.MonsterMind.sense:79 < monster.Monsters.update:393 < Rpg.update:379 < astratto.game.Game.tick:95 < 
+  hitch at frame 74: 36.2 ms = sim 11.3 + draw 24.6 (renderer cpu 12.5) + swap 0.3; gpu 17.7
+  hitch at frame 75: 41.2 ms = sim 18.7 + draw 22.2 (renderer cpu 9.8) + swap 0.3; gpu 23.2
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.passing:437 < objects.Objects.doorsForNpcs:452 < objects.Objects.update:430 < Rpg.update:393 < 
+  hitch at frame 76: 40.6 ms = sim 12.9 + draw 27.5 (renderer cpu 13.9) + swap 0.3; gpu 17.7
+  hitch at frame 77: 41.6 ms = sim 15.8 + draw 25.5 (renderer cpu 11.2) + swap 0.3; gpu 21.3
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:724 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 78: 40.8 ms = sim 14.6 + draw 25.9 (renderer cpu 14.1) + swap 0.3; gpu 17.8
+  hitch at frame 79: 38.3 ms = sim 17.0 + draw 21.0 (renderer cpu 10.1) + swap 0.3; gpu 22.0
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.panelBlocks:148 < world.Voxels.seeThrough:179 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < 
+  hitch at frame 80: 37.0 ms = sim 13.2 + draw 23.5 (renderer cpu 12.4) + swap 0.3; gpu 17.7
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.016 islands 0.001 solve 0.045 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 21 joints 12
+  hitch at frame 81: 36.5 ms = sim 14.1 + draw 22.2 (renderer cpu 10.6) + swap 0.3; gpu 23.1
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:1115 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 82: 40.9 ms = sim 14.6 + draw 26.1 (renderer cpu 12.4) + swap 0.3; gpu 17.8
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Rig.pose:565 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 83: 37.6 ms = sim 15.2 + draw 22.1 (renderer cpu 9.7) + swap 0.3; gpu 21.4
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:565 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 84: 39.9 ms = sim 14.7 + draw 24.9 (renderer cpu 11.7) + swap 0.3; gpu 17.7
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.part:1237 < render.Gfx.limb:1158 < render.Gfx.animalModel:1495 < render.Gfx.animal:1252 < 
+  hitch at frame 85: 42.3 ms = sim 18.3 + draw 23.7 (renderer cpu 9.8) + swap 0.3; gpu 21.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.skyLight:183 < ai.AiSystem.carriage:787 < ai.AiSystem.update:722 < Rpg.update:379 < 
+  hitch at frame 86: 40.3 ms = sim 16.7 + draw 23.4 (renderer cpu 12.7) + swap 0.3; gpu 17.7
+  hitch at frame 87: 36.7 ms = sim 14.2 + draw 22.2 (renderer cpu 10.0) + swap 0.3; gpu 20.6
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.HitVolumes.ray:122 < combat.CombatSystem.bodies:919 < combat.CombatSystem.sweep:908 < combat.CombatSystem.tick:630 < 
+  hitch at frame 88: 41.3 ms = sim 14.7 + draw 26.3 (renderer cpu 12.8) + swap 0.3; gpu 17.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.humanoidMonster:1853 < render.Gfx.monster:1717 < render.Gfx.scene:535 < Bench.frame:171 < 
+      1 x combat.Gore.lost:118 < combat.HitVolumes.ray:132 < combat.CombatSystem.bodies:919 < combat.CombatSystem.sweep:897 < 
+  hitch at frame 89: 41.6 ms = sim 15.6 + draw 25.7 (renderer cpu 11.4) + swap 0.3; gpu 21.9
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:687 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 90: 54.2 ms = sim 22.0 + draw 31.9 (renderer cpu 12.9) + swap 0.3; gpu 17.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.block:64 < world.Foliage.suitable:76 < world.Foliage.update:177 < Rpg.update:389 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.018 islands 0.002 solve 0.048 support 0.002 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 21 manifolds 11 joints 12
+  hitch at frame 91: 34.5 ms = sim 12.8 + draw 21.4 (renderer cpu 10.2) + swap 0.3; gpu 21.1
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:687 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x render.Rig.pose:565 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 92: 36.6 ms = sim 12.4 + draw 23.8 (renderer cpu 12.8) + swap 0.3; gpu 17.6
+  hitch at frame 93: 33.9 ms = sim 12.5 + draw 21.1 (renderer cpu 10.3) + swap 0.3; gpu 20.7
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x combat.Gore.perceive:736 < ai.Brain.think:113 < ai.AiSystem.update:706 < Rpg.update:379 < 
+  hitch at frame 94: 39.7 ms = sim 13.1 + draw 26.3 (renderer cpu 14.7) + swap 0.3; gpu 17.8
+  hitch at frame 95: 39.8 ms = sim 17.3 + draw 22.2 (renderer cpu 11.0) + swap 0.3; gpu 22.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:1124 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 96: 40.3 ms = sim 14.7 + draw 25.2 (renderer cpu 13.9) + swap 0.4; gpu 17.8
+  hitch at frame 97: 39.4 ms = sim 16.1 + draw 23.0 (renderer cpu 10.2) + swap 0.3; gpu 23.1
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:651 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 98: 42.4 ms = sim 14.4 + draw 27.6 (renderer cpu 12.6) + swap 0.3; gpu 17.8
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x ui.HudFragments.wrap:533 < ui.HudFragments.wrapIn:514 < ui.HudFragments$Overlays.bubble:468 < ui.HudFragments$Overlays.draw:317 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.004 narrow 0.016 islands 0.001 solve 0.037 support 0.001 integrate+sleep 0.004 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 15 manifolds 7 joints 12
+  hitch at frame 99: 39.0 ms = sim 16.4 + draw 22.3 (renderer cpu 10.1) + swap 0.3; gpu 22.1
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Rig.pose:700 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+      1 x ai.AiSystem.update:709 < Rpg.update:379 < astratto.game.Game.tick:95 < Bench.frame:167 < 
+  hitch at frame 100: 48.2 ms = sim 20.5 + draw 27.5 (renderer cpu 11.9) + swap 0.3; gpu 17.7
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x world.Voxels.solid:65 < world.Voxels.groundY:188 < Rpg.lambda$init$0:157 < render.Fx.update:51 < 
+  hitch at frame 101: 38.6 ms = sim 15.9 + draw 22.5 (renderer cpu 9.7) + swap 0.3; gpu 21.6
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 102: 37.6 ms = sim 12.4 + draw 24.9 (renderer cpu 13.0) + swap 0.3; gpu 17.8
+  hitch at frame 103: 32.8 ms = sim 12.0 + draw 20.5 (renderer cpu 9.6) + swap 0.3; gpu 20.8
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.part:1237 < render.Gfx.limb:1158 < render.Gfx.animalModel:1495 < render.Gfx.animal:1252 < 
+  hitch at frame 104: 37.5 ms = sim 11.3 + draw 25.9 (renderer cpu 14.6) + swap 0.3; gpu 17.8
+  hitch at frame 105: 40.1 ms = sim 17.4 + draw 22.5 (renderer cpu 10.8) + swap 0.3; gpu 22.4
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 106: 38.9 ms = sim 13.0 + draw 25.5 (renderer cpu 13.8) + swap 0.3; gpu 17.8
+[impulsis profile] per step ms: forces 0.000 broad 0.004 narrow 0.014 islands 0.001 solve 0.035 support 0.001 integrate+sleep 0.004 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 14 manifolds 8 joints 12
+  hitch at frame 107: 40.9 ms = sim 16.5 + draw 24.1 (renderer cpu 10.9) + swap 0.3; gpu 22.3
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.blockLight:184 < ai.Stealth.light:99 < combat.Gore.perceive:742 < ai.Brain.think:113 < 
+  hitch at frame 108: 43.3 ms = sim 13.7 + draw 29.3 (renderer cpu 13.7) + swap 0.3; gpu 17.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.mesh:117 < render.Gfx.headFace:2704 < render.Gfx.headUnits:2697 < render.Gfx.humanModel:2349 < 
+  hitch at frame 109: 38.8 ms = sim 14.9 + draw 23.6 (renderer cpu 10.0) + swap 0.3; gpu 22.8
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x world.Voxels.seeThrough:174 < ai.Stealth.exposure:161 < ai.Stealth.exposure:137 < ai.Stealth.exposure:132 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 110: 36.9 ms = sim 12.8 + draw 23.8 (renderer cpu 12.9) + swap 0.3; gpu 17.8
+  hitch at frame 111: 36.7 ms = sim 14.1 + draw 22.3 (renderer cpu 11.1) + swap 0.3; gpu 22.0
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+  hitch at frame 112: 37.8 ms = sim 13.9 + draw 23.6 (renderer cpu 12.6) + swap 0.3; gpu 17.7
+  hitch at frame 113: 38.7 ms = sim 14.7 + draw 23.7 (renderer cpu 11.9) + swap 0.3; gpu 22.2
+  hitch at frame 114: 39.2 ms = sim 15.1 + draw 23.7 (renderer cpu 12.6) + swap 0.3; gpu 17.7
+[impulsis profile] per step ms: forces 0.001 broad 0.004 narrow 0.015 islands 0.001 solve 0.038 support 0.001 integrate+sleep 0.004 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 15 manifolds 5 joints 12
+  hitch at frame 115: 38.6 ms = sim 12.7 + draw 25.6 (renderer cpu 12.4) + swap 0.4; gpu 21.8
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x world.Voxels.solid:65 < world.Voxels.groundY:188 < Rpg.lambda$init$0:157 < render.Fx.update:51 < 
+  hitch at frame 116: 41.6 ms = sim 16.0 + draw 25.3 (renderer cpu 14.2) + swap 0.3; gpu 17.7
+  hitch at frame 117: 37.2 ms = sim 13.8 + draw 23.1 (renderer cpu 10.8) + swap 0.3; gpu 22.0
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x skill.XpTable.levelFor:39 < skill.Skills.level:32 < actor.Actor.maxHp:275 < actor.Injuries.severity:35 < 
+  hitch at frame 118: 40.2 ms = sim 15.1 + draw 24.8 (renderer cpu 13.5) + swap 0.3; gpu 17.8
+  hitch at frame 119: 43.5 ms = sim 19.0 + draw 24.2 (renderer cpu 12.1) + swap 0.3; gpu 23.3
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 120: 59.0 ms = sim 29.5 + draw 29.2 (renderer cpu 15.9) + swap 0.3; gpu 17.8
+  hitch at frame 121: 56.0 ms = sim 33.6 + draw 22.1 (renderer cpu 10.2) + swap 0.3; gpu 23.0
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx$DamageKey.hashCode:1119 < java.util.HashMap.hash:338 < java.util.HashMap.computeIfAbsent:1200 < render.Gfx.injuredPart:1128 < 
+  hitch at frame 122: 44.9 ms = sim 14.5 + draw 30.1 (renderer cpu 15.5) + swap 0.3; gpu 17.8
+  hitch at frame 123: 39.1 ms = sim 13.3 + draw 25.4 (renderer cpu 11.2) + swap 0.3; gpu 23.1
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.018 islands 0.001 solve 0.043 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 23 manifolds 11 joints 12
+  hitch at frame 124: 42.7 ms = sim 13.9 + draw 28.5 (renderer cpu 14.8) + swap 0.3; gpu 17.8
+  hitch at frame 125: 40.8 ms = sim 15.8 + draw 24.5 (renderer cpu 10.8) + swap 0.5; gpu 23.2
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 126: 44.7 ms = sim 15.9 + draw 28.5 (renderer cpu 13.2) + swap 0.3; gpu 17.9
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+  hitch at frame 127: 46.3 ms = sim 16.7 + draw 29.3 (renderer cpu 12.6) + swap 0.3; gpu 23.3
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+  hitch at frame 128: 41.3 ms = sim 17.6 + draw 23.5 (renderer cpu 12.2) + swap 0.3; gpu 17.8
+  hitch at frame 129: 37.3 ms = sim 13.9 + draw 23.1 (renderer cpu 11.6) + swap 0.3; gpu 22.3
+  hitch at frame 130: 42.9 ms = sim 14.5 + draw 28.1 (renderer cpu 15.2) + swap 0.3; gpu 17.8
+  hitch at frame 131: 41.7 ms = sim 15.4 + draw 25.9 (renderer cpu 11.2) + swap 0.3; gpu 21.4
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.018 islands 0.001 solve 0.042 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 16 manifolds 8 joints 12
+  hitch at frame 132: 43.3 ms = sim 15.4 + draw 27.6 (renderer cpu 13.5) + swap 0.3; gpu 17.8
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.mesh:120 < render.Gfx.expression:2678 < render.Gfx.headFace:2713 < render.Gfx.headUnits:2697 < 
+  hitch at frame 133: 43.6 ms = sim 17.6 + draw 25.7 (renderer cpu 11.7) + swap 0.3; gpu 22.9
+      5 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.upload:1107 < render.Gfx.figure:1063 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < 
+  hitch at frame 134: 41.5 ms = sim 15.3 + draw 25.9 (renderer cpu 14.8) + swap 0.3; gpu 17.8
+  hitch at frame 135: 45.2 ms = sim 21.7 + draw 23.2 (renderer cpu 11.3) + swap 0.3; gpu 22.4
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.humanModel:2337 < render.Gfx.human:2264 < render.Gfx.scene:529 < Bench.frame:171 < 
+  hitch at frame 136: 43.2 ms = sim 14.6 + draw 28.3 (renderer cpu 15.4) + swap 0.3; gpu 17.9
+  hitch at frame 137: 41.1 ms = sim 18.0 + draw 22.8 (renderer cpu 10.9) + swap 0.3; gpu 23.8
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      2 x render.Rig.pose:1063 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 138: 45.7 ms = sim 18.0 + draw 27.4 (renderer cpu 14.6) + swap 0.3; gpu 18.0
+  hitch at frame 139: 41.0 ms = sim 17.3 + draw 23.4 (renderer cpu 10.6) + swap 0.3; gpu 23.2
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x Bench.frame:177 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+  hitch at frame 140: 44.6 ms = sim 15.5 + draw 28.8 (renderer cpu 14.7) + swap 0.3; gpu 18.0 (a gc ran)
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.020 islands 0.001 solve 0.049 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 22 joints 12
+  hitch at frame 141: 45.1 ms = sim 17.3 + draw 27.5 (renderer cpu 11.0) + swap 0.3; gpu 22.8 (a gc ran)
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.all:39 < law.Undertaker.graves:51 < ui.HudFragments$Minimap.height:871 < ui.Fragment.corner:59 < 
+  hitch at frame 142: 49.1 ms = sim 21.5 + draw 27.2 (renderer cpu 13.8) + swap 0.3; gpu 17.9
+  hitch at frame 143: 41.3 ms = sim 16.2 + draw 24.8 (renderer cpu 11.4) + swap 0.3; gpu 21.9
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x objects.Objects.all:39 < ai.Stealth.fires:92 < ai.Stealth.smoke:208 < ai.Stealth.exposure:162 < 
+  hitch at frame 144: 52.3 ms = sim 26.3 + draw 25.7 (renderer cpu 12.8) + swap 0.3; gpu 17.7
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.panels:2865 < render.Gfx.garments:2797 < render.Gfx.humanModel:2351 < render.Gfx.human:2264 < 
+  hitch at frame 145: 49.5 ms = sim 23.4 + draw 25.8 (renderer cpu 12.5) + swap 0.3; gpu 22.4
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Rig.pose:739 < render.Gfx.humanModel:2271 < render.Gfx.human:2264 < render.Gfx.scene:529 < 
+  hitch at frame 146: 47.5 ms = sim 20.6 + draw 26.6 (renderer cpu 13.5) + swap 0.3; gpu 17.7
+  hitch at frame 147: 45.0 ms = sim 17.4 + draw 27.3 (renderer cpu 11.5) + swap 0.3; gpu 21.4
+      4 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      1 x render.Gfx.upload:1107 < render.Gfx.figure:1063 < render.Gfx.humanModel:2280 < render.Gfx.human:2264 < 
+[impulsis profile] per step ms: forces 0.000 broad 0.004 narrow 0.018 islands 0.001 solve 0.044 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 12 manifolds 4 joints 12
+  hitch at frame 148: 48.7 ms = sim 16.5 + draw 31.8 (renderer cpu 16.5) + swap 0.4; gpu 17.7
+  hitch at frame 149: 42.8 ms = sim 18.7 + draw 23.8 (renderer cpu 11.7) + swap 0.3; gpu 22.1
+      3 x Bench.frame:167 < Bench.run:128 < Main.session:102 < Main.run:70 < 
+      3 x render.Gfx.frame:601 < Bench.frame:175 < Bench.run:128 < Main.session:102 < 
+      2 x render.Meshes.box:51 < render.Meshes$Boxes.vertices:37 < render.Gfx.mesh:120 < render.Gfx.expression:2678 < 
+  4 gc in the stop
+
+== battle in the yard (monsters, the watch) [scale 1.00, aiming 60 fps]
+  frame  mean  42.59 ms (   23 fps)   p50  41.32   p99  61.03   worst  62.22   over 16.7 ms: 150/150   over 6.9 ms: 150/150
+  sim  16.58   draw  25.71 (renderer cpu  12.56)   swap   0.30   gpu  20.49 ms   quads 47706  models 1927
+  gpu by pass: uploads 0.33 shadows 5.11 gbuffer 4.65 ao 1.54 ssr 0.17 lighting 3.59 fog 1.45 forward 0.14 resolve 2.56 2d 0.95
+  gpu worst:   uploads 1.48 shadows 10.67 gbuffer 4.78 ao 1.57 ssr 0.19 lighting 3.75 fog 1.47 forward 0.19 resolve 2.63 2d 1.18  (frame 26.70)
+
+== ALL
+  frame  mean  24.74 ms (   40 fps)   p50  21.70   p99  57.59   worst  94.62   over 16.7 ms: 1237/1350   over 6.9 ms: 1350/1350
+  sim  12.45   draw  12.18 (renderer cpu   4.85)   swap   0.11   gpu  15.54 ms   quads 44786  models 615
+  gpu by pass: uploads 0.67 shadows 2.08 gbuffer 2.93 ao 1.51 ssr 0.17 lighting 4.11 fog 1.41 forward 0.24 resolve 2.23 2d 0.19
+  gpu worst:   uploads 7.83 shadows 10.67 gbuffer 4.78 ao 1.75 ssr 0.35 lighting 8.81 fog 1.87 forward 0.84 resolve 3.35 2d 1.18  (frame 26.70)
+java heap: 344 MB used of 2048 MB; gc: ZGC Minor Cycles 10x/984ms ZGC Minor Pauses 30x/0ms ZGC Major Cycles 5x/1195ms ZGC Major Pauses 25x/0ms
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 43s
+8 actionable tasks: 1 executed, 7 up-to-date

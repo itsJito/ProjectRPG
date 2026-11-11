@@ -30,6 +30,8 @@ public final class AiSystem {
     private final Rpg g;
     public final Brain brain;
     public final Stealth stealth;
+    /** (0.3.8) Breaking open, shoving aside and smashing the crates, barrels and signs. */
+    public final Smashing smashing;
     /** How fast an NPC's body gathers and sheds speed (m/s per s). */
     static final float NPC_ACCEL = System.getenv("RPG_NPC_ACCEL") != null ? Float.parseFloat(System.getenv("RPG_NPC_ACCEL")) : 14f;
     private long policy;
@@ -39,7 +41,7 @@ public final class AiSystem {
     private final java.util.Map<Long, Double> heardAt = new java.util.HashMap<>();
     private double abstractClock;
 
-    public AiSystem(Rpg g) { this.g = g; this.brain = new Brain(g, this); this.stealth = new Stealth(g); this.rumors = new Rumors(g, this); this.arms = new Arms(g, this); }
+    public AiSystem(Rpg g) { this.g = g; this.brain = new Brain(g, this); this.stealth = new Stealth(g); this.smashing = new Smashing(g, this); this.rumors = new Rumors(g, this); this.arms = new Arms(g, this); }
     /** Arms shown in the open, and who reacts to them how. */
     public final Arms arms;
 
@@ -133,7 +135,9 @@ public final class AiSystem {
             Ids.INNKEEPER_CITY,Ids.BARTENDER_CITY,Ids.COOK_CITY,Ids.INNKEEPER_PALACE,Ids.BARTENDER_PALACE,Ids.COOK_PALACE,
             // 0.3.5: Guild Row
             Ids.GUILD_METALLISTS,Ids.ARMORY,Ids.GUILD_FORESTERS,Ids.CARDER,Ids.SPINNER,Ids.GUILD_ARTISANS,Ids.FULLER,Ids.DYER,
-            Ids.GUILD_FARMERS,Ids.GUILD_PROVISIONERS,Ids.GUILD_MARINERS,Ids.GUILD_ARCANISTS,Ids.SMELTER,Ids.COASTAL_FISHER);
+            Ids.GUILD_FARMERS,Ids.GUILD_PROVISIONERS,Ids.GUILD_MARINERS,Ids.GUILD_ARCANISTS,Ids.SMELTER,Ids.COASTAL_FISHER,
+            // 0.3.8: the DevMansion's household
+            Ids.BARON,Ids.MANSION_KNIGHT,Ids.MANSION_COOK,Ids.MANSION_PORTER,Ids.MANSION_WOODCUTTER,Ids.MANSION_ORCHARDIST);
     private Npc addReleaseNpc(long id) {
         switch((int)id) {
             case (int)Ids.TELLER -> {
@@ -231,7 +235,7 @@ public final class AiSystem {
                 Profession.RIVER_FISHERMAN.assign(corwin);corwin.skills.setLevel(Skill.FISHING,28);
                 give(corwin,Items.FISHING_ROD,1);give(corwin,Items.BREAD,2);give(corwin,Items.COINS,25);return corwin;
             }
-            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) n = homestead(id); if (n == null) n = guildRow(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
+            default -> { Npc n = support(id); if (n == null) n = expanse(id); if (n == null) n = homestead(id); if (n == null) n = guildRow(id); if (n == null) n = household(id); if (n == null) throw new IllegalArgumentException("Not an authored release NPC: "+id); return n; }
         }
     }
 
@@ -312,7 +316,7 @@ public final class AiSystem {
             case (int) Ids.GAWAIN -> { Npc g3 = npc(id, "Sir Gawain", Npc.Role.HUNTER, "Monster Hunter", 44.5f, 44.5f, 182);
                 Profession.MONSTER_HUNTER.assign(g3); levels(g3, 36, 36, 34, 38); g3.skills.setLevel(Skill.ARCHERY, 38);
                 wear(g3, "oak_shortbow", null, "iron_body"); give(g3, Items.get("iron_sword"), 1); g3.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.IRON_ARROWS, 40)); g.state.mint(Items.IRON_ARROWS, 40); give(g3, Items.TROUT, 3); yield g3; }
-            case (int) Ids.TRISTAN -> { Npc t = npc(id, "Tristan", Npc.Role.HUNTER, "Trapper", 40.5f, 150.5f, 183);
+            case (int) Ids.TRISTAN -> { Npc t = npc(id, "Tristan", Npc.Role.HUNTER, "Trapper", 24.5f, 168.5f, 183);
                 Profession.TRAPPER.assign(t); t.skills.setLevel(Skill.HARVESTING, 32); give(t, Items.SNARE, 3); give(t, Items.KNIFE, 1); give(t, Items.BREAD, 2); give(t, Items.COINS, 20); yield t; }
             case (int) Ids.PERCIVAL -> { Npc p3 = npc(id, "Percival", Npc.Role.MINER, "Coal Miner", 144.5f, 145.5f, 184);
                 Profession.COAL_MINER.assign(p3); p3.skills.setLevel(Skill.MINING, 38); give(p3, Items.get("iron_pickaxe") != null ? Items.get("iron_pickaxe") : Items.get("bronze_pickaxe"), 1); give(p3, Items.BREAD, 2); give(p3, Items.COINS, 25); yield p3; }
@@ -332,6 +336,34 @@ public final class AiSystem {
      * at each inn its innkeeper, bartender and cook. Their beds are where they live: the inn's people over their inn, the
      * DevCity growers in the town's two houses, DevPalace's lodging at the taberna.
      */
+    /**
+     * (0.3.8, gamefixes: the DevMansion, its people who keep the estate) the household of the DevMansion: the Household
+     * Baron who owns it, his Household Knight, the Cook, the Porter, the Firewood Cutter and the Orchard Keeper. Each
+     * sleeps in their own bed in the house (on its own floor), and starts at their work.
+     */
+    private Npc household(long id) {
+        Npc n = switch ((int) id) {
+            case (int) Ids.BARON -> { Npc b = npc(id, "Baron Edric", Npc.Role.CIVIC, "Household Baron", 46.5f, 143.5f, 1000); Profession.HOUSEHOLD_BARON.assign(b);
+                give(b, Items.COINS, 400); levels(b, 12, 10, 14, 14); b.pickpocketLevel = 20; yield b; }
+            case (int) Ids.MANSION_KNIGHT -> { Npc k = npc(id, "Sir Roland", Npc.Role.KNIGHT, "Household Knight", 46.5f, 153.5f, 1001); Profession.HOUSEHOLD_KNIGHT.assign(k);
+                k.dutyTarget = Ids.BARON; k.dutyX = 46.5f; k.dutyZ = 153.5f; levels(k, 38, 38, 40, 40); wear(k, "steel_sword", "steel_shield", "steel_body", "iron_helm"); give(k, Items.BREAD, 2); yield k; }
+            case (int) Ids.MANSION_COOK -> { Npc c = npc(id, "Marta", Npc.Role.CRAFTSMAN, "Cook", 41.5f, 138.5f, 1002); Profession.COOK.assign(c);
+                c.skills.setLevel(Skill.COOKING, 32); give(c, Items.COINS, 15); yield c; }
+            case (int) Ids.MANSION_PORTER -> { Npc p = npc(id, "Osric", Npc.Role.WORKER, "Porter", 46.5f, 138.5f, 1003); Profession.PORTER.assign(p);
+                p.skills.setLevel(Skill.STRENGTH, 22); give(p, Items.COINS, 10); give(p, Items.BREAD, 1); yield p; }
+            case (int) Ids.MANSION_WOODCUTTER -> { Npc w = npc(id, "Bram", Npc.Role.WORKER, "Firewood Cutter", 39.5f, 133.5f, 1004); Profession.FIREWOOD_CUTTER.assign(w);
+                w.skills.setLevel(Skill.WOODCUTTING, 24); give(w, Items.get("bronze_axe"), 1); give(w, Items.LOGS, 3); give(w, Items.COINS, 10); give(w, Items.BREAD, 1); yield w; }
+            case (int) Ids.MANSION_ORCHARDIST -> { Npc o = npc(id, "Elsie", Npc.Role.FARMER, "Orchard Keeper", 41.5f, 154.5f, 1005); Profession.ORCHARD_KEEPER.assign(o);
+                o.skills.setLevel(Skill.HARVESTING, 20); give(o, Items.COINS, 10); give(o, Items.BREAD, 1); yield o; }
+            default -> null;
+        };
+        if (n == null) return null;
+        n.postX = n.x; n.postZ = n.z;
+        float[] bed = rpg.world.Mansion.bedOf(id);
+        if (bed != null) { n.homeX = bed[0]; n.homeY = bed[1]; n.homeZ = bed[2]; }
+        return n;
+    }
+
     private Npc homestead(long id) {
         var inns = rpg.econ.Inns.LAYOUTS;
         Npc n = switch ((int) id) {
@@ -471,7 +503,7 @@ public final class AiSystem {
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
     private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Sabine", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
-            "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia");
+            "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia", "Marta", "Elsie");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
         Npc n = new Npc(id, name, role, title, x, z);
@@ -636,6 +668,7 @@ public final class AiSystem {
     // ------------------------------------------------------------------ the frame
     private double watchAt;
     public void update(float dt) {
+        brain.household.update();
         if (g.scripted && System.getenv("RPG_WATCH") != null && g.time > watchAt) {
             watchAt = g.time + 0.5;
             for (Npc n : g.npcs) if (java.util.Arrays.asList(System.getenv("RPG_WATCH").split(",")).contains(n.name))
@@ -669,7 +702,7 @@ public final class AiSystem {
             }
             stealth.update(n, step);
             if (g.traversal.update(n, step)) continue;
-            if (n.reacting) continue;           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
+            if (n.reacting) { if (n.seated) { n.seated = false; n.seatX = Float.NaN; } continue; }           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
             Actor elevated = n.goal == Brain.Goal.FIGHT ? g.actor(n.fightTarget) : null;
             if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, step)) continue;
@@ -680,7 +713,10 @@ public final class AiSystem {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
                 if (g.traversal.begin(n, heading) && g.traversal.update(n, step)) continue;
             }
+            // (0.3.9) a rider's body is the saddle's (Riding.place): the walking body is not driven under it
+            if (n.riding != 0) { if (n.speech != null && g.time > n.speechUntil) n.speech = null; continue; }
             g.game.commands().moverInput(n.body, 0, 0, 0, 0, NPC_ACCEL, MOVER_STANCE_ONLY | (n.sneaking && n.goal != Brain.Goal.COLLECT ? MOVER_CROUCH : 0));
+            brain.seating.hold(n);   // (0.3.9) held in the seat it still wants, or up out of the one it no longer does
             face(n, step);
             if (n.speech != null && g.time > n.speechUntil) n.speech = null;
             if (!far) { footsteps(n, step); carriage(n, step); }
@@ -852,6 +888,8 @@ public final class AiSystem {
         n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));
         if (g.scripted) System.out.printf("      [stuck] %s %s at (%.2f, %.2f, %.2f) -> (%.1f, %.1f), %s, v (%.2f, %.2f) ground %s route %d facts %s%n", n.name, n.goal, n.x, n.y, n.z, n.gx, n.gz, n.nativeAction, n.vx, n.vz, n.grounded, n.routeCells, java.util.Arrays.toString(n.facts));
         n.lastOutcome = "route blocked while " + n.goal.toString().toLowerCase() + "; replanning";
+        // (0.3.8) a crate or a barrel in the way: shoved aside (or broken through), and on they go
+        if (smashing.blocked(n)) { n.navPauseUntil = g.time + 0.6; return; }
         // no way to the one they meant to talk with: someone else, or back to the day, rather than the same wall again
         if (n.goal == Brain.Goal.SOCIALIZE && n.socialPartner != 0) { n.unreachable.put(n.socialPartner, g.time + 150); n.socialPartner = 0; }
         var blocked=new Memory("BLOCKED",0,0,DevMap.jurisdiction(n.gx,n.gz),g.state.minutes,1,"personal",0,0,"the route is obstructed");blocked.navKnown=true;blocked.navX=n.gx;blocked.navY=n.goalY;blocked.navZ=n.gz;n.remember(blocked,24);
@@ -980,6 +1018,7 @@ public final class AiSystem {
     }
 
     public Actor threatFor(Npc n) {
+        if (n.companionOf != 0) return brain.companions.foe(n);
         if (n.summonOwner != 0) {
             Actor owner = g.actor(n.summonOwner);
             if (owner == null || !owner.alive || g.law.inCustody(owner)) return null;
@@ -1315,6 +1354,23 @@ public final class AiSystem {
         n.wantYaw = (float) Math.atan2(-(who.x - n.x), -(who.z - n.z));
         say(n, "Hey! What do you think you're doing?");
         n.nextThink = 0;
+    }
+
+    /**
+     * (0.3.9, gamefixes: people outside the towns should flee into them to report crimes) the lawman to take word of a
+     * crime to: the place's own; for the wilds (no watch of their own), the nearest town's.
+     */
+    public Npc lawmanTo(String jurisdiction, Actor from) {
+        Npc own = lawmanFor(jurisdiction);
+        if (own != null) return own;
+        Npc best = null; float bd = Float.MAX_VALUE;
+        for (String town : new String[]{DevMap.ALPHA, DevMap.BETA, DevMap.PALACE}) {
+            Npc l = lawmanFor(town);
+            if (l == null) continue;
+            float d = from.distTo(l);
+            if (d < bd) { bd = d; best = l; }
+        }
+        return best;
     }
 
     public Npc lawmanFor(String jurisdiction) {

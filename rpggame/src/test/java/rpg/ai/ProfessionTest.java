@@ -15,7 +15,7 @@ class ProfessionTest {
     @BeforeEach void start(){var config=new NativeEngine.Config();config.deterministic=true;game=Game.create(config);game.activate(DevMap.build(game.engine()));g=game.add(new Rpg(game,"Professions",Appearance.henric(),true));for(Npc n:g.npcs)g.ai.unload(n);g.state.minutes=600;}
     @AfterEach void close(){game.close();}
     @Test void allFiveFamiliesHaveFiveValidSubtypesButOnlyFiveResidentsWereAdded() {
-        assertEquals(94,g.npcs.size());assertEquals(35,Profession.values().length);   // Alpha 0.2.4 adds ten ordinary support trades; 0.3.2 the farms' and inns' ten and four callings; 0.3.5 Guild Row's fourteen and six callings
+        assertEquals(100,g.npcs.size());assertEquals(38,Profession.values().length);   // 0.3.8 the DevMansion household's three callings; Alpha 0.2.4 adds ten ordinary support trades; 0.3.2 the farms' and inns' ten and four callings; 0.3.5 Guild Row's fourteen and six callings
         for(var family:new Npc.Role[]{Npc.Role.FISHERMAN,Npc.Role.MINER,Npc.Role.KNIGHT,Npc.Role.HUNTER})assertEquals(5,java.util.Arrays.stream(Profession.values()).filter(type->type.family==family).count());
         // (0.3.5) the craftsmen's five, and the textile and metal trades' six hands
         assertEquals(11,java.util.Arrays.stream(Profession.values()).filter(type->type.family==Npc.Role.CRAFTSMAN).count());

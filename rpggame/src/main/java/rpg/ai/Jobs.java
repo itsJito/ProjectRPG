@@ -23,6 +23,8 @@ final class Jobs {
     void tick(Npc n, float dt) {
         if(g.interact.of(n)!=null || n.cs.busy()) { g.ai.desire(n,AiSystem.A_HOLD); return; }
         // (0.3.2) the farms' and the inns' callings have their own day (Livelihoods)
+        // (0.3.8) the DevMansion's household
+        if(brain.household.covers(n)) { brain.household.tick(n); return; }
         if(brain.livelihoods.covers(n)) { brain.livelihoods.tick(n); return; }
         if(n.profession==Profession.CARPENTER && brain.mend(n)) return;
         if(n.profession==Profession.CARPENTER) {
@@ -227,7 +229,7 @@ final class Jobs {
         var own=g.econ.shopOf(n);
         return Behavior.sequence(List.of(approach(own.counterX,own.counterZ,1.4f),person->{
             var taken=person.takeItems(piece,1);
-            if(taken==null || taken.isEmpty())return FAILURE;
+            if(taken.isEmpty())return FAILURE;
             for(ItemStack one:taken){one.owner=person.id;own.stock.add(one);own.target.putIfAbsent(piece.id,2);}
             g.state.commit("WaresShelved",person.id,0,own.jurisdiction,0,person.name+" set out a "+piece.name.toLowerCase()+" on "+own.name.toLowerCase());
             return SUCCESS;
@@ -262,7 +264,7 @@ final class Jobs {
     private boolean safe(Node node,Npc n) {
         if (n.unreachable.getOrDefault(node.id,-1.0) > g.time) return false;
         if(node.owner!=0 && node.owner!=n.id || node.depleted())return false;
-        if((g.chemistry.state(node.id)&astratto.bridge.AstrattoNative.CHEM_BURNING)!=0)return false;
+        if((g.chemistry.objectState(node.id)&astratto.bridge.AstrattoNative.CHEM_BURNING)!=0)return false;
         if(n.profession==Profession.COAL_MINER) {
             boolean ventilation=g.vox.skyLight(node.bx,(int)node.y+2,node.bz)>0.2f;
             if(!ventilation || rpg.world.Blocks.charred(g.vox.block(node.bx,(int)node.y,node.bz)))return false;
@@ -430,6 +432,12 @@ final class Jobs {
                     Actor attacker=g.actor(resident.cs.lastAttacker);
                     if(attacker!=null && attacker.alive && g.time-resident.cs.lastHurt<12 && g.ai.canSee(n,attacker) && !AiSystem.alliedWatch(n,attacker)) {n.fightTarget=attacker.id;n.nextThink=0;return;}
                 }
+            }
+            // (0.3.8) the Baron's knight, his patron safe at home, walks the bounds of the estate
+            if(n.profession==Profession.HOUSEHOLD_KNIGHT && n.dutyTarget==rpg.Ids.BARON && rpg.world.Mansion.onEstate(principal.x,principal.z)) {
+                float[] p=Household.bounds(n.patrolIndex);
+                if(brain.goTo(n,p[0],p[1],false,1.2f)) { if(n.busyUntil<g.time-3)n.busyUntil=g.time+4; if(g.time>n.busyUntil){n.patrolIndex++;n.busyUntil=g.time-10;} }
+                n.lastOutcome="walking the bounds of "+principal.name+"'s estate";return;
             }
             float x=n.profession==Profession.ESCORT_KNIGHT?principal.x+1.8f:n.dutyX;
             float z=n.profession==Profession.ESCORT_KNIGHT?principal.z+1.8f:n.dutyZ;

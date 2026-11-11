@@ -106,6 +106,23 @@ public final class Dialogue {
         // (0.3.7, gamefixes: dialogue leaner and more to the point, no redundancies) one question for how they are -
         // their day and their work in one answer (it was two questions and a third about work that said the same);
         // what they have heard only when they have heard something; their calling's own advice; and the moment
+        // (0.3.9, gamefixes: recruitable allies) asked to come along - or, already along, told what to do or let go
+        var party = g.ai.brain.companions;
+        if (n.companionOf == g.player.id) {
+            d.choice("Stay close to me.", () -> party.command(n, Companions.Order.FOLLOW, n.x, n.z, 0));
+            d.choice("Hold here.", () -> party.command(n, Companions.Order.HOLD, n.x, n.z, 0));
+            d.choice("Go back to your own life. (dismiss)", () -> party.dismiss(n, "dismissed"));
+            d.closeChoice("Carry on.", () -> { });
+            return d;
+        }
+        if (Companions.fee(n) >= 0 && !n.hostileToPlayer) {
+            String no = party.refusal(n);
+            int fee = Companions.fee(n);
+            d.choice(fee > 0 ? "Come with me. I'll pay (" + fee + " coins)." : "Ride with me.", () -> {
+                var r = party.recruit(n);
+                if (r.rejected()) g.ui.dialog(new Dialog(n.name, no != null ? no : r.reason()));
+            });
+        }
         if (n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE) {
             d.choice("How are things?", () -> g.ui.dialog(new Dialog(n.name, day(n) + workToday(n))));
             String heard = news(n);
@@ -364,7 +381,62 @@ public final class Dialogue {
             line = pick(n, "You again. ", "Back so soon? ", "Still here, then. ", "Twice in a day - you must want something. ") + line;
         n.talkedDay = (int) (g.state.minutes / 1440);
         String remark = remark(n);
-        return remark == null ? line : line + " " + remark;
+        return voice(n, remark == null ? line : line + " " + remark);
+    }
+
+    // ------------------------------------------------------------------ (0.3.9) how each of them speaks
+    /**
+     * (0.3.9, gamefixes: NPC dialogue less robotic and stiff) a temperament of their own, kept for life: the warm, the
+     * gruff, the nervous, the cheerful and the dry. It does not change what they say - their state, their trade, what
+     * they have seen - but how: the word they come in with, whether they run their words together or say them out in
+     * full, whether a face they know by now is met by name, and how they let a conversation go.
+     */
+    public enum Voice { WARM, GRUFF, NERVOUS, CHEERFUL, DRY }
+
+    /** Their voice: fixed by who they are (a knight or the watch never nervous, a beggar never cheerful) and their nature. */
+    public static Voice voiceOf(Npc n) {
+        Voice v = Voice.values()[(int) (Schedule.trait(n.id, 77) * Voice.values().length)];
+        if (v == Voice.NERVOUS && (n.watch() || n.role == Npc.Role.KNIGHT || n.role == Npc.Role.BRUTE)) v = Voice.GRUFF;
+        if (v == Voice.CHEERFUL && (n.role == Npc.Role.BEGGAR || n.role == Npc.Role.UNDERTAKER)) v = Voice.DRY;
+        return v;
+    }
+
+    /** A line as this one would say it. */
+    String voice(Npc n, String line) {
+        if (line == null || line.isEmpty()) return line;
+        Voice v = voiceOf(n);
+        int turn = Math.floorMod(n.conversations * 7 + (int) n.id + (int) (g.state.minutes / 240), 6);
+        boolean formal = n.role == Npc.Role.KNIGHT || n.role == Npc.Role.LAWMAN || n.role == Npc.Role.PRIEST || n.role == Npc.Role.SCHOLAR || n.role == Npc.Role.CIVIC;
+        if (!formal && v != Voice.DRY) line = contract(line);
+        // a face they know by now (a few words exchanged, nothing against them) is met by name, the warmer ones
+        boolean known = n.conversations >= 3 && n.crimeKnown(g.player.id) == null && !n.hostileToPlayer;
+        String who = known && (v == Voice.WARM || v == Voice.CHEERFUL) && turn < 3 ? g.player.name : null;
+        double hour = g.state.hourOfDay();
+        String daypart = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+        String open = switch (v) {
+            case WARM -> turn == 0 ? "Ah, " + (who != null ? who + ". " : "there you are. ") : turn == 1 && who != null ? who + "! " : turn == 2 ? "Well now. " : "";
+            case GRUFF -> turn == 0 ? "Hm. " : turn == 1 ? "What is it? " : turn == 2 && hour > 20 ? "Late for this. " : "";
+            case NERVOUS -> turn == 0 ? "Oh! Sorry - " : turn == 1 ? "Ah - yes? " : turn == 2 ? "Um. " : "";
+            case CHEERFUL -> turn <= 1 ? "Good " + daypart + (who != null ? ", " + who : "") + "! " : turn == 2 ? "Hello, hello! " : "";
+            case DRY -> turn == 0 ? "Right. " : turn == 1 ? "Mm. " : "";
+        };
+        if (!open.isEmpty() && line.length() > 1 && !open.endsWith("- ")) line = Character.toUpperCase(line.charAt(0)) + line.substring(1);
+        else if (open.endsWith("- ") && line.length() > 1 && !line.startsWith("I ") && !line.startsWith("I'")) line = Character.toLowerCase(line.charAt(0)) + line.substring(1);
+        String close = switch (v) {
+            case WARM -> turn == 4 ? " Take care of yourself." : turn == 5 && who != null ? " Good to see you, " + who + "." : "";
+            case NERVOUS -> turn == 4 ? " ...If that's all." : turn == 5 ? " Sorry. Long day." : "";
+            case CHEERFUL -> turn == 4 ? " Lovely " + daypart + " for it, isn't it?" : turn == 5 ? " Don't be a stranger!" : "";
+            case GRUFF -> turn == 4 ? " Now, if you don't mind." : "";
+            case DRY -> turn == 5 ? " Anyway." : "";
+        };
+        return open + line + close;
+    }
+
+    /** Words run together as people say them (not by the formal: a knight, the law, the clergy, the learned, officials). */
+    static String contract(String s) {
+        return s.replace("I am ", "I'm ").replace("It is ", "It's ").replace(" it is ", " it's ").replace("do not ", "don't ").replace("Do not ", "Don't ")
+                .replace("cannot ", "can't ").replace("will not ", "won't ").replace("You are ", "You're ").replace(" you are ", " you're ")
+                .replace("That is ", "That's ").replace("There is ", "There's ").replace(" is not ", " isn't ").replace("I have ", "I've ").replace("We are ", "We're ");
     }
 
     /** What they are in the middle of, if it shapes what they say (null: nothing worth a word). */
@@ -595,11 +667,67 @@ public final class Dialogue {
             case 0 -> n.profession != null ? trade(n) : calling(n);
             case 1 -> hourTalk(n);
             case 2 -> pick(n, "How's the family, " + other.name + "?", "Good to see you, " + other.name + ".", "Still alive, " + other.name + "?");
-            case 3 -> pick(n, "Prices at the store are robbery.", "Have you tried the bread at Store A? Like stone.", "The well water's gone strange.",
-                    "The undertaker's put a casket out by the path. Gives me the shivers.", "Did you see the farm's new gate? Mara's proud of it.",
-                    "The bank's full of fish, I heard. Someone had nowhere else to put his catch.", "The guards want every blade sheathed in town now.");
+            // (0.3.8, gamefixes: NPC dialogue systemic and dynamic) no fixed gossip: what has really happened near them, what
+            // the store is short of, how they are themselves, what the other is about
+            case 3 -> { String s = gossip(n, other); yield s != null ? s : needTalk(n) != null ? needTalk(n) : n.profession != null ? trade(n) : calling(n); }
             default -> n.profession != null ? trade(n) : calling(n);
         };
+    }
+
+    /**
+     * (0.3.8) A piece of gossip from the world as it is: the latest thing that happened where they live that they would
+     * have heard of, told their way (an outlaw relishes what the honest deplore), or what the other one is visibly about.
+     * Null when there is nothing.
+     */
+    String gossip(Npc n, Npc other) {
+        boolean outlaw = ZonePolicy.outlaw(n);
+        double since = g.state.minutes - 360;
+        int k = (int) Math.floorMod(n.id + other.id + (long) (g.state.minutes / 20), 3);
+        for (var e : g.state.recent(160)) {
+            if (e.gameMinutes() < since) continue;
+            String j = e.jurisdiction();
+            if (j != null && !j.equals(n.homeJurisdiction) && !j.equals(rpg.world.DevMap.jurisdiction(n.x, n.z))) continue;
+            if (e.actor() == n.id || e.actor() == other.id && k != 0) continue;
+            String line = eventLine(n, e, outlaw);
+            if (line != null && k-- <= 0) return line;
+        }
+        // what the other is plainly about: hurt, carrying their trade's goods, at work
+        if (other.hp < other.maxHp() * 0.5f) return pick(n, "You're hurt, " + other.name + ". What happened?", "Gods, " + other.name + ", sit down a moment.");
+        if (other.goal == Brain.Goal.WORK && other.profession != null) return pick(n, "Busy, " + other.name + "? The " + other.profession.title.toLowerCase() + "'s work never ends.", "Don't let me keep you from your work, " + other.name + ".");
+        String short_ = shortages(n);
+        return short_ != null && (n.id + other.id) % 2 == 0 ? short_ : null;
+    }
+
+    /** One event of the world in a person's words (their manner by who they are), or null if it is nothing to talk of. */
+    String eventLine(Npc n, rpg.state.DomainEvent e, boolean outlaw) {
+        String pl = e.payload() == null ? "" : e.payload();
+        String who = e.actor() == 0 ? "someone" : g.nameOf(e.actor());
+        return switch (e.type()) {
+            case "Broken" -> outlaw ? "Somebody cracked open a " + pl.toLowerCase() + ". Wish I'd got there first." : pick(n, "Somebody's gone and smashed a " + pl.toLowerCase() + ". Wood everywhere.", "A " + pl.toLowerCase() + " got broken open. Thieves, I'd wager.");
+            case "FurnitureWrecked" -> pick(n, "I heard " + who + " smashed up a " + pl.toLowerCase() + ". Who does that?", "There's a wrecked " + pl.toLowerCase() + " somewhere about. Someone had a temper on them.");
+            case "FellApart" -> pick(n, "They say a skeleton just fell to pieces - bones all over.", "Another of the walking dead put down. Nothing left but bones.");
+            case "MonsterKilled" -> pick(n, who + " killed a " + pl.split(" level")[0].toLowerCase() + ". Good riddance.", "One less " + pl.split(" level")[0].toLowerCase() + " in the world, thanks to " + who + ".");
+            case "WagesPaid" -> e.subject() == n.id ? "Wages today. Not a fortune, but honest." : null;
+            case "MealServed" -> pick(n, "The cook up at the big house laid on a fine dinner, I hear.", "Smell that? Someone's had a proper meal.");
+            case "FireLit" -> pick(n, "They've got the fires going at the house. Warm in there.", "Smoke's up from the chimney - someone's lit a fire.");
+            case "BodyBuried" -> "Morrow laid " + pl.replace("'s body", "") + " to rest.";
+            case "AnimalBorn" -> "There's a new " + (pl.contains("foal") ? "foal" : pl.contains("calf") ? "calf" : pl.contains("lamb") ? "lamb" : "young one") + " up at the farm.";
+            case "ShipmentDelivered" -> "The caravan came in. The store should have stock again.";
+            case "GlassBroken" -> pick(n, "Someone put a window through. Glass all over the street.", "Did you hear the crash? A pane went.");
+            case "ItemTaken" -> pl.contains("carried off by") ? pick(n, "Something's been raiding the stores - things gone missing.", "Goblins took off with somebody's goods, I heard.") : null;
+            default -> null;
+        };
+    }
+
+    /** (0.3.8) What their own state makes them say: hungry, worn out, hurt, rich or broke. Null when they are well. */
+    String needTalk(Npc n) {
+        if (n.hunger > 0.75f) return pick(n, "I'm starving. Has anyone got bread?", "My stomach's been growling since noon.");
+        if (n.hp < n.maxHp() * 0.5f) return pick(n, "I'm not right - I took a knock.", "Everything hurts today.");
+        if (n.count(rpg.item.Items.COINS) < 5 && n.role != Npc.Role.BANDIT) return pick(n, "Not a coin to my name till wages.", "Money's tight. Tighter than usual.");
+        if (n.count(rpg.item.Items.COINS) > 300) return pick(n, "Business has been kind to me.", "I can't complain - the purse is heavy.");
+        double h = g.state.hourOfDay();
+        if (h >= 21 || h < 5) return pick(n, "I should be abed.", "Late. I'm dead on my feet.");
+        return null;
     }
 
     /**
@@ -628,7 +756,8 @@ public final class Dialogue {
                 case "AlarmRaised" -> "Somebody saw a " + pl.split(" sighted")[0].toLowerCase() + ".";
                 case "ShipmentDelivered" -> "The caravan came in.";
                 case "TorchLit" -> null;
-                default -> null;
+                // (0.3.8) the rest of what can happen, in the same words the townsfolk use among themselves
+                default -> eventLine(n, e, ZonePolicy.outlaw(n));
             };
             if (line != null && !heard.contains(line)) heard.add(line);
         }

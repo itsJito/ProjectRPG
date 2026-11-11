@@ -1,0 +1,147 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+WeeklyLifeTest > theTownsLiveThroughTwoDaysAtSpeed() FAILED
+    org.opentest4j.AssertionFailedError: Corwin was not at work when the plan said work
+    sown 41, harvested 43, apples 107, meals eaten at an inn 43, patrons 38
+      DevCity Inn: meals 10 drinks 8 nights 0 produce bought 50; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 potato, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 apple, 1 apple, 1 apple, 1 apple, 1 bread, 1 bread, 1 potato, 1 apple, 1 hot_cider, 1 potato, 1 potato, 1 potato, 1 potato, 1 potato, 1 onion, 15 barley, 2 hops, 7 glass_bottle, 1 bottle_of_water, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 onion, 1 bread, 1 bread, 1 bread, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple]
+      DevPalace Taberna: meals 13 drinks 12 nights 0 produce bought 35; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 apple, 1 apple, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 bread, 1 bread, 1 potato, 1 bread, 1 bread, 1 bread, 1 potato, 1 apple, 1 apple, 1 potato, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 barley, 6 hops, 6 glass_bottle, 1 bread, 1 apple, 1 potato, 1 onion, 1 onion, 1 apple]
+    goals: {SLEEP=12205, WANDER=1317, FLEE=177, WATCH=21, INN=2400, FIGHT=58, SOCIALIZE=2546, RETURN=4, INVESTIGATE=3423, AID=2, PRAY=676, FIRE_RESPONSE=39, BANK=709, HIDE=343, SEARCH=327, WARN=17, CASE=19, PATROL=1853, IDLE=5, SHELTER=9673, EAT=1174, WORK=22158, ERRAND=1427, REPORT_CRIME=259, LOOK=1070, HOME=7218}
+      Ada          SHOP     work 395/411 blocked   2/ 720  noticed something
+      Bram         WATCH    work 135/135 blocked   7/ 720  searching nearby (0)
+      Cole         WATCH    work 164/164 blocked   0/ 720  calling out
+      Dag          TRADE    work 220/395 blocked   5/ 720  
+      Eda          TRADE    work 246/403 blocked   1/ 720  
+      Gus          SHOP     work 326/405 blocked   2/ 720  
+      Hale         WATCH    work 296/307 blocked   0/ 720  
+      Ivo          TRADE    work 277/380 blocked   4/ 720  
+      Jun          SHOP     work 382/408 blocked   0/ 720  
+      Kit          SHOP     work 251/415 blocked   0/ 720  
+      Mara         GROWER   work 282/361 blocked   0/ 720  fetching help
+      Morrow       CLERGY   work 283/380 blocked   2/ 720  as close as I can get
+      Silas        SHOP     work 204/408 blocked   2/ 720  
+      Bobwin       WATCH    work 140/140 blocked   0/ 720  searching nearby (1)
+      Oswin        LEISURED work  88/ 88 blocked   0/ 720  noticed something
+      Maud         CLERGY   work 258/402 blocked   0/ 720  fetching help
+      Alric        CLERGY   work 227/387 blocked   3/ 720  fetching help
+      Godric       TRADE    work 165/352 blocked   0/ 720  
+      Isolde       LEISURED work 196/196 blocked   0/ 720  looking round the spot
+      Elowen       TRADE    work 283/418 blocked   0/ 720  
+      Oren         TRADE    work 127/288 blocked   0/ 720  
+      Tamsin       TRADE    work 178/357 blocked   0/ 720  
+      Sir Alden    WATCH    work 161/162 blocked   0/ 720  
+      Fenna        TRADE    work 385/388 blocked   0/ 720  fetching help
+      Wren         SHOP     work 383/408 blocked   3/ 720  
+      Hilda        TRADE    work 257/393 blocked   0/ 720  
+      Bertram      TRADE    work 199/405 blocked   0/ 720  
+      Sir Roderic  WATCH    work 291/307 blocked   0/ 720  getting up and dressed
+      Wynn         TRADE    work 205/323 blocked   0/ 720  
+      Corwin       TRADE    work  95/284 blocked   0/ 720  creeping closer to look
+      Severinus    SHOP     work 252/411 blocked   0/ 720  as close as I can get
+      Cassia       WATCH    work 301/303 blocked   0/ 720  
+      Titus        WATCH    work 308/308 blocked   0/ 720  
+      Decimus      WATCH    work 305/305 blocked   0/ 720  getting up and dressed
+      Quintus      WATCH    work 168/169 blocked   0/ 720  
+      Sextus       WATCH    work 165/166 blocked   0/ 720  getting up and dressed
+      Lucilla      SHOP     work 281/403 blocked   2/ 720  as close as I can get
+      Flavia       SHOP     work 232/410 blocked   2/ 720  
+      Aurelia      CLERGY   work 288/380 blocked   0/ 720  
+      Philon       CLERGY   work 273/385 blocked   2/ 720  as close as I can get
+      Nikias       LEISURED work   0/  0 blocked   0/ 720  
+      Gaius        TRADE    work 269/358 blocked   0/ 720  as close as I can get
+      Servius      LEISURED work   0/  0 blocked   0/ 720  
+      Octavia      TRADE    work 213/370 blocked   0/ 720  as close as I can get
+      Marcellus    TRADE    work 303/407 blocked   0/ 720  as close as I can get
+      Cornelia     TRADE    work 272/375 blocked   0/ 720  as close as I can get
+      Lucius       TRADE    work 288/385 blocked   0/ 720  
+      Atalanta     TRADE    work 406/408 blocked   0/ 720  
+      Livia        TRADE    work 179/288 blocked   2/ 720  as close as I can get
+      Maximus      WATCH    work 309/309 blocked   0/ 720  
+      Arthur       TRADE    work 254/401 blocked   2/ 720  fetching help
+      Sir Lancelot WATCH    work 160/161 blocked   0/ 720  looking round the spot
+      Sir Gawain   TRADE    work 144/377 blocked   0/ 720  as close as I can get
+      Tristan      TRADE    work 391/396 blocked   0/ 720  
+      Percival     TRADE    work 226/320 blocked   0/ 720  as close as I can get
+      Merlin       TRADE    work 195/326 blocked   0/ 720  as close as I can get
+      Aeldric      TRADE    work 265/360 blocked   5/ 720  
+      Brannoc      TRADE    work 310/408 blocked   0/ 720  looking round the spot
+      Corren       TRADE    work 211/305 blocked   0/ 720  as close as I can get
+      Deryn        TRADE    work 230/354 blocked   0/ 720  noticed something
+      Eirwen       TRADE    work 204/386 blocked   6/ 720  fetching help
+      Fennric      TRADE    work 276/389 blocked   2/ 720  
+      Garron       TRADE    work  88/385 blocked   2/ 720  as close as I can get
+      Haldren      TRADE    work 254/374 blocked   0/ 720  as close as I can get
+      Istren       SHOP     work 289/411 blocked   7/ 720  calling out
+      Maerwyn      SHOP     work 245/408 blocked   4/ 720  as close as I can get
+      Tobin        GROWER   work 236/340 blocked   0/ 720  creeping closer to look
+      Hedda        GROWER   work 311/395 blocked   0/ 720  as close as I can get
+      Rufus        GROWER   work 313/403 blocked   0/ 720  
+      Valeria      GROWER   work 256/394 blocked   0/ 720  
+      Hamon        INN      work 360/545 blocked   2/ 720  
+      Bess         INN      work 417/540 blocked   0/ 720  
+      Wilfred      INN      work 328/477 blocked   0/ 720  as close as I can get
+      Vibius       INN      work 416/543 blocked   0/ 720  
+      Julia        INN      work 425/547 blocked   0/ 720  as close as I can get
+      Appius       INN      work 378/480 blocked   0/ 720  
+      Hildric      TRADE    work  74/260 blocked   0/ 720  
+      Odda         SHOP     work 273/412 blocked   4/ 720  on the way
+      Wendel       TRADE    work 180/300 blocked   5/ 720  
+      Mabyn        TRADE    work 188/365 blocked   0/ 720  fetching help
+      Elsbet       TRADE    work 290/416 blocked   0/ 720  
+      Tamsyn       TRADE    work 208/317 blocked   0/ 720  fetching help
+      Osric        TRADE    work 287/376 blocked   2/ 720  creeping closer to look
+      Rowena       TRADE    work 374/404 blocked   0/ 720  
+      Ansel        GROWER   work 171/387 blocked   0/ 720  fetching help
+      Beatrix      TRADE    work 255/401 blocked   0/ 720  noticed something
+      Morwen       TRADE    work 131/314 blocked   0/ 720  creeping closer to look
+      Sabine       LEISURED work   0/  0 blocked   0/ 720  as close as I can get
+      Brand        TRADE    work 247/350 blocked   0/ 720  as close as I can get
+      Kerra        TRADE    work 253/318 blocked   0/ 720  creeping closer to look
+      Baron Edric  SHOP     work 391/411 blocked   0/ 720  
+      Sir Roland   WATCH    work 309/311 blocked   0/ 720  
+      Marta        TRADE    work 362/365 blocked   5/ 720  on the way
+      Osric        TRADE    work 371/383 blocked   0/ 720  on the way
+      Bram         TRADE    work 332/377 blocked   0/ 720  on the way
+      Elsie        GROWER   work 219/280 blocked  76/ 720  on the way
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.WeeklyLifeTest.theTownsLiveThroughTwoDaysAtSpeed(WeeklyLifeTest.java:114)
+
+478 tests completed, 1 failed, 13 skipped
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1h 31m 2s
+9 actionable tasks: 1 executed, 8 up-to-date

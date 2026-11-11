@@ -75,7 +75,7 @@ class RecoveryRegressionTest {
         assertTrue(saves.load(old));game.tick(0);assertEquals(6,g.npcs.stream().filter(n->n.id>=Ids.BOBWIN&&n.id<=Ids.SCHOLAR).count());
         assertTrue(g.invariants.check().isEmpty(),()->g.invariants.check().toString());
         var bobwin=(Npc)g.actor(Ids.BOBWIN);bobwin.inv.clear();bobwin.eq.clear();
-        assertTrue(saves.load(old));game.tick(0);assertTrue(((Npc)g.actor(Ids.BOBWIN)).eq.get(ItemDef.Slot.OFF)!=null);
+        assertTrue(saves.load(old),"the older profile loads again");game.tick(0);assertTrue(((Npc)g.actor(Ids.BOBWIN)).eq.get(ItemDef.Slot.OFF)!=null,()->"Bobwin re-equipped: "+((Npc)g.actor(Ids.BOBWIN)).eq.stacks());
         assertTrue(g.invariants.check().isEmpty(),()->g.invariants.check().toString());
         var current=directory.resolve("current.json");assertTrue(saves.save(current));assertTrue(saves.load(current));game.tick(0);
         assertTrue(g.invariants.check().isEmpty(),()->g.invariants.check().toString());
