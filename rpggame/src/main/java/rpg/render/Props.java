@@ -65,6 +65,49 @@ public final class Props {
         return new Layer[]{stone(rock), wood(wood), new Layer(dark, 1, 0, 0), new Layer(turf, 0.95f, 0, 0)};
     }
 
+    /**
+     * (0.3.7, gamefixes: Shrines of Light) a short tower two blocks square: a stepped plinth of pale dressed stone, four
+     * squat pillars at its corners banded in gold, each carrying a small cup of blue flame, a capstone over them, and on
+     * the capstone a broad stone bowl holding the great blue flame. Between the pillars a blue crystal hangs in its
+     * light. Centred on its footprint, its foot on the ground (y 0).
+     */
+    public static Layer[] shrine() {
+        Meshes.Boxes stone = new Meshes.Boxes(), dark = new Meshes.Boxes(), gold = new Meshes.Boxes(), flame = new Meshes.Boxes(), crystal = new Meshes.Boxes();
+        int pale = 0xD8D4CA, paleDark = 0xB4AEA2, shadow = 0x8E887E;
+        // the plinth: two steps
+        stone.rgb(0, 0.09f, 0, 2.0f, 0.18f, 2.0f, paleDark);
+        stone.rgb(0, 0.27f, 0, 1.76f, 0.18f, 1.76f, pale);
+        for (int s = -1; s <= 1; s += 2) { dark.rgb(s * 0.88f, 0.27f, 0, 0.02f, 0.14f, 1.6f, shadow); dark.rgb(0, 0.27f, s * 0.88f, 1.6f, 0.14f, 0.02f, shadow); }
+        // the four pillars, each with a gold band and a cup of flame at its head
+        for (int sx = -1; sx <= 1; sx += 2) for (int sz = -1; sz <= 1; sz += 2) {
+            float px = sx * 0.66f, pz = sz * 0.66f;
+            stone.rgb(px, 0.42f + 0.55f, pz, 0.34f, 1.1f, 0.34f, pale);
+            stone.rgb(px, 0.40f, pz, 0.42f, 0.08f, 0.42f, paleDark);
+            gold.rgb(px, 0.98f, pz, 0.38f, 0.07f, 0.38f, 0xE2B640);
+            stone.rgb(px, 1.58f, pz, 0.44f, 0.1f, 0.44f, paleDark);
+            dark.rgb(px, 1.66f, pz, 0.3f, 0.06f, 0.3f, 0x4A463E);
+            flame.rgb(px, 1.78f, pz, 0.16f, 0.2f, 0.16f, 0x2E8CFF);
+            flame.rgb(px, 1.9f, pz, 0.08f, 0.14f, 0.08f, 0x8CCBFF);
+        }
+        // the capstone over the pillars, its edge gilded, and the bowl on it
+        stone.rgb(0, 1.7f, 0, 1.2f, 0.16f, 1.2f, pale);
+        gold.rgb(0, 1.62f, 0, 1.24f, 0.04f, 1.24f, 0xD8AA38);
+        stone.rgb(0, 1.86f, 0, 0.7f, 0.16f, 0.7f, paleDark);
+        stone.rgb(0, 2.0f, 0, 0.9f, 0.14f, 0.9f, pale);
+        dark.rgb(0, 2.08f, 0, 0.7f, 0.04f, 0.7f, 0x3A362E);
+        // the great flame: tongues of blue rising from the bowl, whiter at the heart
+        flame.rgb(0, 2.25f, 0, 0.6f, 0.3f, 0.6f, 0x1E6CF0);
+        flame.rgb(0.12f, 2.45f, -0.08f, 0.36f, 0.36f, 0.36f, 0x2E86FF);
+        flame.rgb(-0.1f, 2.5f, 0.1f, 0.3f, 0.42f, 0.3f, 0x3E98FF);
+        flame.rgb(0, 2.68f, 0, 0.2f, 0.36f, 0.2f, 0x6AB4FF);
+        flame.rgb(0, 2.85f, 0, 0.1f, 0.2f, 0.1f, 0xB8DEFF);
+        // the crystal hanging between the pillars
+        crystal.rgb(0, 1.15f, 0, 0.26f, 0.5f, 0.26f, 0x4A8CFF);
+        crystal.rgb(0, 1.15f, 0, 0.36f, 0.22f, 0.36f, 0x6AA8FF);
+        dark.rgb(0, 1.5f, 0, 0.03f, 0.14f, 0.03f, 0x9A8A60);
+        return new Layer[]{stone(stone), stone(dark), metal(gold), glow(flame, 1.5f), glow(crystal, 1.4f)};
+    }
+
     /** A wall torch in an iron sconce: the bracket against the wall (at +z), the shaft, the pitch-soaked head. */
     public static Layer[] torch() {
         Meshes.Boxes iron = new Meshes.Boxes(), wood = new Meshes.Boxes(), head = new Meshes.Boxes();

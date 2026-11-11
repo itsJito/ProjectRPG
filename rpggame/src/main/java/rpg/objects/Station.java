@@ -41,8 +41,20 @@ public class Station extends WorldObject {
         // the outputs must fit once the inputs are gone
         var probe = a.inv.copy();
         for (Recipes.Part p : r.inputs) probe.remove(p.item(), p.amount());
-        for (Recipes.Part p : r.outputs) if (!probe.add(new ItemStack(p.item(), p.amount()))) return "You don't have room for the result.";
+        // (0.3.7) the pack tidied first if that is what it takes: what the inputs leave free is room, wherever it lies
+        if (!fits(probe, r)) { probe.sort(); if (!fits(probe, r) && !otherGrids(a, r)) return "You don't have room for the result."; }
         return null;
+    }
+    private static boolean fits(rpg.item.Inventory probe, Recipe r) {
+        var copy = probe.copy();
+        for (Recipes.Part p : r.outputs) if (!copy.add(new ItemStack(p.item(), p.amount()))) return false;
+        return true;
+    }
+    /** Whether a worn bag has room for the whole result. */
+    private static boolean otherGrids(Actor a, Recipe r) {
+        var grids = a.grids();
+        for (int i = 1; i < grids.size(); i++) { var c = grids.get(i).copy(); boolean all = true; for (Recipes.Part p : r.outputs) all &= c.add(new ItemStack(p.item(), p.amount())); if (all) return true; }
+        return false;
     }
 
     public List<Recipe> recipes() { return Recipes.at(kind); }
@@ -89,6 +101,10 @@ public class Station extends WorldObject {
         if (why == null) why = refusal(r, a);
         if (why != null) return Result.no(why);
         for (Recipes.Part p : r.inputs) { a.takeItems(p.item(), p.amount()); g.state.burn(p.item(), p.amount()); }
+        // (0.3.7) the room the inputs left made whole: the pack tidied when the result would not otherwise go in
+        boolean room = true;
+        for (Recipes.Part p : r.outputs) room &= a.canStore(new ItemStack(p.item(), p.amount()));
+        if (!room) a.inv.sort();
         boolean burnt = false;
         double roll = 0, chance = 0;
         if (r.burnt != null) {

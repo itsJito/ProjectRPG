@@ -96,10 +96,7 @@ public final class Objects {
         for (int[] t : DevMap.TREES) node(Node.Kind.TREE, "tree", "Tree", Skill.WOODCUTTING, 1, Items.LOGS, 25, 3.2f, 3, g.cfg.treeRespawn, Blocks.LOG, t, Blocks.LEAVES, 4);
         for (int[] t : DevMap.OAKS) node(Node.Kind.TREE, "oak", "Oak tree", Skill.WOODCUTTING, 15, Items.OAK_LOGS, 37, 4f, 4, g.cfg.treeRespawn, Blocks.OAK_LOG, t, Blocks.OAK_LEAVES, 5);
         for (int[] t : DevMap.WILLOWS) node(Node.Kind.TREE, "willow", "Willow tree", Skill.WOODCUTTING, 30, Items.WILLOW_LOGS, 68, 4.4f, 5, g.cfg.treeRespawn, Blocks.WILLOW_LOG, t, Blocks.WILLOW_LEAVES, 4);
-        for (int[] r : DevMap.COPPER) node(Node.Kind.ROCK, "copper_rock", "Copper rocks", Skill.MINING, 1, Items.COPPER_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.COPPER_ROCK, r, 0, 0);
-        for (int[] r : DevMap.TIN) node(Node.Kind.ROCK, "tin_rock", "Tin rocks", Skill.MINING, 1, Items.TIN_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.TIN_ROCK, r, 0, 0);
-        for (int[] r : DevMap.IRON) node(Node.Kind.ROCK, "iron_rock", "Iron rocks", Skill.MINING, 15, Items.IRON_ORE, 35, 3.6f, 1, g.cfg.rockRespawn, Blocks.IRON_ROCK, r, 0, 0);
-        for (int[] r : DevMap.COALS) node(Node.Kind.ROCK, "coal_rock", "Coal rocks", Skill.MINING, 30, Items.COAL, 50, 4f, 1, g.cfg.rockRespawn, Blocks.COAL_ROCK, r, 0, 0);
+        for (var lode : DevMap.LODES.entrySet()) for (int[] r : lode.getValue()) rock(rpg.item.Minerals.byId(lode.getKey()), r);
         node(Node.Kind.FISH, "shrimp_spot", "Fishing spot (net)", Skill.FISHING, 1, Items.RAW_SHRIMP, 10, 3.4f, 0, 0, 0, new int[]{(int) DevMap.FISH_SPOTS[0][0], (int) DevMap.FISH_SPOTS[0][1]}, 0, 0);
         nodes.get(nodes.size() - 1).needs = Items.FISHING_NET;
         node(Node.Kind.FISH, "trout_spot", "Fishing spot (rod)", Skill.FISHING, 20, Items.RAW_TROUT, 50, 4f, 0, 0, 0, new int[]{(int) DevMap.FISH_SPOTS[1][0], (int) DevMap.FISH_SPOTS[1][1]}, 0, 0);
@@ -265,10 +262,10 @@ public final class Objects {
         nodes.get(nodes.size() - 1).needs = Items.FISHING_ROD; nodes.get(nodes.size() - 1).waters = Node.Waters.LAKE;
         node(Node.Kind.FISH, "crab_spot", "Fishing spot (cage, lake)", Skill.FISHING, 10, Items.RAW_CRAB, 30, 4.6f, 0, 0, 0, new int[]{(int) lake[2][0], (int) lake[2][1]}, 0, 0);
         nodes.get(nodes.size() - 1).needs = Items.CRAB_CAGE; nodes.get(nodes.size() - 1).waters = Node.Waters.SHORE;
-        for (int[] r : rpg.world.Expanse.COPPER) node(Node.Kind.ROCK, "copper_rock", "Copper rocks", Skill.MINING, 1, Items.COPPER_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.COPPER_ROCK, r, 0, 0);
-        for (int[] r : rpg.world.Expanse.TIN) node(Node.Kind.ROCK, "tin_rock", "Tin rocks", Skill.MINING, 1, Items.TIN_ORE, 17, 3f, 1, g.cfg.rockRespawn, Blocks.TIN_ROCK, r, 0, 0);
-        for (int[] r : rpg.world.Expanse.IRON) node(Node.Kind.ROCK, "iron_rock", "Iron rocks", Skill.MINING, 15, Items.IRON_ORE, 35, 3.6f, 1, g.cfg.rockRespawn, Blocks.IRON_ROCK, r, 0, 0);
-        for (int[] r : rpg.world.Expanse.COAL) node(Node.Kind.ROCK, "coal_rock", "Coal rocks", Skill.MINING, 30, Items.COAL, 50, 4f, 1, g.cfg.rockRespawn, Blocks.COAL_ROCK, r, 0, 0);
+        for (int[] r : rpg.world.Expanse.COPPER) rock(rpg.item.Minerals.byId("copper"), r);
+        for (int[] r : rpg.world.Expanse.TIN) rock(rpg.item.Minerals.byId("tin"), r);
+        for (int[] r : rpg.world.Expanse.IRON) rock(rpg.item.Minerals.byId("iron"), r);
+        for (int[] r : rpg.world.Expanse.COAL) rock(rpg.item.Minerals.byId("coal"), r);
         for (int[] r : rpg.world.Expanse.GEMS) { node(Node.Kind.ROCK, "gem_deposit", "Uncertain gem deposit", Skill.MINING, 30, Items.get("uncut_emerald"), 45, 4, 1, g.cfg.rockRespawn, Blocks.COPPER_ROCK, r, 0, 0); nodes.get(nodes.size() - 1).setBlocks(g, true); }
         for (int[] r : new int[][]{rpg.world.Expanse.MARBLE_FACE, rpg.world.Expanse.MARBLE_FACE_2}) {
             node(Node.Kind.ROCK, "marble_face", "Marble face", Skill.MINING, 20, Items.get("marble_block"), 30, 3.6f, 3, g.cfg.rockRespawn, Blocks.MARBLE, r, 0, 0);
@@ -307,6 +304,11 @@ public final class Objects {
     }
 
     private void put(Container c, ItemStack s) { if (c.contents.add(s)) g.state.mint(s.def, s.amount); }
+
+    /** A rock of the mining ladder: what it holds, its level, worth and toughness all the mineral's own (rpg.item.Minerals). */
+    private void rock(rpg.item.Minerals.Mineral m, int[] at) {
+        node(Node.Kind.ROCK, m.rockId(), m.rockName(), Skill.MINING, m.level(), m.ore(), m.xp(), m.toughness(), m.stock(), g.cfg.rockRespawn, m.block(), at, 0, 0);
+    }
 
     private void node(Node.Kind kind, String def, String name, Skill skill, int level, rpg.item.ItemDef product, int xp, float time, int stock, float respawn, int block, int[] at, int leaves, int height) {
         nodes.add(add(new Node(fid(), def, name, kind, skill, level, product, xp, time, stock, respawn, block, at[0], at[1], leaves, height)));

@@ -34,7 +34,13 @@ import rpg.skill.Skill;
 public final class Farming {
     public enum Crop {
         CARROT("Carrots", Items.CARROT, Items.CARROT_SEEDS, 9 * 60, 2, 4, 1, 22),
-        CABBAGE("Cabbages", Items.CABBAGE, Items.CABBAGE_SEEDS, 13 * 60, 1, 2, 5, 34),
+        // (0.3.7, gamefixes: the Harvesting overhaul) what can be harvested, by level: apples 1 (APPLE_LEVEL), potatoes 2,
+        // onions 5, cabbages 7, tomatoes 10, sweetcorn 20
+        POTATO("Potatoes", Items.POTATO, Items.POTATO_SEEDS, 10 * 60, 2, 4, 2, 24),
+        ONION("Onions", Items.ONION, Items.ONION_SEEDS, 11 * 60, 2, 3, 5, 30),
+        CABBAGE("Cabbages", Items.CABBAGE, Items.CABBAGE_SEEDS, 13 * 60, 1, 2, 7, 38),
+        TOMATO("Tomatoes", Items.TOMATO, Items.TOMATO_SEEDS, 14 * 60, 2, 4, 10, 46),
+        SWEETCORN("Sweetcorn", Items.SWEETCORN, Items.SWEETCORN_SEEDS, 17 * 60, 1, 3, 20, 70),
         /** (0.3.4, gamefixes: ale) the brewer's crops: barley and hops, sold to the inns for their ale. */
         BARLEY("Barley", Items.BARLEY, Items.BARLEY_SEEDS, 11 * 60, 2, 4, 3, 26),
         HOPS("Hops", Items.HOPS, Items.HOP_SEEDS, 12 * 60, 2, 3, 8, 30),
@@ -51,19 +57,26 @@ public final class Farming {
     }
 
     /** A garden: its fence (x0..x1, z0..z1, the fence on the edge), its rows of plots, its gate, whose it is, its common row. */
-    public record Field(String name, String jurisdiction, long owner, int x0, int z0, int x1, int z1, int[] rows, int commonRow, int[][] gate, Crop[] rowCrops) {}
+    public record Field(String name, String jurisdiction, long owner, int x0, int z0, int x1, int z1, int[] rows, int commonRow, int[][] gate, Crop[][] rowCrops) {
+        /** The crop a plot of a row is meant to carry: the row's crops in turn along it, a bed of each. */
+        public Crop cropAt(int row, int x) { Crop[] bed = rowCrops[row]; return bed[Math.floorMod((x - x0 - 1) / BED_PLOTS, bed.length)]; }
+    }
+    /** How many plots in a row one bed of a crop takes before the next crop's bed begins. */
+    public static final int BED_PLOTS = 3;
+    /** The Harvesting level and XP of picking an apple from a tree. */
+    public static final int APPLE_LEVEL = 1, APPLE_XP = 9;
     /** An orchard tree: its trunk cell and whose it is. */
     public record Orchard(String name, long owner, int[][] trees) {}
 
     /** DevCity's kitchen garden in the farm paddock (Tobin's), and its orchard to the east (Hedda's); DevPalace's by the east wall (Rufus's, Valeria's trees). */
     public static final Field[] FIELDS = {
             new Field("DevCity kitchen garden", DevMap.ALPHA, Ids.CROP_FARMER_CITY, 88, 104, 99, 112, new int[]{106, 108, 110}, 110, new int[][]{{99, 107}, {99, 108}},
-                    new Crop[]{Crop.BARLEY, Crop.CABBAGE, Crop.CARROT}),
+                    new Crop[][]{{Crop.BARLEY}, {Crop.CABBAGE, Crop.POTATO, Crop.ONION}, {Crop.CARROT, Crop.TOMATO, Crop.SWEETCORN}}),
             new Field("DevPalace garden", DevMap.PALACE, Ids.CROP_FARMER_PALACE, 176, 55, 186, 63, new int[]{57, 59, 61}, 61, new int[][]{{176, 58}, {176, 59}},
-                    new Crop[]{Crop.HOPS, Crop.CARROT, Crop.CABBAGE}),
+                    new Crop[][]{{Crop.HOPS}, {Crop.CARROT, Crop.ONION, Crop.POTATO}, {Crop.CABBAGE, Crop.SWEETCORN, Crop.TOMATO}}),
             // (0.3.5) the outworkers' cotton field on the dunes by their cottage (its plots made after every older fixture)
             new Field("the cotton field", DevMap.WILDS, rpg.Ids.CARDER, 66, 188, 76, 195, new int[]{190, 192, 194}, -1, new int[][]{{71, 188}},
-                    new Crop[]{Crop.COTTON, Crop.COTTON, Crop.COTTON})
+                    new Crop[][]{{Crop.COTTON}, {Crop.COTTON}, {Crop.COTTON}})
     };
     /** How many of the fields were made with the old fixtures (their plots' ids come first); the rest come with Guild Row. */
     public static final int EARLY_FIELDS = 2;
@@ -189,7 +202,8 @@ public final class Farming {
         @Override public String label() { return apples == 0 ? "Apple tree (bare)" : "Apple tree (" + apples + " apple" + (apples == 1 ? "" : "s") + ")"; }
         @Override public List<Option> options(Rpg g, Actor a) {
             boolean mine = owner == 0 || owner == a.id;
-            return List.of(Option.when(apples > 0, "pick", "Pick an apple" + (mine ? "" : " (not yours)"), 9, "There are no apples left on it.", g.cfg.interactRange + 0.6f));
+            boolean able = a.skills.level(Skill.HARVESTING) >= APPLE_LEVEL;
+            return List.of(Option.when(apples > 0 && able, "pick", "Pick an apple" + (mine ? "" : " (not yours)"), 9, able ? "There are no apples left on it." : "You need Harvesting " + APPLE_LEVEL + ".", g.cfg.interactRange + 0.6f));
         }
         @Override public Result perform(Rpg g, Actor a, String action, long req) {
             String why = reach(g, a, g.cfg.interactRange + 0.6f);
@@ -208,7 +222,7 @@ public final class Farming {
             var ev = g.state.commit(req, "ApplePicked", a.id, id, jurisdiction(), 1, name);
             if (!a.store(s)) g.objects.drop(s, a.x, a.y + 0.05f, a.z);
             if (owner != 0 && owner != a.id) g.law.theft(a, owner, s, this, ev.id());
-            g.prog.award(a, Skill.HARVESTING, 9, "picked an apple", ev.id());
+            g.prog.award(a, Skill.HARVESTING, APPLE_XP, "picked an apple", ev.id());
             if (a == g.player) g.chat.say("You pick an apple.");
             return Result.ok();
         }
@@ -246,7 +260,7 @@ public final class Farming {
                 for (int x = field.x0() + 1; x <= field.x1() - 1; x++) {
                     Plot p = new Plot(nextId++, f, x, z, z == field.commonRow(), field.owner());
                     // the keeper's rows start the game sown with their row's crop, a little apart in growth
-                    if (z != field.commonRow() || x % 3 == 0) { p.crop = field.rowCrops()[row]; p.growth = ((x * 7 + z * 3) % 10) / 10f; p.sower = field.owner(); }
+                    if (z != field.commonRow() || x % 3 == 0) { p.crop = field.cropAt(row, x); p.growth = ((x * 7 + z * 3) % 10) / 10f; p.sower = field.owner(); }
                     plots.add(g.objects.add(p));
                 }
             }
@@ -298,7 +312,7 @@ public final class Farming {
     /** The crop a keeper's empty plot is meant to carry (its row's), for what seed to put in. */
     public Crop rowCrop(Plot p) {
         Field f = FIELDS[p.field];
-        for (int i = 0; i < f.rows().length; i++) if (f.rows()[i] == p.bz) return f.rowCrops()[i];
+        for (int i = 0; i < f.rows().length; i++) if (f.rows()[i] == p.bz) return f.cropAt(i, p.bx);
         return Crop.CARROT;
     }
     /** The owner's tree with the most apples on it, or null if none has any worth the walk. */

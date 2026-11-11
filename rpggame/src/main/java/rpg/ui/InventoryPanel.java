@@ -38,7 +38,10 @@ final class InventoryPanel extends Fragment {
     record Zone(float x, float y, float w, float h, Consumer<Drag> accept) {}
 
     static final String[] TABS = {"All", "Arms", "Armour", "Tools", "Goods", "Food", "Bags", "Misc"};
-    static final float CS = 30;
+    /** The largest a cell is drawn (px); the carried grid is drawn as large as the panel's height allows, up to it. */
+    static final float CS = 44;
+    /** The cell size each grid was last drawn at (the item in the hand is drawn at its own grid's). */
+    private float carriedCs = 40;
 
     boolean filterFocus;
     String filter = "";
@@ -89,55 +92,66 @@ final class InventoryPanel extends Fragment {
         if (hovered != null && (lastHovered == null || hovered.def != lastHovered.def) && hud.now - hoverSoundAt > 0.15) { hud.sound("UI_hover", 0.18f); hoverSoundAt = hud.now; }
         lastHovered = hovered;
         hovered = null;
-        // tabs
+        // (0.3.7, gamefixes: the inventory larger and fuller, no empty space) the tabs along the top; under them the carried
+        // grid drawn as large as the panel's height allows (the same cells, bigger), and beside it a column with the name
+        // filter, the bags, what just came in, and the buttons at its foot
         float tx = x;
         for (int i = 0; i < TABS.length; i++) {
             float tw = ui.width(TABS[i], 13) + 14;
             if (Style.tab(ui, TABS[i], tx, y, tw, 24, tab == i) && live) { tab = i; hud.sound("UIbutton1", 0.35f); }
             tx += tw + 1;
         }
+        List<Inventory> grids = p.grids();
+        Inventory carried = grids.get(0);
+        float gy = y + 32;
+        float cs = carriedCs = Math.min(CS, (height() - (gy - y) - 22) / carried.h);
+        label(ui, "Carried", carried, x, gy, cs);
+        drawGrid(ui, carried, x, gy + 18, cs, Source.PLAYER);
+        float bx = x + carried.w * cs + 14, bw = width() - (bx - x), by = gy;
         // the filter box
-        float fy = y + 30;
-        ui.rect(x, fy, 372, 24, filterFocus ? 0x30FFFFFF : 0x14FFFFFF);
-        ui.border(x, fy, 372, 24, 1, filterFocus ? Style.ACCENT : Style.EDGE);
+        ui.rect(bx, by, bw, 24, filterFocus ? 0x30FFFFFF : 0x14FFFFFF);
+        ui.border(bx, by, bw, 24, 1, filterFocus ? Style.ACCENT : Style.EDGE);
         if (filterFocus) {
             filter += hud.typed.replaceAll("[^ -~]", "");
             if (hud.backspace && !filter.isEmpty()) filter = filter.substring(0, filter.length() - 1);
         }
         boolean blink = filterFocus && (hud.now * 2 % 2) < 1;
-        ui.text(filter.isEmpty() && !filterFocus ? "Filter by name..." : filter + (blink ? "|" : ""), x + 8, fy + 5, 13, filter.isEmpty() && !filterFocus ? Style.FAINT : Style.TEXT);
-        if (!filter.isEmpty() && Style.button(ui, "x", x + 372 - 22, fy + 3, 18, 18, live)) filter = "";
-        if (live && ui.clicked(x, fy, 372, 24)) filterFocus = true;
-        // the grids, as carried
-        List<Inventory> grids = p.grids();
-        float gy = fy + 34;
+        ui.text(filter.isEmpty() && !filterFocus ? "Filter by name..." : filter + (blink ? "|" : ""), bx + 8, by + 5, 13, filter.isEmpty() && !filterFocus ? Style.FAINT : Style.TEXT);
+        if (!filter.isEmpty() && Style.button(ui, "x", bx + bw - 22, by + 3, 18, 18, live)) filter = "";
+        if (live && ui.clicked(bx, by, bw, 24)) filterFocus = true;
+        by += 36;
         List<String> names = new ArrayList<>(List.of("Carried"));
         for (Slot sl : new Slot[]{Slot.BACK, Slot.BELT}) { ItemStack bag = p.eq.get(sl); if (bag != null && bag.inner != null) names.add(bag.def.name); }
-        label(ui, names.get(0), grids.get(0), x, gy, CS);
-        drawGrid(ui, grids.get(0), x, gy + 18, CS, Source.PLAYER);
-        float by = gy, bx = x + grids.get(0).w * CS + 16;
         for (int i = 1; i < grids.size(); i++) {
             Inventory inv = grids.get(i);
-            float cs = Math.min(CS, (width() - (bx-x)) / inv.w);
-            label(ui, names.get(i), inv, bx, by, cs);
-            drawGrid(ui, inv, bx, by + 18, cs, Source.PLAYER);
-            by += inv.h * cs + 30;
-        }
-        if (received != null && hud.now-receivedAt < 1.8) {
-            ui.text("Received", bx, by + 4, 12, Style.GOOD);
-            ui.text(received.name, bx, by + 22, 12, Style.TEXT);
-            by += 50;
+            float bcs = Math.min(cs, bw / inv.w);
+            label(ui, names.get(i), inv, bx, by, bcs);
+            drawGrid(ui, inv, bx, by + 18, bcs, Source.PLAYER);
+            by += inv.h * bcs + 30;
         }
         if (grids.size() == 1) {
-            ui.text("More room", bx, by, 12, Style.DIM);
-            ui.text("Wear a backpack", bx, by + 20, 12, Style.FAINT);
-            ui.text("or a belt pouch.", bx, by + 37, 12, Style.FAINT);
-            by += 56;
+            // no bag worn: where one would go, as a slot of its own to drop it in
+            Panels.Panel.sheet(ui, bx, by, bw, 62);
+            ui.text("More room", bx + 10, by + 8, 13, Style.DIM);
+            ui.text("Wear a backpack or a belt", bx + 10, by + 27, 12, Style.FAINT);
+            ui.text("pouch for another grid.", bx + 10, by + 42, 12, Style.FAINT);
+            by += 74;
         }
-        // Auto-Sort: every grid carried, kinds together; level with the foot of the carried grid unless the bags reach lower
-        float sy = Math.max(by, gy + 18 + grids.get(0).h * CS - 26);
-        if (Style.button(ui, "Auto-Sort", bx, sy, 104, 26, live && drag == null)) autoSort(grids);
-        if (Style.button(ui, hud.radial.editing ? "Done" : "Quick Wheel", bx + 110, sy, 112, 26, live)) { hud.radial.editing = !hud.radial.editing; hud.sound("UIbutton1", 0.35f); }
+        if (received != null && hud.now - receivedAt < 1.8) {
+            ui.text("Received", bx, by, 12, Style.GOOD);
+            ui.text(received.name, bx, by + 17, 13, Style.TEXT);
+            by += 42;
+        }
+        // the ways to work it, under the bags, and the buttons at the foot of the grid
+        float sy = gy + 18 + carried.h * cs - 62;
+        if (by < sy - 92) {
+            Panels.Panel.sheet(ui, bx, by, bw, 88);
+            String[][] tips = {{"Shift-click", "equip / move across"}, {"Right-click", "every option"}, {"Drag", "move, wear, bind"}, {"R", "turn it while held"}};
+            float ty = by + 8;
+            for (String[] t : tips) { ui.text(t[0], bx + 10, ty, 11, Style.DIM); ui.text(t[1], bx + 88, ty, 11, Style.FAINT); ty += 19; }
+        }
+        if (Style.button(ui, "Auto-Sort", bx, sy, bw, 28, live && drag == null)) autoSort(grids);
+        if (Style.button(ui, hud.radial.editing ? "Done" : "Quick Wheel", bx, sy + 34, bw, 28, live)) { hud.radial.editing = !hud.radial.editing; hud.sound("UIbutton1", 0.35f); }
     }
 
     private void autoSort(List<Inventory> grids) {
@@ -229,13 +243,29 @@ final class InventoryPanel extends Fragment {
         ItemStack s = inv.get(slot);
         if (s == null) return;
         switch (src) {
-            case CONTAINER -> { if (hud.container != null) g.interact.request(g.player, hud.container, "take:" + slot); }
-            case SHOP -> { }
+            case CONTAINER -> {
+                if (hud.container == null) return;
+                // (0.3.7, gamefixes: shift-click to move things quickly) shift: every stack of the kind, not just this one
+                if (hud.shift) { for (int i = inv.size() - 1; i >= 0; i--) if (inv.get(i) != null && inv.get(i).def == s.def) g.interact.request(g.player, hud.container, "take:" + i); hud.sound("UI_Trading_ItemSelect", 0.35f); }
+                else g.interact.request(g.player, hud.container, "take:" + slot);
+            }
+            case SHOP -> { if (hud.shift) { Result r = g.econ.buy(g.player, hud.shop, s.def, 1, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); } }
             default -> {
-                // the wheel docked for editing: a click puts the item in its armed slice
-                if (hud.shift && s.def.equippable() && hud.win == Hud.Win.NONE) {
-                    g.items.equip(g.player, inv, slot, s.def.slot, g.state.newRequestId()); return;
+                // (0.3.7, gamefixes: shift-click to equip, unequip and move between containers) with a chest or the
+                // vault open, every stack of the kind goes into it; at a shop, the whole stack is sold; otherwise what
+                // can be worn or wielded is put on
+                if (hud.shift && hud.win == Hud.Win.CONTAINER && hud.container != null) {
+                    int gi = g.player.grids().indexOf(inv);
+                    for (int i = inv.size() - 1; i >= 0; i--) if (inv.get(i) != null && inv.get(i).def == s.def) g.interact.request(g.player, hud.container, "deposit:" + gi + ":" + i);
+                    hud.sound("UI_Trading_ItemSelect", 0.35f); return;
                 }
+                if (hud.shift && hud.win == Hud.Win.SHOP) { Result r = g.econ.sell(g.player, inv, hud.shop, slot, s.amount, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); return; }
+                if (hud.shift && s.def.equippable() && hud.win == Hud.Win.NONE) {
+                    Result r = g.items.equip(g.player, inv, slot, s.def.slot, g.state.newRequestId());
+                    if (r.rejected() && r.reason() != null) g.chat.warn(r.reason()); else hud.sound("UI_Trading_ItemSelect", 0.4f);
+                    return;
+                }
+                // the wheel docked for editing: a click puts the item in its armed slice
                 if (hud.radial.editing && hud.win == Hud.Win.NONE) { hud.radial.assign(hud.radial.armed, s.def); return; }
                 int gi = g.player.grids().indexOf(inv);
                 if (hud.win == Hud.Win.SHOP) { Result r = g.econ.sell(g.player, inv, hud.shop, slot, 1, g.state.newRequestId()); if (r.rejected()) g.chat.warn(r.reason()); return; }
@@ -319,7 +349,9 @@ final class InventoryPanel extends Fragment {
         if (!ui.down && drag == null) pressSlot = -1;
         if (drag == null) return;
         if (hud.rotate && drag.source != Source.SHOP) { drag.turned = !drag.turned; hud.sound("UIbutton2", 0.25f); }
-        float iw = drag.fw() * CS, ih = drag.fh() * CS;
+        float[] at = hud.spots.get(drag.grid);
+        float dcs = at == null ? carriedCs : at[2];
+        float iw = drag.fw() * dcs, ih = drag.fh() * dcs;
         hud.itemIcon(ui, drag.stack, ui.mx - iw / 2, ui.my - ih / 2, iw, ih, 0.9f, drag.turned);
         if (!ui.released) return;
         Drag d = drag;

@@ -186,7 +186,7 @@ public final class Guilds {
                 case ARTISANS -> { econ.stockShop(s, Items.WOOL, 6, 14); econ.stockShop(s, Items.COTTON, 4, 14); econ.stockShop(s, Items.FLAX, 4, 12); econ.stockShop(s, Items.BERRIES, 6, 12); econ.stockShop(s, Items.BUCKET_OF_WATER, 3, 6);
                     for (ItemDef d : new ItemDef[]{Items.CLEAN_WOOL, Items.CLEAN_COTTON, Items.YARN, Items.COTTON_THREAD, Items.LINEN_THREAD, Items.LOOM_CLOTH, Items.FULLED_CLOTH, Items.DYED_CLOTH}) econ.stockShop(s, d, 0, 8);
                     econ.stockShop(s, Items.CLOTH, 2, 10); econ.stockShop(s, Items.FINE_CLOTH, 0, 6); econ.stockShop(s, Items.SHEARS, 1, 2); }
-                case FARMERS -> { for (ItemDef d : new ItemDef[]{Items.CARROT_SEEDS, Items.CABBAGE_SEEDS, Items.BARLEY_SEEDS, Items.HOP_SEEDS, Items.COTTON_SEEDS}) econ.stockShop(s, d, 6, 10);
+                case FARMERS -> { for (rpg.world.Farming.Crop c : rpg.world.Farming.Crop.values()) econ.stockShop(s, c.seed, 6, 10);
                     for (ItemDef d : new ItemDef[]{Items.CARROT, Items.CABBAGE, Items.BARLEY, Items.HOPS, Items.COTTON, Items.APPLE}) econ.stockShop(s, d, 2, 10); econ.stockShop(s, Items.get("guam"), 2, 8); econ.stockShop(s, Items.SHEARS, 1, 2); }
                 case PROVISIONERS -> { econ.stockShop(s, Items.BREAD, 4, 10); econ.stockShop(s, Items.RAW_MEAT, 2, 8); econ.stockShop(s, Items.FISHING_BAIT, 20, 40);
                     for (rpg.fishing.FishKind k : rpg.fishing.FishKind.values()) if (k.level <= 45 && k != rpg.fishing.FishKind.STARFISH) econ.stockShop(s, k.raw(), 0, 6); econ.stockShop(s, Items.SHRIMP, 3, 8); econ.stockShop(s, Items.TROUT, 2, 6); }

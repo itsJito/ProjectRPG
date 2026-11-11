@@ -9,11 +9,8 @@ import rpg.Rpg;
 import rpg.actor.Actor;
 import rpg.interact.Option;
 import rpg.interact.Result;
-import rpg.interact.Work;
 import rpg.interact.WorldObject;
 import rpg.item.ItemDef;
-import rpg.item.Items;
-import rpg.skill.Skill;
 import rpg.world.Blocks;
 import rpg.world.DevMap;
 
@@ -246,8 +243,9 @@ public final class Door extends WorldObject {
         else if (locked) {
             o.add(Option.off("open", "Open", 10, "It's locked.", r));
             if (key != null) o.add(Option.when(a.has(key, 1), "unlock", "Unlock", 9, "You need the " + key.name + ".", r));
-            boolean lvl = a.skills.level(Skill.THIEVING) >= lockLevel, pick = a.has(Items.LOCKPICK, 1);
-            o.add(Option.when(lvl && pick, "lockpick", "Pick lock", 8, !lvl ? "You need Thieving level " + lockLevel + "." : "You need a lockpick.", r));
+            // (0.3.7) any lock, any hand: a lockpick carried (none needed from Thieving 50); the lock's grade in the label
+            String why = rpg.interact.Lockpicking.refusal(a);
+            o.add(Option.when(why == null, "lockpick", "Pick lock (" + rpg.interact.Lockpicking.Difficulty.of(lockLevel).title + ")", 8, why, r));
         } else o.add(Option.on("open", "Open", 10, r));
         if (!open && !locked && key != null && a.has(key, 1)) o.add(Option.on("lock", "Lock", 2, r));
         return o;
@@ -280,35 +278,9 @@ public final class Door extends WorldObject {
                 if (g.sfx != null) g.sfx.play("lock", x, y, z, 0.6f);
                 return Result.ok();
             }
-            case "lockpick" -> {
-                if (!locked) return Result.no("It isn't locked.");
-                if (a.skills.level(Skill.THIEVING) < lockLevel) return Result.no("You need Thieving level " + lockLevel + " to pick this lock.");
-                if (!a.has(Items.LOCKPICK, 1)) return Result.no("You need a lockpick.");
-                g.interact.begin(new Work(a, this, "lockpick", "Picking the lock", 2.4f, false, g.time, () -> commitPick(g, a)));
-                return Result.started();
-            }
+            case "lockpick" -> { return g.lockpicking.start(a, this); }
             default -> { return Result.no("You can't do that."); }
         }
-    }
-
-    private Result commitPick(Rpg g, Actor a) {
-        long req = g.state.newRequestId();
-        String why = reach(g, a, g.cfg.interactRange);
-        if (why != null) return Result.no(why);
-        if (!locked) return Result.no("It isn't locked any more.");
-        if (!a.has(Items.LOCKPICK, 1)) return Result.no("You need a lockpick.");
-        int lvl = a.skills.level(Skill.THIEVING);
-        double chance = Math.min(0.95, 0.4 + (lvl - lockLevel) * 0.04);
-        double roll = g.roll(req, id);
-        boolean ok = roll < chance;
-        var ev = g.state.commit(req, ok ? "LockPicked" : "LockpickFailed", a.id, id, jurisdiction(), 0, String.format("%s chance=%.2f roll=%.3f", name, chance, roll));
-        if (owner != 0 && owner != a.id) g.law.crime(a, "LOCKPICKING", owner, 0, this, ev.id());
-        if (!ok) { if (a == g.player) g.chat.say("You fail to pick the lock."); g.prog.award(a, Skill.THIEVING, 5, "failed lockpick", ev.id()); return Result.ok(); }
-        setLocked(g, false);
-        g.prog.award(a, Skill.THIEVING, 35, "picked a lock", ev.id());
-        if (a == g.player) g.chat.say("You pick the lock.");
-        if (g.sfx != null) g.sfx.play("lock", x, y, z, 0.5f);
-        return Result.ok();
     }
 
     public void setLocked(Rpg g, boolean lock) {

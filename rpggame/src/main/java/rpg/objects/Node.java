@@ -21,9 +21,9 @@ import rpg.world.DevMap;
  *
  * <p>Gathering is physical (gamefixes):
  * <ul>
- *   <li><b>Mining</b>: a pickaxe is wielded and swung, and its head has to actually strike the ore. Every strike that
- *       lands pays Mining XP (a share of what the ore is worth); after enough strikes the ore breaks free into the
- *       miner's pack. The better the pickaxe's metal (and the miner's level over the rock's), the fewer strikes.</li>
+ *   <li><b>Mining</b>: a pickaxe is wielded and swung, and its head has to actually strike the rock. After enough
+ *       strikes the rock breaks - dust and rubble - and what it held is the miner's; XP is paid then, for the rock
+ *       broken. The better the pickaxe's metal (and the miner's level over the rock's), the fewer strikes.</li>
  *   <li><b>Woodcutting</b>: a woodcutting axe (one-handed - a battleaxe is no felling tool) is wielded and swung at any
  *       part of the tree, trunk or crown. After enough blows the whole tree comes down - it is gone, a stump left - and
  *       the cutter has its wood; XP is paid then, for the tree felled. A better axe fells sooner.</li>
@@ -203,19 +203,25 @@ public final class Node extends WorldObject {
         g.noise(a, hx, hy, hz, 10, 0.4f);
         long req = g.state.newRequestId();
         if (kind == Kind.ROCK) {
-            // every strike on the ore is Mining practice: the ore's worth of XP shared over the strikes it takes
-            var ev = g.state.commit(req, "OreStruck", a.id, id, jurisdiction(), 0, String.format("%s %d/%d", name, (int) struck, need));
-            g.prog.award(a, skill, xp / (float) need, "struck " + name.toLowerCase(), ev.id());
-            if (struck < need) return true;
+            // (0.3.7, gamefixes: the Mining overhaul) mined as a tree is felled: blow upon blow at the rock itself, and on
+            // the last it breaks - a cloud of dust, lumps of it flying - and what it held is the miner's, with the XP for
+            // it. (Ore came loose into the pack a piece at a time while the rock stood there unmarked.)
+            if (struck < need) {
+                g.state.commit(req, "OreStruck", a.id, id, jurisdiction(), 0, String.format("%s %d/%d", name, (int) struck, need));
+                if (a == g.player && (int) struck == Math.max(1, need / 2)) g.chat.say("The rock cracks.");
+                return true;
+            }
             struck = 0;
-            ItemStack got = new ItemStack(product, 1);
-            g.state.mint(product, 1);
-            a.grab(g.time, a.x - (float) Math.sin(a.yaw) * 0.6f, a.y + 0.2f, a.z - (float) Math.cos(a.yaw) * 0.6f);
-            if (!a.store(got)) { g.objects.drop(got, a.x, a.y + 0.05f, a.z); if (a == g.player) g.chat.warn("No room for the " + product.name.toLowerCase() + ": it drops at your feet."); }
-            stock--;
-            var got2 = g.state.commit(g.state.newRequestId(), "ResourceGathered", a.id, id, jurisdiction(), 0, product.name + " (" + stock + " left)");
-            if (a == g.player) g.chat.say("You manage to mine some " + product.name.toLowerCase().replace(" ore", "") + ".");
-            if (stock <= 0) deplete(g, got2.id());
+            int lumps = Math.max(1, stock);
+            for (int i = 0; i < lumps; i++) g.grant(a, new ItemStack(product, 1));
+            stock = 0;
+            var ev = g.state.commit(req, "ResourceGathered", a.id, id, jurisdiction(), 0, lumps + " x " + product.name + " (rock broken)");
+            g.prog.award(a, skill, xp * lumps, "broke " + name.toLowerCase(), ev.id());
+            if (a == g.player) g.chat.say("The rock breaks apart. You gather " + (lumps > 1 ? lumps + " " : "the ") + product.name.toLowerCase() + (lumps > 1 && !product.name.endsWith("s") ? "s" : "") + ".");
+            if (g.sfx != null) g.sfx.play("stone", x, y, z, 1f);
+            if (g.fx != null) g.fx.rockBreak(bx + 0.5f, DevMap.FLOOR + 0.3f, bz + 0.5f, product.color);
+            g.noise(a, x, y, z, 14, 0.5f);
+            deplete(g, ev.id());
             return true;
         }
         // a tree: blow upon blow, then it is down
@@ -298,7 +304,8 @@ public final class Node extends WorldObject {
         switch (kind) {
             case TREE -> {
                 for (int y = f + 1; y <= f + height; y++) g.setBlock(bx, y, bz, whole ? block : Blocks.AIR);
-                g.setBlock(bx, f, bz, whole ? block : Blocks.STUMP);
+                // (0.3.7, gamefixes: every stump wore one bark) the stump is the foot of the trunk that stood there: its own wood
+                g.setBlock(bx, f, bz, whole ? block : Blocks.stumpOf(block));
                 for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int y = f + height - 1; y <= f + height + 2; y++) {
                     boolean top = y == f + height + 2, corner = Math.abs(dx) == 2 && Math.abs(dz) == 2;
                     if (top && (Math.abs(dx) > 1 || Math.abs(dz) > 1)) continue;

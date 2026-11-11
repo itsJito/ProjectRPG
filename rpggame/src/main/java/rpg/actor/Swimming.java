@@ -4,7 +4,6 @@ import static astratto.bridge.AstrattoNative.*;
 
 import rpg.Rpg;
 import rpg.skill.Skill;
-import rpg.world.Fluids;
 
 /**
  * (0.3.4, gamefixes: swimming and a new water system) Movement in water, run on its own fixed 20 Hz step (0.05 s) apart
@@ -58,8 +57,12 @@ public final class Swimming {
     public static final float SWIM_BOX = 0.6f, ENGAGE = 0.45f, LET_GO = 0.2f;
     /** The jump key lifts only a body this deep in (so a swimmer bobs at the surface rather than leaving the water). */
     public static final float JUMP_DEPTH = 0.4f;
-    /** Where a floating body rides: this much of its height under. */
-    public static final float FLOAT_LINE = 0.84f;
+    /**
+     * Where a floating body rides: this much of its height under. (0.3.7, gamefixes: idle in the water the player should
+     * keep their head above it) the water at the collarbone, the chin and the eyes well clear - at 0.84 it lapped at the
+     * eyes, a hand's breadth from going under, and the view sat in the surface.
+     */
+    public static final float FLOAT_LINE = 0.70f;
     /** The Agility at which a swimmer can haul out onto a ledge higher than a step (holding the sprint key). */
     public static final int HAUL_LEVEL = 10;
     /** Animation modes (Actor.swimMode): none, wading, treading water (afloat, upright), swimming (flat out), hauling out. */
@@ -160,7 +163,9 @@ public final class Swimming {
         sample(p, s);
         // 3. the swimming state and the box: swimming starts on a sprint well under (the chest down) and lasts while the
         // sprint and the water do; the box stands up again only where a standing body fits
-        boolean deepEnough = s.submerged >= 0.75f * p.height * (s.height / p.height) || s.eyeUnder;
+        // (0.3.7) judged against where a body floats now (the float line came down from 0.84 to 0.70): a body afloat at the
+        // surface is deep enough to strike out and dive, as it was before
+        boolean deepEnough = s.submerged >= (FLOAT_LINE - 0.12f) * s.height || s.eyeUnder;
         if (s.swimming) s.swimming = s.sprint && s.inWater && fwd > 0.1f;
         else s.swimming = s.sprint && s.inWater && fwd > 0.1f && deepEnough;
         if (s.swimming) setBox(s, SWIM_BOX, SWIM_BOX);
@@ -302,7 +307,9 @@ public final class Swimming {
 
     // ------------------------------------------------------------------ breath
     /** Seconds of breath a body holds (longer with Agility). */
-    public static float lungs(Actor a) { return 15 + 0.3f * a.skills.level(Skill.AGILITY); }
+    public static float lungs(Actor a) { return lungs(a.skills.level(Skill.AGILITY)); }
+    /** How long a breath held lasts at an Agility level (seconds). */
+    public static float lungs(int agility) { return 15 + 0.3f * agility; }
 
     /**
      * (0.3.6, gamefixes: a head under water was not taken for under water) whether a body's head is in the water - the

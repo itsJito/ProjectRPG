@@ -52,6 +52,8 @@ public final class Rpg implements GameModule {
     public final List<Actor> dummies = new ArrayList<>();
     public Objects objects;
     public Interactions interact;
+    /** (0.3.7) Lockpicking: the hidden-angle locks, the picks' wear, the player's minigame and everyone else's hands. */
+    public rpg.interact.Lockpicking lockpicking;
     public ItemActions items;
     public CombatSystem combat;
     public rpg.combat.Reactions reactions;
@@ -75,6 +77,8 @@ public final class Rpg implements GameModule {
     public rpg.monster.Monsters monsters;
     /** The dungeons (gamefixes): their doors, traps, hoards and residents. */
     public rpg.dungeon.Dungeons dungeons;
+    /** (0.3.7) The Shrines of Light: rest, the night passing, the wild's dead back, and where the player wakes. */
+    public rpg.world.Shrines shrines;
     public Quests quests;
     public Progression prog;
     public rpg.actor.Traversal traversal;
@@ -146,6 +150,7 @@ public final class Rpg implements GameModule {
         objects = new Objects(this);
         glass = new rpg.objects.Glass(this);
         interact = new Interactions(this);
+        lockpicking = new rpg.interact.Lockpicking(this);
         items = new ItemActions(this);
         combat = new CombatSystem(this);
         reactions = new rpg.combat.Reactions(this);
@@ -214,6 +219,8 @@ public final class Rpg implements GameModule {
         monsters.init();
         dungeons = new rpg.dungeon.Dungeons(this);
         dungeons.init();
+        shrines = new rpg.world.Shrines(this);
+        shrines.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
         econ.init();
         inns.shops(econ);
@@ -701,7 +708,9 @@ public final class Rpg implements GameModule {
         player.cs.cancel();
         player.cs.lastAttacker = 0;
         if (gore != null) gore.healed(player);
-        teleport(player, DevMap.GRAVEYARD_SPAWN[0], DevMap.FLOOR, DevMap.GRAVEYARD_SPAWN[1]);
+        // (0.3.7) by the Shrine of Light the player last rested at, else the town's graveyard
+        float[] wake = shrines.wakeSpot();
+        teleport(player, wake[0], DevMap.FLOOR, wake[1]);
         controller.snapTo(0);
         law.playerRespawned();
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");

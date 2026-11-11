@@ -24,6 +24,8 @@ public final class ItemStack {
     public Inventory inner;
     /** Charges left (the Fire staff's); 0 for anything without them. */
     public int charges;
+    /** (0.3.7) How worn a tool is (0 new .. 1 spent): a lockpick's strain, carried between locks until it snaps. */
+    public float wear;
     /** A signed bounty scroll names a reported case, its subject and the last location known to the watch. */
     public record Contract(long caseId, long target, String jurisdiction, int reward, float x, float z) {}
     public Contract contract;
@@ -83,7 +85,7 @@ public final class ItemStack {
     /** Part of the stack, from its front (a bag never splits: its grid is its own). */
     public ItemStack copy(int n) {
         ItemStack c = new ItemStack(def, n, owner, stolen, origin);
-        c.charges = charges; c.contract = contract;
+        c.charges = charges; c.wear = wear; c.contract = contract;
         if (stolen && ledger != null) {
             LinkedHashMap<Long, Integer> part = new LinkedHashMap<>();
             int left = n;

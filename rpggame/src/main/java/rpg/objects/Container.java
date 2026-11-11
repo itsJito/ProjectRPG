@@ -7,13 +7,11 @@ import rpg.Rpg;
 import rpg.actor.Actor;
 import rpg.interact.Option;
 import rpg.interact.Result;
-import rpg.interact.Work;
 import rpg.interact.WorldObject;
 import rpg.item.ItemIO;
 import rpg.item.ItemStack;
 import rpg.item.Inventory;
 import rpg.item.Items;
-import rpg.skill.Skill;
 
 /**
  * A container (GDD 3.2): a chest, a grave, a caravan's cargo. Its contents are items in exactly one place; taking moves
@@ -91,8 +89,9 @@ public class Container extends WorldObject {
         if(kind.equals("grave") && (secured||buried)) { o.add(Option.off("open",open,10,"Speak to the undertaker about this protected claim.",r));return o; }
         if (locked) {
             o.add(Option.off("open", open, 10, "It's locked.", r));
-            boolean lvl = a.skills.level(Skill.THIEVING) >= lockLevel, pick = a.has(Items.LOCKPICK, 1);
-            o.add(Option.when(lvl && pick, "lockpick", "Pick lock", 9, !lvl ? "You need Thieving level " + lockLevel + "." : "You need a lockpick.", r));
+            // (0.3.7) any lock, any hand: a lockpick carried (none needed from Thieving 50); the lock's grade in the label
+            String why = rpg.interact.Lockpicking.refusal(a);
+            o.add(Option.when(why == null, "lockpick", "Pick lock (" + rpg.interact.Lockpicking.Difficulty.of(lockLevel).title + ")", 9, why, r));
         } else o.add(Option.on("open", open + (isTheft(a) ? " (owned)" : ""), 10, r));
         return o;
     }
@@ -111,25 +110,7 @@ public class Container extends WorldObject {
             g.state.commit(req, "ContainerOpened", a.id, id, jurisdiction(), 0, name);
             return Result.ok();
         }
-        if (action.equals("lockpick")) {
-            if (!locked) return Result.no("It isn't locked.");
-            if (a.skills.level(Skill.THIEVING) < lockLevel) return Result.no("You need Thieving level " + lockLevel + " to pick this lock.");
-            if (!a.has(Items.LOCKPICK, 1)) return Result.no("You need a lockpick.");
-            g.interact.begin(new Work(a, this, "lockpick", "Picking the lock", 2.4f, false, g.time, () -> {
-                long r2 = g.state.newRequestId();
-                String w2 = reach(g, a, g.cfg.interactRange);
-                if (w2 != null) return Result.no(w2);
-                if (!locked) return Result.no("It isn't locked any more.");
-                double chance = Math.min(0.95, 0.4 + (a.skills.level(Skill.THIEVING) - lockLevel) * 0.04), roll = g.roll(r2, id);
-                boolean ok = roll < chance;
-                var ev = g.state.commit(r2, ok ? "LockPicked" : "LockpickFailed", a.id, id, jurisdiction(), 0, String.format("%s chance=%.2f roll=%.3f", name, chance, roll));
-                if (isTheft(a)) g.law.crime(a, "LOCKPICKING", owner, 0, this, ev.id());
-                if (ok) { locked = false; g.prog.award(a, Skill.THIEVING, 35, "picked a lock", ev.id()); }
-                if (a == g.player) g.chat.say(ok ? "You pick the lock." : "You fail to pick the lock.");
-                return Result.ok();
-            }));
-            return Result.started();
-        }
+        if (action.equals("lockpick")) return g.lockpicking.start(a, this);
         if (action.startsWith("take:")) return take(g, a, Integer.parseInt(action.substring(5)), Integer.MAX_VALUE, req);
         if (action.startsWith("takeall")) {
             // takeall, takeall:equipment (gear: anything worn or wielded) or takeall:items (everything else)

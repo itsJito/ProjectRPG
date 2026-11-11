@@ -39,6 +39,10 @@ public final class MonsterMind {
         if (t == m || !t.alive || t.dummy) return 0;
         if (t instanceof Monster o) {
             if (o.kind == m.kind) return 0;                                                    // kin
+            // (0.3.7) what shares one dungeon has long since settled who eats whom: its residents leave each other be
+            // (a hollow's spiders spent the visit hunting their own cave's bat round the roof)
+            rpg.world.DungeonLayout den = m.lair == 0 ? null : rpg.world.DungeonLayout.at(m.lairX, m.lairZ);
+            if (den != null && o.lair != 0 && rpg.world.DungeonLayout.at(o.lairX, o.lairZ) == den) return 0;
             if (o.kind == MonsterKind.DRAGON) return -1.5f;                                    // everything defers to a dragon
             if (m.kind.undead() && o.kind.undead()) return 0;                                  // the dead ignore the dead
             if (m.kind == MonsterKind.GOBLIN && o.kind == MonsterKind.ORC || m.kind == MonsterKind.ORC && o.kind == MonsterKind.GOBLIN) return 0;   // allies of convenience
@@ -261,14 +265,59 @@ public final class MonsterMind {
         if (foe == null || !foe.alive) return;
         int called = 0;
         for (Monster o : sys.all()) {
-            if (o == m || !o.alive || !o.loaded || o.distTo(m) > 18 || (o.kind != m.kind && (m.lair == 0 || o.lair != m.lair))) continue;
-            if (o.state == State.ENGAGE || o.state == State.FLEE) continue;
+            if (o == m || !o.alive || !o.loaded || o.distTo(m) > KIN_CALL || (o.kind != m.kind && (m.lair == 0 || o.lair != m.lair))) continue;
+            if (o.state == State.ENGAGE || o.state == State.FLEE || !inEarshot(m, o)) continue;
             Monster.Known k = o.known.computeIfAbsent(foe.id, Monster.Known::new);
             k.x = foe.x; k.z = foe.z; k.at = g.time; k.sense = "heard"; k.damage = Math.max(k.damage, 1);
             o.target = foe.id; o.nextThink = 0;
             called++;
         }
         if (called > 0) g.state.commit("MonsterCalledKin", m.id, foe.id, DevMap.jurisdiction(m.x, m.z), 0, called + " answered");
+    }
+
+    /** How far a monster's call to its kin carries in the open (m). */
+    static final float KIN_CALL = 18;
+    /** Underground, a call past its own room is only heard this near (m): the rock takes the rest. */
+    static final float KIN_CALL_THROUGH_ROCK = 7;
+
+    /**
+     * (0.3.7, gamefixes: dungeons spammed the visitor with monsters) whether one monster's call reaches another: in the
+     * open, anyone in range; underground, those in the same room or stretch of passage, or very near. One goblin's shout
+     * at the door brought every room of the warren down the corridor at once.
+     */
+    private boolean inEarshot(Monster caller, Monster o) {
+        rpg.world.DungeonLayout dl = rpg.world.DungeonLayout.at(caller.x, caller.z);
+        return dl == null || dl.together(caller.x, caller.z, o.x, o.z) || caller.distTo(o) < KIN_CALL_THROUGH_ROCK;
+    }
+
+    /**
+     * (0.3.7, gamefixes: monster combat AI did not work) how far past its own body a monster's blow lands, edge to edge.
+     * A creature's bite or claw is its kind's own reach. A humanoid's is what the melee system really swings: the arm and
+     * the weapon in its hand, at the figure's size, less the body's own half-width. It was the kind's natural reach and
+     * the weapon's added together - a troll squared up nearly four metres off with a hammer that reaches two and a
+     * half, and skeletons swung at the air a pace short, for as long as their foe stood still.
+     */
+    static float reachOf(Monster m) {
+        if (m.kind.form != MonsterKind.Form.HUMANOID) return m.kind.reach * m.kind.scale();
+        rpg.item.ItemDef w = m.main();
+        float k = Math.max(1, m.figureScale());
+        return Math.max(0.35f, (ARM + (w == null ? 0.12f : w.reach) * BLADE_SHARE) * k - m.radius);
+    }
+    /** A person's arm from the shoulder's line to the grip (m), and the share of a blade's length that bites. */
+    static final float ARM = 0.55f, BLADE_SHARE = 0.9f;
+
+    /** How near its mark an archer lets it come before it gives ground (m, edge to edge). */
+    static final float ARCHER_KEEP = 5;
+    /** One that fights with a bow in its hands and arrows for it. */
+    private static boolean archer(Monster m) {
+        return m.main() != null && m.main().family == rpg.item.ItemDef.Family.BOW && m.eq.get(rpg.item.ItemDef.Slot.AMMO) != null;
+    }
+
+    /** Whether anyone else is fighting the same foe near it: only then is there a turn to wait for. */
+    private boolean contested(Monster m, Actor t, float reach) {
+        for (Monster o : sys.all()) if (o != m && o.alive && o.loaded && o.fightTarget == t.id && o.distTo(t) < reach + 8) return true;
+        for (Npc o : g.npcs) if (o.alive && o.loaded && o.fightTarget == t.id && o.distTo(t) < reach + 8) return true;
+        return false;
     }
 
     /**
@@ -346,7 +395,7 @@ public final class MonsterMind {
                 // group aggro: a call alerts the others in call range (kill the caller and the call is never made)
                 if (m.kind.archetype == Archetype.PACK_RAIDER || m.kind.social > 0.5f) {
                     sys.sound(m, m.kind.alarmSound, 0.9f);
-                    for (Monster o : sys.kin(m, 22)) if (o.state != State.ENGAGE && o.target == 0) { o.target = m.target; o.nextThink = g.time + 0.2 + (o.id % 4) * 0.1; Known k = o.known.computeIfAbsent(m.target, Known::new); Actor t = g.actor(m.target); if (t != null) { k.x = t.x; k.z = t.z; k.at = g.time; k.sense = "called"; } }
+                    for (Monster o : sys.kin(m, 22)) if (o.state != State.ENGAGE && o.target == 0 && inEarshot(m, o)) { o.target = m.target; o.nextThink = g.time + 0.2 + (o.id % 4) * 0.1; Known k = o.known.computeIfAbsent(m.target, Known::new); Actor t = g.actor(m.target); if (t != null) { k.x = t.x; k.z = t.z; k.at = g.time; k.sense = "called"; } }
                 } else sys.sound(m, m.kind.alarmSound, 0.8f);
             }
             case ALERT -> sys.sound(m, m.kind.idleSound, 0.5f);
@@ -407,8 +456,17 @@ public final class MonsterMind {
             if (lead != null && lead != m && lead.alive) {
                 double a = (m.id % 6) * 1.05; m.tx = lead.x + (float) Math.sin(a) * 2.2f; m.tz = lead.z + (float) Math.cos(a) * 2.2f;
             } else {
+                // (0.3.7) underground its range is its room: a point picked out in the rock sent it planning a way to
+                // nowhere, and one in another hall sent the whole band wandering the dungeon
+                rpg.world.DungeonLayout dl = rpg.world.DungeonLayout.at(m.lairX, m.lairZ);
+                rpg.world.DungeonLayout.Room room = dl == null ? null : dl.roomAt(m.lairX, m.lairZ);
                 double a = sys.rnd(m) * Math.PI * 2; float r = m.kind.range * (0.35f + 0.55f * (float) sys.rnd(m));
-                float[] p = sys.open(m, m.lairX + (float) Math.sin(a) * r, m.lairZ + (float) Math.cos(a) * r);
+                float px = m.lairX + (float) Math.sin(a) * r, pz = m.lairZ + (float) Math.cos(a) * r;
+                if (dl != null) {
+                    float hw = room == null ? 3 : (room.x1() - room.x0()) / 2f - 1, hd = room == null ? 3 : (room.z1() - room.z0()) / 2f - 1;
+                    px = m.lairX + (float) Math.sin(a) * hw * (float) sys.rnd(m); pz = m.lairZ + (float) Math.cos(a) * hd * (float) sys.rnd(m);
+                }
+                float[] p = sys.open(m, px, pz);
                 m.tx = p[0]; m.tz = p[1];
             }
             m.hasGoalPos = true;
@@ -491,7 +549,7 @@ public final class MonsterMind {
         boolean busy = m.cs.busy() || g.time < m.windupUntil;
         // a telegraphed strike under way (the creatures' wind-ups): it lands when the wind-up ends
         if (busy) { hold(m); return; }
-        float reach = m.kind.reach * m.kind.scale() + (m.main() != null && !m.main().natural ? m.main().reach : 0);
+        float reach = reachOf(m);
         boolean ranged = m.kind.ranged != null && g.time >= m.nextRanged && d > Math.max(3, reach + 1) && d < m.kind.rangedRange && g.vox.sight(m.x, m.eyeY(), m.z, t.x, t.chestY(), t.z);
         if (!m.kind.flies() && m.kind.ranged != null) {
             if (g.ai.rangedPosition(m,t,true)) return;
@@ -506,6 +564,17 @@ public final class MonsterMind {
             if(m.legs!=null && m.hasGoalPos)return;
             // (0.3.2) no way up to it at all: it does not stand frozen below nor wander off at once
             if (t.y > m.y + 1.6f || d > reach + 0.6f) { thwarted(m, t); return; }
+        }
+        // (0.3.7) an archer is an archer: it looses when it can, gives ground when its mark comes close, and only swings
+        // the bow as a club with its back to a wall (a skeleton with a shortbow walked up and beat people with it)
+        if (archer(m)) {
+            if (ranged) { hold(m); sys.ranged(m, t); m.lastOutcome = "loosing at " + t.name; return; }
+            if (d < ARCHER_KEEP) {
+                float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az));
+                float[] back = sys.open(m, m.x + ax / l * 4, m.z + az / l * 4);
+                boolean room = Math.hypot(back[0] - t.x, back[1] - t.z) > l + 1.5f && g.vox.sight(m.x, m.y + 0.5f, m.z, back[0], m.y + 0.5f, back[1]);
+                if (room) { sys.fightTo(m, back[0], back[1], true, 0.5f); m.wantYaw = yawTo(m, t.x, t.z); m.lastOutcome = "giving ground to shoot"; return; }
+            } else { hold(m); m.lastOutcome = "nocking an arrow"; return; }
         }
         // the harassers keep moving: hit and run; the ranged keep their distance; the brutes close in
         if (m.kind == MonsterKind.BAT) { batFight(m, t, d, reach, ranged); return; }
@@ -532,10 +601,13 @@ public final class MonsterMind {
             default -> {
                 if (ranged && (d > reach + 4 || m.kind == MonsterKind.DRAGON && sys.rnd(m) < 0.45) && sys.rnd(m) < 0.5) { sys.ranged(m, t); return; }
                 // (0.3.0, gamefixes: monster AI was not smart) the press: two at a time; the rest prowl the ring round it
-                if (d <= reach + 3 && !g.ai.mayPress(m, t, reach) && t.cs.phase != rpg.actor.Actor.Combat.Phase.RECOVER) {
-                    float ring = reach + 2.5f, ang = (float) (Math.atan2(m.z - t.z, m.x - t.x) + 0.4 * Math.sin(g.time * 0.6 + m.id));
+                // (0.3.7) a turn is only waited for when there is someone to give it to: one alone on its foe kept
+                // stepping back to "wait for an opening" between its own blows and never pressed
+                boolean contested = contested(m, t, reach);
+                if (contested && d <= reach + 3 && !g.ai.mayPress(m, t, reach) && t.cs.phase != rpg.actor.Actor.Combat.Phase.RECOVER) {
+                    float ring = reach + t.radius + m.radius + 2.2f, ang = (float) (Math.atan2(m.z - t.z, m.x - t.x) + 0.4 * Math.sin(g.time * 0.6 + m.id));
                     m.lastOutcome = "prowling, waiting for an opening on " + t.name;
-                    sys.moveTo(m, t.x + (float) Math.cos(ang) * ring, t.z + (float) Math.sin(ang) * ring, false, 0.6f);
+                    sys.fightTo(m, t.x + (float) Math.cos(ang) * ring, t.z + (float) Math.sin(ang) * ring, false, 0.6f);
                     return;
                 }
                 // a blow wound up at it, read in time (its Defense makes it quicker to read): it steps off the line
@@ -544,14 +616,20 @@ public final class MonsterMind {
                 if (windup && t.cs.t >= read && sys.rnd(m) < 0.35f + m.skills.level(rpg.skill.Skill.DEFENSE) / 200f && m.kind.terror() < 20) {
                     float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az)), side = (m.id & 1) == 0 ? 1 : -1;
                     m.lastOutcome = "sidestepping " + t.name + "'s blow";
-                    sys.moveTo(m, m.x + ax / l * 1.4f - az / l * side * 1.2f, m.z + az / l * 1.4f + ax / l * side * 1.2f, true, 0.3f);
+                    sys.fightTo(m, m.x + ax / l * 1.4f - az / l * side * 1.2f, m.z + az / l * 1.4f + ax / l * side * 1.2f, true, 0.3f);
                     return;
                 }
                 // a swing missed and the foe is recovering from it: in at once
                 if (t.cs.phase == rpg.actor.Actor.Combat.Phase.RECOVER && d <= reach + 0.6f && m.nextStrike - g.time < 0.5) m.nextStrike = g.time;
                 // (0.3.1) a hovering body closes right in before it strikes: from the edge of its reach its blow fell short
-                if (d <= reach * (m.kind.flies() ? 0.5f : 1f) + 0.15f) { hold(m); if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); if (g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m); } }
-                else { float[] way = approach(m, t, d, m.kind.flies() ? reach * 0.4f : reach); sys.moveTo(m, way[0], way[1], true, way[2]); }
+                if (d <= reach * (m.kind.flies() ? 0.5f : 1f) + STRIKE_SLACK) {
+                    hold(m);
+                    if (g.time >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) {
+                        attack(m, t); m.lastOutcome = "striking at " + t.name;
+                        if (contested && g.time + 1.5 > m.pressUntil) g.ai.yieldPress(m);
+                    }
+                }
+                else { float[] way = approach(m, t, d, m.kind.flies() ? reach * 0.4f : reach); sys.fightTo(m, way[0], way[1], true, way[2]); }
                 // a target it cannot get to (up on something, behind something) - it adapts: throws, backs off, calls help
                 if (d > reach + 0.5f && Math.hypot(m.vx, m.vz) < 0.2f) m.outOfReach += dt; else m.outOfReach = Math.max(0, m.outOfReach - dt);
                 if (m.outOfReach > 4) { m.outOfReach = 0; if (m.kind.ranged != null) m.nextRanged = 0; else { m.state = State.ALERT; m.nextThink = g.time + 3; } }
@@ -566,7 +644,8 @@ public final class MonsterMind {
      * back before it closes. Otherwise straight in. {x, z, within}.
      */
     private float[] approach(Monster m, Actor t, float d, float reach) {
-        float tx = t.x, tz = t.z, within = reach * 0.9f;
+        // (straight in: to where its blow reaches, measured centre to centre as the walk is)
+        float tx = t.x, tz = t.z, within = reach * 0.9f + t.radius + m.radius;
         Monster ally = null; float nearest = 10;
         for (Monster o : g.monsters.all()) if (o != m && o.alive && o.target == t.id && o.state == State.ENGAGE && o.distTo(t) < nearest) { nearest = o.distTo(t); ally = o; }
         if (ally != null && d > reach + 1) {
@@ -637,6 +716,9 @@ public final class MonsterMind {
      * blow is ready - no more than two at once - strikes, and falls back to the ring. A blow wound up at it close by sends
      * it hopping back; with a throw to hand it throws from the ring.
      */
+    /** How much nearer than its reach a blow is thrown from (m): a foe a hair past the tip is not swung at. */
+    static final float STRIKE_SLACK = 0.1f;
+
     private void packFight(Monster m, Actor t, float d, float reach, boolean ranged, float dt) {
         double now = g.time;
         List<Monster> band = new ArrayList<>();
@@ -653,22 +735,22 @@ public final class MonsterMind {
         if (threatened && m.swoop != 2) { m.swoop = 2; m.swoopUntil = now + 0.7; }
         switch (m.swoop) {
             case 1 -> {   // darting in
-                if (d <= reach + 0.15f) {
+                if (d <= reach + STRIKE_SLACK) {
                     hold(m);
-                    if (now >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); m.swoop = 2; m.swoopUntil = now + 0.9; }
-                } else sys.moveTo(m, t.x, t.z, true, reach * 0.9f);
+                    if (now >= m.nextStrike && Math.abs(rpg.actor.Actor.wrap(m.wantYaw - m.yaw)) < 0.5f) { attack(m, t); m.lastOutcome = "darting in at " + t.name; m.swoop = 2; m.swoopUntil = now + 0.9; }
+                } else sys.fightTo(m, t.x, t.z, true, reach * 0.9f + t.radius + m.radius);
                 if (now > m.swoopUntil) { m.swoop = 2; m.swoopUntil = now + 0.6; }
             }
             case 2 -> {   // falling back to its slot
                 float ax = m.x - t.x, az = m.z - t.z, l = Math.max(0.1f, (float) Math.hypot(ax, az));
-                sys.moveTo(m, t.x + ax / l * ring, t.z + az / l * ring, true, 0.4f);
+                sys.fightTo(m, t.x + ax / l * ring, t.z + az / l * ring, true, 0.4f);
                 if (now > m.swoopUntil) { m.swoop = 0; m.swoopUntil = now + 0.4 + sys.rnd(m) * 0.8; }
             }
             default -> {   // on the ring, edging round to its slot, watching
                 // (a slot inside a wall is taken at the nearest open ground to it)
                 float[] open = sys.open(m, t.x + (float) Math.cos(slot) * ring, t.z + (float) Math.sin(slot) * ring);
                 float sx = open[0], sz = open[1];
-                if (sys.moveTo(m, sx, sz, d > ring + 2, 0.6f)) { hold(m); m.wantYaw = yawTo(m, t.x, t.z); }
+                if (sys.fightTo(m, sx, sz, d > ring + 2, 0.6f)) { hold(m); m.wantYaw = yawTo(m, t.x, t.z); }
                 if (ranged && sys.rnd(m) < 0.01) { sys.ranged(m, t); return; }
                 int darting = 0;
                 for (Monster o : band) if (o != m && o.swoop == 1) darting++;

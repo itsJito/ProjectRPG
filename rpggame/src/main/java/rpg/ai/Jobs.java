@@ -252,7 +252,7 @@ final class Jobs {
     private boolean mineral(Profession p,ItemDef item) {
         return switch(p) {
             case ORE_MINER -> item.id.endsWith("_ore");
-            case QUARRY_WORKER -> item.id.equals("stone_block") || item.id.equals("marble_block");
+            case QUARRY_WORKER -> item.id.endsWith("_block");
             case GEM_PROSPECTOR -> item.id.startsWith("uncut_");
             case CLAY_DIGGER -> item.id.equals("clay");
             case COAL_MINER -> item==Items.COAL;

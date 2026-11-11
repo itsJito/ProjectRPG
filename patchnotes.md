@@ -1,3 +1,70 @@
+# Patch Notes Version Alpha 0.3.7: Lock, Stock and Ore
+
+Locks, ore, crops and a shrine by the graves, with a long list of fixes on top.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added rocks for every rung of the mining ladder: stone, coal, copper, tin, wrought iron, iron, mithril, granite, cobalt, dragonite, moltenite, godstone and malevolent
+- Added a Shrine of Light beside the DevCity graveyard: a short stone tower crowned with blue flame
+### Items
+- Added the ores and bars for every metal from wrought iron to malevolent, each smelted at a furnace and worked at an anvil
+- Added potatoes, onions, tomatoes and sweetcorn, with their seeds sold in the general stores and at the Farmers' Guild
+### Gameplay
+- Added a lockpicking minigame. Set the pick on its arc with the mouse and hold the left button to turn the lock. Near the hidden spot it turns further, inside it the lock opens, and anywhere else the pick strains and wears until it snaps
+- Added resting at a Shrine of Light. It heals you fully, cures every ailment, passes the night to morning, calms the world and brings back the ordinary creatures and outlaws you have killed. Bosses and townsfolk stay dead
+- Added respawning at the Shrine of Light you last rested at
+- Added mining by breaking the rock. Each rock now takes several strikes and breaks apart in a cloud of dust and rubble, giving its ore all at once
+
+## Changes
+### Items
+- Changed Smithing to follow the mining ladder. Every metal is smelted at its tier's level and worked from there, with better metals asking for more coal or a second ore
+- Changed bronze to be smelted and worn from level 3
+- Changed lockpicks to wear down only while they strain against the lock. A worn pick keeps its wear between locks until it breaks
+### NPC's
+- Changed people fighting in a group to work round to your back while one of them holds your attention
+- Changed monsters in a fight to strike from the reach their weapon really has, and to stop backing off when no one else is waiting for a turn
+- Changed skeleton archers to keep their distance and shoot rather than walk up and club you with the bow
+- Changed townsfolk, guards, outlaws, workers, merchants and clergy to dress as their group does while each looks different
+- Changed bounty hunters to wear different armour and hoods from one another
+- Changed the dungeon's residents to leave each other alone
+- Changed conversations to be shorter. NPC's now offer how they are, any news they actually have, their trade's advice and one question for the moment
+### Gameplay
+- Changed Harvesting so that apples come at level 1, potatoes at 2, onions at 5, cabbages at 7, tomatoes at 10 and sweetcorn at 20
+- Changed any lock to be pickable at any Thieving level. Harder locks hide a smaller target and break picks faster
+- Changed lockpicking to need no lockpick from Thieving 50, and from Thieving 25 a fresh pick now goes back where the last one broke
+- Changed shift-clicking in the inventory to equip items, move every stack of a kind into or out of an open chest, and sell a whole stack at a shop
+- Changed the player to tread water with their head well above the surface
+- Changed the fog to a ring around the player that sits closer in, with nothing beyond it drawn
+- Changed felled trees to leave a stump of their own wood
+- Changed saves to stay compatible only within a minor version. Saves from Alpha 0.2 and earlier now start a new game in Alpha 0.3
+- Changed the program to use its own icon
+
+## Technical Changes
+- Changed NPC's, animals, monsters and objects beyond the fog ring to no longer be drawn
+- Changed dungeon torches so only those near you cast light
+- Changed the inventory to draw its grid larger with the same number of slots
+- Changed the Skills tab to show every unlock as a milestone track with the next one marked
+- Changed the Character tab to show health and stamina as bars and your fighting skills at a glance
+- Changed the smithing, smelting and cooking windows to one window with categories, recipe cards and a detail panel
+- Changed crafting to tidy your pack when the result would otherwise not fit
+- Removed old unused code
+
+## Fixed Bugs
+- AE-03701 - Fixed bug where the player and NPC's did not hold or aim crossbows properly
+- AE-03702 - Fixed bug where dungeons spammed players with monsters
+- AE-03703 - Fixed bug where dungeons were too dark to see in
+- AE-03704 - Fixed bug where monsters stood still mid-fight reconsidering their route
+- AE-03705 - Fixed bug where monsters swung at the air short of their target
+- AE-03706 - Fixed bug where electric spells did not shock fish or anyone standing in the water
+- AE-03707 - Fixed bug where every tree stump had the same texture
+- AE-03708 - Fixed bug where the Skills tab did not show everything Agility and Fishing unlock
+- AE-03709 - Fixed bug where hiding townsfolk stayed put while someone killed people around them
+- AE-03710 - Fixed bug where the Fence would not trade for much of the day
+- AE-03711 - Fixed bug where lawmen and bounty hunters surrounded a wanted player and only stared
+- AE-03712 - Fixed bug where crafting refused for lack of room even when the ingredients freed enough
+
 # Patch Notes Version Alpha 0.3.6: Rein Check
 
 Mounts, fish and the insides of houses get a good going-over.

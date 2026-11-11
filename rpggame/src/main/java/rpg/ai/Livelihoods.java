@@ -71,7 +71,8 @@ final class Livelihoods {
     }
 
     /** What the gardens grow, for selling. */
-    private static final ItemDef[] GROWN = {Items.CARROT, Items.CABBAGE, Items.BARLEY, Items.HOPS};
+    /** What the growers take to market: everything a plot yields but cotton (the carder's own). */
+    private static final ItemDef[] GROWN = java.util.Arrays.stream(Farming.Crop.values()).filter(c -> c != Farming.Crop.COTTON).map(c -> c.produce).toArray(ItemDef[]::new);
 
     private void cropFarmer(Npc n) {
         var farming = g.farming;

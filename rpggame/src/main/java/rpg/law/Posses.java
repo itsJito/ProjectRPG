@@ -135,12 +135,18 @@ public final class Posses {
             n.homeJurisdiction = kingdom; n.posse = true; n.hostileToPlayer = false; n.aggroRange = 30;
             n.skills.setLevel(Skill.ATTACK, level); n.skills.setLevel(Skill.STRENGTH, level); n.skills.setLevel(Skill.DEFENSE, level);
             n.skills.setLevel(Skill.HEALTH, Math.max(12, level)); n.skills.setLevel(Skill.ARCHERY, level);
-            n.look = rpg.actor.Appearance.random(n.id, false);
+            // (0.3.7, gamefixes: bounty hunters all looked the same) each their own face and their own pick of the
+            // hunters' leathers, and their own armour: not one stone breastplate on every man of the band
+            n.look = rpg.actor.Appearance.of(rpg.actor.Appearance.Group.BOUNTY_HUNTER, n.id, false);
             boolean melee = m.swords() && i % 2 == 1;
             if (m.bows()) { wear(n, Items.SHORTBOW); wear(n, Items.BRONZE_ARROWS, 30); }
             else if (melee) wear(n, Items.get("iron_sword"));
             else { wear(n, Items.get("iron_crossbow")); wear(n, Items.get("iron_bolts"), 20); }
-            wear(n, Items.get("stone_body"));
+            String[] bodies = {"stone_body", "bronze_body", "chainmail_body", "stone_body"};
+            ItemDef body = Items.find(bodies[(int) Math.floorMod(n.id * 7 + i, bodies.length)]);
+            wear(n, body != null ? body : Items.get("stone_body"));
+            if (Math.floorMod(n.id + i, 3) == 0 && Items.find("stone_helm") != null) wear(n, Items.get("stone_helm"));
+            else if (Math.floorMod(n.id + i, 3) == 1) wear(n, Items.CLOTH_HOOD);
             // (0.3.1, gamefixes: bounty hunters should physically have the player's bounty) a signed warrant in the pack:
             // the quarry, the sum and the last known place - the hunter's authority. Lost (picked from the pack) it ends
             // their hunt; taken from the body, it is the player's own warrant to read

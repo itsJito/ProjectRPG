@@ -42,7 +42,10 @@ public final class Blocks {
             DUAL0 = 84,
             // 0.2.2 (gamefixes): a clipped hedge - small dense leaves, squared off; DevPalace's greenery
             HEDGE = 108,
-            STAIRS = 109, LADDER = 110, COUNT = 111;
+            STAIRS = 109, LADDER = 110,
+            // 0.3.7 (gamefixes: the Mining overhaul): the rest of the ladder's rocks (rpg.item.Minerals says what each holds)
+            STONE_ROCK = 111, WROUGHT_ROCK = 112, MITHRIL_ROCK = 113, COBALT_ROCK = 114, DRAGONITE_ROCK = 115, MOLTENITE_ROCK = 116,
+            GODSTONE_ROCK = 117, MALEVOLENT_ROCK = 118, COUNT = 119;
     /**
      * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
      * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
@@ -80,6 +83,8 @@ public final class Blocks {
     }
     /** The wooden cubes that char into a twin of their own (CHARRED_PLANKS onward); anything else that burns to char is CHARRED. */
     public static final int[] CHAR_SOURCES = {PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, STUMP};
+    /** What is left standing where a tree of this wood is felled: the foot of its own trunk (the plain stump for anything else). */
+    public static int stumpOf(int log) { return isTreeLog(log) ? log : STUMP; }
     /** What a block chars into when fire is done with it. */
     public static int charredOf(int id) {
         for (int i = 0; i < CHAR_SOURCES.length; i++) if (CHAR_SOURCES[i] == id) return CHARRED_PLANKS + i;
@@ -150,9 +155,10 @@ public final class Blocks {
             L_GRANITE = 53, L_STONE_BRICKS = 54, L_MARBLE = 55, L_CLAY = 56, L_MUD = 57, L_SANDSTONE_TOP = 58, L_SANDSTONE = 59,
             L_RED_SANDSTONE_TOP = 60, L_RED_SANDSTONE = 61, L_WHITE_GLASS = 62, L_BLUE_GLASS = 63, L_WHITE_CARPET = 64,
             L_BLACK_CARPET = 65, L_BROWN_CARPET = 66, L_RED_CARPET = 67, L_LIMESTONE = 68, L_IRON_BLOCK = 69, L_GOLD_BLOCK = 70,
-            L_COPPER_BLOCK = 71, L_COAL_BLOCK = 72, L_HAY_TOP = 73, L_HAY_SIDE = 74, L_HEDGE = 75;
+            L_COPPER_BLOCK = 71, L_COAL_BLOCK = 72, L_HAY_TOP = 73, L_HAY_SIDE = 74, L_HEDGE = 75,
+            L_WROUGHT = 76, L_MITHRIL = 77, L_COBALT = 78, L_DRAGONITE = 79, L_MOLTENITE = 80, L_GODSTONE = 81, L_MALEVOLENT = 82;
     /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
-    public static final int CHAR_LAYER0 = 76, LAYERS = 89, TEX = 64;
+    public static final int CHAR_LAYER0 = 83, LAYERS = 96, TEX = 64;
     /** Per charred layer, the layer it was charred from (filled with FACES). */
     private static final int[] CHAR_FROM = new int[LAYERS - CHAR_LAYER0];
 
@@ -177,6 +183,8 @@ public final class Blocks {
         f(LIMESTONE_BRICKS, L_LIMESTONE); f(IRON_BLOCK, L_IRON_BLOCK); f(GOLD_BLOCK, L_GOLD_BLOCK); f(COPPER_BLOCK, L_COPPER_BLOCK); f(COAL_BLOCK, L_COAL_BLOCK);
         f(HAY_BALE, L_HAY_TOP, L_HAY_SIDE, L_HAY_TOP); f(HEDGE, L_HEDGE);
         f(EMBERS, L_COAL); f(STAIRS,L_STONE_BRICKS); f(LADDER,L_PLANKS);
+        f(STONE_ROCK, L_COBBLE); f(WROUGHT_ROCK, L_WROUGHT); f(MITHRIL_ROCK, L_MITHRIL); f(COBALT_ROCK, L_COBALT); f(DRAGONITE_ROCK, L_DRAGONITE);
+        f(MOLTENITE_ROCK, L_MOLTENITE); f(GODSTONE_ROCK, L_GODSTONE); f(MALEVOLENT_ROCK, L_MALEVOLENT);
         // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
         int next = CHAR_LAYER0;
         int[] charOf = new int[CHAR_LAYER0];
@@ -420,6 +428,8 @@ public final class Blocks {
                 {L_BARK, 0.9f, 0f}, {L_OAK_BARK, 0.9f, 0f}, {L_WILLOW_BARK, 0.9f, 0f}, {L_RINGS, 0.7f, 0f},
                 {L_LEAVES, 0.62f, 0f}, {L_OAK_LEAVES, 0.62f, 0f}, {L_WILLOW_LEAVES, 0.6f, 0f}, {L_HERB, 0.7f, 0f}, {L_FLAX, 0.75f, 0f}, {L_BERRY, 0.6f, 0f},
                 {L_COPPER, 0.5f, 0.45f}, {L_TIN, 0.5f, 0.45f}, {L_IRON, 0.55f, 0.4f}, {L_COAL, 0.6f, 0f}, {L_SPENT, 0.82f, 0f},  // ore glints in the rock
+                {L_WROUGHT, 0.6f, 0.35f}, {L_MITHRIL, 0.4f, 0.55f}, {L_COBALT, 0.42f, 0.5f}, {L_DRAGONITE, 0.45f, 0.45f}, {L_MOLTENITE, 0.4f, 0.4f},
+                {L_GODSTONE, 0.3f, 0.6f}, {L_MALEVOLENT, 0.38f, 0.5f},
                 {L_METAL, 0.32f, 1f}, {L_FURNACE, 0.8f, 0f}, {L_RANGE, 0.5f, 0.7f}, {L_TARGET, 0.85f, 0f},
                 {L_GLASS, 0.06f, 0f}, {L_WATER, 0.04f, 0f}, {L_DEBUG, 0.6f, 0f},
                 {L_SPRUCE_BARK, 0.92f, 0f}, {L_JUNGLE_BARK, 0.9f, 0f}, {L_BIRCH_BARK, 0.8f, 0f}, {L_SPRUCE_TOP, 0.7f, 0f}, {L_JUNGLE_TOP, 0.7f, 0f}, {L_BIRCH_TOP, 0.7f, 0f},

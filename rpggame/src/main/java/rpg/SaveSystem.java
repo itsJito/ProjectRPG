@@ -29,6 +29,27 @@ import rpg.world.DevMap;
  */
 public final class SaveSystem {
     public static final int SCHEMA = 1;
+    /** What a save written before saves carried their version is taken to be from: the minor line in which they began to. */
+    public static final String UNSTAMPED = "Alpha 0.3.0";
+
+    /**
+     * (0.3.7, gamefixes: minor versions do not carry saves over) a version's line: its major and minor numbers - "Alpha
+     * 0.3.7" is of line 0.3. Every release that raises the minor number (0.X.0) starts a new line, and a save belongs
+     * to the line it was made in: patches within a line (0.3.6, 0.3.7) read each other's saves, a new line reads none
+     * of the old. {major, minor}, or null for something that is no version.
+     */
+    public static int[] line(String version) {
+        if (version == null) return null;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)(?:\\.\\d+)?").matcher(version);
+        return m.find() ? new int[]{Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))} : null;
+    }
+    /** Whether a save made in one version can be played in another: only within the same line. */
+    public static boolean compatible(String saved, String running) {
+        int[] a = line(saved == null || saved.isBlank() ? UNSTAMPED : saved), b = line(running);
+        return a != null && b != null && a[0] == b[0] && a[1] == b[1];
+    }
+    /** "0.3" for "Alpha 0.3.7": how a line is named to the player. */
+    public static String lineName(String version) { int[] l = line(version == null || version.isBlank() ? UNSTAMPED : version); return l == null ? "an unknown version" : l[0] + "." + l[1]; }
     private final Rpg g;
 
     public SaveSystem(Rpg g) { this.g = g; }
@@ -45,6 +66,7 @@ public final class SaveSystem {
         g.combat.landAll();
         Map<String, Object> root = new HashMap<>();
         root.put("schema", SCHEMA);
+        root.put("version", Main.VERSION);
         root.put("pendingLevels",g.prog.save());
         root.put("npcTraversalProfiles", 1);
         root.put("revision", g.state.revision);
@@ -110,6 +132,7 @@ public final class SaveSystem {
         root.put("animals", g.animals.save());
         root.put("monsters", g.monsters.save(this::actor));
         root.put("dungeons", g.dungeons.save());
+        root.put("shrines", g.shrines.save());
         root.put("law", g.law.save());
         root.put("undertaker", g.undertaker.save());
         root.put("honor", g.honor.save());
@@ -171,6 +194,11 @@ public final class SaveSystem {
         try { root = Json.parseObject(Files.readString(file, StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
+        String made = Json.str(root, "version", UNSTAMPED);
+        if (!compatible(made, Main.VERSION)) {
+            g.chat.warn("That save was made in version " + lineName(made) + ". Saves do not carry over to version " + lineName(Main.VERSION) + ".");
+            return false;
+        }
         g.prog.load(Json.list(root,"pendingLevels"));
         g.chemistry.beforeLoad();
         migrateJurisdictions(root);
@@ -311,6 +339,7 @@ public final class SaveSystem {
         g.animals.load(Json.obj(root, "animals"));
         g.monsters.load(Json.obj(root, "monsters"), this::applyActor);
         g.dungeons.load(Json.obj(root, "dungeons"));
+        g.shrines.load(Json.obj(root, "shrines"));
         g.law.load(Json.obj(root, "law"));
         g.undertaker.load(Json.obj(root, "undertaker"));
         g.honor.load(Json.obj(root, "honor"));

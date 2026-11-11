@@ -31,9 +31,14 @@ public final class Profiles {
         public double playSeconds;
         public int combatLevel = 3, totalLevel = 27;
         private boolean saved;
+        /** The game version its save was last written by (blank: before saves carried one). */
+        public String version = "";
         Profile(int slot) { this.slot = slot; }
         public Path save() { return dir(slot).resolve("save.json"); }
-        public boolean hasSave() { return saved; }
+        /** A save there is, that this version can play (a save from an older minor version does not carry over). */
+        public boolean hasSave() { return saved && !outdated(); }
+        /** A save there is, from a minor version before this one: it cannot be continued, only begun again. */
+        public boolean outdated() { return saved && !SaveSystem.compatible(version, Main.VERSION); }
     }
 
     static Path dir(int slot) { return root.resolve(String.valueOf(slot)); }
@@ -59,6 +64,7 @@ public final class Profiles {
             p.created = Json.lng(m, "created", 0); p.lastPlayed = Json.lng(m, "lastPlayed", 0);
             p.playSeconds = Json.num(m, "playSeconds", 0);
             p.combatLevel = Json.integer(m, "combatLevel", 3); p.totalLevel = Json.integer(m, "totalLevel", 27);
+            p.version = Json.str(m, "version", "");
             return p;
         } catch (IOException | RuntimeException e) {
             System.err.println("[profiles] could not read " + f + ": " + e.getMessage());
@@ -84,7 +90,7 @@ public final class Profiles {
         List<Object> look = new ArrayList<>(); for (int v : p.look.toArray()) look.add(v);
         m.put("look", look);
         m.put("created", p.created); m.put("lastPlayed", p.lastPlayed); m.put("playSeconds", p.playSeconds);
-        m.put("combatLevel", p.combatLevel); m.put("totalLevel", p.totalLevel);
+        m.put("combatLevel", p.combatLevel); m.put("totalLevel", p.totalLevel); m.put("version", p.version);
         try {
             Files.createDirectories(dir(p.slot));
             Files.writeString(dir(p.slot).resolve("profile.json"), Json.write(m), StandardCharsets.UTF_8);
@@ -101,7 +107,7 @@ public final class Profiles {
 
     /** After a save: the time played and the levels, for the title screen's cards. */
     public static void played(Profile p, Rpg g, double seconds) {
-        p.saved=true; p.lastPlayed = System.currentTimeMillis();
+        p.saved=true; p.version = Main.VERSION; p.lastPlayed = System.currentTimeMillis();
         p.playSeconds += seconds;
         p.combatLevel = g.player.skills.combatLevel();
         p.totalLevel = g.player.skills.totalLevel();

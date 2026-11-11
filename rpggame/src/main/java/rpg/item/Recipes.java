@@ -45,6 +45,8 @@ public final class Recipes {
     }
 
     public static final List<Recipe> ALL = new ArrayList<>();
+    /** What smelting a bar pays in XP: a base, and more per level of its metal. */
+    static final int SMELT_XP = 50, SMELT_XP_PER_LEVEL = 6;
 
     private static Recipe r(String id, String name, Station st, Skill sk, int level, int xp, float seconds) {
         Recipe r = new Recipe(id, name, st, sk, level, xp, seconds);
@@ -54,23 +56,24 @@ public final class Recipes {
 
     static {
         // smelting
-        r("smelt_bronze", "Bronze bar", Station.FURNACE, Skill.SMITHING, 1, 62, 2.4f).in(Items.COPPER_ORE, 1).in(Items.TIN_ORE, 1).out(Items.BRONZE_BAR, 1);
-        r("smelt_iron", "Iron bar", Station.FURNACE, Skill.SMITHING, 15, 125, 2.4f).in(Items.IRON_ORE, 1).out(Items.IRON_BAR, 1);
-        r("smelt_steel", "Steel bar", Station.FURNACE, Skill.SMITHING, 30, 175, 2.4f).in(Items.IRON_ORE, 1).in(Items.COAL, 2).out(Items.STEEL_BAR, 1);
-        // smithing: bronze, iron and steel gear at the anvil
-        Object[][] metals = {{Tier.BRONZE, Items.BRONZE_BAR, 1}, {Tier.IRON, Items.IRON_BAR, 15}, {Tier.STEEL, Items.STEEL_BAR, 30}};
-        Object[][] pieces = {{"dagger", 1, 0}, {"axe", 1, 1}, {"pickaxe", 2, 2}, {"mace", 1, 2}, {"sword", 2, 4}, {"helm", 1, 3}, {"shield", 2, 6}, {"legs", 3, 8}, {"body", 5, 9}};
-        for (Object[] m : metals) {
-            Tier t = (Tier) m[0];
-            for (Object[] p : pieces) {
-                ItemDef out = Items.tierItem(t, (String) p[0]);
-                int bars = (int) p[1], lvl = (int) m[2] + (int) p[2];
-                r("smith_" + out.id, out.name, Station.ANVIL, Skill.SMITHING, lvl, 125 * bars * (1 + t.power / 3), 3f).in((ItemDef) m[1], bars).out(out, 1).tool(Items.HAMMER);
+        // (0.3.7, gamefixes: the Mining overhaul - Smithing follows suit) every metal of the ladder (rpg.item.Minerals): its
+        // bar smelted at the furnace at its tier's level, and its gear worked at the anvil from there up - the dagger
+        // first, the body last. (Bronze, iron and steel alone could be made, at levels of their own.)
+        for (Minerals.Metal m : Minerals.METALS) {
+            Tier t = m.tier();
+            Recipe smelt = r("smelt_" + t.name().toLowerCase(), m.bar().name, Station.FURNACE, Skill.SMITHING, m.level(), SMELT_XP + m.level() * SMELT_XP_PER_LEVEL, 2.4f);
+            for (int i = 0; i < m.inputs().length; i += 2) smelt.in((ItemDef) m.inputs()[i], (int) m.inputs()[i + 1]);
+            smelt.out(m.bar(), 1);
+            for (Minerals.Piece p : Minerals.PIECES) {
+                ItemDef out = Items.tierItem(t, p.kind());
+                if (out == null) continue;
+                int lvl = Math.min(rpg.skill.XpTable.MAX_LEVEL, m.level() + p.offset());
+                r("smith_" + out.id, out.name, Station.ANVIL, Skill.SMITHING, lvl, 125 * p.bars() * (1 + t.power / 3), 3f).in(m.bar(), p.bars()).out(out, 1).tool(Items.HAMMER);
             }
         }
         // (0.3.5, gamefixes: the metalworking pipeline) household goods cast at the furnace from bars
-        r("cast_pot", "Pot", Station.FURNACE, Skill.SMITHING, 5, 120, 3.2f).in(Items.get("bronze_bar"), 1).out(Items.POT, 1);
-        r("cast_bucket", "Bucket", Station.FURNACE, Skill.SMITHING, 12, 160, 3.4f).in(Items.get("iron_bar"), 1).out(Items.BUCKET, 1);
+        r("cast_pot", "Pot", Station.FURNACE, Skill.SMITHING, Tier.BRONZE.requirement + 2, 120, 3.2f).in(Items.BRONZE_BAR, 1).out(Items.POT, 1);
+        r("cast_bucket", "Bucket", Station.FURNACE, Skill.SMITHING, Tier.IRON.requirement + 2, 160, 3.4f).in(Items.IRON_BAR, 1).out(Items.BUCKET, 1);
         // cooking (a range, or any fire)
         r("cook_shrimp", "Shrimp", Station.RANGE, Skill.COOKING, 1, 300, 1.8f).in(Items.RAW_SHRIMP, 1).out(Items.SHRIMP, 1).burn(20);
         r("cook_meat", "Cooked meat", Station.RANGE, Skill.COOKING, 1, 300, 2f).in(Items.RAW_MEAT, 1).out(Items.COOKED_MEAT, 1).burn(25).burnt(Items.BURNT_MEAT);

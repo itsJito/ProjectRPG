@@ -96,6 +96,24 @@ public final class Items {
     public static final ItemDef BRONZE_BAR = def("bronze_bar", "Bronze bar", 12, 0xB0703A, "A bar of bronze.");
     public static final ItemDef IRON_BAR = def("iron_bar", "Iron bar", 28, 0x6E6E72, "A bar of iron.");
     public static final ItemDef STEEL_BAR = def("steel_bar", "Steel bar", 50, 0x9CA4AE, "A bar of steel.");
+    // (0.3.7, gamefixes: the Mining overhaul) the rest of the ladder: what is dug, and the bar it is smelted into (rpg.item.Minerals)
+    public static final ItemDef WROUGHT_IRON_ORE = def("wrought_iron_ore", "Wrought iron ore", 11, 0x6A5E58, "Ore that smelts into soft wrought iron: drawn into rings for chainmail.");
+    public static final ItemDef MITHRIL_ORE = def("mithril_ore", "Mithril ore", 40, 0xA6DCEA, "Pale, light ore. Smelted dark with coal or bright with tin.");
+    public static final ItemDef GRANITE_BLOCK = def("granite_block", "Granite block", 60, 0x8A847C, "A block of granite broken from the rock.");
+    public static final ItemDef COBALT_ORE = def("cobalt_ore", "Cobalt ore", 90, 0x2F55A8, "Ore with cobalt in it.");
+    public static final ItemDef DRAGONITE_ORE = def("dragonite_ore", "Dragonite ore", 150, 0xB02020, "Red ore, warm to the touch.");
+    public static final ItemDef MOLTENITE_ORE = def("moltenite_ore", "Moltenite ore", 240, 0xE8642A, "Ore that glows like an ember that will not go out.");
+    public static final ItemDef GODSTONE_ORE = def("godstone_ore", "Godstone ore", 380, 0xF0C850, "Golden ore, heavier than it looks.");
+    public static final ItemDef MALEVOLENT_ORE = def("malevolent_ore", "Malevolent ore", 600, 0x5A1E6E, "Dark violet ore. It is cold however long it is held.");
+    public static final ItemDef WROUGHT_IRON_BAR = def("wrought_iron_bar", "Wrought iron bar", 20, 0x8A8F96, "A bar of wrought iron.");
+    public static final ItemDef BLACK_BAR = def("black_bar", "Black bar", 80, 0x2A2A30, "A bar of mithril smelted dark with coal.");
+    public static final ItemDef WHITE_BAR = def("white_bar", "White bar", 80, 0xE6E6E0, "A bar of mithril smelted bright with tin.");
+    public static final ItemDef GRANITE_BAR = def("granite_bar", "Granite bar", 130, 0x8A847C, "Granite bound with iron into a workable bar.");
+    public static final ItemDef COBALT_BAR = def("cobalt_bar", "Cobalt bar", 190, 0x2F55A8, "A bar of cobalt.");
+    public static final ItemDef DRAGON_BAR = def("dragon_bar", "Dragon bar", 300, 0xB02020, "A bar smelted from dragonite.");
+    public static final ItemDef MOLTEN_BAR = def("molten_bar", "Molten bar", 520, 0xE0602A, "A bar smelted from moltenite.");
+    public static final ItemDef GODLY_BAR = def("godly_bar", "Godly bar", 820, 0xF0C850, "A bar smelted from godstone.");
+    public static final ItemDef MALEVOLENT_BAR = def("malevolent_bar", "Malevolent bar", 1400, 0x4A1A5A, "A bar smelted from malevolent ore.");
     public static final ItemDef RAW_SHRIMP = def("raw_shrimp", "Raw shrimp", 3, 0xC89080, "Needs cooking.");
     public static final ItemDef SHRIMP = food("shrimp", "Shrimp", 6, 3, 0xE8A070);
     public static final ItemDef RAW_CRAB = def("raw_crab", "Raw crab", 14, 0xB04A30, "Needs cooking.");
@@ -209,6 +227,15 @@ public final class Items {
     public static final ItemDef APPLE = food("apple", "Apple", 4, 2, 0xC8302A);
     public static final ItemDef CARROT = food("carrot", "Carrot", 3, 2, 0xE87A22);
     public static final ItemDef CABBAGE = food("cabbage", "Cabbage", 6, 3, 0x7AAA4A);
+    // (0.3.7, gamefixes: the Harvesting overhaul) the rest of the kitchen garden, and the seed for each
+    public static final ItemDef POTATO = food("potato", "Potato", 4, 2, 0xB8955A);
+    public static final ItemDef ONION = food("onion", "Onion", 5, 2, 0xC8A04A);
+    public static final ItemDef TOMATO = food("tomato", "Tomato", 8, 3, 0xD23A26);
+    public static final ItemDef SWEETCORN = food("sweetcorn", "Sweetcorn", 12, 4, 0xF0CC3A);
+    public static final ItemDef POTATO_SEEDS = stack("potato_seeds", "Seed potatoes", 2, 0xA8854A, "Small seed potatoes. Sow them in a tilled plot.");
+    public static final ItemDef ONION_SEEDS = stack("onion_seeds", "Onion seeds", 3, 0x4A4034, "A twist of onion seed. Sow it in a tilled plot.");
+    public static final ItemDef TOMATO_SEEDS = stack("tomato_seeds", "Tomato seeds", 4, 0xD8C890, "A twist of tomato seed. Sow it in a tilled plot.");
+    public static final ItemDef SWEETCORN_SEEDS = stack("sweetcorn_seeds", "Sweetcorn seeds", 6, 0xE8C040, "A twist of sweetcorn kernels. Sow them in a tilled plot.");
     public static final ItemDef CARROT_SEEDS = stack("carrot_seeds", "Carrot seeds", 2, 0xC8A060, "A twist of carrot seed. Sow it in a tilled plot.");
     public static final ItemDef CABBAGE_SEEDS = stack("cabbage_seeds", "Cabbage seeds", 3, 0x8A7050, "A twist of cabbage seed. Sow it in a tilled plot.");
     public static final ItemDef VEGETABLE_STEW = food("vegetable_stew", "Vegetable stew", 16, 7, 0xA8702A);
@@ -460,6 +487,10 @@ public final class Items {
                 {"coins", 1, 1, 0f}, {"logs", 3, 1, 2.5f}, {"oak_logs", 3, 1, 3f}, {"willow_logs", 3, 1, 2.8f},
                 {"copper_ore", 1, 1, 2f}, {"tin_ore", 1, 1, 2f}, {"iron_ore", 1, 1, 2.4f}, {"coal", 1, 1, 1.5f},
                 {"bronze_bar", 2, 1, 1.5f}, {"iron_bar", 2, 1, 1.8f}, {"steel_bar", 2, 1, 1.8f},
+                {"wrought_iron_ore", 1, 1, 2.2f}, {"mithril_ore", 1, 1, 1.6f}, {"granite_block", 2, 2, 6f}, {"cobalt_ore", 1, 1, 2.6f}, {"dragonite_ore", 1, 1, 2.8f},
+                {"moltenite_ore", 1, 1, 3f}, {"godstone_ore", 1, 1, 3.4f}, {"malevolent_ore", 1, 1, 3.2f},
+                {"wrought_iron_bar", 2, 1, 1.7f}, {"black_bar", 2, 1, 1.4f}, {"white_bar", 2, 1, 1.4f}, {"granite_bar", 2, 1, 2.6f}, {"cobalt_bar", 2, 1, 2f},
+                {"dragon_bar", 2, 1, 2.1f}, {"molten_bar", 2, 1, 2.2f}, {"godly_bar", 2, 1, 2.6f}, {"malevolent_bar", 2, 1, 2.4f},
                 {"raw_shrimp", 1, 1, 0.1f}, {"shrimp", 1, 1, 0.1f}, {"raw_trout", 2, 1, 0.5f}, {"trout", 2, 1, 0.4f}, {"burnt_fish", 2, 1, 0.3f},
                 {"bread", 2, 1, 0.4f}, {"berries", 1, 1, 0.1f}, {"guam", 1, 1, 0.05f}, {"flax", 1, 2, 0.1f}, {"bowstring", 1, 1, 0.02f},
                 {"plank", 4, 1, 3f}, {"oak_plank", 4, 1, 4f}, {"bones", 2, 1, 0.5f}, {"big_bones", 3, 1, 1.5f}, {"arrow_shaft", 1, 2, 0.01f},

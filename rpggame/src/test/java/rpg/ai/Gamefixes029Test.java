@@ -251,11 +251,10 @@ class Gamefixes029Test {
     @Test void anyoneCanBeAskedTheWayTheDangersTheirOpinionAndTheShortages() {
         Npc eda = (Npc) g.actor(rpg.Ids.VILLAGER);
         var d = g.dialogue.talk(eda);
-        // (0.3.0) three or four conversational choices: always the day and the news, the rest from the moment
-        for (String ask : new String[]{"How's your day been?", "What have you heard?"})
-            assertTrue(d.choices.stream().anyMatch(c -> c.label().equals(ask)), "offered: " + ask);
+        // (0.3.7) lean: always how they are; what they have heard only when there is news; one thing for the moment
+        assertTrue(d.choices.stream().anyMatch(c -> c.label().equals("How are things?")), "offered: How are things?");
         long talk = d.choices.stream().filter(c -> !c.label().startsWith("Good day") && !c.label().equals("Goodbye.") && !c.label().startsWith("Let's trade") && !c.label().startsWith("Pay")).count();
-        assertTrue(talk >= 3 && talk <= 4, "three or four things to ask: " + d.choices.stream().map(c -> c.label()).toList());
+        assertTrue(talk >= 2 && talk <= 4, "two to four things to ask: " + d.choices.stream().map(c -> c.label()).toList());
         String way = g.dialogue.way(eda, "the bank", rpg.world.DevMap.BANK_TELLER[0], rpg.world.DevMap.BANK_TELLER[1]);
         assertTrue(way.matches(".*(north|south|east|west).*"), way);
         assertFalse(g.dialogue.dangers(eda).isBlank());

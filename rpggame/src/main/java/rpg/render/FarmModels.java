@@ -52,6 +52,10 @@ final class FarmModels {
             else if (p.crop == Farming.Crop.BARLEY) barley(b, cx, top, cz, stage, h);
             else if (p.crop == Farming.Crop.HOPS) hops(b, cx, top, cz, stage, h);
             else if (p.crop == Farming.Crop.COTTON) cotton(b, cx, top, cz, stage, h);
+            else if (p.crop == Farming.Crop.POTATO) potato(b, cx, top, cz, stage, h);
+            else if (p.crop == Farming.Crop.ONION) onion(b, cx, top, cz, stage, h);
+            else if (p.crop == Farming.Crop.TOMATO) tomato(b, cx, top, cz, stage, h);
+            else if (p.crop == Farming.Crop.SWEETCORN) sweetcorn(b, cx, top, cz, stage, h);
             else cabbage(b, cx, top, cz, stage, h);
         }
         for (float[] box : b.list) { box[0] -= o[0]; box[1] -= o[1]; box[2] -= o[2]; }
@@ -104,6 +108,89 @@ final class FarmModels {
     }
 
     private static float jit(long h, int k) { return (((h >>> (k * 5)) & 31) / 31f - 0.5f); }
+
+    /**
+     * (0.3.7) Potatoes: two low, broad mounds of dark leaf earthed up along the ridge, small white flowers over them
+     * when the crop below is ready; gone over, the haulm yellow and fallen.
+     */
+    private static void potato(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
+        float[] spread = {0, 0.1f, 0.2f, 0.28f, 0.32f, 0.3f}, heights = {0, 0.06f, 0.14f, 0.2f, 0.24f, 0.12f};
+        int leaf = stage == 5 ? 0x9A8E40 : 0x3E6E2A, leafHi = stage == 5 ? 0xB0A04E : 0x4E8232;
+        for (int i = 0; i < 2; i++) {
+            long k = h + i * 19;
+            float x = cx + (i == 0 ? -0.2f : 0.2f) + jit(k, 1) * 0.05f, z = cz + jit(k, 2) * 0.08f, s = spread[stage], hh = heights[stage];
+            root(b, x, z);
+            b.rgb(x, y + 0.03f, z, s * 1.2f, 0.06f, s * 1.2f, 0x4A3424);                       // the earthed-up mound
+            b.rgb(x, y + hh * 0.5f + 0.03f, z, s, hh, s, leaf);
+            b.rgb(x + s * 0.2f, y + hh + 0.03f, z - s * 0.15f, s * 0.6f, hh * 0.35f, s * 0.6f, leafHi);
+            if (stage == 4) for (int f = 0; f < 3; f++) b.rgb(x + jit(k, 3 + f) * s, y + hh * 1.25f + 0.04f, z + jit(k, 6 + f) * s, 0.04f, 0.03f, 0.04f, f == 1 ? 0xE8D8F0 : 0xF6F2EA);
+        }
+    }
+
+    /**
+     * (0.3.7) Onions: a row of thin hollow leaves standing straight up, the bulb swelling out of the soil at their foot
+     * as they grow - gold-brown when ready, the tops beginning to fall; gone to seed, a tall stalk under a pale globe.
+     */
+    private static void onion(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
+        float[] heights = {0, 0.1f, 0.2f, 0.3f, 0.34f, 0.3f};
+        for (int row = 0; row < 2; row++) for (int i = 0; i < 3; i++) {
+            long k = h + row * 5 + i * 23;
+            float x = cx - 0.27f + i * 0.27f + jit(k, 1) * 0.04f, z = cz + (row == 0 ? -0.2f : 0.2f) + jit(k, 2) * 0.04f;
+            float hh = heights[stage] * (0.85f + 0.3f * (jit(k, 3) + 0.5f));
+            root(b, x, z);
+            if (stage >= 3) b.rgb(x, y + 0.03f, z, 0.1f, 0.08f, 0.1f, stage == 3 ? 0xD8C89A : 0xC8963C);       // the bulb
+            if (stage == 5) { b.rgb(x, y + 0.3f, z, 0.025f, 0.6f, 0.025f, 0x8A9A5A); b.rgb(x, y + 0.63f, z, 0.11f, 0.11f, 0.11f, 0xE6E0EE); continue; }
+            float lean = stage == 4 ? 0.06f : 0.01f;
+            for (int f = 0; f < 3; f++) b.rgb(x + (f - 1) * (0.025f + lean), y + 0.06f + hh * 0.5f, z + jit(k, 4 + f) * 0.03f, 0.022f, hh, 0.022f, f == 1 ? 0x5E9A3A : stage == 4 ? 0x8AA046 : 0x4E8A32);
+        }
+    }
+
+    /**
+     * (0.3.7) Tomatoes: a bushy vine tied up a stake, the trusses green and then red down its length; gone over, the
+     * leaf yellowed and the last fruit dark on it.
+     */
+    private static void tomato(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
+        float stake = 0.95f;
+        b.alpha = RIGID;   // tied to its stake, and the stake stands
+        b.rgb(cx, y + stake / 2, cz, 0.04f, stake, 0.04f, 0x8A6A44);
+        float[] reach = {0, 0.16f, 0.4f, 0.66f, 0.84f, 0.8f};
+        float up = reach[stage];
+        int leaf = stage == 5 ? 0x98903E : 0x3C7A2C, leafHi = stage == 5 ? 0xAEA24C : 0x50923A;
+        for (int i = 0; i < 9; i++) {
+            float t = (i + 0.5f) / 9f * up;
+            if (t <= 0.02f) continue;
+            double a = i * 2.3 + jit(h, i % 8) * 0.7;
+            float r = 0.08f + 0.03f * (i % 3) * (1 - t / 1.1f);
+            float lx = cx + (float) Math.cos(a) * r, lz = cz + (float) Math.sin(a) * r;
+            b.rgb(lx, y + t, lz, 0.14f, 0.08f, 0.14f, i % 2 == 0 ? leaf : leafHi);
+            if (stage >= 3 && i % 2 == 1 && t > 0.15f) b.rgb(cx + (float) Math.cos(a + 1.4) * (r + 0.06f), y + t - 0.04f, cz + (float) Math.sin(a + 1.4) * (r + 0.06f), 0.07f, 0.065f, 0.07f,
+                    stage == 3 ? 0x8AB040 : stage == 4 ? (i % 4 == 1 ? 0xD23A26 : 0xE2562A) : 0x7A2A1E);
+        }
+    }
+
+    /**
+     * (0.3.7) Sweetcorn: four tall stalks to a plot with long arching leaves, a tassel at each top and, when ripe, a
+     * fat cob in its husk halfway up; gone over, straw-coloured and rattling.
+     */
+    private static void sweetcorn(Meshes.Boxes b, float cx, float y, float cz, int stage, long h) {
+        float[] heights = {0, 0.2f, 0.6f, 1.1f, 1.5f, 1.4f};
+        int stalk = stage == 5 ? 0xB0A060 : 0x5E9A36, leaf = stage == 5 ? 0xC0B070 : 0x4E8A2E;
+        for (int i = 0; i < 4; i++) {
+            long k = h + i * 29;
+            float x = cx + (i % 2 == 0 ? -0.2f : 0.2f) + jit(k, 1) * 0.05f, z = cz + (i < 2 ? -0.2f : 0.2f) + jit(k, 2) * 0.05f;
+            float hh = heights[stage] * (0.9f + 0.2f * (jit(k, 3) + 0.5f));
+            root(b, x, z);
+            b.rgb(x, y + hh * 0.5f, z, 0.045f, hh, 0.045f, stalk);
+            int leaves = Math.min(5, 1 + stage);
+            for (int f = 0; f < leaves; f++) {
+                float t = (f + 1f) / (leaves + 1) * hh;
+                double a = f * 2.1 + jit(k, 4 + f % 3) * 0.8;
+                b.rgb(x + (float) Math.cos(a) * 0.11f, y + t, z + (float) Math.sin(a) * 0.11f, 0.2f * (float) Math.abs(Math.cos(a)) + 0.04f, 0.025f, 0.2f * (float) Math.abs(Math.sin(a)) + 0.04f, leaf);
+            }
+            if (stage >= 3) b.rgb(x, y + hh + 0.05f, z, 0.07f, 0.1f, 0.07f, stage == 5 ? 0x9A8A5A : 0xD8C878);          // the tassel
+            if (stage >= 4) { b.rgb(x + 0.05f, y + hh * 0.5f, z, 0.075f, 0.2f, 0.075f, stage == 5 ? 0xB8A868 : 0x8AB04A); b.rgb(x + 0.05f, y + hh * 0.5f + 0.09f, z, 0.05f, 0.05f, 0.05f, 0xF0CC3A); }
+        }
+    }
 
     /**
      * (0.3.5) Cotton: two bushy plants to a plot, branching and leafy, green buds as they grow, then the bolls split open

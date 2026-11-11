@@ -69,6 +69,14 @@ public final class DevMap {
     public static final int[][] OAKS = {{99, 8}, {105, 13}};
     public static final int[][] WILLOWS = {{97, 24}, {108, 25}};
     public static final int[][] COPPER = {{48, 32}, {50, 32}}, TIN = {{48, 35}, {50, 35}}, IRON = {{54, 32}, {56, 32}}, COALS = {{60, 32}, {60, 35}};
+    /** (0.3.7) The mining yard's rocks, by the mineral each holds (rpg.item.Minerals): every rung of the ladder stands here to be tried. */
+    public static final java.util.Map<String, int[][]> LODES = new java.util.LinkedHashMap<>();
+    static {
+        LODES.put("copper", COPPER); LODES.put("tin", TIN); LODES.put("iron", IRON); LODES.put("coal", COALS);
+        LODES.put("stone", new int[][]{{52, 32}}); LODES.put("wrought_iron", new int[][]{{52, 35}}); LODES.put("mithril", new int[][]{{54, 35}});
+        LODES.put("granite", new int[][]{{56, 35}}); LODES.put("cobalt", new int[][]{{58, 32}}); LODES.put("dragonite", new int[][]{{58, 35}});
+        LODES.put("moltenite", new int[][]{{62, 32}}); LODES.put("godstone", new int[][]{{62, 35}}); LODES.put("malevolent", new int[][]{{46, 33}});
+    }
     public static final int POND_X0 = 86, POND_Z0 = 29, POND_X1 = 106, POND_Z1 = 40;
     public static final float[][] FISH_SPOTS = {{89.5f, 30.5f}, {101.5f, 37.5f}, {95.5f, 39.5f}};
     public static final int[][] HERBS = {{66, 33}, {68, 33}}, FLAXES = {{71, 33}, {73, 33}}, BERRIES = {{76, 33}, {78, 33}};
@@ -409,7 +417,7 @@ public final class DevMap {
             for (int[] r : IRON) set(r[0], FLOOR, r[1], IRON_ROCK);
             for (int[] r : COALS) set(r[0], FLOOR, r[1], COAL_ROCK);
             ground(46, 30, 62, 37, DIRT);
-            for (int[] r : COPPER) set(r[0], FLOOR, r[1], COPPER_ROCK);
+            for (var lode : LODES.entrySet()) for (int[] r : lode.getValue()) set(r[0], FLOOR, r[1], rpg.item.Minerals.byId(lode.getKey()).block());
             pond(POND_X0, POND_Z0, POND_X1, POND_Z1);
             ground(65, 32, 79, 34, DIRT);
             for (int[] p : HERBS) set(p[0], FLOOR, p[1], HERB_PATCH);

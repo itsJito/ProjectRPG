@@ -89,6 +89,7 @@ public final class Economy {
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
         // (0.3.2) seed for the gardens, and casks of ale for the inns to buy in
+        for (ItemDef seed : KITCHEN_SEEDS) { stock(shopA, seed, 6, 8); stock(macellum, seed, 5, 8); }
         stock(shopA, Items.CARROT_SEEDS, 10, 10); stock(shopA, Items.CABBAGE_SEEDS, 8, 8); stock(shopA, Items.ALE, 12, 16);
         stock(macellum, Items.CARROT_SEEDS, 6, 8); stock(macellum, Items.CABBAGE_SEEDS, 6, 8); stock(macellum, Items.ALE, 10, 14);
         stock(shopA, Items.BARLEY_SEEDS, 8, 8); stock(shopA, Items.GLASS_BOTTLE, 6, 10);
@@ -126,6 +127,8 @@ public final class Economy {
     public static Object saveStock(Shop s) { return ItemIO.inventory(s.stock); }
     public static void loadStock(Shop s, Object saved) { s.stock.clear(); if (saved instanceof List<?> list) { @SuppressWarnings("unchecked") List<Object> l = (List<Object>) list; ItemIO.inventory(s.stock, l); } }
 
+    /** (0.3.7) The seed the general shops carry for the newer kitchen crops. */
+    private static final ItemDef[] KITCHEN_SEEDS = {Items.POTATO_SEEDS, Items.ONION_SEEDS, Items.TOMATO_SEEDS, Items.SWEETCORN_SEEDS};
     private void stock(Shop s, ItemDef d, int n, int target) {
         s.target.put(d.id, target);
         if (n > 0 && s.stock.add(new ItemStack(d, n, s.merchant, false, s.merchant))) g.state.mint(d, n);
@@ -177,15 +180,13 @@ public final class Economy {
         if (s == null) return "They have nothing to trade.";
         if (!merchant.alive) return "They're dead.";
         if (merchant.shunning(g, a)) return merchant.name + " is running from you.";
-        // (0.3.3) a business keeps its hours: shut is shut, to everyone
-        String shut = Hours.closedReason(g, s);
-        if (shut != null) return shut;
-        if (rack(s) ? !merchant.working() || Math.hypot(merchant.x - s.counterX, merchant.z - s.counterZ) > 9
-                : !merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
-            return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work."
-                    // (0.3.6) on their shift but not at the stall (on the way back to it): not "off duty"
-                    : merchant.working() ? " is away from " + s.name + ". They'll be back shortly." : " is off duty. Come back when they're working.");
+        // (0.3.7, gamefixes: the Fence did not trade) a fence keeps no shop and no hours: his goods are in his coat and
+        // under his hand, and he deals wherever he is found awake and not running for his life. He refused all through
+        // the middle of the day, off "at prayers" or "at the inn", because he was held to a stall's shift and its spot.
         if (s == fence) {
+            if (merchant.asleep()) return merchant.name + " is asleep.";
+            if (merchant.goal == rpg.ai.Brain.Goal.FLEE || merchant.goal == rpg.ai.Brain.Goal.HIDE || merchant.goal == rpg.ai.Brain.Goal.FIGHT)
+                return merchant.name + " has other things on his mind just now.";
             // a fence deals with the wanted and the known alike - but never under the eyes of the law, and never with
             // someone who has turned on him
             for (Npc law : g.npcs) if (law.alive && (law.role == Npc.Role.GUARD || law.role == Npc.Role.LAWMAN) && law.distTo(merchant) < 16 && g.ai.canSee(law, merchant))
@@ -194,6 +195,14 @@ public final class Economy {
                     (hurt.kind.equals("ASSAULT") || hurt.kind.equals("MURDER"))) return merchant.name + " wants nothing to do with you.";
             return null;
         }
+        // (0.3.3) a business keeps its hours: shut is shut, to everyone
+        String shut = Hours.closedReason(g, s);
+        if (shut != null) return shut;
+        if (rack(s) ? !merchant.working() || Math.hypot(merchant.x - s.counterX, merchant.z - s.counterZ) > 9
+                : !merchant.working() || Math.hypot(merchant.x - merchant.postX, merchant.z - merchant.postZ) > 2)
+            return merchant.name + (rack(s) ? " is away from the forge. Come back when they're at work."
+                    // (0.3.6) on their shift but not at the stall (on the way back to it): not "off duty"
+                    : merchant.working() ? " is away from " + s.name + ". They'll be back shortly." : " is off duty. Come back when they're working.");
         if (g.law.lockdown(s.jurisdiction)) return "The shops of " + s.jurisdiction + " are shut: the town is in lockdown.";
         if (g.law.bounty(a.id, s.jurisdiction) > 0) return merchant.name + " won't trade with someone wanted in " + s.jurisdiction + ".";
         for (Memory m : merchant.memories) if (m.crime() && m.subject == a.id && m.confidence >= 0.4f && (!m.settled || m.victim == merchant.id))

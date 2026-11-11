@@ -103,11 +103,15 @@ public final class Dialogue {
         // (0.3.0, gamefixes: every answer from the NPC's own day; three or four choices, not a wall of them) how their day has
         // been and what they have heard - always; their own work, as it has gone today; and one thing for the moment: what
         // shook them, their hurt, their hunger - or, on a quiet day, one of the everyday questions in turn
+        // (0.3.7, gamefixes: dialogue leaner and more to the point, no redundancies) one question for how they are -
+        // their day and their work in one answer (it was two questions and a third about work that said the same);
+        // what they have heard only when they have heard something; their calling's own advice; and the moment
         if (n.role != Npc.Role.BANDIT && n.role != Npc.Role.BRUTE) {
-            d.choice("How's your day been?", () -> g.ui.dialog(new Dialog(n.name, day(n))));
-            d.choice("What have you heard?", () -> g.ui.dialog(new Dialog(n.name, news(n))));
-            final String[] t = tip != null ? tip : workTip(n);
-            if (t != null) d.choice(t[0], () -> g.ui.dialog(new Dialog(n.name, t[1] + workToday(n))));
+            d.choice("How are things?", () -> g.ui.dialog(new Dialog(n.name, day(n) + workToday(n))));
+            String heard = news(n);
+            if (heard != null) d.choice("What have you heard?", () -> g.ui.dialog(new Dialog(n.name, heard)));
+            final String[] t = tip;
+            if (t != null) d.choice(t[0], () -> g.ui.dialog(new Dialog(n.name, t[1])));
             situational(n, d, t == null);
             if (g.guilds != null) g.guilds.talk(d, n);
         } else d.choice("What do you want?", () -> g.ui.dialog(new Dialog(n.name, day(n))));
@@ -117,13 +121,6 @@ public final class Dialogue {
 
     // ------------------------------------------------------------------ (0.3.0) the day, told from the Diary
     private static String[] tip(Npc n, String question, String answer) { return new String[]{question, answer}; }
-
-    /** A calling with no role tip of its own: asked about their work. */
-    private String[] workTip(Npc n) {
-        if (n.profession == null && n.role != Npc.Role.WORKER && n.role != Npc.Role.FARMER && n.role != Npc.Role.MERCHANT && n.role != Npc.Role.GUARD
-                && n.role != Npc.Role.LAWMAN && n.role != Npc.Role.CARTER && n.role != Npc.Role.UNDERTAKER && n.role != Npc.Role.VILLAGER) return null;
-        return new String[]{n.watch() ? "How's the watch?" : "How's work?", n.watch() ? pick(n, "Same streets, same faces. ", "Long hours on these stones. ") : pick(n, "It keeps me fed. ", "Honest work, mostly. ", "It's work. ")};
-    }
 
     /** What of their work they did today, said after the tip (empty when nothing of it). */
     private String workToday(Npc n) {
@@ -190,7 +187,7 @@ public final class Dialogue {
         if (picks.isEmpty() && !twoSlots) return;
         // a quiet day: one (or, with no work to ask about, two) of the everyday questions, turned about day by day
         int seed = Math.floorMod((int) (g.state.minutes / 1440) * 7 + (int) n.id, 6);
-        int count = (picks.isEmpty() ? 0 : 1) + (twoSlots ? 1 : 0);
+        int count = picks.isEmpty() && !twoSlots ? 0 : 1;
         for (int k = 0; k < count; k++) switch ((seed + k) % 6) {
             case 0 -> d.choice("Could you point me somewhere?", () -> g.ui.dialog(directions(n)));
             case 1 -> d.choice("Is it safe around here?", () -> g.ui.dialog(new Dialog(n.name, dangers(n))));
@@ -636,7 +633,7 @@ public final class Dialogue {
             if (line != null && !heard.contains(line)) heard.add(line);
         }
         for (String h : heard) { b.append(h).append(' '); told++; }
-        if (told == 0) b.append(pick(n, "Nothing worth repeating. ", "Not much. It's been an ordinary day. ", "Quiet, as days go. "));
+        if (told == 0 && alarm == null) return null;   // nothing heard: no question to ask
         b.append(switch (n.goal) { case WORK -> "I've my own work to see to."; case SLEEP -> "I should be getting some rest."; case REPORT_CRIME -> "I have business with the watch."; case COLLECT -> "There's a body that needs seeing to."; case AID -> "Someone nearby could use a hand."; default -> pick(n, "Keep your ears open. News travels with the people who carry it.", "Ask at the store - they hear everything.", "That's all I know."); });
         return b.toString();
     }

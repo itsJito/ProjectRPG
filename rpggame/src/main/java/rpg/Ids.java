@@ -34,6 +34,8 @@ public final class Ids {
      */
     public static final long GUILD_METALLISTS = 970, ARMORY = 971, GUILD_FORESTERS = 972, CARDER = 973, SPINNER = 974, GUILD_ARTISANS = 975,
             FULLER = 976, DYER = 977, GUILD_FARMERS = 978, GUILD_PROVISIONERS = 979, GUILD_MARINERS = 980, GUILD_ARCANISTS = 981, SMELTER = 982, COASTAL_FISHER = 983;
+    /** (0.3.7) The Shrines of Light (rpg.world.Shrines). */
+    public static final long SHRINE_0 = 990;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
     /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */

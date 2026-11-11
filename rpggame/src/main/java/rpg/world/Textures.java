@@ -419,6 +419,14 @@ final class Textures {
             case L_TIN -> ore(cv, 0xD6DCE2, 0x9AA6B4, 0.0f);
             case L_IRON -> ore(cv, 0xB8643C, 0x5A4A48, 0.0f);
             case L_COAL -> ore(cv, 0x1E1C24, 0x6A7896, 0.0f);
+            // (0.3.7) the rest of the mining ladder: each ore its metal's own colour in the same grey rock
+            case L_WROUGHT -> ore(cv, 0x6A5E58, 0x9A7A5E, 0.0f);
+            case L_MITHRIL -> ore(cv, 0xA6DCEA, 0x4A7AA6, 0.0f);
+            case L_COBALT -> ore(cv, 0x2F55A8, 0x78A8EE, 0.0f);
+            case L_DRAGONITE -> ore(cv, 0xB02020, 0xE89A3A, 0.0f);
+            case L_MOLTENITE -> ore(cv, 0xE8642A, 0xFFD45A, 0.0f);
+            case L_GODSTONE -> ore(cv, 0xF0C850, 0xFFF2BE, 0.0f);
+            case L_MALEVOLENT -> ore(cv, 0x5A1E6E, 0xB848C8, 0.0f);
             // (0.3.2, gamefixes: the world's textures 1/10) a fired-clay red that is not one colour: burnt and pale bricks mixed
             // in, mortar a warm sandy grey set back in shadow, soot and damp creeping up from the foot of the wall
             case L_BRICK -> { brickWall(cv); }

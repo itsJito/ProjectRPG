@@ -1,0 +1,192 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 11292). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-11292.out.log
+Starting 4th build in daemon [uptime: 14 mins 5.539 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 16% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#253,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#254,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#255,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#253,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#254,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#254,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#257,Execution worker Thread 4,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#257,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:buildNative (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#257,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:engineResources (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#257,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:processResources (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#257,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:classes (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#257,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:jar (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#257,Execution worker Thread 4,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#257,Execution worker Thread 4,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#253,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#253,included builds Thread 2,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\ai\Brain.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.003 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Starting process 'Gradle Worker Daemon 4'. Working directory: C:\Users\John\.gradle\workers Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath3988705948219826499txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 4'
+Successfully started process 'Gradle Worker Daemon 4'
+Started Gradle worker daemon (1.99 secs) with fork options DaemonForkOptions{executable=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileJava
+Compiling with JDK Java compiler API.
+Incremental compilation of 419 classes completed in 17.617 secs.
+Class dependency analysis for incremental compilation took 0.211 secs.
+Resolve mutations for :classes (Thread[#253,included builds Thread 2,5,main]) started.
+:classes (Thread[#253,included builds Thread 2,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#253,included builds Thread 2,5,main]) started.
+:compileTestJava (Thread[#253,included builds Thread 2,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#253,included builds Thread 2,5,main]) started.
+:processTestResources (Thread[#253,included builds Thread 2,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#253,included builds Thread 2,5,main]) started.
+:testClasses (Thread[#253,included builds Thread 2,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[#253,included builds Thread 2,5,main]) started.
+:test (Thread[#253,included builds Thread 2,5,main]) started.
+Gradle Test Executor 5 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Value of input property 'filter.commandLineIncludePatterns' has changed for task ':test'
+Starting process 'Gradle Test Executor 5'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\test\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath11016493017075696453txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 5'
+Successfully started process 'Gradle Test Executor 5'
+
+NightSoundProbeTest > probe() STANDARD_OUT
+    PROBE t=0 goal=WORK d=9.00 pos=101.5,75.5 out=
+    PROBE t=1 goal=INVESTIGATE d=10.67 pos=99.8,75.1 out=noticed something
+    PROBE t=2 goal=INVESTIGATE d=10.70 pos=99.8,75.1 out=calling out
+    PROBE t=3 goal=INVESTIGATE d=10.70 pos=99.8,75.1 out=calling out
+    PROBE t=4 goal=INVESTIGATE d=10.70 pos=99.8,75.1 out=calling out
+    PROBE t=5 goal=INVESTIGATE d=10.70 pos=99.8,75.1 out=calling out
+    PROBE t=6 goal=INVESTIGATE d=9.98 pos=100.5,75.1 out=creeping closer to look
+    PROBE t=7 goal=INVESTIGATE d=8.63 pos=101.9,75.2 out=creeping closer to look
+    PROBE t=8 goal=INVESTIGATE d=7.28 pos=103.2,75.2 out=creeping closer to look
+    PROBE t=9 goal=INVESTIGATE d=5.94 pos=104.6,75.3 out=creeping closer to look
+    PROBE t=10 goal=INVESTIGATE d=4.59 pos=105.9,75.3 out=creeping closer to look
+    PROBE t=11 goal=SLEEP d=3.75 pos=106.8,76.0 out=saw probe with a weapon drawn in town
+    PROBE t=12 goal=SLEEP d=5.09 pos=106.3,78.4 out=saw probe with a weapon drawn in town
+    PROBE t=13 goal=SLEEP d=7.05 pos=105.8,80.8 out=saw probe with a weapon drawn in town
+    PROBE t=14 goal=SLEEP d=9.25 pos=105.4,83.2 out=saw probe with a weapon drawn in town
+    PROBE t=15 goal=SLEEP d=11.55 pos=104.9,85.6 out=saw probe with a weapon drawn in town
+    PROBE t=16 goal=SLEEP d=13.10 pos=104.7,87.2 out=saw probe with a weapon drawn in town
+    PROBE t=17 goal=SLEEP d=15.37 pos=104.6,89.7 out=saw probe with a weapon drawn in town
+    PROBE t=18 goal=SLEEP d=17.66 pos=104.5,92.1 out=saw probe with a weapon drawn in town
+    PROBE t=19 goal=SLEEP d=17.83 pos=104.5,92.3 out=saw probe with a weapon drawn in town
+    PROBE t=20 goal=SLEEP d=17.83 pos=104.5,92.3 out=saw probe with a weapon drawn in town
+    PROBE t=21 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=22 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=23 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=24 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=25 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=26 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=27 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=28 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+    PROBE t=29 goal=SLEEP d=17.83 pos=104.5,92.3 out=as close as I can get
+
+Gradle Test Executor 5 finished executing tests.
+
+> Task :test
+Finished generating test XML results (0.005 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.013 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\test
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 15s
+9 actionable tasks: 2 executed, 7 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

@@ -217,9 +217,10 @@ public final class DungeonLayout {
         for (int i = 0; i < rooms.size(); i++) {
             Room o = rooms.get(i);
             // a lamp in the middle of two of its walls (the crypt's and the hall's lit better than a cave's)
-            int lamps = theme == Theme.CAVE ? 1 : 2;
+            // (0.3.7, gamefixes: dungeons were hard to see in) and the other two walls as well - a cave keeps to two
             wallLamp(o.x0() - 1, (o.z0() + o.z1()) / 2, 1);
-            if (lamps > 1) wallLamp(o.x1() + 1, (o.z0() + o.z1()) / 2, 3);
+            wallLamp(o.x1() + 1, (o.z0() + o.z1()) / 2, 3);
+            if (theme != Theme.CAVE) { wallLamp((o.x0() + o.x1()) / 2, o.z0() - 1, 2); wallLamp((o.x0() + o.x1()) / 2, o.z1() + 1, 4); }
             int level = depth[i] < 0 ? 1 : depth[i];
             switch (o.kind()) {
                 case ENTRY -> spots.add(new Spot("exit", entryX, entryZ, 0));
@@ -246,6 +247,27 @@ public final class DungeonLayout {
             spots.add(new Spot("trap", x, z, r.nextInt(2)));
             t++;
         }
+        passageLamps();
+    }
+
+    /** How far apart the passages' torches hang (cells): each lights its stretch and leaves a little dusk before the next. */
+    static final int LAMP_SPACING = 9;
+
+    /**
+     * (0.3.7, gamefixes: dungeons were hard to see in) the passages are lit too: a torch on the wall wherever a stretch of
+     * corridor has none within {@link #LAMP_SPACING} cells - found by walking the plan, so it uses none of the seed's rolls
+     * and what was already placed stays where it was.
+     */
+    private void passageLamps() {
+        for (int x = 1; x < w - 1; x++) for (int z = 1; z < d - 1; z++) {
+            if (!open[x][z] || height[x][z] != PASSAGE) continue;
+            int facing = !open[x - 1][z] ? 1 : !open[x + 1][z] ? 3 : !open[x][z - 1] ? 2 : !open[x][z + 1] ? 4 : 0;
+            if (facing == 0) continue;
+            int lx = facing == 1 ? x - 1 : facing == 3 ? x + 1 : x, lz = facing == 2 ? z - 1 : facing == 4 ? z + 1 : z;
+            boolean lit = false;
+            for (Spot s : spots) if (s.what().equals("lamp") && Math.hypot(s.x() - lx, s.z() - lz) < LAMP_SPACING) { lit = true; break; }
+            if (!lit) spots.add(new Spot("lamp", lx, lz, facing));
+        }
     }
 
     /** A cell inside a room clear of its pillars (each 2 x 2). */
@@ -259,13 +281,20 @@ public final class DungeonLayout {
         return new int[]{(int) o.cx(), (int) o.cz()};
     }
 
-    /** A lamp on a wall, at the wall cell nearest the one asked for along the wall (a doorway there moves it along). */
+    /**
+     * A lamp on a wall, at the wall cell nearest the one asked for along the wall (a doorway there moves it along). The
+     * facing is the side its light falls on: 1 east (+x), 3 west (-x), 2 south (+z), 4 north (-z).
+     */
     private void wallLamp(int x, int z, int facing) {
+        int fx = facing == 1 ? 1 : facing == 3 ? -1 : 0, fz = facing == 2 ? 1 : facing == 4 ? -1 : 0;
         for (int k = 0; k < 6; k++) for (int sgn = -1; sgn <= 1; sgn += 2) {
-            int zz = z + sgn * k;
-            if (x >= 0 && x < w && zz >= 0 && zz < d && !open[x][zz] && open[Math.max(0, Math.min(w - 1, x + (facing == 1 ? 1 : -1)))][zz]) { spots.add(new Spot("lamp", x, zz, facing)); return; }
+            int xx = x + (fx == 0 ? sgn * k : 0), zz = z + (fz == 0 ? sgn * k : 0);
+            int ax = Math.max(0, Math.min(w - 1, xx + fx)), az = Math.max(0, Math.min(d - 1, zz + fz));
+            if (xx >= 0 && xx < w && zz >= 0 && zz < d && !open[xx][zz] && open[ax][az]) { spots.add(new Spot("lamp", xx, zz, facing)); return; }
         }
     }
+    /** The unit step from a lamp's wall cell into the open (its facing): {dx, dz}. */
+    public static int[] lampFacing(int facing) { return new int[]{facing == 1 ? 1 : facing == 3 ? -1 : 0, facing == 2 ? 1 : facing == 4 ? -1 : 0}; }
 
     // ------------------------------------------------------------------ the boss dungeon (authored)
     /**
@@ -284,6 +313,7 @@ public final class DungeonLayout {
         spots.add(new Spot("exit", entryX, entryZ, 0));
         wallLamp(2, 26, 1); wallLamp(10, 23, 3);
         for (int z = 16; z <= 36; z += 10) { wallLamp(17, z, 1); wallLamp(37, z, 3); }
+        passageLamps();
         // pillars, two rows down the hall; braziers in its four corners; boulders lying about
         for (int z = 12; z <= 40; z += 7) { spots.add(new Spot("pillar", 22, z, 0)); spots.add(new Spot("pillar", 32, z, 0)); }
         for (int[] c : new int[][]{{19, 7}, {35, 7}, {19, 45}, {35, 45}}) spots.add(new Spot("brazier", c[0], c[1], 0));
@@ -296,6 +326,17 @@ public final class DungeonLayout {
     // ------------------------------------------------------------------ helpers
     public int worldX(int x) { return ox + x; }
     public int worldZ(int z) { return oz + z; }
+    /** The room a world point lies in (its alcoves count as the room's), or null in a passage or the rock. */
+    public Room roomAt(float wx, float wz) {
+        float x = wx - ox, z = wz - oz;
+        for (Room r : rooms) if (x >= r.x0() - 2 && x <= r.x1() + 3 && z >= r.z0() - 2 && z <= r.z1() + 3) return r;
+        return null;
+    }
+    /** Whether two world points share a room, or a clear stretch of passage (neither in a room, and near each other). */
+    public boolean together(float ax, float az, float bx, float bz) {
+        Room a = roomAt(ax, az), b = roomAt(bx, bz);
+        return a != null ? a == b : b == null && Math.hypot(ax - bx, az - bz) < LAMP_SPACING;
+    }
     public boolean openAt(int wx, int wz) { int x = wx - ox, z = wz - oz; return x >= 0 && z >= 0 && x < w && z < d && open[x][z]; }
     /** Waypoints for routing inside: each room's middle and every corridor bend (world coordinates). */
     public List<float[]> waypoints() {

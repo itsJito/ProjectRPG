@@ -173,7 +173,9 @@ public final class Fixtures {
     /** A market stall: its goods belong to the merchant; stealing from it is Thieving, and a crime if seen. Restocks over time. */
     public static final class Stall extends WorldObject {
         public final Inventory goods = new Inventory(10, 1);   // a counter of five loaves
-        public final int level = 5;
+        /** The Thieving level stealing from a stall asks. */
+        public static final int LEVEL = 5;
+        public final int level = LEVEL;
         public double restockAt;
         public Stall(long id, float x, float y, float z, long owner) { super(id, "stall", "Market stall", x, y, z); this.owner = owner; }
         @Override public float focusRadius() { return 1.1f; }

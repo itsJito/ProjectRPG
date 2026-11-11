@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.lwjgl.system.MemoryUtil;
 import rpg.Rpg;
-import rpg.ui.Ui2D;
 import rpg.actor.Actor;
 import rpg.actor.Appearance;
 import rpg.actor.Body;
@@ -160,7 +159,7 @@ public final class Gfx implements AutoCloseable {
             if (l.length < 5 || clock >= l[4]) { boolean r = vox != null && !vox.sight(l[0], l[1] + 0.6f, l[2], l[0], l[1] + 12, l[2]); if (l.length >= 5) { l[3] = r ? 1 : 0; l[4] = (float) (clock + 5 + (Math.abs(l[0] * 7 + l[2]) % 3)); } }
             boolean roofed = l.length >= 5 ? l[3] > 0.5f : vox != null && !vox.sight(l[0], l[1] + 0.6f, l[2], l[0], l[1] + 12, l[2]);
             float near = (float) Math.hypot(l[0] - camX, l[2] - camZ);
-            if (day && (!roofed || near > 48)) continue;
+            if (day && (!roofed || near > 48) || !inFog(l[0], l[2], 13)) continue;
             // (0.3.1, gamefixes: visual flickering) every lamp near the eye asks for a shadow; the renderer gives them to
             // the nearest (it took the first three in the map's list, so shadows came and went as the camera moved)
             int flags = near < 24 ? AstrattoNative.LIGHT_SHADOW : 0;
@@ -175,8 +174,14 @@ public final class Gfx implements AutoCloseable {
             if (vox.block(x, y, z) == Blocks.LAMP) lamps.add(new float[]{x + 0.5f, y + 0.5f, z + 0.5f, 0, -1});
     }
 
-    /** Where the fog bank has swallowed the world (metres from the eye): set by {@link #environment}, used to cull past it. */
+    /** Where the fog bank has swallowed the world (metres from its centre): set by {@link #environment}, used to cull past it. */
     private float fogFar = 400;
+    /** (0.3.7) The fog ring's centre on the ground: the player (the camera where there is no player: the title, the creator). */
+    private float fogX, fogZ;
+    /** How far past the ring a thing's centre may stand and still be drawn (its own size reaching back in, m). */
+    private static final float FOG_PAD = 3;
+    /** Whether a point stands inside the fog ring - drawn; past it nothing is (gamefixes: the fog culls what it hides). */
+    private boolean inFog(float x, float z, float pad) { return Math.hypot(x - fogX, z - fogZ) < fogFar + pad; }
     /** Where the camera stands (for distance culling). */
     private float camX, camY, camZ;
 
@@ -191,7 +196,8 @@ public final class Gfx implements AutoCloseable {
         view.lookAt(cx, cy, cz, cx + fx, cy + fy, cz + fz, 0, 1, 0);
         // (gamefixes: the fog should help performance) nothing is drawn past the fog bank: the far plane closes in
         // behind it, so the chunks and props beyond are culled rather than drawn and then fogged away
-        float far = Math.max(40, Math.min(400, fogFar + 6));
+        // (0.3.7) the ring is round the player, so the camera's reach is the ring and the camera's distance from its centre
+        float far = Math.max(40, Math.min(400, fogFar + (float) Math.hypot(cx - fogX, cz - fogZ) + 6));
         proj.perspective(fov, aspect, 0.05f, far);
         viewProj.set(proj).mul(view);
         cmd.camera(view.m, proj.m, proj.m, cx, cy, cz, fx, fy, fz, fov, aspect, 0.05f, far, Math.min(160f, far), dt, first);
@@ -230,9 +236,13 @@ public final class Gfx implements AutoCloseable {
         float mist = 0.0022f + 0.0075f * dawn + 0.0045f * dusk + 0.0045f * night + wfog * 0.012f;
         boolean indoorsScene = sceneGame == null;
         // A nearer complete bank also bounds chunk and prop submission, including dense weather at night.
-        float bankStart = indoorsScene ? 1e9f : Math.max(22,48 - 16*dawn - 9*dusk - 10*night - 16*wfog);
-        float bankEnd = indoorsScene ? 2e9f : bankStart + 32 + 10*(1-night);
+        // (0.3.7, gamefixes: bring the fog in, a circle round the player, everything past it culled) a ring round the
+        // player, nearer than it was - the street and the next house clear, the far side of the town going into it, the
+        // world past it not drawn at all - thicker at dawn, dusk, by night and in weather
+        float bankStart = indoorsScene ? 1e9f : Math.max(FOG_MIN, FOG_START - 10*dawn - 6*dusk - 8*night - 10*wfog);
+        float bankEnd = indoorsScene ? 2e9f : bankStart + FOG_DEPTH + 6*(1-night);
         fogFar = indoorsScene ? 400 : bankEnd;
+        if (sceneGame != null) { fogX = sceneGame.player.x; fogZ = sceneGame.player.z; } else { fogX = camX; fogZ = camZ; }
         // the light itself: golden while the sun is low, moonlit blue at night, white by day
         float tr = 1, tg = 1 - 0.10f * low * (1 - night), tb = 1 - 0.22f * low * (1 - night);
         tr -= 0.18f * night; tg -= 0.08f * night;
@@ -242,7 +252,7 @@ public final class Gfx implements AutoCloseable {
         boolean roofedNow = !indoorsScene && sceneGame != null && !sceneGame.vox.sight(camX, camY + 0.2f, camZ, camX, camY + 14, camZ);
         indoorFill += ((roofedNow ? 1 : 0) - indoorFill) * Math.min(1, (float) Math.max(0.001, time - atmosAt) * 2.5f);
         float roomDay = indoorFill * clamp01(daylight) * (1 - 0.6f * (weather == null ? 0 : weather.overcast));
-        cmd.env(sx, sy, sz, daylight, (float) time, weather==null?0:weather.rain, weather==null?0:weather.wetness, weather==null?0:weather.snowCover, weather==null?0.1f:weather.overcast, weather==null?0:weather.lightning, fogR, fogG, fogB, indoorsScene ? 1f / 300f : mist, bankStart, bankEnd, indoorsScene ? 0 : 0.62f, 0, tr * (sceneGame==null?1:sceneGame.timeSystem.tintR), tg * (sceneGame==null?1:sceneGame.timeSystem.tintG), tb * (sceneGame==null?1:sceneGame.timeSystem.tintB), (0.004f + 0.006f * night + wfog * 0.012f) * (sceneGame==null?1:sceneGame.timeSystem.fogScale) + 0.03f * roomDay, Float.NaN, 0, 0, 0.05f + 0.03f * low);
+        cmd.env(sx, sy, sz, daylight, (float) time, weather==null?0:weather.rain, weather==null?0:weather.wetness, weather==null?0:weather.snowCover, weather==null?0.1f:weather.overcast, weather==null?0:weather.lightning, fogR, fogG, fogB, indoorsScene ? 1f / 300f : mist, bankStart, bankEnd, indoorsScene ? 0 : 0.62f, 0, tr * (sceneGame==null?1:sceneGame.timeSystem.tintR), tg * (sceneGame==null?1:sceneGame.timeSystem.tintG), tb * (sceneGame==null?1:sceneGame.timeSystem.tintB), (0.004f + 0.006f * night + wfog * 0.012f) * (sceneGame==null?1:sceneGame.timeSystem.fogScale) + 0.03f * roomDay, indoorsScene ? Float.NaN : fogX, indoorsScene ? 0 : sceneGame.player.eyeY(), indoorsScene ? 0 : fogZ, 0.05f + 0.03f * low);
         // (0.3.0, gamefixes) the environment preset of the hour, the weather and the roof over the camera: the ambient cube
         // and the grade move with the sky and the fog in one blend
         atmosphere.apply(cmd, hour, sx, weather, new float[]{fogR, fogG, fogB}, roofedNow, (float) Math.max(0.001, time - atmosAt));
@@ -250,6 +260,8 @@ public final class Gfx implements AutoCloseable {
         return daylight;
     }
 
+    /** The fog ring by day: where it begins and how deep it is (m from the player); never nearer than FOG_MIN, whatever the weather. */
+    static final float FOG_START = 34, FOG_DEPTH = 22, FOG_MIN = 18;
     private static float clamp01(float v) { return Math.max(0, Math.min(1, v)); }
     /** (0.3.0) The environment presets, and when they were last sent (the blend's clock). */
     public final Atmosphere atmosphere = new Atmosphere();
@@ -482,7 +494,7 @@ public final class Gfx implements AutoCloseable {
         workshops(g);
         fences(g);
         // the animals first (0.3.3): a ridden mount's drawn body is what carries its rider's figure this frame
-        if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.loaded && (an.alive || an.carcass() && !an.butchered) && an.distTo(camX, camZ) < 70) animal(an, dt, g.time);
+        if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.loaded && (an.alive || an.carcass() && !an.butchered) && an.distTo(camX, camZ) < 70 && inFog(an.x, an.z, FOG_PAD)) animal(an, dt, g.time);
         // characters
         Actor p = g.player;
         if(!g.notarget()) {
@@ -500,6 +512,8 @@ public final class Gfx implements AutoCloseable {
         }
         }
         for (Npc n : g.npcs) {
+            // (0.3.7) past the fog ring nobody is drawn (they were, every one of them, wherever they were)
+            if (!inFog(n.x, n.z, FOG_PAD)) continue;
             if (n.loaded) shadowProxy(g,n);
             if (n.ragdoll != 0) {
                 // a body in Sydney's hands - reeling from a blow, or dead - is drawn as the engine has it
@@ -514,9 +528,9 @@ public final class Gfx implements AutoCloseable {
         for (Actor d : g.dummies) dummy(d, g.time);
         holyLight(g);
         // the monsters (gamefixes: they were simulated, heard and fought, but never drawn - the invisible imps and goblins)
-        if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) if ((mo.alive ? mo.loaded : mo.ragdoll != 0 || mo.kind.form == rpg.monster.MonsterKind.Form.SPIDER) && mo.distTo(camX, camZ) < 90) monster(mo, dt);
+        if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) if ((mo.alive ? mo.loaded : mo.ragdoll != 0 || mo.kind.form == rpg.monster.MonsterKind.Form.SPIDER) && mo.distTo(camX, camZ) < 90 && inFog(mo.x, mo.z, FOG_PAD + mo.radius)) monster(mo, dt);
         // objects
-        for (WorldObject o : g.objects.all()) if (Math.hypot(o.x - camX, o.z - camZ) < fogFar + 6) object(g, o, dt);
+        for (WorldObject o : g.objects.all()) if (inFog(o.x, o.z, FOG_PAD)) object(g, o, dt);
         if (g.interact.focus != null && g.interact.focus != (Object) g.player) {
             var f = g.interact.focus;
             float bob = (float) Math.sin(g.time * 4) * 0.05f;
@@ -1457,9 +1471,14 @@ public final class Gfx implements AutoCloseable {
      * guttering and its warm light flickering with it; the braziers' fire bright and high, the fire pits glowing low.
      * There is no daylight underground - away from these it is dark.
      */
+    /** How far from the eye a dungeon's torch still casts its light (m). */
+    private static final float TORCH_REACH = 46;
     private void dungeonLights(Rpg g) {
         var dl = rpg.world.DungeonLayout.at(camX, camZ);
         if (dl == null) return;
+        // (0.3.7, gamefixes: dungeons were hard to see in) eyes used to the dark: a faint cool fill round the visitor, so
+        // the floor ahead, a wall and whatever is coming along it can be told apart between one torch and the next
+        cmd.pointLight(g.player.x, g.player.y + 1.7f, g.player.z, 11, 0.5f, 0.56f, 0.7f, 0);
         int i = 0;
         for (var s : dl.spots) {
             i++;
@@ -1468,12 +1487,13 @@ public final class Gfx implements AutoCloseable {
             long emit = 0x5000000000L + dl.id * 4096L + i;
             switch (s.what()) {
                 case "lamp" -> {
-                    float dir = s.arg() == 1 ? 1 : -1;
-                    float tx = x + dir * 0.62f, ty = DevMap.FLOOR + 2.0f;
-                    m.identity().translate(tx, ty, z).rotateY(dir > 0 ? (float) (-Math.PI / 2) : (float) (Math.PI / 2));
+                    int[] f = rpg.world.DungeonLayout.lampFacing(s.arg());
+                    float tx = x + f[0] * 0.62f, tz = z + f[1] * 0.62f, ty = DevMap.FLOOR + 2.0f;
+                    m.identity().translate(tx, ty, tz).rotateY((float) Math.atan2(-f[0], -f[1]));
                     drawLayers("dungeon-torch", Props::torch);
-                    cmd.emitter(emit, 0, tx + dir * 0.06f, ty + 0.36f, z, 0.05f, 22, 0.06f, 0.42f, 5.5f, 1.8f, 0.35f, 0, 0.45f, 0);
-                    cmd.pointLight(tx + dir * 0.3f, ty + 0.45f, z, 12, 4.6f * fl, 2.4f * fl, 0.8f * fl, 0);
+                    cmd.emitter(emit, 0, tx + f[0] * 0.06f, ty + 0.36f, tz + f[1] * 0.06f, 0.05f, 22, 0.06f, 0.42f, 5.5f, 1.8f, 0.35f, 0, 0.45f, 0);
+                    // (0.3.7) only the torches near the eye are lit: the far side of a big dungeon costs nothing
+                    if (Math.hypot(tx - camX, tz - camZ) < TORCH_REACH) cmd.pointLight(tx + f[0] * 0.3f, ty + 0.45f, tz + f[1] * 0.3f, 13, 5.4f * fl, 2.9f * fl, 1.0f * fl, 0);
                 }
                 case "brazier" -> {
                     cmd.emitter(emit, 0, x, DevMap.FLOOR + 1.3f, z, 0.25f, 46, 0.12f, 0.8f, 5.5f, 1.8f, 0.3f, 0, 0.9f, 0);
@@ -2923,6 +2943,19 @@ public final class Gfx implements AutoCloseable {
             drawItem(d, 0);
         } else if (o instanceof Fire f) {
             for (int i = 0; i < 3; i++) { m.identity().translate(f.x, f.y + 0.06f, f.z).rotateY(i * 1.05f).scale(0.6f, 0.1f, 0.1f); put(box, 0x5A3A20, 0.6f, 0.9f, 0); }
+        } else if (o instanceof rpg.world.Shrines.Shrine sh) {
+            // (0.3.7) a Shrine of Light: the tower, its flames alive (a column of blue sparks off the bowl, a wisp off each
+            // pillar's cup), and their cold blue light round the graves
+            m.identity().translate(sh.x, DevMap.FLOOR, sh.z);
+            drawLayers("shrine", Props::shrine);
+            float fl = 0.88f + 0.08f * (float) Math.sin(clock * 7.3 + sh.id) + 0.04f * (float) Math.sin(clock * 19.1);
+            long emit = 0x5800000000L + sh.id * 8;
+            cmd.emitter(emit, 0, sh.x, DevMap.FLOOR + 2.5f, sh.z, 0.22f, 40, 0.09f, 0.7f, 0.6f, 2.2f, 7.0f, 0, 0.8f, 0);
+            for (int k = 0; k < 4; k++) {
+                float px = sh.x + ((k & 1) == 0 ? -0.66f : 0.66f), pz = sh.z + (k < 2 ? -0.66f : 0.66f);
+                cmd.emitter(emit + 1 + k, 0, px, DevMap.FLOOR + 1.9f, pz, 0.05f, 12, 0.05f, 0.45f, 0.6f, 2.2f, 7.0f, 0, 0.5f, 0);
+            }
+            cmd.pointLight(sh.x, DevMap.FLOOR + 2.6f, sh.z, 12, 1.2f * fl, 3.0f * fl, 7.5f * fl, AstrattoNative.LIGHT_SHADOW);
         } else if (o instanceof rpg.dungeon.Dungeons.Door dd) {
             // a dungeon's mouth in the wilds (its theme's stone round a black way down), or the way out inside
             m.identity().translate(dd.x, DevMap.FLOOR, dd.z).rotateY(dd.inside ? (float) (Math.PI / 2) : 0);

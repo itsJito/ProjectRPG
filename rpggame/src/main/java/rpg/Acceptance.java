@@ -15,7 +15,6 @@ import rpg.ai.Stealth;
 import rpg.actor.Player;
 import rpg.combat.Spells;
 import rpg.econ.Economy;
-import rpg.interact.Interactable;
 import rpg.interact.Result;
 import rpg.interact.WorldObject;
 import rpg.item.Equipment;
@@ -300,7 +299,7 @@ public final class Acceptance {
         frames(20);
         var so = store.options(g, g.player);
         need("the locked door's Open is disabled with a reason", so.stream().anyMatch(o -> o.id().equals("open") && !o.enabled() && o.reason() != null));
-        need("its Pick lock is disabled with a reason (Thieving 10)", so.stream().anyMatch(o -> o.id().equals("lockpick") && !o.enabled() && o.reason().contains("Thieving")));
+        need("its Pick lock asks for a lockpick (no level: any lock, any hand)", so.stream().anyMatch(o -> o.id().equals("lockpick") && !o.enabled() && o.reason().contains("lockpick")));
         // loose items: take, then stale target
         tp(51.0f, 15.5f, 0);
         frames(15);
@@ -372,7 +371,7 @@ public final class Acceptance {
         chopAt(tree, need + 6);
         need("Woodcutting: swung blows fell the whole tree, its logs taken and XP paid at the fall (" + g.player.count(Items.LOGS) + " logs)",
                 tree.depleted() && g.player.count(Items.LOGS) >= 2 && g.player.skills.xp(Skill.WOODCUTTING) > wc0);
-        need("a felled tree changes the world (stump, no crown)", g.vox.block(tree.bx, DevMap.FLOOR, tree.bz) == Blocks.STUMP && g.vox.block(tree.bx, DevMap.FLOOR + 2, tree.bz) == Blocks.AIR);
+        need("a felled tree changes the world (stump, no crown)", g.vox.block(tree.bx, DevMap.FLOOR, tree.bz) == Blocks.stumpOf(tree.block) && g.vox.block(tree.bx, DevMap.FLOOR + 2, tree.bz) == Blocks.AIR);
         shot("05-woodcutting");
         // Firemaking: light one log
         tp(70.5f, 30.5f, 0);

@@ -1,11 +1,8 @@
 package rpg.ui;
 
 import java.util.List;
-import rpg.Chat;
-import rpg.Ids;
 import rpg.Rpg;
 import rpg.actor.Player;
-import rpg.ai.Npc;
 import rpg.combat.CombatMath;
 import rpg.combat.Spells;
 import rpg.interact.Result;
@@ -114,7 +111,7 @@ final class Panels {
                 else if (it == null) ui.flatCentered(s.name().toLowerCase(), cx + cs / 2, cy + cs / 2 - 7, 10, Style.FAINT);
                 if (hv) ui.border(cx, cy, cs, cs, 1, Style.EDGE_HI);
                 if (it != null) hud.itemIcon(ui, it, cx + 2, cy + 2, cs - 4, cs - 4, 1);
-                if (hv && it != null) hud.tooltip(hud.describe(it) + "\nClick to remove");
+                if (hv && it != null) hud.tooltip(hud.describe(it) + "\nClick (or shift-click) to take it off");
                 if (it != null && live && ui.clicked(cx, cy, cs, cs)) { Result r = g.items.unequip(p, s); if (r.rejected()) g.chat.warn(r.reason()); else hud.sound("UI_Trading_ItemSelect", 0.4f); }
                 if (it != null && live && ui.rclicked(cx, cy, cs, cs)) hud.openMenu(it.def.name, ui.mx, ui.my, java.util.List.of(
                         new Hud.MenuItem("Remove", true, null, () -> g.items.unequip(p, s)),
@@ -176,16 +173,29 @@ final class Panels {
             Rpg g = hud.g;
             Player p = g.player;
             ItemDef main = p.main();
+            // (0.3.7, gamefixes: the character tab more engaging, no empty space) the name and the two levels as badges;
+            // the vitals as bars; the fighting figures; and on the right Honor, standing, and the fighting skills
             title(ui, p.name, x, y);
-            ui.text("Combat level " + p.skills.combatLevel() + "    Total level " + p.skills.totalLevel(), x, y + 28, 13, Style.DIM);
-            sheet(ui, x - 6, y + 50, 340, 372);
-            sheet(ui, x + 352, y + 50, 300, 90);
-            sheet(ui, x + 352, y + 158, 300, 152);
-            ui.text("Combat & condition", x, y + 56, 13, 0xFFFFD15E);
+            badge(ui, "Combat", p.skills.combatLevel(), x + pw - 236, y - 6);
+            badge(ui, "Total", p.skills.totalLevel(), x + pw - 116, y - 6);
+            sheet(ui, x - 6, y + 34, 340, 404);
+            sheet(ui, x + 352, y + 34, 300, 92);
+            sheet(ui, x + 352, y + 134, 300, 104);
+            sheet(ui, x + 352, y + 246, 300, 192);
+            ui.text("Condition", x, y + 40, 13, 0xFFFFD15E);
+            float[][] vit = {{p.hp, p.maxHp()}, {p.stamina, p.maxStamina()}, {p.faith, p.maxFaith()}, {p.mana, p.maxMana()}};
+            String[] vn = {"Health", "Stamina", "Faith", "Mana"};
+            int[] vc = {Style.HP, Style.STAMINA, Style.FAITH, Style.MANA};
+            for (int i = 0; i < 4; i++) {
+                float ry = y + 62 + i * 24;
+                ui.text(vn[i], x, ry, 13, Style.DIM);
+                Style.bar(ui, x + 84, ry + 5, 170, 6, vit[i][1] <= 0 ? 0 : vit[i][0] / vit[i][1], vc[i]);
+                String v = String.format("%.0f / %.0f", vit[i][0], vit[i][1]);
+                ui.text(v, x + 328 - ui.width(v, 12), ry + 1, 12, Style.TEXT);
+            }
+            ui.text("In a fight", x, y + 166, 13, 0xFFFFD15E);
             float prot = CombatMath.protection(p.skills.level(Skill.DEFENSE), p.eq.armor());
             String[][] rows = {
-                    {"Health", String.format("%.0f / %.0f", p.hp, p.maxHp())}, {"Stamina", String.format("%.0f / %.0f", p.stamina, p.maxStamina())},
-                    {"Faith", String.format("%.0f / %.0f", p.faith, p.maxFaith())}, {"Mana", String.format("%.0f / %.0f", p.mana, p.maxMana())},
                     {"Attack tempo", String.format("x%.2f", 1f / CombatMath.attackCadence(p.skills.level(Skill.ATTACK), main == null ? 0 : main.attackBonus))},
                     {"Impact force", String.format("x%.2f", CombatMath.strengthForce(p.skills.level(Skill.STRENGTH)))},
                     {"Protection", String.format("%.0f rating / %d max hit absorbed", prot, CombatMath.armoredMax(1000, p.skills.level(Skill.DEFENSE), p.eq.armor()) == 1000 ? 0 : 1000 - CombatMath.armoredMax(1000, p.skills.level(Skill.DEFENSE), p.eq.armor()))},
@@ -197,25 +207,51 @@ final class Panels {
                     {"Gold", Currency.full(p.count(Items.COINS))}};
             // Honor (GDD 3.5): the bar with its face, the rank, and what it is worth at the counter
             var hn = g.honor;
-            ui.text("Honor", x + 360, y + 56, 13, Style.DIM);
-            ui.text(hn.rankName() + "  " + (hn.score > 0 ? "+" : "") + hn.score, x + 430, y + 56, 13, Style.TEXT);
-            HudFragments.honorBar(ui, x + 368, y + 88, 270, hn.score, hn.score);
-            ui.text(hn.discount() > 0 ? String.format("Merchants who know you: %.0f%% off", hn.discount() * 100) : "No Honor discount (from +33)", x + 360, y + 112, 11, Style.FAINT);
+            ui.text("Honor", x + 360, y + 40, 13, 0xFFFFD15E);
+            ui.text(hn.rankName() + "  " + (hn.score > 0 ? "+" : "") + hn.score, x + 430, y + 40, 13, Style.TEXT);
+            HudFragments.honorBar(ui, x + 368, y + 72, 270, hn.score, hn.score);
+            ui.text(hn.discount() > 0 ? String.format("Merchants who know you: %.0f%% off", hn.discount() * 100) : "No Honor discount (from +33)", x + 360, y + 96, 11, Style.FAINT);
             for (int i = 0; i < rows.length; i++) {
-                float ry = y + 84 + i * 21;
-                if (i % 2 == 0) ui.rect(x - 4, ry - 3, 336, 20, 0x14FFE0A0);
+                float ry = y + 188 + i * 25;
+                if (i % 2 == 0) ui.rect(x - 4, ry - 4, 336, 22, 0x14FFE0A0);
                 ui.text(rows[i][0], x, ry, 13, Style.DIM);
                 ui.text(rows[i][1], x + 140, ry, 13, i == rows.length - 1 ? Currency.color(p.count(Items.COINS)) : Style.TEXT);
             }
             // (gamefixes: the controls came off the character sheet) where the player stands with each kingdom's law
-            ui.text("Standing", x + 360, y + 166, 13, 0xFFFFD15E);
+            ui.text("Standing", x + 360, y + 140, 13, 0xFFFFD15E);
             String[] kingdoms = {rpg.world.DevMap.ALPHA, rpg.world.DevMap.BETA, rpg.world.DevMap.PALACE};
             for (int i = 0; i < kingdoms.length; i++) {
                 int b = g.law.bounty(p.id, kingdoms[i]);
-                float ry = y + 194 + i * 24;
+                float ry = y + 164 + i * 24;
                 ui.text(kingdoms[i], x + 360, ry, 13, Style.DIM);
                 ui.text(b <= 0 ? "In good standing" : b <= g.cfg.pursuitBounty ? "Fine owed: " + b + " G" : "Wanted: " + Currency.text(b) + " G", x + 470, ry, 13, b <= 0 ? Style.GOOD : b <= g.cfg.pursuitBounty ? Style.WARN : Style.BAD);
             }
+            // the skills a fight is made of, each a plate with its level and the way to the next (a click opens its guide)
+            ui.text("Fighting skills", x + 360, y + 252, 13, 0xFFFFD15E);
+            Skill[] fighting = {Skill.ATTACK, Skill.STRENGTH, Skill.DEFENSE, Skill.HEALTH, Skill.ARCHERY, Skill.MAGIC, Skill.FAITH, Skill.AGILITY};
+            for (int i = 0; i < fighting.length; i++) {
+                Skill s = fighting[i];
+                float cx = x + 360 + (i % 2) * 146, cy = y + 276 + (i / 2) * 39;
+                boolean hv = ui.hover(cx, cy, 140, 35);
+                ui.rect(cx, cy, 140, 35, hv ? 0xFF2C251C : 0xFF211C16);
+                ui.border(cx, cy, 140, 35, 1, hv ? 0xFF5A4A30 : 0xFF0E0B08);
+                ui.img(Atlas.skill(s), cx + 4, cy + 3, 28, 0xFFFFFFFF);
+                ui.text(s.title, cx + 38, cy + 4, 12, Style.DIM);
+                int lvl = p.skills.level(s);
+                ui.text(String.valueOf(lvl), cx + 134 - ui.width(String.valueOf(lvl), 15), cy + 3, 15, lvl >= XpTable.MAX_LEVEL ? 0xFFFFD15E : Style.TEXT);
+                Style.bar(ui, cx + 38, cy + 26, 96, 3, (float) XpTable.progress(p.skills.xp(s)), Style.GOOD);
+                if (hv && live && ui.click) { hud.guide = s; hud.go(Hud.Scene.SKILLS); }
+                if (hv) hud.tooltip(s.title + "\n" + String.format("%,d XP", p.skills.xp(s)) + "\nClick for what it unlocks");
+            }
+        }
+
+        /** A level as a small plate: the word over the number. */
+        private static void badge(Ui2D ui, String word, int value, float x, float y) {
+            ui.rect(x, y, 108, 26, 0x50000000);
+            ui.border(x, y, 108, 26, 1, Style.GOLD);
+            ui.text(word, x + 8, y + 7, 12, Style.DIM);
+            String v = String.valueOf(value);
+            ui.text(v, x + 100 - ui.width(v, 16), y + 4, 16, 0xFFFFD15E);
         }
     }
 
@@ -257,30 +293,104 @@ final class Panels {
         private float scroll;
         private Skill seen;
         Guide(Hud h) { super("guide", 432, 440); }
+        /**
+         * (0.3.7, gamefixes: the skills tab - everything a level unlocks, shown so it reads at a glance) the skill's header
+         * with its level, the way to the next level as a bar and the next unlock ahead; then every level that opens
+         * something, as a milestone down a track - a badge with the level, and beside it each thing it opens, marked by
+         * kind - the reached ones lit, the next one picked out, the rest waiting in grey (they read "???" until they were reached).
+         */
         @Override public void draw(Ui2D ui, float x, float y) {
+            Rpg g = hud.g;
             Skill s = hud.guide;
             if (s != seen) { scroll = 0; seen = s; }
-            Style.well(ui, x, y, 44, 44);
-            ui.img(Atlas.skill(s), x + 2, y + 2, 40, 0xFFFFFFFF);
-            ui.text(ui.body, s.title, x + 54, y - 2, 24, Style.ACCENT);
-            ui.text("level " + hud.g.player.skills.level(s), x + 54, y + 26, 12, Style.DIM);
-            Style.rule(ui, x, y + 48, pw);
-            float dy = y + 56;
+            int lvl = g.player.skills.level(s);
+            long xp = g.player.skills.xp(s);
+            // the header: the skill's plate, its name and level, the bar to the next level
+            Style.well(ui, x, y, 52, 52);
+            ui.img(Atlas.skill(s), x + 3, y + 3, 46, 0xFFFFFFFF);
+            ui.text(ui.body, s.title, x + 62, y - 3, 24, Style.ACCENT);
+            String lv = "Level " + lvl;
+            ui.text(lv, x + pw - ui.width(lv, 15), y + 2, 15, lvl >= XpTable.MAX_LEVEL ? 0xFFFFD15E : Style.TEXT);
+            float prog = (float) XpTable.progress(xp);
+            Style.bar(ui, x + 62, y + 30, pw - 62, 6, lvl >= XpTable.MAX_LEVEL ? 1 : prog, lvl >= XpTable.MAX_LEVEL ? Style.ACCENT : Style.GOOD);
+            String toGo = lvl >= XpTable.MAX_LEVEL ? String.format("%,d XP - mastered", xp) : String.format("%,d XP   %,d to level %d", xp, XpTable.xpFor(lvl + 1) - xp, lvl + 1);
+            ui.text(toGo, x + 62, y + 40, 11, Style.DIM);
+            float dy = y + 62;
             for (String l : HudFragments.wrap(ui, s.description, 12, pw)) { ui.text(l, x, dy, 12, Style.DIM); dy += 15; }
-            dy += 8;
-            List<String> lines = SkillGuide.unlocks(s);
-            if (ui.hover(x, dy, pw, y + ph - dy)) scroll = Math.max(0, Math.min(Math.max(0, lines.size() * 18 - (y + ph - dy)), scroll - (float) ui.scroll * 36));
-            int lvl = hud.g.player.skills.level(s);
-            for (int i = 0; i < lines.size(); i++) {
-                float ly = dy + i * 18 - scroll;
-                if (ly < dy - 1 || ly > y + ph - 18) continue;
-                String line = lines.get(i);
-                int need = Integer.parseInt(line.substring(0, line.indexOf(' ')));
-                ui.text(String.valueOf(need), x, ly, 12, need <= lvl ? Style.GOOD : Style.FAINT);
-                // what a level gives stays a mystery until it is reached
-                if (need <= lvl) ui.text(line.substring(line.indexOf(' ') + 1), x + 36, ly, 12, Style.TEXT);
-                else ui.text("???  (revealed at level " + need + ")", x + 36, ly, 12, Style.FAINT);
+            // the milestones: the unlocks of each level together
+            java.util.TreeMap<Integer, List<SkillGuide.Unlock>> byLevel = new java.util.TreeMap<>();
+            for (SkillGuide.Unlock u : SkillGuide.entries(s)) byLevel.computeIfAbsent(u.level(), k -> new java.util.ArrayList<>()).add(u);
+            Integer next = byLevel.higherKey(lvl);
+            int reached = 0, total = 0;
+            for (var e : byLevel.entrySet()) { total += e.getValue().size(); if (e.getKey() <= lvl) reached += e.getValue().size(); }
+            dy += 4;
+            Panel.sheet(ui, x, dy, pw, 24);
+            ui.text(reached + " of " + total + " unlocked", x + 8, dy + 5, 12, Style.TEXT);
+            String ahead = next == null ? "Everything is open" : "Next at level " + next + (next - lvl == 1 ? " (one to go)" : " (" + (next - lvl) + " to go)");
+            ui.text(ahead, x + pw - 8 - ui.width(ahead, 12), dy + 5, 12, next == null ? Style.GOOD : Style.ACCENT);
+            dy += 32;
+            float top = dy, bottom = y + ph;
+            // laid out once (wrapped), drawn clipped to the list's window and scrolled
+            float rowGap = 6, textX = x + 54, textW = pw - 60;
+            float content = 0;
+            java.util.List<Object[]> rows = new java.util.ArrayList<>();
+            for (var e : byLevel.entrySet()) {
+                java.util.List<Object[]> lines = new java.util.ArrayList<>();
+                for (SkillGuide.Unlock u : merged(e.getValue())) for (String l : HudFragments.wrap(ui, u.text(), 12, textW - 14)) lines.add(new Object[]{u, l, lines.isEmpty() || !((SkillGuide.Unlock) lines.get(lines.size() - 1)[0]).equals(u)});
+                float hgt = Math.max(30, lines.size() * 16 + 10);
+                rows.add(new Object[]{e.getKey(), lines, content, hgt});
+                content += hgt + rowGap;
             }
+            if (ui.hover(x, top, pw, bottom - top)) scroll = Math.max(0, Math.min(Math.max(0, content - (bottom - top)), scroll - (float) ui.scroll * 40));
+            // the track the milestones hang on
+            ui.rect(x + 21, top, 2, bottom - top, 0x40C8A060);
+            for (Object[] r : rows) {
+                int need = (Integer) r[0];
+                float ry = top + (Float) r[2] - scroll, rh = (Float) r[3];
+                if (ry + rh < top || ry > bottom - 4) continue;
+                boolean got = need <= lvl, isNext = next != null && need == next;
+                // the row's card (only the part inside the window)
+                float cy0 = Math.max(top, ry), cy1 = Math.min(bottom, ry + rh);
+                ui.rect(x + 44, cy0, pw - 44, cy1 - cy0, isNext ? 0x30E8C26A : got ? 0x1A8CC47E : 0x10FFFFFF);
+                if (isNext && ry >= top) ui.rect(x + 44, ry, 3, Math.min(rh, bottom - ry), Style.ACCENT);
+                // the level's badge on the track
+                if (ry >= top - 2 && ry + 28 <= bottom) {
+                    int fill = got ? 0xFF2E4A26 : isNext ? 0xFF5A4620 : 0xFF221D17, edge = got ? Style.GOOD : isNext ? Style.ACCENT : 0xFF5A4E3E;
+                    ui.rect(x + 4, ry + 1, 36, 26, fill);
+                    ui.border(x + 4, ry + 1, 36, 26, 1, edge);
+                    String n = String.valueOf(need);
+                    ui.text(n, x + 22 - ui.width(n, 14) / 2, ry + 6, 14, got ? Style.TEXT : isNext ? 0xFFFFD15E : Style.FAINT);
+                }
+                @SuppressWarnings("unchecked") java.util.List<Object[]> lines = (java.util.List<Object[]>) r[1];
+                for (int i = 0; i < lines.size(); i++) {
+                    float ly = ry + 6 + i * 16;
+                    if (ly < top || ly > bottom - 14) continue;
+                    SkillGuide.Unlock u = (SkillGuide.Unlock) lines.get(i)[0];
+                    if ((Boolean) lines.get(i)[2]) ui.rect(textX, ly + 4, 6, 6, got ? kindColor(u.kind()) : Style.fade(kindColor(u.kind()), 0.35f));
+                    ui.text((String) lines.get(i)[1], textX + 14, ly, 12, got ? Style.TEXT : isNext ? 0xFFE6D6B0 : Style.FAINT);
+                }
+            }
+            // what the marks mean, under the list
+            if (content > bottom - top) {
+                float sb = (bottom - top) * (bottom - top) / content, sp = (bottom - top - sb) * scroll / Math.max(1, content - (bottom - top));
+                ui.rect(x + pw - 3, top + sp, 3, sb, 0x60E8C878);
+            }
+        }
+
+        /** Gear a level opens is listed as one line per kind of thing worn or wielded ("Wield: Bronze sword, Bronze axe..."). */
+        private static List<SkillGuide.Unlock> merged(List<SkillGuide.Unlock> us) {
+            java.util.List<SkillGuide.Unlock> out = new java.util.ArrayList<>();
+            java.util.Map<String, java.util.List<String>> gear = new java.util.LinkedHashMap<>();
+            for (SkillGuide.Unlock u : us) {
+                if (u.kind() == SkillGuide.Kind.GEAR) { int sp = u.text().indexOf(' '); gear.computeIfAbsent(u.text().substring(0, sp), k -> new java.util.ArrayList<>()).add(u.text().substring(sp + 1)); }
+                else out.add(u);
+            }
+            for (var e : gear.entrySet()) out.add(0, new SkillGuide.Unlock(us.get(0).level(), e.getKey() + ": " + String.join(", ", e.getValue()), SkillGuide.Kind.GEAR));
+            return out;
+        }
+
+        static int kindColor(SkillGuide.Kind k) {
+            return switch (k) { case GATHER -> Style.GOOD; case MAKE -> Style.WARN; case GEAR -> Style.INFO; case ABILITY -> Style.MAGIC; case BONUS -> Style.DIM; case MILESTONE -> 0xFFFFD15E; };
         }
     }
 

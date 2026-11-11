@@ -253,6 +253,21 @@ public final class Fx {
         }
     }
 
+    /**
+     * (0.3.7, gamefixes: the Mining overhaul) a rock breaks: a cloud of grey dust billowing out and up from it, and lumps
+     * of the rock itself - the ore's colour among the grey - thrown clear and falling.
+     */
+    public void rockBreak(float x, float y, float z, int oreRgb) {
+        float or = (oreRgb >> 16 & 255) / 255f, og = (oreRgb >> 8 & 255) / 255f, ob = (oreRgb & 255) / 255f;
+        for (int i = 0; i < 22; i++) add(1, x + s() * 0.45f, y + rnd.nextFloat() * 0.6f, z + s() * 0.45f, s() * 1.4f, 0.3f + rnd.nextFloat() * 0.9f, s() * 1.4f, 0.45f + rnd.nextFloat() * 0.3f, 0.6f, 0.58f, 0.55f, 0.55f, 1.2f + rnd.nextFloat() * 0.9f, 0, 1.6f);
+        for (int i = 0; i < 26; i++) {
+            boolean ore = i % 3 == 0;
+            float g = 0.42f + rnd.nextFloat() * 0.2f;
+            add(2, x + s() * 0.3f, y + 0.2f + rnd.nextFloat() * 0.5f, z + s() * 0.3f, s() * 3.4f, 1.5f + rnd.nextFloat() * 3.2f, s() * 3.4f, 0.06f + rnd.nextFloat() * 0.07f,
+                    ore ? or : g, ore ? og : g, ore ? ob : g * 1.04f, 1, 0.7f + rnd.nextFloat() * 0.6f, 16, 0.5f);
+        }
+    }
+
     public void puff(float x, float y, float z) {
         for (int i = 0; i < 8; i++) add(1, x + s() * 0.3f, y, z + s() * 0.3f, s() * 0.5f, 0.6f, s() * 0.5f, 0.4f, 0.55f, 0.52f, 0.48f, 0.5f, 1.4f, 0, 0.8f);
     }

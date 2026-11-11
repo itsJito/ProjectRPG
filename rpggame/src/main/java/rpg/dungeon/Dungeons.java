@@ -149,24 +149,46 @@ public final class Dungeons {
         populate();
     }
 
-    /** The residents (once: a load brings them back from the save; an old save without them gets them now). */
+    /**
+     * The residents (once: a load brings them back from the save; an old save without them gets them now). (0.3.7,
+     * gamefixes: dungeons spammed the visitor with monsters) a room's residents are one band with one lair - the room -
+     * holding exactly as many as the plan gives it: they know each other for kin, fight together, and a room is never
+     * refilled past what it was built with. (Each resident had a lair of its own, which could grow to two and, once
+     * cleared, be taken back by three.)
+     */
     public void populate() {
         for (DungeonLayout l : DungeonLayout.all()) {
             String lairName = l.name;
             boolean have = false;
             for (var lair : g.monsters.lairs) if (lair.name.startsWith(lairName)) have = true;
             if (have) continue;
+            int deepest = 1;
+            for (Spot s : l.spots) if (s.what().equals("resident")) deepest = Math.max(deepest, s.arg());
+            boolean hasMaster = l.spots.stream().anyMatch(s -> s.what().equals("master"));
+            boolean led = hasMaster;
+            Map<DungeonLayout.Room, List<Spot>> byRoom = new java.util.LinkedHashMap<>();
+            for (Spot s : l.spots) if (s.what().equals("resident") || s.what().equals("master"))
+                byRoom.computeIfAbsent(l.roomAt(l.worldX(s.x()) + 0.5f, l.worldZ(s.z()) + 0.5f), k -> new ArrayList<>()).add(s);
             int room = 0;
-            for (Spot s : l.spots) {
-                if (!s.what().equals("resident") && !s.what().equals("master")) continue;
-                boolean master = s.what().equals("master");
-                MonsterKind kind = resident(l, s, master);
-                int lv = level(l, s.arg()) + (master ? (int) (12 * l.type.threat) : 0);
-                if (l.type == DungeonLayout.Type.BOSS) lv = kind.maxLevel;
-                float x = l.worldX(s.x()) + 0.5f, z = l.worldZ(s.z()) + 0.5f;
-                Monsters.Lair lair = g.monsters.addLair(kind, lairName + " " + (++room), x, z, Math.max(kind.minLevel, lv - 6), Math.min(kind.maxLevel, lv), master ? 1 : 2);
-                var m = g.monsters.spawn(kind, lv, x, z, lair);
-                if (master) m.leader = true;
+            for (var e : byRoom.entrySet()) {
+                List<Spot> band = e.getValue();
+                // the band's kind is its first member's; one of another kind (a bat among goblins) keeps a lair of its own
+                Map<MonsterKind, Monsters.Lair> lairs = new HashMap<>();
+                for (Spot s : band) {
+                    boolean master = s.what().equals("master");
+                    MonsterKind kind = resident(l, s, master);
+                    int lv = level(l, s.arg()) + (master ? (int) (12 * l.type.threat) : 0);
+                    if (l.type == DungeonLayout.Type.BOSS) lv = kind.maxLevel;
+                    float x = l.worldX(s.x()) + 0.5f, z = l.worldZ(s.z()) + 0.5f;
+                    int members = 0;
+                    for (Spot o : band) if (resident(l, o, o.what().equals("master")) == kind) members++;
+                    float cx = e.getKey() == null ? x : l.ox + e.getKey().cx(), cz = e.getKey() == null ? z : l.oz + e.getKey().cz();
+                    final int top = lv, size = members;
+                    Monsters.Lair lair = lairs.get(kind);
+                    if (lair == null) { lair = g.monsters.addLair(kind, lairName + " " + (++room), cx, cz, Math.max(kind.minLevel, top - 6), Math.min(kind.maxLevel, top), size); lairs.put(kind, lair); }
+                    var m = g.monsters.spawn(kind, lv, x, z, lair);
+                    if (master || !led && s.arg() == deepest) { m.leader = true; led = true; lair.led = true; }
+                }
             }
         }
     }
@@ -202,19 +224,20 @@ public final class Dungeons {
         int[] r = range(l, combat);
         int deepest = 1;
         for (Spot s : l.spots) if (s.what().equals("resident")) deepest = Math.max(deepest, s.arg());
-        // the strongest: a master, or else the first of those in the deepest room (the den's leader)
-        Spot lead = null;
-        for (Spot s : l.spots) if (s.what().equals("master")) lead = s;
-        if (lead == null) for (Spot s : l.spots) if (s.what().equals("resident") && s.arg() == deepest) { lead = s; break; }
+        // (a save from before leaders were kept: the strongest still standing is the one the place answers to)
+        rpg.monster.Monster strongest = null; boolean led = false;
+        for (var m : g.monsters.all()) if (m.alive && DungeonLayout.at(m.lairX, m.lairZ) == l) { led |= m.leader; if (strongest == null || m.level > strongest.level) strongest = m; }
+        if (!led && strongest != null) strongest.leader = true;
         for (var m : new ArrayList<>(g.monsters.all())) {
             if (!m.alive || DungeonLayout.at(m.lairX, m.lairZ) != l) continue;
+            // how deep its band's room lies: the depth of the resident's place nearest its lair
             Spot home = null; float best = Float.MAX_VALUE;
             for (Spot s : l.spots) {
                 if (!s.what().equals("resident") && !s.what().equals("master")) continue;
                 float d = (float) Math.hypot(l.worldX(s.x()) + 0.5f - m.lairX, l.worldZ(s.z()) + 0.5f - m.lairZ);
                 if (d < best) { best = d; home = s; }
             }
-            boolean master = home != null && home == lead || m.leader;
+            boolean master = m.leader;
             float share = master ? 1 : home == null ? 0.5f : 0.15f + 0.7f * (float) Math.pow(Math.min(1f, home.arg() / (float) (deepest + 1)), 0.8);
             if (l.type == DungeonLayout.Type.ELITE && !master) share = (float) Math.sqrt(share);   // elite: most near the cap
             float spread = (Math.floorMod(m.id * 2654435761L, 1000) / 1000f - 0.5f) * 0.3f * (r[1] - r[0]);

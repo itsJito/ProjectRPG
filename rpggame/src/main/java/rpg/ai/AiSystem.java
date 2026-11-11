@@ -336,11 +336,11 @@ public final class AiSystem {
         var inns = rpg.econ.Inns.LAYOUTS;
         Npc n = switch ((int) id) {
             case (int) Ids.CROP_FARMER_CITY -> { Npc t = npc(id, "Tobin", Npc.Role.FARMER, "Crop Farmer", 100.5f, 108.5f, 190); Profession.CROP_FARMER.assign(t);
-                t.skills.setLevel(Skill.HARVESTING, 24); give(t, Items.CARROT_SEEDS, 6); give(t, Items.CABBAGE_SEEDS, 4); give(t, Items.COINS, 30); give(t, Items.BREAD, 1); yield t; }
+                t.skills.setLevel(Skill.HARVESTING, 24); give(t, Items.CARROT_SEEDS, 6); give(t, Items.CABBAGE_SEEDS, 4); for (rpg.world.Farming.Crop c : rpg.world.Farming.Crop.values()) if (c != rpg.world.Farming.Crop.COTTON && !t.has(c.seed, 1)) give(t, c.seed, 4); give(t, Items.COINS, 30); give(t, Items.BREAD, 1); yield t; }
             case (int) Ids.ORCHARD_KEEPER_CITY -> { Npc h = npc(id, "Hedda", Npc.Role.FARMER, "Orchard Keeper", 115.5f, 107.5f, 191); Profession.ORCHARD_KEEPER.assign(h);
                 h.skills.setLevel(Skill.HARVESTING, 20); give(h, Items.COINS, 25); give(h, Items.BREAD, 1); yield h; }
             case (int) Ids.CROP_FARMER_PALACE -> { Npc r = roman(npc(id, "Rufus", Npc.Role.FARMER, "Crop Farmer", 177.5f, 58.5f, 192), 6); Profession.CROP_FARMER.assign(r);
-                r.skills.setLevel(Skill.HARVESTING, 26); give(r, Items.CARROT_SEEDS, 5); give(r, Items.CABBAGE_SEEDS, 5); give(r, Items.COINS, 30); yield r; }
+                r.skills.setLevel(Skill.HARVESTING, 26); give(r, Items.CARROT_SEEDS, 5); give(r, Items.CABBAGE_SEEDS, 5); for (rpg.world.Farming.Crop c : rpg.world.Farming.Crop.values()) if (c != rpg.world.Farming.Crop.COTTON && !r.has(c.seed, 1)) give(r, c.seed, 4); give(r, Items.COINS, 30); yield r; }
             case (int) Ids.ORCHARD_KEEPER_PALACE -> { Npc v = roman(npc(id, "Valeria", Npc.Role.FARMER, "Orchard Keeper", 180.5f, 64.5f, 193), 22); Profession.ORCHARD_KEEPER.assign(v);
                 v.skills.setLevel(Skill.HARVESTING, 22); give(v, Items.COINS, 25); yield v; }
             case (int) Ids.INNKEEPER_CITY -> { float[] at = inns[0].deskSpot(); Npc k = npc(id, "Hamon", Npc.Role.CIVIC, "Innkeeper", at[0], at[1], 194); Profession.INNKEEPER.assign(k);
@@ -371,7 +371,6 @@ public final class AiSystem {
      * and dyer, the Metallists' smelter, and a coastal fisher of the Mariners'.
      */
     private Npc guildRow(long id) {
-        var halls = rpg.econ.Guilds.HALLS;
         rpg.econ.Guilds.Hall h = rpg.econ.Guilds.hallOf(id);
         if (h == null) return null;
         float[] at = h.post();
@@ -457,6 +456,19 @@ public final class AiSystem {
         return added;
     }
 
+    /** The group a role dresses with. */
+    public static Appearance.Group group(Npc.Role role) {
+        return switch (role) {
+            case GUARD, LAWMAN -> Appearance.Group.WATCH;
+            case BANDIT, BRUTE, THIEF, FENCE, CONTACT -> Appearance.Group.OUTLAW;
+            case KNIGHT -> Appearance.Group.KNIGHT;
+            case WORKER, FARMER, FISHERMAN, MINER, CRAFTSMAN, CARTER, HUNTER, UNDERTAKER -> Appearance.Group.LABOURER;
+            case MERCHANT, CIVIC -> Appearance.Group.MERCHANT;
+            case PRIEST, HEALER, SCHOLAR -> Appearance.Group.CLERGY;
+            default -> Appearance.Group.TOWNSFOLK;
+        };
+    }
+
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
     private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Sabine", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
             "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia");
@@ -466,14 +478,8 @@ public final class AiSystem {
         // an ordinary grown man or woman: Health 10 (10 HP), as a new player has - combat level 3 (0.3.0, gamefixes: most
         // townsfolk are level 3, their trades in their other skills); fighters (the watch, hunters, outlaws) are given more below
         n.skills.setLevel(Skill.HEALTH, 10);
-        n.look = Appearance.random(lookSeed, FEMALE_NAMES.contains(name));
-        if(id>=Ids.FISHERMAN && id<=Ids.PREDATOR_HUNTER) {
-            n.look.top=2;n.look.bottom=1;n.look.shoes=10;n.look.shoesColor=16;
-            n.look.topColor=switch(role){case FISHERMAN->6;case MINER->21;case CRAFTSMAN->16;case KNIGHT->9;default->5;};
-            n.look.bottomColor=role==Npc.Role.KNIGHT?9:23;
-            n.look.hair=role==Npc.Role.CRAFTSMAN?10:role==Npc.Role.FISHERMAN?15:6;
-            if(!n.look.female)n.look.beard=role==Npc.Role.MINER?5:0;
-        }
+        // (0.3.7, gamefixes: NPC skin variety) dressed as their kind dresses, each in their own way
+        n.look = Appearance.of(group(role), lookSeed, FEMALE_NAMES.contains(name));
         n.fitBody();
         n.yaw = 0;
         g.npcs.add(n);
@@ -1430,6 +1436,11 @@ public final class AiSystem {
     public boolean mayPress(Npc attacker, Actor target, float reach) {
         double now = g.time;
         if (attacker.pressUntil > now) return true;
+        // (0.3.7, gamefixes: a crowd of lawmen and bounty hunters surrounded the player, backed off and stared) a turn
+        // that ran out unused is a turn had: its holder rests like one who struck. The first two to ask kept the turn
+        // for good - it was taken again the instant it lapsed - and when those two stood behind the others, unable to
+        // get through, nobody in the ring ever struck a blow.
+        if (attacker.pressUntil > PRESS_NEVER) { attacker.pressRestUntil = Math.max(attacker.pressRestUntil, attacker.pressUntil + PRESS_REST * 2); attacker.pressUntil = PRESS_NEVER; }
         if (attacker.pressRestUntil > now) return false;
         int pressing = 0;
         for (Npc o : g.npcs) if (o != attacker && o.alive && o.loaded && o.fightTarget == target.id && o.pressUntil > now && o.distTo(target) < reach + 3) pressing++;
@@ -1439,7 +1450,9 @@ public final class AiSystem {
         return true;
     }
     /** Gives up the token (its turn is over): a short rest out of the press before another. */
-    public void yieldPress(Npc attacker) { if (attacker.pressUntil > g.time) { attacker.pressUntil = -99; attacker.pressRestUntil = g.time + PRESS_REST; } }
+    public void yieldPress(Npc attacker) { if (attacker.pressUntil > g.time) { attacker.pressUntil = PRESS_NEVER; attacker.pressRestUntil = g.time + PRESS_REST; } }
+    /** The mark of no turn held or owed (Npc.pressUntil starts there). */
+    static final double PRESS_NEVER = -99;
 
     /** Whether this NPC is an outlaw or a thief - one who keeps an eye out for the law. */
     public static boolean crook(Npc n) { return n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.role == Npc.Role.THIEF; }

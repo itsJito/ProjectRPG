@@ -218,7 +218,7 @@ public final class ItemModels {
             case "apple" -> apple();
             case "carrot" -> carrot();
             case "cabbage" -> cabbage();
-            case "carrot_seeds", "cabbage_seeds" -> seedTwist(d);
+            case "carrot_seeds", "cabbage_seeds", "potato_seeds", "onion_seeds", "tomato_seeds", "sweetcorn_seeds" -> seedTwist(d);
             case "vegetable_stew" -> stew();
             case "hot_cider" -> mug(d);
             case "guam" -> leaf();

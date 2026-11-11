@@ -109,6 +109,43 @@ public final class Appearance {
         return a;
     }
 
+    /**
+     * (0.3.7, gamefixes: NPC skin variety - people of one group should not all look alike) the groups people dress by.
+     * Each has its own styles of top, legs and shoes and its own palette; within them every member rolls their own -
+     * and their own face, build, skin, hair and beard. A group reads as a group; no two of it are twins.
+     */
+    public enum Group {
+        //               tops                     top colours              legs                 leg colours        shoes               shoe colours
+        TOWNSFOLK(null, null, null, null, null, null),
+        WATCH(of(2, 5, 13, 1), of(8, 9, 21, 9), of(0, 1, 17), of(9, 23, 21), of(0, 1, 3, 5), of(16, 23)),
+        BOUNTY_HUNTER(of(9, 10, 11, 13, 2), of(16, 17, 5, 23, 15, 21), of(1, 16, 17, 18, 19), of(16, 23, 5, 21), of(1, 3, 5, 6, 2), of(16, 23, 17)),
+        OUTLAW(of(0, 9, 16, 17, 19, 10), of(5, 15, 16, 17, 23, 21), of(2, 3, 5, 6, 16), of(16, 23, 5, 19), of(4, 7, 10, 13), of(16, 23, 19)),
+        KNIGHT(of(3, 5, 13), of(9, 22, 0, 18, 21), of(1, 17, 18, 19), of(23, 21, 9), of(0, 3, 6), of(23, 16)),
+        LABOURER(of(0, 1, 2, 16, 17), of(19, 20, 16, 6, 5, 21, 17), of(0, 2, 3, 5, 7), of(16, 19, 21, 23, 5), of(8, 10, 11, 13, 4), of(16, 19, 23)),
+        MERCHANT(of(5, 8, 13, 18, 3), of(0, 1, 10, 12, 4, 7, 15, 18), of(0, 1, 10), of(23, 9, 16, 21), of(9, 11, 14, 8), of(23, 16)),
+        CLERGY(of(12, 14, 15, 13), of(22, 20, 21, 9, 15), of(12, 13, 15, 14), of(22, 20, 21, 23), of(15, 16, 12, 8), of(16, 19));
+        final int[] tops, topColors, bottoms, bottomColors, shoes, shoeColors;
+        Group(int[] tops, int[] topColors, int[] bottoms, int[] bottomColors, int[] shoes, int[] shoeColors) {
+            this.tops = tops; this.topColors = topColors; this.bottoms = bottoms; this.bottomColors = bottomColors; this.shoes = shoes; this.shoeColors = shoeColors;
+        }
+        private static int[] of(int... v) { return v; }
+    }
+
+    /** A member of a group: their own face, build and hair, and their own pick of the group's dress. */
+    public static Appearance of(Group group, long seed, Boolean female) {
+        Appearance a = random(seed, female);
+        if (group == null || group.tops == null) return a;
+        Random r = new Random(seed * 0x9E3779B97F4A7C15L + group.ordinal());
+        a.top = pick(r, group.tops); a.topColor = pick(r, group.topColors);
+        a.bottom = pick(r, group.bottoms); a.bottomColor = pick(r, group.bottomColors);
+        a.shoes = pick(r, group.shoes); a.shoesColor = pick(r, group.shoeColors);
+        // the top and the legs of one person never the very same colour (a group's palette is small)
+        if (a.bottomColor == a.topColor && group.bottomColors.length > 1) a.bottomColor = group.bottomColors[(java.util.Arrays.binarySearch(sorted(group.bottomColors), a.bottomColor) + 1) % group.bottomColors.length];
+        return a;
+    }
+    private static int pick(Random r, int[] from) { return from[r.nextInt(from.length)]; }
+    private static int[] sorted(int[] v) { int[] c = v.clone(); java.util.Arrays.sort(c); return c; }
+
     public int[] toArray() { return new int[]{female ? 1 : 0, bodyType, skin, hair, hairColor, beard, beardColor, top, topColor, bottom, bottomColor, shoes, shoesColor, eyeColor}; }
     public static Appearance fromArray(int[] v) {
         Appearance a = new Appearance();

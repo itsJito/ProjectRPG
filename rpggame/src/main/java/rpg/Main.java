@@ -60,6 +60,7 @@ public final class Main {
         Window win = new Window();
         win.show = !hidden;
         if (bench) win.create("SHADOWVEIL - bench", 1920, 1080); else win.create("SHADOWVEIL", 1600, 900);
+        programIcon(win);
         if (!win.gl45) { System.err.println("the native renderer needs OpenGL 4.5: " + win.glInfo); return 1; }
         int status;
         // play goes round from the title screen to a session and back: each session a fresh engine and world in the one window
@@ -193,6 +194,7 @@ public final class Main {
         gfx.findLamps(g.vox);
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
         if (!fresh && profile.hasSave() && !new SaveSystem(g).load(profile.save())) g.chat.warn("The save for " + profile.name + " could not be loaded: a fresh start.");
+        if (!fresh && profile.outdated()) g.chat.warn(profile.name + "'s save is from version " + SaveSystem.lineName(profile.version) + " and does not carry over to " + SaveSystem.lineName(VERSION) + ": a fresh start.");
         if (fresh) new SaveSystem(g).save(profile.save());
         gfx.preloadWorld(g, g.player.x, g.player.z);
         System.out.printf("[Load] session, audio, figures and save %.2fs%n", (System.nanoTime() - loadStarted) / 1e9);
@@ -438,8 +440,37 @@ public final class Main {
     }
 
     private static boolean shotNext;
+    /**
+     * (0.3.7, gamefixes: the program's icon) the window's icon - the title bar's and the taskbar's - from the game's own
+     * picture of it (resources ui/program_icon.png), at the sizes the desktop asks for.
+     */
+    private static void programIcon(Window win) {
+        try (var in = Main.class.getResourceAsStream("/ui/program_icon.png")) {
+            if (in == null || win.handle == 0) return;
+            java.awt.image.BufferedImage src = javax.imageio.ImageIO.read(in);
+            int[] sizes = {16, 32, 48, 256};
+            try (var images = org.lwjgl.glfw.GLFWImage.malloc(sizes.length)) {
+                java.util.List<java.nio.ByteBuffer> held = new java.util.ArrayList<>();
+                for (int i = 0; i < sizes.length; i++) {
+                    int s = sizes[i];
+                    var scaled = new java.awt.image.BufferedImage(s, s, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                    var g2 = scaled.createGraphics();
+                    g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                    g2.drawImage(src, 0, 0, s, s, null); g2.dispose();
+                    java.nio.ByteBuffer px = org.lwjgl.system.MemoryUtil.memAlloc(s * s * 4);
+                    for (int y = 0; y < s; y++) for (int x = 0; x < s; x++) { int c = scaled.getRGB(x, y); px.put((byte) (c >> 16)).put((byte) (c >> 8)).put((byte) c).put((byte) (c >>> 24)); }
+                    px.flip(); held.add(px);
+                    images.position(i).width(s).height(s).pixels(px);
+                }
+                images.position(0);
+                org.lwjgl.glfw.GLFW.glfwSetWindowIcon(win.handle, images);
+                for (var px : held) org.lwjgl.system.MemoryUtil.memFree(px);
+            }
+        } catch (java.io.IOException | RuntimeException e) { System.err.println("[icon] " + e.getMessage()); }
+    }
+
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.3.6";
+    public static final String VERSION = "Alpha 0.3.7";
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

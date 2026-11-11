@@ -214,7 +214,16 @@ public final class Brain {
         // (with the culprit standing right there, the report waits until it is safe to make)
         Actor culprit = unreported == null ? null : g.actor(unreported.subject);
         boolean exposed = culprit != null && culprit.alive && n.distTo(culprit) < 15 && ai.canSee(n, culprit) && !n.combatant();
-        if (unreported != null && exposed) s.add(new Score(Goal.HIDE, 0.82f, "keeping out of " + culprit.name + "'s sight before reporting"));
+        if (unreported != null && exposed) {
+            // (0.3.7, gamefixes: people in hiding watched a killer cut down the townsfolk round them and stayed put) whom
+            // they hide from is the one in front of them, where that one is now - not whatever they hid from last - and
+            // someone doing violence within a few strides is run from, not crouched beside
+            boolean violent = unreported.kind.equals("MURDER") || unreported.kind.equals("ASSAULT");
+            if (n.fearOf != culprit.id || Math.hypot(n.fearX - culprit.x, n.fearZ - culprit.z) > HIDE_STALE) n.hideSet = false;
+            n.fearOf = culprit.id; n.fearX = culprit.x; n.fearZ = culprit.z; n.fearSeenAt = g.time;
+            if (violent && n.distTo(culprit) < DANGER_CLOSE) s.add(new Score(Goal.FLEE, 0.89f, culprit.name + " is doing violence right here; running"));
+            else s.add(new Score(Goal.HIDE, 0.82f, "keeping out of " + culprit.name + "'s sight before reporting"));
+        }
         if (unreported != null && !exposed && ai.lawmanFor(unreported.jurisdiction) != null && unreported.subject != n.id)
             s.add(new Score(Goal.REPORT_CRIME, 0.78f, unreported.subject == 0 ? "discovered " + unreported.detail + "; must tell the law" : "saw " + g.nameOf(unreported.subject) + " commit " + unreported.kind.toLowerCase() + "; must tell the law"));
         // a wanted player seen in town by someone who knows it: the watch is told where (gamefixes)
@@ -385,7 +394,9 @@ public final class Brain {
 
     // ------------------------------------------------------------------ acting
     public void act(Npc n, float dt) {
-        n.cs.aim = 0;   // a raised crossbow is requested again only while engaging a visible target
+        // a raised crossbow is requested again only while engaging a visible target; (0.3.7) it comes down as it went up,
+        // not in a frame
+        n.cs.aim = Math.max(0, n.cs.aim - dt * AIM_EASE);
         n.hunger = Math.min(1, n.hunger + dt / 900f);
         n.social = Math.min(1, n.social + (n.combatant() ? 0 : dt / 300f));
         n.fatigue = n.asleep() ? Math.max(0, n.fatigue - dt / 60f) : Math.min(1, n.fatigue + dt / 2400f);
@@ -747,6 +758,12 @@ public final class Brain {
      * runtime surface portals (each leg a short search for the engine); the inspector shows the current leg.
      */
     boolean rangedPosition(Npc n,Actor target,boolean visible){return tactics.move(n,target,visible);}
+    /** Violence nearer than this is run from rather than hidden from; a hiding place nearer than HIDE_BLOWN to what is feared, in its plain view, is no hiding place; a hide chosen against a threat that has since moved HIDE_STALE is chosen again (m). */
+    static final float DANGER_CLOSE = 10, HIDE_BLOWN = 7, HIDE_STALE = 5;
+    /** How far round its mark an archer goes for a line clear of its own side (radians). */
+    static final float FRESH_ANGLE = 0.9f;
+    /** How fast a crossbow comes up to the shoulder and down again (the share of the way per second). */
+    static final float AIM_EASE = 5;
     public static boolean canUseLadders(Npc n){
         if(n instanceof rpg.monster.Monster m)return m.kind.form==rpg.monster.MonsterKind.Form.HUMANOID && m.kind.hw<=1 && m.kind.hh<=2.3f;
         return n.watch() || n.goal==Goal.FIGHT || n.goal==Goal.WORK && (n.profession==Profession.CARPENTER || n.role==Npc.Role.WORKER) || DevMap.WILDS.equals(DevMap.jurisdiction(n.x,n.z));
@@ -1029,7 +1046,8 @@ public final class Brain {
                     // (0.3.6, gamefixes: NPC routines) the player plainly in view, close, not creeping and not wanted here,
                     // is as plainly harmless: townsfolk looked into an idle player all morning instead of getting on with it
                     || identified == g.player && !g.player.sneaking && g.law.bounty(g.player.id, n.homeJurisdiction) <= 0)
-                && n.distTo(identified) < 6
+                // (0.3.7) after dark a figure is only made out near: they come close enough to see a face before it is settled
+                && n.distTo(identified) < (g.state.hourOfDay() >= 21 || g.state.hourOfDay() < 5.5 ? 3.8f : 6)
                 && (charge == null || charge.settled)) v.stage(Investigation.Stage.DONE, g.time);
         // a fresh clue moves the spot; heard again, a timid plan gives way to fetching help
         if (w != null && Math.max(w.heardAt, w.seenAt) > v.lastClue + 0.05) {
@@ -1243,6 +1261,15 @@ public final class Brain {
         if (!n.hideSet) {
             float[] h = terror && n.homeX != 0 && Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 90 ? new float[]{n.homeX, n.homeZ} : hideSpot(n, n.fearX, n.fearZ);
             n.hideX = h[0]; n.hideZ = h[1]; n.hideSet = true;
+        }
+        // (0.3.7) a hiding place is one only while it hides: with what they fear in plain view and close, they are found -
+        // up and away from it, and somewhere else is looked for once there is room again
+        Actor feared = g.actor(n.fearOf);
+        if (!terror && feared != null && feared.alive && n.distTo(feared) < HIDE_BLOWN && g.vox.sight(feared.x, feared.eyeY(), feared.z, n.x, n.chestY(), n.z)) {
+            n.fearX = feared.x; n.fearZ = feared.z; n.fearSeenAt = g.time; n.hideSet = false;
+            n.lastOutcome = "found by " + feared.name + "; running";
+            runFrom(n, feared);
+            return;
         }
         n.sneaking = !terror || Math.hypot(n.hideX - n.x, n.hideZ - n.z) < 1.5f;
         n.lastOutcome = "hiding from " + g.nameOf(n.fearOf);
@@ -1988,6 +2015,7 @@ public final class Brain {
         boolean readIt = (telegraph && t.cs.t >= reaction) || t.cs.phase == Actor.Combat.Phase.ACTIVE && d < 3.2f;
         boolean opening = t.cs.phase == Actor.Combat.Phase.RECOVER || t.cs.staggered > 0;
         String choice;
+        float[] flank;
         if (archer) {
             n.pitch=(float)Math.atan2(targetY-n.eyeY(),Math.max(0.3f,d));
             // (0.2.9) a flyer cannot be stepped away from - it follows on the wing, and the archer backed off for good
@@ -2001,6 +2029,17 @@ public final class Brain {
                 // one that is, is met at close quarters
                 n.asideSince = -1;
                 if (n.cs.lastAttacker == t.id && g.time - n.cs.lastHurt < 15 || t.cs.phase != Actor.Combat.Phase.IDLE && d < 8) { choice = "close the distance"; goTo(n, t.x, t.y, t.z, true, 1.5f); }
+                // (0.3.7, gamefixes: bounty hunters stood and stared) only a beast that is not coming for them is let be.
+                // A person they are after is not given up because their own side stands in the line: they go round the
+                // crowd to the side the blocker is not on, and shoot from there
+                else if (!(t instanceof rpg.animal.Animal)) {
+                    choice = "round the crowd for a clear shot";
+                    float side = ((between.x - n.x) * (t.z - n.z) - (between.z - n.z) * (t.x - n.x)) > 0 ? 1 : -1;
+                    float ang = (float) Math.atan2(n.z - t.z, n.x - t.x) + side * FRESH_ANGLE, r = Math.max(7, Math.min(13, d));
+                    float gx = t.x + (float) Math.cos(ang) * r, gz = t.z + (float) Math.sin(ang) * r;
+                    if (!standable(gx, gz)) { ang -= side * FRESH_ANGLE * 2; gx = t.x + (float) Math.cos(ang) * r; gz = t.z + (float) Math.sin(ang) * r; }
+                    goTo(n, gx, gz, true, 0.8f);
+                }
                 else { n.fightTarget = 0; n.goal = Goal.IDLE; n.nextThink = 0; g.combat.setBlock(n, false); ai.giveUp(n, t.id); n.lastOutcome = "no clear shot; let it be"; return; }
             }
             else if (between != null && !ai.hostile(n, between)) {
@@ -2035,8 +2074,10 @@ public final class Brain {
                 boolean onIt = Math.abs(Actor.wrap(aim[0] - n.yaw)) < 0.12f;
                 if (Math.hypot(n.x - n.shotFromX, n.z - n.shotFromZ) > 2.5f) { n.shotFromX = n.x; n.shotFromZ = n.z; n.shotsHere = 0; }
                 if (main.family == ItemDef.Family.CROSSBOW) {
-                    if (n.cs.reload <= 0 && onIt && g.combat.shootCrossbow(n, aim[0] + ey, aim[1] + ep)) n.shotsHere++;
-                    n.cs.aim = 1;
+                    // (0.3.7, gamefixes: NPCs did not aim a crossbow) brought up to the cheek over a moment and loosed only
+                    // from there - it snapped level and shot in the same frame
+                    n.cs.aim = Math.min(1, n.cs.aim + dt * AIM_EASE * 2);
+                    if (n.cs.reload <= 0 && onIt && n.cs.aim >= 0.85f && g.combat.shootCrossbow(n, aim[0] + ey, aim[1] + ep)) n.shotsHere++;
                 } else n.cs.draw = Math.min(1, n.cs.draw + dt / 1.1f);
                 if (n.cs.draw >= 1 && onIt) { if (g.combat.shoot(n, aim[0] + ey, aim[1] + ep, 1)) n.shotsHere++; n.cs.draw = 0; }
             } else { choice = "find a line of sight"; goTo(n, t.x, t.y, t.z, false, 6); }
@@ -2096,7 +2137,14 @@ public final class Brain {
             float ax = n.x - t.x, az = n.z - t.z, l = Math.max(0.01f, (float) Math.hypot(ax, az));
             float side = (n.id & 1) == 0 ? 1 : -1;
             g.combat.dodge(n, ax / l * 0.6f - az / l * side, az / l * 0.6f + ax / l * side);
-        } else if (d < reach + 4 && !opening && !ai.mayPress(n, t, reach)) {
+        } else if (!opening && !n.cs.busy() && (flank = flankSpot(n, t, reach)) != null) {
+            // (0.3.7, gamefixes: people in a group should flank and come at the player from behind) the foe is squared up
+            // to one of their side: round to its back, out of its eyeline, and strike from there
+            choice = "round behind " + t.name;
+            g.combat.setBlock(n, false);
+            ai.combatGoal(n, flank[0], flank[1]);
+            if (Math.hypot(n.x - t.x, n.z - t.z) > 4.5f) ai.desire(n, ai.pace(n, flank[0], flank[1], 0));
+        } else if (d < reach + 4 && !opening && !behind(t, n) && !ai.mayPress(n, t, reach)) {
             // (0.3.0) two already press it: wait a turn on the ring round it, guard up, each at their own place on it
             choice = "wait my turn on the ring";
             g.combat.setBlock(n, hasGuard && d < reach + 2.5f);
@@ -2134,6 +2182,39 @@ public final class Brain {
             ai.closeIn(n, t.x + (n.x - t.x) / Math.max(0.1f, d) * stand, t.z + (n.z - t.z) / Math.max(0.1f, d) * stand);
         }
         if (!choice.equals(n.lastOutcome)) n.lastOutcome = choice;
+    }
+
+    /** How far round from straight ahead of a foe counts as behind it (radians): out of the cone its eyes and blows cover. */
+    static final float BEHIND = 1.95f;
+    /** How near the foe one of their side must be, facing it, for the foe to count as engaged with them (m); and how far a flanker swings either side of the foe's back (radians). */
+    static final float ENGAGED = 3.2f, FLANK_SPREAD = 0.55f;
+
+    /** Whether n stands behind a body: outside the cone its eyes and its blows cover. */
+    private static boolean behind(Actor body, Actor n) { return !inFront(body, n, BEHIND); }
+
+    /**
+     * (0.3.7) Where a fighter goes to take a foe from behind, or null when there is no call to: it fights with others of
+     * its side, one of them is right in front of the foe holding its attention, and this one is not behind it already.
+     * The spot is at striking distance off the foe's back - to one side of it or the other by who this is (so two
+     * flankers split), the other side when that one is walled - and never through the foe to get there.
+     */
+    private float[] flankSpot(Npc n, Actor t, float reach) {
+        if (behind(t, n) || n.hp < n.maxHp() * 0.3f) return null;
+        Npc holding = null;
+        for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.fightTarget == t.id && o.distTo(t) < ENGAGED && inFront(t, o, 1.1f) && !ai.hostile(n, o)) { holding = o; break; }
+        if (holding == null) return null;
+        float stand = reach * 0.85f + t.radius + n.radius;
+        float side = (n.id & 1) == 0 ? 1 : -1;
+        for (int tries = 0; tries < 2; tries++, side = -side) {
+            double back = t.yaw + side * FLANK_SPREAD;
+            float x = t.x + (float) Math.sin(back) * stand, z = t.z + (float) Math.cos(back) * stand;
+            if (standable(x, z) && g.vox.sight(n.x, n.y + 0.6f, n.z, x, n.y + 0.6f, z)) return new float[]{x, z};
+            // round the foe rather than through it: a waypoint off its flank first
+            double flankAng = t.yaw + side * (Math.PI / 2);
+            float wx = t.x + (float) Math.sin(flankAng) * (stand + 1.2f), wz = t.z + (float) Math.cos(flankAng) * (stand + 1.2f);
+            if (standable(wx, wz) && standable(x, z)) return new float[]{wx, wz};
+        }
+        return null;
     }
 
     /** Whether n stands within a cone (half-angle in radians) ahead of a body. */

@@ -70,6 +70,8 @@ final class Gallery {
         if ("p20".equals(System.getenv("RPG_GALLERY_ONLY"))) { p20Shots(); return 0; }
         // RPG_GALLERY_ONLY=p22 RPG_REVIEW_ONLY=a,b: the 0.3.6 review sheets (ride, fly, interior, well, fish), each by name
         if ("p22".equals(System.getenv("RPG_GALLERY_ONLY"))) { p22Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p23 RPG_REVIEW_ONLY=a,b: the 0.3.7 review sheets (ui, lock, fog, crops, mine, smith), each by name
+        if ("p23".equals(System.getenv("RPG_GALLERY_ONLY"))) { p23Shots(); return 0; }
         if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
@@ -721,7 +723,6 @@ final class Gallery {
         for (int x = 52; x <= 77; x++) for (int z = 40; z <= 92; z++) for (int y = DevMap.FLOOR; y < DevMap.FLOOR + 12; y++) g.setBlock(x, y, z, Blocks.AIR);
         g.player.eq.clear(); g.player.firstPerson = false;
         java.util.function.Function<Actor, float[]> side = a -> new float[]{a.x + 5.5f, a.y + 2.0f, a.z + 1.0f, a.x, a.y + 1.3f, a.z - 0.3f};
-        java.util.function.Supplier<rpg.animal.Animal> fresh = () -> null;
         if (want.test("rear")) {
             // a wild horse taken: it bucks and rears, and the rider goes up with it
             place(66.5f, 80.5f, 0); frames(4);
@@ -788,6 +789,101 @@ final class Gallery {
 
     /** The 0.3.4 review: swimming and the water, on threes. */
     /** (0.3.6) The review sheets of this pass: mounts (seat, backing up, the game's own camera), flight, interiors, the well, fish. */
+    /** The 0.3.7 review: the redesigned tabs, the lock's window, the fog ring, the new crops, a rock breaking, the forge's windows. */
+    private void p23Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        g.state.minutes = 13 * 60;
+        g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        if (want.test("ui")) {
+            place(55.5f, 12.5f, (float) Math.PI); frames(30);
+            g.player.skills.setLevel(rpg.skill.Skill.AGILITY, 12); g.player.skills.setLevel(rpg.skill.Skill.FISHING, 22); g.player.skills.setLevel(rpg.skill.Skill.MINING, 24);
+            g.player.skills.setLevel(rpg.skill.Skill.ATTACK, 14); g.player.skills.setLevel(rpg.skill.Skill.STRENGTH, 11);
+            for (String id : new String[]{"iron_ore", "coal", "bronze_bar", "raw_trout", "potato", "tomato", "lockpick"}) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(id), id.equals("coal") ? 4 : 1));
+            hud.go(Hud.Scene.INVENTORY); reviewUi("ui-inventory"); hud.closeAll();
+            hud.go(Hud.Scene.CHARACTER); reviewUi("ui-character"); hud.closeAll();
+            for (rpg.skill.Skill s : new rpg.skill.Skill[]{rpg.skill.Skill.AGILITY, rpg.skill.Skill.FISHING, rpg.skill.Skill.MINING, rpg.skill.Skill.ATTACK}) {
+                hud.guide = s; hud.go(Hud.Scene.SKILLS); reviewUi("ui-skills-" + s.name().toLowerCase()); hud.closeAll();
+            }
+        }
+        if (want.test("lock")) {
+            var door = g.objects.storeDoor;
+            g.player.skills.setLevel(rpg.skill.Skill.THIEVING, 12);
+            for (var grid : g.player.grids()) for (int i = 0; i < grid.size(); i++) grid.set(i, null);
+            for (int i = 0; i < 3; i++) g.player.store(new rpg.item.ItemStack(rpg.item.Items.LOCKPICK, 1));
+            place(door.x + 1.2f, door.z, (float) Math.PI / 2); frames(10);
+            var t = g.lockpicking.begin(g.player, door);
+            hud.openLockpick(t);
+            float wrong = t.target > 0 ? t.target - 50 : t.target + 50;
+            ui.mx = hud.lockCentre()[0] + (float) Math.sin(Math.toRadians(wrong)) * 150; ui.my = hud.lockCentre()[1] - (float) Math.cos(Math.toRadians(wrong)) * 150;
+            reviewUi("lock-idle");
+            ui.down = true; for (int i = 0; i < 9; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, "lock-strain.png"));
+            ui.down = false; for (int i = 0; i < 40; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            float near = t.target + rpg.interact.Lockpicking.sweetWidth(t.difficulty, t.skill) / 2 + rpg.interact.Lockpicking.partialWidth(t.difficulty, t.skill) * 0.4f;
+            ui.mx = hud.lockCentre()[0] + (float) Math.sin(Math.toRadians(near)) * 150; ui.my = hud.lockCentre()[1] - (float) Math.cos(Math.toRadians(near)) * 150;
+            ui.down = true; for (int i = 0; i < 30; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, "lock-partial.png"));
+            ui.down = false; for (int i = 0; i < 40; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            ui.mx = hud.lockCentre()[0] + (float) Math.sin(Math.toRadians(t.target)) * 150; ui.my = hud.lockCentre()[1] - (float) Math.cos(Math.toRadians(t.target)) * 150;
+            ui.down = true; for (int i = 0; i < 44; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+            Main.shot(gfx, win.width, win.height, new File(shots, "lock-open.png"));
+            ui.down = false; hud.picking = null; hud.closeAll();
+        }
+        if (want.test("fog")) {
+            for (double hour : new double[]{13, 21.5}) {
+                g.state.minutes = hour * 60;
+                place(96.5f, 98.5f, 0); g.controller.camPitch = -0.05f; frames(60);
+                for (int i = 0; i < 90; i++) Main.drawGame(g, gfx, ui, hud, win.width, win.height, 1f / 60, false);
+                Main.shot(gfx, win.width, win.height, new File(shots, "fog-" + (hour < 18 ? "day" : "night") + ".png"));
+            }
+            g.state.minutes = 13 * 60;
+        }
+        if (want.test("crops")) {
+            for (var p : g.farming.plots) if (p.field == 0) { p.growth = p.bx % 2 == 0 ? 1 : 0.7f; p.ripeFor = 0; }
+            g.farming.treeChanged();
+            g.farming.versions[0]++;
+            place(94.5f, 114.5f, 0); frames(20);
+            view(94.5f, DevMap.FLOOR + 2.6f, 115.5f, 94.5f, DevMap.FLOOR + 0.3f, 108.5f, "crops");
+            view(91f, DevMap.FLOOR + 1.3f, 110.4f, 96f, DevMap.FLOOR + 0.4f, 108.5f, "crops-close");
+        }
+        if (want.test("mine")) {
+            view(54.5f, DevMap.FLOOR + 4.5f, 41.5f, 54.5f, DevMap.FLOOR, 33.5f, "mine-yard");
+            place(52.5f, 33.5f, 0); frames(10);
+            g.player.skills.setLevel(rpg.skill.Skill.MINING, 99);
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get("steel_pickaxe"), 1)); g.combat.sheathe(g.player, false);
+            var rock = g.objects.nodeAt(52, DevMap.FLOOR, 32);
+            if (rock != null) {
+                for (int i = 0; i < 40 && !rock.depleted(); i++) rock.strike(g, g.player, rock.x, rock.y, rock.z);
+                film("mine-break", 24, i -> { }, a -> new float[]{a.x + 2.4f, a.y + 1.6f, a.z + 1.4f, 52.5f, DevMap.FLOOR + 0.4f, 32.5f}, 0);
+            }
+        }
+        if (want.test("shrine")) {
+            var sh = g.shrines.all.get(0);
+            for (double hour : new double[]{14, 21.5}) {
+                g.state.minutes = hour * 60;
+                place(sh.x - 3.6f, sh.z + 3.4f, 0); frames(30);
+                adapted(new float[]{sh.x - 4.2f, DevMap.FLOOR + 2.1f, sh.z + 4.4f, sh.x, DevMap.FLOOR + 1.3f, sh.z}, "shrine-" + (hour < 18 ? "day" : "night"));
+            }
+            g.state.minutes = 13 * 60;
+        }
+        if (want.test("smith")) {
+            for (var grid : g.player.grids()) for (int i = 0; i < grid.size(); i++) grid.set(i, null);
+            g.player.skills.setLevel(rpg.skill.Skill.SMITHING, 24); g.player.skills.setLevel(rpg.skill.Skill.COOKING, 18);
+            for (String[] it : new String[][]{{"hammer", "1"}, {"bronze_bar", "6"}, {"iron_bar", "3"}, {"copper_ore", "2"}, {"tin_ore", "2"}, {"iron_ore", "2"}, {"coal", "3"}, {"raw_trout", "3"}, {"raw_shrimp", "4"}, {"potato", "1"}})
+                for (int i = 0; i < Integer.parseInt(it[1]); i++) g.player.store(new rpg.item.ItemStack(rpg.item.Items.get(it[0]), 1));
+            for (rpg.item.Recipes.Station kind : new rpg.item.Recipes.Station[]{rpg.item.Recipes.Station.ANVIL, rpg.item.Recipes.Station.FURNACE, rpg.item.Recipes.Station.RANGE}) {
+                rpg.objects.Station st = null;
+                for (var o : g.objects.all()) if (o instanceof rpg.objects.Station x && x.kind == kind) { st = x; break; }
+                if (st == null) continue;
+                place(st.x + 1.2f, st.z + 0.5f, (float) Math.PI / 2); frames(10);
+                hud.openStation(st);
+                reviewUi("craft-" + kind.name().toLowerCase());
+                hud.closeAll();
+            }
+        }
+    }
+
     private void p22Shots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);

@@ -789,6 +789,16 @@ public final class Fishery {
     }
 
     /** (0.3.6, gamefixes: the 'slay' command did not work on fish) killed outright, as a death by any blow. */
+    /**
+     * (0.3.7) Charged water reaches a fish: struck as by any spell when someone sent the charge (their Magic is trained by
+     * it), or simply hurt when nobody did (a dragon's breath, a storm); what lives through it is stunned where it swims.
+     */
+    public void shocked(Fish f, Actor by, float potential) {
+        if (!f.alive) return;
+        if (by != null) struck(by, f, potential, false, false, Skill.MAGIC, f.x, f.y, f.z);
+        else { f.hp -= potential; f.lastHurt = g.time; if (f.hp <= 0) die(f, null); }
+        if (f.alive && f.state != Fish.State.HOOKED) { f.vx = 0; f.vz = 0; f.fleeUntil = 0; set(f, Fish.State.REST, "stunned by a shock"); f.stateSince = g.time; }
+    }
     public void slay(Fish f, Actor by) { if (!f.alive) return; f.hp = 0; f.lastHurt = g.time; die(f, by); }
 
     /** Killed: out of the stock, and its body floats up - a raw catch lying on the water to be picked up. */

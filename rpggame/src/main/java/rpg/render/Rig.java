@@ -840,14 +840,19 @@ public final class Rig {
                 // the thighs, the free hand reaches down the stock to the string at the prod and draws it back to the
                 // latch, then returns to the fore-stock as it comes up again
                 float[] mainShoulder = point(tm, b.shoulderX(), b.shoulderY() - b.hipY(), 0);
-                float[] port = torsoPoint(mainShoulder, -1.4f, -8.2f, -3.8f);
-                float[] portDir = norm(torsoDir(-0.42f, 0.14f, -0.9f)), lowDir = norm(torsoDir(-0.14f, -0.68f, -0.72f));
-                float[] spanAt = torsoPoint(mainShoulder, -2.8f, -6.4f, -4.8f);
+                // (0.3.7, gamefixes: a crossbow was not held or aimed properly) carried at the port: across the chest, the
+                // trigger hand at the grip below the ribs and the bow end up past the far shoulder, both hands on it (it
+                // dangled at the thigh off a straight arm). Spanned out ahead of the knees rather than down between them.
+                float[] port = torsoPoint(mainShoulder, XBOW_PORT[0], XBOW_PORT[1], XBOW_PORT[2]);
+                float[] portDir = norm(torsoDir(-0.62f, 0.5f, -0.6f)), lowDir = norm(torsoDir(-0.1f, -0.5f, -0.86f));
+                float[] spanAt = torsoPoint(mainShoulder, -2.6f, -5.6f, -6.6f);
                 float u = c.reload > 0 ? clamp01((spent - 0.12f) / 0.8f) : 0;
                 float tip = c.reload > 0 ? smooth(clamp01((spent - 0.08f) / 0.14f)) * (1 - smooth(clamp01((spent - 0.86f) / 0.14f))) : 0;
                 if (isMain) {
                     // the grip under the cheek, the stock against the shoulder, the bolt on the line of the eye
-                    float[] up = firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : add(add(add(cheek, aim, 2.6f), new float[]{0, 1, 0}, -2.6f), perp, -1.2f);
+                    // (0.3.7) at the eye: the stock's line a finger under it, where the cheek comes down to meet it (it was
+                    // levelled across the breastbone, sighted with the beard)
+                    float[] up = firstPerson ? view(aim, 0.5f, 1, 3.6f, 4.5f) : add(add(add(cheek, aim, 2.2f), new float[]{0, 1, 0}, XBOW_SIGHT), perp, -1.6f);
                     target = firstPerson ? lerp(rest, up, raise) : lerp(port, up, raise);
                     dir = firstPerson ? norm(lerp(dir, aim, raise)) : norm(lerp(portDir, aim, raise));
                     target = add(add(target, aim, -1.4f * xkick), new float[]{0, 1, 0}, 0.9f * xkick);
@@ -860,10 +865,10 @@ public final class Rig {
                     // under the fore-stock; spanning, down to the string at the prod (9 px along), back to the latch (5)
                     float reach = u < 0.3f ? smooth(u / 0.3f) : u < 0.75f ? 1 : 1 - smooth((u - 0.75f) / 0.25f);
                     float pull = u < 0.3f ? 0 : u < 0.75f ? smooth((u - 0.3f) / 0.45f) : 1;
-                    float along = 4.4f + (9.0f - 4.4f) * reach * (1 - pull) + (5.0f - 4.4f) * reach * pull;
+                    float along = XBOW_FORE + (9.0f - XBOW_FORE) * reach * (1 - pull) + (5.0f - XBOW_FORE) * reach * pull;
                     // the palm under the stock: below it while it is carried level, behind it (toward the body) tipped down
                     float[] under = norm(lerp(new float[]{0, -1, 0}, torsoBack, tip));
-                    target = add(add(hand[0], itemDir[0], along), under, 0.9f);
+                    target = add(add(hand[0], itemDir[0], along), under, 1.5f);
                 }
             } else if (isMain && c.charge > 0 && !bow && a.carryBody == 0) {
                 float[] gr = gripAs(a, Move.HEAVY, -0.3f * c.charge, false);
@@ -1091,8 +1096,8 @@ public final class Rig {
             // straight back and out at the height of the shoulder, the bow arm's elbow turned down
             if (!firstPerson && bow && st.bowRaise > 0.001f)
                 pole = norm(lerp(pole, isMain ? norm(new float[]{-aim[0] + perp[0] * 0.55f, -0.05f + 0.3f * c.draw - aim[1], -aim[2] + perp[2] * 0.55f}) : norm(new float[]{-perp[0] * 0.35f, -1, -perp[2] * 0.35f}), st.bowRaise));
-            else if (!firstPerson && crossbow && c.aim > 0.05f)
-                pole = norm(lerp(pole, isMain ? norm(new float[]{perp[0] * 0.8f, -0.7f, perp[2] * 0.8f}) : norm(new float[]{-perp[0] * 0.4f, -1, -perp[2] * 0.4f}), Math.min(1, c.aim)));
+            else if (!firstPerson && crossbow && a.carryBody == 0)
+                pole = norm(lerp(norm(torsoDir(isMain ? 0.7f : -0.55f, -1f, 0.25f)), isMain ? norm(new float[]{perp[0] * 0.8f, -0.7f, perp[2] * 0.8f}) : norm(new float[]{-perp[0] * 0.4f, -1, -perp[2] * 0.4f}), Math.min(1, c.aim)));
             float[] elbow = ik(shoulder, target, L_ARM1, L_ARM2, pole);
             float[] grip = add(elbow, norm(sub(target, elbow)), L_ARM2);
             float[] right = {torsoRight[0], torsoRight[1], torsoRight[2]};
@@ -1458,6 +1463,11 @@ public final class Rig {
     }
 
     // ------------------------------------------------------------------ small vector and matrix tools
+    /** A crossbow at the port: the trigger hand from the right shoulder (px: across, up, forward). */
+    static final float[] XBOW_PORT = {-2.2f, -6.0f, -4.6f};
+    /** A shouldered crossbow's grip against the cheek point (px up; the eye is a little above it), and the fore-hand's place along the stock (px from the grip). */
+    static final float XBOW_SIGHT = 0.2f, XBOW_FORE = 6.2f;
+
     /** Two-bone IK: the middle joint for a chain from a toward t, bending toward the pole. */
     static float[] ik(float[] a, float[] t, float l1, float l2, float[] pole) {
         float[] d = sub(t, a);

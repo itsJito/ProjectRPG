@@ -11,7 +11,7 @@ package rpg.item;
 public enum Tier {
     WOODEN("Wooden", 1, 1, 0x9A7040, 0),
     STONE("Stone", 1, 1, 0x8C8A84, 1),
-    BRONZE("Bronze", 5, 2, 0xB0703A, 2),
+    BRONZE("Bronze", 3, 2, 0xB0703A, 2),
     CHAINMAIL("Chainmail", 10, 3, 0x8A8F96, 3),
     IRON("Iron", 20, 4, 0x6E6E72, 6),
     BLACK("Black", 30, 5, 0x2A2A30, 9),

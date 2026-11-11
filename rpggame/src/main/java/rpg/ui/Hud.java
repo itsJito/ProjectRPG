@@ -50,8 +50,10 @@ public final class Hud {
     Container container;
     Station station;
     Economy.Shop shop;
-    Skill guide = Skill.ATTACK;
+    public Skill guide = Skill.ATTACK;
     public Dialog dialog;
+    /** (0.3.7) A lock being picked: its window over the world (the world goes on round it). */
+    public rpg.interact.Lockpicking.Attempt picking;
     public final SettingsPanel settings;
     Menu menu;
     public boolean aiInspector, stateInspector, telemetry, xpDashboard;
@@ -137,7 +139,7 @@ public final class Hud {
         group("magic", "magic", inFrame("magic", 16, 52));
         group("faith", "faith", inFrame("faith", 16, 52));
         group("map", "worldmap", inFrame("worldmap", 16, 52));
-        group("window", "station", Placement.at(Anchor.CENTER, -120, -40), "cooking", Placement.at(Anchor.CENTER, -120, -40), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
+        group("window", "station", Placement.at(Anchor.CENTER, 0, -30), "cabinet", Placement.at(Anchor.CENTER, -120, -40), "kiosk", Placement.at(Anchor.CENTER, -120, -40));
         group("talk", "dialogue", Placement.at(Anchor.BOTTOM_LEFT, 8, 66), "pause", Placement.at(Anchor.CENTER, 0, 0), "offer", Placement.at(Anchor.CENTER, 0, 150));
         group("inspect", "ai", Placement.at(Anchor.TOP_LEFT, 8, 60), "state", Placement.at(Anchor.LEFT, 8, 40), "telemetry", Placement.at(Anchor.BOTTOM_LEFT, 8, 180), "xpboard", Placement.at(Anchor.TOP_RIGHT, 260, 200));
         group("addons");
@@ -177,7 +179,12 @@ public final class Hud {
     /** Whether the interface needs the mouse (a scene, a window, a dialogue or a menu is open). */
     public void received(rpg.item.ItemDef item) { inventory.received(item); events.emit("inventory", "received " + item.id); }
 
-    public boolean captures() { return transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
+    /** Opens the lock's window on an attempt. */
+    /** The lock window's centre on screen (the pick's angle is read round it). */
+    public float[] lockCentre() { return LockpickWindow.centre(w, h); }
+    public void openLockpick(rpg.interact.Lockpicking.Attempt t) { picking = t; menu = null; pickMsg = null; sound("UIbutton2", 0.4f); }
+    String pickMsg; float pickMsgT, pickShake, pickClickAt;
+    public boolean captures() { return picking != null || transition >= 0 || settings.open || g.death.choosing() || console.isOpen() || scene != Scene.WORLD || win != Win.NONE || dialog != null || menu != null || inventory.dragging(); }
     /**
      * Whether the world stands still (gamefixes: pausing pauses the entire game): any menu - a panel scene (inventory,
      * character, skills, journal, magic), a window (a chest, a shop, a station), a dialogue or the game menu, the hold-E
@@ -223,6 +230,7 @@ public final class Hud {
         if (inventory.dragging()) { inventory.cancelDrag(); return true; }
         if (menu != null) { menu = null; return true; }
         if (dialog != null) { dismissDialog(); return true; }
+        if (picking != null) { g.lockpicking.abandon(picking); picking = null; sound("UI_windowclose", 0.5f); return true; }
         if (win != Win.NONE && scene == Scene.WORLD) { win = Win.NONE; sound("UI_windowclose", 0.5f); return true; }
         if (scene != Scene.WORLD) { go(Scene.WORLD); return true; }
         return false;
@@ -361,6 +369,7 @@ public final class Hud {
         if (cursorFree || captures()) cursor(ui);
         if (ui.click && !ui.consumed && menu != null) menu = null;
         if (ui.click && !ui.consumed && scene == Scene.INVENTORY) inventory.filterFocus = false;
+        if (picking != null) LockpickWindow.draw(this, ui, w, h, dt);
         typed = ""; backspace = false; rotate = false;
         overlays(ui);
         console.draw(ui, w, h, dt);

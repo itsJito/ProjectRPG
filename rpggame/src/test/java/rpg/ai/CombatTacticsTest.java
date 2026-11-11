@@ -44,7 +44,9 @@ class CombatTacticsTest {
         assertEquals(g.player.id, guard.watchTarget);
         guard.cs.aim = 1;
         g.ai.brain.act(guard, 1f / 60);
-        assertEquals(0, guard.cs.aim, "watching a suspect must lower a previously raised crossbow");
+        assertTrue(guard.cs.aim < 1, "watching a suspect starts lowering a previously raised crossbow");
+        for (int f = 0; f < 30; f++) g.ai.brain.act(guard, 1f / 60);
+        assertEquals(0, guard.cs.aim, "and it is down within half a second");
         assertTrue(guard.lastOutcome.contains("visible blood"));
         assertEquals(0, g.law.bounty(g.player.id, guard.homeJurisdiction));
         assertNull(guard.crimeKnown(g.player.id));

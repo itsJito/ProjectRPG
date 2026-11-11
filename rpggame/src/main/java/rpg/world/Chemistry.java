@@ -50,7 +50,12 @@ public final class Chemistry {
      * across the surface, since and until when. The renderer flickers it - light jumping over the surface, sparks
      * skittering across it, the surface shivering.
      */
-    public record Charge(float x,float y,float z,float radius,double since,double until) {}
+    /** Water carrying a charge: where, how far it spreads, for how long, whose it is, how strong, and what it has shocked already. */
+    public record Charge(float x,float y,float z,float radius,double since,double until,long owner,float strength,Set<Long> shocked) {}
+    /** How much further a charge spreads through water than the spark that made it (water conducts), and the least it spreads (m). */
+    public static final float WATER_SPREAD = 3.2f, WATER_SPREAD_MIN = 3.5f;
+    /** What a charge does to a fish in it, per point of the spark's strength; and to a body standing or swimming in it. */
+    public static final float FISH_SHOCK = 3f, BODY_SHOCK = 1f;
     /**
      * Soot (gamefixes: fire did not burn the world's surfaces as it went): where a block is alight its open faces blacken,
      * and the face above it (flames lick upward) - a scorch laid on the surface, darker with each layer, long before the
@@ -221,8 +226,31 @@ public final class Chemistry {
             while (by < rpg.world.DevMap.SY - 1 && g.vox.block(bx, by + 1, bz) == Blocks.WATER) by++;
             while (by > 0 && g.vox.block(bx, by, bz) != Blocks.WATER) by--;
             if (charges.size() >= 12) charges.removeFirst();
-            charges.addLast(new Charge(x, by + 0.92f, z, Math.max(1.5f, radius * 1.8f), g.time, g.time + 1.2 + strength * 0.25));
+            charges.addLast(new Charge(x, by + 0.92f, z, Math.max(WATER_SPREAD_MIN, radius * WATER_SPREAD), g.time, g.time + 1.2 + strength * 0.25, owner == null ? 0 : owner.id, strength, new HashSet<>()));
             disturb(x, by + 0.92f, z, radius, 2.2f, false);
+        }
+    }
+    /**
+     * (0.3.7, gamefixes: electric spells did not electrocute fish or the water) charged water shocks what is in it: every
+     * fish within the charge's spread takes the jolt once (an eel, which makes its own, shrugs it off), and so does
+     * anyone wading or swimming there - the caster too, if they stand in the water they struck. The spark only ever
+     * touched what lay inside its own half-metre; the water round it shivered and did nothing.
+     */
+    private void conduct() {
+        for (Charge c : charges) {
+            Actor owner = g.actor(c.owner());
+            if (g.fishery != null) for (var f : new java.util.ArrayList<>(g.fishery.live)) {
+                if (!f.alive || f.kind.shocks() || Math.hypot(f.x - c.x(), f.z - c.z()) > c.radius() || !c.shocked().add(f.id)) continue;
+                g.fishery.shocked(f, owner, c.strength() * FISH_SHOCK);
+            }
+            for (Actor a : g.actors()) {
+                if (!a.alive || a.dummy || Math.hypot(a.x - c.x(), a.z - c.z()) > c.radius() || Math.abs(a.y - c.y()) > 2.5f) continue;
+                if (a.swimMode == 0 && !g.fluids.in(a.x, a.y + 0.2f, a.z) || !c.shocked().add(a.id)) continue;
+                g.reactions.shocked(a);
+                int harm = Math.max(1, Math.round(c.strength() * BODY_SHOCK));
+                if (owner != null && owner.alive && owner != a && !retired.containsKey(owner.id)) g.combat.resolve(owner, a, harm, 0, ItemDef.DamageType.MAGIC, null, a.x, a.chestY(), a.z, "electric shock", false);
+                else g.combat.environmentalDamage(a, harm, "electric shock");
+            }
         }
     }
     private void acknowledgeRetirements() {
@@ -236,6 +264,7 @@ public final class Chemistry {
             double a = g.roll(g.state.tick, (long) (c.since * 1000)) * Math.PI * 2, r = g.roll(g.state.tick, 7 + (long) (c.since * 1000)) * c.radius;
             ripples.addLast(new Ripple(c.x + (float) (Math.cos(a) * r), c.z + (float) (Math.sin(a) * r), 0.18f, -0.5f, g.time + 0.05));
         }
+        conduct();
         if (g.time < next) return; next = g.time + 0.25;
         // a fence burning blackens where the flames are, post by post, until there is nothing left to burn (the cell
         // goes to air); the char stays on what survives a fire put out

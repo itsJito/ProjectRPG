@@ -8,13 +8,11 @@ import astratto.bridge.CommandBuffer;
 import astratto.bridge.Snapshots;
 import rpg.Rpg;
 import rpg.actor.Actor;
-import rpg.ai.Npc;
 import rpg.animal.Animal;
 import rpg.item.ItemDef;
 import rpg.item.ItemStack;
 import rpg.item.Items;
 import rpg.monster.Monster.State;
-import rpg.skill.Skill;
 import rpg.world.Blocks;
 import rpg.world.DevMap;
 import rpg.world.DungeonLayout;
@@ -48,6 +46,12 @@ public final class Monsters {
         public final int minLevel, maxLevel, cap;
         public float morale = 1, food = 3;
         public double clearedAt = -1, quietSince;
+        /** Whether one of its members was the place's master (a dungeon's leader: not brought back once slain). */
+        public boolean led;
+        /** Members killed since it was last made up (a shrine's rest brings that many back). */
+        public int lost;
+        /** A lair underground, in a dungeon's sealed map: it holds what it was built with and does not breed. */
+        public boolean sealed() { return DungeonLayout.at(x, z) != null; }
         Lair(long id, MonsterKind kind, String name, float x, float z, int minLevel, int maxLevel, int cap) {
             this.id = id; this.kind = kind; this.name = name; this.x = x; this.z = z; this.minLevel = minLevel; this.maxLevel = maxLevel; this.cap = cap;
         }
@@ -275,6 +279,28 @@ public final class Monsters {
         m.running = run;
         return there;
     }
+    /** Within this of a point in plain view, a fighting monster steers straight for it instead of planning a route (m). */
+    static final float FIGHT_STEER = 9;
+
+    /**
+     * (0.3.7, gamefixes: monster combat AI) a step in a fight - round a foe, in at it, back off it: straight there by the
+     * body's own steering when the spot is near and in plain view. Every such step went through the route planner, which
+     * answered a ring slot against a pillar or a wall with "no route", and the monster stood two seconds reconsidering
+     * while its foe hit it. Anything further, or out of view, is still walked by the travel graph.
+     */
+    boolean fightTo(Monster m, float x, float z, boolean run, float within) {
+        if (m.kind.flies()) return moveTo(m, x, z, run, within);
+        float d = (float) Math.hypot(m.x - x, m.z - z);
+        if (d <= within) { hold(m); return true; }
+        if (d < FIGHT_STEER && g.vox.sight(m.x, m.y + 0.5f, m.z, x, m.y + 0.5f, z)) {
+            m.legs = null; m.running = run;
+            if (m.lastOutcome != null && (m.lastOutcome.startsWith("paused") || m.lastOutcome.startsWith("no "))) m.lastOutcome = "closing";
+            if (run) g.ai.closeIn(m, x, z); else g.ai.combatGoal(m, x, z);
+            return false;
+        }
+        return moveTo(m, x, z, run, within);
+    }
+
     void hold(Monster m) {
         if (m.kind.flies()) { m.tx = m.x; m.tz = m.z; m.hasGoalPos = false; }
         else g.ai.desire(m, rpg.ai.AiSystem.A_HOLD);
@@ -449,16 +475,13 @@ public final class Monsters {
             if (alive == 0) {
                 if (l.clearedAt < 0) { l.clearedAt = g.state.minutes; g.state.commit("LairCleared", 0, l.id, DevMap.jurisdiction(l.x, l.z), 0, l.name); }
                 // a long while empty, then something moves in: its own kind again, a few young of it
-                if (g.state.minutes - l.clearedAt > 60 * 24) {
-                    l.clearedAt = -1; l.morale = 1; l.food = 2;
-                    for (int i = 0; i < Math.max(2, l.kind.groupMin); i++) spawn(l.kind, l.minLevel + i, l.x + i * 1.2f, l.z, l);
-                    recolonised++;
-                    g.state.commit("LairRecolonised", 0, l.id, DevMap.jurisdiction(l.x, l.z), 0, l.name);
-                }
+                if (g.state.minutes - l.clearedAt > RECOLONISE_MINUTES) { refill(l, 0); recolonised++; g.state.commit("LairRecolonised", 0, l.id, DevMap.jurisdiction(l.x, l.z), 0, l.name); }
                 continue;
             }
-            // breeding: fed and left in peace, the lair grows one at a time to its cap
-            if (alive < l.cap && l.food >= 2 && g.time - l.quietSince > 120 && rndLair(l) < 0.08) {
+            // breeding: fed and left in peace, the lair grows one at a time to its cap. (0.3.7, gamefixes: dungeons
+            // spammed the visitor with monsters) not underground: a dungeon's room holds what it was built with, and a
+            // band thinned there is not made up again behind the visitor's back
+            if (alive < l.cap && !l.sealed() && l.food >= 2 && g.time - l.quietSince > 120 && rndLair(l) < 0.08) {
                 l.food -= 2;
                 spawn(l.kind, l.minLevel + (int) (rndLair(l) * (l.maxLevel - l.minLevel + 1) * 0.5), l.x, l.z, l);
                 born++;
@@ -466,6 +489,60 @@ public final class Monsters {
         }
     }
     private double rndLair(Lair l) { return g.roll(g.state.tick, l.id); }
+
+    /** How long a cleared lair stands empty before something moves back in (game minutes). */
+    public static final int RECOLONISE_MINUTES = 60 * 24;
+
+    /**
+     * Makes a lair up from the number it has alive to the number that moves back into one: its own kind again - a few
+     * young of it in the wilds; underground the room's full band (never more than the lair holds, and never its fallen
+     * master: a dungeon's leader stays slain). Each on open ground by the lair. Returns how many came.
+     */
+    private int refill(Lair l, int alive) {
+        boolean leaderLives = false;
+        for (Monster m : monsters) if (m.alive && m.lair == l.id && m.leader) leaderLives = true;
+        int want = l.sealed() ? l.cap - (l.led && !leaderLives ? 1 : 0) : Math.min(l.cap, Math.max(2, l.kind.groupMin));
+        if (alive >= want) return 0;
+        l.clearedAt = -1; l.morale = 1; l.food = Math.max(l.food, 2); l.lost = 0;
+        for (int i = alive; i < want; i++) {
+            Monster m = spawn(l.kind, l.sealed() ? l.maxLevel - (i % 3) * 2 : l.minLevel + i, l.x, l.z, l);
+            float[] at = open(m, l.x + (i % 3 - 1) * 1.6f, l.z + (i / 3 % 3 - 1) * 1.6f);
+            g.teleport(m, at[0], DevMap.FLOOR, at[1]);
+        }
+        return want - alive;
+    }
+
+    /**
+     * (0.3.7, gamefixes: Shrines of Light) the world's ordinary monsters come back: every lair that has lost members is
+     * made up again - the cleared at once, the thinned to their number - and what still lives is mended, forgets whom
+     * it was after and goes home. A dungeon's master and the boss dungeon's residents are not brought back: once slain
+     * they stay slain. Returns how many came back.
+     */
+    public int restoreFallen() {
+        int back = 0;
+        for (Lair l : lairs) {
+            if (DungeonLayout.at(l.x, l.z) instanceof DungeonLayout d && d.type == DungeonLayout.Type.BOSS) { l.lost = 0; continue; }
+            int alive = 0; boolean leaderLives = false;
+            for (Monster m : monsters) if (m.alive && m.lair == l.id) { alive++; leaderLives |= m.leader; }
+            // what was killed comes back, up to what the lair holds - a fallen master excepted
+            int room = l.cap - alive - (l.led && !leaderLives ? 1 : 0);
+            int n = Math.max(0, Math.min(l.lost - (l.led && !leaderLives ? 1 : 0), room));
+            for (int i = 0; i < n; i++) {
+                Monster m = spawn(l.kind, l.sealed() ? l.maxLevel - (i % 3) * 2 : l.minLevel + (int) ((l.maxLevel - l.minLevel) * 0.4f) + i, l.x, l.z, l);
+                float[] at = open(m, l.x + (i % 3 - 1) * 1.6f, l.z + (i / 3 % 3 - 1) * 1.6f);
+                g.teleport(m, at[0], DevMap.FLOOR, at[1]);
+            }
+            if (n > 0) { l.clearedAt = -1; l.morale = 1; }
+            l.lost = 0;
+            back += n;
+        }
+        for (Monster m : monsters) {
+            if (!m.alive || m.puppet) continue;
+            m.hp = m.maxHp(); m.fear = 0; m.target = 0; m.fightTarget = 0; m.known.clear(); m.cs.cancel();
+            m.state = State.IDLE; m.stateSince = g.time; m.nextThink = g.time + 0.5; m.hasGoalPos = false; m.legs = null;
+        }
+        return back;
+    }
 
     // ------------------------------------------------------------------ striking (the creatures' own blows) and ranged attacks
     /** A telegraphed creature strike lands - if the target is still where the blow goes (it may have stepped away). */
@@ -549,6 +626,7 @@ public final class Monsters {
         for (ItemStack s : Loot.roll(g, m)) { if (!m.store(s)) g.objects.drop(s, m.x, m.y + 0.1f, m.z); g.state.mint(s.def, s.amount); }
         Lair l = lair(m.lair);
         Monster lead = l == null ? null : leaderOf(m);
+        if (l != null) l.lost++;
         if (l != null) {
             boolean wasLeader = lead == null || lead.level <= m.level;
             l.morale = Math.max(0, l.morale - (wasLeader ? 0.45f : 0.2f));
@@ -594,7 +672,7 @@ public final class Monsters {
         for (Lair l : lairs) {
             Map<String, Object> o = new HashMap<>();
             o.put("id", l.id); o.put("kind", l.kind.name()); o.put("name", l.name); o.put("x", l.x); o.put("z", l.z); o.put("min", l.minLevel); o.put("max", l.maxLevel); o.put("cap", l.cap);
-            o.put("morale", l.morale); o.put("food", l.food); o.put("cleared", l.clearedAt);
+            o.put("morale", l.morale); o.put("food", l.food); o.put("cleared", l.clearedAt); o.put("led", l.led); o.put("lost", l.lost);
             ls.add(o);
         }
         root.put("lairs", ls);
@@ -602,7 +680,7 @@ public final class Monsters {
         for (Monster m : monsters) {
             Map<String, Object> o = record.apply(m);
             o.put("kind", m.kind.name()); o.put("level", m.level); o.put("lair", m.lair); o.put("lairX", m.lairX); o.put("lairZ", m.lairZ);
-            o.put("hunger", (double) m.hunger); o.put("fatigue", (double) m.fatigue); o.put("loaded", m.loaded);
+            o.put("hunger", (double) m.hunger); o.put("fatigue", (double) m.fatigue); o.put("loaded", m.loaded); o.put("leader", m.leader);
             if (m.breed != null) o.put("breed", m.breed.name());
             var rd = !m.alive && m.ragdoll != 0 ? g.lastBodies.ragdoll(m.ragdoll) : null;
             if (rd != null) { List<Object> pose = new ArrayList<>(); for (float v : rd.p) pose.add((double) v); o.put("pose", pose); }
@@ -624,7 +702,7 @@ public final class Monsters {
             Map<String, Object> r = (Map<String, Object>) o;
             Lair l = new Lair(astratto.util.Json.lng(r, "id", 0), MonsterKind.valueOf(astratto.util.Json.str(r, "kind", "GOBLIN")), astratto.util.Json.str(r, "name", "Lair"),
                     (float) astratto.util.Json.num(r, "x", 0), (float) astratto.util.Json.num(r, "z", 0), astratto.util.Json.integer(r, "min", 1), astratto.util.Json.integer(r, "max", 5), astratto.util.Json.integer(r, "cap", 4));
-            l.morale = (float) astratto.util.Json.num(r, "morale", 1); l.food = (float) astratto.util.Json.num(r, "food", 2); l.clearedAt = astratto.util.Json.num(r, "cleared", -1);
+            l.morale = (float) astratto.util.Json.num(r, "morale", 1); l.food = (float) astratto.util.Json.num(r, "food", 2); l.clearedAt = astratto.util.Json.num(r, "cleared", -1); l.led = astratto.util.Json.bool(r, "led", false); l.lost = astratto.util.Json.integer(r, "lost", 0);
             lairs.add(l);
         }
         for (Object o : astratto.util.Json.list(root, "monsters")) {
@@ -638,7 +716,7 @@ public final class Monsters {
             m.alive = astratto.util.Json.bool(r, "alive", true);
             m.stats();
             m.lair = astratto.util.Json.lng(r, "lair", 0); m.lairX = (float) astratto.util.Json.num(r, "lairX", m.x); m.lairZ = (float) astratto.util.Json.num(r, "lairZ", m.z);
-            m.homeX = m.lairX; m.homeZ = m.lairZ;
+            m.homeX = m.lairX; m.homeZ = m.lairZ; m.leader = astratto.util.Json.bool(r, "leader", false);
             m.hunger = (float) astratto.util.Json.num(r, "hunger", 0.3); m.fatigue = (float) astratto.util.Json.num(r, "fatigue", 0);
             if (r.containsKey("breed")) m.breed = MonsterKind.Breed.valueOf(astratto.util.Json.str(r, "breed", "FIRE"));
             if (r.get("grudge") instanceof Map<?, ?> gr) for (var e : gr.entrySet()) if (e.getValue() instanceof List<?> v && v.size() == 2)
@@ -667,6 +745,8 @@ public final class Monsters {
         for (Monster m : all()) {
             if (!m.alive || !m.loaded || m == source || m.state == Monster.State.DORMANT) continue;
             if (Math.hypot(m.x - x, m.z - z) > radius * 1.1f || Math.abs(m.y - y) > 8) continue;
+            // (0.3.7) underground, rock deadens it: beyond its own room a noise carries half as far
+            if (DungeonLayout.at(m.x, m.z) instanceof DungeonLayout dl && !dl.together(m.x, m.z, x, z) && Math.hypot(m.x - x, m.z - z) > radius * 0.5f) continue;
             Monster.Known k = m.known.computeIfAbsent(source.id, Monster.Known::new);
             k.x = x; k.z = z; k.at = g.time; k.sense = "heard";
             if (m.state == Monster.State.IDLE || m.state == Monster.State.PATROL || m.state == Monster.State.REST || m.state == Monster.State.RETURN) {

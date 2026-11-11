@@ -18,6 +18,7 @@ public final class ItemIO {
         Map<String, Object> m = new HashMap<>();
         m.put("id", s.def.id); m.put("n", s.amount); m.put("owner", s.owner); m.put("stolen", s.stolen); m.put("origin", s.origin);
         if (s.def.maxCharges > 0) m.put("charges", s.charges);
+        if (s.wear > 0) m.put("wear", (double) s.wear);
         if (s.contract != null) { var c = s.contract; m.put("contract", java.util.Map.of("case", c.caseId(), "target", c.target(), "jur", c.jurisdiction(), "reward", c.reward(), "x", c.x(), "z", c.z())); }
         if (s.stolen && s.victims().size() > 1) { Map<String, Object> v = new HashMap<>(); for (var e : s.victims().entrySet()) v.put(String.valueOf(e.getKey()), e.getValue()); m.put("victims", v); }
         if (s.inner != null && !s.inner.isEmpty()) m.put("inner", inventory(s.inner));
@@ -33,6 +34,7 @@ public final class ItemIO {
         ItemStack s = new ItemStack(d, Json.integer(m, "n", 1), Json.lng(m, "owner", 0), Json.bool(m, "stolen", false), Json.lng(m, "origin", 0));
         if (s.inner != null) inventory(s.inner, Json.list(m, "inner"));
         if (d.maxCharges > 0) s.charges = Json.integer(m, "charges", d.maxCharges);
+        s.wear = (float) Json.num(m, "wear", 0);
         var contract = Json.obj(m, "contract");
         if (contract != null && d == Items.BOUNTY_SCROLL) s.contract = new ItemStack.Contract(Json.lng(contract, "case", 0), Json.lng(contract, "target", 0), Json.str(contract, "jur", ""), Json.integer(contract, "reward", 0), (float) Json.num(contract, "x", 0), (float) Json.num(contract, "z", 0));
         Map<String, Object> v = Json.obj(m, "victims");
