@@ -33,6 +33,7 @@ class PolishSystemsTest {
  @Test void rangedAimTracksOnlyVisibleTargetsAndLetsThePlayerBreakAway(){
   var p=g.player;g.teleport(p,64.5f,DevMap.FLOOR,66.5f);p.firstPerson=true;p.headValid=false;
   for(int x=63;x<=66;x++)for(int z=57;z<=67;z++)for(int y=DevMap.FLOOR;y<=DevMap.FLOOR+3;y++)g.setBlock(x,y,z,Blocks.AIR);
+  game.tick(0);   // the cleared lane in the world before the goblin is set down in it (a spawn steps out of anything solid)
   var target=g.monsters.display(MonsterKind.GOBLIN,20,64.8f,58.5f,0);
   game.tick(0);
   p.eq.set(ItemDef.Slot.MAIN,new ItemStack(Items.SHORTBOW,1));p.sheathed=false;p.sheatheAt=-99;

@@ -45,6 +45,14 @@ public final class Node extends WorldObject {
     public double regrowAt = -1;
     /** The block it is made of (trees: the log), and where. */
     public final int block, bx, bz;
+    /**
+     * (0.4.0) The cell the node stands in (a rock's ore, a tree's foot, a patch's plant): the devmap's floor, or the
+     * ground's height wherever ShadowVeil grew it ({@link #base}).
+     */
+    public int by = DevMap.FLOOR;
+    /** (0.4.0) A tree grown in its own shape (ShadowVeil's woods): felled, every cell of it comes down and is kept to grow back. */
+    public boolean grown;
+    private int[] felled;
     private final int leaves, height;
     /** A fishing spot's tool (net, rod, cage); null elsewhere. */
     public ItemDef needs;
@@ -63,6 +71,13 @@ public final class Node extends WorldObject {
         if (kind == Kind.TREE) y = DevMap.FLOOR + 1.2f;
     }
 
+    /** (0.4.0) Stands the node on ground at another height (its cell's y): ShadowVeil's trees, rocks and waters. */
+    public Node base(int cellY) {
+        by = cellY;
+        y = cellY + (kind == Kind.TREE ? 1.2f : kind == Kind.FISH ? 0.2f : 0.6f);
+        return this;
+    }
+
     @Override public float focusRadius() { return kind == Kind.TREE ? 0.9f : kind == Kind.FISH ? 1.2f : 0.75f; }
     /** Only a node with a stock can run out (a fishing spot has none and never does). */
     public boolean depleted() { return stockMax > 0 && stock <= 0; }
@@ -74,7 +89,8 @@ public final class Node extends WorldObject {
     /** Whether a block is part of this node as it stands: a tree's trunk or crown, a rock's ore. */
     public boolean contains(int x, int y, int z) {
         if (depleted()) return false;
-        int f = DevMap.FLOOR;
+        int f = by;
+        if (grown && kind == Kind.TREE) return Math.abs(x - bx) <= 4 && Math.abs(z - bz) <= 4 && y >= f && y <= f + 16;
         return switch (kind) {
             case ROCK -> x == bx && z == bz && y == f;
             case TREE -> x == bx && z == bz && y >= f && y <= f + height
@@ -166,7 +182,7 @@ public final class Node extends WorldObject {
         if (kind == Kind.TREE || kind == Kind.ROCK) {
             // the button only swings: the tool has to land on the tree or the ore, like any blow
             a.yaw = (float) Math.atan2(-(x - a.x), -(z - a.z));
-            a.pitch = (float) Math.atan2((kind == Kind.ROCK ? DevMap.FLOOR + 0.5f : DevMap.FLOOR + 1.2f) - a.eyeY() + 0.35f, Math.max(0.3, Math.hypot(x - a.x, z - a.z)));
+            a.pitch = (float) Math.atan2((kind == Kind.ROCK ? by + 0.5f : by + 1.2f) - a.eyeY() + 0.35f, Math.max(0.3, Math.hypot(x - a.x, z - a.z)));
             var move=kind==Kind.ROCK ? rpg.actor.Actor.Combat.Move.HEAVY : rpg.actor.Actor.Combat.Move.LIGHT_R;
             return g.combat.attack(a, false, move) ? Result.started() : Result.no(null);
         }
@@ -219,7 +235,7 @@ public final class Node extends WorldObject {
             g.prog.award(a, skill, xp * lumps, "broke " + name.toLowerCase(), ev.id());
             if (a == g.player) g.chat.say("The rock breaks apart. You gather " + (lumps > 1 ? lumps + " " : "the ") + product.name.toLowerCase() + (lumps > 1 && !product.name.endsWith("s") ? "s" : "") + ".");
             if (g.sfx != null) g.sfx.play("stone", x, y, z, 1f);
-            if (g.fx != null) g.fx.rockBreak(bx + 0.5f, DevMap.FLOOR + 0.3f, bz + 0.5f, product.color);
+            if (g.fx != null) g.fx.rockBreak(bx + 0.5f, by + 0.3f, bz + 0.5f, product.color);
             g.noise(a, x, y, z, 14, 0.5f);
             deplete(g, ev.id());
             return true;
@@ -235,7 +251,7 @@ public final class Node extends WorldObject {
         g.prog.award(a, skill, xp * logs, "felled " + name.toLowerCase(), ev.id());
         if (a == g.player) g.chat.say("Timber! You fell the " + name.toLowerCase() + " and gather " + logs + " " + product.name.toLowerCase() + ".");
         if (g.sfx != null) g.sfx.play("wood.heavy", x, y + 1.5f, z, 1f);
-        if (g.fx != null) for (int i = 0; i < 4; i++) g.fx.chips(bx + 0.5f, DevMap.FLOOR + 1.5f + i, bz + 0.5f, 10);
+        if (g.fx != null) for (int i = 0; i < 4; i++) g.fx.chips(bx + 0.5f, by + 1.5f + i, bz + 0.5f, 10);
         deplete(g, ev.id());
         return true;
     }
@@ -290,7 +306,7 @@ public final class Node extends WorldObject {
 
     public void update(Rpg g) {
         if (depleted() && regrowAt >= 0 && g.state.minutes >= regrowAt) {
-            if (kind == Kind.PATCH && g.vox.block(bx,DevMap.FLOOR,bz) != Blocks.AIR && g.vox.block(bx,DevMap.FLOOR,bz) != block) return;
+            if (kind == Kind.PATCH && g.vox.block(bx,by,bz) != Blocks.AIR && g.vox.block(bx,by,bz) != block) return;
             stock = stockMax;
             regrowAt = -1;
             setBlocks(g, true);
@@ -300,7 +316,8 @@ public final class Node extends WorldObject {
 
     /** The world as the node's state says: a whole tree or a stump; ore or spent rock; a plant or bare soil. */
     public void setBlocks(Rpg g, boolean whole) {
-        int f = DevMap.FLOOR;
+        int f = by;
+        if (grown && kind == Kind.TREE) { growOrFell(g, whole); return; }
         switch (kind) {
             case TREE -> {
                 for (int y = f + 1; y <= f + height; y++) g.setBlock(bx, y, bz, whole ? block : Blocks.AIR);
@@ -322,6 +339,39 @@ public final class Node extends WorldObject {
                 g.setBlock(bx, f, bz, whole ? block : Blocks.AIR); g.setBlock(bx, f - 1, bz, whole ? Blocks.DIRT : Blocks.BARE_PATCH);
             }
             case FISH -> { }
+        }
+    }
+
+    /**
+     * (0.4.0) A tree of ShadowVeil's own shape: felled, every log and leaf joined to its trunk comes down (none left
+     * hanging in the air) and is remembered; regrown, those cells come back where they are still open.
+     */
+    private void growOrFell(Rpg g, boolean whole) {
+        if (!whole) {
+            if (felled != null) return;
+            java.util.List<int[]> cells = new java.util.ArrayList<>();
+            java.util.ArrayDeque<int[]> open = new java.util.ArrayDeque<>();
+            java.util.Set<Long> seen = new java.util.HashSet<>();
+            open.add(new int[]{bx, by, bz});
+            while (!open.isEmpty() && cells.size() < 900) {
+                int[] c = open.poll();
+                long key = ((long) c[0] << 40) ^ ((long) c[1] << 20) ^ c[2];
+                if (!seen.add(key)) continue;
+                if (Math.abs(c[0] - bx) > 5 || Math.abs(c[2] - bz) > 5 || c[1] < by || c[1] > by + 18) continue;
+                int b = g.vox.block(c[0], c[1], c[2]);
+                if (!Blocks.isTreeLog(b) && !Blocks.isLeaves(b)) continue;
+                cells.add(new int[]{c[0], c[1], c[2], b});
+                for (int[] d : new int[][]{{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}}) open.add(new int[]{c[0] + d[0], c[1] + d[1], c[2] + d[2]});
+            }
+            felled = new int[cells.size() * 4];
+            for (int k = 0; k < cells.size(); k++) System.arraycopy(cells.get(k), 0, felled, k * 4, 4);
+            for (int[] c : cells) g.setBlock(c[0], c[1], c[2], c[0] == bx && c[2] == bz && c[1] == by ? Blocks.stumpOf(block) : Blocks.AIR);
+        } else if (felled != null) {
+            for (int k = 0; k < felled.length; k += 4) {
+                int cur = g.vox.block(felled[k], felled[k + 1], felled[k + 2]);
+                if (cur == Blocks.AIR || cur == Blocks.stumpOf(block)) g.setBlock(felled[k], felled[k + 1], felled[k + 2], felled[k + 3]);
+            }
+            felled = null;
         }
     }
 

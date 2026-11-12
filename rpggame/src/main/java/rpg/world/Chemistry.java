@@ -234,7 +234,7 @@ public final class Chemistry {
         if (element == CHEM_ELECTRIC && onWater(x, y, z)) {
             // the surface: the top of the water column here
             int bx = (int) Math.floor(x), bz = (int) Math.floor(z), by = (int) Math.floor(y);
-            while (by < rpg.world.DevMap.SY - 1 && g.vox.block(bx, by + 1, bz) == Blocks.WATER) by++;
+            while (by < rpg.world.WorldMap.active().sizeY - 1 && g.vox.block(bx, by + 1, bz) == Blocks.WATER) by++;
             while (by > 0 && g.vox.block(bx, by, bz) != Blocks.WATER) by--;
             if (charges.size() >= 12) charges.removeFirst();
             charges.addLast(new Charge(x, by + 0.92f, z, Math.max(WATER_SPREAD_MIN, radius * WATER_SPREAD), g.time, g.time + 1.2 + strength * 0.25, owner == null ? 0 : owner.id, strength, new HashSet<>()));

@@ -327,7 +327,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
     if(m){m->climb=false;m->wishY=0;}
     a.yieldTime=std::max(0.f,a.yieldTime-dt);a.yieldCooldown=std::max(0.f,a.yieldCooldown-dt);
     auto rememberBlock=[&](int x,int y,int z){
-        const int cell=x|(z<<10)|(y<<20);bool found=false;
+        const int cell=x|(z<<11)|(y<<22);bool found=false;
         for(auto& p:a.blockedCosts)if(p.first==cell){p.second=std::min(80.f,p.second+12.f);found=true;}
         if(!found)a.blockedCosts.emplace_back(cell,12.f);
         if(a.blockedCosts.size()>32)a.blockedCosts.erase(a.blockedCosts.begin());
@@ -400,7 +400,7 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             a.yieldWait=0;
             a.yaw = std::atan2(-dx, -dz);
             // a ledge on the route that is not a stair is jumped
-            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
+            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP) && !(cy - a.y <= 1.05f && (w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_GROUND))) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
             // progress: if it has not got nearer for a second and a half it is stuck - search again; three times and it gives up
             a.progressTimer += dt;
             if (d < a.progressBest - 0.1f) { a.progressBest = d; a.progressTimer = 0; a.fails = 0; }

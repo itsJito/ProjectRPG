@@ -46,7 +46,7 @@ class WeeklyLifeTest {
         }
     }
 
-    @Test void theTownsLiveThroughTwoDaysAtSpeed() {
+    @org.junit.jupiter.api.Tag("slow") @Test void theTownsLiveThroughTwoDaysAtSpeed() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));

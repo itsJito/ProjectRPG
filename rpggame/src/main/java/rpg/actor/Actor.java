@@ -325,6 +325,15 @@ public class Actor {
         public double blockStart = -9;
         public float staggered, stabilityBonus, iframes, dodgeT, dodgeX, dodgeZ, hitstop;
         public float charge, draw, aim, castCooldown, regenDelay, flash, slowT;
+        /**
+         * (0.4.0, gamefixes: dynamic and contextual reactions to being hit) the last blow that landed, for the body to
+         * answer: the way it was driven (a unit vector, world x and z, from the striker through the one struck), how hard
+         * (0..1: the damage against the body's health, and the weight behind it), where on the body (0 the legs, 1 the
+         * body, 2 the head), and when.
+         */
+        public float hitDirX, hitDirZ, hitForce;
+        public int hitPart = 1;
+        public double hitAt = -99;
         /** Frozen in place (Fogish ice): seconds left in which the feet cannot move - the hands still can. */
         public float frozenT;
         /** (The old cast-once blessings' timers are gone: prayers are toggled; see combat.Prayers.) */
@@ -333,6 +342,12 @@ public class Actor {
         public int combo;
         public double lastHurt = -99, lastAttack = -99;
         public long lastAttacker;
+        /**
+         * (0.4.0, gamefixes: struck from hiding by spell or shot, the victim still knew it was the player) whether the one
+         * struck knows who struck them: a blow at arm's length is felt from its striker; an arrow, a bolt or a spell from
+         * out of sight comes from someone unknown, and is answered by a search toward where it came from, not a fight.
+         */
+        public boolean attackerKnown = true;
         /** (0.3.9) The kind of the last blow taken, and whether it came from afar (what a body tells an investigator). */
         public rpg.item.ItemDef.DamageType lastDamageType;
         public boolean lastRanged;

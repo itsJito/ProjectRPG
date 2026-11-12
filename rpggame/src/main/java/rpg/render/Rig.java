@@ -50,6 +50,8 @@ public final class Rig {
         /** How far into the side-on archer's stance the body has turned (0..1). */
         float aimSide;
         float headYaw, bowRaise, guardRaise, crouchBlend, seat;
+        /** (0.4.0) the head's answer to a blow this frame: nodded (+ down, - thrown back) and tipped aside. */
+        float hitNod, hitTilt;
         /** The bow: how drawn it was last frame, when it was loosed, how long it has been held at full draw. */
         float lastDraw, heldFull; double loosedAt = -9;
         final float[] armSwing = new float[2];
@@ -394,7 +396,26 @@ public final class Rig {
         ItemDef grabMain = a.main();
         int grabHand = grabMain == null || grabMain.family == Family.BOW ? 0 : 1;
         if (c.staggered > 0) { float k = Math.min(1, c.staggered / 0.4f); extraLean -= 0.32f * k; extraTwist += 0.25f * k * (float) Math.sin(time * 9 + a.id); crouch += 1.2f * k; }
-        extraLean -= 0.14f * c.flash;
+        // (0.4.0, gamefixes: dynamic and contextual reactions to being hit) the blow answered as it landed: the body driven
+        // the way it was struck (a blow from in front bows it back, from behind throws it forward, from the side twists it
+        // and rocks it over), a quick give then a settle that swings a little past and back; a blow to the head snaps the
+        // head, one to the legs buckles the knees - all by how hard it was
+        st.hitNod = 0; st.hitTilt = 0;
+        float sinceHit = (float) (time - c.hitAt);
+        if (sinceHit >= 0 && sinceHit < 0.6f && !a.reacting) {
+            float give = sinceHit < 0.06f ? sinceHit / 0.06f : (float) Math.exp(-(sinceHit - 0.06f) * 7.5f);
+            float settle = sinceHit > 0.16f ? -0.28f * (float) Math.sin(Math.min(1, (sinceHit - 0.16f) / 0.44f) * Math.PI) : 0;
+            float k = c.hitForce * (give + settle);
+            float fwd = -(c.hitDirX * (float) Math.sin(a.yaw) + c.hitDirZ * (float) Math.cos(a.yaw));      // + pushed forward
+            float side = c.hitDirX * (float) Math.cos(a.yaw) - c.hitDirZ * (float) Math.sin(a.yaw);        // + pushed to its right
+            extraLean += fwd * 0.42f * k;
+            extraTwist += side * 0.38f * k;
+            roll += side * 0.22f * k;
+            if (c.hitPart == 0) crouch += 1.6f * Math.abs(k);
+            else crouch += 0.5f * Math.abs(k);
+            if (c.hitPart == 2) { st.hitNod = -fwd * 0.55f * k - 0.15f * Math.abs(k); st.hitTilt = side * 0.45f * k; }
+            else { st.hitNod = -fwd * 0.18f * k; st.hitTilt = side * 0.12f * k; }
+        } else extraLean -= 0.14f * c.flash;
         if (c.blocking) { extraLean += 0.06f; extraTwist -= 0.16f; crouch += 0.8f; }
         // (0.2.2, gamefixes: the walk and run change with the injury) the hurt are drawn hurt, by where they are hurt: a
         // body wound hunches them over it, a head wound tips the head and sets the walk wavering, an arm hangs or is
@@ -619,6 +640,8 @@ public final class Rig {
         rotX(hm, -0.32f * st.charge);
         rotY(hm, -twist * 0.9f + st.headYaw);
         rotX(hm, clamp(a.pitch * 0.7f, -0.7f, 0.7f));
+        // (0.4.0) the head's answer to a blow
+        if (st.hitNod != 0 || st.hitTilt != 0) { rotX(hm, st.hitNod); rotZ(hm, -st.hitTilt); }
         // (0.3.4) in the rain the head is ducked a little under the hand
         if (a.rainCover > 0.01f) rotX(hm, -0.18f * a.rainCover);
         // (0.3.4) laid flat in the water, the chin comes up so the eyes look ahead along the stroke
@@ -962,7 +985,7 @@ public final class Rig {
                 // a hand dipped down to the water ahead, held there while it fills
                 var w = a.working;
                 float fillK = smooth(clamp01(w.t / 0.4f)) * smooth(clamp01((w.duration - w.t) / 0.35f));
-                float[] dip = toFigure(a, a.x - (float) Math.sin(a.yaw) * 0.75f + (float) Math.cos(a.yaw) * side * 0.12f, rpg.world.DevMap.FLOOR - 0.15f, a.z - (float) Math.cos(a.yaw) * 0.75f - (float) Math.sin(a.yaw) * side * 0.12f);
+                float[] dip = toFigure(a, a.x - (float) Math.sin(a.yaw) * 0.75f + (float) Math.cos(a.yaw) * side * 0.12f, a.y - 0.15f, a.z - (float) Math.cos(a.yaw) * 0.75f - (float) Math.sin(a.yaw) * side * 0.12f);
                 target = lerp(rest, dip, fillK * (isMain ? 1 : 0.6f));
                 dir = norm(lerp(dir, new float[]{0, -1, -0.3f}, fillK));
             } else if (looting > 0.001f) {
@@ -1197,7 +1220,7 @@ public final class Rig {
         var w = a.working;
         float t = w.t, on = smooth(clamp01(t / 0.35f)) * smooth(clamp01((w.duration - t) / 0.3f));
         float rx = (float) Math.cos(a.yaw), rz = (float) -Math.sin(a.yaw), fx = (float) -Math.sin(a.yaw), fz = (float) -Math.cos(a.yaw);
-        float f = rpg.world.DevMap.FLOOR, sx = s.x, sz = s.z, hx = sx, hy = f + 0.95f, hz = sz;
+        float f = rpg.world.Ground.at(s.x, s.z), sx = s.x, sz = s.z, hx = sx, hy = f + 0.95f, hz = sz;
         float[] dir = torsoDir(0, -0.3f, -1f);
         // the near edge of the station, toward the worker
         float nx = sx - fx * 0.35f, nz = sz - fz * 0.35f;

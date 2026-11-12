@@ -230,7 +230,7 @@ public final class Companions {
         boolean leaderUp = leader.riding != 0;
         if (n.riding != 0) {
             var ride = g.riding.of(n);
-            if (!leaderUp && ride != null && !ride.mounting() && ride.body.grounded) { g.riding.dismount(n, false); n.lastOutcome = "down from the saddle"; return true; }
+            if (!leaderUp && ride != null && !ride.mounting() && ride.body.grounded) { g.riding.stepDown(n); n.lastOutcome = "down from the saddle"; return true; }
             return false;
         }
         if (!leaderUp || n.order != Order.FOLLOW && n.order != Order.RALLY) return false;

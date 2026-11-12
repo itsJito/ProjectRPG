@@ -67,6 +67,8 @@ public final class SaveSystem {
         Map<String, Object> root = new HashMap<>();
         root.put("schema", SCHEMA);
         root.put("version", Main.VERSION);
+        // (0.4.0) the map the game was played on: a save belongs to its world (ShadowVeil's, or the legacy devmap's)
+        root.put("map", g.map.id);
         root.put("pendingLevels",g.prog.save());
         root.put("npcTraversalProfiles", 1);
         root.put("revision", g.state.revision);
@@ -93,7 +95,7 @@ public final class SaveSystem {
         List<Object> npcs = new ArrayList<>();
         for (Npc n : g.npcs) {
             Map<String, Object> m = actor(n);
-            m.put("loaded", n.loaded); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
+            m.put("loaded", n.loaded); m.put("offstage", n.offstage); m.put("hunger", (double) n.hunger); m.put("fatigue", (double) n.fatigue); m.put("social", (double) n.social);
             if (n.profession != null) m.put("profession",n.profession.name()); m.put("dutyTarget",n.dutyTarget); m.put("dutyPhase",n.dutyPhase); m.put("dutyX",n.dutyX); m.put("dutyZ",n.dutyZ); m.put("dutyLeft",Math.max(0,n.dutyUntil-g.time));
             m.put("arrested", n.arrestedUntil); m.put("arrestJur", n.arrestJurisdiction); m.put("patrol", n.patrolIndex);
             if (n.playerSighting != null) {
@@ -141,15 +143,31 @@ public final class SaveSystem {
         root.put("timeSystem",g.timeSystem.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
+        // (0.4.1) the character apart from the world, readable by any later version (CharacterRecord)
+        Map<String, Object> character = CharacterRecord.capture(g);
+        root.put("character", character);
         try {
             Files.createDirectories(file.toAbsolutePath().getParent());
             Files.writeString(file, Json.write(root), StandardCharsets.UTF_8);
+            Files.writeString(CharacterRecord.besides(file), Json.write(character), StandardCharsets.UTF_8);
             g.state.commit("GameSaved", g.player.id, 0, null, 0, file.toString() + " at revision " + g.state.revision);
             return true;
         } catch (IOException e) {
             g.chat.warn("Could not save: " + e.getMessage());
             return false;
         }
+    }
+
+    /** (0.4.1) A character brought into this world from another version's (or another world's) save, set down at the map's spawn. */
+    public boolean carryOver(Map<String, Object> rec, String from) {
+        List<String> notes = CharacterRecord.apply(g, rec);
+        var m = rpg.world.WorldMap.active();
+        g.teleport(g.player, m.spawnX, rpg.world.WorldMap.standY(m.spawnX, m.spawnZ), m.spawnZ);
+        g.controller.snapTo(m.spawnYaw);
+        g.chat.add("Your character was carried over from " + from + "; the world begins anew around you.", Chat.Kind.GAME);
+        for (String n : notes) g.chat.warn("Carried over: " + n);
+        g.state.commit("CharacterCarriedOver", g.player.id, 0, null, 0, g.player.name + " from " + from + (notes.isEmpty() ? "" : " (" + notes.size() + " notes)"));
+        return true;
     }
 
     private Map<String, Object> actor(Actor a) {
@@ -198,9 +216,14 @@ public final class SaveSystem {
         catch (IOException | RuntimeException e) { g.chat.warn("Could not load " + file + ": " + e.getMessage()); return false; }
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
         String made = Json.str(root, "version", UNSTAMPED);
-        if (!compatible(made, Main.VERSION)) {
-            g.chat.warn("That save was made in version " + lineName(made) + ". Saves do not carry over to version " + lineName(Main.VERSION) + ".");
-            return false;
+        String world = Json.str(root, "map", "devmap");
+        if (!compatible(made, Main.VERSION) || !world.equals(g.map.id)) {
+            // (0.4.1, gamefixes: future versions read the character's data) the world of another version (or another
+            // map) does not carry over; the character does - skills, pack, worn gear, bank, quests and Honor - into this
+            // world, at its spawn
+            Map<String, Object> rec = CharacterRecord.fromSave(root);
+            if (rec == null) { g.chat.warn("That save holds no character this version can read."); return false; }
+            return carryOver(rec, compatible(made, Main.VERSION) ? "another world" : "version " + lineName(made));
         }
         g.prog.load(Json.list(root,"pendingLevels"));
         g.chemistry.beforeLoad();
@@ -284,11 +307,12 @@ public final class SaveSystem {
             n.goal = Brain.Goal.IDLE; n.nextThink = 0; n.fightTarget = 0; n.cs.lastAttacker = 0; n.hasGoalPos = false; n.speech = null;
             n.alive = alive;
             n.loaded = loaded;
+            n.offstage = !loaded && Json.bool(m, "offstage", false);
             if (alive && loaded) g.ai.spawnBody(n);
             else if (!alive) {
                 n.diedAt = g.time;
                 n.ragdoll = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RAGDOLL);
-                g.game.commands().ragdollCreate(n.ragdoll, n.ragdollScale(), n.sydneyProfile(), astratto.bridge.AstrattoNative.RAGDOLL_ACTIVE, n.x, DevMap.FLOOR, n.z, n.yaw, 0, 0, 0);
+                g.game.commands().ragdollCreate(n.ragdoll, n.ragdollScale(), n.sydneyProfile(), astratto.bridge.AstrattoNative.RAGDOLL_ACTIVE, n.x, rpg.world.Ground.at(n.x, n.z), n.z, n.yaw, 0, 0, 0);
                 g.ai.afloat(n);
                 List<Object> pose = Json.list(m, "pose");
                 if (pose != null && pose.size() == astratto.bridge.AstrattoNative.RD_PARTICLES * 3) {

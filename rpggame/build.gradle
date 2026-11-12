@@ -38,9 +38,26 @@ application {
 tasks.named('run', JavaExec) { workingDir = projectDir }
 
 test {
-    useJUnitPlatform()
+    // (0.4.1) the whole-day simulations (a town's two days, a morning's routines, the smith's and the household's days, the
+    // graveyard round, idle knots) are tagged "slow" and run by `gradlew slowTest`; `gradlew test` is the quick suite
+    useJUnitPlatform { excludeTags 'slow' }
     environment 'ASTRATTO_JAVA_FALLBACK', '0'
     jvmArgs '--enable-native-access=ALL-UNNAMED'
+    // (0.4.0) ShadowVeil's cells are grown in the JVM before the engine takes them (230 MB)
+    maxHeapSize = '2g'
+    if (System.getenv('RPG_JFR') != null) jvmArgs "-XX:StartFlightRecording=filename=${System.getenv('RPG_JFR')},settings=profile"
+    testLogging { events 'failed'; exceptionFormat = 'full' }
+}
+
+tasks.register('slowTest', Test) {
+    description = 'The long whole-day simulations (tagged slow), left out of the quick test task.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'slow' }
+    environment 'ASTRATTO_JAVA_FALLBACK', '0'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    maxHeapSize = '2g'
     testLogging { events 'failed'; exceptionFormat = 'full' }
 }
 
@@ -66,6 +83,16 @@ tasks.register('bench', JavaExec) {
     environment 'ASTRATTO_JAVA_FALLBACK', '0'
     environment 'ASTRATTO_NOVSYNC', '1'
     args '--bench'
+}
+
+tasks.register('shadowveil', JavaExec) {
+    group = 'verification'
+    description = 'Grows ShadowVeil from its design, checks it against the world-building rules and draws its survey maps into build/reports/shadowveil.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'rpg.world.shadowveil.Survey'
+    workingDir = projectDir
+    jvmArgs '-Xmx2g', '-Djava.awt.headless=true'
+    args 'build/reports/shadowveil'
 }
 
 tasks.register('gallery', JavaExec) {

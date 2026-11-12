@@ -26,6 +26,16 @@ public final class Interactions {
     public Interactions(Rpg g) { this.g = g; }
 
     /** Every interactable: world objects and living NPCs. */
+    /** (0.4.0, optimisation) What could be looked at within r of (x, z): the near objects and the living about. */
+    public List<Interactable> near(float x, float z, float r) {
+        List<Interactable> l = new ArrayList<>();
+        for (var object : g.objects.near(x, z, r)) if (object.exists() && !(object instanceof rpg.world.Foliage.Patch)) l.add(object);
+        for (var n : g.npcs) if (n.alive && n.loaded && Math.abs(n.x - x) <= r && Math.abs(n.z - z) <= r) l.add(n);
+        if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded && Math.abs(m.x - x) <= r && Math.abs(m.z - z) <= r) l.add(m);
+        if (g.animals != null) for (var a : g.animals.all()) if (a.exists() && Math.abs(a.x - x) <= r && Math.abs(a.z - z) <= r) l.add(a);
+        if (g.fishery != null) for (var f : g.fishery.live) if (f.alive && Math.abs(f.x - x) <= r && Math.abs(f.z - z) <= r) l.add(f);
+        return l;
+    }
     public List<Interactable> all() {
         List<Interactable> l = new ArrayList<>();
         // (0.2.2, gamefixes: the yellow marker still hovered over plants) foliage has nothing to offer since Examine went:
@@ -148,7 +158,7 @@ public final class Interactions {
         // (0.3.6, optimization) what is within reach, gathered once for both looks (it was every object in the world, twice a frame)
         float reach = g.cfg.inspectRange + (float) Math.hypot(a.x - ox, a.z - oz) + 3;
         List<Interactable> near = new ArrayList<>();
-        for (Interactable t : all()) if (Math.abs(t.ax() - a.x) <= reach && Math.abs(t.az() - a.z) <= reach) near.add(t);
+        for (Interactable t : near(a.x, a.z, reach + 2)) if (Math.abs(t.ax() - a.x) <= reach && Math.abs(t.az() - a.z) <= reach) near.add(t);
         // the ray: the nearest focus volume it passes through before the wall it strikes
         for (Interactable t : near) {
             // (0.3.6, gamefixes: riding flickered) the mount one sits on is never in one's own sights: the marker and the

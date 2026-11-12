@@ -80,6 +80,9 @@ class Gamefixes035Test {
         wield(Items.FISHING_NET);
         ticks(10);
         Fishery.Water pond = g.fishery.waterAt(net.x, net.z);
+        // (0.4.1) the pond's hunters taken out first: a trout on the prowl scatters the shrimp from any line, which is
+        // the pond's own life, not what this test is about (the catch itself)
+        g.fishery.live.removeIf(f -> f.kind.preys > 0 && f.water == pond);
         int before = pond.total();
         int shrimpBefore = g.player.count(Items.RAW_SHRIMP), guppyBefore = g.player.count(Items.get("raw_guppy"));
         var r = g.interact.request(g.player, net, "gather");

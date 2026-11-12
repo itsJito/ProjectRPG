@@ -28,8 +28,8 @@ public final class Voxels {
         solid[Blocks.EMBERS] = false; opaque[Blocks.EMBERS] = false;
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.glass(i)) { opaque[i] = false; glassy[i] = true; }
         opaque[Blocks.ICE] = false;
-        for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.FENCE, Blocks.BERRY_BUSH}) opaque[i] = false;
-        for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.BERRY_BUSH}) leafy[i] = true;
+        for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.PINE_LEAVES, Blocks.FENCE, Blocks.BERRY_BUSH}) opaque[i] = false;
+        for (int i : new int[]{Blocks.LEAVES, Blocks.OAK_LEAVES, Blocks.WILLOW_LEAVES, Blocks.PINE_LEAVES, Blocks.BERRY_BUSH}) leafy[i] = true;
         // objects stand on invisible cells: low furniture is seen over, tall pieces (a bookcase, the furnace's stack) still hide
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.objectCell(i)) opaque[i] = i == Blocks.BOOKCASE || i == Blocks.FURNACE;
         for (int i = 1; i < Blocks.COUNT; i++) if (Blocks.plant(i)) { solid[i] = false; opaque[i] = false; }
@@ -37,13 +37,19 @@ public final class Voxels {
 
     public long navigationRevision;
     private boolean navigationPending;
-    private final java.util.Map<Long,Long> chunkVersions=new java.util.HashMap<>();
-    private final java.util.Set<Long> pendingChunks=new java.util.HashSet<>();
-    private static long chunk(float x,float z){return ((long)Math.floorDiv((int)Math.floor(x),16)<<32) ^ (Math.floorDiv((int)Math.floor(z),16)&0xffffffffL);}
-    public long chunkVersion(float x,float z){return chunkVersions.getOrDefault(chunk(x,z),0L);}
+    // (0.4.0, optimisation: ShadowVeil's 4,489 chunks) each chunk's version in an array by its index: the map keyed by
+    // (cx << 32) ^ cz hashed every chunk of a column of chunks to a handful of buckets (a long's hash folds its halves)
+    private long[] chunkVersions;
+    private final java.util.BitSet pendingChunks=new java.util.BitSet();
+    private int chunkIndex(float x,float z){
+        int cx=Math.floorDiv((int)Math.floor(x),16),cz=Math.floorDiv((int)Math.floor(z),16),nx=(v.sizeX+15)>>4,nz=(v.sizeZ+15)>>4;
+        if(chunkVersions==null)chunkVersions=new long[nx*nz];
+        return cx<0 || cz<0 || cx>=nx || cz>=nz ? -1 : cx*nz+cz;
+    }
+    public long chunkVersion(float x,float z){int i=chunkIndex(x,z);return i<0?0:chunkVersions[i];}
     public void edited(int x,int y,int z,int before,int after){
         long revision=navigationRevision;edited(before,after);
-        if(revision!=navigationRevision){long key=chunk(x,z);chunkVersions.merge(key,1L,Long::sum);pendingChunks.add(key);}
+        if(revision!=navigationRevision){int i=chunkIndex(x,z);if(i>=0){chunkVersions[i]++;pendingChunks.set(i);}}
     }
     /** Closest supported, two-cell-high surface; preserves separate floors in stacked interiors. */
     public float standY(float x,float near,float z){
@@ -55,7 +61,7 @@ public final class Voxels {
     public void edited(int before,int after) {
         if(navigationType[before]!=navigationType[after] || before!=after && (door(before)||door(after))) {navigationRevision++;navigationPending=true;}
     }
-    public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;for(long key:pendingChunks)chunkVersions.merge(key,1L,Long::sum);pendingChunks.clear();}}
+    public void afterCommands(){if(navigationPending){navigationRevision++;navigationPending=false;for(int i=pendingChunks.nextSetBit(0);i>=0;i=pendingChunks.nextSetBit(i+1))chunkVersions[i]++;pendingChunks.clear();}}
 
     private java.util.List<rpg.objects.Door> doors = java.util.List.of();
     public void doors(java.util.List<rpg.objects.Door> doors) { this.doors = doors; navigation.doors(doors); }

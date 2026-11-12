@@ -52,6 +52,14 @@ public final class Config {
     public float treeRespawn = 30, rockRespawn = 20, patchRespawn = 25;
     /** The camera's lens: motion blur (the share of a frame the shutter is open) and depth of field. Both off unless chosen. */
     public boolean motionBlur = false, depthOfField = false;
+    /**
+     * (0.4.0, gamefixes: bloom and depth of field in the settings) The bloom's strength (1: as authored, 0: none) and the
+     * depth of field's mode (0 off, 1 subtle - only the far distance softens, 2 cinematic - a wide aperture, the
+     * autofocus racking between near and far); the volumetric light (the fog and sun shafts marched through the air).
+     */
+    public float bloom = 1f;
+    public int dofMode = 0;
+    public boolean volumetrics = true;
     /** The renderer's preset (AstrattoNative.QUALITY_*) and the share of the window's resolution rendered (the TAA upscales). */
     public int quality = astratto.bridge.AstrattoNative.QUALITY_MEDIUM;
     public float renderScale = 1f;
@@ -69,5 +77,5 @@ public final class Config {
         try { if (e != null) return Math.max(0.4f, Math.min(1f, Float.parseFloat(e))); } catch (NumberFormatException ignored) { }
         return -1;
     }
-    public float shutter = 0.5f, aperture = 5f;
+    public float shutter = 0.5f, aperture = 5f, maxBlur = 12f;
 }

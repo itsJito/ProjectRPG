@@ -126,7 +126,7 @@ public final class Fishery {
             case FishKind.W.SHORE -> Coast.shelf(x, z);
             case FishKind.W.SEA -> Coast.depth(x, z) >= 2 && !Coast.shelf(x, z) && !Coast.deep(x, z);
             case FishKind.W.DEEP -> Coast.deep(x, z);
-            default -> g.fluids.water(x, DevMap.FLOOR - 1, z);
+            default -> g.fluids.water(x, rpg.world.Ground.cell(x, z) - 1, z);
         };
     }
     /** The water a point is in (the sea's: the reach whose kind of water it is), or null. */
@@ -153,8 +153,11 @@ public final class Fishery {
     // ------------------------------------------------------------------ lines in the water
     /** A cast at a spot (x, z on the water): drawn fish come to it while its caster keeps at it. */
     public Lure cast(Actor who, Object spot, ItemDef gear, float x, float z) {
+        // (0.4.1) casting again at the same spot with the same gear keeps the line that is out: a fish already drawn to
+        // it lost it to every fresh cast and turned away before it got there
+        for (Lure l : lures) if (l.who == who && l.spot == spot && l.gear == gear && l.hooked == null && g.time - l.since < GIVE_UP) return l;
         lures.removeIf(l -> l.who == who);
-        float s = g.fluids.surface(x, DevMap.FLOOR, z);
+        float s = g.fluids.surface(x, rpg.world.Ground.at(x, z), z);
         if (Float.isNaN(s)) s = DevMap.FLOOR - 0.1f;
         float bed = bed(x, z, s);
         boolean pot = FishKind.methodOf(gear) == FishKind.Method.POT;
@@ -214,8 +217,8 @@ public final class Fishery {
         caught++;
         var ev = g.state.commit(req, "FishCaught", a.id, 0, DevMap.jurisdiction(x, z), 0, kind.title + " from " + from.name + " (" + from.stock[kind.ordinal()] + " left)");
         g.prog.award(a, Skill.FISHING, kind.xp(), "landed a " + kind.title.toLowerCase(), ev.id());
-        if (g.sfx != null) { g.sfx.play("splash", x, DevMap.FLOOR - 0.1f, z, Math.min(1, 0.4f + kind.length * 0.15f)); if (a == g.player) g.sfx.ui("FishReelIn", 0.55f); }
-        if (g.chemistry != null) g.chemistry.splash(x, DevMap.FLOOR + 0.2f, z);
+        if (g.sfx != null) { g.sfx.play("splash", x, rpg.world.Ground.at(x, z) - 0.1f, z, Math.min(1, 0.4f + kind.length * 0.15f)); if (a == g.player) g.sfx.ui("FishReelIn", 0.55f); }
+        if (g.chemistry != null) g.chemistry.splash(x, rpg.world.Ground.at(x, z) + 0.2f, z);
         if (a == g.player) g.chat.say("You catch " + (kind == FishKind.SHRIMP ? "some shrimp" : (kind.title.matches("^[AEIOU].*") ? "an " : "a ") + kind.title.toLowerCase()) + ".");
         return Result.ok();
     }
@@ -374,7 +377,7 @@ public final class Fishery {
             int x = w.x0 + rnd.nextInt(Math.max(1, w.x1 - w.x0 + 1)), z = w.z0 + rnd.nextInt(Math.max(1, w.z1 - w.z0 + 1));
             if (!cellOf(w, x, z)) continue;
             float fx = x + 0.2f + rnd.nextFloat() * 0.6f, fz = z + 0.2f + rnd.nextFloat() * 0.6f;
-            float s = g.fluids.surface(fx, DevMap.FLOOR, fz);
+            float s = g.fluids.surface(fx, rpg.world.Ground.at(fx, fz), fz);
             if (Float.isNaN(s)) continue;
             float bed = bed(fx, fz, s);
             if (s - bed < Math.min(0.6f, k.length * 0.3f)) continue;
@@ -405,7 +408,7 @@ public final class Fishery {
             float d = dx * dx + dz * dz;
             if (d >= bestD || d > 144) continue;
             float cx = (float) Math.floor(x) + dx + 0.5f, cz = (float) Math.floor(z) + dz + 0.5f;
-            float s = g.fluids.surface(cx, DevMap.FLOOR + 2, cz);
+            float s = g.fluids.surface(cx, rpg.world.Ground.at(cx, cz) + 2, cz);
             if (Float.isNaN(s)) continue;
             float bed = bed(cx, cz, s);
             if (s - bed < Math.min(1.2f, Math.max(0.3f, k.length * 0.3f))) continue;
@@ -470,12 +473,19 @@ public final class Fishery {
         if (g.time < f.fleeUntil) return;
         for (float[] a : alarms) if (Math.hypot(a[0] - f.x, a[1] - f.z) < a[2]) { startle(f, a[0], a[1], a[2]); return; }
         if (len < 1.5f) for (Actor a : inWater) {
-            float d = (float) Math.hypot(a.x - f.x, a.z - f.z);
-            if (d < 2.6f + len + (float) Math.hypot(a.vx, a.vz) * 0.5f && Math.abs(a.y + 0.6f - f.y) < 2.2f) { startle(f, a.x, a.z, 3); return; }
+            // (0.4.1) the angler at their own line does not scare off the fish coming to it, and someone standing still in
+            // the shallows only startles a fish that comes right up to them: a body's movement is what frightens fish
+            if (f.lure != null && f.lure.who == a) continue;
+            float d = (float) Math.hypot(a.x - f.x, a.z - f.z), moving = (float) Math.hypot(a.vx, a.vz);
+            float reach = moving < 0.3f ? 1.0f + len : 2.6f + len + moving * 0.5f;
+            if (d < reach && Math.abs(a.y + 0.6f - f.y) < 2.2f) { startle(f, a.x, a.z, 3); return; }
         }
         for (Fish h : near(f.x, f.z, 6.5f, nearThink)) {
             if (h == f || h.water != f.water || h.kind.preys <= 0 || h.kind.preys * h.length() < len || h.state != Fish.State.HUNT && h.hunger < 0.6f) continue;
-            if (Math.hypot(h.x - f.x, h.z - f.z) < 4 + h.length() * 0.5f) { startle(f, h.x, h.z, 4); return; }
+            // (0.4.1) a hunter after this very fish is fled from at a distance; one merely hungry nearby only when it is close
+            // (the whole pond's small fish used to scatter from any hungry trout within four metres, so a line rarely took one)
+            float reach = h.prey == f ? 4 + h.length() * 0.5f : 1.8f + h.length() * 0.5f;
+            if (Math.hypot(h.x - f.x, h.z - f.z) < reach) { startle(f, h.x, h.z, 4); return; }
         }
         // 2. a hunter that is hungry goes after something it can swallow
         if (f.kind.preys > 0 && f.hunger > 0.6f) {

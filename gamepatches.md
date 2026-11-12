@@ -1,3 +1,123 @@
+# Patch Notes Version Alpha 0.4.1: Brick by Brick
+
+The seven kingdoms have walls, roofs and streets now, though nobody has moved the furniture in yet.
+
+Developer: Hoodie
+
+## New Features
+### Gameplay
+- Added the exteriors of all seven kingdoms, built in their own styles: Loxford's stone and timber-framed town under its castle, Harlette's thatched village and Dracula's walled manor, walled Valgard in pale limestone, Gorrick's timber hall behind its palisade, walled Azharad with its domed palace and courtyard khans, Severia's whitewashed city inside its land walls, and Camelot's castle ward
+- Added Loxford Castle: a curtain wall with round towers, a gatehouse, a cobbled court with a well and a three-storey keep. New characters now wake inside the keep, facing the door and the gate beyond it
+- Added the kingdoms' landmarks where the old maps put them, including Loxford Church and its graveyard, the Drunken Duck, the Sanctuary of Jaehaerys, the Metallists Guild, the Hojimo Monastery, Azharad Palace and Temple, the Workers' Khan, the Severian Palace, Museum, Bank, Red Moon Inn, Great Market and harbour, and Camelot's Keep, Sun Chapel and Service Court
+- Added houses along the streets of every town, in each kingdom's three house sizes, with chimneys, timber framing and jettied upper floors where the culture builds them
+- Added streets, squares, markets and lanes from every door to the road network, with lamp posts along the town streets
+- Added town walls with gatehouses wherever a road passes through, and Pilgrim's Gate on the King's Road below Severia
+- Added farms, fields, vineyards, olive terraces, a date grove, stables, mills, wood yards and work yards across the countryside
+- Added the wilderness landmarks: the Waystation, Smugglers' Cove, the Tollgate on the Southern Road, the Marches Crossroads' ruined forge, the gibbets and hanging tree of Gallows Heath, the Standing Stones, the Bone Orchard, Gibbet Grove, Garmund's Camp, the Unlit Lantern on its isle, and the Mere's sunken bell
+- Added the entrances of every documented dungeon, mine, cave and crypt, sealed for now: Loxford Crypt, the Castle Undercroft, the Murk caves, the Hollow Crags mines, the Spider Nest, the Museum Vault, the Lantern Cellars, Ashmaw Throat, the Sunkissed and Marble Mines and Goblin Hollow
+- Added Valgard's aqueduct, carrying running water down from the highland into a cistern in the town
+- Added bridges with parapets and piers wherever a road crosses water, and the rope crossing over the Murk
+- Added doors to every building. The rooms behind them are empty until the interiors arrive
+- Added the devmode console command, a developer display showing your frame rate, position and chunk, the region and building you are in, what you are standing on and looking at, the time and weather, and the people nearby with lines showing who can see you
+- Added the devreport console command, which writes everything on the developer display to a report file and takes a screenshot
+### NPC's
+- Added a simpler day for people beyond the fog. They now sleep, work, eat and sell their goods while you are elsewhere, and are found where their day took them when you return
+- Added kitchen gardens for the crop farmers of Loxford and Severia's vineyard terraces
+
+## Changes
+### Blocks
+- Changed tree leaves to full, bushy crowns of small leaves with far fewer gaps of sky
+### Gameplay
+- Changed walking into a one-block rise to an automatic hop up onto it, for you and for everyone else, instead of appearing on top of it
+- Changed the bank to stand in Loxford Castle's keep on ShadowVeil
+- Changed the fog so it now covers the far edge of what is drawn, and trees near the fog are drawn more simply
+- Changed rivers to run and bend with their channels, with waterfalls pouring down at Gleam Falls and the rapids, and spray at their feet
+- Changed falling water to stream downward with white water
+- Changed road verges to slope evenly to the road instead of in steps and notches
+- Changed saves from older versions to carry your character over: your skills, pack, worn gear, bank vault, quest progress and Honor now come with you into the new version's world
+
+## Technical Changes
+### Gameplay
+- Changed every save to also keep a character file that any future version can read
+- Changed loading so the ground, plants and paths around you are ready before you arrive
+- Changed the world's buildings, streets and walls to be read from data, so the layout of every town can be changed without touching the game
+
+## Fixed Bugs
+- AE-04101 - Fixed bug where some spots in the ground had one block deep holes, most of all around the spawn and along the roads
+- AE-04102 - Fixed bug where stray stone blocks sat on the ground in some places
+- AE-04103 - Fixed bug where fishermen, miners, woodcutters and farmers on ShadowVeil stood idle instead of working
+- AE-04104 - Fixed bug where innkeepers and bartenders on ShadowVeil had nothing to do
+- AE-04105 - Fixed bug where shellfish gatherers had no crab cages to work on ShadowVeil
+- AE-04106 - Fixed bug where workers with a full pack walked off toward a bank that did not exist on ShadowVeil
+- AE-04107 - Fixed bug where you and NPC's appeared on top of one-block-high blocks instead of jumping onto them
+- AE-04108 - Fixed bug where running water only seemed to flow in some stretches of a river
+- AE-04109 - Fixed bug where grass, flowers and bushes on hillsides floated above the ground or sank into it
+- AE-04110 - Fixed bug where the game stuttered heavily for the first seconds after loading into the map
+- AE-04111 - Fixed bug where NPC's going to bed walked toward the roof above their bed and stood waiting for a way up
+- AE-04112 - Fixed bug where the mansion's servants could not reach their room or the top floor past the furniture, and the household woodcutter never lit the fire
+- AE-04113 - Fixed bug where the mansion's porter started his day standing on a candelabrum
+- AE-04114 - Fixed bug where fish swam off from anglers and waders standing still, and the lure changed with every cast
+
+# Patch Notes Version Alpha 0.4.0: Lay of the Land
+
+ShadowVeil is open: the first ground of the real world, with no towns on it yet.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added Ash, the grey fall that covers Ashmaw's slopes and cinder fields
+- Added Heath, the low heather of the moors with its drifts of purple bloom
+- Added Podzol, the needle-strewn floor of the Dead Wood and the pine stands
+- Added Dry Grass, the sun-cured turf of the Southern Marches and the desert's edge
+- Added Pine Needles, the dark sprays on the ash-pines, the cypress of the north and the olive groves
+### Gameplay
+- Added ShadowVeil, the permanent 1,072 by 1,072 world. The game now starts there, in Loxford
+- Added all seven realms' ground: Loxford's lowlands, Harlette's willow valley, Valgard's highlands, Gorrick on its shoulder above the lake, Azharad's desert basin, Camelot above the Dead Wood, and Severia along the northern coast
+- Added the wilds between them: the Southern Marches, the Murk Gorge, Gallows Heath, the Hollow Crags, Dimwater and its marshes, the Dead Wood and the volcano Ashmaw
+- Added the rivers and lakes. The Gleam runs north over Gleam Falls to its estuary, the Murk runs south through its gorge to Smugglers' Cove, and Dimwater, the Mere, the Oasis and the Mist Pools lie where the old maps put them
+- Added the Lantern's isle in Dimwater, reached by causeways from the west and north shores
+- Added the road network: the King's Road, the Southern Road, the Western and Ore Roads, the East Road, the Northern Crossing, the South Lake Road and the paths between them, with bridges wherever they cross water
+- Added the northern scarp, a long escarpment broken by Pilgrim's Stair, Gleam Falls and the coast paths
+- Added ocean all the way around the world, with a walkable shore of beaches, coves and shallows along every edge
+- Added woods that can be felled across the whole map: oak, birch and willow in the south, palm and acacia at the oasis, ash-pine and cypress in the north, dead snags in the Dead Wood
+- Added ore outcrops where they belong: copper and tin beside Loxford, coal at Azharad's clay pits, iron and coal in Valgard's mine slopes, iron, coal, mithril and cobalt in the Hollow Crags, and moltenite and dragonite on Ashmaw
+- Added fishing waters on the Mere, Willow Brook, Dimwater, the Murk, the Gleam and its estuary, Smugglers' Cove, the harbour and the shores
+- Added ground mist that gathers over Dimwater, Harlette's valley, the Mist Pools, the Murk Gorge, the Dead Wood and the heath's hollows at dawn, dusk, by night and in the wet
+- Added each realm's own light: Loxford cool and grey, Harlette damp and misty, Azharad warm and amber, Severia bright and clear, and the wilds bleak and overcast
+- Added Bloom, Depth of Field (Off, Subtle or Cinematic) and Volumetric Lighting to the Display settings
+- Added a World setting, so you can return to the old development map for testing
+### NPC's
+- Added everyone from the development map to ShadowVeil, living near the places their trades and towns belong to. There are no buildings yet, so they keep their roles out in the open for now
+
+## Changes
+### NPC's
+- Changed animals to walk, trot and gallop with their own footfalls. Wolves, the Dire Wolf, dogs and big cats now gallop with a flexing back, and every four-legged animal now bends its legs at the joints
+- Changed predator attacks. Wolves and big cats now drop onto their haunches, spring with their forelegs flung out and bite with a shake of the head, and bears rise up to rake with a forepaw
+- Changed how people, animals and monsters react to being hit. They are now knocked the way the blow came from, a blow to the head snaps the head and a blow to the legs buckles the knees, scaled by how hard it landed
+- Changed getting off a mount to a full climb down from the saddle, the far leg swung back over and lowered to the ground by the stirrup
+- Changed worshippers to stand in rows before the altar instead of all on one spot
+### Gameplay
+- Changed allies to show in green on the minimap and the world map: companions, your summons, and animals that are tamed to you or that you ride
+- Changed natural ground so you can now walk up a single step of hillside without jumping
+- Changed the minimap and world map to cover the whole of ShadowVeil, with its realms and great landmarks named on the world map
+- Changed depth of field to focus smoothly on what you are looking at instead of snapping
+- Changed saves to belong to the world they were made in. Saves from 0.3 and earlier do not carry over to 0.4.0
+
+## Technical Changes
+### Gameplay
+- Changed loading of the world to use every core when lighting it and weathering its ground
+- Changed how people plan long walks, so a crowd planning at once no longer stalls the game
+- Changed far-off plants to be let go as you travel and grown again when you return, so a long journey no longer slows the game
+- Changed the game to look things up by where they are, so thousands of trees and stones no longer slow the game
+
+## Fixed Bugs
+- AE-04001 - Fixed bug where NPC's could spawn inside furniture, most of all in the DevMansion
+- AE-04002 - Fixed bug where NPC's jumped up onto tables and other furniture
+- AE-04003 - Fixed bug where NPC's crowded together in one spot and stood idle
+- AE-04004 - Fixed bug where an NPC hit by a spell or an arrow from someone they never saw still knew it was you
+- AE-04005 - Fixed bug where getting off a mount had no animation
+
 # Patch Notes Version Alpha 0.3.9: Ride or Die
 
 Company on the road, a new beast to ride, and a watch that asks questions.

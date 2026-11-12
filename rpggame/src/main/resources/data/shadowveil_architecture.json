@@ -1,0 +1,332 @@
+{
+  "_about": "ShadowVeil's built world (Alpha 0.4.1): the exteriors of the seven kingdoms, their streets' houses, walls, gates, bridges, aqueducts, ruins, landmarks and the mouths of every documented underground place. Transcribed from projectrpg.txt (WORLD BUILDING and each kingdom's Major Locations), which has the final say. 'at' is a chunk [x, z] as the document gives it (x west to east, z south to north, fractions allowed); 'size' is [front width, depth] in cells; 'facing' is the way the front looks (n, s, e, w, or 'road': toward the nearest road). Interiors, furnishings and people come in 0.4.2: every building here keeps its rooms' volumes empty, every dungeon its volume beyond the sealed door.",
+
+  "architecture": {
+    "styles": {
+      "loxford":   { "wall": "stone_bricks", "base": "cobble", "upper": "timber_frame", "trim": "dark_planks", "post": "spruce_log", "roof": "slate_roof", "glass": "glass", "floor": "planks", "chimney": "stone_bricks", "accent": "mossy_bricks", "banner": "none", "court": "cobble", "fence": "fence", "column": "stone_bricks", "dome": "slate_roof", "cloth": "white_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "loxford_cottage": { "wall": "timber_frame", "base": "cobble", "upper": "timber_frame", "trim": "dark_planks", "post": "spruce_log", "roof": "thatch", "glass": "glass", "floor": "planks", "chimney": "cobble", "accent": "mossy_bricks", "banner": "none", "court": "gravel", "fence": "fence", "column": "cobble", "dome": "thatch", "cloth": "white_carpet", "deck": "planks", "lining": "cobble", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "harlette":  { "wall": "timber_frame", "base": "limestone_bricks", "upper": "timber_frame", "trim": "dark_planks", "post": "dark_planks", "roof": "thatch", "glass": "glass", "floor": "planks", "chimney": "limestone_bricks", "accent": "red_carpet", "banner": "none", "court": "gravel", "fence": "fence", "column": "limestone_bricks", "dome": "slate_roof", "cloth": "red_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "harlette_manor": { "wall": "stone_bricks", "base": "mossy_bricks", "upper": "timber_frame", "trim": "dark_planks", "post": "dark_planks", "roof": "slate_roof", "glass": "stained_glass", "floor": "dark_planks", "chimney": "stone_bricks", "accent": "red_carpet", "banner": "red_carpet", "court": "gravel", "fence": "fence", "column": "stone_bricks", "dome": "slate_roof", "cloth": "red_carpet", "deck": "dark_planks", "lining": "mossy_bricks", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "valgard":   { "wall": "limestone_bricks", "base": "stone_bricks", "upper": "limestone_bricks", "trim": "granite", "post": "granite", "roof": "slate_roof", "glass": "white_glass", "floor": "planks", "chimney": "stone_bricks", "accent": "gold_block", "banner": "white_carpet", "court": "flagstone", "fence": "fence", "column": "limestone_bricks", "dome": "slate_roof", "cloth": "white_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "granite", "pitch": 1, "roofShape": "gable" },
+      "gorrick":   { "wall": "dark_planks", "base": "stone", "upper": "dark_planks", "trim": "spruce_log", "post": "spruce_log", "roof": "slate_roof", "glass": "glass", "floor": "planks", "chimney": "cobble", "accent": "iron_block", "banner": "none", "court": "gravel", "fence": "fence", "column": "spruce_log", "dome": "slate_roof", "cloth": "brown_carpet", "deck": "planks", "lining": "cobble", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "gorrick_palisade": { "wall": "spruce_log", "base": "stone", "trim": "dark_planks", "post": "spruce_log", "roof": "slate_roof", "floor": "planks" },
+      "azharad":   { "wall": "sandstone", "base": "red_sandstone", "upper": "sandstone", "trim": "terracotta", "post": "sandstone", "roof": "sandstone", "glass": "white_glass", "floor": "terracotta", "chimney": "sandstone", "accent": "gold_block", "banner": "none", "court": "sandstone", "fence": "fence", "column": "sandstone", "dome": "terracotta", "cloth": "red_carpet", "deck": "planks", "lining": "sandstone", "rock": "sandstone", "pitch": 1, "roofShape": "flat" },
+      "severia":   { "wall": "plaster", "base": "marble", "upper": "plaster", "trim": "limestone_bricks", "post": "marble", "roof": "terracotta", "glass": "light_blue_glass", "floor": "planks", "chimney": "plaster", "accent": "light_blue_glass", "banner": "none", "court": "flagstone", "fence": "fence", "column": "marble", "dome": "terracotta", "cloth": "white_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "marble", "pitch": 0.5, "roofShape": "gable" },
+      "severia_stone": { "wall": "limestone_bricks", "base": "marble", "upper": "limestone_bricks", "trim": "marble", "post": "marble", "roof": "terracotta", "glass": "light_blue_glass", "floor": "planks", "chimney": "limestone_bricks", "accent": "gold_block", "banner": "none", "court": "flagstone", "fence": "fence", "column": "marble", "dome": "terracotta", "cloth": "white_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "marble", "pitch": 0.5, "roofShape": "gable" },
+      "camelot":   { "wall": "limestone_bricks", "base": "stone_bricks", "upper": "limestone_bricks", "trim": "sandstone", "post": "limestone_bricks", "roof": "slate_roof", "glass": "white_glass", "floor": "planks", "chimney": "stone_bricks", "accent": "gold_block", "banner": "red_carpet", "court": "gravel", "fence": "fence", "column": "limestone_bricks", "dome": "slate_roof", "cloth": "red_carpet", "deck": "planks", "lining": "stone_bricks", "rock": "granite", "pitch": 1, "roofShape": "gable" },
+      "wilds":     { "wall": "cobble", "base": "cobble", "upper": "planks", "trim": "spruce_log", "post": "spruce_log", "roof": "thatch", "glass": "glass", "floor": "planks", "chimney": "cobble", "accent": "mossy_bricks", "banner": "none", "court": "gravel", "fence": "fence", "column": "cobble", "dome": "thatch", "cloth": "brown_carpet", "deck": "planks", "lining": "cobble", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "timber":    { "wall": "spruce_log", "base": "cobble", "upper": "spruce_log", "trim": "dark_planks", "post": "spruce_log", "roof": "dark_planks", "glass": "glass", "floor": "planks", "chimney": "cobble", "accent": "mossy_bricks", "banner": "none", "court": "gravel", "fence": "fence", "column": "spruce_log", "dome": "dark_planks", "cloth": "brown_carpet", "deck": "planks", "lining": "cobble", "rock": "stone", "pitch": 1, "roofShape": "gable" },
+      "ruin":      { "wall": "stone_bricks", "base": "cobble", "upper": "stone_bricks", "trim": "cobble", "post": "spruce_log", "roof": "thatch", "glass": "glass", "floor": "gravel", "accent": "mossy_bricks", "court": "gravel", "fence": "fence", "rock": "stone", "lining": "cobble", "column": "stone_bricks" },
+      "mine":      { "wall": "stone", "base": "cobble", "upper": "planks", "trim": "planks", "post": "spruce_log", "roof": "planks", "glass": "glass", "floor": "planks", "accent": "mossy_bricks", "court": "gravel", "fence": "fence", "rock": "stone", "lining": "stone", "column": "spruce_log", "cloth": "brown_carpet", "deck": "planks", "chimney": "cobble" },
+      "cave":      { "wall": "stone", "base": "stone", "trim": "stone", "post": "spruce_log", "rock": "stone", "lining": "cobble", "court": "gravel", "floor": "gravel" },
+      "basalt_cave": { "wall": "basalt", "base": "basalt", "trim": "basalt", "post": "basalt", "rock": "basalt", "lining": "basalt", "court": "gravel", "floor": "gravel" },
+      "lantern":   { "wall": "stone_bricks", "base": "mossy_bricks", "upper": "stone_bricks", "trim": "granite", "post": "granite", "roof": "slate_roof", "glass": "white_glass", "floor": "planks", "accent": "coal_block", "fence": "fence", "court": "flagstone", "lining": "mossy_bricks", "rock": "stone", "column": "granite" },
+      "beacon":    { "wall": "limestone_bricks", "base": "marble", "upper": "limestone_bricks", "trim": "marble", "post": "marble", "roof": "terracotta", "glass": "white_glass", "floor": "planks", "accent": "lamp", "fence": "fence", "court": "flagstone", "lining": "stone_bricks", "rock": "marble", "column": "marble" }
+    },
+
+    "spawn": { "structure": "loxford_castle", "point": "spawn", "look": "spawnLook" },
+
+    "_services": "(0.4.1) where a shared service stands on this map (a structure and one of its points), and whose post a service is (rpg.Ids constant names)",
+    "services": { "bank_teller": { "structure": "loxford_castle", "point": "bankTeller" }, "bank_customer": { "structure": "loxford_castle", "point": "bankCustomer" } },
+    "posts": { "TELLER": "bank_teller" },
+
+    "_farms": "(0.4.1) the gardens the growers work (rpg.world.Farming): a grower (rpg.Ids constant), the garden structure, its rows' crops in turn",
+    "farms": [
+      { "owner": "CROP_FARMER_CITY", "structure": "cuthmar_garden", "crops": [["BARLEY"], ["CABBAGE", "POTATO", "ONION"], ["CARROT", "TOMATO", "SWEETCORN"]] },
+      { "owner": "CROP_FARMER_PALACE", "structure": "terrace_garden", "crops": [["HOPS"], ["CARROT", "ONION", "POTATO"], ["CABBAGE", "SWEETCORN", "TOMATO"]] }
+    ],
+
+    "walls": [
+      { "id": "valgard_wall", "style": "valgard", "points": [[7.3, 25.2], [15.9, 25.2], [15.9, 31.75], [7.3, 31.75]], "thick": 2, "high": 7 },
+      { "id": "azharad_wall", "style": "azharad", "points": [[50.15, 8.55], [61.6, 8.55], [61.6, 17.05], [50.15, 17.05]], "thick": 2, "high": 7 },
+      { "id": "severia_wall", "style": "severia_stone", "points": [[24.15, 66.3], [24.15, 53.15], [45.1, 53.15]], "closed": false, "thick": 3, "high": 9 },
+      { "id": "camelot_curtain", "style": "camelot", "points": [[48.25, 42.3], [55.25, 42.3], [55.25, 45.45], [48.25, 45.45]], "thick": 2, "high": 7 },
+      { "id": "gorrick_palisade", "style": "gorrick_palisade", "points": [[21.55, 39.55], [26.5, 39.55], [26.5, 44.45], [21.55, 44.45]], "thick": 1, "high": 4 },
+      { "id": "dracula_garden_wall", "style": "harlette_manor", "points": [[4.75, 22.62], [7.6, 22.62], [7.6, 24.45], [4.75, 24.45]], "thick": 1, "high": 3, "gates": [[6.2, 22.62]] }
+    ],
+
+    "aqueducts": [
+      { "id": "valgard_aqueduct", "style": "valgard", "points": [[8.6, 33.9], [8.6, 32.1], [9.7, 32.1], [9.7, 31.3]], "from": 66, "to": 58 }
+    ],
+
+    "_views": "(0.4.1) four reference cameras for every region and settlement (eye [chunk x, chunk z, height over the ground], look [chunk x, chunk z, height]), each shot in the morning and at night by the gallery (RPG_GALLERY_ONLY=p27) - the reference for every change to an exterior or a terrain.",
+    "views": {
+      "loxford": [ {"name": "courtyard", "eye": [15, 7.9, 1.7], "look": [15, 6.9, 6]}, {"name": "high_street", "eye": [14.4, 9.5, 6], "look": [17.4, 8.7, 3]}, {"name": "church", "eye": [13.0, 9.6, 5], "look": [13.2, 11.2, 4]}, {"name": "aerial", "eye": [17.5, 5.6, 40], "look": [14.6, 10.5, 0]} ],
+      "harlette": [ {"name": "green", "eye": [9.4, 19.2, 4], "look": [8.1, 20.3, 2]}, {"name": "manor", "eye": [6.6, 21.6, 5], "look": [6.0, 23.6, 6]}, {"name": "mill", "eye": [7.6, 20.8, 4], "look": [6.2, 20.3, 2]}, {"name": "aerial", "eye": [11.6, 16.8, 35], "look": [7.6, 21.0, 0]} ],
+      "valgard": [ {"name": "keep_square", "eye": [10.6, 26.3, 3], "look": [10.0, 27.9, 7]}, {"name": "high_street", "eye": [15.2, 28.6, 4], "look": [12.4, 27.4, 3]}, {"name": "aqueduct", "eye": [10.6, 32.8, 8], "look": [9.2, 30.6, 2]}, {"name": "aerial", "eye": [17.6, 24.0, 45], "look": [11.0, 29.0, 0]} ],
+      "gorrick": [ {"name": "kings_road", "eye": [24.3, 38.9, 3], "look": [24.0, 42.0, 3]}, {"name": "hall", "eye": [25.9, 43.6, 4], "look": [23.6, 42.6, 3]}, {"name": "lodge", "eye": [21.1, 40.3, 5], "look": [23.0, 41.5, 2]}, {"name": "aerial", "eye": [28.2, 37.8, 35], "look": [24.0, 42.0, 0]} ],
+      "azharad": [ {"name": "palace_square", "eye": [53.2, 11.7, 4], "look": [56.2, 12.0, 6]}, {"name": "souq", "eye": [52.3, 12.5, 4], "look": [53.7, 14.5, 2]}, {"name": "oasis", "eye": [47.5, 8.7, 5], "look": [50.0, 7.4, 2]}, {"name": "aerial", "eye": [55.0, 4.6, 50], "look": [55.5, 12.5, 0]} ],
+      "severia": [ {"name": "great_market", "eye": [27.4, 57.8, 4], "look": [29.6, 59.6, 2]}, {"name": "palace", "eye": [34.4, 56.8, 6], "look": [35.0, 61.2, 8]}, {"name": "harbor", "eye": [33.8, 63.0, 6], "look": [30.0, 66.2, 0]}, {"name": "aerial", "eye": [31.0, 50.2, 60], "look": [34.0, 59.0, 0]} ],
+      "camelot": [ {"name": "ward", "eye": [49.4, 44.0, 3], "look": [52.0, 44.0, 4]}, {"name": "east_gate", "eye": [56.2, 45.6, 4], "look": [53.4, 44.4, 3]}, {"name": "keep", "eye": [53.6, 43.0, 4], "look": [51.3, 44.7, 8]}, {"name": "aerial", "eye": [52.0, 40.2, 40], "look": [51.6, 44.0, 0]} ],
+      "loxford_lowlands": [ {"name": "watchtower", "eye": [21.0, 19.3, 3], "look": [22.4, 20.1, 6]}, {"name": "the_mere", "eye": [11.6, 6.0, 4], "look": [10.0, 7.2, 0]}, {"name": "millwood", "eye": [20.8, 13.6, 4], "look": [19.4, 11.4, 2]}, {"name": "goblin_hollow", "eye": [22.0, 19.0, 3], "look": [23.6, 18.3, 1]} ],
+      "southern_marches": [ {"name": "waystation", "eye": [35.8, 13.6, 4], "look": [37.4, 12.3, 2]}, {"name": "smugglers_cove", "eye": [38.8, 6.2, 6], "look": [37.0, 3.0, 0]}, {"name": "murk_gorge", "eye": [34.0, 19.4, 4], "look": [37.0, 18.4, -4]}, {"name": "tollgate", "eye": [26.4, 10.6, 3], "look": [28.0, 11.0, 2]} ],
+      "azharad_basin": [ {"name": "clay_pits", "eye": [52.4, 19.6, 4], "look": [54.0, 18.0, 0]}, {"name": "sandstone_cliffs", "eye": [61.0, 21.4, 4], "look": [63.0, 23.0, 4]}, {"name": "oasis_wadi", "eye": [46.4, 10.4, 4], "look": [44.0, 12.0, 0]}, {"name": "south_shore", "eye": [61.6, 6.6, 6], "look": [64.0, 3.0, 0]} ],
+      "western_highlands": [ {"name": "sunkissed_mine", "eye": [11.0, 32.4, 4], "look": [10.0, 34.0, 2]}, {"name": "marble_mine", "eye": [7.6, 32.0, 4], "look": [5.8, 33.4, 2]}, {"name": "gallows_tor", "eye": [14.4, 39.6, 6], "look": [12.0, 41.4, 10]}, {"name": "north_crags", "eye": [8.4, 43.6, 4], "look": [6.0, 45.0, 6]} ],
+      "gallows_marches": [ {"name": "crossroads", "eye": [21.4, 25.0, 3], "look": [22.8, 26.4, 2]}, {"name": "gibbets", "eye": [23.2, 29.8, 3], "look": [24.6, 31.0, 3]}, {"name": "hanging_tree", "eye": [27.0, 32.0, 3], "look": [25.6, 33.2, 4]}, {"name": "pilgrims_stair", "eye": [24.8, 48.4, 4], "look": [24.0, 45.4, 4]} ],
+      "dimwater": [ {"name": "lantern", "eye": [35.4, 36.0, 3], "look": [37.0, 36.0, 22]}, {"name": "north_causeway", "eye": [37.2, 41.8, 3], "look": [37.0, 37.0, 10]}, {"name": "pile_hut", "eye": [35.0, 29.4, 3], "look": [36.3, 30.5, 1]}, {"name": "broken_weir", "eye": [38.8, 26.2, 4], "look": [37.0, 27.3, 0]} ],
+      "dead_wood": [ {"name": "ranger_lodge", "eye": [53.2, 35.0, 3], "look": [55.0, 36.0, 2]}, {"name": "spider_nest", "eye": [49.4, 34.0, 3], "look": [51.0, 35.0, 1]}, {"name": "clamp_hut", "eye": [56.8, 30.2, 3], "look": [55.4, 31.2, 1]}, {"name": "gibbet_grove", "eye": [53.4, 40.8, 3], "look": [55.0, 42.0, 3]} ],
+      "ashmaw": [ {"name": "throat", "eye": [58.8, 36.0, 5], "look": [61.4, 37.0, 3]}, {"name": "garmunds_camp", "eye": [50.8, 23.8, 4], "look": [53.0, 25.0, 1]}, {"name": "summit", "eye": [57.6, 30.0, 30], "look": [62.0, 36.0, 0]}, {"name": "resin_camp", "eye": [60.6, 41.8, 3], "look": [62.0, 43.0, 1]} ],
+      "severian_north": [ {"name": "gleam_falls", "eye": [48.4, 48.8, 4], "look": [46.0, 46.0, 6]}, {"name": "vineyards", "eye": [14.2, 47.4, 5], "look": [13.6, 49.4, 0]}, {"name": "loggers_rest", "eye": [10.2, 57.8, 3], "look": [12.0, 59.0, 3]}, {"name": "lookout_point", "eye": [62.8, 63.4, 4], "look": [65.0, 65.0, 2]} ]
+    },
+
+    "settlements": [
+      {
+        "id": "loxford", "realm": "Loxford", "style": "loxford",
+        "patrol": [[15, 8.9], [16.9, 8.9], [16.2, 10.6], [14.3, 10.2], [12.4, 10.3], [13.6, 8.6]],
+        "buildings": [
+          { "id": "loxford_castle", "name": "Loxford Castle", "template": "castle", "at": [15, 6.95], "size": [44, 46], "facing": "n", "search": 20, "maxSlope": 12,
+            "wallH": 8, "towerR": 4, "gateW": 4, "keepW": 22, "keepD": 14, "keepStoreys": 3, "keepWallH": 5, "undercroftDepth": 10 },
+          { "id": "loxford_square", "name": "Castle Square", "template": "plaza", "at": [15, 8.95], "size": [30, 12], "facing": "n", "onRoad": true, "lane": false },
+          { "id": "freds_axes", "name": "Fred's Fine Axes", "at": [15.85, 9.6], "size": [9, 9], "facing": "s", "storeys": 2, "wallH": 4, "jetty": true, "chimney": true },
+          { "id": "loxford_store", "name": "Loxford General Store", "at": [16.55, 9.6], "size": [9, 9], "facing": "s", "storeys": 2, "wallH": 4, "jetty": true },
+          { "id": "drunken_duck", "name": "The Drunken Duck", "template": "hall", "at": [17.8, 8.3], "size": [14, 11], "facing": "n", "storeys": 2, "wallH": 4, "jetty": true },
+          { "id": "duck_cellar", "name": "The Duck's cellar", "template": "cellar", "at": [18.65, 8.2], "size": [4, 12], "facing": "n", "depth": 8, "reserve": "cellar_shortcut", "lane": false },
+          { "id": "loxford_church", "name": "Loxford Church", "template": "church", "at": [14.0, 10.9], "size": [13, 26], "facing": "s", "towerW": 6, "towerH": 18, "crown": "pyramid", "spire": 2.4, "windowGlass": "stained_glass" },
+          { "id": "loxford_graveyard", "name": "Loxford Graveyard", "template": "graveyard", "at": [11.3, 11.2], "size": [18, 22], "facing": "e", "crypt": true, "depth": 10, "search": 30 },
+          { "id": "sextons_cottage", "name": "Sexton's cottage", "style": "loxford_cottage", "at": [11.6, 12.5], "size": [7, 6], "chimney": true },
+          { "id": "garvins_cottage", "name": "Cottage by the church", "style": "loxford_cottage", "at": [15.1, 11.7], "size": [6, 6], "chimney": true },
+          { "id": "loxford_stables", "name": "Stables & Pasture", "template": "stable", "at": [12.9, 7.1], "size": [16, 18], "facing": "n", "paddock": 8, "wallH": 4, "search": 24 },
+          { "id": "mere_shrine", "name": "Mere shrine", "template": "shrine", "at": [10.5, 8.3], "size": [5, 5], "facing": "s", "search": 30 },
+          { "id": "mere_shack", "name": "Mere shack", "style": "loxford_cottage", "at": [11.5, 7.7], "size": [6, 6], "facing": "w", "search": 30 },
+          { "id": "mere_bell", "name": "The Mere's sunken bell", "template": "sunkbell", "at": [10, 7], "size": [5, 5], "facing": "n", "water": true, "lane": false },
+          { "id": "cuthmar_farmhouse", "name": "Cuthmar's farmhouse", "style": "loxford_cottage", "at": [15.9, 11.3], "size": [9, 8], "chimney": true },
+          { "id": "loxford_field_1", "name": "Loxford field", "template": "field", "at": [15.4, 12.5], "size": [20, 14], "facing": "e", "hay": true },
+          { "id": "cuthmar_garden", "name": "Cuthmar's garden", "template": "garden", "at": [16.6, 11.2], "size": [14, 9], "facing": "n" },
+          { "id": "osric_hall", "name": "Osric's farm hall", "template": "hall", "at": [16.0, 14.0], "size": [16, 10], "wallH": 5, "windowGaps": 1.0, "chimney": true },
+          { "id": "osric_barn", "name": "Barn", "style": "loxford_cottage", "at": [17.3, 13.4], "size": [12, 9], "wallH": 5, "windowGaps": 1.0 },
+          { "id": "loxford_field_2", "name": "Loxford field", "template": "field", "at": [17.3, 14.6], "size": [22, 16], "hay": true },
+          { "id": "loxford_field_3", "name": "Loxford field", "template": "field", "at": [16.5, 15.6], "size": [20, 14] },
+          { "id": "earl_manor", "name": "Earl William's Manor", "at": [18.2, 13.0], "size": [16, 12], "storeys": 3, "wallH": 4, "towers": "front", "towerCrown": "cone", "towerW": 5, "chimney": true, "materials": { "upper": "stone_bricks" } },
+          { "id": "tams_cottage", "name": "Tam's cottage", "style": "loxford_cottage", "at": [18.4, 15.2], "size": [6, 6], "chimney": true },
+          { "id": "north_farmhouse", "name": "Farmhouse", "style": "loxford_cottage", "at": [16.8, 17.0], "size": [8, 7], "chimney": true },
+          { "id": "loxford_field_4", "name": "Loxford field", "template": "field", "at": [17.6, 16.6], "size": [20, 14] },
+          { "id": "millwood_lodge", "name": "Millwood Lodge", "template": "hall", "style": "timber", "at": [19.3, 11.0], "size": [20, 10], "storeys": 2, "wallH": 4 },
+          { "id": "millwood_yard", "name": "Millwood wood yard", "template": "yard", "style": "timber", "at": [19.6, 12.0], "size": [14, 10], "stock": "oak_log", "shelter": true },
+          { "id": "border_watchtower", "name": "Border Watchtower", "template": "tower", "at": [22.45, 20.1], "size": [9, 9], "height": 16, "shape": "round", "crown": "crenel" },
+          { "id": "watch_barracks", "name": "Watchtower bunkhouse", "at": [22.8, 20.9], "size": [10, 7], "wallH": 4, "chimney": true },
+          { "id": "hunting_lodge", "name": "Hunting lodge", "template": "hall", "style": "timber", "at": [22.7, 17.8], "size": [12, 8], "wallH": 4 },
+          { "id": "goblin_hollow", "name": "Goblin Hollow", "template": "mouth", "style": "cave", "at": [23.6, 18.3], "size": [5, 12], "facing": "w", "mouth": "cave", "length": 10, "width": 3, "height": 3, "reserve": "goblin_hollow", "search": 30, "maxSlope": 14 }
+        ],
+        "districts": [
+          { "id": "loxford_houses", "name": "House", "rect": [10, 12, 12, 16], "style": "loxford", "roads": ["western_road"], "step": 4, "max": 20, "min": 8,
+            "opts": { "chimney": true },
+            "sizes": [ { "size": [5, 5], "storeys": 1, "wallH": 3, "materials": { "roof": "thatch", "wall": "timber_frame" } },
+                       { "size": [7, 7], "storeys": 2, "wallH": 4, "jetty": true },
+                       { "size": [8, 8], "storeys": 2, "wallH": 4, "jetty": true } ] },
+          { "id": "loxford_cottages", "name": "Cottage", "rect": [15, 22, 7, 13], "style": "loxford_cottage", "roads": ["kings_road", "loxford_high_street", "southern_road", "loxford_back_lane", "church_lane"], "step": 4, "max": 22, "min": 8,
+            "opts": { "chimney": true },
+            "sizes": [ { "size": [6, 6], "storeys": 1, "wallH": 4 }, { "size": [7, 6], "storeys": 1, "wallH": 4 } ] }
+        ]
+      },
+      {
+        "id": "harlette", "realm": "Harlette", "style": "harlette",
+        "patrol": [[8.3, 19.0], [8.3, 20.6], [8.6, 22.0], [6.4, 20.4], [9.6, 19.4]],
+        "buildings": [
+          { "id": "harlette_green", "name": "Village Green & Market", "template": "plaza", "at": [8.3, 20.1], "size": [18, 14], "facing": "e", "onRoad": true, "green": true, "well": true, "stalls": 3, "lane": false },
+          { "id": "shuttered_lantern", "name": "The Shuttered Lantern", "template": "hall", "at": [8.7, 19.0], "size": [13, 10], "storeys": 2, "wallH": 4, "jetty": true },
+          { "id": "harlette_store", "name": "Harlette store", "at": [7.5, 19.5], "size": [8, 7], "storeys": 2, "wallH": 4, "chimney": true },
+          { "id": "harlette_chapel", "name": "Harlette Chapel", "template": "church", "at": [8.7, 22.0], "size": [9, 18], "towerW": 4, "towerH": 11, "crown": "pyramid", "spire": 2.0, "materials": { "wall": "limestone_bricks", "upper": "limestone_bricks", "roof": "slate_roof" } },
+          { "id": "harlette_graveyard", "name": "Harlette Graveyard", "template": "graveyard", "at": [7.5, 22.3], "size": [12, 14], "search": 24 },
+          { "id": "harlette_sexton", "name": "Sexton's cottage", "at": [7.3, 21.4], "size": [6, 6], "chimney": true },
+          { "id": "willow_mill", "name": "Willow Mill", "template": "mill", "at": [6.3, 20.4], "size": [10, 8], "storeys": 2, "wallH": 4, "search": 30 },
+          { "id": "mill_cottage_1", "name": "Mill cottage", "at": [5.7, 19.8], "size": [6, 6], "chimney": true },
+          { "id": "mill_cottage_2", "name": "Mill cottage", "at": [6.6, 21.1], "size": [6, 6], "chimney": true },
+          { "id": "brookside_cottage", "name": "Brookside cottage", "at": [7.0, 19.1], "size": [6, 6], "chimney": true },
+          { "id": "ilva_farmhouse", "name": "East Fields farmhouse", "at": [10.0, 20.2], "size": [8, 7], "chimney": true },
+          { "id": "harlette_field_1", "name": "Tenant field", "template": "field", "at": [10.7, 19.5], "size": [18, 14], "hay": true },
+          { "id": "harlette_field_2", "name": "Tenant field", "template": "field", "at": [9.9, 21.1], "size": [16, 12] },
+          { "id": "borin_farmhouse", "name": "South Fields farmhouse", "at": [10.0, 18.2], "size": [8, 7], "chimney": true },
+          { "id": "borin_yard", "name": "Livestock yard", "template": "yard", "at": [10.7, 18.6], "size": [14, 12], "stock": "hay_bale", "piles": 2, "shelter": true },
+          { "id": "dracula_manor", "name": "Dracula's Manor", "style": "harlette_manor", "at": [6.0, 23.5], "size": [18, 14], "facing": "s", "storeys": 3, "wallH": 4, "towers": "front", "towerCrown": "cone", "towerW": 5, "towerRise": 7, "chimney": true, "banner": true, "search": 16 }
+        ],
+        "districts": [
+          { "id": "harlette_cottages", "name": "Cottage", "rect": [5, 11, 18, 22], "roads": ["western_road"], "step": 4, "max": 12, "min": 4,
+            "opts": { "chimney": true },
+            "sizes": [ { "size": [6, 6], "storeys": 1, "wallH": 4 }, { "size": [7, 6], "storeys": 2, "wallH": 3 } ] }
+        ]
+      },
+      {
+        "id": "valgard", "realm": "Valgard", "style": "valgard",
+        "patrol": [[10.0, 26.6], [12.6, 27.5], [14.6, 28.4], [13.0, 29.8], [11.0, 31.2], [8.6, 30.6], [8.4, 26.6]],
+        "buildings": [
+          { "id": "valgard_keep", "name": "Valgard Keep", "template": "castle", "at": [10.0, 28.15], "size": [30, 32], "facing": "s", "search": 16, "maxSlope": 12,
+            "wallH": 8, "towerR": 3, "gateW": 4, "keepW": 18, "keepD": 11, "keepStoreys": 3, "keepWallH": 5, "undercroftDepth": 8 },
+          { "id": "valgard_square", "name": "Keep Square", "template": "plaza", "at": [10.0, 26.6], "size": [22, 10], "facing": "n", "onRoad": true, "statue": true, "lane": false },
+          { "id": "white_hart", "name": "The White Hart", "template": "hall", "at": [8.55, 26.7], "size": [12, 10], "facing": "e", "storeys": 2, "wallH": 4 },
+          { "id": "sanctuary_jaehaerys", "name": "Sanctuary of Jaehaerys", "template": "church", "at": [8.7, 30.1], "size": [14, 24], "facing": "e", "towerW": 6, "towerH": 20, "crown": "crenel", "windowGlass": "white_glass", "search": 20 },
+          { "id": "metallists_guild", "name": "Metallists Guild", "template": "hall", "at": [12.1, 29.3], "size": [16, 12], "facing": "e", "storeys": 2, "wallH": 5, "banner": true },
+          { "id": "valgard_bank", "name": "Valgard Bank & Ore Exchange", "at": [12.2, 28.0], "size": [12, 10], "facing": "e", "storeys": 2, "wallH": 5, "roof": "hip", "banner": true },
+          { "id": "ore_yard", "name": "Bonded ore yard", "template": "yard", "at": [13.1, 28.4], "size": [10, 8], "stock": "coal_block", "piles": 3 },
+          { "id": "fennas_shop", "name": "Founders' Row shop", "at": [12.1, 26.3], "size": [8, 8], "storeys": 2, "wallH": 4 },
+          { "id": "tovins_workshop", "name": "Armour repair", "at": [13.1, 26.7], "size": [8, 8], "storeys": 2, "wallH": 4, "chimney": true },
+          { "id": "guild_bunkhouse", "name": "Guild bunkhouse", "template": "hall", "at": [14.2, 26.4], "size": [14, 8], "storeys": 2, "wallH": 4 },
+          { "id": "valgard_field_1", "name": "South Fields", "template": "field", "at": [8.9, 24.7], "size": [16, 10], "hay": true, "search": 24 },
+          { "id": "valgard_field_2", "name": "South Fields", "template": "field", "at": [10.7, 24.7], "size": [14, 10], "search": 24 },
+          { "id": "hesta_farmhouse", "name": "South Fields farmhouse", "at": [8.0, 24.5], "size": [8, 7], "chimney": true, "search": 24 },
+          { "id": "cart_shed", "name": "Cart shed", "template": "yard", "at": [11.5, 24.5], "size": [10, 8], "stock": "planks", "piles": 1, "shelter": true, "search": 24 },
+          { "id": "standing_stones", "name": "Standing Stones", "template": "stones", "style": "valgard", "at": [9, 26], "size": [11, 11], "count": 9, "search": 30, "lane": false },
+          { "id": "sunkissed_mine", "name": "Sunkissed Mine", "template": "mouth", "style": "mine", "at": [10.0, 34.0], "size": [5, 14], "facing": "s", "mouth": "mine", "length": 12, "width": 3, "height": 3, "reserve": "sunkissed_mine", "search": 24, "maxSlope": 16 },
+          { "id": "sunkissed_bunkhouse", "name": "Sunkissed Mine bunkhouse", "template": "hall", "style": "mine", "at": [10.9, 33.5], "size": [12, 8], "wallH": 4, "search": 30, "maxSlope": 10 },
+          { "id": "marble_yard", "name": "Marble Mine cutting yard", "template": "yard", "style": "mine", "at": [6.2, 33.1], "size": [14, 12], "stock": "marble", "piles": 4, "search": 30, "maxSlope": 10 },
+          { "id": "marble_mine", "name": "Marble Mine", "template": "mouth", "style": "mine", "at": [5.6, 33.8], "size": [5, 14], "facing": "s", "mouth": "mine", "length": 12, "width": 3, "height": 3, "reserve": "marble_mine", "search": 30, "maxSlope": 16 },
+          { "id": "marble_bunkhouse", "name": "Marble Mine bunkhouse", "template": "hall", "style": "mine", "at": [6.9, 32.6], "size": [10, 7], "wallH": 4, "search": 30, "maxSlope": 10 }
+        ],
+        "districts": [
+          { "id": "valgard_homes", "name": "House", "rect": [7, 16, 26, 31], "roads": ["valgard_high_street", "valgard_north_street", "founders_row", "valgard_west_street", "ore_road"], "step": 3, "max": 40, "min": 14,
+            "sizes": [ { "size": [5, 5], "storeys": 1, "wallH": 3 }, { "size": [7, 7], "storeys": 2, "wallH": 4, "chimney": true }, { "size": [8, 8], "storeys": 2, "wallH": 4, "chimney": true } ] }
+        ]
+      },
+      {
+        "id": "gorrick", "realm": "Gorrick", "style": "gorrick",
+        "patrol": [[24, 39.8], [24, 41.8], [25.8, 41.8], [24, 44.2], [22.4, 41.8]],
+        "buildings": [
+          { "id": "chieftains_hall", "name": "Chieftain's Hall", "template": "hall", "at": [24.75, 42.6], "size": [14, 10], "facing": "s", "storeys": 2, "wallH": 5, "roof": "gable" },
+          { "id": "hojimo_monastery", "name": "Hojimo Monastery", "template": "church", "at": [23.0, 43.2], "size": [12, 22], "facing": "e", "towerW": 5, "towerH": 13, "crown": "pyramid", "materials": { "wall": "stone_bricks", "upper": "stone_bricks" } },
+          { "id": "monastery_cells", "name": "Guest cells", "at": [22.4, 43.9], "size": [10, 7], "wallH": 4, "materials": { "wall": "stone_bricks", "upper": "stone_bricks" } },
+          { "id": "gorrick_bank", "name": "Gorrick Bank", "at": [24.65, 41.2], "size": [9, 8], "facing": "w", "storeys": 2, "wallH": 4, "materials": { "wall": "stone_bricks" } },
+          { "id": "iron_yard_forge", "name": "Iron Yard", "at": [25.7, 42.6], "size": [10, 8], "facing": "s", "wallH": 5, "chimney": true },
+          { "id": "iron_yard", "name": "Iron Yard store", "template": "yard", "at": [25.7, 41.4], "size": [12, 9], "stock": "coal_block", "piles": 3 },
+          { "id": "last_hearth", "name": "The Last Hearth", "template": "hall", "at": [24.65, 40.1], "size": [13, 10], "facing": "w", "storeys": 2, "wallH": 4 },
+          { "id": "workers_lodge", "name": "Workers' Lodge", "template": "hall", "at": [22.4, 41.0], "size": [14, 8], "facing": "e", "storeys": 2, "wallH": 4 },
+          { "id": "gorrick_allotments", "name": "West Allotments", "template": "field", "at": [22.2, 40.2], "size": [14, 10] },
+          { "id": "allotment_cottage", "name": "Allotment cottage", "at": [21.9, 41.9], "size": [6, 6], "chimney": true },
+          { "id": "gorrick_woodyard", "name": "Wood yard", "template": "yard", "at": [23.0, 41.8], "size": [8, 7], "stock": "spruce_log", "piles": 2 },
+          { "id": "viggos_cottage", "name": "Postern cottage", "at": [26.1, 42.7], "size": [6, 6], "chimney": true }
+        ]
+      },
+      {
+        "id": "azharad", "realm": "Azharad", "style": "azharad",
+        "patrol": [[54.6, 12.0], [52.4, 11.7], [52.6, 13.8], [54.6, 14.9], [57.4, 16.2], [59.6, 13.4]],
+        "buildings": [
+          { "id": "azharad_palace", "name": "Azharad Palace", "template": "courtyard", "at": [56.25, 12.0], "size": [36, 32], "facing": "w", "ring": 7, "storeys": 2, "wallH": 5, "gateW": 4, "minarets": true, "crenel": true,
+            "dome": { "r": 7 }, "materials": { "dome": "gold_block" }, "search": 16 },
+          { "id": "palace_square", "name": "Palace Square", "template": "plaza", "at": [54.5, 12.0], "size": [20, 12], "facing": "w", "onRoad": true, "statue": false, "well": true, "lane": false },
+          { "id": "azharad_bank", "name": "Azharad Bank", "at": [53.0, 10.2], "size": [12, 10], "facing": "n", "storeys": 2, "wallH": 5, "crenel": true },
+          { "id": "azharad_workshop", "name": "Azharad Workshop", "at": [53.0, 12.55], "size": [12, 10], "facing": "s", "storeys": 1, "wallH": 6, "chimney": true },
+          { "id": "zafirs_swords", "name": "Zafir's Superior Swords", "at": [51.0, 10.7], "size": [9, 8], "facing": "n", "storeys": 2, "wallH": 4 },
+          { "id": "mohameds_crafting", "name": "Mohamed's Crafting Store", "at": [51.9, 12.9], "size": [9, 8], "facing": "s", "storeys": 2, "wallH": 4 },
+          { "id": "karims_kitchen", "name": "Karim's kitchen", "at": [52.1, 15.0], "size": [10, 8], "storeys": 2, "wallH": 4, "chimney": true },
+          { "id": "azharad_souq", "name": "The souq", "template": "plaza", "at": [53.6, 14.3], "size": [14, 10], "facing": "n", "onRoad": true, "stalls": 4, "lane": false },
+          { "id": "azharad_store", "name": "The general store", "at": [54.5, 13.4], "size": [10, 8], "storeys": 2, "wallH": 4 },
+          { "id": "azharad_temple", "name": "Azharad Temple", "template": "courtyard", "at": [57.3, 14.3], "size": [22, 20], "facing": "w", "ring": 5, "wallH": 4, "dome": { "r": 4.5 }, "well": true },
+          { "id": "osamas_armour", "name": "Osama's armour shop", "at": [59.2, 14.4], "size": [9, 8], "storeys": 2, "wallH": 4 },
+          { "id": "marwans_armour", "name": "Marwan's armour shop", "at": [60.0, 16.0], "size": [9, 8], "storeys": 2, "wallH": 4 },
+          { "id": "azharad_tannery", "name": "The tannery", "at": [56.2, 15.6], "size": [12, 9], "storeys": 2, "wallH": 4 },
+          { "id": "tannery_yard", "name": "Drying yard", "template": "yard", "at": [56.9, 16.3], "size": [10, 8], "stock": "brown_carpet", "piles": 3 },
+          { "id": "workers_khan", "name": "Workers' Khan", "template": "courtyard", "at": [59.3, 12.0], "size": [24, 24], "facing": "w", "ring": 6, "storeys": 2, "wallH": 4, "well": true },
+          { "id": "oasis_garden", "name": "Oasis herb garden", "template": "field", "at": [48.6, 8.0], "size": [12, 10], "furrow": "dirt", "crop": "grass", "search": 20 },
+          { "id": "date_grove", "name": "Date grove", "template": "orchard", "at": [50.0, 7.3], "size": [18, 16], "species": "palm", "spacing": 6, "search": 20 },
+          { "id": "oasis_cottage", "name": "Oasis garden cottage", "at": [48.8, 6.3], "size": [7, 6], "search": 20 },
+          { "id": "clay_pits", "name": "Clay Pits", "template": "yard", "at": [54.0, 18.0], "size": [16, 14], "stock": "clay", "piles": 5, "fenced": false, "search": 20 },
+          { "id": "clay_hut", "name": "Clay digger's hut", "at": [55.1, 18.4], "size": [6, 6], "search": 20 }
+        ],
+        "districts": [
+          { "id": "azharad_homes", "name": "House", "rect": [50, 61, 9, 17], "roads": ["azharad_souq_street", "southern_road", "east_road", "azharad_north_street", "azharad_east_street", "azharad_lane_nw", "azharad_lane_n", "azharad_lane_se", "azharad_lane_sw", "azharad_lane_e"], "step": 3, "max": 90, "min": 40,
+            "sizes": [ { "size": [6, 6], "storeys": 2, "wallH": 4 }, { "size": [7, 6], "storeys": 2, "wallH": 4, "crenel": true }, { "size": [6, 5], "storeys": 1, "wallH": 4 } ] },
+          { "id": "azharad_south_quarter", "name": "House", "rect": [54, 61, 6, 8], "roads": ["azharad_south_street"], "step": 4, "max": 8, "min": 2,
+            "sizes": [ { "size": [5, 5], "storeys": 1, "wallH": 3 }, { "size": [6, 6], "storeys": 2, "wallH": 4 }, { "size": [7, 6], "storeys": 2, "wallH": 4 } ] }
+        ]
+      },
+      {
+        "id": "severia", "realm": "Severia", "style": "severia",
+        "patrol": [[29, 59], [31, 56], [34, 56], [35, 59.2], [39, 57], [30, 62.5], [26.2, 54.2]],
+        "buildings": [
+          { "id": "severian_palace", "name": "Severian Palace", "template": "courtyard", "style": "severia_stone", "at": [35.0, 61.1], "size": [48, 36], "facing": "s", "ring": 8, "storeys": 2, "wallH": 6, "gateW": 4, "crenel": false, "dome": { "r": 6 }, "search": 16 },
+          { "id": "palace_gardens", "name": "Palace gardens", "template": "plaza", "style": "severia_stone", "at": [35.0, 59.3], "size": [30, 10], "facing": "s", "green": true, "statue": true, "onRoad": true, "lane": false },
+          { "id": "palace_barracks", "name": "Palace barracks", "template": "hall", "style": "severia_stone", "at": [37.8, 60.2], "size": [16, 9], "facing": "w", "storeys": 2, "wallH": 4 },
+          { "id": "severian_museum", "name": "Severian Museum", "template": "classical", "style": "severia_stone", "at": [39.2, 57.7], "size": [26, 19], "facing": "s", "storeys": 2, "wallH": 5, "portico": 3, "porticoH": 8 },
+          { "id": "museum_vault", "name": "Museum service passage", "template": "cellar", "style": "severia_stone", "at": [40.4, 57.7], "size": [4, 14], "facing": "s", "depth": 10, "reserve": "museum_vault", "lane": false },
+          { "id": "severian_bank", "name": "Severian Bank", "template": "classical", "style": "severia_stone", "at": [27.0, 55.1], "size": [14, 14], "storeys": 2, "wallH": 5, "portico": 2, "porticoH": 6 },
+          { "id": "anvil_building", "name": "Anvil building", "at": [27.9, 54.6], "size": [9, 8], "wallH": 5, "chimney": true },
+          { "id": "tenement_1", "name": "Tenement", "at": [28.3, 56.4], "size": [12, 9], "storeys": 4, "wallH": 4 },
+          { "id": "tenement_2", "name": "Tenement", "at": [27.6, 57.3], "size": [10, 9], "storeys": 3, "wallH": 4 },
+          { "id": "red_moon_inn", "name": "Red Moon Inn", "template": "hall", "at": [34.0, 55.6], "size": [16, 12], "storeys": 3, "wallH": 4 },
+          { "id": "town_square", "name": "Town Square", "template": "plaza", "at": [31.2, 55.8], "size": [24, 20], "facing": "n", "onRoad": true, "statue": true, "lane": false },
+          { "id": "great_market", "name": "The Great Market", "template": "plaza", "at": [29.0, 59.0], "size": [32, 26], "facing": "s", "onRoad": true, "stalls": 8, "lane": false },
+          { "id": "moon_shrine", "name": "Moon Shrine", "template": "shrine", "at": [27.6, 59.8], "size": [5, 5], "materials": { "accent": "copper_block" } },
+          { "id": "market_flats", "name": "Great Market stalls and flats", "at": [30.6, 60.3], "size": [10, 8], "storeys": 3, "wallH": 4 },
+          { "id": "customs_house", "name": "Customs house", "template": "classical", "style": "severia_stone", "at": [32.2, 65.2], "size": [12, 10], "facing": "n", "storeys": 2, "wallH": 4, "portico": 2, "search": 24 },
+          { "id": "harbor_beacon", "name": "Harbor Beacon", "template": "tower", "style": "beacon", "at": [28.6, 65.5], "size": [7, 7], "height": 14, "shape": "round", "crown": "lantern", "search": 24 },
+          { "id": "harbor_tenement", "name": "Harbor tenement", "at": [29.9, 65.0], "size": [12, 9], "facing": "n", "storeys": 3, "wallH": 4, "search": 24 },
+          { "id": "net_loft", "name": "Net loft", "at": [30.8, 64.4], "size": [8, 6], "facing": "n", "storeys": 2, "wallH": 3, "search": 24 },
+          { "id": "harbor_pier_1", "name": "Harbor pier", "template": "pier", "at": [29.6, 66.35], "size": [4, 16], "facing": "n", "water": true, "lane": false, "search": 20 },
+          { "id": "harbor_pier_2", "name": "Harbor pier", "template": "pier", "at": [31.2, 66.35], "size": [4, 18], "facing": "n", "water": true, "lane": false, "search": 20 },
+          { "id": "harbor_pier_3", "name": "Harbor pier", "template": "pier", "at": [32.8, 66.3], "size": [4, 14], "facing": "n", "water": true, "lane": false, "search": 20 },
+          { "id": "severian_church", "name": "Severian Church", "template": "church", "style": "severia_stone", "at": [56.0, 64.0], "size": [16, 32], "facing": "s", "towerW": 7, "towerH": 22, "crown": "pyramid", "spire": 2.0, "search": 24 },
+          { "id": "loggers_rest", "name": "Loggers' Rest", "template": "hall", "style": "timber", "at": [12.0, 59.0], "size": [16, 9], "storeys": 2, "wallH": 4, "search": 24 },
+          { "id": "loggers_yard", "name": "Loggers' wood yard", "template": "yard", "style": "timber", "at": [12.8, 58.4], "size": [12, 9], "stock": "spruce_log", "search": 24 },
+          { "id": "vineyard_farmhouse", "name": "Terrace farmhouse", "at": [14.0, 49.6], "size": [10, 8], "storeys": 2, "wallH": 4, "search": 24 },
+          { "id": "terrace_garden", "name": "Terrace kitchen garden", "template": "garden", "at": [14.9, 50.4], "size": [13, 9], "facing": "n", "search": 24 },
+          { "id": "vineyard", "name": "Vineyard terraces", "template": "field", "at": [12.6, 49.0], "size": [24, 14], "rowBlock": "hedge", "crop": "grass", "furrow": "dirt", "search": 24, "maxSlope": 12 },
+          { "id": "olive_terraces", "name": "Olive terraces", "template": "orchard", "at": [15.4, 49.0], "size": [20, 14], "species": "olive", "spacing": 5, "search": 24, "maxSlope": 12 },
+          { "id": "pilgrims_gate", "name": "Pilgrim's Gate", "template": "gatehouse", "style": "severia_stone", "at": [24.0, 49.0], "size": [15, 7], "facing": "n", "onRoad": true, "gateW": 5, "height": 11, "search": 0, "lane": false },
+          { "id": "dig_shed", "name": "Dig shed", "style": "timber", "at": [55.6, 59.0], "size": [6, 6], "search": 24 },
+          { "id": "fossil_dig", "name": "Fossil Cliffs dig", "template": "yard", "style": "timber", "at": [56.3, 59.4], "size": [10, 8], "stock": "marble", "piles": 3, "search": 24, "maxSlope": 12 },
+          { "id": "lookout_point", "name": "Lookout Point", "template": "ruin", "style": "severia_stone", "at": [65, 65], "size": [10, 10], "height": 2, "search": 24 }
+        ],
+        "districts": [
+          { "id": "severia_homes", "name": "House", "rect": [25, 44, 53, 66], "roads": ["severia_streets", "harbor_way", "via_palatina", "tenement_row", "kings_road", "via_mese", "north_quay", "palace_east", "west_avenue", "market_north", "east_quarter", "south_lane", "inner_ring", "museum_lane"], "step": 3, "max": 170, "min": 60,
+            "sizes": [ { "size": [6, 6], "storeys": 2, "wallH": 4 }, { "size": [7, 7], "storeys": 2, "wallH": 5 }, { "size": [8, 8], "storeys": 3, "wallH": 4 }, { "size": [10, 8], "storeys": 3, "wallH": 4, "materials": { "wall": "limestone_bricks" } }, { "size": [7, 9], "storeys": 3, "wallH": 4, "materials": { "wall": "terracotta", "upper": "plaster" } } ] },
+          { "id": "severia_east_housing", "name": "House", "rect": [47, 58, 49, 61], "roads": ["camelot_east_road", "severia_streets", "east_road", "quay_road"], "step": 3, "max": 50, "min": 16,
+            "sizes": [ { "size": [6, 6], "storeys": 2, "wallH": 4 }, { "size": [7, 7], "storeys": 2, "wallH": 5 }, { "size": [8, 8], "storeys": 2, "wallH": 5 } ] }
+        ]
+      },
+      {
+        "id": "camelot", "realm": "Camelot", "style": "camelot",
+        "patrol": [[49.2, 44.6], [51.0, 43.8], [53.2, 43.6], [54.6, 44.6], [51.4, 42.6]],
+        "buildings": [
+          { "id": "camelot_keep", "name": "Camelot Keep & Round Table Hall", "template": "keep", "at": [51.3, 44.6], "size": [20, 16], "facing": "s", "storeys": 3, "wallH": 5, "towerW": 5, "search": 12 },
+          { "id": "camelot_chapel", "name": "Sun Chapel", "template": "church", "at": [49.95, 44.4], "size": [10, 18], "facing": "s", "towerW": 4, "towerH": 12, "crown": "pyramid", "materials": { "accent": "gold_block" }, "search": 12 },
+          { "id": "sinclair_ward", "name": "Sinclair Ward", "at": [48.9, 43.6], "size": [10, 12], "facing": "e", "storeys": 2, "wallH": 4, "chimney": true },
+          { "id": "sinclair_graves", "name": "Ancestral graves", "template": "graveyard", "at": [49.2, 42.9], "size": [10, 8], "lane": false },
+          { "id": "service_court", "name": "Service Court", "template": "courtyard", "at": [52.25, 42.85], "size": [18, 16], "facing": "n", "ring": 5, "wallH": 4, "well": true },
+          { "id": "training_grounds", "name": "Knight Training Grounds", "template": "yard", "at": [53.5, 44.55], "size": [16, 12], "stock": "hay_bale", "piles": 2 },
+          { "id": "training_quarters", "name": "Training-ground quarters", "at": [53.5, 45.3], "size": [10, 6], "wallH": 4, "facing": "s" },
+          { "id": "camelot_stables", "name": "East Gate stables", "template": "stable", "at": [54.6, 43.6], "size": [12, 14], "paddock": 6, "facing": "n" }
+        ]
+      },
+      {
+        "id": "wilds", "realm": "WILDS", "style": "wilds",
+        "buildings": [
+          { "id": "smugglers_boathouse", "name": "Skarn's boathouse", "at": [36.4, 3.4], "size": [8, 10], "wallH": 4, "water": true, "search": 30, "lane": false, "materials": { "wall": "dark_planks", "upper": "dark_planks" } },
+          { "id": "driftwood_hut", "name": "Driftwood hut", "at": [38.2, 3.8], "size": [6, 5], "wallH": 3, "search": 30, "materials": { "wall": "planks", "upper": "planks" } },
+          { "id": "cove_pier", "name": "Cove pier", "template": "pier", "at": [37.6, 2.6], "size": [3, 10], "facing": "s", "water": true, "search": 30, "lane": false },
+          { "id": "waystation_bunks", "name": "Waystation", "template": "hall", "style": "timber", "at": [38.2, 12.6], "size": [14, 8], "wallH": 4 },
+          { "id": "wagon_stop", "name": "Wagon stop", "template": "yard", "style": "timber", "at": [38.4, 11.3], "size": [12, 10], "stock": "planks", "piles": 1, "shelter": true },
+          { "id": "waystation_stakes", "name": "Torchlit stakes", "template": "gibbets", "at": [36.3, 12.8], "size": [14, 14], "count": 1, "stakes": true, "lane": false },
+          { "id": "culvert_cave", "name": "Culvert cave", "template": "mouth", "style": "cave", "at": [36.6, 11.6], "size": [5, 10], "facing": "e", "mouth": "cave", "length": 8, "width": 3, "height": 3, "reserve": "culvert", "search": 20, "maxSlope": 14 },
+          { "id": "tollgate", "name": "Tollgate Heath toll", "template": "gatehouse", "style": "timber", "at": [28.0, 11.0], "size": [9, 4], "facing": "e", "onRoad": true, "gateW": 5, "height": 5, "search": 6, "lane": false },
+          { "id": "toll_house", "name": "Toll house", "style": "timber", "at": [28.0, 10.5], "size": [6, 6], "search": 16 },
+          { "id": "murk_caves", "name": "Murk caves", "template": "mouth", "style": "cave", "at": [32.0, 17.0], "size": [5, 12], "facing": "e", "mouth": "cave", "length": 10, "width": 3, "height": 4, "reserve": "murk_caves", "search": 30, "maxSlope": 18 },
+          { "id": "gorge_overlook", "name": "Gorge Overlook", "template": "ruin", "style": "ruin", "at": [34.0, 19.0], "size": [8, 8], "height": 2, "search": 20 },
+          { "id": "murk_rope_crossing", "name": "Murk rope crossing", "template": "pier", "at": [37.0, 22.0], "size": [3, 18], "facing": "e", "water": true, "span": true, "search": 12, "lane": false },
+          { "id": "broken_weir", "name": "The broken weir", "template": "weir", "style": "ruin", "at": [37.0, 27.3], "size": [16, 3], "facing": "n", "water": true, "onRoad": true, "breach": 5, "search": 10, "lane": false },
+          { "id": "ruined_forge", "name": "Ruined forge", "template": "ruin", "style": "ruin", "at": [22.6, 26.5], "size": [12, 10], "height": 5, "hearth": true, "search": 20 },
+          { "id": "orrins_leanto", "name": "Orrin's lean-to", "at": [23.6, 26.7], "size": [6, 5], "roof": "lean", "wallH": 3, "search": 20 },
+          { "id": "gallows_gibbets", "name": "Gallows Heath gibbets", "template": "gibbets", "at": [24.6, 31.0], "size": [12, 10], "count": 3, "search": 20, "lane": false },
+          { "id": "hanging_tree", "name": "The hanging tree", "template": "orchard", "at": [25.6, 33.2], "size": [5, 5], "species": "deadtree", "spacing": 9, "search": 20, "lane": false },
+          { "id": "stair_head_shrine", "name": "Pilgrim's Stair Head", "template": "shrine", "style": "severia_stone", "at": [24.7, 46.3], "size": [5, 5], "search": 24 },
+          { "id": "highland_bunkhouse", "name": "Highland adit bunkhouse", "template": "hall", "style": "mine", "at": [12.6, 40.2], "size": [14, 8], "wallH": 4, "search": 48, "maxSlope": 12 },
+          { "id": "highland_adit", "name": "Highland adit", "template": "mouth", "style": "mine", "at": [11.6, 40.8], "size": [5, 12], "mouth": "mine", "length": 10, "width": 3, "height": 3, "reserve": "highland_adit", "search": 48, "maxSlope": 18 },
+          { "id": "crags_mine_south", "name": "Hollow Crags mine", "template": "mouth", "style": "mine", "at": [11.0, 36.0], "size": [5, 12], "mouth": "mine", "length": 10, "width": 3, "height": 3, "reserve": "hollow_crags_mine_1", "search": 40, "maxSlope": 18 },
+          { "id": "crags_mine_west", "name": "Hollow Crags mine", "template": "mouth", "style": "mine", "at": [6.0, 39.0], "size": [5, 12], "mouth": "mine", "length": 10, "width": 3, "height": 3, "reserve": "hollow_crags_mine_2", "search": 40, "maxSlope": 18 },
+          { "id": "hakons_lodge", "name": "Trapper's lodge", "template": "hall", "style": "timber", "at": [6.7, 31.6], "size": [10, 7], "wallH": 4, "search": 30, "maxSlope": 10 },
+          { "id": "bryns_pile_hut", "name": "Bryn's pile hut", "style": "timber", "at": [36.3, 30.5], "size": [7, 6], "facing": "s", "wallH": 3, "water": true, "search": 24, "lane": false },
+          { "id": "unlit_lantern", "name": "The Unlit Lantern", "template": "tower", "style": "lantern", "at": [37.0, 36.0], "size": [11, 11], "topY": 92, "shape": "round", "crown": "lantern", "cellar": 12, "cellarReserve": "lantern_cellars", "search": 20, "maxSlope": 30 },
+          { "id": "falls_shrine", "name": "Falls Stair shrine", "template": "shrine", "style": "camelot", "at": [47.4, 45.0], "size": [5, 5], "search": 24 },
+          { "id": "forester_lodge", "name": "Ranger lodge", "template": "hall", "style": "timber", "at": [55.0, 36.0], "size": [12, 8], "wallH": 4, "search": 24 },
+          { "id": "clamp_hut", "name": "Clamp hut", "style": "timber", "at": [55.0, 31.0], "size": [6, 6], "search": 24 },
+          { "id": "charcoal_clamps", "name": "Charcoal clamps", "template": "yard", "style": "timber", "at": [55.6, 31.4], "size": [10, 8], "stock": "coal_block", "piles": 3, "fenced": false, "search": 24 },
+          { "id": "snare_hut", "name": "Snare hut", "style": "timber", "at": [46.0, 37.0], "size": [6, 5], "wallH": 3, "search": 24 },
+          { "id": "resin_camp", "name": "Resin tapper's tent", "template": "camp", "at": [62.0, 43.0], "size": [10, 10], "tents": 1, "stakes": false, "search": 24 },
+          { "id": "spider_nest", "name": "Spider Nest", "template": "mouth", "style": "cave", "at": [51.0, 35.0], "size": [5, 12], "mouth": "cave", "length": 10, "width": 4, "height": 4, "reserve": "spider_nest", "search": 30, "maxSlope": 18 },
+          { "id": "gibbet_grove", "name": "Gibbet Grove", "template": "gibbets", "at": [55.0, 42.0], "size": [12, 12], "count": 4, "stakes": true, "search": 24, "lane": false },
+          { "id": "ashmaw_throat", "name": "Ashmaw Throat", "template": "mouth", "style": "basalt_cave", "at": [61.4, 37.0], "size": [7, 14], "facing": "w", "mouth": "cave", "length": 12, "width": 5, "height": 5, "reserve": "ashmaw_throat", "reserveDepth": 18, "search": 30, "maxSlope": 22 },
+          { "id": "garmunds_camp", "name": "Garmund's Camp", "template": "camp", "at": [53.0, 25.0], "size": [20, 18], "tents": 4, "stakes": true, "search": 24 },
+          { "id": "bone_orchard", "name": "Bone Orchard", "template": "orchard", "at": [43.0, 22.0], "size": [16, 16], "species": "deadtree", "spacing": 5, "search": 24, "lane": false },
+          { "id": "sandstone_quarry", "name": "Sandstone quarry", "template": "yard", "style": "mine", "at": [62.6, 22.6], "size": [14, 12], "stock": "sandstone", "piles": 4, "shelter": true, "search": 30, "maxSlope": 12 }
+        ]
+      }
+    ]
+  }
+}

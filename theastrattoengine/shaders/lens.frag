@@ -3,7 +3,7 @@
 // before bloom and exposure. Both are off unless the caller turns them on (ASTRATTO_PASS_DEPTH_OF_FIELD, _MOTION_BLUR).
 in vec2 vUV;
 layout(location=0) out vec4 oColor;
-uniform sampler2D uColor, uDepth;
+uniform sampler2D uColor, uDepth, uFocusTex;
 uniform mat4 uInvPV, uPrevPV;
 uniform vec2 uScreen;
 uniform float uShutter, uFocus, uAperture, uMaxBlur, uNear, uFar, uFrame;
@@ -22,17 +22,9 @@ void main() {
     float z = lin(d);
     float jit = ign(gl_FragCoord.xy + uFrame * 5.588);
     if (uDof != 0) {
-        // the focus: as asked, or what is in the middle of the screen (five taps, the nearest that is not sky)
+        // the focus: as asked, or (0.4.0) the autofocus's - eased toward what is under the middle of the screen (focus.frag)
         float f = uFocus;
-        if (f <= 0.0) {
-            f = 1e9;
-            for (int i = 0; i < 5; i++) {
-                vec2 o = vec2(i == 1 ? 0.02 : i == 2 ? -0.02 : 0.0, i == 3 ? 0.02 : i == 4 ? -0.02 : 0.0);
-                float dd = texture(uDepth, vec2(0.5) + o).r;
-                if (dd < 1.0) f = min(f, lin(dd));
-            }
-            if (f > 1e8) f = 60.0;
-        }
+        if (f <= 0.0) f = max(0.3, texelFetch(uFocusTex, ivec2(0), 0).r);
         float c0 = coc(z, f);
         // gather on a golden-angle spiral as wide as the widest blur near the point; each sample counts as far as its own
         // blur reaches the centre, so a sharp thing in front is not smeared over the blur behind it (and a blurred thing

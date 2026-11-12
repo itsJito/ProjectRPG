@@ -453,9 +453,13 @@ final class Textures {
             case L_BIRCH_TOP -> endGrain(cv, 0xE0C896, 0xE8E2D2, 3.0f);
             // (0.2.2, gamefixes: leaves did not look like leaves) fewer, bigger leaves - each one a shape you can read at
             // a few metres: a broad pointed leaf, an oak's wide blunt one, a willow's long blade
-            case L_LEAVES -> leaves(cv, 0x3E9230, 5.4f, 2.6f, 120, 0.36f);
-            case L_OAK_LEAVES -> leaves(cv, 0x3C7E26, 5.8f, 3.2f, 100, 0.34f);
-            case L_WILLOW_LEAVES -> leaves(cv, 0x78AE3A, 7.6f, 1.5f, 150, 0.38f);
+            // (0.4.1, gamefixes: leaves should read as a full, bushy crown) smaller leaves, more of them, the gaps between
+            // the clusters closed down to flecks of light - the crown's faces are drawn under its leaf cards now
+            case L_LEAVES -> leaves(cv, 0x3E9230, 4.0f, 2.0f, 230, 0.24f);
+            case L_OAK_LEAVES -> leaves(cv, 0x3C7E26, 4.4f, 2.4f, 210, 0.22f);
+            case L_WILLOW_LEAVES -> leaves(cv, 0x78AE3A, 6.0f, 1.3f, 260, 0.27f);
+            // (0.4.0) the conifers' needles: many short narrow blades, a cool deep green, gaps of sky between the sprays
+            case L_PINE_LEAVES -> leaves(cv, 0x2C5A30, 3.6f, 0.9f, 380, 0.2f);
             // the hedge: small clipped leaves packed tight on a dark body, barely a gap in it, the light on its top edge
             case L_HEDGE -> leaves(cv, 0x2F7428, 2.8f, 1.5f, 420, 0.08f);
             case L_BERRY -> berries(cv);
@@ -517,6 +521,13 @@ final class Textures {
             case L_BASALT_TOP -> basalt(cv, true);
             case L_STAINED -> stained(cv);
             case L_GRAVEL -> gravel(cv);
+            case L_ASH -> ash(cv);
+            case L_HEATH -> heath(cv);
+            case L_HEATH_SIDE -> { dirt(cv, 0x6A4630, 10); lip(cv, 0x5E5A34, 0x8A5A7A); }
+            case L_PODZOL -> podzol(cv);
+            case L_PODZOL_SIDE -> { dirt(cv, 0x5E3E26, 10); lip(cv, 0x4A3220, 0x7A4A22); }
+            case L_DRY_GRASS -> dryGrass(cv);
+            case L_DRY_GRASS_SIDE -> { dirt(cv, 0x7E5634, 10); lip(cv, 0x9A8C48, 0xC2B064); }
             case L_BRASS -> { plate(cv, 0xC8A050, false); for (int k = 0; k < 4; k++) cv.tone(cv.rf() * T, cv.rf() * T, 4, 1.5f, cv.rf() * 3, 0.4f, 0.9f); for (int y = 0; y < T; y += 21) for (int x = 0; x < T; x++) { cv.light(y * T + x, -0.4f); cv.light(Canvas.w(y + 1) * T + x, 0.35f); } }
             default -> { cv.fill(0xFF00FF); }
         }
@@ -706,6 +717,99 @@ final class Textures {
     }
 
     // ---- terrain
+    // (0.4.0, gamefixes: ShadowVeil) the wild ground of the permanent world, painted as the grass and earth are: broad
+    // soft areas of light and shade, then the small things that make it read at a metre - and nothing that tiles into a
+    // pattern across a slope
+
+    /** Ash: Ashmaw's fall - fine grey dust drifted into soft ridges, black cinders through it, a few pale pumice crumbs. */
+    static void ash(Canvas cv) {
+        cv.fill(0x6A6662);
+        cv.mottle(0.14f, 3);
+        for (int k = 0; k < 6; k++) cv.dab(cv.rf() * T, cv.rf() * T, 14 + cv.rf() * 12, 9 + cv.rf() * 8, cv.rf() * 3, rgb(0x6E6A66), 0.32f, 1f);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 12 + cv.rf() * 10, 8 + cv.rf() * 7, cv.rf() * 3, rgb(0x4A4746), 0.34f, 1f);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            float wv = (float) Math.sin((x * 0.7f + y + (cv.noise(2, x, y) - 0.5f) * 14) * Math.PI * 2 / 21.333f);
+            cv.light(y * T + x, wv * 0.07f);
+        }
+        pebbles(cv, 70, 0x26242A, 0.6f, 1.7f);
+        pebbles(cv, 18, 0x9A948C, 0.5f, 1.0f);
+        cv.mottle(0.05f, 7);
+    }
+
+    /** Heath: the moor's cover - low, wiry heather in olive and rust, purple bloom in loose drifts, dark gaps between the crowns. */
+    static void heath(Canvas cv) {
+        cv.fill(0x4E5630);
+        cv.mottle(0.2f, 2);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 14 + cv.rf() * 12, 10 + cv.rf() * 8, cv.rf() * 3, rgb(0x66603A), 0.32f, 1f);
+        for (int k = 0; k < 4; k++) cv.dab(cv.rf() * T, cv.rf() * T, 12 + cv.rf() * 10, 9 + cv.rf() * 7, cv.rf() * 3, rgb(0x6A4A3A), 0.3f, 1f);
+        // the crowns: small rounded clumps, shadowed under, lit on top
+        for (int k = 0; k < 120; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, r = 1.2f + cv.rf() * 1.8f;
+            cv.tone(x + 0.3f, y + r * 0.6f, r * 1.1f, r * 0.6f, 0, -0.35f, 0.7f);
+            cv.dab(x, y, r, r * 0.8f, cv.rf() * 3, shade(rgb(cv.rf() < 0.75f ? 0x5A6236 : 0x6E5A3A), (cv.rf() - 0.3f) * 0.35f), 0.85f, 0.6f);
+        }
+        // the bloom: purple in drifts, not every crown
+        for (int k = 0; k < 5; k++) {
+            float cx = cv.rf() * T, cy = cv.rf() * T;
+            for (int t = 0; t < 22; t++) {
+                float x = cx + cv.rs() * 7, y = cy + cv.rs() * 5;
+                cv.dab(x, y, 0.7f, 0.7f, 0, shade(rgb(0x8A4E86), cv.rs() * 0.2f), 0.85f, 0.5f);
+            }
+        }
+        cv.mottle(0.06f, 11);
+    }
+
+    /** Podzol: the Dead Wood's floor - dark needle-litter over grey-brown soil, the needles crossing every way, rusty patches. */
+    static void podzol(Canvas cv) {
+        cv.fill(0x45301E);
+        cv.mottle(0.22f, 3);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 12 + cv.rf() * 10, 8 + cv.rf() * 8, cv.rf() * 3, rgb(0x6A4424), 0.3f, 1f);
+        for (int k = 0; k < 4; k++) cv.dab(cv.rf() * T, cv.rf() * T, 10 + cv.rf() * 9, 7 + cv.rf() * 6, cv.rf() * 3, rgb(0x3A3028), 0.3f, 1f);
+        for (int k = 0; k < 420; k++) {
+            float x = cv.rf() * T, y = cv.rf() * T, a = cv.rf() * 6.28f, len = 1.6f + cv.rf() * 2.4f;
+            float[] c = shade(rgb(cv.rf() < 0.6f ? 0x7A5228 : 0x5A4430), (cv.rf() - 0.4f) * 0.4f);
+            cv.stroke(x, y, x + (float) Math.cos(a) * len, y + (float) Math.sin(a) * len, 0.32f, 0.25f, c, 0.75f);
+        }
+        pebbles(cv, 10, 0x6E665E, 0.6f, 1.4f);
+        cv.mottle(0.05f, 9);
+    }
+
+    /** Dry grass: sun-cured turf - straw and olive over a pale earth, the blades thinner and fewer than the meadow's. */
+    static void dryGrass(Canvas cv) {
+        // (olive turf going to straw: a grass first - it read as sand from a few metres - then dry)
+        cv.fill(0x6E7A3C);
+        cv.mottle(0.16f, 2);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 16 + cv.rf() * 12, 12 + cv.rf() * 9, cv.rf() * 3, rgb(0x8E9048), 0.32f, 1f);
+        for (int k = 0; k < 5; k++) cv.dab(cv.rf() * T, cv.rf() * T, 14 + cv.rf() * 12, 10 + cv.rf() * 9, cv.rf() * 3, rgb(0x56682E), 0.36f, 1f);
+        for (int k = 0; k < 6; k++) cv.dab(cv.rf() * T, cv.rf() * T, 3 + cv.rf() * 4, 2 + cv.rf() * 3, cv.rf() * 3, rgb(0x7E6A44), 0.45f, 1f);
+        int n = 22;
+        for (int gy = 0; gy < n; gy++) for (int gx = 0; gx < n; gx++) {
+            float x = (gx + cv.rf()) * T / n, y = (gy + cv.rf()) * T / n;
+            float lean = cv.rs() * 1.4f, len = 1.8f + cv.rf() * 2.4f;
+            cv.toneStroke(x, y + 0.5f, x + lean * 0.3f, y - len * 0.3f, 0.55f, 0.4f, -0.3f);
+            float[] tip = shade(rgb(cv.rf() < 0.6f ? 0xB8B068 : 0x8EA050), (cv.rf() - 0.3f) * 0.35f);
+            cv.stroke(x + lean * 0.3f, y - len * 0.3f, x + lean, y - len, 0.38f, 0.2f, tip, 0.7f);
+        }
+        cv.mottle(0.06f, 11);
+    }
+
+    /** A cover's lip over an earth face: like the grass's, in the cover's own colours (body, then its lit crown). */
+    static void lip(Canvas cv, int body, int crown) {
+        float[] gr = rgb(body);
+        for (int x = 0; x < T; x++) {
+            float depth = 8 + cv.noise(3, x, 0) * 5 + (float) Math.abs(Math.sin(x * 0.55 + cv.noise(4, x, 3) * 3)) * 3;
+            for (int y = 0; y < T; y++) {
+                int i = y * T + x;
+                if (y < depth) {
+                    float k = (y < 2 ? 0.4f : 0.08f) - y / depth * 0.45f + (cv.noise(5, x, y) - 0.5f) * 0.3f;
+                    float[] o = shade(gr, k);
+                    cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+                } else if (y < depth + 3) cv.light(i, -0.5f * (1 - (y - depth) / 3));
+            }
+        }
+        for (int k = 0; k < 30; k++) { float x = cv.rf() * T, y = 2 + cv.rf() * 7; cv.stroke(x, y, x + cv.rs(), y - 2 - cv.rf() * 2, 0.5f, 0.25f, rgb(crown), 0.8f); }
+    }
+
     static void grass(Canvas cv) {
         // (0.3.2, gamefixes: textures 1/10, at least 7/10 wanted) painted turf: a calm mid green with broad, soft areas of
         // warmer sunlit and cooler shaded green (large enough not to read as a pattern when the block repeats), over it an

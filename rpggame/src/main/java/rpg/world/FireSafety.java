@@ -27,7 +27,7 @@ public final class FireSafety {
         for(int turn=0;turn<8;turn++) {
             double angle=away+turn*Math.PI/4;
             float x=actor.x+(float)Math.cos(angle)*4,z=actor.z+(float)Math.sin(angle)*4;
-            if(g.vox.solid((int)Math.floor(x),DevMap.FLOOR,(int)Math.floor(z)) || !g.vox.solid((int)Math.floor(x),DevMap.FLOOR-1,(int)Math.floor(z))
+            if(g.vox.solid((int)Math.floor(x),rpg.world.Ground.cell((int)Math.floor(x), (int)Math.floor(z)),(int)Math.floor(z)) || !g.vox.solid((int)Math.floor(x),rpg.world.Ground.cell((int)Math.floor(x), (int)Math.floor(z))-1,(int)Math.floor(z))
                     || !g.vox.clear(actor.x,actor.y+0.7f,actor.z,x,actor.y+0.7f,z))continue;
             float score=(float)Math.hypot(x-fire.x,z-fire.z);
             if(score>best){best=score;spot=new float[]{x,z};}

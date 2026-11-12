@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * as a fresh murder scene, and nobody goes back to collect it again.
  */
 class GraveyardDeliveryTest {
-    @Test void aDeliveredBodyIsNotInvestigatedAgain() {
+    @org.junit.jupiter.api.Tag("slow") @Test void aDeliveredBodyIsNotInvestigatedAgain() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));

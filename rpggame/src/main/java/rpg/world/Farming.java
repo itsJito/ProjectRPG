@@ -57,7 +57,7 @@ public final class Farming {
     }
 
     /** A garden: its fence (x0..x1, z0..z1, the fence on the edge), its rows of plots, its gate, whose it is, its common row. */
-    public record Field(String name, String jurisdiction, long owner, int x0, int z0, int x1, int z1, int[] rows, int commonRow, int[][] gate, Crop[][] rowCrops) {
+    public record Field(String name, String jurisdiction, long owner, int x0, int z0, int x1, int z1, int[] rows, int commonRow, int[][] gate, Crop[][] rowCrops, int y) {
         /** The crop a plot of a row is meant to carry: the row's crops in turn along it, a bed of each. */
         public Crop cropAt(int row, int x) { Crop[] bed = rowCrops[row]; return bed[Math.floorMod((x - x0 - 1) / BED_PLOTS, bed.length)]; }
     }
@@ -69,15 +69,21 @@ public final class Farming {
     public record Orchard(String name, long owner, int[][] trees) {}
 
     /** DevCity's kitchen garden in the farm paddock (Tobin's), and its orchard to the east (Hedda's); DevPalace's by the east wall (Rufus's, Valeria's trees). */
-    public static final Field[] FIELDS = {
+    /**
+     * The fields of the map in play: the devmap's ({@link #DEVMAP_FIELDS}), or (0.4.1) ShadowVeil's - its farms' gardens,
+     * each a structure the architecture raised and the grower the data gives it (rpg.world.shadowveil.ShadowVeil.farms).
+     */
+    public static Field[] FIELDS;
+    public static final Field[] DEVMAP_FIELDS = {
             new Field("DevCity kitchen garden", DevMap.ALPHA, Ids.CROP_FARMER_CITY, 88, 104, 99, 112, new int[]{106, 108, 110}, 110, new int[][]{{99, 107}, {99, 108}},
-                    new Crop[][]{{Crop.BARLEY}, {Crop.CABBAGE, Crop.POTATO, Crop.ONION}, {Crop.CARROT, Crop.TOMATO, Crop.SWEETCORN}}),
+                    new Crop[][]{{Crop.BARLEY}, {Crop.CABBAGE, Crop.POTATO, Crop.ONION}, {Crop.CARROT, Crop.TOMATO, Crop.SWEETCORN}}, DevMap.FLOOR),
             new Field("DevPalace garden", DevMap.PALACE, Ids.CROP_FARMER_PALACE, 176, 55, 186, 63, new int[]{57, 59, 61}, 61, new int[][]{{176, 58}, {176, 59}},
-                    new Crop[][]{{Crop.HOPS}, {Crop.CARROT, Crop.ONION, Crop.POTATO}, {Crop.CABBAGE, Crop.SWEETCORN, Crop.TOMATO}}),
+                    new Crop[][]{{Crop.HOPS}, {Crop.CARROT, Crop.ONION, Crop.POTATO}, {Crop.CABBAGE, Crop.SWEETCORN, Crop.TOMATO}}, DevMap.FLOOR),
             // (0.3.5) the outworkers' cotton field on the dunes by their cottage (its plots made after every older fixture)
             new Field("the cotton field", DevMap.WILDS, rpg.Ids.CARDER, 66, 188, 76, 195, new int[]{190, 192, 194}, -1, new int[][]{{71, 188}},
-                    new Crop[][]{{Crop.COTTON}, {Crop.COTTON}, {Crop.COTTON}})
+                    new Crop[][]{{Crop.COTTON}, {Crop.COTTON}, {Crop.COTTON}}, DevMap.FLOOR)
     };
+    static { FIELDS = DEVMAP_FIELDS; }
     /** How many of the fields were made with the old fixtures (their plots' ids come first); the rest come with Guild Row. */
     public static final int EARLY_FIELDS = 2;
     /** (0.3.8) The orchards made after every older fixture (so their ids hold): the DevMansion's. */
@@ -113,7 +119,7 @@ public final class Farming {
         public float growth, ripeFor;
         public long sower;
         Plot(long id, int field, int bx, int bz, boolean common, long owner) {
-            super(id, "crop_plot", "Tilled plot", bx + 0.5f, DevMap.FLOOR + 0.15f, bz + 0.5f);
+            super(id, "crop_plot", "Tilled plot", bx + 0.5f, FIELDS[field].y() + 0.15f, bz + 0.5f);
             this.field = field; this.bx = bx; this.bz = bz; this.common = common; this.owner = common ? 0 : owner;
         }
         public boolean ripe() { return crop != null && growth >= 1 && ripeFor < BOLT_MINUTES; }
@@ -244,13 +250,20 @@ public final class Farming {
     public final List<Plot> plots = new ArrayList<>();
     public final List<AppleTree> trees = new ArrayList<>();
     /** Per field, a version the renderer rebuilds its mesh on; and the trees' (their apples). */
-    public final int[] versions = new int[FIELDS.length];
+    public final int[] versions;
     public int treeVersion;
     /** Tallies for the reports and tests: plots sown, harvested, apples picked. */
     public int sownCount, harvestCount, pickedCount;
     private double lastMinutes = -1;
 
-    public Farming(Rpg g) { this.g = g; }
+    public Farming(Rpg g) {
+        this.g = g;
+        // (0.4.1) the fields of the map in play
+        FIELDS = WorldMap.shadowveil() ? rpg.world.shadowveil.ShadowVeil.farms() : DEVMAP_FIELDS;
+        versions = new int[FIELDS.length];
+    }
+    /** (0.4.1) ShadowVeil's gardens' plots, with fixed ids from a base (its farms have no orchards of apple trees yet). */
+    public long buildShadowveil(long nextId) { return plots(nextId, 0, FIELDS.length); }
     private static Orchard[] concat(Orchard[] a, Orchard[] b) { Orchard[] r = java.util.Arrays.copyOf(a, a.length + b.length); System.arraycopy(b, 0, r, a.length, b.length); return r; }
 
     /** The plots and the trees, made once with fixed ids from a base (after every older fixture). */
@@ -335,7 +348,7 @@ public final class Farming {
     /** The blocks: tilled soil in the plots' cells, paths between the rows, the fence round each garden (its gate left open), the apple trees. */
     public static void build(astratto.bridge.CommandBuffer b) {
         int f = DevMap.FLOOR;
-        for (Field field : FIELDS) {
+        for (Field field : DEVMAP_FIELDS) {
             for (int x = field.x0(); x <= field.x1(); x++) for (int z = field.z0(); z <= field.z1(); z++) {
                 for (int y = f; y < f + 3; y++) b.blockSet(x, y, z, Blocks.AIR);
                 boolean edge = x == field.x0() || x == field.x1() || z == field.z0() || z == field.z1();

@@ -200,7 +200,7 @@ public final class Waypoints {
         int steps = Math.max(1, (int) Math.ceil(d / 0.5f));
         for (int i = 0; i <= steps; i++) {
             int x = (int) Math.floor(ax + (bx - ax) * i / steps), z = (int) Math.floor(az + (bz - az) * i / steps);
-            if (blocked(vox, x, DevMap.FLOOR, z) || blocked(vox, x, DevMap.FLOOR + 1, z) || !vox.solid(x, DevMap.FLOOR - 1, z)) return false;
+            if (blocked(vox, x, rpg.world.Ground.cell(x, z), z) || blocked(vox, x, rpg.world.Ground.cell(x, z) + 1, z) || !vox.solid(x, rpg.world.Ground.cell(x, z) - 1, z)) return false;
         }
         return true;
     }

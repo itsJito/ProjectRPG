@@ -46,6 +46,8 @@ public final class Rpg implements GameModule {
     public final Game game;
     public final boolean scripted;
     public Voxels vox;
+    /** (0.4.0) The map this session is played on (rpg.world.WorldMap): ShadowVeil, or the legacy devmap. */
+    public rpg.world.WorldMap map = rpg.world.WorldMap.active();
     public Player player;
     public PlayerController controller;
     public final Roster npcs = new Roster();
@@ -132,6 +134,8 @@ public final class Rpg implements GameModule {
     public Snapshots.Bodies lastBodies = new Snapshots.Bodies();
     /** The rigid bodies and joints (Impulsis) as the last frame left them: doors, shards, things dropped. */
     public Snapshots.Rigids lastRigids = new Snapshots.Rigids();
+    /** (0.4.0) The agents as the last frame left them (their route searches' cost: the stress test's report). */
+    public Snapshots.Agents lastAgents = new Snapshots.Agents();
     /** Set when a block edit should refresh the minimap. */
     public boolean mapDirty = true;
     private final boolean audioOnRequest;
@@ -152,7 +156,9 @@ public final class Rpg implements GameModule {
     @Override public void init(GameContext ctx) {
         vox = new Voxels(ctx.view());
         fluids = new rpg.world.Fluids(vox);
-        DevMap.currents(fluids);
+        // (0.4.0) the map in play: the devmap (legacy, for regression testing) or ShadowVeil (rpg.world.WorldMap)
+        map = rpg.world.WorldMap.active();
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) DevMap.currents(fluids); else rpg.world.shadowveil.ShadowVeil.currents(fluids);
         fx = new Fx();
         fx.ground = (x, y, z) -> vox.groundY(x, y, z);
         sfx = Sfx.shared(game);
@@ -179,7 +185,7 @@ public final class Rpg implements GameModule {
         law = new Law(this);
         undertaker = new rpg.law.Undertaker(this);
         graveyards = new rpg.law.Graveyards(this);
-        graveyards.plots.add(new rpg.law.Graveyards.Plot("DevCity graveyard", DevMap.ALPHA, 113, DevMap.FLOOR, 89, 8, 4));
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) graveyards.plots.add(new rpg.law.Graveyards.Plot("DevCity graveyard", DevMap.ALPHA, 113, rpg.world.Ground.at(113, 89), 89, 8, 4));
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
         bank = new rpg.econ.Bank(this);
@@ -196,8 +202,10 @@ public final class Rpg implements GameModule {
         farming = new rpg.world.Farming(this);
         inns = new rpg.econ.Inns(this);
         waterContacts = new rpg.world.WaterContacts(this);
-        timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
-        timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,DevMap.FLOOR+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) {
+            timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
+            timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,rpg.world.Ground.at(60, 88)+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
+        } else { rpg.world.shadowveil.ShadowVeil.atmosphere(timeSystem); rpg.world.shadowveil.ShadowVeil.mists(timeSystem); }
         timeSystem.weather.listener = new astratto.weather.Weather.Listener() {
             @Override public void thunder(float distance,float gain) { if(sfx!=null && sfx.has("thunder"))sfx.ui("thunder",gain*0.7f); }
             @Override public void strike(float x,float y,float z) {
@@ -210,28 +218,35 @@ public final class Rpg implements GameModule {
         invariants = new Invariants(this);
         controller = new PlayerController(this);
         // the player
-        player.x = DevMap.SPAWN_X; player.z = DevMap.SPAWN_Z; player.y = DevMap.FLOOR;
+        player.x = map.spawnX; player.z = map.spawnZ; player.y = rpg.world.WorldMap.standY(player.x, player.z);
         player.body = ctx.reserve(AstrattoNative.KIND_MOVER);
         ctx.commands().moverCreate(player.body, player.x, player.y + 0.05f, player.z, player.radius, player.height, 0.6f, 0, player.height * rpg.actor.Body.CROUCH_HEIGHT);
         player.restore();
         starterKit();
-        controller.snapTo((float) Math.PI);
-        // fixtures, agents, shops, dummies
-        objects.buildFixtures();
-        // (0.3.2) the gardens' plots and trees, the inns' fixtures: after every older fixture, so their ids hold
-        objects.reserveAfter(id -> inns.init(farming.build(id)));
-        // (0.3.5) the fish, and the sea's fishing spots (after every older fixture, so their ids hold)
+        controller.snapTo(map.spawnYaw);
         fishery = new rpg.fishing.Fishery(this);
-        objects.reserveAfter(this::seaSpots);
-        // (0.3.5) Guild Row's fixtures, then the cotton field's plots
         guilds = new rpg.econ.Guilds(this);
-        objects.reserveAfter(id -> farming.buildLate(guilds.init(id)));
-        // (0.3.8) the DevMansion's furnishings, doors, range and stores, and its orchard (after every older fixture)
-        farming.buildLateOrchards(objects.mansion(Ids.ESTATE));
-        // (0.3.9) every other room dressed for its use (numbered in the estates' band, after the DevMansion's)
-        rpg.world.Interiors.furnish(this, rpg.world.Interiors.INTERIORS);
-        // (0.3.9, optimisation) the routing graph built up front for play (tests and review runs build it as they go)
-        if (!scripted) vox.navigation.warm();
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) {
+            // fixtures, agents, shops, dummies
+            objects.buildFixtures();
+            // (0.3.2) the gardens' plots and trees, the inns' fixtures: after every older fixture, so their ids hold
+            objects.reserveAfter(id -> inns.init(farming.build(id)));
+            // (0.3.5) the sea's fishing spots (after every older fixture, so their ids hold)
+            objects.reserveAfter(this::seaSpots);
+            // (0.3.5) Guild Row's fixtures, then the cotton field's plots
+            objects.reserveAfter(id -> farming.buildLate(guilds.init(id)));
+            // (0.3.8) the DevMansion's furnishings, doors, range and stores, and its orchard (after every older fixture)
+            farming.buildLateOrchards(objects.mansion(Ids.ESTATE));
+            // (0.3.9) every other room dressed for its use (numbered in the estates' band, after the DevMansion's)
+            rpg.world.Interiors.furnish(this, rpg.world.Interiors.INTERIORS);
+            // (0.3.9, optimisation) the routing graph built up front for play (tests and review runs build it as they go)
+            if (!scripted) vox.navigation.warm();
+        } else {
+            // (0.4.0) ShadowVeil: terrain only in this version - its woods, outcrops and fishing waters are the fixtures
+            objects.buildShadowveil(rpg.world.shadowveil.ShadowVeil.terrain());
+            // (0.4.1) the farms' gardens' plots (the growers' work), in their own id band
+            farming.buildShadowveil(Ids.SV_PLOTS);
+        }
         for (rpg.objects.Node n : objects.nodes) if (n.kind == rpg.objects.Node.Kind.FISH) n.fishery = fishery;
         ai.init();
         animals = new rpg.animal.Animals(this);
@@ -239,7 +254,7 @@ public final class Rpg implements GameModule {
         monsters = new rpg.monster.Monsters(this);
         monsters.init();
         dungeons = new rpg.dungeon.Dungeons(this);
-        dungeons.init();
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) dungeons.init();     // (0.4.0) ShadowVeil's dungeons come with its buildings
         shrines = new rpg.world.Shrines(this);
         shrines.init();
         for (rpg.objects.Furniture f : objects.furniture) if (f.kind == rpg.objects.Furniture.Kind.BED && f.owner != 0 && f.owner != player.id) f.name = nameOf(f.owner) + "'s bed";
@@ -247,7 +262,7 @@ public final class Rpg implements GameModule {
         inns.shops(econ);
         guilds.shops(econ);
         for (var inn : inns.all) for (var bed : inn.guestBeds) bed.name = "Guest bed";
-        for (int i = 0; i < DevMap.DUMMIES.length; i++) {
+        for (int i = 0; i < (map.kind == rpg.world.WorldMap.Kind.DEVMAP ? DevMap.DUMMIES.length : 0); i++) {
             Actor d = new Actor(Ids.DUMMY_0 + i, "Target dummy", 0);
             d.dummy = true; d.team = 0;
             d.x = DevMap.DUMMIES[i][0] + 0.5f; d.z = DevMap.DUMMIES[i][1] + 0.5f; d.y = DevMap.FLOOR; d.yaw = (float) Math.PI;
@@ -260,8 +275,9 @@ public final class Rpg implements GameModule {
         repairs.clear(); // Fixture placement is construction, not damage.
         worldReady=true;
         invariants.baseline();
-        state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on the devmap");
-        chat.add("Welcome to the SHADOWVEIL devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
+        state.commit("SessionStarted", player.id, 0, null, 0, player.name + " on " + map.title);
+        chat.add(map.kind == rpg.world.WorldMap.Kind.DEVMAP ? "Welcome to the SHADOWVEIL devmap. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings."
+                : "Welcome to SHADOWVEIL. Tab frees the mouse for menus. F5 saves; F6 loads. Adjust your controls in Settings.", Chat.Kind.GAME);
     }
 
     /**
@@ -330,7 +346,7 @@ public final class Rpg implements GameModule {
 
     // ------------------------------------------------------------------ the tick
     /** RPG_PROF set: each system's share of the update, summed (nanoseconds) - see {@link #profile()}. */
-    public static final boolean PROF = System.getenv("RPG_PROF") != null;
+    public static final boolean PROF = System.getenv("RPG_PROF") != null || Boolean.getBoolean("rpg.prof");
     public static final String[] PROF_NAMES = {"time+death", "law.update", "controller.update", "interact.update", "combat.update", "gore.update", "prayers.update", "magic.update", "ai", "carrying.update", "chemistry.update", "traps.update", "dungeons.update", "foliage.update", "objects.update", "undertaker.update", "spareWatch", "glass.update", "econ.update", "prog.update", "fx.update", "animals", "monsters", "engine.frame (native)", "afterFrame"};
     public final long[] prof = new long[PROF_NAMES.length];
     private long profAt;
@@ -431,7 +447,8 @@ public final class Rpg implements GameModule {
             player.x = m.x; player.y = m.y; player.z = m.z; player.vx = m.vx; player.vz = m.vz; player.grounded = m.grounded; player.crouched = m.crouched; player.onLadder=rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y),(int)Math.floor(m.z))) || rpg.world.Blocks.ladder(vox.block((int)Math.floor(m.x),(int)Math.floor(m.y)-1,(int)Math.floor(m.z))); player.climbVelocity=m.vy;
             movementPractice.moved(traveled);
         }
-        ai.afterFrame(lastBodies, ctx.agents());
+        lastAgents = ctx.agents();
+        ai.afterFrame(lastBodies, lastAgents);
         falling.afterFrame(lastBodies, (float) lastDt);
         reactions.afterFrame(lastBodies);
         animals.afterFrame(lastBodies, ctx.agents());
@@ -687,7 +704,7 @@ public final class Rpg implements GameModule {
         // the wanted pay for it first: the law takes its share before the rest goes to the grave
         law.forfeitOnDeath(player);
         if (player.inv.isEmpty() && player.eq.stacks().isEmpty()) return null;
-        Container grave = objects.add(new Container(state.newEntityId(), secured ? "death_claim" : "grave", player.name + "'s belongings", secured ? "claim" : "grave", secured ? DevMap.CUSTODY_CHEST[0] : x, DevMap.FLOOR + 0.3f, secured ? DevMap.CUSTODY_CHEST[1] : z, 320, player.id));
+        Container grave = objects.add(new Container(state.newEntityId(), secured ? "death_claim" : "grave", player.name + "'s belongings", secured ? "claim" : "grave", secured ? DevMap.CUSTODY_CHEST[0] : x, rpg.world.Ground.at(secured ? DevMap.CUSTODY_CHEST[0] : x, secured ? DevMap.CUSTODY_CHEST[1] : z) + 0.3f, secured ? DevMap.CUSTODY_CHEST[1] : z, 320, player.id));
         grave.ownerOnly = secured;
         grave.secured = secured;
         grave.killer = killer;
@@ -699,13 +716,13 @@ public final class Rpg implements GameModule {
             ItemStack s = player.inv.get(i);
             if (s == null) continue;
             player.inv.set(i, null);
-            if (!grave.contents.add(s)) objects.drop(s, x + 0.5f, DevMap.FLOOR + 0.05f, z + 0.3f);
+            if (!grave.contents.add(s)) objects.drop(s, x + 0.5f, rpg.world.Ground.at(x + 0.5f, z + 0.3f) + 0.05f, z + 0.3f);
         }
         for (rpg.item.ItemDef.Slot slot : rpg.item.ItemDef.Slot.values()) {
             ItemStack s = player.eq.get(slot);
             if (s == null) continue;
             player.eq.set(slot, null);
-            if (!grave.contents.add(s)) objects.drop(s, x - 0.5f, DevMap.FLOOR + 0.05f, z + 0.3f);
+            if (!grave.contents.add(s)) objects.drop(s, x - 0.5f, rpg.world.Ground.at(x - 0.5f, z + 0.3f) + 0.05f, z + 0.3f);
         }
         state.commit("GraveCreated", player.id, grave.id, DevMap.jurisdiction(x, z), 0, (secured ? "secured; " : "exposed; ") + grave.contents.stacks());
         if (secured) undertaker.secureClaim(grave);
@@ -738,7 +755,7 @@ public final class Rpg implements GameModule {
         if (gore != null) gore.healed(player);
         // (0.3.7) by the Shrine of Light the player last rested at, else the town's graveyard
         float[] wake = shrines.wakeSpot();
-        teleport(player, wake[0], DevMap.FLOOR, wake[1]);
+        teleport(player, wake[0], rpg.world.Ground.at(wake[0], wake[1]), wake[1]);
         controller.snapTo(0);
         law.playerRespawned();
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");
@@ -762,7 +779,7 @@ public final class Rpg implements GameModule {
         var s = econ.active();
         if (s != null && s.status == Economy.Status.IN_TRANSIT && minutes >= 20) {
             Npc carter = (Npc) actor(Ids.CARTER);
-            if (carter != null && carter.alive) { teleport(carter, DevMap.CARAVAN_B[0], DevMap.FLOOR, DevMap.CARAVAN_B[1]); econ.deliver(s); }
+            if (carter != null && carter.alive) { teleport(carter, DevMap.CARAVAN_B[0], rpg.world.Ground.at(DevMap.CARAVAN_B[0], DevMap.CARAVAN_B[1]), DevMap.CARAVAN_B[1]); econ.deliver(s); }
         }
     }
 }

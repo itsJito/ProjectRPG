@@ -174,7 +174,8 @@ enum {
     ASTRATTO_BLOCK_DOOR = 1u << 7,       /* a door leaf: passable to those who open doors unless it is sealed */
     ASTRATTO_BLOCK_SKY_DIM = 1u << 8,    /* daylight coming down through it loses two of its fifteen levels (water, leaves) */
     ASTRATTO_BLOCK_LIGHT_PASS = 1u << 9, /* (only compared) a change to or from it relights the cells round it */
-    ASTRATTO_BLOCK_NO_COLLIDE_AI = 1u << 10 /* bodies driven by agents pass it (laundry on a line) */
+    ASTRATTO_BLOCK_NO_COLLIDE_AI = 1u << 10, /* bodies driven by agents pass it (laundry on a line) */
+    ASTRATTO_BLOCK_GROUND = 1u << 11     /* natural ground: a rise of one cell onto it is walked up, not jumped (0.4.0) */
 };
 enum { ASTRATTO_MATERIAL_OTHER = 0, ASTRATTO_MATERIAL_GLASS = 1, ASTRATTO_MATERIAL_FOLIAGE = 2 };
 

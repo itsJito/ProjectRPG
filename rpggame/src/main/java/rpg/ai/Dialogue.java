@@ -222,7 +222,7 @@ public final class Dialogue {
         java.util.List<Object[]> l = new java.util.ArrayList<>();
         if (g.econ.shopA != null) l.add(new Object[]{"the store", g.econ.shopA.counterX, g.econ.shopA.counterZ});
         if (g.econ.shopB != null) l.add(new Object[]{"the store", g.econ.shopB.counterX, g.econ.shopB.counterZ});
-        l.add(new Object[]{"the bank", rpg.world.DevMap.BANK_TELLER[0], rpg.world.DevMap.BANK_TELLER[1]});
+        l.add(new Object[]{"the bank", g.bank.tellerSpot()[0], g.bank.tellerSpot()[1]});
         l.add(new Object[]{"an altar", rpg.world.DevMap.ALTAR[0] + 0.5f, rpg.world.DevMap.ALTAR[1] + 0.5f});
         l.add(new Object[]{"an altar", rpg.world.Expanse.ALTAR[0], rpg.world.Expanse.ALTAR[1]});
         l.add(new Object[]{"the well", rpg.world.DevMap.WELL[0] + 0.5f, rpg.world.DevMap.WELL[1] + 0.5f});

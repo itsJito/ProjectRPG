@@ -18,7 +18,7 @@ import rpg.world.DevMap;
  * may not spend more than a fifth of her working hours with no work she can do.
  */
 class BlacksmithDayTest {
-    @Test void theBlacksmithKeepsWorkingThroughTheDay() {
+    @org.junit.jupiter.api.Tag("slow") @Test void theBlacksmithKeepsWorkingThroughTheDay() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));

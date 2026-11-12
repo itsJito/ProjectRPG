@@ -15,7 +15,8 @@ namespace {
 
 const int DIRS[8][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
-inline int key(int x, int y, int z) { return x | z << 10 | y << 20; }
+// (0.4.0) eleven bits for x, eleven for z (worlds to 2048 a side), the rest for y (to 511)
+inline int key(int x, int y, int z) { return x | z << 11 | y << 22; }
 inline int floorInt(float v) { return static_cast<int>(std::floor(v)); }
 /** Half up, as the game rounds a height to the cell a body stands in. */
 inline int roundInt(float v) { return static_cast<int>(std::floor(static_cast<double>(v) + 0.5)); }
@@ -61,7 +62,9 @@ bool Pathfinder::pass(const VoxelWorld& w, int x, int y, int z, bool doors) {
 
 bool Pathfinder::stand(const VoxelWorld& w, int x, int y, int z, bool doors) {
     if (y < 1 || y >= w.sizeY() - 2 || x < 1 || z < 1 || x >= w.sizeX() - 1 || z >= w.sizeZ() - 1) return false;
-    if (!w.solid(x, y - 1, z) || (w.def(x, y - 1, z).flags & ASTRATTO_BLOCK_HAZARD) != 0) return false;
+    // (0.4.0, gamefixes: people jumped up onto the tables) what is seen through - furniture, a fence, a hedge, the leaves
+    // of a tree (ASTRATTO_BLOCK_CUTOUT) - holds a body up but is no floor to walk: no route crosses its top
+    if (!w.solid(x, y - 1, z) || (w.def(x, y - 1, z).flags & (ASTRATTO_BLOCK_HAZARD | ASTRATTO_BLOCK_CUTOUT)) != 0) return false;
     return pass(w, x, y, z, doors) && pass(w, x, y + 1, z, doors);
 }
 
@@ -172,7 +175,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
         if (closed_[n]) continue;
         closed_[n] = 1;
         done++;
-        const int k = nk_[n], x = k & 1023, z = (k >> 10) & 1023, y = k >> 20;
+        const int k = nk_[n], x = k & 2047, z = (k >> 11) & 2047, y = k >> 22;
         const float hh = heuristic(x, z, gx, gz) + (goalY < 0 ? 0.0f : static_cast<float>(std::abs(y - goalY)) * 2.0f);
         if (hh < bestH) { bestH = hh; best = n; }
         if (x == gx && z == gz && (goalY < 0 || std::abs(y - goalY) <= 1)) { best = n; break; }
@@ -203,7 +206,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
             // a step up is nearly free on a stair and a deliberate jump anywhere else: routes prefer stairs to ledges
             float extra;
             if (pullUp) extra = tune.mantleCost * static_cast<float>(ny - y);
-            else if (ny > y) extra = (w.def(nx, ny - 1, nz).flags & ASTRATTO_BLOCK_STEP) ? 0.6f : tune.jumpCost;
+            else if (ny > y) { const uint32_t under = w.def(nx, ny - 1, nz).flags; extra = (under & ASTRATTO_BLOCK_STEP) ? 0.6f : (under & ASTRATTO_BLOCK_GROUND) && ny - y == 1 ? 0.45f : tune.jumpCost; }
             else if (ny < y) extra = 0.3f * static_cast<float>(y - ny);
             else extra = 0.0f;
             float cost = (d >= 4 ? 1.414f : 1.0f) + extra;
@@ -219,7 +222,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
     }
     expansions = static_cast<uint32_t>(done);
     const int bestKey=nk_[best];
-    partial_=((bestKey & 1023)!=gx || ((bestKey>>10)&1023)!=gz || (goalY>=0 && std::abs((bestKey>>20)-goalY)>1));
+    partial_=((bestKey & 2047)!=gx || ((bestKey>>11)&2047)!=gz || (goalY>=0 && std::abs((bestKey>>22)-goalY)>1));
     capped_=partial_ && (done>=q.maxExpand || count_>=CAP);
     if (best == s) return false;
     int len = 0;
@@ -229,7 +232,7 @@ bool Pathfinder::path(const VoxelWorld& w, const NavTuning& tune, const PathQuer
     for (int n = best; n != s; n = parent_[n]) {
         i--;
         const int k = nk_[n];
-        out[i * 3] = k & 1023; out[i * 3 + 1] = k >> 20; out[i * 3 + 2] = (k >> 10) & 1023;
+        out[i * 3] = k & 2047; out[i * 3 + 1] = k >> 22; out[i * 3 + 2] = (k >> 11) & 2047;
     }
     return true;
 }

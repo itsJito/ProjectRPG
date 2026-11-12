@@ -11,18 +11,20 @@ float leafCardAlphaProc(vec2 st) {
     vec2 uv = fract(st);
     float a = 0.0;
     leafShade = 0.5;
-    int n = 8 + int(leafHash(seed + 0.7) * 4.0);
-    for (int i = 0; i < 11; i++) {
+    // 2.11: fourteen to nineteen smaller leaves on three twigs, filling the card (a crown reads as foliage, not as a few
+    // big leaves with sky between them)
+    int n = 14 + int(leafHash(seed + 0.7) * 6.0);
+    for (int i = 0; i < 19; i++) {
         if (i >= n) break;
         float fi = float(i);
         float r1 = leafHash(seed * 7.13 + fi * 1.91), r2 = leafHash(seed * 3.71 + fi * 5.37), r3 = leafHash(seed * 1.37 + fi * 9.13);
         // two twigs on the card, the leaves fanned out from each: angle across the fan, a little reach, a little size
-        float twig = mod(fi, 2.0);
-        float k0 = floor(fi * 0.5) / max(1.0, floor(float(n) * 0.5));
-        float ang = mix(-1.35, 1.35, k0 + 0.1) * (twig > 0.5 ? -1.0 : 1.0) + (r1 - 0.5) * 0.5;
-        vec2 base = vec2(twig > 0.5 ? 0.62 : 0.38, 0.22 + r3 * 0.30) + vec2((r2 - 0.5) * 0.12, 0.0);
+        float twig = mod(fi, 3.0);
+        float k0 = floor(fi / 3.0) / max(1.0, floor(float(n) / 3.0));
+        float ang = mix(-1.45, 1.45, k0 + 0.05) * (twig > 1.5 ? -1.0 : 1.0) + (r1 - 0.5) * 0.7;
+        vec2 base = vec2(0.24 + twig * 0.26, 0.18 + r3 * 0.5) + vec2((r2 - 0.5) * 0.16, 0.0);
         vec2 dirL = vec2(sin(ang), cos(ang));
-        float len = 0.20 + r1 * 0.11, wid = len * (0.34 + r2 * 0.12);
+        float len = 0.13 + r1 * 0.08, wid = len * (0.40 + r2 * 0.12);
         vec2 d = uv - (base + dirL * len * 0.55);
         float along = dot(d, dirL) / (len * 0.5), across = dot(d, vec2(-dirL.y, dirL.x)) / wid;
         // a pointed oval: wide in the middle, narrowing to a tip at both ends

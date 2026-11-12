@@ -142,8 +142,8 @@ final class CombatTactics {
         return false;
     }
     private boolean standable(float x, float z) {
-        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), y = DevMap.FLOOR;
-        return bx > 0 && bz > 0 && bx < DevMap.SX - 1 && bz < DevMap.SZ - 1 && g.vox.solid(bx, y - 1, bz)
+        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), y = rpg.world.Ground.cell(x, z);
+        return bx > 0 && bz > 0 && bx < rpg.world.WorldMap.active().overworldX() - 1 && bz < rpg.world.WorldMap.active().sizeZ - 1 && g.vox.solid(bx, y - 1, bz)
                 && !g.vox.solid(bx, y, bz) && !g.vox.solid(bx, y + 1, bz);
     }
     private static boolean ranged(Actor a) { return a.main() != null && (a.main().family == ItemDef.Family.BOW || a.main().family == ItemDef.Family.CROSSBOW); }

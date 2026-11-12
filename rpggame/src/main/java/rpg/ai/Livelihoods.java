@@ -151,9 +151,21 @@ final class Livelihoods {
     }
 
     // ------------------------------------------------------------------ the inn
+    /**
+     * (0.4.1, gamefixes: NPCs stood idle) an inn's people where their world has no inn of the inns system's own yet
+     * (ShadowVeil's inns are built; their rooms and fittings come with the interiors): they keep the house - at the inn
+     * by day and into the evening, its door their post - rather than standing nowhere with nothing to do.
+     */
+    private void keepHouse(Npc n) {
+        double h = g.state.hourOfDay();
+        boolean open = h >= 7 && h < 23;
+        if (brain.goTo(n, n.postX, n.postZ, false, 1.2f)) g.ai.desire(n, AiSystem.A_IDLE);
+        n.lastOutcome = n.profession.title + ": " + (open ? "keeping the house" : "closing up for the night");
+    }
+
     private void innkeeper(Npc n) {
         Inns.Inn inn = g.inns.of(n);
-        if (inn == null) return;
+        if (inn == null) { keepHouse(n); return; }
         double h = g.state.hourOfDay();
         // the bread the bar sells is bought in from the town's market, when the shelf runs low
         Economy.Shop market = g.econ.localShop(n);
@@ -193,7 +205,7 @@ final class Livelihoods {
 
     private void bartender(Npc n) {
         Inns.Inn inn = g.inns.of(n);
-        if (inn == null) return;
+        if (inn == null) { keepHouse(n); return; }
         double h = g.state.hourOfDay();
         // the cask runs low: ale is bought in from the market in the quiet of the day
         Economy.Shop market = g.econ.localShop(n);
@@ -268,7 +280,7 @@ final class Livelihoods {
     private boolean fetchWater(Npc n, Inns.Inn inn) {
         if (!n.has(Items.GLASS_BOTTLE, 1)) for (int i = 0; i < 3; i++) take(inn, n, Items.GLASS_BOTTLE);
         if (!n.has(Items.GLASS_BOTTLE, 1)) return false;
-        float[] spot = waterFor.computeIfAbsent(inn, k -> { float[] h = inn.layout.hearthSpot(); float[] e = g.fluids.edge(h[0], h[1], rpg.world.DevMap.FLOOR, 48); return e == null ? new float[0] : e; });
+        float[] spot = waterFor.computeIfAbsent(inn, k -> { float[] h = inn.layout.hearthSpot(); float[] e = g.fluids.edge(h[0], h[1], rpg.world.Ground.cell(h[0], h[1]), 48); return e == null ? new float[0] : e; });
         if (spot.length == 0) { n.lastOutcome = "Cook: no water near enough to fill the bottles"; return false; }
         if (!brain.goTo(n, spot[0], spot[2], false, 1.2f)) { n.lastOutcome = "Cook: taking the bottles to the water"; return true; }
         int filled = 0;

@@ -199,7 +199,7 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                             const bool trans = (b.flags & ASTRATTO_RB_TRANSLUCENT) != 0;
                             const bool liq = (b.flags & ASTRATTO_RB_LIQUID) != 0, nliq = (nb.flags & ASTRATTO_RB_LIQUID) != 0;
                             if (trans) vis = !nOcc && nid != bid && !(liq && nliq) && !((nb.flags & ASTRATTO_RB_TRANSLUCENT) && !liq && !nliq);
-                            else if (b.flags & ASTRATTO_RB_CUTOUT) vis = !(cards_ && leaf(bid)) && !nOcc && nid != bid && !(leaf(bid) && leaf(nid));
+                            else if (b.flags & ASTRATTO_RB_CUTOUT) vis = !nOcc && nid != bid && !(leaf(bid) && leaf(nid));   // 2.11: a crown's own faces under its cards
                             else vis = !nOcc;
                             if (ny >= H_ && a == 1) vis = true;
                             if (vis) {
@@ -424,7 +424,8 @@ void ChunkMesher::leafCards(int x, int y, int z, const Block& b) {
     int open = 0;
     static const int N6[6][3] = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
     for (const auto& n : N6) { const int nid = id(x + n[0], y + n[1], z + n[2]); if (!leaf(nid) && !(def(nid).flags & ASTRATTO_RB_OCCLUDES)) open++; }
-    const int cards = open > 0 ? 3 : 1, ao = open > 0 ? 3 : 1;
+    // 2.11: four cards on the crown's surface, overhanging the cell (they round off its cube and fluff its outline)
+    const int cards = open > 0 ? 4 : 1, ao = open > 0 ? 3 : 1;
     const int l = lightAt(x, y, z);
     const int sky = (l >> 4) & 15, blk = l & 15;
     // the cell's own seed, from where it is in the world (the same cell always grows the same cluster)
@@ -436,7 +437,7 @@ void ChunkMesher::leafCards(int x, int y, int z, const Block& b) {
         // a little bigger than the cell so the clusters knit together
         const float yaw = next() * 6.2831853f + static_cast<float>(c) * 2.0944f, tip = (next() - 0.5f) * 1.4f;
         const float cx = x + 0.5f + (next() - 0.5f) * 0.3f, cy = y + 0.5f + (next() - 0.5f) * 0.3f, cz = z + 0.5f + (next() - 0.5f) * 0.3f;
-        const float w = 0.62f + next() * 0.14f, hh = 0.56f + next() * 0.12f;
+        const float w = (open > 0 ? 0.80f : 0.62f) + next() * 0.18f, hh = (open > 0 ? 0.74f : 0.56f) + next() * 0.14f;
         const float ux = std::cos(yaw), uz = std::sin(yaw);                      // the card's across
         const float vx = -uz * std::sin(tip), vy = std::cos(tip), vz = ux * std::sin(tip);   // and its up
         const float px[4] = {cx - ux * w - vx * hh, cx + ux * w - vx * hh, cx + ux * w + vx * hh, cx - ux * w + vx * hh};

@@ -80,7 +80,7 @@ public final class TitleScreen {
             if (on) ui.rect(x, y, 4, 74, Style.ACCENT);
             ui.text(p.name, x + 18, y + 10, 19, on ? Style.TEXT : Style.DIM);
             ui.text("Level " + p.combatLevel + "   Total level " + p.totalLevel, x + 18, y + 38, 12, Style.DIM);
-            ui.text(p.outdated() ? "Save from version " + rpg.SaveSystem.lineName(p.version) + " - begins anew in " + rpg.SaveSystem.lineName(version)
+            ui.text(p.outdated() ? "Save from version " + rpg.SaveSystem.lineName(p.version) + " - the character carries over to " + rpg.SaveSystem.lineName(version)
                     : p.hasSave() ? "Played " + Profiles.duration(p.playSeconds) + "   last " + ago(p.lastPlayed) : "New - not yet played", x + 18, y + 54, 11, p.outdated() ? Style.ACCENT : Style.FAINT);
             ui.text("Slot " + p.slot, x + MENU_W - 54, y + 10, 11, Style.FAINT);
             if (ui.clicked(x, y, MENU_W, 74)) { if (on && ui.doubleClick) { choice = Choice.CONTINUE; click("UI_select"); } else { selected = p; click("UIbutton1"); } }

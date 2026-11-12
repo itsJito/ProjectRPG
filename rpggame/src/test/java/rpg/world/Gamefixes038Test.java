@@ -118,7 +118,7 @@ class Gamefixes038Test {
         assertTrue(g.breakables.all.stream().anyMatch(b -> Mansion.inside(b.x, b.z) && b.contents.count(Items.CARROT) > 0), "a stocked pantry");
     }
 
-    @Test void theHouseholdWorks() {
+    @org.junit.jupiter.api.Tag("slow") @Test void theHouseholdWorks() {
         g.state.minutes = 9 * 60;
         for (Npc n : g.npcs) if (!(n.id >= Ids.BARON && n.id <= Ids.MANSION_ORCHARDIST)) g.ai.unload(n);
         for (Furniture f : g.objects.furniture) if (f.kind == Furniture.Kind.FIREPLACE) f.fuel = 0;

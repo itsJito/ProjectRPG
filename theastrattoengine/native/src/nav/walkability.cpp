@@ -16,7 +16,7 @@ inline int floorInt(float v) { return static_cast<int>(std::floor(v)); }
 /** Java's Math.round(float): the nearest integer, halves up. */
 inline int roundHalfUp(float v) { return static_cast<int>(std::floor(v + 0.5f)); }
 
-inline bool stairUp(const VoxelWorld& w, int x, int ny, int z) { return (w.def(x, ny - 1, z).flags & ASTRATTO_BLOCK_STEP) != 0; }
+inline bool stairUp(const VoxelWorld& w, int x, int ny, int z) { return (w.def(x, ny - 1, z).flags & (ASTRATTO_BLOCK_STEP | ASTRATTO_BLOCK_GROUND)) != 0; }
 
 /** One edge of a body's sweep: every cell under it can be stood in at about the height the body is at. */
 bool edge(const VoxelWorld& w, float sx, float sy, float sz, float tx, float tz, bool doors) {

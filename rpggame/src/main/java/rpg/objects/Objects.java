@@ -65,6 +65,35 @@ public final class Objects {
     private double sweptAt;
     public List<WorldObject> everything() { return list; }
     /**
+     * (0.4.0, optimisation: ShadowVeil) the things within r of (x, z), from sixteen-metre squares rebuilt when the world's
+     * list changes or half a second has passed (things that roll or are carried move between rebuilds by less than a
+     * square). Asked every frame for what the player is looking at: it was every object in the world.
+     */
+    public List<WorldObject> near(float x, float z, float r) {
+        if (gridAt != list.changes() || g.time - gridTime > 0.5) {
+            grid.clear();
+            for (WorldObject o : snapshot()) if (!o.removed) grid.computeIfAbsent(square(o.x, o.z), k -> new ArrayList<>()).add(o);
+            gridAt = list.changes(); gridTime = g.time;
+        }
+        List<WorldObject> out = new ArrayList<>();
+        int x0 = (int) Math.floor((x - r) / 16) - 1, x1 = (int) Math.floor((x + r) / 16) + 1, z0 = (int) Math.floor((z - r) / 16) - 1, z1 = (int) Math.floor((z + r) / 16) + 1;
+        for (int gx = x0; gx <= x1; gx++) for (int gz = z0; gz <= z1; gz++)
+            for (WorldObject o : grid.getOrDefault(((long) gx << 32) ^ (gz & 0xffffffffL) ^ ((long) gx * 0x9E3779B1L), List.of()))
+                if (!o.removed && Math.abs(o.x - x) <= r && Math.abs(o.z - z) <= r) out.add(o);
+        return out;
+    }
+    private static long square(float x, float z) { int gx = (int) Math.floor(x / 16), gz = (int) Math.floor(z / 16); return ((long) gx << 32) ^ (gz & 0xffffffffL) ^ ((long) gx * 0x9E3779B1L); }
+    private final java.util.Map<Long, List<WorldObject>> grid = new java.util.HashMap<>();
+    private int gridAt = -1;
+    private double gridTime;
+    /** (0.4.0) Takes things out of the world's list whole (a far chunk's growth let go; it is grown again on return). */
+    public void unlist(java.util.Collection<? extends WorldObject> gone) {
+        if (gone.isEmpty()) return;
+        java.util.Set<WorldObject> set = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        set.addAll(gone);
+        list.removeIf(set::contains);
+    }
+    /**
      * An object by id. (0.3.5, optimization) from an index kept beside the list - rebuilt whenever the list has changed
      * size, since things are taken out of it from outside - instead of a walk of every object in the world per call.
      */
@@ -85,6 +114,17 @@ public final class Objects {
     private long fid() { return nextFixture++; }
     /** (0.3.5) A gathering node made by another system (the sea's fishing spots), from its own reserved id. */
     public Node addNode(Node n) { nodes.add(add(n)); return n; }
+    /** (0.4.0) The nodes of one kind ("tree", "oak", "copper_rock"...), kept as the list of nodes grows. */
+    public List<Node> byDef(String def) {
+        if (indexedNodes != nodes.size()) {
+            nodesByDef.clear();
+            for (Node n : nodes) nodesByDef.computeIfAbsent(n.def, k -> new ArrayList<>()).add(n);
+            indexedNodes = nodes.size();
+        }
+        return nodesByDef.getOrDefault(def, List.of());
+    }
+    private final java.util.Map<String, List<Node>> nodesByDef = new java.util.HashMap<>();
+    private int indexedNodes = -1;
     /** (0.3.5) Every workstation in the world (furnaces, anvils, ranges, tables, looms...), kept as they are added. */
     public List<Station> stations() {
         if (stationList.size() != stationSeen || list.size() != listSeen) { stationList.clear(); for (WorldObject o : list) if (o instanceof Station s) stationList.add(s); stationSeen = stationList.size(); listSeen = list.size(); }
@@ -355,9 +395,20 @@ public final class Objects {
 
     /** The tree or rock a block belongs to (the trunk or crown, the ore), or null. */
     public Node nodeAt(int bx, int by, int bz) {
-        for (Node n : nodes) if ((n.kind == Node.Kind.TREE || n.kind == Node.Kind.ROCK) && Math.abs(n.bx - bx) <= 2 && Math.abs(n.bz - bz) <= 2 && n.contains(bx, by, bz)) return n;
+        // (0.4.0, optimisation) looked up in the eight-cell squares round the cell (ShadowVeil's thousands of trees)
+        if (gridded != nodes.size()) {
+            nodeGrid.clear();
+            for (Node n : nodes) if (n.kind == Node.Kind.TREE || n.kind == Node.Kind.ROCK) nodeGrid.computeIfAbsent(gridKey(n.bx >> 3, n.bz >> 3), k -> new ArrayList<>()).add(n);
+            gridded = nodes.size();
+        }
+        for (int gx = (bx >> 3) - 1; gx <= (bx >> 3) + 1; gx++) for (int gz = (bz >> 3) - 1; gz <= (bz >> 3) + 1; gz++)
+            for (Node n : nodeGrid.getOrDefault(gridKey(gx, gz), List.of()))
+                if (Math.abs(n.bx - bx) <= 4 && Math.abs(n.bz - bz) <= 4 && n.contains(bx, by, bz)) return n;
         return null;
     }
+    private static long gridKey(int gx, int gz) { return (long) gx * 0x9E3779B1L ^ gz; }
+    private final java.util.Map<Long, List<Node>> nodeGrid = new java.util.HashMap<>();
+    private int gridded = -1;
 
     /** The standing furniture whose cells hold a block, or null. */
     public Furniture furnitureAt(int bx, int by, int bz) {
@@ -371,6 +422,74 @@ public final class Objects {
     /** A rock of the mining ladder: what it holds, its level, worth and toughness all the mineral's own (rpg.item.Minerals). */
     private void rock(rpg.item.Minerals.Mineral m, int[] at) {
         node(Node.Kind.ROCK, m.rockId(), m.rockName(), Skill.MINING, m.level(), m.ore(), m.xp(), m.toughness(), m.stock(), g.cfg.rockRespawn, m.block(), at, 0, 0);
+    }
+
+    /**
+     * (0.4.0, gamefixes: ShadowVeil) The permanent world's gathering, from the ground as it grew (rpg.world.shadowveil):
+     * every living tree a woodcutting node of its kind (the Millwood oaks, the willows of Harlette and the Mere, the
+     * pines and cypress), every ore outcrop the design places a mining rock, and the fishing waters it names - the Mere
+     * and the brooks, Dimwater, the Gleam's estuary and the coasts. Numbered in their own band (Ids.WILD_NODES).
+     */
+    public void buildShadowveil(rpg.world.shadowveil.Terrain t) {
+        long saved = nextFixture;
+        nextFixture = Ids.WILD_NODES;
+        java.util.Map<String, Object> treeDefs = rpg.world.shadowveil.Atlas.get().map("trees");
+        for (int[] tr : t.trees) {
+            String sp = t.species.get(tr[3]);
+            String kind = rpg.world.shadowveil.Atlas.s(rpg.world.shadowveil.Atlas.map(treeDefs, sp), "node", "tree");
+            int log = Blocks.OAK_LOG;
+            try { log = Blocks.class.getField(rpg.world.shadowveil.Atlas.s(rpg.world.shadowveil.Atlas.map(treeDefs, sp), "log", "log").toUpperCase(java.util.Locale.ROOT)).getInt(null); }
+            catch (ReflectiveOperationException ignored) { }
+            int[] at = {tr[0], tr[1]};
+            switch (kind) {
+                case "oak" -> node(Node.Kind.TREE, "oak", "Oak tree", Skill.WOODCUTTING, 15, Items.OAK_LOGS, 37, 4f, 4, g.cfg.treeRespawn, log, at, Blocks.OAK_LEAVES, 5);
+                case "willow" -> node(Node.Kind.TREE, "willow", "Willow tree", Skill.WOODCUTTING, 30, Items.WILLOW_LOGS, 68, 4.4f, 5, g.cfg.treeRespawn, log, at, Blocks.WILLOW_LEAVES, 4);
+                case "tree" -> node(Node.Kind.TREE, "tree", "Tree", Skill.WOODCUTTING, 1, Items.LOGS, 25, 3.2f, 3, g.cfg.treeRespawn, log, at, Blocks.LEAVES, 4);
+                default -> { continue; }
+            }
+            Node n = nodes.get(nodes.size() - 1);
+            n.base(tr[2]);
+            n.grown = true;
+        }
+        for (int k = 0; k < t.rocks.size(); k++) {
+            int[] r = t.rocks.get(k);
+            var mineral = rpg.item.Minerals.byId(t.rockMinerals.get(k));
+            if (mineral == null) continue;
+            rock(mineral, new int[]{r[0], r[2]});
+            Node n = nodes.get(nodes.size() - 1);
+            n.base(r[1]);
+            n.setBlocks(g, true);
+        }
+        for (java.util.Map<String, Object> f : rpg.world.shadowveil.Atlas.list(rpg.world.shadowveil.Atlas.get().root, "fishing")) {
+            double[] p = rpg.world.shadowveil.Atlas.pt(f.get("at"));
+            var a = rpg.world.shadowveil.Atlas.get();
+            int[] spot = rpg.world.shadowveil.ShadowVeil.fishingSpot((float) a.x(p[0]), (float) a.z(p[1]));
+            if (spot == null) continue;
+            String gear = rpg.world.shadowveil.Atlas.s(f, "gear", "net");
+            rpg.item.ItemDef needs = switch (gear) { case "rod" -> Items.FISHING_ROD; case "pot" -> Items.LOBSTER_POT; case "harpoon" -> Items.HARPOON; default -> Items.FISHING_NET; };
+            boolean trout = gear.equals("rod"), cage = gear.equals("pot");
+            String what = rpg.world.shadowveil.Atlas.s(f, "name", "Fishing spot");
+            // (0.4.1) a pot is a crab cage, as on the devmap's shore (the shellfish gatherers' work: they had none)
+            if (cage) node(Node.Kind.FISH, "crab_spot", what, Skill.FISHING, 10, Items.RAW_CRAB, 30, 4.6f, 0, 0, 0, new int[]{spot[0], spot[1]}, 0, 0);
+            else node(Node.Kind.FISH, trout ? "trout_spot" : "shrimp_spot", what, Skill.FISHING, trout ? 20 : 1, trout ? Items.RAW_TROUT : Items.RAW_SHRIMP, trout ? 50 : 10,
+                    gear.equals("harpoon") ? 5.5f : trout ? 4f : 3.4f, 0, 0, 0, new int[]{spot[0], spot[1]}, 0, 0);
+            Node n = nodes.get(nodes.size() - 1);
+            n.needs = needs;
+            // the spot floats at the water's surface (the top of its top cell)
+            n.base(spot[2] + 1);
+            n.y = spot[2] + 0.9f;
+            try { n.waters = Node.Waters.valueOf(rpg.world.shadowveil.Atlas.s(f, "waters", "LAKE")); } catch (IllegalArgumentException ignored) { }
+        }
+        // (0.4.1) the buildings' doors: a door hung in every doorway that takes one, closed (the rooms behind are kept
+        // for 0.4.2), on the building's own floor
+        nextFixture = Ids.SV_DOORS;
+        if (t.arch != null) for (rpg.world.shadowveil.Architecture.Structure s : t.arch.structures) for (int k = 0; k < s.doors.size(); k++) {
+            if (!s.doorLeaf.get(k)) continue;
+            int[][] cells = s.doors.get(k);
+            if (cells.length > 2 || cells.length == 0) continue;
+            add(new Door(fid(), s.name + (k == 0 ? " door" : " back door"), cells, false, null, 1, 0, s.doorFloors.get(k) + 1)).spawn(g);
+        }
+        nextFixture = saved;
     }
 
     private void node(Node.Kind kind, String def, String name, Skill skill, int level, rpg.item.ItemDef product, int xp, float time, int stock, float respawn, int block, int[] at, int leaves, int height) {
@@ -450,7 +569,7 @@ public final class Objects {
     public void update(float dt) {
         for (Node n : nodes) n.update(g);
         for(var object:snapshot())if(object instanceof FishingNet net && !net.removed)net.update(g);
-        stall.update(g);
+        if (stall != null) stall.update(g);
         for (WorldObject o : snapshot()) if (o instanceof Fire fire && !fire.removed) fire.update(g, dt);
         // the burnt-out fires and the picked-up things swept out now and then, not every frame
         if (g.time - sweptAt > 1.0) { sweptAt = g.time; list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && !Ids.fixture(gi.id)))); }

@@ -57,7 +57,7 @@ public class Container extends WorldObject {
         if (solidBody != 0 || g.game == null) return;
         solidBody = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
         g.game.commands().rigidCreate(solidBody, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, CHEST_HX, CHEST_HY, CHEST_HZ, 0,
-                x, rpg.world.DevMap.FLOOR + CHEST_HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+                x, rpg.world.Ground.at(x, z) + CHEST_HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
     }
 
     /** A transient view over an actor's live inventory; never registered or serialized as a second owner. */

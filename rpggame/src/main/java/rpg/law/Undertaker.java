@@ -89,7 +89,7 @@ public final class Undertaker {
             if (s == null) continue;
             grave.contents.set(i, null);
             if (chest.contents.add(s)) moved += s.amount;
-            else g.objects.drop(s, chest.x - 0.6f, DevMap.FLOOR + 0.05f, chest.z);   // a full chest: beside it, still in the hut
+            else g.objects.drop(s, chest.x - 0.6f, rpg.world.Ground.at(chest.x - 0.6f, chest.z) + 0.05f, chest.z);   // a full chest: beside it, still in the hut
         }
         grave.removed = true;
         grave.heldBy = 0;

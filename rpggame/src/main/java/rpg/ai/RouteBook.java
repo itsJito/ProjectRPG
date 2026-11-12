@@ -31,7 +31,7 @@ public final class RouteBook {
     private Route find(float sx,float sz,float x,float z){for(var route:routes)if(Math.hypot(route.sx-sx,route.sz-sz)<5 && Math.hypot(route.x-x,route.z-z)<1)return route;return null;}
     private Route find(float sx,float sy,float sz,float x,float y,float z){for(var r:routes)if(Math.hypot(r.sx-sx,r.sz-sz)<5 && Math.hypot(r.x-x,r.z-z)<1 && Math.abs(r.sy-sy)<1 && Math.abs(r.y-y)<1)return r;return null;}
     public double avoiding(float x,float z,double now){double until=0;for(var route:routes)if(Math.hypot(route.x-x,route.z-z)<3)until=Math.max(until,route.avoidUntil);return Math.max(now,until);}
-    public int[] recall(Npc n,float x,float z,Voxels vox,double now,java.util.function.Predicate<rpg.objects.Door> doors){return recall(n,x,rpg.world.DevMap.FLOOR,z,vox,now,doors);}
+    public int[] recall(Npc n,float x,float z,Voxels vox,double now,java.util.function.Predicate<rpg.objects.Door> doors){return recall(n,x,rpg.world.Ground.at(x, z),z,vox,now,doors);}
     public int[] recall(Npc n,float x,float y,float z,Voxels vox,double now,java.util.function.Predicate<rpg.objects.Door> doors){
         var route=find(n.x,n.y,n.z,x,y,z);if(route==null || Math.abs(route.sy-n.y)>1.2 || Math.abs(route.y-y)>.5 || route.confidence*(float)Math.exp(-Math.max(0,now-route.lastUsed)/7200)<.35f || route.avoidUntil>now)return null;
         for(var entry:route.versions.entrySet())if(vox.chunkVersion((int)(entry.getKey()>>32)*16,(int)(long)entry.getKey()*16)!=entry.getValue())return null;
@@ -43,7 +43,7 @@ public final class RouteBook {
         else if(!vox.navigation.validLeg(px,py,pz,x,y,z,doors))return null;
         route.lastUsed=now;return result;
     }
-    public void begin(Npc n,float x,float z,int[] plan,double now){begin(n,x,rpg.world.DevMap.FLOOR,z,plan,now);}
+    public void begin(Npc n,float x,float z,int[] plan,double now){begin(n,x,rpg.world.Ground.at(x, z),z,plan,now);}
     public void begin(Npc n,float x,float y,float z,int[] plan,double now){
         travelling=find(n.x,n.y,n.z,x,y,z);
         if(travelling==null){travelling=new Route();travelling.sx=n.x;travelling.sz=n.z;travelling.x=x;travelling.z=z;routes.add(travelling);if(routes.size()>32)routes.remove(0);}

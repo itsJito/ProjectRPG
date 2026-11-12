@@ -18,7 +18,7 @@ final class FarmModels {
     private static float ox, oz;
 
     /** Where a garden's mesh is drawn from: its corner on the ground. */
-    static float[] origin(int field) { var f = Farming.FIELDS[field]; return new float[]{f.x0(), DevMap.FLOOR, f.z0()}; }
+    static float[] origin(int field) { var f = Farming.FIELDS[field]; return new float[]{f.x0(), f.y(), f.z0()}; }
 
     /** (0.3.5) The parts added next bend in the wind and under a body from this root as one stiff plant. */
     private static void root(Meshes.Boxes b, float x, float z) {
@@ -35,7 +35,7 @@ final class FarmModels {
         Meshes.Boxes b = new Meshes.Boxes();
         float[] o = origin(field);
         ox = o[0]; oz = o[2];
-        float y0 = DevMap.FLOOR;
+        float y0 = Farming.FIELDS[field].y();
         for (Farming.Plot p : farming.plots) {
             if (p.field != field) continue;
             float cx = p.bx + 0.5f, cz = p.bz + 0.5f;

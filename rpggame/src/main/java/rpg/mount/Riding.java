@@ -69,6 +69,11 @@ public final class Riding {
          * mount has had its chance to shy yet.
          */
         public float mountT = 1, mountDur = 1;
+        /**
+         * (0.4.0, gamefixes: there was no animation for dismounting) stepping down: the climb in reverse - the far leg
+         * swung back over the croup, the body turned to the flank, lowered by the near stirrup to the ground beside it.
+         */
+        public boolean dismounting;
         /** (0.3.9) How far the rider is turned in the saddle (rad, + to the left). */
         public float twist;
         public int side = -1;
@@ -344,6 +349,54 @@ public final class Riding {
     private static float accelOf(Animal a) { return a.species.plan == Species.Plan.BIRD ? 18 : 10; }
 
     /** Off: down beside it (thrown: flung off and knocked down). Off in mid-air, the rider drops from the saddle's height. */
+    /**
+     * (0.4.0, gamefixes: no animation for dismounting) Getting down as one gets up, the climb played backward over most of
+     * its time: from a mount stood (or slowed) on the ground, to the side there is room on. Thrown, knocked off, in the
+     * air or with nowhere to stand, it is the old instant parting ({@link #dismount}).
+     */
+    public void stepDown(Actor rider) {
+        Ride r = of(rider);
+        if (r == null || r.dismounting) return;
+        Animal a = r.mount;
+        if (r.mounting() || !r.body.grounded || rider.reacting || Math.abs(r.speed) > 3.5f) { dismount(rider, false); return; }
+        float[] spot = mountSpot(rider, a);
+        if (spot == null) { dismount(rider, false); return; }
+        r.side = (int) spot[3]; r.sideX = spot[0]; r.groundY = spot[1]; r.sideZ = spot[2];
+        rider.mountNear = r.side < 0 ? 1 : 0;
+        r.dismounting = true;
+        r.mountDur = mountTime(rider, a) * rpg.Tuning.f("mounts.dismountShare", 0.8f);
+        r.mountT = 1 - 1e-4f;
+        r.speed = 0;
+        rider.cs.cancel(); rider.cs.blocking = false;
+        if (g.sfx != null) g.sfx.play("cloth", a.x, a.y + 1.2f, a.z, 0.5f, 0.9f, 12);
+        g.state.commit("DismountingStarted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, String.format("to its %s side, %.2f s", r.side < 0 ? "left" : "right", r.mountDur));
+    }
+
+    /** (0.4.0) A moment of the step down: the mount stands for it; a blow or a fall ends it at once, on the ground. */
+    private void descend(Ride r, float dt) {
+        Animal a = r.mount; Actor rider = r.rider;
+        if (!a.alive || !rider.alive || a.ragdoll != null || rider.reacting || rider.cs.staggered > 0 || rider.cs.lastHurt > g.time - dt) { finishDown(r); return; }
+        float was = r.mountT;
+        r.mountT = Math.max(0, r.mountT - dt / r.mountDur);
+        if (was > 0.2f && r.mountT <= 0.2f && g.sfx != null) g.sfx.play("step.earth", r.sideX, r.groundY, r.sideZ, 0.55f, 1f, 10);
+        r.speed = 0;
+        place(r);
+        if (r.mountT <= 0) finishDown(r);
+    }
+    /** Down: on the ground beside the saddle, facing the way the mount faces, and the ride over. */
+    private void finishDown(Ride r) {
+        Animal a = r.mount; Actor rider = r.rider;
+        rides.remove(a.id);
+        a.rider = 0; rider.riding = 0; rider.mountPhase = 1; r.dismounting = false;
+        a.flying = false;
+        release(a, 0, 0, 0, accelOf(a));
+        a.vx = a.vz = 0;
+        a.nextThink = 0;
+        if (!rider.reacting) { g.teleport(rider, r.sideX, r.groundY, r.sideZ); release(rider, 0, 0, 0, 80); }
+        rider.yaw = a.yaw + r.side * (float) (Math.PI / 2) * 0.35f;
+        g.state.commit("Dismounted", rider.id, a.id, DevMap.jurisdiction(a.x, a.z), 0, "stepped down");
+    }
+
     public void dismount(Actor rider, boolean thrown) {
         Ride r = of(rider);
         if (r == null) return;
@@ -421,9 +474,10 @@ public final class Riding {
         for (Ride r : new java.util.ArrayList<>(rides.values())) {
             Animal a = r.mount; Actor rider = r.rider;
             Controls c = rider == g.player ? playerControls() : npcControls(r);
+            if (r.dismounting) { descend(r, dt); continue; }
             if (r.mounting()) { climb(r, c, dt); continue; }
             if (!a.alive || !rider.alive || !a.loaded || rider.reacting || a.ragdoll != null) { dismount(rider, false); continue; }
-            if (c.dismount() && !r.flying) { dismount(rider, false); continue; }
+            if (c.dismount() && !r.flying) { stepDown(rider); continue; }
             MountStats st = stats(a);
             boolean tamed = tamedFor(a, rider), steerable = tamed && a.saddled;
             float wantYaw = r.body.yaw, want = 0;
@@ -659,7 +713,7 @@ public final class Riding {
         for (int y = lo; y <= hi; y++) if (g.vox.block(bx, y, bz) == rpg.world.Blocks.WATER) { wet = y; break; }
         if (wet == Integer.MIN_VALUE) return Float.NaN;
         int top = wet;
-        while (top < DevMap.SY - 1 && g.vox.block(bx, top + 1, bz) == rpg.world.Blocks.WATER) top++;
+        while (top < rpg.world.WorldMap.active().sizeY - 1 && g.vox.block(bx, top + 1, bz) == rpg.world.Blocks.WATER) top++;
         return top + 1;
     }
 
@@ -736,7 +790,7 @@ public final class Riding {
         // (0.3.9) water under it is met at its float line: it lights on the water and swims
         float wet = waterSurface(r.body);
         if (Float.isFinite(wet)) floor = Math.max(floor, wet - r.body.height * MOUNT_FLOAT);
-        if (ny > DevMap.SY - 6) ny = DevMap.SY - 6;
+        if (ny > rpg.world.WorldMap.active().sizeY - 6) ny = rpg.world.WorldMap.active().sizeY - 6;
         if (ny <= floor + 0.05f) {
             // the ground: a landing - soft enough, it gallops on; too fast and steep, a hard landing that checks it
             boolean hard = r.airspeed > 16 && r.pitch < -0.35f;

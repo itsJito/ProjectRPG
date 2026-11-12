@@ -76,7 +76,7 @@ public final class Magic {
             case DARKNESS -> {
                 Voxels.Hit h = g.vox.ray(a.x, a.eyeY(), a.z, dx, dy, dz, 16, false);
                 float t = h.hit ? Math.max(0, h.dist - 0.5f) : 16;
-                darkness.add(new Dark(a.x + dx * t, Math.max(DevMap.FLOOR + 1, a.eyeY() + dy * t), a.z + dz * t, 4.5f, g.time + 20));
+                darkness.add(new Dark(a.x + dx * t, Math.max(rpg.world.Ground.at(a.x + dx * t, a.z + dz * t) + 1, a.eyeY() + dy * t), a.z + dz * t, 4.5f, g.time + 20));
                 return true;
             }
             case DISGUISE_SELF -> { a.disguiseT = 60; return true; }
@@ -198,8 +198,9 @@ public final class Magic {
     }
     public boolean allied(Actor a,Actor b) { return a==b || a.summonOwner==b.id || b.summonOwner==a.id || a.summonOwner!=0 && a.summonOwner==b.summonOwner || companionBond(a,b) || a.team!=0 && a.team==b.team && !g.ai.hostile(a,b); }
     private void hostileEffect(Actor a,Actor target) {
+        target.cs.attackerKnown=g.ai.knowsStriker(target,a,true);
         g.ai.onAttacked(target,a); g.law.onHit(a,target,0);
-        target.cs.lastAttacker=a.id; target.cs.lastHurt=g.time;
+        target.cs.lastAttacker=a.id; target.cs.lastHurt=g.time; target.cs.attackerKnown=g.ai.knowsStriker(target,a,true);
         if(target instanceof Animal animal)g.animals.struck(animal,0,0,1,false);
     }
     public Animal form(Actor actor) {

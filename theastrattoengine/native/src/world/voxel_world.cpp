@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <thread>
 
 namespace astratto {
 
@@ -17,8 +18,10 @@ void BlockTable::set(const astratto_block_def* d, uint32_t count) {
 VoxelWorld::VoxelWorld(const BlockTable* table) : table_(table) {}
 
 bool VoxelWorld::create(uint32_t sx, uint32_t sy, uint32_t sz, uint32_t belowFloor, const uint8_t* cells, uint64_t cellBytes, const uint8_t* light, uint64_t lightBytes) {
-    // the path search packs a cell into 32 bits: ten for x, ten for z, the rest for y
-    if (sx == 0 || sy == 0 || sz == 0 || sx > 1024 || sz > 1024 || sy > 2048 || belowFloor > 255) return false;
+    // the path search packs a cell into 32 bits: eleven for x, eleven for z, nine for y (0.4.0: ShadowVeil is 1,072 a side)
+    if (sx == 0 || sy == 0 || sz == 0 || sx > 2048 || sz > 2048 || sy > 511 || belowFloor > 255) return false;
+    // a cell's index is 32 bits wherever the light fill and the meshers keep one
+    if (static_cast<uint64_t>(sx) * sy * sz >= (1ull << 32)) return false;
     const uint64_t need = static_cast<uint64_t>(sx) * sy * sz;
     if ((cells != nullptr && cellBytes != need) || (light != nullptr && lightBytes != need)) return false;
     sx_ = static_cast<int>(sx); sy_ = static_cast<int>(sy); sz_ = static_cast<int>(sz);
@@ -196,35 +199,57 @@ void VoxelWorld::lightBox(int x0, int z0, int x1, int z1, bool seedBorder) {
     uint8_t* li = light_.data();
     queue_.clear(); head_ = 0;
     if (queue_.capacity() < (1u << 20)) queue_.reserve(1u << 20);
+    // (0.4.0, optimisation: ShadowVeil's 230 million cells) the two passes over the columns - each column's own work,
+    // reading at most its neighbours' light from the first pass in the second - split by slices of x across the cores
+    // for a large box; what each slice found is queued in slice order, so the fill that follows is the same every time
+    const int width = x1 - x0 + 1;
+    const unsigned hw = std::max(1u, std::min(8u, std::thread::hardware_concurrency()));
+    const unsigned slices = static_cast<long long>(width) * (z1 - z0 + 1) >= (1 << 16) ? std::min<unsigned>(hw, static_cast<unsigned>(width)) : 1u;
+    std::vector<std::vector<uint32_t>> found(slices);
+    auto run = [&](auto&& body) {
+        if (slices <= 1) { body(0u, x0, x1); return; }
+        std::vector<std::thread> threads;
+        for (unsigned k = 0; k < slices; k++) {
+            const int a = x0 + static_cast<int>(static_cast<long long>(width) * k / slices), b = x0 + static_cast<int>(static_cast<long long>(width) * (k + 1) / slices) - 1;
+            threads.emplace_back([&, k, a, b] { body(k, a, b); });
+        }
+        for (auto& t : threads) t.join();
+    };
     // 1) column sky pass + emitters
-    for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
-        const uint32_t base = (static_cast<uint32_t>(x) * D + static_cast<uint32_t>(z)) * H;
-        int sky = 15;
-        for (int y = sy_ - 1; y >= 0; y--) {
-            const int id = bl[base + y];
-            const astratto_block_def& d = table_->defs[id];
-            if (d.flags & ASTRATTO_BLOCK_OPAQUE) sky = 0;
-            else if (sky > 0 && id != 0 && (d.flags & ASTRATTO_BLOCK_SKY_DIM)) sky = std::max(0, sky - 2);
-            const int em = d.emission & 15;
-            li[base + y] = static_cast<uint8_t>((sky << 4) | em);
-            if (em > 0) push(base + y);
+    run([&](unsigned k, int xa, int xb) {
+        for (int x = xa; x <= xb; x++) for (int z = z0; z <= z1; z++) {
+            const uint32_t base = (static_cast<uint32_t>(x) * D + static_cast<uint32_t>(z)) * H;
+            int sky = 15;
+            for (int y = sy_ - 1; y >= 0; y--) {
+                const int id = bl[base + y];
+                const astratto_block_def& d = table_->defs[id];
+                if (d.flags & ASTRATTO_BLOCK_OPAQUE) sky = 0;
+                else if (sky > 0 && id != 0 && (d.flags & ASTRATTO_BLOCK_SKY_DIM)) sky = std::max(0, sky - 2);
+                const int em = d.emission & 15;
+                li[base + y] = static_cast<uint8_t>((sky << 4) | em);
+                if (em > 0) found[k].push_back(base + y);
+            }
         }
-    }
+    });
+    for (auto& f : found) { for (uint32_t i : f) push(i); f.clear(); }
     // 2) seed cells adjacent to darker non-opaque neighbours
-    for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
-        const uint32_t base = (static_cast<uint32_t>(x) * D + static_cast<uint32_t>(z)) * H;
-        for (int y = 0; y < sy_; y++) {
-            const int s = (li[base + y] >> 4) & 15;
-            if (s < 2) continue;
-            bool edge = false;
-            if (x > 0) edge |= dim(base - XS + y, s);
-            if (x < sx_ - 1) edge |= dim(base + XS + y, s);
-            if (z > 0) edge |= dim(base - H + y, s);
-            if (z < sz_ - 1) edge |= dim(base + H + y, s);
-            if (y > 0 && s < 15) edge |= dim(base + y - 1, s);
-            if (edge) push(base + y);
+    run([&](unsigned k, int xa, int xb) {
+        for (int x = xa; x <= xb; x++) for (int z = z0; z <= z1; z++) {
+            const uint32_t base = (static_cast<uint32_t>(x) * D + static_cast<uint32_t>(z)) * H;
+            for (int y = 0; y < sy_; y++) {
+                const int s = (li[base + y] >> 4) & 15;
+                if (s < 2) continue;
+                bool edge = false;
+                if (x > 0) edge |= dim(base - XS + y, s);
+                if (x < sx_ - 1) edge |= dim(base + XS + y, s);
+                if (z > 0) edge |= dim(base - H + y, s);
+                if (z < sz_ - 1) edge |= dim(base + H + y, s);
+                if (y > 0 && s < 15) edge |= dim(base + y - 1, s);
+                if (edge) found[k].push_back(base + y);
+            }
         }
-    }
+    });
+    for (auto& f : found) for (uint32_t i : f) push(i);
     // 3) border ring: existing light flows inward
     if (seedBorder) {
         for (int x = x0 - 1; x <= x1 + 1; x++) for (int z = z0 - 1; z <= z1 + 1; z++) {

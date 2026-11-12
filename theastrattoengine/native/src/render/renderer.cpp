@@ -167,12 +167,12 @@ Renderer::~Renderer() {
     if (decalVbo_) g_.DeleteBuffers(1, &decalVbo_);
     if (decalVao_) g_.DeleteVertexArrays(1, &decalVao_);
     Program* all[] = {&gWorld_, &gModel_, &sWorld_, &sModel_, &lighting_, &cull_, &gtao_, &aoBlur_, &ssr_, &vol_, &fogApply_, &fWorld_, &fModel_,
-                      &particle_, &chemistryParticles_, &waterWaves_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_, &rain_};
+                      &particle_, &chemistryParticles_, &waterWaves_, &taa_, &bloomDown_, &bloomUp_, &lum_, &exposure_, &tonemap_, &copy_, &ui_, &portrait_, &probeCs_, &folG_, &folS_, &propG_, &propS_, &decal_, &lens_, &leafBake_, &rain_, &focus_};
     for (Program* p : all) p->destroy(g_);
     if (leafTex_) g_.DeleteTextures(1, &leafTex_);
-    GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], layerMat_, white_, shadowTex_, paletteTex_, water_[0], water_[1], waterMask_};
+    GLuint t[] = {lumTex_, expoTex_[0], expoTex_[1], focusTex_[0], focusTex_[1], layerMat_, white_, shadowTex_, paletteTex_, water_[0], water_[1], waterMask_};
     for (GLuint x : t) if (x) g_.DeleteTextures(1, &x);
-    GLuint f[] = {lumFbo_, expoFbo_[0], expoFbo_[1]};
+    GLuint f[] = {lumFbo_, expoFbo_[0], expoFbo_[1], focusFbo_[0], focusFbo_[1]};
     for (GLuint x : f) if (x) g_.DeleteFramebuffers(1, &x);
     if (shadowTex_) g_.DeleteFramebuffers(4, shadowFbo_);
     GLuint b[] = {lightBuf_, tileBuf_, ebo_, particleVbo_, quadVbo_, quadEbo_, chemistryVbo_, chemistryState_, chemistrySources_};
@@ -250,7 +250,8 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
                       {&tonemap_, "fullscreen.vert", "tonemap.frag"}, {&copy_, "fullscreen.vert", "copy.frag"}, {&ui_, "ui2d.vert", "ui2d.frag"}, {&portrait_, "model.vert", "portrait.frag"},
                       {&folG_, "foliage.vert", "foliage_gbuffer.frag"}, {&folS_, "foliage.vert", "foliage_shadow.frag"},
                       {&propG_, "props.vert", "props_gbuffer.frag"}, {&propS_, "props.vert", "props_shadow.frag"}, {&decal_, "decal.vert", "decal.frag"},
-                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}, {&rain_, "fullscreen.vert", "rain.frag"}};
+                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}, {&rain_, "fullscreen.vert", "rain.frag"},
+                      {&focus_, "fullscreen.vert", "focus.frag"}};
     for (const P& p : list) {
         if (p.p == &gWorld_ || p.p == &lighting_ || p.p == &vol_ || p.p == &fogApply_ || p.p == &fWorld_ || p.p == &fModel_) continue;
         std::string vs = src(p.vs), fs = src(p.fs);
@@ -323,6 +324,7 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
     lumTex_ = tex2D(R16F, 256, 256, LINEAR_MIPMAP_NEAREST, 9);
     lumFbo_ = fbo(lumTex_, 0);
     for (int i = 0; i < 2; i++) { expoTex_[i] = tex2D(R16F, 1, 1, NEAREST, 1); expoFbo_[i] = fbo(expoTex_[i], 0); }
+    for (int i = 0; i < 2; i++) { focusTex_[i] = tex2D(R32F, 1, 1, NEAREST, 1); focusFbo_[i] = fbo(focusTex_[i], 0); }
     resize(static_cast<int>(d.width), static_cast<int>(d.height));
     lights_.reserve(MAX_LIGHTS * 12);
     return error_.empty();
@@ -1092,7 +1094,7 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 astratto_rcmd_water_flow c;
                 if(!readRecord(r,head.bytes,c)) { error_="short water flow record";return false; }
                 if(!std::isfinite(c.x0+c.z0+c.x1+c.z1+c.vx+c.vz) || c.x1<c.x0 || c.z1<c.z0 || std::abs(c.vx)>8 || std::abs(c.vz)>8) { error_="invalid water flow";return false; }
-                if(flows_.size()<16*8) { flows_.insert(flows_.end(),{c.x0,c.z0,c.x1,c.z1,c.vx,c.vz,0,0}); }
+                if(flows_.size()<32*8) { flows_.insert(flows_.end(),{c.x0,c.z0,c.x1,c.z1,c.vx,c.vz,0,0}); }
                 break;
             }
             case ASTRATTO_RCMD_EMITTER: {
@@ -1271,7 +1273,8 @@ int32_t Renderer::frame(Engine* engine, astratto_render_io& io) {
         } else {
             // (0.2.1, gamefixes: stuttering on the larger map) in play a frame meshes a few columns, nearest first -
             // a burst of edits (a fire, a fall of blocks) is spread over frames instead of stalling one
-            meshColumns(engine, *w, pending_.size() > 600 ? 192 : pending_.size() > 96 ? 32 : 12);
+            // (2.11) a backlog is worked off a few dozen columns a frame - 192 at once held a frame for a third of a second
+            meshColumns(engine, *w, pending_.size() > 600 ? 48 : pending_.size() > 96 ? 24 : 12);
             voxelSync(*w, 48);
             environment();
             probesUpdate(q_.probeBudget, q_.probeRays, cam_.x, cam_.z);
@@ -1469,6 +1472,7 @@ void Renderer::shadowPass(VoxelWorld*) {
         sWorld_.mat4("uPV", shadowVP_[i].m);
         sWorld_.f1("uTime", env_.time);
         sWorld_.f4("uWind", foliage_.wind_x, foliage_.wind_z, foliage_.time, foliage_.gust);
+        sWorld_.f4("uLod", cam_.x, cam_.y, cam_.z, std::max(28.0f, cam_.viewDistance * 0.62f));
         sWorld_.tex("uAtlas", 0, TEXTURE_2D_ARRAY, textures_[atlasTex_].id);
         sWorld_.tex("uLeaves", 5, TEXTURE_2D_ARRAY, leafTex_);
         drawOpaque(sWorld_, lightFrustum, cam_.x, cam_.z, zf + 150, false);
@@ -1520,6 +1524,8 @@ void Renderer::gbufferPass(VoxelWorld* w) {
     gWorld_.mat4("uPV", pvJ_.m);
     gWorld_.f1("uTime", env_.time);
     gWorld_.f4("uWind", foliage_.wind_x, foliage_.wind_z, foliage_.time, foliage_.gust);
+    // 2.11: leaf cards drawn only within the nearer part of the view (past it, toward the fog, a crown is its faces alone)
+    gWorld_.f4("uLod", cam_.x, cam_.y, cam_.z, std::max(28.0f, cam_.viewDistance * 0.62f));
     gWorld_.f1("uRain", env_.wet >= 0 ? env_.wet : env_.rain);
     gWorld_.f4("uWeather", env_.snow, env_.rain, 0, 0);
     gWorld_.tex("uAtlas", 0, TEXTURE_2D_ARRAY, textures_[atlasTex_].id);
@@ -2101,6 +2107,22 @@ void Renderer::resolve(int windowW, int windowH) {
     histIdx_ = cur;
     GLuint sceneTex = hist_[cur];
     // 2.4: the lens - depth of field and motion blur, when asked for - into the colour target the fog pass is done with
+    if (q_.dof && lens_cfg_.focus <= 0) {
+        // (0.4.0) autofocus: the focus eases toward what is under the middle of the screen
+        const int fcur = 1 - focusIdx_;
+        g_.BindFramebuffer(FRAMEBUFFER, focusFbo_[fcur]);
+        g_.Viewport(0, 0, 1, 1);
+        focus_.use();
+        focus_.tex("uDepth", 0, TEXTURE_2D, gDepth_);
+        focus_.tex("uPrev", 1, TEXTURE_2D, focusTex_[focusIdx_]);
+        focus_.f1("uDt", std::max(0.001f, cam_.dt));
+        focus_.f1("uNear", cam_.nearP);
+        focus_.f1("uFar", cam_.farP);
+        focus_.f1("uRate", 3.2f);
+        focus_.f1("uReset", historyValid_ && !cam_.reset ? 0.0f : 1.0f);
+        fullscreen();
+        focusIdx_ = fcur;
+    }
     if (q_.motionBlur || q_.dof) {
         g_.BindFramebuffer(FRAMEBUFFER, lensFbo_);
         g_.Viewport(0, 0, ow_, oh_);
@@ -2119,6 +2141,7 @@ void Renderer::resolve(int windowW, int windowH) {
         lens_.f1("uFrame", static_cast<float>(frameNo_ & 1023));
         lens_.i1("uMotion", q_.motionBlur && historyValid_ && !cam_.reset ? 1 : 0);
         lens_.i1("uDof", q_.dof ? 1 : 0);
+        lens_.tex("uFocusTex", 2, TEXTURE_2D, focusTex_[focusIdx_]);
         fullscreen();
         sceneTex = lensTex_;
     }

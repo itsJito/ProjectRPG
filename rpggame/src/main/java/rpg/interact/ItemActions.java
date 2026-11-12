@@ -28,7 +28,7 @@ public final class ItemActions {
     /** Whether there is open water within a step or two of the actor. */
     private boolean nearWater(Actor a) {
         int bx = (int) Math.floor(a.x), bz = (int) Math.floor(a.z);
-        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int y = DevMap.FLOOR - 2; y <= DevMap.FLOOR; y++)
+        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int y = rpg.world.Ground.cell(bx + dx, bz + dz) - 3; y <= rpg.world.Ground.cell(bx + dx, bz + dz); y++)
             if (g.vox.block(bx + dx, y, bz + dz) == rpg.world.Blocks.WATER) return true;
         return false;
     }
@@ -129,7 +129,7 @@ public final class ItemActions {
                 g.state.burn(d, 1);
                 g.state.commit(req, "FishReleased", a.id, 0, null, 0, d.name);
                 if (a == g.player) { g.chat.say("You slip the " + d.name.toLowerCase().replace("raw ", "") + " back into the water. It darts away."); g.honor.released(); }
-                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, rpg.world.Ground.at(a.x - (float) Math.sin(a.yaw) * 0.8f, a.z - (float) Math.cos(a.yaw) * 0.8f) - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
                 yield Result.ok();
             }
             case "bury" -> {
@@ -156,7 +156,7 @@ public final class ItemActions {
                     g.grant(a, new ItemStack(Items.BUCKET_OF_WATER, 1));
                     g.state.commit(req, "BucketFilled", a.id, 0, null, 0, "water");
                     if (a == g.player) g.chat.say("You fill the bucket with water.");
-                    if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, DevMap.FLOOR - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
+                    if (g.fx != null) g.chemistry.splash(a.x - (float) Math.sin(a.yaw) * 0.8f, rpg.world.Ground.at(a.x - (float) Math.sin(a.yaw) * 0.8f, a.z - (float) Math.cos(a.yaw) * 0.8f) - 0.2f, a.z - (float) Math.cos(a.yaw) * 0.8f);
                     return Result.ok();
                 }));
                 yield Result.started();

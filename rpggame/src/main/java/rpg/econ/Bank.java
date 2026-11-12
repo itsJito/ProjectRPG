@@ -43,13 +43,22 @@ public final class Bank {
     public Npc teller() { return g.actor(Ids.TELLER) instanceof Npc n ? n : null; }
 
     /** Where a customer stands to be served: before the counter, in front of the teller's place. */
-    public float[] customerSpot() { return new float[]{DevMap.BANK_TELLER[0], DevMap.BANK_COUNTER_Z - 0.9f}; }
+    public float[] customerSpot() {
+        // (0.4.1) on ShadowVeil the bank is where its world puts it (the architecture's services): Loxford Castle's keep
+        if (rpg.world.WorldMap.shadowveil()) { float[] p = rpg.world.shadowveil.ShadowVeil.service("bank_customer"); if (p != null) return p; }
+        return new float[]{DevMap.BANK_TELLER[0], DevMap.BANK_COUNTER_Z - 0.9f};
+    }
+    /** Where the teller works. */
+    public float[] tellerSpot() {
+        if (rpg.world.WorldMap.shadowveil()) { float[] p = rpg.world.shadowveil.ShadowVeil.service("bank_teller"); if (p != null) return p; }
+        return DevMap.BANK_TELLER;
+    }
 
     /** Whether the bank is serving: the teller alive, at the counter, not asleep or running. */
     public boolean open() {
         Npc t = teller();
         return t != null && t.alive && t.loaded && t.working()
-                && Math.hypot(t.x - DevMap.BANK_TELLER[0], t.z - DevMap.BANK_TELLER[1]) < 1.6;
+                && Math.hypot(t.x - tellerSpot()[0], t.z - tellerSpot()[1]) < 1.6;
     }
 
     /** Why someone cannot be served now (null: they can). */
@@ -82,6 +91,22 @@ public final class Bank {
         return Result.ok();
     }
 
+    /**
+     * (0.4.1) An account brought from another version's save (CharacterRecord): opened without a fee, its vault grown to
+     * the cells it had and filled with what lay in it (made anew in this world's ledger). Returns how many stacks came.
+     */
+    public int restoreAccount(Actor a, List<Object> items, int cells) {
+        Container c = hasAccount(a.id) ? vaults(a.id).get(0) : vault(a);
+        int rows = Math.max(c.contents.h, (cells + VAULT_W - 1) / VAULT_W);
+        if (rows > c.contents.h) c.contents.growRows(rows);
+        for (ItemStack s : c.contents.stacks()) g.state.burn(s.def, s.amount);
+        rpg.item.ItemIO.inventory(c.contents, items);
+        int n = 0;
+        for (ItemStack s : c.contents.stacks()) { g.state.mint(s.def, s.amount); n++; }
+        g.state.commit("BankAccountRestored", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": " + n + " stacks carried over");
+        return n;
+    }
+
     /** The price of the next vault for an account, or -1 when it has all it may. */
     public int nextVaultPrice(long owner) {
         var account = vaults(owner);
@@ -109,7 +134,8 @@ public final class Bank {
     }
 
     private Container vault(Actor a) {
-        Container c = new Container(g.state.newEntityId(), "bank_vault", "Bank vault", "vault", DevMap.BANK_TELLER[0], DevMap.FLOOR - 6, DevMap.BANK_TELLER[1] + 1.5f, FIRST_VAULTS * VAULT_W * VAULT_H, a.id);
+        float[] at = tellerSpot();
+        Container c = new Container(g.state.newEntityId(), "bank_vault", "Bank vault", "vault", at[0], rpg.world.Ground.at(at[0], at[1] + 1.5f) - 6, at[1] + 1.5f, FIRST_VAULTS * VAULT_W * VAULT_H, a.id);
         c.ownerOnly = true;
         return g.objects.add(c);
     }

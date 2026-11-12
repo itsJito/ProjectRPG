@@ -113,7 +113,7 @@ public final class Law {
             returnPossessions(npc);
             var cell = rpg.world.Jails.forJurisdiction(jurisdiction);
             if (npc.alive && cell != null) {
-                g.teleport(npc, cell.releaseX(), DevMap.FLOOR, cell.releaseZ());
+                g.teleport(npc, cell.releaseX(), rpg.world.Ground.at(cell.releaseX(), cell.releaseZ()), cell.releaseZ());
                 npc.goal = rpg.ai.Brain.Goal.IDLE; npc.nextThink = 0;
             }
             openEmptyCell(jurisdiction);
@@ -136,7 +136,7 @@ public final class Law {
         sentenceBounty = 0;
         returnPossessions(g.player);
         openEmptyCell(sentenceJurisdiction);
-        if (cell != null) { g.player.poseReset = true; var door=g.objects.jailDoor(cell.jurisdiction()); if(door!=null && door.locked)g.teleport(g.player,cell.releaseX(),DevMap.FLOOR,cell.releaseZ()); }
+        if (cell != null) { g.player.poseReset = true; var door=g.objects.jailDoor(cell.jurisdiction()); if(door!=null && door.locked)g.teleport(g.player,cell.releaseX(),rpg.world.Ground.at(cell.releaseX(), cell.releaseZ()),cell.releaseZ()); }
         clearSlate(g.player);
         g.chat.add("Your sentence is served. You are free to leave.", Chat.Kind.CRIME);
         g.state.commit("SentenceServed", g.player.id, 0, sentenceJurisdiction, 0, "admission " + jailAdmissions);
@@ -652,7 +652,7 @@ public final class Law {
         int taken = 0;
         for (ItemStack coin : a.takeItems(Items.COINS, coins)) {
             coin.owner = to.id; coin.stolen = false; taken += coin.amount;
-            if (!to.store(coin)) { coin.owner = 0; if (!to.store(coin)) g.objects.drop(coin, to.x, DevMap.FLOOR + 0.1f, to.z); }
+            if (!to.store(coin)) { coin.owner = 0; if (!to.store(coin)) g.objects.drop(coin, to.x, rpg.world.Ground.at(to.x, to.z) + 0.1f, to.z); }
         }
         // collateral against the rest: the dearest things in the pack until they cover it (stolen goods are left for the
         // arrest, which returns them to their owners)
@@ -912,7 +912,7 @@ public final class Law {
         int bill=b+(int)((b*3L+99)/100), paid=Math.min(bill,Property.coins(escrow.contents));
         for(ItemStack coin:Property.takeCoins(escrow.contents,paid)) {
             coin.owner=lawman==null?0:lawman.id;coin.stolen=false;
-            if(lawman==null || !lawman.store(coin))g.objects.drop(coin,by==null?a.x:by.x,DevMap.FLOOR+0.1f,by==null?a.z:by.z);
+            if(lawman==null || !lawman.store(coin))g.objects.drop(coin,by==null?a.x:by.x,rpg.world.Ground.at(by==null?a.x:by.x, by==null?a.z:by.z)+0.1f,by==null?a.z:by.z);
         }
         // (0.2.2, gamefixes) a bounty worth more than everything the prisoner owns (their gold and the worth of their things
         // together): all of it is forfeit to the crown, for good - sold off through the town's store (burnt if there is no
@@ -935,7 +935,7 @@ public final class Law {
         var cell = rpg.world.Jails.forJurisdiction(jur);
         float cx = cell != null ? cell.x() : lawman != null ? lawman.postX - 2 : a.x;
         float cz = cell != null ? cell.z() : lawman != null ? lawman.postZ + 3 : a.z;
-        g.teleport(a, cx, DevMap.FLOOR, cz);
+        g.teleport(a, cx, rpg.world.Ground.at(cx, cz), cz);
         if (a == g.player && cell != null) g.controller.snapTo((float) Math.atan2(-(cell.gateX() + 0.5f - cx), -(cell.frontZ() + 0.5f - cz)));
         // taken in, the prisoner's wounds are seen to (gamefixes: they bled out in the cell): whole again, the bleeding
         // stopped, any fire on them out
@@ -1083,7 +1083,7 @@ public final class Law {
             if (!stillThere) continue;
             if (h.slot != null) dead.eq.set(h.slot, null); else h.grid.set(h.index, null);
             taken += Math.max(1, h.stack.value()); count++;
-            if (!seized.add(h.stack)) g.objects.drop(h.stack, dead.x, DevMap.FLOOR + 0.05f, dead.z);
+            if (!seized.add(h.stack)) g.objects.drop(h.stack, dead.x, rpg.world.Ground.at(dead.x, dead.z) + 0.05f, dead.z);
         }
         int returned = Property.confiscate(g, seized);
         Npc lawman = g.ai.lawmanFor(worst);

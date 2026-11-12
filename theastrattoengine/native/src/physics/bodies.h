@@ -32,6 +32,8 @@ struct Mover {
     bool crouch = false, wantsCrouch = false, climb = false, posed = false;
     // state
     bool onGround = false, climbing = false;
+    /** (2.11) Hopping up a one-cell rise met while walking (an auto-jump): the push is kept while it rises clear of it. */
+    bool hopping = false;
     float fallSpeed = 0, stepped = 0, acc = 0;
     /** 2.3: where it was before its last fixed step - what is seen is blended between the two by the time left over
      *  (a mover steps at 120 Hz; a frame lands between steps, and drawn raw it would stutter by a step's worth). */
@@ -51,8 +53,11 @@ private:
     void tick(const VoxelWorld* w, float dt, float gravity);
     bool move(const VoxelWorld* w, float dt, float gravity);
     bool subStep(const VoxelWorld* w, float dt, float gravity);
+    /** How far up the body must rise to stand clear at (x, z): stairs or a lip. -1 when something else is in the way. */
     static float stairRise(const VoxelWorld* w, float x, float y, float z, float r, float h, float lip);
     bool climbStair(const VoxelWorld* w, float nx, float nz, float r, float h);
+    /** (2.11) An auto-jump onto a one-cell rise ahead (a full cube with room above it): true when the hop began. */
+    bool hopUp(const VoxelWorld* w, float nx, float nz, float r, float h, float gravity);
     static float stairBelow(const VoxelWorld* w, float x, float y, float z, float r);
     void depenetrate(const VoxelWorld* w, float r, float h);
     static bool inClimb(const VoxelWorld* w, float x, float y, float z);

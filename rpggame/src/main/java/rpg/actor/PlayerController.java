@@ -274,7 +274,7 @@ public final class PlayerController {
     public void walkTo(float x, float z) {
         pathRequest++;
         route = null;
-        g.game.commands().pathRequest(pathRequest, 1, g.player.x, g.player.y, g.player.z, x, rpg.world.DevMap.FLOOR, z, 20000);
+        g.game.commands().pathRequest(pathRequest, 1, g.player.x, g.player.y, g.player.z, x, rpg.world.Ground.at(x, z), z, 20000);
     }
 
     public void onPath(int request, int[] cells) {
@@ -501,7 +501,7 @@ public final class PlayerController {
             if (!(o instanceof rpg.objects.Door d) || d.open || d.removed) continue;
             boolean here = false;
             for (int[] c : d.cells) if (c[0] == bx && c[1] == bz) { here = true; break; }
-            if (!here || Math.abs(p.y - DevMap.FLOOR) > 1.5f && Math.abs(p.y - d.y) > 1.5f) continue;
+            if (!here || Math.abs(p.y - rpg.world.Ground.at(p.x, p.z)) > 1.5f && Math.abs(p.y - d.y) > 1.5f) continue;
             boolean forced = d.locked;
             if (forced) d.setLocked(g, false);
             d.setOpen(g, true, p, g.state.newRequestId());

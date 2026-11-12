@@ -29,10 +29,12 @@ public final class Economy {
 
     public static final class Shop {
         public final long merchant;
-        public final String name, jurisdiction;
+        public final String name;
+        /** (0.4.0) Where the shop trades: its town and counter (moved with its keeper to ShadowVeil). */
+        public String jurisdiction;
         public final Inventory stock = new Inventory(20, 20);   // the shop's storeroom
         public final Map<String, Integer> target = new HashMap<>();
-        public final float counterX, counterZ;
+        public float counterX, counterZ;
         Shop(long merchant, String name, String jurisdiction, float cx, float cz) { this.merchant = merchant; this.name = name; this.jurisdiction = jurisdiction; this.counterX = cx; this.counterZ = cz; }
     }
 
@@ -85,6 +87,11 @@ public final class Economy {
             seedMaterials(market);
         }
         forge = new Shop(Ids.CRAFTSMAN, "The forge rack", DevMap.jurisdiction(DevMap.ANVIL_AT[0], DevMap.ANVIL_AT[1]), DevMap.ANVIL_AT[0] + 0.5f, DevMap.ANVIL_AT[1] + 1.7f);
+        // (0.4.0) on ShadowVeil each shop trades where its keeper now lives: the counter at the keeper's post, their town's law
+        if (rpg.world.WorldMap.shadowveil()) for (Shop s : new Shop[]{shopA, shopB, fence, macellum, materialsCity, materialsPalace, forge}) {
+            if (!(g.actor(s.merchant) instanceof Npc keeper)) continue;
+            s.counterX = keeper.postX; s.counterZ = keeper.postZ + 1.4f; s.jurisdiction = keeper.homeJurisdiction;
+        }
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);
         stock(shopA, Items.ANIMAL_FEED, 16, 16);
@@ -330,7 +337,7 @@ public final class Economy {
         if (s != null && s.status == Status.IN_TRANSIT) {
             if (carter == null || !carter.alive) lose(s, "the carter was killed on the road");
             else if (s.crate.contents.isEmpty()) lose(s, "the cargo was taken on the road");
-            else { s.crate.x = carter.x - (float) Math.sin(carter.yaw) * -1.2f; s.crate.z = carter.z - (float) Math.cos(carter.yaw) * -1.2f; s.crate.y = DevMap.FLOOR + 0.4f; }
+            else { s.crate.x = carter.x - (float) Math.sin(carter.yaw) * -1.2f; s.crate.z = carter.z - (float) Math.cos(carter.yaw) * -1.2f; s.crate.y = rpg.world.Ground.at(s.crate.x, s.crate.z) + 0.4f; }
         }
     }
 
@@ -338,7 +345,7 @@ public final class Economy {
     public Shipment plan(int logs) {
         List<ItemStack> moved = shopA.stock.remove(Items.LOGS, logs);
         if (moved == null) return null;
-        Container crate = g.objects.add(new Container(g.state.newEntityId(), "cargo", "Caravan cargo", "cargo", shopA.counterX - 1.5f, DevMap.FLOOR + 0.4f, shopA.counterZ + 1.5f, 10, Ids.MERCHANT_A));
+        Container crate = g.objects.add(new Container(g.state.newEntityId(), "cargo", "Caravan cargo", "cargo", shopA.counterX - 1.5f, rpg.world.Ground.at(shopA.counterX - 1.5f, shopA.counterZ + 1.5f) + 0.4f, shopA.counterZ + 1.5f, 10, Ids.MERCHANT_A));
         for (ItemStack it : moved) if (!crate.contents.add(it)) shopA.stock.add(it);   // (what the crate cannot take stays in stock)
         Shipment s = new Shipment(crate.id, crate);
         s.created = s.updated = g.state.minutes;
@@ -421,7 +428,7 @@ public final class Economy {
         for (Object o : sh) {
             Map<String, Object> e = (Map<String, Object>) o;
             long id = astratto.util.Json.lng(e, "id", 0);
-            Container crate = g.objects.add(new Container(id, "cargo", "Caravan cargo", "cargo", (float) astratto.util.Json.num(e, "x", 0), DevMap.FLOOR + 0.4f, (float) astratto.util.Json.num(e, "z", 0), 10, Ids.MERCHANT_A));
+            Container crate = g.objects.add(new Container(id, "cargo", "Caravan cargo", "cargo", (float) astratto.util.Json.num(e, "x", 0), rpg.world.Ground.at((float) astratto.util.Json.num(e, "x", 0), (float) astratto.util.Json.num(e, "z", 0)) + 0.4f, (float) astratto.util.Json.num(e, "z", 0), 10, Ids.MERCHANT_A));
             crate.removed = astratto.util.Json.bool(e, "removed", false);
             ItemIO.inventory(crate.contents, astratto.util.Json.list(e, "items"));
             Shipment s = new Shipment(id, crate);

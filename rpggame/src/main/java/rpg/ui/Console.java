@@ -144,7 +144,7 @@ public final class Console {
         cmd("save", "save <name>: saves the game to saves/<name>.json.", a -> { String n = a.length > 1 ? a[1] : "quick"; if (new SaveSystem(g).save(SaveSystem.slot(n))) print("Saved " + SaveSystem.slot(n), GOOD); });
         cmd("load", "load <name>: loads saves/<name>.json.", a -> { String n = a.length > 1 ? a[1] : "quick"; if (new SaveSystem(g).load(SaveSystem.slot(n))) print("Loaded " + SaveSystem.slot(n), GOOD); });
         cmd("screenshot", "Saves a screenshot to shots/.", a -> hud.screenshotRequested = true);
-        cmd("restart", "Puts you back at the start of the devmap, healed.", a -> { g.player.restore(); g.teleport(g.player, DevMap.SPAWN_X, DevMap.FLOOR, DevMap.SPAWN_Z); });
+        cmd("restart", "Puts you back at the start of the devmap, healed.", a -> { g.player.restore(); g.teleport(g.player, DevMap.SPAWN_X, rpg.world.Ground.at(DevMap.SPAWN_X, DevMap.SPAWN_Z), DevMap.SPAWN_Z); });
         cmd("reset","reset [player|skills|bounty <kingdom|all>]: restores the player, skills, or selected legal case.",a->{
             String target=a.length>1?a[1].toLowerCase(Locale.ROOT):"player";
             switch(target){
@@ -153,7 +153,7 @@ public final class Console {
                     g.interact.cancel(g.player,"developer reset");g.carrying.dropAll();g.traversal.cancel(g.player);g.reactions.cancel(g.player);g.falling.reset(g.player);
                     g.player.restore();g.chemistry.cleanse(g.player);g.gore.healed(g.player);g.controller.cancelHandInput();
                     god=immortal=noclip=false;core.set("ai_ignore_player","0");
-                    g.teleport(g.player,DevMap.SPAWN_X,DevMap.FLOOR,DevMap.SPAWN_Z);print("Player restored at the starting point.",GOOD);
+                    g.teleport(g.player,DevMap.SPAWN_X,rpg.world.Ground.at(DevMap.SPAWN_X, DevMap.SPAWN_Z),DevMap.SPAWN_Z);print("Player restored at the starting point.",GOOD);
                 }
                 case "skills"->{for(Skill skill:Skill.ALL)hud.debugSetLevel(skill,skill==Skill.HEALTH?10:1);print("Skills reset.",GOOD);}
                 case "bounty"->{if(a.length<3){print("reset bounty <kingdom|all>",WARN);return;}bountyReset(a[2]);}
@@ -184,6 +184,12 @@ public final class Console {
         cmd("animals", "Every animal near you (within 60 m).", a -> { for (var an : g.animals.all()) if (an.alive && an.distTo(g.player) < 60) print(String.format("#%-6d %-14s level %-3d (%.0f, %.0f)", an.id, an.kind(), an.skills.combatLevel(), an.x, an.z), TEXT); });
         cmd("invariants", "Checks every world-state invariant.", a -> { var f = g.invariants.check(); if (f.isEmpty()) print("All invariants hold.", GOOD); else for (String s : f) print(s, ERR); });
         cmd("ai_inspector", "Toggles the AI inspector (F9).", a -> hud.aiInspector = !hud.aiInspector);
+        // (0.4.1) the developer display: frames, position, chunk, region, structure, time, the people near and their line of sight
+        cmd("devmode", "Toggles the developer display: FPS, XYZ and chunk, region and structure, what is underfoot and looked at, the people near with their lines of sight to you.", a -> { hud.dev.on = !hud.dev.on; print("devmode " + (hud.dev.on ? "ON" : "OFF"), TEXT); });
+        cmd("devreport", "devreport [note]: writes the developer display, the nearest person's AI readout and the recent chat to reports/, with a screenshot.", a -> {
+            try { var f = hud.dev.report(a.length > 1 ? String.join(" ", java.util.Arrays.copyOfRange(a, 1, a.length)) : ""); print("report written: " + f.toAbsolutePath(), GOOD); }
+            catch (java.io.IOException e) { print("the report could not be written: " + e.getMessage(), ERR); }
+        });
         cmd("state_inspector", "Toggles the state and events inspector (F10).", a -> hud.stateInspector = !hud.stateInspector);
         cmd("combat_telemetry", "Toggles the combat telemetry (F11).", a -> hud.telemetry = !hud.telemetry);
         cmd("xp_dashboard", "Toggles the XP dashboard (F8).", a -> hud.xpDashboard = !hud.xpDashboard);
@@ -202,7 +208,7 @@ public final class Console {
             Map<String, float[]> spots = places();
             float[] s = a.length > 1 ? spots.get(a[1].toLowerCase(Locale.ROOT)) : null;
             if (s == null) { print("goto: x y z, or one of " + String.join(", ", spots.keySet()), WARN); return; }
-            g.teleport(g.player, s[0], DevMap.FLOOR, s[1]);
+            g.teleport(g.player, s[0], rpg.world.Ground.at(s[0], s[1]), s[1]);
         });
         core.completer("goto", t -> { List<String> l = new ArrayList<>(); for (String k : places().keySet()) if (k.startsWith(t)) l.add(k); return l; });
         cmd("face", "face <pitch> <yaw>: turns the camera (degrees).", a -> { if (a.length < 3) { print("Usage: face pitch yaw", WARN); return; } g.controller.camPitch = (float) Math.toRadians(DevConsole.num(a[1], 0)); g.controller.snapTo((float) Math.toRadians(DevConsole.num(a[2], 0))); });

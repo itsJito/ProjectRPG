@@ -31,6 +31,10 @@ import rpg.world.DevMap;
 public final class Door extends WorldObject {
     public final int[][] cells;
     public final int height;
+    /** The cell the door stands in at its foot (the devmap's floor there; a building's own on ShadowVeil). */
+    public final int floor;
+    /** Whether the door has written its cells once (the first time, cells already as wanted are left alone). */
+    private boolean spawned;
     /** (0.2.2, gamefixes) A fence-gate: one block high, rails and a brace in the fence's own boards, in a fence's line. */
     public final boolean fenceGate;
     public boolean cellDoor;
@@ -67,16 +71,20 @@ public final class Door extends WorldObject {
     public static final int MATERIAL_WOOD_DOOR = 2;
 
     public Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner) {
-        this(id, name, cells, locked, key, lockLevel, owner, DevMap.DOOR_HEIGHT, false);
+        this(id, name, cells, locked, key, lockLevel, owner, DevMap.DOOR_HEIGHT, false, DevMap.FLOOR);
     }
-    private Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner, int height, boolean fenceGate) {
-        super(id, "door", name, cx(cells), DevMap.FLOOR + (fenceGate ? 0.5f : 1.2f), cz(cells));
+    /** (0.4.1) A door standing on its own floor (ShadowVeil's buildings stand at every height): its sill's cell is 'floor'. */
+    public Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner, int floor) {
+        this(id, name, cells, locked, key, lockLevel, owner, DevMap.DOOR_HEIGHT, false, floor);
+    }
+    private Door(long id, String name, int[][] cells, boolean locked, ItemDef key, int lockLevel, long owner, int height, boolean fenceGate, int floor) {
+        super(id, "door", name, cx(cells), floor + (fenceGate ? 0.5f : 1.2f), cz(cells));
         this.cells = cells; this.locked = locked; this.key = key; this.lockLevel = lockLevel; this.owner = owner;
-        this.height = height; this.fenceGate = fenceGate;
+        this.height = height; this.fenceGate = fenceGate; this.floor = floor;
         this.hingeAt = new float[Math.min(2, cells.length)][];
     }
     /** A gate in a fence, as high as the fence (one block): it swings either way and can be climbed over. */
-    public static Door fenceGate(long id, String name, int[][] cells, long owner) { return new Door(id, name, cells, false, null, 1, owner, 1, true); }
+    public static Door fenceGate(long id, String name, int[][] cells, long owner) { return new Door(id, name, cells, false, null, 1, owner, 1, true, DevMap.FLOOR); }
     public static Door cellDoor(long id, String name, int[][] cells) {
         Door door = new Door(id, name, cells, true, null, 100, 0);
         door.cellDoor = true;
@@ -107,7 +115,7 @@ public final class Door extends WorldObject {
         for (int[] c : cells) { int v = ax ? c[0] : c[1]; minA = Math.min(minA, v); maxA = Math.max(maxA, v); }
         float line = ax ? cells[0][1] + 0.5f : cells[0][0] + 0.5f;
         // which side is inside: the one with a roof over it
-        int c0x = cells[0][0], c0z = cells[0][1], up = DevMap.FLOOR + 4, plus = 0, minus = 0;
+        int c0x = cells[0][0], c0z = cells[0][1], up = floor + 4, plus = 0, minus = 0;
         for (int k = 1; k <= 3; k++) {
             if (g.vox.solid(c0x + (ax ? 0 : k), up, c0z + (ax ? k : 0))) plus++;
             if (g.vox.solid(c0x - (ax ? 0 : k), up, c0z - (ax ? k : 0))) minus++;
@@ -119,7 +127,7 @@ public final class Door extends WorldObject {
         float inset = gate || cellDoor ? 0 : 0.5f - HALF_THICK;
         float leafW = cells.length >= 2 ? (maxA - minA + 1) / 2f : 1f;
         leafWidth = leafW;
-        float h = height - 0.04f, y = DevMap.FLOOR + 0.02f + h / 2;
+        float h = height - 0.04f, y = floor + 0.02f + h / 2;
         for (int i = 0; i < n; i++) {
             boolean first = i == 0;
             float hingeA = first ? minA : maxA + 1;
@@ -239,7 +247,7 @@ public final class Door extends WorldObject {
         boolean ax = alongX();
         float ex = ax ? (i == 0 ? 1 : -1) : 0, ez = ax ? 0 : (i == 0 ? 1 : -1);
         float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = leafWidth;
-        g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
+        g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, floor + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
                 (float) Math.cos(yaw / 2), 0, (float) Math.sin(yaw / 2), 0, 0, 0, 0, 0, 0, 0);
     }
     /** A leaf's stops, unlatched: from shut to SWING into the room (a gate, either way). */
@@ -256,8 +264,13 @@ public final class Door extends WorldObject {
     private void applyCells(Rpg g, boolean wayOpen) {
         cellsOpen = wayOpen;
         int block = locked ? Blocks.LOCKED_DOOR : wayOpen ? Blocks.AIR : Blocks.DOOR;
-        for (int[] c : cells) for (int y = 0; y < height; y++) g.setBlock(c[0], DevMap.FLOOR + y, c[1], block);
-        for (int[] c : cells) for (int y = 0; y < height; y++) g.game.commands().doorSeal(c[0], DevMap.FLOOR + y, c[1], locked);
+        // (0.4.1, the stutter on loading in) a door hung where its world already has it shut (ShadowVeil's are built shut)
+        // leaves the cells alone: every door rewriting its cells at load re-meshed hundreds of chunks in the first seconds
+        boolean same = !spawned;
+        for (int[] c : cells) for (int y = 0; y < height && same; y++) if (g.vox.block(c[0], floor + y, c[1]) != block) same = false;
+        if (!same) for (int[] c : cells) for (int y = 0; y < height; y++) g.setBlock(c[0], floor + y, c[1], block);
+        spawned = true;
+        for (int[] c : cells) for (int y = 0; y < height; y++) g.game.commands().doorSeal(c[0], floor + y, c[1], locked);
     }
 
     // ------------------------------------------------------------------ interaction
@@ -358,8 +371,8 @@ public final class Door extends WorldObject {
             boolean ax = alongX();
             float ex = ax ? (i == 0 ? 1 : -1) : 0, ez = ax ? 0 : (i == 0 ? 1 : -1);
             float yaw = (float) Math.atan2(-ez, ex), h = height - 0.04f, leafW = leafWidth;
-            restPose(i, hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2, yaw);
-            g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, DevMap.FLOOR + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
+            restPose(i, hingeAt[i][0] + ex * leafW / 2, floor + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2, yaw);
+            g.game.commands().rigidPlace(leaf[i], hingeAt[i][0] + ex * leafW / 2, floor + 0.02f + h / 2, hingeAt[i][1] + ez * leafW / 2,
                     (float) Math.cos(yaw / 2), 0, (float) Math.sin(yaw / 2), 0, 0, 0, 0, 0, 0, 0);
         }
         latch(g);

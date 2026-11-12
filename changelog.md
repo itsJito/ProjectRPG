@@ -2,6 +2,199 @@
 
 A running log of what changed, in plain words. The newest pass is first; the first pass on `gamefixes.md` follows below it.
 
+## Pass 32 - Alpha 0.4.1 "Brick by Brick" (Hoodie)
+
+The exterior pass on ShadowVeil. Every kingdom, settlement, landmark, road, wall, bridge, ruin and documented underground entrance from `projectrpg.txt` is raised on the 0.4.0 terrain from data, in each culture's style. Interiors, furnishings and NPC placement are left for 0.4.2: every building keeps its rooms' volumes empty, and every dungeon keeps its volume beyond a sealed door. The pass also covers the 0.4.1 gamefixes list: holes, floating foliage, idle workers, auto-jump, stray stone, leaves, flowing water, fog and LOD, reference cameras, devmode, the off-stage simulation and portable character saves. The 0.4.0 work (pass 31) was never committed and goes in with this pass.
+
+New tests: `rpg.world.Gamefixes041Test` (built world and checks, spawn, doors, bank and gardens, the auto-jump hop, the off-stage day, the character record, the developer display). `gradlew shadowveil` now grows the world with cells, so door and volume checks run, and it draws a close-up map of each settlement (`town-<realm>.png`). Reference cameras: gallery mode `p27` (`RPG_MAP=shadowveil RPG_GALLERY_ONLY=p27 RPG_REVIEW_ONLY=zone,...`) shoots 4 views of each of the 16 zones (the 7 settlements and 9 terrain regions) at 08:30 and 22:00, as `v-zone-view-morning/night.png` and `views-zone.png` sheets. `RPG_REVIEW_ONLY=stutter` measures the first 10 s after arriving at the spawn.
+
+The test suite is split in two. The whole-day simulations are tagged `slow` and left out of `gradlew test`, which is now the quick suite: `WeeklyLifeTest`'s two town days, `NpcRoutineTest`, `BlacksmithDayTest`, `GraveyardDeliveryTest`, `ClusterProbeTest` and `Gamefixes038`'s household day. They run with the new `gradlew slowTest` task.
+
+### Architecture (`rpg.world.shadowveil.Architecture`, `Kit`; data `resources/data/shadowveil_architecture.json`, joined to `shadowveil.json` by its new `include` list)
+- `Architecture.plan` runs inside `Terrain.generate` after the causeways, before the ground's cells are written:
+  - it places each structure from its documented chunk and size, with its front turned to the street (`facing: road`), a named chunk, or a compass point
+  - each lot must be dry, off the roads (squares may sit on them), clear of every other lot and margin, and no steeper than its `maxSlope`; otherwise it spirals outward to the nearest free ground (`search`)
+  - each pad is levelled to the median of its ground, and its edge is eased back into the land over a distance that grows with the cut or fill
+- New column flags: `BUILT` (a lot), `YARD` (margins, courts, fields, yards), `SQUARE` (a square a road may cross) and `LANE` (a door's path). Trees, boulders and ore outcrops keep off `BUILT` and `YARD`.
+- Districts fill streets with houses. Walking each named road through the district rect, a plot is tried every `step` cells on both sides, set back from the road and facing it. Sizes come from the culture's three house sizes (projectrpg.txt), picked by a hash so neighbours differ. A `min` count is enforced as a survey failure.
+- Town walls are polylines: Valgard, Azharad, Severia's land walls, Camelot's curtain, Gorrick's palisade and Dracula's garden wall. Their line is claimed so lots keep off it. Gateways with flanking towers open wherever a road (or a river) crosses, and at named `gates`. Towers stand at the turns.
+- Aqueducts are a polyline falling evenly from `from` to `to`, with piers every fourth cell and arches between, a channel of running water (Fluids currents) and a cistern with a spout at the foot. Valgard's carries village water from the highland, separate from the mine runoff.
+- Lanes run from every door to the road network: breadth-first over open ground (no step over two), then pulled taut into straight runs, two cells wide, graded to no more than one cell a step, gravel.
+- After the cells are written, `Architecture.raise` draws every structure, then:
+  - bridges get a kerb and parapet (stone, or fence rails on plank bridges) and piers down to the bed
+  - streets get lamp posts at the kind's `lamps` spacing inside the realms
+  - the checks run: every doorway open two high with a floor before it, no wall in front of it and no drop; no two lots overlapping; no two underground volumes overlapping; water samples inside a reserved volume are noted
+- Water structures (Bryn's pile hut, Skarn's boathouse) get a plank walk on posts from each door to the shore.
+- Styles are data, per culture:
+  - Loxford: stone and timber framing under slate
+  - Loxford cottages: timber framing and thatch
+  - Harlette: black timber, pale stone and thatch
+  - Harlette manor: stone, slate and stained glass
+  - Valgard: limestone, slate and white banners
+  - Gorrick: dark timber and a log palisade
+  - Azharad: sandstone with terracotta bands, flat crenellated roofs, a gold dome
+  - Severia: whitewash, marble and terracotta at half pitch, sea-blue glass
+  - Camelot: pale stone, slate and red banners
+  - the wilds: timber, ruin, mine, cave and basalt styles, plus lantern and beacon
+- Templates in `Kit`, each drawn in its own frame (front toward -v) and rotated, never mirrored, onto the world:
+  - `building`: footing, storeys with a base course, corner posts, two-faced walls, timber posts every third cell on timber-framed storeys, windows with lintels (three tall where the storey is six), a doorway with posts and lintel, optional back door, jetty, chimney, front towers and banner; roofs can be gable (pitch from the style), hip, pyramid, flat with parapet or crenellation, dome or lean-to; stone buildings use their wall stone for gables
+  - `castle`: curtain and walk, inset round corner towers, a gatehouse inside the lot, a cobbled court, a well and lamps, a three-storey keep with front round towers and square back towers, an undercroft stair, and named points `spawn`, `spawnLook`, `keepDoor`, `bankTeller`, `bankCustomer` and `gate`
+  - `keep`, `tower` (round or square; crenel, cone, pyramid or Lantern crown; `topY`; cellar stair), `church` (nave plus bell tower), `courtyard` (ring range, gate, court doors, well, dome, minarets), `classical` (portico)
+  - `hall`, `stable`, `mill` (wheel on whichever flank has water), `plaza` (stalls, well, statue, lamps), `garden`, `field` (furrows, vine rows), `orchard` (trees planted at plan time so a cell-less survey grows the same world), `yard`, `pier` (and `span` for the rope crossing), `weir`, `gatehouse`, `cellar`, `graveyard` (with an optional crypt house), `mouth` (cave, mine adit or dressed portal, a passage and a sealed end), `ruin`, `camp` (tents, fire ring, stakes), `stones`, `gibbets`, `shrine` and `sunkbell`
+- Every underground place's volume beyond its sealed door is reserved, and interiors are reserved per building, so 0.4.2 can build into them: Loxford Crypt, Castle Undercroft, Murk caves, both Hollow Crags mines and the highland adit, Spider Nest, Museum Vault, Lantern Cellars, Ashmaw Throat, Sunkissed and Marble Mines, Goblin Hollow, the culvert cave and the Duck's cellar shortcut.
+- Roads in `shadowveil.json`:
+  - new kinds `street`, `street_sand`, `street_marble` (each with lamp spacing), `track`, `lane` and `stair`
+  - the towns' streets: High Street, Church Lane, the Back Lane, Valgard's High Street, Residents' Street, Sanctuary Street and Founders' Row, Gorrick's Hall Street, the Souq, Palace Street, Khan Street and Azharad's lanes, the Mese, Via Palatina, the North Quay and Quay Road (the northern quay bridge), West Avenue and the other Severian streets, The Ward, and Pilgrim's Stair
+  - road ends moved off the buildings they used to run into (Loxford Castle, the Duck, Azharad Palace, Valgard Keep, Camelot Keep)
+- The architecture data also gives the settlements' patrols (`ShadowVeil.patrol`), `services` (the bank in Loxford Castle's keep, read by `Bank.customerSpot`/`tellerSpot` and the dialogue's directions), `posts` (the teller's) and `farms` (`Farming` fields).
+- `Survey`:
+  - the walking flood goes round built lots (`standAt`)
+  - a chunk wholly under a castle counts as reached through its gate
+  - every structure's front must be reachable from Loxford Castle
+  - the architecture's failures and notes are merged in
+  - `town-<realm>.png` is drawn per settlement
+
+### Spawn, saves, devmode
+- `WorldMap.spawnYaw`. ShadowVeil spawns in Loxford Castle's keep hall, five cells in, facing the keep door and the gate beyond it; `Rpg.init` snaps the camera to it. Saved in `architecture.spawn`.
+- `CharacterRecord` stores the character apart from the world:
+  - what it holds: name, appearance, skills' XP by skill name, the pack (with its grid width), worn gear by slot name, quick slots, spell and book, prayers, every bank vault with its cells and items, quests, Honor and faith
+  - every save writes it as `"character"` and beside the save as `character.json`
+  - `SaveSystem.load` on a save from another version's line or another map now carries the character over instead of refusing: `fromSave` reads either the record or a pre-0.4.1 save's player block, vault objects, quests and Honor; `apply` burns the new game's starting items and mints the record's (so the ledger holds); `Bank.restoreAccount` reopens the vault; the player is set down at the spawn
+  - unknown skills or items are noted, never fatal
+  - the title screen says the character carries over
+- `rpg.ui.DevDisplay` (console `devmode`, `devreport [note]`) shows:
+  - FPS over the last second with its worst frame; render load (chunks, quads, models, lights, meshing)
+  - XYZ; the document's chunk and the cell in it; heading and pitch
+  - jurisdiction, map, biome, ground Y, and the structure the player is in or near
+  - the block underfoot and the one looked at; the interaction focus
+  - date, hour and weather
+  - people near, far and off-stage (with step count), dead; animals and monsters
+  - the 6 nearest people, each with distance, line of sight to the player, awareness, goal and last outcome; sight lines are also drawn over the world (green seen, amber blocked, grey out of range)
+  - version, map, seed, heap and tick
+  - `devreport` writes all of it, the nearest person's full AI readout, the last 20 chat lines and the profile (under `RPG_PROF`) to `reports/bug-<time>.txt`, and takes a screenshot.
+
+### NPCs
+- `rpg.ai.Offstage` runs only on ShadowVeil:
+  - a resident past 150 m (`offstage.unload`) loses their body and agent; they come back inside 125 m (`offstage.reload`), where their day left them
+  - companions, posses, hunts, riders, the carried, summons, anyone busy, reacting, traversing, fighting, fleeing, searching or reporting stay in play
+  - every 10 game minutes their day runs as a schedule: asleep at home 22:00–06:00 (fatigue recovers), at home for breakfast and the midday meal (hunger falls), about home in the evening, at work otherwise
+  - work: woodcutters, miners and fishers take real stock from the nearest node of their trade within reach of home, minted into their pack; crop farmers cut ripe rows and sow bare ones from seed carried
+  - a full pack is sold at the town's shop if it lies within 400 m of home (`offstage.sellReach`); the seller stays at their site
+  - every step goes into the diary and last outcome as `(off-stage) ...`
+  - `Npc.offstage` is saved
+- Work sites on ShadowVeil must lie within the leash of home (`ZonePolicy.withinReach`, in `Jobs.site` and `AiSystem.nearestNode`). The nearest node across the map used to send workers on journeys their routine refused, so they stood still.
+- ShadowVeil pot spots are crab cages (`crab_spot`, raw crab), so shellfish gatherers have work.
+- Fishing stand spots search 8 rings for a bank (was 4).
+- Innkeepers and bartenders without an inn of the inns system keep the house at their post (`Livelihoods.keepHouse`).
+- `Farming.FIELDS` is per map (`DEVMAP_FIELDS` or `ShadowVeil.farms()`), with a floor `y` on `Field`. Cuthmar's garden in Loxford and the terrace garden by the Severian vineyard are the crop farmers' (`Ids.SV_PLOTS` plots). `FarmModels` draws at each field's own floor.
+- The bank's teller is posted to the keep (`Settle.person` reads `posts`).
+- Going to bed (found by `NpcRoutineTest` and `WeeklyLifeTest`, which failed on 0.4.0). A bed is not standable since 0.4.0, so `standY` at a bed found the next standable cell up its column, which was the roof. Everyone going to sleep walked for the roof and paused at 'a blocked route'. `Brain.goTo` now takes a spot whose standable cell is on another floor than the target (or, with no target height, than the walker) from the nearest standable cell beside it on that floor. This also covers the old fallback for spots with nothing to stand on.
+- The mansion had furniture on its only ways through:
+  - the kitchen stools shut off the servants' room (Gamefixes038: the household woodcutter never lit the fire)
+  - an armour stand stood at the foot of the stair to the top floor
+  - a candelabrum stood on the porter's post
+  They now stand by the walls. New `rpg.world.Gamefixes041PostsTest`: no one's post is furniture or in the air, and every floor of the mansion can be walked to from the hall.
+- Fishing (Gamefixes035, failing on 0.4.0): `Fishery.cast` keeps the same lure across casts. Anglers and waders who are standing still no longer scare fish. Predators scare only their own prey, or fish within 1.8 m plus their length.
+
+### Doors
+- `Door` has its own `floor` (a new constructor). Every ShadowVeil doorway that hangs a door gets a closed, unlocked `Door` (ids from `Ids.SV_DOORS`). Gates, court arches and cave mouths stay open (`Out.gate`, `Structure.doorLeaf`).
+
+### Terrain and water
+- `Terrain.pits` runs after the plan. It fills a single cell below all four neighbours, or a two-cell trough below its six, and takes down a lone cell proud of all four (never a road or a cliff). 1,341 cells filled. A probe across the whole map finds no voxel pits left outside lots.
+- Road shoulders: each cell is shaped once, by the nearest point of its road, from the ground as it was. Every sample used to stamp the verge in turn, leaving one-cell notches and ledges along both sides. Verges are worn in patches (low-frequency noise), not cell by cell.
+- The stray cobble and stone blocks on the ground near Loxford's High Street were the castle's corner towers spilling 4 cells outside its lot. They are inset now.
+- `Terrain.curtains`: where a river drops two or more cells, the cell below is filled from its surface up to the stretch above, so the drop is a curtain of water. Each cell goes on `Terrain.falls`, and `Gfx` draws spray there near the eye.
+- `ShadowVeil.currents` splits each river leg into reaches of about 10 cells, so boxes hug the channel and follow bends. `Fluids.flow` averages overlapping reaches instead of summing them. `Gfx` sends the 32 nearest reaches, sorted by distance (it used to send the first 16 in the list).
+- Floating foliage: each 16x16 chunk of plants was drawn as one mesh translated to the ground height at the chunk's corner, so on slopes whole patches floated or sank. A chunk is now one mesh per height its plants stand at, each drawn at its own height. Each plant still bends from its own root.
+- Leaf textures have smaller leaves, more of them, and gap thresholds of 0.20–0.27 (were 0.30–0.38).
+
+### Engine (Astratto)
+- Auto-jump (`Mover::hopUp`). Walking into a one-cell rise of a full opaque cube (no door, grating or stair) with room above now gives a hop: `vy = sqrt(2g(rise + 0.18))`. The push is kept while rising (`hopping`) and cleared on landing. This replaces `GROUND_LIFT`'s instant lift, which `Mover::seen` showed as a placement (over 1 m in one step), so bodies appeared on top. Stairs and lips are still walked.
+- The chunk mesher draws a crown's outer leaf faces under its cards in card mode as well, and puts four larger cards (overhanging the cell) on surface cells.
+- `leaf.glsl`: 14–19 smaller leaves on three twigs per card.
+- `world.vert` `uLod`: leaf cards past `max(28, viewDistance * 0.62)` are dropped (gbuffer and shadow passes), so a crown near the fog is its faces alone.
+- `water_waves.comp` takes up to 32 reaches and averages overlapping ones by weight; the renderer accepts 32 (was 16).
+- `world_forward.frag`: vertical water faces stream downward with white water (falls, rapid steps).
+- The native library was rebuilt.
+
+### Rendering and loading
+- `Gfx`: the world is drawn `render.pastFog` (24 m) past the fog bank's far edge, so the bank covers the end of the rendering. The gallery's high views scale the fog (`reviewFogScale`).
+- The load stutter (measured with the gallery's `stutter` mode): the first frame took 3.7 s and the next 20 about 300 ms each. Three causes:
+  - every `Door` rewrote its cells when it was hung, which re-meshed a few hundred chunks just after loading. ShadowVeil's doorways are now built shut, and a door whose cells already hold what it wants leaves them alone the first time.
+  - the renderer worked off a backlog of more than 600 columns at 192 a frame. It is now 48 (24 past 96, 12 otherwise).
+  - the first tick paid the engine's first frame and every creature's first plan (about 1 s).
+- `Main.preloadAll` now readies the spawn before the first frame: plant growth, the routing graph within 96 m (`RuntimeNavigation.warmAround`, `load.navRadius`), one tick of the world, and hidden frames in the renderer's loading mode (`camera(..., prepare)`: everything pending meshed at once, probes settled) until nothing is pending or 20 s pass (`Gfx.preloadChunks`).
+- Result: after a 9 s preload, the first frame takes 1.3 s and the next frames 20–50 ms (no mesh backlog left), settling at 13 ms. Before: 3.7 s, then about 20 frames over 300 ms.
+
+## Pass 31 - Alpha 0.4.0 "Lay of the Land" (Hoodie)
+
+The move to the permanent world. ShadowVeil (1,072 x 1,072, 200 high, ground kept to Y99) is built from `projectrpg.txt`'s WORLD BUILDING section, and the game launches on it. The devmap is kept whole beside it for regression testing: `RPG_MAP=devmap`, Settings > World, or any acceptance or gallery run. Review sheets are in `work/p26/` (gallery mode `p26`; with `RPG_MAP=shadowveil` the vistas `loxford, mere, dimwater, gorge, scarp, falls, ashmaw, azharad, severia, deadwood, crags, heath, cove, aerial`; on any map `dismount` and `beasts` with `RPG_BEASTS=...`). New tests: `rpg.world.ShadowVeilTest` (survey, engine, determinism, roster, a stress game-day, the routing-graph warm probe), `rpg.Gamefixes040Test`, `rpg.ai.ClusterProbeTest`. The native library was rebuilt (121 self-tests pass).
+
+### Engine (Astratto)
+- Cell keys are 11/11/9 bits (x, z, y) in the native pathfinder, `ai_service` blocked costs and the Java `RuntimeNavigation`, so worlds can be up to 2048 x 511 x 2048 (was 1024 a side).
+- New block flag `ASTRATTO_BLOCK_GROUND` (1 << 11): a mover walks up one cell of natural ground (`GROUND_LIFT` 1.02 in `Mover::stairRise`/`climbStair`), the walkability check treats it like a tread, the pathfinder charges 0.45 instead of a jump, and agents don't jump there. Only ShadowVeil's block table sets it (`Blocks.engineDefs(true)`); the devmap's is unchanged.
+- `Pathfinder::stand` no longer stands on cutout blocks (furniture, fences, hedges, leaves). This fixes NPCs jumping onto tables. The Java routing graph follows the same rule.
+- Depth-of-field autofocus: `shaders/focus.frag` eases a 1x1 R32F focus distance toward the centre of the screen (focusing in is quicker than out). `lens.frag` reads it instead of re-sampling every pixel each frame.
+- `VoxelWorld::lightBox` splits its sky and seed passes across threads by x slices for large boxes (whole-world light 3.8 s down to 1.8 s), queueing results in slice order so the fill stays deterministic.
+
+### ShadowVeil (`rpg.world.shadowveil`, data `resources/data/shadowveil.json`)
+- `Atlas` reads the design. Coordinates are the document's 1-based chunks with z south to north; cell z is turned over so the map's south is +z, as on the devmap. A `shadowveil.json` beside the game overrides the built-in design.
+- `Terrain` generates the world deterministically from the seed:
+  - registry regions blended pairwise through a domain warp, then settlement and landmark overlays as warped superellipses, with heights eased into each core's target range
+  - biome variants (woods, copses, heath, dunes, stony ground, groves) and peaks (Ashmaw's cone with its crater rim at Y92, Gallows Tor, the crags)
+  - the northern scarp, wobbling, varying in height and broken by its valleys
+  - the shore belt round all four edges, with an asymmetric warp so the very edge is always sea
+  - thermal erosion, column-striped across cores (1.4 s down to 0.34 s)
+  - lakes with marsh fingers and the Lantern isle; rivers that meander and run in valleys widened to their depth (smoothed along their length), with the Murk Gorge keeping its walls; dry wadis
+  - roads as Catmull-Rom splines, grade-limited to 0.34, with banks that widen with the cut or fill; bridges over water; causeways
+  - bank holding (no water ever stands above dry ground), surface materials, trees by species shape, boulders, ore outcrops
+- `Survey` checks the design's rules and draws `relief/height/realms/reach.png` (`gradlew shadowveil`). The rules: ocean on every edge, nothing above Y99, settlement elevation targets, peak heights, lake surfaces including Dimwater at Y44, rivers running downhill to the sea, no step over one cell on any road, all seven settlements and every named place reachable from Loxford Castle and back, and every chunk reachable on foot or by swimming.
+- `ShadowVeil` covers:
+  - building the engine world (pristine copy kept), activating the map, and jurisdictions from the realm boxes (Loxford, Harlette and Severia keep the lawmen of DevCity, DevTown and DevPalace)
+  - patrol loops, named places, dry spots, fishing spots
+  - realm tints as TimeSystem regions (from the spec's Visual Tint lines), river currents for `Fluids`, and ground mists as fog volumes for the volumetric march
+- `Settle` moves the people to the homes given by the transfer rules (by `Ids` name, role or old town). Animal habitats move whole (`Habitat.moved`), monster lairs go to their kinds' places, and everything is set on the ground.
+
+### Shared systems made map-aware
+- `rpg.world.WorldMap` (active map, size, sea, spawn, `standY`/`settleY`) and `rpg.world.Ground` (`at`/`cell`). About 200 runtime uses of `DevMap.FLOOR` now ask the ground. On the devmap these return the floor exactly as before.
+- `DevMap.ALPHA`/`BETA`/`PALACE` are no longer final; the active map names them.
+- `Rpg.init` branches by map: devmap fixtures, inns, guilds, the mansion, interiors, dungeons and dummies only on the devmap. `Objects.buildShadowveil` turns the trees, outcrops and fishing waters into nodes in the `Ids.WILD_NODES` band. `Node.base` and `Node.grown` mean a felled tree takes down every joined cell and regrows them.
+- Shops move to their keepers. `Foliage` covers the active map and lets far chunks go (`foliage.keepChunks`/`evictRing`). The minimap and world map size themselves to the map, shade ShadowVeil's relief and name its realms.
+- `Main` picks the map; saves are stamped with `map` and refuse the other world's.
+- New blocks: `ASH` 210, `HEATH` 211, `PODZOL` 212, `DRY_GRASS` 213, `PINE_LEAVES` 214 (`COUNT` 215, new layers, `CHAR_LAYER0` 111, `LAYERS` 124).
+
+### Performance on the big map
+- `ZonePolicy` leash (`shadowveil.leash` 120 m): routines past it are pulled home. Travellers on their work, hunts, posses and companions are exempt.
+- `AiSystem.nearestNode` counts occupancy once and prunes by distance; `Objects.byDef`; a grid for `nodeAt`.
+- `Objects.near`, a 16 m grid, is used for focus and the minimap.
+- `Voxels` chunk versions are an array; the long hash folded each column of chunks into a few buckets.
+- `RuntimeNavigation`:
+  - chunks use primitive `IntTable`s and stop at each column's top (whole-world warm 14.3 s / 153 MB down to 6.5 s / 28 MB)
+  - corridor searches are bounded (`nav.corridorZones`, kept to a box `nav.corridorMargin` round the ends)
+  - a per-tick work budget for route searches (`nav.routeBudget`, counted in cells and zones, so runs stay deterministic)
+- `Jobs.site` and `Jobs.station` no longer scan the whole world list.
+- Stress run of a game day on ShadowVeil at 24x speed: 30.5 ms a tick (worst 13.3 s) down to about 6–7 ms (worst 0.26 s, the first frame).
+
+### Gamefixes
+- Unseen strikers: `Actor.Combat.attackerKnown` is set by `AiSystem.knowsStriker`, which is true for a melee blow at arm's length or a striker the victim can see. When it is false, `unknownStrike` starts a search for an unknown culprit toward the shot, or makes non-fighters afraid. The 0.6 s and 12 s "it was them" rules respect it.
+- `AiSystem.clearSpawn` sets NPC and monster bodies made inside furniture or walls down on the nearest open, supported cell.
+- `Riding.stepDown` plays the mount climb backward (`descend`, `finishDown`, `mounts.dismountShare`) for the player's and companions' dismounts. Being thrown or knocked off keeps the instant parting.
+- `Brain.prayerPlace` and `Npc.prayAtX/Z` give each worshipper a place in rows before the altar. This was almost all the idle knots in `ClusterProbeTest`.
+- Allies are green: `Style.ALLY`, `Minimap.ally`.
+- Hit reactions:
+  - `Actor.Combat.hitDirX/Z`, `hitForce`, `hitPart` and `hitAt` are set in `CombatSystem.resolve`
+  - `Rig` drives the torso the way the blow went, with twist and roll, and adds a head snap for head blows and a knee buckle for leg blows
+  - animals rock and brace, and humanoid monsters lean, roll and throw the head
+- Quadrupeds:
+  - jointed legs for every four-legged animal with legs of 5+ voxels, hunters' joints lower (`AnimalModels.hunter`)
+  - footfall tables (`Gfx.footfalls`) for walk, trot, canter and gallop, with the hunters' rotary gallop and back flexion
+  - predators crouch, spring and bite with a head shake (the Dire Wolf's harder); bears rear and rake
+- Settings gained Bloom (a strength scale), Depth of field (Off, Subtle, Cinematic) and Volumetric lighting; `Config.bloom/dofMode/volumetrics/maxBlur`.
+- The fog ranges are unchanged, as the spec asks.
+
+### Removed
+- Unused helpers from this pass and leftover devmap-size bounds in `Brain`, `CombatTactics`, `Posses`, `Monsters`, `Gore`, `Riding`, `Chemistry`, `WaterContacts` and the decal source, which now ask the active map.
+
 ## Pass 30 - Alpha 0.3.9 "Ride or Die" (Hoodie)
 
 Committed together with Pass 29 (0.3.8), which was still uncommitted when this pass began; its twelve failing tests were fixed first (below). Review sheets in `work/p25/` (`direwolf-*`, `mount-fNN` on threes, `attack-fNN`, `peg-<phase>-fNN`, `ride-swim`, `int-NN-<room>`, `squad-frames/menu/wheel`, `seats-inn`), gallery mode `p25` (`RPG_REVIEW_ONLY=direwolf,mount,attack,pegasus,swim,interiors,squad,seats`). New test class `rpg.Gamefixes039Test`. The native library was rebuilt (Impulsis joint skipping, opt-in profiling).

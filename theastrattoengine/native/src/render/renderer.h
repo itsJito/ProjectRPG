@@ -192,7 +192,7 @@ private:
     gl::GLuint leafTex_ = 0;                // 2.5: the baked leaf cards (64 x 64 x 16, RG: cut, midrib)
     void bakeLeaves();
     Program gWorld_, gModel_, sWorld_, sModel_, lighting_, cull_, gtao_, aoBlur_, ssr_, vol_, fogApply_, fWorld_, fModel_, particle_, taa_,
-            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_, rain_;
+            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_, rain_, focus_;
     // (0.3.8) the rain: the height of the highest solid thing in each column of the world (R16F, x by z), kept with the
     // voxel volume; the rain is drawn only above it
     gl::GLuint roofTex_ = 0;
@@ -217,6 +217,9 @@ private:
     int bloomW_[BLOOM_LEVELS] = {}, bloomH_[BLOOM_LEVELS] = {};
     gl::GLuint lumTex_ = 0, lumFbo_ = 0, expoTex_[2] = {}, expoFbo_[2] = {};
     int expoIdx_ = 0;
+    // (0.4.0) the depth of field's autofocus: the distance focused at, eased frame to frame (focus.frag)
+    gl::GLuint focusTex_[2] = {}, focusFbo_[2] = {};
+    int focusIdx_ = 0;
     gl::GLuint shadowTex_ = 0, shadowFbo_[4] = {};
     int shadowRes_ = 0, shadowLayers_ = 0, cascadeAge_ = -1;
     gl::GLuint layerMat_ = 0, fsVao_ = 0, lightBuf_ = 0, tileBuf_ = 0, white_ = 0;

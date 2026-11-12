@@ -168,10 +168,22 @@ public final class FoliageModels {
         }
         return boxes;
     }
-    static float[] chunk(Foliage.Chunk chunk) {
+    /** The heights the chunk's plants stand at (each its own mesh, drawn there - see {@link #chunk(Foliage.Chunk, int)}). */
+    static int[] levels(Foliage.Chunk chunk) {
+        java.util.TreeSet<Integer> l=new java.util.TreeSet<>();
+        for(var plant:chunk.plants)if(!plant.removed)l.add(level(plant));
+        return l.stream().mapToInt(Integer::intValue).toArray();
+    }
+    static int level(Foliage.Patch p){return (int)Math.floor(p.y+1e-3f);}
+    /**
+     * (0.4.1, gamefixes: foliage in the air) the plants of a chunk that stand at one height: a chunk on a slope is drawn
+     * as one mesh per height, each set down at its own (the whole chunk was drawn at its corner's height, so on ShadowVeil's
+     * hills its plants floated above the ground or sank into it); each plant still bends from its own root.
+     */
+    static float[] chunk(Foliage.Chunk chunk,int height) {
         Meshes.Boxes merged=new Meshes.Boxes();
         var leaves=new java.util.ArrayList<float[]>();
-        for(var plant:chunk.plants)if(!plant.removed) {
+        for(var plant:chunk.plants)if(!plant.removed && level(plant)==height) {
             float co=(float)Math.cos(plant.facing),si=(float)Math.sin(plant.facing);
             // the plant's root, packed into the vertex alpha for the bend (model.vert): every part leans from it
             float root=2+Math.clamp(Math.round((plant.x-chunk.x)*16),0,255)+256*Math.clamp(Math.round((plant.z-chunk.z)*16),0,255);

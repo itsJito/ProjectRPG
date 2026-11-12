@@ -77,6 +77,8 @@ public final class Monsters {
     }
 
     public Lair addLair(MonsterKind kind, String name, float x, float z, int minLevel, int maxLevel, int cap) {
+        // (0.4.0) on ShadowVeil a kind's lair is where the design puts its kind (Goblin Hollow, the Spider Nest...)
+        if (rpg.world.WorldMap.shadowveil()) { float[] p = rpg.world.shadowveil.Settle.lair(kind.name(), x, z); x = p[0]; z = p[1]; }
         Lair l = new Lair(g.state.newEntityId(), kind, name, x, z, minLevel, maxLevel, cap);
         lairs.add(l);
         return l;
@@ -86,6 +88,11 @@ public final class Monsters {
     /** A monster made in the world (a birth at its lair, a recolonisation, a dungeon's resident): its body, kit, drives. */
     public Monster spawn(MonsterKind kind, int level, float x, float z, Lair lair) {
         level = Math.max(kind.minLevel, Math.min(kind.maxLevel, level));
+        // (0.4.0) a resident placed by the devmap's numbers comes home to its lair where the lair has moved
+        if (lair != null && rpg.world.WorldMap.shadowveil() && Math.hypot(x - lair.x, z - lair.z) > 24) {
+            float[] p = rpg.world.shadowveil.ShadowVeil.dry(lair.x + (float) Math.cos(lair.id + spawned) * 2.5f, lair.z + (float) Math.sin(lair.id + spawned) * 2.5f);
+            x = p[0]; z = p[1];
+        }
         Monster m = new Monster(g.state.newEntityId(), kind, level, x, z);
         if (lair != null) { m.lair = lair.id; m.lairX = lair.x; m.lairZ = lair.z; }
         else { m.lairX = x; m.lairZ = z; }
@@ -149,6 +156,8 @@ public final class Monsters {
         CommandBuffer c = g.game.commands();
         m.body = g.game.reserve(KIND_MOVER);
         int flags = m.kind.flies() ? MOVER_FLY : MOVER_AGENT;
+        m.y = rpg.world.WorldMap.settleY(m.x, m.y, m.z);
+        if (!m.kind.flies()) g.ai.clearSpawn(m);
         c.moverCreate(m.body, m.x, m.y + 0.05f, m.z, m.radius, m.height, Math.min(1.2f, m.height * 0.4f), flags, m.height * 0.8f);
         m.agent = 0;
         if (!m.kind.flies()) g.ai.agentFor(m, m.eyeY() - m.y, m.kind.sight);
@@ -236,7 +245,7 @@ public final class Monsters {
             int cx = (int) Math.floor(x) + dx, cz = (int) Math.floor(z) + dz;
             boolean ok = true;
             for (int ox = -1; ox <= 1 && ok; ox++) for (int oz = -1; oz <= 1 && ok; oz++)
-                ok = g.vox.solid(cx + ox, DevMap.FLOOR - 1, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR, cz + oz) && !g.vox.solid(cx + ox, DevMap.FLOOR + 1, cz + oz) && g.vox.block(cx + ox, DevMap.FLOOR - 1, cz + oz) != Blocks.WATER;
+                ok = g.vox.solid(cx + ox, rpg.world.Ground.cell(cx + ox, cz + oz) - 1, cz + oz) && !g.vox.solid(cx + ox, rpg.world.Ground.cell(cx + ox, cz + oz), cz + oz) && !g.vox.solid(cx + ox, rpg.world.Ground.cell(cx + ox, cz + oz) + 1, cz + oz) && g.vox.block(cx + ox, rpg.world.Ground.cell(cx + ox, cz + oz) - 1, cz + oz) != Blocks.WATER;
             if (ok) return new float[]{cx + 0.5f, cz + 0.5f};
         }
         return new float[]{x, z};
@@ -244,11 +253,11 @@ public final class Monsters {
 
     /** The nearest open cell to a point (somewhere a body can stand), within a few cells. */
     float[] open(Monster m, float x, float z) {
-        x = Math.max(2, Math.min(DevMap.SX - 3, x)); z = Math.max(2, Math.min(DevMap.SZ - 3, z));
+        x = Math.max(2, Math.min(rpg.world.WorldMap.active().overworldX() - 3, x)); z = Math.max(2, Math.min(rpg.world.WorldMap.active().sizeZ - 3, z));
         if (m.kind.flies()) return new float[]{x, z};
         for (int r = 0; r < 5; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
             int cx = (int) Math.floor(x) + dx, cz = (int) Math.floor(z) + dz;
-            if (g.vox.solid(cx, DevMap.FLOOR - 1, cz) && !g.vox.solid(cx, DevMap.FLOOR, cz) && !g.vox.solid(cx, DevMap.FLOOR + 1, cz) && g.vox.block(cx, DevMap.FLOOR - 1, cz) != Blocks.WATER) return new float[]{cx + 0.5f, cz + 0.5f};
+            if (g.vox.solid(cx, rpg.world.Ground.cell(cx, cz) - 1, cz) && !g.vox.solid(cx, rpg.world.Ground.cell(cx, cz), cz) && !g.vox.solid(cx, rpg.world.Ground.cell(cx, cz) + 1, cz) && g.vox.block(cx, rpg.world.Ground.cell(cx, cz) - 1, cz) != Blocks.WATER) return new float[]{cx + 0.5f, cz + 0.5f};
         }
         return new float[]{m.x, m.z};
     }
@@ -256,14 +265,16 @@ public final class Monsters {
     /** How high a bat hangs at its roost: just under the lowest thing over it (a canopy, a roof, a cave's ceiling). */
     float hangHeight(Monster m) {
         int bx = (int) Math.floor(m.lairX), bz = (int) Math.floor(m.lairZ);
-        for (int y = DevMap.FLOOR + 1; y < DevMap.SY - 1; y++) if (g.vox.solid(bx, y, bz)) return Math.max(1.5f, y - DevMap.FLOOR - m.height - 0.1f);
+        int floor = rpg.world.Ground.cell(bx, bz), top = rpg.world.WorldMap.active().sizeY;
+        for (int y = floor + 1; y < top - 1; y++) if (g.vox.solid(bx, y, bz)) return Math.max(1.5f, y - floor - m.height - 0.1f);
         return 3;
     }
 
     /** How high an imp perches above the ground at its nest (the roof it nests on). */
     float perchHeight(Monster m) {
         int bx = (int) Math.floor(m.lairX), bz = (int) Math.floor(m.lairZ);
-        for (int y = DevMap.SY - 2; y > DevMap.FLOOR; y--) if (g.vox.solid(bx, y, bz)) return y + 1 - DevMap.FLOOR;
+        int floor = rpg.world.Ground.cell(bx, bz), top = rpg.world.WorldMap.active().sizeY;
+        for (int y = top - 2; y > floor; y--) if (g.vox.solid(bx, y, bz)) return y + 1 - floor;
         return 0;
     }
 
@@ -360,14 +371,14 @@ public final class Monsters {
         int y = (int) Math.floor(m.y + 0.5f);
         while (y > 0 && g.vox.solid(bx, y, bz)) y--;
         for (; y > 0; y--) if (g.vox.solid(bx, y - 1, bz)) return y;
-        return DevMap.FLOOR;
+        return rpg.world.Ground.at(m.x, m.z);
     }
 
     /** The underside of whatever is over a flyer's floor (the open sky: the top of the world). */
     private float ceilingAbove(Monster m, float ground) {
         int bx = (int) Math.floor(m.x), bz = (int) Math.floor(m.z);
-        for (int y = (int) ground; y < DevMap.SY - 1; y++) if (g.vox.solid(bx, y, bz)) return y;
-        return DevMap.SY;
+        for (int y = (int) ground; y < rpg.world.WorldMap.active().sizeY - 1; y++) if (g.vox.solid(bx, y, bz)) return y;
+        return rpg.world.WorldMap.active().sizeY;
     }
 
     // ------------------------------------------------------------------ the frame
@@ -428,11 +439,11 @@ public final class Monsters {
                 ItemStack s = c.contents.get(i);
                 if (s == null) continue;
                 c.contents.set(i, null);
-                g.objects.drop(s, x + (k % 3 - 1) * 0.3f, DevMap.FLOOR + 0.05f, z + (k / 3 - 1) * 0.3f); k++;
+                g.objects.drop(s, x + (k % 3 - 1) * 0.3f, rpg.world.Ground.at(x + (k % 3 - 1) * 0.3f, z + (k / 3 - 1) * 0.3f) + 0.05f, z + (k / 3 - 1) * 0.3f); k++;
             }
             c.removed = true;
         }
-        for (ItemDef.Slot s : ItemDef.Slot.values()) { ItemStack w = m.eq.get(s); if (w != null && !w.def.natural) g.objects.drop(w, x, DevMap.FLOOR + 0.05f, z); m.eq.set(s, null); }
+        for (ItemDef.Slot s : ItemDef.Slot.values()) { ItemStack w = m.eq.get(s); if (w != null && !w.def.natural) g.objects.drop(w, x, rpg.world.Ground.at(x, z) + 0.05f, z); m.eq.set(s, null); }
         g.state.commit("MonsterRemainsGone", 0, m.id, DevMap.jurisdiction(x, z), 0, m.kind.title);
         if (g.carrying != null) g.carrying.release(m);
         remove(m);
@@ -507,7 +518,7 @@ public final class Monsters {
         for (int i = alive; i < want; i++) {
             Monster m = spawn(l.kind, l.sealed() ? l.maxLevel - (i % 3) * 2 : l.minLevel + i, l.x, l.z, l);
             float[] at = open(m, l.x + (i % 3 - 1) * 1.6f, l.z + (i / 3 % 3 - 1) * 1.6f);
-            g.teleport(m, at[0], DevMap.FLOOR, at[1]);
+            g.teleport(m, at[0], rpg.world.Ground.at(at[0], at[1]), at[1]);
         }
         return want - alive;
     }
@@ -530,7 +541,7 @@ public final class Monsters {
             for (int i = 0; i < n; i++) {
                 Monster m = spawn(l.kind, l.sealed() ? l.maxLevel - (i % 3) * 2 : l.minLevel + (int) ((l.maxLevel - l.minLevel) * 0.4f) + i, l.x, l.z, l);
                 float[] at = open(m, l.x + (i % 3 - 1) * 1.6f, l.z + (i / 3 % 3 - 1) * 1.6f);
-                g.teleport(m, at[0], DevMap.FLOOR, at[1]);
+                g.teleport(m, at[0], rpg.world.Ground.at(at[0], at[1]), at[1]);
             }
             if (n > 0) { l.clearedAt = -1; l.morale = 1; }
             l.lost = 0;
@@ -604,7 +615,7 @@ public final class Monsters {
         float fx = (float) -Math.sin(m.yaw), fz = (float) -Math.cos(m.yaw), hy = m.eyeY();
         for (int i = 1; i <= 6; i++) {
             float d = i * 2.4f;
-            g.chemistry.emit(m, element, m.x + fx * d, Math.max(DevMap.FLOOR + 0.5f, hy - d * 0.25f), m.z + fz * d, 0.8f + i * 0.35f, 4, 0.6f);
+            g.chemistry.emit(m, element, m.x + fx * d, Math.max(rpg.world.Ground.at(m.x + fx * d, m.z + fz * d) + 0.5f, hy - d * 0.25f), m.z + fz * d, 0.8f + i * 0.35f, 4, 0.6f);
             g.chemistry.visual(breed == MonsterKind.Breed.FIRE ? 0 : 2, m.x + fx * d, hy - d * 0.25f, m.z + fz * d, 0.4f + i * 0.2f, 160, 0.4f, 0.7f, 2, 1.2f, 0.4f);
         }
         sound(m, "creature_roar", 1f);
@@ -641,7 +652,7 @@ public final class Monsters {
         if (m.kind.form == MonsterKind.Form.SPIDER) {
             if (m.ragdoll != 0) { g.game.commands().release(m.ragdoll); m.ragdoll = 0; }
             m.reacting = false;
-            m.y = Math.max(DevMap.FLOOR, (float) Math.floor(m.y + 0.5f));
+            m.y = Math.max(rpg.world.Ground.at(m.x, m.z), (float) Math.floor(m.y + 0.5f));
             while (m.y > 0 && !g.vox.solid((int) Math.floor(m.x), (int) Math.floor(m.y - 0.5f), (int) Math.floor(m.z))) m.y -= 1;
         } else if (m.kind.fallsApart && g.bones != null) {
             // (0.3.8, gamefixes: a skeleton's whole body should fall apart) no body to fall as one: each bone goes its own way
@@ -652,7 +663,7 @@ public final class Monsters {
         } else if (m.ragdoll == 0 && (g.reactions == null || !g.reactions.died(m))) {
             boolean posed = m.posePts != null && g.time - m.poseAt < 0.5;
             m.ragdoll = g.game.reserve(KIND_RAGDOLL);
-            g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), m.x, Math.max(DevMap.FLOOR, m.y), m.z, m.yaw, 0, 0, 0);
+            g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE | (posed ? 0 : RAGDOLL_STAND), m.x, Math.max(rpg.world.Ground.at(m.x, m.z), m.y), m.z, m.yaw, 0, 0, 0);
             if (posed) g.game.commands().ragdollPose(m.ragdoll, m.vx, 0, m.vz, m.posePts);
             g.game.commands().ragdollControl(m.ragdoll, CONTROL_DIE, 1);
         } else if (m.ragdoll != 0 && g.reactions != null) g.reactions.died(m);
@@ -739,7 +750,7 @@ public final class Monsters {
             else if (!m.alive) {
                 m.diedAt = g.time - astratto.util.Json.num(r, "deadFor", 0);
                 m.ragdoll = g.game.reserve(KIND_RAGDOLL);
-                g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE, m.x, DevMap.FLOOR, m.z, m.yaw, 0, 0, 0);
+                g.game.commands().ragdollCreate(m.ragdoll, m.ragdollScale(), m.sydneyProfile(), RAGDOLL_ACTIVE, m.x, rpg.world.Ground.at(m.x, m.z), m.z, m.yaw, 0, 0, 0);
                 List<Object> pose = astratto.util.Json.list(r, "pose");
                 if (pose != null && pose.size() >= RD_PARTICLES * 3) { float[] p = new float[pose.size()]; for (int i = 0; i < p.length; i++) p[i] = ((Number) pose.get(i)).floatValue(); g.game.commands().ragdollPose(m.ragdoll, 0, 0, 0, p); }
                 g.game.commands().ragdollControl(m.ragdoll, CONTROL_DIE, 1);

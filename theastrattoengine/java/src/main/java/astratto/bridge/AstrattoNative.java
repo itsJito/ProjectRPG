@@ -46,7 +46,9 @@ public final class AstrattoNative {
 
     // ---- the world
     public static final int BLOCK_SOLID = 1, BLOCK_OPAQUE = 1 << 1, BLOCK_CUTOUT = 1 << 2, BLOCK_CLIMB = 1 << 3, BLOCK_STEP = 1 << 4,
-            BLOCK_LIQUID = 1 << 5, BLOCK_HAZARD = 1 << 6, BLOCK_DOOR = 1 << 7, BLOCK_SKY_DIM = 1 << 8, BLOCK_LIGHT_PASS = 1 << 9, BLOCK_NO_COLLIDE_AI = 1 << 10;
+            BLOCK_LIQUID = 1 << 5, BLOCK_HAZARD = 1 << 6, BLOCK_DOOR = 1 << 7, BLOCK_SKY_DIM = 1 << 8, BLOCK_LIGHT_PASS = 1 << 9, BLOCK_NO_COLLIDE_AI = 1 << 10,
+            /** (0.4.0) natural ground: a rise of one cell onto it is walked up, not jumped */
+            BLOCK_GROUND = 1 << 11;
     public static final int MATERIAL_OTHER = 0, MATERIAL_GLASS = 1, MATERIAL_FOLIAGE = 2;
     public static final int WORLD_LIGHT = 1;
     public static final int EDIT_BLOCK = 1, EDIT_FILL = 5, EDIT_LIGHT_ALL = 6, EDIT_LIGHT_BOX = 7, EDIT_LIGHT_FILL = 8, EDIT_PRISTINE_SAVE = 9,

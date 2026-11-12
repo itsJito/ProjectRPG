@@ -38,7 +38,7 @@ public final class Fixtures {
         public Casket solid(Rpg g) {
             long body = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
             g.game.commands().rigidCreate(body, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, HX, HY, HZ, 0,
-                    x, rpg.world.DevMap.FLOOR + HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+                    x, rpg.world.Ground.at(x, z) + HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
             return this;
         }
         @Override public List<Option> options(Rpg g, Actor a) {
@@ -233,7 +233,7 @@ public final class Fixtures {
         public Board solid(Rpg g) {
             long body = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
             g.game.commands().rigidCreate(body, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, HALF_W, HALF_H, HALF_D, 0,
-                    x, rpg.world.DevMap.FLOOR + HALF_H, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+                    x, rpg.world.Ground.at(x, z) + HALF_H, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
             return this;
         }
         @Override public List<Option> options(Rpg g, Actor a) { return List.of(Option.on("read", "Read warrants", 10, g.cfg.interactRange)); }

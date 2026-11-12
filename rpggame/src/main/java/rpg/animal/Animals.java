@@ -96,7 +96,8 @@ public final class Animals {
         }
         habitats();
         trough = g.objects.trough == null ? null : new Trough(g.objects.trough);
-        roster();
+        rostering = true;
+        try { roster(); } finally { rostering = false; }
     }
 
     private void habitats() {
@@ -116,7 +117,19 @@ public final class Animals {
         float[][] glades = {{30.5f, 150.5f}, {44.5f, 176.5f}, {76.5f, 166.5f}, {108.5f, 178.5f}, {18.5f, 180.5f}};
         southWood = new Habitat("south_wood", "the southern wood", rpg.world.Expanse.WOOD_X0 + 2, rpg.world.Expanse.WOOD_Z0 + 2, rpg.world.Expanse.WOOD_X1 - 2, rpg.world.Expanse.WOOD_Z1 - 2, 0, brook, glades)
                 .cap(Species.DEER, 12).cap(Species.BROWN_BEAR, 2).cap(Species.RABBIT, 8).cap(Species.FOX, 2).cap(Species.DIRE_WOLF, 2);
+        // (0.4.0) on ShadowVeil each habitat moves whole to the wild the design gives it (rpg.world.shadowveil.Settle)
+        if (rpg.world.WorldMap.shadowveil()) { wild = moved(wild); farm = moved(farm); southWood = moved(southWood); }
         habitats.add(wild); habitats.add(farm); habitats.add(southWood);
+    }
+    /** Set while the starting roster is placed (its spots are the devmap's). */
+    private boolean rostering;
+    /** How far each habitat was moved to ShadowVeil (the devmap's spots in its roster move with it). */
+    private final java.util.Map<Habitat, float[]> shifted = new java.util.HashMap<>();
+    private Habitat moved(Habitat h) {
+        float[] d = rpg.world.shadowveil.Settle.habitatShift(h.id, h.cx(), h.cz());
+        Habitat m = h.moved(d[0], d[1]);
+        shifted.put(m, d);
+        return m;
     }
 
     /** Drinking spots round a pond: on the bank, facing the water (x, z, yaw). */
@@ -196,6 +209,13 @@ public final class Animals {
     }
 
     public Animal spawnNew(Species s, boolean baby, boolean female, float x, float z, Habitat h, long group, long mother) {
+        // (0.4.0) the devmap's roster spots carried with their habitat to ShadowVeil (a homeless stray to the town it was in)
+        float[] shift = h == null ? null : shifted.get(h);
+        if (shift != null) { x += shift[0]; z += shift[1]; }
+        else if (h == null && rostering && rpg.world.WorldMap.shadowveil()) {
+            float[] p = rpg.world.shadowveil.Settle.stray(x, z, (long) (x * 31 + z));
+            x = p[0]; z = p[1];
+        }
         Animal a = new Animal(g.state.newEntityId(), s, baby, female, x, z);
         a.group = group; a.mother = mother;
         a.owner = h == null ? 0 : h.owner;
@@ -224,7 +244,8 @@ public final class Animals {
         a.body = g.game.reserve(KIND_MOVER);
         a.agent = g.game.reserve(KIND_AGENT);
         a.fit();
-        c.moverCreate(a.body, a.x, DevMap.FLOOR + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
+        a.y = rpg.world.WorldMap.settleY(a.x, rpg.world.WorldMap.devmap() ? rpg.world.Ground.at(a.x, a.z) : a.y, a.z);
+        c.moverCreate(a.body, a.x, a.y + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
         c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags | astratto.bridge.AstrattoNative.AGENT_NO_LADDERS | (a.species.swims ? astratto.bridge.AstrattoNative.AGENT_SWIMS : 0), (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
@@ -317,7 +338,7 @@ public final class Animals {
         a.yaw = (float) Math.atan2(-fx, -fz);
         a.lieT = 1;
         dropRagdoll(a);
-        if (a.body != 0) g.game.commands().moverPlace(a.body, a.x, DevMap.FLOOR, a.z, 0, 0, 0);
+        if (a.body != 0) g.game.commands().moverPlace(a.body, a.x, rpg.world.Ground.at(a.x, a.z), a.z, 0, 0, 0);
         a.nextThink = 0;
     }
 
@@ -501,7 +522,7 @@ public final class Animals {
             float x = a.homeX + (float) Math.cos(ang) * r, z = a.homeZ + (float) Math.sin(ang) * r;
             if (a.home != null && !a.home.contains(x, z)) continue;
             int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-            if (g.vox.block(bx, DevMap.FLOOR - 1, bz) == rpg.world.Blocks.WATER && g.vox.block(bx, DevMap.FLOOR, bz) == 0 && g.vox.solid(bx, DevMap.FLOOR - 2, bz)) return new float[]{x, z};
+            if (g.vox.block(bx, rpg.world.Ground.cell(bx, bz) - 1, bz) == rpg.world.Blocks.WATER && g.vox.block(bx, rpg.world.Ground.cell(bx, bz), bz) == 0 && g.vox.solid(bx, rpg.world.Ground.cell(bx, bz) - 2, bz)) return new float[]{x, z};
         }
         return null;
     }
@@ -510,7 +531,7 @@ public final class Animals {
         if (a.home != null && !a.home.contains(x, z)) return false;
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
         for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-            if (g.vox.block(bx + dx, DevMap.FLOOR, bz + dz) != 0 || g.vox.block(bx + dx, DevMap.FLOOR - 1, bz + dz) == rpg.world.Blocks.WATER) return false;
+            if (g.vox.block(bx + dx, rpg.world.Ground.cell(bx + dx, bz + dz), bz + dz) != 0 || g.vox.block(bx + dx, rpg.world.Ground.cell(bx + dx, bz + dz) - 1, bz + dz) == rpg.world.Blocks.WATER) return false;
         }
         return true;
     }
@@ -538,7 +559,7 @@ public final class Animals {
         if (Math.hypot(a.x - x, a.z - z) <= within) { desire(a, AnimalMind.A_HOLD); return true; }
         if (!a.routed || Math.hypot(a.rx - x, a.rz - z) > 0.4) {
             a.rx = x; a.rz = z; a.routed = true;
-            g.game.commands().agentGoal(a.agent, x, DevMap.FLOOR, z);
+            g.game.commands().agentGoal(a.agent, x, rpg.world.Ground.at(x, z), z);
         }
         desire(a, run ? AnimalMind.A_RUN : AnimalMind.A_GOTO);
         return false;
@@ -835,10 +856,10 @@ public final class Animals {
         for (int t = 0; t < 30; t++) {
             float x = h.x0 + 1 + rnd.nextFloat() * (h.x1 - h.x0 - 2), z = h.z0 + 1 + rnd.nextFloat() * (h.z1 - h.z0 - 2);
             int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-            if (g.vox.block(bx, DevMap.FLOOR, bz) != 0 || g.vox.block(bx, DevMap.FLOOR + 1, bz) != 0 || g.vox.block(bx, DevMap.FLOOR - 1, bz) == rpg.world.Blocks.WATER) continue;
+            if (g.vox.block(bx, rpg.world.Ground.cell(bx, bz), bz) != 0 || g.vox.block(bx, rpg.world.Ground.cell(bx, bz) + 1, bz) != 0 || g.vox.block(bx, rpg.world.Ground.cell(bx, bz) - 1, bz) == rpg.world.Blocks.WATER) continue;
             float d = (float) Math.hypot(x - g.player.x, z - g.player.z);
             if (d < 20) continue;
-            if (g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, x, DevMap.FLOOR + 0.6f, z) && d < 60) continue;
+            if (g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, x, rpg.world.Ground.at(x, z) + 0.6f, z) && d < 60) continue;
             return new float[]{x, z};
         }
         return null;

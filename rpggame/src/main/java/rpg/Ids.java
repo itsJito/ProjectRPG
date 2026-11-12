@@ -50,6 +50,12 @@ public final class Ids {
      * into the people's own numbers - a bed and a villager shared one, and the fire took the one for the other).
      */
     public static final long ESTATE = 1L << 40, ESTATE_END = ESTATE + 1_000_000;
+    /** (0.4.0) ShadowVeil's own gathering nodes (its trees, outcrops and fishing waters), numbered in the estates' band from here. */
+    public static final long WILD_NODES = ESTATE + 500_000;
+    /** (0.4.1) ShadowVeil's doors, one id per doorway of its buildings (in the order the architecture raised them). */
+    public static final long SV_DOORS = ESTATE + 900_000;
+    /** (0.4.1) ShadowVeil's garden plots (the farms' rows). */
+    public static final long SV_PLOTS = ESTATE + 950_000;
     /** Whether an id is a fixture's (built with the world, kept by its id in a save) rather than made in play. */
     public static boolean fixture(long id) { return id < DYNAMIC || id >= ESTATE && id < ESTATE_END; }
 }

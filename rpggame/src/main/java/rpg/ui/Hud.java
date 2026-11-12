@@ -92,6 +92,7 @@ public final class Hud {
 
     public Hud(Rpg g, Gfx gfx) {
         this.g = g; this.gfx = gfx; this.r = gfx.renderer();
+        this.dev = new DevDisplay(g, this);
         events = new UiEvents(g);
         icons = new ItemIcons(r);
         inventory = new InventoryPanel(this);
@@ -406,7 +407,12 @@ public final class Hud {
     static final String[] TOP_STACK = {"sentence", "target", "levelbanner", "levelup", "honor", "bountynotice"};
 
     /** cl_showfps and cl_showpos: the frame rate, and where you are, top left over everything. */
+    /** (0.4.1) The developer display (devmode). */
+    public final DevDisplay dev;
+
     private void overlays(Ui2D ui) {
+        dev.frame(dt);
+        dev.draw(ui, w, h);
         float y = 4;
         int fps = (int) console.f("show_fps");
         if (fps > 0) {

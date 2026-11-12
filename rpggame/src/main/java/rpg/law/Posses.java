@@ -273,13 +273,13 @@ public final class Posses {
         float yaw = p == g.player && g.controller != null ? g.controller.camYaw : p.yaw;
         float fx = (float) -Math.sin(yaw), fz = (float) -Math.cos(yaw);
         if ((dx * fx + dz * fz) / d > -0.15f && d < 70) return true;
-        return g.vox.sight(p.x, p.eyeY(), p.z, x, DevMap.FLOOR + 1.6f, z);
+        return g.vox.sight(p.x, p.eyeY(), p.z, x, rpg.world.Ground.at(x, z) + 1.6f, z);
     }
 
     private boolean open(float x, float z) {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-        if (bx < 2 || bz < 2 || bx >= DevMap.SX - 2 || bz >= DevMap.SZ - 2) return false;
-        return g.vox.block(bx, DevMap.FLOOR, bz) == Blocks.AIR && g.vox.block(bx, DevMap.FLOOR + 1, bz) == Blocks.AIR && Blocks.traversable(g.vox.block(bx, DevMap.FLOOR - 1, bz));
+        if (bx < 2 || bz < 2 || bx >= rpg.world.WorldMap.active().overworldX() - 2 || bz >= rpg.world.WorldMap.active().sizeZ - 2) return false;
+        return g.vox.block(bx, rpg.world.Ground.cell(bx, bz), bz) == Blocks.AIR && g.vox.block(bx, rpg.world.Ground.cell(bx, bz) + 1, bz) == Blocks.AIR && Blocks.traversable(g.vox.block(bx, rpg.world.Ground.cell(bx, bz) - 1, bz));
     }
 
     void clear() { nextTracking.clear(); nextAmbush.clear(); lostSince.clear(); check = 0; formed = 0; }

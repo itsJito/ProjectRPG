@@ -42,6 +42,12 @@ public final class Preferences {
     public float sensitivity = 1, fov = 70, renderScale = 1;
     public int quality = 1, targetFps = 60;
     public boolean fullscreen, vsync = true, autoScale = true, reducedMotion, subtitles = true, invertY, toggleCrouch, toggleSprint;
+    /** (0.4.0) The bloom's strength (0..2, 1 as authored), the depth of field (0 off, 1 subtle, 2 cinematic), the volumetric light. */
+    public float bloom = 1f;
+    public int depthOfField = 0;
+    public boolean volumetrics = true;
+    /** (0.4.0) Play the legacy devmap (regression testing) instead of ShadowVeil. */
+    public boolean legacyDevmap;
     public Preferences() { for (Action a : Action.values()) keys.put(a, a.defaultKey); }
 
     /** Keyboard and mouse chords are stored as a key plus GLFW modifier bits; legacy key-only saves still work. */
@@ -97,11 +103,18 @@ public final class Preferences {
                 + ((mods & GLFW_MOD_SHIFT) != 0 ? "Shift+" : "") + ((mods & GLFW_MOD_SUPER) != 0 ? "Super+" : "") + name;
     }
 
-    public void apply(Config c) { c.quality = quality; c.targetFps = targetFps; c.renderScale = renderScale; c.autoScale = autoScale; if (reducedMotion) c.motionBlur = false; }
+    public void apply(Config c) {
+        c.quality = quality; c.targetFps = targetFps; c.renderScale = renderScale; c.autoScale = autoScale; if (reducedMotion) c.motionBlur = false;
+        c.bloom = bloom; c.volumetrics = volumetrics;
+        c.dofMode = depthOfField; c.depthOfField = depthOfField > 0;
+        // subtle: a small aperture, only what is well behind the focus softens; cinematic: a wide one, the blur generous
+        c.aperture = depthOfField == 2 ? 9f : 3.2f; c.maxBlur = depthOfField == 2 ? 14f : 7f;
+    }
     public void mix(astratto.bridge.CommandBuffer commands) { commands.audioMix(master, false, new float[]{sfx, music, voice, ambience, ui}, 0); }
     public Map<String, Object> data() {
         Map<String, Object> m = new LinkedHashMap<>();
-        for (String name : new String[]{"master", "sfx", "music", "voice", "ambience", "ui", "sensitivity", "fov", "renderScale", "quality", "targetFps", "fullscreen", "vsync", "autoScale", "reducedMotion", "subtitles", "invertY", "toggleCrouch", "toggleSprint"}) {
+        for (String name : new String[]{"master", "sfx", "music", "voice", "ambience", "ui", "sensitivity", "fov", "renderScale", "quality", "targetFps", "fullscreen", "vsync", "autoScale", "reducedMotion", "subtitles", "invertY", "toggleCrouch", "toggleSprint",
+                "bloom", "depthOfField", "volumetrics", "legacyDevmap"}) {
             try { m.put(name, getClass().getField(name).get(this)); } catch (ReflectiveOperationException e) { throw new IllegalStateException(e); }
         }
         Map<String, Object> bindings = new LinkedHashMap<>(); keys.forEach((a, k) -> bindings.put(a.name(), k)); m.put("keys", bindings); return m;
@@ -116,6 +129,7 @@ public final class Preferences {
         } catch (ReflectiveOperationException ignored) { }
         p.master = clamp(p.master, 0, 1); p.sfx = clamp(p.sfx, 0, 1); p.music = clamp(p.music, 0, 1); p.voice = clamp(p.voice, 0, 1); p.ambience = clamp(p.ambience, 0, 1); p.ui = clamp(p.ui, 0, 1);
         p.sensitivity = clamp(p.sensitivity, 0.1f, 4); p.fov = clamp(p.fov, 50, 110); p.renderScale = clamp(p.renderScale, 0.5f, 1); p.quality = Math.max(0, Math.min(3, p.quality)); p.targetFps = Math.max(30, Math.min(144, p.targetFps));
+        p.bloom = clamp(p.bloom, 0, 2); p.depthOfField = Math.max(0, Math.min(2, p.depthOfField));
         Object bindings = m.get("keys");
         if (bindings instanceof Map<?, ?> map) for (Action a : Action.values()) if (map.get(a.name()) instanceof Number n) p.bind(a, n.intValue());
         return p;

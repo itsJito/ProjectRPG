@@ -373,7 +373,7 @@ public final class Brain {
         // - a stall kept, a row weeded, a hood up - and go in only for a real downpour: a trader at an open-air post was
         // indoors more than half of every working day
         boolean working = Schedule.now(n, g.state.weekday(), g.state.hourOfDay()) == Schedule.Activity.WORK;
-        if (threat == null && rain > (working ? 0.75f : 0.45f) && !indoorErrand && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), DevMap.FLOOR + 1, (int) Math.floor(n.z)) > 0.9f)
+        if (threat == null && rain > (working ? 0.75f : 0.45f) && !indoorErrand && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), rpg.world.Ground.cell((int) Math.floor(n.x), (int) Math.floor(n.z)) + 1, (int) Math.floor(n.z)) > 0.9f)
             s.add(new Score(Goal.SHELTER, 0.45f + rain * 0.25f, String.format("rain (%.0f%%); going in out of it", rain * 100)));
         // the devout go to their town's altar of a morning, once a day
         double hr = g.state.hourOfDay();
@@ -556,12 +556,32 @@ public final class Brain {
     private void pray(Npc n) {
         float[] at = altarFor(n);
         if (at == null) { n.nextThink = 0; return; }
-        if (!goTo(n, at[0], at[1] + 1.6f, false, 1.4f)) { n.lastOutcome = "on the way to prayers"; return; }
+        // (0.4.0, gamefixes: NPCs all clustered together and idled) each takes a place of their own before the altar - rows
+        // of five facing it, the nearest free one - rather than every worshipper standing on the one spot
+        if (!Float.isFinite(n.prayAtX) || Math.hypot(n.prayAtX - at[0], n.prayAtZ - at[1]) > 8) {
+            float[] spot = prayerPlace(n, at);
+            if (spot == null) { n.lastOutcome = "the altar is crowded; prayers later"; n.prayedDay = (int) (g.state.minutes / 1440); n.nextThink = 0; return; }
+            n.prayAtX = spot[0]; n.prayAtZ = spot[1];
+        }
+        if (!goTo(n, n.prayAtX, n.prayAtZ, false, 0.45f)) { n.lastOutcome = "on the way to prayers"; return; }
         ai.desire(n, AiSystem.A_HOLD);
         n.wantYaw = (float) Math.atan2(-(at[0] - n.x), -(at[1] - n.z));
         if (n.prayStarted < n.goalSince) n.prayStarted = g.time;
         n.lastOutcome = "praying at the altar";
-        if (g.time - n.prayStarted > 25) { n.prayedDay = (int) (g.state.minutes / 1440); n.nextThink = 0; }
+        if (g.time - n.prayStarted > 25) { n.prayedDay = (int) (g.state.minutes / 1440); n.prayAtX = n.prayAtZ = Float.NaN; n.nextThink = 0; }
+    }
+    /** The nearest free place before an altar: rows of five, each a long pace from the next, the first row 2 m out, the rows behind it staggered. */
+    private float[] prayerPlace(Npc n, float[] altar) {
+        float[] best = null; float bd = Float.MAX_VALUE;
+        for (int row = 0; row < 3; row++) for (int col = -2; col <= 2; col++) {
+            float x = altar[0] + col * 1.7f + (row % 2) * 0.85f, z = altar[1] + 2.0f + row * 1.9f;
+            boolean taken = false;
+            for (Npc o : g.npcs) if (o != n && o.alive && o.goal == Goal.PRAY && Float.isFinite(o.prayAtX) && Math.hypot(o.prayAtX - x, o.prayAtZ - z) < 0.6f) { taken = true; break; }
+            if (taken || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked)) continue;
+            float d = (float) Math.hypot(x - n.x, z - n.z) + row * 2;
+            if (d < bd) { bd = d; best = new float[]{x, z}; }
+        }
+        return best;
     }
 
     /** To the bank counter; served when the teller is there (the bank shut, they come back later). */
@@ -843,6 +863,21 @@ public final class Brain {
             }within=Math.max(.15f,within-(float)Math.hypot(bx-x,bz-z));x=bx;z=bz;
         }
         float surface=g.vox.navigation.standY(x,Float.isFinite(targetY)?targetY:n.y,z);
+        // (0.4.1) a spot with nothing to stand on at its own floor - a bed, furniture before a hearth (since 0.4.0 not floor to
+        // walk on) - is reached from the nearest standable cell beside it on that floor. The column's nearest standable cell
+        // was the roof above it: everyone going to bed walked for the roof and found no way up
+        float level=Float.isFinite(targetY)?targetY:n.y;
+        if(!Float.isFinite(surface) || Math.abs(surface-level)>1.2f){
+            float targetLevel=level;
+            float best=Float.MAX_VALUE,bx=x,bz=z,by=Float.NaN;
+            for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){
+                float px=(float)Math.floor(x)+dx+.5f,pz=(float)Math.floor(z)+dz+.5f;
+                float sy=g.vox.navigation.standY(px,targetLevel,pz);
+                if(!Float.isFinite(sy) || Math.abs(sy-targetLevel)>1.2f || Math.hypot(px-x,pz-z)>within+1.6f)continue;
+                float distance=(float)Math.hypot(px-x,pz-z);if(distance<best){best=distance;bx=px;bz=pz;by=sy;}
+            }
+            if(Float.isFinite(by)){within=Math.max(.3f,within+best);x=bx;z=bz;surface=by;targetY=targetLevel;}
+        }
         // (0.3.3) a spot with nothing to stand on (a grave's stone, a block of furniture) is reached from beside it
         if(!Float.isFinite(surface) && Math.hypot(n.x-x,n.z-z)<=Math.max(within+0.9f,1.8f)){ai.desire(n,AiSystem.A_HOLD);n.legs=null;n.hasGoalPos=false;return true;}
         if(!Float.isFinite(surface)){ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="looking for supported ground";return false;}
@@ -858,7 +893,12 @@ public final class Brain {
         if (n.legs == null || Math.hypot(n.legsX-x,n.legsZ-z)>.5 || Math.abs(n.legsY-surface)>.5f) {
             java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.owner==n.id||d.key!=null&&n.has(d.key,1);
             n.legs=n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
-            if(n.legs==null)n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time);
+            if(n.legs==null){
+                // (0.4.0) the tick's search time spent: stand a moment, plan next tick
+                if(!g.vox.navigation.mayRoute(g.state.tick)){ai.desire(n,AiSystem.A_HOLD);return false;}
+                n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time);
+                g.vox.navigation.spent(g.state.tick);
+            }
             if(n.legs==null){n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";n.noRoutes++;return false;}
             n.routeBook.begin(n,x,surface,z,n.legs,g.time);
             n.legAt=0;n.legsX=x;n.legsY=surface;n.legsZ=z;
@@ -972,7 +1012,7 @@ public final class Brain {
             for (int k = 0; k < r * 3; k++) {
                 double a = k * Math.PI * 2 / (r * 3);
                 float x = (float) Math.floor(n.x + Math.cos(a) * r) + 0.5f, z = (float) Math.floor(n.z + Math.sin(a) * r) + 0.5f;
-                if (g.vox.skyLight((int) Math.floor(x), DevMap.FLOOR + 1, (int) Math.floor(z)) > 0.35f) continue;
+                if (g.vox.skyLight((int) Math.floor(x), rpg.world.Ground.cell((int) Math.floor(x), (int) Math.floor(z)) + 1, (int) Math.floor(z)) > 0.35f) continue;
                 if (!standable(x, z) || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked || d.owner == n.id)) continue;
                 if (r < best) { best = r; bx = x; bz = z; }
                 break;
@@ -1041,7 +1081,7 @@ public final class Brain {
         v.y = w.y;
         double hour = g.state.hourOfDay();
         boolean night = hour >= 21 || hour < 5.5;
-        boolean dark = ai.stealth.light(w.x, DevMap.FLOOR + 1, w.z) < 0.25f;
+        boolean dark = ai.stealth.light(w.x, rpg.world.Ground.at(w.x, w.z) + 1, w.z) < 0.25f;
         int company = 0;
         for (Npc o : g.npcs) if (o != n && o.alive && o.loaded && o.goal != Goal.SLEEP && o.distTo(n) < 8 && bystander(o)) company++;
         // (0.2.9, gamefixes: people did not look into the sounds they heard - the night alone put nearly every townsman
@@ -1271,10 +1311,10 @@ public final class Brain {
             // Cover beyond the threat is not safety: do not cross its reach to get there.
             if (!safeRetreat(n,fx,fz,x,z)) continue;
             float score = 0;
-            if (!g.vox.sight(fx, DevMap.FLOOR + 1.5f, fz, x, DevMap.FLOOR + 1.0f, z)) score += 4;
+            if (!g.vox.sight(fx, rpg.world.Ground.at(fx, fz) + 1.5f, fz, x, rpg.world.Ground.at(x, z) + 1.0f, z)) score += 4;
             score += (float) Math.hypot(x - fx, z - fz) * 0.25f;
             int cover = 0;
-            for (int ox = -1; ox <= 1; ox++) for (int oz = -1; oz <= 1; oz++) if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(x) + ox, DevMap.FLOOR, (int) Math.floor(z) + oz)) cover++;
+            for (int ox = -1; ox <= 1; ox++) for (int oz = -1; oz <= 1; oz++) if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(x) + ox, rpg.world.Ground.cell((int) Math.floor(x) + ox, (int) Math.floor(z) + oz), (int) Math.floor(z) + oz)) cover++;
             score += Math.min(3, cover) * 0.7f;
             if (score > bestScore) { bestScore = score; bx = x; bz = z; }
         }
@@ -1306,7 +1346,7 @@ public final class Brain {
                 if (!standable(x, z) || !safeRetreat(n,f.x,f.z,x,z)) continue;
                 float score = (float) Math.hypot(x - f.x, z - f.z) - Math.abs(i) * 0.4f;
                 if (n.homeX != 0) score -= (float) Math.hypot(x - n.homeX, z - n.homeZ) * 0.05f;
-                if (!g.vox.clear(n.x, n.eyeY(), n.z, x, DevMap.FLOOR + 1, z)) score -= 3;
+                if (!g.vox.clear(n.x, n.eyeY(), n.z, x, rpg.world.Ground.at(x, z) + 1, z)) score -= 3;
                 if (score > best) { best = score; bx = x; bz = z; }
                 break;
             }
@@ -1635,8 +1675,8 @@ public final class Brain {
 
     private boolean standable(float x, float z) { return standable(x, Float.NaN, z); }
     private boolean standable(float x, float y, float z) {
-        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), f = Float.isFinite(y) ? Math.round(y) : DevMap.FLOOR;
-        if (bx < 1 || bz < 1 || bx >= DevMap.SX - 1 || bz >= DevMap.SZ - 1) return false;
+        int bx = (int) Math.floor(x), bz = (int) Math.floor(z), f = Float.isFinite(y) ? Math.round(y) : rpg.world.Ground.cell(x, z);
+        if (bx < 1 || bz < 1 || bx >= rpg.world.WorldMap.active().overworldX() - 1 || bz >= rpg.world.WorldMap.active().sizeZ - 1) return false;
         return !g.vox.solid(bx, f, bz) && !g.vox.solid(bx, f + 1, bz) && g.vox.solid(bx, f - 1, bz);
     }
 
@@ -1657,13 +1697,13 @@ public final class Brain {
             float score = 0;
             if (h.triedNear(x, z, 2.5f)) continue;
             // somewhere it cannot see from here is somewhere they could be
-            if (!g.vox.sight(n.x, ey, n.z, x, DevMap.FLOOR + 1.0f, z)) score += 3;
+            if (!g.vox.sight(n.x, ey, n.z, x, rpg.world.Ground.at(x, z) + 1.0f, z)) score += 3;
             // (0.3.5) where someone would hide: tall grass and bushes, under a roof
             if (g.foliage != null && (g.foliage.tallGrassAt(x, z) || g.foliage.plantAt(x, z, 0.9f) != null)) score += 2.2f;
-            if (g.vox.solid((int) Math.floor(x), DevMap.FLOOR + 3, (int) Math.floor(z)) || g.vox.solid((int) Math.floor(x), DevMap.FLOOR + 4, (int) Math.floor(z))) score += 1.4f;
+            if (g.vox.solid((int) Math.floor(x), rpg.world.Ground.cell((int) Math.floor(x), (int) Math.floor(z)) + 3, (int) Math.floor(z)) || g.vox.solid((int) Math.floor(x), rpg.world.Ground.cell((int) Math.floor(x), (int) Math.floor(z)) + 4, (int) Math.floor(z))) score += 1.4f;
             // cover: walls, bushes and trees round the spot
             int cover = 0;
-            for (int ox = -1; ox <= 1; ox++) for (int oz = -1; oz <= 1; oz++) if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(x) + ox, DevMap.FLOOR, (int) Math.floor(z) + oz)) cover++;
+            for (int ox = -1; ox <= 1; ox++) for (int oz = -1; oz <= 1; oz++) if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(x) + ox, rpg.world.Ground.cell((int) Math.floor(x) + ox, (int) Math.floor(z) + oz), (int) Math.floor(z) + oz)) cover++;
             score += Math.min(4, cover) * 0.6f;
             score -= (float) Math.hypot(x - n.x, z - n.z) * 0.06f;
             // not where another searcher is already looking
@@ -1676,7 +1716,7 @@ public final class Brain {
         // the cover beside it, to look into on arrival
         h.coverYaw = 0;
         for (int ox = -1; ox <= 1 && h.coverYaw == 0; ox++) for (int oz = -1; oz <= 1; oz++)
-            if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(bx) + ox, DevMap.FLOOR, (int) Math.floor(bz) + oz)) { h.coverYaw = (float) Math.atan2(-ox, -oz); if (h.coverYaw == 0) h.coverYaw = 1e-3f; break; }
+            if ((ox != 0 || oz != 0) && g.vox.solid((int) Math.floor(bx) + ox, rpg.world.Ground.cell((int) Math.floor(bx) + ox, (int) Math.floor(bz) + oz), (int) Math.floor(bz) + oz)) { h.coverYaw = (float) Math.atan2(-ox, -oz); if (h.coverYaw == 0) h.coverYaw = 1e-3f; break; }
         return true;
     }
 
@@ -2009,6 +2049,7 @@ public final class Brain {
 
     private void steal(Npc n) {
         var stall = g.objects.stall;
+        if (stall == null) { ai.desire(n, AiSystem.A_WANDER); return; }
         float sx = stall.x, sz = stall.z + 1.4f;
         if (ai.stealOpportunity(n) < 0.3f) { ai.desire(n, AiSystem.A_WANDER); return; }
         if (!goTo(n, sx, sz, false, 0.9f)) return;

@@ -24,14 +24,20 @@ public final class DevMap {
     /** Doors and doorways are two blocks (2 m) tall. */
     public static final int DOOR_HEIGHT = 2;
 
-    /** The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). */
-    public static final String ALPHA = "DevCity", BETA = "DevTown", WILDS = "WILDS";
+    /**
+     * The two synthetic jurisdictions and the unpoliced wilds (GDD 4.2: two or more jurisdiction ids). (0.4.0) The three
+     * towns that keep a lawman are named by the map in play (WorldMap): DevCity, DevTown and DevPalace here; Loxford,
+     * Harlette and Severia on ShadowVeil.
+     */
+    public static String ALPHA = "DevCity", BETA = "DevTown";
+    public static final String WILDS = "WILDS";
     /** The kingdom of 0.2.0 (gamefixes): DevPalace, the Roman city in the east of the map. */
-    public static final String PALACE = "DevPalace";
-    /** Whether a point is in the dungeons (beyond the map's edge, where they are dug). */
-    public static boolean inDungeon(double x, double z) { return x >= SX; }
+    public static String PALACE = "DevPalace";
+    /** Whether a point is in the dungeons (beyond the map's edge, where they are dug; ShadowVeil has none yet). */
+    public static boolean inDungeon(double x, double z) { return WorldMap.devmap() && x >= SX; }
 
     public static String jurisdiction(double x, double z) {
+        if (WorldMap.shadowveil()) return rpg.world.shadowveil.ShadowVeil.jurisdiction(x, z);
         if (x >= SX) return WILDS;   // the dungeons are nobody's to police
         String palace = Expanse.jurisdiction(x, z);
         if (palace != null) return palace;
@@ -42,7 +48,10 @@ public final class DevMap {
         return WILDS;
     }
     /** The watch's round in each kingdom (DevTown keeps none: its lawman holds his chancery). */
-    public static float[][] patrol(String jurisdiction) { return PALACE.equals(jurisdiction) ? Expanse.PATROL : PATROL; }
+    public static float[][] patrol(String jurisdiction) {
+        if (WorldMap.shadowveil()) return rpg.world.shadowveil.ShadowVeil.patrol(jurisdiction);
+        return PALACE.equals(jurisdiction) ? Expanse.PATROL : PATROL;
+    }
 
     // ------------------------------------------------------------------ where things are
     public static final float SPAWN_X = 64.5f, SPAWN_Z = 68.5f;
@@ -237,6 +246,7 @@ public final class DevMap {
     /** Builds the devmap into a new engine world (lit) and returns its handle. */
     public static long build(NativeEngine e) {
         if (!e.blockTable(Blocks.engineDefs())) throw new IllegalStateException("block table refused: " + e.lastError());
+        WorldMap.activateDevmap();
         long world = e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, null, null, 0);
         if (world == 0) throw new IllegalStateException("world refused: " + e.lastError());
         CommandBuffer b = new CommandBuffer(1 << 16);

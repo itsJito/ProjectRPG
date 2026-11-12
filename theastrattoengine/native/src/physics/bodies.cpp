@@ -13,6 +13,8 @@ namespace {
 inline int fl(float v) { return static_cast<int>(std::floor(v)); }
 constexpr float PI = 3.14159265358979f;
 constexpr int STAIR_DX[4] = {0, -1, 0, 1}, STAIR_DZ[4] = {1, 0, -1, 0};
+// (2.11) GROUND_LIFT: the most a one-cell rise may stand above the feet for the mover's auto-jump (Mover::hopUp)
+constexpr float GROUND_LIFT = 1.02f;
 constexpr float STAIR_LIP = 0.08f, STAIR_LIFT = 0.62f, MOVER_STEP = 1.0f / 120.0f, GROUND_EPS = 0.02f;
 const float OFFX[8] = {1, -1, 0, 0, 0.7071f, 0.7071f, -0.7071f, -0.7071f}, OFFZ[8] = {0, 0, 1, -1, 0.7071f, -0.7071f, 0.7071f, -0.7071f};
 
@@ -77,11 +79,36 @@ float Mover::stairBelow(const VoxelWorld* w, float x, float y, float z, float r)
 
 bool Mover::climbStair(const VoxelWorld* w, float nx, float nz, float r, float hh) {
     const float lip = !std::isnan(stairBelow(w, x, y + 0.05f, z, r)) ? 0.5f : STAIR_LIP;
+    // (2.11) a whole cell of rise - natural ground or built - is no longer lifted onto in one step (it showed as the body
+    // appearing on top): it is hopped up (hopUp). Stairs and lips are still walked.
     float rise = stairRise(w, nx, y, nz, r, hh, lip);
     if (rise <= 0 || rise > std::max(STAIR_LIFT, step)) return false;
     rise += 3e-3f;
     if (!bodyFree(w, nx, y + rise, nz, r, hh)) return false;
     y += rise; x = nx; z = nz; stepped += rise;
+    return true;
+}
+
+bool Mover::hopUp(const VoxelWorld* w, float nx, float nz, float r, float hh, float gravity) {
+    if (w == nullptr || hopping) return hopping;
+    const float speed = std::sqrt(vx * vx + vz * vz);
+    if (speed < 0.6f) return false;                      // sliding along a wall is not walking into it
+    const int y0 = fl(y + 0.01f);
+    const float top = static_cast<float>(y0 + 1);
+    if (top - y > GROUND_LIFT || top - y <= STAIR_LIFT) return false;
+    // what is in the way at the feet: one full cube (no door, no grating, no stair), and the body fits standing on it
+    const int x0 = fl(nx - r), x1 = fl(nx + r - 1e-4f), z0 = fl(nz - r), z1 = fl(nz + r - 1e-4f);
+    bool any = false;
+    for (int bx = x0; bx <= x1; bx++) for (int bz = z0; bz <= z1; bz++) {
+        if (!solidAt(w, bx, y0, bz)) continue;
+        const auto& d = w->def(bx, y0, bz);
+        if ((d.flags & (ASTRATTO_BLOCK_DOOR | ASTRATTO_BLOCK_CUTOUT | ASTRATTO_BLOCK_STEP)) || !(d.flags & ASTRATTO_BLOCK_OPAQUE) || d.shape != 0) return false;
+        any = true;
+    }
+    if (!any || !bodyFree(w, nx, top + 3e-3f, nz, r, hh) || !bodyFree(w, x, top + 3e-3f, z, r, hh)) return false;
+    // a hop just high enough to clear the cell with a hand's breadth to spare
+    vy = std::sqrt(2.0f * std::max(1.0f, gravity) * (top - y + 0.18f));
+    onGround = false; hopping = true;
     return true;
 }
 
@@ -123,10 +150,17 @@ bool Mover::subStep(const VoxelWorld* w, float dt, float gravity) {
     const bool wasGround = onGround, mayClimb = !fly && (wasGround || (vy <= 0.5f && !std::isnan(stairBelow(w, x, y + 0.3f, z, r))));
     const float nx = x + vx * dt;
     if (bodyFree(w, nx, y, z, r, hh)) x = nx;
-    else if (!(mayClimb && !climbing && climbStair(w, nx, z, r, hh))) { blocked = true; vx = 0; }
+    else if (!(mayClimb && !climbing && climbStair(w, nx, z, r, hh))) {
+        // (2.11) walking into a one-cell rise: hop up it; while the hop rises the push is kept, so it goes on over the top
+        if (!fly && !climbing && ((wasGround && hopUp(w, nx, z, r, hh, gravity)) || hopping)) blocked = true;
+        else { blocked = true; vx = 0; }
+    }
     const float nz = z + vz * dt;
     if (bodyFree(w, x, y, nz, r, hh)) z = nz;
-    else if (!(mayClimb && !climbing && climbStair(w, x, nz, r, hh))) { blocked = true; vz = 0; }
+    else if (!(mayClimb && !climbing && climbStair(w, x, nz, r, hh))) {
+        if (!fly && !climbing && ((wasGround && hopUp(w, x, nz, r, hh, gravity)) || hopping)) blocked = true;
+        else { blocked = true; vz = 0; }
+    }
     if (wasGround && vy <= 0 && !climbing && !fly) {
         const float s = stairBelow(w, x, y, z, r);
         if (!std::isnan(s) && s < y - 2e-3f && y - s <= STAIR_LIFT && bodyFree(w, x, s + 3e-3f, z, r, hh)) { stepped -= y - s; y = s + 3e-3f; vy = 0; }
@@ -152,6 +186,7 @@ bool Mover::subStep(const VoxelWorld* w, float dt, float gravity) {
     // reported off the ground half the time - figures flickered into their airborne pose and jumps were refused.
     if (!onGround && !fly && !climbing && vy <= 0 && !bodyFree(w, x, y - GROUND_EPS, z, r, hh)) { onGround = true; vy = 0; }
     if (!bodyFree(w, x, y, z, r, hh)) depenetrate(w, r, hh);
+    if (hopping && (onGround || climbing || fly)) hopping = false;
     return blocked;
 }
 

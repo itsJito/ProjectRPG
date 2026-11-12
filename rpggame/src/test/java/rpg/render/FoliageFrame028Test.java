@@ -16,8 +16,8 @@ class FoliageFrame028Test {
             g.teleport(g.player,88.5f,DevMap.FLOOR,12);
             for(int i=0;i<25;i++){g.time+=.26;g.foliage.update();}
             boolean wall=false;
-            for(var chunk:g.foliage.chunks.values()) {
-                float[] mesh=FoliageModels.chunk(chunk);
+            for(var chunk:g.foliage.chunks.values()) for(int level:FoliageModels.levels(chunk)) {
+                float[] mesh=FoliageModels.chunk(chunk,level);
                 for(int vertex=0;vertex<mesh.length;vertex+=10) {
                     float metadata=mesh[vertex+6];
                     // Renderer::createMesh sends an entire model to the forward pass if any vertex is below this.

@@ -254,11 +254,11 @@ public final class Breakables {
             ItemStack s = b.contents.get(i);
             if (s == null) continue;
             b.contents.set(i, null);
-            g.objects.drop(s, b.x + (k % 3 - 1) * 0.25f, Math.max(DevMap.FLOOR + 0.05f, b.y - b.form.hy() + 0.05f), b.z + (k / 3 % 3 - 1) * 0.25f);
+            g.objects.drop(s, b.x + (k % 3 - 1) * 0.25f, Math.max(rpg.world.Ground.at(b.x, b.z) + 0.05f, b.y - b.form.hy() + 0.05f), b.z + (k / 3 % 3 - 1) * 0.25f);
             k++;
         }
         // a good plank or two survives a crate (the joiner's wood is not lost)
-        if (b.form == Breakable.Form.CRATE && b.integrity() > 0.5f) g.objects.drop(new ItemStack(Items.PLANK, 1), b.x, Math.max(DevMap.FLOOR + 0.05f, b.y - b.form.hy() + 0.05f), b.z);
+        if (b.form == Breakable.Form.CRATE && b.integrity() > 0.5f) g.objects.drop(new ItemStack(Items.PLANK, 1), b.x, Math.max(rpg.world.Ground.at(b.x, b.z) + 0.05f, b.y - b.form.hy() + 0.05f), b.z);
         if (g.fx != null) g.fx.chips(b.x, b.y, b.z, 18);
         if (g.sfx != null) { g.sfx.play("wood.heavy", b.x, b.y, b.z, 0.95f, 0.9f, 30); g.sfx.play("wood", b.x, b.y, b.z, 0.7f, 1.2f, 24); }
         g.noise(by, b.x, b.y, b.z, 16, 0.85f);

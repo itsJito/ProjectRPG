@@ -74,7 +74,7 @@ final class Jobs {
             List<ItemStack> tools=n.has(Items.FISHING_NET,1)?n.takeItems(Items.FISHING_NET,1):List.of();
             if(tools.isEmpty() && n.main()==Items.FISHING_NET){tools=List.of(n.eq.get(ItemDef.Slot.MAIN));n.eq.set(ItemDef.Slot.MAIN,null);}
             if(tools.isEmpty())return;
-            var net=new rpg.objects.FishingNet(g.state.newEntityId(),n.id,site.id,site.x,DevMap.FLOOR-0.1f,site.z,g.state.minutes+4);
+            var net=new rpg.objects.FishingNet(g.state.newEntityId(),n.id,site.id,site.x,rpg.world.Ground.at(site.x, site.z)-0.1f,site.z,g.state.minutes+4);
             net.laidAt=g.state.minutes;
             for(var tool:tools)net.contents.add(tool);g.objects.add(net);n.dutyTarget=net.id;
         }
@@ -275,10 +275,14 @@ final class Jobs {
     private Node site(Npc n) {
         Node best=null;float score=Float.MAX_VALUE;
         for(Node node:g.objects.nodes) {
-            if(!safe(node,n))continue;
+            // (0.4.0, optimisation) the cheap question first: ShadowVeil's thousands of trees are never a miner's or a fisher's site
+            if(node.kind==Node.Kind.TREE || node.kind==Node.Kind.PATCH)continue;
             boolean eligible=n.profession.family==Npc.Role.MINER && node.kind==Node.Kind.ROCK && mineral(n.profession,node.product)
                     || n.profession.family==Npc.Role.FISHERMAN && fishing(n,node);
-            if(!eligible || n.skills.level(node.skill)<node.level)continue;
+            if(!eligible || n.skills.level(node.skill)<node.level || !safe(node,n))continue;
+            // (0.4.1, gamefixes: workers stood idle) on ShadowVeil a site is one within reach of home (the leash): the nearest
+            // across the whole map sent a miner on a journey its routine could never make, and it stood still all day
+            if(!ZonePolicy.withinReach(n,node.x,node.z))continue;
             // (0.2.9) others already at a deposit or a spot send this worker to the next one, or another side of it
             int others=g.ai.workersOn(node,n);
             if(node.kind==Node.Kind.FISH && others>0 || others>=3)continue;
@@ -327,7 +331,8 @@ final class Jobs {
     private Station station(Recipes.Recipe recipe) {
         Station known=stations.get(recipe.station);
         if(known!=null && !known.removed)return known;
-        for(var object:g.objects.all())if(object instanceof Station station && station.kind==recipe.station){stations.put(recipe.station,station);return station;}
+        // (0.4.0, optimisation) from the world's list of stations, not every object in it (ShadowVeil's thousands)
+        for(Station station:g.objects.stations())if(station.kind==recipe.station && !station.removed){stations.put(recipe.station,station);return station;}
         return null;
     }
     /** (0.3.5) The station of a recipe's kind nearest where this worker works (their post): a guild hall's own, not the first in the world. */
@@ -469,7 +474,7 @@ final class Jobs {
     }
     /** How far the border beat runs from the post: positive along x, negative along z, whichever is clear for longer (at most 5 m). */
     private float beat(Npc n) {
-        float y=DevMap.FLOOR+1;
+        float y=rpg.world.Ground.at(n.dutyX,n.dutyZ)+1;
         float best=0;
         for(float d=5;d>=1.5f;d-=0.5f) {
             if(g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX+d,y,n.dutyZ) && g.vox.clear(n.dutyX,y,n.dutyZ,n.dutyX-d,y,n.dutyZ)) { best=d; break; }

@@ -16,7 +16,7 @@ import rpg.world.DevMap;
  * investigating something instead of getting on with the day.
  */
 class NpcRoutineTest {
-    @Test void everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() {
+    @org.junit.jupiter.api.Tag("slow") @Test void everyNpcGetsOnWithTheirMorningWithoutStandingBlocked() {
         var config = new NativeEngine.Config(); config.deterministic = true;
         try (Game game = Game.create(config)) {
             game.activate(DevMap.build(game.engine()));

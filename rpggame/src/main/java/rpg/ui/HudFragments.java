@@ -272,7 +272,7 @@ final class HudFragments {
             for (Object[] s : DevMap.SIGNS) {
                 float x = (float) s[1], z = (float) s[2];
                 float d = (float) Math.hypot(x - g.player.x, z - g.player.z);
-                if (d > 22 || !gfx.project(x, DevMap.FLOOR + 3.1f, z, p2)) continue;
+                if (d > 22 || !gfx.project(x, rpg.world.Ground.at(x, z) + 3.1f, z, p2)) continue;
                 float a = Math.min(1, (22 - d) / 6);
                 String t = (String) s[0];
                 float tw = ui.width(t, 13);
@@ -756,7 +756,7 @@ final class HudFragments {
             // the map one is on: the world's, or a dungeon's own (gamefixes: every dungeon is a map of its own)
             var dungeon = rpg.world.DungeonLayout.at(g.player.x, g.player.z);
             float x0 = dungeon == null ? 0 : dungeon.ox, z0 = dungeon == null ? 0 : dungeon.oz;
-            float span = dungeon == null ? Minimap.S : Math.max(dungeon.w, dungeon.d);
+            float span = dungeon == null ? map.S : Math.max(dungeon.w, dungeon.d);
             java.util.function.BiFunction<Float, Float, float[]> at = (wx, wz) -> new float[]{left + (wx - x0) / span * size, top + (wz - z0) / span * size};
             ui.text(ui.body, dungeon == null ? "World Map" : dungeon.name, left, y - 6, 22, Style.ACCENT);
             // the map as a chart pinned in a frame: a dark mount, the gold trim, the paper a little warm
@@ -775,13 +775,20 @@ final class HudFragments {
                 ui.img((String) marker[0], m[0] - 7, m[1] - 7, 14, 0xFFFFFFFF);
                 shown.add((String) marker[0]);
             }
+            // (0.4.0) ShadowVeil's chart names its realms and its great landmarks
+            if (dungeon == null && rpg.world.WorldMap.shadowveil()) for (var label : rpg.world.shadowveil.ShadowVeil.labels().entrySet()) {
+                float[] m = at.apply(label.getValue()[0], label.getValue()[1]);
+                if (!onChart.test(m)) continue;
+                ui.flatCentered(label.getKey(), m[0] + 1, m[1] - 6, 11, 0xC0000000);
+                ui.flatCentered(label.getKey(), m[0], m[1] - 7, 11, 0xFFF4E8D0);
+            }
             for (var door : g.dungeons.doors) if ((rpg.world.DungeonLayout.at(door.x, door.z) == dungeon)) {
                 float[] m = at.apply(door.x, door.z);
                 if (onChart.test(m)) { ui.img("Boss_Icon", m[0] - 8, m[1] - 8, 16, 0xFFFFFFFF); shown.add("Boss_Icon"); }
             }
             // Local people only: a world map is not remote knowledge of hidden actors.
             for (Npc n : g.npcs) if (n.alive && n.loaded && n.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, n.x, n.chestY(), n.z)) {
-                float[] m = at.apply(n.x, n.z); if (onChart.test(m)) ui.disc(m[0], m[1], 2, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
+                float[] m = at.apply(n.x, n.z); if (onChart.test(m)) ui.disc(m[0], m[1], 2, Minimap.ally(n, g) ? Style.ALLY : n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC);
             }
             for (var mo : g.monsters.all()) if (mo.alive && mo.loaded && mo.distTo(g.player) < 28 && g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, mo.x, mo.chestY(), mo.z)) {
                 float[] m = at.apply(mo.x, mo.z); if (onChart.test(m)) ui.disc(m[0], m[1], 2, Style.NPC_HOSTILE);
@@ -823,7 +830,7 @@ final class HudFragments {
         String place = dungeon == null ? DevMap.jurisdiction(g.player.x, g.player.z) : dungeon.name;
         ui.text(place, x, cy, 18, Style.ACCENT);
         cy += 26;
-        ui.text(dungeon == null ? DevMap.SX + " x " + DevMap.SZ + " m, north is up" : dungeon.type.title + ", " + dungeon.threatWord() + " threat", x, cy, 12, Style.DIM);
+        ui.text(dungeon == null ? rpg.world.WorldMap.active().overworldX() + " x " + rpg.world.WorldMap.active().sizeZ + " m, north is up" : dungeon.type.title + ", " + dungeon.threatWord() + " threat", x, cy, 12, Style.DIM);
         cy += 18;
         ui.text("You stand at " + (int) g.player.x + ", " + (int) g.player.z + "    " + g.state.clockText(), x, cy, 12, Style.FAINT);
         cy += 24;
@@ -871,18 +878,30 @@ final class HudFragments {
         @Override public float height() { return R * 2 + 24 + Math.min(2, hud.g.undertaker.graves().size()) * 20; }
 
         private ByteBuffer px;
-        /** (0.3.5) The chart's side in blocks: the map is no longer square (the sea runs along its south), so it is drawn in a square that holds it all. */
-        static final int S = Math.max(DevMap.SX, DevMap.SZ);
+        /**
+         * (0.3.5) The chart's side in blocks: the map is no longer square (the sea runs along its south), so it is drawn in
+         * a square that holds it all. (0.4.0) The map in play's: the devmap's 256, ShadowVeil's 1,072.
+         */
+        final int S = Math.max(rpg.world.WorldMap.active().overworldX(), rpg.world.WorldMap.active().sizeZ);
+        private final rpg.world.WorldMap map = rpg.world.WorldMap.active();
 
         /** The colour of one map column, from its top block. */
         private void column(Rpg g, int x, int z) {
-            if (x >= DevMap.SX || z >= DevMap.SZ) { int at = (z * S + x) * 4; px.put(at, (byte) 0x1A).put(at + 1, (byte) 0x16).put(at + 2, (byte) 0x12).put(at + 3, (byte) 255); return; }   // off the map: the chart's margin
+            if (x >= map.overworldX() || z >= map.sizeZ) { int at = (z * S + x) * 4; px.put(at, (byte) 0x1A).put(at + 1, (byte) 0x16).put(at + 2, (byte) 0x12).put(at + 3, (byte) 255); return; }   // off the map: the chart's margin
             int top = 0, ty = 0;
-            for (int y = DevMap.SY - 1; y >= 0; y--) { int b = g.vox.block(x, y, z); if (b != 0) { top = b; ty = y; break; } }
+            // (0.4.0) on ShadowVeil the search starts just over the ground and its trees, not at the top of the sky
+            int from = map.kind == rpg.world.WorldMap.Kind.DEVMAP ? map.sizeY - 1 : Math.min(map.sizeY - 1, rpg.world.Ground.cell(x + 0.5f, z + 0.5f) + 16);
+            for (int y = from; y >= 0; y--) { int b = g.vox.block(x, y, z); if (b != 0) { top = b; ty = y; break; } }
             int c = Blocks.mapColor(top);
-            float shade = 0.62f + (ty - DevMap.FLOOR + 1) * 0.06f;
-            if (top == Blocks.WATER) { c = 0x355E8C; shade = 1; }
-            boolean wall = ty >= DevMap.FLOOR && ty <= DevMap.FLOOR + 3 && (Blocks.dual(top) || top == Blocks.BRICK || top == Blocks.PLANKS || top == Blocks.PLASTER || top == Blocks.STONE || top == Blocks.FENCE);
+            float shade;
+            if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) shade = 0.62f + (ty - DevMap.FLOOR + 1) * 0.06f;
+            else {
+                // the land's height and its relief: lit from the north-west, the hills standing out, the valleys deeper
+                int nw = x > 0 && z > 0 ? rpg.world.Ground.cell(x - 0.5f, z - 0.5f) - 1 : ty;
+                shade = Math.max(0.55f, Math.min(1.25f, 0.82f + (ty - map.sea) * 0.006f + (ty - nw) * 0.07f));
+            }
+            if (top == Blocks.WATER) { c = 0x355E8C; shade = map.kind == rpg.world.WorldMap.Kind.DEVMAP ? 1 : 0.9f + Math.min(0.15f, (ty - map.sea) * 0.01f); }
+            boolean wall = map.kind == rpg.world.WorldMap.Kind.DEVMAP && ty >= DevMap.FLOOR && ty <= DevMap.FLOOR + 3 && (Blocks.dual(top) || top == Blocks.BRICK || top == Blocks.PLANKS || top == Blocks.PLASTER || top == Blocks.STONE || top == Blocks.FENCE);
             // flat and low-contrast: colours pulled toward grey, walls a soft light line
             int rr = (int) (((c >> 16) & 255) * shade), gg = (int) (((c >> 8) & 255) * shade), bb = (int) ((c & 255) * shade);
             int grey = (rr + gg + bb) / 3;
@@ -962,19 +981,27 @@ final class HudFragments {
                 String icon = switch (n.role) { case MERCHANT, FENCE -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
                 if (icon != null && onWorld(n.postX, n.postZ)) markers.add(new Object[]{icon, n.postX, n.postZ});
             }
-            markers.add(new Object[]{"Water_source_map_icon", DevMap.WELL[0] + 0.5f, DevMap.WELL[1] + 0.5f});
-            markers.add(new Object[]{"Fishing_spot_map_icon", DevMap.FISH_SPOTS[0][0], DevMap.FISH_SPOTS[0][1]});
-            markers.add(new Object[]{"Woodcutting_Icon", 94.5f, 14.5f});
-            markers.add(new Object[]{"Mining_Icon", 54.5f, 34.5f});
-            markers.add(new Object[]{"Harvesting_area_map_icon", 72.5f, 34.5f});
-            markers.add(new Object[]{"Sword_map_icon", 16.5f, 47.5f});
-            markers.add(new Object[]{"Minigame_map_icon", DevMap.SPAWN_X, DevMap.SPAWN_Z});
+            if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) {
+                markers.add(new Object[]{"Water_source_map_icon", DevMap.WELL[0] + 0.5f, DevMap.WELL[1] + 0.5f});
+                markers.add(new Object[]{"Fishing_spot_map_icon", DevMap.FISH_SPOTS[0][0], DevMap.FISH_SPOTS[0][1]});
+                markers.add(new Object[]{"Woodcutting_Icon", 94.5f, 14.5f});
+                markers.add(new Object[]{"Mining_Icon", 54.5f, 34.5f});
+                markers.add(new Object[]{"Harvesting_area_map_icon", 72.5f, 34.5f});
+                markers.add(new Object[]{"Sword_map_icon", 16.5f, 47.5f});
+                markers.add(new Object[]{"Minigame_map_icon", DevMap.SPAWN_X, DevMap.SPAWN_Z});
+            } else {
+                // (0.4.0) ShadowVeil: its fishing waters and ore where they are (the woods are the map's own green)
+                for (rpg.objects.Node n : g.objects.nodes) {
+                    if (n.kind == rpg.objects.Node.Kind.FISH) markers.add(new Object[]{"Fishing_spot_map_icon", n.x, n.z});
+                    else if (n.kind == rpg.objects.Node.Kind.ROCK && n.id % 3 == 0) markers.add(new Object[]{"Mining_Icon", n.x, n.z});
+                }
+            }
             markersAt = g.time;
         }
 
         /** On the world's own chart: inside its bounds and not in a dungeon's rooms (laid out beyond them). */
-        private static boolean onWorld(float x, float z) {
-            return x >= 0 && z >= 0 && x < DevMap.SX && z < DevMap.SZ && rpg.world.DungeonLayout.at(x, z) == null;
+        private boolean onWorld(float x, float z) {
+            return x >= 0 && z >= 0 && x < map.overworldX() && z < map.sizeZ && rpg.world.DungeonLayout.at(x, z) == null;
         }
 
         @Override public void draw(Ui2D ui, float x, float y) {
@@ -991,7 +1018,7 @@ final class HudFragments {
             float want = dungeon != null ? DUNGEON_SCALE : DevMap.WILDS.equals(DevMap.jurisdiction(p.x, p.z)) ? WILD_SCALE : TOWN_SCALE;
             float step = scaledAt < 0 ? 1 : (float) Math.min(1, (g.time - scaledAt) * 1.6);
             SCALE += (want - SCALE) * Math.max(0, step); scaledAt = g.time;
-            float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? Minimap.S : dungeon.w, mapD = dungeon == null ? Minimap.S : dungeon.d;
+            float mapX0 = dungeon == null ? 0 : dungeon.ox, mapZ0 = dungeon == null ? 0 : dungeon.oz, mapW = dungeon == null ? S : dungeon.w, mapD = dungeon == null ? S : dungeon.d;
             ui.disc(cx, cy, R + 3, 0x90141518);
             int seg = 48;
             for (int i = 0; i < seg; i++) {
@@ -1007,13 +1034,17 @@ final class HudFragments {
             }
             ui.ring(cx, cy, R + 1, 1, Style.EDGE_HI);
             for (Object[] m : markers) if (toMap((float) m[1], (float) m[2], cx, cy)) ui.img((String) m[0], p2[0] - 7, p2[1] - 7, 14, 0xF0FFFFFF);
-            for (WorldObject o : g.objects.all()) {
+            // (0.4.0, optimisation) only what lies within the chart's reach
+            for (WorldObject o : g.objects.near(p.x, p.z, R / SCALE + 4)) {
                 if (o instanceof rpg.objects.GroundItem) dot(ui, o.x, o.z, cx, cy, 0xFFE02020, 2);
                 if (o instanceof rpg.objects.Fire) dot(ui, o.x, o.z, cx, cy, 0xFFFF9020, 3);
             }
             // the areas being searched (gamefixes): a soft patch where they think you are, pulsing at its edge
             for (var area : g.ai.searchAreas()) searchArea(ui, area, cx, cy, (float) g.time);
-            for (Npc n : g.npcs) if (n.alive && n.loaded) dot(ui, n.x, n.z, cx, cy, n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC, 3);
+            // (0.4.0, gamefixes: allies green on the minimap) those on the player's side - companions, summoned allies - in green
+            for (Npc n : g.npcs) if (n.alive && n.loaded) dot(ui, n.x, n.z, cx, cy, ally(n, g) ? Style.ALLY : n.hostileToPlayer ? Style.NPC_HOSTILE : Style.NPC, 3);
+            // and the animals that answer to the player: tamed, owned or under the saddle
+            if (g.animals != null) for (rpg.animal.Animal an : g.animals.all()) if (an.alive && an.loaded && (an.tamedBy == p.id || an.owner == p.id || an.rider == p.id)) dot(ui, an.x, an.z, cx, cy, Style.ALLY, 3);
             // (0.2.2, gamefixes: goblins were missing from the minimap) monsters: a dark red dot, ringed while one is after you
             if (g.monsters != null) for (rpg.monster.Monster mo : g.monsters.all()) if (mo.alive && mo.loaded) {
                 boolean after = mo.state == rpg.monster.Monster.State.ENGAGE || mo.state == rpg.monster.Monster.State.STALK;
@@ -1066,6 +1097,9 @@ final class HudFragments {
                 g.controller.walkTo(tx, tz);
             }
         }
+
+        /** (0.4.0) Whether someone is the player's ally: a companion, a summoned ally of theirs. */
+        static boolean ally(Npc n, Rpg g) { return n.companionOf == g.player.id || n.summonOwner == g.player.id; }
 
         /** A point off the map: where its direction meets the rim (p2). */
         private void rim(float x, float z, float cx, float cy) {
@@ -1684,8 +1718,8 @@ final class HudFragments {
         }
     }
 
-    static List<String> aiLines(Hud hud) {
-        Npc n = hud.inspected();
+    static List<String> aiLines(Hud hud) { return aiLines(hud, hud.inspected()); }
+    static List<String> aiLines(Hud hud, Npc n) {
         List<String> lines = new ArrayList<>();
         if (n == null) return lines;
         lines.add(n.name + " #" + n.id + " - " + n.title + "  [PgUp/PgDn to cycle]");

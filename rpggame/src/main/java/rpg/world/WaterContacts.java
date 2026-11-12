@@ -59,7 +59,7 @@ public final class WaterContacts {
         }
         contact.x=x;contact.y=y;contact.z=z;contact.seen=g.time;
         int bx=(int)Math.floor(x),bz=(int)Math.floor(z);float surface=Float.NaN;
-        int top=Math.min(DevMap.SY-2,(int)Math.ceil(Math.max(y,previous)+radius));
+        int top=Math.min(rpg.world.WorldMap.active().sizeY-2,(int)Math.ceil(Math.max(y,previous)+radius));
         int bottom=Math.max(0,(int)Math.floor(Math.min(y,previous)-radius));
         for(int h=top;h>=Math.max(bottom,top-12);h--)if(g.vox.block(bx,h,bz)==Blocks.WATER && g.vox.block(bx,h+1,bz)!=Blocks.WATER){surface=h+0.9f;break;}
         boolean wet=Float.isFinite(surface) && y-radius<surface && y+radius>surface-1.5f;

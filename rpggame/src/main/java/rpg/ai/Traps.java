@@ -58,9 +58,9 @@ public final class Traps {
         if(prey==null){g.ai.desire(hunter,AiSystem.A_HOLD);return;}
         if(hunter.dutyUntil<g.time) {hunter.dutyX=(float)Math.floor(prey.x+prey.vx)+0.5f;hunter.dutyZ=(float)Math.floor(prey.z+prey.vz)+0.5f;hunter.dutyUntil=g.time+8;}
         int x=(int)hunter.dutyX,z=(int)hunter.dutyZ;
-        if(!g.vox.solid(x,DevMap.FLOOR-1,z)||g.vox.solid(x,DevMap.FLOOR,z)||g.vox.block(x,DevMap.FLOOR,z)==Blocks.WATER){hunter.dutyUntil=0;return;}
+        if(!g.vox.solid(x,rpg.world.Ground.cell(x, z)-1,z)||g.vox.solid(x,rpg.world.Ground.cell(x, z),z)||g.vox.block(x,rpg.world.Ground.cell(x, z),z)==Blocks.WATER){hunter.dutyUntil=0;return;}
         if(g.ai.brain.goTo(hunter,hunter.dutyX,hunter.dutyZ,false,0.9f)) {
-            Trap trap=new Trap(g.state.newEntityId(),hunter.id,hunter.dutyX,DevMap.FLOOR,hunter.dutyZ);
+            Trap trap=new Trap(g.state.newEntityId(),hunter.id,hunter.dutyX,rpg.world.Ground.at(hunter.dutyX, hunter.dutyZ),hunter.dutyZ);
             for(var item:hunter.takeItems(Items.SNARE,1))trap.contents.add(item);
             trap.checkedAt=g.state.minutes;g.objects.add(trap);hunter.dutyUntil=0;
         }

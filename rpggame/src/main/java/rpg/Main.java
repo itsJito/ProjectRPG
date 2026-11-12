@@ -54,7 +54,7 @@ public final class Main {
     static boolean bench;
 
     static int run(boolean acceptance, boolean gallery, boolean female, boolean hidden, String shots) {
-        System.out.println(Astratto.NAME + " " + Astratto.VERSION + " - SHADOWVEIL devmap" + (Astratto.javaFallbackAllowed() ? "" : " (Java fallbacks disabled)"));
+        System.out.println(Astratto.NAME + " " + Astratto.VERSION + " - SHADOWVEIL" + (Astratto.javaFallbackAllowed() ? "" : " (Java fallbacks disabled)"));
         // the recordings decode on background threads while the window, the engine and the intro come up
         rpg.audio.Sfx.warm();
         Window win = new Window();
@@ -88,9 +88,15 @@ public final class Main {
         System.out.println(AstrattoNative.buildInfo());
         System.out.printf("[Load] native services %.2fs%n", (System.nanoTime() - boot) / 1e9);
         boot = System.nanoTime();
-        long world = DevMap.build(game.engine());
+        // (0.4.0) the map: ShadowVeil, the permanent world, unless the devmap is asked for - by the settings (World: Devmap),
+        // by RPG_MAP=devmap, or by the acceptance and gallery runs, whose checks and pictures are of the devmap
+        // (RPG_MAP=shadowveil runs them on ShadowVeil)
+        String asked = System.getenv("RPG_MAP");
+        boolean devmap = asked != null ? rpg.world.WorldMap.parse(asked) == rpg.world.WorldMap.Kind.DEVMAP
+                : acceptance || gallery || Preferences.load(java.nio.file.Path.of("saves", "preferences.json")).legacyDevmap;
+        long world = devmap ? DevMap.build(game.engine()) : rpg.world.shadowveil.ShadowVeil.build(game.engine());
         game.activate(world);
-        System.out.printf("[Load] devmap %.2fs%n", (System.nanoTime() - boot) / 1e9);
+        System.out.printf("[Load] %s %.2fs%n", rpg.world.WorldMap.active().title, (System.nanoTime() - boot) / 1e9);
         boot = System.nanoTime();
         Gfx gfx = new Gfx(game.engine(), win.width, win.height);
         Ui2D ui = new Ui2D(gfx.renderer());
@@ -195,9 +201,9 @@ public final class Main {
         gfx.findLamps(g.vox);
         gfx.preload(g.npcs); gfx.preload(java.util.List.of(g.player));
         if (!fresh && profile.hasSave() && !new SaveSystem(g).load(profile.save())) g.chat.warn("The save for " + profile.name + " could not be loaded: a fresh start.");
-        if (!fresh && profile.outdated()) g.chat.warn(profile.name + "'s save is from version " + SaveSystem.lineName(profile.version) + " and does not carry over to " + SaveSystem.lineName(VERSION) + ": a fresh start.");
+        // (0.4.1) an older version's save brings its character into this version's world (SaveSystem.load carries it over)
         if (fresh) new SaveSystem(g).save(profile.save());
-        gfx.preloadWorld(g, g.player.x, g.player.z);
+        preloadAll(g, gfx);
         System.out.printf("[Load] session, audio, figures and save %.2fs%n", (System.nanoTime() - loadStarted) / 1e9);
         boolean[] toTitle = {false};
         hud.onTitle = () -> { toTitle[0] = true; win.requestClose(); };
@@ -510,7 +516,22 @@ public final class Main {
     }
 
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.3.9";
+    public static final String VERSION = "Alpha 0.4.1";
+    /**
+     * (0.4.1, gamefixes: the stutter on loading into the map) everything the first seconds in the world would otherwise do
+     * a piece at a time, done before the first frame: the growth about the spawn, the routing graph about it, and the
+     * chunks in view meshed and lit, so the player arrives into a world that is already all there.
+     */
+    public static void preloadAll(Rpg g, rpg.render.Gfx gfx) {
+        long t0 = System.nanoTime();
+        gfx.preloadWorld(g, g.player.x, g.player.z);
+        if (rpg.world.WorldMap.shadowveil()) g.vox.navigation.warmAround(g.player.x, g.player.z, Tuning.i("load.navRadius", 96));
+        // one step of the world behind the loading screen: the first tick's own costs (the engine's first frame, every
+        // creature's first plan, the residents beyond the fog going off-stage) are paid before anything is shown
+        g.game.tick(1f / 60);
+        gfx.preloadChunks(g, g.player.x, g.player.z);
+        System.out.printf("[Load] the world about the spawn made ready in %.2fs%n", (System.nanoTime() - t0) / 1e9);
+    }
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
     static int keyCode(String name) {

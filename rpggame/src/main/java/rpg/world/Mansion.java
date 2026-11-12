@@ -95,7 +95,7 @@ public final class Mansion {
             // the entrance hall: a tapestry over the stair's foot, a longcase clock, a bust and ferns, the chandelier
             f("CHANDELIER", 47, 141, 48, 142, STOREY, 0, 0), f("CLOCK", 49, 149, 49, 149, 2, 1, 0), f("BUST", 49, 140, 1, 0), f("PLANTER", 49, 150, 0, 0),
             f("PLANTER", 44, 150, 0, 0), f("TAPESTRY", 44, 141, 45, 141, STOREY, 3, 0), f("ARMOR_STAND", 49, 137, 49, 137, 2, 2, 0),
-            f("RUG", 47, 146, 48, 150, 1, 0, 0), f("MIRROR", 49, 144, 1, 0), f("CANDELABRA", 46, 138, 0, 0),
+            f("RUG", 47, 146, 48, 150, 1, 0, 0), f("MIRROR", 49, 144, 1, 0), f("CANDELABRA", 44, 138, 0, 0),   // (0.4.1) by the wall, off the porter's post
             // the dining room: the long table for eight, its chairs, the sideboard, the fireplace on the west wall, paintings
             f("DINING_TABLE", 39, 145, 40, 148, 1, 1, 0),
             f("CHAIR", 38, 145, 3, 0), f("CHAIR", 38, 146, 3, 0), f("CHAIR", 38, 147, 3, 0), f("CHAIR", 38, 148, 3, 0),
@@ -105,7 +105,9 @@ public final class Mansion {
             f("PAINTING", 38, 150, 39, 150, STOREY, 0, 0), f("PAINTING", 41, 143, 42, 143, STOREY, 2, 0), f("PLANTER", 37, 150, 0, 0),
             // the kitchen: the range (a station), the dresser, the pot rack, a work table and stools, the shelves
             f("CUPBOARD", 41, 137, 42, 137, 2, 2, 0), f("POT_RACK", 37, 138, 37, 139, STOREY, 3, 0), f("TABLE", 39, 139, 40, 140, 1, 0, 0),
-            f("STOOL", 41, 139, 0, 0), f("STOOL", 41, 140, 0, 0), f("SHELVES", 37, 141, 38, 141, 2, 0, 0), f("CHANDELIER", 39, 139, 40, 140, STOREY, 0, 0), f("CANDELABRA", 42, 141, 0, 0),
+            // (0.4.1) the stools at the table's north side: on its east side they closed the only way through to the servants'
+            // room once furniture stopped being something to walk over (0.4.0)
+            f("STOOL", 39, 138, 0, 0), f("STOOL", 40, 138, 0, 0), f("SHELVES", 37, 141, 38, 141, 2, 0, 0), f("CHANDELIER", 39, 139, 40, 140, STOREY, 0, 0), f("CANDELABRA", 42, 141, 0, 0),
             // the drawing room: the settee and armchairs round the fire, a rug, paintings, a clock, a planter, a sideboard
             f("FIREPLACE", 56, 146, 56, 147, 2, 1, 0), f("SOFA", 52, 145, 52, 148, 1, 3, 0), f("ARMCHAIR", 54, 144, 2, 0), f("ARMCHAIR", 54, 149, 0, 0),
             f("RUG", 53, 145, 55, 148, 1, 0, 0), f("CHANDELIER", 53, 146, 54, 147, STOREY, 0, 0), f("PAINTING", 51, 143, 52, 143, STOREY, 2, 0),
@@ -114,7 +116,8 @@ public final class Mansion {
             f("SHELVES", 51, 137, 53, 137, 2, 2, 0), f("SHELVES", 56, 140, 56, 141, 2, 1, 0), f("WINE_RACK", 51, 141, 52, 141, 2, 0, 0), f("CHANDELIER", 53, 139, 54, 140, STOREY, 0, 0),
             // ---- the first floor
             // the gallery: armour, a bust, portraits, a bench to sit and look at them
-            f("ARMOR_STAND", 44, 137, 44, 137, 2, 2, 1), f("ARMOR_STAND", 46, 137, 46, 137, 2, 2, 1), f("BUST", 45, 137, 2, 1),
+            // (0.4.1) the second armour stand by the first, off the foot of the stair to the top floor (it stood on the only way on)
+            f("ARMOR_STAND", 44, 137, 44, 137, 2, 2, 1), f("ARMOR_STAND", 44, 138, 44, 138, 2, 1, 1), f("BUST", 45, 137, 2, 1),
             f("PAINTING", 44, 141, 44, 142, STOREY, 3, 1), f("PAINTING", 49, 143, 49, 144, STOREY, 1, 1), f("CHANDELIER", 45, 142, 46, 143, STOREY, 0, 1),
             f("BENCH", 45, 140, 46, 140, 1, 0, 1), f("TAPESTRY", 44, 150, 45, 150, STOREY, 0, 1),
             // the library: bookcases round the walls, a desk, a reading chair, a candelabrum

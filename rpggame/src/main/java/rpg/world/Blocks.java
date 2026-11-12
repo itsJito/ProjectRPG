@@ -56,7 +56,12 @@ public final class Blocks {
             DUAL1 = 137,
             // 0.3.9 (gamefixes: chairs, settees, stools and benches had no collision): a seat's cells - solid to every body
             // and ray, seen through like any furnishing; a sitter is set down onto it (rpg.ai.Seating), never walks onto it
-            SEAT = 209, COUNT = 210;
+            SEAT = 209,
+            // 0.4.0 (gamefixes: ShadowVeil): the wild ground of the permanent world - Ashmaw's ash, the moors' heath, the
+            // Dead Wood's needle-litter floor (podzol), the Marches' and the south's sun-dried grass
+            ASH = 210, HEATH = 211, PODZOL = 212, DRY_GRASS = 213,
+            // 0.4.0: the conifers' needles (ShadowVeil's ash-pines, cypress and olives): sprays of fine dark leaves, seen through
+            PINE_LEAVES = 214, COUNT = 215;
     /**
      * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
      * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
@@ -65,6 +70,7 @@ public final class Blocks {
     public static byte[] groundRanks() {
         byte[] r = new byte[256];
         r[GRASS] = 6; r[BARE_PATCH] = 5; r[DIRT] = 4; r[MUD] = 4; r[SAND] = 3; r[CLAY] = 3; r[COBBLE] = 2; r[STONE] = 1; r[DEBUG_FLOOR] = 1;
+        r[HEATH] = 6; r[DRY_GRASS] = 6; r[PODZOL] = 5; r[ASH] = 3; r[GRAVEL] = 2;
         return r;
     }
     public static boolean stairs(int id) { return id == STAIRS; }
@@ -137,7 +143,8 @@ public final class Blocks {
         if (dual(id)) return material(outerOf(id));   // what is struck and walked against is the outside
         return switch (id) {
             case AIR, EMBERS -> Material.NONE;
-            case GRASS, DIRT, BARE_PATCH, CLAY, MUD -> Material.EARTH;
+            case GRASS, DIRT, BARE_PATCH, CLAY, MUD, HEATH, PODZOL, DRY_GRASS -> Material.EARTH;
+            case ASH -> Material.SAND;
             case SAND -> Material.SAND;
             case WAINSCOT, PARQUET, DARK_PLANKS -> Material.WOOD;
             case VELVET_CARPET, WALLPAPER_GREEN, WALLPAPER_RED, WALLPAPER_BLUE -> Material.CLOTH;
@@ -148,7 +155,7 @@ public final class Blocks {
             case LADDER, PLANKS, LOG, OAK_LOG, WILLOW_LOG, SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, BEAM, ROOF, FENCE, STUMP, CRATE, BOOKCASE, TABLE,
                  CRAFT_TABLE, SAWBENCH, TARGET, SEAT, DOOR, LOCKED_DOOR, CHARRED, CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG,
                  CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF, CHARRED_STUMP -> Material.WOOD;
-            case LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
+            case LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, HEDGE, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
             case WHITE_CARPET, BLACK_CARPET, BROWN_CARPET, RED_CARPET, BED -> Material.CLOTH;
             case HAY_BALE -> Material.STRAW;
             case IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, ANVIL, LAMP -> Material.METAL;
@@ -173,7 +180,7 @@ public final class Blocks {
                 SPRUCE_LOG, JUNGLE_LOG, BIRCH_LOG, GRANITE, STONE_BRICKS, MARBLE, CLAY, MUD, SANDSTONE, RED_SANDSTONE, WHITE_CARPET, BLACK_CARPET,
                 BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE,
                 WALLPAPER_GREEN, WALLPAPER_RED, WAINSCOT, PARQUET, DARK_PLANKS, CHECKER_TILE, FLAGSTONE, SLATE_ROOF, TIMBER_FRAME, MOSSY_BRICKS,
-                TERRACOTTA, VELVET_CARPET, THATCH, BASALT, GRAVEL, BRASS_BLOCK, WALLPAPER_BLUE,
+                TERRACOTTA, VELVET_CARPET, THATCH, BASALT, GRAVEL, BRASS_BLOCK, WALLPAPER_BLUE, ASH, HEATH, PODZOL, DRY_GRASS,
                 CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG, CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF -> true; default -> false; };
     }
     /** Plants drawn as crossed planes that bodies walk through (gamefixes: no foliage is ever solid - the berry bush neither). */
@@ -194,9 +201,10 @@ public final class Blocks {
             L_WROUGHT = 76, L_MITHRIL = 77, L_COBALT = 78, L_DRAGONITE = 79, L_MOLTENITE = 80, L_GODSTONE = 81, L_MALEVOLENT = 82,
             L_PAPER_GREEN = 83, L_PAPER_RED = 84, L_WAINSCOT = 85, L_PARQUET = 86, L_DARK_PLANKS = 87, L_CHECKER = 88, L_FLAGSTONE = 89,
             L_SLATE = 90, L_TIMBER = 91, L_MOSSY = 92, L_TERRACOTTA = 93, L_VELVET = 94, L_THATCH = 95, L_BASALT = 96, L_STAINED = 97,
-            L_GRAVEL = 98, L_BRASS = 99, L_PAPER_BLUE = 100, L_THATCH_TOP = 101, L_BASALT_TOP = 102;
+            L_GRAVEL = 98, L_BRASS = 99, L_PAPER_BLUE = 100, L_THATCH_TOP = 101, L_BASALT_TOP = 102,
+            L_ASH = 103, L_HEATH = 104, L_HEATH_SIDE = 105, L_PODZOL = 106, L_PODZOL_SIDE = 107, L_DRY_GRASS = 108, L_DRY_GRASS_SIDE = 109, L_PINE_LEAVES = 110;
     /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
-    public static final int CHAR_LAYER0 = 103, LAYERS = 116, TEX = 64;
+    public static final int CHAR_LAYER0 = 111, LAYERS = 124, TEX = 64;
     /** Per charred layer, the layer it was charred from (filled with FACES). */
     private static final int[] CHAR_FROM = new int[LAYERS - CHAR_LAYER0];
 
@@ -228,6 +236,7 @@ public final class Blocks {
         f(FLAGSTONE, L_FLAGSTONE, L_STONE, L_STONE); f(SLATE_ROOF, L_SLATE); f(TIMBER_FRAME, L_PLASTER, L_TIMBER, L_PLASTER); f(MOSSY_BRICKS, L_MOSSY);
         f(TERRACOTTA, L_TERRACOTTA); f(VELVET_CARPET, L_VELVET); f(THATCH, L_THATCH_TOP, L_THATCH, L_THATCH_TOP); f(BASALT, L_BASALT_TOP, L_BASALT, L_BASALT_TOP);
         f(STAINED_GLASS, L_STAINED); f(GRAVEL, L_GRAVEL); f(BRASS_BLOCK, L_BRASS);
+        f(ASH, L_ASH); f(HEATH, L_HEATH, L_HEATH_SIDE, L_DIRT); f(PODZOL, L_PODZOL, L_PODZOL_SIDE, L_DIRT); f(DRY_GRASS, L_DRY_GRASS, L_DRY_GRASS_SIDE, L_DIRT); f(PINE_LEAVES, L_PINE_LEAVES);
         // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
         int next = CHAR_LAYER0;
         int[] charOf = new int[CHAR_LAYER0];
@@ -255,10 +264,25 @@ public final class Blocks {
     }
 
     public static boolean isTreeLog(int id) { return id == LOG || id == OAK_LOG || id == WILLOW_LOG || id == SPRUCE_LOG || id == JUNGLE_LOG || id == BIRCH_LOG; }
-    public static boolean isLeaves(int id) { return id == LEAVES || id == OAK_LEAVES || id == WILLOW_LEAVES || id == HEDGE; }
+    public static boolean isLeaves(int id) { return id == LEAVES || id == OAK_LEAVES || id == WILLOW_LEAVES || id == PINE_LEAVES || id == HEDGE; }
 
-    /** What each block means to the engine. */
-    public static NativeEngine.BlockDef[] engineDefs() {
+    /**
+     * (0.4.0) The blocks of natural ground: on ShadowVeil a rise of one cell onto them is walked up, not jumped
+     * (AstrattoNative.BLOCK_GROUND) - hills of cubes would be a jump at every contour. The devmap's table leaves them off.
+     */
+    public static boolean naturalGround(int id) {
+        return switch (id) { case GRASS, DIRT, STONE, SAND, GRAVEL, CLAY, MUD, SANDSTONE, RED_SANDSTONE, GRANITE, MARBLE, BASALT, BARE_PATCH,
+                ASH, HEATH, PODZOL, DRY_GRASS, COBBLE, FLAGSTONE -> true; default -> false; };
+    }
+    /** The devmap's table: what each block means to the engine. */
+    public static NativeEngine.BlockDef[] engineDefs() { return engineDefs(false); }
+    /** What each block means to the engine; with natural ground, one cell of it is walked up (ShadowVeil). */
+    public static NativeEngine.BlockDef[] engineDefs(boolean ground) {
+        NativeEngine.BlockDef[] d = defs();
+        if (ground) for (int i = 1; i < COUNT; i++) if (naturalGround(i)) d[i].flags |= AstrattoNative.BLOCK_GROUND;
+        return d;
+    }
+    private static NativeEngine.BlockDef[] defs() {
         NativeEngine.BlockDef[] d = new NativeEngine.BlockDef[COUNT];
         int solid = AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_OPAQUE;
         for (int i = 0; i < COUNT; i++) d[i] = new NativeEngine.BlockDef(solid);
@@ -270,7 +294,7 @@ public final class Blocks {
         }
         for (int i = 1; i < COUNT; i++) if (glass(i)) { d[i] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_LIGHT_PASS); d[i].material = AstrattoNative.MATERIAL_GLASS; }
         d[LAMP].emission = 15;
-        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, HEDGE, BERRY_BUSH}) {
+        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, HEDGE, BERRY_BUSH}) {
             d[leaves] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_CUTOUT | AstrattoNative.BLOCK_SKY_DIM);
             d[leaves].material = AstrattoNative.MATERIAL_FOLIAGE;
         }
@@ -302,7 +326,7 @@ public final class Blocks {
         r[ICE] = def(FACES[ICE],AstrattoNative.RB_SOLID|AstrattoNative.RB_TRANSLUCENT);
         r[WATER] = def(FACES[WATER], AstrattoNative.RB_LIQUID | AstrattoNative.RB_TRANSLUCENT);
         r[LAMP] = def(FACES[LAMP], cube | AstrattoNative.RB_EMISSIVE);
-        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
+        for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
         r[HEDGE]=def(FACES[HEDGE],AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID); r[FENCE].shape = SHAPE_HIDDEN;   // the game draws fences as models (Props.fences)
         r[DOOR] = def(FACES[DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
@@ -469,7 +493,7 @@ public final class Blocks {
                 {L_PLANKS, 0.62f, 0f}, {L_TABLE_TOP, 0.45f, 0f}, {L_TABLE_SIDE, 0.55f, 0f}, {L_DOOR, 0.6f, 0f}, {L_LOCKED, 0.5f, 0.35f},
                 {L_BEAM, 0.7f, 0f}, {L_CRATE, 0.75f, 0f}, {L_FENCE, 0.78f, 0f}, {L_BOOKS, 0.7f, 0f}, {L_SAW, 0.5f, 0.4f},
                 {L_BARK, 0.9f, 0f}, {L_OAK_BARK, 0.9f, 0f}, {L_WILLOW_BARK, 0.9f, 0f}, {L_RINGS, 0.7f, 0f},
-                {L_LEAVES, 0.62f, 0f}, {L_OAK_LEAVES, 0.62f, 0f}, {L_WILLOW_LEAVES, 0.6f, 0f}, {L_HERB, 0.7f, 0f}, {L_FLAX, 0.75f, 0f}, {L_BERRY, 0.6f, 0f},
+                {L_LEAVES, 0.62f, 0f}, {L_OAK_LEAVES, 0.62f, 0f}, {L_WILLOW_LEAVES, 0.6f, 0f}, {L_PINE_LEAVES, 0.64f, 0f}, {L_HERB, 0.7f, 0f}, {L_FLAX, 0.75f, 0f}, {L_BERRY, 0.6f, 0f},
                 {L_COPPER, 0.5f, 0.45f}, {L_TIN, 0.5f, 0.45f}, {L_IRON, 0.55f, 0.4f}, {L_COAL, 0.6f, 0f}, {L_SPENT, 0.82f, 0f},  // ore glints in the rock
                 {L_WROUGHT, 0.6f, 0.35f}, {L_MITHRIL, 0.4f, 0.55f}, {L_COBALT, 0.42f, 0.5f}, {L_DRAGONITE, 0.45f, 0.45f}, {L_MOLTENITE, 0.4f, 0.4f},
                 {L_GODSTONE, 0.3f, 0.6f}, {L_MALEVOLENT, 0.38f, 0.5f},
@@ -486,13 +510,14 @@ public final class Blocks {
                 {L_PAPER_GREEN, 0.88f, 0f}, {L_PAPER_RED, 0.88f, 0f}, {L_PAPER_BLUE, 0.88f, 0f}, {L_WAINSCOT, 0.42f, 0f}, {L_PARQUET, 0.36f, 0f},
                 {L_DARK_PLANKS, 0.5f, 0f}, {L_CHECKER, 0.18f, 0f}, {L_FLAGSTONE, 0.8f, 0f}, {L_SLATE, 0.5f, 0f}, {L_TIMBER, 0.86f, 0f},
                 {L_MOSSY, 0.88f, 0f}, {L_TERRACOTTA, 0.7f, 0f}, {L_VELVET, 0.97f, 0f}, {L_THATCH, 0.97f, 0f}, {L_THATCH_TOP, 0.97f, 0f},
-                {L_BASALT, 0.6f, 0f}, {L_BASALT_TOP, 0.55f, 0f}, {L_STAINED, 0.06f, 0f}, {L_GRAVEL, 0.93f, 0f}, {L_BRASS, 0.24f, 1f}};
+                {L_BASALT, 0.6f, 0f}, {L_BASALT_TOP, 0.55f, 0f}, {L_STAINED, 0.06f, 0f}, {L_GRAVEL, 0.93f, 0f}, {L_BRASS, 0.24f, 1f},
+                {L_ASH, 0.96f, 0f}, {L_HEATH, 0.9f, 0f}, {L_HEATH_SIDE, 0.9f, 0f}, {L_PODZOL, 0.92f, 0f}, {L_PODZOL_SIDE, 0.9f, 0f}, {L_DRY_GRASS, 0.9f, 0f}, {L_DRY_GRASS_SIDE, 0.9f, 0f}};
         for (Object[] t : table) { int l = (Integer) t[0]; m[l * 4] = (byte) rough((Float) t[1]); m[l * 4 + 1] = (byte) clamp((Float) t[2] * 255); }
         for (int l = CHAR_LAYER0; l < LAYERS; l++) m[l * 4] = (byte) rough(0.97f);   // char is dry and dull
         m[L_LAMP * 4 + 2] = (byte) 255;
         m[L_FURNACE * 4 + 2] = (byte) 120;
         for (int l = 0; l < LAYERS; l++) m[l * 4 + 3] = (byte) rough((m[l * 4] & 255) / 255f * 0.55f);
-        for (int l : new int[]{L_GRASS, L_GRASS_SIDE, L_DIRT, L_SAND, L_BARE, L_LEAVES, L_OAK_LEAVES, L_WILLOW_LEAVES, L_HEDGE, L_HAY_TOP, L_HAY_SIDE, L_WHITE_CARPET, L_BLACK_CARPET, L_BROWN_CARPET, L_RED_CARPET,
+        for (int l : new int[]{L_GRASS, L_GRASS_SIDE, L_DIRT, L_SAND, L_BARE, L_LEAVES, L_OAK_LEAVES, L_WILLOW_LEAVES, L_PINE_LEAVES, L_HEDGE, L_HAY_TOP, L_HAY_SIDE, L_WHITE_CARPET, L_BLACK_CARPET, L_BROWN_CARPET, L_RED_CARPET,
                 L_VELVET, L_THATCH, L_THATCH_TOP, L_GRAVEL, L_PAPER_GREEN, L_PAPER_RED, L_PAPER_BLUE}) m[l * 4 + 3] = (byte) rough(0.8f);
         return m;
     }

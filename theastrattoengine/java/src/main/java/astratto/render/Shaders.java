@@ -27,7 +27,7 @@ public final class Shaders {
             "world_forward.frag", "model_forward.frag", "particle.vert", "particle.frag", "taa.frag", "bloom_down.frag", "bloom_up.frag",
             "luminance.frag", "exposure.frag", "tonemap.frag", "copy.frag", "ui2d.vert", "ui2d.frag", "portrait.frag", "model_simple.vert", "model_simple.frag",
             "decal.vert", "decal.frag", "foliage.vert", "foliage_gbuffer.frag", "foliage_shadow.frag", "props.vert", "props_gbuffer.frag",
-            "props_shadow.frag", "lens.frag", "leaf_bake.frag", "rain.frag"};
+            "props_shadow.frag", "lens.frag", "leaf_bake.frag", "rain.frag", "focus.frag"};
 
     /** A shader's source with its includes resolved. Throws when the engine's shaders cannot be found. */
     public static String source(String name) {

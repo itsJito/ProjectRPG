@@ -301,7 +301,7 @@ public final class Gore {
         Limb l = new Limb(body, an.id, part, null, Math.max(hx, Math.max(hy, hz)) * 2);
         l.species = an.species; l.variant = an.variant; l.scale = an.scale();
         limbs.add(l);
-        evidence(Kind.LIMB, lx, DevMap.FLOOR, lz, 0.4f, an.id, by == null ? 0 : by.id);
+        evidence(Kind.LIMB, lx, rpg.world.Ground.at(lx, lz), lz, 0.4f, an.id, by == null ? 0 : by.id);
         w.bleed = Math.min(2.5f, w.bleed + (part == Part.HEAD ? 2f : part == Part.TAIL ? 0.3f : 0.7f));
         if (g.fx != null) for (int i = 0; i < 5; i++) g.fx.blood(lx, ly, lz, dirX * 0.5f, dirZ * 0.5f);
         for (int i = 0; i < 2; i++) spatter(lx, ly, lz, dirX + (rnd.nextFloat() - 0.5f), dirZ + (rnd.nextFloat() - 0.5f), 0.4f, an.id, by == null ? 0 : by.id);
@@ -357,7 +357,7 @@ public final class Gore {
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
         Actor owner=g.actor(source);int from=(int)Math.floor(owner==null?DevMap.FLOOR+2:owner.y+owner.height);
         int top = 0;
-        for (int y = Math.min(DevMap.SY-1,from); y >= 0; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
+        for (int y = Math.min(rpg.world.WorldMap.active().sizeY-1,from); y >= 0; y--) if (g.vox.solid(bx, y, bz)) { top = y; break; }
         if (g.vox.block(bx, top + 1, bz) == Blocks.WATER) return;   // into water: it washes away
         float y = top + 1;
         stain(x + (rnd.nextFloat() - 0.5f) * 0.2f, y, z + (rnd.nextFloat() - 0.5f) * 0.2f, 0, 1, 0, size);
@@ -444,7 +444,7 @@ public final class Gore {
         Limb cut = new Limb(body, v.id, part, v.look.copy(), len);
         if (v instanceof rpg.monster.Monster mo) { cut.monster = mo.kind; cut.breed = mo.breed; }
         limbs.add(cut);
-        evidence(Kind.LIMB, lx, DevMap.FLOOR, lz, 0.6f, v.id, by == null ? 0 : by.id);
+        evidence(Kind.LIMB, lx, rpg.world.Ground.at(lx, lz), lz, 0.6f, v.id, by == null ? 0 : by.id);
         // the gush
         w.spurtUntil = g.time + 6;
         w.bleed = Math.min(2.5f, w.bleed + (part == Part.HEAD ? 2f : 0.75f));
@@ -469,7 +469,7 @@ public final class Gore {
         ItemStack s = v.eq.get(slot);
         if (s == null) return;
         v.eq.set(slot, null);
-        g.objects.drop(s, v.x + (float) Math.cos(v.yaw) * 0.5f, DevMap.FLOOR + 0.05f, v.z - (float) Math.sin(v.yaw) * 0.5f);
+        g.objects.drop(s, v.x + (float) Math.cos(v.yaw) * 0.5f, rpg.world.Ground.at(v.x + (float) Math.cos(v.yaw) * 0.5f, v.z - (float) Math.sin(v.yaw) * 0.5f) + 0.05f, v.z - (float) Math.sin(v.yaw) * 0.5f);
         v.cs.cancel();
         v.cs.blocking = false;
     }
@@ -613,7 +613,7 @@ public final class Gore {
             else if (ageing) a.blood.age(g.time);
         }
         // bodies are evidence while they lie there; evidence goes when what it was is gone (a day for blood)
-        for (Npc n : g.npcs) if (!n.alive && n.ragdoll != 0 && !bodyKnown(n.id)) evidence(Kind.BODY, n.x, DevMap.FLOOR, n.z, 1, n.id, n.cs.lastAttacker);
+        for (Npc n : g.npcs) if (!n.alive && n.ragdoll != 0 && !bodyKnown(n.id)) evidence(Kind.BODY, n.x, rpg.world.Ground.at(n.x, n.z), n.z, 1, n.id, n.cs.lastAttacker);
         // a body is found where it lies now, not where it fell (it may have been carried off, thrown, dragged)
         for (Evidence e : evidence) if (e.kind == Kind.BODY && g.actor(e.source) instanceof Npc n && n.ragdoll != 0) {
             var pose = g.lastBodies.ragdoll(n.ragdoll);
@@ -683,7 +683,7 @@ public final class Gore {
             if (dist >= bestD) continue;
             bestD = dist; bx = a.x; bz = a.z; person = false; fresh = false; found = true;
         }
-        if (!found || !g.vox.sight(n.x, n.eyeY(), n.z, bx, DevMap.FLOOR + 0.3f, bz)) return;
+        if (!found || !g.vox.sight(n.x, n.eyeY(), n.z, bx, rpg.world.Ground.at(bx, bz) + 0.3f, bz)) return;
         uneasyAt.put(n.id, g.time + UNEASY_AGAIN);
         if (uneasyAt.size() > 400) uneasyAt.entrySet().removeIf(en -> g.time > en.getValue());
         n.wantYaw = (float) Math.atan2(-(bx - n.x), -(bz - n.z));

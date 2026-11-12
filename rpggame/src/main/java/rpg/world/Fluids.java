@@ -126,6 +126,8 @@ public final class Fluids {
         float[] out = new float[2];
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
         if (!in(x, y, z) && !in(x, y - 0.5f, z)) return out;
+        // (0.4.1) where reaches overlap (a river's bends) the water runs at their average, never their sum
+        int over = 0;
         for (Current c : currents) {
             if (!c.holds(bx, bz)) continue;
             // across the channel: 1 in the middle, about half at the bank
@@ -136,7 +138,9 @@ public final class Fluids {
             float near = Float.isNaN(s) ? 1 : Math.max(0.35f, 1 - Math.max(0, s - y) * 0.35f);
             out[0] += c.dx * c.speed * middle * near;
             out[1] += c.dz * c.speed * middle * near;
+            over++;
         }
+        if (over > 1) { out[0] /= over; out[1] /= over; }
         return out;
     }
 }

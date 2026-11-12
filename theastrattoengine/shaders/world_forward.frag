@@ -84,6 +84,17 @@ void main() {
     vec3 irr = max(vec3(r.x + dot(r.yzw, N), g.x + dot(g.yzw, N), b.x + dot(b.yzw, N)), vec3(0.0));
     float sky = vLight.x;
     vec3 col = albedo * (irr + uSunCol * max(dot(N, uSunDir), 0.0) * smoothstep(0.6, 1.0, sky));
+    // 2.11: the face of falling water (a falls' curtain, the step of a rapid) runs downward: streaks of white water
+    // pour down it at a falling pace, broken across it, catching the light
+    if (liquid && abs(N.y) < 0.5) {
+        vec2 across = normalize(vec2(-N.z, N.x) + vec2(1e-4));
+        float u = dot(vWorld.xz, across);
+        vec2 f0 = texture(uWaterNoise, vec2(u * 0.45, vWorld.y * 0.22 + uTime * 0.9)).rg;
+        vec2 f1 = texture(uWaterNoise, vec2(u * 0.9 + 0.37, vWorld.y * 0.4 + uTime * 1.7)).gb;
+        float streak = smoothstep(0.52, 0.86, f0.r * 0.65 + f1.g * 0.45);
+        col = mix(col, vec3(0.86, 0.92, 0.96) * (irr * 0.9 + uSunCol * 0.35 * smoothstep(0.6, 1.0, sky)), streak * 0.55);
+        crest = max(crest, streak * 0.4);
+    }
     float fres = 0.04 + 0.96 * pow(1.0 - max(dot(N, V), 0.0), 5.0);
     vec3 R = reflect(-V, N);
     vec3 refl = mix(irr, skyColor(R), smoothstep(0.3, 0.9, sky) * smoothstep(-0.1, 0.2, R.y));

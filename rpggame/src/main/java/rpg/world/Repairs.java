@@ -220,10 +220,10 @@ public final class Repairs {
         float[] best = null; float nearest = Float.MAX_VALUE;
         for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}}) {
             int x = d.x + o[0], z = d.z + o[1];
-            if (g.vox.solid(x, DevMap.FLOOR, z) || g.vox.solid(x, DevMap.FLOOR + 1, z) || !g.vox.solid(x, DevMap.FLOOR - 1, z)) continue;
+            if (g.vox.solid(x, rpg.world.Ground.cell(x, z), z) || g.vox.solid(x, rpg.world.Ground.cell(x, z) + 1, z) || !g.vox.solid(x, rpg.world.Ground.cell(x, z) - 1, z)) continue;
             // the outside of a wall first (a window is glazed from the street; indoors may be locked or out of the way)
             boolean roofed = false;
-            for (int y = DevMap.FLOOR + 2; y < DevMap.FLOOR + 9 && !roofed; y++) roofed = g.vox.solid(x, y, z);
+            for (int y = Ground.cell(x, z) + 2; y < Ground.cell(x, z) + 9 && !roofed; y++) roofed = g.vox.solid(x, y, z);
             float dist = (float) Math.hypot(x + 0.5 - n.x, z + 0.5 - n.z) + (roofed ? 40 : 0);
             if (dist < nearest) { nearest = dist; best = new float[]{x + 0.5f, z + 0.5f}; }
         }

@@ -119,6 +119,8 @@ public final class AiSystem {
         brute.aggroRange = 9;
         // those with a bed sleep in it
         for (Npc n : g.npcs) { float[] bed = DevMap.bedOf(n.id); if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; } }
+        // (0.4.0) on ShadowVeil everyone goes to the home the transfer rules give them (rpg.world.shadowveil.Settle)
+        rpg.world.shadowveil.Settle.people(g.npcs);
         for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
     }
 
@@ -243,7 +245,7 @@ public final class AiSystem {
     private Npc support(long id) {
         if (id < Ids.CARPENTER_CITY || id > Ids.TRADER_PALACE) return null;
         int index = (int)(id - Ids.CARPENTER_CITY);
-        float[][] posts = {{74.5f,28.5f},{39.5f,108.5f},{90.5f,134.5f},{172.5f,84.5f},
+        float[][] posts = {{74.5f,28.5f},{39.5f,108.5f},{91.5f,134.5f},{172.5f,84.5f},     // (0.4.1) Corren off the bed at 90,134
                 {80.5f,20.5f},{31.5f,102.5f},{93.5f,24.5f},{140.5f,152.5f},{76.5f,28.5f},{182.5f,96.5f}};
         Npc.Role role = index < 4 ? Npc.Role.CRAFTSMAN : index < 6 ? Npc.Role.WORKER : index < 8 ? Npc.Role.MINER : Npc.Role.MERCHANT;
         String title = index < 4 ? "Carpenter" : index < 6 ? "Woodcutter" : index < 8 ? "Ore Miner" : "Materials Trader";
@@ -483,7 +485,7 @@ public final class AiSystem {
                 if(old.ragdoll!=0)g.game.commands().release(old.ragdoll);
                 g.npcs.remove(old);
             }
-            Npc n=addReleaseNpc(id);n.restore();n.poseReset=true;n.social=(n.id%7)/10f;n.hunger=(n.id%5)/10f;spawnBody(n);added.add(n);
+            Npc n=addReleaseNpc(id);rpg.world.shadowveil.Settle.person(n);n.restore();n.poseReset=true;n.social=(n.id%7)/10f;n.hunger=(n.id%5)/10f;spawnBody(n);added.add(n);
         }
         return added;
     }
@@ -533,11 +535,37 @@ public final class AiSystem {
 
     private void give(Npc n, ItemDef d, int amount) { g.grant(n, new ItemStack(d, amount)); }
 
+    /**
+     * (0.4.0, gamefixes: NPCs spawned inside furniture - the DevMansion's household above all) a body is never made inside
+     * something: when its spot is a table, a chair, a chest or a wall's cell, it is set down on the nearest open, supported
+     * cell within four (the floor beside the furniture), at that floor's own height.
+     */
+    public void clearSpawn(Actor n) {
+        int bx = (int) Math.floor(n.x), bz = (int) Math.floor(n.z), by = (int) Math.floor(n.y + 0.1f);
+        if (openCell(bx, by, bz)) return;
+        for (int r = 1; r <= 4; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+            for (int dy : new int[]{0, 1, -1}) if (openCell(bx + dx, by + dy, bz + dz)) {
+                n.x = bx + dx + 0.5f; n.z = bz + dz + 0.5f; n.y = by + dy;
+                return;
+            }
+        }
+    }
+    /** A cell a body can stand in: room for feet and head, and a floor under it that is not furniture or a fence. */
+    private boolean openCell(int x, int y, int z) {
+        if (g.vox.solid(x, y, z) || g.vox.solid(x, y + 1, z) || !g.vox.solid(x, y - 1, z)) return false;
+        int under = g.vox.block(x, y - 1, z);
+        return !rpg.world.Blocks.objectCell(under) && under != rpg.world.Blocks.FENCE && !rpg.world.Blocks.isLeaves(under)
+                && !rpg.world.Blocks.objectCell(g.vox.block(x, y, z)) && g.vox.block(x, y, z) != rpg.world.Blocks.WATER;
+    }
+
     /** Makes the NPC's mover and agent in the engine (on spawning, reloading or reviving). */
     public void spawnBody(Npc n) {
         CommandBuffer c = g.game.commands();
         n.body = g.game.reserve(KIND_MOVER);
         n.agent = g.game.reserve(KIND_AGENT);
+        n.y = rpg.world.WorldMap.settleY(n.x, n.y, n.z);
+        clearSpawn(n);
         c.moverCreate(n.body, n.x, n.y + 0.05f, n.z, n.radius, n.height, 0.6f, MOVER_AGENT, n.height * rpg.actor.Body.CROUCH_HEIGHT);
         c.agentCreate(n.agent, policy, n.body, 0, 0, 0, 1.6f, 22, 0.25f, 24, n.team, n.domain.flags | AGENT_DOORS | AGENT_EXTERNAL_TRAVERSAL | (n.skills.level(Skill.AGILITY) >= 5 ? AGENT_MANTLE : 0), (int) n.id * 7919);
         c.agentTarget(n.agent, g.player == null ? 0 : g.player.body, 0, 0, 0);
@@ -667,7 +695,16 @@ public final class AiSystem {
 
     // ------------------------------------------------------------------ the frame
     private double watchAt;
+    /** A mind that takes over a tenth of a second in one tick is named on the console (rpg.slowProbe: the stress tests). */
+    static final boolean SLOW_PROBE = Boolean.getBoolean("rpg.slowProbe");
+    /** (0.4.1) The off-stage day of the residents beyond the fog. */
+    public int offstageCount() { return offstageSim.count; }
+    public int offstageSteps() { return offstageSim.steps; }
+    private Offstage offstageSim;
+
     public void update(float dt) {
+        if (offstageSim == null) offstageSim = new Offstage(g, this);
+        offstageSim.update();
         brain.household.update();
         if (g.scripted && System.getenv("RPG_WATCH") != null && g.time > watchAt) {
             watchAt = g.time + 0.5;
@@ -703,11 +740,13 @@ public final class AiSystem {
             stealth.update(n, step);
             if (g.traversal.update(n, step)) continue;
             if (n.reacting) { if (n.seated) { n.seated = false; n.seatX = Float.NaN; } continue; }           // off balance in Sydney's hands: no thinking, no walking, until back on their feet
+            long slowAt = SLOW_PROBE ? System.nanoTime() : 0;
             if (g.time >= n.nextThink) { brain.think(n); decisions++; }
             Actor elevated = n.goal == Brain.Goal.FIGHT ? g.actor(n.fightTarget) : null;
             if (elevated != null && elevated.y > n.y + 0.75f && g.traversal.begin(n, (float) Math.atan2(-(elevated.x - n.x), -(elevated.z - n.z))) && g.traversal.update(n, step)) continue;
             g.game.commands().agentFact(n.agent,15,Brain.canUseLadders(n)?1:-1);
             brain.act(n, step);
+            if (SLOW_PROBE && System.nanoTime() - slowAt > 100_000_000L) System.out.printf("[slow mind] %s %s goal %s (%s) %.0f ms%n", n.name, n.role, n.goal, n.lastOutcome, (System.nanoTime() - slowAt) / 1e6);
             n.diary.note(g.state.minutes, n.lastOutcome);
             if (n.stuck && (n.goal == Brain.Goal.FIGHT || n.goal == Brain.Goal.FLEE || n.goal == Brain.Goal.RETURN) && n.hasGoalPos) {
                 float heading = (float) Math.atan2(-(n.gx - n.x), -(n.gz - n.z));
@@ -871,8 +910,8 @@ public final class AiSystem {
 
     /** A cell a body can stand in: a floor under it, nothing solid at the feet or the head. */
     private boolean standable(int x, int z) {
-        return g.vox.solid(x, DevMap.FLOOR - 1, z) && !g.vox.solid(x, DevMap.FLOOR, z) && !g.vox.solid(x, DevMap.FLOOR + 1, z) && g.vox.block(x, DevMap.FLOOR - 1, z) != rpg.world.Blocks.WATER
-                && g.vox.block(x, DevMap.FLOOR, z) != rpg.world.Blocks.EMBERS;
+        return g.vox.solid(x, rpg.world.Ground.cell(x, z) - 1, z) && !g.vox.solid(x, rpg.world.Ground.cell(x, z), z) && !g.vox.solid(x, rpg.world.Ground.cell(x, z) + 1, z) && g.vox.block(x, rpg.world.Ground.cell(x, z) - 1, z) != rpg.world.Blocks.WATER
+                && g.vox.block(x, rpg.world.Ground.cell(x, z), z) != rpg.world.Blocks.EMBERS;
     }
 
     // ------------------------------------------------------------------ engine events
@@ -918,7 +957,7 @@ public final class AiSystem {
                 if (best < Float.MAX_VALUE) {
                     // (0.2.9, gamefixes: NPCs still popped about mid-fight) in a fight the step is walked, not jumped
                     if (fighting) combatGoal(n, cx + 0.5f, cz + 0.5f);
-                    else g.teleport(n, cx + 0.5f, DevMap.FLOOR, cz + 0.5f);
+                    else g.teleport(n, cx + 0.5f, rpg.world.Ground.at(cx + 0.5f, cz + 0.5f), cz + 0.5f);
                     g.state.commit("NpcUnstuck", n.id, 0, DevMap.jurisdiction(n.x, n.z), 0, String.format("%s back onto (%d, %d)", fighting ? "walked" : "stepped", cx, cz));
                     break;
                 }
@@ -1046,7 +1085,7 @@ public final class AiSystem {
         if (n.charmUntil > g.time && n.fightTarget == g.player.id) { n.fightTarget = 0; n.cs.cancel(); }
         if (n.charmUntil > g.time && n.hostileToPlayer) return null;
         if (n.fightTarget != 0 && alliedWatch(n, g.actor(n.fightTarget))) { n.fightTarget = 0; n.hunt = null; n.cs.cancel(); }
-        if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 0.6) {
+        if (n.cs.lastAttacker != 0 && g.time - n.cs.lastHurt < 0.6 && n.cs.attackerKnown) {
             Actor recent = g.actor(n.cs.lastAttacker);
             if (recent != null && recent.alive && !alliedWatch(n, recent) && !g.law.inCustody(recent) && !(law && g.law.settled(recent.id, n.cs.lastHurt))) { n.fightTarget = recent.id; return recent; }
         }
@@ -1069,8 +1108,9 @@ public final class AiSystem {
             Actor t = g.actor(n.cs.lastAttacker);
             // a blow struck before the striker's arrest is answered by the sentence, not by the guard
             if (t != null && t.alive && !alliedWatch(n, t) && !g.law.inCustody(t) && !(law && g.law.settled(t.id, n.cs.lastHurt))) {
-                if (placed(n, t) || g.time - n.cs.lastHurt < 0.6) return t;    // a blow just taken: its striker is right there
-                if (n.combatant()) lose(n, t, "struck by someone unseen");
+                // (0.4.0) a striker only once placed: seen since, or the blow felt from beside them
+                if (placed(n, t) || g.time - n.cs.lastHurt < 0.6 && n.cs.attackerKnown) return t;
+                if (n.combatant() && n.cs.attackerKnown) lose(n, t, "struck by someone unseen");
             }
         }
         // searching for whoever did it (a body, blood): someone in sight with blood on them, close to it, is a suspect
@@ -1344,8 +1384,41 @@ public final class AiSystem {
     public void onAttacked(Actor victim, Actor attacker) {
         if (alliedWatch(victim, attacker)) return;
         if (victim instanceof Npc n && n.alive) {
+            // (0.4.0) a striker unseen - a shot or a spell from hiding - is not known: the fighter searches toward where it
+            // came from, the rest are frightened from that way; neither has a name to put to it
+            if (!victim.cs.attackerKnown) { unknownStrike(n, attacker); return; }
             if (n.combatant()) { n.fightTarget = attacker.id; n.nextThink = 0; }
             if (!n.combatant()) n.nextThink = 0;
+        }
+    }
+
+    /**
+     * (0.4.0, gamefixes) Whether someone struck knows who struck them: a blow at arm's length, or a striker they can see
+     * at the moment the blow lands. An arrow, a bolt or a spell loosed from out of sight comes from no one they can name.
+     */
+    public boolean knowsStriker(Actor victim, Actor striker, boolean fromAfar) {
+        if (striker == null || !(victim instanceof Npc n)) return true;
+        if (!fromAfar && n.distTo(striker) < 3.5f) return true;
+        return canSee(n, striker);
+    }
+
+    /** Struck by someone unseen: a search of where it came from (a fighter), or fear from that way (anyone else). */
+    private void unknownStrike(Npc n, Actor attacker) {
+        n.nextThink = 0;
+        // only roughly where it came from: along the line of the shot, short of its true source
+        float x = n.x + (attacker.x - n.x) * 0.55f, z = n.z + (attacker.z - n.z) * 0.55f;
+        n.wantYaw = (float) Math.atan2(-(attacker.x - n.x), -(attacker.z - n.z));
+        if (n.combatant() || n.role == Npc.Role.LAWMAN) {
+            if (n.hunt == null || n.hunt.target != 0) {
+                Hunt h = new Hunt(0, "struck by someone unseen", x, z, g.time, n.watch() ? 55 : 22);
+                h.y = n.y;
+                n.hunt = h;
+            }
+            if (n.fightTarget == attacker.id) n.fightTarget = 0;
+            say(n, "Who's there? Show yourself!");
+        } else {
+            n.fearX = x; n.fearZ = z; n.fearSeenAt = g.time;
+            say(n, "Someone's shooting! Help!");
         }
     }
 
@@ -1515,7 +1588,7 @@ public final class AiSystem {
 
     public float stealOpportunity(Npc thief) {
         var stall = g.objects.stall;
-        if (stall.goods.isEmpty() || thief.count(Items.BREAD) >= 3) return 0;
+        if (stall == null || stall.goods.isEmpty() || thief.count(Items.BREAD) >= 3) return 0;
         // a thief does nothing stupid with the law in sight of the stall or of himself
         if (lawInSight(thief, stall.x, stall.z, 22) != null || lawInSight(thief, thief.x, thief.z, 16) != null) return 0.02f;
         for (Npc o : g.npcs) {
@@ -1529,18 +1602,42 @@ public final class AiSystem {
     public Node nearestNode(Npc n, String def) {
         Node best = null;
         float bd = Float.MAX_VALUE;
-        for (Node node : g.objects.nodes) {
-            if (!node.def.equals(def) || node.depleted() || n.skills.level(node.skill) < node.level) continue;
+        // (0.4.0, optimisation: ShadowVeil has thousands of trees) who is at which node counted once, not once per node;
+        // the nearer nodes looked at first by distance alone (a node no nearer than the best so far is never weighed)
+        java.util.Map<Node, Integer> busy = occupancy(n);
+        int level = -1; boolean toolChecked = false, hasTool = false;
+        for (Node node : g.objects.byDef(def)) {
+            if (node.depleted()) continue;
+            float d0 = (float) Math.hypot(node.x - n.x, node.z - n.z);
+            if (d0 >= bd) continue;
+            if (level < 0) level = n.skills.level(node.skill);
+            if (level < node.level) continue;
+            if (!ZonePolicy.withinReach(n, node.x, node.z)) continue;
             // the tool must be one they carry (or hold): a woodcutter takes his axe in hand when he gets there
-            if (node.tool(n) == null && !carriesTool(n, node)) continue;
+            if (!toolChecked) { hasTool = node.tool(n) != null || carriesTool(n, node); toolChecked = true; }
+            if (!hasTool) continue;
             // (0.2.9, gamefixes: workers crowded one tree) a tree is felled by one person at a time; a rock or a bush
             // takes one worker per open side, the rest going on to the next
-            int others = workersOn(node, n);
+            int others = busy.getOrDefault(node, 0);
             if (others > 0 && (node.kind == Node.Kind.TREE || others >= sides(node))) continue;
-            float d = (float) Math.hypot(node.x - n.x, node.z - n.z) + others * 6;
+            float d = d0 + others * 6;
             if (d < bd) { bd = d; best = node; }
         }
         return best;
+    }
+
+    /** How many others are at or bound for each node, counted in one pass over the people and the work under way. */
+    private java.util.Map<Node, Integer> occupancy(Npc except) {
+        java.util.Map<Node, Integer> busy = new java.util.IdentityHashMap<>();
+        for (Npc o : g.npcs) {
+            if (o == except || !o.alive || !o.loaded) continue;
+            var w = g.interact.of(o);
+            Node at = w != null && w.target instanceof Node nd ? nd : null;
+            if (at != null) busy.merge(at, 1, Integer::sum);
+            else if (o.claimNode != 0 && g.time - o.claimAt < CLAIM_FOR && g.objects.get(o.claimNode) instanceof Node claimed) busy.merge(claimed, 1, Integer::sum);
+        }
+        for (var w : g.interact.work.values()) if (w.target instanceof Node nd && !(w.actor instanceof Npc) && w.actor != except) busy.merge(nd, 1, Integer::sum);
+        return busy;
     }
 
     /** How many others are working a node or on their way to (a fresh claim, or the work itself under way). */
@@ -1593,11 +1690,13 @@ public final class AiSystem {
         float[] best = {node.x + 1, node.z};
         int bestCell = (int) Math.floor(node.x + 1) << 16 | ((int) Math.floor(node.z) & 0xFFFF);
         float bd = Float.MAX_VALUE;
-        for (int ring = 1; ring <= 4 && bd == Float.MAX_VALUE; ring++)
+        // (0.4.1) a fishing spot looks further for its bank (a lake's spots can lie a few cells off a shelving shore)
+        int rings = node.kind == Node.Kind.FISH ? 8 : 4;
+        for (int ring = 1; ring <= rings && bd == Float.MAX_VALUE; ring++)
             for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
                 if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) continue;
                 int cx = node.bx + dx, cz = node.bz + dz;
-                if (g.vox.solid(cx, DevMap.FLOOR, cz) || g.vox.solid(cx, DevMap.FLOOR + 1, cz) || !g.vox.solid(cx, DevMap.FLOOR - 1, cz)) continue;
+                if (g.vox.solid(cx, rpg.world.Ground.cell(cx, cz), cz) || g.vox.solid(cx, rpg.world.Ground.cell(cx, cz) + 1, cz) || !g.vox.solid(cx, rpg.world.Ground.cell(cx, cz) - 1, cz)) continue;
                 float d = (float) Math.hypot(cx + 0.5f - node.x, cz + 0.5f - node.z) * 2 + (float) Math.hypot(cx + 0.5f - n.x, cz + 0.5f - n.z) * 0.1f;
                 // a rock is worked square on, from a side where the swing's sideways sweep crosses no other deposit on its
                 // way to this one - from a corner, or with a neighbouring rock in the sweep, the blow lands on the neighbour
@@ -1679,24 +1778,24 @@ public final class AiSystem {
         // what they carried stays on the body, to be searched (worn things stay worn: the search mirrors them); an outlaw's
         // (and a monster's) is anyone's, anyone else's is still theirs. What will not fit lies beside the body; bones are left
         boolean ownerless = n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n instanceof rpg.monster.Monster;
-        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, DevMap.FLOOR + 0.2f, n.z, ownerless ? 0 : n.id));
+        rpg.objects.Corpse corpse = g.objects.add(new rpg.objects.Corpse(g.state.newEntityId(), n.name, n.id, n.x, rpg.world.Ground.at(n.x, n.z) + 0.2f, n.z, ownerless ? 0 : n.id));
         for (int i = 0; i < n.inv.size(); i++) {
             ItemStack s = n.inv.get(i);
             if (s == null) continue;
             n.inv.set(i, null);
-            if (!corpse.contents.add(s)) g.objects.drop(s, n.x + 0.4f, DevMap.FLOOR + 0.05f, n.z - 0.3f);
+            if (!corpse.contents.add(s)) g.objects.drop(s, n.x + 0.4f, rpg.world.Ground.at(n.x + 0.4f, n.z - 0.3f) + 0.05f, n.z - 0.3f);
         }
         n.corpse = corpse.id;
         if (killer == g.player && g.honor != null) g.honor.corpseLoot(n, corpse);
         if (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE) {
             ItemStack w = n.eq.get(ItemDef.Slot.MAIN);
-            if (w != null && n.role == Npc.Role.BANDIT) { g.objects.drop(w, n.x + 0.4f, DevMap.FLOOR + 0.05f, n.z); n.eq.set(ItemDef.Slot.MAIN, null); }
+            if (w != null && n.role == Npc.Role.BANDIT) { g.objects.drop(w, n.x + 0.4f, rpg.world.Ground.at(n.x + 0.4f, n.z) + 0.05f, n.z); n.eq.set(ItemDef.Slot.MAIN, null); }
         }
         // (a monster's remains are its kind's own - ashes, ectoplasm, a troll's big bones - rolled with its drops)
         if (n instanceof rpg.monster.Monster) return;
         ItemDef bones = n.role == Npc.Role.BRUTE ? Items.BIG_BONES : Items.BONES;
         g.state.mint(bones, 1);
-        g.objects.drop(new ItemStack(bones, 1), n.x, DevMap.FLOOR + 0.05f, n.z + 0.3f);
+        g.objects.drop(new ItemStack(bones, 1), n.x, rpg.world.Ground.at(n.x, n.z + 0.3f) + 0.05f, n.z + 0.3f);
     }
 
     /** Hostile test NPCs come back after a while (fixtures); townsfolk do not - their deaths are permanent. */
@@ -1710,7 +1809,7 @@ public final class AiSystem {
         if (n.ragdoll != 0) { g.game.commands().release(n.ragdoll); n.ragdoll = 0; }
         // the old body goes; whatever was left in its pack lies where it lay
         if (n.corpse != 0 && g.objects.get(n.corpse) instanceof rpg.objects.Corpse c && !c.removed) {
-            for (ItemStack s : c.contents.stacks()) g.objects.drop(s, c.x, DevMap.FLOOR + 0.05f, c.z);
+            for (ItemStack s : c.contents.stacks()) g.objects.drop(s, c.x, rpg.world.Ground.at(c.x, c.z) + 0.05f, c.z);
             c.contents.clear();
             c.removed = true;
         }
@@ -1750,7 +1849,7 @@ public final class AiSystem {
     public void reload(Npc n) {
         if (n.loaded || !n.alive) return;
         // where their abstract activity says they are
-        if (n.role == Npc.Role.WORKER) {
+        if (n.role == Npc.Role.WORKER && !n.offstage) {
             Node t = nearestNode(n, "tree");
             if (n.count(Items.LOGS) >= 5 || t == null) { float[] c = g.econ.counterSpot(g.econ.shopA); n.x = c[0]; n.z = c[1]; }
             else { float[] s = standSpot(n, t); n.x = s[0]; n.z = s[1]; }
@@ -1763,8 +1862,9 @@ public final class AiSystem {
     private void abstractSim() {
         while (g.state.minutes - abstractClock >= 10) {
             abstractClock += 10;
+            if (offstageSim != null) offstageSim.step(abstractClock);
             for (Npc n : g.npcs) {
-                if (n.loaded || !n.alive) continue;
+                if (n.loaded || !n.alive || n.offstage) continue;
                 if (n.role == Npc.Role.WORKER) {
                     double h = (abstractClock % 1440) / 60.0;
                     if (h < 6 || h >= 22) continue;

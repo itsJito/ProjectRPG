@@ -29,6 +29,16 @@ public final class Habitat {
     }
 
     public boolean contains(float x, float z) { return x >= x0 && x <= x1 && z >= z0 && z <= z1; }
+
+    /** (0.4.0) The same habitat moved by (dx, dz): its bounds, drinking and resting spots, its capacities (ShadowVeil's wilds). */
+    public Habitat moved(float dx, float dz) {
+        float[][] w = new float[water.length][], r = new float[rest.length][];
+        for (int i = 0; i < w.length; i++) { w[i] = water[i].clone(); w[i][0] += dx; w[i][1] += dz; }
+        for (int i = 0; i < r.length; i++) { r[i] = rest[i].clone(); r[i][0] += dx; r[i][1] += dz; }
+        Habitat h = new Habitat(id, name, x0 + dx, z0 + dz, x1 + dx, z1 + dz, owner, w, r);
+        h.capacity.putAll(capacity);
+        return h;
+    }
     public float cx() { return (x0 + x1) / 2; }
     public float cz() { return (z0 + z1) / 2; }
 

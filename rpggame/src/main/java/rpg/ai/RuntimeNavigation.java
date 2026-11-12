@@ -21,7 +21,8 @@ public final class RuntimeNavigation {
     private final Map<Integer,Portals> portals = new HashMap<>();
     private final Map<Long,Door> doors = new HashMap<>();
     public long searches, expansions, rebuiltChunks, failures, regionExpansions;
-    private record Chunk(long version, Set<Integer> surfaces, Map<Integer,Integer> regions, Map<Integer,List<Integer>> members) {}
+    /** A chunk's standable cells, the zone (its seed cell) each belongs to, and each zone's cells (0.4.0: primitive tables). */
+    private record Chunk(long version, IntTable surfaces, IntTable regions, Map<Integer,int[]> members) {}
     private record Visit(int cell, float cost, float estimate) {}
     private record Portals(Chunk owner, long west, long east, long north, long south,
                            Map<Integer,List<Integer>> walk, Map<Integer,List<Integer>> climb) {}
@@ -32,16 +33,25 @@ public final class RuntimeNavigation {
      * were built the first time anyone planned a way through a chunk - in a fight, a chase, a search - and that frame paid
      * for it (tens of milliseconds). Later edits rebuild only the chunk they touch.
      */
+    /** (0.4.1) The routing graph built up front about a point (the spawn) - the first routes there no longer build it mid-play. */
+    public void warmAround(float cx, float cz, int radius) {
+        for (int x = Math.max(0, ((int) cx - radius) / 16 * 16); x < Math.min(vox.sizeX(), (int) cx + radius); x += 16)
+            for (int z = Math.max(0, ((int) cz - radius) / 16 * 16); z < Math.min(vox.sizeZ(), (int) cz + radius); z += 16) {
+                Chunk c = chunk(x, z);
+                for (int zone : c.members().keySet()) { exits(zone, false); exits(zone, true); }
+            }
+    }
     public void warm() {
         for (int x = 0; x < vox.sizeX(); x += 16) for (int z = 0; z < vox.sizeZ(); z += 16) {
             Chunk c = chunk(x, z);
             for (int zone : c.members().keySet()) { exits(zone, false); exits(zone, true); }
         }
     }
-    public static int key(int x,int y,int z) { return x | z<<10 | y<<20; }
-    public static int x(int k) { return k&1023; }
-    public static int y(int k) { return (k>>>20)&1023; }
-    public static int z(int k) { return (k>>>10)&1023; }
+    // (0.4.0) eleven bits each for x and z (ShadowVeil is 1,072 a side), nine for y; the top bit marks a handle
+    public static int key(int x,int y,int z) { return x | z<<11 | y<<22; }
+    public static int x(int k) { return k&2047; }
+    public static int y(int k) { return (k>>>22)&511; }
+    public static int z(int k) { return (k>>>11)&2047; }
     /** Stable coordinate handles, unlike transient designer waypoint indices. */
     public static int handle(int cell) { return cell|Integer.MIN_VALUE; }
     public static float[] point(int handle) { return new float[]{x(handle)+.5f,z(handle)+.5f,y(handle)}; }
@@ -54,37 +64,48 @@ public final class RuntimeNavigation {
     }
     private boolean surface(int x,int y,int z) {
         return x>0 && z>0 && x<vox.sizeX()-1 && z<vox.sizeZ()-1 && y>0 && y<vox.sizeY()-2
-            && pass(x,y,z) && pass(x,y+1,z) && (solid(x,y-1,z) || ladder(x,y,z) || ladder(x,y-1,z));
+            && pass(x,y,z) && pass(x,y+1,z) && (solid(x,y-1,z) && (PHYSICS[vox.block(x,y-1,z)].flags & astratto.bridge.AstrattoNative.BLOCK_CUTOUT)==0 || ladder(x,y,z) || ladder(x,y-1,z));
     }
     private boolean ladder(int x,int y,int z) { return Blocks.ladder(vox.block(x,y,z)); }
     private Chunk chunk(int x,int z) {
         int cx=x>>4,cz=z>>4,id=cx<<16|cz;
         long version=vox.chunkVersion(x,z);Chunk old=chunks.get(id);
         if(old!=null && old.version==version)return old;
-        Set<Integer> cells=new HashSet<>();
         // (0.3.9, optimisation: the stutter) each column read once into an array and judged from it: every cell used to be
-        // tested with half a dozen lookups of its own (a chunk's rebuild was the long frames of a fight or a search)
+        // tested with half a dozen lookups of its own (a chunk's rebuild was the long frames of a fight or a search).
+        // (0.4.0) only up to the column's top, the cells in a primitive table, and leaves never a floor: a tree's crown is
+        // solid to a body but no ground to walk (ShadowVeil's woods split every chunk into dozens of zones on their tops)
         int sy=vox.sizeY();int[] col=new int[sy];boolean[] solidAt=new boolean[sy];
+        int[] found=new int[256];int count=0;
         for(int bx=Math.max(1,cx*16);bx<Math.min(vox.sizeX()-1,cx*16+16);bx++)
             for(int bz=Math.max(1,cz*16);bz<Math.min(vox.sizeZ()-1,cz*16+16);bz++) {
-                for(int by=0;by<sy;by++){int b=vox.block(bx,by,bz);col[by]=b;solidAt[by]=(PHYSICS[b].flags & astratto.bridge.AstrattoNative.BLOCK_SOLID)!=0;}
-                for(int by=1;by<sy-2;by++) {
-                    boolean under=solidAt[by-1] || Blocks.ladder(col[by]) || Blocks.ladder(col[by-1]);
+                int top=sy-1;while(top>0 && vox.block(bx,top,bz)==0)top--;
+                int lim=Math.min(sy-3,top+2);
+                for(int by=0;by<=Math.min(sy-1,lim+2);by++){int b=vox.block(bx,by,bz);col[by]=b;solidAt[by]=(PHYSICS[b].flags & astratto.bridge.AstrattoNative.BLOCK_SOLID)!=0;}
+                for(int by=1;by<=lim;by++) {
+                    // (0.4.0) no floor on what is seen through: furniture, fences, hedges, a tree's leaves (the engine's own rule)
+                    boolean under=solidAt[by-1] && (PHYSICS[col[by-1]].flags & astratto.bridge.AstrattoNative.BLOCK_CUTOUT)==0 || Blocks.ladder(col[by]) || Blocks.ladder(col[by-1]);
                     if(!under)continue;
-                    if(passIn(col,solidAt,by) && passIn(col,solidAt,by+1))cells.add(key(bx,by,bz));
+                    if(passIn(col,solidAt,by) && passIn(col,solidAt,by+1)){
+                        if(count==found.length)found=Arrays.copyOf(found,count*2);
+                        found[count++]=key(bx,by,bz);
+                    }
                 }
             }
-        Map<Integer,Integer> regions=new HashMap<>();Map<Integer,List<Integer>> members=new HashMap<>();
+        IntTable cells=new IntTable(count);for(int k=0;k<count;k++)cells.add(found[k]);
+        IntTable regions=new IntTable(count);Map<Integer,int[]> members=new HashMap<>();
         // A doorway, ladder or height transition is a portal; ordinary connected floor is a zone.
-        for(int seed:new TreeSet<>(cells))if(!regions.containsKey(seed)){
-            var queue=new ArrayDeque<Integer>();var area=new ArrayList<Integer>();queue.add(seed);regions.put(seed,seed);
-            while(!queue.isEmpty()){
-                int c=queue.removeFirst();area.add(c);
+        int[] sorted=Arrays.copyOf(found,count);Arrays.sort(sorted);
+        int[] queue=new int[Math.max(1,count)];
+        for(int seed:sorted)if(regions.get(seed,IntTable.EMPTY)==IntTable.EMPTY){
+            int head=0,tail=0;queue[tail++]=seed;regions.put(seed,seed);
+            while(head<tail){
+                int c=queue[head++];
                 if(portal(c))continue;
                 for(int[] d:DIR){int n=key(x(c)+d[0],y(c),z(c)+d[1]);
-                    if(cells.contains(n) && !portal(n) && !regions.containsKey(n)){regions.put(n,seed);queue.add(n);}
+                    if(cells.contains(n) && regions.get(n,IntTable.EMPTY)==IntTable.EMPTY && !portal(n)){regions.put(n,seed);queue[tail++]=n;}
                 }
-            }members.put(seed,area);
+            }members.put(seed,Arrays.copyOf(queue,tail));
         }
         var result=new Chunk(version,cells,regions,members);chunks.put(id,result);rebuiltChunks++;return result;
     }
@@ -94,7 +115,7 @@ public final class RuntimeNavigation {
         return (b==Blocks.DOOR || b==Blocks.LOCKED_DOOR || !solidAt[y]) && b!=Blocks.EMBERS && (b!=Blocks.WATER || y+1>=col.length || col[y+1]!=Blocks.WATER);
     }
     private boolean portal(int c){int b=vox.block(x(c),y(c),z(c));return b==Blocks.DOOR || b==Blocks.LOCKED_DOOR || ladder(x(c),y(c),z(c)) || ladder(x(c),y(c)-1,z(c));}
-    private int region(int c){return chunk(x(c),z(c)).regions.getOrDefault(c,-1);}
+    private int region(int c){return chunk(x(c),z(c)).regions.get(c,-1);}
     private int[] neighbours(int c,boolean climb){
         return neighbours(c,climb,false);
     }
@@ -117,7 +138,7 @@ public final class RuntimeNavigation {
                 Set<Integer> destinations=new TreeSet<>();
                 // (0.3.9) from the chunks' own cells (built once), not every neighbour tested afresh
                 for(int c:area.getValue())for(int next:neighbours(c,capability,false))
-                    if(next>=0 && owner.regions.getOrDefault(next,-1)!=area.getKey().intValue())destinations.add(next);
+                    if(next>=0 && owner.regions.get(next,-1)!=area.getKey().intValue())destinations.add(next);
                 (capability?ladder:walk).put(area.getKey(),List.copyOf(destinations));
             }
             old=new Portals(owner,west,east,north,south,walk,ladder);portals.put(id,old);
@@ -127,15 +148,26 @@ public final class RuntimeNavigation {
     private static int regionEstimate(int from,int to) {
         return Math.abs((x(from)>>4)-(x(to)>>4))+Math.abs((z(from)>>4)-(z(to)>>4));
     }
+    /**
+     * (0.4.0, optimisation: ShadowVeil) the most zones one corridor search may open before it gives the trip up as out of
+     * reach: on the devmap a search never came near it; across 4,489 chunks an unreachable goal searched (and built) the
+     * whole world in one frame - thirteen seconds once, in a fight looking for high ground.
+     */
+    private static final int CORRIDOR_ZONES = rpg.Tuning.i("nav.corridorZones", 1200), CORRIDOR_MARGIN = rpg.Tuning.i("nav.corridorMargin", 64);
     private Set<Integer> corridor(int start,int goal,Predicate<Door> permission,boolean climb,RouteBook book,double now){
-        int from=region(start),to=region(goal);Map<Integer,Integer> previous=new HashMap<>();Map<Integer,Float> costs=new HashMap<>();
+        int from=region(start),to=region(goal),opened=0;
+        // the search keeps to a box about the two ends (a way that wanders more than four chunks wide of the straight line
+        // is not a way anyone takes, and an unreachable goal is given up without building the world round it)
+        int bx0=Math.min(x(start),x(goal))-CORRIDOR_MARGIN,bx1=Math.max(x(start),x(goal))+CORRIDOR_MARGIN,bz0=Math.min(z(start),z(goal))-CORRIDOR_MARGIN,bz1=Math.max(z(start),z(goal))+CORRIDOR_MARGIN;Map<Integer,Integer> previous=new HashMap<>();Map<Integer,Float> costs=new HashMap<>();
         var queue=new PriorityQueue<Visit>(Comparator.comparingDouble(Visit::estimate).thenComparingInt(Visit::cell));
         costs.put(from,0f);queue.add(new Visit(from,0,0));
         while(!queue.isEmpty()){
             var visit=queue.remove();int zone=visit.cell;if(visit.cost>costs.getOrDefault(zone,Float.MAX_VALUE))continue;
             regionExpansions++;
+            if(++opened>CORRIDOR_ZONES)return null;
             if(zone==to){Set<Integer> result=new HashSet<>();for(int c=to;;c=previous.get(c)){result.add(c);if(c==from)break;}return result;}
             for(int next:exits(zone,climb)){
+                if(x(next)<bx0 || x(next)>bx1 || z(next)<bz0 || z(next)>bz1)continue;
                 if(!allowed(x(next),z(next),permission))continue;int other=region(next);if(other<0 || other==zone)continue;
                 float price=visit.cost+1+(book==null?0:book.penalty(x(next)+.5f,y(next),z(next)+.5f,now));
                 if(price>=costs.getOrDefault(other,Float.MAX_VALUE))continue;
@@ -165,6 +197,18 @@ public final class RuntimeNavigation {
         return -1;
     }
     private static float estimate(int a,int b) { return Math.abs(x(a)-x(b))+Math.abs(z(a)-z(b))+.7f*Math.abs(y(a)-y(b)); }
+    /**
+     * (0.4.0, optimisation: the hitches of a crowd planning at once) the work route searches may do in one tick (cells
+     * opened, a zone counting as twenty cells): once it is spent, those still wanting a route wait the tick out (they
+     * stand a moment) instead of every search landing in the same frame. Counted in work, not time, so a run is the
+     * same on any machine. Tuning "nav.routeBudget".
+     */
+    private static final long ROUTE_BUDGET = rpg.Tuning.i("nav.routeBudget", 60_000);
+    private long budgetTick = -1, spentWork, workAt;
+    private long work() { return expansions + regionExpansions * 20 + rebuiltChunks * 400; }
+    public boolean mayRoute(long tick) { if (tick != budgetTick) { budgetTick = tick; spentWork = 0; } workAt = work(); return spentWork < ROUTE_BUDGET; }
+    /** The search just made charged to this tick. */
+    public void spent(long tick) { if (tick != budgetTick) { budgetTick = tick; spentWork = 0; } spentWork += work() - workAt; }
     /** null means no verified route, never a successful empty/partial path. */
     public int[] route(float sx,float sy,float sz,float tx,float ty,float tz,Predicate<Door> permission,boolean climb,long person,RouteBook book,double now) {
         searches++;

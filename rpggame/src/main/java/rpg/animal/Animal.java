@@ -147,7 +147,7 @@ public final class Animal extends Actor implements Interactable {
         super(id, s.label(baby), 0);
         this.domain=astratto.ai.AgentDomain.ANIMAL;
         this.species = s; this.baby = baby; this.female = female;
-        this.x = x; this.z = z; this.y = DevMap.FLOOR;
+        this.x = x; this.z = z; this.y = rpg.world.Ground.at(x, z);
         this.homeX = x; this.homeZ = z;
         this.team = 10 + s.ordinal();
         skills.setLevel(Skill.ATTACK, s.attack); skills.setLevel(Skill.STRENGTH, s.strength); skills.setLevel(Skill.DEFENSE, s.defense);

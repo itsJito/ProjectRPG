@@ -58,8 +58,12 @@ public final class Foliage {
     /** Where each body last left a trail point. */
     private final Map<Long,float[]> lastPoint=new HashMap<>();
     private static final double RECOVER=2.2;
+    /** (0.4.0) Chunks of growth kept before the far ones are let go, and how far (chunks) is far. */
+    private static final int EVICT_OVER=rpg.Tuning.i("foliage.keepChunks",120), EVICT_RING=rpg.Tuning.i("foliage.evictRing",6);
+    private double evictAt;
     private final float[] push=new float[32];
-    private static final int CHUNKS_X = (DevMap.SX + 15) / 16, CHUNKS_Z = (DevMap.SZ + 15) / 16;
+    /** (0.4.0) The overworld's chunks on the map in play (the devmap's 12 x 16, ShadowVeil's 67 x 67). */
+    private final int CHUNKS_X = (WorldMap.active().overworldX() + 15) / 16, CHUNKS_Z = (WorldMap.active().sizeZ + 15) / 16;
     private final Rpg g;
     public final Map<Integer,Chunk> chunks=new HashMap<>();
     private final Map<Long,Double> depleted=new HashMap<>();
@@ -69,15 +73,17 @@ public final class Foliage {
     private static int hash(int x,int z){int n=x*374761393+z*668265263;n=(n^(n>>>13))*1274126177;return n^(n>>>16);}
     public static long id(int x,int y,int z){return 0x1000000000000L|((long)x<<32)|((long)y<<16)|z;}
     public boolean suitable(Kind kind,int x,int y,int z) {
-        if(x<1 || z<1 || x>=DevMap.SX-1 || z>=DevMap.SZ-1 || g.vox.block(x,y,z)!=Blocks.AIR)return false;
+        if(x<1 || z<1 || x>=WorldMap.active().overworldX()-1 || z>=WorldMap.active().sizeZ-1 || g.vox.block(x,y,z)!=Blocks.AIR)return false;
         // Leave the root and first trunk block readable; wall growth must not wrap a living tree.
         for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)
             if(Blocks.isTreeLog(g.vox.block(x+dx,y,z+dz)) || g.vox.block(x+dx,y,z+dz)==Blocks.STUMP)return false;
-        int soil=g.vox.block(x,y-1,z);boolean earth=soil==Blocks.GRASS || soil==Blocks.DIRT || soil==Blocks.BARE_PATCH;
+        int soil=g.vox.block(x,y-1,z);boolean earth=soil==Blocks.GRASS || soil==Blocks.DIRT || soil==Blocks.BARE_PATCH || soil==Blocks.HEATH || soil==Blocks.PODZOL || soil==Blocks.DRY_GRASS;
         float sky=g.vox.skyLight(x,y+1,z);
         if(kind==Kind.IVY || kind==Kind.MOSS) {
             return backing(kind,x,y,z)!=null && (kind==Kind.IVY || sky<0.7f);
         }
+        // (0.4.0) the desert's and the shore's sand carries a little scrub, nothing else
+        if(soil==Blocks.SAND && !earth)return (kind==Kind.SHRUB || kind==Kind.BUSH) && sky>0.3f && (hash(x*3+1,z*5+2)&7)==0 && g.vox.block(x,y+1,z)==Blocks.AIR;
         if(!earth || g.vox.block(x,y+1,z)!=Blocks.AIR)return false;
         return switch(kind){
             case FERN,MUSHROOM,BRACKEN->sky<0.65f;
@@ -112,13 +118,13 @@ public final class Foliage {
             if(((x+z)&1)!=0) {
                 int s2=hash(x*7+3,z*5+1);
                 float drift=(float)(Math.sin(x*0.19+Math.cos(z*0.13)*1.7)+Math.sin(z*0.23+x*0.07));
-                if(drift<-0.1f || (s2&3)==0 || !suitable(Kind.TALL_GRASS,x,DevMap.FLOOR,z))continue;
+                if(drift<-0.1f || (s2&3)==0 || !suitable(Kind.TALL_GRASS,x,rpg.world.Ground.cell(x, z),z))continue;
                 float gx=((s2>>>20)&15)/15f*0.6f-0.3f,gz=((s2>>>24)&15)/15f*0.6f-0.3f;
-                long gid=id(x,DevMap.FLOOR,z);Patch grass=new Patch(gid,Kind.TALL_GRASS,s2,key,x+0.5f+gx,DevMap.FLOOR,z+0.5f+gz,(s2>>>16)*0.00009587f);
+                long gid=id(x,rpg.world.Ground.cell(x, z),z);Patch grass=new Patch(gid,Kind.TALL_GRASS,s2,key,x+0.5f+gx,rpg.world.Ground.at(x+0.5f+gx, z+0.5f+gz),z+0.5f+gz,(s2>>>16)*0.00009587f);
                 grass.removed=depleted.getOrDefault(gid,-1.0)>g.state.minutes;chunk.plants.add(grass);g.objects.add(grass);
                 continue;
             }
-            int seed=hash(x,z);if((seed&1)!=0)continue;int y=DevMap.FLOOR;
+            int seed=hash(x,z);if((seed&1)!=0)continue;int y=Ground.cell(x,z);
             // Preserve the established species distribution, varying some shrubs into fuller bushes.
             int established=Kind.BUSH.ordinal(),first=Math.floorMod(seed>>>3,established);Kind kind=null;
             for(int k=0;k<4 && kind==null;k++){Kind trial=Kind.values()[(first+k*5)%established];if(suitable(trial,x,y,z))kind=trial;}
@@ -156,6 +162,15 @@ public final class Foliage {
         if(!chunks.containsKey(hereX+hereZ*CHUNKS_X)){preload(g.player.x,g.player.z,1);next=0;}
         if(g.time<next)return;next=g.time+0.25;
         int centerX=hereX,centerZ=hereZ;
+        // (0.4.0) on a map the size of ShadowVeil the growth far behind the traveller is let go (its picked plants are
+        // remembered in 'depleted' and stay picked when the chunk grows again on return): a journey across the world
+        // otherwise left every chunk's plants in the world's list, a cost that only grew
+        if(chunks.size()>EVICT_OVER && g.time>evictAt){
+            evictAt=g.time+2;
+            java.util.List<Patch> gone=new java.util.ArrayList<>();
+            chunks.values().removeIf(c->{boolean far=Math.max(Math.abs(c.x/16-centerX),Math.abs(c.z/16-centerZ))>EVICT_RING;if(far)gone.addAll(c.plants);return far;});
+            if(!gone.isEmpty()){g.objects.unlist(gone);farOrder.clear();epoch++;}
+        }
         boolean generated=false;
         for(int ring=0;ring<=2 && !generated;ring++)for(int dz=-ring;dz<=ring && !generated;dz++)for(int dx=-ring;dx<=ring;dx++) {
             int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated=true;break;

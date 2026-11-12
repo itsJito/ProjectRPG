@@ -113,6 +113,8 @@ public class Npc extends Actor implements Interactable {
     /** What it fears and got away from (the player, a beast), where it was last seen, and when; and where it hides. */
     public long fearOf;
     public float fearX, fearZ, hideX, hideZ;
+    /** (0.4.0) The place before an altar this person has taken to pray (NaN: none). */
+    public float prayAtX = Float.NaN, prayAtZ = Float.NaN;
     public double fearSeenAt = -99;
     public boolean hideSet;
     /** A guard keeping an eye on a player he has heard bad things about, until (then a while before he does again). */
@@ -275,6 +277,8 @@ public class Npc extends Actor implements Interactable {
     public void resetMotion() { svx = svz = 0; vx = vz = 0; wantYaw = Float.NaN; tactic = null; nextTactic = 0; }
     /** The search it is on (a foe lost from sight, a body found), or null; and until when it stays watchful after giving one up. */
     public Hunt hunt;
+    /** (0.4.1) Living the off-stage day (rpg.ai.Offstage): beyond the fog, bodiless, their day resolved as a schedule. */
+    public boolean offstage;
     public double vigilantUntil = -1;
     /** When the farmer last filled the trough (a full set of nest boxes is not left for ever behind a hungry herd). */
     public double lastTroughFill = -999;
@@ -285,7 +289,7 @@ public class Npc extends Actor implements Interactable {
     public Npc(long id, String name, Role role, String title, float x, float z) {
         super(id, name, 28);
         this.role = role; this.title = title;
-        this.x = x; this.z = z; this.y = DevMap.FLOOR;
+        this.x = x; this.z = z; this.y = rpg.world.WorldMap.standY(x, z);
         this.homeX = this.postX = this.spawnX = this.dutyX = x; this.homeZ = this.postZ = this.spawnZ = this.dutyZ = z;
         this.homeJurisdiction = DevMap.jurisdiction(x, z);
         this.team = role == Role.BANDIT || role == Role.BRUTE ? 3 : role == Role.THIEF ? 4 : 2;

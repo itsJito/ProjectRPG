@@ -6,6 +6,7 @@ uniform mat4 uPV;
 uniform vec3 uOrigin;
 uniform float uTime;
 uniform vec4 uWind;                    // 2.4: x, z in m/s; the wind's clock; gust (the foliage layer's)
+uniform vec4 uLod;                     // 2.11: the eye (xyz) and the distance past which leaf cards are not drawn (w; 0: always drawn)
 out vec3 vWorld;
 out vec2 vST;
 out vec3 vLight;
@@ -23,6 +24,7 @@ void main() {
     vLayer = int(aTex.z + 0.5) + ((pk & 3) << 8);
     vVar = ((pk >> 2) & 3) + 1;
     vFlags = pk >> 4;
+    if ((vFlags & 8) != 0 && uLod.w > 0.0 && distance(p.xz, uLod.xz) > uLod.w) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); vWorld = p; vST = aTex.xy; vNormal = n; vLight = aLight.xyz; return; }
     if ((vFlags & 8) != 0) {
         // 2.4: a leaf card. The cluster sways as one with the branch (a slow lean and swing with the wind, in swathes
         // across the crown) and each card flutters on its own, faster and smaller.

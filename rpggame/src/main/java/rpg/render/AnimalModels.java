@@ -137,8 +137,11 @@ public final class AnimalModels {
         VoxModel lf = leg(s, legH, legW, coat, true), lb = leg(s, legH, legW, coat, false);
         f.legFront = new ItemModels.Model(lf, legW / 2f, legH, legW / 2f);
         f.legBack = new ItemModels.Model(lb, legW / 2f, legH, legW / 2f);
-        if (horseLike(s)) {
-            int knee = Math.round(legH * 0.52f);           // the joint a little above the middle: a long cannon below it
+        // (0.4.0, gamefixes: every animal's walk, run and attack polished) every four-legged animal tall enough to show it
+        // has a jointed leg: the hoofed ones' knee and hock a little above the middle; the hunters' (who walk on their toes)
+        // the hock and the wrist lower, a long upper leg over a short lower one
+        if (horseLike(s) || legH >= 5 && !s.equals(Species.RABBIT)) {
+            int knee = Math.round(legH * (hunter(s) ? 0.42f : 0.52f));
             f.kneeAt = legH - knee;
             f.legFrontHi = new ItemModels.Model(slice(lf, knee, legH), legW / 2f, legH - knee, legW / 2f);
             f.legFrontLo = new ItemModels.Model(slice(lf, 0, knee), legW / 2f, knee, legW / 2f);
@@ -155,6 +158,11 @@ public final class AnimalModels {
         f.tail = tail(s, coat);
         f.tailAt = new float[]{0, bh / 2f - (s == Species.PIG ? 2 : 1.5f), bl / 2f - 0.5f};
         return f;
+    }
+
+    /** (0.4.0) The hunters: they walk on their toes, gallop with a flexing back and spring to bite (or, the bear, rear to swipe). */
+    public static boolean hunter(Species s) {
+        return switch (s) { case WOLF, DIRE_WOLF, FOX, COYOTE, DOG, CAT, MOUNTAIN_LION, BROWN_BEAR -> true; default -> false; };
     }
 
     /** Rows y0 (inclusive) to y1 (exclusive) of a part, as a part of their own. */

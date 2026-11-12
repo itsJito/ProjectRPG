@@ -66,7 +66,12 @@ public final class SettingsPanel {
             if (row(ui, "Performance budget", values.targetFps + " FPS", lx, rx, yy)) { values.targetFps = values.targetFps == 30 ? 60 : values.targetFps == 60 ? 120 : 30; changed(); } yy += 45;
             if (row(ui, "Dynamic resolution", yes(values.autoScale), lx, rx, yy)) { values.autoScale = !values.autoScale; changed(); } yy += 45;
             values.renderScale = slider(ui, "Resolution scale", values.renderScale, 0.5f, 1, lx, rx, yy); yy += 45;
-            values.fov = slider(ui, "Field of view", values.fov, 50, 110, lx, rx, yy);
+            values.fov = slider(ui, "Field of view", values.fov, 50, 110, lx, rx, yy); yy += 45;
+            // (0.4.0, gamefixes: bloom and depth of field in the settings)
+            float bloom = slider(ui, "Bloom", values.bloom, 0, 2, lx, rx, yy); if (bloom != values.bloom) { values.bloom = bloom; apply(); } yy += 45;
+            if (row(ui, "Depth of field", new String[]{"Off", "Subtle", "Cinematic"}[values.depthOfField], lx, rx, yy)) { values.depthOfField = (values.depthOfField + 1) % 3; changed(); } yy += 45;
+            if (row(ui, "Volumetric lighting", yes(values.volumetrics), lx, rx, yy)) { values.volumetrics = !values.volumetrics; changed(); } yy += 45;
+            if (row(ui, "World (next session)", values.legacyDevmap ? "Devmap (legacy)" : "ShadowVeil", lx, rx, yy)) { values.legacyDevmap = !values.legacyDevmap; changed(); }
         } else if (tab == 1) {
             values.master = slider(ui, "Master volume", values.master, 0, 1, lx, rx, yy); yy += 45;
             values.sfx = slider(ui, "Effects", values.sfx, 0, 1, lx, rx, yy); yy += 45;

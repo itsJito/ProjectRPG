@@ -979,7 +979,7 @@ public final class CombatSystem {
             rpg.objects.Node nd = g.objects.nodeAt(h.bx, h.by, h.bz);
             if (nd != null && nd.strike(g, a, h.x, h.y, h.z)) {
                 a.cs.gathered = true;
-                boolean leafy = h.block == Blocks.LEAVES || h.block == Blocks.OAK_LEAVES || h.block == Blocks.WILLOW_LEAVES;
+                boolean leafy = h.block == Blocks.LEAVES || h.block == Blocks.OAK_LEAVES || h.block == Blocks.WILLOW_LEAVES || h.block == Blocks.PINE_LEAVES;
                 if (!leafy) { a.cs.hitstop = 0.06f; a.cs.phase = Phase.RECOVER; a.cs.t = 0; return; }
             }
         }
@@ -997,7 +997,7 @@ public final class CombatSystem {
                 if (g.fx != null) g.fx.puff(h.x, h.y, h.z);
                 if (g.sfx != null) g.sfx.play("block", h.x, h.y, h.z, 0.25f);
             }
-        } else if (h.block != Blocks.LEAVES && h.block != Blocks.OAK_LEAVES && h.block != Blocks.WILLOW_LEAVES) {
+        } else if (h.block != Blocks.LEAVES && h.block != Blocks.OAK_LEAVES && h.block != Blocks.WILLOW_LEAVES && h.block != Blocks.PINE_LEAVES) {
             deflections++;
             if (g.fx != null) g.fx.sparks(h.x, h.y, h.z, 10);
             if (g.sfx != null) g.sfx.play("block", h.x, h.y, h.z, 0.5f);
@@ -1158,6 +1158,18 @@ public final class CombatSystem {
         v.cs.lastHurt = g.time;
         v.cs.lastAttacker = a.id;
         if (dealt > 0) { v.cs.lastDamageType = type; v.cs.lastRanged = proj != null; }
+        // (0.4.0) the blow as the body will answer it: driven from the striker (or along the shot), how hard, and where
+        {
+            float dx = v.x - (proj != null ? px - proj.vx * 0.05f : a.x), dz = v.z - (proj != null ? pz - proj.vz * 0.05f : a.z);
+            if (proj != null) { float pl = (float) Math.hypot(proj.vx, proj.vz); if (pl > 0.5f) { dx = proj.vx; dz = proj.vz; } }
+            float l = (float) Math.max(1e-3, Math.hypot(dx, dz));
+            v.cs.hitDirX = dx / l; v.cs.hitDirZ = dz / l;
+            v.cs.hitForce = Math.max(0.15f, Math.min(1, dealt / Math.max(1f, v.maxHp() * 0.25f) * 0.7f + impact * 0.004f));
+            float rel = (py - v.y) / Math.max(0.3f, v.height);
+            v.cs.hitPart = rel > 0.82f ? 2 : rel < 0.42f ? 0 : 1;
+            v.cs.hitAt = g.time;
+        }
+        v.cs.attackerKnown = g.ai.knowsStriker(v, a, proj != null);
         v.cs.flash = 1;
         // impact against Stability, a channel of its own
         float stab = CombatMath.stability(v.skills.level(Skill.DEFENSE), v.skills.level(Skill.STRENGTH), v.eq.armor(), v.cs.stabilityBonus);

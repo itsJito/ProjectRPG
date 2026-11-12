@@ -16,6 +16,8 @@ public final class Style {
     public static final int RIM = 0xFF0C0A07, GOLD = 0xFF9C7838, GOLD_LIT = 0xFFE0BC6C;
     /** NPCs on the minimap and over their heads keep the colours they have always had. */
     public static final int NPC = 0xFFFFFF00, NPC_HOSTILE = 0xFFFF5050, MONSTER = 0xFFB01818;
+    /** (0.4.0, gamefixes: allies green on the minimap) a companion, a summoned ally, an animal tamed to the player or ridden. */
+    public static final int ALLY = 0xFF46D46A;
     public static final float BODY = 13, SMALL = 11, TITLE = 15;
 
     /** A panel: parchment darkened to leather, a gold trim inside a dark rim, a stud at each corner. */

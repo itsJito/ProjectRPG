@@ -64,14 +64,14 @@ public final class Bones {
             float wx = o[0] + (x[0] * ox + y[0] * oy + z[0] * oz) * vs;
             float wy = o[1] + (x[1] * ox + y[1] * oy + z[1] * oz) * vs;
             float wz = o[2] + (x[2] * ox + y[2] * oy + z[2] * oz) * vs;
-            wy = Math.max(wy, DevMap.FLOOR + p.hy() * vs);
+            wy = Math.max(wy, rpg.world.Ground.at(wx, wz) + p.hy() * vs);
             float[] q = quat(x, y, z);
             // its own motion: the body's, the blow's, and outward from the middle as it loses its shape
             float outX = wx - pelvis[0], outZ = wz - pelvis[2], outL = (float) Math.max(0.05, Math.hypot(outX, outZ));
             float kick = force * (0.6f + rnd.nextFloat() * 0.9f);
             float vx = m.vx + pushX * kick + outX / outL * (0.9f + rnd.nextFloat() * 1.3f) + (rnd.nextFloat() - 0.5f) * 0.8f;
             float vz = m.vz + pushZ * kick + outZ / outL * (0.9f + rnd.nextFloat() * 1.3f) + (rnd.nextFloat() - 0.5f) * 0.8f;
-            float vy = (wy - DevMap.FLOOR) * 0.4f + rnd.nextFloat() * 0.8f;
+            float vy = (wy - rpg.world.Ground.at(wx, wz)) * 0.4f + rnd.nextFloat() * 0.8f;
             float mass = Math.max(0.06f, Math.min(2.5f, p.voxels() * vs * vs * vs * 1100));
             long body = g.game.reserve(AstrattoNative.KIND_RIGID);
             g.game.commands().rigidCreate(body, AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_DEBRIS | AstrattoNative.RIGID_REPORT | AstrattoNative.RIGID_NO_MOVERS,
@@ -86,7 +86,7 @@ public final class Bones {
             if (held == null || held.def.natural) continue;
             float[] hand = at(pts, s == ItemDef.Slot.MAIN ? AstrattoNative.RD_R_WRIST : AstrattoNative.RD_L_WRIST);
             m.eq.set(s, null);
-            g.objects.drop(held, hand[0], Math.max(DevMap.FLOOR + 0.05f, hand[1] - 0.3f), hand[2]);
+            g.objects.drop(held, hand[0], Math.max(rpg.world.Ground.at(hand[0], hand[2]) + 0.05f, hand[1] - 0.3f), hand[2]);
         }
         while (bones.size() > MAX) release(bones.remove(0));
         collapsed++;
@@ -136,7 +136,7 @@ public final class Bones {
         float vs = f.vs;
         float[] p = new float[AstrattoNative.RD_PARTICLES * 3];
         float rx = (float) Math.cos(m.yaw), rz = (float) -Math.sin(m.yaw);
-        float px = m.x, py = Math.max(DevMap.FLOOR, m.y) + f.hipY * vs, pz = m.z;
+        float px = m.x, py = Math.max(rpg.world.Ground.at(m.x, m.z), m.y) + f.hipY * vs, pz = m.z;
         put(p, AstrattoNative.RD_PELVIS, px, py, pz);
         put(p, AstrattoNative.RD_NECK, px, py + f.neck[1] * vs, pz);
         put(p, AstrattoNative.RD_HEAD, px, py + (f.neck[1] + f.headHalf * 2) * vs, pz);
