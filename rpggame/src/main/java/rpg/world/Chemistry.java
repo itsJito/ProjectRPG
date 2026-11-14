@@ -127,9 +127,16 @@ public final class Chemistry {
     }
     public void splash(float x,float y,float z) { disturb(x,y,z,0.8f,3,true); }
     public void disturb(float x,float y,float z,float radius,float strength,boolean spray) {
-        if(spray)visual(8,x,y,z,0.035f,Math.min(120,30+strength*20),0.12f,0.45f,0.6f,0.85f,1);
+        // (0.4.4, gamefixes: "frame refused: malformed command stream: invalid water ripple") the renderer refuses a whole
+        // frame over one ripple out of its range (not finite, a radius outside (0, 8] m, a strength over 30): a heavy body
+        // falling far into a lake, or an electric spell's wide charge, asked for one. Each is kept to what the surface takes.
+        if(!Float.isFinite(x) || !Float.isFinite(z) || !Float.isFinite(radius) || !Float.isFinite(strength))return;
+        radius=Math.max(RIPPLE_MIN,Math.min(RIPPLE_MAX,radius));strength=Math.max(-RIPPLE_STRENGTH,Math.min(RIPPLE_STRENGTH,strength));
+        if(spray && Float.isFinite(y))visual(8,x,y,z,0.035f,Math.min(120,30+strength*20),0.12f,0.45f,0.6f,0.85f,1);
         if(ripples.size()>=32)ripples.removeFirst();ripples.addLast(new Ripple(x,z,radius,-strength,g.time+0.18));
     }
+    /** The renderer's own limits on a ripple (renderer.cpp: radius in (0, 8] m, |strength| at most 30). */
+    public static final float RIPPLE_MIN=0.05f,RIPPLE_MAX=8f,RIPPLE_STRENGTH=30f;
     private long visualId=1L<<48;
     public void visual(int kind,float x,float y,float z,float radius,float rate,float duration,float life,float red,float green,float blue) {
         if(visuals.size()>=48)visuals.removeFirst();

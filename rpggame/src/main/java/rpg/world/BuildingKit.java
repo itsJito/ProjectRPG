@@ -38,6 +38,9 @@ public final class BuildingKit {
             case Blocks.BRICK, Blocks.STONE_BRICKS -> Blocks.PLASTER;
             case Blocks.PLASTER -> Blocks.PLANKS;
             case Blocks.LIMESTONE_BRICKS -> Blocks.MARBLE;
+            // (0.4.2) the territories' own walls (ShadowVeil's): plastered, or boarded, inside
+            case Blocks.RUBBLE_STONE, Blocks.OCHRE_DAUB, Blocks.GRANITE_ASHLAR, Blocks.ADOBE, Blocks.STUCCO, Blocks.WHITE_ASHLAR -> Blocks.PLASTER;
+            case Blocks.TARRED_PLANKS -> Blocks.PLANKS;
             default -> outer;
         };
     }

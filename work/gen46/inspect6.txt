@@ -1,0 +1,162 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.45s ({regions=895, overlays=531, variants=495, scarp=52, coast=514, erosion=447, peaks=46, lakes=76, isles=4, rivers=804, wadis=14, ground=23, roads=619, causeways=4, architecture=1019, pitsFilled=1309, pits=452, banks=80, clamp=15, cliffs=60, columns=749, falls=17, raise=10699, trees=282, outcrops=0, ways=513}), made and lit in 2.14s
+    [water] flow field grown in 1894 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+
+    ================ 320, 40, 994  law Loxford  stand Y 40.0
+    structure here: drunken_duck The Drunken Duck (hall) lot 318,990 - 331,1000 floor 39
+      near loxford_store              Loxford General Store                    building       22 m lot 302,972-310,980 floor 38
+      near duck_cellar                The Duck's cellar                        cellar         18 m lot 336,991-339,1002 floor 39
+      near loxford_cottages_1         Cottage                                  building       29 m lot 307,964-312,969 floor 39
+      near loxford_cottages_9         Cottage                                  building       25 m lot 336,974-341,979 floor 39
+      near loxford_cottages_10        Cottage                                  building       32 m lot 343,972-348,977 floor 39
+      near loxford_cottages_11        Cottage                                  building       25 m lot 342,988-347,993 floor 39
+      near loxford_cottages_12        Cottage                                  building       32 m lot 349,989-354,994 floor 39
+      near loxford_cottages_13        Cottage                                  building       38 m lot 352,975-357,980 floor 39
+      object Door                   The Drunken Duck door          (325.0, 41.2, 990.5)
+      object Furniture              Bench                          (322.0, 40.5, 989.5)
+      object Furniture              Berthild's bed                 (320.0, 44.5, 991.5)
+      object Furniture              Bench                          (320.0, 40.5, 991.5)
+      object Furniture              Maddoc's bed                   (324.0, 44.5, 993.5)
+      object Furniture              Bedside table                  (324.5, 44.5, 994.5)
+      object Furniture              Counter                        (323.5, 40.5, 995.5)
+      object Furniture              Table                          (322.5, 40.5, 993.0)
+      object Furniture              Bench                          (321.5, 40.5, 993.0)
+      object Furniture              Bench                          (323.5, 40.5, 993.0)
+      object Furniture              Bench                          (321.0, 40.5, 999.5)
+      object Furniture              Washstand                      (324.5, 44.5, 997.5)
+      object Furniture              Stool                          (324.5, 44.5, 996.5)
+      object Furniture              Chandelier                     (321.5, 45.0, 995.5)
+      object Door                   The Drunken Duck guest_room door (325.5, 45.2, 999.5)
+      object Container              Chest                          (324.5, 44.4, 998.5)
+      npc Ealdra       MERCHANT       (309.5, 39.0, 974.5) goal BANK
+      npc Berthild     CIVIC          (323.5, 40.0, 996.5) goal SLEEP
+      npc Maddoc       MERCHANT       (322.5, 44.0, 996.5) goal SLEEP
+      npc Karlon       CRAFTSMAN      (329.5, 40.0, 994.5) goal SLEEP
+      layer Y38 (x 314..326 across, z down; * the point)
+       aabbbbbbbbbbb
+       aabbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbb*bbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+       bbbbbbbbbbbbb
+      layer Y39 (x 314..326 across, z down; * the point)
+       ..aaaaaaaacca
+       ..aaaaaaaacca
+       aaaaddddddeed
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaade*eeeeee
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaadeeeeeeee
+       aaaaddddddddd
+      layer Y40 (x 314..326 across, z down; * the point)
+       ........f....
+       .......g.....
+       ....fddddfhhf
+       ....dgg......
+       ....d..gig...
+       ....d..gig..i
+       ...fd.*......
+       ...fd.iiiiiii
+       ....dj......i
+       ....de......k
+       ....de......k
+       ....degg.....
+       ....fdddddhhd
+      layer Y41 (x 314..326 across, z down; * the point)
+       ........f....
+       .............
+       ....flmllfhhf
+       ....n........
+       ....m........
+       ....n.......i
+       ...fn.*......
+       ...fn........
+       ....n.......i
+       ....nj......k
+       ....me......k
+       ....ne.......
+       ....fomoomhhm
+      layer Y42 (x 314..326 across, z down; * the point)
+       ........f....
+       ....f....p...
+       ....flmlllffl
+       ....n........
+       ....m........
+       ....n........
+       ....n.*......
+       ....n........
+       ....n........
+       ....n........
+       ....mj.......
+       ....ne.......
+       ....fomoomoom
+      layer Y43 (x 314..326 across, z down; * the point)
+       ........p....
+       ....fffffffff
+       ....flfllllll
+       ....feeeeeeee
+       ....feeeeeeee
+       ....feeeeeeee
+       ....fe*eeeeee
+       ....feeeeeeee
+       ....f.eeeeeee
+       ....f.eeeeeee
+       ....f.eeeeeee
+       ....fjeeeeeee
+       ....fofoofoof
+      layer Y44 (x 314..326 across, z down; * the point)
+       .............
+       ....fqqfqqfqq
+       ....f........
+       ....rss....ti
+       ....r......ts
+       ....f....sst.
+       ....r.*...it.
+       ....ru.....t.
+       ....f.u...gt.
+       ....r.u...it.
+       ....r.u...vt.
+       ....f......h.
+       ....r........
+      legend: a=grass b=dirt c=gravel d=cobble e=planks f=spruce_log g=seat h=door i=table j=stairs k=headstone l=#224 m=glass n=dual2 o=#225 p=lamp q=#171 r=#169 s=bed t=plaster u=fence v=crate
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 33.616 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 37s
+9 actionable tasks: 1 executed, 8 up-to-date

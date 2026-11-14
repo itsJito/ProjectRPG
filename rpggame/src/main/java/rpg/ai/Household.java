@@ -41,6 +41,8 @@ final class Household {
 
     /** Whether this is one of the household's working people (the Jobs dispatcher hands them here). */
     boolean covers(Npc n) {
+        // (0.4.3) the DevMansion's household runs on the devmap only (its rooms and range are the devmap's)
+        if (!rpg.world.WorldMap.devmap()) return false;
         long id = n.id;
         return id == Ids.BARON || id == Ids.MANSION_COOK || id == Ids.MANSION_PORTER || id == Ids.MANSION_WOODCUTTER || id == Ids.MANSION_ORCHARDIST;
     }

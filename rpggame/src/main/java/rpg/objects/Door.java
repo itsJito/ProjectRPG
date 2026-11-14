@@ -90,6 +90,12 @@ public final class Door extends WorldObject {
         door.cellDoor = true;
         return door;
     }
+    /** (0.4.4) A jail cell's barred door on its own floor (ShadowVeil's jails): 'walk' is the cell above the floor's blocks. */
+    public static Door cellDoor(long id, String name, int[][] cells, int walk) {
+        Door door = new Door(id, name, cells, true, null, 100, 0, walk);
+        door.cellDoor = true;
+        return door;
+    }
 
     private static float cx(int[][] c) { float s = 0; for (int[] p : c) s += p[0] + 0.5f; return s / c.length; }
     private static float cz(int[][] c) { float s = 0; for (int[] p : c) s += p[1] + 0.5f; return s / c.length; }
@@ -156,6 +162,9 @@ public final class Door extends WorldObject {
     }
 
     /** Reads where each leaf has swung to, latches a closing door as it comes home, and says to the world whether the way is open. */
+    /** (0.4.4, optimisation) Shut, latched and still: nothing to follow until someone comes to it. */
+    public boolean idle() { return !open && !closing && motorUntil == 0 && !cellsOpen; }
+
     public void update(Rpg g, Snapshots.Rigids rigids) {
         float most = 0;
         for (int i = 0; i < hinge.length; i++) {
@@ -175,7 +184,22 @@ public final class Door extends WorldObject {
         } else homeSince = -1;
         boolean wayOpen = most > 0.35f;
         if (wayOpen != cellsOpen) applyCells(g, wayOpen);
+        // (0.4.6, gamefixes: NPC AI still got stuck) someone of the town going through an open door is never held by its
+        // leaf: a leaf swung out against its stop, square across a narrow doorway's jamb, pinned a monk in the monastery's
+        // doorway all morning, walking into it and pushed back by it. While anyone but the player is in or by the
+        // doorway, the leaf lets bodies by; the player still pushes it (it is solid to them again once the way is clear)
+        boolean passing = false;
+        if (open && !locked) for (Actor o : g.npcs) if (o.alive && Math.abs(o.x - x) < PASS_REACH && Math.abs(o.z - z) < PASS_REACH) { passing = true; break; }
+        if (passing != ghost && leaf.length > 0) {
+            ghost = passing;
+            int flags = AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT | (ghost ? AstrattoNative.RIGID_NO_MOVERS : 0);
+            for (long l : leaf) g.game.commands().rigidSet(l, flags, 0, 0, 0, Float.NaN, Float.NaN, Float.NaN);
+        }
     }
+    /** (0.4.6) How near (m, either way) someone of the world comes to an open door for its leaf to let bodies by. */
+    static final float PASS_REACH = rpg.Tuning.f("doors.passReach", 1.8f);
+    /** Whether the leaves now let bodies by (see {@link #update}). */
+    private boolean ghost;
 
     private void restPose(int i, float x, float y, float z, float yaw) {
         var pose = new Snapshots.Rigid(); pose.x = x; pose.y = y; pose.z = z;
@@ -235,6 +259,7 @@ public final class Door extends WorldObject {
      */
     private void hold(Rpg g, boolean still) {
         int flags = AstrattoNative.RIGID_NO_WORLD | AstrattoNative.RIGID_REPORT | (still ? AstrattoNative.RIGID_KINEMATIC : 0);
+        ghost = false;
         for (int i = 0; i < leaf.length; i++) {
             // held: squared in its frame and stopped dead first - a fixed body keeps whatever spin it had, and a leaf held
             // with the last of its closing swing turned slowly on in the frame and jammed on its hinge when next opened

@@ -50,11 +50,15 @@ public final class Console {
         print("Developer console. 'help' for a start, 'commands' and 'vars' for everything, Tab to complete.", DIM);
     }
 
-    private static List<String> kingdoms(){return List.of(DevMap.ALPHA,DevMap.BETA,DevMap.PALACE);}
+    private static List<String> kingdoms(){
+        // (0.4.3) every kingdom of the map being played
+        if(rpg.world.WorldMap.shadowveil()){List<String> l=new ArrayList<>();for(var r:rpg.world.shadowveil.ShadowVeil.realms())l.add(r.name());if(!l.isEmpty())return l;}
+        return List.of(DevMap.ALPHA,DevMap.BETA,DevMap.PALACE);
+    }
     private static String kingdom(String word){for(String name:kingdoms())if(name.equalsIgnoreCase(word))return name;return null;}
     private void bountyReset(String word){
         String jurisdiction=kingdom(word);
-        if(jurisdiction==null && !word.equalsIgnoreCase("all")){print("Choose DevCity, DevTown, DevPalace or all.",ERR);return;}
+        if(jurisdiction==null && !word.equalsIgnoreCase("all")){print("Choose "+String.join(", ",kingdoms())+" or all.",ERR);return;}
         for(String name:kingdoms())if(jurisdiction==null || jurisdiction.equals(name))g.law.setBounty(g.player,name,0);
         print("Bounty reset: "+(jurisdiction==null?"all kingdoms":jurisdiction),GOOD);
     }
@@ -144,7 +148,7 @@ public final class Console {
         cmd("save", "save <name>: saves the game to saves/<name>.json.", a -> { String n = a.length > 1 ? a[1] : "quick"; if (new SaveSystem(g).save(SaveSystem.slot(n))) print("Saved " + SaveSystem.slot(n), GOOD); });
         cmd("load", "load <name>: loads saves/<name>.json.", a -> { String n = a.length > 1 ? a[1] : "quick"; if (new SaveSystem(g).load(SaveSystem.slot(n))) print("Loaded " + SaveSystem.slot(n), GOOD); });
         cmd("screenshot", "Saves a screenshot to shots/.", a -> hud.screenshotRequested = true);
-        cmd("restart", "Puts you back at the start of the devmap, healed.", a -> { g.player.restore(); g.teleport(g.player, DevMap.SPAWN_X, rpg.world.Ground.at(DevMap.SPAWN_X, DevMap.SPAWN_Z), DevMap.SPAWN_Z); });
+        cmd("restart", "Puts you back where a new character wakes on this map, healed.", a -> { g.player.restore(); toStart(); });
         cmd("reset","reset [player|skills|bounty <kingdom|all>]: restores the player, skills, or selected legal case.",a->{
             String target=a.length>1?a[1].toLowerCase(Locale.ROOT):"player";
             switch(target){
@@ -153,12 +157,18 @@ public final class Console {
                     g.interact.cancel(g.player,"developer reset");g.carrying.dropAll();g.traversal.cancel(g.player);g.reactions.cancel(g.player);g.falling.reset(g.player);
                     g.player.restore();g.chemistry.cleanse(g.player);g.gore.healed(g.player);g.controller.cancelHandInput();
                     god=immortal=noclip=false;core.set("ai_ignore_player","0");
-                    g.teleport(g.player,DevMap.SPAWN_X,rpg.world.Ground.at(DevMap.SPAWN_X, DevMap.SPAWN_Z),DevMap.SPAWN_Z);print("Player restored at the starting point.",GOOD);
+                    toStart();print("Player restored at the starting point.",GOOD);
                 }
                 case "skills"->{for(Skill skill:Skill.ALL)hud.debugSetLevel(skill,skill==Skill.HEALTH?10:1);print("Skills reset.",GOOD);}
                 case "bounty"->{if(a.length<3){print("reset bounty <kingdom|all>",WARN);return;}bountyReset(a[2]);}
                 default->print("reset [player|skills|bounty <kingdom|all>]",WARN);
             }
+        });
+        // (0.4.3, gamefixes: a 'pos' command) the player's cell coordinates, printed and put on the clipboard
+        cmd("pos", "Prints your X Y Z and copies them to the clipboard (as 'goto' takes them).", a -> {
+            String xyz = String.format(Locale.ROOT, "%.0f %.0f %.0f", Math.floor(g.player.x), Math.floor(g.player.y), Math.floor(g.player.z));
+            boolean copied = copy(xyz);
+            print("X " + xyz.split(" ")[0] + "  Y " + xyz.split(" ")[1] + "  Z " + xyz.split(" ")[2] + (copied ? "  (copied to the clipboard)" : "  (the clipboard could not be reached)"), copied ? GOOD : WARN);
         });
         cmd("where", "Where you are and which way you look (as 'goto' and 'face' would take them).", a -> print(String.format("goto %.2f %.2f %.2f; face %.2f %.2f", g.player.x, g.player.y, g.player.z, Math.toDegrees(g.controller.camPitch), Math.toDegrees(g.controller.camYaw)), TEXT));
         cmd("thirdperson", "The camera behind you.", a -> g.player.firstPerson = false);
@@ -185,7 +195,8 @@ public final class Console {
         cmd("invariants", "Checks every world-state invariant.", a -> { var f = g.invariants.check(); if (f.isEmpty()) print("All invariants hold.", GOOD); else for (String s : f) print(s, ERR); });
         cmd("ai_inspector", "Toggles the AI inspector (F9).", a -> hud.aiInspector = !hud.aiInspector);
         // (0.4.1) the developer display: frames, position, chunk, region, structure, time, the people near and their line of sight
-        cmd("devmode", "Toggles the developer display: FPS, XYZ and chunk, region and structure, what is underfoot and looked at, the people near with their lines of sight to you.", a -> { hud.dev.on = !hud.dev.on; print("devmode " + (hud.dev.on ? "ON" : "OFF"), TEXT); });
+        // (0.4.2, gamefixes: devmode crashed the game; it is devui now)
+        cmd("devui", "Toggles the developer display: FPS, XYZ and chunk, region and structure, what is underfoot and looked at, the people near with their lines of sight to you.", a -> { hud.dev.on = !hud.dev.on; print("devui " + (hud.dev.on ? "ON" : "OFF"), TEXT); });
         cmd("devreport", "devreport [note]: writes the developer display, the nearest person's AI readout and the recent chat to reports/, with a screenshot.", a -> {
             try { var f = hud.dev.report(a.length > 1 ? String.join(" ", java.util.Arrays.copyOfRange(a, 1, a.length)) : ""); print("report written: " + f.toAbsolutePath(), GOOD); }
             catch (java.io.IOException e) { print("the report could not be written: " + e.getMessage(), ERR); }
@@ -203,12 +214,13 @@ public final class Console {
         cmd("hurt", "hurt <hp>: hurts you (a negative amount heals).", a -> { float d = a.length > 1 ? DevConsole.num(a[1], 1) : 1; g.player.hp = Math.max(1, Math.min(g.player.maxHp(), g.player.hp - d)); });
         cmd("kill", "Kills you (no one is to blame).", a -> g.combat.bleedOutNow(g.player));
         cmd("heal", "Restores all resources and clears burning, shock, frost and bleeding.", a -> { g.player.restore(); g.chemistry.cleanse(g.player); if (g.gore != null) g.gore.healed(g.player); });
-        cmd("goto", "goto <x> <y> <z>, or goto <place>: start, combat, skills, yard, economy, quest, farm, wilds, pond, graveyard, fence.", a -> {
+        cmd("goto", "goto <x> <y> <z>, or goto <place> (a kingdom, a landmark, a cave mouth - Tab completes, 'goto' alone lists them).", a -> {
             if (a.length >= 4) { g.teleport(g.player, DevConsole.num(a[1], g.player.x), DevConsole.num(a[2], g.player.y), DevConsole.num(a[3], g.player.z)); return; }
             Map<String, float[]> spots = places();
             float[] s = a.length > 1 ? spots.get(a[1].toLowerCase(Locale.ROOT)) : null;
             if (s == null) { print("goto: x y z, or one of " + String.join(", ", spots.keySet()), WARN); return; }
             g.teleport(g.player, s[0], rpg.world.Ground.at(s[0], s[1]), s[1]);
+            print("goto " + a[1].toLowerCase(Locale.ROOT) + String.format(Locale.ROOT, " (%.0f, %.0f, %.0f)", s[0], rpg.world.Ground.at(s[0], s[1]), s[1]), DIM);
         });
         core.completer("goto", t -> { List<String> l = new ArrayList<>(); for (String k : places().keySet()) if (k.startsWith(t)) l.add(k); return l; });
         cmd("face", "face <pitch> <yaw>: turns the camera (degrees).", a -> { if (a.length < 3) { print("Usage: face pitch yaw", WARN); return; } g.controller.camPitch = (float) Math.toRadians(DevConsole.num(a[1], 0)); g.controller.snapTo((float) Math.toRadians(DevConsole.num(a[2], 0))); });
@@ -353,8 +365,11 @@ public final class Console {
             print("Clock: " + c.mode().name().toLowerCase(Locale.ROOT) + " x" + c.scale(), GOOD);
         });
         // 0.1.8 (gamefixes: everything in the game reachable from the console)
-        cmd("weather", "weather <clear|overcast|fog|rain|storm|snow>: sets the weather at once.", a -> {
-            if (a.length < 2) { print("weather: " + g.timeSystem.weather.kind().name().toLowerCase(Locale.ROOT), TEXT); return; }
+        cmd("weather", "weather <name>: any of the world's weathers at once over this region (weather alone lists them).", a -> {
+            if (a.length < 2) { print("weather: " + (g.weatherSystem == null ? g.timeSystem.weather.name() : g.weatherSystem.name() + String.format(" (%.0f C)", g.weatherSystem.temperature())) + "; presets: " + (g.weatherSystem == null ? "" : String.join(", ", g.weatherSystem.presets.keySet())), TEXT); return; }
+            // (0.4.6) any of the data's weathers by name ("weather dense fog", "weather ground_blizzard"), for a few hours over this region
+            String wanted = String.join(" ", java.util.Arrays.copyOfRange(a, 1, a.length));
+            if (g.weatherSystem != null && g.weatherSystem.force(wanted, g.player.x, g.player.z, 3)) { print("Weather: " + g.weatherSystem.name(), GOOD); return; }
             try { g.timeSystem.weather.set(astratto.weather.Weather.Kind.valueOf(a[1].toUpperCase(Locale.ROOT))); g.timeSystem.weather.snap(); print("Weather: " + a[1], GOOD); }
             catch (IllegalArgumentException e) { print("weather: clear, overcast, fog, rain, storm or snow", ERR); }
         });
@@ -442,7 +457,8 @@ public final class Console {
         if (role == null) for (Npc.Role r : Npc.Role.values()) if (r != Npc.Role.MONSTER && norm(r.name()).equals(want)) role = r;
         if (role == null) return null;
         String title = calling != null ? calling.title : role.name().charAt(0) + role.name().substring(1).toLowerCase(Locale.ROOT).replace('_', ' ');
-        Npc n = new Npc(g.state.newEntityId(), title, role, title, x, z);
+        long nid = g.state.newEntityId();
+        Npc n = new Npc(nid, rpg.ai.Names.drawn(nid, false), role, title, x, z);
         if (calling != null) calling.assign(n);
         boolean fighter = role == Npc.Role.GUARD || role == Npc.Role.KNIGHT || role == Npc.Role.LAWMAN || role == Npc.Role.BANDIT || role == Npc.Role.BRUTE || role == Npc.Role.HUNTER;
         int lv = level > 0 ? Math.min(99, level) : switch (role) { case KNIGHT -> 45; case GUARD, LAWMAN -> 35; case BRUTE -> 28; case BANDIT -> 15; case HUNTER -> 22; default -> 1; };
@@ -468,7 +484,29 @@ public final class Console {
         return n;
     }
 
-    private static Map<String, float[]> places() {
+    /** Back to where a new character wakes on the map being played. */
+    private void toStart() {
+        var m = rpg.world.WorldMap.active();
+        g.teleport(g.player, m.spawnX, rpg.world.Ground.at(m.spawnX, m.spawnZ), m.spawnZ);
+    }
+
+    /** Text onto the system clipboard. */
+    static boolean copy(String text) {
+        // on Windows the clip tool (starting the desktop toolkit inside the game's window costs a hitch), else the toolkit
+        if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")) try {
+            Process p = new ProcessBuilder("clip").redirectErrorStream(true).start();
+            try (var o = p.getOutputStream()) { o.write(text.getBytes(java.nio.charset.StandardCharsets.US_ASCII)); }
+            if (p.waitFor(3, java.util.concurrent.TimeUnit.SECONDS) && p.exitValue() == 0) return true;
+        } catch (Exception ignored) { }
+        try {
+            java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new java.awt.datatransfer.StringSelection(text), null);
+            return true;
+        } catch (Throwable t) { return false; }
+    }
+
+    /** The places 'goto' knows on the map being played. */
+    static Map<String, float[]> places() {
+        if (rpg.world.WorldMap.shadowveil()) return rpg.world.shadowveil.ShadowVeil.destinations();
         Map<String, float[]> spots = new LinkedHashMap<>();
         spots.put("start", new float[]{DevMap.SPAWN_X, DevMap.SPAWN_Z}); spots.put("combat", new float[]{30.5f, 48.5f}); spots.put("skills", new float[]{66.5f, 29.5f});
         spots.put("yard", new float[]{100.5f, 68.5f}); spots.put("economy", new float[]{30.5f, 100.5f}); spots.put("quest", new float[]{61.5f, 98.5f});

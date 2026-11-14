@@ -44,6 +44,17 @@ public final class ItemDef {
     public boolean natural;
     /** The shape a monster's drop is modelled as (LootModels: "essence", "pelt", "fang" ...), null for everything else. */
     public String look;
+    /**
+     * (0.4.5) A garment's look (data/apparel.json via Apparel): the shape it is drawn with and its colours, read by
+     * rpg.render.Garments on the body and as the item itself. Null for everything else.
+     */
+    public java.util.Map<String, Object> wear;
+    /** (0.4.5) The outfit a garment belongs to (Apparel's id), or null. */
+    public String outfit;
+    /** (0.4.5) Every skill level it asks to be worn, where more than one (the Rogue outfit's Agility and Thieving). */
+    public java.util.Map<Skill, Integer> reqs = java.util.Map.of();
+    /** Every requirement: the extra ones, else the one. */
+    public java.util.Map<Skill, Integer> requirements() { return !reqs.isEmpty() ? reqs : reqSkill == null ? java.util.Map.of() : java.util.Map.of(reqSkill, reqLevel); }
     /** Gathering tool power (axes for Woodcutting, pickaxes for Mining). */
     public int toolPower;
     public Skill toolSkill;

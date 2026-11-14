@@ -1,0 +1,1172 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+Removing 1 daemon stop events from registry
+Previous Daemon (16476) stopped at Fri Nov 13 14:42:11 EST 2026 stop command received
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+Starting process 'Gradle build daemon'. Working directory: C:\Users\John\.gradle\daemon\8.14.3 Command: C:\Program Files\Java\jdk-24\bin\java.exe --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED --enable-native-access=ALL-UNNAMED -XX:MaxMetaspaceSize=384m -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\John\.gradle\wrapper\dists\gradle-8.14.3-bin\cv11ve7ro1n3o1j4so8xd9n66\gradle-8.14.3\lib\gradle-daemon-main-8.14.3.jar -javaagent:C:\Users\John\.gradle\wrapper\dists\gradle-8.14.3-bin\cv11ve7ro1n3o1j4so8xd9n66\gradle-8.14.3\lib\agents\gradle-instrumentation-agent-8.14.3.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.14.3
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 13.276 secs.
+The client will now receive all logging from the daemon (pid: 8468). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-8468.out.log
+Starting build in new daemon [memory: 512 MiB]
+Using 6 worker leases.
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-24': {JAVA_HOME=C:\Program Files\Java\jdk-24, JAVA_VERSION=24.0.1, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=24.0.1+9-30, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=24.0.1+9-30, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'slowTest'
+Selected primary task 'slowTest' from project :
+Starting process 'command 'C:\Program Files\Java\jre1.8.0_471\bin\java.exe''. Working directory: C:\Users\John\.gradle\.tmp\tmp-jvm6725976753850663436probe Command: C:\Program Files\Java\jre1.8.0_471\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Java\jre1.8.0_471\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Java\jre1.8.0_471': {JAVA_HOME=C:\Program Files\Java\jre1.8.0_471, JAVA_VERSION=1.8.0_471, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=1.8.0_471-b09, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=25.471-b09, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Starting process 'command 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe''. Working directory: C:\Users\John\.gradle\.tmp\tmp-jvm3782938336103806106probe Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe''
+Received JVM installation metadata from 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2': {JAVA_HOME=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2, JAVA_VERSION=21.0.12.1, JAVA_VENDOR=Azul Systems, Inc., RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.12.1+1-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.12.1+1-LTS, VM_VENDOR=Azul Systems, Inc., OS_ARCH=amd64}
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':slowTest']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#74,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#78,Execution worker Thread 4,5,main]) started.
+destroyer locations for task group 0 (Thread[#79,Execution worker Thread 5,5,main]) started.
+:processResources (Thread[#79,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:compileJava (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#73,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#74,included builds Thread 2,5,main]) started.
+:theastrattoengine:buildNative (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#73,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#73,included builds,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#74,included builds Thread 2,5,main]) started.
+:theastrattoengine:processResources (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#73,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#73,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#73,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#74,included builds Thread 2,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#74,included builds Thread 2,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#79,Execution worker Thread 5,5,main]) started.
+:compileJava (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\ui\HudFragments.java has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\world\shadowveil\Architecture.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.038 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Starting process 'Gradle Worker Daemon 1'. Working directory: C:\Users\John\.gradle\workers Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath8166151628825839084txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 1'
+Successfully started process 'Gradle Worker Daemon 1'
+Started Gradle worker daemon (19.967 secs) with fork options DaemonForkOptions{executable=C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileJava
+Compiling with JDK Java compiler API.
+Incremental compilation of 519 classes completed in 1 mins 10.247 secs.
+Class dependency analysis for incremental compilation took 3.06 secs.
+Resolve mutations for :classes (Thread[#79,Execution worker Thread 5,5,main]) started.
+:classes (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#79,Execution worker Thread 5,5,main]) started.
+:compileTestJava (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\ui\HudFragments$Minimap.class has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\world\StairWalkTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.06 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 158 classes completed in 14.146 secs.
+Class dependency analysis for incremental compilation took 0.135 secs.
+Resolve mutations for :processTestResources (Thread[#79,Execution worker Thread 5,5,main]) started.
+:processTestResources (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#79,Execution worker Thread 5,5,main]) started.
+:testClasses (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :slowTest (Thread[#79,Execution worker Thread 5,5,main]) started.
+:slowTest (Thread[#79,Execution worker Thread 5,5,main]) started.
+
+> Task :slowTest
+Deleting stale output file: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\slowTest
+Deleting stale output file: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\slowTest\binary
+Deleting stale output file: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\slowTest
+Caching disabled for task ':slowTest' because:
+  Build cache is disabled
+Task ':slowTest' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 2'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=8 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\slowTest\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath4415606633560571350txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 2'
+Successfully started process 'Gradle Test Executor 2'
+Starting process 'Gradle Test Executor 3'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=8 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\slowTest\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath8601761995735355343txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 3'
+Successfully started process 'Gradle Test Executor 3'
+
+Gradle Test Executor 2 started executing tests.
+Gradle Test Executor 3 started executing tests.
+Gradle Test Executor 2 finished executing tests.
+
+> Task :slowTest
+
+StairWalkTest > everyStaircaseIsWalkedUpAndDown() STANDARD_OUT
+    [Load] ShadowVeil grown in 16.28s ({regions=840, overlays=491, variants=450, scarp=46, coast=632, erosion=329, peaks=44, lakes=72, isles=4, rivers=754, wadis=15, ground=21, roads=640, causeways=3, architecture=1031, pitsFilled=1405, pits=488, banks=46, clamp=16, cliffs=44, columns=1262, falls=17, raise=8233, trees=281, outcrops=0, ways=480}), made and lit in 1.63s
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 761 settled points)
+    [stairs] 958 walks, 958 failed
+    [stairs] loxford_castle up 229,40,987: stuck before point 3 of 6 (226.5,43.0,987.5) at 227.13,42.20,987.50
+    [stairs] loxford_castle down 229,40,987: stuck before point 4 of 6 (227.5,42.0,987.5) at 226.70,42.63,987.50
+    [stairs] loxford_castle up 232,45,987: stuck before point 3 of 6 (229.5,48.0,987.5) at 230.13,47.20,987.50
+    [stairs] loxford_castle down 232,45,987: stuck before point 4 of 6 (230.5,47.0,987.5) at 229.70,47.63,987.50
+    [stairs] freds_axes up 238,40,915: stuck before point 2 of 5 (236.5,42.0,915.5) at 237.13,41.20,915.50
+    [stairs] freds_axes down 238,40,915: stuck before point 4 of 5 (237.5,41.0,915.5) at 236.70,41.63,915.50
+    [stairs] loxford_store up 259,39,925: stuck before point 2 of 5 (257.5,41.0,925.5) at 258.13,40.20,925.50
+    [stairs] loxford_store down 259,39,925: stuck before point 4 of 5 (258.5,40.0,925.5) at 257.70,40.63,925.50
+    [stairs] drunken_duck up 271,40,947: stuck before point 2 of 5 (271.5,42.0,949.5) at 271.50,41.20,948.87
+    [stairs] drunken_duck down 271,40,947: stuck before point 4 of 5 (271.5,41.0,948.5) at 271.50,41.63,949.30
+    [stairs] loxford_church up 217,39,916: stuck before point 1 of 7 (217.5,40.0,915.5) at 217.31,39.57,915.79
+    [stairs] loxford_church down 217,39,916: stuck before point 4 of 7 (216.5,42.0,914.5) at 215.70,42.63,914.50
+    [stairs] earl_manor up 296,40,877: stuck before point 2 of 5 (298.5,42.0,877.5) at 297.87,41.20,877.50
+    [stairs] earl_manor down 296,40,877: stuck before point 4 of 5 (297.5,41.0,877.5) at 298.31,41.63,877.50
+    [stairs] earl_manor up 293,44,877: stuck before point 2 of 5 (295.5,46.0,877.5) at 294.87,45.20,877.50
+    [stairs] earl_manor down 293,44,877: stuck before point 4 of 5 (294.5,45.0,877.5) at 295.30,45.63,877.50
+    [stairs] millwood_lodge up 304,40,908: stuck before point 2 of 5 (304.5,42.0,910.5) at 304.50,41.20,909.87
+    [stairs] millwood_lodge down 304,40,908: stuck before point 4 of 5 (304.5,41.0,909.5) at 304.50,41.63,910.30
+    [stairs] border_watchtower up 354,46,755: stuck before point 4 of 7 (354.5,50.0,759.5) at 354.50,49.00,758.70
+    [stairs] border_watchtower down 354,46,755: stuck before point 4 of 7 (354.5,49.0,758.5) at 354.50,49.83,759.30
+    [stairs] border_watchtower up 354,52,755: stuck before point 4 of 7 (358.5,56.0,755.5) at 357.70,55.00,755.50
+    [stairs] border_watchtower down 354,52,755: stuck before point 4 of 7 (357.5,55.0,755.5) at 358.30,55.83,755.50
+    [stairs] shuttered_lantern up 136,41,780: stuck before point 2 of 5 (138.5,43.0,780.5) at 137.87,42.20,780.50
+    [stairs] shuttered_lantern down 136,41,780: stuck before point 4 of 5 (137.5,42.0,780.5) at 138.31,42.63,780.50
+    [stairs] harlette_store up 110,41,766: stuck before point 2 of 5 (110.5,43.0,768.5) at 110.50,42.20,767.87
+    [stairs] harlette_store down 110,41,766: stuck before point 4 of 5 (110.5,42.0,767.5) at 110.50,42.63,768.30
+    [stairs] willow_mill up 83,39,747: stuck before point 2 of 5 (83.5,41.0,745.5) at 83.50,40.20,746.13
+    [stairs] willow_mill down 83,39,747: stuck before point 4 of 5 (83.5,40.0,746.5) at 83.50,40.63,745.70
+    [stairs] dracula_manor up 91,48,698: stuck before point 2 of 5 (93.5,50.0,698.5) at 92.87,49.20,698.50
+    [stairs] dracula_manor down 91,48,698: stuck before point 4 of 5 (92.5,49.0,698.5) at 93.31,49.63,698.50
+    [stairs] dracula_manor up 88,52,698: stuck before point 2 of 5 (90.5,54.0,698.5) at 89.87,53.20,698.50
+    [stairs] dracula_manor down 88,52,698: stuck before point 4 of 5 (89.5,53.0,698.5) at 90.30,53.63,698.50
+    [stairs] valgard_keep up 152,54,616: stuck before point 3 of 6 (155.5,57.0,616.5) at 154.87,56.20,616.50
+    [stairs] valgard_keep down 152,54,616: stuck before point 4 of 6 (154.5,56.0,616.5) at 155.31,56.63,616.50
+    [stairs] valgard_keep up 149,59,616: stuck before point 3 of 6 (152.5,62.0,616.5) at 151.87,61.20,616.50
+    [stairs] valgard_keep down 149,59,616: stuck before point 4 of 6 (151.5,61.0,616.5) at 152.30,61.63,616.50
+    [stairs] white_hart up 126,54,651: stuck before point 2 of 5 (124.5,56.0,651.5) at 125.13,55.20,651.50
+    [stairs] white_hart down 126,54,651: stuck before point 4 of 5 (125.5,55.0,651.5) at 124.70,55.63,651.50
+    [stairs] sanctuary_jaehaerys up 149,61,591: stuck before point 2 of 7 (147.5,63.0,591.5) at 148.30,62.00,591.50
+    [stairs] sanctuary_jaehaerys down 149,61,591: stuck before point 4 of 7 (147.5,64.0,592.5) at 147.50,64.63,593.30
+    [stairs] metallists_guild up 183,56,604: stuck before point 2 of 6 (181.5,58.0,604.5) at 182.30,57.00,604.50
+    [stairs] metallists_guild down 183,56,604: stuck before point 4 of 6 (181.5,58.0,604.5) at 181.50,58.63,605.30
+    [stairs] valgard_bank up 186,53,625: stuck before point 3 of 6 (183.5,56.0,625.5) at 184.13,55.20,625.50
+    [stairs] valgard_bank down 186,53,625: stuck before point 4 of 6 (184.5,55.0,625.5) at 183.70,55.63,625.50
+    [stairs] fennas_shop up 179,53,655: stuck before point 2 of 5 (179.5,55.0,657.5) at 179.50,54.20,656.87
+    [stairs] fennas_shop down 179,53,655: stuck before point 4 of 5 (179.5,54.0,656.5) at 179.50,54.63,657.30
+    [stairs] tovins_workshop up 204,53,654: stuck before point 2 of 5 (204.5,55.0,652.5) at 204.50,54.20,653.13
+    [stairs] tovins_workshop down 204,53,654: stuck before point 4 of 5 (204.5,54.0,653.5) at 204.50,54.63,652.70
+    [stairs] guild_bunkhouse up 217,53,652: stuck before point 2 of 5 (219.5,55.0,652.5) at 218.87,54.20,652.50
+    [stairs] guild_bunkhouse down 217,53,652: stuck before point 4 of 5 (218.5,54.0,652.5) at 219.31,54.63,652.50
+    [stairs] chieftains_hall up 392,57,382: stuck before point 3 of 6 (392.5,60.0,379.5) at 392.50,59.20,380.13
+    [stairs] chieftains_hall down 392,57,382: stuck before point 4 of 6 (392.5,59.0,380.5) at 392.50,59.63,379.69
+    [stairs] gorrick_bank up 388,56,421: stuck before point 2 of 5 (388.5,58.0,419.5) at 388.50,57.20,420.13
+    [stairs] gorrick_bank down 388,56,421: stuck before point 4 of 5 (388.5,57.0,420.5) at 388.50,57.63,419.69
+    [stairs] last_hearth up 387,54,441: stuck before point 2 of 5 (389.5,56.0,441.5) at 388.87,55.20,441.50
+    [stairs] last_hearth down 387,54,441: stuck before point 4 of 5 (388.5,55.0,441.5) at 389.31,55.63,441.50
+    [stairs] workers_lodge up 352,51,429: stuck before point 2 of 5 (352.5,53.0,427.5) at 352.50,52.20,428.13
+    [stairs] workers_lodge down 352,51,429: stuck before point 4 of 5 (352.5,52.0,428.5) at 352.50,52.63,427.69
+    [stairs] azharad_palace up 906,37,899: stuck before point 3 of 6 (906.5,40.0,902.5) at 906.50,39.20,901.87
+    [stairs] azharad_palace down 906,37,899: stuck before point 4 of 6 (906.5,39.0,901.5) at 906.50,39.63,902.30
+    [stairs] azharad_palace up 881,37,898: stuck before point 3 of 6 (881.5,40.0,895.5) at 881.50,39.20,896.13
+    [stairs] azharad_palace down 881,37,898: stuck before point 4 of 6 (881.5,39.0,896.5) at 881.50,39.63,895.70
+    [stairs] azharad_palace up 885,37,904: stuck before point 3 of 6 (888.5,40.0,904.5) at 887.87,39.20,904.50
+    [stairs] azharad_palace down 885,37,904: stuck before point 4 of 6 (887.5,39.0,904.5) at 888.30,39.63,904.50
+    [stairs] azharad_palace up 899,37,871: stuck before point 3 of 6 (896.5,40.0,871.5) at 897.13,39.20,871.50
+    [stairs] azharad_palace down 899,37,871: stuck before point 4 of 6 (897.5,39.0,871.5) at 896.70,39.63,871.50
+    [stairs] azharad_bank up 835,37,915: stuck before point 3 of 6 (835.5,40.0,918.5) at 835.50,39.20,917.87
+    [stairs] azharad_bank down 835,37,915: stuck before point 4 of 6 (835.5,39.0,917.5) at 835.50,39.63,918.30
+    [stairs] zafirs_swords up 805,37,909: stuck before point 2 of 5 (807.5,39.0,909.5) at 806.87,38.20,909.50
+    [stairs] zafirs_swords down 805,37,909: stuck before point 4 of 5 (806.5,38.0,909.5) at 807.30,38.63,909.50
+    [stairs] mohameds_crafting up 813,37,861: stuck before point 2 of 5 (811.5,39.0,861.5) at 812.13,38.20,861.50
+    [stairs] mohameds_crafting down 813,37,861: stuck before point 4 of 5 (812.5,38.0,861.5) at 811.70,38.63,861.50
+    [stairs] karims_kitchen up 830,37,832: stuck before point 2 of 5 (832.5,39.0,832.5) at 831.87,38.20,832.50
+    [stairs] karims_kitchen down 830,37,832: stuck before point 4 of 5 (831.5,38.0,832.5) at 832.30,38.63,832.50
+    [stairs] azharad_store up 856,37,863: stuck before point 2 of 5 (856.5,39.0,861.5) at 856.50,38.20,862.13
+    [stairs] azharad_store down 856,37,863: stuck before point 4 of 5 (856.5,38.0,862.5) at 856.50,38.63,861.70
+    [stairs] osamas_armour up 938,37,852: stuck before point 2 of 5 (940.5,39.0,852.5) at 939.87,38.20,852.50
+    [stairs] osamas_armour down 938,37,852: stuck before point 4 of 5 (939.5,38.0,852.5) at 940.30,38.63,852.50
+    [stairs] marwans_armour up 953,37,821: stuck before point 2 of 5 (951.5,39.0,821.5) at 952.13,38.20,821.50
+    [stairs] marwans_armour down 953,37,821: stuck before point 4 of 5 (952.5,38.0,821.5) at 951.70,38.63,821.50
+    [stairs] azharad_tannery up 889,37,833: stuck before point 2 of 5 (887.5,39.0,833.5) at 888.13,38.20,833.50
+    [stairs] azharad_tannery down 889,37,833: stuck before point 4 of 5 (888.5,38.0,833.5) at 887.70,38.63,833.50
+    [stairs] workers_khan up 951,37,894: stuck before point 2 of 5 (951.5,39.0,896.5) at 951.50,38.20,895.87
+    [stairs] workers_khan down 951,37,894: stuck before point 4 of 5 (951.5,38.0,895.5) at 951.50,38.63,896.30
+    [stairs] workers_khan up 930,37,894: stuck before point 2 of 5 (930.5,39.0,896.5) at 930.50,38.20,895.87
+    [stairs] workers_khan down 930,37,894: stuck before point 4 of 5 (930.5,38.0,895.5) at 930.50,38.63,896.30
+    [stairs] workers_khan up 937,37,898: stuck before point 2 of 5 (939.5,39.0,898.5) at 938.87,38.20,898.50
+    [stairs] workers_khan down 937,37,898: stuck before point 4 of 5 (938.5,38.0,898.5) at 939.30,38.63,898.50
+    [stairs] workers_khan up 945,37,877: stuck before point 2 of 5 (943.5,39.0,877.5) at 944.13,38.20,877.50
+    [stairs] workers_khan down 945,37,877: stuck before point 4 of 5 (944.5,38.0,877.5) at 943.70,38.63,877.50
+    [stairs] severian_palace up 568,37,85: stuck before point 4 of 7 (572.5,41.0,85.5) at 571.87,40.20,85.50
+    [stairs] severian_palace down 568,37,85: stuck before point 4 of 7 (571.5,40.0,85.5) at 572.30,40.63,85.50
+    [stairs] severian_palace up 567,37,113: stuck before point 4 of 7 (563.5,41.0,113.5) at 564.13,40.20,113.50
+    [stairs] severian_palace down 567,37,113: stuck before point 4 of 7 (564.5,40.0,113.5) at 563.70,40.63,113.50
+    [stairs] severian_palace up 574,37,109: stuck before point 4 of 7 (574.5,41.0,105.5) at 574.50,40.20,106.13
+    [stairs] severian_palace down 574,37,109: stuck before point 4 of 7 (574.5,40.0,106.5) at 574.50,40.63,105.70
+    [stairs] severian_palace up 529,37,93: stuck before point 4 of 7 (529.5,41.0,97.5) at 529.50,40.20,96.87
+    [stairs] severian_palace down 529,37,93: stuck before point 4 of 7 (529.5,40.0,96.5) at 529.50,40.63,97.30
+    [stairs] palace_barracks up 595,37,115: stuck before point 2 of 5 (595.5,39.0,117.5) at 595.50,38.20,116.87
+    [stairs] palace_barracks down 595,37,115: stuck before point 4 of 5 (595.5,38.0,116.5) at 595.50,38.63,117.31
+    [stairs] severian_museum up 622,36,145: stuck before point 3 of 6 (625.5,39.0,145.5) at 624.87,38.20,145.50
+    [stairs] severian_museum down 622,36,145: stuck before point 4 of 6 (624.5,38.0,145.5) at 625.30,38.63,145.50
+    [stairs] severian_bank up 435,37,204: stuck before point 3 of 6 (432.5,40.0,204.5) at 433.13,39.20,204.50
+    [stairs] severian_bank down 435,37,204: stuck before point 4 of 6 (433.5,39.0,204.5) at 432.69,39.63,204.50
+    [stairs] tenement_1 up 449,37,172: stuck before point 2 of 5 (451.5,39.0,172.5) at 450.87,38.20,172.50
+    [stairs] tenement_1 down 449,37,172: stuck before point 4 of 5 (450.5,38.0,172.5) at 451.31,38.63,172.50
+    [stairs] tenement_1 up 446,41,172: stuck before point 2 of 5 (448.5,43.0,172.5) at 447.87,42.20,172.50
+    [stairs] tenement_1 down 446,41,172: stuck before point 4 of 5 (447.5,42.0,172.5) at 448.30,42.63,172.50
+    [stairs] tenement_1 up 444,45,174: stuck before point 2 of 5 (444.5,47.0,172.5) at 444.50,46.00,173.30
+    [stairs] tenement_1 down 444,45,174: stuck before point 4 of 5 (444.5,46.0,173.5) at 444.50,46.83,172.70
+    [stairs] tenement_2 up 424,37,151: stuck before point 2 of 5 (426.5,39.0,151.5) at 425.87,38.20,151.50
+    [stairs] tenement_2 down 424,37,151: stuck before point 4 of 5 (425.5,38.0,151.5) at 426.31,38.63,151.50
+    [stairs] tenement_2 up 421,41,151: stuck before point 2 of 5 (423.5,43.0,151.5) at 422.87,42.20,151.50
+    [stairs] tenement_2 down 421,41,151: stuck before point 4 of 5 (422.5,42.0,151.5) at 423.30,42.63,151.50
+    [stairs] red_moon_inn up 535,37,199: stuck before point 2 of 5 (533.5,39.0,199.5) at 534.13,38.20,199.50
+    [stairs] red_moon_inn down 535,37,199: stuck before point 4 of 5 (534.5,38.0,199.5) at 533.70,38.63,199.50
+    [stairs] red_moon_inn up 538,41,199: stuck before point 2 of 5 (536.5,43.0,199.5) at 537.13,42.20,199.50
+    [stairs] red_moon_inn down 538,41,199: stuck before point 4 of 5 (537.5,42.0,199.5) at 536.70,42.63,199.50
+    [stairs] market_flats up 484,36,114: stuck before point 2 of 5 (484.5,38.0,116.5) at 484.50,37.20,115.87
+    [stairs] market_flats down 484,36,114: stuck before point 4 of 5 (484.5,37.0,115.5) at 484.50,37.63,116.31
+    [stairs] market_flats up 484,40,111: stuck before point 2 of 5 (484.5,42.0,113.5) at 484.50,41.20,112.87
+    [stairs] market_flats down 484,40,111: stuck before point 4 of 5 (484.5,41.0,112.5) at 484.50,41.63,113.30
+    [stairs] customs_house up 495,36,57: stuck before point 2 of 5 (493.5,38.0,57.5) at 494.13,37.20,57.50
+    [stairs] customs_house down 495,36,57: stuck before point 4 of 5 (494.5,37.0,57.5) at 493.69,37.63,57.50
+    [stairs] harbor_beacon up 450,34,32: stuck before point 2 of 7 (450.5,36.0,30.5) at 450.50,35.00,31.30
+    [stairs] harbor_beacon down 450,34,32: stuck before point 4 of 7 (449.5,37.0,30.5) at 448.70,37.83,30.50
+    [stairs] harbor_tenement up 465,34,39: stuck before point 2 of 5 (463.5,36.0,39.5) at 464.13,35.20,39.50
+    [stairs] harbor_tenement down 465,34,39: stuck before point 4 of 5 (464.5,35.0,39.5) at 463.69,35.63,39.50
+    [stairs] harbor_tenement up 468,38,39: stuck before point 2 of 5 (466.5,40.0,39.5) at 467.13,39.20,39.50
+    [stairs] harbor_tenement down 468,38,39: stuck before point 4 of 5 (467.5,39.0,39.5) at 466.70,39.63,39.50
+    [stairs] net_loft up 482,36,63: stuck before point 2 of 5 (484.5,38.0,63.5) at 483.87,37.20,63.50
+    [stairs] net_loft down 482,36,63: stuck before point 4 of 5 (483.5,37.0,63.5) at 484.31,37.63,63.50
+    [stairs] severian_church up 875,34,50: stuck before point 3 of 7 (872.5,37.0,50.5) at 873.30,36.00,50.50
+    [stairs] severian_church down 875,34,50: stuck before point 4 of 7 (872.5,37.0,50.5) at 872.50,37.63,51.31
+    [stairs] severian_church up 876,40,51: stuck before point 2 of 7 (876.5,42.0,49.5) at 876.50,41.00,50.30
+    [stairs] severian_church down 876,40,51: stuck before point 4 of 7 (875.5,43.0,49.5) at 874.70,43.63,49.50
+    [stairs] severian_church up 874,46,53: stuck before point 2 of 7 (876.5,48.0,53.5) at 875.70,47.00,53.50
+    [stairs] severian_church down 874,46,53: stuck before point 4 of 7 (876.5,49.0,52.5) at 876.50,49.63,51.69
+    [stairs] loggers_rest up 178,38,125: stuck before point 2 of 5 (180.5,40.0,125.5) at 179.87,39.20,125.50
+    [stairs] loggers_rest down 178,38,125: stuck before point 4 of 5 (179.5,39.0,125.5) at 180.31,39.63,125.50
+    [stairs] vineyard_farmhouse up 218,40,285: stuck before point 2 of 5 (218.5,42.0,287.5) at 218.50,41.20,286.87
+    [stairs] vineyard_farmhouse down 218,40,285: stuck before point 4 of 5 (218.5,41.0,286.5) at 218.50,41.63,287.31
+    [stairs] camelot_keep up 819,66,359: stuck before point 3 of 6 (816.5,69.0,359.5) at 817.13,68.20,359.50
+    [stairs] camelot_keep down 819,66,359: stuck before point 4 of 6 (817.5,68.0,359.5) at 816.70,68.63,359.50
+    [stairs] camelot_keep up 811,71,359: stuck before point 3 of 6 (808.5,74.0,359.5) at 809.13,73.20,359.50
+    [stairs] camelot_keep down 811,71,359: stuck before point 4 of 6 (809.5,73.0,359.5) at 808.70,73.63,359.50
+    [stairs] sinclair_ward up 792,61,382: stuck before point 2 of 5 (790.5,63.0,382.5) at 791.13,62.20,382.50
+    [stairs] sinclair_ward down 792,61,382: stuck before point 4 of 5 (791.5,62.0,382.5) at 790.70,62.63,382.50
+    [stairs] unlit_lantern up 585,52,507: stuck before point 2 of 7 (587.5,54.0,507.5) at 586.70,53.00,507.50
+    [stairs] unlit_lantern down 585,52,507: stuck before point 4 of 7 (587.5,55.0,506.5) at 587.50,55.63,505.70
+    [stairs] unlit_lantern up 583,58,504: stuck before point 4 of 7 (583.5,62.0,508.5) at 583.50,61.00,507.70
+    [stairs] unlit_lantern down 583,58,504: stuck before point 4 of 7 (583.5,61.0,507.5) at 583.50,61.83,508.30
+    [stairs] unlit_lantern up 584,64,505: stuck before point 4 of 7 (588.5,68.0,505.5) at 587.70,67.00,505.50
+    [stairs] unlit_lantern down 584,64,505: stuck before point 4 of 7 (587.5,67.0,505.5) at 588.30,67.83,505.50
+    [stairs] unlit_lantern up 586,70,504: stuck before point 3 of 7 (586.5,73.0,507.5) at 586.50,72.00,506.70
+    [stairs] unlit_lantern down 586,70,504: stuck before point 4 of 7 (586.5,73.0,507.5) at 587.30,73.83,507.50
+    [stairs] unlit_lantern up 583,76,506: stuck before point 2 of 7 (585.5,78.0,506.5) at 584.70,77.00,506.50
+    [stairs] unlit_lantern down 583,76,506: stuck before point 4 of 7 (585.5,79.0,507.5) at 585.50,79.83,508.30
+    [stairs] unlit_lantern up 587,82,503: stuck before point 4 of 7 (587.5,86.0,507.5) at 587.50,85.00,506.70
+    [stairs] unlit_lantern down 587,82,503: stuck before point 4 of 7 (587.5,85.0,506.5) at 587.50,85.83,507.30
+    [stairs] loxford_houses_6 up 150,40,866: stuck before point 2 of 5 (150.5,42.0,868.5) at 150.50,41.20,867.87
+    [stairs] loxford_houses_6 down 150,40,866: stuck before point 4 of 5 (150.5,41.0,867.5) at 150.50,41.63,868.30
+    [stairs] loxford_houses_7 up 167,40,858: stuck before point 2 of 5 (167.5,42.0,856.5) at 167.50,41.20,857.13
+    [stairs] loxford_houses_7 down 167,40,858: stuck before point 4 of 5 (167.5,41.0,857.5) at 167.50,41.63,856.70
+    [stairs] loxford_houses_8 up 145,40,858: stuck before point 2 of 5 (145.5,42.0,860.5) at 145.50,41.20,859.87
+    [stairs] loxford_houses_8 down 145,40,858: stuck before point 4 of 5 (145.5,41.0,859.5) at 145.50,41.63,860.30
+    [stairs] loxford_houses_10 up 160,39,844: stuck before point 2 of 5 (160.5,41.0,842.5) at 160.50,40.20,843.13
+    [stairs] loxford_houses_10 down 160,39,844: stuck before point 4 of 5 (160.5,40.0,843.5) at 160.50,40.63,842.70
+    [stairs] loxford_houses_12 up 155,39,829: stuck before point 2 of 5 (155.5,41.0,827.5) at 155.50,40.20,828.13
+    [stairs] loxford_houses_12 down 155,39,829: stuck before point 4 of 5 (155.5,40.0,828.5) at 155.50,40.63,827.70
+    [stairs] harlette_cottages_0 up 142,40,795: stuck before point 2 of 5 (142.5,42.0,793.5) at 142.50,41.20,794.13
+    [stairs] harlette_cottages_0 down 142,40,795: stuck before point 4 of 5 (142.5,41.0,794.5) at 142.50,41.63,793.70
+    [stairs] harlette_cottages_1 up 124,41,792: stuck before point 2 of 5 (124.5,43.0,794.5) at 124.50,42.20,793.87
+    [stairs] harlette_cottages_1 down 124,41,792: stuck before point 4 of 5 (124.5,42.0,793.5) at 124.50,42.63,794.30
+    [stairs] harlette_cottages_2 up 119,41,784: stuck before point 2 of 5 (119.5,43.0,786.5) at 119.50,42.20,785.87
+    [stairs] harlette_cottages_2 down 119,41,784: stuck before point 4 of 5 (119.5,42.0,785.5) at 119.50,42.63,786.30
+    [stairs] harlette_cottages_3 up 115,41,776: stuck before point 2 of 5 (115.5,43.0,778.5) at 115.50,42.20,777.87
+    [stairs] harlette_cottages_3 down 115,41,776: stuck before point 4 of 5 (115.5,42.0,777.5) at 115.50,42.63,778.30
+    [stairs] harlette_cottages_6 up 119,42,722: stuck before point 2 of 5 (119.5,44.0,724.5) at 119.50,43.20,723.87
+    [stairs] harlette_cottages_6 down 119,42,722: stuck before point 4 of 5 (119.5,43.0,723.5) at 119.50,43.63,724.30
+    [stairs] valgard_homes_1 up 208,57,605: stuck before point 2 of 5 (208.5,59.0,603.5) at 208.50,58.20,604.13
+    [stairs] valgard_homes_1 down 208,57,605: stuck before point 4 of 5 (208.5,58.0,604.5) at 208.50,58.63,603.70
+    [stairs] valgard_homes_3 up 202,60,591: stuck before point 2 of 5 (202.5,62.0,589.5) at 202.50,61.20,590.13
+    [stairs] valgard_homes_3 down 202,60,591: stuck before point 4 of 5 (202.5,61.0,590.5) at 202.50,61.63,589.70
+    [stairs] valgard_homes_4 up 183,60,598: stuck before point 2 of 5 (185.5,62.0,598.5) at 184.87,61.20,598.50
+    [stairs] valgard_homes_4 down 183,60,598: stuck before point 4 of 5 (184.5,61.0,598.5) at 185.31,61.63,598.50
+    [stairs] valgard_homes_5 up 196,62,579: stuck before point 2 of 5 (194.5,64.0,579.5) at 195.13,63.20,579.50
+    [stairs] valgard_homes_5 down 196,62,579: stuck before point 4 of 5 (195.5,63.0,579.5) at 194.70,63.63,579.50
+    [stairs] valgard_homes_11 up 208,53,644: stuck before point 2 of 5 (210.5,55.0,644.5) at 209.87,54.20,644.50
+    [stairs] valgard_homes_11 down 208,53,644: stuck before point 4 of 5 (209.5,54.0,644.5) at 210.31,54.63,644.50
+    [stairs] valgard_homes_14 up 229,53,636: stuck before point 2 of 5 (231.5,55.0,636.5) at 230.87,54.20,636.50
+    [stairs] valgard_homes_14 down 229,53,636: stuck before point 4 of 5 (230.5,54.0,636.5) at 231.31,54.63,636.50
+    [stairs] valgard_homes_17 up 233,55,607: stuck before point 2 of 5 (233.5,57.0,609.5) at 233.50,56.20,608.87
+    [stairs] valgard_homes_17 down 233,55,607: stuck before point 4 of 5 (233.5,56.0,608.5) at 233.50,56.63,609.30
+    [stairs] valgard_homes_18 up 213,56,609: stuck before point 2 of 5 (213.5,58.0,611.5) at 213.50,57.20,610.87
+    [stairs] valgard_homes_18 down 213,56,609: stuck before point 4 of 5 (213.5,57.0,610.5) at 213.50,57.63,611.30
+    [stairs] valgard_homes_19 up 214,57,601: stuck before point 2 of 5 (214.5,59.0,603.5) at 214.50,58.20,602.87
+    [stairs] valgard_homes_19 down 214,57,601: stuck before point 4 of 5 (214.5,58.0,602.5) at 214.50,58.63,603.30
+    [stairs] valgard_homes_21 up 215,57,593: stuck before point 2 of 5 (215.5,59.0,595.5) at 215.50,58.20,594.87
+    [stairs] valgard_homes_21 down 215,57,593: stuck before point 4 of 5 (215.5,58.0,594.5) at 215.50,58.63,595.30
+    [stairs] valgard_homes_22 up 237,57,597: stuck before point 2 of 5 (237.5,59.0,595.5) at 237.50,58.20,596.13
+    [stairs] valgard_homes_22 down 237,57,597: stuck before point 4 of 5 (237.5,58.0,596.5) at 237.50,58.63,595.70
+    [stairs] valgard_homes_23 up 218,58,584: stuck before point 2 of 5 (218.5,60.0,586.5) at 218.50,59.20,585.87
+    [stairs] valgard_homes_23 down 218,58,584: stuck before point 4 of 5 (218.5,59.0,585.5) at 218.50,59.63,586.30
+    [stairs] valgard_homes_25 up 181,53,669: stuck before point 2 of 5 (183.5,55.0,669.5) at 182.87,54.20,669.50
+    [stairs] valgard_homes_25 down 181,53,669: stuck before point 4 of 5 (182.5,54.0,669.5) at 183.31,54.63,669.50
+    [stairs] valgard_homes_26 up 190,53,669: stuck before point 2 of 5 (192.5,55.0,669.5) at 191.87,54.20,669.50
+    [stairs] valgard_homes_26 down 190,53,669: stuck before point 4 of 5 (191.5,54.0,669.5) at 192.31,54.63,669.50
+    [stairs] valgard_homes_27 up 198,53,670: stuck before point 2 of 5 (200.5,55.0,670.5) at 199.87,54.20,670.50
+    [stairs] valgard_homes_27 down 198,53,670: stuck before point 4 of 5 (199.5,54.0,670.5) at 200.31,54.63,670.50
+    [stairs] valgard_homes_29 up 230,54,649: stuck before point 2 of 5 (228.5,56.0,649.5) at 229.13,55.20,649.50
+    [stairs] valgard_homes_29 down 230,54,649: stuck before point 4 of 5 (229.5,55.0,649.5) at 228.70,55.63,649.50
+    [stairs] valgard_homes_30 up 225,54,670: stuck before point 2 of 5 (227.5,56.0,670.5) at 226.87,55.20,670.50
+    [stairs] valgard_homes_30 down 225,54,670: stuck before point 4 of 5 (226.5,55.0,670.5) at 227.31,55.63,670.50
+    [stairs] valgard_homes_32 up 115,54,646: stuck before point 2 of 5 (117.5,56.0,646.5) at 116.87,55.20,646.50
+    [stairs] valgard_homes_32 down 115,54,646: stuck before point 4 of 5 (116.5,55.0,646.5) at 117.31,55.63,646.50
+    [stairs] valgard_homes_33 up 133,54,634: stuck before point 2 of 5 (133.5,56.0,632.5) at 133.50,55.20,633.13
+    [stairs] valgard_homes_33 down 133,54,634: stuck before point 4 of 5 (133.5,55.0,633.5) at 133.50,55.63,632.70
+    [stairs] valgard_homes_35 up 129,54,625: stuck before point 2 of 5 (129.5,56.0,623.5) at 129.50,55.20,624.13
+    [stairs] valgard_homes_35 down 129,54,625: stuck before point 4 of 5 (129.5,55.0,624.5) at 129.50,55.63,623.70
+    [stairs] valgard_homes_37 up 129,56,609: stuck before point 2 of 5 (129.5,58.0,607.5) at 129.50,57.20,608.13
+    [stairs] valgard_homes_37 down 129,56,609: stuck before point 4 of 5 (129.5,57.0,608.5) at 129.50,57.63,607.70
+    [stairs] valgard_homes_39 up 115,58,586: stuck before point 2 of 5 (115.5,60.0,588.5) at 115.50,59.20,587.87
+    [stairs] valgard_homes_39 down 115,58,586: stuck before point 4 of 5 (115.5,59.0,587.5) at 115.50,59.63,588.30
+    [stairs] azharad_homes_0 up 787,37,888: stuck before point 2 of 5 (785.5,39.0,888.5) at 786.13,38.20,888.50
+    [stairs] azharad_homes_0 down 787,37,888: stuck before point 4 of 5 (786.5,38.0,888.5) at 785.70,38.63,888.50
+    [stairs] azharad_homes_1 up 783,37,906: stuck before point 2 of 5 (785.5,39.0,906.5) at 784.87,38.20,906.50
+    [stairs] azharad_homes_1 down 783,37,906: stuck before point 4 of 5 (784.5,38.0,906.5) at 785.30,38.63,906.50
+    [stairs] azharad_homes_2 up 813,37,888: stuck before point 2 of 5 (813.5,39.0,886.5) at 813.50,38.20,887.13
+    [stairs] azharad_homes_2 down 813,37,888: stuck before point 4 of 5 (813.5,38.0,887.5) at 813.50,38.63,886.70
+    [stairs] azharad_homes_3 up 817,37,885: stuck before point 2 of 5 (817.5,39.0,887.5) at 817.50,38.20,886.87
+    [stairs] azharad_homes_3 down 817,37,885: stuck before point 4 of 5 (817.5,38.0,886.5) at 817.50,38.63,887.30
+    [stairs] azharad_homes_5 up 835,37,900: stuck before point 2 of 5 (837.5,39.0,900.5) at 836.87,38.20,900.50
+    [stairs] azharad_homes_5 down 835,37,900: stuck before point 4 of 5 (836.5,38.0,900.5) at 837.30,38.63,900.50
+    [stairs] azharad_homes_6 up 843,37,900: stuck before point 2 of 5 (845.5,39.0,900.5) at 844.87,38.20,900.50
+    [stairs] azharad_homes_6 down 843,37,900: stuck before point 4 of 5 (844.5,38.0,900.5) at 845.30,38.63,900.50
+    [stairs] azharad_homes_7 up 853,37,880: stuck before point 2 of 5 (851.5,39.0,880.5) at 852.13,38.20,880.50
+    [stairs] azharad_homes_7 down 853,37,880: stuck before point 4 of 5 (852.5,38.0,880.5) at 851.70,38.63,880.50
+    [stairs] azharad_homes_8 up 855,37,871: stuck before point 2 of 5 (855.5,39.0,873.5) at 855.50,38.20,872.87
+    [stairs] azharad_homes_8 down 855,37,871: stuck before point 4 of 5 (855.5,38.0,872.5) at 855.50,38.63,873.30
+    [stairs] azharad_homes_9 up 877,37,865: stuck before point 2 of 5 (877.5,39.0,863.5) at 877.50,38.20,864.13
+    [stairs] azharad_homes_9 down 877,37,865: stuck before point 4 of 5 (877.5,38.0,864.5) at 877.50,38.63,863.70
+    [stairs] azharad_homes_10 up 878,37,857: stuck before point 2 of 5 (878.5,39.0,855.5) at 878.50,38.20,856.13
+    [stairs] azharad_homes_10 down 878,37,857: stuck before point 4 of 5 (878.5,38.0,856.5) at 878.50,38.63,855.70
+    [stairs] azharad_homes_11 up 861,37,852: stuck before point 2 of 5 (863.5,39.0,852.5) at 862.87,38.20,852.50
+    [stairs] azharad_homes_11 down 861,37,852: stuck before point 4 of 5 (862.5,38.0,852.5) at 863.30,38.63,852.50
+    [stairs] azharad_homes_12 up 880,37,850: stuck before point 2 of 5 (880.5,39.0,848.5) at 880.50,38.20,849.13
+    [stairs] azharad_homes_12 down 880,37,850: stuck before point 4 of 5 (880.5,38.0,849.5) at 880.50,38.63,848.70
+    [stairs] azharad_homes_13 up 866,37,835: stuck before point 2 of 5 (864.5,39.0,835.5) at 865.13,38.20,835.50
+    [stairs] azharad_homes_13 down 866,37,835: stuck before point 4 of 5 (865.5,38.0,835.5) at 864.70,38.63,835.50
+    [stairs] azharad_homes_14 up 882,37,841: stuck before point 2 of 5 (882.5,39.0,839.5) at 882.50,38.20,840.13
+    [stairs] azharad_homes_14 down 882,37,841: stuck before point 4 of 5 (882.5,38.0,840.5) at 882.50,38.63,839.70
+    [stairs] azharad_homes_15 up 867,37,828: stuck before point 2 of 5 (867.5,39.0,830.5) at 867.50,38.20,829.87
+    [stairs] azharad_homes_15 down 867,37,828: stuck before point 4 of 5 (867.5,38.0,829.5) at 867.50,38.63,830.30
+    [stairs] azharad_homes_16 up 867,37,821: stuck before point 2 of 5 (867.5,39.0,823.5) at 867.50,38.20,822.87
+    [stairs] azharad_homes_16 down 867,37,821: stuck before point 4 of 5 (867.5,38.0,822.5) at 867.50,38.63,823.30
+    [stairs] azharad_homes_17 up 899,37,814: stuck before point 2 of 5 (897.5,39.0,814.5) at 898.13,38.20,814.50
+    [stairs] azharad_homes_17 down 899,37,814: stuck before point 4 of 5 (898.5,38.0,814.5) at 897.70,38.63,814.50
+    [stairs] azharad_homes_18 up 892,37,797: stuck before point 2 of 5 (892.5,39.0,799.5) at 892.50,38.20,798.87
+    [stairs] azharad_homes_18 down 892,37,797: stuck before point 4 of 5 (892.5,38.0,798.5) at 892.50,38.63,799.30
+    [stairs] azharad_homes_19 up 818,37,878: stuck before point 2 of 5 (818.5,39.0,880.5) at 818.50,38.20,879.87
+    [stairs] azharad_homes_19 down 818,37,878: stuck before point 4 of 5 (818.5,38.0,879.5) at 818.50,38.63,880.30
+    [stairs] azharad_homes_20 up 824,37,860: stuck before point 2 of 5 (822.5,39.0,860.5) at 823.13,38.20,860.50
+    [stairs] azharad_homes_20 down 824,37,860: stuck before point 4 of 5 (823.5,38.0,860.5) at 822.70,38.63,860.50
+    [stairs] azharad_homes_21 up 838,37,870: stuck before point 2 of 5 (838.5,39.0,868.5) at 838.50,38.20,869.13
+    [stairs] azharad_homes_21 down 838,37,870: stuck before point 4 of 5 (838.5,38.0,869.5) at 838.50,38.63,868.70
+    [stairs] azharad_homes_22 up 842,37,862: stuck before point 2 of 5 (842.5,39.0,860.5) at 842.50,38.20,861.13
+    [stairs] azharad_homes_22 down 842,37,862: stuck before point 4 of 5 (842.5,38.0,861.5) at 842.50,38.63,860.70
+    [stairs] azharad_homes_23 up 832,37,844: stuck before point 2 of 5 (832.5,39.0,846.5) at 832.50,38.20,845.87
+    [stairs] azharad_homes_23 down 832,37,844: stuck before point 4 of 5 (832.5,38.0,845.5) at 832.50,38.63,846.30
+    [stairs] azharad_homes_25 up 849,37,833: stuck before point 2 of 5 (847.5,39.0,833.5) at 848.13,38.20,833.50
+    [stairs] azharad_homes_25 down 849,37,833: stuck before point 4 of 5 (848.5,38.0,833.5) at 847.70,38.63,833.50
+    [stairs] azharad_homes_27 up 899,37,832: stuck before point 2 of 5 (901.5,39.0,832.5) at 900.87,38.20,832.50
+    [stairs] azharad_homes_27 down 899,37,832: stuck before point 4 of 5 (900.5,38.0,832.5) at 901.30,38.63,832.50
+    [stairs] azharad_homes_29 up 922,37,819: stuck before point 2 of 5 (920.5,39.0,819.5) at 921.13,38.20,819.50
+    [stairs] azharad_homes_29 down 922,37,819: stuck before point 4 of 5 (921.5,38.0,819.5) at 920.70,38.63,819.50
+    [stairs] azharad_homes_31 up 930,37,823: stuck before point 2 of 5 (928.5,39.0,823.5) at 929.13,38.20,823.50
+    [stairs] azharad_homes_31 down 930,37,823: stuck before point 4 of 5 (929.5,38.0,823.5) at 928.70,38.63,823.50
+    [stairs] azharad_homes_32 up 933,37,842: stuck before point 2 of 5 (933.5,39.0,840.5) at 933.50,38.20,841.13
+    [stairs] azharad_homes_32 down 933,37,842: stuck before point 4 of 5 (933.5,38.0,841.5) at 933.50,38.63,840.70
+    [stairs] azharad_homes_33 up 938,37,822: stuck before point 2 of 5 (936.5,39.0,822.5) at 937.13,38.20,822.50
+    [stairs] azharad_homes_33 down 938,37,822: stuck before point 4 of 5 (937.5,38.0,822.5) at 936.70,38.63,822.50
+    [stairs] azharad_homes_36 up 947,37,846: stuck before point 2 of 5 (949.5,39.0,846.5) at 948.87,38.20,846.50
+    [stairs] azharad_homes_36 down 947,37,846: stuck before point 4 of 5 (948.5,38.0,846.5) at 949.30,38.63,846.50
+    [stairs] azharad_homes_37 up 963,37,830: stuck before point 2 of 5 (961.5,39.0,830.5) at 962.13,38.20,830.50
+    [stairs] azharad_homes_37 down 963,37,830: stuck before point 4 of 5 (962.5,38.0,830.5) at 961.70,38.63,830.50
+    [stairs] azharad_homes_38 up 966,37,841: stuck before point 2 of 5 (966.5,39.0,839.5) at 966.50,38.20,840.13
+    [stairs] azharad_homes_38 down 966,37,841: stuck before point 4 of 5 (966.5,38.0,840.5) at 966.50,38.63,839.70
+    [stairs] azharad_homes_40 up 969,37,849: stuck before point 2 of 5 (969.5,39.0,847.5) at 969.50,38.20,848.13
+    [stairs] azharad_homes_40 down 969,37,849: stuck before point 4 of 5 (969.5,38.0,848.5) at 969.50,38.63,847.70
+    [stairs] azharad_homes_42 up 954,37,858: stuck before point 2 of 5 (954.5,39.0,860.5) at 954.50,38.20,859.87
+    [stairs] azharad_homes_42 down 954,37,858: stuck before point 4 of 5 (954.5,38.0,859.5) at 954.50,38.63,860.30
+    [stairs] azharad_homes_44 up 953,37,865: stuck before point 2 of 5 (953.5,39.0,867.5) at 953.50,38.20,866.87
+    [stairs] azharad_homes_44 down 953,37,865: stuck before point 4 of 5 (953.5,38.0,866.5) at 953.50,38.63,867.30
+    [stairs] azharad_homes_46 up 970,38,879: stuck before point 2 of 5 (970.5,40.0,877.5) at 970.50,39.20,878.13
+    [stairs] azharad_homes_46 down 970,38,879: stuck before point 4 of 5 (970.5,39.0,878.5) at 970.50,39.63,877.70
+    [stairs] azharad_homes_49 up 971,37,893: stuck before point 2 of 5 (971.5,39.0,891.5) at 971.50,38.20,892.13
+    [stairs] azharad_homes_49 down 971,37,893: stuck before point 4 of 5 (971.5,38.0,892.5) at 971.50,38.63,891.70
+    [stairs] azharad_homes_50 up 969,37,903: stuck before point 2 of 5 (969.5,39.0,901.5) at 969.50,38.20,902.13
+    [stairs] azharad_homes_50 down 969,37,903: stuck before point 4 of 5 (969.5,38.0,902.5) at 969.50,38.63,901.70
+    [stairs] azharad_homes_51 up 968,37,910: stuck before point 2 of 5 (968.5,39.0,908.5) at 968.50,38.20,909.13
+    [stairs] azharad_homes_51 down 968,37,910: stuck before point 4 of 5 (968.5,38.0,909.5) at 968.50,38.63,908.70
+    [stairs] azharad_homes_52 up 951,37,906: stuck before point 2 of 5 (951.5,39.0,908.5) at 951.50,38.20,907.87
+    [stairs] azharad_homes_52 down 951,37,906: stuck before point 4 of 5 (951.5,38.0,907.5) at 951.50,38.63,908.30
+    [stairs] azharad_homes_55 up 965,37,926: stuck before point 2 of 5 (965.5,39.0,924.5) at 965.50,38.20,925.13
+    [stairs] azharad_homes_55 down 965,37,926: stuck before point 4 of 5 (965.5,38.0,925.5) at 965.50,38.63,924.70
+    [stairs] azharad_homes_57 up 816,37,822: stuck before point 2 of 5 (818.5,39.0,822.5) at 817.87,38.20,822.50
+    [stairs] azharad_homes_57 down 816,37,822: stuck before point 4 of 5 (817.5,38.0,822.5) at 818.30,38.63,822.50
+    [stairs] azharad_homes_58 up 801,37,833: stuck before point 2 of 5 (803.5,39.0,833.5) at 802.87,38.20,833.50
+    [stairs] azharad_homes_58 down 801,37,833: stuck before point 4 of 5 (802.5,38.0,833.5) at 803.30,38.63,833.50
+    [stairs] azharad_homes_61 up 814,37,847: stuck before point 2 of 5 (814.5,39.0,849.5) at 814.50,38.20,848.87
+    [stairs] azharad_homes_61 down 814,37,847: stuck before point 4 of 5 (814.5,38.0,848.5) at 814.50,38.63,849.30
+    [stairs] azharad_homes_63 up 801,37,871: stuck before point 2 of 5 (801.5,39.0,873.5) at 801.50,38.20,872.87
+    [stairs] azharad_homes_63 down 801,37,871: stuck before point 4 of 5 (801.5,38.0,872.5) at 801.50,38.63,873.30
+    [stairs] azharad_homes_64 up 825,37,823: stuck before point 2 of 5 (827.5,39.0,823.5) at 826.87,38.20,823.50
+    [stairs] azharad_homes_64 down 825,37,823: stuck before point 4 of 5 (826.5,38.0,823.5) at 827.30,38.63,823.50
+    [stairs] azharad_homes_66 up 841,37,821: stuck before point 2 of 5 (843.5,39.0,821.5) at 842.87,38.20,821.50
+    [stairs] azharad_homes_66 down 841,37,821: stuck before point 4 of 5 (842.5,38.0,821.5) at 843.30,38.63,821.50
+    [stairs] azharad_homes_67 up 850,37,823: stuck before point 2 of 5 (852.5,39.0,823.5) at 851.87,38.20,823.50
+    [stairs] azharad_homes_67 down 850,37,823: stuck before point 4 of 5 (851.5,38.0,823.5) at 852.30,38.63,823.50
+    [stairs] azharad_homes_68 up 859,37,824: stuck before point 2 of 5 (861.5,39.0,824.5) at 860.87,38.20,824.50
+    [stairs] azharad_homes_68 down 859,37,824: stuck before point 4 of 5 (860.5,38.0,824.5) at 861.30,38.63,824.50
+    [stairs] azharad_homes_69 up 870,37,928: stuck before point 2 of 5 (870.5,39.0,926.5) at 870.50,38.20,927.13
+    [stairs] azharad_homes_69 down 870,37,928: stuck before point 4 of 5 (870.5,38.0,927.5) at 870.50,38.63,926.70
+    [stairs] azharad_homes_70 up 878,37,922: stuck before point 2 of 5 (876.5,39.0,922.5) at 877.13,38.20,922.50
+    [stairs] azharad_homes_70 down 878,37,922: stuck before point 4 of 5 (877.5,38.0,922.5) at 876.70,38.63,922.50
+    [stairs] azharad_homes_74 up 893,37,920: stuck before point 2 of 5 (891.5,39.0,920.5) at 892.13,38.20,920.50
+    [stairs] azharad_homes_74 down 893,37,920: stuck before point 4 of 5 (892.5,38.0,920.5) at 891.70,38.63,920.50
+    [stairs] azharad_homes_75 up 900,37,918: stuck before point 2 of 5 (898.5,39.0,918.5) at 899.13,38.20,918.50
+    [stairs] azharad_homes_75 down 900,37,918: stuck before point 4 of 5 (899.5,38.0,918.5) at 898.70,38.63,918.50
+    [stairs] azharad_homes_76 up 902,37,935: stuck before point 2 of 5 (904.5,39.0,935.5) at 903.87,38.20,935.50
+    [stairs] azharad_homes_76 down 902,37,935: stuck before point 4 of 5 (903.5,38.0,935.5) at 904.30,38.63,935.50
+    [stairs] azharad_homes_77 up 908,37,916: stuck before point 2 of 5 (906.5,39.0,916.5) at 907.13,38.20,916.50
+    [stairs] azharad_homes_77 down 908,37,916: stuck before point 4 of 5 (907.5,38.0,916.5) at 906.70,38.63,916.50
+    [stairs] azharad_homes_78 up 909,37,934: stuck before point 2 of 5 (911.5,39.0,934.5) at 910.87,38.20,934.50
+    [stairs] azharad_homes_78 down 909,37,934: stuck before point 4 of 5 (910.5,38.0,934.5) at 911.30,38.63,934.50
+    [stairs] azharad_homes_79 up 917,37,933: stuck before point 2 of 5 (919.5,39.0,933.5) at 918.87,38.20,933.50
+    [stairs] azharad_homes_79 down 917,37,933: stuck before point 4 of 5 (918.5,38.0,933.5) at 919.30,38.63,933.50
+    [stairs] azharad_homes_80 up 922,37,921: stuck before point 2 of 5 (922.5,39.0,919.5) at 922.50,38.20,920.13
+    [stairs] azharad_homes_80 down 922,37,921: stuck before point 4 of 5 (922.5,38.0,920.5) at 922.50,38.63,919.70
+    [stairs] azharad_homes_84 up 936,37,915: stuck before point 2 of 5 (934.5,39.0,915.5) at 935.13,38.20,915.50
+    [stairs] azharad_homes_84 down 936,37,915: stuck before point 4 of 5 (935.5,38.0,915.5) at 934.70,38.63,915.50
+    [stairs] azharad_homes_86 up 943,37,915: stuck before point 2 of 5 (941.5,39.0,915.5) at 942.13,38.20,915.50
+    [stairs] azharad_homes_86 down 943,37,915: stuck before point 4 of 5 (942.5,38.0,915.5) at 941.70,38.63,915.50
+    [stairs] azharad_homes_87 up 945,37,935: stuck before point 2 of 5 (947.5,39.0,935.5) at 946.87,38.20,935.50
+    [stairs] azharad_homes_87 down 945,37,935: stuck before point 4 of 5 (946.5,38.0,935.5) at 947.30,38.63,935.50
+    [stairs] azharad_homes_88 up 952,37,933: stuck before point 2 of 5 (954.5,39.0,933.5) at 953.87,38.20,933.50
+    [stairs] azharad_homes_88 down 952,37,933: stuck before point 4 of 5 (953.5,38.0,933.5) at 954.30,38.63,933.50
+    [stairs] azharad_homes_89 up 826,37,910: stuck before point 2 of 5 (826.5,39.0,908.5) at 826.50,38.20,909.13
+    [stairs] azharad_homes_89 down 826,37,910: stuck before point 4 of 5 (826.5,38.0,909.5) at 826.50,38.63,908.70
+    [stairs] azharad_south_quarter_0 up 868,37,950: stuck before point 2 of 5 (868.5,39.0,952.5) at 868.50,38.20,951.87
+    [stairs] azharad_south_quarter_0 down 868,37,950: stuck before point 4 of 5 (868.5,38.0,951.5) at 868.50,38.63,952.30
+    [stairs] azharad_south_quarter_1 up 875,37,956: stuck before point 2 of 5 (875.5,39.0,958.5) at 875.50,38.20,957.87
+    [stairs] azharad_south_quarter_1 down 875,37,956: stuck before point 4 of 5 (875.5,38.0,957.5) at 875.50,38.63,958.30
+    [stairs] azharad_south_quarter_6 up 903,37,950: stuck before point 2 of 5 (901.5,39.0,950.5) at 902.13,38.20,950.50
+    [stairs] azharad_south_quarter_6 down 903,37,950: stuck before point 4 of 5 (902.5,38.0,950.5) at 901.70,38.63,950.50
+    [stairs] azharad_south_quarter_7 up 902,37,965: stuck before point 2 of 5 (904.5,39.0,965.5) at 903.87,38.20,965.50
+    [stairs] azharad_south_quarter_7 down 902,37,965: stuck before point 4 of 5 (903.5,38.0,965.5) at 904.30,38.63,965.50
+    [stairs] severia_homes_0 up 412,37,241: stuck before point 2 of 6 (414.5,39.0,241.5) at 413.70,38.00,241.50
+    [stairs] severia_homes_0 down 412,37,241: stuck before point 4 of 6 (414.5,39.0,241.5) at 414.50,39.63,240.70
+    [stairs] severia_homes_1 up 399,37,216: stuck before point 2 of 5 (399.5,39.0,218.5) at 399.50,38.20,217.87
+    [stairs] severia_homes_1 down 399,37,216: stuck before point 4 of 5 (399.5,38.0,217.5) at 399.50,38.63,218.31
+    [stairs] severia_homes_1 up 402,41,216: stuck before point 2 of 5 (400.5,43.0,216.5) at 401.13,42.20,216.50
+    [stairs] severia_homes_1 down 402,41,216: stuck before point 4 of 5 (401.5,42.0,216.5) at 400.70,42.63,216.50
+    [stairs] severia_homes_2 up 421,37,222: stuck before point 2 of 6 (423.5,39.0,222.5) at 422.70,38.00,222.50
+    [stairs] severia_homes_2 down 421,37,222: stuck before point 4 of 6 (423.5,39.0,222.5) at 423.50,39.63,221.70
+    [stairs] severia_homes_3 up 417,37,197: stuck before point 2 of 5 (417.5,39.0,195.5) at 417.50,38.20,196.13
+    [stairs] severia_homes_3 down 417,37,197: stuck before point 4 of 5 (417.5,38.0,196.5) at 417.50,38.63,195.70
+    [stairs] severia_homes_4 up 416,37,186: stuck before point 2 of 5 (416.5,39.0,188.5) at 416.50,38.20,187.87
+    [stairs] severia_homes_4 down 416,37,186: stuck before point 4 of 5 (416.5,38.0,187.5) at 416.50,38.63,188.31
+    [stairs] severia_homes_4 up 418,41,185: stuck before point 2 of 5 (416.5,43.0,185.5) at 417.30,42.00,185.50
+    [stairs] severia_homes_4 down 418,41,185: stuck before point 4 of 5 (417.5,42.0,185.5) at 416.70,42.83,185.50
+    [stairs] severia_homes_5 up 420,37,177: stuck before point 2 of 6 (418.5,39.0,177.5) at 419.30,38.00,177.50
+    [stairs] severia_homes_5 down 420,37,177: stuck before point 4 of 6 (418.5,39.0,177.5) at 418.50,39.63,178.30
+    [stairs] severia_homes_6 up 426,37,169: stuck before point 2 of 6 (424.5,39.0,169.5) at 425.30,38.00,169.50
+    [stairs] severia_homes_6 down 426,37,169: stuck before point 4 of 6 (424.5,39.0,169.5) at 424.50,39.63,170.30
+    [stairs] severia_homes_7 up 437,37,156: stuck before point 2 of 6 (437.5,39.0,154.5) at 437.50,38.00,155.30
+    [stairs] severia_homes_7 down 437,37,156: stuck before point 4 of 6 (437.5,39.0,154.5) at 436.70,39.63,154.50
+    [stairs] severia_homes_8 up 453,36,152: stuck before point 2 of 5 (453.5,38.0,154.5) at 453.50,37.20,153.87
+    [stairs] severia_homes_8 down 453,36,152: stuck before point 4 of 5 (453.5,37.0,153.5) at 453.50,37.63,154.30
+    [stairs] severia_homes_9 up 462,36,168: stuck before point 2 of 5 (464.5,38.0,168.5) at 463.87,37.20,168.50
+    [stairs] severia_homes_9 down 462,36,168: stuck before point 4 of 5 (463.5,37.0,168.5) at 464.30,37.63,168.50
+    [stairs] severia_homes_10 up 480,36,165: stuck before point 2 of 6 (480.5,38.0,167.5) at 480.50,37.00,166.70
+    [stairs] severia_homes_10 down 480,36,165: stuck before point 4 of 6 (480.5,38.0,167.5) at 481.30,38.63,167.50
+    [stairs] severia_homes_11 up 460,36,173: stuck before point 2 of 5 (460.5,38.0,175.5) at 460.50,37.20,174.87
+    [stairs] severia_homes_11 down 460,36,173: stuck before point 4 of 5 (460.5,37.0,174.5) at 460.50,37.63,175.31
+    [stairs] severia_homes_11 up 462,40,172: stuck before point 2 of 5 (460.5,42.0,172.5) at 461.30,41.00,172.50
+    [stairs] severia_homes_11 down 462,40,172: stuck before point 4 of 5 (461.5,41.0,172.5) at 460.70,41.83,172.50
+    [stairs] severia_homes_12 up 472,36,175: stuck before point 2 of 5 (470.5,38.0,175.5) at 471.13,37.20,175.50
+    [stairs] severia_homes_12 down 472,36,175: stuck before point 4 of 5 (471.5,37.0,175.5) at 470.70,37.63,175.50
+    [stairs] severia_homes_13 up 516,37,197: stuck before point 2 of 5 (514.5,39.0,197.5) at 515.13,38.20,197.50
+    [stairs] severia_homes_13 down 516,37,197: stuck before point 4 of 5 (515.5,38.0,197.5) at 514.70,38.63,197.50
+    [stairs] severia_homes_13 up 519,41,197: stuck before point 2 of 5 (517.5,43.0,197.5) at 518.13,42.20,197.50
+    [stairs] severia_homes_13 down 519,41,197: stuck before point 4 of 5 (518.5,42.0,197.5) at 517.70,42.63,197.50
+    [stairs] severia_homes_14 up 513,37,178: stuck before point 2 of 5 (511.5,39.0,178.5) at 512.13,38.20,178.50
+    [stairs] severia_homes_14 down 513,37,178: stuck before point 4 of 5 (512.5,38.0,178.5) at 511.70,38.63,178.50
+    [stairs] severia_homes_15 up 521,37,177: stuck before point 2 of 6 (521.5,39.0,175.5) at 521.50,38.00,176.30
+    [stairs] severia_homes_15 down 521,37,177: stuck before point 4 of 6 (521.5,39.0,175.5) at 520.70,39.63,175.50
+    [stairs] severia_homes_16 up 534,37,173: stuck before point 2 of 5 (532.5,39.0,173.5) at 533.13,38.20,173.50
+    [stairs] severia_homes_16 down 534,37,173: stuck before point 4 of 5 (533.5,38.0,173.5) at 532.70,38.63,173.50
+    [stairs] severia_homes_16 up 535,41,175: stuck before point 2 of 5 (535.5,43.0,173.5) at 535.50,42.00,174.30
+    [stairs] severia_homes_16 down 535,41,175: stuck before point 4 of 5 (535.5,42.0,174.5) at 535.50,42.83,173.70
+    [stairs] severia_homes_17 up 543,37,171: stuck before point 2 of 5 (541.5,39.0,171.5) at 542.13,38.20,171.50
+    [stairs] severia_homes_17 down 543,37,171: stuck before point 4 of 5 (542.5,38.0,171.5) at 541.70,38.63,171.50
+    [stairs] severia_homes_17 up 544,41,173: stuck before point 2 of 5 (544.5,43.0,171.5) at 544.50,42.00,172.30
+    [stairs] severia_homes_17 down 544,41,173: stuck before point 4 of 5 (544.5,42.0,172.5) at 544.50,42.83,171.70
+    [stairs] severia_homes_18 up 556,37,192: stuck before point 2 of 5 (554.5,39.0,192.5) at 555.13,38.20,192.50
+    [stairs] severia_homes_18 down 556,37,192: stuck before point 4 of 5 (555.5,38.0,192.5) at 554.70,38.63,192.50
+    [stairs] severia_homes_18 up 559,41,192: stuck before point 2 of 5 (557.5,43.0,192.5) at 558.13,42.20,192.50
+    [stairs] severia_homes_18 down 559,41,192: stuck before point 4 of 5 (558.5,42.0,192.5) at 557.70,42.63,192.50
+    [stairs] severia_homes_19 up 556,37,169: stuck before point 2 of 5 (554.5,39.0,169.5) at 555.13,38.20,169.50
+    [stairs] severia_homes_19 down 556,37,169: stuck before point 4 of 5 (555.5,38.0,169.5) at 554.70,38.63,169.50
+    [stairs] severia_homes_19 up 557,41,171: stuck before point 2 of 5 (557.5,43.0,169.5) at 557.50,42.00,170.30
+    [stairs] severia_homes_19 down 557,41,171: stuck before point 4 of 5 (557.5,42.0,170.5) at 557.50,42.83,169.70
+    [stairs] severia_homes_20 up 567,37,188: stuck before point 2 of 5 (565.5,39.0,188.5) at 566.13,38.20,188.50
+    [stairs] severia_homes_20 down 567,37,188: stuck before point 4 of 5 (566.5,38.0,188.5) at 565.70,38.63,188.50
+    [stairs] severia_homes_20 up 570,41,188: stuck before point 2 of 5 (568.5,43.0,188.5) at 569.13,42.20,188.50
+    [stairs] severia_homes_20 down 570,41,188: stuck before point 4 of 5 (569.5,42.0,188.5) at 568.70,42.63,188.50
+    [stairs] severia_homes_21 up 565,37,166: stuck before point 2 of 5 (563.5,39.0,166.5) at 564.13,38.20,166.50
+    [stairs] severia_homes_21 down 565,37,166: stuck before point 4 of 5 (564.5,38.0,166.5) at 563.70,38.63,166.50
+    [stairs] severia_homes_21 up 565,41,169: stuck before point 2 of 5 (565.5,43.0,167.5) at 565.50,42.20,168.13
+    [stairs] severia_homes_21 down 565,41,169: stuck before point 4 of 5 (565.5,42.0,168.5) at 565.50,42.63,167.70
+    [stairs] severia_homes_22 up 578,37,186: stuck before point 2 of 5 (576.5,39.0,186.5) at 577.13,38.20,186.50
+    [stairs] severia_homes_22 down 578,37,186: stuck before point 4 of 5 (577.5,38.0,186.5) at 576.70,38.63,186.50
+    [stairs] severia_homes_22 up 581,41,186: stuck before point 2 of 5 (579.5,43.0,186.5) at 580.13,42.20,186.50
+    [stairs] severia_homes_22 down 581,41,186: stuck before point 4 of 5 (580.5,42.0,186.5) at 579.70,42.63,186.50
+    [stairs] severia_homes_23 up 575,37,163: stuck before point 2 of 5 (577.5,39.0,163.5) at 576.87,38.20,163.50
+    [stairs] severia_homes_23 down 575,37,163: stuck before point 4 of 5 (576.5,38.0,163.5) at 577.30,38.63,163.50
+    [stairs] severia_homes_23 up 572,41,163: stuck before point 2 of 5 (574.5,43.0,163.5) at 573.87,42.20,163.50
+    [stairs] severia_homes_23 down 572,41,163: stuck before point 4 of 5 (573.5,42.0,163.5) at 574.30,42.63,163.50
+    [stairs] severia_homes_24 up 598,36,181: stuck before point 2 of 6 (600.5,38.0,181.5) at 599.70,37.00,181.50
+    [stairs] severia_homes_24 down 598,36,181: stuck before point 4 of 6 (600.5,38.0,181.5) at 600.50,38.63,180.70
+    [stairs] severia_homes_25 up 599,36,162: stuck before point 2 of 5 (599.5,38.0,160.5) at 599.50,37.20,161.13
+    [stairs] severia_homes_25 down 599,36,162: stuck before point 4 of 5 (599.5,37.0,161.5) at 599.50,37.63,160.70
+    [stairs] severia_homes_25 up 597,40,163: stuck before point 2 of 5 (599.5,42.0,163.5) at 598.70,41.00,163.50
+    [stairs] severia_homes_25 down 597,40,163: stuck before point 4 of 5 (598.5,41.0,163.5) at 599.30,41.83,163.50
+    [stairs] severia_homes_26 up 605,36,179: stuck before point 2 of 5 (607.5,38.0,179.5) at 606.87,37.20,179.50
+    [stairs] severia_homes_26 down 605,36,179: stuck before point 4 of 5 (606.5,37.0,179.5) at 607.30,37.63,179.50
+    [stairs] severia_homes_26 up 604,40,177: stuck before point 2 of 5 (604.5,42.0,179.5) at 604.50,41.00,178.70
+    [stairs] severia_homes_26 down 604,40,177: stuck before point 4 of 5 (604.5,41.0,178.5) at 604.50,41.83,179.30
+    [stairs] severia_homes_27 up 613,36,176: stuck before point 2 of 5 (615.5,38.0,176.5) at 614.87,37.20,176.50
+    [stairs] severia_homes_27 down 613,36,176: stuck before point 4 of 5 (614.5,37.0,176.5) at 615.30,37.63,176.50
+    [stairs] severia_homes_28 up 621,37,178: stuck before point 2 of 5 (623.5,39.0,178.5) at 622.87,38.20,178.50
+    [stairs] severia_homes_28 down 621,37,178: stuck before point 4 of 5 (622.5,38.0,178.5) at 623.30,38.63,178.50
+    [stairs] severia_homes_28 up 620,41,176: stuck before point 2 of 5 (620.5,43.0,178.5) at 620.50,42.00,177.70
+    [stairs] severia_homes_28 down 620,41,176: stuck before point 4 of 5 (620.5,42.0,177.5) at 620.50,42.83,178.30
+    [stairs] severia_homes_29 up 630,37,179: stuck before point 2 of 5 (632.5,39.0,179.5) at 631.87,38.20,179.50
+    [stairs] severia_homes_29 down 630,37,179: stuck before point 4 of 5 (631.5,38.0,179.5) at 632.30,38.63,179.50
+    [stairs] severia_homes_29 up 629,41,177: stuck before point 2 of 5 (629.5,43.0,179.5) at 629.50,42.00,178.70
+    [stairs] severia_homes_29 down 629,41,177: stuck before point 4 of 5 (629.5,42.0,178.5) at 629.50,42.83,179.30
+    [stairs] severia_homes_30 up 638,37,177: stuck before point 2 of 6 (638.5,39.0,179.5) at 638.50,38.00,178.70
+    [stairs] severia_homes_30 down 638,37,177: stuck before point 4 of 6 (638.5,39.0,179.5) at 639.30,39.63,179.50
+    [stairs] severia_homes_31 up 646,37,158: stuck before point 2 of 5 (644.5,39.0,158.5) at 645.13,38.20,158.50
+    [stairs] severia_homes_31 down 646,37,158: stuck before point 4 of 5 (645.5,38.0,158.5) at 644.70,38.63,158.50
+    [stairs] severia_homes_32 up 646,37,180: stuck before point 2 of 5 (648.5,39.0,180.5) at 647.87,38.20,180.50
+    [stairs] severia_homes_32 down 646,37,180: stuck before point 4 of 5 (647.5,38.0,180.5) at 648.30,38.63,180.50
+    [stairs] severia_homes_32 up 646,41,177: stuck before point 2 of 5 (646.5,43.0,179.5) at 646.50,42.20,178.87
+    [stairs] severia_homes_32 down 646,41,177: stuck before point 4 of 5 (646.5,42.0,178.5) at 646.50,42.63,179.30
+    [stairs] severia_homes_33 up 658,37,158: stuck before point 2 of 5 (656.5,39.0,158.5) at 657.13,38.20,158.50
+    [stairs] severia_homes_33 down 658,37,158: stuck before point 4 of 5 (657.5,38.0,158.5) at 656.70,38.63,158.50
+    [stairs] severia_homes_33 up 659,41,160: stuck before point 2 of 5 (659.5,43.0,158.5) at 659.50,42.00,159.30
+    [stairs] severia_homes_33 down 659,41,160: stuck before point 4 of 5 (659.5,42.0,159.5) at 659.50,42.83,158.70
+    [stairs] severia_homes_34 up 654,37,178: stuck before point 2 of 6 (654.5,39.0,180.5) at 654.50,38.00,179.70
+    [stairs] severia_homes_34 down 654,37,178: stuck before point 4 of 6 (654.5,39.0,180.5) at 655.30,39.63,180.50
+    [stairs] severia_homes_35 up 662,37,180: stuck before point 2 of 5 (664.5,39.0,180.5) at 663.87,38.20,180.50
+    [stairs] severia_homes_35 down 662,37,180: stuck before point 4 of 5 (663.5,38.0,180.5) at 664.30,38.63,180.50
+    [stairs] severia_homes_36 up 666,37,162: stuck before point 2 of 5 (664.5,39.0,162.5) at 665.13,38.20,162.50
+    [stairs] severia_homes_36 down 666,37,162: stuck before point 4 of 5 (665.5,38.0,162.5) at 664.70,38.63,162.50
+    [stairs] severia_homes_37 up 673,37,161: stuck before point 2 of 5 (671.5,39.0,161.5) at 672.13,38.20,161.50
+    [stairs] severia_homes_37 down 673,37,161: stuck before point 4 of 5 (672.5,38.0,161.5) at 671.70,38.63,161.50
+    [stairs] severia_homes_38 up 682,38,186: stuck before point 2 of 6 (684.5,40.0,186.5) at 683.70,39.00,186.50
+    [stairs] severia_homes_38 down 682,38,186: stuck before point 4 of 6 (684.5,40.0,186.5) at 684.50,40.63,185.70
+    [stairs] severia_homes_39 up 688,38,168: stuck before point 2 of 6 (690.5,40.0,168.5) at 689.70,39.00,168.50
+    [stairs] severia_homes_39 down 688,38,168: stuck before point 4 of 6 (690.5,40.0,168.5) at 690.50,40.63,167.70
+    [stairs] severia_homes_40 up 689,38,186: stuck before point 2 of 5 (691.5,40.0,186.5) at 690.87,39.20,186.50
+    [stairs] severia_homes_40 down 689,38,186: stuck before point 4 of 5 (690.5,39.0,186.5) at 691.30,39.63,186.50
+    [stairs] severia_homes_41 up 698,38,169: stuck before point 2 of 5 (696.5,40.0,169.5) at 697.13,39.20,169.50
+    [stairs] severia_homes_41 down 698,38,169: stuck before point 4 of 5 (697.5,39.0,169.5) at 696.70,39.63,169.50
+    [stairs] severia_homes_42 up 696,38,191: stuck before point 2 of 5 (698.5,40.0,191.5) at 697.87,39.20,191.50
+    [stairs] severia_homes_42 down 696,38,191: stuck before point 4 of 5 (697.5,39.0,191.5) at 698.30,39.63,191.50
+    [stairs] severia_homes_42 up 696,42,188: stuck before point 2 of 5 (696.5,44.0,190.5) at 696.50,43.20,189.87
+    [stairs] severia_homes_42 down 696,42,188: stuck before point 4 of 5 (696.5,43.0,189.5) at 696.50,43.63,190.30
+    [stairs] severia_homes_43 up 456,36,114: stuck before point 2 of 5 (456.5,38.0,112.5) at 456.50,37.20,113.13
+    [stairs] severia_homes_43 down 456,36,114: stuck before point 4 of 5 (456.5,37.0,113.5) at 456.50,37.63,112.70
+    [stairs] severia_homes_44 up 453,36,104: stuck before point 2 of 5 (453.5,38.0,102.5) at 453.50,37.20,103.13
+    [stairs] severia_homes_44 down 453,36,104: stuck before point 4 of 5 (453.5,37.0,103.5) at 453.50,37.63,102.70
+    [stairs] severia_homes_44 up 453,40,107: stuck before point 2 of 5 (453.5,42.0,105.5) at 453.50,41.20,106.13
+    [stairs] severia_homes_44 down 453,40,107: stuck before point 4 of 5 (453.5,41.0,106.5) at 453.50,41.63,105.70
+    [stairs] severia_homes_45 up 459,36,92: stuck before point 2 of 6 (457.5,38.0,92.5) at 458.30,37.00,92.50
+    [stairs] severia_homes_45 down 459,36,92: stuck before point 4 of 6 (457.5,38.0,92.5) at 457.50,38.63,93.30
+    [stairs] severia_homes_46 up 458,37,85: stuck before point 2 of 5 (458.5,39.0,87.5) at 458.50,38.20,86.87
+    [stairs] severia_homes_46 down 458,37,85: stuck before point 4 of 5 (458.5,38.0,86.5) at 458.50,38.63,87.30
+    [stairs] severia_homes_47 up 474,36,90: stuck before point 2 of 5 (474.5,38.0,92.5) at 474.50,37.20,91.87
+    [stairs] severia_homes_47 down 474,36,90: stuck before point 4 of 5 (474.5,37.0,91.5) at 474.50,37.63,92.30
+    [stairs] severia_homes_48 up 483,36,85: stuck before point 2 of 5 (483.5,38.0,83.5) at 483.50,37.20,84.13
+    [stairs] severia_homes_48 down 483,36,85: stuck before point 4 of 5 (483.5,37.0,84.5) at 483.50,37.63,83.70
+    [stairs] severia_homes_48 up 481,40,86: stuck before point 2 of 5 (483.5,42.0,86.5) at 482.70,41.00,86.50
+    [stairs] severia_homes_48 down 481,40,86: stuck before point 4 of 5 (482.5,41.0,86.5) at 483.30,41.83,86.50
+    [stairs] severia_homes_49 up 460,37,74: stuck before point 2 of 5 (460.5,39.0,76.5) at 460.50,38.20,75.87
+    [stairs] severia_homes_49 down 460,37,74: stuck before point 4 of 5 (460.5,38.0,75.5) at 460.50,38.63,76.31
+    [stairs] severia_homes_49 up 462,41,73: stuck before point 2 of 5 (460.5,43.0,73.5) at 461.30,42.00,73.50
+    [stairs] severia_homes_49 down 462,41,73: stuck before point 4 of 5 (461.5,42.0,73.5) at 460.70,42.83,73.50
+    [stairs] severia_homes_50 up 482,37,75: stuck before point 2 of 6 (484.5,39.0,75.5) at 483.70,38.00,75.50
+    [stairs] severia_homes_50 down 482,37,75: stuck before point 4 of 6 (484.5,39.0,75.5) at 484.50,39.63,74.70
+    [stairs] severia_homes_51 up 462,37,64: stuck before point 2 of 5 (462.5,39.0,66.5) at 462.50,38.20,65.87
+    [stairs] severia_homes_51 down 462,37,64: stuck before point 4 of 5 (462.5,38.0,65.5) at 462.50,38.63,66.31
+    [stairs] severia_homes_51 up 465,41,64: stuck before point 2 of 5 (463.5,43.0,64.5) at 464.13,42.20,64.50
+    [stairs] severia_homes_51 down 465,41,64: stuck before point 4 of 5 (464.5,42.0,64.5) at 463.70,42.63,64.50
+    [stairs] severia_homes_52 up 466,36,56: stuck before point 2 of 6 (464.5,38.0,56.5) at 465.30,37.00,56.50
+    [stairs] severia_homes_52 down 466,36,56: stuck before point 4 of 6 (464.5,38.0,56.5) at 464.50,38.63,57.30
+    [stairs] severia_homes_53 up 486,36,55: stuck before point 2 of 5 (486.5,38.0,53.5) at 486.50,37.20,54.13
+    [stairs] severia_homes_53 down 486,36,55: stuck before point 4 of 5 (486.5,37.0,54.5) at 486.50,37.63,53.70
+    [stairs] severia_homes_54 up 491,37,172: stuck before point 2 of 5 (491.5,39.0,170.5) at 491.50,38.20,171.13
+    [stairs] severia_homes_54 down 491,37,172: stuck before point 4 of 5 (491.5,38.0,171.5) at 491.50,38.63,170.70
+    [stairs] severia_homes_55 up 509,37,174: stuck before point 2 of 5 (511.5,39.0,174.5) at 510.87,38.20,174.50
+    [stairs] severia_homes_55 down 509,37,174: stuck before point 4 of 5 (510.5,38.0,174.5) at 511.30,38.63,174.50
+    [stairs] severia_homes_56 up 517,37,171: stuck before point 2 of 5 (519.5,39.0,171.5) at 518.87,38.20,171.50
+    [stairs] severia_homes_56 down 517,37,171: stuck before point 4 of 5 (518.5,38.0,171.5) at 519.30,38.63,171.50
+    [stairs] severia_homes_56 up 516,41,169: stuck before point 2 of 5 (516.5,43.0,171.5) at 516.50,42.00,170.70
+    [stairs] severia_homes_56 down 516,41,169: stuck before point 4 of 5 (516.5,42.0,170.5) at 516.50,42.83,171.30
+    [stairs] severia_homes_57 up 525,37,163: stuck before point 2 of 5 (527.5,39.0,163.5) at 526.87,38.20,163.50
+    [stairs] severia_homes_57 down 525,37,163: stuck before point 4 of 5 (526.5,38.0,163.5) at 527.30,38.63,163.50
+    [stairs] severia_homes_58 up 523,36,141: stuck before point 2 of 5 (521.5,38.0,141.5) at 522.13,37.20,141.50
+    [stairs] severia_homes_58 down 523,36,141: stuck before point 4 of 5 (522.5,37.0,141.5) at 521.70,37.63,141.50
+    [stairs] severia_homes_58 up 524,40,143: stuck before point 2 of 5 (524.5,42.0,141.5) at 524.50,41.00,142.30
+    [stairs] severia_homes_58 down 524,40,143: stuck before point 4 of 5 (524.5,41.0,142.5) at 524.50,41.83,141.70
+    [stairs] severia_homes_59 up 533,37,158: stuck before point 2 of 6 (533.5,39.0,160.5) at 533.50,38.00,159.70
+    [stairs] severia_homes_59 down 533,37,158: stuck before point 4 of 6 (533.5,39.0,160.5) at 534.30,39.63,160.50
+    [stairs] severia_homes_60 up 532,36,137: stuck before point 2 of 5 (530.5,38.0,137.5) at 531.13,37.20,137.50
+    [stairs] severia_homes_60 down 532,36,137: stuck before point 4 of 5 (531.5,37.0,137.5) at 530.70,37.63,137.50
+    [stairs] severia_homes_60 up 532,40,140: stuck before point 2 of 5 (532.5,42.0,138.5) at 532.50,41.20,139.13
+    [stairs] severia_homes_60 down 532,40,140: stuck before point 4 of 5 (532.5,41.0,139.5) at 532.50,41.63,138.70
+    [stairs] severia_homes_61 up 545,37,158: stuck before point 2 of 5 (543.5,39.0,158.5) at 544.13,38.20,158.50
+    [stairs] severia_homes_61 down 545,37,158: stuck before point 4 of 5 (544.5,38.0,158.5) at 543.70,38.63,158.50
+    [stairs] severia_homes_61 up 548,41,158: stuck before point 2 of 5 (546.5,43.0,158.5) at 547.13,42.20,158.50
+    [stairs] severia_homes_61 down 548,41,158: stuck before point 4 of 5 (547.5,42.0,158.5) at 546.70,42.63,158.50
+    [stairs] severia_homes_62 up 452,37,195: stuck before point 2 of 5 (454.5,39.0,195.5) at 453.87,38.20,195.50
+    [stairs] severia_homes_62 down 452,37,195: stuck before point 4 of 5 (453.5,38.0,195.5) at 454.31,38.63,195.50
+    [stairs] severia_homes_62 up 451,41,193: stuck before point 2 of 5 (451.5,43.0,195.5) at 451.50,42.00,194.70
+    [stairs] severia_homes_62 down 451,41,193: stuck before point 4 of 5 (451.5,42.0,194.5) at 451.50,42.83,195.30
+    [stairs] severia_homes_63 up 460,37,192: stuck before point 2 of 6 (460.5,39.0,194.5) at 460.50,38.00,193.70
+    [stairs] severia_homes_63 down 460,37,192: stuck before point 4 of 6 (460.5,39.0,194.5) at 461.30,39.63,194.50
+    [stairs] severia_homes_64 up 468,36,195: stuck before point 2 of 5 (470.5,38.0,195.5) at 469.87,37.20,195.50
+    [stairs] severia_homes_64 down 468,36,195: stuck before point 4 of 5 (469.5,37.0,195.5) at 470.31,37.63,195.50
+    [stairs] severia_homes_64 up 468,40,192: stuck before point 2 of 5 (468.5,42.0,194.5) at 468.50,41.20,193.87
+    [stairs] severia_homes_64 down 468,40,192: stuck before point 4 of 5 (468.5,41.0,193.5) at 468.50,41.63,194.30
+    [stairs] severia_homes_65 up 408,37,157: stuck before point 2 of 5 (408.5,39.0,155.5) at 408.50,38.20,156.13
+    [stairs] severia_homes_65 down 408,37,157: stuck before point 4 of 5 (408.5,38.0,156.5) at 408.50,38.63,155.70
+    [stairs] severia_homes_66 up 410,37,173: stuck before point 2 of 6 (412.5,39.0,173.5) at 411.70,38.00,173.50
+    [stairs] severia_homes_66 down 410,37,173: stuck before point 4 of 6 (412.5,39.0,173.5) at 412.50,39.63,172.70
+    [stairs] severia_homes_67 up 416,37,150: stuck before point 2 of 5 (414.5,39.0,150.5) at 415.13,38.20,150.50
+    [stairs] severia_homes_67 down 416,37,150: stuck before point 4 of 5 (415.5,38.0,150.5) at 414.69,38.63,150.50
+    [stairs] severia_homes_67 up 416,41,153: stuck before point 2 of 5 (416.5,43.0,151.5) at 416.50,42.20,152.13
+    [stairs] severia_homes_67 down 416,41,153: stuck before point 4 of 5 (416.5,42.0,152.5) at 416.50,42.63,151.70
+    [stairs] severia_homes_68 up 481,36,149: stuck before point 2 of 5 (479.5,38.0,149.5) at 480.13,37.20,149.50
+    [stairs] severia_homes_68 down 481,36,149: stuck before point 4 of 5 (480.5,37.0,149.5) at 479.70,37.63,149.50
+    [stairs] severia_homes_69 up 493,37,144: stuck before point 2 of 5 (491.5,39.0,144.5) at 492.13,38.20,144.50
+    [stairs] severia_homes_69 down 493,37,144: stuck before point 4 of 5 (492.5,38.0,144.5) at 491.69,38.63,144.50
+    [stairs] severia_homes_69 up 493,41,147: stuck before point 2 of 5 (493.5,43.0,145.5) at 493.50,42.20,146.13
+    [stairs] severia_homes_69 down 493,41,147: stuck before point 4 of 5 (493.5,42.0,146.5) at 493.50,42.63,145.70
+    [stairs] severia_homes_70 up 490,37,163: stuck before point 2 of 6 (490.5,39.0,165.5) at 490.50,38.00,164.70
+    [stairs] severia_homes_70 down 490,37,163: stuck before point 4 of 6 (490.5,39.0,165.5) at 491.30,39.63,165.50
+    [stairs] severia_homes_71 up 501,37,160: stuck before point 2 of 5 (499.5,39.0,160.5) at 500.13,38.20,160.50
+    [stairs] severia_homes_71 down 501,37,160: stuck before point 4 of 5 (500.5,38.0,160.5) at 499.70,38.63,160.50
+    [stairs] severia_homes_72 up 501,36,145: stuck before point 2 of 6 (501.5,38.0,143.5) at 501.50,37.00,144.30
+    [stairs] severia_homes_72 down 501,36,145: stuck before point 4 of 6 (501.5,38.0,143.5) at 500.70,38.63,143.50
+    [stairs] severia_homes_73 up 509,36,142: stuck before point 2 of 5 (511.5,38.0,142.5) at 510.87,37.20,142.50
+    [stairs] severia_homes_73 down 509,36,142: stuck before point 4 of 5 (510.5,37.0,142.5) at 511.30,37.63,142.50
+    [stairs] severia_homes_73 up 506,40,142: stuck before point 2 of 5 (508.5,42.0,142.5) at 507.87,41.20,142.50
+    [stairs] severia_homes_73 down 506,40,142: stuck before point 4 of 5 (507.5,41.0,142.5) at 508.30,41.63,142.50
+    [stairs] severia_homes_74 up 555,37,154: stuck before point 2 of 6 (555.5,39.0,156.5) at 555.50,38.00,155.70
+    [stairs] severia_homes_74 down 555,37,154: stuck before point 4 of 6 (555.5,39.0,156.5) at 556.30,39.63,156.50
+    [stairs] severia_homes_75 up 564,37,155: stuck before point 2 of 5 (566.5,39.0,155.5) at 565.87,38.20,155.50
+    [stairs] severia_homes_75 down 564,37,155: stuck before point 4 of 5 (565.5,38.0,155.5) at 566.30,38.63,155.50
+    [stairs] severia_homes_75 up 563,41,153: stuck before point 2 of 5 (563.5,43.0,155.5) at 563.50,42.00,154.70
+    [stairs] severia_homes_75 down 563,41,153: stuck before point 4 of 5 (563.5,42.0,154.5) at 563.50,42.83,155.30
+    [stairs] severia_homes_76 up 576,37,154: stuck before point 2 of 5 (574.5,39.0,154.5) at 575.13,38.20,154.50
+    [stairs] severia_homes_76 down 576,37,154: stuck before point 4 of 5 (575.5,38.0,154.5) at 574.70,38.63,154.50
+    [stairs] severia_homes_76 up 579,41,154: stuck before point 2 of 5 (577.5,43.0,154.5) at 578.13,42.20,154.50
+    [stairs] severia_homes_76 down 579,41,154: stuck before point 4 of 5 (578.5,42.0,154.5) at 577.70,42.63,154.50
+    [stairs] severia_homes_77 up 581,36,137: stuck before point 2 of 5 (583.5,38.0,137.5) at 582.87,37.20,137.50
+    [stairs] severia_homes_77 down 581,36,137: stuck before point 4 of 5 (582.5,37.0,137.5) at 583.30,37.63,137.50
+    [stairs] severia_homes_78 up 594,36,149: stuck before point 2 of 6 (594.5,38.0,151.5) at 594.50,37.00,150.70
+    [stairs] severia_homes_78 down 594,36,149: stuck before point 4 of 6 (594.5,38.0,151.5) at 595.30,38.63,151.50
+    [stairs] severia_homes_79 up 594,36,134: stuck before point 2 of 5 (596.5,38.0,134.5) at 595.87,37.20,134.50
+    [stairs] severia_homes_79 down 594,36,134: stuck before point 4 of 5 (595.5,37.0,134.5) at 596.30,37.63,134.50
+    [stairs] severia_homes_80 up 603,36,131: stuck before point 2 of 6 (603.5,38.0,133.5) at 603.50,37.00,132.70
+    [stairs] severia_homes_80 down 603,36,131: stuck before point 4 of 6 (603.5,38.0,133.5) at 604.30,38.63,133.50
+    [stairs] severia_homes_81 up 614,36,129: stuck before point 2 of 6 (614.5,38.0,131.5) at 614.50,37.00,130.70
+    [stairs] severia_homes_81 down 614,36,129: stuck before point 4 of 6 (614.5,38.0,131.5) at 615.30,38.63,131.50
+    [stairs] severia_homes_82 up 622,36,129: stuck before point 2 of 5 (624.5,38.0,129.5) at 623.87,37.20,129.50
+    [stairs] severia_homes_82 down 622,36,129: stuck before point 4 of 5 (623.5,37.0,129.5) at 624.30,37.63,129.50
+    [stairs] severia_homes_83 up 632,36,142: stuck before point 2 of 5 (634.5,38.0,142.5) at 633.87,37.20,142.50
+    [stairs] severia_homes_83 down 632,36,142: stuck before point 4 of 5 (633.5,37.0,142.5) at 634.30,37.63,142.50
+    [stairs] severia_homes_84 up 631,36,128: stuck before point 2 of 5 (633.5,38.0,128.5) at 632.87,37.20,128.50
+    [stairs] severia_homes_84 down 631,36,128: stuck before point 4 of 5 (632.5,37.0,128.5) at 633.30,37.63,128.50
+    [stairs] severia_homes_85 up 639,36,128: stuck before point 2 of 5 (641.5,38.0,128.5) at 640.87,37.20,128.50
+    [stairs] severia_homes_85 down 639,36,128: stuck before point 4 of 5 (640.5,37.0,128.5) at 641.30,37.63,128.50
+    [stairs] severia_homes_85 up 638,40,126: stuck before point 2 of 5 (638.5,42.0,128.5) at 638.50,41.00,127.70
+    [stairs] severia_homes_85 down 638,40,126: stuck before point 4 of 5 (638.5,41.0,127.5) at 638.50,41.83,128.30
+    [stairs] severia_homes_86 up 639,36,142: stuck before point 2 of 6 (639.5,38.0,144.5) at 639.50,37.00,143.70
+    [stairs] severia_homes_86 down 639,36,142: stuck before point 4 of 6 (639.5,38.0,144.5) at 640.30,38.63,144.50
+    [stairs] severia_homes_87 up 649,36,139: stuck before point 2 of 6 (649.5,38.0,141.5) at 649.50,37.00,140.70
+    [stairs] severia_homes_87 down 649,36,139: stuck before point 4 of 6 (649.5,38.0,141.5) at 650.30,38.63,141.50
+    [stairs] severia_homes_88 up 648,37,126: stuck before point 2 of 5 (650.5,39.0,126.5) at 649.87,38.20,126.50
+    [stairs] severia_homes_88 down 648,37,126: stuck before point 4 of 5 (649.5,38.0,126.5) at 650.30,38.63,126.50
+    [stairs] severia_homes_88 up 647,41,124: stuck before point 2 of 5 (647.5,43.0,126.5) at 647.50,42.00,125.70
+    [stairs] severia_homes_88 down 647,41,124: stuck before point 4 of 5 (647.5,42.0,125.5) at 647.50,42.83,126.30
+    [stairs] severia_homes_89 up 660,37,122: stuck before point 2 of 6 (660.5,39.0,120.5) at 660.50,38.00,121.30
+    [stairs] severia_homes_89 down 660,37,122: stuck before point 4 of 6 (660.5,39.0,120.5) at 659.70,39.63,120.50
+    [stairs] severia_homes_90 up 658,37,145: stuck before point 2 of 5 (660.5,39.0,145.5) at 659.87,38.20,145.50
+    [stairs] severia_homes_90 down 658,37,145: stuck before point 4 of 5 (659.5,38.0,145.5) at 660.30,38.63,145.50
+    [stairs] severia_homes_90 up 658,41,142: stuck before point 2 of 5 (658.5,43.0,144.5) at 658.50,42.20,143.87
+    [stairs] severia_homes_90 down 658,41,142: stuck before point 4 of 5 (658.5,42.0,143.5) at 658.50,42.63,144.30
+    [stairs] severia_homes_91 up 667,37,122: stuck before point 2 of 5 (669.5,39.0,122.5) at 668.87,38.20,122.50
+    [stairs] severia_homes_91 down 667,37,122: stuck before point 4 of 5 (668.5,38.0,122.5) at 669.30,38.63,122.50
+    [stairs] severia_homes_91 up 664,41,122: stuck before point 2 of 5 (666.5,43.0,122.5) at 665.87,42.20,122.50
+    [stairs] severia_homes_91 down 664,41,122: stuck before point 4 of 5 (665.5,42.0,122.5) at 666.30,42.63,122.50
+    [stairs] severia_homes_92 up 666,37,143: stuck before point 2 of 5 (668.5,39.0,143.5) at 667.87,38.20,143.50
+    [stairs] severia_homes_92 down 666,37,143: stuck before point 4 of 5 (667.5,38.0,143.5) at 668.30,38.63,143.50
+    [stairs] severia_homes_93 up 673,37,143: stuck before point 2 of 6 (673.5,39.0,145.5) at 673.50,38.00,144.70
+    [stairs] severia_homes_93 down 673,37,143: stuck before point 4 of 6 (673.5,39.0,145.5) at 674.30,39.63,145.50
+    [stairs] severia_homes_94 up 395,35,38: stuck before point 2 of 5 (397.5,37.0,38.5) at 396.87,36.20,38.50
+    [stairs] severia_homes_94 down 395,35,38: stuck before point 4 of 5 (396.5,36.0,38.5) at 397.31,36.63,38.50
+    [stairs] severia_homes_94 up 392,39,38: stuck before point 2 of 5 (394.5,41.0,38.5) at 393.87,40.20,38.50
+    [stairs] severia_homes_94 down 392,39,38: stuck before point 4 of 5 (393.5,40.0,38.5) at 394.30,40.63,38.50
+    [stairs] severia_homes_95 up 407,35,40: stuck before point 2 of 6 (407.5,37.0,38.5) at 407.50,36.00,39.30
+    [stairs] severia_homes_95 down 407,35,40: stuck before point 4 of 6 (407.5,37.0,38.5) at 406.70,37.63,38.50
+    [stairs] severia_homes_96 up 408,37,56: stuck before point 2 of 6 (408.5,39.0,58.5) at 408.50,38.00,57.70
+    [stairs] severia_homes_96 down 408,37,56: stuck before point 4 of 6 (408.5,39.0,58.5) at 409.30,39.63,58.50
+    [stairs] severia_homes_97 up 414,34,35: stuck before point 2 of 5 (416.5,36.0,35.5) at 415.87,35.20,35.50
+    [stairs] severia_homes_97 down 414,34,35: stuck before point 4 of 5 (415.5,35.0,35.5) at 416.31,35.63,35.50
+    [stairs] severia_homes_97 up 411,38,35: stuck before point 2 of 5 (413.5,40.0,35.5) at 412.87,39.20,35.50
+    [stairs] severia_homes_97 down 411,38,35: stuck before point 4 of 5 (412.5,39.0,35.5) at 413.30,39.63,35.50
+    [stairs] severia_homes_98 up 416,36,53: stuck before point 2 of 5 (416.5,38.0,55.5) at 416.50,37.20,54.87
+    [stairs] severia_homes_98 down 416,36,53: stuck before point 4 of 5 (416.5,37.0,54.5) at 416.50,37.63,55.30
+    [stairs] severia_homes_99 up 426,34,38: stuck before point 2 of 6 (426.5,36.0,36.5) at 426.50,35.00,37.30
+    [stairs] severia_homes_99 down 426,34,38: stuck before point 4 of 6 (426.5,36.0,36.5) at 425.70,36.63,36.50
+    [stairs] severia_homes_100 up 433,34,35: stuck before point 2 of 5 (435.5,36.0,35.5) at 434.87,35.20,35.50
+    [stairs] severia_homes_100 down 433,34,35: stuck before point 4 of 5 (434.5,35.0,35.5) at 435.31,35.63,35.50
+    [stairs] severia_homes_100 up 430,38,35: stuck before point 2 of 5 (432.5,40.0,35.5) at 431.87,39.20,35.50
+    [stairs] severia_homes_100 down 430,38,35: stuck before point 4 of 5 (431.5,39.0,35.5) at 432.30,39.63,35.50
+    [stairs] severia_homes_101 up 436,36,59: stuck before point 2 of 5 (436.5,38.0,57.5) at 436.50,37.20,58.13
+    [stairs] severia_homes_101 down 436,36,59: stuck before point 4 of 5 (436.5,37.0,58.5) at 436.50,37.63,57.69
+    [stairs] severia_homes_101 up 434,40,60: stuck before point 2 of 5 (436.5,42.0,60.5) at 435.70,41.00,60.50
+    [stairs] severia_homes_101 down 434,40,60: stuck before point 4 of 5 (435.5,41.0,60.5) at 436.30,41.83,60.50
+    [stairs] severia_homes_102 up 443,36,58: stuck before point 2 of 5 (445.5,38.0,58.5) at 444.87,37.20,58.50
+    [stairs] severia_homes_102 down 443,36,58: stuck before point 4 of 5 (444.5,37.0,58.5) at 445.31,37.63,58.50
+    [stairs] severia_homes_102 up 443,40,55: stuck before point 2 of 5 (443.5,42.0,57.5) at 443.50,41.20,56.87
+    [stairs] severia_homes_102 down 443,40,55: stuck before point 4 of 5 (443.5,41.0,56.5) at 443.50,41.63,57.30
+    [stairs] severia_homes_103 up 451,36,58: stuck before point 2 of 5 (453.5,38.0,58.5) at 452.87,37.20,58.50
+    [stairs] severia_homes_103 down 451,36,58: stuck before point 4 of 5 (452.5,37.0,58.5) at 453.31,37.63,58.50
+    [stairs] severia_homes_103 up 451,40,55: stuck before point 2 of 5 (451.5,42.0,57.5) at 451.50,41.20,56.87
+    [stairs] severia_homes_103 down 451,40,55: stuck before point 4 of 5 (451.5,41.0,56.5) at 451.50,41.63,57.30
+    [stairs] severia_homes_104 up 485,32,38: stuck before point 2 of 6 (487.5,34.0,38.5) at 486.70,33.00,38.50
+    [stairs] severia_homes_104 down 485,32,38: stuck before point 4 of 6 (487.5,34.0,38.5) at 487.50,34.63,37.70
+    [stairs] severia_homes_105 up 520,35,53: stuck before point 2 of 6 (522.5,37.0,53.5) at 521.70,36.00,53.50
+    [stairs] severia_homes_105 down 520,35,53: stuck before point 4 of 6 (522.5,37.0,53.5) at 522.50,37.63,52.70
+    [stairs] severia_homes_106 up 523,32,37: stuck before point 2 of 6 (523.5,34.0,35.5) at 523.50,33.00,36.30
+    [stairs] severia_homes_106 down 523,32,37: stuck before point 4 of 6 (523.5,34.0,35.5) at 522.70,34.63,35.50
+    [stairs] severia_homes_107 up 534,33,35: stuck before point 2 of 5 (532.5,35.0,35.5) at 533.13,34.20,35.50
+    [stairs] severia_homes_107 down 534,33,35: stuck before point 4 of 5 (533.5,34.0,35.5) at 532.70,34.63,35.50
+    [stairs] severia_homes_108 up 533,35,57: stuck before point 2 of 5 (531.5,37.0,57.5) at 532.13,36.20,57.50
+    [stairs] severia_homes_108 down 533,35,57: stuck before point 4 of 5 (532.5,36.0,57.5) at 531.70,36.63,57.50
+    [stairs] severia_homes_108 up 536,39,57: stuck before point 2 of 5 (534.5,41.0,57.5) at 535.13,40.20,57.50
+    [stairs] severia_homes_108 down 536,39,57: stuck before point 4 of 5 (535.5,40.0,57.5) at 534.70,40.63,57.50
+    [stairs] severia_homes_109 up 543,33,37: stuck before point 2 of 6 (543.5,35.0,35.5) at 543.50,34.00,36.30
+    [stairs] severia_homes_109 down 543,33,37: stuck before point 4 of 6 (543.5,35.0,35.5) at 542.70,35.63,35.50
+    [stairs] severia_homes_110 up 540,35,55: stuck before point 2 of 5 (542.5,37.0,55.5) at 541.87,36.20,55.50
+    [stairs] severia_homes_110 down 540,35,55: stuck before point 4 of 5 (541.5,36.0,55.5) at 542.30,36.63,55.50
+    [stairs] severia_homes_111 up 550,33,35: stuck before point 2 of 5 (548.5,35.0,35.5) at 549.13,34.20,35.50
+    [stairs] severia_homes_111 down 550,33,35: stuck before point 4 of 5 (549.5,34.0,35.5) at 548.70,34.63,35.50
+    [stairs] severia_homes_112 up 547,35,54: stuck before point 2 of 5 (549.5,37.0,54.5) at 548.87,36.20,54.50
+    [stairs] severia_homes_112 down 547,35,54: stuck before point 4 of 5 (548.5,36.0,54.5) at 549.30,36.63,54.50
+    [stairs] severia_homes_113 up 562,33,37: stuck before point 2 of 6 (562.5,35.0,35.5) at 562.50,34.00,36.30
+    [stairs] severia_homes_113 down 562,33,37: stuck before point 4 of 6 (562.5,35.0,35.5) at 561.70,35.63,35.50
+    [stairs] severia_homes_114 up 558,35,56: stuck before point 2 of 5 (560.5,37.0,56.5) at 559.87,36.20,56.50
+    [stairs] severia_homes_114 down 558,35,56: stuck before point 4 of 5 (559.5,36.0,56.5) at 560.30,36.63,56.50
+    [stairs] severia_homes_115 up 569,34,35: stuck before point 2 of 5 (567.5,36.0,35.5) at 568.13,35.20,35.50
+    [stairs] severia_homes_115 down 569,34,35: stuck before point 4 of 5 (568.5,35.0,35.5) at 567.70,35.63,35.50
+    [stairs] severia_homes_116 up 565,36,57: stuck before point 2 of 5 (567.5,38.0,57.5) at 566.87,37.20,57.50
+    [stairs] severia_homes_116 down 565,36,57: stuck before point 4 of 5 (566.5,37.0,57.5) at 567.30,37.63,57.50
+    [stairs] severia_homes_116 up 565,40,54: stuck before point 2 of 5 (565.5,42.0,56.5) at 565.50,41.20,55.87
+    [stairs] severia_homes_116 down 565,40,54: stuck before point 4 of 5 (565.5,41.0,55.5) at 565.50,41.63,56.30
+    [stairs] severia_homes_117 up 577,33,33: stuck before point 2 of 5 (575.5,35.0,33.5) at 576.13,34.20,33.50
+    [stairs] severia_homes_117 down 577,33,33: stuck before point 4 of 5 (576.5,34.0,33.5) at 575.70,34.63,33.50
+    [stairs] severia_homes_117 up 577,37,36: stuck before point 2 of 5 (577.5,39.0,34.5) at 577.50,38.20,35.13
+    [stairs] severia_homes_117 down 577,37,36: stuck before point 4 of 5 (577.5,38.0,35.5) at 577.50,38.63,34.70
+    [stairs] severia_homes_118 up 573,36,56: stuck before point 2 of 5 (575.5,38.0,56.5) at 574.87,37.20,56.50
+    [stairs] severia_homes_118 down 573,36,56: stuck before point 4 of 5 (574.5,37.0,56.5) at 575.30,37.63,56.50
+    [stairs] severia_homes_119 up 585,33,33: stuck before point 2 of 5 (583.5,35.0,33.5) at 584.13,34.20,33.50
+    [stairs] severia_homes_119 down 585,33,33: stuck before point 4 of 5 (584.5,34.0,33.5) at 583.70,34.63,33.50
+    [stairs] severia_homes_119 up 586,37,35: stuck before point 2 of 5 (586.5,39.0,33.5) at 586.50,38.00,34.30
+    [stairs] severia_homes_119 down 586,37,35: stuck before point 4 of 5 (586.5,38.0,34.5) at 586.50,38.83,33.70
+    [stairs] severia_homes_120 up 580,36,54: stuck before point 2 of 6 (580.5,38.0,56.5) at 580.50,37.00,55.70
+    [stairs] severia_homes_120 down 580,36,54: stuck before point 4 of 6 (580.5,38.0,56.5) at 581.30,38.63,56.50
+    [stairs] severia_homes_121 up 593,33,36: stuck before point 2 of 5 (591.5,35.0,36.5) at 592.13,34.20,36.50
+    [stairs] severia_homes_121 down 593,33,36: stuck before point 4 of 5 (592.5,34.0,36.5) at 591.70,34.63,36.50
+    [stairs] severia_homes_122 up 592,36,57: stuck before point 2 of 5 (590.5,38.0,57.5) at 591.13,37.20,57.50
+    [stairs] severia_homes_122 down 592,36,57: stuck before point 4 of 5 (591.5,37.0,57.5) at 590.70,37.63,57.50
+    [stairs] severia_homes_122 up 595,40,57: stuck before point 2 of 5 (593.5,42.0,57.5) at 594.13,41.20,57.50
+    [stairs] severia_homes_122 down 595,40,57: stuck before point 4 of 5 (594.5,41.0,57.5) at 593.70,41.63,57.50
+    [stairs] severia_homes_123 up 603,33,36: stuck before point 2 of 5 (605.5,35.0,36.5) at 604.87,34.20,36.50
+    [stairs] severia_homes_123 down 603,33,36: stuck before point 4 of 5 (604.5,34.0,36.5) at 605.30,34.63,36.50
+    [stairs] severia_homes_123 up 600,37,36: stuck before point 2 of 5 (602.5,39.0,36.5) at 601.87,38.20,36.50
+    [stairs] severia_homes_123 down 600,37,36: stuck before point 4 of 5 (601.5,38.0,36.5) at 602.30,38.63,36.50
+    [stairs] severia_homes_124 up 601,36,60: stuck before point 2 of 5 (603.5,38.0,60.5) at 602.87,37.20,60.50
+    [stairs] severia_homes_124 down 601,36,60: stuck before point 4 of 5 (602.5,37.0,60.5) at 603.30,37.63,60.50
+    [stairs] severia_homes_124 up 600,40,58: stuck before point 2 of 5 (600.5,42.0,60.5) at 600.50,41.00,59.70
+    [stairs] severia_homes_124 down 600,40,58: stuck before point 4 of 5 (600.5,41.0,59.5) at 600.50,41.83,60.30
+    [stairs] severia_homes_125 up 609,36,56: stuck before point 2 of 5 (611.5,38.0,56.5) at 610.87,37.20,56.50
+    [stairs] severia_homes_125 down 609,36,56: stuck before point 4 of 5 (610.5,37.0,56.5) at 611.30,37.63,56.50
+    [stairs] severia_homes_126 up 616,34,36: stuck before point 2 of 5 (614.5,36.0,36.5) at 615.13,35.20,36.50
+    [stairs] severia_homes_126 down 616,34,36: stuck before point 4 of 5 (615.5,35.0,36.5) at 614.70,35.63,36.50
+    [stairs] severia_homes_126 up 616,38,39: stuck before point 2 of 5 (616.5,40.0,37.5) at 616.50,39.20,38.13
+    [stairs] severia_homes_126 down 616,38,39: stuck before point 4 of 5 (616.5,39.0,38.5) at 616.50,39.63,37.70
+    [stairs] severia_homes_127 up 616,36,60: stuck before point 2 of 5 (618.5,38.0,60.5) at 617.87,37.20,60.50
+    [stairs] severia_homes_127 down 616,36,60: stuck before point 4 of 5 (617.5,37.0,60.5) at 618.30,37.63,60.50
+    [stairs] severia_homes_127 up 616,40,57: stuck before point 2 of 5 (616.5,42.0,59.5) at 616.50,41.20,58.87
+    [stairs] severia_homes_127 down 616,40,57: stuck before point 4 of 5 (616.5,41.0,58.5) at 616.50,41.63,59.30
+    [stairs] severia_homes_128 up 624,34,39: stuck before point 2 of 6 (624.5,36.0,37.5) at 624.50,35.00,38.30
+    [stairs] severia_homes_128 down 624,34,39: stuck before point 4 of 6 (624.5,36.0,37.5) at 623.70,36.63,37.50
+    [stairs] severia_homes_129 up 631,34,37: stuck before point 2 of 5 (629.5,36.0,37.5) at 630.13,35.20,37.50
+    [stairs] severia_homes_129 down 631,34,37: stuck before point 4 of 5 (630.5,35.0,37.5) at 629.70,35.63,37.50
+    [stairs] severia_homes_130 up 626,36,61: stuck before point 2 of 5 (628.5,38.0,61.5) at 627.87,37.20,61.50
+    [stairs] severia_homes_130 down 626,36,61: stuck before point 4 of 5 (627.5,37.0,61.5) at 628.30,37.63,61.50
+    [stairs] severia_homes_130 up 625,40,59: stuck before point 2 of 5 (625.5,42.0,61.5) at 625.50,41.00,60.70
+    [stairs] severia_homes_130 down 625,40,59: stuck before point 4 of 5 (625.5,41.0,60.5) at 625.50,41.83,61.30
+    [stairs] severia_homes_131 up 639,34,37: stuck before point 2 of 5 (637.5,36.0,37.5) at 638.13,35.20,37.50
+    [stairs] severia_homes_131 down 639,34,37: stuck before point 4 of 5 (638.5,35.0,37.5) at 637.70,35.63,37.50
+    [stairs] severia_homes_131 up 639,38,40: stuck before point 2 of 5 (639.5,40.0,38.5) at 639.50,39.20,39.13
+    [stairs] severia_homes_131 down 639,38,40: stuck before point 4 of 5 (639.5,39.0,39.5) at 639.50,39.63,38.70
+    [stairs] severia_homes_132 up 636,36,61: stuck before point 2 of 5 (638.5,38.0,61.5) at 637.87,37.20,61.50
+    [stairs] severia_homes_132 down 636,36,61: stuck before point 4 of 5 (637.5,37.0,61.5) at 638.30,37.63,61.50
+    [stairs] severia_homes_132 up 635,40,59: stuck before point 2 of 5 (635.5,42.0,61.5) at 635.50,41.00,60.70
+    [stairs] severia_homes_132 down 635,40,59: stuck before point 4 of 5 (635.5,41.0,60.5) at 635.50,41.83,61.30
+    [stairs] severia_homes_133 up 647,34,36: stuck before point 2 of 5 (645.5,36.0,36.5) at 646.13,35.20,36.50
+    [stairs] severia_homes_133 down 647,34,36: stuck before point 4 of 5 (646.5,35.0,36.5) at 645.70,35.63,36.50
+    [stairs] severia_homes_133 up 647,38,39: stuck before point 2 of 5 (647.5,40.0,37.5) at 647.50,39.20,38.13
+    [stairs] severia_homes_133 down 647,38,39: stuck before point 4 of 5 (647.5,39.0,38.5) at 647.50,39.63,37.70
+    [stairs] severia_homes_134 up 644,36,60: stuck before point 2 of 5 (646.5,38.0,60.5) at 645.87,37.20,60.50
+    [stairs] severia_homes_134 down 644,36,60: stuck before point 4 of 5 (645.5,37.0,60.5) at 646.30,37.63,60.50
+    [stairs] severia_homes_134 up 644,40,57: stuck before point 2 of 5 (644.5,42.0,59.5) at 644.50,41.20,58.87
+    [stairs] severia_homes_134 down 644,40,57: stuck before point 4 of 5 (644.5,41.0,58.5) at 644.50,41.63,59.30
+    [stairs] severia_homes_135 up 656,34,41: stuck before point 2 of 6 (656.5,36.0,39.5) at 656.50,35.00,40.30
+    [stairs] severia_homes_135 down 656,34,41: stuck before point 4 of 6 (656.5,36.0,39.5) at 655.70,36.63,39.50
+    [stairs] severia_homes_136 up 653,36,61: stuck before point 2 of 5 (655.5,38.0,61.5) at 654.87,37.20,61.50
+    [stairs] severia_homes_136 down 653,36,61: stuck before point 4 of 5 (654.5,37.0,61.5) at 655.30,37.63,61.50
+    [stairs] severia_homes_136 up 652,40,59: stuck before point 2 of 5 (652.5,42.0,61.5) at 652.50,41.00,60.70
+    [stairs] severia_homes_136 down 652,40,59: stuck before point 4 of 5 (652.5,41.0,60.5) at 652.50,41.83,61.30
+    [stairs] severia_homes_137 up 664,34,41: stuck before point 2 of 5 (662.5,36.0,41.5) at 663.13,35.20,41.50
+    [stairs] severia_homes_137 down 664,34,41: stuck before point 4 of 5 (663.5,35.0,41.5) at 662.70,35.63,41.50
+    [stairs] severia_homes_138 up 661,36,58: stuck before point 2 of 6 (661.5,38.0,60.5) at 661.50,37.00,59.70
+    [stairs] severia_homes_138 down 661,36,58: stuck before point 4 of 6 (661.5,38.0,60.5) at 662.30,38.63,60.50
+    [stairs] severia_homes_139 up 672,32,36: stuck before point 2 of 5 (670.5,34.0,36.5) at 671.13,33.20,36.50
+    [stairs] severia_homes_139 down 672,32,36: stuck before point 4 of 5 (671.5,33.0,36.5) at 670.70,33.63,36.50
+    [stairs] severia_homes_139 up 672,36,39: stuck before point 2 of 5 (672.5,38.0,37.5) at 672.50,37.20,38.13
+    [stairs] severia_homes_139 down 672,36,39: stuck before point 4 of 5 (672.5,37.0,38.5) at 672.50,37.63,37.70
+    [stairs] severia_homes_140 up 670,36,61: stuck before point 2 of 5 (672.5,38.0,61.5) at 671.87,37.20,61.50
+    [stairs] severia_homes_140 down 670,36,61: stuck before point 4 of 5 (671.5,37.0,61.5) at 672.30,37.63,61.50
+    [stairs] severia_homes_140 up 669,40,59: stuck before point 2 of 5 (669.5,42.0,61.5) at 669.50,41.00,60.70
+    [stairs] severia_homes_140 down 669,40,59: stuck before point 4 of 5 (669.5,41.0,60.5) at 669.50,41.83,61.30
+    [stairs] severia_homes_141 up 680,32,41: stuck before point 2 of 5 (678.5,34.0,41.5) at 679.13,33.20,41.50
+    [stairs] severia_homes_141 down 680,32,41: stuck before point 4 of 5 (679.5,33.0,41.5) at 678.70,33.63,41.50
+    [stairs] severia_homes_142 up 688,32,37: stuck before point 2 of 5 (686.5,34.0,37.5) at 687.13,33.20,37.50
+    [stairs] severia_homes_142 down 688,32,37: stuck before point 4 of 5 (687.5,33.0,37.5) at 686.70,33.63,37.50
+    [stairs] severia_homes_142 up 688,36,40: stuck before point 2 of 5 (688.5,38.0,38.5) at 688.50,37.20,39.13
+    [stairs] severia_homes_142 down 688,36,40: stuck before point 4 of 5 (688.5,37.0,39.5) at 688.50,37.63,38.70
+    [stairs] severia_homes_143 up 688,35,59: stuck before point 2 of 5 (688.5,37.0,57.5) at 688.50,36.20,58.13
+    [stairs] severia_homes_143 down 688,35,59: stuck before point 4 of 5 (688.5,36.0,58.5) at 688.50,36.63,57.70
+    [stairs] severia_homes_144 up 696,33,39: stuck before point 2 of 5 (694.5,35.0,39.5) at 695.13,34.20,39.50
+    [stairs] severia_homes_144 down 696,33,39: stuck before point 4 of 5 (695.5,34.0,39.5) at 694.70,34.63,39.50
+    [stairs] severia_homes_144 up 697,37,41: stuck before point 2 of 5 (697.5,39.0,39.5) at 697.50,38.00,40.30
+    [stairs] severia_homes_144 down 697,37,41: stuck before point 4 of 5 (697.5,38.0,40.5) at 697.50,38.83,39.70
+    [stairs] severia_homes_145 up 692,35,63: stuck before point 2 of 5 (694.5,37.0,63.5) at 693.87,36.20,63.50
+    [stairs] severia_homes_145 down 692,35,63: stuck before point 4 of 5 (693.5,36.0,63.5) at 694.30,36.63,63.50
+    [stairs] severia_homes_145 up 692,39,60: stuck before point 2 of 5 (692.5,41.0,62.5) at 692.50,40.20,61.87
+    [stairs] severia_homes_145 down 692,39,60: stuck before point 4 of 5 (692.5,40.0,61.5) at 692.50,40.63,62.30
+    [stairs] severia_homes_146 up 705,32,39: stuck before point 2 of 5 (703.5,34.0,39.5) at 704.13,33.20,39.50
+    [stairs] severia_homes_146 down 705,32,39: stuck before point 4 of 5 (704.5,33.0,39.5) at 703.70,33.63,39.50
+    [stairs] severia_homes_146 up 706,36,41: stuck before point 2 of 5 (706.5,38.0,39.5) at 706.50,37.00,40.30
+    [stairs] severia_homes_146 down 706,36,41: stuck before point 4 of 5 (706.5,37.0,40.5) at 706.50,37.83,39.70
+    [stairs] severia_homes_147 up 704,34,62: stuck before point 2 of 5 (702.5,36.0,62.5) at 703.13,35.20,62.50
+    [stairs] severia_homes_147 down 704,34,62: stuck before point 4 of 5 (703.5,35.0,62.5) at 702.70,35.63,62.50
+    [stairs] severia_homes_147 up 707,38,62: stuck before point 2 of 5 (705.5,40.0,62.5) at 706.13,39.20,62.50
+    [stairs] severia_homes_147 down 707,38,62: stuck before point 4 of 5 (706.5,39.0,62.5) at 705.70,39.63,62.50
+    [stairs] severia_homes_148 up 608,37,112: stuck before point 2 of 5 (610.5,39.0,112.5) at 609.87,38.20,112.50
+    [stairs] severia_homes_148 down 608,37,112: stuck before point 4 of 5 (609.5,38.0,112.5) at 610.30,38.63,112.50
+    [stairs] severia_homes_148 up 605,41,112: stuck before point 2 of 5 (607.5,43.0,112.5) at 606.87,42.20,112.50
+    [stairs] severia_homes_148 down 605,41,112: stuck before point 4 of 5 (606.5,42.0,112.5) at 607.30,42.63,112.50
+    [stairs] severia_homes_149 up 619,36,108: stuck before point 2 of 5 (621.5,38.0,108.5) at 620.87,37.20,108.50
+    [stairs] severia_homes_149 down 619,36,108: stuck before point 4 of 5 (620.5,37.0,108.5) at 621.30,37.63,108.50
+    [stairs] severia_homes_149 up 616,40,108: stuck before point 2 of 5 (618.5,42.0,108.5) at 617.87,41.20,108.50
+    [stairs] severia_homes_149 down 616,40,108: stuck before point 4 of 5 (617.5,41.0,108.5) at 618.30,41.63,108.50
+    [stairs] severia_homes_150 up 632,36,111: stuck before point 2 of 6 (632.5,38.0,109.5) at 632.50,37.00,110.30
+    [stairs] severia_homes_150 down 632,36,111: stuck before point 4 of 6 (632.5,38.0,109.5) at 631.70,38.63,109.50
+    [stairs] severia_homes_151 up 639,37,108: stuck before point 2 of 5 (637.5,39.0,108.5) at 638.13,38.20,108.50
+    [stairs] severia_homes_151 down 639,37,108: stuck before point 4 of 5 (638.5,38.0,108.5) at 637.70,38.63,108.50
+    [stairs] severia_homes_152 up 647,37,104: stuck before point 2 of 5 (645.5,39.0,104.5) at 646.13,38.20,104.50
+    [stairs] severia_homes_152 down 647,37,104: stuck before point 4 of 5 (646.5,38.0,104.5) at 645.70,38.63,104.50
+    [stairs] severia_homes_152 up 648,41,106: stuck before point 2 of 5 (648.5,43.0,104.5) at 648.50,42.00,105.30
+    [stairs] severia_homes_152 down 648,41,106: stuck before point 4 of 5 (648.5,42.0,105.5) at 648.50,42.83,104.70
+    [stairs] severia_homes_153 up 656,37,106: stuck before point 2 of 6 (656.5,39.0,104.5) at 656.50,38.00,105.30
+    [stairs] severia_homes_153 down 656,37,106: stuck before point 4 of 6 (656.5,39.0,104.5) at 655.70,39.63,104.50
+    [stairs] severia_homes_154 up 664,36,100: stuck before point 2 of 6 (664.5,38.0,98.5) at 664.50,37.00,99.30
+    [stairs] severia_homes_154 down 664,36,100: stuck before point 4 of 6 (664.5,38.0,98.5) at 663.70,38.63,98.50
+    [stairs] severia_homes_155 up 668,37,116: stuck before point 2 of 6 (668.5,39.0,118.5) at 668.50,38.00,117.70
+    [stairs] severia_homes_155 down 668,37,116: stuck before point 4 of 6 (668.5,39.0,118.5) at 669.30,39.63,118.50
+    [stairs] severia_homes_156 up 663,37,90: stuck before point 2 of 6 (661.5,39.0,90.5) at 662.30,38.00,90.50
+    [stairs] severia_homes_156 down 663,37,90: stuck before point 4 of 6 (661.5,39.0,90.5) at 661.50,39.63,91.30
+    [stairs] severia_homes_157 up 668,37,82: stuck before point 2 of 6 (666.5,39.0,82.5) at 667.30,38.00,82.50
+    [stairs] severia_homes_157 down 668,37,82: stuck before point 4 of 6 (666.5,39.0,82.5) at 666.50,39.63,83.30
+    [stairs] severia_homes_158 up 688,37,92: stuck before point 2 of 5 (688.5,39.0,90.5) at 688.50,38.20,91.13
+    [stairs] severia_homes_158 down 688,37,92: stuck before point 4 of 5 (688.5,38.0,91.5) at 688.50,38.63,90.70
+    [stairs] severia_homes_159 up 688,37,85: stuck before point 2 of 5 (688.5,39.0,83.5) at 688.50,38.20,84.13
+    [stairs] severia_homes_159 down 688,37,85: stuck before point 4 of 5 (688.5,38.0,84.5) at 688.50,38.63,83.70
+    [stairs] severia_homes_160 up 668,37,72: stuck before point 2 of 5 (668.5,39.0,74.5) at 668.50,38.20,73.87
+    [stairs] severia_homes_160 down 668,37,72: stuck before point 4 of 5 (668.5,38.0,73.5) at 668.50,38.63,74.31
+    [stairs] severia_homes_160 up 670,41,71: stuck before point 2 of 5 (668.5,43.0,71.5) at 669.30,42.00,71.50
+    [stairs] severia_homes_160 down 670,41,71: stuck before point 4 of 5 (669.5,42.0,71.5) at 668.70,42.83,71.50
+    [stairs] severia_homes_161 up 691,37,74: stuck before point 2 of 5 (691.5,39.0,76.5) at 691.50,38.20,75.87
+    [stairs] severia_homes_161 down 691,37,74: stuck before point 4 of 5 (691.5,38.0,75.5) at 691.50,38.63,76.31
+    [stairs] severia_homes_161 up 691,41,71: stuck before point 2 of 5 (691.5,43.0,73.5) at 691.50,42.20,72.87
+    [stairs] severia_homes_161 down 691,41,71: stuck before point 4 of 5 (691.5,42.0,72.5) at 691.50,42.63,73.30
+    [stairs] severia_homes_162 up 403,37,208: stuck before point 2 of 5 (403.5,39.0,210.5) at 403.50,38.20,209.87
+    [stairs] severia_homes_162 down 403,37,208: stuck before point 4 of 5 (403.5,38.0,209.5) at 403.50,38.63,210.30
+    [stairs] severia_homes_163 up 401,37,200: stuck before point 2 of 5 (401.5,39.0,202.5) at 401.50,38.20,201.87
+    [stairs] severia_homes_163 down 401,37,200: stuck before point 4 of 5 (401.5,38.0,201.5) at 401.50,38.63,202.30
+    [stairs] severia_homes_164 up 399,37,192: stuck before point 2 of 6 (397.5,39.0,192.5) at 398.30,38.00,192.50
+    [stairs] severia_homes_164 down 399,37,192: stuck before point 4 of 6 (397.5,39.0,192.5) at 397.50,39.63,193.30
+    [stairs] severia_homes_165 up 396,37,182: stuck before point 2 of 5 (396.5,39.0,184.5) at 396.50,38.20,183.87
+    [stairs] severia_homes_165 down 396,37,182: stuck before point 4 of 5 (396.5,38.0,183.5) at 396.50,38.63,184.30
+    [stairs] severia_homes_166 up 394,37,174: stuck before point 2 of 6 (392.5,39.0,174.5) at 393.30,38.00,174.50
+    [stairs] severia_homes_166 down 394,37,174: stuck before point 4 of 6 (392.5,39.0,174.5) at 392.50,39.63,175.30
+    [stairs] severia_homes_167 up 394,37,166: stuck before point 2 of 6 (392.5,39.0,166.5) at 393.30,38.00,166.50
+    [stairs] severia_homes_167 down 394,37,166: stuck before point 4 of 6 (392.5,39.0,166.5) at 392.50,39.63,167.30
+    [stairs] severia_homes_168 up 391,37,155: stuck before point 2 of 5 (391.5,39.0,157.5) at 391.50,38.20,156.87
+    [stairs] severia_homes_168 down 391,37,155: stuck before point 4 of 5 (391.5,38.0,156.5) at 391.50,38.63,157.30
+    [stairs] severia_homes_169 up 390,37,146: stuck before point 2 of 5 (390.5,39.0,148.5) at 390.50,38.20,147.87
+    [stairs] severia_homes_169 down 390,37,146: stuck before point 4 of 5 (390.5,38.0,147.5) at 390.50,38.63,148.30
+    [stairs] severia_east_housing_0 up 737,34,299: stuck before point 3 of 6 (737.5,37.0,302.5) at 737.50,36.20,301.87
+    [stairs] severia_east_housing_0 down 737,34,299: stuck before point 4 of 6 (737.5,36.0,301.5) at 737.50,36.63,302.31
+    [stairs] severia_east_housing_1 up 758,39,305: stuck before point 3 of 6 (758.5,42.0,302.5) at 758.50,41.20,303.13
+    [stairs] severia_east_housing_1 down 758,39,305: stuck before point 4 of 6 (758.5,41.0,303.5) at 758.50,41.63,302.69
+    [stairs] severia_east_housing_2 up 754,38,296: stuck before point 2 of 5 (754.5,40.0,294.5) at 754.50,39.20,295.13
+    [stairs] severia_east_housing_2 down 754,38,296: stuck before point 4 of 5 (754.5,39.0,295.5) at 754.50,39.63,294.70
+    [stairs] severia_east_housing_3 up 753,38,289: stuck before point 2 of 6 (755.5,40.0,289.5) at 754.70,39.00,289.50
+    [stairs] severia_east_housing_3 down 753,38,289: stuck before point 4 of 6 (755.5,40.0,289.5) at 755.50,40.63,288.70
+    [stairs] severia_east_housing_4 up 738,34,288: stuck before point 2 of 6 (736.5,36.0,288.5) at 737.30,35.00,288.50
+    [stairs] severia_east_housing_4 down 738,34,288: stuck before point 4 of 6 (736.5,36.0,288.5) at 736.50,36.63,289.30
+    [stairs] severia_east_housing_5 up 736,33,280: stuck before point 2 of 5 (736.5,35.0,282.5) at 736.50,34.20,281.87
+    [stairs] severia_east_housing_5 down 736,33,280: stuck before point 4 of 5 (736.5,34.0,281.5) at 736.50,34.63,282.30
+    [stairs] severia_east_housing_6 up 753,38,281: stuck before point 2 of 5 (753.5,40.0,279.5) at 753.50,39.20,280.13
+    [stairs] severia_east_housing_6 down 753,38,281: stuck before point 4 of 5 (753.5,39.0,280.5) at 753.50,39.63,279.70
+    [stairs] severia_east_housing_7 up 752,38,273: stuck before point 2 of 6 (754.5,40.0,273.5) at 753.70,39.00,273.50
+    [stairs] severia_east_housing_7 down 752,38,273: stuck before point 4 of 6 (754.5,40.0,273.5) at 754.50,40.63,272.70
+    [stairs] severia_east_housing_8 up 736,33,270: stuck before point 2 of 6 (734.5,35.0,270.5) at 735.30,34.00,270.50
+    [stairs] severia_east_housing_8 down 736,33,270: stuck before point 4 of 6 (734.5,35.0,270.5) at 734.50,35.63,271.30
+    [stairs] severia_east_housing_9 up 751,38,265: stuck before point 2 of 5 (751.5,40.0,263.5) at 751.50,39.20,264.13
+    [stairs] severia_east_housing_9 down 751,38,265: stuck before point 4 of 5 (751.5,39.0,264.5) at 751.50,39.63,263.70
+    [stairs] severia_east_housing_10 up 732,33,263: stuck before point 2 of 5 (732.5,35.0,265.5) at 732.50,34.20,264.87
+    [stairs] severia_east_housing_10 down 732,33,263: stuck before point 4 of 5 (732.5,34.0,264.5) at 732.50,34.63,265.30
+    [stairs] severia_east_housing_11 up 752,39,256: stuck before point 3 of 6 (752.5,42.0,253.5) at 752.50,41.20,254.13
+    [stairs] severia_east_housing_11 down 752,39,256: stuck before point 4 of 6 (752.5,41.0,254.5) at 752.50,41.63,253.70
+    [stairs] severia_east_housing_12 up 749,39,244: stuck before point 3 of 6 (749.5,42.0,241.5) at 749.50,41.20,242.13
+    [stairs] severia_east_housing_12 down 749,39,244: stuck before point 4 of 6 (749.5,41.0,242.5) at 749.50,41.63,241.70
+    [stairs] severia_east_housing_13 up 745,38,235: stuck before point 2 of 5 (745.5,40.0,233.5) at 745.50,39.20,234.13
+    [stairs] severia_east_housing_13 down 745,38,235: stuck before point 4 of 5 (745.5,39.0,234.5) at 745.50,39.63,233.70
+    [stairs] severia_east_housing_14 up 743,36,228: stuck before point 2 of 6 (745.5,38.0,228.5) at 744.70,37.00,228.50
+    [stairs] severia_east_housing_14 down 743,36,228: stuck before point 4 of 6 (745.5,38.0,228.5) at 745.50,38.63,227.70
+    [stairs] severia_east_housing_15 up 876,37,300: stuck before point 2 of 5 (876.5,39.0,302.5) at 876.50,38.20,301.87
+    [stairs] severia_east_housing_15 down 876,37,300: stuck before point 4 of 5 (876.5,38.0,301.5) at 876.50,38.63,302.30
+    [stairs] severia_east_housing_16 up 894,37,303: stuck before point 2 of 5 (894.5,39.0,301.5) at 894.50,38.20,302.13
+    [stairs] severia_east_housing_16 down 894,37,303: stuck before point 4 of 5 (894.5,38.0,302.5) at 894.50,38.63,301.70
+    [stairs] severia_east_housing_17 up 891,38,292: stuck before point 2 of 5 (891.5,40.0,290.5) at 891.50,39.20,291.13
+    [stairs] severia_east_housing_17 down 891,38,292: stuck before point 4 of 5 (891.5,39.0,291.5) at 891.50,39.63,290.70
+    [stairs] severia_east_housing_18 up 874,37,292: stuck before point 2 of 6 (872.5,39.0,292.5) at 873.30,38.00,292.50
+    [stairs] severia_east_housing_18 down 874,37,292: stuck before point 4 of 6 (872.5,39.0,292.5) at 872.50,39.63,293.30
+    [stairs] severia_east_housing_19 up 888,38,285: stuck before point 2 of 6 (890.5,40.0,285.5) at 889.70,39.00,285.50
+    [stairs] severia_east_housing_19 down 888,38,285: stuck before point 4 of 6 (890.5,40.0,285.5) at 890.50,40.63,284.70
+    [stairs] severia_east_housing_20 up 869,37,283: stuck before point 3 of 6 (869.5,40.0,286.5) at 869.50,39.20,285.87
+    [stairs] severia_east_housing_20 down 869,37,283: stuck before point 4 of 6 (869.5,39.0,285.5) at 869.50,39.63,286.31
+    [stairs] severia_east_housing_21 up 885,38,277: stuck before point 2 of 6 (887.5,40.0,277.5) at 886.70,39.00,277.50
+    [stairs] severia_east_housing_21 down 885,38,277: stuck before point 4 of 6 (887.5,40.0,277.5) at 887.50,40.63,276.70
+    [stairs] severia_east_housing_22 up 880,38,269: stuck before point 2 of 6 (882.5,40.0,269.5) at 881.70,39.00,269.50
+    [stairs] severia_east_housing_22 down 880,38,269: stuck before point 4 of 6 (882.5,40.0,269.5) at 882.50,40.63,268.70
+    [stairs] severia_east_housing_23 up 865,38,274: stuck before point 2 of 5 (865.5,40.0,276.5) at 865.50,39.20,275.87
+    [stairs] severia_east_housing_23 down 865,38,274: stuck before point 4 of 5 (865.5,39.0,275.5) at 865.50,39.63,276.30
+    [stairs] severia_east_housing_24 up 876,38,261: stuck before point 3 of 6 (876.5,41.0,258.5) at 876.50,40.20,259.13
+    [stairs] severia_east_housing_24 down 876,38,261: stuck before point 4 of 6 (876.5,40.0,259.5) at 876.50,40.63,258.69
+    [stairs] severia_east_housing_25 up 860,38,266: stuck before point 2 of 6 (858.5,40.0,266.5) at 859.30,39.00,266.50
+    [stairs] severia_east_housing_25 down 860,38,266: stuck before point 4 of 6 (858.5,40.0,266.5) at 858.50,40.63,267.30
+    [stairs] severia_east_housing_26 up 850,38,262: stuck before point 3 of 6 (853.5,41.0,262.5) at 852.87,40.20,262.50
+    [stairs] severia_east_housing_26 down 850,38,262: stuck before point 4 of 6 (852.5,40.0,262.5) at 853.30,40.63,262.50
+    [stairs] severia_east_housing_27 up 868,39,250: stuck before point 2 of 6 (868.5,41.0,248.5) at 868.50,40.00,249.30
+    [stairs] severia_east_housing_27 down 868,39,250: stuck before point 4 of 6 (868.5,41.0,248.5) at 867.70,41.63,248.50
+    [stairs] severia_east_housing_28 up 860,39,241: stuck before point 2 of 6 (860.5,41.0,239.5) at 860.50,40.00,240.30
+    [stairs] severia_east_housing_28 down 860,39,241: stuck before point 4 of 6 (860.5,41.0,239.5) at 859.70,41.63,239.50
+    [stairs] severia_east_housing_29 up 845,39,253: stuck before point 2 of 5 (847.5,41.0,253.5) at 846.87,40.20,253.50
+    [stairs] severia_east_housing_29 down 845,39,253: stuck before point 4 of 5 (846.5,40.0,253.5) at 847.30,40.63,253.50
+    [stairs] severia_east_housing_30 up 836,39,247: stuck before point 3 of 6 (839.5,42.0,247.5) at 838.87,41.20,247.50
+    [stairs] severia_east_housing_30 down 836,39,247: stuck before point 4 of 6 (838.5,41.0,247.5) at 839.30,41.63,247.50
+    [stairs] severia_east_housing_31 up 853,39,232: stuck before point 2 of 5 (851.5,41.0,232.5) at 852.13,40.20,232.50
+    [stairs] severia_east_housing_31 down 853,39,232: stuck before point 4 of 5 (852.5,40.0,232.5) at 851.70,40.63,232.50
+    [stairs] severia_east_housing_32 up 832,39,235: stuck before point 2 of 5 (832.5,41.0,237.5) at 832.50,40.20,236.87
+    [stairs] severia_east_housing_32 down 832,39,235: stuck before point 4 of 5 (832.5,40.0,236.5) at 832.50,40.63,237.30
+    [stairs] severia_east_housing_33 up 847,39,225: stuck before point 2 of 5 (845.5,41.0,225.5) at 846.13,40.20,225.50
+    [stairs] severia_east_housing_33 down 847,39,225: stuck before point 4 of 5 (846.5,40.0,225.5) at 845.70,40.63,225.50
+    [stairs] severia_east_housing_34 up 825,39,226: stuck before point 3 of 6 (825.5,42.0,229.5) at 825.50,41.20,228.87
+    [stairs] severia_east_housing_34 down 825,39,226: stuck before point 4 of 6 (825.5,41.0,228.5) at 825.50,41.63,229.31
+    [stairs] severia_east_housing_35 up 844,39,215: stuck before point 3 of 6 (841.5,42.0,215.5) at 842.13,41.20,215.50
+    [stairs] severia_east_housing_35 down 844,39,215: stuck before point 4 of 6 (842.5,41.0,215.5) at 841.70,41.63,215.50
+    [stairs] severia_east_housing_36 up 822,39,219: stuck before point 2 of 5 (822.5,41.0,221.5) at 822.50,40.20,220.87
+    [stairs] severia_east_housing_36 down 822,39,219: stuck before point 4 of 5 (822.5,40.0,220.5) at 822.50,40.63,221.30
+    [stairs] severia_east_housing_37 up 837,39,211: stuck before point 2 of 5 (837.5,41.0,209.5) at 837.50,40.20,210.13
+    [stairs] severia_east_housing_37 down 837,39,211: stuck before point 4 of 5 (837.5,40.0,210.5) at 837.50,40.63,209.70
+    [stairs] severia_east_housing_38 up 819,39,212: stuck before point 2 of 5 (819.5,41.0,214.5) at 819.50,40.20,213.87
+    [stairs] severia_east_housing_38 down 819,39,212: stuck before point 4 of 5 (819.5,40.0,213.5) at 819.50,40.63,214.30
+    [stairs] severia_east_housing_39 up 834,39,204: stuck before point 3 of 6 (834.5,42.0,201.5) at 834.50,41.20,202.13
+    [stairs] severia_east_housing_39 down 834,39,204: stuck before point 4 of 6 (834.5,41.0,202.5) at 834.50,41.63,201.70
+    [stairs] severia_east_housing_40 up 813,39,203: stuck before point 3 of 6 (813.5,42.0,206.5) at 813.50,41.20,205.87
+    [stairs] severia_east_housing_40 down 813,39,203: stuck before point 4 of 6 (813.5,41.0,205.5) at 813.50,41.63,206.31
+    [stairs] severia_east_housing_41 up 828,39,192: stuck before point 3 of 6 (828.5,42.0,189.5) at 828.50,41.20,190.13
+    [stairs] severia_east_housing_41 down 828,39,192: stuck before point 4 of 6 (828.5,41.0,190.5) at 828.50,41.63,189.70
+    [stairs] severia_east_housing_42 up 810,39,199: stuck before point 2 of 5 (812.5,41.0,199.5) at 811.87,40.20,199.50
+    [stairs] severia_east_housing_42 down 810,39,199: stuck before point 4 of 5 (811.5,40.0,199.5) at 812.30,40.63,199.50
+    [stairs] severia_east_housing_43 up 819,38,184: stuck before point 2 of 5 (819.5,40.0,182.5) at 819.50,39.20,183.13
+    [stairs] severia_east_housing_43 down 819,38,184: stuck before point 4 of 5 (819.5,39.0,183.5) at 819.50,39.63,182.70
+    [stairs] severia_east_housing_44 up 803,39,192: stuck before point 2 of 5 (805.5,41.0,192.5) at 804.87,40.20,192.50
+    [stairs] severia_east_housing_44 down 803,39,192: stuck before point 4 of 5 (804.5,40.0,192.5) at 805.30,40.63,192.50
+    [stairs] severia_east_housing_45 up 812,38,176: stuck before point 2 of 5 (810.5,40.0,176.5) at 811.13,39.20,176.50
+    [stairs] severia_east_housing_45 down 812,38,176: stuck before point 4 of 5 (811.5,39.0,176.5) at 810.70,39.63,176.50
+    [stairs] severia_east_housing_46 up 793,39,188: stuck before point 2 of 5 (795.5,41.0,188.5) at 794.87,40.20,188.50
+    [stairs] severia_east_housing_46 down 793,39,188: stuck before point 4 of 5 (794.5,40.0,188.5) at 795.30,40.63,188.50
+    [stairs] severia_east_housing_47 up 789,38,170: stuck before point 2 of 6 (789.5,40.0,168.5) at 789.50,39.00,169.30
+    [stairs] severia_east_housing_47 down 789,38,170: stuck before point 4 of 6 (789.5,40.0,168.5) at 788.70,40.63,168.50
+    [stairs] severia_east_housing_48 up 784,39,188: stuck before point 2 of 6 (784.5,41.0,190.5) at 784.50,40.00,189.70
+    [stairs] severia_east_housing_48 down 784,39,188: stuck before point 4 of 6 (784.5,41.0,190.5) at 785.30,41.63,190.50
+    [stairs] severia_east_housing_49 up 775,39,192: stuck before point 3 of 6 (778.5,42.0,192.5) at 777.87,41.20,192.50
+    [stairs] severia_east_housing_49 down 775,39,192: stuck before point 4 of 6 (777.5,41.0,192.5) at 778.30,41.63,192.50
+    [stairs] loxford_gaol up 192,39,932: stuck before point 2 of 5 (192.5,41.0,930.5) at 192.50,40.00,931.30
+    [stairs] loxford_gaol down 192,39,932: stuck before point 4 of 5 (192.5,40.0,931.5) at 192.50,40.83,930.70
+    [stairs] harlette_gaol up 104,41,782: stuck before point 2 of 5 (106.5,43.0,782.5) at 105.70,42.00,782.50
+    [stairs] harlette_gaol down 104,41,782: stuck before point 4 of 5 (105.5,42.0,782.5) at 106.30,42.83,782.50
+    [stairs] harlette_bank up 161,45,724: stuck before point 2 of 5 (159.5,47.0,724.5) at 160.13,46.20,724.50
+    [stairs] harlette_bank down 161,45,724: stuck before point 4 of 5 (160.5,46.0,724.5) at 159.70,46.63,724.50
+    [stairs] valgard_gaol up 163,57,596: stuck before point 2 of 5 (165.5,59.0,596.5) at 164.70,58.00,596.50
+    [stairs] valgard_gaol down 163,57,596: stuck before point 4 of 5 (164.5,58.0,596.5) at 165.30,58.83,596.50
+    [stairs] gorrick_gaol up 408,56,432: stuck before point 2 of 5 (408.5,58.0,434.5) at 408.50,57.00,433.70
+    [stairs] gorrick_gaol down 408,56,432: stuck before point 4 of 5 (408.5,57.0,433.5) at 408.50,57.83,434.30
+    [stairs] azharad_gaol up 912,37,965: stuck before point 2 of 5 (912.5,39.0,963.5) at 912.50,38.00,964.30
+    [stairs] azharad_gaol down 912,37,965: stuck before point 4 of 5 (912.5,38.0,964.5) at 912.50,38.83,963.70
+    [stairs] severia_gaol up 504,37,135: stuck before point 2 of 5 (502.5,39.0,135.5) at 503.30,38.00,135.50
+    [stairs] severia_gaol down 504,37,135: stuck before point 4 of 5 (503.5,38.0,135.5) at 502.70,38.83,135.50
+    [stairs] camelot_gaol up 845,62,396: stuck before point 2 of 5 (843.5,64.0,396.5) at 844.30,63.00,396.50
+    [stairs] camelot_gaol down 845,62,396: stuck before point 4 of 5 (844.5,63.0,396.5) at 843.70,63.83,396.50
+    [stairs] camelot_bank up 822,62,388: stuck before point 2 of 5 (824.5,64.0,388.5) at 823.87,63.20,388.50
+    [stairs] camelot_bank down 822,62,388: stuck before point 4 of 5 (823.5,63.0,388.5) at 824.30,63.63,388.50
+
+Gradle Test Executor 3 finished executing tests.
+
+> Task :slowTest FAILED
+  slow: rpg.world.StairWalkTest.everyStaircaseIsWalkedUpAndDown() 1041.701 s
+
+StairWalkTest > everyStaircaseIsWalkedUpAndDown() FAILED
+    java.util.concurrent.TimeoutException: everyStaircaseIsWalkedUpAndDown() timed out after 8 minutes
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+1 test completed, 1 failed
+Finished generating test XML results (0.031 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\slowTest
+Generating HTML test report...
+Finished generating test html results (0.05 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\slowTest
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':slowTest'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/slowTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 19m 40s
+9 actionable tasks: 3 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

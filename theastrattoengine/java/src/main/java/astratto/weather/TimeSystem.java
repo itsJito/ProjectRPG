@@ -22,6 +22,8 @@ public final class TimeSystem {
     public final List<Region> regions = new ArrayList<>();
     public final Weather weather = new Weather();
     public float tintR=1,tintG=1,tintB=1,fogScale=1;
+    /** (2.13) Whether the system rolls its own weather every four hours (off: the game asks for the weather itself). */
+    public boolean autoWeather=true;
     private long weatherEpoch=Long.MIN_VALUE;
     public static float daylight(double hour) {
         double sun=Math.sin((hour-6)/12*Math.PI);
@@ -47,7 +49,7 @@ public final class TimeSystem {
 
     public void update(double minutes,float dt,float x,float y,float z) {
         long epoch=(long)Math.floor(minutes/240);
-        if(epoch!=weatherEpoch) {
+        if(autoWeather && epoch!=weatherEpoch) {
             weatherEpoch=epoch;
             int roll=(int)Math.floorMod(epoch*6364136223846793005L+1442695040888963407L,100);
             weather.set(roll<55?Weather.Kind.CLEAR:roll<82?Weather.Kind.OVERCAST:roll<97?Weather.Kind.RAIN:Weather.Kind.STORM);

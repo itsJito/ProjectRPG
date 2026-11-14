@@ -241,7 +241,7 @@ public final class Breakables {
             float vx = dx * sp * near + ox / ol * (0.6f + rnd.nextFloat()), vy = 0.8f + rnd.nextFloat() * 1.4f + Math.max(0, dy) * sp, vz = dz * sp * near + oz / ol * (0.6f + rnd.nextFloat());
             float mass = Math.max(0.1f, vs.size() * Breakable.VOXEL * Breakable.VOXEL * Breakable.VOXEL * 600);
             long body = g.game.reserve(AstrattoNative.KIND_RIGID);
-            g.game.commands().rigidCreate(body, AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_DEBRIS | AstrattoNative.RIGID_REPORT | AstrattoNative.RIGID_NO_MOVERS,
+            g.game.commands().rigidCreate(body, AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_DEBRIS | AstrattoNative.RIGID_REPORT | AstrattoNative.RIGID_YIELD,
                     Math.max(0.02f, v.sx * Breakable.VOXEL / 2), Math.max(0.02f, v.sy * Breakable.VOXEL / 2), Math.max(0.02f, v.sz * Breakable.VOXEL / 2), mass,
                     wx, wy, wz, b.qw, b.qx, b.qy, b.qz, vx, vy, vz,
                     (rnd.nextFloat() - 0.5f) * 10, (rnd.nextFloat() - 0.5f) * 10, (rnd.nextFloat() - 0.5f) * 10, 0.7f, 0.15f, MATERIAL_WOOD, null);
@@ -289,6 +289,20 @@ public final class Breakables {
         if (p.body != 0) { g.game.commands().release(p.body); p.body = 0; }
         if (p.gpu != 0) { freed.add(p.gpu); p.gpu = 0; }
         if (p.gpuMetal != 0) { freed.add(p.gpuMetal); p.gpuMetal = 0; }
+    }
+
+    /** (0.4.6) Every crate, barrel and sign whole again where it was first set down, and the splinters gone. Returns how many. */
+    public int restoreAll() {
+        int n = 0;
+        for (Breakable b : all) {
+            boolean moved = Math.abs(b.x - b.homeX) > 0.05f || Math.abs(b.z - b.homeZ) > 0.05f || Math.abs(b.y - b.homeY) > 0.05f;
+            if (!b.broken && b.lost == 0 && !moved) continue;
+            b.rebuild();
+            respawn(b);
+            n++;
+        }
+        while (!debris.isEmpty()) release(debris.pollFirst());
+        return n;
     }
 
     /** All bodies let go (a world unloaded). */

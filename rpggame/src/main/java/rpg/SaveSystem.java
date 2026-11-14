@@ -44,6 +44,9 @@ public final class SaveSystem {
         return m.find() ? new int[]{Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))} : null;
     }
     /** Whether a save made in one version can be played in another: only within the same line. */
+    /** (0.4.6) The open sea round ShadowVeil's design (its layout's stamp; 0 on the devmap). */
+    private static int worldMargin() { return rpg.world.WorldMap.shadowveil() ? rpg.world.shadowveil.Atlas.get().margin : 0; }
+
     public static boolean compatible(String saved, String running) {
         int[] a = line(saved == null || saved.isBlank() ? UNSTAMPED : saved), b = line(running);
         return a != null && b != null && a[0] == b[0] && a[1] == b[1];
@@ -69,6 +72,7 @@ public final class SaveSystem {
         root.put("version", Main.VERSION);
         // (0.4.0) the map the game was played on: a save belongs to its world (ShadowVeil's, or the legacy devmap's)
         root.put("map", g.map.id);
+        root.put("worldMargin", worldMargin());
         root.put("pendingLevels",g.prog.save());
         root.put("npcTraversalProfiles", 1);
         root.put("revision", g.state.revision);
@@ -141,6 +145,7 @@ public final class SaveSystem {
         root.put("honor", g.honor.save());
         root.put("chemistry", g.chemistry.save());root.put("foliage",g.foliage.save());root.put("farming",g.farming.save());root.put("inns",g.inns.save());if(g.fishery!=null)root.put("fishery",g.fishery.save());if(g.guilds!=null)root.put("guilds",g.guilds.save());
         root.put("timeSystem",g.timeSystem.save());
+        if (g.weatherSystem != null) root.put("weatherCycle", g.weatherSystem.save());
         root.put("quests", g.quests.save());
         root.put("invariants", g.invariants.save());
         // (0.4.1) the character apart from the world, readable by any later version (CharacterRecord)
@@ -217,7 +222,8 @@ public final class SaveSystem {
         if (Json.integer(root, "schema", 0) != SCHEMA) { g.chat.warn("That save is from another schema version."); return false; }
         String made = Json.str(root, "version", UNSTAMPED);
         String world = Json.str(root, "map", "devmap");
-        if (!compatible(made, Main.VERSION) || !world.equals(g.map.id)) {
+        // (0.4.6) a world laid out with another margin of sea round it has every place elsewhere: the character carries over
+        if (!compatible(made, Main.VERSION) || !world.equals(g.map.id) || Json.integer(root, "worldMargin", 0) != worldMargin()) {
             // (0.4.1, gamefixes: future versions read the character's data) the world of another version (or another
             // map) does not carry over; the character does - skills, pack, worn gear, bank, quests and Honor - into this
             // world, at its spawn
@@ -278,7 +284,7 @@ public final class SaveSystem {
                 ally.loaded=false; g.npcs.add(ally); a=ally;
             }
             if(a==null && Json.bool(m,"posse",false)) {
-                Npc hunter=new Npc(Json.lng(m,"id",-1),Json.str(m,"name","Bounty hunter"),Npc.Role.HUNTER,"Bounty Hunter",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
+                Npc hunter=new Npc(Json.lng(m,"id",-1),Json.str(m,"name",rpg.ai.Names.drawn(Json.lng(m,"id",-1),false)),Npc.Role.HUNTER,"Bounty Hunter",(float)Json.num(m,"x",0),(float)Json.num(m,"z",0));
                 hunter.posse=true; hunter.homeJurisdiction=Json.str(m,"posseJur",DevMap.ALPHA);
                 hunter.loaded=false; g.npcs.add(hunter); a=hunter;
             }
@@ -376,6 +382,8 @@ public final class SaveSystem {
         g.honor.load(Json.obj(root, "honor"));
         g.chemistry.load(Json.list(root, "chemistry"));g.foliage.load(Json.obj(root,"foliage"));g.farming.load(Json.obj(root,"farming"));g.inns.load(Json.obj(root,"inns"));if(g.fishery!=null)g.fishery.load(Json.obj(root,"fishery"));if(g.guilds!=null)g.guilds.load(Json.obj(root,"guilds"));g.traps.afterLoad();
         g.timeSystem.load(Json.obj(root,"timeSystem"));
+        if (g.weatherSystem == null) g.weatherSystem = new rpg.world.WeatherSystem(g);
+        g.weatherSystem.load(Json.obj(root, "weatherCycle"));
         g.quests.load(Json.obj(root, "quests"));
         g.invariants.load(Json.obj(root, "invariants"));
         for(Npc resident:addedResidents)g.invariants.rebase(resident);
@@ -383,6 +391,7 @@ public final class SaveSystem {
         g.ai.syncAbstractClock();
         g.mapDirty = true;
         g.mapColumns.clear();   // (a load redraws the whole map)
+        g.restoreWorld("loaded");
         g.state.commit("GameLoaded", g.player.id, 0, null, 0, file + " (saved at revision " + Json.lng(root, "revision", 0) + ")");
         return true;
     }

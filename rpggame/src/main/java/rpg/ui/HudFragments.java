@@ -52,6 +52,7 @@ final class HudFragments {
         hud.add(new Wanted(hud)).wake("law").linger(8);
         hud.add(new HonorToast(hud)).wake("honor");
         hud.add(new BountyNotice(hud)).wake("bountynotice");
+        hud.add(new RegionBanner(hud));
         hud.add(new Target(hud)).wake("combat").linger(5);
         hud.add(new Milestone(hud));
         hud.add(new LevelBanner(hud));
@@ -168,6 +169,62 @@ final class HudFragments {
     private static float ease(float t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
 
     /**
+     * (0.4.6, gamefixes: entering a new region shows its name) the name of the kingdom or the wild region the player has
+     * come into, top centre: the letters spaced wide over a soft dark band, gilt rules drawing out either side, a smaller
+     * line under it saying what the place is, fading in and out. It heads the column of notices at the top (Hud.TOP_STACK),
+     * so a bounty reminder that comes with it stands below it, never over it. A border crossed and crossed back within a
+     * moment shows nothing.
+     */
+    static final class RegionBanner extends Fragment {
+        RegionBanner(Hud h) { super("regionbanner"); fadeIn = 0.6f; fadeOut = 0.9f; }
+        static final float SHOW = rpg.Tuning.f("hud.regionShow", 5f), SETTLE = rpg.Tuning.f("hud.regionSettle", 1.5f);
+        private String shown, title = "", caption = "", pending;
+        private double pendingAt, at = -99;
+        @Override protected boolean active() {
+            var g = hud.g;
+            if (g.player == null || !rpg.world.WorldMap.shadowveil()) return false;
+            String realm = rpg.world.DevMap.jurisdiction(g.player.x, g.player.z);
+            var t = rpg.world.shadowveil.ShadowVeil.terrain();
+            String region = t == null ? null : t.regionName((int) Math.floor(g.player.x), (int) Math.floor(g.player.z));
+            boolean wild = rpg.world.DevMap.WILDS.equals(realm);
+            String place = wild ? region : realm;
+            if (place != null && !place.equals(shown)) {
+                if (!place.equals(pending)) { pending = place; pendingAt = g.time; }
+                else if (g.time - pendingAt >= SETTLE) {
+                    shown = place; pending = null;
+                    title = place;
+                    caption = wild ? "The Wilds" : region != null && !region.equals(realm) ? "Kingdom of " + realm + "  -  " + region : "Kingdom of " + realm;
+                    at = g.time;
+                }
+            } else if (place != null) pending = null;
+            return g.time >= at && g.time - at < SHOW;
+        }
+        @Override public float width() { return 640; }
+        @Override public float height() { return 92; }
+        @Override public void draw(Ui2D ui, float x, float y) {
+            float t = (float) (hud.g.time - at), a = Math.min(Math.min(1, t / 0.8f), Math.max(0, (SHOW - t) / 1.0f));
+            if (a <= 0) return;
+            float cx = x + 320;
+            StringBuilder sp = new StringBuilder();
+            for (char c : title.toUpperCase(java.util.Locale.ROOT).toCharArray()) { if (sp.length() > 0) sp.append(' '); sp.append(c == ' ' ? "  " : String.valueOf(c)); }
+            String spaced = sp.toString();
+            float size = Math.min(44, 900f / Math.max(10, spaced.length()));
+            float tw = ui.width(ui.body, spaced, size);
+            // a soft dark band under the words, widest in the middle
+            for (int i = 0; i < 10; i++) { float k = 1 - Math.abs(i - 4.5f) / 5f; ui.rect(cx - tw / 2 - 90, y + 8 + i * 7, tw + 180, 7, Style.fade(0xFF000000, a * 0.32f * k)); }
+            // gilt rules drawing out from the middle either side, a lozenge at each end
+            float open = ease(t / 1.1f), rl = (tw / 2 + 70) * open;
+            ui.rect(cx - rl, y + 62, rl * 2, 1, Style.fade(0xFFE8C878, a * 0.85f));
+            ui.rect(cx - rl * 0.8f, y + 65, rl * 1.6f, 1, Style.fade(0xFF8A6A30, a * 0.6f));
+            for (float s : new float[]{-1, 1}) { float lx = cx + s * rl; ui.rect(lx - 3, y + 60, 6, 6, Style.fade(0xFFE8C878, a)); ui.rect(lx - 1, y + 58, 2, 10, Style.fade(0xFFF6E2A8, a)); }
+            float rise = (1 - ease(t / 0.9f)) * 10;
+            ui.text(ui.body, spaced, cx - tw / 2 + 2, y + 16 + rise + 2, size, Style.fade(0xFF000000, a * 0.75f));
+            ui.text(ui.body, spaced, cx - tw / 2, y + 16 + rise, size, Style.fade(0xFFF2E2B4, a));
+            ui.flatCentered(caption, cx, y + 72, 14, Style.fade(0xFFD8C8A0, a * ease((t - 0.35f) / 0.8f)));
+        }
+    }
+
+    /**
      * The death screen (gamefixes): the frame closes to a letterbox as the camera finds the killer; the words come up
      * through the grey - what happened, who did it, what becomes of what was carried - and after the five seconds the
      * choice: Continue (wake at the graveyard) or Exit (to the title). Enter is Continue.
@@ -269,7 +326,8 @@ final class HudFragments {
         @Override public void draw(Ui2D ui, float x0, float y0) {
             Rpg g = hud.g;
             var gfx = hud.gfx;
-            for (Object[] s : DevMap.SIGNS) {
+            // (0.4.3, gamefixes: the devmap's area signs - Store B, Chancery B - floated over ShadowVeil) the devmap's own
+            for (Object[] s : rpg.world.WorldMap.devmap() ? DevMap.SIGNS : new Object[0][]) {
                 float x = (float) s[1], z = (float) s[2];
                 float d = (float) Math.hypot(x - g.player.x, z - g.player.z);
                 if (d > 22 || !gfx.project(x, rpg.world.Ground.at(x, z) + 3.1f, z, p2)) continue;
@@ -813,9 +871,9 @@ final class HudFragments {
 
     /** What each map icon stands for, in the order a traveller needs them; only the ones on the chart are listed. */
     private static final String[][] MAP_KEY = {
-            {"General_store_map_icon", "General store"}, {"Food_shop_map_icon", "Food stall"}, {"Bank_map_icon", "Chest"},
+            {"General_store_map_icon", "General store"}, {"Food_shop_map_icon", "Food stall"}, {"Bank_map_icon", "Bank"},
             {"Platebody_map_icon", "Armour cabinet"}, {"Smithing_Icon", "Anvil and furnace"}, {"Cookingrange_map_icon", "Cooking range"},
-            {"Crafting_shop_map_icon", "Crafting table"}, {"Construction_Icon", "Sawbench"}, {"Estate_map_icon", "Bed"},
+            {"Crafting_shop_map_icon", "Crafting table"}, {"Construction_Icon", "Sawbench"}, {"Estate_map_icon", "Your bed and chest"},
             {"Shield_map_icon", "Lawman"}, {"Quest_map_icon", "Quest"}, {"Sidequest_map_icon", "Notice board"},
             {"Gravestone_map_icon", "Undertaker"}, {"Agility_training_map_icon", "Climbing course"}, {"Water_source_map_icon", "Well"},
             {"Fishing_spot_map_icon", "Fishing spot"}, {"Woodcutting_Icon", "Trees"}, {"Mining_Icon", "Mine"},
@@ -968,15 +1026,21 @@ final class HudFragments {
             markers.clear();
             for (WorldObject o : g.objects.all()) {
                 String icon = null;
-                if (o instanceof Station s) icon = switch (s.def) { case "range" -> "Cookingrange_map_icon"; case "anvil", "furnace" -> "Smithing_Icon"; case "craft_table" -> "Crafting_shop_map_icon"; case "sawbench" -> "Construction_Icon"; default -> null; };
-                else if (o instanceof Container c) icon = c.kind.equals("chest") && c != g.objects.custody ? "Bank_map_icon" : null;
+                // (0.4.5, gamefixes: the map took every chest for a bank, a house for a bank) a household's own range, bed
+                // and chest are its business, not the chart's: a station is marked where anyone may use it, a bed or a
+                // chest only when it is the player's
+                boolean mine = o.owner == g.player.id, open = o.owner == 0 || mine;
+                if (o instanceof Station s) icon = !open ? null : switch (s.def) { case "range" -> "Cookingrange_map_icon"; case "anvil", "furnace" -> "Smithing_Icon"; case "craft_table" -> "Crafting_shop_map_icon"; case "sawbench" -> "Construction_Icon"; default -> null; };
+                else if (o instanceof Container c) icon = mine && c.kind.equals("chest") ? "Estate_map_icon" : null;
                 else if (o instanceof Fixtures.Stall) icon = "Food_shop_map_icon";
                 else if (o instanceof Fixtures.Kiosk) icon = "Sidequest_map_icon";
                 else if (o instanceof Fixtures.Cabinet) icon = "Platebody_map_icon";
                 else if (o instanceof Fixtures.Climb) icon = "Agility_training_map_icon";
-                else if (o instanceof Furniture f && f.def.contains("bed")) icon = "Estate_map_icon";
+                else if (o instanceof Furniture f && f.def.contains("bed") && mine) icon = "Estate_map_icon";
                 if (icon != null && onWorld(o.x, o.z)) markers.add(new Object[]{icon, o.x, o.z});
             }
+            // the banks: where each branch's teller serves
+            for (var b : g.bank.branches()) if (onWorld(b.customerSpot()[0], b.customerSpot()[1])) markers.add(new Object[]{"Bank_map_icon", b.customerSpot()[0], b.customerSpot()[1]});
             for (Npc n : g.npcs) {
                 String icon = switch (n.role) { case MERCHANT, FENCE -> "General_store_map_icon"; case LAWMAN -> "Shield_map_icon"; case QUEST_GIVER -> "Quest_map_icon"; case UNDERTAKER -> "Gravestone_map_icon"; default -> null; };
                 if (icon != null && onWorld(n.postX, n.postZ)) markers.add(new Object[]{icon, n.postX, n.postZ});

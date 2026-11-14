@@ -23,8 +23,9 @@ import rpg.world.Blocks;
  *     given parapets and piers, the streets their lamps, and every door, interior and reserved underground volume
  *     checked against what was built.</li>
  * </ol>
- * Interiors, furnishings and the people who live in these places come in 0.4.2: here every building has its footprint,
- * its doors and its rooms' volumes kept empty, and every dungeon its entrance and the volume beyond it reserved.
+ * Interiors, furnishings and the people who live in these places come in 0.4.3: here every building has its footprint,
+ * its doors and its rooms' volumes kept empty, and every dungeon its entrance and the volume beyond it reserved - and
+ * (0.4.2) every one registered and checked ({@link Registry}) and dressed outside for what it is ({@link Dressing}).
  */
 public final class Architecture {
     /** A structure of the world as planned and raised. */
@@ -103,6 +104,21 @@ public final class Architecture {
         ar.planAqueducts();
         for (Map<String, Object> s : Atlas.list(ar.data, "settlements")) ar.planSettlement(s);
         for (Map<String, Object> s : Atlas.list(ar.data, "settlements")) for (Map<String, Object> dd : Atlas.list(s, "districts")) ar.planDistrict(s, dd);
+        // (0.4.4) the civic buildings added after the streets were laid (the jails, banks and graveyards): on free ground
+        for (Map<String, Object> s : Atlas.list(ar.data, "settlements")) {
+            Kit.Style st = ar.style(Atlas.s(s, "style", "wilds"));
+            for (Map<String, Object> b : Atlas.list(s, "later")) {
+                // inside its own kingdom's bounds where there is room there, else the nearest ground that will take it
+                Map<String, Object> o = new HashMap<>(b); o.put("later", true); o.put("realm", Atlas.s(s, "realm", ""));
+                // (a wider search within the bounds, a road a little further off, before the bounds are given up: a bank
+                // just outside Harlette was under the wilds' law)
+                java.util.function.Supplier<Boolean> again = () -> { ar.failures.removeIf(f -> f.startsWith("no ground for " + Atlas.s(b, "id", "?"))); return ar.place(Atlas.s(s, "id", "?"), st, o) != null; };
+                if (ar.place(Atlas.s(s, "id", "?"), st, o) == null) {
+                    o.put("search", Atlas.i(b, "search", 28) * 2); o.put("nearRoad", Atlas.i(b, "nearRoad", 16) + 8);
+                    if (!again.get()) { o.remove("realm"); again.get(); }
+                }
+            }
+        }
         ar.lanes();
         ar.orchards();
         return ar;
@@ -131,7 +147,7 @@ public final class Architecture {
         double cx = a.x(at[0]), cz = a.z(at[1]);
         char facing = facing(Atlas.s(b, "facing", "road"), cx, cz, b);
         long seed = a.seed * 31 + id.hashCode();
-        Structure s = new Structure(id, Atlas.s(b, "name", id), template, settlement, opts, st, seed);
+        Structure s = new Structure(id, Atlas.s(b, "name", id), template, settlement, opts, st.vary(seed), seed);
         s.w = w; s.d = d; s.facing = facing;
         if (!lot(s, cx, cz, Atlas.i(b, "search", 28), Atlas.i(b, "margin", 2), Atlas.d(b, "maxSlope", 9),
                 Boolean.TRUE.equals(b.get("water")), Boolean.TRUE.equals(b.get("onRoad")))) {
@@ -177,10 +193,35 @@ public final class Architecture {
             if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
             int x0 = bx + dx, z0 = bz + dz;
             if (!free(x0, z0, x0 + sx - 1, z0 + sz - 1, margin, maxSlope, water, onRoad)) continue;
+            if (Boolean.TRUE.equals(s.opts.get("later")) && !laterFits(s, x0, z0, x0 + sx - 1, z0 + sz - 1)) continue;
             s.x0 = x0; s.z0 = z0; s.x1 = x0 + sx - 1; s.z1 = z0 + sz - 1;
             s.floor = water ? waterLevel(s) + 1 : pad(s, margin, onRoad);
             claim(s, margin);
             return true;
+        }
+        return false;
+    }
+    /**
+     * (0.4.4) Whether a building added after the streets fits a lot: never across another building's front (the ground
+     * three cells before its face, where its door and its lane are), and with a road near its own front for its lane.
+     */
+    private boolean laterFits(Structure s, int x0, int z0, int x1, int z1) {
+        String realm = Atlas.s(s.opts, "realm", "");
+        if (!realm.isEmpty() && !realm.equals(ShadowVeil.realmAt(a, (x0 + x1) / 2, (z0 + z1) / 2))) return false;
+        for (Structure o : structures) {
+            if (o.x1 < x0 - 6 || o.x0 > x1 + 6 || o.z1 < z0 - 6 || o.z0 > z1 + 6) continue;
+            // a clear way round every building already standing (its back doors, its eaves, its eased ground)
+            if (!YARDS.contains(o.template) && o.x0 - 4 <= x1 && x0 <= o.x1 + 4 && o.z0 - 4 <= z1 && z0 <= o.z1 + 4) return false;
+            int fx0 = o.x0, fz0 = o.z0, fx1 = o.x1, fz1 = o.z1;
+            switch (o.facing) { case 'n' -> { fz1 = o.z0 - 1; fz0 = o.z0 - 4; } case 's' -> { fz0 = o.z1 + 1; fz1 = o.z1 + 4; } case 'w' -> { fx1 = o.x0 - 1; fx0 = o.x0 - 4; } default -> { fx0 = o.x1 + 1; fx1 = o.x1 + 4; } }
+            if (fx0 <= x1 && x0 <= fx1 && fz0 <= z1 && z0 <= fz1) return false;
+        }
+        int cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+        int[] out = switch (s.facing) { case 'n' -> new int[]{cx, z0 - 3}; case 's' -> new int[]{cx, z1 + 3}; case 'w' -> new int[]{x0 - 3, cz}; default -> new int[]{x1 + 3, cz}; };
+        int reach = Atlas.i(s.opts, "nearRoad", 16);
+        for (int dx = -reach; dx <= reach; dx++) for (int dz = -reach; dz <= reach; dz++) {
+            int x = out[0] + dx, z = out[1] + dz;
+            if (t.in(x, z) && (t.flags[t.idx(x, z)] & Terrain.ROAD) != 0) return true;
         }
         return false;
     }
@@ -256,11 +297,25 @@ public final class Architecture {
             if (t.water[i] >= 0 || (t.flags[i] & (Terrain.ROAD | Terrain.BRIDGE | Terrain.BUILT)) != 0) continue;
             double dd = Math.hypot(x + 0.5 - cx, z + 0.5 - cz) / R;
             if (dd >= 1) continue;
-            int want = P + (int) Math.round(need * (1 - dd * dd) + Noise.hash(a.seed, x, z, 97) * 1.2);
+            // (0.4.3, gamefixes: the culvert cave at 573, 40, 899 was a dome of bare cobble) a smooth rise, grassed as the
+            // land about it; bare rock only on the face about the opening
+            double e = 1 - dd, rise = e * e * (3 - 2 * e);
+            int want = P + (int) Math.round(need * rise + Noise.hash(a.seed, x - a.margin, z - a.margin, 97) * 0.8);
             if (s.contains(x, z) || t.top[i] < want) t.top[i] = Math.max(t.top[i], want);
-            t.flags[i] |= Terrain.CLIFF;
+            if (face(s, x, z)) t.flags[i] |= Terrain.CLIFF; else t.flags[i] &= ~Terrain.CLIFF;
+            t.flags[i] &= ~Terrain.TREE;
         }
     }
+    /** Whether a cell is on a mouth's face: within two cells of its front, and no wider than its lot and a cell each side. */
+    private static boolean face(Structure s, int x, int z) {
+        return switch (s.facing) {
+            case 'n' -> z >= s.z0 - 1 && z <= s.z0 + 2 && x >= s.x0 - 1 && x <= s.x1 + 1;
+            case 's' -> z <= s.z1 + 1 && z >= s.z1 - 2 && x >= s.x0 - 1 && x <= s.x1 + 1;
+            case 'w' -> x >= s.x0 - 1 && x <= s.x0 + 2 && z >= s.z0 - 1 && z <= s.z1 + 1;
+            default -> x <= s.x1 + 1 && x >= s.x1 - 2 && z >= s.z0 - 1 && z <= s.z1 + 1;
+        };
+    }
+
     private void claim(Structure s, int margin) {
         for (int x = s.x0 - margin; x <= s.x1 + margin; x++) for (int z = s.z0 - margin; z <= s.z1 + margin; z++) {
             if (!t.in(x, z)) continue;
@@ -303,7 +358,7 @@ public final class Architecture {
                 tx /= tl; tz /= tl;
                 for (int side = -1; side <= 1 && made < max; side += 2) {
                     double nx = -tz * side, nz = tx * side;
-                    Map<String, Object> pick = sizes.get((int) (Noise.hash(a.seed, x, z, 98 + side) * sizes.size()));
+                    Map<String, Object> pick = sizes.get((int) (Noise.hash(a.seed, x - a.margin, z - a.margin, 98 + side) * sizes.size()));
                     double[] sz = Atlas.pt(pick.get("size"));
                     int w = (int) sz[0], d = (int) sz[1];
                     double off = half + setback + 2 + d / 2.0;
@@ -311,12 +366,15 @@ public final class Architecture {
                     if (cx < rect[0] || cx > rect[2] || cz < rect[1] || cz > rect[3]) continue;
                     // its front to the road: the way back along the normal, to the nearest of the four
                     char facing = Math.abs(nx) > Math.abs(nz) ? (-nx > 0 ? 'e' : 'w') : (-nz > 0 ? 's' : 'n');
+                    // (0.4.5, gamefixes: a house at a bend stood side-on to its street) its front to the nearest road
+                    // cell from where it stands, not the normal of the road at the point it was measured from
+                    facing = towardRoad(cx, cz, Math.max(w, d) / 2.0 + half + setback + 4, facing);
                     Map<String, Object> opts = new HashMap<>(Atlas.map(dd, "opts"));
                     opts.putAll(pick);
                     String hid = id + "_" + made;
                     opts.put("id", hid);
                     Structure h = new Structure(hid, Atlas.s(dd, "name", "House"), Atlas.s(pick, "template", Atlas.s(dd, "template", "building")), sid, opts,
-                            Atlas.map(pick, "materials").isEmpty() ? st : st.with(Atlas.map(pick, "materials")), a.seed * 31 + hid.hashCode());
+                            (Atlas.map(pick, "materials").isEmpty() ? st : st.with(Atlas.map(pick, "materials"))).vary(a.seed * 31 + hid.hashCode()), a.seed * 31 + hid.hashCode());
                     h.w = w; h.d = d; h.facing = facing;
                     if (lot(h, cx, cz, Atlas.i(dd, "search", 2), Atlas.i(dd, "margin", 1), Atlas.d(dd, "maxSlope", 6), false, false)) { structures.add(h); made++; }
                 }
@@ -324,6 +382,20 @@ public final class Architecture {
         }
         if (made < Atlas.i(dd, "min", 0)) failures.add("district " + id + " holds only " + made + " houses (it asks for at least " + Atlas.i(dd, "min", 0) + ")");
         notes.add("district " + id + ": " + made + " houses");
+    }
+
+    /** The side (n, e, s, w) of the nearest road cell to a spot, within a reach; the fallback where none is. */
+    private char towardRoad(double cx, double cz, double reach, char fallback) {
+        double best = 1e9; char out = fallback;
+        int r = (int) Math.ceil(reach);
+        for (int x = (int) cx - r; x <= (int) cx + r; x++) for (int z = (int) cz - r; z <= (int) cz + r; z++) {
+            if (!t.in(x, z) || (t.flags[t.idx(x, z)] & Terrain.ROAD) == 0) continue;
+            double dx = x + 0.5 - cx, dz = z + 0.5 - cz, d = Math.hypot(dx, dz);
+            if (d >= best || d > reach) continue;
+            best = d;
+            out = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 'e' : 'w') : (dz > 0 ? 's' : 'n');
+        }
+        return out;
     }
 
     // ------------------------------------------------------------------ walls and aqueducts
@@ -349,7 +421,8 @@ public final class Architecture {
                         boolean atGate = false;
                         for (int[] g : wall.gates) if (Math.abs(g[0] - x - ox) <= 2 && Math.abs(g[1] - z - oz) <= 2) atGate = true;
                         if (atGate) continue;
-                        boolean core = ox >= -1 && ox <= wall.thick && oz >= -1 && oz <= wall.thick;
+                        // (0.4.3, gamefixes: houses stood a cell from the town wall, leaving blind slots) the wall's whole band is kept clear of lots
+                        boolean core = ox >= -2 && ox <= wall.thick + 1 && oz >= -2 && oz <= wall.thick + 1;
                         t.flags[ii] |= core ? Terrain.BUILT : Terrain.YARD;
                         t.flags[ii] &= ~Terrain.TREE;
                     }
@@ -370,11 +443,13 @@ public final class Architecture {
             if (line.isEmpty()) continue;
             Aqueduct aq = new Aqueduct(Atlas.s(q, "id", "aqueduct"), style(Atlas.s(q, "style", "wilds")), line, Atlas.i(q, "from", 70), Atlas.i(q, "to", 50));
             aqueducts.add(aq);
-            for (int[] p : line) for (int ox = -2; ox <= 2; ox++) for (int oz = -2; oz <= 2; oz++) {
+            // (0.4.3, gamefixes: map glitches at 246, 55, 607 - the aqueduct ran over Valgard's roofs) its line claimed
+            // three cells either side, so no lot (nor a lot's eaves) comes within reach of its arches
+            for (int[] p : line) for (int ox = -4; ox <= 4; ox++) for (int oz = -4; oz <= 4; oz++) {
                 if (!t.in(p[0] + ox, p[1] + oz)) continue;
                 int i = t.idx(p[0] + ox, p[1] + oz);
                 if ((t.flags[i] & (Terrain.ROAD | Terrain.BRIDGE)) != 0) continue;
-                t.flags[i] |= Math.abs(ox) <= 1 && Math.abs(oz) <= 1 ? Terrain.BUILT : Terrain.YARD;
+                t.flags[i] |= Math.abs(ox) <= 3 && Math.abs(oz) <= 3 ? Terrain.BUILT : Terrain.YARD;
                 t.flags[i] &= ~Terrain.TREE;
             }
             // the water runs down its length (the current, a stretch a few cells long at a time)
@@ -539,7 +614,164 @@ public final class Architecture {
         streetLamps(c);
         spawnPoint();
         check(c);
+        // (0.4.2) every structure registered from what was built, and checked for its interior to come; then each
+        // dressed outside for what it is (its signs, lanterns, woodpiles, crates, benches)
+        registry = Registry.of(this, c);
+        // (0.4.4) every interior built, furnished and fitted for its work, then recorded with the registry
+        Fitout fo = new Fitout(this, c, registry);
+        fo.fitAll();
+        notes.addAll(fo.notes);
+        registry.fitted(this);
+        Dressing dr = new Dressing(this, c);
+        dr.dressAll(registry);
+        props.addAll(dr.props);
     }
+
+    // ------------------------------------------------------------------ (0.4.4) what the interiors hold
+    /** A piece of furniture inside: its kind (Furniture.Kind's name), cells, the walking level it stands on, height, facing, and a tag (bed, pew, cell...). */
+    public record Piece(String owner, String kind, int x0, int z0, int x1, int z1, int y, int h, int facing, String tag) {}
+    /** A door hung in a partition's doorway: its cells, the floor under its sill, locked or not. */
+    public record InnerDoor(String owner, String name, int[][] cells, int floorY, boolean locked, String key) {}
+    /**
+     * A working fitting: a station ("station:ANVIL"), a chest, an altar, a post where its people stand to work
+     * ("post:counter", "post:altar", "post:desk"...) - where it is, the walking level, which way it faces, and the cell
+     * it is used from (the customer's place before a counter, the step before an altar or a station).
+     */
+    public record Fitting(String owner, String type, float x, float y, float z, int facing, String tag, float useX, float useZ) {}
+    /** A jail's cell: its barred door's cell, the walking level, its box {x0, z0, x1, z1}, where a prisoner is put and let out, its slab. */
+    public record Cell(String owner, int index, int gateX, int gateZ, int y, int[] box, float[] inside, float[] release, int[] slab, int slabFacing) {}
+    /** A room as fitted: what it is for, its storey, its box {x0, z0, x1, z1}, walking level and clear height, whether walled off, whether lit. */
+    public static final class RoomRecord {
+        public final String use;
+        public final int level, y, clear;
+        public final int[] rect;
+        public final boolean walled;
+        public boolean lit;
+        RoomRecord(String use, int level, int[] rect, int y, int clear, boolean walled) { this.use = use; this.level = level; this.rect = rect; this.y = y; this.clear = clear; this.walled = walled; }
+    }
+    /** One building's interior as fitted out: its rooms, what was put in them, the beds, seats and stairs, and every defect found. */
+    public static final class Fitted {
+        public final String id, purpose, wealth;
+        public int bedsWanted, beds, seats, stairs, ladders, walkable, unreached, sealed;
+        public final List<RoomRecord> rooms = new ArrayList<>();
+        public final List<String> pieces = new ArrayList<>(), stations = new ArrayList<>(), fittings = new ArrayList<>(), defects = new ArrayList<>();
+        /**
+         * (0.4.5) Its staircases, each the way a body walks it: {x, y, z} of the foot (y the cell the feet stand in), each
+         * step (y its tread block), and the head (y the cell the feet stand in up there).
+         */
+        public final List<int[][]> flights = new ArrayList<>();
+        Fitted(String id, String purpose, String wealth) { this.id = id; this.purpose = purpose; this.wealth = wealth; }
+    }
+    public final List<Piece> pieces = new ArrayList<>();
+    public final List<InnerDoor> innerDoors = new ArrayList<>();
+    public final List<Fitting> fittings = new ArrayList<>();
+    public final List<Cell> cells = new ArrayList<>();
+    public final Map<String, Fitted> fitted = new LinkedHashMap<>();
+    /** (0.4.2) A piece of furniture set outside a building: its kind (Furniture.Kind's name), cell, floor and facing (quarter turns from +z). */
+    public record Prop(String kind, int x, int z, int floor, int facing) {}
+
+    /** (0.4.3) What a way is cleared of: loose logs, earth, rock, hay, crates and low leaves - never a building, a door, a node. */
+    private static final java.util.Set<Integer> LITTER = java.util.Set.of(Blocks.LOG, Blocks.OAK_LOG, Blocks.WILLOW_LOG, Blocks.SPRUCE_LOG, Blocks.JUNGLE_LOG,
+            Blocks.BIRCH_LOG, Blocks.DIRT, Blocks.GRASS, Blocks.STONE, Blocks.GRAVEL, Blocks.COBBLE, Blocks.MUD, Blocks.SAND, Blocks.GRANITE, Blocks.HAY_BALE, Blocks.CRATE);
+    /** (0.4.3) Cells cleared by the last {@link #clearWays()} and props taken off the ways (the survey reports them). */
+    public int waysCleared, propsMoved;
+
+    /**
+     * (0.4.3, gamefixes: some alleyways were blocked by random logs or dirt blocks) Every road, lane and square outside a
+     * building's lot is walked clear, after everything else has been raised and grown: whatever litter stands within two
+     * cells over its surface - a woodpile's log, a heap of earth, a stray rock or hay bale, a branch hanging at head
+     * height - is taken away, and no prop is left standing on a way. A living tree's trunk is left (its node stands).
+     */
+    /** (0.4.4) Door steps laid where a doorway stood above its ground (the survey reports how many). */
+    public int doorSteps;
+
+    /**
+     * (0.4.4, gamefixes: players and NPCs reliably entering and exiting buildings; a targeted exterior correction where an
+     * entrance did not meet its ground) Before every doorway, outward, the ground is met by a flight of steps wherever it
+     * falls away more than a step below the threshold: a stair block a cell lower at each cell out, the ground filled under
+     * it in the building's base, until the steps reach the ground. Run after the ways are cleared, so nothing undoes them.
+     */
+    void doorSteps() {
+        Kit.Canvas c = new Kit.Canvas(t);
+        int made = 0;
+        for (Structure s : structures) {
+            if (Boolean.TRUE.equals(s.opts.get("water"))) continue;
+            int base = s.style.b("base");
+            for (int k = 0; k < s.doors.size(); k++) {
+                int[] out = s.doorOut.get(k);
+                for (int[] cell : s.doors.get(k)) {
+                    int level = s.doorFloors.get(k);   // the threshold's cell: walked on at level + 1
+                    for (int step = 1; step <= 8; step++) {
+                        int x = cell[0] + out[0] * step, z = cell[1] + out[1] * step;
+                        if (!t.in(x, z) || inLot(x, z, 0) && !s.contains(x, z) || t.water[t.idx(x, z)] >= 0) break;
+                        // the ground under the step's air (never the eaves overhanging it)
+                        int ground = level + 2;
+                        while (ground > 0 && (c.get(x, ground, z) == Blocks.AIR || c.get(x, ground, z) == Blocks.WATER || Blocks.isLeaves(c.get(x, ground, z)))) ground--;
+                        if (ground > level) {
+                            // (0.4.6, gamefixes: NPCs stuck at doorways sunk below the street - a drop through a door
+                            // whose lintel stood at the street's head height) the ground rising before the doorway is cut
+                            // back: a level landing before the door, then a step up each cell out until the ground is met
+                            int floor = level;
+                            for (int up = step; up <= 8; up++) {
+                                int ux = cell[0] + out[0] * up, uz = cell[1] + out[1] * up;
+                                if (!t.in(ux, uz) || inLot(ux, uz, 0) && !s.contains(ux, uz) || t.water[t.idx(ux, uz)] >= 0) break;
+                                int g2 = floor + 4;
+                                while (g2 > 0 && (c.get(ux, g2, uz) == Blocks.AIR || Blocks.isLeaves(c.get(ux, g2, uz)))) g2--;
+                                if (g2 <= floor) break;                  // met
+                                for (int y = floor + 1; y <= floor + 3; y++) if (c.get(ux, y, uz) != Blocks.AIR) c.set(ux, y, uz, Blocks.AIR);
+                                if (up > step) c.set(ux, floor, uz, Blocks.STAIRS); else if (c.get(ux, floor, uz) == Blocks.AIR) c.footing(ux, floor, uz, base);
+                                made++;
+                                floor++;
+                            }
+                            break;
+                        }
+                        if (ground == level) continue;                           // level: walked on
+                        // (0.4.5, gamefixes: people stalled at doorways a whole block over the street - a hop up through
+                        // a door frame) a single block's rise gets its tread too, set before the threshold
+                        if (ground == level - 1) {
+                            if (step == 1 && c.get(x, level, z) == Blocks.AIR && c.get(x, level + 1, z) == Blocks.AIR && c.get(x, level + 2, z) == Blocks.AIR) { c.set(x, level, z, Blocks.STAIRS); made++; }
+                            level = ground; continue;
+                        }
+                        if (c.get(x, level + 1, z) != Blocks.AIR || c.get(x, level + 2, z) != Blocks.AIR) break;
+                        level--;
+                        c.set(x, level, z, Blocks.STAIRS);
+                        c.footing(x, level - 1, z, base);
+                        made++;
+                    }
+                }
+            }
+        }
+        doorSteps = made;
+        notes.add(made + " door steps laid where doorways stood above their ground");
+    }
+
+    void clearWays() {
+        Kit.Canvas c = new Kit.Canvas(t);
+        java.util.Set<Long> trunks = new java.util.HashSet<>();
+        for (int[] tr : t.trees) trunks.add((long) tr[0] << 32 | (tr[1] & 0xffffffffL));
+        int cleared = 0;
+        for (int x = 1; x < t.S - 1; x++) for (int z = 1; z < t.S - 1; z++) {
+            int i = t.idx(x, z);
+            if ((t.flags[i] & (Terrain.ROAD | Terrain.LANE | Terrain.SQUARE)) == 0 || (t.flags[i] & Terrain.BRIDGE) != 0 || t.water[i] >= 0) continue;
+            if (inLot(x, z, 0) || trunks.contains((long) x << 32 | (z & 0xffffffffL))) continue;
+            int top = t.top[i];
+            // (0.4.4, gamefixes: floating objects at 217,39,931 and 459,36,135) a square's own furniture - its lamp posts, its
+            // stalls' posts - is built of the same logs a stray pile is: inside a square only a branch's leaves are cleared
+            boolean square = inPlaza(x, z);
+            for (int y = top + 1; y <= top + 2; y++) {
+                int b = c.get(x, y, z);
+                if (!square && LITTER.contains(b) || Blocks.isLeaves(b)) { c.set(x, y, z, Blocks.AIR); cleared++; }
+            }
+        }
+        waysCleared = cleared;
+        int before = props.size();
+        props.removeIf(pr -> { int i = t.idx(pr.x(), pr.z()); return (t.flags[i] & (Terrain.ROAD | Terrain.LANE)) != 0 && !inLot(pr.x(), pr.z(), 0); });
+        propsMoved = before - props.size();
+    }
+    /** The furniture the dressing set out (the world's objects make them). */
+    public final List<Prop> props = new ArrayList<>();
+    /** (0.4.2) The building registry (made with the raising; null for a survey without cells). */
+    public Registry registry;
 
     /**
      * An aqueduct: a stone channel carried on piers from its spring down to its cistern, falling evenly, the water in it
@@ -553,12 +785,18 @@ public final class Architecture {
             int[] nx = q.line.get(Math.min(n - 1, k + 1)), pv = q.line.get(Math.max(0, k - 1));
             int dx = Integer.signum(nx[0] - pv[0]), dz = Integer.signum(nx[1] - pv[1]);
             int sxa = dz != 0 ? 1 : 0, sza = dx != 0 ? 1 : 0;
-            int deck = (int) Math.round(q.yFrom + (q.yTo - q.yFrom) * (k / (double) Math.max(1, n - 1)));
+            // (0.4.2, gamefixes: floating blocks) the channel falls only at a pier: each arch's span is level, so the deck
+            // reads as arches in a row rather than a stair of loose blocks in the air
+            int span = Math.min(n - 1, (k / 4) * 4);
+            int deck = (int) Math.round(q.yFrom + (q.yTo - q.yFrom) * (span / (double) Math.max(1, n - 1)));
             for (int side = -1; side <= 1; side++) {
                 int x = p[0] + sxa * side, z = p[1] + sza * side;
                 if (!c.in(x, deck, z)) continue;
+                // (0.4.3) never through a building's lot (its walls and roof stand), and where the ground stands over the
+                // channel it runs on as a buried conduit - no trench is cut through the town above it
+                if (inLot(x, z, 1)) continue;
                 int g = c.ground(x, z);
-                if (g >= deck) for (int y = deck + 1; y <= g; y++) c.set(x, y, z, Blocks.AIR);
+                if (g >= deck + 1) continue;
                 // the piers every few cells, the arches' crowns between them
                 // piers every fourth cell, round arches springing between them (the crown a course under the channel)
                 boolean pier = k % 4 == 0;
@@ -583,6 +821,16 @@ public final class Architecture {
         // the spout from the channel's end into the basin
         int deckEnd = q.yTo;
         for (int y = g + 2; y <= deckEnd + 1; y++) c.set(end[0], y, end[1], Blocks.WATER);
+    }
+
+    /** Whether a cell lies in a structure's lot (or within a margin of one). */
+    private boolean inPlaza(int x, int z) {
+        for (Structure st : structures) if (st.template.equals("plaza") && st.contains(x, z)) return true;
+        return false;
+    }
+    private boolean inLot(int x, int z, int m) {
+        for (Structure st : structures) if (x >= st.x0 - m && x <= st.x1 + m && z >= st.z0 - m && z <= st.z1 + m && !st.template.equals("plaza")) return true;
+        return false;
     }
 
     /** A building over the water (a pile hut, a boathouse): a walk of boards on posts from each door to the nearest dry ground. */
@@ -706,9 +954,10 @@ public final class Architecture {
             if (p.x0 <= q.x1 && q.x0 <= p.x1 && p.z0 <= q.z1 && q.z0 <= p.z1) failures.add("lots overlap: " + p.id + " and " + q.id);
         }
         List<Reserved> deep = new ArrayList<>();
-        for (Reserved r : reserved) if (!r.kind().equals("interior")) deep.add(r);
+        for (Reserved r : reserved) if (!r.kind().startsWith("interior") && !r.kind().equals("stair")) deep.add(r);
+        // (one place's own volumes - its passage's shaft and the halls beyond - are meant to join)
         for (int i = 0; i < deep.size(); i++) for (int j = i + 1; j < deep.size(); j++)
-            if (deep.get(i).overlaps(deep.get(j))) failures.add("reserved volumes overlap: " + deep.get(i).owner() + " " + deep.get(i).kind() + " and " + deep.get(j).owner() + " " + deep.get(j).kind());
+            if (!deep.get(i).owner().equals(deep.get(j).owner()) && deep.get(i).overlaps(deep.get(j))) failures.add("reserved volumes overlap: " + deep.get(i).owner() + " " + deep.get(i).kind() + " and " + deep.get(j).owner() + " " + deep.get(j).kind());
         for (Reserved r : deep) {
             int wet = 0;
             for (int x = r.x0(); x <= r.x1(); x += 2) for (int z = r.z0(); z <= r.z1(); z += 2) for (int y = r.y0(); y <= r.y1(); y += 2) if (c.get(x, y, z) == Blocks.WATER) wet++;
@@ -729,4 +978,9 @@ public final class Architecture {
         return null;
     }
     public Structure byId(String id) { for (Structure s : structures) if (s.id.equals(id)) return s; return null; }
+    /** (0.4.4) The kingdom a structure's settlement belongs to (its data's realm), else the ground's under it. */
+    public String realmOf(Structure s) {
+        for (Map<String, Object> st : Atlas.list(data, "settlements")) if (Atlas.s(st, "id", "").equals(s.settlement) && st.get("realm") instanceof String r) return r;
+        return ShadowVeil.realmAt(a, (int) s.cx(), (int) s.cz());
+    }
 }

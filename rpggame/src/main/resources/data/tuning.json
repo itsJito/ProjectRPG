@@ -1,39 +1,214 @@
 {
-  "companions": {
-    "max": 4,
-    "knightHonor": 25,
-    "holdLeash": 7,
-    "fee": { "BANDIT": 150, "BRUTE": 120, "HUNTER": 90, "KNIGHT": 0 },
-    "cooldown": { "POWER_STRIKE": 14, "TAUNT": 22, "SHIELD_WALL": 18, "VOLLEY": 16, "SPELL": 10, "MEND": 30 }
+ "companions": {
+  "max": 4,
+  "knightHonor": 25,
+  "holdLeash": 7,
+  "fee": {
+   "BANDIT": 150,
+   "BRUTE": 120,
+   "HUNTER": 90,
+   "KNIGHT": 0
   },
-  "squad": {
-    "menuPace": 0.25,
-    "wheelPace": 0,
-    "holdToOpen": 0.2
-  },
-  "homicide": {
-    "chargeAt": 0.6,
-    "canvassRadius": 42,
-    "canvassMax": 5,
-    "examineTime": 6,
-    "askPatience": 45,
-    "freshBlood": 180
-  },
-  "mounts": {
-    "horse":    { "walk": 1.6, "trot": 3.4, "canter": 6.0, "gallop": 9.5, "gallopSpread": 3.0, "jump": 1.15, "jumpSpread": 1.15, "turn": 2.5, "vigor": 80 },
-    "pegasus":  { "gallop": 11.0, "gallopSpread": 3.0, "jump": 2.0, "jumpSpread": 1.0, "vigor": 100 },
-    "direWolf": { "walk": 1.7, "trot": 4.2, "canter": 7.2, "gallop": 12.0, "gallopSpread": 2.2, "jump": 1.8, "jumpSpread": 0.6, "turn": 3.2, "vigor": 60 },
-    "swimFloat": 0.58,
-    "swimPaceFloor": 1.8,
-    "mountSeconds": 1.3,
-    "barebackExtra": 0.45
-  },
-  "seating": {
-    "ease": 0.55,
-    "approach": 1.0
-  },
-  "interiors": {
-    "cellsPerPiece": 7,
-    "mostPerRoom": 9
+  "cooldown": {
+   "POWER_STRIKE": 14,
+   "TAUNT": 22,
+   "SHIELD_WALL": 18,
+   "VOLLEY": 16,
+   "SPELL": 10,
+   "MEND": 30
   }
+ },
+ "squad": {
+  "menuPace": 0.25,
+  "wheelPace": 0,
+  "holdToOpen": 0.2
+ },
+ "homicide": {
+  "chargeAt": 0.6,
+  "canvassRadius": 42,
+  "canvassMax": 5,
+  "examineTime": 6,
+  "askPatience": 45,
+  "freshBlood": 180
+ },
+ "mounts": {
+  "horse": {
+   "walk": 1.6,
+   "trot": 3.4,
+   "canter": 6.0,
+   "gallop": 9.5,
+   "gallopSpread": 3.0,
+   "jump": 1.15,
+   "jumpSpread": 1.15,
+   "turn": 2.5,
+   "vigor": 80
+  },
+  "pegasus": {
+   "gallop": 11.0,
+   "gallopSpread": 3.0,
+   "jump": 2.0,
+   "jumpSpread": 1.0,
+   "vigor": 100
+  },
+  "direWolf": {
+   "walk": 1.7,
+   "trot": 4.2,
+   "canter": 7.2,
+   "gallop": 12.0,
+   "gallopSpread": 2.2,
+   "jump": 1.8,
+   "jumpSpread": 0.6,
+   "turn": 3.2,
+   "vigor": 60
+  },
+  "swimFloat": 0.58,
+  "swimPaceFloor": 1.8,
+  "mountSeconds": 1.3,
+  "barebackExtra": 0.45
+ },
+ "seating": {
+  "ease": 0.55,
+  "approach": 1.0
+ },
+ "interiors": {
+  "cellsPerPiece": 7,
+  "mostPerRoom": 9,
+  "_about": "",
+  "stairOpenOver": 4
+ },
+ "names": {
+  "_about": "(0.4.2, gamefixes: every person has a one-word name - none is called Fisher or Hunter) the roster's names that once were callings, and the names drawn for people who join the world in play (bounty hunters, people spawned at the console), by their id",
+  "roster": {
+   "BANDIT_1": "Garth",
+   "BANDIT_2": "Nell",
+   "BRUTE": "Grimbald",
+   "KNIGHT": "Sir Alden",
+   "BORDER_KNIGHT": "Sir Roderic",
+   "LANCELOT": "Sir Lancelot",
+   "GAWAIN": "Sir Gawain",
+   "BARON": "Baron Edric",
+   "MANSION_KNIGHT": "Sir Roland",
+   "MANSION_PORTER": "Godwin",
+   "MANSION_WOODCUTTER": "Leofric"
+  },
+  "female": [
+   "Nell",
+   "Brisa",
+   "Hesta",
+   "Ilsa",
+   "Merrit",
+   "Sunniva",
+   "Tove",
+   "Wenna"
+  ],
+  "male": [
+   "Varn",
+   "Cade",
+   "Ulric",
+   "Holt",
+   "Jory",
+   "Kestrel",
+   "Lorcan",
+   "Mattias",
+   "Rook",
+   "Sten",
+   "Torvald",
+   "Yorick"
+  ]
+ },
+ "ai": {
+  "_about": "People's minds: (0.4.5) how long (s) and how far (m) anyone keeps after the player short of a fight, and how long they then leave it; the spin guard, the altar reach, a knight's rest between rounds.",
+  "tailMax": 25,
+  "tailLeash": 28,
+  "tailRest": 150,
+  "spinWindow": 3,
+  "altarReach": 220,
+  "knightRoundRest": 40,
+  "reportWalk": 60,
+  "goalRest": 240,
+  "goalFails": 3,
+  "jobMethodRest": 45,
+  "tendDwell": 15,
+  "spawnApart": 1.6,
+  "spawnShift": 6,
+  "carterLeg": 25,
+  "beatDwell": 12,
+  "nudgeReach": 1.9,
+  "nudgeRest": 3,
+  "ladderAloft": 3.5,
+  "jobMethodFails": 3,
+  "tendHold": 3,
+  "nudgeAfter": 0.8
+ },
+ "water": {
+  "_about": "(0.4.5) The water's motion (rpg.world.FlowField): a river's pace (m/s), a lake's, the quickening toward a drop and how far before it, the slack by the banks, a lake drawn into its outflow, whitewater by a drop and on fast water, the cost of a carved step in the search for the way out, the aqueducts' pace; how hard the current pushes a swimmer and a wader.",
+  "riverSpeed": 0.85,
+  "lakeSpeed": 0.05,
+  "lipBoost": 0.7,
+  "lipReach": 5,
+  "bankSlack": 0.5,
+  "outletReach": 6,
+  "foamLip": 2.5,
+  "foamFast": 1.05,
+  "uphillCost": 40,
+  "aqueductSpeed": 1.1,
+  "swimPush": 0.0065,
+  "wadePush": 0.35
+ },
+ "repairs": {
+  "_about": "(0.4.5) How near their home or post (m) a breakage is someone's own to know of, seen or not.",
+  "ownReach": 14
+ },
+ "terrain": {
+  "_about": "(0.4.5) How far (cells) the wild's loose stones keep from every lot, yard, square, lane and road.",
+  "boulderClear": 5
+ },
+ "render": {
+  "_about": "The renderer's budgets: (0.4.5) how many falls pour, spray and stir their pools near the eye.",
+  "fallEmitters": 26,
+  "fallSprays": 6,
+  "fallStirs": 12
+ },
+ "doors": {
+  "_about": "(0.4.6) see the code that reads it",
+  "passReach": 1.8
+ },
+ "law": {
+  "_about": "(0.4.6) see the code that reads it",
+  "heldGoodsCells": 320,
+  "escapeHeard": 40,
+  "escapeSearch": 120,
+  "shoveTolerance": 3,
+  "shoveMemory": 120
+ },
+ "world": {
+  "_about": "(0.4.6) the open sea at the world edge: where it starts to harm (cells from the edge), the share of health it takes a second at its start and at the edge, how often.",
+  "edgeStart": 40,
+  "edgeHurtMin": 0.08,
+  "edgeHurtMax": 0.45,
+  "edgeTick": 1
+ },
+ "fish": {
+  "_about": "(0.4.6) a fish pressed against something (s) before it takes another way, and how long it keeps to it.",
+  "stuck": 0.6,
+  "escape": 1.8
+ },
+ "reactions": {
+  "_about": "(0.4.6) a ragdolled body caught off the ground is let go after caughtLimit s; any body is got up after downLimit s.",
+  "caughtLimit": 0.9,
+  "downLimit": 6
+ },
+ "foliage": {
+  "_about": "(0.4.6) see the code that reads it",
+  "genRings": 4,
+  "genPerPass": 3
+ },
+ "audio": {
+  "_about": "(0.4.6) see the code that reads it",
+  "hoofHeard": 30
+ },
+ "hud": {
+  "regionShow": 5,
+  "regionSettle": 1.5
+ }
 }

@@ -200,6 +200,14 @@ public final class Survey {
                 if (!near(ap[0], ap[1], 3)) { cut++; if (cut <= 20) notes.add("cut off: " + s.id + " (" + s.name + ") at " + ap[0] + "," + ap[1]); }
             }
             if (cut > 0) failures.add(cut + " structures' fronts cannot be walked to from Loxford Castle");
+            // (0.4.2) every enterable building and underground place ready for its interior (the registry's checks)
+            if (t.arch.registry != null) {
+                int flagged = 0;
+                for (Registry.Entry e : t.arch.registry.entries) if (!e.ready) { flagged++; if (flagged <= 40) notes.add("not ready: " + e.id + " (" + e.name + ", " + e.purpose + "): " + String.join("; ", e.issues)); }
+                if (flagged > 0) failures.add(flagged + " structures are not ready for their interiors (see registry.md)");
+                int ready = 0; for (Registry.Entry e : t.arch.registry.entries) if (e.ready && (e.enterable || e.underground)) ready++;
+                notes.add(ready + " structures ready for their interiors");
+            }
             notes.add(t.arch.structures.size() + " structures planned");
         }
         return this;
@@ -335,6 +343,11 @@ public final class Survey {
         ShadowVeil.prime(t);
         Survey s = new Survey(t).check();
         s.draw(out);
+        // (0.4.2) the building registry and its report beside the maps
+        if (t.arch != null && t.arch.registry != null) {
+            java.nio.file.Files.writeString(out.resolve("registry.json"), t.arch.registry.json());
+            java.nio.file.Files.writeString(out.resolve("registry.md"), t.arch.registry.report());
+        }
         System.out.printf("ShadowVeil grown and surveyed in %.1fs -> %s%n", (System.nanoTime() - at) / 1e9, out.toAbsolutePath());
         for (String n : s.notes) System.out.println("  " + n);
         for (String f : s.failures) System.out.println("  ! " + f);

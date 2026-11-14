@@ -285,7 +285,7 @@ public final class Props {
     // ------------------------------------------------------------------ furniture
     public static Layer[] furniture(Furniture.Kind kind, float w, float d, int h, int seed) {
         return switch (kind) {
-            case TABLE -> new Layer[]{wood(table(w, d, Furniture.TABLE_TOP))};
+            case TABLE -> seed >= Furnishings.LAID ? Furnishings.laid(wood(table(w, d, Furniture.TABLE_TOP)), w, d, seed - Furnishings.LAID) : new Layer[]{wood(table(w, d, Furniture.TABLE_TOP))};
             case COUNTER -> new Layer[]{wood(counter(w, d))};
             case CRATE -> new Layer[]{wood(crate())};
             case BOOKCASE -> new Layer[]{wood(bookcase(h, seed))};

@@ -1,0 +1,118 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :shadowveil
+ShadowVeil grown and surveyed in 15.3s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y96
+  5134 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y40 (target 37-44)
+  harlette_manor median Y47 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y60 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y96 (design 92)
+  gallows_tor top Y93 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y54 (design 56)
+  bone_orchard_rise top Y55 (design 52)
+  shore belt reached: 97%
+  district loxford_houses: 13 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 40 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shack: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_32: no lane to a road within reach
+  532 lanes laid from doors to the roads
+  374 cells of bridge parapet
+  189 street lamps
+  576 structures, 529 doorways, 881 reserved volumes
+  unlit_lantern lantern_cellars: 147 water samples inside its reserved volume (its roof must hold them out)
+  not ready: loxford_castle (Loxford Castle, castle): interior volume obstructed: 682 solid cells where 660 are allowed
+  not ready: duck_cellar (The Duck's cellar, cellar): no entrance
+  not ready: loxford_church (Loxford Church, church): rooms only 0 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: border_watchtower (Border Watchtower, tower): no stair shaft reserved through its upper floors; interior volume obstructed: 303 solid cells where 186 are allowed
+  not ready: goblin_hollow (Goblin Hollow, dungeon): doorway 364,788 has no threshold under it; doorway 364,787 has no threshold under it; goblin_hollow volume lies under less than 2 cells of cover in 109 of 120 columns
+  not ready: harlette_chapel (Harlette Chapel, church): rooms only 1 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: valgard_keep (Valgard Keep, castle): interior volume obstructed: 490 solid cells where 396 are allowed
+  not ready: sanctuary_jaehaerys (Sanctuary of Jaehaerys, church): rooms only 0 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: sunkissed_mine (Sunkissed Mine, dungeon): doorway 153,542 has no threshold under it; doorway 152,542 has no threshold under it; sunkissed_mine volume lies under less than 2 cells of cover in 50 of 120 columns
+  not ready: marble_mine (Marble Mine, dungeon): doorway 73,536 has no threshold under it; doorway 72,536 has no threshold under it
+  not ready: hojimo_monastery (Hojimo Monastery, church): rooms only 1 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: azharad_palace (Azharad Palace, palace): no stair shaft reserved through its upper floors
+  not ready: azharad_temple (Azharad Temple, church): interior volume obstructed: 205 solid cells where 72 are allowed
+  not ready: workers_khan (Workers' Khan, inn): no stair shaft reserved through its upper floors; interior volume obstructed: 709 solid cells where 677 are allowed
+  not ready: severian_palace (Severian Palace, palace): no stair shaft reserved through its upper floors
+  not ready: palace_barracks (Palace barracks, palace): interior 98 m2, its purpose needs 120
+  not ready: museum_vault (Museum service passage, cellar): no entrance
+  not ready: harbor_beacon (Harbor Beacon, tower): no stair shaft reserved through its upper floors; interior volume obstructed: 119 solid cells where 67 are allowed
+  not ready: net_loft (Net loft, workshop): rooms only 2 cells clear (standard 3)
+  not ready: severian_church (Severian Church, church): rooms only 0 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: pilgrims_gate (Pilgrim's Gate, gatehouse): no entrance; no interior volume reserved
+  not ready: dig_shed (Dig shed, workshop): interior 16 m2, its purpose needs 20
+  not ready: camelot_chapel (Sun Chapel, church): rooms only 1 cells clear (standard 3); no stair shaft reserved through its upper floors
+  not ready: service_court (Service Court, civic): interior volume obstructed: 141 solid cells where 44 are allowed
+  not ready: training_quarters (Training-ground quarters, barracks): interior 32 m2, its purpose needs 40; room for 5 bed(s), needs 6
+  not ready: waystation_bunks (Waystation, inn): 1 floor(s), its purpose needs 2
+  not ready: culvert_cave (Culvert cave, dungeon): doorway 577,898 has no threshold under it; doorway 577,899 has no threshold under it; culvert volume lies under less than 2 cells of cover in 106 of 120 columns
+  not ready: tollgate (Tollgate Heath toll, gatehouse): no entrance; no interior volume reserved
+  not ready: toll_house (Toll house, civic): interior 16 m2, its purpose needs 24
+  not ready: murk_caves (Murk caves, dungeon): doorway 504,812 has no threshold under it; doorway 504,813 has no threshold under it; murk_caves volume lies under less than 2 cells of cover in 113 of 120 columns
+  not ready: highland_adit (Highland adit, dungeon): doorway 180,423 has no threshold under it; doorway 180,424 has no threshold under it; highland_adit volume lies under less than 2 cells of cover in 120 of 120 columns
+  not ready: crags_mine_south (Hollow Crags mine, dungeon): doorway 162,502 has no threshold under it; doorway 161,502 has no threshold under it; hollow_crags_mine_1 volume lies under less than 2 cells of cover in 51 of 120 columns
+  not ready: crags_mine_west (Hollow Crags mine, dungeon): doorway 82,457 has no threshold under it; doorway 82,456 has no threshold under it; hollow_crags_mine_2 volume lies under less than 2 cells of cover in 47 of 120 columns
+  not ready: unlit_lantern (The Unlit Lantern, tower): no stair shaft reserved through its upper floors; interior volume obstructed: 1095 solid cells where 895 are allowed
+  not ready: spider_nest (Spider Nest, dungeon): doorway 814,520 has no threshold under it; doorway 813,520 has no threshold under it; spider_nest volume lies under less than 2 cells of cover in 114 of 120 columns
+  not ready: ashmaw_throat (Ashmaw Throat, dungeon): doorway 967,489 has no threshold under it; doorway 967,488 has no threshold under it; ashmaw_throat volume lies under less than 2 cells of cover in 129 of 132 columns
+  not ready: harlette_cottages_0 (Cottage, cottage): rooms only 2 cells clear (standard 3)
+  not ready: harlette_cottages_1 (Cottage, cottage): rooms only 2 cells clear (standard 3)
+  not ready: harlette_cottages_2 (Cottage, cottage): rooms only 2 cells clear (standard 3)
+  not ready: harlette_cottages_3 (Cottage, cottage): rooms only 2 cells clear (standard 3)
+  472 structures ready for their interiors
+  576 structures planned
+  ! 41 structures are not ready for their interiors (see registry.md)
+FAILED (1)
+
+> Task :shadowveil FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':shadowveil'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 18s
+8 actionable tasks: 1 executed, 7 up-to-date

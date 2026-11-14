@@ -1,0 +1,23 @@
+Astratto Engine 2.0 - SHADOWVEIL devmap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 11 2026 20:31:04 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.52s ({regions=965, overlays=658, variants=393, scarp=61, coast=488, erosion=1453, peaks=52, lakes=84, isles=1, rivers=84, wadis=13, ground=24, roads=434, causeways=3, banks=75, clamp=17, cliffs=76, columns=1027, trees=576, outcrops=0}), made and lit in 5.98s
+[Load] ShadowVeil 12.56s
+[Load] renderer and UI 5.39s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] first rendered frame 0.50s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-loxford.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-gorge.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-scarp.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-ashmaw.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-azharad.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-severia.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-crags.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-heath.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\..\work\p26\c\sv-cove.png

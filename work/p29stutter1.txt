@@ -1,0 +1,78 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 7.17s ({regions=850, overlays=593, variants=296, scarp=57, coast=437, erosion=485, peaks=55, lakes=88, isles=7, rivers=647, wadis=13, ground=31, roads=495, causeways=4, architecture=366, pitsFilled=1405, pits=550, banks=46, clamp=14, cliffs=42, columns=891, falls=16, raise=556, trees=304, outcrops=0, ways=288}), made and lit in 1.79s
+[Load] ShadowVeil 9.03s
+[Load] renderer and UI 2.38s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 0.94s
+[Load] first rendered frame 5.57s
+[Load] the world about the spawn made ready in 8.94s
+[Load] game frame 1: scene 20 ms, interface 899 ms, render 24 ms
+[Load] game frame 2: scene 7 ms, interface 4 ms, render 5 ms
+[Load] the first frames drawn behind the loading screen in 0.96s
+[stutter] preload 9.90s
+[stutter] first tick 32 ms
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+
+[Load] game frame 3: scene 9 ms, interface 5 ms, render 5 ms
+[stutter] spike at 180: 173 ms - tick 168, draw 5 -
+[stutter] spike at 299: 60 ms - tick 13, draw 48 -
+[stutter] median 12.1 ms, p95 27.8, p99 48.5, worst 173.3 at frame 180, 20 frames over 33 ms
+[stutter] first 60: 54(0/0) 40(0/0) 38(0/0) 38(0/0) 36(0/0) 39(0/0) 45(0/0) 44(0/0) 48(0/0) 30(0/0) 37(0/0) 32(0/0) 30(0/0) 27(0/0) 39(0/0) 28(0/0) 29(0/0) 26(0/0) 26(0/0) 27(0/0) 29(0/0) 29(0/0) 25(0/0) 26(0/0) 25(0/0) 25(0/0) 25(0/0) 23(0/0) 24(0/0) 33(0/0) 25(0/0) 24(0/0) 25(0/0) 22(0/0) 22(0/0) 23(0/0) 23(0/0) 24(0/0) 24(0/0) 23(0/0) 24(0/0) 23(0/0) 24(0/0) 34(0/0) 28(0/0) 19(0/0) 19(0/0) 18(0/0) 18(0/0) 18(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 18(0/0) 17(0/0) 18(0/0) 19(0/0) 17(0/0) 23(0/0)
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+

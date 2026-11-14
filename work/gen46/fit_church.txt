@@ -1,0 +1,116 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :shadowveil
+levels interior 210,893-220,912: 38=1.00 39=0.01 40=0.01 41=0.01 42=0.03 43=0.03 44=0.03 45=0.03
+levels interior 214,913-217,916: 38=1.00 39=0.00 40=0.00 41=0.00 42=0.00 43=0.00 44=0.75 45=0.00 46=0.00 47=0.00 48=0.00 49=0.00 50=0.75 51=0.00 52=0.00 53=0.00 54=0.00 55=0.00
+stair 38->44: 217,915 217,914 216,914 215,914 214,914 214,913
+stair 44->50: 217,914 217,915 217,916 216,916 215,916 214,916
+== loxford_church []
+storey y38 clear 10 frame s 11x20 entries 2
+T.....T.TBF
+k.....k..Bk
+Bk...kB..k.
+BT.k.TBT.BB
+###k#######
+Tk.k.F.T..T
+Tk...k....k
+...........
+...........
+.ssss.ssss.
+...........
+.ssss.ssss.
+...........
+.ssss.ssss.
+...........
+.ssss.ssss.
+.........kT
+.ssss.ssss.
+........k.k
+..#E..E#T.T
+  room nave u0-10 v0-14 walled
+  room vestry u0-10 v16-19
+storey y38 clear 5 frame s 4x4 entries 4
+E..E
+////
+/kkT
+kEEk
+  room vestry u0-3 v0-3
+storey y44 clear 5 frame s 4x4 entries 1
+k.kE
+/   
+/###
+////
+  room bedroom u0-3 v0-3
+storey y50 clear 5 frame s 4x4 entries 1
+Tkcs
+..kk
+###k
+   E
+  room belfry u0-3 v0-3
+ShadowVeil grown and surveyed in 18.1s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y96
+  5121 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y40 (target 37-44)
+  harlette_manor median Y47 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y60 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y96 (design 92)
+  gallows_tor top Y93 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y54 (design 56)
+  bone_orchard_rise top Y55 (design 52)
+  shore belt reached: 97%
+  district loxford_houses: 13 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 40 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shack: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_32: no lane to a road within reach
+  azharad_homes_58: no lane to a road within reach
+  gorrick_graveyard: no lane to a road within reach
+  azharad_graveyard: no lane to a road within reach
+  543 lanes laid from doors to the roads
+  374 cells of bridge parapet
+  186 street lamps
+  590 structures, 566 doorways, 939 reserved volumes
+  unlit_lantern lantern_cellars: 147 water samples inside its reserved volume (its roof must hold them out)
+  orrins_leanto: no room at home for a craft table (its user works at the nearest)
+  1456 rooms fitted out in 509 buildings: 7186 pieces, 481 staircases
+  604 exterior pieces dressed (99 of them furniture); cells refused: {no ground=9, occupied=51, road=14}
+  75 door steps laid where doorways stood above their ground
+  521 structures ready for their interiors
+  590 structures planned
+PASSED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 20s
+8 actionable tasks: 1 executed, 7 up-to-date

@@ -48,7 +48,7 @@ public final class Undertaker {
     /** The player's standing graves (not yet collected), oldest first. */
     public List<Container> graves() {
         List<Container> l = new ArrayList<>();
-        for (var o : g.objects.all()) if (o instanceof Container c && !c.removed && c.kind.equals("grave") && !c.buried && c.owner == g.player.id) l.add(c);
+        for (Container c : g.objects.containers("grave")) if (!c.removed && !c.buried && c.owner == g.player.id) l.add(c);
         return l;
     }
 

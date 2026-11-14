@@ -1,0 +1,31 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.68s ({regions=736, overlays=512, variants=283, scarp=60, coast=441, erosion=393, peaks=53, lakes=74, isles=5, rivers=683, wadis=13, ground=21, roads=470, causeways=3, architecture=322, pitsFilled=1405, pits=500, banks=45, clamp=15, cliffs=61, columns=670, falls=14, raise=556, trees=269, outcrops=0, ways=439}), made and lit in 1.64s
+[Load] ShadowVeil 8.39s
+[Load] renderer and UI 2.17s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.13s
+[Load] first rendered frame 5.50s
+[Load] the world about the spawn made ready in 8.95s
+[Load] game frame 1: scene 7 ms, interface 961 ms, render 25 ms
+[Load] game frame 2: scene 7 ms, interface 5 ms, render 5 ms
+[Load] game frame 3: scene 6 ms, interface 4 ms, render 5 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-246-607-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-246-607-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-246-607-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-246-607-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-246-607-top.png
+[Load] growth about the spawn: 49 chunks made, 66 meshes, 0.91s
+[Load] the world about the spawn made ready in 1.52s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-573-899-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-573-899-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-573-899-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-573-899-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p29\at5\at-573-899-top.png

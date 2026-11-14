@@ -50,6 +50,8 @@ public final class Rig {
         /** How far into the side-on archer's stance the body has turned (0..1). */
         float aimSide;
         float headYaw, bowRaise, guardRaise, crouchBlend, seat;
+        /** (0.4.6, gamefixes: every NPC interaction animated) how far into a kneeling prayer, a talk's gestures and a stance at rest the figure is, and which stance (0 easy, 1 arms folded, 2 hands behind, 3 hands on hips). */
+        float pray, talk, rest; int restStyle;
         /** (0.4.0) the head's answer to a blow this frame: nodded (+ down, - thrown back) and tipped aside. */
         float hitNod, hitTilt;
         /** The bow: how drawn it was last frame, when it was loosed, how long it has been held at full draw. */
@@ -357,6 +359,25 @@ public final class Rig {
             boolean drinkNow = a.working != null && a.working.action.equals("drink");
             float k = smooth(clamp01(a.working.t / 0.3f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.3f));
             extraLean += k * (drinkNow ? -0.12f : 0.06f + 0.05f * bite);
+        }
+        // (0.4.6, gamefixes: every NPC interaction animated) at prayer: down on both knees before the altar, the back a
+        // little bowed (the hands are put together in front of the chest, below); talking: a hand that moves with the
+        // words and a sway of the shoulders; at rest, a stance of their own - arms folded, hands behind the back or on the
+        // hips, the weight shifted from foot to foot - changing now and then
+        rpg.ai.Npc who = a instanceof rpg.ai.Npc nn ? nn : null;
+        float prayWant = who != null && who.goal == rpg.ai.Brain.Goal.PRAY && who.lastOutcome != null && who.lastOutcome.startsWith("praying") ? 1 : 0;
+        st.pray += (prayWant - st.pray) * (1 - (float) Math.exp(-3.5f * dt));
+        boolean idleHere = Math.hypot(vx, vz) < 0.15f && grounded && a.working == null && c.phase == Phase.IDLE && a.carryBody == 0;
+        float talkWant = who != null && idleHere && who.speech != null && who.speechUntil > time ? 1 : 0;
+        st.talk += (talkWant - st.talk) * (1 - (float) Math.exp(-5f * dt));
+        float restWant = who != null && idleHere && st.seat < 0.05f && prayWant == 0 && who.goal != rpg.ai.Brain.Goal.FIGHT && who.goal != rpg.ai.Brain.Goal.SLEEP ? 1 : 0;
+        int style = who == null ? 0 : (int) Math.floorMod(who.id * 7 + (long) (time / 23.0), 4);
+        if (style != st.restStyle) { if (st.rest < 0.05f) st.restStyle = style; else restWant = 0; }
+        st.rest += (restWant - st.rest) * (1 - (float) Math.exp(-2.2f * dt));
+        if (!firstPerson) {
+            if (st.pray > 0.001f) { crouch += 7.2f * st.pray; extraLean += 0.18f * st.pray; }
+            if (st.talk > 0.001f) { extraTwist += st.talk * 0.06f * (float) Math.sin(time * 2.3 + (who == null ? 0 : who.id)); extraLean += st.talk * 0.03f * (float) Math.sin(time * 3.1); }
+            if (st.rest > 0.001f) roll += st.rest * 0.035f * (float) Math.sin(time * 0.45 + (who == null ? 0 : who.id * 1.7));
         }
         if (a.working != null && a.working.action.equals("fill") && !firstPerson) {
             float k = smooth(clamp01(a.working.t / 0.4f)) * smooth(clamp01((a.working.duration - a.working.t) / 0.35f));
@@ -762,6 +783,22 @@ public final class Rig {
             if (holds == null) rest = lerp(rest, new float[]{side * (b.shoulderX() + 0.6f), 4.8f, -8.5f + opp * 0.5f}, st.crouchBlend);
             // seated at a table: the forearms rest on it, a little apart
             if (holds == null && st.seat > 0.001f) rest = lerp(rest, torsoPoint(shoulder, -side * 0.9f, -6.2f, -5.8f), st.seat);
+            // (0.4.6) the hands of a prayer, a talk and a stance at rest (see the body's above)
+            if (holds == null && !firstPerson) {
+                if (st.pray > 0.001f) rest = lerp(rest, torsoPoint(shoulder, -side * 1.35f, -4.6f, -3.9f), st.pray);
+                if (st.talk > 0.001f && k == 0) {
+                    float tw = (float) (time * 2.7 + a.id);
+                    rest = lerp(rest, torsoPoint(shoulder, side * 0.5f, -6.0f + 1.1f * (float) Math.sin(tw), -4.6f - 0.9f * (float) Math.sin(tw * 0.7f)), st.talk * 0.85f);
+                }
+                if (st.rest > 0.001f && st.restStyle != 0) {
+                    float[] pose = switch (st.restStyle) {
+                        case 1 -> torsoPoint(shoulder, -side * 1.7f, -6.4f, -3.3f);   // arms folded across the chest
+                        case 2 -> torsoPoint(shoulder, -side * 0.7f, -8.2f, 2.2f);    // hands clasped behind the back
+                        default -> torsoPoint(shoulder, side * 1.0f, -7.6f, -0.4f);   // hands on the hips
+                    };
+                    rest = lerp(rest, pose, st.rest);
+                }
+            }
             if (holds != null && holds.family != Family.SHIELD && holds.family != Family.BOW && holds.family != Family.STAFF) {
                 rest = torsoPoint(shoulder, side * 0.5f, -7.4f + 1.0f * (float) Math.cos(theta), -3.8f - 3.0f * (float) Math.sin(theta));
                 // (0.3.2, gamefixes: melee by skill) between blows, in a fight, the weapon is held ready as well as the
@@ -840,10 +877,10 @@ public final class Rig {
                 // (0.3.0) the reins: both hands low and forward over the pommel, a little apart, moving with the head
                 target = torsoPoint(shoulder, -side * 1.3f, -7.6f + 0.4f * (float) Math.sin(a.rideGait * 2), -4.8f);
                 dir = norm(torsoDir(0, -0.15f, -1f));
-            } else if (main != null && main.family == Family.TORCH && (isMain || a.torchLighting(time) >= 0) && a.carryBody == 0) {
+            } else if (main != null && main.family == Family.TORCH && (isMain || a.torchLighting(time) >= 0 && (off == null || off.family != Family.SHIELD)) && a.carryBody == 0) {
                 // (0.3.0, gamefixes) a torch: carried up and forward to light the way (higher once it burns); being lit,
                 // it is brought in before the chest and the other hand strikes a light at its head - three strikes - then
-                // draws back as the rags catch
+                // draws back as the rags catch (0.4.3: a shield arm stays where it is, the light struck against its rim)
                 float lt = a.torchLighting(time);
                 float bring = lt < 0 ? 0 : smooth(clamp01(lt / 0.2f)) * (1 - smooth(clamp01((lt - 0.85f) / 0.15f)));
                 float[] mainShoulder = point(tm, b.shoulderX(), b.shoulderY() - b.hipY(), 0);
@@ -852,6 +889,16 @@ public final class Rig {
                 float[] chest = torsoPoint(mainShoulder, -1.8f, -5.2f, -5.2f);
                 float[] torchAt = lerp(carry, chest, bring);
                 float[] torchDir = norm(lerp(a.torchLit ? torsoDir(0.3f, 0.88f, -0.36f) : torsoDir(0.08f, 0.95f, -0.3f), torsoDir(-0.25f, 0.72f, -0.65f), bring));
+                if (firstPerson) {
+                    // (0.4.3, gamefixes: torches were not visible in first person) through the eyes the torch is carried in
+                    // the view - low at the right, its head up in the corner where its flame lights the way without
+                    // blinding - and brought in before the face to be lit (the carry about the shoulder was outside the view)
+                    int ms = isMain ? side : -side;
+                    float[] fpCarry = view(aim, 4.4f, ms, 6.2f, 10.5f + 0.25f * (float) Math.cos(theta * 2));
+                    float[] fpChest = view(aim, 1.8f, ms, 6.4f, 13.5f);
+                    torchAt = lerp(fpCarry, fpChest, bring);
+                    torchDir = norm(lerp(viewDirection(aim, ms * 0.18f, 0.85f, 0.55f), viewDirection(aim, -ms * 0.12f, 0.55f, 0.85f), bring));
+                }
                 if (isMain) { target = torchAt; dir = torchDir; }
                 else {
                     float[] head = add(torchAt, torchDir, 0.58f / Body.PX);
@@ -1398,6 +1445,9 @@ public final class Rig {
     }
 
     private static void plant(Actor a, State st, int k) {
+        // (0.4.6, gamefixes: footsteps in time with the actual steps of the feet) the figure's foot is down: counted, for the
+        // footfall's sound (heard when the game next looks: Actor.footPlants)
+        if (!st.stance[k]) { a.footPlants++; a.footPlantSeen = System.nanoTime(); }
         st.stance[k] = true;
         st.swing[k] = 0;
         System.arraycopy(st.to[k], 0, st.foot[k], 0, 3);

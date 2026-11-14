@@ -58,7 +58,7 @@ class BuildingStandardTest {
                 }
             }
             for (var f : g.objects.furniture) {
-                // a cell's slab is behind its bars: reached by the gaoler's key, not walked to (Jails)
+                // a cell's slab is behind its bars: reached by the jailer's key, not walked to (Jails)
                 if (!p.inside(f.x0, f.z0) || f.kind == rpg.objects.Furniture.Kind.SLAB) continue;
                 boolean reach = false;
                 for (int x = f.x0 - 1; x <= f.x1 + 1 && !reach; x++) for (int z = f.z0 - 1; z <= f.z1 + 1 && !reach; z++)

@@ -433,6 +433,7 @@ public final class Furnishings {
      * while it burns.
      */
     public static Layer[] fireplace(float w, int seed) {
+        if (seed >= PLAIN) return hearth(w, seed - PLAIN);
         Meshes.Boxes st = new Meshes.Boxes(), dark = new Meshes.Boxes(), m = new Meshes.Boxes(), wd = new Meshes.Boxes(), wax = new Meshes.Boxes(), fl = new Meshes.Boxes();
         float fw = Math.max(1.4f, w - 0.1f), depth = 0.7f, mantel = 1.25f, back = 0.5f;
         st.rgb(0, mantel / 2, back - depth / 2 + 0.05f, fw, mantel, depth - 0.1f, MARBLE_SHADE);
@@ -450,6 +451,76 @@ public final class Furnishings {
         wd.rgb(0, mantel + 0.18f, back - depth / 2 + 0.1f, 0.2f, 0.26f, 0.12f, MAHOGANY); m.rgb(0, mantel + 0.2f, back - depth / 2 + 0.035f, 0.12f, 0.12f, 0.01f, 0xEAE2C8);
         for (float x : new float[]{-fw / 2 + 0.25f, fw / 2 - 0.25f}) { m.rgb(x, mantel + 0.16f, back - depth / 2 + 0.1f, 0.04f, 0.24f, 0.04f, BRASS); candle(m, wax, fl, x, mantel + 0.28f, back - depth / 2 + 0.1f, 0.12f); }
         return new Layer[]{stone(st), new Layer(dark, 1, 0, 0), metal(m), wood(wd), cloth(wax), glow(fl, 3.0f)};
+    }
+
+    /** (0.4.4) A plain piece's seed offset: the working household's version of a fine one (a stone hearth for a marble fireplace). */
+    public static final int PLAIN = 100;
+    /** (0.4.4) A laid table's seed offset (the place settings vary by the seed past it). */
+    public static final int LAID = 300;
+
+    /**
+     * (0.4.4, gamefixes: interiors visually detailed, furnished as lived in) a table laid for a meal, on top of the table
+     * itself: a wooden bowl and a cup at each place along its length, a loaf on a board or a jug between them, a candle in
+     * its holder at the middle - each place a little different by the seed.
+     */
+    static Layer[] laid(Layer table, float w, float d, int seed) {
+        Meshes.Boxes wd = new Meshes.Boxes(), cer = new Meshes.Boxes(), m = new Meshes.Boxes(), food = new Meshes.Boxes(), wax = new Meshes.Boxes(), fl = new Meshes.Boxes();
+        float top = rpg.objects.Furniture.TABLE_TOP;
+        boolean alongX = w >= d;
+        float len = Math.max(w, d) - 0.25f, half = Math.min(w, d) / 2 - 0.18f;
+        java.util.Random rnd = new java.util.Random(31 + seed);
+        int places = Math.max(1, Math.round(len / 0.7f));
+        for (int k = 0; k < places; k++) {
+            float a = -len / 2 + (k + 0.5f) * len / places;
+            for (int side : new int[]{-1, 1}) {
+                if (rnd.nextFloat() < 0.25f) continue;
+                float bx = alongX ? a : side * half, bz = alongX ? side * half : a;
+                wd.rgb(bx, top + 0.035f, bz, 0.16f, 0.07f, 0.16f, OAK_LIGHT);                              // the bowl
+                food.rgb(bx, top + 0.06f, bz, 0.11f, 0.02f, 0.11f, rnd.nextBoolean() ? 0xB07840 : 0x8A6A3A);  // its broth
+                float cx = bx + (alongX ? 0.14f : 0), cz = bz + (alongX ? 0 : 0.14f);
+                (rnd.nextBoolean() ? cer : m).rgb(cx, top + 0.06f, cz, 0.07f, 0.12f, 0.07f, rnd.nextBoolean() ? CERAMIC : PEWTER);   // the cup
+            }
+            if (k % 2 == 0) {
+                float x = alongX ? a + 0.25f : 0, z = alongX ? 0 : a + 0.25f;
+                if (rnd.nextBoolean()) { wd.rgb(x, top + 0.012f, z, 0.28f, 0.025f, 0.18f, WALNUT); food.rgb(x, top + 0.07f, z, 0.22f, 0.1f, 0.12f, 0xC8945A); }   // a loaf on its board
+                else cer.rgb(x, top + 0.11f, z, 0.12f, 0.22f, 0.12f, 0xA86A40);   // a jug
+            }
+        }
+        m.rgb(0, top + 0.02f, 0, 0.09f, 0.04f, 0.09f, BRASS);
+        candle(m, wax, fl, 0, top + 0.04f, 0, 0.14f);
+        return new Layer[]{table, wood(wd), stone(cer), metal(m), cloth(food), cloth(wax), glow(fl, 3.0f)};
+    }
+
+    /**
+     * (0.4.4, gamefixes: interiors culturally appropriate and consistent with each building's wealth) A working hearth:
+     * rough fieldstone round the fire, a squared oak beam for a lintel and a plank shelf on it with a jug and a pot, a
+     * blackened iron pot hung over the grate from a crane, the hearthstone worn before it.
+     */
+    static Layer[] hearth(float w, int seed) {
+        Meshes.Boxes st = new Meshes.Boxes(), dark = new Meshes.Boxes(), m = new Meshes.Boxes(), wd = new Meshes.Boxes(), cer = new Meshes.Boxes();
+        float fw = Math.max(1.4f, w - 0.1f), depth = 0.75f, back = 0.5f, lintel = 1.15f;
+        java.util.Random rnd = new java.util.Random(7 + seed);
+        // the stone cheeks, a course at a time, each stone its own shade
+        for (float side : new float[]{-1, 1}) for (int k = 0; k < 5; k++) {
+            float y = 0.12f + k * 0.22f, x = side * (fw / 2 - 0.17f) + (rnd.nextFloat() - 0.5f) * 0.03f;
+            st.rgb(x, y, back - depth / 2, 0.34f + rnd.nextFloat() * 0.05f, 0.2f, depth - 0.04f, shade(STONE, 0.82f + rnd.nextFloat() * 0.3f));
+        }
+        st.rgb(0, lintel + 0.42f, back - depth / 2 + 0.08f, fw, 0.62f, depth - 0.2f, shade(STONE, 0.9f));        // the breast over the lintel
+        dark.rgb(0, 0.5f, back - 0.12f, fw - 0.66f, 1.0f, 0.2f, SOOT);
+        dark.rgb(0, 0.95f, back - depth / 2 + 0.05f, fw - 0.66f, 0.3f, depth - 0.25f, shade(SOOT, 1.4f));        // the smoke-blackened throat
+        wd.rgb(0, lintel, back - depth / 2 - 0.02f, fw + 0.08f, 0.16f, 0.2f, OAK);                              // the oak lintel beam
+        wd.rgb(0, lintel + 0.12f, back - depth / 2 - 0.08f, fw + 0.12f, 0.04f, 0.26f, WALNUT);                 // the shelf on it
+        st.rgb(0, 0.01f, back - depth / 2 - 0.3f, fw + 0.2f, 0.02f, 0.5f, STONE_DARK);                          // the hearthstone
+        // the grate's logs and the pot on its crane
+        wd.rgb(0, 0.09f, back - depth / 2 + 0.05f, 0.7f, 0.1f, 0.1f, 0x5A3A22); wd.rgb(0.05f, 0.17f, back - depth / 2 + 0.1f, 0.6f, 0.09f, 0.09f, 0x4A2E1A);
+        m.rgb(-fw / 2 + 0.4f, 0.75f, back - depth / 2 + 0.05f, 0.04f, 0.9f, 0.04f, IRON);
+        m.rgb(-fw / 2 + 0.62f, 1.1f, back - depth / 2 + 0.05f, 0.46f, 0.03f, 0.03f, IRON);
+        m.rgb(-fw / 2 + 0.82f, 0.88f, back - depth / 2 + 0.05f, 0.015f, 0.42f, 0.015f, IRON);
+        m.rgb(-fw / 2 + 0.82f, 0.56f, back - depth / 2 + 0.05f, 0.3f, 0.24f, 0.3f, 0x2A2A2E);                  // the pot
+        // on the shelf: a jug and a crock
+        cer.rgb(-fw / 2 + 0.35f, lintel + 0.25f, back - depth / 2 - 0.06f, 0.12f, 0.2f, 0.12f, 0xB8865A);
+        cer.rgb(fw / 2 - 0.4f, lintel + 0.22f, back - depth / 2 - 0.06f, 0.16f, 0.14f, 0.16f, CERAMIC);
+        return new Layer[]{stone(st), new Layer(dark, 1, 0, 0), metal(m), wood(wd), stone(cer)};
     }
 
     /**
@@ -526,32 +597,35 @@ public final class Furnishings {
         m.rgb(0, y, z - 0.02f, pw + 0.06f, ph + 0.06f, 0.03f, GILT_DARK);
         Random r = new Random(seed * 31L + 7);
         int kind = Math.floorMod(seed, 3);
-        float zc = z - 0.036f;
+        // (0.4.6, gamefixes: paintings flickered the farther off they were seen) the canvas stands clear of the frame
+        // and each layer of paint a few millimetres clear of the one under it: a millimetre apart, the depth buffer could
+        // not tell them apart at a distance and they fought
+        float zc = z - 0.040f;
         if (kind == 0) {
             // a landscape: sky over hills over a meadow, a tree and a river
             cv.rgb(0, y + ph * 0.25f, zc, pw, ph * 0.5f, 0.005f, 0x8AB0D0);
-            cv.rgb(0, y + ph * 0.12f, zc - 0.001f, pw, ph * 0.12f, 0.005f, 0xE8D8B0);
-            cv.rgb(-pw * 0.2f, y + 0.02f, zc - 0.002f, pw * 0.7f, ph * 0.22f, 0.005f, 0x5A7A4A);
-            cv.rgb(pw * 0.25f, y + 0.0f, zc - 0.002f, pw * 0.6f, ph * 0.18f, 0.005f, 0x4A6A3E);
-            cv.rgb(0, y - ph * 0.3f, zc - 0.003f, pw, ph * 0.4f, 0.005f, 0x6A8A3A);
-            cv.rgb(pw * 0.1f, y - ph * 0.28f, zc - 0.004f, pw * 0.18f, ph * 0.36f, 0.005f, 0x5A8AA8);
-            cv.rgb(-pw * 0.3f, y - ph * 0.05f, zc - 0.004f, pw * 0.04f, ph * 0.3f, 0.005f, 0x4A3220);
-            cv.rgb(-pw * 0.3f, y + ph * 0.12f, zc - 0.005f, pw * 0.2f, ph * 0.2f, 0.005f, 0x2E5A2A);
+            cv.rgb(0, y + ph * 0.12f, zc - 0.003f, pw, ph * 0.12f, 0.005f, 0xE8D8B0);
+            cv.rgb(-pw * 0.2f, y + 0.02f, zc - 0.006f, pw * 0.7f, ph * 0.22f, 0.005f, 0x5A7A4A);
+            cv.rgb(pw * 0.25f, y + 0.0f, zc - 0.009f, pw * 0.6f, ph * 0.18f, 0.005f, 0x4A6A3E);
+            cv.rgb(0, y - ph * 0.3f, zc - 0.012f, pw, ph * 0.4f, 0.005f, 0x6A8A3A);
+            cv.rgb(pw * 0.1f, y - ph * 0.28f, zc - 0.015f, pw * 0.18f, ph * 0.36f, 0.005f, 0x5A8AA8);
+            cv.rgb(-pw * 0.3f, y - ph * 0.05f, zc - 0.015f, pw * 0.04f, ph * 0.3f, 0.005f, 0x4A3220);
+            cv.rgb(-pw * 0.3f, y + ph * 0.12f, zc - 0.018f, pw * 0.2f, ph * 0.2f, 0.005f, 0x2E5A2A);
         } else if (kind == 1) {
             // a portrait: a dark ground, the sitter's shoulders in their coat, the face, the hair
             int coat = r.nextBoolean() ? 0x2A2A4A : 0x5A1A1E;
             cv.rgb(0, y, zc, pw, ph, 0.005f, 0x2A2420);
-            cv.rgb(0, y - ph * 0.3f, zc - 0.001f, pw * 0.7f, ph * 0.4f, 0.005f, coat);
-            cv.rgb(0, y - ph * 0.12f, zc - 0.002f, pw * 0.14f, ph * 0.1f, 0.005f, LINEN);
-            cv.rgb(0, y + ph * 0.1f, zc - 0.002f, pw * 0.26f, ph * 0.3f, 0.005f, 0xD8A888);
-            cv.rgb(0, y + ph * 0.27f, zc - 0.003f, pw * 0.3f, ph * 0.1f, 0.005f, r.nextBoolean() ? 0x4A3020 : 0xA88850);
-            cv.rgb(-pw * 0.05f, y + ph * 0.12f, zc - 0.004f, pw * 0.03f, ph * 0.02f, 0.005f, 0x2A1E1A); cv.rgb(pw * 0.05f, y + ph * 0.12f, zc - 0.004f, pw * 0.03f, ph * 0.02f, 0.005f, 0x2A1E1A);
+            cv.rgb(0, y - ph * 0.3f, zc - 0.003f, pw * 0.7f, ph * 0.4f, 0.005f, coat);
+            cv.rgb(0, y - ph * 0.12f, zc - 0.006f, pw * 0.14f, ph * 0.1f, 0.005f, LINEN);
+            cv.rgb(0, y + ph * 0.1f, zc - 0.006f, pw * 0.26f, ph * 0.3f, 0.005f, 0xD8A888);
+            cv.rgb(0, y + ph * 0.27f, zc - 0.009f, pw * 0.3f, ph * 0.1f, 0.005f, r.nextBoolean() ? 0x4A3020 : 0xA88850);
+            cv.rgb(-pw * 0.05f, y + ph * 0.12f, zc - 0.012f, pw * 0.03f, ph * 0.02f, 0.005f, 0x2A1E1A); cv.rgb(pw * 0.05f, y + ph * 0.12f, zc - 0.012f, pw * 0.03f, ph * 0.02f, 0.005f, 0x2A1E1A);
         } else {
             // a still life: a dark table, a jug, fruit and a candle
             cv.rgb(0, y, zc, pw, ph, 0.005f, 0x3A3024);
-            cv.rgb(0, y - ph * 0.3f, zc - 0.001f, pw, ph * 0.4f, 0.005f, 0x5A3A22);
-            cv.rgb(-pw * 0.15f, y - ph * 0.02f, zc - 0.002f, pw * 0.18f, ph * 0.3f, 0.005f, 0xC8B890);
-            for (int k = 0; k < 4; k++) cv.rgb(pw * (0.05f + k * 0.08f), y - ph * 0.1f + (k % 2) * 0.03f, zc - 0.003f, pw * 0.07f, pw * 0.07f, 0.005f, k % 2 == 0 ? 0xB83028 : 0xC8A028);
+            cv.rgb(0, y - ph * 0.3f, zc - 0.003f, pw, ph * 0.4f, 0.005f, 0x5A3A22);
+            cv.rgb(-pw * 0.15f, y - ph * 0.02f, zc - 0.006f, pw * 0.18f, ph * 0.3f, 0.005f, 0xC8B890);
+            for (int k = 0; k < 4; k++) cv.rgb(pw * (0.05f + k * 0.08f), y - ph * 0.1f + (k % 2) * 0.03f, zc - 0.009f, pw * 0.07f, pw * 0.07f, 0.005f, k % 2 == 0 ? 0xB83028 : 0xC8A028);
         }
         return new Layer[]{metal(m), cloth(cv)};
     }
@@ -564,15 +638,15 @@ public final class Furnishings {
         for (float x : new float[]{-tw / 2 - 0.12f, tw / 2 + 0.12f}) m.rgb(x, top + 0.04f, z, 0.06f, 0.08f, 0.06f, GILT);
         c.rgb(0, y, z, tw, th, 0.02f, 0x6A2A22);
         c.rgb(0, y, z - 0.011f, tw - 0.16f, th - 0.16f, 0.004f, 0x3E5A3A);
-        c.rgb(0, y - th * 0.3f, z - 0.013f, tw - 0.16f, th * 0.24f, 0.004f, 0x5A6A30);
+        c.rgb(0, y - th * 0.3f, z - 0.017f, tw - 0.16f, th * 0.24f, 0.004f, 0x5A6A30);
         // the trees, and the stag between them
-        for (float x : new float[]{-tw * 0.32f, tw * 0.3f}) { c.rgb(x, y - th * 0.05f, z - 0.015f, 0.05f, th * 0.4f, 0.004f, 0x4A3020); c.rgb(x, y + th * 0.18f, z - 0.016f, tw * 0.2f, th * 0.22f, 0.004f, 0x2A4A26); }
-        c.rgb(0, y - th * 0.08f, z - 0.016f, tw * 0.22f, th * 0.1f, 0.004f, 0x9A6A3A);
-        c.rgb(tw * 0.1f, y + 0.0f, z - 0.017f, tw * 0.07f, th * 0.1f, 0.004f, 0x9A6A3A);
-        for (float x : new float[]{-0.08f, -0.02f, 0.04f, 0.09f}) c.rgb(x * tw, y - th * 0.17f, z - 0.017f, 0.025f, th * 0.1f, 0.004f, 0x7A5030);
-        c.rgb(tw * 0.13f, y + th * 0.08f, z - 0.018f, tw * 0.1f, 0.02f, 0.004f, 0xE8D8B0);
+        for (float x : new float[]{-tw * 0.32f, tw * 0.3f}) { c.rgb(x, y - th * 0.05f, z - 0.023f, 0.05f, th * 0.4f, 0.004f, 0x4A3020); c.rgb(x, y + th * 0.18f, z - 0.026f, tw * 0.2f, th * 0.22f, 0.004f, 0x2A4A26); }
+        c.rgb(0, y - th * 0.08f, z - 0.026f, tw * 0.22f, th * 0.1f, 0.004f, 0x9A6A3A);
+        c.rgb(tw * 0.1f, y + 0.0f, z - 0.029f, tw * 0.07f, th * 0.1f, 0.004f, 0x9A6A3A);
+        for (float x : new float[]{-0.08f, -0.02f, 0.04f, 0.09f}) c.rgb(x * tw, y - th * 0.17f, z - 0.029f, 0.025f, th * 0.1f, 0.004f, 0x7A5030);
+        c.rgb(tw * 0.13f, y + th * 0.08f, z - 0.032f, tw * 0.1f, 0.02f, 0.004f, 0xE8D8B0);
         // the border's gold thread, the tassels
-        c.rgb(0, y + th / 2 - 0.05f, z - 0.012f, tw - 0.06f, 0.02f, 0.004f, 0xD8B060); c.rgb(0, y - th / 2 + 0.05f, z - 0.012f, tw - 0.06f, 0.02f, 0.004f, 0xD8B060);
+        c.rgb(0, y + th / 2 - 0.05f, z - 0.014f, tw - 0.06f, 0.02f, 0.004f, 0xD8B060); c.rgb(0, y - th / 2 + 0.05f, z - 0.014f, tw - 0.06f, 0.02f, 0.004f, 0xD8B060);
         for (int k = 0; k < 7; k++) c.rgb(-tw / 2 + 0.1f + k * (tw - 0.2f) / 6, y - th / 2 - 0.06f, z, 0.03f, 0.12f, 0.02f, 0xD8B060);
         return new Layer[]{cloth(c), metal(m)};
     }

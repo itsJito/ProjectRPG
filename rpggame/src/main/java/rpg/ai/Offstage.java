@@ -44,10 +44,25 @@ final class Offstage {
             if (!n.alive) continue;
             float d = (float) Math.hypot(n.x - g.player.x, n.z - g.player.z);
             if (n.loaded && d > OUT && free(n)) { ai.unload(n); n.offstage = true; n.diary.note(g.state.minutes, "(off-stage) " + activity(n)); }
-            else if (!n.loaded && n.offstage && d < IN) { ai.reload(n); n.offstage = false; }
+            // (0.4.3, gamefixes: placeholder sleeping destinations until the interiors come) a resident come home for the
+            // night goes in at their door - off-stage until morning, wherever the player is - and comes out there at dawn
+            // (0.4.4) everyone with a bed indoors now walks in to it and sleeps in it, seen by whoever comes in
+            else if (n.loaded && night() && n.goal == Brain.Goal.SLEEP && free(n) && rpg.world.shadowveil.Census.of(n.id) != null && !Float.isFinite(n.homeY)
+                    && Math.hypot(n.x - n.homeX, n.z - n.homeZ) < 1.8f) {
+                ai.unload(n); n.offstage = true; n.indoors = true; n.diary.note(g.state.minutes, "(indoors) gone in for the night");
+            }
+            else if (!n.loaded && n.offstage && d < IN && !(n.indoors && night())) { ai.reload(n); n.offstage = false; n.indoors = false; }
+            else if (!n.loaded && n.indoors && !night() && d >= IN) n.indoors = false;
             if (!n.loaded && n.offstage) off++;
         }
         count = off;
+    }
+
+    /** The townsfolk's night (the census's hours: in at bedtime, out at waking). */
+    private boolean night() {
+        var st = rpg.world.shadowveil.Atlas.map(rpg.world.shadowveil.Atlas.get().map("census"), "stage");
+        double h = g.state.hourOfDay(), bed = rpg.world.shadowveil.Atlas.d(st, "bedHour", 22), wake = rpg.world.shadowveil.Atlas.d(st, "wakeHour", 6);
+        return h >= bed || h < wake;
     }
 
     /** Whether a resident can leave play now (nothing under way that must be seen through in full). */
@@ -75,7 +90,11 @@ final class Offstage {
             steps++;
             if (h < 6 || h >= 22) { at(n, n.homeX, n.homeZ); n.fatigue = Math.max(0, n.fatigue - 0.08f); note(n, minute, "asleep at home"); continue; }
             if (h >= 12 && h < 13 || h < 7) { at(n, n.homeX, n.homeZ); n.hunger = Math.max(0, n.hunger - 0.3f); note(n, minute, h < 7 ? "up and about at home" : "home for the midday meal"); continue; }
-            if (h >= 18) { at(n, n.homeX + (float) Math.cos(n.id) * 3, n.homeZ + (float) Math.sin(n.id) * 3); note(n, minute, "about home for the evening"); continue; }
+            if (h >= 18) {
+                String did = g.repairs == null ? null : g.repairs.offstage(n);
+                if (did == null) at(n, n.homeX + (float) Math.cos(n.id) * 3, n.homeZ + (float) Math.sin(n.id) * 3);
+                note(n, minute, did != null ? did : "about home for the evening"); continue;
+            }
             work(n, minute);
             n.hunger = Math.min(1, n.hunger + 0.01f); n.fatigue = Math.min(1, n.fatigue + 0.01f);
         }
@@ -84,12 +103,20 @@ final class Offstage {
     private void note(Npc n, double minute, String what) { n.lastOutcome = "(off-stage) " + what; n.diary.note(minute, n.lastOutcome); }
     private void at(Npc n, float x, float z) {
         float[] p = rpg.world.shadowveil.ShadowVeil.dry(x, z);
-        n.x = p[0]; n.z = p[1]; n.y = WorldMap.standY(n.x, n.z);
+        float y = WorldMap.standY(p[0], p[1]);
+        // (0.4.6, gamefixes: spawn points clustered) two sharing a post or a doorstep off-stage stand apart, so nobody
+        // comes back into play stood inside another
+        java.util.List<float[]> others = new java.util.ArrayList<>();
+        for (Npc o : g.npcs) if (o != n && o.alive && Math.abs(o.x - p[0]) < 4 && Math.abs(o.z - p[1]) < 4) others.add(new float[]{o.x, o.y, o.z});
+        float[] q = others.isEmpty() ? new float[]{p[0], y, p[1]} : ai.apart(p[0], y, p[1], others);
+        n.x = q[0]; n.y = q[1]; n.z = q[2];
     }
 
     /** Ten minutes of a resident's work: their trade's site worked by the same rules as in play, the haul sold when the pack is full. */
     private void work(Npc n, double minute) {
         Profession p = n.profession;
+        // (0.4.5) damage they know of comes first: told to the one who mends it, or mended by them
+        if (g.repairs != null) { String did = g.repairs.offstage(n); if (did != null) { note(n, minute, (p == null ? n.title : p.title) + ": " + did); return; } }
         Node site = p == null ? null : site(n, p);
         if (site != null) {
             ItemDef product = site.product;

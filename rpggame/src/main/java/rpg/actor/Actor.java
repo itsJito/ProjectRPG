@@ -25,6 +25,16 @@ public class Actor {
     /** The engine mover this actor walks (0 when it has none - a dummy). */
     public long body;
     public float x, y, z, yaw, pitch, vx, vz;
+    /** (0.4.6) A ragdolled body's last centre (to tell it held still) and how long it has hung caught off the ground (Reactions). */
+    public float ragLastX, ragLastY, ragLastZ, ragCaught;
+    /** (0.4.6) Feet the drawn figure has set down, the last time one was (System.nanoTime), and how many have been heard. */
+    public int footPlants, footPlantsHeard;
+    public long footPlantSeen;
+    /** Whether the drawn figure set a foot down lately (its footfalls are its own then, not the clock's): how many new. */
+    public int newFootPlants() {
+        if (System.nanoTime() - footPlantSeen > 600_000_000L) { footPlantsHeard = footPlants; return -1; }
+        int n = footPlants - footPlantsHeard; footPlantsHeard = footPlants; return Math.min(2, Math.max(0, n));
+    }
     /** (0.2.9) metres shimmied along edges toward the next Agility award, when one last leapt off a wall, and barged someone. */
     public float shimmied;
     public double leapAt = -99, chargeAt = -99;

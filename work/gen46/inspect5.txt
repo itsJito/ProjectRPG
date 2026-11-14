@@ -1,0 +1,124 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.49s ({regions=871, overlays=514, variants=475, scarp=46, coast=488, erosion=311, peaks=41, lakes=119, isles=15, rivers=757, wadis=11, ground=21, roads=634, causeways=3, architecture=962, pitsFilled=1309, pits=477, banks=69, clamp=17, cliffs=43, columns=1544, falls=17, raise=11235, trees=268, outcrops=0, ways=500}), made and lit in 2.31s
+    [water] flow field grown in 1232 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+
+    ================ 143, 48, 616  law WILDS  stand Y 48.0
+    structure here: -
+      near marble_yard                Marble Mine cutting yard                 yard           29 m lot 125,583-136,596 floor 44
+      near marble_bunkhouse           Marble Mine bunkhouse                    hall           4 m lot 138,609-147,615 floor 46
+      near hakons_lodge               Trapper's lodge                          hall           8 m lot 142,619-151,625 floor 48
+      near valgard_homes_37           House                                    building       37 m lot 162,643-166,647 floor 55
+      near valgard_homes_38           House                                    building       30 m lot 162,633-168,639 floor 57
+      near valgard_graveyard          Valgard Graveyard                        graveyard      21 m lot 136,630-151,643 floor 51
+      object Door                   Marble Mine bunkhouse door     (143.0, 48.2, 615.5)
+      object Furniture              Bed                            (140.0, 47.5, 614.5)
+      object Furniture              Bedside table                  (139.5, 47.5, 613.5)
+      object Door                   Marble Mine bunkhouse bunk_room door (143.5, 48.2, 612.5)
+      object Door                   Trapper's lodge door           (147.0, 50.2, 619.5)
+      object Furniture              Bench                          (144.0, 49.5, 618.5)
+      object Furniture              Bed                            (146.0, 47.5, 614.5)
+      object Furniture              Weapon trophy                  (145.5, 48.0, 613.5)
+      object Furniture              Weapon trophy                  (146.5, 48.0, 613.5)
+      npc Hakon        HUNTER         (147.5, 49.0, 617.5) goal IDLE
+      npc Hilde        UNDERTAKER     (144.5, 52.0, 636.5) goal IDLE
+      npc Tamsin       MINER          (131.5, 45.0, 589.5) goal IDLE
+      layer Y46 (x 139..147 across, z down; * the point)
+       aaaaaaaab
+       aaaaaaaab
+       aaaaaaaab
+       bbbaabbbb
+       cdee*eeee
+       deeeeeeee
+       deeeeeeee
+       feeeeeeee
+       feeeeeeee
+      layer Y47 (x 139..147 across, z down; * the point)
+       gggghgggb
+       i.......b
+       jj....jjb
+       bbkhhkbbk
+       ..de*ddee
+       .keeeekee
+       .eeeeeeee
+       feeeeeeee
+       feeeeeeee
+      layer Y48 (x 139..147 across, z down; * the point)
+       gggghgggg
+       ........l
+       ........g
+       ggkhhklgk
+       ....*....
+       .kd.ddkee
+       .ddddddee
+       .ddbbbbaa
+       .ddbaaaaa
+      layer Y49 (x 139..147 across, z down; * the point)
+       ggggggggg
+       ........l
+       ........g
+       gggaaglgk
+       ....*....
+       .k...kk..
+       ....m....
+       ...kbbkhh
+       ...bm....
+      layer Y50 (x 139..147 across, z down; * the point)
+       ggggggggg
+       ........a
+       ........g
+       ggggggagk
+       ....*....
+       .n...kn..
+       .........
+       ...kklkhh
+       ...k.....
+      layer Y51 (x 139..147 across, z down; * the point)
+       gggggggga
+       ........a
+       ........a
+       ........a
+       aaaa*aaaa
+       .....k...
+       ......n..
+       ...kklkoo
+       ...k.....
+      layer Y52 (x 139..147 across, z down; * the point)
+       gggggggga
+       ........a
+       ........a
+       aaaaaaaaa
+       ....*....
+       .....n...
+       .........
+       ...kkokkk
+       ...k.....
+      legend: a=planks b=cobble c=podzol d=grass e=gravel f=granite g=stone h=door i=table j=bed k=spruce_log l=glass m=seat n=lamp o=dark_planks
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 34.359 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 39s
+9 actionable tasks: 1 executed, 8 up-to-date

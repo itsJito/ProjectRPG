@@ -135,8 +135,12 @@ public final class Music implements astratto.game.GameModule {
         };
     }
 
+    /** (0.4.2) The pieces the place names for a mood (a realm's, a ground's), or null: the general set (Soundscape). */
+    public java.util.function.Function<Mood, String[]> regional;
+
     private void start(Mood m) {
-        String[] set = TRACKS.get(m);
+        String[] own = regional == null ? null : regional.apply(m);
+        String[] set = own != null ? own : TRACKS.get(m);
         if (set == null) return;
         String pick = set[rnd.nextInt(set.length)];
         if (set.length > 1 && pick.equals(lastTrack)) pick = set[(java.util.Arrays.asList(set).indexOf(pick) + 1) % set.length];

@@ -310,7 +310,7 @@ public final class Brain {
             case GUARD, LAWMAN -> s.add(new Score(Goal.PATROL, onDuty ? 0.5f : 0.21f, onDuty ? "on patrol duty" : "off duty"));
             case WORKER, VILLAGER, CARTER, MERCHANT, QUEST_GIVER, CONTACT, FARMER, UNDERTAKER, FENCE, BEGGAR, HEALER, PRIEST, HUNTER, SCHOLAR, FISHERMAN, MINER, CRAFTSMAN, KNIGHT, CIVIC -> {
                 // a job under way is a commitment: a carter with a shipment to carry sees it through before lesser wants
-                boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null;
+                boolean committed = n.role == Npc.Role.CARTER && g.econ.active() != null && !rpg.world.WorldMap.shadowveil();
                 // (0.2.9) a lake net still out when the day ends is brought in before its fisher goes home
                 boolean netOut = threat == null && n.profession == Profession.LAKE_NET_FISHERMAN && jobs.lateForNets() && jobs.netOf(n) != null;
                 // (0.3.0, the Weekly System) Solday afternoon is the week's rest: ordinary trades put their work down
@@ -361,11 +361,13 @@ public final class Brain {
         // money matters: a purse too heavy to carry about, or too light to work with, means an errand to the bank (by day)
         // (0.3.9) not in the middle of a shift worked far out of town (a smith at an outlying forge spent his working
         // hours walking to the bank and back): it waits for the end of the day
-        if (threat == null && !night && g.bank != null && !farOnShift(n, plan, g.bank.customerSpot())) { String why = g.bank.errand(n); if (why != null) s.add(new Score(Goal.BANK, 0.53f, why)); }
+        if (threat == null && !night && g.bank != null && !farOnShift(n, plan, g.bank.customerSpot(n))) { String why = g.bank.errand(n); if (why != null) s.add(new Score(Goal.BANK, 0.53f, why)); }
         if (!ZonePolicy.routineAllowed(n, n.x, n.z) && threat == null && !g.carrying.busy(n)) s.add(new Score(Goal.RETURN, 0.57f, "leaving an unwelcome zone"));
         // (0.2.1, gamefixes: human AI choices expanded) a downpour sends ordinary folk out of doors home to shelter; the
         // watch keeps its round, and work under a roof goes on
-        float rain = g.timeSystem.weather.rain;
+        // (0.4.6) how foul the weather is: rain, and now hail, snow, a sandstorm, a blizzard's drift, a gale
+        var wx = g.timeSystem.weather;
+        float rain = Math.max(Math.max(wx.rain, wx.snow * 0.7f), Math.max(Math.max(wx.hail * 1.2f, wx.sand), Math.max(wx.drift * 0.6f, (wx.wind - 1) * 0.8f)));
         // (0.3.2) and an errand that takes them indoors anyway - the bank, the inn, the market counter - is shelter enough:
         // they were turned back from the bank's door by the rain and sent out to it again, round and round
         boolean indoorErrand = n.goal == Goal.BANK || n.goal == Goal.INN || n.goal == Goal.ERRAND;
@@ -374,13 +376,27 @@ public final class Brain {
         // indoors more than half of every working day
         boolean working = Schedule.now(n, g.state.weekday(), g.state.hourOfDay()) == Schedule.Activity.WORK;
         if (threat == null && rain > (working ? 0.75f : 0.45f) && !indoorErrand && !n.combatant() && !n.watch() && !g.carrying.busy(n) && g.vox.skyLight((int) Math.floor(n.x), rpg.world.Ground.cell((int) Math.floor(n.x), (int) Math.floor(n.z)) + 1, (int) Math.floor(n.z)) > 0.9f)
-            s.add(new Score(Goal.SHELTER, 0.45f + rain * 0.25f, String.format("rain (%.0f%%); going in out of it", rain * 100)));
+            s.add(new Score(Goal.SHELTER, 0.45f + rain * 0.25f, String.format("%s (%.0f%%); going in out of it", g.weatherSystem == null ? "rain" : g.weatherSystem.name().toLowerCase(java.util.Locale.ROOT), rain * 100)));
         // the devout go to their town's altar of a morning, once a day
         double hr = g.state.hourOfDay();
         int today = (int) (g.state.minutes / 1440);
         if (threat == null && !n.combatant() && devout(n) && hr >= 6.5 && hr < 9 && n.prayedDay != today && altarFor(n) != null)
             s.add(new Score(Goal.PRAY, 0.56f, "morning prayers at the altar"));
         s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
+        // (0.4.4, gamefixes: bandits should prioritise being in the wilderness) an outlaw's day stays out in the wilds: no
+        // errand, inn, bank, market, shelter or prayers in a kingdom's streets, and company only among their own
+        if (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE) {
+            s.removeIf(sc -> sc.goal == Goal.ERRAND || sc.goal == Goal.INN || sc.goal == Goal.BANK || sc.goal == Goal.PRAY || sc.goal == Goal.SHELTER
+                    || sc.goal == Goal.SOCIALIZE && (ai.partnerFor(n) == null || !(ai.partnerFor(n).role == Npc.Role.BANDIT || ai.partnerFor(n).role == Npc.Role.BRUTE)));
+            if (s.isEmpty()) s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
+        }
+        tailBudget(n, s);
+        // (0.4.5) a goal whose way kept failing is set aside a while; the day goes on with the rest of it
+        if (!n.goalRest.isEmpty()) {
+            n.goalRest.values().removeIf(t -> t <= g.time);
+            s.removeIf(sc -> n.goalRest.containsKey(sc.goal) && !URGENT.contains(sc.goal));
+            if (s.isEmpty()) s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
+        }
         s.sort(Comparator.comparing(Score::value).reversed());
         // a little inertia: keep the current goal unless another beats it clearly
         Score best = s.get(0);
@@ -405,6 +421,56 @@ public final class Brain {
         }
         if (best.goal == Goal.FIGHT && threat != null) n.fightTarget = threat.id;
         n.goalReason = best.reason;
+    }
+
+    /** (0.4.5) How long (s) and how far (m) anyone keeps after the player short of a fight, and how long they then leave it. */
+    /** (0.4.5) How long (s) someone tries to walk a damage report to its mender before sending word instead. */
+    static final float REPORT_WALK = rpg.Tuning.f("ai.reportWalk", 60f);
+    /** (0.4.5) Goals never set aside for a failing way (a fight, a flight, a report, a fire), and how long (s) one is. */
+    static final java.util.Set<Goal> URGENT = java.util.EnumSet.of(Goal.FIGHT, Goal.FLEE, Goal.HIDE, Goal.REPORT_CRIME, Goal.REPORT_DAMAGE, Goal.FIRE_RESPONSE, Goal.HELD, Goal.FOLLOW, Goal.SHELTER);
+    static final float GOAL_REST = rpg.Tuning.f("ai.goalRest", 240f);
+    static final int GOAL_FAILS = rpg.Tuning.i("ai.goalFails", 3);
+    static final float TAIL_MAX = rpg.Tuning.f("ai.tailMax", 25f), TAIL_LEASH = rpg.Tuning.f("ai.tailLeash", 28f), TAIL_REST = rpg.Tuning.f("ai.tailRest", 150f);
+
+    /** Whether a goal, as this one holds it, keeps them after the player without a fight (watching, a look, a lead, aid). */
+    private boolean afterPlayer(Npc n, Goal goal) {
+        long p = g.player.id;
+        return switch (goal) {
+            case WATCH -> n.watchTarget == p;
+            case LOOK -> { var e = ai.stealth.unresolved(n); yield e != null && e.getKey() == p; }
+            case INVESTIGATE -> n.investigation != null && n.investigation.subject == p || n.investigation == null && ai.stealth.unresolved(n) != null && ai.stealth.unresolved(n).getKey() == p;
+            case AID -> n.aidTarget == p;
+            default -> false;
+        };
+    }
+
+    /**
+     * (0.4.5, gamefixes: NPCs sometimes followed the player for way too long) the tail budget: keeping after the player
+     * short of a fight - watching them, a look or a lead that is them, a helping hand - lasts at most TAIL_MAX seconds
+     * and TAIL_LEASH metres from where it began; then it is let go (the watch eased, the lead settled as nothing more than
+     * curious) and none of it is taken up again for TAIL_REST seconds. A fight, an arrest, a hunt for the wanted, a
+     * report and a companion's following are not tails and are never cut short by it.
+     */
+    private void tailBudget(Npc n, List<Score> s) {
+        boolean tailing = afterPlayer(n, n.goal);
+        if (!tailing) n.tailSince = -1;
+        else {
+            if (n.tailSince < 0) { n.tailSince = g.time; n.tailX = n.x; n.tailZ = n.z; }
+            if (g.time - n.tailSince > TAIL_MAX || Math.hypot(n.x - n.tailX, n.z - n.tailZ) > TAIL_LEASH) {
+                n.tailRestUntil = g.time + TAIL_REST;
+                n.tailSince = -1;
+                if (n.watchTarget == g.player.id) n.watchUntil = Math.min(n.watchUntil, g.time);
+                if (n.investigation != null && n.investigation.subject == g.player.id) n.investigation = null;
+                Stealth.Aware w = n.aware.get(g.player.id);
+                if (w != null) { w.settledAt = g.time; w.level = Math.min(w.level, Stealth.CURIOUS); }
+                if (n.aidTarget == g.player.id) n.aidTarget = 0;
+                g.state.commit("NpcTailEnded", n.id, g.player.id, DevMap.jurisdiction(n.x, n.z), 0, n.goal + " let go");
+            }
+        }
+        if (g.time < n.tailRestUntil) {
+            s.removeIf(sc -> afterPlayer(n, sc.goal));
+            if (s.isEmpty()) s.add(new Score(Goal.WANDER, 0.15f, "nothing pressing"));
+        }
     }
 
     private String workText(Npc n) {
@@ -491,6 +557,8 @@ public final class Brain {
             case REPORT_DAMAGE -> {
                 var report=g.repairs.reportFor(n);
                 if(report==null){ai.desire(n,AiSystem.A_HOLD);n.nextThink=0;}
+                // (0.4.5) one off in the world, or a way that will not be walked for a minute, is sent word instead
+                else if(!report.recipient().loaded || g.time-n.goalSince>REPORT_WALK){g.repairs.sendWord(n,report.damage(),report.recipient());n.lastOutcome="sent word of the damage to "+report.recipient().name;n.nextThink=0;}
                 else if(goTo(n, report.recipient().x, report.recipient().y, report.recipient().z,false,2.3f)){g.repairs.report(n,report.damage(),report.recipient());n.nextThink=0;}
             }
             case LOOK -> {
@@ -548,6 +616,8 @@ public final class Brain {
     }
     /** The altar of the town a person lives in (DevPalace's temple, or the debug square's), or null in the wilds. */
     private float[] altarFor(Npc n) {
+        // (0.4.4) on ShadowVeil their kingdom's church (its altar and the step before it)
+        if (rpg.world.WorldMap.shadowveil()) { float[] a = rpg.world.shadowveil.Rooms.altarFor(n.homeJurisdiction, n.homeX, n.homeZ, ALTAR_REACH); return a == null ? null : new float[]{a[0], a[2], a[3], a[4], a[1]}; }
         if (DevMap.PALACE.equals(n.homeJurisdiction)) return rpg.world.Expanse.ALTAR;
         if (DevMap.ALPHA.equals(n.homeJurisdiction) || DevMap.BETA.equals(n.homeJurisdiction)) return new float[]{DevMap.ALTAR[0] + 0.5f, DevMap.ALTAR[1] + 0.5f};
         return null;
@@ -563,7 +633,18 @@ public final class Brain {
             if (spot == null) { n.lastOutcome = "the altar is crowded; prayers later"; n.prayedDay = (int) (g.state.minutes / 1440); n.nextThink = 0; return; }
             n.prayAtX = spot[0]; n.prayAtZ = spot[1];
         }
-        if (!goTo(n, n.prayAtX, n.prayAtZ, false, 0.45f)) { n.lastOutcome = "on the way to prayers"; return; }
+        if (!goTo(n, n.prayAtX, n.prayAtZ, false, 0.45f)) {
+            // (0.4.6, gamefixes: people stood all morning "on the way to prayers") a place no route reaches is given up at
+            // once (another is chosen); a second that fails too ends the morning's prayers for today
+            if (n.lastOutcome != null && n.lastOutcome.startsWith("no traversable")) {
+                n.prayMisses++; n.prayFailX = n.prayAtX; n.prayFailZ = n.prayAtZ; n.prayAtX = n.prayAtZ = Float.NaN;
+                if (n.prayMisses >= 2) { n.prayMisses = 0; n.prayedDay = (int) (g.state.minutes / 1440); n.lastOutcome = "could not get near the altar; prayers another day"; n.nextThink = 0; }
+                return;
+            }
+            if (!n.lastOutcome.startsWith("paused")) n.lastOutcome = "on the way to prayers";
+            return;
+        }
+        n.prayMisses = 0;
         ai.desire(n, AiSystem.A_HOLD);
         n.wantYaw = (float) Math.atan2(-(at[0] - n.x), -(at[1] - n.z));
         if (n.prayStarted < n.goalSince) n.prayStarted = g.time;
@@ -571,13 +652,22 @@ public final class Brain {
         if (g.time - n.prayStarted > 25) { n.prayedDay = (int) (g.state.minutes / 1440); n.prayAtX = n.prayAtZ = Float.NaN; n.nextThink = 0; }
     }
     /** The nearest free place before an altar: rows of five, each a long pace from the next, the first row 2 m out, the rows behind it staggered. */
+    /** (0.4.4) How far a person goes to their kingdom's church for the morning prayers (m). */
+    static final float ALTAR_REACH = rpg.Tuning.f("ai.altarReach", 220f);
     private float[] prayerPlace(Npc n, float[] altar) {
         float[] best = null; float bd = Float.MAX_VALUE;
+        // which way the altar faces: toward the step before it (ShadowVeil's), else +z (the devmap's)
+        float fx = 0, fz = 1;
+        if (altar.length >= 4) { float dx = altar[2] - altar[0], dz = altar[3] - altar[1], l = (float) Math.hypot(dx, dz); if (l > 0.1f) { fx = dx / l; fz = dz / l; } }
         for (int row = 0; row < 3; row++) for (int col = -2; col <= 2; col++) {
-            float x = altar[0] + col * 1.7f + (row % 2) * 0.85f, z = altar[1] + 2.0f + row * 1.9f;
-            boolean taken = false;
+            float out = 2.0f + row * 1.9f, side = col * 1.7f + (row % 2) * 0.85f;
+            float x = altar[0] + fx * out - fz * side, z = altar[1] + fz * out + fx * side;
+            boolean taken = Math.hypot(n.prayFailX - x, n.prayFailZ - z) < 0.6f;
             for (Npc o : g.npcs) if (o != n && o.alive && o.goal == Goal.PRAY && Float.isFinite(o.prayAtX) && Math.hypot(o.prayAtX - x, o.prayAtZ - z) < 0.6f) { taken = true; break; }
-            if (taken || !g.vox.navigation.validPoint(x, n.y, z, d -> !d.locked)) continue;
+            // (0.4.6) judged on the altar's own floor (it was the worshipper's, wherever they stood when they set out) and
+            // clear of the pews: a place a seat's block stands in is no place to kneel
+            float fy = altar.length >= 5 ? altar[4] : n.y;
+            if (taken || !g.vox.navigation.validPoint(x, fy, z, d -> !d.locked) || rpg.world.Blocks.objectCell(g.vox.block((int) Math.floor(x), (int) Math.floor(fy), (int) Math.floor(z)))) continue;
             float d = (float) Math.hypot(x - n.x, z - n.z) + row * 2;
             if (d < bd) { bd = d; best = new float[]{x, z}; }
         }
@@ -586,10 +676,10 @@ public final class Brain {
 
     /** To the bank counter; served when the teller is there (the bank shut, they come back later). */
     private void bank(Npc n) {
-        float[] at = g.bank.customerSpot();
+        float[] at = g.bank.customerSpot(n);
         if (!goTo(n, at[0] + (n.id % 3 - 1) * 0.7f, at[1] - 0.4f, false, 0.9f)) return;
         n.wantYaw = (float) Math.PI;   // facing the counter (south, +z)
-        if (!g.bank.open()) { n.bankAgain = g.time + 300; n.lastOutcome = "the bank was shut"; n.nextThink = 0; return; }
+        if (!g.bank.open(n)) { n.bankAgain = g.time + 300; n.lastOutcome = "the bank was shut"; n.nextThink = 0; return; }
         String done = g.bank.serve(n);
         if (done != null) { ai.say(n, done.startsWith("deposited") ? "Into my account, if you please." : "I'll need a little from my account."); n.lastOutcome = done + " at the bank"; }
         n.nextThink = 0;
@@ -730,6 +820,16 @@ public final class Brain {
         return best;
     }
 
+    /**
+     * (0.4.6, gamefixes: lawmen said they would take a body "to Morrow", the devmap's undertaker, in every kingdom) who the
+     * dead go to in a person's own kingdom: its undertaker by name ("the undertaker, Astrid"), or simply the undertaker.
+     */
+    String undertakerName(Npc n) {
+        for (Npc o : g.npcs) if (o.alive && o.role == Npc.Role.UNDERTAKER && o.homeJurisdiction.equals(n.homeJurisdiction)) return "the undertaker, " + o.name;
+        return "the undertaker";
+    }
+    private static String capital(String s) { return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1); }
+
     /** The guard's errand: to the grave, a moment gathering it up, then the bundle carried to the undertaker's hut. */
     private void collect(Npc n) {
         rpg.objects.Container c = graveFor(n);
@@ -737,11 +837,12 @@ public final class Brain {
         if (n.layingBody == c.id) c.heldBy = n.id;
         if (c.heldBy != n.id) {
             if (goTo(n, c.x, c.y, c.z, false, 1.2f)) {
-                if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Poor soul. I'll see your belongings safely home." : "Poor soul. I'll see this to Morrow."); }
+                if (n.arrivedAt < n.goalSince) { n.arrivedAt = g.time; g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Poor soul. I'll see your belongings safely home." : "Poor soul. I'll take this to " + undertakerName(n) + "."); }
                 n.wantYaw = (float) Math.atan2(-(c.x - n.x), -(c.z - n.z));
                 if (g.time - n.arrivedAt > 0.5) {
                     if (c instanceof rpg.objects.Corpse && g.carrying.begin(n, c).rejected()) { n.nextThink = g.time + 1; return; }
                     c.heldBy = n.id;
+                    if (c instanceof rpg.objects.Corpse taken) taken.inCare = true;
                     g.state.commit("GraveCollected", n.id, c.id, DevMap.jurisdiction(c.x, c.z), 0, "carried by " + n.name);
                     n.lastOutcome = "gathered up the grave; taking it to the undertaker";
                 }
@@ -761,7 +862,7 @@ public final class Brain {
                 if (n.layingSince < 0) {
                     n.layingSince = g.time; n.layingBody = c.id;
                     g.carrying.putDown(n);
-                    g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Rest now. Your things stay with you." : "There. Morrow will see to the rest.");
+                    g.ai.say(n, n.role == Npc.Role.UNDERTAKER ? "Rest now. Your things stay with you." : "There. " + capital(undertakerName(n)) + " will see to the rest.");
                     rpg.render.Faces.react(g, n, rpg.render.Faces.Mood.SAD, LAYING + 1);
                 }
                 c.heldBy = n.id;
@@ -835,11 +936,20 @@ public final class Brain {
     static final float FRESH_ANGLE = 0.9f;
     /** How fast a crossbow comes up to the shoulder and down again (the share of the way per second). */
     static final float AIM_EASE = 5;
+    /** (0.4.6) How far (m) above the ground beneath them a person stands to be allowed a ladder down whatever they are about. */
+    static final float LADDER_ALOFT = rpg.Tuning.f("ai.ladderAloft", 3.5f);
     public static boolean canUseLadders(Npc n){
         if(n instanceof rpg.monster.Monster m)return m.kind.form==rpg.monster.MonsterKind.Form.HUMANOID && m.kind.hw<=1 && m.kind.hh<=2.3f;
+        // (0.4.6, gamefixes: NPC AI must work 100% - a knight whose duty took him up a church tower's ladder stood in the
+        // belfry for the rest of the day, his next errand not allowed the ladder down) anyone up above the ground a storey
+        // or more, where a ladder may be the only way down, may take it
+        if(n.y>rpg.world.Ground.at(n.x,n.z)+LADDER_ALOFT)return true;
         return n.watch() || n.goal==Goal.FIGHT || n.goal==Goal.WORK && (n.profession==Profession.CARPENTER || n.role==Npc.Role.WORKER) || DevMap.WILDS.equals(DevMap.jurisdiction(n.x,n.z));
     }
-    boolean goTo(Npc n,float x,float z,boolean run,float within){return goTo(n,x,Float.NaN,z,run,within);}
+    boolean goTo(Npc n,float x,float z,boolean run,float within){
+        // (0.4.4) their post on its own floor (upstairs posts were sought on the ground below them)
+        return goTo(n,x,Float.isFinite(n.postY) && x==n.postX && z==n.postZ?n.postY:Float.NaN,z,run,within);
+    }
     boolean goTo(Npc n, float x, float targetY, float z, boolean run, float within) {
         // (0.3.9, gamefixes: people ride, and fight from the saddle) in the saddle every errand is ridden: the mount is
         // reined toward the place (Riding.npcControls) and the rider is there when the mount is
@@ -851,7 +961,15 @@ public final class Brain {
             n.rideToX = there ? Float.NaN : x; n.rideToZ = z;
             return there;
         }
-        if (n.summonOwner == 0 && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE && n.goal != Goal.HIDE) { x = n.spawnX; z = n.spawnZ; }
+        // (0.4.6, gamefixes: AI spun round altars and stood "on the way" by them) a spot already found to be as close as the
+        // body gets (a place before an altar a pew's end keeps a hand short of) stays reached while the body stays where it
+        // stopped: it was called reached for one moment, then sought again for two seconds of pressing into the pew, over
+        // and over, so a prayer or an errand there never began
+        if (Math.hypot(n.nearTX - x, n.nearTZ - z) < 0.6f && Math.hypot(n.x - n.nearPX, n.z - n.nearPZ) < 0.6f && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f)) {
+            ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false; return true;
+        }
+        final float askedX = x, askedZ = z;
+        if (n.summonOwner == 0 && !n.errand && !ZonePolicy.routineAllowed(n, x, z) && n.goal != Goal.COLLECT && n.goal != Goal.REPORT_CRIME && n.goal != Goal.REPORT_DAMAGE && n.goal != Goal.FLEE && n.goal != Goal.HIDE) { x = n.spawnX; z = n.spawnZ; }
         if(!Float.isFinite(targetY) && Math.hypot(n.x-x,n.z-z)<=within){ai.desire(n,AiSystem.A_HOLD);n.legs=null;n.hasGoalPos=false;if(n.lastOutcome!=null && (n.lastOutcome.contains("blocked") || n.lastOutcome.contains("no traversable")))n.lastOutcome="arrived";return true;}
         // An interaction targets the near ground beside a solid object, not its roof.
         if(!Float.isFinite(targetY) && !g.vox.navigation.validPoint(x,n.y,z,d->!d.locked || d.owner==n.id)){
@@ -863,10 +981,15 @@ public final class Brain {
             }within=Math.max(.15f,within-(float)Math.hypot(bx-x,bz-z));x=bx;z=bz;
         }
         float surface=g.vox.navigation.standY(x,Float.isFinite(targetY)?targetY:n.y,z);
+        // (0.4.6, gamefixes: NPCs stood all morning on the way to a church up the hill) a place more than a storey's climb
+        // above or below the body was sought at the body's own height, found nothing to stand on there, and the errand stood
+        // "looking for supported ground" for ever: such a place is taken at its own ground's height
+        float bodyLevel=n.y;
+        if(!Float.isFinite(surface) && !Float.isFinite(targetY)){float top=rpg.world.WorldMap.standY(x,z);if(Float.isFinite(top)){bodyLevel=top;surface=g.vox.navigation.standY(x,top,z);}}
         // (0.4.1) a spot with nothing to stand on at its own floor - a bed, furniture before a hearth (since 0.4.0 not floor to
         // walk on) - is reached from the nearest standable cell beside it on that floor. The column's nearest standable cell
         // was the roof above it: everyone going to bed walked for the roof and found no way up
-        float level=Float.isFinite(targetY)?targetY:n.y;
+        float level=Float.isFinite(targetY)?targetY:bodyLevel;
         if(!Float.isFinite(surface) || Math.abs(surface-level)>1.2f){
             float targetLevel=level;
             float best=Float.MAX_VALUE,bx=x,bz=z,by=Float.NaN;
@@ -887,19 +1010,31 @@ public final class Brain {
             if(n.legs!=null && n.hasGoalPos && !g.vox.navigation.validPoint(n.gx,n.goalY,n.gz,d->!d.locked || d.owner==n.id || d.key!=null && n.has(d.key,1))) {n.legs=null;n.hasGoalPos=false;}
         }
         n.routeBook.seed(n,g);n.routeBook.readBlocked(n,g.state.minutes,g.time);
-        if(g.time<n.navPauseUntil && Math.hypot(n.legsX-x,n.legsZ-z)<1 && Math.abs(n.legsY-surface)<1){ai.desire(n,AiSystem.A_HOLD);n.wantYaw=n.yaw+(float)Math.sin(g.time*1.2)*.35f;n.lastOutcome="paused to reconsider a blocked route";return false;}
+        if(g.time<n.navPauseUntil && Math.hypot(n.legsX-x,n.legsZ-z)<1 && Math.abs(n.legsY-surface)<1){ai.desire(n,AiSystem.A_HOLD);
+            // (0.4.6, gamefixes: AI spun in circles) a look about from the heading the pause began with - taken from the
+            // heading of the moment, it pushed the body on round and round for as long as the pause lasted
+            if(g.time-n.pauseYawAt>0.5){n.pauseYaw=n.yaw;}n.pauseYawAt=g.time;
+            n.wantYaw=n.pauseYaw+(float)Math.sin(g.time*1.2)*.35f;n.lastOutcome="paused to reconsider a blocked route";return false;}
         // (0.3.3) the pause is over: on the way again (the word of it lingered on someone walking their route for minutes)
         if(n.lastOutcome!=null && n.lastOutcome.startsWith("paused"))n.lastOutcome="on the way";
         if (n.legs == null || Math.hypot(n.legsX-x,n.legsZ-z)>.5 || Math.abs(n.legsY-surface)>.5f) {
             java.util.function.Predicate<rpg.objects.Door> permission=d->n instanceof rpg.monster.Monster mo && mo.kind.form!=rpg.monster.MonsterKind.Form.HUMANOID ? d.open&&!d.locked : !d.locked||d.owner==n.id||d.key!=null&&n.has(d.key,1);
-            n.legs=n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
+            // (0.4.6) stalled twice on this place: the way worked out cell by cell, in short legs, not handed over whole
+            boolean fine = n.stuckGoalCount >= 2 && Math.hypot(n.stuckGoalX - x, n.stuckGoalZ - z) < 1.0f;
+            n.legs=fine?null:n.routeBook.recall(n,x,surface,z,g.vox,g.time,permission);
             if(n.legs==null){
                 // (0.4.0) the tick's search time spent: stand a moment, plan next tick
                 if(!g.vox.navigation.mayRoute(g.state.tick)){ai.desire(n,AiSystem.A_HOLD);return false;}
-                n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time);
+                n.legs=g.vox.navigation.route(n.x,n.y,n.z,x,surface,z,permission,canUseLadders(n),n.id,n.routeBook,g.time,fine);
                 g.vox.navigation.spent(g.state.tick);
+                if(n.legs!=null)n.failStreak=0;
             }
-            if(n.legs==null){n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.min(g.time+2,n.routeBook.failed(n,g.time));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";n.noRoutes++;return false;}
+            // (0.4.2, gamefixes: the stutter - a goal no route reaches was searched for again every two seconds, a fifth
+            // of a second each time) the same goal failing again waits longer each time: 2, 4, 8 ... 64 seconds
+            if(n.legs==null){boolean same=Math.hypot(n.failX-x,n.failZ-z)<1.5f;n.failStreak=same?Math.min(5,n.failStreak+1):0;n.failX=x;n.failZ=z;
+                n.legsX=x;n.legsY=surface;n.legsZ=z;n.gx=x;n.goalY=surface;n.gz=z;n.routeBook.begin(n,x,surface,z,new int[0],g.time);n.navPauseUntil=Math.max(Math.min(g.time+2,n.routeBook.failed(n,g.time)),g.time+2*(1<<n.failStreak));ai.desire(n,AiSystem.A_HOLD);n.lastOutcome="no traversable route; looking for another way";n.noRoutes++;
+                if(n.failStreak>=GOAL_FAILS && !URGENT.contains(n.goal) && n.goal!=Goal.SLEEP){n.goalRest.put(n.goal,g.time+GOAL_REST);if(n.goal==Goal.PRAY){n.prayedDay=(int)(g.state.minutes/1440);n.prayAtX=n.prayAtZ=Float.NaN;}n.failStreak=0;n.nextThink=0;n.lastOutcome="no way there; leaving it for now";g.state.commit("NpcGoalSetAside",n.id,0,DevMap.jurisdiction(n.x,n.z),0,n.goal+" (no way to "+Math.round(x)+", "+Math.round(z)+")");}
+                return false;}
             n.routeBook.begin(n,x,surface,z,n.legs,g.time);
             n.legAt=0;n.legsX=x;n.legsY=surface;n.legsZ=z;
             // (0.3.3) a way found: whatever was said of the last one failing is over
@@ -929,19 +1064,84 @@ public final class Brain {
         float left = (float) Math.hypot(n.x - x, n.z - z);
         if (Math.hypot(n.stallX - x, n.stallZ - z) > 0.6f) { n.stallX = x; n.stallZ = z; n.stallBest = left; n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
         else if (left < n.stallBest - 0.25f || Math.hypot(n.x - n.stallPX, n.z - n.stallPZ) > 1.25f) { n.stallBest = Math.min(n.stallBest, left); n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z; }
+        // (0.4.6) held up a moment where the next waypoint is a step away (a drop, a tread, a door's sill): the step is
+        // taken at once, not after the long wait for a new way
+        else if (g.time - n.stallSince > NUDGE_AFTER && g.time > n.nudgeAt && Float.isFinite(ty) && stepToward(n, tx, ty, tz) != null) {
+            float[] st = stepToward(n, tx, ty, tz);
+            n.nudgeAt = g.time + NUDGE_REST; n.nudges++; n.stallSince = g.time;
+            g.teleport(n, st[0], st[1], st[2]);
+            return false;
+        }
         // (0.3.3) at arm's length of a spot that cannot quite be reached (a grave plot, a counter, a spot in furniture) two
         // seconds of no headway is enough to call it there; far off, six before a new way is looked for
         else if (g.time - n.stallSince > (left <= Math.max(within + 2.2f, 3.2f) ? 2.0 : STALL)) {
             n.stallSince = g.time; n.stallPX = n.x; n.stallPZ = n.z;
             if (left <= Math.max(within + 2.2f, 3.2f) && (!Float.isFinite(targetY) || Math.abs(n.y - targetY) < 1.2f)) {
                 ai.desire(n, AiSystem.A_HOLD); n.legs = null; n.hasGoalPos = false;
+                n.nearTX = askedX; n.nearTZ = askedZ; n.nearPX = n.x; n.nearPZ = n.z;
                 n.lastOutcome = "as close as I can get"; return true;
+            }
+            // (0.4.6, gamefixes: NPC AI still got stuck - Loxford Castle's household stood all day on its stair, a step from
+            // the floor below the route dropped them onto) the next waypoint is in reach - beside, a step up or a drop of a
+            // storey down - and free: the body takes the step there (as a person would hop down or scramble up), once in a while
+            if (g.time > n.nudgeAt && Float.isFinite(ty) && Math.hypot(tx - n.x, tz - n.z) < NUDGE_REACH && Math.abs(ty - n.y) <= 3.5f
+                    && g.vox.navigation.validPoint(tx, ty, tz, d -> !d.locked || d.owner == n.id) && !crowded(n, tx, ty, tz)) {
+                n.nudgeAt = g.time + NUDGE_REST; n.nudges++;
+                g.teleport(n, tx, ty, tz);
+                n.lastOutcome = "on the way"; return false;
+            }
+            // (0.4.6) the same near place stalled on again and again (a way the body's own steering will not take): out of
+            // the player's sight, the body is set there - as it would have got there by the way it could not find
+            if (Math.hypot(n.stuckGoalX - x, n.stuckGoalZ - z) < 1.0f) n.stuckGoalCount++; else { n.stuckGoalX = x; n.stuckGoalZ = z; n.stuckGoalCount = 1; }
+            if (n.stuckGoalCount >= 3 && left < 14 && Float.isFinite(surface) && !seenByPlayer(n) && !crowded(n, x, surface, z)
+                    && g.vox.navigation.validPoint(x, surface, z, d -> !d.locked || d.owner == n.id)) {
+                n.stuckGoalCount = 0; n.nudges++;
+                g.teleport(n, x, surface, z);
+                n.lastOutcome = "on the way"; return false;
             }
             n.legs = null; n.hasGoalPos = false; n.lastOutcome = "no headway; finding another way"; n.stalls++;
         }
         ai.desire(n, run ? ai.pace(n, x, z, within) : AiSystem.A_GOTO);
         return false;
     }
+    /** (0.4.6) How near (m) a stalled body's next waypoint must be for it to take the step there, and how often (s) it may. */
+    static final float NUDGE_REACH = rpg.Tuning.f("ai.nudgeReach", 1.9f);
+    static final double NUDGE_REST = rpg.Tuning.f("ai.nudgeRest", 3f), NUDGE_AFTER = rpg.Tuning.f("ai.nudgeAfter", 0.8f);
+    /** (0.4.6) Whether the player could see a person now (near, in front, a clear line). */
+    private boolean seenByPlayer(Npc n) {
+        var p = g.player;
+        if (p == null || !p.alive) return false;
+        float dx = n.x - p.x, dz = n.z - p.z, d = (float) Math.hypot(dx, dz);
+        if (d > 60) return false;
+        float fx = (float) -Math.sin(g.controller.camYaw), fz = (float) -Math.cos(g.controller.camYaw);
+        if (d > 3 && (dx * fx + dz * fz) / d < 0.2f) return false;
+        return g.vox.sight(p.x, p.eyeY(), p.z, n.x, n.eyeY(), n.z);
+    }
+    /**
+     * (0.4.6) The step a body held up short of its way can take: the waypoint itself when it is a step away (a drop, a
+     * tread, a sill), else the floor one cell on toward it when that is a level up or down (out of a hole, onto a kerb).
+     */
+    private float[] stepToward(Npc n, float tx, float ty, float tz) {
+        java.util.function.Predicate<rpg.objects.Door> may = d -> !d.locked || d.owner == n.id;
+        if (Math.hypot(tx - n.x, tz - n.z) < NUDGE_REACH && Math.abs(ty - n.y) >= 0.5f && Math.abs(ty - n.y) <= 3.5f && g.vox.navigation.validPoint(tx, ty, tz, may) && !crowded(n, tx, ty, tz))
+            return new float[]{tx, ty, tz};
+        float dx = tx - n.x, dz = tz - n.z, l = (float) Math.hypot(dx, dz);
+        if (l < 0.5f) return null;
+        float ax = (float) Math.floor(n.x + dx / l * 1.0f) + 0.5f, az = (float) Math.floor(n.z + dz / l * 1.0f) + 0.5f;
+        if ((int) Math.floor(ax) == (int) Math.floor(n.x) && (int) Math.floor(az) == (int) Math.floor(n.z)) return null;
+        float ay = g.vox.navigation.standY(ax, n.y, az);
+        if (!Float.isFinite(ay) || Math.abs(ay - n.y) < 0.5f || Math.abs(ay - n.y) > 1.2f || !g.vox.navigation.validPoint(ax, ay, az, may) || crowded(n, ax, ay, az)) return null;
+        // the head clear over the step taken (never through a ceiling)
+        if (g.vox.solid((int) Math.floor(ax), (int) Math.floor(Math.max(ay, n.y)) + 2, (int) Math.floor(az)) && ay > n.y) return null;
+        return new float[]{ax, ay, az};
+    }
+
+    /** Whether someone else stands at a point. */
+    private boolean crowded(Npc n, float x, float y, float z) {
+        for (Actor o : g.actors()) if (o != n && o.alive && Math.abs(o.y - y) < 1.5f && Math.hypot(o.x - x, o.z - z) < 0.7f) return true;
+        return false;
+    }
+
     /**
      * (0.3.2, gamefixes: aggressive optimization that keeps the experience) AI level of detail: someone far from the player
      * and about ordinary business re-decides less often - up to a third as often past 80 m - and anyone near, fighting,
@@ -1368,7 +1568,9 @@ public final class Brain {
     private void hide(Npc n) {
         boolean terror = g.actor(n.fearOf) instanceof rpg.monster.Monster tm && tm.kind.terror() > 0;
         if (!n.hideSet) {
-            float[] h = terror && n.homeX != 0 && Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 90 ? new float[]{n.homeX, n.homeZ} : hideSpot(n, n.fearX, n.fearZ);
+            // (0.4.6, gamefixes: people stood about crouching in the open with a dragon overhead) from a terror they go in
+            // under a roof - home if it is near, else the nearest roofed floor - never a crouch behind a bush in its sight
+            float[] h = terror && n.homeX != 0 && Math.hypot(n.homeX - n.x, n.homeZ - n.z) < 90 ? new float[]{n.homeX, n.homeZ} : terror ? shelterFor(n) : hideSpot(n, n.fearX, n.fearZ);
             n.hideX = h[0]; n.hideZ = h[1]; n.hideSet = true;
         }
         // (0.3.7) a hiding place is one only while it hides: with what they fear in plain view and close, they are found -
@@ -1380,7 +1582,10 @@ public final class Brain {
             runFrom(n, feared);
             return;
         }
-        n.sneaking = !terror || Math.hypot(n.hideX - n.x, n.hideZ - n.z) < 1.5f;
+        boolean roofed = g.vox.skyLight((int) Math.floor(n.x), (int) Math.floor(n.y) + 1, (int) Math.floor(n.z)) < 0.35f;
+        n.sneaking = terror ? roofed && Math.hypot(n.hideX - n.x, n.hideZ - n.z) < 1.5f : true;
+        // a terror and no roof reached (the way in shut, nowhere near): away from it rather than frozen in its sight
+        if (terror && !roofed && feared != null && feared.alive && Math.hypot(n.hideX - n.x, n.hideZ - n.z) < 1.5f) { n.hideSet = false; runFrom(n, feared); n.lastOutcome = "no shelter here; running from " + feared.name; return; }
         n.lastOutcome = "hiding from " + g.nameOf(n.fearOf);
         if (goTo(n, n.hideX, n.hideZ, true, 0.9f)) { ai.desire(n, AiSystem.A_HOLD); n.wantYaw = (float) Math.atan2(-(n.fearX - n.x), -(n.fearZ - n.z)); }
         if (n.speech == null && (n.id + (long) g.time) % 9 == 0) g.ai.say(n, "Please don't find me...");
@@ -1733,7 +1938,19 @@ public final class Brain {
         if (d == null) return false;
         float[] at = g.repairs.standSpot(n, d);
         if (at == null) { g.repairs.abandon(n); return false; }
-        if (!goTo(n, at[0], at[1], false, 0.9f)) { n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; return true; }
+        // (0.4.5, gamefixes: broken glass was never mended - a window past the mender's daily round turned them back
+        // to their own door, where they "mended" it from a hundred metres off) a repair is an errand: it goes where it must
+        n.errand = true;
+        boolean there;
+        try { there = goTo(n, at[0], at[1], false, 0.9f); } finally { n.errand = false; }
+        if (!there) {
+            // (0.4.5, gamefixes: broken glass was never mended) a side of the wall that will not be walked to is given up
+            // for the other: the next spot to work from, inside or out, until none is left
+            String o = n.lastOutcome == null ? "" : n.lastOutcome;
+            n.routeNote = o;
+            if (o.startsWith("no traversable") || o.startsWith("no way there") || o.startsWith("looking for supported")) { g.repairs.tryOtherSpot(n, d); return true; }
+            n.lastOutcome = "on the way to mend the broken " + (d.glass() ? "window" : "timber") + " at (" + d.x() + ", " + d.z() + ")"; return true;
+        }
         n.wantYaw = (float) Math.atan2(-(d.x() + 0.5f - n.x), -(d.z() + 0.5f - n.z));
         ai.desire(n, AiSystem.A_HOLD);
         n.lootStarted=g.time;n.lootUntil=g.time+3.5;n.reachX=d.x()+0.5f;n.reachY=d.y()+0.5f;n.reachZ=d.z()+0.5f;
@@ -1771,6 +1988,10 @@ public final class Brain {
             case WORKER -> { if (!mend(n)) gatherAndSell(n, Items.LOGS, "tree"); }
             case VILLAGER -> gatherAndSell(n, Items.BERRIES, "berry_bush");
             case CARTER -> {
+                // (0.4.6, gamefixes: NPC AI must work 100% - ShadowVeil's carters stood all day at their door, "blocked",
+                // walking for the devmap's caravan stop) on ShadowVeil a carter's round is their town's: loading at their
+                // yard (their post), then the load taken to their town's shop counter and unloaded there, and back
+                if (rpg.world.WorldMap.shadowveil()) { carterRound(n); return; }
                 float[] dest = g.econ.carterStep(n);
                 if (dest == null) { if (goTo(n, n.postX, n.postZ, false, 1.2f)) holdFacingPlayer(n); }
                 else goTo(n, dest[0], dest[1], false, 1.0f);
@@ -1788,6 +2009,18 @@ public final class Brain {
             case PRIEST -> { if (goTo(n, n.postX, n.postZ, false, 1)) ai.desire(n, AiSystem.A_IDLE); }
             default -> { if (goTo(n, n.postX, n.postZ, false, 0.8f)) holdFacingPlayer(n); }
         }
+    }
+
+    /** (0.4.6) How long (game minutes) a ShadowVeil carter spends at each end of their round. */
+    static final double CARTER_LEG = rpg.Tuning.f("ai.carterLeg", 25f);
+    private void carterRound(Npc n) {
+        var shop = g.econ.localShop(n);
+        boolean toShop = shop != null && ZonePolicy.withinReach(n, shop.counterX, shop.counterZ) && Math.floorMod((long) (g.state.minutes / CARTER_LEG) + n.id, 2) == 1;
+        float tx = toShop ? shop.counterX : n.postX, tz = toShop ? shop.counterZ : n.postZ;
+        if (goTo(n, tx, tz, false, 1.3f)) {
+            ai.desire(n, AiSystem.A_IDLE);
+            n.lastOutcome = toShop ? "unloading the cart at " + shop.name : "loading the cart at the yard";
+        } else n.lastOutcome = toShop ? "taking a load to " + shop.name : "taking the cart back to the yard";
     }
 
     /**
@@ -1913,7 +2146,7 @@ public final class Brain {
 
     private void holdFacingPlayer(Npc n) {
         if (n.id == Ids.TELLER) {
-            float[] customer = g.bank.customerSpot();
+            float[] customer = g.bank.customerSpot(n);
             n.wantYaw = (float) Math.atan2(-(customer[0] - n.x), -(customer[1] - n.z));
             ai.target(n, 0); ai.desire(n, AiSystem.A_IDLE); return;
         }
@@ -1958,6 +2191,13 @@ public final class Brain {
     private void patrol(Npc n) {
         float[][] round = DevMap.patrol(n.homeJurisdiction);
         float[] p = round[n.patrolIndex % round.length];
+        // (0.4.6, gamefixes: NPC AI must work 100% - a guard stood "reconsidering a blocked route" to a patrol point no
+        // route reaches) a point of the round that cannot be reached is passed over for the next
+        if (n.lastOutcome != null && (n.lastOutcome.startsWith("no traversable") || n.lastOutcome.startsWith("no way there")) && Math.hypot(n.failX - p[0], n.failZ - p[1]) < 1.5f) {
+            n.patrolIndex++; n.failStreak = 0; n.navPauseUntil = 0; n.legs = null; n.lastOutcome = "passed over an unreachable patrol point";
+            return;
+        }
+        if (g.time < n.navPauseUntil && n.failStreak > 0 && Math.hypot(n.failX - p[0], n.failZ - p[1]) < 1.5f) { n.patrolIndex++; n.failStreak = 0; n.navPauseUntil = 0; n.legs = null; return; }
         if (goTo(n, p[0], p[1], false, 1.0f)) {
             if (n.busyUntil < g.time - 3) n.busyUntil = g.time + 2;
             if (g.time > n.busyUntil) { n.patrolIndex++; n.busyUntil = g.time - 10; n.lastOutcome = "reached patrol point " + (n.patrolIndex - 1) % round.length; }

@@ -91,6 +91,9 @@ public final class Economy {
         if (rpg.world.WorldMap.shadowveil()) for (Shop s : new Shop[]{shopA, shopB, fence, macellum, materialsCity, materialsPalace, forge}) {
             if (!(g.actor(s.merchant) instanceof Npc keeper)) continue;
             s.counterX = keeper.postX; s.counterZ = keeper.postZ + 1.4f; s.jurisdiction = keeper.homeJurisdiction;
+            // (0.4.4) a keeper behind a counter indoors: the customers' place before it
+            float[] cust = rpg.world.shadowveil.Census.customerSpot(keeper.id);
+            if (cust != null) { s.counterX = cust[0]; s.counterZ = cust[1]; }
         }
         stock(shopA, Items.BREAD, 8, 10); stock(shopA, Items.SHRIMP, 5, 8); stock(shopA, Items.LOGS, 3, 6); stock(shopA, Items.BERRIES, 2, 8);
         stock(shopA, Items.TINDERBOX, 2, 2); stock(shopA, Items.TORCH, 4, 4); stock(shopA, Items.SADDLE, 2, 2); stock(shopA, Items.KNIFE, 2, 2); stock(shopA, Items.HAMMER, 2, 2); stock(shopA, Items.FISHING_ROD, 2, 2);

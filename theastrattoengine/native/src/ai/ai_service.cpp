@@ -400,7 +400,12 @@ void AiService::follow(Engine& e, Agent& a, const VoxelWorld* w, float dt, Physi
             a.yieldWait=0;
             a.yaw = std::atan2(-dx, -dz);
             // a ledge on the route that is not a stair is jumped
-            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP) && !(cy - a.y <= 1.05f && (w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_GROUND))) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
+            // (2.13) a stair tread met from its side (its ramp runs across the way) is hopped onto once walking at it has
+            // made no headway for a moment - an agent pressed against a flight's side stood there for good
+            // (and any step up the body's own stride would take - a terrace's edge, a kerb - that it has stood against a
+            // moment without rising: it hops it)
+            const bool sideStep = a.progressTimer > 0.6f && cy - a.y <= 1.05f;
+            if (m && cy > a.y + 0.6f && d < 1.4f && m->onGround && (!(a.flags & ASTRATTO_AGENT_EXTERNAL_TRAVERSAL) || cy - a.y <= 1.05f) && (sideStep || !(w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_STEP)) && (sideStep || !(cy - a.y <= 1.05f && (w->def(fl(cx), fl(cy) - 1, fl(cz)).flags & ASTRATTO_BLOCK_GROUND)))) jump = std::sqrt(2 * 22.0f * (cy - a.y + 0.35f));
             // progress: if it has not got nearer for a second and a half it is stuck - search again; three times and it gives up
             a.progressTimer += dt;
             if (d < a.progressBest - 0.1f) { a.progressBest = d; a.progressTimer = 0; a.fails = 0; }

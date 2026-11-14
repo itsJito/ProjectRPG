@@ -1,0 +1,2840 @@
+{
+ "census": {
+  "_about": "(0.4.3, gamefixes: every NPC of the lore registered, spawned in their kingdom, with their documented occupation, home, workplace and bed) ShadowVeil's people as projectrpg.txt lists them under 'NPCs Present', one entry each: a one-word name (titles in 'title'), their kingdom, the Npc role and profession that drive their behaviour, the registry structure that is their home and the one that is their workplace (null home: the one exception, the bounty hunter). An entry with a 'body' is played by the roster person of that Ids constant (renamed and re-dressed on ShadowVeil; the devmap keeps its own people); every other entry is made for ShadowVeil alone, numbered from Ids.SV_PEOPLE in this order. Until the interiors come (0.4.4) each person keeps exterior stand-ins: a home stage and a work stage on open ground before their buildings' doors, where they arrive home, wait at work and go in for the night; their bed is planned inside their home's reserved interior and kept in the registry.",
+  "stage": {
+   "_about": "How far before a doorway its stand-ins lie (cells), how far apart people sharing one stand side by side, and when the townsfolk turn in and come out (hours).",
+   "out": 2.0,
+   "spacing": 1.4,
+   "bedHour": 22,
+   "wakeHour": 6,
+   "guestBedsForResidents": true
+  },
+  "kits": {
+   "_about": "What a person made for ShadowVeil carries and how able they are, by role (then by profession where it says so): skill levels, worn kit, and items in the pack.",
+   "GUARD": {
+    "levels": {
+     "ATTACK": 30,
+     "STRENGTH": 30,
+     "DEFENSE": 30,
+     "HEALTH": 30
+    },
+    "wear": [
+     "iron_sword",
+     "iron_shield",
+     "iron_body",
+     "iron_helm",
+     "iron_legs",
+     "leather_boots",
+     "leather_gloves"
+    ],
+    "give": {
+     "bread": 2,
+     "coins": 40
+    }
+   },
+   "KNIGHT": {
+    "levels": {
+     "ATTACK": 40,
+     "STRENGTH": 40,
+     "DEFENSE": 42,
+     "HEALTH": 40
+    },
+    "wear": [
+     "steel_sword",
+     "steel_shield",
+     "steel_body",
+     "steel_helm",
+     "steel_legs",
+     "leather_boots",
+     "leather_gloves"
+    ],
+    "give": {
+     "coins": 200
+    }
+   },
+   "BANDIT": {
+    "levels": {
+     "ATTACK": 12,
+     "STRENGTH": 12,
+     "DEFENSE": 10,
+     "HEALTH": 14
+    },
+    "wear": [
+     "bronze_sword",
+     "wooden_shield"
+    ],
+    "give": {
+     "coins": 12
+    }
+   },
+   "HUNTER": {
+    "levels": {
+     "ARCHERY": 25,
+     "HARVESTING": 20,
+     "HEALTH": 18
+    },
+    "wear": [
+     "shortbow",
+     "leather_boots",
+     "leather_gloves"
+    ],
+    "ammo": [
+     "bronze_arrows",
+     30
+    ],
+    "give": {
+     "knife": 1,
+     "bread": 2,
+     "coins": 30
+    }
+   },
+   "MINER": {
+    "levels": {
+     "MINING": 30
+    },
+    "give": {
+     "bronze_pickaxe": 1,
+     "bread": 2,
+     "coins": 30
+    }
+   },
+   "WORKER": {
+    "levels": {
+     "WOODCUTTING": 30,
+     "STRENGTH": 20
+    },
+    "give": {
+     "bronze_axe": 1,
+     "bread": 2,
+     "coins": 25
+    }
+   },
+   "FISHERMAN": {
+    "levels": {
+     "FISHING": 28
+    },
+    "give": {
+     "bread": 2,
+     "coins": 25
+    },
+    "byProfession": {
+     "RIVER_FISHERMAN": {
+      "fishing_rod": 1
+     },
+     "COASTAL_FISHERMAN": {
+      "fishing_rod": 1
+     },
+     "DEEP_WATER_FISHERMAN": {
+      "harpoon": 1
+     },
+     "SHELLFISH_GATHERER": {
+      "crab_cage": 1
+     },
+     "LAKE_NET_FISHERMAN": {
+      "small_fishing_net": 1
+     }
+    }
+   },
+   "CRAFTSMAN": {
+    "levels": {
+     "SMITHING": 30,
+     "CONSTRUCTION": 30,
+     "COOKING": 30,
+     "CRAFTING": 30
+    },
+    "give": {
+     "hammer": 1,
+     "bread": 2,
+     "coins": 60
+    }
+   },
+   "FARMER": {
+    "levels": {
+     "HARVESTING": 25
+    },
+    "give": {
+     "carrot_seeds": 6,
+     "cabbage_seeds": 4,
+     "potato_seeds": 4,
+     "bread": 2,
+     "coins": 40
+    }
+   },
+   "MERCHANT": {
+    "give": {
+     "bread": 3,
+     "coins": 300
+    }
+   },
+   "CIVIC": {
+    "give": {
+     "coins": 400
+    }
+   },
+   "PRIEST": {
+    "levels": {
+     "FAITH": 40
+    },
+    "give": {
+     "bread": 2,
+     "coins": 30
+    }
+   },
+   "SCHOLAR": {
+    "levels": {
+     "MAGIC": 30
+    },
+    "give": {
+     "coins": 60
+    }
+   },
+   "THIEF": {
+    "levels": {
+     "THIEVING": 30,
+     "AGILITY": 25
+    },
+    "give": {
+     "lockpick": 1,
+     "coins": 20
+    }
+   },
+   "FENCE": {
+    "levels": {
+     "THIEVING": 35
+    },
+    "give": {
+     "coins": 600
+    }
+   },
+   "_default": {
+    "give": {
+     "bread": 2,
+     "coins": 20
+    }
+   }
+  },
+  "stations": {
+   "_about": "The workstations each calling needs at its workplace (Recipes.Station names), set out in the open before the workplace until its interior comes - one of each kind per workplace, shared by everyone who works there.",
+   "BLACKSMITH": [
+    "ANVIL",
+    "FURNACE"
+   ],
+   "ARMORER": [
+    "ANVIL",
+    "FURNACE"
+   ],
+   "SMELTER": [
+    "FURNACE"
+   ],
+   "CARPENTER": [
+    "SAWBENCH",
+    "CRAFT_TABLE"
+   ],
+   "TAILOR": [
+    "CRAFT_TABLE"
+   ],
+   "COOK": [
+    "RANGE"
+   ],
+   "CARDER": [
+    "CARDING_BENCH"
+   ],
+   "SPINNER": [
+    "SPINNING_WHEEL"
+   ],
+   "WEAVER": [
+    "LOOM"
+   ],
+   "FULLER": [
+    "FULLING_TUB"
+   ],
+   "DYER": [
+    "DYE_VAT"
+   ]
+  },
+  "people": [
+   {
+    "name": "Richard",
+    "title": "Diplomat King",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_castle"
+   },
+   {
+    "name": "Donald",
+    "title": "Logistics Duke",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_castle"
+   },
+   {
+    "name": "William",
+    "title": "Patronage Count",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "earl_manor",
+    "work": "earl_manor"
+   },
+   {
+    "name": "Osric",
+    "title": "Agrarian Baron",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "osric_hall",
+    "work": "osric_hall",
+    "body": "ORCHARD_KEEPER_CITY"
+   },
+   {
+    "name": "Andrew",
+    "title": "Order Knight",
+    "kingdom": "Loxford",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "loxford_church",
+    "work": "loxford_church",
+    "profession": "ORDER_KNIGHT",
+    "body": "KNIGHT"
+   },
+   {
+    "name": "Hedric",
+    "title": "Border Knight",
+    "kingdom": "Loxford",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "watch_barracks",
+    "work": "watch_barracks",
+    "profession": "BORDER_KNIGHT",
+    "body": "BORDER_KNIGHT"
+   },
+   {
+    "name": "Gregory",
+    "title": "Sun Priest",
+    "kingdom": "Loxford",
+    "role": "PRIEST",
+    "female": false,
+    "home": "loxford_church",
+    "work": "loxford_church",
+    "body": "PRIEST"
+   },
+   {
+    "name": "Alaric",
+    "title": "Faith Instructor",
+    "kingdom": "Loxford",
+    "role": "PRIEST",
+    "female": false,
+    "home": "loxford_church",
+    "work": "loxford_church"
+   },
+   {
+    "name": "Wulfric",
+    "title": "Funerary Priest",
+    "kingdom": "Loxford",
+    "role": "PRIEST",
+    "female": false,
+    "home": "sextons_cottage",
+    "work": "loxford_graveyard",
+    "body": "UNDERTAKER"
+   },
+   {
+    "name": "Ysolde",
+    "title": "Shrine Keeper",
+    "kingdom": "Loxford",
+    "role": "PRIEST",
+    "female": true,
+    "home": "mere_shack",
+    "work": "mere_shack",
+    "body": "HEALER"
+   },
+   {
+    "name": "Hadwin",
+    "title": "Banker",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_castle",
+    "body": "TELLER"
+   },
+   {
+    "name": "Berthild",
+    "title": "Innkeeper",
+    "kingdom": "Loxford",
+    "role": "CIVIC",
+    "female": true,
+    "home": "drunken_duck",
+    "work": "drunken_duck",
+    "profession": "INNKEEPER",
+    "body": "INNKEEPER_CITY"
+   },
+   {
+    "name": "Maddoc",
+    "title": "Bartender",
+    "kingdom": "Loxford",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "drunken_duck",
+    "work": "drunken_duck",
+    "profession": "BARTENDER",
+    "body": "BARTENDER_CITY"
+   },
+   {
+    "name": "Karlon",
+    "title": "Cook",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "drunken_duck",
+    "work": "drunken_duck",
+    "profession": "COOK",
+    "body": "COOK_CITY"
+   },
+   {
+    "name": "Fred",
+    "title": "Blacksmith",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "freds_axes",
+    "work": "freds_axes",
+    "profession": "BLACKSMITH",
+    "body": "CRAFTSMAN"
+   },
+   {
+    "name": "Ealdra",
+    "title": "General Store Owner",
+    "kingdom": "Loxford",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "loxford_store",
+    "work": "loxford_store",
+    "body": "MERCHANT_A"
+   },
+   {
+    "name": "Maeve",
+    "title": "Tailor",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "loxford_castle",
+    "work": "loxford_castle",
+    "profession": "TAILOR"
+   },
+   {
+    "name": "Tam",
+    "title": "Cobbler",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tams_cottage",
+    "work": "tams_cottage",
+    "profession": "TAILOR",
+    "body": "VILLAGER"
+   },
+   {
+    "name": "Cuthmar",
+    "title": "Crop Farmer",
+    "kingdom": "Loxford",
+    "role": "FARMER",
+    "female": false,
+    "home": "cuthmar_farmhouse",
+    "work": "cuthmar_garden",
+    "profession": "CROP_FARMER",
+    "body": "CROP_FARMER_CITY"
+   },
+   {
+    "name": "Wynn",
+    "title": "Livestock Farmer",
+    "kingdom": "Loxford",
+    "role": "FARMER",
+    "female": true,
+    "home": "loxford_stables",
+    "work": "loxford_stables",
+    "body": "FARMER"
+   },
+   {
+    "name": "Dunstan",
+    "title": "Builder",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "millwood_lodge",
+    "work": "millwood_lodge",
+    "profession": "CARPENTER",
+    "body": "CARPENTER_CITY"
+   },
+   {
+    "name": "Leofric",
+    "title": "Builder",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "millwood_lodge",
+    "work": "millwood_lodge",
+    "profession": "CARPENTER",
+    "body": "MANSION_WOODCUTTER"
+   },
+   {
+    "name": "Oswin",
+    "title": "Logger",
+    "kingdom": "Loxford",
+    "role": "WORKER",
+    "female": false,
+    "home": "millwood_lodge",
+    "work": "millwood_yard",
+    "profession": "FIREWOOD_CUTTER",
+    "body": "WORKER"
+   },
+   {
+    "name": "Wat",
+    "title": "River Fisherman",
+    "kingdom": "Loxford",
+    "role": "FISHERMAN",
+    "female": false,
+    "home": "mere_shack",
+    "work": "mere_shack",
+    "profession": "RIVER_FISHERMAN",
+    "body": "FISHER_P"
+   },
+   {
+    "name": "Rafe",
+    "title": "Game Hunter",
+    "kingdom": "Loxford",
+    "role": "HUNTER",
+    "female": false,
+    "home": "hunting_lodge",
+    "work": "hunting_lodge",
+    "profession": "GAME_HUNTER",
+    "body": "HUNTER"
+   },
+   {
+    "name": "Ferrick",
+    "title": "Wagon Driver",
+    "kingdom": "Loxford",
+    "role": "CARTER",
+    "female": false,
+    "home": "loxford_stables",
+    "work": "loxford_stables",
+    "body": "CARTER"
+   },
+   {
+    "name": "Aldric",
+    "title": "Town Guard",
+    "kingdom": "Loxford",
+    "role": "GUARD",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_castle",
+    "body": "GUARD"
+   },
+   {
+    "name": "Torren",
+    "title": "Prison Guard",
+    "kingdom": "Loxford",
+    "role": "GUARD",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_jail",
+    "body": "LAWMAN_A"
+   },
+   {
+    "name": "Bram",
+    "title": "Gate Guard",
+    "kingdom": "Loxford",
+    "role": "GUARD",
+    "female": false,
+    "home": "loxford_castle",
+    "work": "loxford_castle",
+    "body": "BOBWIN"
+   },
+   {
+    "name": "Hob",
+    "title": "Rural Patrol Guard",
+    "kingdom": "Loxford",
+    "role": "GUARD",
+    "female": false,
+    "home": "watch_barracks",
+    "work": "watch_barracks"
+   },
+   {
+    "name": "Garvin",
+    "title": "Retiree",
+    "kingdom": "Loxford",
+    "role": "VILLAGER",
+    "female": false,
+    "home": "loxford_church",
+    "work": "loxford_church",
+    "body": "QUEST_GIVER"
+   },
+   {
+    "name": "Eadmund",
+    "title": "Road Worker",
+    "kingdom": "Loxford",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "millwood_lodge",
+    "work": "millwood_lodge",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Cenric",
+    "title": "Firewood Cutter",
+    "kingdom": "Loxford",
+    "role": "WORKER",
+    "female": false,
+    "home": "millwood_lodge",
+    "work": "millwood_yard",
+    "profession": "FIREWOOD_CUTTER",
+    "body": "WOODCUTTER_CITY"
+   },
+   {
+    "name": "Beric",
+    "title": "Monster Hunter",
+    "kingdom": "Loxford",
+    "role": "HUNTER",
+    "female": false,
+    "home": "hunting_lodge",
+    "work": "hunting_lodge",
+    "profession": "MONSTER_HUNTER"
+   },
+   {
+    "name": "Fahad",
+    "title": "Patron King",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace",
+    "body": "CITIZEN_2"
+   },
+   {
+    "name": "Bashir",
+    "title": "Marshal Duke",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Awhad",
+    "title": "Market Count",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_store",
+    "work": "azharad_store"
+   },
+   {
+    "name": "Faris-ul-Azhar",
+    "title": "Household Knight",
+    "kingdom": "Azharad",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace",
+    "profession": "HOUSEHOLD_KNIGHT"
+   },
+   {
+    "name": "Jalal",
+    "title": "Workshop Baron",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_workshop",
+    "work": "azharad_workshop",
+    "body": "GUILD_ARTISANS"
+   },
+   {
+    "name": "Hassan",
+    "title": "Clerk",
+    "kingdom": "Azharad",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Idris",
+    "title": "Curator",
+    "kingdom": "Azharad",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Rafiq",
+    "title": "Moon Priest",
+    "kingdom": "Azharad",
+    "role": "PRIEST",
+    "female": false,
+    "home": "azharad_temple",
+    "work": "azharad_temple"
+   },
+   {
+    "name": "Yusuf",
+    "title": "Faith Instructor",
+    "kingdom": "Azharad",
+    "role": "PRIEST",
+    "female": false,
+    "home": "azharad_temple",
+    "work": "azharad_temple"
+   },
+   {
+    "name": "Tariq",
+    "title": "Banker",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_bank",
+    "work": "azharad_bank"
+   },
+   {
+    "name": "Zafir",
+    "title": "Blacksmith",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "zafirs_swords",
+    "work": "zafirs_swords",
+    "profession": "BLACKSMITH"
+   },
+   {
+    "name": "Osama",
+    "title": "Armorer",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "osamas_armour",
+    "work": "osamas_armour",
+    "profession": "ARMORER"
+   },
+   {
+    "name": "Marwan",
+    "title": "Armorer",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "marwans_armour",
+    "work": "marwans_armour",
+    "profession": "ARMORER"
+   },
+   {
+    "name": "Ziad",
+    "title": "Tanner",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "azharad_tannery",
+    "work": "azharad_tannery",
+    "profession": "TAILOR",
+    "body": "FULLER"
+   },
+   {
+    "name": "Karim",
+    "title": "Cook",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "karims_kitchen",
+    "work": "karims_kitchen",
+    "profession": "COOK",
+    "body": "GUILD_PROVISIONERS"
+   },
+   {
+    "name": "Mohamed",
+    "title": "General Store Owner",
+    "kingdom": "Azharad",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "mohameds_crafting",
+    "work": "mohameds_crafting"
+   },
+   {
+    "name": "Rashid",
+    "title": "General Store Owner",
+    "kingdom": "Azharad",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "azharad_store",
+    "work": "azharad_store"
+   },
+   {
+    "name": "Munir",
+    "title": "Caravan Hauler",
+    "kingdom": "Azharad",
+    "role": "CARTER",
+    "female": false,
+    "home": "karims_kitchen",
+    "work": "karims_kitchen"
+   },
+   {
+    "name": "Hakim",
+    "title": "Courier",
+    "kingdom": "Azharad",
+    "role": "CARTER",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Hamid",
+    "title": "Builder",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "workers_khan",
+    "work": "workers_khan",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Nabil",
+    "title": "Builder",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "workers_khan",
+    "work": "workers_khan",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Salim",
+    "title": "Repair Worker",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "workers_khan",
+    "work": "workers_khan",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Kamal",
+    "title": "Repair Worker",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "workers_khan",
+    "work": "workers_khan",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Qasim",
+    "title": "Logger",
+    "kingdom": "Azharad",
+    "role": "WORKER",
+    "female": false,
+    "home": "workers_khan",
+    "work": "workers_khan",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Dawud",
+    "title": "Quarry Worker",
+    "kingdom": "Azharad",
+    "role": "MINER",
+    "female": false,
+    "home": "workers_khan",
+    "work": "clay_pits",
+    "profession": "QUARRY_WORKER",
+    "body": "QUARRY_WORKER"
+   },
+   {
+    "name": "Fadi",
+    "title": "Clay Digger",
+    "kingdom": "Azharad",
+    "role": "MINER",
+    "female": false,
+    "home": "clay_hut",
+    "work": "clay_pits",
+    "profession": "CLAY_DIGGER"
+   },
+   {
+    "name": "Jamila",
+    "title": "Herbal Grower",
+    "kingdom": "Azharad",
+    "role": "FARMER",
+    "female": true,
+    "home": "oasis_cottage",
+    "work": "oasis_garden",
+    "profession": "CROP_FARMER"
+   },
+   {
+    "name": "Samira",
+    "title": "Orchard Keeper",
+    "kingdom": "Azharad",
+    "role": "FARMER",
+    "female": true,
+    "home": "oasis_cottage",
+    "work": "oasis_garden",
+    "profession": "ORCHARD_KEEPER"
+   },
+   {
+    "name": "Bilal",
+    "title": "Hobo",
+    "kingdom": "Azharad",
+    "role": "BEGGAR",
+    "female": false,
+    "home": "azharad_temple",
+    "work": "azharad_temple",
+    "body": "BEGGAR"
+   },
+   {
+    "name": "Anwar",
+    "title": "City Guard",
+    "kingdom": "Azharad",
+    "role": "GUARD",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace",
+    "body": "LEGIONARY_2"
+   },
+   {
+    "name": "Zaid",
+    "title": "Gate Guard",
+    "kingdom": "Azharad",
+    "role": "GUARD",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Sabir",
+    "title": "Rural Patrol Guard",
+    "kingdom": "Azharad",
+    "role": "GUARD",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace"
+   },
+   {
+    "name": "Nuri",
+    "title": "Household Baron",
+    "kingdom": "Azharad",
+    "role": "CIVIC",
+    "female": false,
+    "home": "azharad_palace",
+    "work": "azharad_palace",
+    "profession": "HOUSEHOLD_BARON"
+   },
+   {
+    "name": "Layla",
+    "title": "Leather Cutter",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "azharad_tannery",
+    "work": "azharad_tannery",
+    "profession": "TAILOR",
+    "body": "CARDER"
+   },
+   {
+    "name": "Zainab",
+    "title": "Leather Stitcher",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "azharad_tannery",
+    "work": "azharad_tannery",
+    "profession": "TAILOR",
+    "body": "SPINNER"
+   },
+   {
+    "name": "Murad",
+    "title": "Leather Goods Repairer",
+    "kingdom": "Azharad",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "azharad_tannery",
+    "work": "azharad_tannery",
+    "profession": "TAILOR",
+    "body": "DYER"
+   },
+   {
+    "name": "Leonidas",
+    "title": "Administrator King",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": false,
+    "home": "severian_palace",
+    "work": "severian_palace",
+    "body": "EMPEROR"
+   },
+   {
+    "name": "Artemios",
+    "title": "Court Duke",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": false,
+    "home": "severian_palace",
+    "work": "severian_palace"
+   },
+   {
+    "name": "Constantine",
+    "title": "Revenue Count",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": false,
+    "home": "customs_house",
+    "work": "customs_house"
+   },
+   {
+    "name": "Nicholas",
+    "title": "Knight Errant",
+    "kingdom": "Severia",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks",
+    "profession": "KNIGHT_ERRANT"
+   },
+   {
+    "name": "Kosmas",
+    "title": "Escort Knight",
+    "kingdom": "Severia",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks",
+    "profession": "ESCORT_KNIGHT"
+   },
+   {
+    "name": "Photios",
+    "title": "Garrison Baron",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks",
+    "body": "PRAETOR"
+   },
+   {
+    "name": "Eudokia",
+    "title": "Restoration Baron",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": true,
+    "home": "severian_museum",
+    "work": "severian_museum"
+   },
+   {
+    "name": "Paul",
+    "title": "Sun Priest",
+    "kingdom": "Severia",
+    "role": "PRIEST",
+    "female": false,
+    "home": "severian_church",
+    "work": "severian_church",
+    "body": "PRIESTESS"
+   },
+   {
+    "name": "Khalid",
+    "title": "Moon Priest",
+    "kingdom": "Severia",
+    "role": "PRIEST",
+    "female": false,
+    "home": "market_flats",
+    "work": "market_flats"
+   },
+   {
+    "name": "Ione",
+    "title": "Shrine Keeper",
+    "kingdom": "Severia",
+    "role": "PRIEST",
+    "female": true,
+    "home": "harbor_beacon",
+    "work": "harbor_beacon"
+   },
+   {
+    "name": "Stavros",
+    "title": "Banker",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": false,
+    "home": "severian_bank",
+    "work": "severian_bank"
+   },
+   {
+    "name": "Demetrios",
+    "title": "Blacksmith",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "anvil_building",
+    "work": "anvil_building",
+    "profession": "BLACKSMITH"
+   },
+   {
+    "name": "Melitta",
+    "title": "Innkeeper",
+    "kingdom": "Severia",
+    "role": "CIVIC",
+    "female": true,
+    "home": "red_moon_inn",
+    "work": "red_moon_inn",
+    "profession": "INNKEEPER",
+    "body": "INNKEEPER_PALACE"
+   },
+   {
+    "name": "Basil",
+    "title": "Bartender",
+    "kingdom": "Severia",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "red_moon_inn",
+    "work": "red_moon_inn",
+    "profession": "BARTENDER",
+    "body": "BARTENDER_PALACE"
+   },
+   {
+    "name": "Lazaros",
+    "title": "Cook",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "red_moon_inn",
+    "work": "red_moon_inn",
+    "profession": "COOK",
+    "body": "COOK_PALACE"
+   },
+   {
+    "name": "Aristides",
+    "title": "Curator",
+    "kingdom": "Severia",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "severian_museum",
+    "work": "severian_museum",
+    "body": "PHILOSOPHER"
+   },
+   {
+    "name": "Irene",
+    "title": "Clerk",
+    "kingdom": "Severia",
+    "role": "SCHOLAR",
+    "female": true,
+    "home": "severian_palace",
+    "work": "severian_palace"
+   },
+   {
+    "name": "Theodora",
+    "title": "Tailor",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "tenement_1",
+    "work": "tenement_1",
+    "profession": "TAILOR"
+   },
+   {
+    "name": "Alexios",
+    "title": "Carpenter",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement",
+    "profession": "CARPENTER",
+    "body": "CARPENTER_PALACE"
+   },
+   {
+    "name": "Xenia",
+    "title": "Armorer",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "palace_barracks",
+    "work": "palace_barracks",
+    "profession": "ARMORER"
+   },
+   {
+    "name": "Eleni",
+    "title": "Cobbler",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "tenement_1",
+    "work": "tenement_1",
+    "profession": "TAILOR"
+   },
+   {
+    "name": "Zoe",
+    "title": "General Store Owner",
+    "kingdom": "Severia",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "market_flats",
+    "work": "market_flats",
+    "body": "MACELLUM"
+   },
+   {
+    "name": "Damaris",
+    "title": "Food Merchant",
+    "kingdom": "Severia",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "market_flats",
+    "work": "market_flats",
+    "body": "TRADER_PALACE"
+   },
+   {
+    "name": "Theron",
+    "title": "Weapons Merchant",
+    "kingdom": "Severia",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "market_flats",
+    "work": "market_flats"
+   },
+   {
+    "name": "Pavlos",
+    "title": "Fence",
+    "kingdom": "Severia",
+    "role": "FENCE",
+    "female": false,
+    "home": "market_flats",
+    "work": "market_flats"
+   },
+   {
+    "name": "Kyra",
+    "title": "Vineyard Keeper",
+    "kingdom": "Severia",
+    "role": "FARMER",
+    "female": true,
+    "home": "vineyard_farmhouse",
+    "work": "terrace_garden",
+    "profession": "CROP_FARMER",
+    "body": "CROP_FARMER_PALACE"
+   },
+   {
+    "name": "Marinos",
+    "title": "Orchard Keeper",
+    "kingdom": "Severia",
+    "role": "FARMER",
+    "female": false,
+    "home": "vineyard_farmhouse",
+    "work": "terrace_garden",
+    "profession": "ORCHARD_KEEPER",
+    "body": "ORCHARD_KEEPER_PALACE"
+   },
+   {
+    "name": "Yannis",
+    "title": "Coastal Fisherman",
+    "kingdom": "Severia",
+    "role": "FISHERMAN",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement",
+    "profession": "COASTAL_FISHERMAN",
+    "body": "COASTAL_FISHER"
+   },
+   {
+    "name": "Petros",
+    "title": "Deep-Water Fisherman",
+    "kingdom": "Severia",
+    "role": "FISHERMAN",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement",
+    "profession": "DEEP_WATER_FISHERMAN",
+    "body": "GUILD_MARINERS"
+   },
+   {
+    "name": "Melina",
+    "title": "Shellfish Gatherer",
+    "kingdom": "Severia",
+    "role": "FISHERMAN",
+    "female": true,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement",
+    "profession": "SHELLFISH_GATHERER"
+   },
+   {
+    "name": "Spiros",
+    "title": "Porter",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_pier_1",
+    "profession": "PORTER"
+   },
+   {
+    "name": "Timon",
+    "title": "Dockworker",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_pier_1",
+    "profession": "PORTER"
+   },
+   {
+    "name": "Damon",
+    "title": "Dockworker",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_pier_1",
+    "profession": "PORTER"
+   },
+   {
+    "name": "Alkis",
+    "title": "Courier",
+    "kingdom": "Severia",
+    "role": "CARTER",
+    "female": false,
+    "home": "market_flats",
+    "work": "market_flats"
+   },
+   {
+    "name": "Andreas",
+    "title": "Builder",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Nikos",
+    "title": "Builder",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Kallias",
+    "title": "Repair Worker",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Isidoros",
+    "title": "Repair Worker",
+    "kingdom": "Severia",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Orestes",
+    "title": "Logger",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": false,
+    "home": "loggers_rest",
+    "work": "loggers_yard",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Leontios",
+    "title": "City Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks",
+    "body": "LEGIONARY_1"
+   },
+   {
+    "name": "Myron",
+    "title": "City Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Perikles",
+    "title": "City Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Zenon",
+    "title": "Gate Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Argyros",
+    "title": "Gate Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Gorgias",
+    "title": "Prison Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "severia_jail"
+   },
+   {
+    "name": "Kleon",
+    "title": "Rural Patrol Guard",
+    "kingdom": "Severia",
+    "role": "GUARD",
+    "female": false,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Kyros",
+    "title": "Pickpocket",
+    "kingdom": "Severia",
+    "role": "THIEF",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2"
+   },
+   {
+    "name": "Tolis",
+    "title": "Hobo",
+    "kingdom": "Severia",
+    "role": "BEGGAR",
+    "female": false,
+    "home": "net_loft",
+    "work": "net_loft",
+    "body": "PALACE_BEGGAR"
+   },
+   {
+    "name": "Mimis",
+    "title": "Hobo",
+    "kingdom": "Severia",
+    "role": "BEGGAR",
+    "female": false,
+    "home": "net_loft",
+    "work": "net_loft"
+   },
+   {
+    "name": "Polyxena",
+    "title": "Excavator",
+    "kingdom": "Severia",
+    "role": "MINER",
+    "female": true,
+    "home": "dig_shed",
+    "work": "fossil_dig",
+    "profession": "QUARRY_WORKER",
+    "body": "STONEMASON"
+   },
+   {
+    "name": "Argus",
+    "title": "Burglar",
+    "kingdom": "Severia",
+    "role": "THIEF",
+    "female": false,
+    "home": "tenement_2",
+    "work": "tenement_2"
+   },
+   {
+    "name": "Phaedra",
+    "title": "Supply Runner",
+    "kingdom": "Severia",
+    "role": "CARTER",
+    "female": true,
+    "home": "palace_barracks",
+    "work": "palace_barracks"
+   },
+   {
+    "name": "Leandros",
+    "title": "Job Seeker",
+    "kingdom": "Severia",
+    "role": "BEGGAR",
+    "female": false,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement"
+   },
+   {
+    "name": "Sabeen",
+    "title": "Displaced Resident",
+    "kingdom": "Severia",
+    "role": "BEGGAR",
+    "female": true,
+    "home": "harbor_tenement",
+    "work": "harbor_tenement"
+   },
+   {
+    "name": "Phillip",
+    "title": "Lawgiver King",
+    "kingdom": "Valgard",
+    "role": "CIVIC",
+    "female": false,
+    "home": "valgard_keep",
+    "work": "valgard_keep"
+   },
+   {
+    "name": "Edran",
+    "title": "Logistics Duke",
+    "kingdom": "Valgard",
+    "role": "CIVIC",
+    "female": false,
+    "home": "valgard_keep",
+    "work": "valgard_keep"
+   },
+   {
+    "name": "Garran",
+    "title": "Order Knight",
+    "kingdom": "Valgard",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "valgard_keep",
+    "work": "valgard_keep",
+    "profession": "ORDER_KNIGHT",
+    "body": "MANSION_KNIGHT"
+   },
+   {
+    "name": "Vaelor",
+    "title": "Order Knight",
+    "kingdom": "Valgard",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "sanctuary_jaehaerys",
+    "work": "sanctuary_jaehaerys",
+    "profession": "ORDER_KNIGHT"
+   },
+   {
+    "name": "Anselm",
+    "title": "Sun Priest",
+    "kingdom": "Valgard",
+    "role": "PRIEST",
+    "female": false,
+    "home": "sanctuary_jaehaerys",
+    "work": "sanctuary_jaehaerys"
+   },
+   {
+    "name": "Maelin",
+    "title": "Clerk",
+    "kingdom": "Valgard",
+    "role": "SCHOLAR",
+    "female": true,
+    "home": "sanctuary_jaehaerys",
+    "work": "sanctuary_jaehaerys",
+    "body": "SCHOLAR"
+   },
+   {
+    "name": "Hadrik",
+    "title": "Workshop Baron",
+    "kingdom": "Valgard",
+    "role": "CIVIC",
+    "female": false,
+    "home": "metallists_guild",
+    "work": "metallists_guild",
+    "body": "SMELTER"
+   },
+   {
+    "name": "Brennar",
+    "title": "Blacksmith",
+    "kingdom": "Valgard",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "metallists_guild",
+    "work": "metallists_guild",
+    "profession": "BLACKSMITH",
+    "body": "GUILD_METALLISTS"
+   },
+   {
+    "name": "Tovin",
+    "title": "Armorer",
+    "kingdom": "Valgard",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "tovins_workshop",
+    "work": "tovins_workshop",
+    "profession": "ARMORER"
+   },
+   {
+    "name": "Elric",
+    "title": "Banker",
+    "kingdom": "Valgard",
+    "role": "CIVIC",
+    "female": false,
+    "home": "valgard_bank",
+    "work": "valgard_bank"
+   },
+   {
+    "name": "Dorran",
+    "title": "Ore Miner",
+    "kingdom": "Valgard",
+    "role": "MINER",
+    "female": false,
+    "home": "sunkissed_bunkhouse",
+    "work": "sunkissed_mine",
+    "profession": "ORE_MINER",
+    "body": "MINER_CITY"
+   },
+   {
+    "name": "Merek",
+    "title": "Quarry Worker",
+    "kingdom": "Valgard",
+    "role": "MINER",
+    "female": false,
+    "home": "marble_bunkhouse",
+    "work": "marble_yard",
+    "profession": "QUARRY_WORKER",
+    "body": "MINER_PALACE"
+   },
+   {
+    "name": "Halwen",
+    "title": "Builder",
+    "kingdom": "Valgard",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "guild_bunkhouse",
+    "work": "guild_bunkhouse",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Orven",
+    "title": "Wagon Driver",
+    "kingdom": "Valgard",
+    "role": "CARTER",
+    "female": false,
+    "home": "valgard_homes_0",
+    "work": "valgard_homes_0",
+    "body": "MANSION_PORTER"
+   },
+   {
+    "name": "Hesta",
+    "title": "Crop Farmer",
+    "kingdom": "Valgard",
+    "role": "FARMER",
+    "female": true,
+    "home": "valgard_homes_1",
+    "work": "valgard_field_2",
+    "profession": "CROP_FARMER"
+   },
+   {
+    "name": "Fenna",
+    "title": "General Store Owner",
+    "kingdom": "Valgard",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "tovins_workshop",
+    "work": "tovins_workshop",
+    "body": "ARMORY"
+   },
+   {
+    "name": "Aldis",
+    "title": "Innkeeper",
+    "kingdom": "Valgard",
+    "role": "CIVIC",
+    "female": true,
+    "home": "white_hart",
+    "work": "white_hart",
+    "profession": "INNKEEPER"
+   },
+   {
+    "name": "Toben",
+    "title": "Cook",
+    "kingdom": "Valgard",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "white_hart",
+    "work": "white_hart",
+    "profession": "COOK"
+   },
+   {
+    "name": "Roder",
+    "title": "Town Guard",
+    "kingdom": "Valgard",
+    "role": "GUARD",
+    "female": false,
+    "home": "valgard_keep",
+    "work": "valgard_keep",
+    "body": "LEGIONARY_4"
+   },
+   {
+    "name": "Torkell",
+    "title": "Frontier Duke",
+    "kingdom": "Gorrick",
+    "role": "CIVIC",
+    "female": false,
+    "home": "chieftains_hall",
+    "work": "chieftains_hall",
+    "body": "CENTURION"
+   },
+   {
+    "name": "Eirik",
+    "title": "Sun Priest",
+    "kingdom": "Gorrick",
+    "role": "PRIEST",
+    "female": false,
+    "home": "hojimo_monastery",
+    "work": "hojimo_monastery",
+    "body": "MEDICUS"
+   },
+   {
+    "name": "Soren",
+    "title": "Clerk",
+    "kingdom": "Gorrick",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "hojimo_monastery",
+    "work": "hojimo_monastery",
+    "body": "GUILD_ARCANISTS"
+   },
+   {
+    "name": "Yrsa",
+    "title": "Banker",
+    "kingdom": "Gorrick",
+    "role": "CIVIC",
+    "female": true,
+    "home": "gorrick_bank",
+    "work": "gorrick_bank",
+    "body": "CITIZEN_1"
+   },
+   {
+    "name": "Halvar",
+    "title": "Blacksmith",
+    "kingdom": "Gorrick",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "iron_yard_forge",
+    "work": "iron_yard_forge",
+    "profession": "BLACKSMITH"
+   },
+   {
+    "name": "Runa",
+    "title": "Supply Runner",
+    "kingdom": "Gorrick",
+    "role": "CARTER",
+    "female": true,
+    "home": "iron_yard_forge",
+    "work": "iron_yard_forge"
+   },
+   {
+    "name": "Bera",
+    "title": "Innkeeper",
+    "kingdom": "Gorrick",
+    "role": "CIVIC",
+    "female": true,
+    "home": "last_hearth",
+    "work": "last_hearth",
+    "profession": "INNKEEPER",
+    "body": "CITIZEN_4"
+   },
+   {
+    "name": "Ulven",
+    "title": "Cook",
+    "kingdom": "Gorrick",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "last_hearth",
+    "work": "last_hearth",
+    "profession": "COOK"
+   },
+   {
+    "name": "Nessa",
+    "title": "General Store Owner",
+    "kingdom": "Gorrick",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "last_hearth",
+    "work": "last_hearth"
+   },
+   {
+    "name": "Sten",
+    "title": "Builder",
+    "kingdom": "Gorrick",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "workers_lodge",
+    "work": "workers_lodge",
+    "profession": "CARPENTER",
+    "body": "CARPENTER_WOOD"
+   },
+   {
+    "name": "Einar",
+    "title": "Logger",
+    "kingdom": "Gorrick",
+    "role": "WORKER",
+    "female": false,
+    "home": "workers_lodge",
+    "work": "gorrick_woodyard",
+    "profession": "FIREWOOD_CUTTER",
+    "body": "GUILD_FORESTERS"
+   },
+   {
+    "name": "Siv",
+    "title": "Herbal Grower",
+    "kingdom": "Gorrick",
+    "role": "FARMER",
+    "female": true,
+    "home": "allotment_cottage",
+    "work": "gorrick_allotments",
+    "profession": "CROP_FARMER",
+    "body": "MANSION_ORCHARDIST"
+   },
+   {
+    "name": "Brand",
+    "title": "Rural Patrol Guard",
+    "kingdom": "Gorrick",
+    "role": "GUARD",
+    "female": false,
+    "home": "chieftains_hall",
+    "work": "chieftains_hall",
+    "body": "LEGIONARY_3"
+   },
+   {
+    "name": "Viggo",
+    "title": "Trapper",
+    "kingdom": "Gorrick",
+    "role": "HUNTER",
+    "female": false,
+    "home": "viggos_cottage",
+    "work": "viggos_cottage",
+    "profession": "TRAPPER",
+    "body": "TRISTAN"
+   },
+   {
+    "name": "Dracula",
+    "title": "Settlement Count",
+    "kingdom": "Harlette",
+    "role": "CIVIC",
+    "female": false,
+    "home": "dracula_manor",
+    "work": "dracula_manor",
+    "body": "BARON"
+   },
+   {
+    "name": "Varek",
+    "title": "Clerk",
+    "kingdom": "Harlette",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "dracula_manor",
+    "work": "dracula_manor"
+   },
+   {
+    "name": "Odran",
+    "title": "Sun Priest",
+    "kingdom": "Harlette",
+    "role": "PRIEST",
+    "female": false,
+    "home": "harlette_chapel",
+    "work": "harlette_chapel"
+   },
+   {
+    "name": "Mirel",
+    "title": "Funerary Priest",
+    "kingdom": "Harlette",
+    "role": "PRIEST",
+    "female": true,
+    "home": "harlette_sexton",
+    "work": "harlette_graveyard"
+   },
+   {
+    "name": "Ilva",
+    "title": "Crop Farmer",
+    "kingdom": "Harlette",
+    "role": "FARMER",
+    "female": true,
+    "home": "ilva_farmhouse",
+    "work": "harlette_field_2",
+    "profession": "CROP_FARMER",
+    "body": "GUILD_FARMERS"
+   },
+   {
+    "name": "Borin",
+    "title": "Livestock Farmer",
+    "kingdom": "Harlette",
+    "role": "FARMER",
+    "female": false,
+    "home": "borin_farmhouse",
+    "work": "borin_yard"
+   },
+   {
+    "name": "Radek",
+    "title": "Logger",
+    "kingdom": "Harlette",
+    "role": "WORKER",
+    "female": false,
+    "home": "mill_cottage_1",
+    "work": "willow_mill",
+    "profession": "FIREWOOD_CUTTER",
+    "body": "WOODCUTTER_TOWN"
+   },
+   {
+    "name": "Vesna",
+    "title": "River Fisherman",
+    "kingdom": "Harlette",
+    "role": "FISHERMAN",
+    "female": true,
+    "home": "brookside_cottage",
+    "work": "brookside_cottage",
+    "profession": "RIVER_FISHERMAN",
+    "body": "RIVER_FISHERMAN"
+   },
+   {
+    "name": "Olek",
+    "title": "Repair Worker",
+    "kingdom": "Harlette",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "mill_cottage_2",
+    "work": "mill_cottage_2",
+    "profession": "CARPENTER",
+    "body": "CARPENTER_TOWN"
+   },
+   {
+    "name": "Mara",
+    "title": "General Store Owner",
+    "kingdom": "Harlette",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "harlette_store",
+    "work": "harlette_store",
+    "body": "MERCHANT_B"
+   },
+   {
+    "name": "Sella",
+    "title": "Innkeeper",
+    "kingdom": "Harlette",
+    "role": "CIVIC",
+    "female": true,
+    "home": "shuttered_lantern",
+    "work": "shuttered_lantern",
+    "profession": "INNKEEPER",
+    "body": "MANSION_COOK"
+   },
+   {
+    "name": "Danek",
+    "title": "Cook",
+    "kingdom": "Harlette",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "shuttered_lantern",
+    "work": "shuttered_lantern",
+    "profession": "COOK",
+    "body": "COOK"
+   },
+   {
+    "name": "Lucan",
+    "title": "Town Guard",
+    "kingdom": "Harlette",
+    "role": "GUARD",
+    "female": false,
+    "home": "dracula_manor",
+    "work": "dracula_manor",
+    "body": "LAWMAN_B"
+   },
+   {
+    "name": "Arthur",
+    "title": "Defender King",
+    "kingdom": "Camelot",
+    "role": "CIVIC",
+    "female": false,
+    "home": "camelot_keep",
+    "work": "camelot_keep",
+    "body": "ARTHUR"
+   },
+   {
+    "name": "Guinevere",
+    "title": "Household Baron",
+    "kingdom": "Camelot",
+    "role": "CIVIC",
+    "female": true,
+    "home": "camelot_keep",
+    "work": "camelot_keep",
+    "profession": "HOUSEHOLD_BARON",
+    "body": "SENATOR"
+   },
+   {
+    "name": "Lancelot",
+    "title": "Knight Errant",
+    "kingdom": "Camelot",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "camelot_keep",
+    "work": "camelot_keep",
+    "profession": "KNIGHT_ERRANT",
+    "body": "LANCELOT"
+   },
+   {
+    "name": "Gawain",
+    "title": "Order Knight",
+    "kingdom": "Camelot",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "training_quarters",
+    "work": "training_quarters",
+    "profession": "ORDER_KNIGHT",
+    "body": "GAWAIN"
+   },
+   {
+    "name": "Bedivere",
+    "title": "Escort Knight",
+    "kingdom": "Camelot",
+    "role": "KNIGHT",
+    "female": false,
+    "home": "camelot_stables",
+    "work": "camelot_stables",
+    "profession": "ESCORT_KNIGHT"
+   },
+   {
+    "name": "Merlin",
+    "title": "Clerk",
+    "kingdom": "Camelot",
+    "role": "SCHOLAR",
+    "female": false,
+    "home": "camelot_chapel",
+    "work": "camelot_chapel",
+    "body": "MERLIN"
+   },
+   {
+    "name": "Cadren",
+    "title": "Sun Priest",
+    "kingdom": "Camelot",
+    "role": "PRIEST",
+    "female": false,
+    "home": "camelot_chapel",
+    "work": "camelot_chapel"
+   },
+   {
+    "name": "Elian",
+    "title": "Faith Instructor",
+    "kingdom": "Camelot",
+    "role": "PRIEST",
+    "female": false,
+    "home": "training_quarters",
+    "work": "training_quarters"
+   },
+   {
+    "name": "Aldren",
+    "title": "Household Baron",
+    "kingdom": "Camelot",
+    "role": "CIVIC",
+    "female": false,
+    "home": "sinclair_ward",
+    "work": "sinclair_ward",
+    "profession": "HOUSEHOLD_BARON"
+   },
+   {
+    "name": "Wystan",
+    "title": "Blacksmith",
+    "kingdom": "Camelot",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "service_court",
+    "work": "service_court",
+    "profession": "BLACKSMITH"
+   },
+   {
+    "name": "Cerys",
+    "title": "Cook",
+    "kingdom": "Camelot",
+    "role": "CRAFTSMAN",
+    "female": true,
+    "home": "service_court",
+    "work": "service_court",
+    "profession": "COOK",
+    "body": "CITIZEN_3"
+   },
+   {
+    "name": "Perrin",
+    "title": "Builder",
+    "kingdom": "Camelot",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "service_court",
+    "work": "service_court",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Rowena",
+    "title": "General Store Owner",
+    "kingdom": "Camelot",
+    "role": "MERCHANT",
+    "female": true,
+    "home": "service_court",
+    "work": "service_court"
+   },
+   {
+    "name": "Huw",
+    "title": "Livestock Farmer",
+    "kingdom": "Camelot",
+    "role": "FARMER",
+    "female": false,
+    "home": "camelot_stables",
+    "work": "camelot_stables"
+   },
+   {
+    "name": "Edric",
+    "title": "Gate Guard",
+    "kingdom": "Camelot",
+    "role": "GUARD",
+    "female": false,
+    "home": "camelot_stables",
+    "work": "camelot_stables"
+   },
+   {
+    "name": "Brannoc",
+    "title": "Highwayman",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": false,
+    "home": "culvert_cave",
+    "work": "culvert_cave",
+    "body": "THIEF"
+   },
+   {
+    "name": "Skarn",
+    "title": "Smuggler",
+    "kingdom": "Wilds",
+    "role": "FENCE",
+    "female": false,
+    "home": "smugglers_boathouse",
+    "work": "smugglers_boathouse",
+    "body": "FENCE"
+   },
+   {
+    "name": "Gudrik",
+    "title": "Shellfish Gatherer",
+    "kingdom": "Wilds",
+    "role": "FISHERMAN",
+    "female": false,
+    "home": "driftwood_hut",
+    "work": "driftwood_hut",
+    "profession": "SHELLFISH_GATHERER",
+    "body": "SHELLFISH_GATHERER"
+   },
+   {
+    "name": "Garmund",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BRUTE",
+    "female": false,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp",
+    "body": "BRUTE"
+   },
+   {
+    "name": "Hurk",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": false,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp",
+    "body": "BANDIT_1"
+   },
+   {
+    "name": "Sigrun",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": true,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp",
+    "body": "BANDIT_2"
+   },
+   {
+    "name": "Vark",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": false,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp"
+   },
+   {
+    "name": "Meriwyn",
+    "title": "Traveling Merchant",
+    "kingdom": "Wilds",
+    "role": "MERCHANT",
+    "female": false,
+    "home": "waystation_bunks",
+    "work": "waystation_bunks",
+    "body": "TRADER_CITY"
+   },
+   {
+    "name": "Dolgrin",
+    "title": "Gem Prospector",
+    "kingdom": "Wilds",
+    "role": "MINER",
+    "female": false,
+    "home": "highland_bunkhouse",
+    "work": "highland_adit",
+    "profession": "GEM_PROSPECTOR"
+   },
+   {
+    "name": "Brokk",
+    "title": "Ore Miner",
+    "kingdom": "Wilds",
+    "role": "MINER",
+    "female": false,
+    "home": "highland_bunkhouse",
+    "work": "highland_adit",
+    "profession": "ORE_MINER",
+    "body": "MINER"
+   },
+   {
+    "name": "Torvik",
+    "title": "Coal Miner",
+    "kingdom": "Wilds",
+    "role": "MINER",
+    "female": false,
+    "home": "highland_bunkhouse",
+    "work": "highland_adit",
+    "profession": "COAL_MINER",
+    "body": "PERCIVAL"
+   },
+   {
+    "name": "Tauron",
+    "title": "Forester",
+    "kingdom": "Wilds",
+    "role": "HUNTER",
+    "female": false,
+    "home": "forester_lodge",
+    "work": "forester_lodge",
+    "profession": "GAME_HUNTER",
+    "body": "HUNTRESS"
+   },
+   {
+    "name": "Pell",
+    "title": "Charcoal Burner",
+    "kingdom": "Wilds",
+    "role": "WORKER",
+    "female": false,
+    "home": "clamp_hut",
+    "work": "charcoal_clamps",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Ysmay",
+    "title": "Resin Tapper",
+    "kingdom": "Wilds",
+    "role": "WORKER",
+    "female": true,
+    "home": "resin_camp",
+    "work": "resin_camp",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Hask",
+    "title": "Trapper",
+    "kingdom": "Wilds",
+    "role": "HUNTER",
+    "female": false,
+    "home": "snare_hut",
+    "work": "snare_hut",
+    "profession": "TRAPPER"
+   },
+   {
+    "name": "Bryn",
+    "title": "Lake Net Fisherman",
+    "kingdom": "Wilds",
+    "role": "FISHERMAN",
+    "female": false,
+    "home": "bryns_pile_hut",
+    "work": "bryns_pile_hut",
+    "profession": "LAKE_NET_FISHERMAN",
+    "body": "FISHERMAN"
+   },
+   {
+    "name": "Kettil",
+    "title": "Repair Worker",
+    "kingdom": "Wilds",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "waystation_bunks",
+    "work": "waystation_bunks",
+    "profession": "CARPENTER",
+    "body": "CONTACT"
+   },
+   {
+    "name": "Orrin",
+    "title": "Repair Worker",
+    "kingdom": "Wilds",
+    "role": "CRAFTSMAN",
+    "female": false,
+    "home": "orrins_leanto",
+    "work": "orrins_leanto",
+    "profession": "CARPENTER"
+   },
+   {
+    "name": "Hakon",
+    "title": "Predator Hunter",
+    "kingdom": "Wilds",
+    "role": "HUNTER",
+    "female": false,
+    "home": "hakons_lodge",
+    "work": "hakons_lodge",
+    "profession": "PREDATOR_HUNTER",
+    "body": "PREDATOR_HUNTER"
+   },
+   {
+    "name": "Corvane",
+    "title": "Bounty Hunter",
+    "kingdom": "Wilds",
+    "role": "HUNTER",
+    "female": false,
+    "home": null,
+    "work": null,
+    "profession": "BOUNTY_HUNTER"
+   }
+  ],
+  "fields": {
+   "_about": "(0.4.3, gamefixes: farms did not work or have their crops) every field and garden the architecture raised is farmed: its rows sown with its kingdom's crops (row by row, cycling), kept by the crop farmer the census sets to work there - else the nearest crop farmer of its kingdom within 'reach' cells - or, with nobody to keep it, open to anyone. 'unfarmed' names the ones that are not (the vineyard's vines).",
+   "templates": [
+    "field",
+    "garden"
+   ],
+   "reach": 240,
+   "unfarmed": [
+    "vineyard"
+   ],
+   "crops": {
+    "Loxford": [
+     [
+      "BARLEY"
+     ],
+     [
+      "POTATO",
+      "CABBAGE"
+     ],
+     [
+      "CARROT",
+      "ONION"
+     ]
+    ],
+    "Harlette": [
+     [
+      "CABBAGE",
+      "POTATO"
+     ],
+     [
+      "CARROT"
+     ],
+     [
+      "ONION",
+      "BARLEY"
+     ]
+    ],
+    "Valgard": [
+     [
+      "BARLEY"
+     ],
+     [
+      "POTATO"
+     ],
+     [
+      "CABBAGE",
+      "ONION"
+     ]
+    ],
+    "Gorrick": [
+     [
+      "POTATO"
+     ],
+     [
+      "CABBAGE",
+      "CARROT"
+     ],
+     [
+      "ONION"
+     ]
+    ],
+    "Azharad": [
+     [
+      "COTTON"
+     ],
+     [
+      "TOMATO",
+      "ONION"
+     ],
+     [
+      "SWEETCORN"
+     ]
+    ],
+    "Severia": [
+     [
+      "TOMATO"
+     ],
+     [
+      "ONION",
+      "SWEETCORN"
+     ],
+     [
+      "HOPS"
+     ]
+    ],
+    "Camelot": [
+     [
+      "BARLEY"
+     ],
+     [
+      "CABBAGE",
+      "POTATO"
+     ]
+    ],
+    "_default": [
+     [
+      "CARROT",
+      "POTATO"
+     ],
+     [
+      "CABBAGE"
+     ]
+    ]
+   }
+  },
+  "posts": {
+   "_about": "(0.4.4) Where each person stands to work inside their workplace: the kinds of post they take there, in the order they want them - by words of their title first, then by calling, then by role. A post is one the interiors set out (teller, clerk, counter, bar, cook, kitchen, altar, desk, jailer, guard, head, throne, mill, station:<STATION>); 'station:' alone takes any station. Whoever finds none works out of doors as before.",
+   "byTitle": {
+    "banker": [
+     "teller",
+     "clerk"
+    ],
+    "prison guard": [
+     "jailer",
+     "guard"
+    ],
+    "innkeeper": [
+     "bar",
+     "desk",
+     "counter"
+    ],
+    "bartender": [
+     "bar"
+    ],
+    "king": [
+     "throne",
+     "head",
+     "desk"
+    ],
+    "duke": [
+     "head",
+     "desk",
+     "clerk"
+    ],
+    "count": [
+     "desk",
+     "head",
+     "clerk"
+    ],
+    "baron": [
+     "desk",
+     "head",
+     "clerk"
+    ],
+    "priest": [
+     "altar",
+     "desk"
+    ],
+    "priestess": [
+     "altar",
+     "desk"
+    ],
+    "cook": [
+     "cook",
+     "kitchen"
+    ],
+    "curator": [
+     "desk"
+    ],
+    "clerk": [
+     "clerk",
+     "desk"
+    ],
+    "steward": [
+     "desk",
+     "clerk"
+    ],
+    "tailor": [
+     "station:SPINNING_WHEEL",
+     "station:LOOM",
+     "station:CRAFT_TABLE"
+    ]
+   },
+   "byProfession": {
+    "COOK": [
+     "cook",
+     "kitchen"
+    ],
+    "INNKEEPER": [
+     "bar",
+     "desk"
+    ],
+    "BARTENDER": [
+     "bar"
+    ],
+    "BLACKSMITH": [
+     "station:ANVIL",
+     "station:FURNACE"
+    ],
+    "ARMORER": [
+     "station:ANVIL",
+     "station:FURNACE"
+    ],
+    "SMELTER": [
+     "station:FURNACE"
+    ],
+    "CARPENTER": [
+     "station:SAWBENCH",
+     "station:CRAFT_TABLE"
+    ],
+    "TAILOR": [
+     "station:CRAFT_TABLE"
+    ],
+    "CARDER": [
+     "station:CARDING_BENCH"
+    ],
+    "SPINNER": [
+     "station:SPINNING_WHEEL"
+    ],
+    "WEAVER": [
+     "station:LOOM"
+    ],
+    "FULLER": [
+     "station:FULLING_TUB"
+    ],
+    "DYER": [
+     "station:DYE_VAT"
+    ],
+    "HOUSEHOLD_BARON": [
+     "desk",
+     "head",
+     "clerk"
+    ]
+   },
+   "byRole": {
+    "MERCHANT": [
+     "counter",
+     "bar",
+     "clerk"
+    ],
+    "PRIEST": [
+     "altar",
+     "desk"
+    ],
+    "SCHOLAR": [
+     "desk",
+     "clerk"
+    ],
+    "CIVIC": [
+     "teller",
+     "throne",
+     "head",
+     "desk",
+     "clerk",
+     "counter"
+    ],
+    "CRAFTSMAN": [
+     "station:"
+    ],
+    "HEALER": [
+     "desk"
+    ],
+    "UNDERTAKER": [
+     "desk"
+    ]
+   }
+  },
+  "_additions": "(0.4.4, gamefixes: ten more people across the map) The people who keep the new jails, banks and graveyards, after the lore's own roll (kept apart so the roll's generator never drops them): each made for ShadowVeil alone, numbered after the roll. (0.4.5, gamefixes: 225 people) Ten more of the wilds: four of Garmund's band at his camp, three prospectors in the mines' bunkhouses, two loggers at the Loggers' Rest and a charcoal burner at the clamps.",
+  "additions": [
+   {
+    "name": "Bogdan",
+    "title": "Prison Guard",
+    "kingdom": "Harlette",
+    "role": "GUARD",
+    "female": false,
+    "home": "harlette_jail",
+    "work": "harlette_jail"
+   },
+   {
+    "name": "Milena",
+    "title": "Banker",
+    "kingdom": "Harlette",
+    "role": "CIVIC",
+    "female": true,
+    "home": "harlette_bank",
+    "work": "harlette_bank"
+   },
+   {
+    "name": "Lothar",
+    "title": "Prison Guard",
+    "kingdom": "Valgard",
+    "role": "GUARD",
+    "female": false,
+    "home": "valgard_jail",
+    "work": "valgard_jail"
+   },
+   {
+    "name": "Hilde",
+    "title": "Gravedigger",
+    "kingdom": "Valgard",
+    "role": "UNDERTAKER",
+    "female": true,
+    "home": "sanctuary_jaehaerys",
+    "work": "valgard_graveyard"
+   },
+   {
+    "name": "Gunnar",
+    "title": "Prison Guard",
+    "kingdom": "Gorrick",
+    "role": "GUARD",
+    "female": false,
+    "home": "gorrick_jail",
+    "work": "gorrick_jail"
+   },
+   {
+    "name": "Astrid",
+    "title": "Gravedigger",
+    "kingdom": "Gorrick",
+    "role": "UNDERTAKER",
+    "female": true,
+    "home": "hojimo_monastery",
+    "work": "gorrick_graveyard"
+   },
+   {
+    "name": "Nadim",
+    "title": "Prison Guard",
+    "kingdom": "Azharad",
+    "role": "GUARD",
+    "female": false,
+    "home": "azharad_jail",
+    "work": "azharad_jail"
+   },
+   {
+    "name": "Samir",
+    "title": "Gravedigger",
+    "kingdom": "Azharad",
+    "role": "UNDERTAKER",
+    "female": false,
+    "home": "azharad_temple",
+    "work": "azharad_graveyard"
+   },
+   {
+    "name": "Emrys",
+    "title": "Prison Guard",
+    "kingdom": "Camelot",
+    "role": "GUARD",
+    "female": false,
+    "home": "camelot_jail",
+    "work": "camelot_jail"
+   },
+   {
+    "name": "Rhiannon",
+    "title": "Banker",
+    "kingdom": "Camelot",
+    "role": "CIVIC",
+    "female": true,
+    "home": "camelot_bank",
+    "work": "camelot_bank"
+   },
+   {
+    "name": "Rask",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": false,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp"
+   },
+   {
+    "name": "Wenna",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": true,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp"
+   },
+   {
+    "name": "Hullen",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": false,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp"
+   },
+   {
+    "name": "Grisel",
+    "title": "Bandit",
+    "kingdom": "Wilds",
+    "role": "BANDIT",
+    "female": true,
+    "home": "garmunds_camp",
+    "work": "garmunds_camp"
+   },
+   {
+    "name": "Haskel",
+    "title": "Ore Miner",
+    "kingdom": "Valgard",
+    "role": "MINER",
+    "female": false,
+    "home": "sunkissed_bunkhouse",
+    "work": "sunkissed_mine",
+    "profession": "ORE_MINER"
+   },
+   {
+    "name": "Tamsin",
+    "title": "Quarry Worker",
+    "kingdom": "Valgard",
+    "role": "MINER",
+    "female": true,
+    "home": "marble_bunkhouse",
+    "work": "marble_yard",
+    "profession": "QUARRY_WORKER"
+   },
+   {
+    "name": "Osk",
+    "title": "Gem Prospector",
+    "kingdom": "Wilds",
+    "role": "MINER",
+    "female": false,
+    "home": "highland_bunkhouse",
+    "work": "highland_adit",
+    "profession": "GEM_PROSPECTOR"
+   },
+   {
+    "name": "Mabry",
+    "title": "Logger",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": true,
+    "home": "loggers_rest",
+    "work": "loggers_yard",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Edvin",
+    "title": "Logger",
+    "kingdom": "Severia",
+    "role": "WORKER",
+    "female": false,
+    "home": "loggers_rest",
+    "work": "loggers_yard",
+    "profession": "FIREWOOD_CUTTER"
+   },
+   {
+    "name": "Corra",
+    "title": "Charcoal Burner",
+    "kingdom": "Wilds",
+    "role": "WORKER",
+    "female": true,
+    "home": "clamp_hut",
+    "work": "charcoal_clamps",
+    "profession": "FIREWOOD_CUTTER"
+   }
+  ],
+  "honorifics": {
+   "_about": "(0.4.4) The honorific a person's name carries, by a word of their title (male, female), else by their role: a knight is Sir or Dame, a lord by their rank, a priest Father or Mother.",
+   "byTitle": {
+    "King": [
+     "King",
+     "Queen"
+    ],
+    "Duke": [
+     "Duke",
+     "Duchess"
+    ],
+    "Count": [
+     "Count",
+     "Countess"
+    ],
+    "Baron": [
+     "Baron",
+     "Baroness"
+    ],
+    "Priest": [
+     "Father",
+     "Mother"
+    ],
+    "Priestess": [
+     "Father",
+     "Mother"
+    ]
+   },
+   "byRole": {
+    "KNIGHT": [
+     "Sir",
+     "Dame"
+    ]
+   }
+  },
+  "outfits": {
+   "_about": "(0.4.5, gamefixes: the clothing update; everyone but the townsfolk in gear that can be seen and looted) What each person wears of the outfits (data/apparel.json), the first that applies: by name, by where they live, by calling, by role, then by kingdom (by title words, by role, else its default) for those of the kingdom not in arms. A slot the kit already filled (a guard's helm, a knight's plate) keeps what the kit put there; where an outfit has two pieces for one slot (the Desert's legs and robes), the rank decides ('robesFor').",
+   "people": {
+    "Brannoc": "rogue"
+   },
+   "byHome": {
+    "garmunds_camp": "pigskin"
+   },
+   "byProfession": {
+    "FIREWOOD_CUTTER": "lumberjack",
+    "ORE_MINER": "prospector",
+    "GEM_PROSPECTOR": "prospector",
+    "COAL_MINER": "prospector",
+    "QUARRY_WORKER": "prospector",
+    "CLAY_DIGGER": "prospector",
+    "CROP_FARMER": "farmer",
+    "ORCHARD_KEEPER": "farmer"
+   },
+   "byRole": {
+    "MINER": "prospector",
+    "FARMER": "farmer",
+    "THIEF": "rogue",
+    "BANDIT": "pigskin",
+    "BRUTE": "pigskin"
+   },
+   "byKingdom": {
+    "Azharad": {
+     "byTitle": {
+      "king": "desert_royal",
+      "queen": "desert_royal",
+      "duke": "desert_royal",
+      "count": "desert_royal",
+      "baron": "desert_noble"
+     },
+     "byRole": {
+      "CIVIC": "desert_noble",
+      "MERCHANT": "desert_noble",
+      "SCHOLAR": "desert_noble",
+      "PRIEST": "desert_noble"
+     },
+     "_default": "desert_commoner"
+    }
+   },
+   "notInArms": [
+    "GUARD",
+    "KNIGHT"
+   ],
+   "robesFor": [
+    "desert_royal",
+    "desert_noble"
+   ]
+  }
+ }
+}

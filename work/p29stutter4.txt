@@ -1,0 +1,77 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.90s ({regions=632, overlays=522, variants=284, scarp=62, coast=426, erosion=510, peaks=45, lakes=66, isles=5, rivers=628, wadis=14, ground=19, roads=503, causeways=3, architecture=318, pitsFilled=1405, pits=569, banks=46, clamp=14, cliffs=48, columns=866, falls=16, raise=546, trees=292, outcrops=0, ways=432}), made and lit in 1.62s
+[Load] ShadowVeil 8.60s
+[Load] renderer and UI 2.16s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.13s
+[Load] first rendered frame 5.66s
+[Load] the world about the spawn made ready in 9.18s
+[Load] game frame 1: scene 25 ms, interface 1051 ms, render 24 ms
+[Load] game frame 2: scene 8 ms, interface 5 ms, render 6 ms
+[Load] the first frames drawn behind the loading screen in 1.12s
+[stutter] preload 10.30s
+[stutter] first tick 33 ms
+engine.frame (native)      757.73 ms
+ai                          73.89 ms
+animals                     61.78 ms
+afterFrame                  35.89 ms
+monsters                    23.25 ms
+objects.update              17.06 ms
+foliage.update              14.69 ms
+controller.update           14.13 ms
+chemistry.update             9.76 ms
+econ.update                  2.56 ms
+gore.update                  2.53 ms
+combat.update                2.40 ms
+magic.update                 1.90 ms
+undertaker.update            1.86 ms
+law.update                   1.69 ms
+fx.update                    1.32 ms
+traps.update                 0.73 ms
+dungeons.update              0.32 ms
+time+death                   0.25 ms
+spareWatch                   0.11 ms
+glass.update                 0.08 ms
+prog.update                  0.04 ms
+carrying.update              0.04 ms
+interact.update              0.03 ms
+prayers.update               0.02 ms
+
+[Load] game frame 3: scene 7 ms, interface 8 ms, render 6 ms
+[stutter] spike at 299: 65 ms - tick 14, draw 51 -
+[stutter] median 12.3 ms, p95 26.9, p99 41.9, worst 65.1 at frame 299, 16 frames over 33 ms
+[stutter] first 60: 56(0/0) 40(0/0) 37(0/0) 37(0/0) 33(0/0) 39(0/0) 45(0/0) 42(0/0) 48(0/0) 33(0/0) 32(0/0) 30(0/0) 30(0/0) 27(0/0) 42(0/0) 28(0/0) 31(0/0) 26(0/0) 27(0/0) 31(0/0) 27(0/0) 27(0/0) 26(0/0) 24(0/0) 26(0/0) 23(0/0) 26(0/0) 22(0/0) 23(0/0) 31(0/0) 20(0/0) 20(0/0) 20(0/0) 21(0/0) 21(0/0) 20(0/0) 22(0/0) 21(0/0) 21(0/0) 20(0/0) 22(0/0) 22(0/0) 23(0/0) 34(0/0) 29(0/0) 18(0/0) 20(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 21(0/0) 19(0/0) 19(0/0) 27(0/0)
+engine.frame (native)     2419.57 ms
+afterFrame                1166.64 ms
+objects.update             735.39 ms
+animals                    679.70 ms
+monsters                   459.52 ms
+foliage.update             263.45 ms
+controller.update          171.57 ms
+ai                          97.45 ms
+combat.update               76.34 ms
+chemistry.update            69.58 ms
+undertaker.update           64.51 ms
+gore.update                 39.14 ms
+magic.update                27.50 ms
+law.update                  26.47 ms
+time+death                  17.89 ms
+spareWatch                  16.04 ms
+traps.update                13.76 ms
+fx.update                    5.83 ms
+econ.update                  5.12 ms
+glass.update                 4.59 ms
+dungeons.update              2.54 ms
+interact.update              2.18 ms
+carrying.update              1.82 ms
+prayers.update               1.80 ms
+prog.update                  1.77 ms
+

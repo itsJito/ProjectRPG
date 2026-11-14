@@ -1,0 +1,356 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.46s ({regions=984, overlays=516, variants=621, scarp=47, coast=535, erosion=349, peaks=45, lakes=64, isles=5, rivers=1253, wadis=12, ground=21, roads=634, causeways=3, architecture=976, pitsFilled=1309, pits=420, banks=73, clamp=13, cliffs=51, columns=1130, falls=17, raise=10751, trees=298, outcrops=0, ways=592}), made and lit in 2.29s
+    [water] flow field grown in 1534 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Astrid     (374.50,61.04,433.50) yaw 0.00 want NaN v 0.00,0.00 goal SLEEP(bedtime (Solday 06:20)) act - working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    40 Astrid     (374.51,61.00,433.50) yaw 0.00 want NaN v 0.70,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    50 Astrid     (374.81,61.00,433.50) yaw -0.76 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    60 Astrid     (375.21,61.00,433.50) yaw -1.57 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    70 Astrid     (375.62,61.00,433.50) yaw -1.57 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    80 Astrid     (376.03,61.00,433.50) yaw -1.57 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]    90 Astrid     (376.44,61.00,433.50) yaw -1.57 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]   100 Astrid     (376.85,61.00,433.50) yaw -1.57 want NaN v 2.45,0.00 goal SLEEP(bedtime (Solday 06:20)) act go to goal working null gp true 380.5,61.0,433.5 legs 0/52 st 0 nu 0 | 
+    [trace]   110 Astrid     (377.26,61.00,433.50) yaw -1.57 want NaN v 2.41,0.23 goal SOCIALIZE(lonely (60%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/10 st 0 nu 0 | 
+    [trace]   120 Astrid     (377.65,61.00,433.59) yaw -1.73 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (60%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/10 st 0 nu 0 | 
+    [trace]   130 Astrid     (378.05,61.00,433.68) yaw -1.76 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (60%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/10 st 0 nu 0 | 
+    [trace]   140 Astrid     (378.45,61.00,433.78) yaw -1.79 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (60%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/9 st 0 nu 0 | 
+    [trace]   150 Astrid     (378.85,61.00,433.87) yaw -1.79 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (60%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/9 st 0 nu 0 | 
+    [trace]   160 Astrid     (379.24,61.00,433.97) yaw -1.79 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/9 st 0 nu 0 | 
+    [trace]   170 Astrid     (379.64,61.00,434.06) yaw -1.79 want NaN v 2.38,0.56 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,434.5 legs 1/9 st 0 nu 0 | 
+    [trace]   180 Astrid     (379.99,61.00,434.20) yaw -1.94 want NaN v 1.38,1.54 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,442.5 legs 1/8 st 0 nu 0 | 
+    [trace]   190 Astrid     (380.13,61.00,434.56) yaw -2.63 want NaN v 0.46,2.41 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,442.5 legs 1/8 st 0 nu 0 | 
+    [trace]   200 Astrid     (380.20,61.00,434.77) yaw -2.66 want NaN v 0.39,0.00 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,442.5 legs 1/8 st 0 nu 0 | 
+    [trace]   210 Astrid     (380.26,61.00,434.86) yaw -2.64 want NaN v 0.38,1.63 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,442.5 legs 1/8 st 0 nu 0 | 
+    [trace]   220 Astrid     (380.33,61.00,435.24) yaw -2.93 want NaN v 0.39,2.42 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,442.5 legs 1/8 st 0 nu 0 | 
+    [trace]   230 Astrid     (380.39,61.00,435.64) yaw -2.96 want NaN v 0.16,2.44 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,437.5 legs 0/8 st 0 nu 0 | 
+    [trace]   240 Astrid     (380.42,61.00,436.05) yaw -3.04 want NaN v 0.14,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,61.0,437.5 legs 1/8 st 0 nu 0 | 
+    [trace]   250 Astrid     (380.44,61.00,436.46) yaw -3.07 want NaN v 0.14,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,62.0,445.5 legs 2/9 st 0 nu 0 | 
+    [trace]   260 Astrid     (380.45,61.00,436.87) yaw -3.10 want NaN v 0.02,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 381.5,62.0,445.5 legs 2/9 st 0 nu 0 | 
+    [trace]   270 Astrid     (380.45,61.00,437.27) yaw -3.13 want NaN v 0.02,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   280 Astrid     (380.46,61.00,437.68) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   290 Astrid     (380.46,61.00,438.09) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   300 Astrid     (380.47,61.00,438.50) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   310 Astrid     (380.47,61.00,438.91) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   320 Astrid     (380.47,61.00,439.32) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (61%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   330 Astrid     (380.48,61.00,439.72) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 380.5,61.0,441.5 legs 0/8 st 0 nu 0 | 
+    [trace]   340 Astrid     (380.48,61.00,440.13) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 378.5,61.0,441.5 legs 1/8 st 0 nu 0 | 
+    [trace]   350 Astrid     (380.49,61.00,440.54) yaw -3.13 want NaN v 0.03,2.45 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 378.5,61.0,441.5 legs 1/8 st 0 nu 0 | 
+    [trace]   360 Astrid     (380.48,61.00,440.94) yaw -3.13 want NaN v -0.51,2.00 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 378.5,61.0,441.5 legs 1/8 st 0 nu 0 | 
+    [trace]   370 Astrid     (380.25,61.00,441.17) yaw 2.48 want NaN v -2.30,0.62 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 378.5,61.0,441.5 legs 1/8 st 0 nu 0 | 
+    [trace]   380 Astrid     (380.17,61.00,441.31) yaw 2.56 want NaN v -1.23,1.16 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 378.5,61.0,442.5 legs 1/7 st 0 nu 0 | 
+    [trace]   390 Astrid     (379.87,61.00,441.53) yaw 2.26 want NaN v -2.00,1.41 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 373.5,61.0,442.5 legs 2/7 st 0 nu 0 | 
+    [trace]   400 Astrid     (379.52,61.00,441.73) yaw 2.09 want NaN v -2.42,0.33 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 373.5,61.0,442.5 legs 2/7 st 0 nu 0 | 
+    [trace]   410 Astrid     (379.11,61.00,441.78) yaw 1.79 want NaN v -2.43,0.31 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 373.5,61.0,442.5 legs 2/7 st 0 nu 0 | 
+    [trace]   420 Astrid     (378.71,61.00,441.83) yaw 1.73 want NaN v -2.43,0.31 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 373.5,61.0,442.5 legs 1/5 st 0 nu 0 | 
+    [trace]   430 Astrid     (378.31,61.00,441.89) yaw 1.73 want NaN v -2.19,0.71 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 370.5,62.0,445.5 legs 0/1 st 0 nu 0 | 
+    [trace]   440 Astrid     (377.99,61.00,442.13) yaw 2.12 want NaN v -1.80,1.66 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 370.5,62.0,445.5 legs 0/1 st 0 nu 0 | 
+    [trace]   450 Astrid     (377.69,61.00,442.40) yaw 2.24 want NaN v -1.80,1.66 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 370.5,62.0,445.5 legs 0/1 st 0 nu 0 | 
+    [trace]   460 Astrid     (377.39,61.00,442.68) yaw 2.27 want NaN v -1.80,1.66 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 370.5,62.0,445.5 legs 0/1 st 0 nu 0 | 
+    [trace]   470 Astrid     (377.09,61.00,442.96) yaw 2.30 want NaN v -1.80,1.66 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 370.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   480 Astrid     (376.79,61.00,443.23) yaw 2.30 want NaN v -1.88,1.44 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 371.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   490 Astrid     (376.42,61.00,443.35) yaw 1.99 want NaN v -2.39,0.56 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 371.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   500 Astrid     (376.02,61.00,443.45) yaw 1.87 want NaN v -2.39,0.56 goal SOCIALIZE(lonely (62%), Einar nearby) act go to goal working null gp true 371.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   510 Astrid     (375.62,61.00,443.54) yaw 1.83 want NaN v -2.39,0.56 goal SOCIALIZE(lonely (63%), Einar nearby) act go to goal working null gp true 372.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   520 Astrid     (375.23,61.00,443.65) yaw 1.83 want NaN v -2.34,0.73 goal SOCIALIZE(lonely (63%), Einar nearby) act go to goal working null gp true 372.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   530 Astrid     (374.84,61.00,443.77) yaw 1.87 want NaN v -2.34,0.73 goal SOCIALIZE(lonely (63%), Einar nearby) act go to goal working null gp true 372.5,62.0,444.5 legs 0/1 st 0 nu 0 | 
+    [trace]   540 Astrid     (374.45,61.91,443.77) yaw 1.90 want NaN v -2.22,0.95 goal SOCIALIZE(lonely (63%), Einar nearby) act go to goal working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   550 Astrid     (374.11,62.21,443.89) yaw 1.96 want NaN v -1.82,0.82 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   560 Astrid     (373.85,62.00,444.01) yaw 1.96 want NaN v -0.97,0.44 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   570 Astrid     (373.81,62.00,444.03) yaw 1.64 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   580 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   590 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   600 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   610 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   620 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   630 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   640 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   650 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   660 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   670 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   680 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (63%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   690 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   700 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   710 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   720 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   730 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   740 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   750 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   760 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   770 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | 
+    [trace]   780 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | talked with Einar
+    [trace]   790 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | talked with Einar
+    [trace]   800 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | talked with Einar
+    [trace]   810 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | talked with Einar
+    [trace]   820 Astrid     (373.81,62.00,444.03) yaw 1.46 want 1.46 v 0.00,0.00 goal SOCIALIZE(lonely (64%), Einar nearby) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | talked with Einar
+    [trace]   830 Astrid     (373.81,62.00,444.03) yaw 0.48 want -0.08 v 0.00,0.00 goal INVESTIGATE(glimpsed someone at (375, 430); deciding what to do) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | noticed something
+    [trace]   840 Astrid     (373.81,62.00,444.03) yaw -0.06 want -0.08 v 0.00,0.00 goal INVESTIGATE(glimpsed someone at (375, 430); deciding what to do) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | noticed something
+    [trace]   850 Astrid     (373.81,62.00,444.03) yaw -0.06 want -0.08 v 0.00,0.00 goal INVESTIGATE(glimpsed someone at (375, 430); deciding what to do) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | noticed something
+    [trace]   860 Astrid     (373.81,62.00,444.03) yaw -0.06 want -0.08 v 0.00,0.00 goal INVESTIGATE(glimpsed someone at (375, 430); deciding what to do) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | noticed something
+    [trace]   870 Astrid     (373.81,62.00,444.03) yaw -0.06 want -0.08 v 0.00,0.00 goal INVESTIGATE(check: noticed something at (375, 430) - courage 0.72, not alone) act hold/face working null gp false 373.5,62.0,444.1 legs - st 0 nu 0 | noticed something
+    [trace]   880 Astrid     (373.95,62.00,443.98) yaw -0.17 want NaN v 1.96,-0.74 goal INVESTIGATE(check: noticed something at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   890 Astrid     (374.33,62.00,443.84) yaw -1.23 want NaN v 2.34,-0.80 goal INVESTIGATE(check: noticed something at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   900 Astrid     (374.73,61.92,443.71) yaw -1.23 want NaN v 2.37,-0.77 goal INVESTIGATE(check: noticed something at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   910 Astrid     (375.12,61.29,443.58) yaw -1.23 want NaN v 2.37,-0.78 goal INVESTIGATE(check: noticed something at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   920 Astrid     (375.52,61.00,443.45) yaw -1.23 want NaN v 2.35,-0.82 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   930 Astrid     (375.91,61.00,443.31) yaw -1.23 want NaN v 2.35,-0.82 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   940 Astrid     (376.30,61.00,443.18) yaw -1.23 want NaN v 2.35,-0.83 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   950 Astrid     (376.69,61.00,443.04) yaw -1.23 want NaN v 2.36,-0.84 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   960 Astrid     (377.08,61.00,442.90) yaw -1.23 want NaN v 2.36,-0.85 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   970 Astrid     (377.48,61.00,442.75) yaw -1.23 want NaN v 2.36,-0.86 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   980 Astrid     (377.87,61.00,442.61) yaw -1.23 want NaN v 2.37,-0.88 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]   990 Astrid     (378.27,61.00,442.46) yaw -1.23 want NaN v 2.37,-0.90 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1000 Astrid     (378.66,61.00,442.31) yaw -1.23 want NaN v 2.37,-0.93 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1010 Astrid     (379.06,61.00,442.15) yaw -1.20 want NaN v 2.36,-0.96 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1020 Astrid     (379.45,61.00,441.99) yaw -1.20 want NaN v 2.34,-1.00 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1030 Astrid     (379.83,61.00,441.80) yaw -1.13 want NaN v 2.22,-1.49 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1040 Astrid     (380.16,61.00,441.48) yaw -0.85 want NaN v 1.44,-2.29 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1050 Astrid     (380.26,61.00,441.08) yaw -0.36 want NaN v 0.09,-2.45 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1060 Astrid     (380.28,61.00,440.67) yaw -0.11 want NaN v 0.09,-2.45 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1070 Astrid     (380.29,61.00,440.26) yaw -0.08 want NaN v 0.09,-2.45 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1080 Astrid     (380.31,61.00,439.86) yaw -0.05 want NaN v 0.09,-2.45 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [trace]  1090 Astrid     (380.32,61.00,439.45) yaw -0.05 want NaN v 0.09,-2.45 goal INVESTIGATE(check: going to look at (375, 430) - courage 0.72, not alone) act go to goal working null gp true 375.5,61.0,430.5 legs 0/1 st 0 nu 0 | going to look
+    [life] stop 375,430 done (15 people seen so far)
+
+    [life] 1 stops of 1100 frames; 15 people seen
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (285,1026)
+      never in play: Aldric GUARD home (288,1029)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam VILLAGER home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1030)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde HEALER home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Maelin SCHOLAR home (178,647)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (288,966)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hakon HUNTER home (144,624)
+      never in play: Hadwin CIVIC home (271,1031)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Roder GUARD home (196,669)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (924,102)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: King Fahad VILLAGER home (954,943)
+      never in play: Cerys VILLAGER home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: King Arthur CRAFTSMAN home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain HUNTER home (890,392)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin MINER home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Alexios CRAFTSMAN home (513,84)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Dorran MINER home (224,584)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric FARMER home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (581,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Brennar CRAFTSMAN home (230,664)
+      never in play: Fenna MERCHANT home (248,703)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CRAFTSMAN home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (942,882)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Petros FISHERMAN home (516,84)
+      never in play: Baron Hadrik CRAFTSMAN home (238,662)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sir Garran KNIGHT home (200,672)
+      never in play: Sella CRAFTSMAN home (188,825)
+      never in play: Orven WORKER home (253,661)
+      never in play: Leofric WORKER home (346,944)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (278,1028)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (906,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,914)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (532,161)
+      never in play: Melina FISHERMAN home (518,85)
+      never in play: Spiros WORKER home (516,82)
+      never in play: Timon WORKER home (510,85)
+      never in play: Damon WORKER home (513,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (475,205)
+      never in play: Mimis BEGGAR home (530,109)
+      never in play: Argus THIEF home (474,205)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (512,87)
+      never in play: Sabeen BEGGAR home (510,82)
+      never in play: King Phillip CIVIC home (207,669)
+      never in play: Duke Edran CIVIC home (204,672)
+      never in play: Sir Vaelor KNIGHT home (177,642)
+      never in play: Father Anselm PRIEST home (177,645)
+      never in play: Tovin CRAFTSMAN home (252,704)
+      never in play: Elric CIVIC home (230,682)
+      never in play: Halwen CRAFTSMAN home (263,701)
+      never in play: Hesta FARMER home (252,654)
+      never in play: Aldis CIVIC home (177,705)
+      never in play: Toben CRAFTSMAN home (177,708)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Lothar GUARD home (211,654)
+      never in play: Hilde UNDERTAKER home (177,649)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (954,908)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Haskel MINER home (219,583)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+    [life] 0 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 44.968 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 49s
+9 actionable tasks: 1 executed, 8 up-to-date

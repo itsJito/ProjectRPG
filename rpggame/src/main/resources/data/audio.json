@@ -1,0 +1,471 @@
+{
+ "_about": "(0.4.2, gamefixes: the audio configured to each region, situation and context instead of playing everything everywhere) What is heard where. The music's mood comes from what the player is living through (rpg.audio.Soundscape): a fight, being hunted, underground, at an altar, in a palace's realm, in a town, in a wood, in the open; each realm or biome may name its own pieces for a mood. The ambience bed is one loop whose level follows the place, the hour, the roof overhead and the ground underfoot.",
+ "music": {
+  "palaceRealms": [
+   "Severia"
+  ],
+  "woodBiomes": [
+   "oakwood",
+   "deadwood",
+   "pinewood",
+   "copse",
+   "scrubwood",
+   "cypress",
+   "olivegrove",
+   "clearing"
+  ],
+  "sacredReach": 9,
+  "undergroundDepth": 4,
+  "regions": {
+   "Azharad": {
+    "TOWN_DAY": [
+     "exotic",
+     "exotic2",
+     "desert"
+    ],
+    "TOWN_NIGHT": [
+     "desert_ominous",
+     "mystery"
+    ]
+   },
+   "Severia": {
+    "PALACE_DAY": [
+     "roman_empire",
+     "peacetime",
+     "exotic2"
+    ],
+    "TOWN_DAY": [
+     "roman_empire",
+     "peacetime",
+     "civilizedarea"
+    ]
+   },
+   "Valgard": {
+    "TOWN_DAY": [
+     "civilizedarea",
+     "peacetime",
+     "wilderness2"
+    ]
+   },
+   "Gorrick": {
+    "TOWN_DAY": [
+     "wilderness2",
+     "exploration",
+     "peaceful"
+    ],
+    "TOWN_NIGHT": [
+     "tense_night",
+     "dark_night"
+    ]
+   },
+   "Camelot": {
+    "TOWN_DAY": [
+     "prophecy_fulfilled",
+     "civilizedarea",
+     "happy_times"
+    ]
+   },
+   "desert": {
+    "OPEN_DAY": [
+     "desert",
+     "exotic",
+     "exploration"
+    ],
+    "OPEN_NIGHT": [
+     "desert_ominous",
+     "mystery"
+    ]
+   },
+   "dunes": {
+    "OPEN_DAY": [
+     "desert",
+     "exotic"
+    ],
+    "OPEN_NIGHT": [
+     "desert_ominous"
+    ]
+   },
+   "oasis": {
+    "OPEN_DAY": [
+     "exotic",
+     "exotic2",
+     "desert"
+    ]
+   },
+   "sandstone": {
+    "OPEN_DAY": [
+     "desert",
+     "exploration"
+    ]
+   },
+   "deadwood": {
+    "WOOD_DAY": [
+     "evil_forest",
+     "mystery"
+    ],
+    "WOOD_NIGHT": [
+     "evil_forest",
+     "dark_night"
+    ]
+   },
+   "volcanic": {
+    "OPEN_DAY": [
+     "desert_ominous",
+     "tense_night"
+    ],
+    "OPEN_NIGHT": [
+     "desert_ominous",
+     "dark_night"
+    ]
+   },
+   "cinders": {
+    "OPEN_DAY": [
+     "desert_ominous",
+     "mystery"
+    ],
+    "OPEN_NIGHT": [
+     "desert_ominous",
+     "dark_night"
+    ]
+   },
+   "scorched": {
+    "OPEN_DAY": [
+     "desert_ominous",
+     "mystery"
+    ],
+    "OPEN_NIGHT": [
+     "dark_night"
+    ]
+   },
+   "marsh": {
+    "OPEN_DAY": [
+     "mystery",
+     "wilderness3"
+    ],
+    "OPEN_NIGHT": [
+     "evil_forest",
+     "dark_night"
+    ]
+   },
+   "heath": {
+    "OPEN_DAY": [
+     "wilderness2",
+     "exploration",
+     "mystery"
+    ],
+    "OPEN_NIGHT": [
+     "tense_night",
+     "dark_night"
+    ]
+   },
+   "mediterranean": {
+    "OPEN_DAY": [
+     "peaceful",
+     "peaceful_bgm",
+     "exotic2"
+    ]
+   },
+   "vineyard": {
+    "OPEN_DAY": [
+     "peaceful",
+     "happy_times",
+     "peaceful_bgm"
+    ]
+   },
+   "olivegrove": {
+    "WOOD_DAY": [
+     "peaceful",
+     "peaceful_bgm",
+     "exotic2"
+    ]
+   },
+   "highland": {
+    "OPEN_DAY": [
+     "wilderness2",
+     "exploration",
+     "wilderness1"
+    ]
+   },
+   "crags": {
+    "OPEN_DAY": [
+     "wilderness2",
+     "exploration"
+    ]
+   }
+  }
+ },
+ "ambience": {
+  "file": "devmapambience.ogg",
+  "fade": 2.5,
+  "town": {
+   "day": 0.42,
+   "night": 0.2
+  },
+  "farmland": {
+   "day": 0.36,
+   "night": 0.16
+  },
+  "wood": {
+   "day": 0.3,
+   "night": 0.14
+  },
+  "open": {
+   "day": 0.24,
+   "night": 0.12
+  },
+  "barren": {
+   "day": 0.06,
+   "night": 0.04
+  },
+  "coast": {
+   "day": 0.16,
+   "night": 0.1
+  },
+  "indoors": 0.35,
+  "underground": 0.0,
+  "barrenBiomes": [
+   "desert",
+   "dunes",
+   "volcanic",
+   "cinders",
+   "scorched",
+   "crags",
+   "sandstone",
+   "seabed"
+  ],
+  "farmBiomes": [
+   "meadow",
+   "willowmeadow",
+   "vineyard",
+   "claypits",
+   "chalk"
+  ],
+  "coastBiomes": [
+   "beach",
+   "lakeshore"
+  ]
+ },
+ "footsteps": {
+  "_about": "(0.4.6, gamefixes: foley to match every material, in time with the feet, quieter) what a footfall on each kind of ground sounds like: one or more layers (a recorded bank, its share of the step's loudness, its pitch), played together. 'feet' is the people's overall loudness (and how much harder a running foot lands); 'hooves' the same for a horse or a Pegasus, whose shod hooves ring on stone and drum on wood. 'wading' is laid over any step in water up to the shins; 'snowCover' over open ground the snow has settled on.",
+  "feet": {
+   "gain": 0.09,
+   "force": 0.17,
+   "range": 15
+  },
+  "hooves": {
+   "gain": 0.16,
+   "force": 0.2,
+   "range": 26,
+   "pitch": 0.78
+  },
+  "surfaces": {
+   "grass": [
+    {
+     "bank": "step.grass",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "earth": [
+    {
+     "bank": "step.earth",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "mud": [
+    {
+     "bank": "step.earth",
+     "gain": 0.9,
+     "pitch": 0.8
+    },
+    {
+     "bank": "step.water",
+     "gain": 0.35,
+     "pitch": 0.75
+    }
+   ],
+   "sand": [
+    {
+     "bank": "step.earth",
+     "gain": 0.55,
+     "pitch": 1.18
+    },
+    {
+     "bank": "step.cloth",
+     "gain": 0.45,
+     "pitch": 0.85
+    }
+   ],
+   "gravel": [
+    {
+     "bank": "step.stone",
+     "gain": 0.6,
+     "pitch": 0.9
+    },
+    {
+     "bank": "step.earth",
+     "gain": 0.6,
+     "pitch": 1.2
+    }
+   ],
+   "stone": [
+    {
+     "bank": "step.stone",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "wood": [
+    {
+     "bank": "step.wood",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "cloth": [
+    {
+     "bank": "step.cloth",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "straw": [
+    {
+     "bank": "step.grass",
+     "gain": 0.7,
+     "pitch": 1.12
+    },
+    {
+     "bank": "step.cloth",
+     "gain": 0.4,
+     "pitch": 1.25
+    }
+   ],
+   "leaves": [
+    {
+     "bank": "step.grass",
+     "gain": 0.85,
+     "pitch": 1.2
+    },
+    {
+     "bank": "step.cloth",
+     "gain": 0.3,
+     "pitch": 1.4
+    }
+   ],
+   "snow": [
+    {
+     "bank": "step.snow",
+     "gain": 1.0,
+     "pitch": 1.0
+    }
+   ],
+   "ice": [
+    {
+     "bank": "step.stone",
+     "gain": 0.8,
+     "pitch": 1.35
+    }
+   ],
+   "metal": [
+    {
+     "bank": "step.stone",
+     "gain": 0.55,
+     "pitch": 1.05
+    },
+    {
+     "bank": "step.metal",
+     "gain": 0.3,
+     "pitch": 1.3
+    }
+   ],
+   "glass": [
+    {
+     "bank": "step.stone",
+     "gain": 0.7,
+     "pitch": 1.25
+    },
+    {
+     "bank": "step.metal",
+     "gain": 0.15,
+     "pitch": 1.6
+    }
+   ],
+   "coal": [
+    {
+     "bank": "step.stone",
+     "gain": 0.6,
+     "pitch": 0.85
+    },
+    {
+     "bank": "step.earth",
+     "gain": 0.5,
+     "pitch": 0.9
+    }
+   ],
+   "water": [
+    {
+     "bank": "step.water",
+     "gain": 0.9,
+     "pitch": 1.0
+    }
+   ]
+  },
+  "hoofSurfaces": {
+   "stone": [
+    {
+     "bank": "step.stone",
+     "gain": 0.9,
+     "pitch": 0.75
+    },
+    {
+     "bank": "step.metal",
+     "gain": 0.45,
+     "pitch": 0.9
+    }
+   ],
+   "gravel": [
+    {
+     "bank": "step.stone",
+     "gain": 0.7,
+     "pitch": 0.7
+    },
+    {
+     "bank": "step.earth",
+     "gain": 0.7,
+     "pitch": 0.85
+    }
+   ],
+   "wood": [
+    {
+     "bank": "step.wood",
+     "gain": 1.0,
+     "pitch": 0.7
+    },
+    {
+     "bank": "step.plank",
+     "gain": 0.5,
+     "pitch": 0.8
+    }
+   ],
+   "metal": [
+    {
+     "bank": "step.metal",
+     "gain": 0.7,
+     "pitch": 0.85
+    }
+   ]
+  },
+  "wading": {
+   "bank": "step.water",
+   "gain": 0.75,
+   "pitch": 1.0
+  },
+  "snowCover": {
+   "bank": "step.snow",
+   "gain": 0.8,
+   "pitch": 1.0
+  }
+ }
+}

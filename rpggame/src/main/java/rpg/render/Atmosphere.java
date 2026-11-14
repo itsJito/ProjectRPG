@@ -64,12 +64,15 @@ public final class Atmosphere {
         float[] sun = lerp(p.sun, flatSide, cloud * 0.85f), shade = lerp(p.shade, flatSide, cloud * 0.6f);
         float[] grey = v((p.sky[0] + p.sky[1] + p.sky[2]) / 3, (p.sky[0] + p.sky[1] + p.sky[2]) / 3, (p.sky[0] + p.sky[1] + p.sky[2]) / 3 * 1.06f);
         float[] sky = lerp(p.sky, grey, cloud * 0.7f);
-        float dark = 1 - 0.12f * rain;
+        // (0.4.6) a dark overcast, a storm, a hurricane: the day darkened; a sandstorm or a whiteout tints the sky its own colour
+        float dark = (1 - 0.12f * rain) * (1 - 0.55f * w.dark);
+        float tk = Math.min(1, w.fog);
+        sky = v(sky[0] * (1 + (w.tintR - 1) * tk * 0.8f), sky[1] * (1 + (w.tintG - 1) * tk * 0.8f), sky[2] * (1 + (w.tintB - 1) * tk * 0.8f));
         sky = scale(sky, dark); sun = scale(sun, dark); shade = scale(shade, dark);
         float[] ground = lerp(p.ground, v(p.ground[0] + 0.08f, p.ground[1] + 0.08f, p.ground[2] + 0.09f), snow);
         if (fog != null && fogK > 0) { float k = Math.min(0.5f, fogK * 0.6f); shade = lerp(shade, scale(fog, 0.25f), k); ground = lerp(ground, scale(fog, 0.15f), k); }
         float[] tint = lerp(p.tint, v(p.tint[0] * 0.95f, p.tint[1] * 0.98f, p.tint[2] * 1.05f), rain);
-        return new Preset(p.name + (rain > 0.4f ? "+rain" : cloud > 0.5f ? "+cloud" : ""), sky, ground, sun, shade, p.exposure * (1 + 0.04f * cloud + 0.12f * rain),
+        return new Preset(p.name + (rain > 0.4f ? "+rain" : cloud > 0.5f ? "+cloud" : ""), sky, ground, sun, shade, p.exposure * (1 + 0.04f * cloud + 0.12f * rain) * (1 - 0.32f * w.dark),
                 p.saturation * (1 - 0.14f * cloud - 0.1f * rain), p.contrast * (1 - 0.05f * cloud - 0.08f * fogK), tint);
     }
 

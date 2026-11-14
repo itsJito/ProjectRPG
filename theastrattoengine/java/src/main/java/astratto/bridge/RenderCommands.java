@@ -47,8 +47,25 @@ public final class RenderCommands {
     /** A quality preset ({@code QUALITY_*}), the passes that are on ({@code PASS_*}) and the render scale; kept until changed. */
     /** A GPU emitter, with recorded simulation state supplied by the caller, never CPU particle readback. */
     public void ripple(float x,float z,float radius,float strength) { head(AstrattoNative.RCMD_RIPPLE,24); buf.putFloat(x).putFloat(z).putFloat(radius).putFloat(strength); }
-    /** (2.10) A stretch of water running this frame: its rect in world x/z and its velocity (m/s). Up to 16 a frame. */
-    public void waterFlow(float x0,float z0,float x1,float z1,float vx,float vz) { head(AstrattoNative.RCMD_WATER_FLOW,32); buf.putFloat(x0).putFloat(z0).putFloat(x1).putFloat(z1).putFloat(vx).putFloat(vz); }
+    /**
+     * (2.12) The water's motion round the eye, kept until the next is sent: n x n cells from (x0, z0), cell metres each,
+     * row by row along x, four bytes a cell - the flow along x and z (128 + 32 per m/s), whitewater, open water (0..255).
+     */
+    public void waterField(float x0,float z0,float cell,int n,java.nio.ByteBuffer cells) {
+        int bytes=n*n*4;
+        head(AstrattoNative.RCMD_WATER_FIELD,8+20+bytes); buf.putFloat(x0).putFloat(z0).putFloat(cell).putInt(n).putInt(0);
+        for(int i=0;i<bytes;i++)buf.put(cells.get(i));
+    }
+    /**
+     * (2.13) This frame's precipitation: the wind (m/s), the weather's clock, the light's scale, and its layers - each
+     * 20 floats: kind (0 rain, 1 snow, 2 hail, 3 dust, 4 splash), instances, fall, size, streak length, tile width, tile
+     * height, ground band low, high, wind share, turbulence, ground (1/0), seed salt, r, g, b, alpha, then three spare.
+     */
+    public void precip(float windX, float windZ, float time, float light, float[] layers, int count) {
+        head(AstrattoNative.RCMD_PRECIP, 8 + 8 + 16 + count * 80); buf.putInt(count).putInt(0);
+        buf.putFloat(windX).putFloat(windZ).putFloat(time).putFloat(light);
+        for (int i = 0; i < count * 20; i++) buf.putFloat(layers[i]);
+    }
     /** Kind EMITTER_ATTACHED_FIRE retains the emitter translation for the life of each flame. */
     public void emitter(long id, int kind, float x, float y, float z, float size, float rate, float spread, float life, float r, float g, float b, float vx, float vy, float vz) {
         head(AstrattoNative.RCMD_EMITTER,80); buf.putLong(id);

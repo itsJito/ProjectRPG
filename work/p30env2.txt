@@ -1,0 +1,26 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 00:31:22 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 18.91s ({regions=1375, overlays=621, variants=345, scarp=66, coast=473, erosion=382, peaks=71, lakes=93, isles=5, rivers=1016, wadis=23, ground=24, roads=728, causeways=4, architecture=881, pitsFilled=1405, pits=584, banks=65, clamp=16, cliffs=52, columns=1165, falls=18, raise=9899, trees=305, outcrops=1, ways=662}), made and lit in 1.89s
+[Load] ShadowVeil 20.91s
+[Load] renderer and UI 2.68s
+[monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 761 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 28 chunks made, 24 meshes, 0.44s
+[Load] 236 furniture models made in 0.08s
+[Load] first rendered frame 6.62s
+[Load] the world about the spawn made ready in 10.13s
+[Load] game frame 1: scene 8 ms, interface 1110 ms, render 25 ms
+[Load] game frame 2: scene 10 ms, interface 5 ms, render 7 ms
+[Load] game frame 3: scene 10 ms, interface 5 ms, render 8 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\env2\at-540-1062-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\env2\at-540-1062-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\env2\at-540-1062-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\env2\at-540-1062-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\env2\at-540-1062-top.png

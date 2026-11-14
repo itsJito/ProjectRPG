@@ -204,6 +204,7 @@ public final class Main {
         // (0.4.1) an older version's save brings its character into this version's world (SaveSystem.load carries it over)
         if (fresh) new SaveSystem(g).save(profile.save());
         preloadAll(g, gfx);
+        warmFrames(g, gfx, ui, hud, win.width, win.height);
         System.out.printf("[Load] session, audio, figures and save %.2fs%n", (System.nanoTime() - loadStarted) / 1e9);
         boolean[] toTitle = {false};
         hud.onTitle = () -> { toTitle[0] = true; win.requestClose(); };
@@ -250,7 +251,7 @@ public final class Main {
         boolean cursorFree = false;
         win.setCursorLocked(true);
         double eHeld = -1;
-        boolean eMenuOpened = false;
+        boolean eMenuOpened = false, eSwallow = false;
         // a mouse button is the body's only when it went down while the mouse was looking (not on a menu): the click
         // that picks a dialogue choice or closes a window is never also a swing when the menu closes under it
         boolean mainArmed = false, offArmed = false, wasPaused = false, crouchToggle = false, sprintToggle = false;
@@ -342,13 +343,16 @@ public final class Main {
                 if (preferences.pressed(in, Preferences.Action.PANEL_INVENTORY)) hud.openTabKey(3);
                 if (preferences.pressed(in, Preferences.Action.PANEL_MAP)) hud.openTabKey(6);
             }
+            // (0.4.6, gamefixes) E with a container or the inventory open closes it (and does nothing else that press)
+            boolean eCloses = !typing && preferences.pressed(in, Preferences.Action.INTERACT) && hud.dialog == null && hud.scene == Hud.Scene.INVENTORY;
+            if (eCloses) { hud.closeAll(); eHeld = -1; eSwallow = true; }
             // E: a tap is the primary action, a hold opens every option
-            if (!typing && preferences.pressed(in, Preferences.Action.INTERACT)) { eHeld = g.time; eMenuOpened = false; }
+            if (!typing && !eCloses && !eSwallow && preferences.pressed(in, Preferences.Action.INTERACT)) { eHeld = g.time; eMenuOpened = false; }
             if (eHeld >= 0 && preferences.down(in, Preferences.Action.INTERACT) && !eMenuOpened && g.time - eHeld > 0.3) {
                 hud.openInteractMenu();
                 eMenuOpened = true;
             }
-            if (preferences.released(in, Preferences.Action.INTERACT)) { if (!eMenuOpened && !hud.captures()) it.interact = true; eHeld = -1; }
+            if (preferences.released(in, Preferences.Action.INTERACT)) { if (!eMenuOpened && !hud.captures() && !eSwallow) it.interact = true; eHeld = -1; eSwallow = false; }
             if (!typing && preferences.pressed(in, Preferences.Action.XP_INSPECTOR)) hud.xpDashboard = !hud.xpDashboard;
             if (!typing && preferences.pressed(in, Preferences.Action.AI_INSPECTOR)) hud.aiInspector = !hud.aiInspector;
             if (!typing && preferences.pressed(in, Preferences.Action.STATE_INSPECTOR)) hud.stateInspector = !hud.stateInspector;
@@ -406,6 +410,7 @@ public final class Main {
                 music.paused(paused);
                 wasPaused = paused;
             }
+            music.regional = g.soundscape::tracks;
             music.update(g.mood(), dt);
             music.updateStingers(dt);
             // host_timescale: the world's clock runs faster or slower; the interface keeps the wall clock
@@ -516,7 +521,7 @@ public final class Main {
     }
 
     /** The game's version (the patch notes' number). */
-    public static final String VERSION = "Alpha 0.4.1";
+    public static final String VERSION = "Alpha 0.4.6";
     /**
      * (0.4.1, gamefixes: the stutter on loading into the map) everything the first seconds in the world would otherwise do
      * a piece at a time, done before the first frame: the growth about the spawn, the routing graph about it, and the
@@ -525,12 +530,37 @@ public final class Main {
     public static void preloadAll(Rpg g, rpg.render.Gfx gfx) {
         long t0 = System.nanoTime();
         gfx.preloadWorld(g, g.player.x, g.player.z);
-        if (rpg.world.WorldMap.shadowveil()) g.vox.navigation.warmAround(g.player.x, g.player.z, Tuning.i("load.navRadius", 96));
+        gfx.prewarmFurniture(g);
+        if (rpg.world.WorldMap.shadowveil()) {
+            g.vox.navigation.warmAround(g.player.x, g.player.z, Tuning.i("load.navRadius", 96));
+            // (0.4.2, gamefixes: the stutter after loading in) and about every creature awake beyond it - a goblin's den,
+            // a spider's nest - whose first route would otherwise build its ground's navigation in the first seconds of play
+            int r = Tuning.i("load.navRadiusCreatures", 24);
+            if (g.monsters != null) for (var m : g.monsters.all()) if (m.loaded) g.vox.navigation.warmAround(m.x, m.z, r);
+            for (var n : g.npcs) if (n.loaded) g.vox.navigation.warmAround(n.x, n.z, r);
+        }
         // one step of the world behind the loading screen: the first tick's own costs (the engine's first frame, every
         // creature's first plan, the residents beyond the fog going off-stage) are paid before anything is shown
         g.game.tick(1f / 60);
         gfx.preloadChunks(g, g.player.x, g.player.z);
         System.out.printf("[Load] the world about the spawn made ready in %.2fs%n", (System.nanoTime() - t0) / 1e9);
+    }
+
+    /**
+     * (0.4.2, gamefixes: the huge stutter on loading in) two whole game frames drawn behind the loading screen (never
+     * shown: the buffers are not swapped) - the interface's first draw builds its map, its fonts' pages and its icons, a
+     * second's work that was the first frame of play; it is paid here, before the player sees anything move.
+     */
+    public static void warmFrames(Rpg g, Gfx gfx, Ui2D ui, Hud hud, int w, int h) {
+        long t0 = System.nanoTime();
+        // (a second each: the interface's pieces fade in over their own time, and a piece not yet faded in is not drawn)
+        for (int i = 0; i < 2; i++) drawGame(g, gfx, ui, hud, Math.max(1, w), Math.max(1, h), 1f, false);
+        // (0.4.3, gamefixes: the stutter on loading in) the world's own first moments run behind the loading screen too -
+        // a few dozen ticks and frames, so every system's first-time work (the routes first asked, the code first run) is
+        // done before the player is shown the world, not in their first second of play
+        int warm = Tuning.i("load.warmTicks", 45);
+        for (int i = 0; i < warm; i++) { g.game.tick(1 / 60f); if (i % 3 == 2) drawGame(g, gfx, ui, hud, Math.max(1, w), Math.max(1, h), 1 / 20f, false); }
+        System.out.printf("[Load] the first frames drawn behind the loading screen in %.2fs%n", (System.nanoTime() - t0) / 1e9);
     }
 
     /** A GLFW key from the name a bind uses ("f5", "p", "kp_1", "space", "mouse4"...), or -1. */
@@ -562,14 +592,23 @@ public final class Main {
         float sx = shake > 0 ? (float) Math.sin(g.time * 60) * shake * 0.05f : 0, sy = shake > 0 ? (float) Math.cos(g.time * 47) * shake * 0.05f : 0;
         float worldDt = paused ? 0 : dt * hud.worldPace();
         gfx.camera(c.cx + sx, c.cy + sy, c.cz, c.fx, c.fy, c.fz, w, h, worldDt);
+        long t0 = System.nanoTime();
         gfx.scene(g, g.player.firstPerson, worldDt, g.state.hourOfDay());
         if (g.death.active) gfx.cmd.grading(g.death.grade(), g.death.flash(), 0, 0, 0);
         else if (g.time - g.player.cs.lastHurt < 0.4) gfx.cmd.grading(0, (float) (0.4 - (g.time - g.player.cs.lastHurt)) * 2, 0, 0, 0);
+        long t1 = System.nanoTime();
         ui.begin(gfx.cmd);
         hud.draw(ui, w, h, cursorFree, dt);
         ui.end();
+        long t2 = System.nanoTime();
         if (gfx.frame(w, h) == null) System.err.println("frame refused: " + gfx.renderer().lastError());
+        // (0.4.2, gamefixes: the stutter on loading in) the first frames of play, phase by phase, in the log
+        lastScene = (t1 - t0) / 1e6f; lastUi = (t2 - t1) / 1e6f; lastRender = (System.nanoTime() - t2) / 1e6f;
+        if (framesLogged < 3) { framesLogged++; System.out.printf("[Load] game frame %d: scene %.0f ms, interface %.0f ms, render %.0f ms%n", framesLogged, (t1 - t0) / 1e6, (t2 - t1) / 1e6, (System.nanoTime() - t2) / 1e6); }
     }
+    private static int framesLogged;
+    /** (0.4.4) The last drawn frame's phases (ms): the scene built, the interface, the renderer's frame - for the stutter's report. */
+    public static float lastScene, lastUi, lastRender;
 
     static void shot(Gfx gfx, int w, int h, File out) {
         ByteBuffer px = gfx.pixels(w, h);

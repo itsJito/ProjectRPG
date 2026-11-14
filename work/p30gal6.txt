@@ -1,0 +1,29 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 00:31:22 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 23.42s ({regions=1593, overlays=671, variants=396, scarp=69, coast=478, erosion=559, peaks=54, lakes=92, isles=13, rivers=724, wadis=20, ground=47, roads=723, causeways=4, architecture=1237, pitsFilled=1383, pits=770, banks=70, clamp=17, cliffs=52, columns=1168, falls=20, raise=13578, trees=336, outcrops=0, ways=693}), made and lit in 2.02s
+[Load] ShadowVeil 25.54s
+[Load] renderer and UI 4.29s
+[monsters] 10 wilderness territories (passed over: 7 wet or road, 28 in a realm, 68 near the settled, 8 by a road, 23 by their biome's chances; 759 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 38 meshes, 1.54s
+[Load] first rendered frame 6.70s
+[Load] game frame 1: scene 68 ms, interface 1121 ms, render 52 ms
+[Load] game frame 2: scene 23 ms, interface 13 ms, render 103 ms
+[Load] game frame 3: scene 11 ms, interface 7 ms, render 99 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-2-function-great_hall.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room0-great_hall-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room0-kitchen-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room1-chamber-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room1-chamber-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room1-solar-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room2-high_room-7.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s6\camelot_keep-3-room2-chamber-8.png
+[interiors] 1 buildings shot in 25s -> build/review-p30/s6

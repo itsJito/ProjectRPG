@@ -11,9 +11,10 @@ uniform ivec2 uShift;
 uniform float uDt,uTime,uRain,uImpulseScale;
 uniform int uImpulses;
 uniform vec4 uImpulse[32];
-// 2.10: where the water runs - a rect (x0, z0, x1, z1) and its velocity (vx, vz, -, -) each
-uniform int uFlows;
-uniform vec4 uFlow[64];
+// 2.12: where the water runs - the game's motion field round the eye (corner x, z, cell, cells across): R, G the
+// flow (128 + 32 per m/s), B whitewater, A open water
+uniform sampler2D uFlowField;
+uniform vec4 uFlowGrid;
 vec4 previous(ivec2 p) {
  ivec2 q=p+uShift;
  return any(lessThan(q,ivec2(0))) || any(greaterThanEqual(q,ivec2(256)))?vec4(0):imageLoad(uPrevious,q);
@@ -46,17 +47,11 @@ void main() {
  float drop=hash(vec2(p)+floor(uTime*120.0));
  if(drop<uRain*texelFetch(uMask,p,0).b*0.0004)v-=0.35;
  h=clamp(h+v*uDt,-0.14,0.14);
- // the flow here (m/s), eased in over the edge of a stretch so the surface's drift has no seam at its banks
- // 2.11: where reaches overlap (a river's bends) the water runs at their weighted average, never their sum
+ // the flow here (m/s), read smoothly from the field (none outside it)
  vec2 flow=vec2(0.0);
- float weight=0.0;
- for(int i=0;i<min(uFlows,32);i++) {
-  vec4 r=uFlow[i*2];
-  vec2 inside=min(world-r.xy,r.zw-world);
-  float k=smoothstep(-0.5,1.0,min(inside.x,inside.y));
-  flow+=uFlow[i*2+1].xy*k;
-  weight+=k;
+ if(uFlowGrid.w>0.0) {
+  vec2 fuv=(world-uFlowGrid.xy)/(uFlowGrid.z*uFlowGrid.w);
+  if(all(greaterThanEqual(fuv,vec2(0.0)))&&all(lessThanEqual(fuv,vec2(1.0)))) flow=(texture(uFlowField,fuv).rg*255.0-128.0)/32.0;
  }
- if(weight>1.0)flow/=weight;
  imageStore(uNext,p,vec4(h,clamp(v,-2.0,2.0),flow));
 }

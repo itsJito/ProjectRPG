@@ -141,6 +141,9 @@ public final class Reactions {
         return best;
     }
 
+    /** (0.4.6) How long (s) a ragdolled body may hang caught off the ground, and stay down at all, before it is got up. */
+    static final float CAUGHT_LIMIT = rpg.Tuning.f("reactions.caughtLimit", 0.9f), DOWN_LIMIT = rpg.Tuning.f("reactions.downLimit", 6f);
+
     /** After the engine's frame: where each held body is, and whether it is back on its feet. */
     public void afterFrame(Snapshots.Bodies bodies) {
         for (int i = held.size() - 1; i >= 0; i--) {
@@ -184,8 +187,25 @@ public final class Reactions {
             // than waiting out the physical struggle to full height and a steady stance
             float tx = rd.p[RD_HEAD * 3] - rd.p[RD_PELVIS * 3], tz = rd.p[RD_HEAD * 3 + 2] - rd.p[RD_PELVIS * 3 + 2];
             boolean rising = n.wentDown && rd.state == SYDNEY_GETUP && headUp > n.height * 0.6f && Math.hypot(tx, tz) < 0.3f;
-            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND || n.uprightFor > 0.15f || rising;
-            boolean tooLong = g.time - n.reactSince > 9;
+            // (0.4.4, gamefixes: a body ragdolled into water had no buoyancy, and struggled to stand up on the bed) once a
+            // knocked-down body lies in water too deep to stand in, it is not got up: it is handed back at once, where it
+            // floats, to the swimming (the player's strokes, or an NPC's float) - it swims, it does not sink and climb
+            float pelvisY = rd.p[RD_PELVIS * 3 + 1];
+            boolean afloat = g.time - n.reactSince > 0.3 && g.fluids.in(rd.comX, pelvisY, rd.comZ) && g.fluids.depth(rd.comX, pelvisY, rd.comZ) >= rpg.actor.Swimming.FLOAT_DEPTH;
+            if (afloat) n.y = Math.max(footY(rd), pelvisY - 0.9f);
+            boolean back = rd.outcome == OUTCOME_RECOVERED && rd.state == SYDNEY_STAND || n.uprightFor > 0.15f || rising || afloat;
+            // (0.4.6, gamefixes: a ragdolled body hung on to a block's edge or a ledge for far too long) a body held still off
+            // the ground - caught on an edge, wedged on a lip - is let go of after a moment: it is set down on the floor
+            // under it (or beside it) and gets up there, rather than dangling until the long limit
+            float moved = (float) Math.hypot(rd.comX - n.ragLastX, rd.comZ - n.ragLastZ) + Math.abs(rd.comY - n.ragLastY);
+            n.ragLastX = rd.comX; n.ragLastY = rd.comY; n.ragLastZ = rd.comZ;
+            float floorUnder = g.vox.navigation.standY(rd.comX, rd.comY, rd.comZ);
+            boolean aground = Float.isFinite(floorUnder) && footY(rd) - floorUnder < 0.45f;
+            n.ragCaught = !aground && moved < 0.02f && g.time - n.reactSince > 0.4 ? n.ragCaught + (float) g.lastDt : 0;
+            boolean caught = n.ragCaught > CAUGHT_LIMIT;
+            if (caught && Float.isFinite(floorUnder)) n.y = floorUnder;
+            back |= caught;
+            boolean tooLong = g.time - n.reactSince > DOWN_LIMIT;
             boolean rolling = n.burnSince>=0 && g.time-n.burnSince>=3 && (g.chemistry.state(n.id)&CHEM_BURNING)!=0;
             boolean shocked = g.time < n.shockUntil;
             if (!rolling && !shocked) g.game.commands().ragdollControl(n.ragdoll, CONTROL_STAY_DOWN, 0);

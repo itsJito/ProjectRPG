@@ -65,11 +65,26 @@ public final class Profiles {
             p.playSeconds = Json.num(m, "playSeconds", 0);
             p.combatLevel = Json.integer(m, "combatLevel", 3); p.totalLevel = Json.integer(m, "totalLevel", 27);
             p.version = Json.str(m, "version", "");
+            // (0.4.2, gamefixes: characters made in 0.4 showed as made in an earlier version) a profile written before its
+            // first save carries no version; its save's own stamp says which version wrote it, never the unstamped default
+            if (p.version.isBlank() && p.saved) p.version = savedBy(p.save());
             return p;
         } catch (IOException | RuntimeException e) {
             System.err.println("[profiles] could not read " + f + ": " + e.getMessage());
             return null;
         }
+    }
+
+    /** The version stamped in a save file (read from its head; the stamp is written first), or this version's when it has none. */
+    public static String savedBy(Path save) {
+        try (var in = Files.newBufferedReader(save, StandardCharsets.UTF_8)) {
+            char[] head = new char[4096];
+            int n = in.read(head);
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"version\"\\s*:\\s*\"([^\"]+)\"").matcher(new String(head, 0, Math.max(0, n)));
+            if (m.find()) return m.group(1);
+            Map<String, Object> all = Json.parseObject(Files.readString(save, StandardCharsets.UTF_8));
+            return Json.str(all, "version", Main.VERSION);
+        } catch (IOException | RuntimeException e) { return Main.VERSION; }
     }
 
     /** A new profile in the first free slot, or null when all five are taken. */
@@ -78,6 +93,7 @@ public final class Profiles {
             if (read(s) != null) continue;
             Profile p = new Profile(s);
             p.name = name; p.look = look.copy(); p.created = p.lastPlayed = System.currentTimeMillis();
+            p.version = Main.VERSION;   // (0.4.2) a new character is of the version that made it
             write(p);
             return p;
         }

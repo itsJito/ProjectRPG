@@ -88,7 +88,18 @@ public final class Voxels {
     public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater) { return ray(ox, oy, oz, dx, dy, dz, max, stopAtWater, true); }
 
     /** The same, optionally past open doors' leaves (an open leaf swings out of the way of a blade or a reaching hand; a shut one is still a door). */
-    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater, boolean leaves) {
+    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater, boolean leaves) { return ray(ox, oy, oz, dx, dy, dz, max, stopAtWater, leaves, false); }
+
+    /**
+     * (0.4.5, gamefixes: none of the furniture could be broken) The cells a piece of furniture stands on (its invisible
+     * collision): a blade, an arrow or a spell passes into them to meet the piece's own parts (rpg.objects.Wreckage) -
+     * the cell's face is not the piece. Null: none.
+     */
+    public java.util.function.LongPredicate furnitureCells;
+    public static long cellKey(int x, int y, int z) { return ((long) x & 0xfffff) << 40 | ((long) y & 0xfffff) << 20 | (long) z & 0xfffff; }
+
+    /** The same, passing through furniture's own cells when asked (a blow or a shot: the piece's parts take it, not its cell). */
+    public Hit ray(float ox, float oy, float oz, float dx, float dy, float dz, float max, boolean stopAtWater, boolean leaves, boolean throughFurniture) {
         Hit h = new Hit();
         float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 1e-6f) return h;
@@ -103,7 +114,7 @@ public final class Voxels {
         int nx = 0, ny = 0, nz = 0;
         for (int i = 0; i < 512 && t <= max; i++) {
             int b = v.block(x, y, z);
-            if (b != 0 && (!door(b) && solid[b] || stopAtWater && b == Blocks.WATER)) {
+            if (b != 0 && (!door(b) && solid[b] || stopAtWater && b == Blocks.WATER) && !(throughFurniture && furnitureCells != null && furnitureCells.test(cellKey(x, y, z)))) {
                 h.hit = true; h.dist = t; h.bx = x; h.by = y; h.bz = z; h.nx = nx; h.ny = ny; h.nz = nz; h.block = b;
                 h.x = ox + dx * t; h.y = oy + dy * t; h.z = oz + dz * t;
                 for (var panel : doors) if (leaves || !panel.open) panel.ray(h, ox, oy, oz, dx, dy, dz, t);
@@ -120,10 +131,12 @@ public final class Voxels {
     /** Whether a segment crosses no solid cell (contact through walls is impossible). */
     public boolean clear(float ax, float ay, float az, float bx, float by, float bz) { return clear(ax, ay, az, bx, by, bz, true); }
     /** The same, optionally past open door leaves (a swung leaf does not shield what stands beside it from a blade). */
-    public boolean clear(float ax, float ay, float az, float bx, float by, float bz, boolean leaves) {
+    public boolean clear(float ax, float ay, float az, float bx, float by, float bz, boolean leaves) { return clear(ax, ay, az, bx, by, bz, leaves, false); }
+    /** The same, the furniture's own cells passed through when asked (a blade's length reaching into a table). */
+    public boolean clear(float ax, float ay, float az, float bx, float by, float bz, boolean leaves, boolean throughFurniture) {
         float dx = bx - ax, dy = by - ay, dz = bz - az, d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (d < 1e-4f) return !solid((int) Math.floor(ax), (int) Math.floor(ay), (int) Math.floor(az));
-        Hit h = ray(ax, ay, az, dx, dy, dz, d, false, leaves);
+        if (d < 1e-4f) { int x = (int) Math.floor(ax), y = (int) Math.floor(ay), z = (int) Math.floor(az); return !solid(x, y, z) || throughFurniture && furnitureCells != null && furnitureCells.test(cellKey(x, y, z)); }
+        Hit h = ray(ax, ay, az, dx, dy, dz, d, false, leaves, throughFurniture);
         return !h.hit || h.dist >= d;
     }
 

@@ -1,0 +1,25 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 00:31:22 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 15.41s ({regions=861, overlays=526, variants=293, scarp=58, coast=402, erosion=368, peaks=54, lakes=79, isles=5, rivers=582, wadis=13, ground=20, roads=647, causeways=4, architecture=654, pitsFilled=1383, pits=587, banks=48, clamp=14, cliffs=50, columns=1125, falls=24, raise=8158, trees=240, outcrops=0, ways=560}), made and lit in 1.63s
+[Load] ShadowVeil 17.12s
+[Load] renderer and UI 2.57s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 35 chunks made, 29 meshes, 0.65s
+[Load] 215 furniture models made in 0.10s
+[Load] first rendered frame 5.54s
+[Load] the world about the spawn made ready in 8.53s
+[Load] game frame 1: scene 8 ms, interface 873 ms, render 25 ms
+[Load] game frame 2: scene 7 ms, interface 6 ms, render 5 ms
+[Load] game frame 3: scene 4 ms, interface 4 ms, render 5 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\vis2\at-20-520-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\vis2\at-20-520-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\vis2\at-20-520-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\vis2\at-20-520-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\vis2\at-20-520-top.png

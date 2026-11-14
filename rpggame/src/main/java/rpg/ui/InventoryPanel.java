@@ -195,6 +195,9 @@ final class InventoryPanel extends Fragment {
             if (!live || drag != null) continue;
             if (ui.hover(ix, iy, iw, ih)) {
                 hovered = s;
+                // (0.4.6, gamefixes: items could not be turned) R over an item - pointed at, or pressed and not yet dragged
+                // - turns it where it lies, if there is room for it turned there (or at another corner of its own space)
+                if (hud.rotate && src != Source.SHOP && s.def.gw != s.def.gh) { if (turnInPlace(inv, i)) hud.sound("UIbutton2", 0.25f); else hud.g.chat.warn("There is no room to turn the " + s.def.name.toLowerCase() + " there."); hud.rotate = false; }
                 ui.border(ix, iy, iw, ih, 1, Style.EDGE_HI);
                 hud.tooltip(hud.describe(s) + hint(src));
                 if (ui.click && !ui.consumed) { ui.consumed = true; pressSource = src; pressGrid = inv; pressSlot = i; pressX = ui.mx; pressY = ui.my; }
@@ -339,6 +342,21 @@ final class InventoryPanel extends Fragment {
         Rpg g = hud.g;
         Result r = g.econ.sell(g.player, d.grid, hud.shop, d.slot, d.stack.amount, g.state.newRequestId());
         if (r.rejected()) g.chat.warn(r.reason());
+    }
+
+    /** Turns an item where it lies: kept at its corner if it fits turned, else at the nearest corner within its old space that does. */
+    private static boolean turnInPlace(Inventory inv, int i) {
+        ItemStack s = inv.get(i);
+        if (s == null) return false;
+        boolean t = !inv.turned(i);
+        int x0 = inv.x(i), y0 = inv.y(i), w = Inventory.fw(s.def, !t), h = Inventory.fh(s.def, !t), nw = Inventory.fw(s.def, t), nh = Inventory.fh(s.def, t);
+        java.util.List<int[]> tries = new java.util.ArrayList<>();
+        for (int dy = 0; dy <= Math.max(0, h - nh) + Math.max(0, nh - 1); dy++) for (int dx = 0; dx <= Math.max(0, w - nw) + Math.max(0, nw - 1); dx++) {
+            tries.add(new int[]{x0 + dx, y0 + dy}); tries.add(new int[]{x0 - dx, y0 - dy});
+        }
+        tries.sort(java.util.Comparator.comparingInt(c -> Math.abs(c[0] - x0) + Math.abs(c[1] - y0)));
+        for (int[] c : tries) if (c[0] >= 0 && c[1] >= 0 && inv.fits(s.def, c[0], c[1], t, i) && inv.move(i, c[0], c[1], t)) return true;
+        return false;
     }
 
     /** Called once all fragments have drawn: the held item follows the mouse; a release lands it. */

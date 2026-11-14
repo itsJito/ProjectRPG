@@ -1,0 +1,33 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+StationAuditProbeTest > audit() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.60s ({regions=884, overlays=516, variants=602, scarp=54, coast=587, erosion=338, peaks=48, lakes=66, isles=4, rivers=1235, wadis=13, ground=20, roads=608, causeways=3, architecture=934, pitsFilled=1309, pits=466, banks=87, clamp=18, cliffs=63, columns=1168, falls=17, raise=10869, trees=332, outcrops=0, ways=622}), made and lit in 2.31s
+    [water] flow field grown in 1762 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [stations] 0 of 511 stations under the open sky
+  slow: rpg.probe.StationAuditProbeTest.audit() 34.817 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 40s
+9 actionable tasks: 2 executed, 7 up-to-date

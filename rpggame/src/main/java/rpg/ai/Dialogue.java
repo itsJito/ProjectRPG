@@ -79,10 +79,10 @@ public final class Dialogue {
                     d.choice("Offer a loaf of bread.", () -> g.interact.request(g.player, n, "give_bread"));
             }
             case HEALER -> tip = tip(n, "Where can I find supplies?", "A good meal mends more than you'd think - bread, a cooked fish, anything hot. I carry what I can for the hurt, but it never stretches far. If you come across herbs or berries, the store will pay for them, and I'd thank you for any you spare.");
-            case PRIEST -> tip = tip(n, "Who tends the dead?", "The watch carries the fallen to these stones. Morrow keeps the belongings safe. Even a criminal deserves a name and a resting place.");
+            case PRIEST -> tip = tip(n, "Who tends the dead?", "The watch carries the fallen to these stones. The undertaker keeps the belongings safe. Even a criminal deserves a name and a resting place.");
             case SCHOLAR -> tip = tip(n, "Where can I sell questionable goods?", "Silas keeps a quiet nook behind Store B, in DevTown. He buys stolen goods, at a price. I would keep that conversation away from the watch.");
             case HUNTER -> tip = tip(n, "Any advice for the wilderness?", "Keep clear of a predator's kill. Feed brings the herd together, and blood brings the scavengers. A horse won't pick a fight unless you hurt it.");
-            case CIVIC -> { if (n.id == Ids.TELLER) g.bank.choices(n, d); }
+            case CIVIC -> { if (g.bank.isTeller(n)) g.bank.choices(n, d); }
             case THIEF -> tip = tip(n, "Got anything for me?", "Psst. Stalls are easy when nobody's looking. The trick is that nobody's looking.");
             default -> { }
         }
@@ -222,10 +222,19 @@ public final class Dialogue {
         java.util.List<Object[]> l = new java.util.ArrayList<>();
         if (g.econ.shopA != null) l.add(new Object[]{"the store", g.econ.shopA.counterX, g.econ.shopA.counterZ});
         if (g.econ.shopB != null) l.add(new Object[]{"the store", g.econ.shopB.counterX, g.econ.shopB.counterZ});
-        l.add(new Object[]{"the bank", g.bank.tellerSpot()[0], g.bank.tellerSpot()[1]});
+        // (0.4.4) every branch of the bank, every church's altar, every jail (ShadowVeil's own)
+        for (var b : g.bank.branches()) l.add(new Object[]{"the bank", b.customerSpot()[0], b.customerSpot()[1]});
+        if (rpg.world.WorldMap.shadowveil()) {
+            for (var a : g.objects.altars()) l.add(new Object[]{"an altar", a.x, a.z});
+            for (var cells : rpg.world.shadowveil.Rooms.cells().values()) if (!cells.isEmpty()) l.add(new Object[]{"the jail", cells.get(0).releaseX(), cells.get(0).releaseZ()});
+            return withPeople(l);
+        }
         l.add(new Object[]{"an altar", rpg.world.DevMap.ALTAR[0] + 0.5f, rpg.world.DevMap.ALTAR[1] + 0.5f});
         l.add(new Object[]{"an altar", rpg.world.Expanse.ALTAR[0], rpg.world.Expanse.ALTAR[1]});
         l.add(new Object[]{"the well", rpg.world.DevMap.WELL[0] + 0.5f, rpg.world.DevMap.WELL[1] + 0.5f});
+        return withPeople(l);
+    }
+    private java.util.List<Object[]> withPeople(java.util.List<Object[]> l) {
         for (Npc o : g.npcs) {
             if (!o.alive) continue;
             if (o.role == Npc.Role.LAWMAN) l.add(new Object[]{"the watch", o.postX, o.postZ});
@@ -511,7 +520,9 @@ public final class Dialogue {
             case MINER -> pick(n, "There's ore in the hills, if you've the back for it.", "A good pick is worth more than a good friend. Some days.", "The rock gives up nothing without a fight.");
             case CRAFTSMAN -> pick(n, "Bring me the stock and I'll bring you the work.", "Every tool on this bench has a story. Most of them involve my thumbs.", "Good work outlasts the hands that made it.");
             case KNIGHT -> pick(n, "Keep your blade clean and your word cleaner.", "There's a road to watch. There always is.", "I serve. That's the whole of it.");
-            case CIVIC -> g.bank.open() ? pick(n, "Welcome to the Bank of ASHENWRATH. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
+            // (0.4.4) a banker speaks for the bank; the rest of the civic folk (lords, stewards, clerks) for their own business
+            case CIVIC -> !g.bank.isTeller(n) ? pick(n, "Good day. Is there business you've come about?", "Speak plainly; the day has enough in it already.", "If it's a petition, it goes through the proper hands.")
+                    : g.bank.open(n) ? pick(n, "Welcome to the Bank of ASHENWRATH. How may I help?", "Deposits, withdrawals, a new vault? Step up to the counter.", "Good day. Your things are safe with us.")
                     : pick(n, "We're closed just now. Come back when I'm at the counter.", "The counter's shut. The vaults aren't going anywhere.", "Banking hours are over. Your coin is sleeping, as I'd like to be.");
             case SCHOLAR -> pick(n, "A story is only as sound as its witness.", "I collect accounts, not certainties. What have you seen?", "Everyone in this town has a version. I like to compare them.");
             case BRUTE -> pick(n, "What? Speak up, then.", "Don't crowd me.", "I've nothing to say to you. Move on.");
@@ -710,7 +721,7 @@ public final class Dialogue {
             case "WagesPaid" -> e.subject() == n.id ? "Wages today. Not a fortune, but honest." : null;
             case "MealServed" -> pick(n, "The cook up at the big house laid on a fine dinner, I hear.", "Smell that? Someone's had a proper meal.");
             case "FireLit" -> pick(n, "They've got the fires going at the house. Warm in there.", "Smoke's up from the chimney - someone's lit a fire.");
-            case "BodyBuried" -> "Morrow laid " + pl.replace("'s body", "") + " to rest.";
+            case "BodyBuried" -> (e.actor() == 0 ? "The undertaker" : g.nameOf(e.actor())) + " laid " + pl.replace("'s body", "") + " to rest.";
             case "AnimalBorn" -> "There's a new " + (pl.contains("foal") ? "foal" : pl.contains("calf") ? "calf" : pl.contains("lamb") ? "lamb" : "young one") + " up at the farm.";
             case "ShipmentDelivered" -> "The caravan came in. The store should have stock again.";
             case "GlassBroken" -> pick(n, "Someone put a window through. Glass all over the street.", "Did you hear the crash? A pane went.");
@@ -750,7 +761,7 @@ public final class Dialogue {
             if (j != null && !j.equals(n.homeJurisdiction)) continue;
             String pl = e.payload() == null ? "" : e.payload();
             String line = switch (e.type()) {
-                case "BodyBuried" -> "Morrow laid " + pl.replace("'s body", "") + " to rest.";
+                case "BodyBuried" -> (e.actor() == 0 ? "The undertaker" : g.nameOf(e.actor())) + " laid " + pl.replace("'s body", "") + " to rest.";
                 case "AnimalBorn" -> "There's a new " + (pl.contains("foal") ? "foal" : pl.contains("calf") ? "calf" : pl.contains("lamb") ? "lamb" : "young one") + " up at the farm.";
                 case "MountTamed" -> g.nameOf(e.actor()) + " broke in a " + pl.toLowerCase() + ". Rode it right through town.";
                 case "AlarmRaised" -> "Somebody saw a " + pl.split(" sighted")[0].toLowerCase() + ".";

@@ -1,0 +1,139 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 23.16s ({regions=872, overlays=580, variants=496, scarp=47, coast=442, erosion=483, peaks=60, lakes=78, isles=5, rivers=832, wadis=15, ground=19, roads=743, causeways=3, architecture=973, pitsFilled=1405, pits=420, banks=63, clamp=12, cliffs=45, columns=1078, falls=18, raise=14832, trees=334, outcrops=0, ways=665}), made and lit in 1.90s
+    [water] flow field grown in 943 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [life] stop 244,928 done (30 people seen so far)
+    [life] stop 590,884 done (34 people seen so far)
+    [life] stop 119,749 done (54 people seen so far)
+    [life] stop 591,1023 done (56 people seen so far)
+    [life] stop 898,870 done (92 people seen so far)
+    [life] stop 357,772 done (96 people seen so far)
+    [life] stop 160,604 done (115 people seen so far)
+    [life] stop 571,593 done (116 people seen so far)
+    [life] stop 198,436 done (120 people seen so far)
+    [life] stop 551,109 done (150 people seen so far)
+    [life] stop 378,410 done (166 people seen so far)
+    [life] stop 825,385 done (183 people seen so far)
+    [life] stop 877,91 done (185 people seen so far)
+    [life] stop 864,554 done (188 people seen so far)
+    [life] stop 215,286 done (190 people seen so far)
+          [crime] ASSAULT by Garmund against world life at (828.5, 691.7), t 601.9
+          [crime] ASSAULT by Hurk against world life at (827.7, 693.5), t 602.3
+          [crime] ASSAULT by Wenna against world life at (829.5, 692.3), t 602.3
+          [crime] ASSAULT by Vark against world life at (828.8, 691.2), t 602.3
+          [crime] ASSAULT by Grisel against world life at (829.9, 692.1), t 602.5
+          [crime] ASSAULT by Rask against world life at (827.5, 692.3), t 603.1
+          [crime] ASSAULT by Hullen against world life at (827.6, 691.6), t 605.0
+          [crime] ASSAULT by Vark against world life at (828.4, 691.1), t 613.4
+          [crime] ASSAULT by Wenna against world life at (829.6, 693.5), t 613.8
+          [crime] ASSAULT by Hurk against world life at (827.2, 692.4), t 614.6
+          [crime] ASSAULT by Grisel against world life at (829.7, 691.4), t 614.6
+          [crime] ASSAULT by Rask against world life at (827.5, 691.5), t 614.8
+          [crime] ASSAULT by Hullen against world life at (827.3, 692.3), t 618.5
+          [crime] ASSAULT by Sigrun against world life at (824.0, 689.5), t 619.1
+          [crime] ASSAULT by Garmund against world life at (828.5, 691.3), t 621.7
+          [crime] ASSAULT by Grisel against world life at (829.6, 691.3), t 624.8
+          [crime] ASSAULT by Wenna against world life at (829.8, 691.2), t 625.5
+          [crime] ASSAULT by Hurk against world life at (827.5, 691.5), t 626.2
+          [crime] ASSAULT by Hullen against world life at (827.4, 692.6), t 628.8
+          [crime] ASSAULT by Vark against world life at (828.5, 691.0), t 629.2
+          [crime] ASSAULT by Sigrun against world life at (823.8, 690.2), t 630.5
+          [crime] ASSAULT by Garmund against world life at (827.8, 691.3), t 634.2
+          [crime] ASSAULT by Wenna against world life at (827.6, 691.5), t 637.3
+          [crime] ASSAULT by Grisel against world life at (829.7, 691.4), t 637.9
+          [crime] ASSAULT by Hurk against world life at (827.3, 692.5), t 639.7
+    [life] stop 829,692 done (198 people seen so far)
+    [life] stop 768,985 done (200 people seen so far)
+    [life] stop 450,34 done (209 people seen so far)
+    [life] stop 432,169 done (219 people seen so far)
+    [life] stop 176,131 done (222 people seen so far)
+    [life] stop 984,391 done (223 people seen so far)
+    [life] stop 720,481 done (224 people seen so far)
+
+    [life] 22 stops of 2400 frames; 224 people seen
+      Ealdra           MERCHANT     seen   380 spins   0 blocked     0 still   276
+          last (258.5,39.0,926.2) SLEEP: on the way
+      Lucan            LAWMAN       seen   380 spins   0 blocked     0 still    83
+          last (90.5,47.0,719.3) PATROL: on the way
+      Father Paul      PRIEST       seen   380 spins   0 blocked     0 still    80
+          last (874.0,34.0,51.3) PRAY: on the way to prayers
+      Alexios          CRAFTSMAN    seen  1016 spins   2 blocked     0 still     0
+          spun at (476.4,36.0,114.9) WORK: Carpenter: make the selected order
+      Einar            WORKER       seen   380 spins   2 blocked     0 still     0
+          spun at (325.5,66.0,399.5) WORK: Firewood Cutter: gather at a suitable site
+      Leofric          WORKER       seen   380 spins   0 blocked     0 still    55
+          last (303.7,40.0,909.5) SLEEP: on the way
+      King Richard     CIVIC        seen   380 spins   0 blocked     0 still   265
+          last (228.5,40.0,986.7) SOCIALIZE: on the way
+      Alaric           PRIEST       seen   380 spins   1 blocked     0 still     0
+          spun at (217.3,39.0,897.9) SOCIALIZE: 
+      Munir            CARTER       seen   380 spins   2 blocked     0 still     0
+          spun at (833.5,37.0,840.5) WORK: taking a load to Materials stall
+      Duke Edran       CIVIC        seen   380 spins   0 blocked     0 still   111
+          last (140.5,57.0,605.3) PRAY: on the way to prayers
+      Runa             CARTER       seen   380 spins   2 blocked     0 still     0
+          spun at (405.5,56.0,403.5) WORK: taking a load to Materials stall
+      Varek            SCHOLAR      seen   380 spins   0 blocked     0 still    86
+          last (80.3,47.8,717.5) PRAY: on the way to prayers
+      Mother Mirel     PRIEST       seen   380 spins   4 blocked    98 still     1
+          spun at (106.5,43.0,728.5) PRAY: paused to reconsider a blocked route
+          last (106.5,43.0,728.5) PRAY: paused to reconsider a blocked route
+      Lothar           GUARD        seen   380 spins   2 blocked   124 still     0
+          spun at (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+          last (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   380 spins   4 blocked   128 still     4
+          spun at (324.7,64.0,367.6) WORK: paused to reconsider a blocked route
+          last (324.7,64.0,367.6) WORK: paused to reconsider a blocked route
+      Haskel           MINER        seen   650 spins   3 blocked     0 still     0
+          spun at (155.7,59.0,543.7) WANDER: 
+      never in play: Orrin CRAFTSMAN home (369,654)
+    [life] 16 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 557.284 s
+
+WorldLifeProbeTest > life() FAILED
+    java.util.concurrent.TimeoutException: life() timed out after 9 minutes
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+1 test completed, 1 failed
+
+> Task :probe FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':probe'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/probe/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9m 23s
+9 actionable tasks: 1 executed, 8 up-to-date

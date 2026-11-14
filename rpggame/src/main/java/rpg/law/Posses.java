@@ -130,7 +130,8 @@ public final class Posses {
         for (int i = 0; i < m.hunters(); i++) {
             float ox = (i % 3 - 1) * 1.3f, oz = (i / 3) * 1.3f;
             if (!open(at[0] + ox, at[1] + oz)) { ox = 0; oz = 0; }
-            Npc n = new Npc(g.state.newEntityId(), "Bounty hunter", Npc.Role.HUNTER, "Bounty Hunter", at[0] + ox, at[1] + oz);
+            long hid = g.state.newEntityId();
+            Npc n = new Npc(hid, rpg.ai.Names.drawn(hid, false), Npc.Role.HUNTER, "Bounty Hunter", at[0] + ox, at[1] + oz);
             Profession.BOUNTY_HUNTER.assign(n);
             n.homeJurisdiction = kingdom; n.posse = true; n.hostileToPlayer = false; n.aggroRange = 30;
             n.skills.setLevel(Skill.ATTACK, level); n.skills.setLevel(Skill.STRENGTH, level); n.skills.setLevel(Skill.DEFENSE, level);

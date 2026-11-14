@@ -118,9 +118,82 @@ public final class Animals {
         southWood = new Habitat("south_wood", "the southern wood", rpg.world.Expanse.WOOD_X0 + 2, rpg.world.Expanse.WOOD_Z0 + 2, rpg.world.Expanse.WOOD_X1 - 2, rpg.world.Expanse.WOOD_Z1 - 2, 0, brook, glades)
                 .cap(Species.DEER, 12).cap(Species.BROWN_BEAR, 2).cap(Species.RABBIT, 8).cap(Species.FOX, 2).cap(Species.DIRE_WOLF, 2);
         // (0.4.0) on ShadowVeil each habitat moves whole to the wild the design gives it (rpg.world.shadowveil.Settle)
-        if (rpg.world.WorldMap.shadowveil()) { wild = moved(wild); farm = moved(farm); southWood = moved(southWood); }
+        // (0.4.3, gamefixes: wildlife throughout the world, no predators near the towns) the farm's stock moves to its
+        // stables; the devmap's two woods do not come (their wolves and lions were set down beside Loxford) - the wild's
+        // own habitats are grown over the whole map from its biomes instead (wilds())
+        if (rpg.world.WorldMap.shadowveil()) { farm = moved(farm); habitats.add(farm); wild = null; southWood = null; wilds(); return; }
         habitats.add(wild); habitats.add(farm); habitats.add(southWood);
     }
+    /** (0.4.3) ShadowVeil's wild habitats' starting groups: {habitat, species, females, males, young, {x, z}}. */
+    private final List<Object[]> wildGroups = new ArrayList<>();
+    /**
+     * (0.4.3) The wild's habitats over all of ShadowVeil, from the design's 'fauna.wilds': a point every so many cells, its
+     * biome's groups each by its chance; prey clear of every building, predators only where no kingdom's law holds and far
+     * from any settlement. Each habitat drinks at the nearest bank and rests about its middle.
+     */
+    private void wilds() {
+        var a = rpg.world.shadowveil.Atlas.get();
+        java.util.Map<String, Object> w = rpg.world.shadowveil.Atlas.map(a.map("fauna"), "wilds");
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (t == null || w.isEmpty()) return;
+        int grid = rpg.world.shadowveil.Atlas.i(w, "grid", 72), size = rpg.world.shadowveil.Atlas.i(w, "size", 40);
+        java.util.Map<String, Object> clear = rpg.world.shadowveil.Atlas.map(w, "clearance"), biomes = rpg.world.shadowveil.Atlas.map(w, "biomes");
+        float preyClear = (float) rpg.world.shadowveil.Atlas.d(clear, "prey", 36), predClear = (float) rpg.world.shadowveil.Atlas.d(clear, "predator", 170);
+        List<float[]> built = new ArrayList<>(), settled = new ArrayList<>();
+        if (t.arch != null) for (var st : t.arch.structures) {
+            built.add(new float[]{st.cx(), st.cz()});
+            if (!DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(st.cx(), st.cz()))) settled.add(new float[]{st.cx(), st.cz()});
+        }
+        // every census home counts as a settlement's too (the farms and halls outside the kingdoms' cores)
+        for (var as : rpg.world.shadowveil.Census.all().values()) if (as.homeStage() != null && !"Wilds".equals(as.kingdom())) settled.add(as.homeStage());
+        int k = 0;
+        for (int x = grid / 2; x < t.S - 8; x += grid) for (int z = grid / 2; z < t.S - 8; z += grid) {
+            // a little off the grid, so the habitats do not stand in rows
+            float px = x + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 91) - 0.5) * grid * 0.6), pz = z + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 92) - 0.5) * grid * 0.6);
+            float[] p = rpg.world.shadowveil.ShadowVeil.dry(px, pz);
+            int i = t.idx((int) p[0], (int) p[1]);
+            if (t.water[i] >= 0) continue;
+            List<?> groups = rpg.world.shadowveil.Atlas.arr(biomes, t.biomeAt((int) p[0], (int) p[1]));
+            if (groups.isEmpty()) continue;
+            float nearBuilt = nearest(built, p), nearSettled = nearest(settled, p);
+            boolean wildsLaw = DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(p[0], p[1]));
+            if (nearBuilt < preyClear) continue;
+            List<Object[]> here = new ArrayList<>();
+            for (Object o : groups) {
+                List<?> gr = (List<?>) o;
+                Species sp;
+                try { sp = Species.valueOf(String.valueOf(gr.get(0))); } catch (IllegalArgumentException e) { continue; }
+                if (sp.predator() && (!wildsLaw || nearSettled < predClear)) continue;
+                double chance = rpg.world.shadowveil.Atlas.dn(gr.get(4)) / 100.0;
+                if (rpg.world.shadowveil.Noise.hash(a.seed, x, z, 93 + sp.ordinal()) >= chance) continue;
+                here.add(new Object[]{sp, rpg.world.shadowveil.Atlas.n(gr.get(1)), rpg.world.shadowveil.Atlas.n(gr.get(2)), rpg.world.shadowveil.Atlas.n(gr.get(3))});
+            }
+            if (here.isEmpty()) continue;
+            int[] drink = rpg.world.shadowveil.ShadowVeil.fishingSpot(p[0], p[1]);
+            float[][] water = drink == null || Math.hypot(drink[0] - p[0], drink[1] - p[1]) > size ? new float[0][] : bank(drink);
+            float[][] rest = new float[4][];
+            for (int r = 0; r < 4; r++) rest[r] = rpg.world.shadowveil.ShadowVeil.dry(p[0] + (float) Math.cos(r * 1.57 + 0.4) * size * 0.3f, p[1] + (float) Math.sin(r * 1.57 + 0.4) * size * 0.3f);
+            Habitat h = new Habitat("wild_" + k++, "the wild (" + t.biomeAt((int) p[0], (int) p[1]) + ")", p[0] - size / 2f, p[1] - size / 2f, p[0] + size / 2f, p[1] + size / 2f, 0, water, rest);
+            for (Object[] gr : here) h.cap((Species) gr[0], Math.max(2, ((int) gr[1] + (int) gr[2] + (int) gr[3]) * 2));
+            habitats.add(h);
+            for (Object[] gr : here) wildGroups.add(new Object[]{h, gr[0], gr[1], gr[2], gr[3], p});
+        }
+    }
+    private static float nearest(List<float[]> pts, float[] p) {
+        float best = Float.MAX_VALUE;
+        for (float[] q : pts) best = Math.min(best, (float) Math.hypot(q[0] - p[0], q[1] - p[1]));
+        return best;
+    }
+    /** Drinking spots on the dry bank beside a water cell, facing it. */
+    private static float[][] bank(int[] water) {
+        List<float[]> l = new ArrayList<>();
+        for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+            float[] b = rpg.world.shadowveil.ShadowVeil.dry(water[0] + d[0] * 2 + 0.5f, water[1] + d[1] * 2 + 0.5f);
+            if (Math.hypot(b[0] - water[0], b[1] - water[1]) < 5) l.add(new float[]{b[0], b[1], (float) Math.atan2(-(water[0] + 0.5f - b[0]), -(water[1] + 0.5f - b[1]))});
+        }
+        return l.toArray(new float[0][]);
+    }
+
     /** Set while the starting roster is placed (its spots are the devmap's). */
     private boolean rostering;
     /** How far each habitat was moved to ShadowVeil (the devmap's spots in its roster move with it). */
@@ -155,6 +228,13 @@ public final class Animals {
         Animal pup = spawnNew(Species.DOG, true, false, 101.5f, 107.5f, farm, herd++, dog.id);
         pup.trust.put(Ids.FARMER, 1f);
         herd = group(farm, Species.CAT, herd, new float[]{115, 118}, 1, 0, 1);
+        if (wild == null) {
+            // (0.4.3) ShadowVeil: each wild habitat's own groups at its middle (the farm's stock above, a town cat below)
+            for (Object[] gr : wildGroups) herd = groupAt((Habitat) gr[0], (Species) gr[1], herd, (float[]) gr[5], (int) gr[2], (int) gr[3], (int) gr[4]);
+            spawnNew(Species.CAT, false, true, 99.5f, 78.5f, null, herd++, 0).range = 9;
+            for (Habitat h : habitats) h.count("starting", count(h));
+            return;
+        }
         // the wood
         herd = group(wild, Species.RABBIT, herd, new float[]{14, 22}, 2, 2, 2);
         herd = group(wild, Species.RABBIT, herd, new float[]{34, 30}, 1, 1, 0);
@@ -180,6 +260,25 @@ public final class Animals {
         // a town cat, nobody's
         spawnNew(Species.CAT, false, true, 99.5f, 78.5f, null, herd++, 0).range = 9;
         for (Habitat h : habitats) h.count("starting", count(h));
+    }
+
+    /** (0.4.3) A group set down where its habitat really is (no devmap spot to carry over). */
+    private long groupAt(Habitat h, Species s, long id, float[] at, int females, int males, int young) {
+        Animal mother = null;
+        for (int i = 0; i < females + males; i++) {
+            float[] p = rpg.world.shadowveil.ShadowVeil.dry(at[0] + (i % 3) * 1.4f - 1.4f, at[1] + (i / 3) * 1.5f - 0.7f);
+            Animal a = spawnNew(s, false, i < females, p[0], p[1], h, id, 0);
+            a.homeX = at[0]; a.homeZ = at[1]; a.range = s.predator() || s == Species.BROWN_BEAR ? 18 : 12;
+            if (i < females && mother == null) mother = a;
+        }
+        for (int i = 0; i < young; i++) {
+            float[] p = rpg.world.shadowveil.ShadowVeil.dry(at[0] + 1.2f + i * 0.7f, at[1] + 1.4f);
+            Animal b = spawnNew(s, true, i % 2 == 0, p[0], p[1], h, id, mother == null ? 0 : mother.id);
+            b.bornAt = g.state.minutes - s.mature * (0.2f + 0.15f * i);
+            b.matureAt = b.bornAt + s.mature;
+            b.homeX = at[0]; b.homeZ = at[1]; b.range = 12;
+        }
+        return id + 1;
     }
 
     /** A group: so many adult females and males (the first female the mother of the young), and young. Returns the next group id. */
@@ -232,7 +331,7 @@ public final class Animals {
         a.yaw = (float) ((a.id * 1.7) % (2 * Math.PI));
         if (s.domestic && a.owned()) a.trust.put(a.owner, 1f);
         a.nextThink = g.time + Math.floorMod(a.id * 73, 200) / 1000.0;
-        nextSense.put(a.id, g.time + Math.floorMod(a.id * 97, 200) / 1000.0);
+        a.nextSenseAt = g.time + Math.floorMod(a.id * 97, 200) / 1000.0;
         animals.add(a);
         spawnBody(a);
         return a;
@@ -247,6 +346,7 @@ public final class Animals {
         a.y = rpg.world.WorldMap.settleY(a.x, rpg.world.WorldMap.devmap() ? rpg.world.Ground.at(a.x, a.z) : a.y, a.z);
         c.moverCreate(a.body, a.x, a.y + 0.05f, a.z, a.radius, a.height, Math.min(0.6f, a.height * 0.45f), MOVER_AGENT, a.height);
         a.slow = a.baby;
+        a.sentRate = -1;
         c.agentCreate(a.agent, policies.get(a.species)[a.baby ? 1 : 0], a.body, 0, 0, 0, a.eyeY() - a.y, 18, 0.25f, 20, a.team, astratto.ai.AgentDomain.ANIMAL.flags | astratto.bridge.AstrattoNative.AGENT_NO_LADDERS | (a.species.swims ? astratto.bridge.AstrattoNative.AGENT_SWIMS : 0), (int) a.id * 7919);
         c.moverInput(a.body, 0, 0, 0, 0, a.species.plan == Species.Plan.BIRD ? 18 : 10, 0);
         java.util.Arrays.fill(a.facts, -1);
@@ -365,6 +465,11 @@ public final class Animals {
     public int count(Habitat h, Species s) { int n = 0; for (Animal a : animals) if (a.alive && a.home == h && a.species == s) n++; for (Nest ne : nests) if (!ne.done && ne.species == s && h.contains(ne.x, ne.z)) n += 0; return n + h.cohortCount(s); }
     public int living() { int n = 0; for (Animal a : animals) if (a.alive) n++; for (Habitat h : habitats) n += h.cohortTotal(); return n; }
 
+    /** (0.4.4) Whether any young of its kind near it was struck by someone in the last so many seconds. */
+    boolean youngHurtBy(Animal a, rpg.actor.Actor by, float seconds) {
+        for (Animal o : live()) if (o.baby && o.species == a.species && o.distTo(a) < 14 && o.cs.lastAttacker == by.id && g.time - o.cs.lastHurt < seconds) return true;
+        return false;
+    }
     /** How sharp its eyes are now: the species' own, dimmed when it lies resting. */
     float acuity(Animal a) { return a.species.acuity * (a.atRest ? 0.35f : 1f) * (a.baby ? 0.8f : 1f); }
 
@@ -557,6 +662,10 @@ public final class Animals {
     /** Heads somewhere (the engine searches the route); true once within reach of it. */
     boolean goTo(Animal a, float x, float z, boolean run, float within) {
         if (Math.hypot(a.x - x, a.z - z) <= within) { desire(a, AnimalMind.A_HOLD); return true; }
+        // (0.4.2, aggressive optimization: a fox or a lion after something it could never reach searched to the cap and
+        // searched again, a second at a time, all day) a goal given up on stays given up for a while: the beast stands
+        // and its mind finds something else to want, rather than the search being run again and again
+        if (!Float.isNaN(a.giveUpX) && g.time < a.giveUpUntil && Math.hypot(a.giveUpX - x, a.giveUpZ - z) < GIVE_UP_NEAR) { desire(a, AnimalMind.A_HOLD); return false; }
         if (!a.routed || Math.hypot(a.rx - x, a.rz - z) > 0.4) {
             a.rx = x; a.rz = z; a.routed = true;
             g.game.commands().agentGoal(a.agent, x, rpg.world.Ground.at(x, z), z);
@@ -566,23 +675,49 @@ public final class Animals {
     }
 
     // ------------------------------------------------------------------ the frame
-    private final Map<Long, Double> nextSense = new java.util.HashMap<>();
+
+    /** (0.4.4) Beyond this (cells, x plus z) from the player an animal senses once a second. */
+    static final float FAR_SENSE = rpg.Tuning.f("animals.farSense", 160f);
+
+    private final List<Animal> tickList = new ArrayList<>();
+    /**
+     * (0.4.6, gamefixes: horses' and the Pegasus's footfalls) a horse's hooves near the player: four to a stride, each
+     * struck on the ground it is on (a shod hoof rings on cobbles, drums on a bridge), a walk's slow beat, a gallop's
+     * quick one; none in the air.
+     */
+    private void hooves(Animal a, float dt) {
+        if (g.sfx == null || a.species != rpg.animal.Species.HORSE && a.species != rpg.animal.Species.PEGASUS) return;
+        float speed = (float) Math.hypot(a.vx, a.vz);
+        if (!a.grounded || speed < 0.4f || a.distTo(g.player) > HOOF_HEARD) { a.hoofClock = 0.5f; return; }
+        // strides a second rise with the pace and level off at the gallop; four footfalls a stride
+        a.hoofClock += dt * 4 * Math.min(2.4f, 0.55f + speed * 0.16f);
+        if (a.hoofClock >= 1) { a.hoofClock -= 1; g.sfx.footstep(a, Math.min(1, speed / 9f)); }
+    }
+    static final float HOOF_HEARD = rpg.Tuning.f("audio.hoofHeard", 30f);
 
     public void update(float dt) {
         float dm = (float) (dt * g.minuteRate());
-        for (Animal a : new ArrayList<>(animals)) {
+        // (0.4.5, optimisation) the herd walked over a reused copy (one may die or be born during the walk), and each
+        // body's pace sent to the engine only when it changes
+        tickList.clear(); tickList.addAll(animals);
+        for (Animal a : tickList) {
             if (a.ragdoll != null) ragdollTick(a);
             if (!a.alive) { carcass(a); continue; }
             if (!a.loaded) continue;
-            g.game.commands().agentRate(a.agent,a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1)*waterPace(a));
+            hooves(a, dt);
+            float rate = a.cs.frozenT>0?0.001f:a.actionRate()*(a.cs.slowT>0?0.6f:1)*waterPace(a);
+            if (rate != a.sentRate) { a.sentRate = rate; g.game.commands().agentRate(a.agent, rate); }
             if (a.ragdoll != null) { desire(a, AnimalMind.A_HOLD); continue; }   // off its feet: no mind until it is up
             if (a.trappedBy!=0 && g.objects.get(a.trappedBy) instanceof rpg.objects.Trap trap && !trap.removed && !trap.contents.isEmpty()) { desire(a,AnimalMind.A_HOLD); continue; }
             a.trappedBy=0;
             if (a.puppet) { face(a, dt); continue; }
             // (0.3.0) ridden: the rider's controls move it (Riding), not its own mind
             if (a.rider != 0) { desire(a, AnimalMind.A_HOLD); continue; }
-            double due = nextSense.getOrDefault(a.id, 0.0);
-            if (g.time >= due) { mind.sense(a, (float) Math.min(0.5, g.time - due + 0.2)); nextSense.put(a.id, g.time + 0.2); }
+            double due = a.nextSenseAt;
+            // (0.4.4, optimisation) a beast far from the player (a farm's herd across the map) looks about once a second, not
+            // five times: nothing it could see there is the player's to notice, and its mind still keeps its day
+            float beat = a.goal != Goal.HUNT && a.goal != Goal.DEFEND && a.goal != Goal.FLEE && Math.abs(a.x - g.player.x) + Math.abs(a.z - g.player.z) > FAR_SENSE ? 1.0f : 0.2f;
+            if (g.time >= due) { mind.sense(a, (float) Math.min(beat + 0.3f, g.time - due + beat)); a.nextSenseAt = g.time + beat; }
             if (g.time >= a.nextThink) { mind.think(a); thinks++; }
             if (a.goal != Goal.HUNT) a.sneaking = false;
             // spent: an exhausted animal can only manage its young's pace until it recovers
@@ -627,8 +762,44 @@ public final class Animals {
             if (!a.alive || !a.loaded || a.rider != 0) continue;
             Snapshots.Mover m = bodies.mover(a.body);
             if (m != null) { a.x = m.x; a.y = m.y; a.z = m.z; a.vx = m.vx; a.vz = m.vz; a.grounded = m.grounded; }
+            if (m != null) offTheRail(a);
+            Snapshots.Agent ag = agents == null ? null : agents.agent(a.agent);
+            // (each new search counted once, as it is reported)
+            if (ag != null && a.routed && ag.repaths != a.lastRepaths) {
+                a.lastRepaths = ag.repaths;
+                if (ag.capped && ag.partial) { if (++a.cappedRoutes >= GIVE_UP_AFTER) { a.giveUpX = a.rx; a.giveUpZ = a.rz; a.giveUpUntil = g.time + GIVE_UP_FOR; a.cappedRoutes = 0; a.routed = false; } }
+                else if (!ag.capped) a.cappedRoutes = 0;
+            }
         }
     }
+    /**
+     * (0.4.4, gamefixes: animals could get up onto fences) a beast found standing on a fence, a jail's bars or a hedge -
+     * nothing it can stand on - is set down on the open ground beside it (the lower side first), and goes on from there.
+     */
+    private void offTheRail(Animal a) {
+        int bx = (int) Math.floor(a.x), bz = (int) Math.floor(a.z), under = (int) Math.floor(a.y - 0.05f);
+        int b = g.vox.block(bx, under, bz);
+        if (b != rpg.world.Blocks.FENCE && b != rpg.world.Blocks.IRON_BARS && b != rpg.world.Blocks.HEDGE) return;
+        float bestY = Float.MAX_VALUE; int tx = 0, tz = 0;
+        for (int r = 1; r <= 3; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+            int x = bx + dx, z = bz + dz;
+            float y = rpg.world.WorldMap.standY(x + 0.5f, z + 0.5f);
+            int ground = g.vox.block(x, (int) Math.floor(y) - 1, z);
+            if (ground == rpg.world.Blocks.FENCE || ground == rpg.world.Blocks.IRON_BARS || ground == rpg.world.Blocks.HEDGE || ground == rpg.world.Blocks.WATER) continue;
+            if (g.vox.solid(x, (int) Math.floor(y), z) || g.vox.solid(x, (int) Math.floor(y) + 1, z)) continue;
+            if (y < bestY) { bestY = y; tx = x; tz = z; }
+            if (bestY < Float.MAX_VALUE && r >= 1) break;
+        }
+        if (bestY == Float.MAX_VALUE) return;
+        a.x = tx + 0.5f; a.z = tz + 0.5f; a.y = bestY;
+        g.game.commands().moverPlace(a.body, a.x, a.y + 0.02f, a.z, 0, 0, 0);
+        a.routed = false;
+    }
+
+    /** How many capped searches in a row give a goal up, for how long (s), and how near another goal must be to count as the same. */
+    static final int GIVE_UP_AFTER = rpg.Tuning.i("animals.routeGiveUpAfter", 3);
+    static final float GIVE_UP_FOR = rpg.Tuning.f("animals.routeGiveUpFor", 25f), GIVE_UP_NEAR = rpg.Tuning.f("animals.routeGiveUpNear", 6f);
 
     // ------------------------------------------------------------------ life: births, clutches, growing up, the ordinary eggs
     private void life() {
@@ -825,7 +996,7 @@ public final class Animals {
             if (a.distTo(px, pz) < 84 || a.baby || youngNear(a, 40) || a.dueAt > 0 || a.hp < a.maxHp() || clutchOf(a) != null || a.goal == Goal.HUNT || a.goal == Goal.DEFEND) continue;
             if (g.vox.sight(px, g.player.eyeY(), pz, a.x, a.y + a.height * 0.5f, a.z)) continue;   // never vanishes in plain view
             despawnBody(a);
-            animals.remove(a); indexed = -1; nextSense.remove(a.id);
+            animals.remove(a); indexed = -1;
             a.home.cohort.computeIfAbsent(a.species, k -> new int[4])[Habitat.slot(a.baby, a.female)]++;
             a.home.count("into the cohort", 1);
             dematerialized++;
@@ -950,7 +1121,7 @@ public final class Animals {
     public void load(Map<String, Object> root) {
         if (root == null) return;
         for (Animal a : animals) if (a.loaded && a.alive) despawnBody(a);
-        animals.clear(); nests.clear(); nextSense.clear();
+        animals.clear(); nests.clear();
         for (Object o : astratto.util.Json.list(root, "animals")) {
             Map<String, Object> m = (Map<String, Object>) o;
             Species s = Species.valueOf(astratto.util.Json.str(m, "sp", "CHICKEN"));

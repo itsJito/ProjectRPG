@@ -1,0 +1,82 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+Gamefixes042Test > everyBuildingIsRegisteredAndReadyForItsInterior() FAILED
+    org.opentest4j.AssertionFailedError: townsfolk with no registered home near their bed: [Morrow at 185,913, Maud at 161,949, Elowen at 158,957, Titus at 491,189, Flavia at 462,130, Philon at 496,189, Cornelia at 493,188, Sir Gawain at 837,374, Tristan at 846,370, Percival at 840,366, Maerwyn at 460,135] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes042Test.everyBuildingIsRegisteredAndReadyForItsInterior(Gamefixes042Test.java:78)
+
+Gamefixes042Test > executionError FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-1), not junit-timeout-thread-10
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.close(Game.java:144)
+        at rpg.world.Gamefixes042Test.close(Gamefixes042Test.java:43)
+
+Gamefixes041Test > aOneCellRiseIsHoppedUpNotClimbedByMagic() FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-1), not junit-timeout-thread-6
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.tick(Game.java:93)
+        at rpg.world.Gamefixes041Test.aOneCellRiseIsHoppedUpNotClimbedByMagic(Gamefixes041Test.java:105)
+
+Gamefixes041Test > residentsBeyondTheFogLiveTheirDayOffStageAndComeBack() FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-1), not junit-timeout-thread-7
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.tick(Game.java:93)
+        at rpg.world.Gamefixes041Test.residentsBeyondTheFogLiveTheirDayOffStageAndComeBack(Gamefixes041Test.java:117)
+
+Gamefixes041Test > executionError FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-1), not junit-timeout-thread-10
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.close(Game.java:144)
+        at rpg.world.Gamefixes041Test.close(Gamefixes041Test.java:42)
+
+ShadowVeilTest > aWholeGameDayRunsWithoutAFault() FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-11), not junit-timeout-thread-16
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.tick(Game.java:93)
+        at rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault(ShadowVeilTest.java:99)
+
+ShadowVeilTest > executionError FAILED
+    java.lang.IllegalStateException: a game is driven from the thread that made it (junit-timeout-thread-11), not junit-timeout-thread-18
+        at astratto.game.Game.thread(Game.java:119)
+        at astratto.game.Game.close(Game.java:144)
+        at rpg.world.ShadowVeilTest.close(ShadowVeilTest.java:40)
+
+25 tests completed, 7 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1m 11s
+9 actionable tasks: 1 executed, 8 up-to-date

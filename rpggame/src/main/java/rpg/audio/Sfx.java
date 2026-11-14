@@ -103,6 +103,10 @@ public final class Sfx {
         bank("step.wood", "foley/footstep_wood_00", 5);
         bank("step.cloth", "foley/footstep_carpet_00", 5);
         bank("step.snow", "foley/footstep_snow_00", 5);
+        // (0.4.6) the other halves of the layered footfalls: a splash for wading and mud, a shod hoof's ring, a board's knock
+        bank("step.water", "elements/water", 3, ".ogg", 1);
+        bank("step.metal", "foley/impactMetal_light_00", 5);
+        bank("step.plank", "foley/impactPlank_medium_00", 5);
         // combat (gamefixes: recorded swings and impacts). Bare-handed swings keep the swish pack; weapons swing with
         // the recorded blades and hafts of "Medieval sound effects - Weapon Textures" (CC0); flesh, steel and shields
         // are struck with 0 A.D.'s recorded impacts (Wildfire Games, CC BY-SA 3.0)
@@ -646,7 +650,7 @@ public final class Sfx {
         return switch (surface(block)) { case "wood" -> "arrow.wood"; case "earth", "grass", "cloth" -> "arrow.earth"; default -> "arrow.stone"; };
     }
 
-    /** The devmap's ambience, looped on the ambience bus (once). */
+    /** The ambience bed, looped on the ambience bus (once); its level is the soundscape's (ambienceLevel). */
     public void ambience(String file, float gain) {
         if (ambience != 0) return;
         one("ambience", file, 0);
@@ -656,13 +660,55 @@ public final class Sfx {
         game.commands().voicePlay(ambience, s, AstrattoNative.BUS_AMBIENCE, AstrattoNative.VOICE_LOOP, gain, 1, 0, 0, 0, 0, 0, 0);
     }
 
-    /** A footfall: what it sounds like depends on what the foot came down on, and how hard (0..1). */
+    /** (0.4.2) The ambience bed's level now (sent only when it moves). */
+    public void ambienceLevel(float gain) {
+        if (ambience == 0 || Math.abs(gain - ambienceSent) < 0.004f) return;
+        ambienceSent = gain;
+        game.commands().voiceSet(ambience, AstrattoNative.SET_GAIN, gain, 1, 0, 0, 0, 0, 0);
+    }
+    private float ambienceSent = -1;
+
+    /**
+     * A footfall: what it sounds like depends on what the foot came down on, and how hard (0..1). (0.4.6, gamefixes: foley
+     * to match every material) each kind of ground its own layered sound from the data - gravel the stone and the earth
+     * together, mud a squelch under the earth, a board's knock, a shod hoof's ring on the cobbles - with a splash laid over
+     * a step in shallow water and the crunch of settled snow over open ground; quieter than before.
+     */
     public void footstep(Actor a, float force) {
         int below = a.y > 0 ? blockBelow(a) : 0;
+        boolean hooves = a instanceof rpg.animal.Animal an && (an.species == rpg.animal.Species.HORSE || an.species == rpg.animal.Species.PEGASUS);
         String surface = surface(below);
-        float gain = 0.16f + 0.3f * force, pitch = 0.9f + rnd.nextFloat() * 0.2f;
-        play("step." + surface, a.x, a.y + 0.05f, a.z, gain, pitch, 18 + 10 * force);
+        java.util.Map<String, Object> fs = FOOTSTEPS;
+        java.util.Map<String, Object> who = obj(fs, hooves ? "hooves" : "feet");
+        float base = num(who, "gain", 0.09f) + num(who, "force", 0.17f) * force, range = num(who, "range", 15) + 8 * force, tone = num(who, "pitch", 1f);
+        float pitch = (0.92f + rnd.nextFloat() * 0.16f) * tone;
+        Object layers = hooves && obj(fs, "hoofSurfaces").containsKey(surface) ? obj(fs, "hoofSurfaces").get(surface) : obj(fs, "surfaces").get(surface);
+        if (!(layers instanceof java.util.List<?> l) || l.isEmpty()) { play("step." + surface, a.x, a.y + 0.05f, a.z, base, pitch, range); return; }
+        for (Object o : l) if (o instanceof java.util.Map<?, ?> m) layer(m, a, base, pitch, range);
+        if (wading.test(a)) layer(obj(fs, "wading"), a, base, pitch, range);
+        else if (snowy.test(a) && !surface.equals("snow")) layer(obj(fs, "snowCover"), a, base, pitch, range);
     }
+    private void layer(java.util.Map<?, ?> m, Actor a, float base, float pitch, float range) {
+        Object bank = m.get("bank");
+        if (!(bank instanceof String b)) return;
+        float gain = base * (m.get("gain") instanceof Number n ? n.floatValue() : 1), p = pitch * (m.get("pitch") instanceof Number n ? n.floatValue() : 1);
+        play(b, a.x, a.y + 0.05f, a.z, gain, p, range);
+    }
+    /** Whether an actor's feet are in water up to the shins, and whether it walks on open ground the snow lies on (the game's). */
+    public java.util.function.Predicate<Actor> wading = a -> false, snowy = a -> false;
+    /** (0.4.6) The footfalls' data (audio.json "footsteps"). */
+    private static final java.util.Map<String, Object> FOOTSTEPS = readFootsteps();
+    @SuppressWarnings("unchecked")
+    private static java.util.Map<String, Object> readFootsteps() {
+        try (var in = Sfx.class.getResourceAsStream("/data/audio.json")) {
+            if (in == null) return java.util.Map.of();
+            var m = astratto.util.Json.parseObject(new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+            return m.get("footsteps") instanceof java.util.Map<?, ?> f ? (java.util.Map<String, Object>) f : java.util.Map.of();
+        } catch (Exception e) { return java.util.Map.of(); }
+    }
+    @SuppressWarnings("unchecked")
+    private static java.util.Map<String, Object> obj(java.util.Map<?, ?> m, String k) { return m.get(k) instanceof java.util.Map<?, ?> v ? (java.util.Map<String, Object>) v : java.util.Map.of(); }
+    private static float num(java.util.Map<?, ?> m, String k, float d) { return m.get(k) instanceof Number n ? n.floatValue() : d; }
 
     /** What an actor stands on (the game hands this over: the voxel world is not this class's). */
     public java.util.function.ToIntFunction<Actor> ground = a -> 0;
@@ -670,12 +716,23 @@ public final class Sfx {
 
     /** The family of sound a block makes underfoot: its material's (Blocks.material). */
     public static String surface(int block) {
-        if (block == Blocks.GRASS) return "grass";
+        if (block == Blocks.GRASS || block == Blocks.HEATH || block == Blocks.DRY_GRASS) return "grass";
+        if (block == Blocks.MUD || block == Blocks.CLAY) return "mud";
+        if (block == Blocks.GRAVEL) return "gravel";
+        if (block == Blocks.ICE) return "ice";
+        if (Blocks.isLeaves(block)) return "leaves";
         return switch (Blocks.material(block)) {
-            case FOLIAGE, STRAW -> "grass";
-            case EARTH, SAND -> "earth";
+            case FOLIAGE -> "leaves";
+            case STRAW -> "straw";
+            case EARTH -> "earth";
+            case SAND -> "sand";
             case WOOD -> "wood";
             case CLOTH -> "cloth";
+            case METAL -> "metal";
+            case GLASS -> "glass";
+            case COAL -> "coal";
+            case ICE -> "ice";
+            case WATER -> "water";
             default -> "stone";
         };
     }

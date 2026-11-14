@@ -72,11 +72,12 @@ class SummonStressTest {
         float[] lane=rpg.TestLanes.open(g);g.teleport(g.player,lane[0],DevMap.FLOOR,lane[1]);game.tick(0);
         assertEquals(1, call(1), "a fresh ally");
         Npc ally = g.npcs.stream().filter(n -> n.summonOwner == g.player.id).findFirst().orElseThrow();
-        long objects = g.objects.all().stream().filter(o -> o instanceof rpg.objects.Corpse c && !c.removed).count();
         g.combat.environmentalDamage(ally, 9999, "test");
         frames(30);
         assertFalse(g.npcs.contains(ally));
-        assertEquals(objects, g.objects.all().stream().filter(o -> o instanceof rpg.objects.Corpse c && !c.removed).count(), "no corpse for a conjured ally");
+        // (0.4.2) the ally's own body, by name: the dens' goblins and bats fighting about the lane may fall in the same moment
+        String allyBody = ally.name + "'s body";
+        assertEquals(0, g.objects.all().stream().filter(o -> o instanceof rpg.objects.Corpse c && !c.removed && c.name.equals(allyBody)).count(), "no corpse for a conjured ally");
         // the dismissed are gone entirely: nobody is left behind in the town's lists, and the world still saves and loads
         frames(60 * 35);
         assertEquals(npcs, g.npcs.size(), "dismissed allies must leave the world");

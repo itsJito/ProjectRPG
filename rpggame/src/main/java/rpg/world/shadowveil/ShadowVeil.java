@@ -136,25 +136,12 @@ public final class ShadowVeil {
         return new float[]{x, z};
     }
     /**
-     * (0.4.1) A service's place (the architecture's 'services': a structure and one of its points) - where the bank's
-     * teller stands, where a customer waits at its counter. {x, z}, or null when the map names none.
-     */
-    public static float[] service(String key) {
-        Terrain t = terrain;
-        if (t == null || t.arch == null) return null;
-        Map<String, Object> s = Atlas.map(Atlas.map(Atlas.get().map("architecture"), "services"), key);
-        if (s.isEmpty()) return null;
-        var st = t.arch.byId(Atlas.s(s, "structure", ""));
-        if (st == null) return null;
-        float[] p = st.points.get(Atlas.s(s, "point", ""));
-        return p == null ? null : new float[]{p[0], p[1]};
-    }
-    /**
      * (0.4.1) ShadowVeil's gardens as the farming system's fields: each of the data's 'farms' (a grower by their rpg.Ids
      * name, the garden structure, its rows' crops), its rows across it every other cell, its gate where the garden's is.
      */
     public static rpg.world.Farming.Field[] farms() {
         List<rpg.world.Farming.Field> out = new ArrayList<>();
+        java.util.Set<String> farmed = new java.util.HashSet<>();
         Terrain t = terrain;
         if (t == null || t.arch == null) return new rpg.world.Farming.Field[0];
         for (Map<String, Object> farm : Atlas.list(Atlas.get().map("architecture"), "farms")) {
@@ -176,14 +163,58 @@ public final class ShadowVeil {
             int gx = (s.x0 + s.x1) / 2;
             int[][] gate = {{gx, s.z0}, {gx + 1, s.z0}};
             out.add(new rpg.world.Farming.Field(s.name, jurisdiction(s.cx(), s.cz()), owner, s.x0, s.z0, s.x1, s.z1, rowsA, -1, gate, rc, s.floor + 1));
+            farmed.add(s.id);
+        }
+        // (0.4.3, gamefixes: farms did not work or have their crops) every other field and garden, farmed too
+        Map<String, Object> fd = Atlas.map(Atlas.map(Atlas.get().root, "census"), "fields");
+        List<?> templates = Atlas.arr(fd, "templates"), unfarmed = Atlas.arr(fd, "unfarmed");
+        Map<String, Object> cropsBy = Atlas.map(fd, "crops");
+        for (var s : t.arch.structures) {
+            if (farmed.contains(s.id) || !templates.contains(s.template) || unfarmed.contains(s.id) || s.x1 - s.x0 < 4 || s.z1 - s.z0 < 4) continue;
+            String kingdom = kingdomOf(s);
+            long owner = farmerFor(s, kingdom, Atlas.d(fd, "reach", 240));
+            List<Integer> rows = new ArrayList<>();
+            for (int z = s.z0 + 2; z <= s.z1 - 2; z += 2) rows.add(z);
+            if (rows.isEmpty()) continue;
+            List<?> crops = Atlas.arr(cropsBy, kingdom);
+            if (crops.isEmpty()) crops = Atlas.arr(cropsBy, "_default");
+            rpg.world.Farming.Crop[][] rc = new rpg.world.Farming.Crop[rows.size()][];
+            for (int k = 0; k < rc.length; k++) {
+                List<?> row = crops.isEmpty() ? List.of("CARROT") : (List<?>) crops.get(k % crops.size());
+                rc[k] = new rpg.world.Farming.Crop[row.size()];
+                for (int j = 0; j < row.size(); j++) rc[k][j] = rpg.world.Farming.Crop.valueOf(String.valueOf(row.get(j)));
+            }
+            int[] rowsA = rows.stream().mapToInt(Integer::intValue).toArray();
+            int gx = (s.x0 + s.x1) / 2;
+            out.add(new rpg.world.Farming.Field(s.name, kingdom, owner, s.x0, s.z0, s.x1, s.z1, rowsA, -1, new int[][]{{gx, s.z0}, {gx + 1, s.z0}}, rc, s.floor + 1));
         }
         return out.toArray(new rpg.world.Farming.Field[0]);
     }
 
-    /** The person whose post a service names (its 'posts': an Ids constant's name to a service), or null. */
-    public static float[] post(String idName) {
-        Map<String, Object> posts = Atlas.map(Atlas.get().map("architecture"), "posts");
-        return posts.get(idName) instanceof String svc ? service(svc) : null;
+    /** (0.4.3) The kingdom a structure belongs to: its settlement's, else whose law holds where it stands. */
+    static String kingdomOf(Architecture.Structure s) {
+        for (Realm r : REALMS) if (s.settlement != null && r.name.equalsIgnoreCase(s.settlement)) return r.name;
+        return jurisdiction(s.cx(), s.cz());
+    }
+    /**
+     * (0.4.3) Who keeps a field: the census's crop farmer set to work there, else the nearest crop farmer of its kingdom
+     * within reach (their Ids constant's id, or their own on ShadowVeil); 0 - nobody's, open to anyone.
+     */
+    static long farmerFor(Architecture.Structure s, String kingdom, double reach) {
+        List<Map<String, Object>> people = Atlas.list(Atlas.map(Atlas.get().root, "census"), "people");
+        long best = 0; double bd = reach;
+        for (int k = 0; k < people.size(); k++) {
+            Map<String, Object> p = people.get(k);
+            if (!"CROP_FARMER".equals(p.get("profession"))) continue;
+            long id = Census.idOf(p, k);
+            if (s.id.equals(p.get("work"))) return id;
+            if (!kingdom.equals(p.get("kingdom"))) continue;
+            var w = p.get("work") instanceof String ws && terrain != null && terrain.arch != null ? terrain.arch.byId(ws) : null;
+            if (w == null) continue;
+            double d = Math.hypot(w.cx() - s.cx(), w.cz() - s.cz());
+            if (d < bd) { bd = d; best = id; }
+        }
+        return best;
     }
 
     /** The open water nearest a point that has a dry bank beside it: {x, z, water cell y} (null: none within 48 cells). */
@@ -255,7 +286,7 @@ public final class ShadowVeil {
         Atlas a = Atlas.get();
         Map<String, Object> realms = a.map("realms");
         float blend = (float) Atlas.d(realms, "blend", 48);
-        time.regions.add(new astratto.weather.TimeSystem.Region("Wilds", -64, -64, a.size + 64, a.size + 64, 0, profile(Atlas.map(realms, "wilds").get("tint"))));
+        time.regions.add(new astratto.weather.TimeSystem.Region("Wilds", -64, -64, a.world + 64, a.world + 64, 0, profile(Atlas.map(realms, "wilds").get("tint"))));
         for (Map<String, Object> r : Atlas.list(realms, "list")) {
             astratto.weather.TimeSystem.Profile p = profile(r.get("tint"));
             for (Object o : Atlas.arr(r, "rects")) {
@@ -264,6 +295,41 @@ public final class ShadowVeil {
             }
         }
     }
+    /**
+     * (0.4.4, gamefixes: fog should have a different colour/tint depending on which region of the world you're in) the fog
+     * colour at a point, as a multiplier on the hour's own: the wilds' by the biomes round it (sampled over a few dozen
+     * cells, so it changes gradually as the land does), each realm's over its bounds, blended in toward its edge as the
+     * realms' tints are. {r, g, b}.
+     */
+    public static float[] fogTint(float x, float z) {
+        Atlas a = Atlas.get();
+        Terrain t = terrain;
+        Map<String, Object> realms = a.map("realms");
+        Map<String, Object> biomeFog = Atlas.map(Atlas.map(realms, "wilds"), "fogBiomes");
+        float r = 0, g = 0, b = 0; int n = 0;
+        if (t != null) for (int dx = -24; dx <= 24; dx += 12) for (int dz = -24; dz <= 24; dz += 12) {
+            int sx = (int) Math.max(0, Math.min(t.S - 1, x + dx)), sz = (int) Math.max(0, Math.min(t.S - 1, z + dz));
+            double[] c = Atlas.pt(biomeFog.get(t.biomeAt(sx, sz)));
+            if (c.length < 3) c = new double[]{1, 1, 1};
+            r += c[0]; g += c[1]; b += c[2]; n++;
+        }
+        float[] out = n == 0 ? new float[]{1, 1, 1} : new float[]{r / n, g / n, b / n};
+        float blend = (float) Atlas.d(realms, "blend", 48);
+        for (Map<String, Object> rl : Atlas.list(realms, "list")) {
+            double[] c = Atlas.pt(rl.get("fog"));
+            if (c.length < 3) continue;
+            float w = 0;
+            for (Object o : Atlas.arr(rl, "rects")) {
+                int[] q = a.cells((List<?>) o);
+                float inX = Math.min(x - q[0], q[2] + 1 - x), inZ = Math.min(z - q[1], q[3] + 1 - z), in = Math.min(inX, inZ);
+                w = Math.max(w, blend <= 0 ? (in >= 0 ? 1 : 0) : Math.max(0, Math.min(1, (in + blend * 0.5f) / blend)));
+            }
+            if (w <= 0) continue;
+            for (int k = 0; k < 3; k++) out[k] += ((float) c[k] - out[k]) * w;
+        }
+        return out;
+    }
+
     /**
      * (0.4.0, gamefixes: volumetric ray marching) the design's ground mists as fog volumes for the volumetric march:
      * banks over the lakes, in the valleys and hollows (set on the ground or the water where each falls), drawn near
@@ -280,7 +346,7 @@ public final class ShadowVeil {
                 double ang = Noise.hash(a.seed, k, id.hashCode(), 61) * Math.PI * 2, r = Math.sqrt(Noise.hash(a.seed, k, id.hashCode(), 62)) * spread;
                 float x = (float) (a.x(at[0]) + Math.cos(ang) * r), z = (float) (a.z(at[1]) + Math.sin(ang) * r);
                 Terrain t = terrain;
-                int xi = (int) Math.max(0, Math.min(a.size - 1, x)), zi = (int) Math.max(0, Math.min(a.size - 1, z));
+                int xi = (int) Math.max(0, Math.min(a.world - 1, x)), zi = (int) Math.max(0, Math.min(a.world - 1, z));
                 float base = t == null ? a.sea : Math.max(t.top[t.idx(xi, zi)], t.water[t.idx(xi, zi)]) + 1;
                 float rad = (float) (size * (0.7 + 0.6 * Noise.hash(a.seed, k, id.hashCode(), 63)));
                 time.fogVolumes.add(new astratto.weather.TimeSystem.Fog(x, base + (float) lift, z, rad, (float) Atlas.d(m, "density", 0.04),
@@ -295,32 +361,60 @@ public final class ShadowVeil {
         return new astratto.weather.TimeSystem.Profile((float) t[0], (float) t[1], (float) t[2], (float) t[3], (float) t[4], (float) t[5], (float) t[6]);
     }
 
-    /** The rivers' flow (Fluids): each stretch of each river carried downstream at a pace that quickens where it falls. */
+    /**
+     * (0.4.5, gamefixes: flowing water set up for all water, by itself) the water's motion (Fluids' field) grown from the
+     * terrain's own water - every river, brook, lake and outflow running toward the sea (rpg.world.FlowField) - with the
+     * aqueducts' channels laid over it. The field is kept with the terrain: grown once per world.
+     */
     public static void currents(rpg.world.Fluids f) {
-        Atlas a = Atlas.get();
-        for (Map<String, Object> r : a.list("rivers")) {
-            List<?> pts = Atlas.arr(r, "points");
-            double[] widths = Atlas.pt(r.get("width"));
-            int half = (int) Math.ceil((widths.length > 1 ? widths[1] : widths[0]) / 2) + 1;
-            // (0.4.1) the river carried along in short reaches (about ten cells each), so each reach's box hugs the channel
-            // and its flow follows the bends - a reach the whole way between two of the design's points ran a box over
-            // half a chunk of dry land and pointed one way through every bend in it
-            for (int k = 0; k + 1 < pts.size(); k++) {
-                double[] p = Atlas.pt(pts.get(k)), q = Atlas.pt(pts.get(k + 1));
-                float x0 = (float) a.x(p[0]), z0 = (float) a.z(p[1]), x1 = (float) a.x(q[0]), z1 = (float) a.z(q[1]);
-                float dx = x1 - x0, dz = z1 - z0, len = (float) Math.hypot(dx, dz);
-                if (len < 1) continue;
-                float drop = (float) Math.max(0, p[2] - q[2]);
-                float speed = Math.min(2.4f, 0.55f + drop / len * 18);
-                int reaches = Math.max(1, Math.round(len / 10));
-                for (int r2 = 0; r2 < reaches; r2++) {
-                    float ax = x0 + dx * r2 / reaches, az = z0 + dz * r2 / reaches, bx = x0 + dx * (r2 + 1) / reaches, bz = z0 + dz * (r2 + 1) / reaches;
-                    f.current((int) Math.min(ax, bx) - half, (int) Math.min(az, bz) - half, (int) Math.max(ax, bx) + half, (int) Math.max(az, bz) + half, dx, dz, speed);
+        if (terrain == null) return;
+        if (field == null || fieldOf != terrain) {
+            Terrain t = terrain;
+            int n = t.S * t.S;
+            boolean[] sea = new boolean[n], river = new boolean[n];
+            for (int i = 0; i < n; i++) { sea[i] = (t.flags[i] & Terrain.SEA) != 0; river[i] = (t.flags[i] & (Terrain.RIVER | Terrain.FALLS)) != 0; }
+            long t0 = System.nanoTime();
+            // the falls: each drop's lower column and the first water upstream of it, joined
+            List<int[]> links = new ArrayList<>();
+            for (int[] fl : t.falls) {
+                int lx = fl[0], lz = fl[2], dx = fl[4], dz = fl[5];
+                if (!t.in(lx, lz) || t.water[t.idx(lx, lz)] < 0 || dx == 0 && dz == 0) continue;
+                for (int k = 1; k <= 4; k++) {
+                    int ux = lx - dx * k, uz = lz - dz * k;
+                    if (!t.in(ux, uz)) break;
+                    int u = t.idx(ux, uz);
+                    if (t.water[u] > t.water[t.idx(lx, lz)]) { links.add(new int[]{u, t.idx(lx, lz)}); break; }
                 }
             }
+            field = rpg.world.FlowField.grow(t.S, t.water, sea, river, links.toArray(new int[0][]));
+            if (t.arch != null) {
+                for (float[] c : t.arch.channels) f.current((int) c[0], (int) c[1], (int) c[2], (int) c[3], c[4], c[5], rpg.Tuning.f("water.aqueductSpeed", 1.1f));
+                field.overlay(f.currents());
+            }
+            fieldOf = t;
+            System.out.printf("[water] flow field grown in %.0f ms: %d columns moving%n", (System.nanoTime() - t0) / 1e6, field.moving);
         }
-        // (0.4.1) the aqueducts' channels
-        if (terrain != null && terrain.arch != null) for (float[] c : terrain.arch.channels) f.current((int) c[0], (int) c[1], (int) c[2], (int) c[3], c[4], c[5], 1.1f);
+        f.field = field;
+    }
+    private static rpg.world.FlowField field;
+    private static Terrain fieldOf;
+
+    /**
+     * (0.4.3, gamefixes: 'goto' still took the devmap's places) every place a developer can be sent to on ShadowVeil, by
+     * name: the start, each kingdom (its heart, on dry open ground), every named place of the design and each cave or mine
+     * mouth the architecture raised. {x, z} in cells, in the order the console lists them.
+     */
+    public static Map<String, float[]> destinations() {
+        Map<String, float[]> out = new LinkedHashMap<>();
+        WorldMap m = WorldMap.active();
+        out.put("start", new float[]{m.spawnX, m.spawnZ});
+        for (Realm r : REALMS) out.put(r.name.toLowerCase(java.util.Locale.ROOT), dry(r.cx, r.cz));
+        for (String key : Atlas.get().places().keySet()) { if (key.startsWith("_")) continue; float[] p = place(key); if (p != null) out.putIfAbsent(key, p); }
+        if (terrain != null && terrain.arch != null) for (Architecture.Structure s : terrain.arch.structures) {
+            float[] mouth = s.points.get("mouth");
+            if (mouth != null) out.putIfAbsent(s.id.toLowerCase(java.util.Locale.ROOT), dry(mouth[0], mouth[1]));
+        }
+        return out;
     }
 
     /** The named places, in cells (the map screen's labels). */

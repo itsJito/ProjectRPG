@@ -1,0 +1,1 @@
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 50.336 s

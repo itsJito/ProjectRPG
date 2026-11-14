@@ -1,3 +1,378 @@
+# Patch Notes Version Alpha 0.4.6: Weather or Not
+
+A new sky over every region, a wider sea, footsteps that know what they are walking on, and townsfolk who get where they are going.
+
+Developer: Hoodie
+
+## New Features
+### Gameplay
+- Added a full weather cycle: Sunny, High Pressure, Clouds, Overcast, Dark Overcast, Mist, Dense Fog, Drizzle, Rain, Showers, Thunder, Thunderstorm, Hail, Sleet, Light Snow, Snow, Blizzard, Ground Blizzard, Sandstorm, Snow Clearing and Rain Clearing
+- Added Hurricanes and Whiteouts, which never happen on their own
+- Added regional weather: every region now has its own climate and its own weather at the same time. Azharad's desert sees sandstorms, Valgard's highlands blizzards, the marshes fog and drizzle, the coast showers and storms
+- Added weather changes that follow the clock: each weather lasts a few hours and gives way on the hour, the way people's days turn over
+- Added fog that is likelier at dawn and thunder that is likelier in the afternoon
+- Added rain that clears and snow that clears, so a downpour no longer stops all at once
+- Added a temperature to the air that follows the region, the hour and the weather
+- Added the name of the region you enter, shown across the top of the screen
+- Added more open sea round the edge of the map
+- Added a deadly open sea: swimming out past the shore toward the edge of the world now harms you more and more until you turn back or die
+### Items
+- Added a way to turn an item in your inventory: point at it and press the rotate key
+### NPC's
+- Added kneeling and folded hands to people at prayer
+- Added hand gestures to people while they talk
+- Added resting stances to people standing about: arms folded, hands behind the back or hands on the hips, changing now and then
+- Added hoofbeats to horses and Pegasi
+### Blocks
+- Added old headstones to every graveyard in place of the plain stone markers
+
+## Changes
+### Gameplay
+- Changed rain to fall all around you in sheets that lean with the wind, stop at roofs and splash where they land
+- Changed snow to drift and tumble on the wind, and blizzards and ground blizzards to blow snow along the ground
+- Changed sandstorms to drive sand through the air and turn the air the colour of the desert
+- Changed dense fog, blizzards, sandstorms and whiteouts to close the world in around you
+- Changed storms to darken the sky, and lightning to come with thunder clouds rather than only heavy rain
+- Changed the wind to swing trees and plants harder as the weather worsens
+- Changed footsteps to match every kind of ground: grass, earth, mud, sand, gravel, stone, wood, carpet, straw, leaves, snow, ice, metal and glass, with a splash in shallow water and a crunch in fresh snow
+- Changed footsteps to land with each foot as it touches the ground, and made them quieter
+- Changed broken crates, barrels and furniture to leave pieces you can push about and walk straight through
+- Changed the world to be put right when you load, sleep, die or rest at a Shrine of Light: broken furniture, crates, barrels, windows and walls are whole again
+- Changed broken chandeliers and lamps to stop giving light
+- Changed the region banner to sit above any bounty notice, never over it
+- Changed the interact key to close a container or your inventory when one is open
+- Changed lawmen to say exactly what you are wanted for, who named you and where it happened
+- Changed lawmen to tell the town's undertaker by name when they take away a body
+- Changed breaking out of jail to raise the alarm: the watch now searches for you and tells you so
+- Changed the jail's held goods chest to hold everything taken from you when you are arrested, so it can be found if you break out
+- Changed every Gaol to a Jail
+- Changed sprinting into people: the first two shoves are now shrugged off with a word, and only the third makes them angry
+### NPC's
+- Changed people to begin the day spread out at their work, their homes or about their workplaces instead of all standing at their front doors
+- Changed people to take shelter indoors from a dragon or another terror rather than crouching in the open
+- Changed people to go indoors from snow, hail, sandstorms and gales as well as rain
+- Changed carters to run their loads between their yard and their town's shop
+- Changed border knights to stand a while at each end of their beat
+- Changed people who cannot reach a prayer spot to find another, or say their prayers another day
+- Changed guards to skip a patrol point they cannot reach
+### Items
+- Changed every tier of sword and blade to have its own form: knapped Stone, leaf-shaped Bronze, forge-marked Iron, blackened Black, ring-guarded White, banded Steel with swept guards, hewn Granite, swept Cobalt, glowing Molten, barbed Dragon, jewelled Godly and spiked Malevolent
+
+## Technical Changes
+### Gameplay
+- Changed every weather, climate, temperature and precipitation look to be read from the game's data files
+- Changed the weather to be saved with the game, region by region
+- Changed precipitation to be drawn by the graphics card without being worked out each frame
+- Changed far-away plants to be let go of one patch at a time instead of all at once
+- Changed plants to be laid out further ahead of you, a few patches at a time
+- Changed every new setting this update added to be read from the game's data files
+- Added groundwork for the dungeons: every dungeon now has its levels and rooms planned and a recommended combat level
+- Added a test that walks the whole world checking that people never spin, stall or crowd
+- Added a test that checks every work station in the world stands indoors
+
+## Fixed Bugs
+- AE-04601 - Fixed bug where a church's staircase filled the way from its tower into the nave
+- AE-04602 - Fixed bug where people turned round and round on the spot by altars and at their work
+- AE-04603 - Fixed bug where paintings flickered the farther away you were from them
+- AE-04604 - Fixed bug where your possessions were not in the jail's held goods chest after an arrest
+- AE-04605 - Fixed bug where the watch did not notice when you broke out of jail
+- AE-04606 - Fixed bug where you could walk through gravestones
+- AE-04607 - Fixed bug where graveyards were scattered with patches of cobblestone
+- AE-04608 - Fixed bug where flowing water stepped down in a sheer wall instead of running down the step
+- AE-04609 - Fixed bug where people stood stuck all day short of their bed, their post or their prayers
+- AE-04610 - Fixed bug where people stood stuck on staircases above a lower floor
+- AE-04611 - Fixed bug where people stood pressed against an open door's leaf in narrow doorways
+- AE-04612 - Fixed bug where some doorways sat below the street and could not be walked through
+- AE-04613 - Fixed bug where fish could stay stuck swimming into a block
+- AE-04614 - Fixed bug where chandeliers kept their light after being broken
+- AE-04615 - Fixed bug where lawmen said they would take a body to Morrow in every kingdom
+- AE-04616 - Fixed bug where a lawman who set a body down took its blood for a new trail
+- AE-04617 - Fixed bug where plants popped in and out when running or flying fast
+- AE-04618 - Fixed bug where a knocked-down body hung on to ledges for too long before getting up
+- AE-04619 - Fixed bug where people crouched in the open when a dragon was near
+- AE-04620 - Fixed bug where a knight could be stranded at the top of a church tower's ladder
+- AE-04621 - Fixed bug where carters stood all day at their door with a blocked route
+- AE-04622 - Fixed bug where many people began the game lined up in front of their homes
+- AE-04623 - Fixed bug where a guard stood all day trying to reach a patrol point with no way to it
+- AE-04624 - Fixed bug where people waiting for a blocked route turned slowly round and round on the spot
+- AE-04625 - Fixed bug where a craftsman short of supplies paced back and forth across the workshop, turning on the spot
+- AE-04626 - Fixed bug where people stood stuck for several seconds at a single step up or down on their way
+- AE-04627 - Fixed bug where a fish turned back and forth against a wall instead of swimming away from it
+
+# Patch Notes Version Alpha 0.4.5: Dressed to Kill
+
+New clothes for everyone, water that finds its own way, and stairs you can actually climb.
+
+Developer: Hoodie
+
+## New Features
+### Items
+- Added the Pigskin outfit: a purple hood, a dark purple shirt, long purple robes, dark gloves, dark boots, a flowing purple cloak and the cult's insignia worn at the neck
+- Added the Rogue outfit: a black mask that hides all but the eyes, a tight black leather top, slim black trousers, fitted gloves and dark leather boots. Requires 50 Agility and 50 Thieving
+- Added the Prospector outfit: a mining helmet with its lamp, a thick tan work jacket, loose work trousers and heavy iron-toed boots. Requires 30 Mining
+- Added the Desert outfit in Commoner, Noble and Royal styles: a fez, a loose desert top, a long open overcoat, light trousers and long flowing robes
+- Added the Farmer's outfit: a wide straw hat, an open work jacket over a shirt, patched boro trousers and sturdy brown boots. Requires 5 Harvesting
+- Added the Lumberjack outfit: a dark fitted cap, a red-and-black checked shirt, grey work trousers with braces and heavy leather boots. Requires 40 Woodcutting
+- Added herb patches, flax and redberry bushes growing wild across the countryside of ShadowVeil
+### NPC's
+- Added ten new people to the wilds: four more of Garmund's band at his camp, three prospectors in the mine bunkhouses, two loggers at the Loggers' Rest and a charcoal burner at the clamps
+- Added outfits to people who work for a living: miners now wear the Prospector outfit, loggers the Lumberjack outfit, farmers the Farmer's outfit, thieves the Rogue outfit and Garmund's band the Pigskin outfit
+- Added the Desert outfit to the people of Azharad, in the style of their rank
+### Gameplay
+- Added a Shrine of Light by every kingdom's graveyard
+
+## Changes
+### Items
+- Changed every tier of armour to have its own look: Stone slabs lashed with cord, Bronze scales with a plumed helm, Chainmail with a coif, banded Iron with a nasal helm, riveted Black plate with spiked pauldrons, fluted White plate, Steel lames with a grilled visor, hewn Granite, chevroned Cobalt with a winged helm, scaled Dragon plate with horns, cracked Molten plate glowing from within, filigreed Godly plate with a crown and jagged Malevolent plate
+### NPC's
+- Changed guards and knights to wear their full armour, and hunters their boots and gloves, all of which can be looted
+- Changed people to only keep an eye on you, follow up something they noticed or offer help for a short while before going back to their day
+- Changed people who find their way somewhere blocked again and again to leave it for a while and get on with the rest of their day
+- Changed people who live or work where a window is broken to notice it, and to send word to the town's carpenter when they cannot walk the report over themselves
+- Changed carpenters to go wherever in their town a repair is needed, even past their usual rounds
+### Blocks
+- Changed houses to face the street nearest to them
+- Changed loose stones in the countryside to stay out of towns
+- Changed partition walls inside buildings to reach all the way up to the roof
+- Changed doorways that stand a block above the street to have a step up to them
+### Gameplay
+- Changed rivers to pull swimmers and waders much less, so you can now swim against a current
+- Changed every river, stream, lake outflow and waterfall to flow on its own, following the lie of the land down to the sea
+- Changed fast water to break into white foam below falls, through rapids and along quick channels
+- Changed waterfalls to pour as streams of falling water that burst into spray and ripple the pool below
+- Changed the map to mark the banks, and to stop marking every household's chests, beds and cooking ranges
+- Changed dying to wake you at the graveyard of the nearest Shrine of Light if you are not bound to one
+
+## Technical Changes
+### Gameplay
+- Changed the water's motion to be worked out once for the whole map and shared by swimming, wading and the water's surface
+- Changed the water's surface motion to be sent to the graphics card only when you move a good distance
+- Changed every outfit, armour design and water speed to be read from the game's data files
+- Changed doors to only be checked when someone is moving near them, which makes towns full of buildings much cheaper to run
+- Changed trees, rocks and plants to check whether they have grown back once a game minute instead of every frame
+- Changed animals to only send their pace to the engine when it changes
+- Changed plants for new ground to start being prepared as soon as they come into reach, which removes most of the hitch when walking into new ground
+- Added a test that walks a player-sized body up and down every staircase in the world
+
+## Fixed Bugs
+- AE-04501 - Fixed bug where the Shrine of Light by Loxford's graveyard could not be used and could be walked through
+- AE-04502 - Fixed bug where chandeliers hung down stairwells and over steps
+- AE-04503 - Fixed bug where some houses faced the street with their side
+- AE-04504 - Fixed bug where the map showed every chest as a bank
+- AE-04505 - Fixed bug where fireplaces and other furniture stood inside staircases
+- AE-04506 - Fixed bug where walls inside some buildings stopped short of the roof
+- AE-04507 - Fixed bug where furniture could not be damaged or broken
+- AE-04508 - Fixed bug where most staircases stopped you from going all the way up or down
+- AE-04509 - Fixed bug where rivers pulled you along too hard
+- AE-04510 - Fixed bug where there was nothing wild to harvest in ShadowVeil
+- AE-04511 - Fixed bug where wall hangings and lights overlapped other furniture
+- AE-04512 - Fixed bug where stone blocks were scattered against buildings in towns
+- AE-04513 - Fixed bug where only some rivers flowed
+- AE-04514 - Fixed bug where people followed you around for far too long
+- AE-04515 - Fixed bug where people did not report or mend broken windows
+- AE-04516 - Fixed bug where furnaces, anvils, ranges and other work stations stood outside buildings
+- AE-04517 - Fixed bug where people could stand all day trying to reach somewhere they had no way to
+- AE-04518 - Fixed bug where carpenters walked home and tried to mend a window from the other side of town
+- AE-04519 - Fixed bug where people stalled in doorways that stood a block above the street
+
+# Patch Notes Version Alpha 0.4.4: Interior Motives
+
+Every building in ShadowVeil can now be walked into, and the people who live and work there use it.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added interiors to all 509 enterable buildings across the seven kingdoms and the wilds, with floors, ceilings, partition walls, doorways and real staircases between every storey
+- Added furnished rooms to every kind of building: hearths, kitchens and bedrooms in homes, shop floors with counters and storerooms, workrooms with their trade's stations, common rooms, kitchens and guest rooms in inns, banking halls with locked vaults, great halls, chambers and solars in castles and palaces, naves with pews and altars in churches, and mess halls, armouries and bunk rooms in barracks
+- Added furniture chosen by how well off a building is: stone hearths, plain tables and stools in working homes, and marble fireplaces, four-poster beds and dining chairs in the grand ones
+- Added light to every room, from candles, chandeliers and lit hearths, with more of them in larger rooms
+- Added laid tables in homes, inns, halls and barracks, with bowls, cups, bread, jugs and a candle
+- Added Iron Bars, Roman Brick, Mosaic and Banded Masonry
+### NPC's
+- Added a bed of their own for everyone who lives in a building; people now walk home, climb the stairs and sleep in it
+- Added a place to work indoors for shopkeepers, bankers, innkeepers, bartenders, cooks, smiths, priests and lords: behind the counter, at the bar, at the range, at the anvil, at the altar or at the desk
+- Added ten new people to keep the new gaols, banks and graveyards: Bogdan, Milena, Lothar, Hilde, Gunnar, Astrid, Nadim, Samir, Emrys and Rhiannon
+### Gameplay
+- Added a gaol to every kingdom, with barred cells; the watch now takes prisoners to their own kingdom's cells
+- Added banks inside Harlette and Camelot; every banker now serves at their own counter, and one account can be used at any bank
+- Added graveyards to Valgard, Gorrick, Azharad, Severia and Camelot, each with room for new graves
+- Added an altar to every church; townsfolk now walk to their own church for morning prayers
+- Added monster territories across the wilderness: goblin camps, orc warbands, troll haunts, imp nests, werewolf ranges, giant spider webs and restless ground, all well away from the kingdoms and their roads
+- Added the sea beyond the edge of the map, stretching out to the horizon
+
+## Changes
+### Blocks
+- Changed Severia to look like Rome and Byzantium, with stucco over Roman brick, banded masonry on its public buildings, low hipped roofs of terracotta tile, tiled and mosaic floors, and a domed Severian Church with a domed bell tower
+- Changed river falls and rapids to pour over their edge as a sheet of falling water with spray and mist at the foot, instead of standing as columns of still water
+- Changed doorways that stood above the street to have steps down to it
+### NPC's
+- Changed names to carry a rank or calling where a person has one, such as Sir Lancelot, Count Dracula and Father Gregory
+- Changed Order Knights to carry on to the next inspection of their kingdom's round after reporting, instead of waiting by their commander
+- Changed craftsmen who are out of supplies to tidy their workplace instead of standing still
+- Changed bandits to keep out in the wilds, away from the towns' inns, markets and banks
+- Changed farm animals to shy away from people walking past instead of charging them
+### Gameplay
+- Changed fog to take on the colour of the region you are in
+- Changed the developer display to be smaller and easier to read, with no background behind it and each line on its own black strip
+
+## Technical Changes
+### Gameplay
+- Changed lights to be chosen nearest first, so the lamps and candles near you always light the room you are in
+- Changed furniture and fittings inside buildings to only be drawn when you are close enough to see them
+- Changed plants to be prepared in the background as you travel, which removes the hitches when walking into new ground
+- Changed doors to only be updated when someone is near them
+- Changed distant shadows to refresh as soon as you turn, so they always match the view
+- Changed monsters far away from you to rest where they are until you come near
+- Changed animals far away from you to look around less often
+- Changed people to look further afield for a way up when the nearest stairs in a large building are on its far side
+- Added a quality record for every building interior, listing its rooms, furniture, working fittings, residents, how every room is reached, its screenshots and its score
+
+## Fixed Bugs
+- AE-04401 - Fixed bug where the game could refuse to draw a frame with "malformed command stream: invalid water ripple"
+- AE-04402 - Fixed bug where most people stood around doing nothing or spun on the spot
+- AE-04403 - Fixed bug where turning noclip off after noclipping out of water put you back in the water you had left
+- AE-04404 - Fixed bug where there were no gaols in any kingdom
+- AE-04405 - Fixed bug where the game hitched every few seconds while walking through towns
+- AE-04406 - Fixed bug where distant shadows went wrong after turning away from the sun or a light
+- AE-04407 - Fixed bug where lamps floated over the squares at 217, 39, 931 and 459, 36, 135
+- AE-04408 - Fixed bug where cows attacked players who walked past them
+- AE-04409 - Fixed bug where animals could get up onto fences
+- AE-04410 - Fixed bug where stopping a sprint swim near a wall or the lake's edge at 177, 37, 963 pushed you under the map
+- AE-04411 - Fixed bug where a body knocked down into water sank and tried to stand up on the bottom; it now swims
+- AE-04412 - Fixed bug where every building interior was empty
+- AE-04413 - Fixed bug where interiors were pitch black during the day
+- AE-04414 - Fixed bug where a chest upstairs left an invisible obstacle on the roof or the floor above it
+- AE-04415 - Fixed bug where people could not reach the upper floors of the Severian and Azharad palaces
+- AE-04416 - Fixed bug where every lord and official spoke as if they were the banker
+- AE-04417 - Fixed bug where nobody in ShadowVeil ever went to pray
+- AE-04418 - Fixed bug where a house in the east of Severia could not be entered because its door stood above the street
+
+# Patch Notes Version Alpha 0.4.3: Full House
+
+Everyone the world's records name now lives in it, with a home, a bed waiting for them and a job to go to.
+
+Developer: Hoodie
+
+## New Features
+### NPC's
+- Added the full population of ShadowVeil: 205 people across the seven kingdoms and the wilds, each with their own one-word name, calling, home and workplace
+- Added homes for everyone: each person now has a house, cottage, inn room, barracks bunk or hall of their own, with a bed set aside inside it for when the interiors open
+- Added workplaces for everyone: shopkeepers now keep their shop fronts, guards their barracks and gates, farmers their fields, miners their mines, loggers their wood yards and fishers their waters
+- Added going home for the night: townsfolk now walk to their own door at bedtime, go inside, and come out again in the morning
+- The bounty hunter Corvane is now the one person in the world with no home, as the records say
+### Blocks
+- Added outdoor workstations beside the workshops that need them: anvils and furnaces at the smithies, sawbenches and crafting tables at the builders' yards, ranges at the kitchens, and the cloth trades' benches, wheels, looms, tubs and vats
+### Gameplay
+- Added wildlife across the whole map: deer, rabbits, foxes, ducks and coyotes in the meadows, woods, marshes and deserts, with wolves, bears, mountain lions and dire wolves in the deep wilds
+- Added fish to every ocean, river, lake and pond, each holding the fish its kind of water should
+- Added working farms: every field and garden is now sown with its kingdom's crops in rows, kept by a farmer of that kingdom
+- Added the pos console command, which prints your X, Y and Z and copies them to the clipboard
+- Added goto places for all seven kingdoms, every named landmark and every cave and mine mouth
+
+## Changes
+### NPC's
+- Changed everyone to a one-word name. Sir Alden, Sir Roderic, Sir Lancelot, Sir Gawain, Baron Edric and Sir Roland are now Alden, Roderic, Lancelot, Gawain, Edric and Roland, and nobody shares a name with anyone else
+- Changed people's titles to say what they do and where, such as Blacksmith of Valgard or Gate Guard of Severia
+- Changed woodcutters and loggers to fell the trees near their workplace
+### Gameplay
+- Changed predators to keep well away from the towns and villages, so townsfolk are no longer scared off by wolves and lions at their doors
+- Changed the developer display to be larger and easier to read, with your position in large green, red and blue figures and the people nearby set out as a table
+- Changed torches so they can now be lit with a shield on the other arm; the shield now stays on the arm while the torch is lit
+- Changed the cave mouths so they now open in a grassed bank, with bare rock only around the entrance
+- Changed the fields so their crop rows now line up with the furrows
+### Blocks
+- Changed Valgard's houses to stand back from the town wall, leaving proper lanes between them
+- Changed town walls to stand whole where a road runs alongside them, opening only where a road passes through
+- Changed Valgard's aqueduct to keep clear of the houses and run underground where the hill rises over it
+
+## Technical Changes
+### Gameplay
+- Changed the loading screen to run the world's first moments before you arrive, so the first seconds of play run smoothly
+- Changed short trips for people and creatures to look for a way close at hand, which removes the long pauses when a creature first moves after loading
+- Added a census of every resident to the building register, recording each building's residents, workers, planned beds and workstations
+- Added automatic checks that everyone has a home, a bed and a workplace they can walk to, that every kind of water has fish, that the wild's predators keep away from the towns and that the roads are clear
+
+## Fixed Bugs
+- AE-04301 - Fixed bug where the map switched to a test map's dungeon on parts of ShadowVeil
+- AE-04302 - Fixed bug where test map place names such as Store B and Chancery B floated over ShadowVeil
+- AE-04303 - Fixed bug where goto, restart and reset sent you to the test map's places
+- AE-04304 - Fixed bug where a torch could not be lit while a shield was equipped
+- AE-04305 - Fixed bug where a torch could not be seen in first person
+- AE-04306 - Fixed bug where fences on ShadowVeil were invisible, leaving a ring of invisible blocks around the farms
+- AE-04307 - Fixed bug where the farms had no crops and could not be worked
+- AE-04308 - Fixed bug where the buildings near 246, 55, 607 in Valgard left blind slots against the town wall and the aqueduct crossed the rooftops
+- AE-04309 - Fixed bug where the culvert cave at 573, 40, 899 was a heap of loose cobblestone on the open meadow
+- AE-04310 - Fixed bug where some alleyways were blocked by stray logs, earth and rocks
+- AE-04311 - Fixed bug where people stood idle at work because their trade had no workplace or tools in reach
+- AE-04312 - Fixed bug where smiths, builders and other crafters had no workstations on ShadowVeil
+- AE-04313 - Fixed bug where there were no fish in the oceans, rivers, lakes or ponds
+- AE-04314 - Fixed bug where wolves and mountain lions roamed beside Loxford and scared its people
+- AE-04315 - Fixed bug where people far from the player kept test map titles such as Citizen of DevPalace
+- AE-04316 - Fixed bug where two people shared the names Bram and Osric
+- AE-04317 - Fixed bug where a large stutter followed loading into the world
+- AE-04318 - Fixed bug where smoke and a glow from the test map's furnace hung in the air on ShadowVeil
+
+# Patch Notes Version Alpha 0.4.2: Curb Appeal
+
+The towns got a once-over from the street side, and every building is measured up for the furniture that comes next.
+
+Developer: Hoodie
+
+## New Features
+### Blocks
+- Added a walling of its own for each kingdom: Loxford's lime-pointed rubble stone, Harlette's ochre daub, Valgard's granite ashlar, Gorrick's tarred weatherboard, Azharad's straw-flecked adobe, Severia's warm stucco and Camelot's white ashlar
+- Added inside faces to the new walls, so each is plastered or boarded on the room side
+### Gameplay
+- Added exterior detail to the towns and countryside: wall lanterns and hanging signs by shop and inn doors, woodpiles against cottage gables, planting along house fronts, hay by barns and stables, crates and benches outside, and pit-props by mine mouths
+- Added guard rooms with doors on either side of the gatehouse passages
+- Added stair wells through the upper floors of every tall building, kept open for the stairs to come
+- Added a door into each wing of the palaces, temples and khans from their courtyards
+- Added the devui console command, which shows the developer display
+### NPC's
+- Added one-word names for everyone who did not have one. The roadside bandits are now Garth, Nell and Grimbald, and bounty hunters and people called up at the console now have names of their own
+
+## Changes
+### Blocks
+- Changed stained glass so it is now see-through, and sunlight now falls through church windows in coloured pools
+### Gameplay
+- Changed every building in a kingdom to draw its own mix of walls, roofs and trim from that kingdom's materials, so neighbouring houses no longer look alike
+- Changed new characters to wake in Loxford Castle's courtyard in front of the keep door, facing the gate, instead of inside the keep
+- Changed the music to follow the place you are in: each kingdom and kind of country now has its own pieces, the hymn plays at every church and shrine altar, and the dungeon music plays underground
+- Changed the background ambience to rise and fall with where you are, quieter in deserts and wastes, muffled indoors and silent underground
+- Changed the people standing near the fog to be drawn with less fine detail
+- Changed the cave and mine entrances to slope down into the hill, so the passages beyond them now lie under solid rock
+- Changed Valgard's aqueduct to fall only at its piers, so each arch now runs level
+- Changed the Loxford Castle undercroft stair to stand in the open courtyard, where it can now be reached
+### NPC's
+- Changed fishers to work any water their gear suits when their own kind of water is out of reach, and up to two anglers can now share a lake shore or a quay
+- Changed fishers who cannot fish for the moment (the tide is out, the weather is too rough) to mend their gear on the bank facing the water
+- Changed Elowen to watch her net from the bank while it soaks
+
+## Technical Changes
+### Gameplay
+- Changed the loading screen to also prepare the interface and the ground around every awake creature, so the first moments of play run smoothly
+- Changed creatures that cannot reach where they want to go to give up for a while instead of searching for a way again and again, which noticeably lightens the game's work in the wild
+- Changed people and creatures who fail to find a route to the same place to wait longer before each new try
+- Added a building register of every structure in the world, recording its kingdom, size, floors, doors and the rooms it is ready to hold, checked so that every building now opens onto a usable room
+- Changed the reference camera views to rise clear of any building that has grown over their spot
+- Changed the automatic tests to build the test map once and reuse it, so they now finish several times faster
+
+## Fixed Bugs
+- AE-04201 - Fixed bug where the devmode command crashed the game
+- AE-04202 - Fixed bug where characters made in 0.4 showed as created in an earlier version
+- AE-04203 - Fixed bug where church glass was not see-through and let no light in
+- AE-04204 - Fixed bug where people such as Elowen stood staring at the player
+- AE-04205 - Fixed bug where fishers on ShadowVeil never caught anything, because its waters held no fish their gear could take
+- AE-04206 - Fixed bug where shellfish gatherers on ShadowVeil were asked for a lobster pot instead of their crab cage
+- AE-04207 - Fixed bug where a huge stutter followed loading into the world
+- AE-04208 - Fixed bug where street lamps and wall lanterns on ShadowVeil never lit up at night
+- AE-04209 - Fixed bug where the music and ambience on ShadowVeil followed the old test map's places
+- AE-04210 - Fixed bug where the Loxford Castle undercroft stair was walled in by a corner tower
+- AE-04211 - Fixed bug where the halls beyond cave and mine entrances could break through the hillside above them
+- AE-04212 - Fixed bug where some reference camera views looked at the inside of a wall
+- AE-04213 - Fixed bug where the automatic tests could run for hours without finishing
+
 # Patch Notes Version Alpha 0.4.1: Brick by Brick
 
 The seven kingdoms have walls, roofs and streets now, though nobody has moved the furniture in yet.

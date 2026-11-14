@@ -114,7 +114,7 @@ public final class AstrattoNative {
     public static final int EVT_RIGID_IMPACT = 160, EVT_JOINT_BROKEN = 161, EVT_RIGID_SLEEP = 162;
     public static final int SHAPE_BOX = 0, SHAPE_SPHERE = 1, SHAPE_CAPSULE = 2, SHAPE_HULL = 3;
     public static final int RIGID_KINEMATIC = 1, RIGID_STATIC = 1 << 1, RIGID_NO_WORLD = 1 << 2, RIGID_NO_MOVERS = 1 << 3, RIGID_NO_SLEEP = 1 << 4,
-            RIGID_BULLET = 1 << 5, RIGID_REPORT = 1 << 6, RIGID_DEBRIS = 1 << 7;
+            RIGID_BULLET = 1 << 5, RIGID_REPORT = 1 << 6, RIGID_DEBRIS = 1 << 7, RIGID_YIELD = 1 << 8;
     public static final int JOINT_BALL = 0, JOINT_HINGE = 1, JOINT_SLIDER = 2, JOINT_CONE_TWIST = 3, JOINT_FIXED = 4;
     public static final int JOINT_LIMITED = 1, JOINT_MOTOR = 1 << 1, JOINT_COLLIDE = 1 << 2;
 
@@ -138,7 +138,7 @@ public final class AstrattoNative {
     public static int texMaxLevel(int n) { return ((n + 1) & 15) << 8; }
     public static final int RES_TEXTURE = 1, RES_MESH = 2;
     public static final int RCMD_CAMERA = 1, RCMD_ENV = 2, RCMD_LIGHT = 3, RCMD_MODEL = 4, RCMD_PARTICLES = 5, RCMD_QUADS = 6, RCMD_GRADING = 7, RCMD_ATMOS = 20,
-            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17, RCMD_EMITTER = 18, RCMD_RIPPLE = 19, RCMD_WATER_FLOW = 21;
+            RCMD_SHADOW_BODY = 8, RCMD_WORLD = 9, RCMD_CLEAR = 10, RCMD_QUALITY = 11, RCMD_FOLIAGE = 12, RCMD_PROPS = 13, RCMD_DECALS = 14, RCMD_LENS = 15, RCMD_SMOKE = 16, RCMD_PORTRAIT = 17, RCMD_EMITTER = 18, RCMD_RIPPLE = 19, RCMD_WATER_FIELD = 21, RCMD_PRECIP = 22;
     /** 2.1: the renderer's layers. */
     public static final int LAYER_FOLIAGE = 1, LAYER_PROP = 2, LAYER_DECAL = 3, INSTANCES_SHADOW = 1;
     public static final int PASS_GTAO = 1, PASS_SSR = 1 << 1, PASS_VOLUMETRICS = 1 << 2, PASS_TAA = 1 << 3, PASS_BLOOM = 1 << 4, PASS_MOTION_BLUR = 1 << 5, PASS_DEPTH_OF_FIELD = 1 << 6;

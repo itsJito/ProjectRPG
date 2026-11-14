@@ -1,0 +1,100 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.92s ({regions=853, overlays=512, variants=604, scarp=49, coast=419, erosion=343, peaks=43, lakes=64, isles=4, rivers=700, wadis=15, ground=31, roads=600, causeways=4, architecture=943, pitsFilled=1309, pits=458, banks=73, clamp=14, cliffs=57, columns=1055, falls=15, raise=11146, trees=254, outcrops=0, ways=621}), made and lit in 2.24s
+    [water] flow field grown in 779 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+
+    ================ 375, 60, 422  law WILDS  stand Y 60.0
+    structure here: -
+      near hojimo_monastery           Hojimo Monastery                         church         36 m lot 397,431-418,442 floor 56
+      near monastery_cells            Guest cells                              building       28 m lot 395,402-401,411 floor 39
+      near allotment_cottage          Allotment cottage                        building       34 m lot 389,449-394,454 floor 55
+      near gorrick_woodyard           Wood yard                                yard           39 m lot 397,447-403,454 floor 55
+      near gorrick_graveyard          Gorrick Graveyard                        graveyard      12 m lot 368,427-379,440 floor 60
+      object Shrine                 Shrine of Light                (378.0, 62.0, 425.0)
+      npc Einar        WORKER         (373.5, 64.0, 447.5) goal IDLE
+      npc Astrid       UNDERTAKER     (374.5, 61.0, 433.5) goal IDLE
+      layer Y58 (x 372..378 across, z down; * the point)
+       aaaaaaa
+       aaaaaaa
+       aaaaaaa
+       aaa*aaa
+       aaaaaaa
+       aaaaaaa
+       aaaaaaa
+      layer Y59 (x 372..378 across, z down; * the point)
+       aaaabbb
+       aaabbbb
+       aaaaabb
+       aaa*bbb
+       aaaaaaa
+       aaaaaaa
+       aaaaaaa
+      layer Y60 (x 372..378 across, z down; * the point)
+       abbb...
+       bbb....
+       bbbbb..
+       bbb*...
+       bbbbbbb
+       bbbbbbb
+       bbbbbbb
+      layer Y61 (x 372..378 across, z down; * the point)
+       b......
+       .......
+       .......
+       ...*...
+       .......
+       .....cc
+       .....cc
+      layer Y62 (x 372..378 across, z down; * the point)
+       .......
+       .......
+       .......
+       ...*...
+       .......
+       .....cc
+       .....cc
+      layer Y63 (x 372..378 across, z down; * the point)
+       .......
+       .......
+       .......
+       ...*...
+       .......
+       .......
+       .......
+      layer Y64 (x 372..378 across, z down; * the point)
+       .......
+       .......
+       .......
+       ...*...
+       .......
+       .......
+       .......
+      legend: a=dirt b=grass c=headstone
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 37.638 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 42s
+9 actionable tasks: 1 executed, 8 up-to-date

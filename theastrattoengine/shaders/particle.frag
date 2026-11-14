@@ -12,7 +12,7 @@ void main() {
     int kind = int(vParams.y + 0.5);
     float age = vParams.z, seed = vParams.w;
     float r = length(vQ);
-    if (r > 1.0 && kind != 5 && kind != 7 && kind != 9) discard;
+    if (r > 1.0 && kind != 5 && kind != 7 && kind != 9 && kind != 11) discard;
     if (kind == 9 && r > 1.0) discard;
     // soft where the sprite cuts into geometry
     float scene = lin(texture(uDepth, gl_FragCoord.xy / uScreen).r);
@@ -77,6 +77,12 @@ void main() {
         float speck = step(0.86, texture(uNoise, vQ * 1.7 + vec2(seed * 9.0, seed)).g) * (1.0 - smoothstep(0.7, 1.0, r));
         a = max(body, speck) * (1.0 - smoothstep(0.7, 1.0, age));
         col *= mix(1.0, 0.55, smoothstep(0.0, 0.5, age)) * (0.85 + 0.3 * n);
+    } else if (kind == 11) {
+        // 2.12: falling water: a soft white-blue streak, densest down its middle, thinning to its ends
+        float across = 1.0 - smoothstep(0.35, 1.0, abs(vQ.x));
+        float along = 1.0 - vQ.y * vQ.y;
+        a = across * along * 0.5 * (1.0 - smoothstep(0.8, 1.0, age));
+        col = mix(col, vec3(1.0), 0.35 * across);
     } else if (kind == 8) {
         a = (1.0 - smoothstep(0.45, 1.0, r)) * vColor.a * (1.0 - smoothstep(0.75, 1.0, age));
     } else {
@@ -85,5 +91,5 @@ void main() {
     a *= soft;
     if (a < 0.004) discard;
     // premultiplied output: additive kinds carry no alpha, smoke and dust occlude, rain is half one and half the other
-    oColor = (kind == 1 || kind == 8 || kind == 9 || kind == 10) ? vec4(col * a, a) : kind == 4 ? vec4(col * a, a * 0.8) : kind == 7 ? vec4(col * a * 0.55, a * 0.3) : vec4(col * a, 0.0);
+    oColor = (kind == 1 || kind == 8 || kind == 9 || kind == 10 || kind == 11) ? vec4(col * a, a) : kind == 4 ? vec4(col * a, a * 0.8) : kind == 7 ? vec4(col * a * 0.55, a * 0.3) : vec4(col * a, 0.0);
 }

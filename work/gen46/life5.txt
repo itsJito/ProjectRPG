@@ -1,0 +1,149 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.86s ({regions=903, overlays=468, variants=418, scarp=46, coast=651, erosion=310, peaks=40, lakes=64, isles=4, rivers=657, wadis=13, ground=31, roads=664, causeways=3, architecture=954, pitsFilled=1405, pits=481, banks=50, clamp=12, cliffs=42, columns=1011, falls=16, raise=11220, trees=280, outcrops=0, ways=476}), made and lit in 1.54s
+    [water] flow field grown in 1014 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 4 stand with 3+ others within 2 m
+       Duke Bashir CIVIC (875.5,37.0,894.5) 3 near goal IDLE
+       Idris SCHOLAR (875.5,37.0,894.5) 3 near goal IDLE
+       Hakim CARTER (874.5,37.0,894.5) 3 near goal IDLE
+       Zaid GUARD (874.5,37.0,895.5) 3 near goal IDLE
+
+    [life] stop 244,928 done (30 people seen so far)
+    [life] stop 590,884 done (34 people seen so far)
+    [life] stop 119,749 done (54 people seen so far)
+    [life] stop 591,1023 done (56 people seen so far)
+    [life] stop 898,870 done (92 people seen so far)
+    [life] stop 357,772 done (96 people seen so far)
+    [life] stop 160,604 done (115 people seen so far)
+    [life] stop 571,593 done (116 people seen so far)
+    [life] stop 198,436 done (120 people seen so far)
+    [life] stop 551,109 done (150 people seen so far)
+    [life] stop 378,410 done (166 people seen so far)
+    [life] stop 825,385 done (183 people seen so far)
+    [life] stop 877,91 done (185 people seen so far)
+    [life] stop 864,554 done (188 people seen so far)
+    [life] stop 215,286 done (190 people seen so far)
+          [crime] ASSAULT by Vark against world life at (829.0, 692.9), t 601.7
+          [crime] ASSAULT by Wenna against world life at (829.6, 693.2), t 602.0
+          [crime] ASSAULT by Hurk against world life at (829.0, 693.7), t 602.2
+          [crime] ASSAULT by Rask against world life at (828.6, 694.1), t 602.3
+          [crime] ASSAULT by Grisel against world life at (829.9, 692.5), t 602.5
+          [crime] ASSAULT by Hullen against world life at (828.2, 693.5), t 603.3
+          [crime] ASSAULT by Garmund against world life at (830.4, 692.4), t 603.5
+          [crime] ASSAULT by Vark against world life at (830.0, 692.3), t 612.2
+          [crime] ASSAULT by Wenna against world life at (829.8, 692.8), t 612.4
+          [crime] ASSAULT by Grisel against world life at (829.9, 692.7), t 612.6
+          [crime] ASSAULT by Rask against world life at (828.6, 693.8), t 612.8
+          [crime] ASSAULT by Hurk against world life at (828.4, 693.7), t 613.5
+          [crime] ASSAULT by Hullen against world life at (828.7, 693.9), t 613.7
+          [crime] ASSAULT by Garmund against world life at (829.7, 693.7), t 615.9
+          [stuck] Garmund FIGHT at (829.69, 58.00, 693.74) -> (829.3, 693.0), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Garmund FIGHT at (829.74, 58.00, 693.83) -> (829.2, 693.2), combat move, v (0.01, 0.30) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Garmund FIGHT at (829.75, 58.00, 693.87) -> (829.2, 693.2), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Garmund FIGHT at (829.53, 58.00, 694.00) -> (829.2, 693.2), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [crime] ASSAULT by Vark against world life at (828.3, 693.9), t 622.7
+          [crime] ASSAULT by Grisel against world life at (829.9, 692.7), t 623.0
+          [crime] ASSAULT by Wenna against world life at (829.7, 693.7), t 623.1
+          [crime] ASSAULT by Hullen against world life at (828.7, 693.8), t 624.7
+          [crime] ASSAULT by Hurk against world life at (828.6, 691.5), t 624.7
+          [crime] ASSAULT by Rask against world life at (829.8, 694.1), t 625.2
+          [crime] ASSAULT by Garmund against world life at (829.6, 693.4), t 629.2
+          [crime] ASSAULT by Wenna against world life at (828.2, 694.1), t 633.5
+          [crime] ASSAULT by Vark against world life at (829.7, 693.3), t 633.8
+          [crime] ASSAULT by Grisel against world life at (829.4, 693.7), t 633.8
+          [crime] ASSAULT by Hullen against world life at (829.3, 693.7), t 634.8
+          [crime] ASSAULT by Rask against world life at (829.1, 692.8), t 635.5
+          [crime] ASSAULT by Hurk against world life at (829.7, 693.3), t 637.7
+          [crime] ASSAULT by Garmund against world life at (830.1, 692.4), t 639.6
+    [life] stop 829,692 done (198 people seen so far)
+    [life] stop 768,985 done (200 people seen so far)
+    [life] stop 450,34 done (209 people seen so far)
+    [life] stop 432,169 done (219 people seen so far)
+    [life] stop 176,131 done (222 people seen so far)
+    [life] stop 984,391 done (223 people seen so far)
+    [life] stop 720,481 done (224 people seen so far)
+
+    [life] 22 stops of 2400 frames; 224 people seen
+      Ealdra           MERCHANT     seen   380 spins   0 blocked     0 still   276
+          last (258.5,39.0,926.2) SLEEP: on the way
+      Oswin            WORKER       seen   380 spins   1 blocked     0 still    44
+          spun at (304.3,42.7,911.4) PRAY: on the way to prayers
+          last (302.6,44.0,902.1) PRAY: on the way to prayers
+      Hadwin           CIVIC        seen   380 spins   0 blocked     0 still   290
+          last (230.5,47.8,987.3) SLEEP: on the way
+      Father Paul      PRIEST       seen   380 spins   0 blocked     0 still    58
+          last (874.0,34.0,51.3) PRAY: on the way to prayers
+      Alexios          CRAFTSMAN    seen  1016 spins   2 blocked     0 still     0
+          spun at (476.3,36.0,115.0) WORK: Carpenter: make the selected order
+      Einar            WORKER       seen   380 spins   2 blocked     0 still     0
+          spun at (325.5,66.0,399.5) WORK: Firewood Cutter: gather at a suitable site
+      Count Dracula    CIVIC        seen   380 spins   5 blocked     0 still   132
+          spun at (100.4,49.0,702.1) WORK: Household Baron: tidying the workplace while short of supplies
+          last (99.1,48.0,701.8) PRAY: on the way to prayers
+      Leofric          WORKER       seen   380 spins   0 blocked     0 still    55
+          last (303.7,40.0,909.5) SLEEP: on the way
+      King Richard     CIVIC        seen   380 spins   0 blocked     0 still   269
+          last (228.5,40.0,986.7) SOCIALIZE: on the way
+      Alaric           PRIEST       seen   380 spins   1 blocked     0 still     0
+          spun at (217.2,39.0,898.4) SOCIALIZE: 
+      Duke Bashir      CIVIC        seen   380 spins   0 blocked     0 still    42
+          last (913.1,37.0,851.0) PRAY: on the way to prayers
+      Sir Nicholas     KNIGHT       seen   380 spins   7 blocked     0 still     0
+          spun at (586.0,37.0,114.5) WORK: inspected the assigned border
+      Alkis            CARTER       seen  1140 spins   4 blocked   241 still     0
+          spun at (476.5,36.0,120.5) WORK: paused to reconsider a blocked route
+          last (476.5,36.0,120.5) WORK: paused to reconsider a blocked route
+      Phaedra          CARTER       seen   380 spins   2 blocked   137 still     0
+          spun at (586.5,37.0,107.5) WORK: paused to reconsider a blocked route
+          last (586.5,37.0,107.5) WORK: paused to reconsider a blocked route
+      Duke Edran       CIVIC        seen   380 spins   0 blocked     0 still    76
+          last (140.5,57.0,605.3) PRAY: on the way to prayers
+      Runa             CARTER       seen   380 spins   2 blocked   122 still     0
+          spun at (405.5,56.0,403.5) WORK: paused to reconsider a blocked route
+          last (405.5,56.0,403.5) WORK: paused to reconsider a blocked route
+      Varek            SCHOLAR      seen   380 spins   0 blocked     0 still    64
+          last (80.3,47.9,717.5) PRAY: on the way to prayers
+      Mother Mirel     PRIEST       seen   380 spins   4 blocked     0 still    99
+          spun at (106.5,43.0,728.5) PRAY: on the way to prayers
+          last (106.5,43.0,728.5) PRAY: on the way to prayers
+      Elian            PRIEST       seen   380 spins   0 blocked     0 still   379
+          last (840.5,35.0,349.5) PRAY: on the way to prayers
+      Lothar           GUARD        seen   380 spins   2 blocked   124 still     0
+          spun at (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+          last (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   380 spins   4 blocked   129 still   140
+          spun at (324.7,64.0,367.6) WORK: paused to reconsider a blocked route
+          last (324.7,64.0,367.6) WORK: paused to reconsider a blocked route
+      Haskel           MINER        seen   650 spins   2 blocked     0 still     0
+          spun at (155.5,58.0,544.5) WORK: Ore Miner: deliver a real batch
+      never in play: Orrin CRAFTSMAN home (369,654)
+    [life] 22 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 501.906 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8m 27s
+9 actionable tasks: 1 executed, 8 up-to-date

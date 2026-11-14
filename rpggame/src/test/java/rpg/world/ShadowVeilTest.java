@@ -45,11 +45,11 @@ class ShadowVeilTest {
     }
 
     @Test @org.junit.jupiter.api.Order(2) void theEngineHoldsTheWholeWorldAndTheMapIsShadowVeil() {
-        assertEquals(1072, g.vox.sizeX()); assertEquals(1072, g.vox.sizeZ()); assertEquals(200, g.vox.sizeY());
+        assertEquals(Atlas.get().world, g.vox.sizeX()); assertEquals(Atlas.get().world, g.vox.sizeZ()); assertEquals(200, g.vox.sizeY());
         assertTrue(WorldMap.shadowveil());
         assertEquals("Loxford", DevMap.ALPHA);
         // the far corner is open sea; the spawn stands on dry ground in Loxford
-        assertEquals(Blocks.WATER, g.vox.block(1071, 29, 1071));
+        assertEquals(Blocks.WATER, g.vox.block(Atlas.get().world - 1, 29, Atlas.get().world - 1));
         assertEquals("Loxford", DevMap.jurisdiction(WorldMap.active().spawnX, WorldMap.active().spawnZ));
         int below = g.vox.block((int) g.player.x, (int) Math.floor(g.player.y) - 1, (int) g.player.z);
         assertTrue(g.vox.solid((int) g.player.x, (int) Math.floor(g.player.y) - 1, (int) g.player.z), "the player stands on ground (" + below + ")");
@@ -76,9 +76,11 @@ class ShadowVeilTest {
         assertTrue(g.npcs.size() >= 90, "the whole roster came over: " + g.npcs.size());
         List<String> wrong = new ArrayList<>();
         for (Npc n : g.npcs) {
-            if (n.x < 16 || n.z < 16 || n.x > 1056 || n.z > 1056) wrong.add(n.name + " off the map");
-            float ground = WorldMap.standY(n.x, n.z);
-            if (Math.abs(n.y - ground) > 1.5f) wrong.add(n.name + " at y " + n.y + " over ground " + ground);
+            int edge = Atlas.get().world;
+            if (n.x < 16 || n.z < 16 || n.x > edge - 16 || n.z > edge - 16) wrong.add(n.name + " off the map");
+            // (0.4.6) on a floor a body stands on: the ground, or a storey of the building they begin the day in
+            float floor = g.vox.navigation.standY(n.x, n.y, n.z);
+            if (!Float.isFinite(floor) || Math.abs(n.y - floor) > 1.5f) wrong.add(n.name + " at y " + n.y + " over floor " + floor);
         }
         assertTrue(wrong.isEmpty(), wrong::toString);
         Npc bram = (Npc) g.actor(rpg.Ids.LAWMAN_A);

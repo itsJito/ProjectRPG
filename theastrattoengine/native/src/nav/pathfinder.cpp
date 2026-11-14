@@ -71,6 +71,9 @@ bool Pathfinder::stand(const VoxelWorld& w, int x, int y, int z, bool doors) {
 int Pathfinder::stepY(const VoxelWorld& w, int x, int z, int y, bool doors) {
     if (stand(w, x, y, z, doors)) return y;
     if (stand(w, x, y + 1, z, doors)) return y + 1;
+    // (0.4.6, gamefixes: NPCs stuck on a castle stair) a drop is stepped off at the body's own height: the cells it leans
+    // into must be clear head high (a step off a stair's side under the floor above was a route no body could take)
+    if (!pass(w, x, y, z, doors) || !pass(w, x, y + 1, z, doors)) return -1;
     for (int d = 1; d <= 3; d++) {
         if (w.solid(x, y - d + 1, z)) break;
         if (stand(w, x, y - d, z, doors)) return y - d;

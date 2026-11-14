@@ -60,16 +60,19 @@ class Gamefixes041Test {
         assertFalse(arch().patrols.isEmpty(), "the towns have their watch's rounds");
     }
 
-    @Test @org.junit.jupiter.api.Order(2) void aNewCharacterWakesInsideLoxfordCastleFacingTheWayOut() {
+    @Test @org.junit.jupiter.api.Order(2) void aNewCharacterWakesInLoxfordCastlesCourtBeforeTheKeepDoor() {
+        // (0.4.2, gamefixes: players spawned inside a building) out in the ward, in front of the keep's door, facing the gate
         var castle = arch().byId("loxford_castle");
-        assertTrue(castle.contains((int) g.player.x, (int) g.player.z), "the spawn is inside Loxford Castle");
+        assertTrue(castle.contains((int) g.player.x, (int) g.player.z), "the spawn is within Loxford Castle's walls");
         assertEquals("Loxford", DevMap.jurisdiction(g.player.x, g.player.z));
-        assertTrue(g.vox.solid((int) g.player.x, (int) Math.floor(g.player.y) - 1, (int) g.player.z), "standing on the keep's floor");
-        float[] door = castle.points.get("keepDoor");
-        float want = (float) Math.atan2(-(door[0] - g.player.x), -(door[1] - g.player.z));
-        assertTrue(Math.abs(rpg.actor.Actor.wrap(want - g.controller.camYaw)) < 0.2f, "facing the keep's door: " + g.controller.camYaw + " vs " + want);
-        // the way out is open: the keep's door, then the gate
-        assertTrue(g.vox.navigation.validPoint(door[0], g.player.y, door[1] + 2, d -> true) || g.vox.navigation.validPoint(door[0], g.player.y, door[1] - 2, d -> true));
+        assertTrue(g.vox.solid((int) g.player.x, (int) Math.floor(g.player.y) - 1, (int) g.player.z), "standing on the court");
+        for (var r : arch().reserved) if (r.owner().equals("loxford_castle") && r.kind().equals("interior"))
+            assertFalse(g.player.x >= r.x0() && g.player.x < r.x1() + 1 && g.player.z >= r.z0() && g.player.z < r.z1() + 1 && g.player.y >= r.y0() && g.player.y <= r.y1() + 1, "not inside the keep");
+        assertTrue(g.vox.sight(g.player.x, g.player.eyeY(), g.player.z, g.player.x, g.player.eyeY() + 20, g.player.z), "under the open sky");
+        float[] door = castle.points.get("keepDoor"), gate = castle.points.get("gate");
+        assertTrue(Math.hypot(door[0] - g.player.x, door[1] - g.player.z) < 6, "a few steps from the keep's door");
+        float want = (float) Math.atan2(-(gate[0] - g.player.x), -(gate[1] - g.player.z));
+        assertTrue(Math.abs(rpg.actor.Actor.wrap(want - g.controller.camYaw)) < 0.2f, "facing the gate: " + g.controller.camYaw + " vs " + want);
     }
 
     @Test @org.junit.jupiter.api.Order(3) void theBuildingsHangTheirDoorsOnTheirOwnFloors() {
@@ -152,6 +155,6 @@ class Gamefixes041Test {
 
     @Test @org.junit.jupiter.api.Order(8) void theDeveloperDisplayTellsWhereWhenAndWho() {
         String all = String.join("\n", new rpg.ui.DevDisplay(g, null).lines());
-        assertTrue(all.contains("FPS") && all.contains("XYZ") && all.contains("chunk [") && all.contains("people:") && all.contains("Alpha 0.4.1"), all);
+        assertTrue(all.contains("FPS") && all.contains("XYZ") && all.contains("chunk [") && all.contains("people:") && all.contains(rpg.Main.VERSION), all);
     }
 }

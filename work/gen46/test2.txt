@@ -1,0 +1,92 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+
+> Task :theastrattoengine:buildNative
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :theastrattoengine:jar
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :test
+  slow: rpg.ai.ProfessionTest.aCookBuysRealIngredientsInsteadOfSelectingAnUnusableFishingJob() 28.101 s
+
+ProfessionTest > aMinerUsesActualStrikesAndRetainsFixedSkillValues() FAILED
+    org.opentest4j.AssertionFailedError: Ore Miner: tidying the workplace while short of supplies at 72.13088,27.645538 phase=IDLE ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.ai.ProfessionTest.aMinerUsesActualStrikesAndRetainsFixedSkillValues(ProfessionTest.java:32)
+
+Gamefixes044Test > everyoneWalksFromTheirDoorToTheirBedAndTheirPost() FAILED
+    org.opentest4j.AssertionFailedError: 2: [Merek: no way from 143,616 to the bed at 140,47,611, Tamsin: no way from 144,616 to the bed at 146,47,611] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyoneWalksFromTheirDoorToTheirBedAndTheirPost(Gamefixes044Test.java:122)
+
+Gamefixes044Test > everyRoomOfEveryBuildingIsReachedFromItsDoor() FAILED
+    org.opentest4j.AssertionFailedError: 2: [marble_bunkhouse's mess (storey 0) is not reached from its door: 143,49,617 -> 142,47,613, marble_bunkhouse's bunk_room (storey 0) is not reached from its door: 143,49,617 -> 142,47,610] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyRoomOfEveryBuildingIsReachedFromItsDoor(Gamefixes044Test.java:152)
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 54.548 s
+
+27 tests completed, 3 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 49s
+9 actionable tasks: 5 executed, 4 up-to-date

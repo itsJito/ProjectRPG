@@ -61,6 +61,19 @@ public final class Objects {
             };
         }
     };
+    private int nodesAt = Integer.MIN_VALUE, activeAt = -1;
+    private final List<WorldObject> active = new ArrayList<>();
+    /** (0.4.5, optimisation) The containers by kind ("grave", "chest" ...), rebuilt only when the world's list changes. */
+    private final java.util.Map<String, List<Container>> byKind = new java.util.HashMap<>();
+    private int kindAt = -1;
+    public List<Container> containers(String kind) {
+        if (kindAt != list.changes()) {
+            byKind.clear();
+            for (WorldObject o : snapshot()) if (o instanceof Container c) byKind.computeIfAbsent(c.kind, k -> new ArrayList<>()).add(c);
+            kindAt = list.changes();
+        }
+        return byKind.getOrDefault(kind, List.of());
+    }
     /** When the removed were last swept out of the list. */
     private double sweptAt;
     public List<WorldObject> everything() { return list; }
@@ -109,6 +122,7 @@ public final class Objects {
         if (indexed == list.size() - 1) { byId.put(o.id, o); indexed = list.size(); }
         if (o instanceof Door door) doors.add(door);
         if (o instanceof Container c && c.kind.equals("chest")) c.solid(g);
+        if (o instanceof Container c && c.kind.equals("memorial")) c.stoneSolid(g);
         return o;
     }
     private long fid() { return nextFixture++; }
@@ -392,6 +406,8 @@ public final class Objects {
         for (Door door : jailDoors) if (door.name.equals(jurisdiction + " cell door")) return door;
         return null;
     }
+    /** (0.4.4) Every altar of the world (the devmap's one, ShadowVeil's churches'). */
+    public List<Fixtures.Altar> altars() { List<Fixtures.Altar> out = new ArrayList<>(); for (WorldObject o : list) if (o instanceof Fixtures.Altar a) out.add(a); return out; }
 
     /** The tree or rock a block belongs to (the trunk or crown, the ore), or null. */
     public Node nodeAt(int bx, int by, int bz) {
@@ -466,7 +482,9 @@ public final class Objects {
             int[] spot = rpg.world.shadowveil.ShadowVeil.fishingSpot((float) a.x(p[0]), (float) a.z(p[1]));
             if (spot == null) continue;
             String gear = rpg.world.shadowveil.Atlas.s(f, "gear", "net");
-            rpg.item.ItemDef needs = switch (gear) { case "rod" -> Items.FISHING_ROD; case "pot" -> Items.LOBSTER_POT; case "harpoon" -> Items.HARPOON; default -> Items.FISHING_NET; };
+            // (0.4.2, gamefixes: fishers did not fish) a pot is the crab cage the shellfish gatherers carry (it asked for a
+            // lobster pot no one had)
+            rpg.item.ItemDef needs = switch (gear) { case "rod" -> Items.FISHING_ROD; case "pot" -> Items.CRAB_CAGE; case "harpoon" -> Items.HARPOON; default -> Items.FISHING_NET; };
             boolean trout = gear.equals("rod"), cage = gear.equals("pot");
             String what = rpg.world.shadowveil.Atlas.s(f, "name", "Fishing spot");
             // (0.4.1) a pot is a crab cage, as on the devmap's shore (the shellfish gatherers' work: they had none)
@@ -480,6 +498,7 @@ public final class Objects {
             n.y = spot[2] + 0.9f;
             try { n.waters = Node.Waters.valueOf(rpg.world.shadowveil.Atlas.s(f, "waters", "LAKE")); } catch (IllegalArgumentException ignored) { }
         }
+        gathering(t);
         // (0.4.1) the buildings' doors: a door hung in every doorway that takes one, closed (the rooms behind are kept
         // for 0.4.2), on the building's own floor
         nextFixture = Ids.SV_DOORS;
@@ -489,7 +508,85 @@ public final class Objects {
             if (cells.length > 2 || cells.length == 0) continue;
             add(new Door(fid(), s.name + (k == 0 ? " door" : " back door"), cells, false, null, 1, 0, s.doorFloors.get(k) + 1)).spawn(g);
         }
+        // (0.4.2) the furniture set out of doors by the buildings' dressing (crates, benches), in their own band
+        nextFixture = Ids.SV_PROPS;
+        if (t.arch != null) for (rpg.world.shadowveil.Architecture.Prop p : t.arch.props) {
+            Furniture.Kind kind = Furniture.Kind.valueOf(p.kind());
+            int x1 = p.x() + (kind == Furniture.Kind.BENCH && (p.facing() == 0 || p.facing() == 2) ? 1 : 0), z1 = p.z() + (kind == Furniture.Kind.BENCH && (p.facing() == 1 || p.facing() == 3) ? 1 : 0);
+            furniture.add(add(new Furniture(fid(), kind, p.x(), p.z(), kind == Furniture.Kind.BENCH ? x1 : p.x(), kind == Furniture.Kind.BENCH ? z1 : p.z(), 1, p.facing(), 0, true, p.floor())));
+        }
+        // (0.4.4, gamefixes: every interior built, furnished and working) the interiors' furniture, inner doors, stations,
+        // chests, altars and jail cells, in their own band (their cells are already in the world's blocks)
+        nextFixture = Ids.SV_INTERIORS;
+        if (t.arch != null) rpg.world.shadowveil.Rooms.spawn(g, t.arch, new rpg.world.shadowveil.Rooms.Maker() {
+            @Override public long id() { return fid(); }
+            @Override public <T extends WorldObject> T add(T o) { return Objects.this.add(o); }
+            @Override public void furniture(Furniture f) { furniture.add(f); }
+            @Override public void door(Door d, boolean cell) { d.spawn(g); if (cell) jailDoors.add(d); }
+        });
+        // (0.4.4) the routes know every door (who may pass a locked one): they never did on ShadowVeil
+        g.vox.doors(doors);
         nextFixture = saved;
+    }
+
+    /**
+     * (0.4.5, gamefixes: Harvesting did not work - ShadowVeil had nothing wild to gather) the wild's herb patches, flax
+     * and berry bushes, grown by biome from the data ('gathering'), each a Harvesting node like the devmap's: on open
+     * ground of the wild, never on a way, a lot, a yard, water, a cliff or under a tree.
+     */
+    private void gathering(rpg.world.shadowveil.Terrain t) {
+        var a = rpg.world.shadowveil.Atlas.get();
+        java.util.Map<String, Object> gd = rpg.world.shadowveil.Atlas.map(a.root, "gathering");
+        java.util.Map<String, Object> kinds = rpg.world.shadowveil.Atlas.map(gd, "kinds");
+        if (kinds.isEmpty()) return;
+        int grid = Math.max(3, rpg.world.shadowveil.Atlas.i(gd, "grid", 6));
+        java.util.Map<String, Object> clear = rpg.world.shadowveil.Atlas.map(gd, "clearance");
+        int builtGap = rpg.world.shadowveil.Atlas.i(clear, "built", 3), roadGap = rpg.world.shadowveil.Atlas.i(clear, "road", 1);
+        int made = 0;
+        for (int gx = 0; gx < t.S; gx += grid) for (int gz = 0; gz < t.S; gz += grid) {
+            long h = (gx * 73856093L ^ gz * 19349663L ^ 0x5EED_6A7EL) * 0x9E3779B97F4A7C15L; h ^= h >>> 31;
+            int x = gx + (int) ((h >>> 3) % grid), z = gz + (int) ((h >>> 13) % grid);
+            if (!t.in(x, z)) continue;
+            int i = t.idx(x, z);
+            String biome = t.biomes.get(t.biome[i] & 0xFF);
+            float roll = ((h >>> 23) & 0xFFFF) / 65536f;
+            for (var e : kinds.entrySet()) {
+                if (!(e.getValue() instanceof java.util.Map<?, ?> km)) continue;
+                @SuppressWarnings("unchecked") java.util.Map<String, Object> k = (java.util.Map<String, Object>) km;
+                double chance = rpg.world.shadowveil.Atlas.d(rpg.world.shadowveil.Atlas.map(k, "biomes"), biome, 0);
+                if (roll >= chance) { roll -= (float) chance; continue; }
+                if (!wildGround(t, x, z, builtGap, roadGap)) break;
+                int y = t.top[i] + 1;
+                if (g.vox.block(x, y, z) != Blocks.AIR || g.vox.block(x, y + 1, z) != Blocks.AIR || !g.vox.solid(x, y - 1, z)) break;
+                int block;
+                try { block = Blocks.class.getField(rpg.world.shadowveil.Atlas.s(k, "block", "HERB_PATCH")).getInt(null); } catch (ReflectiveOperationException ex) { break; }
+                rpg.item.ItemDef item = rpg.item.Items.find(rpg.world.shadowveil.Atlas.s(k, "item", "guam"));
+                if (item == null) break;
+                node(Node.Kind.PATCH, e.getKey(), rpg.world.shadowveil.Atlas.s(k, "name", "Patch"), Skill.HARVESTING, rpg.world.shadowveil.Atlas.i(k, "level", 1), item,
+                        rpg.world.shadowveil.Atlas.i(k, "xp", 10), (float) rpg.world.shadowveil.Atlas.d(k, "time", 2), rpg.world.shadowveil.Atlas.i(k, "stock", 3), g.cfg.patchRespawn, block, new int[]{x, z}, 0, 0);
+                Node n = nodes.get(nodes.size() - 1);
+                n.base(y);
+                n.setBlocks(g, true);
+                made++;
+                break;
+            }
+        }
+        System.out.println("[gathering] " + made + " wild herb patches, flax and berry bushes");
+    }
+
+    /** Open ground of the wild: dry, level enough, off every way and lot by its gap, no tree, no cliff. */
+    private static boolean wildGround(rpg.world.shadowveil.Terrain t, int x, int z, int builtGap, int roadGap) {
+        int i = t.idx(x, z);
+        int bad = rpg.world.shadowveil.Terrain.TREE | rpg.world.shadowveil.Terrain.CLIFF | rpg.world.shadowveil.Terrain.BRIDGE | rpg.world.shadowveil.Terrain.FALLS;
+        if ((t.flags[i] & bad) != 0 || t.water[i] >= 0) return false;
+        for (int dx = -builtGap; dx <= builtGap; dx++) for (int dz = -builtGap; dz <= builtGap; dz++) {
+            if (!t.in(x + dx, z + dz)) return false;
+            int f = t.flags[t.idx(x + dx, z + dz)];
+            if ((f & (rpg.world.shadowveil.Terrain.BUILT | rpg.world.shadowveil.Terrain.YARD | rpg.world.shadowveil.Terrain.SQUARE)) != 0) return false;
+            if (Math.abs(dx) <= roadGap && Math.abs(dz) <= roadGap && (f & (rpg.world.shadowveil.Terrain.ROAD | rpg.world.shadowveil.Terrain.LANE)) != 0) return false;
+            if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1 && Math.abs(t.top[t.idx(x + dx, z + dz)] - t.top[i]) > 1) return false;
+        }
+        return true;
     }
 
     private void node(Node.Kind kind, String def, String name, Skill skill, int level, rpg.item.ItemDef product, int xp, float time, int stock, float respawn, int block, int[] at, int leaves, int height) {
@@ -567,14 +664,26 @@ public final class Objects {
     }
 
     public void update(float dt) {
-        for (Node n : nodes) n.update(g);
-        for(var object:snapshot())if(object instanceof FishingNet net && !net.removed)net.update(g);
+        // (0.4.5, optimisation) regrowth is a matter of game minutes: the thousands of trees, rocks and patches are looked
+        // at once a game minute, not every tick
+        int minute = (int) g.state.minutes;
+        if (minute != nodesAt) { nodesAt = minute; for (Node n : nodes) n.update(g); }
+        // (0.4.5, optimisation) the nets and fires kept apart, rebuilt only when the world's list changes (two walks over
+        // tens of thousands of things a tick found a handful)
+        if (activeAt != list.changes()) {
+            active.clear();
+            for (WorldObject o : snapshot()) if (o instanceof FishingNet || o instanceof Fire) active.add(o);
+            activeAt = list.changes();
+        }
+        for (int i = 0; i < active.size(); i++) if (active.get(i) instanceof FishingNet net && !net.removed) net.update(g);
         if (stall != null) stall.update(g);
-        for (WorldObject o : snapshot()) if (o instanceof Fire fire && !fire.removed) fire.update(g, dt);
+        for (int i = 0; i < active.size(); i++) if (active.get(i) instanceof Fire fire && !fire.removed) fire.update(g, dt);
         // the burnt-out fires and the picked-up things swept out now and then, not every frame
         if (g.time - sweptAt > 1.0) { sweptAt = g.time; list.removeIf(o -> o.removed && (o instanceof Fire || (o instanceof GroundItem gi && !Ids.fixture(gi.id)))); }
         doorsForNpcs();
-        for (Door d : doors()) d.update(g, g.lastRigids);
+        // (0.4.4, optimisation: ShadowVeil's doors, hundreds more with its interiors) a shut door at rest is followed only
+        // when someone is by it (the player, or anyone moving near); the rest wait as they are
+        for (Door d : doors) if (!d.idle() || Math.abs(d.x - g.player.x) < 12 && Math.abs(d.z - g.player.z) < 12 || doorsNear.contains(d) && near(d, 3)) d.update(g, g.lastRigids);
         settleAmmo();
     }
 
@@ -586,25 +695,71 @@ public final class Objects {
         return dd < 1.3 || n.hasGoalPos && d.side(n.x, n.z) != d.side(bx, bz);
     }
 
+    /** (0.4.4, optimisation) The people and humanoid monsters moving about, binned by 8-cell squares (built once a tick). */
+    private final java.util.Map<Long, List<rpg.ai.Npc>> movers = new java.util.HashMap<>();
+    private void binMovers() {
+        movers.clear();
+        for (var n : g.npcs) if (n.alive && n.loaded) movers.computeIfAbsent(bin(n.x, n.z), k -> new ArrayList<>()).add(n);
+        if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded && m.kind.form == rpg.monster.MonsterKind.Form.HUMANOID) movers.computeIfAbsent(bin(m.x, m.z), k -> new ArrayList<>()).add(m);
+    }
+    private static long bin(float x, float z) { return ((long) Math.floorDiv((int) Math.floor(x), 8) << 32) ^ (Math.floorDiv((int) Math.floor(z), 8) & 0xffffffffL); }
+    /** Whether anyone moving is within a reach of a door (the 8-cell squares round it). */
+    private boolean near(Door d, float reach) {
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+            List<rpg.ai.Npc> l = movers.get(bin(d.x + dx * 8, d.z + dz * 8));
+            if (l != null) for (var n : l) if (Math.abs(n.x - d.x) < reach && Math.abs(n.z - d.z) < reach) return true;
+        }
+        return false;
+    }
+    private final List<rpg.ai.Npc> nearDoor = new ArrayList<>();
+
     /** NPCs open unlocked doors on their way through and close them behind them. */
+    /** (0.4.5, optimisation) The doors binned by the same squares (they do not move; rebuilt when doors are added). */
+    private final java.util.Map<Long, List<Door>> doorGrid = new java.util.HashMap<>();
+    private int doorGridFor = -1;
+    /** The doors in the squares round anyone moving this tick, and every door a passer-by left open. */
+    private final java.util.Set<Door> doorsNear = new java.util.LinkedHashSet<>();
+    private void doorsNearMovers() {
+        if (doorGridFor != doors.size()) {
+            doorGrid.clear();
+            for (Door d : doors) doorGrid.computeIfAbsent(bin(d.x, d.z), k -> new ArrayList<>()).add(d);
+            doorGridFor = doors.size();
+        }
+        doorsNear.clear();
+        for (long key : movers.keySet()) {
+            int bx = (int) (key >> 32), bz = (int) key;
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+                List<Door> l = doorGrid.get(((long) (bx + dx) << 32) ^ ((bz + dz) & 0xffffffffL));
+                if (l != null) doorsNear.addAll(l);
+            }
+        }
+        for (Door d : doors) if (d.open && d.autoOpened) doorsNear.add(d);
+    }
+
     private void doorsForNpcs() {
-        for (Door d : doors()) {
+        binMovers();
+        doorsNearMovers();
+        for (Door d : doorsNear) {
+            // (0.4.4, optimisation) only those within the squares round the door are asked (every door asked every person)
+            nearDoor.clear();
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) { List<rpg.ai.Npc> l = movers.get(bin(d.x + dx * 8, d.z + dz * 8)); if (l != null) nearDoor.addAll(l); }
+            if (nearDoor.isEmpty() && !(d.open && d.autoOpened)) continue;
             boolean near = false;
             rpg.ai.Npc by = null;
             // (0.2.3) near means passing through: in the doorway, or by it with somewhere to be on its far side - someone who
             // has come through and stopped just inside (a shopkeeper at her counter) no longer holds it open behind her
-            for (var n : g.npcs) {
-                if (!n.alive || !n.loaded || n.asleep() || n.reacting || g.law.inCustody(n)) continue;
-                if (passing(d, n)) { near = true; by = n; }
-            }
             // (0.2.2, pathfinding: goblins pushed at a shut shed door forever) a goblin, an imp, a troll - anything with
             // hands - opens an unlocked door too; a beast does not (its routes keep to open ways)
-            if (g.monsters != null) for (var m : g.monsters.all()) if (m.alive && m.loaded && m.kind.form == rpg.monster.MonsterKind.Form.HUMANOID && passing(d, m)) { near = true; if (by == null) by = m; }
+            for (var n : nearDoor) {
+                if (n instanceof rpg.monster.Monster) { if (passing(d, n)) { near = true; if (by == null) by = n; } continue; }
+                if (n.asleep() || n.reacting || g.law.inCustody(n)) continue;
+                if (passing(d, n)) { near = true; by = n; }
+            }
             if (!d.open && !d.locked && near) { d.setOpen(g, true, by, 0); d.autoOpened = true; d.autoCloseAt = g.time + 3; }
             // a locked door its owner (or whoever carries its key) is on their way through: unlocked, opened, and locked
             // again behind them once it is shut (gamefixes: people open their own doors)
-            if (!d.open && d.locked) for (var n : g.npcs) {
-                if (!n.alive || !n.loaded || n.asleep() || n.reacting || g.law.inCustody(n) || Math.hypot(n.x - d.x, n.z - d.z) > 2.4) continue;
+            if (!d.open && d.locked) for (var n : nearDoor) {
+                if (n instanceof rpg.monster.Monster || n.asleep() || n.reacting || g.law.inCustody(n) || Math.hypot(n.x - d.x, n.z - d.z) > 2.4) continue;
                 boolean keyHolder = d.owner == n.id || d.key != null && n.has(d.key, 1);
                 // where they are bound (the trip's end, not the leg to the door's front) lies through it
                 float bx = n.legs != null ? n.legsX : n.gx, bz = n.legs != null ? n.legsZ : n.gz;

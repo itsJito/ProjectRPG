@@ -1,0 +1,18 @@
+{
+ "_about": "(0.4.5, gamefixes: every equipment tier its own look, by its material - not only its colour) Each armour tier's design: the surface of its plates ('pattern': slab, scale, rings, bands, rivets, flutes, lames, chisel, chevron, cracks, filigree, jagged), its pauldrons (none, slab, round, layered, spiked, flared), its helm's face (open, nasal, coif, corinthian, tslit, grill, slot, vslit, sallet, skull) and crest (none, ridge, plume, horns, wings, crown, spikes), and its knees (none, slab, round, spiked, fan). The worn look (Skin, Gfx) and the things themselves (HiResItems) are both built from it.",
+ "tiers": {
+  "STONE":      {"pattern": "slab",     "pauldron": "slab",    "visor": "open",       "crest": "none",   "knee": "slab"},
+  "BRONZE":     {"pattern": "scale",    "pauldron": "round",   "visor": "corinthian", "crest": "plume",  "knee": "round"},
+  "CHAINMAIL":  {"pattern": "rings",    "pauldron": "none",    "visor": "coif",       "crest": "none",   "knee": "none"},
+  "IRON":       {"pattern": "bands",    "pauldron": "layered", "visor": "nasal",      "crest": "ridge",  "knee": "round"},
+  "BLACK":      {"pattern": "rivets",   "pauldron": "spiked",  "visor": "tslit",      "crest": "none",   "knee": "spiked"},
+  "WHITE":      {"pattern": "flutes",   "pauldron": "round",   "visor": "sallet",     "crest": "ridge",  "knee": "fan"},
+  "STEEL":      {"pattern": "lames",    "pauldron": "layered", "visor": "grill",      "crest": "none",   "knee": "fan"},
+  "GRANITE":    {"pattern": "chisel",   "pauldron": "slab",    "visor": "slot",       "crest": "none",   "knee": "slab"},
+  "COBALT":     {"pattern": "chevron",  "pauldron": "flared",  "visor": "vslit",      "crest": "wings",  "knee": "fan"},
+  "DRAGON":     {"pattern": "scale",    "pauldron": "spiked",  "visor": "tslit",      "crest": "horns",  "knee": "spiked"},
+  "MOLTEN":     {"pattern": "cracks",   "pauldron": "layered", "visor": "grill",      "crest": "ridge",  "knee": "round", "glow": "FF8A2A"},
+  "GODLY":      {"pattern": "filigree", "pauldron": "flared",  "visor": "sallet",     "crest": "crown",  "knee": "fan", "accent": "F0C850"},
+  "MALEVOLENT": {"pattern": "jagged",   "pauldron": "spiked",  "visor": "skull",      "crest": "spikes", "knee": "spiked", "glow": "C040FF"}
+ }
+}

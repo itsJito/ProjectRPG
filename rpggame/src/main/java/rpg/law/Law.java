@@ -128,6 +128,7 @@ public final class Law {
     public void sleepThroughSentence() {
         if (!inCustody(g.player)) return;
         g.advanceTime(sentenceRemaining(), "sleeping through the sentence");
+        g.restoreWorld("slept through a sentence");
         update();
     }
     private void releasePlayer() {
@@ -143,15 +144,30 @@ public final class Law {
         sentenceJurisdiction = "";
     }
 
+    /** (0.4.6) How near (m) an officer must be to raise the cry at a breakout, and how long (s) the watch searches for the escaped. */
+    static final float ESCAPE_HEARD = rpg.Tuning.f("law.escapeHeard", 40f);
+    static final double ESCAPE_SEARCH = rpg.Tuning.f("law.escapeSearch", 120f);
+
     private void escapePlayer() {
         String jurisdiction = sentenceJurisdiction;
         int before = bounty(g.player.id, jurisdiction);
         int restored = (int)Math.min(Integer.MAX_VALUE, (long)before + sentenceBounty + 75);
         sentenceUntil = -1; sentenceJurisdiction = ""; sentenceBounty = 0;
         bounties.computeIfAbsent(jurisdiction, k -> new HashMap<>()).put(g.player.id, restored);
+        addCharge(g.player.id, jurisdiction, "breaking out of the " + jurisdiction + " Jail");
         var event = g.state.commit("Jailbreak", g.player.id, 0, jurisdiction, 0, "bounty " + before + " -> " + restored);
         g.state.commit("BountyChanged", 0, g.player.id, jurisdiction, event.id(), before + " -> " + restored);
-        g.chat.add("You escaped before serving your sentence. Your previous bounty is restored, plus 75 Gold.", Chat.Kind.CRIME);
+        g.chat.crime("Jailbreak", "You broke out of the " + jurisdiction + " Jail before serving your sentence. Your bounty in " + jurisdiction + " is now " + restored + " coins, and the watch is after you.");
+        // (0.4.6, gamefixes: lawmen did not notice a breakout) the jail's watch knows at once: those in the kingdom set out
+        // to search from where the prisoner was last seen, and the nearest officer who can see them raises the cry
+        Npc crier = null; float near = ESCAPE_HEARD;
+        for (Npc n : g.npcs) {
+            if (!n.alive || !n.homeJurisdiction.equals(jurisdiction) || n.role != Npc.Role.GUARD && n.role != Npc.Role.LAWMAN) continue;
+            if (n.hunt == null) { n.hunt = new rpg.ai.Hunt(g.player.id, "the prisoner broke out of the jail", g.player.x, g.player.z, g.time, (float) ESCAPE_SEARCH); n.nextThink = 0; }
+            float d = n.distTo(g.player);
+            if (n.loaded && d < near) { near = d; crier = n; }
+        }
+        if (crier != null) g.ai.say(crier, "The prisoner's out! After them!");
         openEmptyCell(jurisdiction);
     }
 
@@ -190,6 +206,7 @@ public final class Law {
         a.cs.cancel(); a.cs.blocking = false; a.cs.draw = 0;
         if (a == g.player) g.controller.cancelHandInput();
         if (bounties.containsKey(jur)) bounties.get(jur).remove(a.id);
+        charges.remove(new Key(a.id, jur));
         confronted.remove(new Key(a.id, jur)); fineDeclined.remove(new Key(a.id, jur)); fineAsked.remove(new Key(a.id, jur)); fineAskedAt.remove(new Key(a.id, jur));
         resisting.remove(a.id); haltedAt.remove(a.id);defiance.remove(defianceKey(a.id,jur));
         if(a==g.player){reminder="";if(g.ui!=null && g.ui.dialog!=null && g.ui.dialog.standoff)g.ui.closeDialog();}
@@ -237,6 +254,49 @@ public final class Law {
     public final Posses posses;
     /** Offenders who have walked up to the watch of a kingdom while wanted there: that watch acts on any bounty. */
     private record Key(long offender, String jurisdiction) {}
+    /**
+     * (0.4.6, gamefixes: lawmen said only "there is an accusation against you") what each bounty is for: every charge put
+     * on it, as an officer would read it out - "the killing of Garth at Loxford Mill", "breaking out of the Loxford Jail" -
+     * kept with the bounty and cleared with it.
+     */
+    private final Map<Key, List<String>> charges = new HashMap<>();
+    /** Adds a charge to an offender's record in a jurisdiction (the same charge twice is said once, with a count). */
+    public void addCharge(long offender, String jur, String what) {
+        if (what == null || what.isBlank()) return;
+        charges.computeIfAbsent(new Key(offender, jur), k -> new ArrayList<>()).add(what);
+    }
+    /** The charges on an offender's record in a jurisdiction, read out: "a, b and c" (repeats counted), or "" for none. */
+    public String chargesRead(long offender, String jur) {
+        List<String> l = charges.get(new Key(offender, jur));
+        if (l == null || l.isEmpty()) return "";
+        java.util.LinkedHashMap<String, Integer> n = new java.util.LinkedHashMap<>();
+        for (String c : l) n.merge(c, 1, Integer::sum);
+        List<String> parts = new ArrayList<>();
+        for (var e : n.entrySet()) parts.add(e.getValue() > 1 ? e.getKey() + " (" + e.getValue() + " times)" : e.getKey());
+        if (parts.size() == 1) return parts.get(0);
+        return String.join(", ", parts.subList(0, parts.size() - 1)) + " and " + parts.get(parts.size() - 1);
+    }
+    /** A crime as a charge: what was done, to whom, where ("theft from Fred at Fred's Fine Axes"). */
+    String chargeOf(String kind, long victim, float x, float z) {
+        String what = switch (kind) {
+            case "THEFT" -> "theft"; case "ASSAULT" -> "assault"; case "MURDER" -> "the killing"; case "LOCKPICKING" -> "picking a lock";
+            case "VANDALISM" -> "vandalism"; case "TRESPASS" -> "trespassing"; case "ARSON" -> "arson"; case "LIVESTOCK" -> "stealing livestock";
+            case "DISORDERLY" -> "disorderly conduct"; case "BRIBERY" -> "attempted bribery"; default -> crimeWord(kind);
+        };
+        String who = victim == 0 || g.actor(victim) == null ? "" : switch (kind) {
+            case "THEFT", "LIVESTOCK" -> " from " + g.nameOf(victim); case "LOCKPICKING", "TRESPASS" -> " on " + g.nameOf(victim) + "'s property";
+            case "ASSAULT", "MURDER" -> " of " + g.nameOf(victim); default -> " against " + g.nameOf(victim);
+        };
+        String where = placeAt(x, z);
+        return what + who + (where.isEmpty() ? "" : " at " + where);
+    }
+    /** The name of the building or place at a point (ShadowVeil's structures), or "". */
+    private static String placeAt(float x, float z) {
+        if (!Float.isFinite(x) || !rpg.world.WorldMap.shadowveil()) return "";
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        var s = t == null || t.arch == null ? null : t.arch.at((int) Math.floor(x), (int) Math.floor(z));
+        return s == null || s.name == null || s.name.equals("House") || s.name.equals("Cottage") ? "" : s.name;
+    }
     private final Set<Key> confronted = new HashSet<>();
     /** The kingdom the player was last in, for the reminder on crossing into one where they are wanted. */
     private String lastKingdom = "";
@@ -568,6 +628,7 @@ public final class Law {
         int before = bounty(m.subject, jur);
         int after = before + add;
         bounties.computeIfAbsent(jur, k -> new HashMap<>()).put(m.subject, after);
+        addCharge(m.subject, jur, chargeOf(m.kind, m.victim, m.navKnown ? m.navX : witness.x, m.navKnown ? m.navZ : witness.z));
         m.reported = true;
         reports++;
         var ev = g.state.commit("CrimeReported", witness.id, m.subject, jur, m.eventId, m.kind + " reported to " + lawman.name + "; bounty " + before + " -> " + after);
@@ -598,6 +659,7 @@ public final class Law {
         if (c.suspect == g.player.id && g.honor != null && g.honor.high()) add = Math.max(1, add / 2);
         int before = bounty(c.suspect, c.jurisdiction), after = before + add;
         bounties.computeIfAbsent(c.jurisdiction, k -> new HashMap<>()).put(c.suspect, after);
+        addCharge(c.suspect, c.jurisdiction, "the killing of " + g.nameOf(c.victim));
         reports++;
         g.state.commit("BountyChanged", c.detective, c.suspect, c.jurisdiction, 0, before + " -> " + after + " (the case on " + g.nameOf(c.victim) + "'s killing)");
         reportsLog.add(String.format("%s worked the killing of %s and named %s. That puts the bounty on %s at %d coins", g.nameOf(c.detective), g.nameOf(c.victim), g.nameOf(c.suspect), g.nameOf(c.suspect), after));
@@ -833,7 +895,14 @@ public final class Law {
         int b = bounty(p.id, jur);
         g.ai.say(guard, petty ? "A word with you." : "Halt!");
         float evidence = certainty(guard, p);
-        String charge = evidence >= 0.85f ? "I saw what you did. " : evidence >= 0.5f ? "Witnesses have identified you. " : "There is an accusation against you. ";
+        // (0.4.6) the charges read out, each by name: what, to whom, where - and on whose word
+        String read = chargesRead(p.id, jur);
+        Memory said0 = account(guard, p);
+        String accuser = said0 == null || said0.witness == 0 || said0.witness == guard.id ? null : g.nameOf(said0.witness);
+        String charge = read.isEmpty()
+                ? (evidence >= 0.85f ? "I saw what you did. " : accuser != null ? accuser + " has named you to the watch. " : "Witnesses have named you to the watch. ")
+                : (evidence >= 0.85f ? "I saw it myself: " : accuser != null ? accuser + " has named you for " : "You are charged with ") + read + ". ";
+        if (!read.isEmpty() && evidence >= 0.85f) charge = "I saw it myself: " + read + ". ";
         // (0.3.5, gamefixes: interrogations) the account, piece by piece, against the one standing there
         Memory account = account(guard, p);
         if (account != null && !petty) {
@@ -893,10 +962,16 @@ public final class Law {
         int b = bounty(a.id, jur);
         List<Npc> witnesses = g.ai.witnesses(a); // identify witnesses before the prisoner is moved into the cell
         settle(a, jur);
-        var escrow = new rpg.objects.Container(g.state.newEntityId(), "jail_escrow", a.name + "'s held possessions", "escrow", a.x, -32, a.z, 320, a.id);
-        escrow.locked = true;
         // Preflight before moving any originals. Filled bags remain their own containers.
         var originals = new ArrayList<>(a.inv.stacks()); originals.addAll(a.eq.stacks());
+        // (0.4.6, gamefixes: the jail's held goods chest had none of the prisoner's things in it) the player's possessions
+        // go into their jail's own chest of held goods, locked, where a prisoner who breaks out can find them (and pick its
+        // lock); anyone else's, or the player's when that chest is taken, into a strongbox kept out of reach
+        rpg.objects.Container jailChest = a == g.player && rpg.world.WorldMap.shadowveil() ? rpg.world.shadowveil.Rooms.heldGoods(jur) : null;
+        if (jailChest != null && (jailChest.removed || jailChest.custodyOf != 0 && jailChest.custodyOf != a.id || !jailChest.contents.isEmpty() && jailChest.custodyOf != a.id || !jailChest.contents.canAddAll(originals))) jailChest = null;
+        var escrow = jailChest != null ? jailChest : new rpg.objects.Container(g.state.newEntityId(), "jail_escrow", a.name + "'s held possessions", "escrow", a.x, -32, a.z, 320, a.id);
+        escrow.locked = true;
+        if (jailChest != null) { jailChest.custodyOf = a.id; jailChest.custodySlots.clear(); }
         if (!escrow.contents.canAddAll(originals)) throw new IllegalStateException("prison escrow capacity");
         for (var slot : rpg.item.ItemDef.Slot.values()) {
             var item = a.eq.get(slot); if (item == null) continue;
@@ -906,7 +981,7 @@ public final class Law {
             escrow.custodySlots.put(slot.name(), place[1]*escrow.contents.w+place[0]);
         }
         for (var item : new ArrayList<>(a.inv.stacks())) escrow.contents.add(item);
-        a.inv.clear(); g.objects.add(escrow);
+        a.inv.clear(); if (jailChest == null) g.objects.add(escrow);
         int returned = Property.confiscate(g, escrow.contents);
         Npc lawman = g.ai.lawmanFor(jur);
         int bill=b+(int)((b*3L+99)/100), paid=Math.min(bill,Property.coins(escrow.contents));
@@ -976,7 +1051,7 @@ public final class Law {
     }
 
     private void returnPossessions(Actor actor) {
-        for (var object : g.objects.all()) if (object instanceof rpg.objects.Container held && held.kind.equals("escrow") && held.owner == actor.id) {
+        for (var object : g.objects.all()) if (object instanceof rpg.objects.Container held && (held.kind.equals("escrow") && held.owner == actor.id || held.custodyOf == actor.id)) {
             for (var entry : held.custodySlots.entrySet()) {
                 rpg.item.ItemDef.Slot slot;
                 try { slot = rpg.item.ItemDef.Slot.valueOf(entry.getKey()); } catch (IllegalArgumentException ignored) { continue; }
@@ -988,7 +1063,8 @@ public final class Law {
             for (var item : new ArrayList<>(held.contents.stacks())) {
                 if (!actor.store(item)) g.objects.drop(item, actor.x, actor.y+0.1f, actor.z);
             }
-            held.contents.clear(); held.removed = true;
+            held.contents.clear();
+            if (held.kind.equals("escrow")) held.removed = true; else { held.custodyOf = 0; held.custodySlots.clear(); }
         }
     }
 
@@ -999,6 +1075,9 @@ public final class Law {
         m.put("_legacyReported",new ArrayList<>(reportedLegacy));
         m.put("_custody", Map.of("until", sentenceUntil, "jur", sentenceJurisdiction, "admissions", jailAdmissions, "bounty", sentenceBounty));
         m.put("_cases", homicide.save());
+        List<Object> ch = new ArrayList<>();
+        for (var e : charges.entrySet()) ch.add(Map.of("o", e.getKey().offender(), "j", e.getKey().jurisdiction(), "c", new ArrayList<>(e.getValue())));
+        m.put("_charges", ch);
         for (var e : bounties.entrySet()) {
             Map<String, Object> j = new HashMap<>();
             for (var b : e.getValue().entrySet()) j.put(String.valueOf(b.getKey()), b.getValue());
@@ -1014,8 +1093,13 @@ public final class Law {
         for(Object key:astratto.util.Json.list(m,"_legacyReported"))reportedLegacy.add(key.toString());
         for(Object entry:astratto.util.Json.list(m,"_defiance"))defiance.add(entry.toString());
         homicide.load(astratto.util.Json.list(m, "_cases"));
+        for (Object o : astratto.util.Json.list(m, "_charges")) if (o instanceof Map<?, ?> c) {
+            List<String> l = new ArrayList<>();
+            if (c.get("c") instanceof List<?> cl) for (Object x : cl) l.add(String.valueOf(x));
+            charges.put(new Key(((Number) c.get("o")).longValue(), String.valueOf(c.get("j"))), l);
+        }
         for (var e : m.entrySet()) {
-            if(e.getKey().equals("_defiance") || e.getKey().equals("_legacyReported") || e.getKey().equals("_cases"))continue;
+            if(e.getKey().equals("_defiance") || e.getKey().equals("_legacyReported") || e.getKey().equals("_cases") || e.getKey().equals("_charges"))continue;
             if (e.getKey().equals("_custody")) {
                 Map<String, Object> custody = (Map<String, Object>) e.getValue();
                 sentenceUntil = astratto.util.Json.num(custody, "until", -1);
@@ -1046,7 +1130,7 @@ public final class Law {
         }
     }
 
-    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); fineAsked.clear(); fineAskedAt.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); reportedLegacy.clear(); bounties.clear(); homicide.cases.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
+    public void clear() { defiance.clear();confronted.clear(); fineDeclined.clear(); fineAsked.clear(); fineAskedAt.clear(); lastKingdom = ""; reminder = ""; posses.clear(); roofWarnings.clear();roofCheck=0; reportedCrimes.clear(); reportedLegacy.clear(); bounties.clear(); charges.clear(); homicide.cases.clear(); resisting.clear(); haltedAt.clear(); assaultAt.clear(); settledAt.clear(); sentenceUntil = -1; sentenceJurisdiction = ""; jailAdmissions = 0; sentenceBounty = 0; }
 
     /** Below this a bounty costs nothing at death; from it the law takes its share of what the dead carried (gamefixes). */
     public static final int FORFEIT_FROM = 25;

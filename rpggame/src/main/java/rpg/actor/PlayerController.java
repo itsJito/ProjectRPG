@@ -189,7 +189,9 @@ public final class PlayerController {
         // off hand: guard with a shield (or the main weapon when the off hand is empty), or use what it holds
         boolean guardItem = main == null && off == null || off != null && off.family == Family.SHIELD || off == null && main != null && main.guard > 0 && !bow && !staff && !crossbow;
         // (0.3.0, gamefixes) a drawn torch: the guard key strikes a light to it (while it is out; a burning one guards as anything held does)
-        boolean torch = main != null && main.family == Family.TORCH && off == null;
+        // (0.4.3, gamefixes: torches could not be lit with a shield on the arm) whatever the other hand holds - a lit
+        // torch then guards with the shield as before
+        boolean torch = main != null && main.family == Family.TORCH;
         if (torch && !p.torchLit) { g.combat.setBlock(p, false); if (in.offDown && !offWas) g.combat.lightTorch(p); }
         else if (guardItem) g.combat.setBlock(p, in.offDown);
         else {
@@ -243,6 +245,9 @@ public final class PlayerController {
 
     /** noclip: the body flies where the camera looks, through everything (Space up, Ctrl down, Shift fast). */
     private void fly(Player p, float dt) {
+        // (0.4.4, gamefixes: swimming, noclipped out and back, threw the player back into the water left) the flight takes
+        // the body out of any swim it was in - the swim's own state, held while the flight ran past it, resumed on landing
+        if (g.swimming.active(p)) g.swimming.cancel(p);
         float cp = (float) Math.cos(camPitch), sp = (float) Math.sin(camPitch);
         float fx = (float) -Math.sin(camYaw) * cp, fy = sp, fz = (float) -Math.cos(camYaw) * cp, rx = (float) Math.cos(camYaw), rz = (float) -Math.sin(camYaw);
         float speed = in.sprint ? 22 : 8;
@@ -460,7 +465,10 @@ public final class PlayerController {
         // a footfall each time a foot is planted, in step with the gait the figure walks
         float speed = (float) Math.hypot(nvx, nvz);
         if (speed > Gait.STILL && p.grounded && p.gaseousT <= 0) {
-            stepClock += dt * Gait.steps(speed, p.sneaking);
+            // (0.4.6) the figure's own feet when it is drawn (third person, a mirror); the gait's clock when it is not
+            int planted = p.newFootPlants();
+            if (planted < 0) stepClock += dt * Gait.steps(speed, p.sneaking);
+            else stepClock = planted > 0 ? 1 : Math.min(stepClock, 0.99f);
             if (stepClock >= 1) {
                 stepClock -= 1;
                 float force = p.sprinting ? 1f : 0.3f + 0.5f * Math.min(1, speed / g.cfg.runSpeed);
@@ -518,6 +526,10 @@ public final class PlayerController {
 
     /** Who was barged and when (each once a second at most), so a charge through a crowd strikes each body once. */
     private final java.util.Map<Long, Double> barged = new java.util.HashMap<>(), chargeCrime = new java.util.HashMap<>();
+    /** (0.4.6) Shoves given each person lately {count, when last}: how many are let go, and how long (s) they are remembered. */
+    private final java.util.Map<Long, double[]> shoves = new java.util.HashMap<>();
+    static final int SHOVE_TOLERANCE = rpg.Tuning.i("law.shoveTolerance", 3);
+    static final double SHOVE_MEMORY = rpg.Tuning.f("law.shoveMemory", 120f);
 
     /**
      * The shoulder charge's contact: anyone close ahead in the line of the run is knocked aside - an ordinary townsman
@@ -539,12 +551,22 @@ public final class PlayerController {
             barged.put(o.id, g.time);
             p.chargeAt = g.time;
             // only a charge run long enough topples anyone; fresh, it jostles even a townsman aside on his feet
-            boolean sturdy = (o instanceof rpg.ai.Npc n ? n.combatant() : true) || chargeTime < rpg.actor.Traversal.CHARGE_KNOCKDOWN;
+            // (0.4.6, gamefixes: people got angry at a single sprint shove) the first shoves are shrugged off - jostled aside
+            // on their feet, with a word; only the one that makes it a habit (the third inside a while) is taken badly
+            boolean tolerated = false;
+            if (o instanceof rpg.ai.Npc tn) {
+                double[] tally = shoves.computeIfAbsent(tn.id, k -> new double[]{0, -1e9});
+                if (g.time - tally[1] > SHOVE_MEMORY) tally[0] = 0;
+                tally[0]++; tally[1] = g.time;
+                tolerated = tally[0] < SHOVE_TOLERANCE;
+            }
+            boolean sturdy = tolerated || (o instanceof rpg.ai.Npc n ? n.combatant() : true) || chargeTime < rpg.actor.Traversal.CHARGE_KNOCKDOWN;
             float heft = 0.6f + p.skills.level(Skill.STRENGTH) / 99f * 0.6f;
             // the blow lands on their chest along the run, a little to the side the charger's shoulder leads with
             float side = 0.25f;
             float ix = dx + -dz * side, iz = dz + dx * side;
-            if (sturdy) g.reactions.struck(o, ix, 0.15f, iz, 70 * heft, 1.2f, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
+            if (tolerated) g.reactions.struck(o, ix, 0.05f, iz, 30 * heft, 0.6f, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
+            else if (sturdy) g.reactions.struck(o, ix, 0.15f, iz, 70 * heft, 1.2f, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
             else g.reactions.knockDown(o, ix, iz, 120 * heft, o.x - dx * 0.2f, o.chestY(), o.z - dz * 0.2f);
             o.cs.cancel();
             kept *= sturdy ? 0.72f : 0.85f;
@@ -553,6 +575,9 @@ public final class PlayerController {
             var ev = g.state.commit("ShoulderCharge", p.id, o.id, rpg.world.DevMap.jurisdiction(o.x, o.z), 0, (sturdy ? "sent reeling: " : "knocked down: ") + o.name);
             g.prog.award(p, Skill.AGILITY, 4, "shoulder charge", ev.id());
             if (o instanceof rpg.ai.Npc n) {
+                // (0.4.6, gamefixes: people got angry at a single sprint shove) the first shoves are shrugged off with a word;
+                // only the one that makes it a habit - the third inside a while - is taken badly (a fight, the law)
+                if (tolerated) { g.ai.say(n, shoves.get(n.id)[0] < 2 ? (n.watch() ? "Careful, there." : "Easy!") : (n.watch() ? "Watch yourself." : "Hey - again?")); continue; }
                 g.ai.say(n, n.watch() ? "Oi! Mind where you're going!" : sturdy ? "Watch it!" : "Ow! What was that for?");
                 // an outlaw or a brute takes it as the start of a fight; the watch and the townsfolk take it up with the law
                 if (n.combatant() && !n.watch()) { n.cs.lastAttacker = p.id; n.cs.lastHurt = g.time; }

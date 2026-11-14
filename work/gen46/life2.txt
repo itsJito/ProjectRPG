@@ -1,0 +1,1137 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.96s ({regions=781, overlays=487, variants=584, scarp=45, coast=393, erosion=305, peaks=41, lakes=61, isles=4, rivers=661, wadis=13, ground=31, roads=624, causeways=3, architecture=939, pitsFilled=1405, pits=491, banks=53, clamp=12, cliffs=45, columns=816, falls=16, raise=11737, trees=296, outcrops=0, ways=485}), made and lit in 1.64s
+    [water] flow field grown in 1161 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 4 stand with 3+ others within 2 m
+       Duke Bashir CIVIC (875.5,37.0,894.5) 3 near goal IDLE
+       Idris SCHOLAR (875.5,37.0,894.5) 3 near goal IDLE
+       Hakim CARTER (874.5,37.0,894.5) 3 near goal IDLE
+       Zaid GUARD (874.5,37.0,895.5) 3 near goal IDLE
+
+    [trace]    30 Zainab     (888.50,37.04,824.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act - working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]    30 Ziad       (886.50,37.04,835.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    30 Kamal      (927.50,37.04,892.50) yaw 0.00 want NaN v 0.00,0.00 goal SOCIALIZE act go to goal working null gp true 909.5,884.5 | 
+    [trace]    40 Zainab     (888.51,37.00,824.52) yaw 0.00 want NaN v 0.42,0.83 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]    40 Ziad       (886.34,37.00,835.50) yaw 0.43 want NaN v -2.15,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    40 Kamal      (927.36,37.00,892.43) yaw 0.43 want NaN v -1.96,-0.87 goal SOCIALIZE act go to goal working null gp true 909.5,884.5 | 
+    [trace]    50 Zainab     (888.66,37.00,824.81) yaw -0.87 want NaN v 1.10,2.19 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]    50 Ziad       (885.94,37.00,835.50) yaw 1.52 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    50 Kamal      (926.99,37.00,892.27) yaw 1.15 want NaN v -2.24,-0.99 goal SOCIALIZE act go to goal working null gp true 909.5,885.5 | 
+    [trace]    60 Zainab     (888.84,37.00,825.18) yaw -1.95 want NaN v 1.09,2.19 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]    60 Ziad       (885.53,37.00,835.50) yaw 1.57 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    60 Kamal      (926.61,37.00,892.12) yaw 1.19 want NaN v -2.28,-0.88 goal SOCIALIZE act go to goal working null gp true 909.5,885.5 | 
+    [trace]    70 Zainab     (889.02,37.00,825.54) yaw -2.68 want NaN v 1.10,2.19 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]    70 Ziad       (885.12,37.00,835.50) yaw 1.57 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    70 Kamal      (926.23,37.00,891.98) yaw 1.19 want NaN v -2.28,-0.88 goal SOCIALIZE act go to goal working null gp true 909.5,885.5 | 
+    [trace]    80 Zainab     (889.19,37.00,825.77) yaw -2.47 want NaN v 0.75,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    80 Ziad       (884.71,37.00,835.50) yaw 1.57 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    80 Kamal      (925.85,37.00,891.83) yaw 1.19 want NaN v -2.28,-0.88 goal SOCIALIZE act go to goal working null gp true 909.5,885.5 | 
+    [trace]    90 Zainab     (889.30,37.00,825.89) yaw -2.51 want NaN v 0.61,1.86 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    90 Ziad       (884.30,37.00,835.50) yaw 1.57 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]    90 Kamal      (925.46,37.00,891.69) yaw 1.22 want NaN v -2.33,-0.76 goal SOCIALIZE act go to goal working null gp true 909.5,886.5 | 
+    [trace]   100 Zainab     (889.33,37.00,826.03) yaw -2.76 want NaN v -0.28,-0.29 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   100 Ziad       (883.95,37.00,835.43) yaw 1.39 want NaN v -1.47,-1.30 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   100 Kamal      (925.08,37.00,891.56) yaw 1.22 want NaN v -2.33,-0.76 goal SOCIALIZE act go to goal working null gp true 909.5,886.5 | 
+    [trace]   110 Zainab     (889.23,37.00,825.82) yaw 2.98 want NaN v 0.00,-2.13 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   110 Ziad       (883.77,37.00,835.30) yaw 1.16 want NaN v -0.79,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   110 Kamal      (924.69,37.00,891.44) yaw 1.26 want NaN v -2.33,-0.76 goal SOCIALIZE act go to goal working null gp true 909.5,886.5 | 
+    [trace]   120 Zainab     (889.10,37.00,825.47) yaw 1.90 want NaN v -1.29,-2.09 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   120 Ziad       (883.68,37.00,835.28) yaw 1.20 want NaN v -0.29,-0.81 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   120 Kamal      (924.30,37.00,891.32) yaw 1.26 want NaN v -2.37,-0.61 goal SOCIALIZE act go to goal working null gp true 909.5,887.5 | 
+    [trace]   130 Zainab     (888.97,37.00,825.28) yaw 0.82 want NaN v -0.21,-0.01 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   130 Ziad       (883.66,37.00,834.98) yaw 0.16 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   130 Kamal      (923.90,37.00,891.22) yaw 1.30 want NaN v -2.37,-0.61 goal SOCIALIZE act go to goal working null gp true 909.5,888.5 | 
+    [trace]   140 Zainab     (889.00,37.00,825.44) yaw 0.82 want 0.82 v 0.34,1.28 goal WORK act hold/face working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   140 Ziad       (883.65,37.00,834.57) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   140 Kamal      (923.51,37.00,891.12) yaw 1.30 want NaN v -2.40,-0.48 goal SOCIALIZE act go to goal working null gp true 909.5,888.5 | 
+    [trace]   150 Zainab     (889.04,37.00,825.60) yaw 0.92 want NaN v 0.51,1.71 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   150 Ziad       (883.65,37.00,834.16) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   150 Kamal      (923.11,37.00,891.04) yaw 1.35 want NaN v -2.41,-0.45 goal SOCIALIZE act go to goal working null gp true 909.5,888.5 | 
+    [trace]   160 Zainab     (889.15,37.00,825.78) yaw 2.01 want NaN v 0.61,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   160 Ziad       (883.64,37.00,833.75) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   160 Kamal      (922.70,37.00,890.97) yaw 1.38 want NaN v -2.41,-0.45 goal SOCIALIZE act go to goal working null gp true 909.5,888.5 | 
+    [trace]   170 Zainab     (889.23,37.00,825.77) yaw 3.09 want NaN v 0.20,-0.36 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   170 Ziad       (883.63,37.00,833.35) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   170 Kamal      (922.30,37.00,890.92) yaw 1.42 want NaN v -2.44,-0.27 goal SOCIALIZE act go to goal working null gp true 909.5,889.5 | 
+    [trace]   180 Zainab     (889.15,37.00,825.57) yaw -2.43 want NaN v -1.27,-2.10 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   180 Ziad       (883.63,37.00,832.94) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   180 Kamal      (921.89,37.00,890.87) yaw 1.45 want NaN v -2.44,-0.27 goal SOCIALIZE act go to goal working null gp true 909.5,890.5 | 
+    [trace]   190 Zainab     (888.94,37.00,825.22) yaw -1.35 want NaN v -1.27,-2.10 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   190 Ziad       (883.62,37.00,832.53) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   190 Kamal      (921.49,37.00,890.84) yaw 1.49 want NaN v -2.45,-0.07 goal SOCIALIZE act go to goal working null gp true 909.5,890.5 | 
+    [trace]   200 Zainab     (888.78,37.00,824.97) yaw -0.27 want NaN v -0.34,-0.47 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   200 Ziad       (883.61,37.00,832.12) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   200 Kamal      (921.08,37.00,890.83) yaw 1.52 want NaN v -2.45,-0.07 goal SOCIALIZE act go to goal working null gp true 909.5,890.5 | 
+    [trace]   210 Zainab     (888.81,37.00,825.06) yaw 0.49 want NaN v 0.73,1.59 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   210 Ziad       (883.60,37.00,831.72) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   210 Kamal      (920.67,37.00,890.81) yaw 1.52 want NaN v -2.45,-0.07 goal SOCIALIZE act go to goal working null gp true 909.5,891.5 | 
+    [trace]   220 Zainab     (888.98,37.00,825.41) yaw 1.14 want NaN v 1.06,2.21 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   220 Ziad       (883.60,37.00,831.31) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   220 Kamal      (920.27,37.00,890.83) yaw 1.59 want NaN v -2.45,0.15 goal SOCIALIZE act go to goal working null gp true 909.5,891.5 | 
+    [trace]   230 Zainab     (889.15,37.00,825.78) yaw 2.22 want NaN v 1.06,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   230 Ziad       (883.59,37.00,830.90) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   230 Kamal      (919.86,37.00,890.86) yaw 1.62 want NaN v -2.45,0.15 goal SOCIALIZE act go to goal working null gp true 909.5,891.5 | 
+    [trace]   240 Zainab     (889.27,37.00,825.83) yaw -2.98 want NaN v 0.60,1.28 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   240 Ziad       (883.58,37.00,830.49) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   240 Kamal      (919.45,37.00,890.90) yaw 1.66 want NaN v -2.42,0.39 goal SOCIALIZE act go to goal working null gp true 909.5,892.5 | 
+    [trace]   250 Zainab     (889.29,37.00,825.88) yaw -2.58 want NaN v -0.49,-0.78 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   250 Ziad       (883.58,37.00,830.08) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   250 Kamal      (919.05,37.00,890.97) yaw 1.69 want NaN v -2.42,0.39 goal SOCIALIZE act go to goal working null gp true 909.5,893.5 | 
+    [trace]   260 Zainab     (889.13,37.00,825.60) yaw -1.93 want NaN v -1.21,-2.13 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   260 Ziad       (883.57,37.00,829.68) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   260 Kamal      (918.65,37.00,891.03) yaw 1.72 want NaN v -2.36,0.64 goal SOCIALIZE act go to goal working null gp true 909.5,893.5 | 
+    [trace]   270 Zainab     (888.96,37.00,825.30) yaw -0.84 want NaN v -0.59,-0.88 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   270 Ziad       (883.56,37.00,829.27) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   270 Kamal      (918.25,37.00,891.14) yaw 1.79 want NaN v -2.37,0.64 goal SOCIALIZE act go to goal working null gp true 909.5,893.5 | 
+    [trace]   280 Zainab     (888.93,37.00,825.33) yaw 0.13 want NaN v 0.31,1.28 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   280 Ziad       (883.56,37.00,828.86) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   280 Kamal      (917.86,37.00,891.25) yaw 1.82 want NaN v -2.37,0.64 goal SOCIALIZE act go to goal working null gp true 909.5,894.5 | 
+    [trace]   290 Zainab     (889.04,37.00,825.67) yaw -0.19 want NaN v 1.11,2.10 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   290 Ziad       (883.55,37.00,828.45) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   290 Kamal      (917.47,37.00,891.38) yaw 1.89 want NaN v -2.28,0.89 goal SOCIALIZE act go to goal working null gp true 909.5,894.5 | 
+    [trace]   300 Zainab     (889.18,37.00,825.77) yaw -1.28 want NaN v 0.60,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   300 Ziad       (883.54,37.00,828.05) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   300 Kamal      (917.09,37.00,891.53) yaw 1.92 want NaN v -2.28,0.89 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   310 Zainab     (889.27,37.00,825.83) yaw -2.27 want NaN v 0.54,1.28 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   310 Ziad       (883.54,37.00,827.64) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   310 Kamal      (916.72,37.00,891.69) yaw 1.97 want NaN v -2.17,1.14 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   320 Zainab     (889.32,37.00,826.00) yaw -2.73 want NaN v -0.13,0.02 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   320 Ziad       (883.53,37.00,827.23) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   320 Kamal      (916.36,37.00,891.89) yaw 2.03 want NaN v -2.17,1.14 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   330 Zainab     (889.23,37.00,825.84) yaw 3.11 want NaN v -0.12,-2.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   330 Ziad       (883.52,37.00,826.82) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   330 Kamal      (916.00,37.00,892.08) yaw 2.03 want NaN v -2.17,1.14 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   340 Zainab     (889.11,37.00,825.50) yaw 2.02 want NaN v -1.28,-2.09 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   340 Ziad       (883.52,37.00,826.42) yaw 0.04 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   340 Kamal      (915.63,37.00,892.27) yaw 2.03 want NaN v -2.17,1.14 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   350 Zainab     (888.96,37.00,825.28) yaw 0.94 want NaN v -0.29,-0.24 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   350 Ziad       (883.52,37.00,826.02) yaw 0.01 want NaN v 0.48,-1.99 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   350 Kamal      (915.27,37.00,892.46) yaw 2.03 want NaN v -2.17,1.14 goal SOCIALIZE act go to goal working null gp true 909.5,895.5 | 
+    [trace]   360 Zainab     (888.98,37.00,825.41) yaw 0.82 want 0.82 v 0.54,1.94 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   360 Ziad       (883.70,37.00,825.79) yaw -0.56 want NaN v 0.00,-0.89 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   360 Kamal      (914.93,37.00,892.68) yaw 2.11 want NaN v -2.00,1.41 goal SOCIALIZE act go to goal working null gp true 909.5,896.5 | 
+    [trace]   370 Zainab     (889.12,37.00,825.77) yaw 1.68 want NaN v 0.78,0.12 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   370 Ziad       (883.71,37.00,825.69) yaw -0.29 want NaN v 0.47,-0.44 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   370 Kamal      (914.60,37.00,892.91) yaw 2.17 want NaN v -2.00,1.41 goal SOCIALIZE act go to goal working null gp true 910.5,896.5 | 
+    [trace]   380 Zainab     (889.22,37.00,825.77) yaw 2.77 want NaN v 0.50,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   380 Ziad       (883.96,37.00,825.61) yaw -1.21 want NaN v 2.42,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   380 Kamal      (914.27,37.00,893.16) yaw 2.21 want NaN v -1.83,1.62 goal SOCIALIZE act go to goal working null gp true 910.5,897.5 | 
+    [trace]   390 Zainab     (889.31,37.00,825.96) yaw -2.66 want NaN v 0.53,1.88 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   390 Ziad       (884.37,37.00,825.55) yaw -1.36 want NaN v 2.42,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   390 Kamal      (913.97,37.00,893.43) yaw 2.27 want NaN v -1.83,1.62 goal SOCIALIZE act go to goal working null gp true 910.5,897.5 | 
+    [trace]   400 Zainab     (889.34,37.00,826.10) yaw -2.87 want NaN v -0.30,-0.30 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   400 Ziad       (884.77,37.00,825.48) yaw -1.36 want NaN v 2.42,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   400 Kamal      (913.66,37.00,893.70) yaw 2.27 want NaN v -1.83,1.62 goal SOCIALIZE act go to goal working null gp true 910.5,897.5 | 
+    [trace]   410 Zainab     (889.23,37.00,825.88) yaw 2.86 want NaN v -0.23,-2.15 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   410 Ziad       (885.17,37.00,825.41) yaw -1.40 want NaN v 2.42,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   410 Kamal      (913.40,37.00,894.01) yaw 2.38 want NaN v -1.56,1.89 goal SOCIALIZE act go to goal working null gp true 910.5,898.5 | 
+    [trace]   420 Zainab     (889.13,37.00,825.53) yaw 1.78 want NaN v -1.28,-2.09 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   420 Ziad       (885.58,37.00,825.34) yaw -1.40 want NaN v 2.42,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   420 Kamal      (913.13,37.00,894.32) yaw 2.41 want NaN v -1.56,1.89 goal SOCIALIZE act go to goal working null gp true 910.5,898.5 | 
+    [trace]   430 Zainab     (888.97,37.00,825.29) yaw 0.70 want NaN v -0.40,-0.44 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   430 Ziad       (885.98,37.00,825.27) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   430 Kamal      (912.90,37.00,894.66) yaw 2.53 want NaN v -1.30,2.08 goal SOCIALIZE act go to goal working null gp true 910.5,898.5 | 
+    [trace]   440 Zainab     (888.97,37.00,825.38) yaw 0.80 want 0.80 v 0.46,1.73 goal WORK act go to goal working null gp false 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   440 Ziad       (886.38,37.00,825.20) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   440 Kamal      (912.68,37.00,895.00) yaw 2.57 want NaN v -1.30,2.08 goal SOCIALIZE act go to goal working null gp true 910.5,899.5 | 
+    [trace]   450 Zainab     (889.10,37.00,825.75) yaw 1.56 want NaN v 0.89,2.27 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   450 Ziad       (886.78,37.00,825.14) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   450 Kamal      (912.47,37.00,895.35) yaw 2.62 want NaN v -1.05,2.21 goal SOCIALIZE act go to goal working null gp true 910.5,900.5 | 
+    [trace]   460 Zainab     (889.21,37.00,825.77) yaw 2.64 want NaN v 0.52,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   460 Ziad       (887.19,37.00,825.07) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   460 Kamal      (912.29,37.00,895.72) yaw 2.65 want NaN v -1.05,2.21 goal SOCIALIZE act go to goal working null gp true 910.5,900.5 | 
+    [trace]   470 Zainab     (889.30,37.00,825.94) yaw -2.66 want NaN v 0.61,2.21 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   470 Ziad       (887.59,37.00,825.00) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   470 Kamal      (912.12,37.00,896.09) yaw 2.69 want NaN v -1.05,2.21 goal SOCIALIZE act go to goal working null gp true 910.5,900.5 | 
+    [trace]   480 Zainab     (889.34,37.00,826.13) yaw -2.84 want NaN v -0.17,0.01 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   480 Ziad       (887.99,37.00,824.93) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   480 Kamal      (911.97,37.00,896.47) yaw 2.74 want NaN v -0.84,2.30 goal SOCIALIZE act go to goal working null gp true 910.5,900.5 | 
+    [trace]   490 Zainab     (889.24,37.00,825.97) yaw 2.99 want NaN v -1.08,-2.13 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   490 Ziad       (888.40,37.00,824.86) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   490 Kamal      (911.83,37.00,896.85) yaw 2.77 want NaN v -0.84,2.30 goal SOCIALIZE act go to goal working null gp true 910.5,901.5 | 
+    [trace]   500 Zainab     (889.18,37.00,825.62) yaw 1.91 want NaN v -1.16,-2.08 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   500 Ziad       (888.80,37.00,824.79) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   500 Kamal      (911.70,37.00,897.24) yaw 2.82 want NaN v -0.66,2.36 goal SOCIALIZE act go to goal working null gp true 910.5,902.5 | 
+    [trace]   510 Zainab     (889.00,37.00,825.33) yaw 0.82 want NaN v -0.64,-0.84 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   510 Ziad       (889.20,37.00,824.72) yaw -1.40 want NaN v 2.41,-0.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   510 Kamal      (911.59,37.00,897.63) yaw 2.85 want NaN v -0.66,2.36 goal SOCIALIZE act go to goal working null gp true 910.5,902.5 | 
+    [trace]   520 Zainab     (888.96,37.00,825.36) yaw 0.85 want NaN v 0.17,1.34 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   520 Ziad       (889.55,37.00,824.69) yaw -1.49 want NaN v 1.34,0.48 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   520 Kamal      (911.48,37.00,898.02) yaw 2.85 want NaN v -0.66,2.36 goal SOCIALIZE act go to goal working null gp true 910.5,902.5 | 
+    [trace]   530 Zainab     (889.00,37.00,825.54) yaw 0.85 want 0.85 v 0.31,0.80 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   530 Ziad       (889.68,37.00,824.93) yaw -2.34 want NaN v 0.30,2.43 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   530 Kamal      (911.39,37.00,898.42) yaw 2.89 want NaN v -0.52,2.39 goal SOCIALIZE act go to goal working null gp true 910.5,903.5 | 
+    [trace]   540 Zainab     (889.14,37.00,825.76) yaw 1.61 want NaN v 1.11,0.35 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   540 Ziad       (889.73,37.00,825.34) yaw -2.90 want NaN v 0.30,2.43 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   540 Kamal      (911.30,37.00,898.82) yaw 2.92 want NaN v -0.52,2.39 goal SOCIALIZE act go to goal working null gp true 910.5,903.5 | 
+    [trace]   550 Zainab     (889.25,37.00,825.82) yaw 2.69 want NaN v 0.16,1.28 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   550 Ziad       (889.71,37.00,825.56) yaw -3.12 want NaN v -0.28,0.50 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   550 Kamal      (911.23,37.00,899.22) yaw 2.96 want NaN v -0.41,2.42 goal SOCIALIZE act go to goal working null gp true 910.5,904.5 | 
+    [trace]   560 Zainab     (889.25,37.00,826.00) yaw -3.04 want NaN v -0.47,0.30 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   560 Ziad       (889.64,37.00,825.65) yaw 2.82 want NaN v -0.27,0.55 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   560 Kamal      (911.16,37.00,899.63) yaw 2.96 want NaN v -0.41,2.42 goal SOCIALIZE act go to goal working null gp true 910.5,904.5 | 
+    [trace]   570 Zainab     (889.23,37.00,825.92) yaw 2.96 want NaN v 0.00,-1.35 goal HIDE act sprint to goal working null gp true 879.5,824.5 | running from world life
+    [trace]   570 Ziad       (889.69,37.00,825.61) yaw 2.89 want NaN v 0.95,-1.26 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   570 Kamal      (911.09,37.00,900.03) yaw 2.99 want NaN v -0.32,2.43 goal SOCIALIZE act go to goal working null gp true 910.5,904.5 | 
+    [trace]   580 Zainab     (889.23,37.00,825.85) yaw 2.31 want NaN v 0.00,-0.17 goal HIDE act sprint to goal working null gp true 879.5,823.5 | running from world life
+    [trace]   580 Ziad       (889.91,37.00,825.31) yaw -2.31 want NaN v 1.45,-1.98 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   580 Kamal      (911.04,37.00,900.43) yaw 2.99 want NaN v -0.32,2.43 goal SOCIALIZE act go to goal working null gp true 910.5,905.5 | 
+    [trace]   590 Zainab     (889.23,37.00,825.79) yaw 2.31 want NaN v 0.00,-0.56 goal HIDE act sprint to goal working null gp true 879.5,822.5 | running from world life
+    [trace]   590 Ziad       (890.14,37.00,825.00) yaw -1.23 want NaN v 1.02,-1.15 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   590 Kamal      (910.98,37.00,900.84) yaw 2.99 want NaN v -0.32,2.43 goal SOCIALIZE act go to goal working null gp true 910.5,905.5 | 
+    [trace]   600 Zainab     (889.08,37.00,825.67) yaw 1.34 want NaN v -2.08,-0.87 goal HIDE act sprint to goal working null gp true 879.5,822.5 | running from world life
+    [trace]   600 Ziad       (890.24,37.00,824.98) yaw -1.05 want NaN v 0.30,1.04 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   600 Kamal      (910.94,37.00,901.25) yaw 3.02 want NaN v -0.25,2.44 goal SOCIALIZE act go to goal working null gp true 910.5,906.5 | 
+    [trace]   610 Zainab     (888.55,37.00,825.48) yaw 1.19 want NaN v -4.32,-1.50 goal HIDE act sprint to goal working null gp true 879.5,821.5 | running from world life
+    [trace]   610 Ziad       (890.26,37.00,825.31) yaw -2.13 want NaN v 0.09,2.45 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   610 Kamal      (910.90,37.00,901.65) yaw 3.02 want NaN v -0.25,2.44 goal SOCIALIZE act go to goal working null gp true 910.5,906.5 | 
+    [trace]   620 Zainab     (887.66,37.00,825.18) yaw 1.22 want NaN v -6.56,-2.17 goal HIDE act sprint to goal working null gp true 878.5,821.5 | running from world life
+    [trace]   620 Ziad       (890.32,37.00,825.62) yaw -2.93 want NaN v 0.77,0.94 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   620 Kamal      (910.86,37.00,902.06) yaw 3.02 want NaN v -0.20,2.44 goal SOCIALIZE act go to goal working null gp true 910.5,906.5 | 
+    [trace]   630 Zainab     (886.51,37.00,824.76) yaw 1.22 want NaN v -6.84,-2.78 goal HIDE act sprint to goal working null gp true 877.5,821.5 | running from world life
+    [trace]   630 Ziad       (890.46,37.00,825.77) yaw -2.73 want NaN v 0.82,1.21 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   630 Kamal      (910.83,37.00,902.46) yaw 3.05 want NaN v -0.20,2.44 goal SOCIALIZE act go to goal working null gp true 910.5,906.5 | 
+    [trace]   640 Zainab     (885.37,37.00,824.30) yaw 1.22 want NaN v -6.84,-2.78 goal HIDE act sprint to goal working null gp true 876.5,820.5 | running from world life
+    [trace]   640 Ziad       (890.57,37.00,825.96) yaw -2.57 want NaN v 0.31,0.22 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   640 Kamal      (910.79,37.00,902.87) yaw 3.05 want NaN v -0.20,2.44 goal SOCIALIZE act go to goal working null gp true 910.5,906.5 | 
+    [trace]   650 Zainab     (884.23,37.00,823.84) yaw 1.19 want NaN v -6.89,-2.63 goal HIDE act sprint to goal working null gp true 875.5,820.5 | running from world life
+    [trace]   650 Ziad       (890.59,37.00,825.81) yaw -2.05 want NaN v -0.10,-2.08 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   650 Kamal      (910.76,37.00,903.28) yaw 3.05 want NaN v -0.20,2.44 goal SOCIALIZE act go to goal working null gp true 909.5,907.5 | 
+    [trace]   660 Zainab     (883.09,37.00,823.40) yaw 1.19 want NaN v -6.46,-2.47 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   660 Ziad       (890.56,37.00,825.42) yaw -0.96 want NaN v -0.15,-1.98 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   660 Kamal      (910.65,37.00,903.67) yaw 2.92 want NaN v -0.71,2.35 goal SOCIALIZE act go to goal working null gp true 909.5,907.5 | 
+    [trace]   670 Zainab     (882.18,37.00,823.05) yaw 1.19 want NaN v -4.28,-1.63 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   670 Ziad       (890.55,37.00,825.27) yaw 0.08 want NaN v -0.05,0.35 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   670 Kamal      (910.54,37.00,904.06) yaw 2.87 want NaN v -0.71,2.35 goal SOCIALIZE act go to goal working null gp true 909.5,907.5 | 
+    [trace]   680 Zainab     (881.63,37.00,822.87) yaw 1.23 want NaN v -2.30,-0.41 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   680 Ziad       (890.54,37.00,825.51) yaw 0.48 want NaN v -0.02,2.45 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   680 Kamal      (910.42,37.00,904.45) yaw 2.87 want NaN v -0.71,2.35 goal SOCIALIZE act go to goal working null gp true 909.5,907.5 | 
+    [trace]   690 Zainab     (881.40,37.00,822.91) yaw 1.53 want NaN v -0.36,0.89 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   690 Ziad       (890.55,37.00,825.92) yaw 1.57 want NaN v 0.45,2.23 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   690 Kamal      (910.30,37.00,904.84) yaw 2.87 want NaN v -0.71,2.35 goal SOCIALIZE act go to goal working null gp true 908.5,907.5 | 
+    [trace]   700 Zainab     (881.43,37.00,823.11) yaw 2.55 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   700 Ziad       (890.58,37.00,826.31) yaw 2.65 want NaN v -0.04,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   700 Kamal      (910.09,37.00,905.19) yaw 2.65 want NaN v -1.39,2.02 goal SOCIALIZE act go to goal working null gp true 908.5,907.5 | 
+    [trace]   710 Zainab     (881.48,37.00,823.33) yaw -3.03 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   710 Ziad       (890.58,37.00,826.69) yaw -3.13 want NaN v -0.04,1.52 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   710 Kamal      (909.86,37.00,905.53) yaw 2.56 want NaN v -1.39,2.02 goal SOCIALIZE act go to goal working null gp true 907.5,907.5 | 
+    [trace]   720 Zainab     (881.53,37.00,823.55) yaw -2.96 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   720 Ziad       (890.57,37.00,826.76) yaw 3.12 want NaN v -0.05,-0.82 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   720 Kamal      (909.63,37.00,905.86) yaw 2.56 want NaN v -1.39,2.02 goal SOCIALIZE act go to goal working null gp true 907.5,907.5 | 
+    [trace]   730 Zainab     (881.57,37.00,823.77) yaw -2.96 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   730 Ziad       (890.56,37.00,826.45) yaw 2.54 want NaN v -0.08,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   730 Kamal      (909.40,37.00,906.20) yaw 2.56 want NaN v -1.39,2.02 goal SOCIALIZE act go to goal working null gp true 907.5,907.5 | 
+    [trace]   740 Zainab     (881.62,37.00,823.99) yaw -2.96 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   740 Ziad       (890.57,37.00,826.05) yaw 1.46 want NaN v -0.10,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   740 Kamal      (909.16,37.00,906.53) yaw 2.56 want NaN v -1.68,1.65 goal SOCIALIZE act go to goal working null gp true 906.5,907.5 | 
+    [trace]   750 Zainab     (881.67,37.00,824.21) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   750 Ziad       (890.55,37.00,825.64) yaw 0.37 want NaN v -0.11,-2.45 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   750 Kamal      (908.82,37.00,906.75) yaw 2.20 want NaN v -2.13,1.22 goal SOCIALIZE act go to goal working null gp true 906.5,907.5 | 
+    [trace]   760 Zainab     (881.72,37.00,824.43) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   760 Ziad       (890.54,37.00,825.42) yaw 0.05 want NaN v -0.04,-0.12 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   760 Kamal      (908.46,37.00,906.95) yaw 2.15 want NaN v -2.13,1.22 goal SOCIALIZE act go to goal working null gp true 905.5,907.5 | 
+    [trace]   770 Zainab     (881.77,37.00,824.65) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   770 Ziad       (890.53,37.00,825.58) yaw 0.21 want NaN v -0.02,2.22 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   770 Kamal      (908.31,37.00,907.17) yaw 2.64 want NaN v -0.27,1.28 goal SOCIALIZE act go to goal working null gp true 905.5,907.5 | 
+    [trace]   780 Zainab     (881.82,37.00,824.87) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   780 Ziad       (890.53,37.00,825.93) yaw 1.29 want NaN v -0.02,1.05 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   780 Kamal      (908.30,37.00,907.32) yaw 2.90 want NaN v -0.45,0.44 goal SOCIALIZE act go to goal working null gp true 905.5,907.5 | 
+    [trace]   790 Zainab     (881.87,37.00,825.09) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   790 Ziad       (890.53,37.00,825.92) yaw 2.16 want NaN v -0.03,-1.28 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   790 Kamal      (908.04,37.00,907.36) yaw 1.79 want NaN v -2.45,0.10 goal SOCIALIZE act go to goal working null gp true 904.5,907.5 | 
+    [trace]   800 Zainab     (881.92,37.00,825.31) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   800 Ziad       (890.52,37.00,825.57) yaw 1.40 want NaN v -0.04,-1.98 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   800 Kamal      (907.63,37.00,907.38) yaw 1.65 want NaN v -2.45,0.10 goal SOCIALIZE act go to goal working null gp true 904.5,907.5 | 
+    [trace]   810 Zainab     (881.97,37.00,825.53) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   810 Ziad       (890.52,37.00,825.42) yaw 0.32 want NaN v -0.01,0.35 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   810 Kamal      (907.23,37.00,907.39) yaw 1.62 want NaN v -2.45,0.10 goal SOCIALIZE act go to goal working null gp true 903.5,907.5 | 
+    [trace]   820 Zainab     (882.01,37.00,825.75) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act sprint to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   820 Ziad       (890.51,37.00,825.66) yaw 0.10 want 0.10 v -0.01,2.45 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   820 Kamal      (906.82,37.00,907.40) yaw 1.62 want NaN v -2.45,0.07 goal SOCIALIZE act go to goal working null gp true 903.5,907.5 | 
+    [trace]   830 Zainab     (882.06,37.00,825.97) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   830 Ziad       (890.52,37.00,825.95) yaw 1.18 want NaN v 0.19,0.46 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   830 Kamal      (906.41,37.00,907.42) yaw 1.62 want NaN v -2.45,0.07 goal SOCIALIZE act go to goal working null gp true 903.5,907.5 | 
+    [trace]   840 Zainab     (882.11,37.00,826.19) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   840 Ziad       (890.53,37.00,825.85) yaw 1.83 want NaN v -0.01,-1.86 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   840 Kamal      (906.00,37.00,907.43) yaw 1.62 want NaN v -2.45,0.05 goal SOCIALIZE act go to goal working null gp true 902.5,907.5 | 
+    [trace]   850 Zainab     (882.16,37.00,826.41) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   850 Ziad       (890.53,37.00,825.48) yaw 0.75 want NaN v -0.05,-1.52 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   850 Kamal      (905.59,37.00,907.43) yaw 1.62 want NaN v -2.45,0.05 goal SOCIALIZE act go to goal working null gp true 901.5,907.5 | 
+    [trace]   860 Zainab     (882.21,37.00,826.63) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   860 Ziad       (890.52,37.00,825.41) yaw 0.03 want NaN v -0.02,0.82 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   860 Kamal      (905.19,37.00,907.44) yaw 1.62 want NaN v -2.45,0.04 goal SOCIALIZE act go to goal working null gp true 901.5,907.5 | 
+    [trace]   870 Zainab     (882.26,37.00,826.85) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   870 Ziad       (890.52,37.00,825.72) yaw 0.57 want NaN v -0.01,2.45 goal WORK act go to goal working null gp true 890.5,831.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   870 Kamal      (904.78,37.00,907.45) yaw 1.59 want NaN v -2.45,0.04 goal SOCIALIZE act go to goal working null gp true 901.5,907.5 | 
+    [trace]   880 Zainab     (882.31,37.00,827.07) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   880 Ziad       (890.55,37.00,826.12) yaw 1.33 want NaN v 0.15,2.41 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   880 Kamal      (904.37,37.00,907.46) yaw 1.59 want NaN v -2.45,0.04 goal SOCIALIZE act go to goal working null gp true 901.5,907.5 | 
+    [trace]   890 Zainab     (882.36,37.00,827.29) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   890 Ziad       (890.55,37.00,826.52) yaw 2.41 want NaN v -0.02,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   890 Kamal      (903.96,37.00,907.46) yaw 1.59 want NaN v -2.45,0.03 goal SOCIALIZE act go to goal working null gp true 900.5,907.5 | 
+    [trace]   900 Zainab     (882.40,37.00,827.51) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   900 Ziad       (890.54,37.00,826.87) yaw 3.14 want NaN v -0.02,1.05 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   900 Kamal      (903.56,37.00,907.47) yaw 1.59 want NaN v -2.45,0.03 goal SOCIALIZE act go to goal working null gp true 899.5,907.5 | 
+    [trace]   910 Zainab     (882.45,37.00,827.73) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   910 Ziad       (890.54,37.00,826.86) yaw 3.10 want NaN v -0.03,-1.28 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   910 Kamal      (903.15,37.00,907.47) yaw 1.59 want NaN v -2.45,0.02 goal SOCIALIZE act go to goal working null gp true 899.5,907.5 | 
+    [trace]   920 Zainab     (882.50,37.00,827.95) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   920 Ziad       (890.53,37.00,826.50) yaw 2.34 want NaN v -0.04,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   920 Kamal      (902.74,37.00,907.47) yaw 1.59 want NaN v -2.45,0.02 goal SOCIALIZE act go to goal working null gp true 899.5,907.5 | 
+    [trace]   930 Zainab     (882.55,37.00,828.17) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   930 Ziad       (890.54,37.00,826.10) yaw 1.26 want NaN v 0.15,-2.34 goal HIDE act run to goal working null gp true 899.5,822.5 | running from world life
+    [trace]   930 Kamal      (902.33,37.00,907.48) yaw 1.59 want NaN v -2.45,0.02 goal SOCIALIZE act go to goal working null gp true 898.5,907.5 | 
+    [trace]   940 Zainab     (882.60,37.00,828.38) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   940 Ziad       (890.55,37.00,825.89) yaw 0.18 want NaN v 0.00,-0.01 goal HIDE act sprint to goal working null gp true 899.5,821.5 | running from world life
+    [trace]   940 Kamal      (901.92,37.00,907.48) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 898.5,907.5 | 
+    [trace]   950 Zainab     (882.65,37.00,828.60) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   950 Ziad       (890.55,37.00,825.89) yaw -0.04 want NaN v 0.00,0.00 goal HIDE act sprint to goal working null gp true 899.5,821.5 | running from world life
+    [trace]   950 Kamal      (901.51,37.00,907.48) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 897.5,907.5 | 
+    [trace]   960 Zainab     (882.69,37.00,828.82) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   960 Ziad       (890.63,37.00,825.84) yaw -0.25 want NaN v 1.42,-0.80 goal HIDE act sprint to goal working null gp true 899.5,821.5 | running from world life
+    [trace]   960 Kamal      (901.11,37.00,907.48) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 897.5,907.5 | 
+    [trace]   970 Zainab     (882.74,37.00,829.04) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   970 Ziad       (890.71,37.00,825.65) yaw -0.39 want NaN v 0.57,-1.46 goal HIDE act sprint to goal working null gp true 899.5,820.5 | running from world life
+    [trace]   970 Kamal      (900.70,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 897.5,907.5 | 
+    [trace]   980 Zainab     (882.79,37.00,829.26) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   980 Ziad       (890.98,37.00,825.36) yaw -0.74 want NaN v 2.72,-2.27 goal HIDE act sprint to goal working null gp true 898.5,819.5 | running from world life
+    [trace]   980 Kamal      (900.29,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 896.5,907.5 | 
+    [trace]   990 Zainab     (882.84,37.00,829.48) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]   990 Ziad       (891.58,37.00,824.87) yaw -0.85 want NaN v 4.61,-3.64 goal HIDE act sprint to goal working null gp true 900.5,821.5 | running from world life
+    [trace]   990 Kamal      (899.88,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 896.5,907.5 | 
+    [trace]  1000 Zainab     (882.89,37.00,829.70) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1000 Ziad       (892.49,37.00,824.17) yaw -0.89 want NaN v 5.83,-4.52 goal HIDE act sprint to goal working null gp true 901.5,821.5 | running from world life
+    [trace]  1000 Kamal      (899.47,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 896.5,907.5 | 
+    [trace]  1010 Zainab     (882.93,37.00,829.92) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1010 Ziad       (893.52,37.00,823.55) yaw -1.00 want NaN v 6.85,-2.69 goal HIDE act sprint to goal working null gp true 902.5,820.5 | running from world life
+    [trace]  1010 Kamal      (899.06,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 895.5,907.5 | 
+    [trace]  1020 Zainab     (882.98,37.00,830.14) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1020 Ziad       (894.67,37.00,823.11) yaw -1.16 want NaN v 6.89,-2.63 goal HIDE act sprint to goal working null gp true 904.5,820.5 | running from world life
+    [trace]  1020 Kamal      (898.65,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 895.5,907.5 | 
+    [trace]  1030 Zainab     (883.03,37.00,830.36) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act run to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1030 Ziad       (895.80,37.00,822.63) yaw -1.16 want NaN v 6.37,-3.67 goal HIDE act sprint to goal working null gp true 904.5,817.5 | running from world life
+    [trace]  1030 Kamal      (898.24,37.00,907.49) yaw 1.59 want NaN v -2.45,0.01 goal SOCIALIZE act go to goal working null gp true 894.5,907.5 | 
+    [trace]  1040 Zainab     (883.08,37.00,830.58) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1040 Ziad       (896.77,37.00,822.03) yaw -1.06 want NaN v 4.89,-3.02 goal HIDE act sprint to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1040 Kamal      (897.83,37.00,907.49) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 894.5,907.5 | 
+    [trace]  1050 Zainab     (883.13,37.00,830.80) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1050 Ziad       (897.43,37.00,821.63) yaw -1.06 want NaN v 2.96,-1.73 goal HIDE act sprint to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1050 Kamal      (897.43,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 894.5,907.5 | 
+    [trace]  1060 Zainab     (883.18,37.00,831.02) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1060 Ziad       (897.81,37.00,821.48) yaw -1.13 want NaN v 1.53,0.11 goal HIDE act sprint to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1060 Kamal      (897.02,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 893.5,907.5 | 
+    [trace]  1070 Zainab     (883.22,37.00,831.24) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1070 Ziad       (897.97,37.00,821.62) yaw -1.87 want NaN v 0.69,1.16 goal HIDE act sprint to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1070 Kamal      (896.61,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 893.5,907.5 | 
+    [trace]  1080 Zainab     (883.27,37.00,831.46) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp true 883.5,832.5 | hiding from world life
+    [trace]  1080 Ziad       (898.09,37.00,821.82) yaw -2.39 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1080 Kamal      (896.20,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 892.5,907.5 | 
+    [trace]  1090 Zainab     (883.32,37.00,831.68) yaw -2.93 want NaN v 0.29,1.32 goal HIDE act go to goal working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1090 Ziad       (898.20,37.00,822.01) yaw -2.56 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1090 Kamal      (895.79,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 892.5,907.5 | 
+    [trace]  1100 Zainab     (883.35,37.00,831.79) yaw -2.82 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1100 Ziad       (898.32,37.00,822.20) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1100 Kamal      (895.38,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 892.5,907.5 | 
+    [trace]  1110 Zainab     (883.35,37.00,831.79) yaw -1.73 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1110 Ziad       (898.44,37.00,822.39) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1110 Kamal      (894.97,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 891.5,907.5 | 
+    [trace]  1120 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1120 Ziad       (898.55,37.00,822.59) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1120 Kamal      (894.56,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 891.5,907.5 | 
+    [trace]  1130 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1130 Ziad       (898.67,37.00,822.78) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1130 Kamal      (894.15,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 890.5,907.5 | 
+    [trace]  1140 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1140 Ziad       (898.78,37.00,822.97) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1140 Kamal      (893.74,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 890.5,907.5 | 
+    [trace]  1150 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1150 Ziad       (898.90,37.00,823.17) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1150 Kamal      (893.34,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 890.5,907.5 | 
+    [trace]  1160 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1160 Ziad       (899.02,37.00,823.36) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1160 Kamal      (892.93,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 889.5,907.5 | 
+    [trace]  1170 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1170 Ziad       (899.13,37.00,823.55) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1170 Kamal      (892.52,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 888.5,907.5 | 
+    [trace]  1180 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1180 Ziad       (899.25,37.00,823.74) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1180 Kamal      (892.11,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 888.5,907.5 | 
+    [trace]  1190 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1190 Ziad       (899.36,37.00,823.94) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1190 Kamal      (891.70,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 888.5,907.5 | 
+    [trace]  1200 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1200 Ziad       (899.48,37.00,824.13) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1200 Kamal      (891.29,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 888.5,907.5 | 
+    [trace]  1210 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1210 Ziad       (899.59,37.00,824.32) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1210 Kamal      (890.88,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 887.5,907.5 | 
+    [trace]  1220 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1220 Ziad       (899.71,37.00,824.52) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1220 Kamal      (890.47,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 886.5,907.5 | 
+    [trace]  1230 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1230 Ziad       (899.83,37.00,824.71) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1230 Kamal      (890.06,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 886.5,907.5 | 
+    [trace]  1240 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1240 Ziad       (899.94,37.00,824.90) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1240 Kamal      (889.66,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 886.5,907.5 | 
+    [trace]  1250 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1250 Ziad       (900.06,37.00,825.09) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1250 Kamal      (889.25,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 885.5,907.5 | 
+    [trace]  1260 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1260 Ziad       (900.17,37.00,825.29) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1260 Kamal      (888.84,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 885.5,907.5 | 
+    [trace]  1270 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1270 Ziad       (900.29,37.00,825.48) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1270 Kamal      (888.43,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 884.5,907.5 | 
+    [trace]  1280 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1280 Ziad       (900.41,37.00,825.67) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act run to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1280 Kamal      (888.02,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 884.5,907.5 | 
+    [trace]  1290 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1290 Ziad       (900.52,37.00,825.87) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act go to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1290 Kamal      (887.61,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 884.5,907.5 | 
+    [trace]  1300 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1300 Ziad       (900.64,37.00,826.06) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act go to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1300 Kamal      (887.20,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 883.5,907.5 | 
+    [trace]  1310 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1310 Ziad       (900.75,37.00,826.25) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act go to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1310 Kamal      (886.79,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 883.5,907.5 | 
+    [trace]  1320 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1320 Ziad       (900.87,37.00,826.44) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act go to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1320 Kamal      (886.38,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 882.5,907.5 | 
+    [trace]  1330 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1330 Ziad       (900.99,37.00,826.64) yaw -2.59 want NaN v 0.69,1.16 goal HIDE act go to goal working null gp true 901.5,827.5 | hiding from world life
+    [trace]  1330 Kamal      (885.98,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 882.5,907.5 | 
+    [trace]  1340 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1340 Ziad       (901.10,37.00,826.83) yaw -2.59 want NaN v 0.45,0.76 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1340 Kamal      (885.57,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 882.5,907.5 | 
+    [trace]  1350 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1350 Ziad       (901.11,37.00,826.85) yaw -3.13 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1350 Kamal      (885.16,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 881.5,907.5 | 
+    [trace]  1360 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1360 Ziad       (901.11,37.00,826.85) yaw 2.07 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1360 Kamal      (884.75,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 881.5,907.5 | 
+    [trace]  1370 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1370 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1370 Kamal      (884.34,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 880.5,907.5 | 
+    [trace]  1380 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1380 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1380 Kamal      (883.93,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 880.5,907.5 | 
+    [trace]  1390 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1390 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1390 Kamal      (883.52,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 880.5,907.5 | 
+    [trace]  1400 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1400 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1400 Kamal      (883.11,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 879.5,907.5 | 
+    [trace]  1410 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1410 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1410 Kamal      (882.70,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 878.5,907.5 | 
+    [trace]  1420 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1420 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1420 Kamal      (882.29,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 878.5,907.5 | 
+    [trace]  1430 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1430 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1430 Kamal      (881.89,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 878.5,907.5 | 
+    [trace]  1440 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1440 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1440 Kamal      (881.48,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 878.5,907.5 | 
+    [trace]  1450 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1450 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1450 Kamal      (881.07,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 877.5,907.5 | 
+    [trace]  1460 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1460 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1460 Kamal      (880.66,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 877.5,907.5 | 
+    [trace]  1470 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1470 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1470 Kamal      (880.25,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 877.5,907.5 | 
+    [trace]  1480 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1480 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1480 Kamal      (879.84,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 876.5,907.5 | 
+    [trace]  1490 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]  1490 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]  1490 Kamal      (879.43,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,906.5 | 
+    [life] stop 890,826 done (33 people seen so far)
+    [trace]     0 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]     0 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]     0 Kamal      (879.02,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,906.5 | 
+    [trace]    10 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]    10 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    10 Kamal      (878.61,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,906.5 | 
+    [trace]    20 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]    20 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    20 Kamal      (878.21,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,906.5 | 
+    [trace]    30 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal HIDE act hold/face working null gp false 883.5,832.5 | hiding from world life
+    [trace]    30 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    30 Kamal      (877.80,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,906.5 | 
+    [trace]    40 Zainab     (883.35,37.00,831.79) yaw -0.87 want -0.87 v 0.00,0.00 goal WORK act hold/face working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    40 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    40 Kamal      (877.39,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,904.5 | 
+    [trace]    50 Zainab     (883.35,37.00,831.68) yaw -0.87 want -0.87 v 0.05,-1.87 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    50 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    50 Kamal      (876.98,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,904.5 | 
+    [trace]    60 Zainab     (883.36,37.00,831.28) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    60 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    60 Kamal      (876.57,37.00,907.50) yaw 1.59 want NaN v -2.45,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,904.5 | 
+    [trace]    70 Zainab     (883.37,37.00,830.88) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    70 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    70 Kamal      (876.20,37.00,907.36) yaw 1.31 want NaN v -2.18,-1.11 goal SOCIALIZE act go to goal working null gp true 875.5,904.5 | 
+    [trace]    80 Zainab     (883.38,37.00,830.47) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    80 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    80 Kamal      (875.84,37.00,907.30) yaw 1.40 want NaN v -2.04,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,903.5 | 
+    [trace]    90 Zainab     (883.39,37.00,830.06) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]    90 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]    90 Kamal      (875.51,37.00,907.22) yaw 1.31 want NaN v -1.99,-1.43 goal SOCIALIZE act go to goal working null gp true 875.5,903.5 | 
+    [trace]   100 Zainab     (883.40,37.00,829.65) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   100 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   100 Kamal      (875.28,37.00,906.90) yaw 0.78 want NaN v -1.48,-1.77 goal SOCIALIZE act go to goal working null gp true 875.5,902.5 | 
+    [trace]   110 Zainab     (883.41,37.00,829.25) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   110 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   110 Kamal      (875.07,37.00,906.55) yaw 0.57 want NaN v -1.17,-2.15 goal SOCIALIZE act go to goal working null gp true 875.5,902.5 | 
+    [trace]   120 Zainab     (883.42,37.00,828.84) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   120 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   120 Kamal      (874.88,37.00,906.30) yaw 0.71 want NaN v -1.04,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,902.5 | 
+    [trace]   130 Zainab     (883.43,37.00,828.43) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   130 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   130 Kamal      (874.74,37.00,906.30) yaw 1.21 want NaN v -0.61,0.00 goal SOCIALIZE act go to goal working null gp true 875.5,901.5 | 
+    [trace]   140 Zainab     (883.44,37.00,828.02) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   140 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   140 Kamal      (874.67,37.00,906.24) yaw 0.91 want NaN v -0.24,-1.39 goal SOCIALIZE act go to goal working null gp true 875.5,901.5 | 
+    [trace]   150 Zainab     (883.45,37.00,827.61) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   150 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   150 Kamal      (874.65,37.00,905.87) yaw 0.13 want NaN v 0.13,-2.44 goal SOCIALIZE act go to goal working null gp true 877.5,900.5 | 
+    [trace]   160 Zainab     (883.46,37.00,827.21) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   160 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   160 Kamal      (874.67,37.00,905.47) yaw 0.01 want NaN v 0.13,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,900.5 | 
+    [trace]   170 Zainab     (883.47,37.00,826.80) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   170 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   170 Kamal      (874.69,37.00,905.06) yaw -0.02 want NaN v 0.13,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,900.5 | 
+    [trace]   180 Zainab     (883.48,37.00,826.39) yaw -0.02 want NaN v 0.06,-2.45 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   180 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   180 Kamal      (874.70,37.00,904.65) yaw -0.02 want NaN v 0.35,-2.42 goal SOCIALIZE act go to goal working null gp true 875.5,899.5 | 
+    [trace]   190 Zainab     (883.51,37.00,826.00) yaw -0.06 want NaN v 0.76,-1.83 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   190 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   190 Kamal      (874.76,37.00,904.25) yaw -0.12 want NaN v 0.38,-2.42 goal SOCIALIZE act go to goal working null gp true 877.5,898.5 | 
+    [trace]   200 Zainab     (883.77,37.00,825.82) yaw -0.94 want NaN v 0.00,-0.28 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   200 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   200 Kamal      (874.83,37.00,903.84) yaw -0.12 want NaN v 0.38,-2.42 goal SOCIALIZE act go to goal working null gp true 877.5,898.5 | 
+    [trace]   210 Zainab     (883.79,37.00,825.76) yaw -0.68 want NaN v 0.70,-0.48 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   210 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   210 Kamal      (874.86,37.00,903.44) yaw -0.09 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,898.5 | 
+    [trace]   220 Zainab     (884.08,37.00,825.66) yaw -1.23 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   220 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   220 Kamal      (874.88,37.00,903.03) yaw -0.06 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,898.5 | 
+    [trace]   230 Zainab     (884.47,37.00,825.56) yaw -1.27 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   230 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   230 Kamal      (874.89,37.00,902.62) yaw -0.06 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,897.5 | 
+    [trace]   240 Zainab     (884.87,37.00,825.45) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   240 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   240 Kamal      (874.91,37.00,902.21) yaw -0.06 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,897.5 | 
+    [trace]   250 Zainab     (885.26,37.00,825.35) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   250 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   250 Kamal      (874.93,37.00,901.81) yaw -0.06 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,897.5 | 
+    [trace]   260 Zainab     (885.66,37.00,825.25) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   260 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   260 Kamal      (874.95,37.00,901.40) yaw -0.06 want NaN v 0.11,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,897.5 | 
+    [trace]   270 Zainab     (886.05,37.00,825.14) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   270 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   270 Kamal      (874.99,37.00,900.99) yaw -0.09 want NaN v 0.28,-2.43 goal SOCIALIZE act go to goal working null gp true 875.5,895.5 | 
+    [trace]   280 Zainab     (886.45,37.00,825.04) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   280 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   280 Kamal      (875.04,37.00,900.59) yaw -0.09 want NaN v 0.28,-2.43 goal SOCIALIZE act go to goal working null gp true 875.5,895.5 | 
+    [trace]   290 Zainab     (886.85,37.00,824.93) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   290 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   290 Kamal      (875.08,37.00,900.18) yaw -0.09 want NaN v 0.22,-2.44 goal SOCIALIZE act go to goal working null gp true 875.5,895.5 | 
+    [trace]   300 Zainab     (887.24,37.00,824.83) yaw -1.31 want NaN v 2.37,-0.62 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   300 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   300 Kamal      (875.11,37.00,899.78) yaw -0.09 want NaN v 0.22,-2.44 goal SOCIALIZE act go to goal working null gp true 875.5,894.5 | 
+    [trace]   310 Zainab     (887.63,37.00,824.79) yaw -1.43 want NaN v 2.28,0.77 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   310 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   310 Kamal      (875.15,37.00,899.37) yaw -0.09 want NaN v 0.18,-2.44 goal SOCIALIZE act go to goal working null gp true 875.5,894.5 | 
+    [trace]   320 Zainab     (888.01,37.00,824.94) yaw -1.84 want NaN v 2.29,0.87 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   320 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   320 Kamal      (875.18,37.00,898.96) yaw -0.09 want NaN v 0.18,-2.44 goal SOCIALIZE act go to goal working null gp true 875.5,893.5 | 
+    [trace]   330 Zainab     (888.39,37.00,825.08) yaw -1.88 want NaN v 2.29,0.87 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   330 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   330 Kamal      (875.21,37.00,898.55) yaw -0.09 want NaN v 0.18,-2.44 goal SOCIALIZE act go to goal working null gp true 877.5,892.5 | 
+    [trace]   340 Zainab     (888.76,37.00,825.24) yaw -2.04 want NaN v 1.64,1.53 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   340 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   340 Kamal      (875.23,37.00,898.15) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,892.5 | 
+    [trace]   350 Zainab     (888.97,37.00,825.58) yaw -2.44 want NaN v 1.22,2.12 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   350 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   350 Kamal      (875.24,37.00,897.74) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,892.5 | 
+    [trace]   360 Zainab     (889.11,37.00,825.75) yaw -2.38 want NaN v 0.10,-0.63 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   360 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   360 Kamal      (875.25,37.00,897.33) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,892.5 | 
+    [trace]   370 Zainab     (889.02,37.00,825.50) yaw -1.94 want NaN v -1.12,-2.18 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   370 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   370 Kamal      (875.27,37.00,896.92) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,891.5 | 
+    [trace]   380 Zainab     (888.84,37.00,825.16) yaw -0.64 want NaN v -0.70,-1.35 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   380 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   380 Kamal      (875.28,37.00,896.51) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,891.5 | 
+    [trace]   390 Zainab     (888.81,37.00,825.10) yaw 0.22 want NaN v 0.36,0.74 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   390 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   390 Kamal      (875.29,37.00,896.11) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,891.5 | 
+    [trace]   400 Zainab     (888.93,37.00,825.34) yaw 0.22 want 0.22 v 0.57,1.15 goal WORK act hold/face working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   400 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   400 Kamal      (875.31,37.00,895.70) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,890.5 | 
+    [trace]   410 Zainab     (889.04,37.00,825.58) yaw -0.64 want NaN v 1.09,2.19 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   410 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   410 Kamal      (875.32,37.00,895.29) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,890.5 | 
+    [trace]   420 Zainab     (889.21,37.00,825.77) yaw -1.94 want NaN v 0.66,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   420 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   420 Kamal      (875.33,37.00,894.88) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 876.5,889.5 | 
+    [trace]   430 Zainab     (889.27,37.00,825.88) yaw -2.54 want NaN v 0.03,0.38 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   430 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   430 Kamal      (875.34,37.00,894.48) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 876.5,889.5 | 
+    [trace]   440 Zainab     (889.23,37.00,825.78) yaw -2.22 want NaN v -0.10,-1.54 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   440 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   440 Kamal      (875.36,37.00,894.07) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 876.5,889.5 | 
+    [trace]   450 Zainab     (889.07,37.00,825.46) yaw -1.35 want NaN v -1.26,-2.10 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   450 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   450 Kamal      (875.37,37.00,893.66) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,889.5 | 
+    [trace]   460 Zainab     (888.92,37.00,825.21) yaw -0.05 want NaN v -0.34,-0.47 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   460 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v 0.00,0.00 goal HIDE act hold/face working null gp false 901.5,827.5 | hiding from world life
+    [trace]   460 Kamal      (875.38,37.00,893.25) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,889.5 | 
+    [trace]   470 Zainab     (888.95,37.00,825.30) yaw 0.38 want NaN v 0.71,1.61 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   470 Ziad       (901.11,37.00,826.85) yaw 1.53 want 1.51 v -0.43,-0.18 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   470 Kamal      (875.39,37.00,892.85) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 877.5,889.5 | 
+    [trace]   480 Zainab     (889.08,37.00,825.59) yaw -0.49 want NaN v 0.44,0.95 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   480 Ziad       (900.87,37.00,826.75) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   480 Kamal      (875.41,37.00,892.44) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 878.5,889.5 | 
+    [trace]   490 Zainab     (889.07,37.00,825.59) yaw -0.92 want NaN v -0.61,-1.13 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   490 Ziad       (900.49,37.00,826.59) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   490 Kamal      (875.42,37.00,892.03) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 878.5,889.5 | 
+    [trace]   500 Zainab     (888.91,37.00,825.27) yaw 0.38 want NaN v -1.14,-2.17 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   500 Ziad       (900.12,37.00,826.44) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   500 Kamal      (875.43,37.00,891.62) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 879.5,889.5 | 
+    [trace]   510 Zainab     (888.75,37.00,824.97) yaw 0.49 want NaN v -0.50,-0.92 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   510 Ziad       (899.74,37.00,826.28) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   510 Kamal      (875.45,37.00,891.21) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 879.5,889.5 | 
+    [trace]   520 Zainab     (888.75,37.00,824.98) yaw 0.49 want NaN v 0.56,1.15 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   520 Ziad       (899.36,37.00,826.12) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   520 Kamal      (875.46,37.00,890.81) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 879.5,889.5 | 
+    [trace]   530 Zainab     (888.90,37.00,825.30) yaw 1.35 want NaN v 1.09,2.20 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   530 Ziad       (898.99,37.00,825.96) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   530 Kamal      (875.47,37.00,890.40) yaw -0.06 want NaN v 0.08,-2.45 goal SOCIALIZE act go to goal working null gp true 880.5,889.5 | 
+    [trace]   540 Zainab     (889.09,37.00,825.66) yaw 2.65 want NaN v 1.09,2.20 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   540 Ziad       (898.61,37.00,825.81) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   540 Kamal      (875.49,37.00,890.00) yaw -0.06 want NaN v 0.59,-1.97 goal SOCIALIZE act go to goal working null gp true 880.5,889.5 | 
+    [trace]   550 Zainab     (889.22,37.00,825.77) yaw 2.65 want 2.65 v 0.00,0.00 goal WORK act hold/face working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   550 Ziad       (898.24,37.00,825.65) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   550 Kamal      (875.69,37.00,889.78) yaw -0.61 want NaN v 0.35,-0.83 goal SOCIALIZE act go to goal working null gp true 881.5,889.5 | 
+    [trace]   560 Zainab     (889.16,37.00,825.67) yaw 2.22 want NaN v -0.92,-1.63 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]   560 Ziad       (897.86,37.00,825.49) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   560 Kamal      (875.71,37.00,889.68) yaw -0.42 want NaN v 0.69,-0.32 goal SOCIALIZE act go to goal working null gp true 881.5,889.5 | 
+    [trace]   570 Zainab     (888.97,37.00,825.33) yaw 1.35 want NaN v -1.20,-2.13 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   570 Ziad       (897.48,37.00,825.33) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   570 Kamal      (876.00,37.00,889.65) yaw -1.38 want NaN v 2.45,-0.07 goal SOCIALIZE act go to goal working null gp true 882.5,889.5 | 
+    [trace]   580 Zainab     (888.86,37.00,825.14) yaw 0.51 want NaN v -0.06,-0.10 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   580 Ziad       (897.11,37.00,825.18) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   580 Kamal      (876.41,37.00,889.64) yaw -1.49 want NaN v 2.45,-0.06 goal SOCIALIZE act go to goal working null gp true 882.5,889.5 | 
+    [trace]   590 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   590 Ziad       (896.73,37.00,825.02) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   590 Kamal      (876.82,37.00,889.63) yaw -1.52 want NaN v 2.45,-0.06 goal SOCIALIZE act go to goal working null gp true 883.5,889.5 | 
+    [trace]   600 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   600 Ziad       (896.36,37.00,824.86) yaw 1.20 want NaN v -2.26,-0.95 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   600 Kamal      (877.23,37.00,889.62) yaw -1.52 want NaN v 2.45,-0.05 goal SOCIALIZE act go to goal working null gp true 883.5,889.5 | 
+    [trace]   610 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   610 Ziad       (896.30,37.00,824.73) yaw 0.74 want NaN v 0.00,-0.52 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   610 Kamal      (877.63,37.00,889.62) yaw -1.52 want NaN v 2.45,-0.05 goal SOCIALIZE act go to goal working null gp true 883.5,889.5 | 
+    [trace]   620 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   620 Ziad       (896.23,37.00,824.67) yaw 0.96 want NaN v -1.51,-0.19 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   620 Kamal      (878.04,37.00,889.61) yaw -1.52 want NaN v 2.45,-0.05 goal SOCIALIZE act go to goal working null gp true 884.5,889.5 | 
+    [trace]   630 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   630 Ziad       (895.85,37.00,824.65) yaw 1.45 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   630 Kamal      (878.45,37.00,889.60) yaw -1.55 want NaN v 2.45,-0.04 goal SOCIALIZE act go to goal working null gp true 884.5,889.5 | 
+    [trace]   640 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   640 Ziad       (895.45,37.00,824.64) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   640 Kamal      (878.86,37.00,889.59) yaw -1.55 want NaN v 2.45,-0.04 goal SOCIALIZE act go to goal working null gp true 885.5,889.5 | 
+    [trace]   650 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   650 Ziad       (895.04,37.00,824.63) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   650 Kamal      (879.26,37.00,889.59) yaw -1.55 want NaN v 2.45,-0.03 goal SOCIALIZE act go to goal working null gp true 885.5,889.5 | 
+    [trace]   660 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   660 Ziad       (894.63,37.00,824.62) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   660 Kamal      (879.67,37.00,889.58) yaw -1.55 want NaN v 2.45,-0.03 goal SOCIALIZE act go to goal working null gp true 885.5,889.5 | 
+    [trace]   670 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   670 Ziad       (894.22,37.00,824.61) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   670 Kamal      (880.08,37.00,889.57) yaw -1.55 want NaN v 2.45,-0.03 goal SOCIALIZE act go to goal working null gp true 886.5,889.5 | 
+    [trace]   680 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   680 Ziad       (893.81,37.00,824.59) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   680 Kamal      (880.49,37.00,889.57) yaw -1.55 want NaN v 2.45,-0.03 goal SOCIALIZE act go to goal working null gp true 886.5,889.5 | 
+    [trace]   690 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   690 Ziad       (893.41,37.00,824.58) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   690 Kamal      (880.90,37.00,889.56) yaw -1.55 want NaN v 2.45,-0.03 goal SOCIALIZE act go to goal working null gp true 886.5,889.5 | 
+    [trace]   700 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   700 Ziad       (893.00,37.00,824.57) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   700 Kamal      (881.30,37.00,889.56) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 887.5,889.5 | 
+    [trace]   710 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   710 Ziad       (892.59,37.00,824.56) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   710 Kamal      (881.71,37.00,889.56) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 887.5,889.5 | 
+    [trace]   720 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   720 Ziad       (892.18,37.00,824.55) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   720 Kamal      (882.12,37.00,889.55) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 888.5,889.5 | 
+    [trace]   730 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   730 Ziad       (891.78,37.00,824.54) yaw 1.52 want NaN v -2.45,-0.07 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   730 Kamal      (882.53,37.00,889.55) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 888.5,889.5 | 
+    [trace]   740 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   740 Ziad       (891.41,37.00,824.57) yaw 1.64 want NaN v -1.56,1.01 goal WORK act go to goal working null gp true 891.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   740 Kamal      (882.93,37.00,889.55) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 888.5,889.5 | 
+    [trace]   750 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   750 Ziad       (891.22,37.00,824.88) yaw 2.47 want NaN v -0.99,2.24 goal WORK act go to goal working null gp true 891.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   750 Kamal      (883.34,37.00,889.54) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 889.5,889.5 | 
+    [trace]   760 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   760 Ziad       (891.05,37.00,825.25) yaw 2.65 want NaN v -0.99,2.24 goal WORK act go to goal working null gp true 891.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   760 Kamal      (883.75,37.00,889.54) yaw -1.55 want NaN v 2.45,-0.02 goal SOCIALIZE act go to goal working null gp true 890.5,889.5 | 
+    [trace]   770 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   770 Ziad       (890.89,37.00,825.63) yaw 2.68 want NaN v -0.99,2.24 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   770 Kamal      (884.16,37.00,889.54) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 890.5,889.5 | 
+    [trace]   780 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   780 Ziad       (890.74,37.00,825.70) yaw 2.29 want NaN v -0.66,0.00 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   780 Kamal      (884.57,37.00,889.54) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 890.5,889.5 | 
+    [trace]   790 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   790 Ziad       (890.66,37.00,825.58) yaw 1.24 want NaN v -0.39,-1.86 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   790 Kamal      (884.98,37.00,889.53) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 891.5,889.5 | 
+    [trace]   800 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   800 Ziad       (890.60,37.00,825.19) yaw 0.38 want NaN v -0.35,-2.42 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   800 Kamal      (885.38,37.00,889.53) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 891.5,889.5 | 
+    [trace]   810 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   810 Ziad       (890.55,37.00,824.85) yaw 0.18 want NaN v -0.20,-1.14 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   810 Kamal      (885.79,37.00,889.53) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 892.5,889.5 | 
+    [trace]   820 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   820 Ziad       (890.53,37.00,824.84) yaw 0.33 want NaN v -0.06,1.19 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   820 Kamal      (886.20,37.00,889.53) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 892.5,889.5 | 
+    [trace]   830 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   830 Ziad       (890.53,37.00,825.19) yaw 1.20 want NaN v -0.01,2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   830 Kamal      (886.61,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 892.5,889.5 | 
+    [trace]   840 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   840 Ziad       (890.52,37.00,825.60) yaw 2.06 want NaN v -0.01,2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   840 Kamal      (887.02,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 893.5,889.5 | 
+    [trace]   850 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   850 Ziad       (890.52,37.00,826.01) yaw 3.14 want NaN v -0.01,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   850 Kamal      (887.43,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 893.5,889.5 | 
+    [trace]   860 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   860 Ziad       (890.52,37.00,826.35) yaw 3.14 want NaN v -0.01,1.05 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   860 Kamal      (887.84,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 893.5,889.5 | 
+    [trace]   870 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   870 Ziad       (890.52,37.00,826.34) yaw 3.14 want NaN v -0.02,-1.28 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   870 Kamal      (888.25,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 894.5,889.5 | 
+    [trace]   880 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   880 Ziad       (890.52,37.00,825.99) yaw 2.27 want NaN v -0.03,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   880 Kamal      (888.66,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 894.5,889.5 | 
+    [trace]   890 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   890 Ziad       (890.51,37.00,825.58) yaw 0.97 want NaN v -0.03,-2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   890 Kamal      (889.06,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 895.5,889.5 | 
+    [trace]   900 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   900 Ziad       (890.51,37.00,825.36) yaw 0.10 want NaN v -0.01,-0.12 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   900 Kamal      (889.47,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 895.5,889.5 | 
+    [trace]   910 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   910 Ziad       (890.51,37.00,825.52) yaw 0.45 want NaN v -0.00,2.22 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   910 Kamal      (889.88,37.00,889.52) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 895.5,889.5 | 
+    [trace]   920 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   920 Ziad       (890.51,37.00,825.93) yaw 1.32 want NaN v -0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   920 Kamal      (890.29,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 896.5,889.5 | 
+    [trace]   930 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   930 Ziad       (890.51,37.00,826.34) yaw 2.62 want NaN v -0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   930 Kamal      (890.70,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.01 goal SOCIALIZE act go to goal working null gp true 896.5,889.5 | 
+    [trace]   940 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   940 Ziad       (890.51,37.00,826.74) yaw 3.14 want NaN v -0.00,1.98 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   940 Kamal      (891.11,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 897.5,889.5 | 
+    [trace]   950 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   950 Ziad       (890.51,37.00,826.89) yaw 3.14 want NaN v -0.00,-0.35 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   950 Kamal      (891.52,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 897.5,889.5 | 
+    [trace]   960 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   960 Ziad       (890.51,37.00,826.64) yaw 3.14 want 3.14 v -0.01,-2.45 goal WORK act hold/face working null gp false 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   960 Kamal      (891.93,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 898.5,889.5 | 
+    [trace]   970 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   970 Ziad       (890.51,37.00,826.37) yaw 1.84 want NaN v -0.01,-1.98 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   970 Kamal      (892.34,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 898.5,889.5 | 
+    [trace]   980 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   980 Ziad       (890.50,37.00,825.97) yaw 0.97 want NaN v -0.01,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]   980 Kamal      (892.75,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 899.5,889.5 | 
+    [trace]   990 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   990 Ziad       (890.50,37.00,825.56) yaw 0.00 want NaN v -0.01,-2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]   990 Kamal      (893.15,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 899.5,889.5 | 
+    [trace]  1000 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1000 Ziad       (890.50,37.00,825.33) yaw 0.00 want NaN v -0.00,-0.12 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1000 Kamal      (893.56,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 899.5,889.5 | 
+    [trace]  1010 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1010 Ziad       (890.49,37.00,825.38) yaw 0.00 want NaN v -0.41,0.74 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1010 Kamal      (893.97,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 899.5,888.5 | 
+    [trace]  1020 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1020 Ziad       (890.38,37.00,825.55) yaw 0.87 want NaN v -0.61,1.51 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1020 Kamal      (894.38,37.00,889.51) yaw -1.55 want NaN v 2.45,-0.00 goal SOCIALIZE act go to goal working null gp true 900.5,888.5 | 
+    [trace]  1030 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1030 Ziad       (890.26,37.00,825.84) yaw 2.17 want NaN v -0.30,2.26 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1030 Kamal      (894.78,37.00,889.45) yaw -1.48 want NaN v 2.42,-0.40 goal SOCIALIZE act go to goal working null gp true 900.5,888.5 | 
+    [trace]  1040 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1040 Ziad       (890.26,37.00,826.24) yaw 3.04 want NaN v 0.10,1.98 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1040 Kamal      (895.19,37.00,889.39) yaw -1.45 want NaN v 2.42,-0.40 goal SOCIALIZE act go to goal working null gp true 901.5,887.5 | 
+    [trace]  1050 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1050 Ziad       (890.28,37.00,826.39) yaw -3.05 want NaN v 0.14,-0.35 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1050 Kamal      (895.59,37.00,889.30) yaw -1.38 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 901.5,887.5 | 
+    [trace]  1060 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1060 Ziad       (890.30,37.00,826.15) yaw -2.62 want NaN v -0.25,-2.16 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1060 Kamal      (895.98,37.00,889.18) yaw -1.32 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 901.5,887.5 | 
+    [trace]  1070 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1070 Ziad       (890.26,37.00,825.90) yaw -2.62 want -2.62 v 0.01,-1.17 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1070 Kamal      (896.37,37.00,889.06) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 901.5,887.5 | 
+    [trace]  1080 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1080 Ziad       (890.29,37.00,825.57) yaw -1.75 want NaN v 0.48,-2.40 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1080 Kamal      (896.76,37.00,888.94) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 901.5,887.5 | 
+    [trace]  1090 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1090 Ziad       (890.37,37.00,825.17) yaw -0.45 want NaN v 0.48,-2.40 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1090 Kamal      (897.15,37.00,888.83) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 902.5,887.5 | 
+    [trace]  1100 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1100 Ziad       (890.43,37.00,824.89) yaw -0.19 want NaN v 0.20,-0.56 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1100 Kamal      (897.54,37.00,888.71) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 902.5,887.5 | 
+    [trace]  1110 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1110 Ziad       (890.45,37.00,824.98) yaw -0.91 want NaN v 0.05,1.77 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1110 Kamal      (897.93,37.00,888.59) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 902.5,887.5 | 
+    [trace]  1120 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1120 Ziad       (890.45,37.00,825.37) yaw -1.78 want NaN v 0.02,2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1120 Kamal      (898.32,37.00,888.47) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 903.5,887.5 | 
+    [trace]  1130 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1130 Ziad       (890.45,37.00,825.78) yaw -3.08 want NaN v 0.02,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1130 Kamal      (898.71,37.00,888.35) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 903.5,887.5 | 
+    [trace]  1140 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1140 Ziad       (890.46,37.00,826.18) yaw -3.13 want NaN v 0.02,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1140 Kamal      (899.10,37.00,888.23) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 903.5,887.5 | 
+    [trace]  1150 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1150 Ziad       (890.46,37.00,826.41) yaw -3.13 want NaN v 0.02,0.12 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1150 Kamal      (899.49,37.00,888.11) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 904.5,888.5 | 
+    [trace]  1160 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1160 Ziad       (890.47,37.00,826.24) yaw -3.09 want NaN v 0.05,-2.22 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1160 Kamal      (899.88,37.00,887.99) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 904.5,888.5 | 
+    [trace]  1170 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1170 Ziad       (890.47,37.00,825.84) yaw -1.79 want NaN v 0.05,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1170 Kamal      (900.27,37.00,887.87) yaw -1.29 want NaN v 2.34,-0.71 goal SOCIALIZE act go to goal working null gp true 904.5,888.5 | 
+    [trace]  1180 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1180 Ziad       (890.48,37.00,825.43) yaw -0.93 want NaN v 0.04,-1.98 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1180 Kamal      (900.67,37.00,887.77) yaw -1.32 want NaN v 2.42,-0.36 goal SOCIALIZE act go to goal working null gp true 904.5,889.5 | 
+    [trace]  1190 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1190 Ziad       (890.49,37.00,825.29) yaw -0.06 want NaN v 0.01,0.35 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1190 Kamal      (900.70,37.00,887.71) yaw -1.04 want NaN v 0.00,-0.33 goal SOCIALIZE act go to goal working null gp true 904.5,889.5 | 
+    [trace]  1200 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1200 Ziad       (890.49,37.00,825.53) yaw -0.49 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1200 Kamal      (900.80,37.00,887.66) yaw -1.17 want NaN v 1.75,-0.26 goal SOCIALIZE act go to goal working null gp true 905.5,890.5 | 
+    [trace]  1210 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1210 Ziad       (890.49,37.00,825.94) yaw -1.79 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1210 Kamal      (901.19,37.00,887.62) yaw -1.43 want NaN v 2.44,-0.23 goal SOCIALIZE act go to goal working null gp true 905.5,890.5 | 
+    [trace]  1220 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1220 Ziad       (890.49,37.00,826.35) yaw -2.66 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1220 Kamal      (901.59,37.00,887.59) yaw -1.46 want NaN v 2.44,-0.23 goal SOCIALIZE act go to goal working null gp true 905.5,890.5 | 
+    [trace]  1230 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1230 Ziad       (890.49,37.00,826.73) yaw -3.14 want NaN v 0.00,1.52 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1230 Kamal      (902.00,37.00,887.55) yaw -1.46 want NaN v 2.44,-0.24 goal SOCIALIZE act go to goal working null gp true 905.5,891.5 | 
+    [trace]  1240 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1240 Ziad       (890.49,37.00,826.80) yaw -3.14 want NaN v 0.01,-0.82 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1240 Kamal      (902.34,37.00,887.64) yaw -1.80 want NaN v 1.59,1.66 goal SOCIALIZE act go to goal working null gp true 905.5,891.5 | 
+    [trace]  1250 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1250 Ziad       (890.49,37.00,826.50) yaw -2.71 want NaN v 0.01,-1.98 goal WORK act hold/face working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1250 Kamal      (902.60,37.00,887.95) yaw -2.31 want NaN v 1.72,1.73 goal SOCIALIZE act go to goal working null gp true 906.5,891.5 | 
+    [trace]  1260 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1260 Ziad       (890.49,37.00,826.22) yaw -1.84 want NaN v 0.01,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1260 Kamal      (902.90,37.00,888.23) yaw -2.31 want NaN v 1.81,1.65 goal SOCIALIZE act go to goal working null gp true 906.5,891.5 | 
+    [trace]  1270 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1270 Ziad       (890.50,37.00,825.81) yaw -0.54 want NaN v 0.01,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1270 Kamal      (903.20,37.00,888.50) yaw -2.31 want NaN v 1.81,1.65 goal SOCIALIZE act go to goal working null gp true 906.5,892.5 | 
+    [trace]  1280 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1280 Ziad       (890.50,37.00,825.41) yaw -0.00 want NaN v 0.01,-1.98 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1280 Kamal      (903.48,37.00,888.80) yaw -2.39 want NaN v 1.55,1.90 goal SOCIALIZE act go to goal working null gp true 906.5,892.5 | 
+    [trace]  1290 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1290 Ziad       (890.50,37.00,825.27) yaw -0.00 want NaN v 0.00,0.35 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1290 Kamal      (903.74,37.00,889.12) yaw -2.42 want NaN v 1.55,1.90 goal SOCIALIZE act go to goal working null gp true 906.5,893.5 | 
+    [trace]  1300 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1300 Ziad       (890.50,37.00,825.51) yaw -0.44 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,832.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1300 Kamal      (903.99,37.00,889.44) yaw -2.46 want NaN v 1.29,2.08 goal SOCIALIZE act go to goal working null gp true 906.5,893.5 | 
+    [trace]  1310 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act idle working null gp false 888.5,824.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1310 Ziad       (890.50,37.00,825.92) yaw -1.74 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1310 Kamal      (904.20,37.00,889.79) yaw -2.54 want NaN v 1.29,2.08 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1320 Zainab     (888.86,37.00,825.13) yaw 0.51 want NaN v 0.00,0.00 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1320 Ziad       (890.50,37.00,826.33) yaw -2.60 want NaN v 0.00,2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1320 Kamal      (904.41,37.00,890.13) yaw -2.57 want NaN v 1.29,2.08 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1330 Zainab     (888.94,37.00,825.30) yaw 0.94 want NaN v 0.99,2.11 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1330 Ziad       (890.50,37.00,826.71) yaw -3.14 want NaN v 0.00,1.52 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1330 Kamal      (904.60,37.00,890.50) yaw -2.64 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1340 Zainab     (889.11,37.00,825.67) yaw 2.24 want NaN v 1.04,2.22 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1340 Ziad       (890.50,37.00,826.78) yaw -3.14 want NaN v 0.00,-0.82 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1340 Kamal      (904.77,37.00,890.87) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1350 Zainab     (889.21,37.00,825.75) yaw 3.11 want NaN v -0.11,-0.71 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1350 Ziad       (890.50,37.00,826.47) yaw -2.27 want NaN v 0.00,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1350 Kamal      (904.95,37.00,891.24) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1360 Zainab     (889.08,37.00,825.50) yaw 2.24 want NaN v -1.24,-2.11 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1360 Ziad       (890.50,37.00,826.06) yaw -1.41 want NaN v 0.00,-2.45 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1360 Kamal      (905.12,37.00,891.60) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1370 Zainab     (888.88,37.00,825.15) yaw 1.38 want NaN v -1.01,-1.71 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1370 Ziad       (890.50,37.00,825.65) yaw -0.11 want NaN v 0.00,-2.45 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1370 Kamal      (905.30,37.00,891.97) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1380 Zainab     (888.80,37.00,825.03) yaw 0.58 want NaN v 0.10,0.34 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1380 Ziad       (890.48,37.00,825.43) yaw 0.04 want NaN v -0.20,-0.13 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1380 Kamal      (905.47,37.00,892.34) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1390 Zainab     (888.90,37.00,825.25) yaw 1.01 want NaN v 1.06,2.21 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1390 Ziad       (890.41,37.00,825.59) yaw 0.60 want NaN v -0.69,2.15 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1390 Kamal      (905.65,37.00,892.71) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp true 906.5,894.5 | 
+    [trace]  1400 Zainab     (889.07,37.00,825.62) yaw 1.88 want 1.88 v 0.61,2.35 goal WORK act go to goal working null gp false 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1400 Ziad       (890.31,37.00,825.91) yaw 1.47 want NaN v -0.37,0.99 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1400 Kamal      (905.82,37.00,893.08) yaw -2.67 want NaN v 1.05,2.21 goal SOCIALIZE act go to goal working null gp false 906.5,894.5 | 
+    [trace]  1410 Zainab     (889.16,37.00,825.77) yaw 2.74 want NaN v 0.48,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1410 Ziad       (890.29,37.00,825.90) yaw 2.33 want NaN v 0.14,-1.29 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1410 Kamal      (905.97,37.00,893.39) yaw -2.67 want NaN v 0.45,0.95 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1420 Zainab     (889.22,37.00,825.75) yaw -2.67 want NaN v -0.10,-0.73 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1420 Ziad       (890.34,37.00,825.55) yaw 1.47 want NaN v 0.29,-1.96 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1420 Kamal      (905.99,37.00,893.43) yaw -2.89 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1430 Zainab     (889.09,37.00,825.50) yaw -1.81 want NaN v -1.25,-2.11 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1430 Ziad       (890.35,37.00,825.40) yaw 0.17 want NaN v -0.17,0.33 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1430 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1440 Zainab     (888.88,37.00,825.14) yaw -0.51 want NaN v -1.25,-2.11 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1440 Ziad       (890.28,37.00,825.64) yaw 0.17 want 0.17 v -0.65,2.36 goal WORK act hold/face working null gp false 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1440 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1450 Zainab     (888.77,37.00,824.95) yaw 0.36 want NaN v -0.11,-0.07 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1450 Ziad       (890.22,37.00,825.85) yaw 1.47 want NaN v -0.06,0.10 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1450 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1460 Zainab     (888.83,37.00,825.11) yaw 0.58 want 0.58 v 0.96,2.00 goal WORK act go to goal working null gp false 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1460 Ziad       (890.25,37.00,825.69) yaw 1.03 want NaN v 0.45,-2.17 goal WORK act go to goal working null gp true 890.5,824.5 | Tailor: buy missing inputs
+    [trace]  1460 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1470 Zainab     (889.01,37.00,825.47) yaw 1.45 want NaN v 1.06,2.21 goal WORK act go to goal working null gp true 890.5,830.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1470 Ziad       (890.34,37.00,825.29) yaw -0.20 want NaN v 0.50,-2.40 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1470 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1480 Zainab     (889.18,37.00,825.77) yaw 2.75 want NaN v 0.86,0.00 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1480 Ziad       (890.38,37.00,825.07) yaw -0.20 want NaN v -0.01,-0.12 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1480 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [trace]  1490 Zainab     (889.29,37.00,825.85) yaw -2.67 want NaN v 0.38,0.75 goal WORK act go to goal working null gp true 888.5,824.5 | Tailor: buy missing inputs
+    [trace]  1490 Ziad       (890.33,37.00,825.23) yaw 0.23 want NaN v -0.55,2.15 goal WORK act go to goal working null gp true 889.5,828.5 | Tailor: tidying the workplace while short of supplies
+    [trace]  1490 Kamal      (905.99,37.00,893.43) yaw 2.78 want 2.78 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 906.5,894.5 | 
+    [life] stop 928,889 done (35 people seen so far)
+
+    [life] 2 stops of 1500 frames; 35 people seen
+      Zainab           CRAFTSMAN    seen   460 spins   2 blocked     0 still     0
+          spun at (888.9,37.0,825.1) WORK: Tailor: tidying the workplace while short of supplies
+      Ziad             CRAFTSMAN    seen   460 spins   1 blocked     0 still     0
+          spun at (890.5,37.0,826.3) WORK: Tailor: buy missing inputs
+      Idris            SCHOLAR      seen   460 spins   0 blocked     0 still   137
+          last (874.6,37.0,877.1) PRAY: on the way to prayers
+      Tariq            CIVIC        seen   230 spins   0 blocked    29 still   162
+          last (835.6,37.0,911.5) WORK: paused to reconsider a blocked route
+      Marwan           CRAFTSMAN    seen   460 spins   0 blocked     0 still   236
+          last (952.5,37.0,822.3) SLEEP: on the way
+      Rashid           MERCHANT     seen   460 spins   0 blocked     0 still    53
+          last (860.9,37.0,863.9) PRAY: on the way to prayers
+      never in play: Ealdra MERCHANT home (261,926)
+      never in play: Torren LAWMAN home (237,978)
+      never in play: Aldric GUARD home (240,981)
+      never in play: Oswin WORKER home (304,901)
+      never in play: Tam VILLAGER home (285,836)
+      never in play: Brannoc THIEF home (580,900)
+      never in play: Mara MERCHANT home (114,771)
+      never in play: Lucan LAWMAN home (95,701)
+      never in play: Ferrick CARTER home (192,973)
+      never in play: Garvin QUEST_GIVER home (211,897)
+      never in play: Kettil CONTACT home (599,876)
+      never in play: Wynn FARMER home (204,970)
+      never in play: Father Wulfric UNDERTAKER home (179,880)
+      never in play: Skarn FENCE home (580,1026)
+      never in play: Bram GUARD home (237,982)
+      never in play: Ysolde HEALER home (183,963)
+      never in play: Father Gregory PRIEST home (212,894)
+      never in play: Rafe HUNTER home (355,801)
+      never in play: Maelin SCHOLAR home (130,596)
+      never in play: Bryn FISHERMAN home (571,593)
+      never in play: Brokk MINER home (199,434)
+      never in play: Fred CRAFTSMAN home (240,918)
+      never in play: Sir Andrew KNIGHT home (221,896)
+      never in play: Hakon HUNTER home (96,576)
+      never in play: Hadwin CIVIC home (223,983)
+      never in play: Danek CRAFTSMAN home (135,777)
+      never in play: Sir Hedric KNIGHT home (359,748)
+      never in play: Gudrik FISHERMAN home (602,1020)
+      never in play: Vesna FISHERMAN home (104,773)
+      never in play: King Leonidas CIVIC home (569,86)
+      never in play: Baron Photios LAWMAN home (596,107)
+      never in play: Leontios GUARD home (595,112)
+      never in play: Brand GUARD home (382,381)
+      never in play: Roder GUARD home (148,621)
+      never in play: Baroness Guinevere CIVIC home (817,367)
+      never in play: Zoe MERCHANT home (480,117)
+      never in play: Father Paul PRIEST home (876,53)
+      never in play: Father Eirik HEALER home (351,388)
+      never in play: Aristides SCHOLAR home (611,151)
+      never in play: Polyxena MINER home (877,129)
+      never in play: Tolis BEGGAR home (486,61)
+      never in play: Yrsa VILLAGER home (384,418)
+      never in play: Cerys VILLAGER home (814,420)
+      never in play: Wat FISHERMAN home (182,962)
+      never in play: Tauron HUNTER home (860,509)
+      never in play: Bera VILLAGER home (387,441)
+      never in play: Duke Torkell KNIGHT home (386,378)
+      never in play: King Arthur CRAFTSMAN home (817,371)
+      never in play: Sir Lancelot KNIGHT home (809,372)
+      never in play: Sir Gawain HUNTER home (842,344)
+      never in play: Viggo HUNTER home (423,408)
+      never in play: Torvik MINER home (194,439)
+      never in play: Merlin MINER home (779,375)
+      never in play: Dunstan CRAFTSMAN home (304,904)
+      never in play: Olek CRAFTSMAN home (98,743)
+      never in play: Sten CRAFTSMAN home (356,426)
+      never in play: Alexios CRAFTSMAN home (465,36)
+      never in play: Cenric WORKER home (303,896)
+      never in play: Radek WORKER home (88,769)
+      never in play: Dorran MINER home (176,536)
+      never in play: Merek MINER home (92,564)
+      never in play: Meriwyn MERCHANT home (599,871)
+      never in play: Damaris MERCHANT home (480,119)
+      never in play: Cuthmar FARMER home (249,898)
+      never in play: Baron Osric FARMER home (244,854)
+      never in play: Kyra FARMER home (214,290)
+      never in play: Marinos FARMER home (216,283)
+      never in play: Berthild CIVIC home (272,944)
+      never in play: Maddoc MERCHANT home (276,946)
+      never in play: Karlon CRAFTSMAN home (279,945)
+      never in play: Melitta CIVIC home (533,191)
+      never in play: Basil MERCHANT home (545,191)
+      never in play: Lazaros CRAFTSMAN home (532,191)
+      never in play: Brennar CRAFTSMAN home (182,616)
+      never in play: Fenna MERCHANT home (200,655)
+      never in play: Einar WORKER home (356,436)
+      never in play: Ilva FARMER home (155,758)
+      never in play: Petros FISHERMAN home (468,36)
+      never in play: Soren SCHOLAR home (352,392)
+      never in play: Baron Hadrik CRAFTSMAN home (190,614)
+      never in play: Yannis FISHERMAN home (462,36)
+      never in play: Count Dracula CIVIC home (92,702)
+      never in play: Sir Garran KNIGHT home (152,624)
+      never in play: Sella CRAFTSMAN home (140,777)
+      never in play: Orven WORKER home (205,613)
+      never in play: Leofric WORKER home (298,896)
+      never in play: Siv FARMER home (343,403)
+      never in play: Hurk BANDIT home (830,693)
+      never in play: Sigrun BANDIT home (827,694)
+      never in play: Garmund BRUTE home (828,692)
+      never in play: King Richard CIVIC home (226,977)
+      never in play: Duke Donald CIVIC home (227,983)
+      never in play: Count William CIVIC home (298,884)
+      never in play: Alaric PRIEST home (215,896)
+      never in play: Maeve CRAFTSMAN home (230,980)
+      never in play: Hob GUARD home (359,742)
+      never in play: Eadmund CRAFTSMAN home (298,902)
+      never in play: Beric HUNTER home (356,796)
+      never in play: Zafir CRAFTSMAN home (804,910)
+      never in play: Jamila FARMER home (769,985)
+      never in play: Samira FARMER home (766,985)
+      never in play: Duke Artemios CIVIC home (553,86)
+      never in play: Count Constantine CIVIC home (497,53)
+      never in play: Sir Nicholas KNIGHT home (592,107)
+      never in play: Sir Kosmas KNIGHT home (590,107)
+      never in play: Baroness Eudokia CIVIC home (605,150)
+      never in play: Father Khalid PRIEST home (484,112)
+      never in play: Ione PRIEST home (450,34)
+      never in play: Stavros CIVIC home (431,215)
+      never in play: Demetrios CRAFTSMAN home (447,196)
+      never in play: Irene SCHOLAR home (541,86)
+      never in play: Theodora CRAFTSMAN home (448,173)
+      never in play: Xenia CRAFTSMAN home (590,116)
+      never in play: Eleni CRAFTSMAN home (449,173)
+      never in play: Theron MERCHANT home (482,113)
+      never in play: Pavlos FENCE home (484,113)
+      never in play: Melina FISHERMAN home (470,37)
+      never in play: Spiros WORKER home (468,34)
+      never in play: Timon WORKER home (462,37)
+      never in play: Damon WORKER home (465,34)
+      never in play: Alkis CARTER home (481,118)
+      never in play: Andreas CRAFTSMAN home (424,152)
+      never in play: Nikos CRAFTSMAN home (422,152)
+      never in play: Kallias CRAFTSMAN home (424,157)
+      never in play: Isidoros CRAFTSMAN home (428,157)
+      never in play: Orestes WORKER home (180,131)
+      never in play: Myron GUARD home (590,114)
+      never in play: Perikles GUARD home (593,119)
+      never in play: Zenon GUARD home (591,119)
+      never in play: Argyros GUARD home (590,111)
+      never in play: Gorgias GUARD home (595,115)
+      never in play: Kleon GUARD home (595,110)
+      never in play: Kyros THIEF home (427,157)
+      never in play: Mimis BEGGAR home (482,61)
+      never in play: Argus THIEF home (426,157)
+      never in play: Phaedra CARTER home (594,107)
+      never in play: Leandros BEGGAR home (464,39)
+      never in play: Sabeen BEGGAR home (462,34)
+      never in play: King Phillip CIVIC home (159,621)
+      never in play: Duke Edran CIVIC home (156,624)
+      never in play: Sir Vaelor KNIGHT home (129,591)
+      never in play: Father Anselm PRIEST home (129,594)
+      never in play: Tovin CRAFTSMAN home (204,656)
+      never in play: Elric CIVIC home (182,634)
+      never in play: Halwen CRAFTSMAN home (215,653)
+      never in play: Hesta FARMER home (204,606)
+      never in play: Aldis CIVIC home (129,657)
+      never in play: Toben CRAFTSMAN home (129,660)
+      never in play: Halvar CRAFTSMAN home (400,401)
+      never in play: Runa CARTER home (406,399)
+      never in play: Ulven CRAFTSMAN home (385,438)
+      never in play: Nessa MERCHANT home (391,432)
+      never in play: Varek SCHOLAR home (89,706)
+      never in play: Father Odran PRIEST home (150,724)
+      never in play: Mother Mirel PRIEST home (108,739)
+      never in play: Borin FARMER home (154,788)
+      never in play: Sir Bedivere KNIGHT home (862,387)
+      never in play: Father Cadren PRIEST home (783,374)
+      never in play: Elian PRIEST home (841,347)
+      never in play: Baron Aldren CIVIC home (797,384)
+      never in play: Wystan CRAFTSMAN home (815,416)
+      never in play: Perrin CRAFTSMAN home (821,423)
+      never in play: Rowena MERCHANT home (829,423)
+      never in play: Huw FARMER home (870,385)
+      never in play: Edric GUARD home (870,388)
+      never in play: Vark BANDIT home (831,692)
+      never in play: Dolgrin MINER home (201,434)
+      never in play: Pell WORKER home (865,578)
+      never in play: Ysmay WORKER home (984,391)
+      never in play: Hask HUNTER home (720,481)
+      never in play: Orrin CRAFTSMAN home (369,654)
+      never in play: Corvane HUNTER home (585,889)
+      never in play: Bogdan GUARD home (103,789)
+      never in play: Milena CIVIC home (164,723)
+      never in play: Lothar GUARD home (166,606)
+      never in play: Hilde UNDERTAKER home (129,598)
+      never in play: Gunnar GUARD home (402,434)
+      never in play: Astrid UNDERTAKER home (352,385)
+      never in play: Emrys GUARD home (846,387)
+      never in play: Rhiannon CIVIC home (820,389)
+      never in play: Rask BANDIT home (826,693)
+      never in play: Wenna BANDIT home (832,693)
+      never in play: Hullen BANDIT home (824,692)
+      never in play: Grisel BANDIT home (834,693)
+      never in play: Haskel MINER home (171,535)
+      never in play: Tamsin MINER home (99,563)
+      never in play: Osk MINER home (200,439)
+      never in play: Mabry WORKER home (178,131)
+      never in play: Edvin WORKER home (172,131)
+      never in play: Corra WORKER home (868,577)
+    [life] 6 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 60.447 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 5s
+9 actionable tasks: 2 executed, 7 up-to-date

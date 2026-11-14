@@ -885,14 +885,16 @@ public final class CombatSystem {
             float length = Math.max(0.001f, (float) Math.sqrt(dx * dx + dy * dy + dz * dz)); dx /= length; dy /= length; dz /= length;
             // A low stroke may enter the floor after hitting a small animal. Resolve the exposed blade before that wall.
             // (an open door's leaf is no wall: the blade knocks it aside and carries on to whoever stands in the doorway)
-            Voxels.Hit wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false);
+            // (0.4.5, gamefixes: none of the furniture was destructible) a blade passes into a piece of furniture's own
+            // cells to meet the piece's parts (Wreckage) - the invisible cell it stands on stopped every blow at its face
+            Voxels.Hit wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false, true, true);
             if (wall.hit && wall.door != null && wall.door.open && !wall.door.locked) {
                 wall.door.knock(g, wall.x, wall.z, dx, dz);
-                wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false, false);
+                wall = g.vox.ray(grip[0], grip[1], grip[2], dx, dy, dz, length, false, false, true);
             }
             boolean hard = wall.hit && !Blocks.glass(wall.block) && !Blocks.isLeaves(wall.block);
             float limit = hard ? wall.dist : length;
-            if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2], false)) limit = 0;
+            if (!g.vox.clear(tip[3], tip[4], tip[5], grip[0], grip[1], grip[2], false, true)) limit = 0;
             int struckBefore = a.cs.struck.size();
             if (limit > 0 && bodies(a, m, grip, dx, dy, dz, limit)) return;
             if (a.cs.struck.size() == struckBefore && style(a) < 0.999f) {
@@ -1466,7 +1468,7 @@ public final class CombatSystem {
         p.angle += p.spin * dt;
         // an elemental spell meets the surface of water (gamefixes: ice freezes it, fire thaws ice, lightning runs through it)
         boolean elemental = p.spell != null && (p.spell.element == Spells.Element.ICE || p.spell.element == Spells.Element.FIRE || p.spell.element == Spells.Element.ELECTRIC || p.spell.element == Spells.Element.WATER);
-        Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, elemental);
+        Voxels.Hit h = g.vox.ray(p.x, p.y, p.z, sx, sy, sz, len, elemental, true, true);
         float wall = h.hit ? h.dist : len;
         // (0.3.8) a crate, a box, a barrel or a sign in the way, nearer than any wall: what the shot meets first unless a body is nearer
         Object[] crate = g.breakables == null || g.breakables.all.isEmpty() ? null : g.breakables.ray(p.x, p.y, p.z, sx / len, sy / len, sz / len, wall);

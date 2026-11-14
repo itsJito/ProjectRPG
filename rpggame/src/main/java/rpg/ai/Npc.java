@@ -79,6 +79,13 @@ public class Npc extends Actor implements Interactable {
     public int claimCell = Integer.MIN_VALUE;
     public double claimAt = -99;
     public int dutyPhase;
+    /** (0.4.4) When their duty was last reported done (game minutes), and how many rounds they have walked. */
+    public double dutyDoneAt = -1;
+    /** (0.4.4) The spin guard: where they stood, since when, how far their walking heading has turned there, and the last heading. */
+    public float spinX = Float.NaN, spinZ, spinTurn, spinLast = Float.NaN;
+    public double spinSince;
+    public int spins;
+    public int dutyRounds;
     public float dutyX, dutyZ;
     public double dutyUntil;
     /** The kingdom whose law this person answers to (a posse's hunters come from the kingdom of the bounty). */
@@ -119,6 +126,25 @@ public class Npc extends Actor implements Interactable {
     public boolean hideSet;
     /** A guard keeping an eye on a player he has heard bad things about, until (then a while before he does again). */
     public double watchUntil = -999;
+    /**
+     * (0.4.5, gamefixes: NPCs followed the player far too long) the tail budget: when this one began keeping after the
+     * player in a goal that is not a fight (watching, looking, a lead, a helping hand) and from where; and until when,
+     * having let it go, they will not take it up again (rpg.ai.Brain).
+     */
+    public double tailSince = -1, tailRestUntil = -999;
+    /**
+     * (0.4.5, gamefixes: NPCs still could not complete their routines - one would stand all day re-planning a way that was
+     * not there) goals set aside after their route failed again and again, until when (rpg.ai.Brain).
+     */
+    /** (0.4.5) What the way said last while an errand that overwrites the outcome was under way (the diary's, the tests'). */
+    public transient String routeNote = "";
+    /** (0.4.5) Set while walking an errand that goes past the daily round (a repair): the round's leash is not applied. */
+    public transient boolean errand;
+    public final java.util.EnumMap<Brain.Goal, Double> goalRest = new java.util.EnumMap<>(Brain.Goal.class);
+    public float tailX, tailZ;
+    /** (0.4.2) The last goal no route reached, and how many times running it has failed (the wait before trying again grows). */
+    public float failX = Float.NaN, failZ;
+    public int failStreak;
     public long watchTarget;
     /** Arms seen shown lately (Arms): how often (fading over a minute), when last, what kind, and when they last spoke of it. */
     public float armsSeen;
@@ -133,6 +159,8 @@ public class Npc extends Actor implements Interactable {
     public double smashAfter = 60, shovedAt = -99;
     /** (0.3.8) The floor their bed is on (NaN: wherever the ground is), when they last spoke a passing word, and the day their wages were last paid. */
     public float homeY = Float.NaN;
+    /** (0.4.4) The floor their post is on (NaN: wherever the ground is) - a teller's counter on a keep's top floor. */
+    public float postY = Float.NaN;
     public double lastTalk = -99;
     public int paidOn = -1;
     /** When this NPC may next hold something out to the player (an offer is not pressed again straight after an answer). */
@@ -184,6 +212,26 @@ public class Npc extends Actor implements Interactable {
     public final List<String> scores = new ArrayList<>();
     public double nextThink, goalSince;
     public float gx, gy, gz;
+    /** (0.4.6) A calling's steps that failed lately, each to the time (s) it may be tried again (Jobs.METHOD_REST). */
+    public final java.util.Map<String, Double> methodRest = new java.util.HashMap<>();
+    /** (0.4.6) A calling's steps' failures in a row (Jobs.METHOD_FAILS). */
+    public final java.util.Map<String, Integer> methodFails = new java.util.HashMap<>();
+    public final java.util.Map<String, Double> methodFailAt = new java.util.HashMap<>();
+    /** (0.4.6) The last spot found to be as close as this body gets (Brain.goTo), and where the body stood then. */
+    /** (0.4.6) Until when (s) a person stands where a round has brought them before going on (a border knight's beat). */
+    public double dwellUntil;
+    /** (0.4.6) Until when a worker short of work keeps the workplace (Jobs.TEND_HOLD). */
+    public double tendUntil, jobFailAt = -99;
+    /** (0.4.6) The heading a route's pause began with, and when the pause was last held (Brain.goTo). */
+    public float pauseYaw; public double pauseYawAt = -9;
+    /** (0.4.6) When a stalled body may next take the step to its waypoint (Brain.goTo), and how often it has. */
+    public double nudgeAt; public int nudges;
+    /** (0.4.6) The place stalled on lately and how many times in a row (Brain.goTo). */
+    public float stuckGoalX = Float.NaN, stuckGoalZ = Float.NaN; public int stuckGoalCount;
+    /** (0.4.6) Places before the altar this morning that no route reached (Brain.pray). */
+    public int prayMisses;
+    public float prayFailX = Float.NaN, prayFailZ = Float.NaN;
+    public float nearTX = Float.NaN, nearTZ = Float.NaN, nearPX = Float.NaN, nearPZ = Float.NaN;
     /** A long trip's waypoints (indices into the map's travel graph), the next one, and the trip's end. */
     public final RouteBook routeBook=new RouteBook();
     public double navPauseUntil;
@@ -279,6 +327,8 @@ public class Npc extends Actor implements Interactable {
     public Hunt hunt;
     /** (0.4.1) Living the off-stage day (rpg.ai.Offstage): beyond the fog, bodiless, their day resolved as a schedule. */
     public boolean offstage;
+    /** (0.4.3) Gone in at their home's door for the night (ShadowVeil, until the interiors come): off-stage until morning. */
+    public boolean indoors;
     public double vigilantUntil = -1;
     /** When the farmer last filled the trough (a full set of nest boxes is not left for ever behind a hungry herd). */
     public double lastTroughFill = -999;

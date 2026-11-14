@@ -1,0 +1,118 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.96s ({regions=835, overlays=514, variants=642, scarp=47, coast=421, erosion=440, peaks=42, lakes=75, isles=4, rivers=560, wadis=12, ground=21, roads=561, causeways=3, architecture=932, pitsFilled=1309, pits=469, banks=65, clamp=14, cliffs=55, columns=1125, falls=17, raise=11237, trees=280, outcrops=0, ways=545}), made and lit in 2.23s
+    [water] flow field grown in 893 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [life] stop 292,976 done (30 people seen so far)
+    [life] stop 638,932 done (34 people seen so far)
+    [life] stop 167,797 done (54 people seen so far)
+    [life] stop 639,1071 done (56 people seen so far)
+    [life] stop 945,915 done (92 people seen so far)
+    [life] stop 405,820 done (96 people seen so far)
+    [life] stop 207,653 done (115 people seen so far)
+    [life] stop 619,641 done (116 people seen so far)
+    [life] stop 246,484 done (120 people seen so far)
+    [life] stop 599,157 done (150 people seen so far)
+    [life] stop 426,458 done (166 people seen so far)
+          [stuck] Baroness Guinevere WANDER at (849.27, 66.00, 404.57) -> (863.5, 417.5), wander, v (0.00, 0.00) ground true route 0 facts [0.08, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [life] stop 873,433 done (183 people seen so far)
+    [life] stop 925,139 done (185 people seen so far)
+    [life] stop 912,602 done (188 people seen so far)
+    [life] stop 263,334 done (190 people seen so far)
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.8), t 476.9
+          [crime] ASSAULT by Wenna against world life at (878.0, 741.0), t 477.3
+          [crime] ASSAULT by Vark against world life at (876.7, 738.9), t 477.3
+          [crime] ASSAULT by Grisel against world life at (877.8, 740.4), t 477.6
+          [crime] ASSAULT by Hurk against world life at (877.5, 740.9), t 478.0
+          [crime] ASSAULT by Rask against world life at (875.4, 740.3), t 478.0
+          [crime] ASSAULT by Hullen against world life at (875.3, 739.3), t 478.2
+          [crime] ASSAULT by Grisel against world life at (875.5, 739.5), t 487.6
+          [crime] ASSAULT by Wenna against world life at (875.7, 741.3), t 487.8
+          [crime] ASSAULT by Hurk against world life at (875.5, 741.4), t 488.6
+          [crime] ASSAULT by Rask against world life at (875.4, 741.6), t 489.1
+          [crime] ASSAULT by Vark against world life at (875.5, 739.5), t 489.2
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.2), t 491.7
+          [crime] ASSAULT by Sigrun against world life at (870.8, 742.7), t 493.7
+          [crime] ASSAULT by Hullen against world life at (875.3, 740.4), t 495.3
+          [crime] ASSAULT by Vark against world life at (877.3, 739.8), t 499.6
+          [crime] ASSAULT by Grisel against world life at (877.6, 739.4), t 499.8
+          [crime] ASSAULT by Wenna against world life at (876.2, 739.3), t 500.0
+          [crime] ASSAULT by Hurk against world life at (876.4, 739.2), t 501.8
+          [crime] ASSAULT by Garmund against world life at (876.3, 739.1), t 503.0
+          [crime] ASSAULT by Hullen against world life at (877.1, 741.5), t 505.6
+    [life] stop 877,740 done (198 people seen so far)
+    [life] stop 816,1033 done (200 people seen so far)
+    [life] stop 498,82 done (209 people seen so far)
+    [life] stop 480,217 done (219 people seen so far)
+    [life] stop 224,179 done (222 people seen so far)
+    [life] stop 1032,439 done (223 people seen so far)
+    [life] stop 768,529 done (224 people seen so far)
+
+    [life] 22 stops of 1900 frames; 224 people seen
+      Ealdra           MERCHANT     seen   297 spins   0 blocked     0 still   276
+          last (306.5,39.0,974.2) SLEEP: on the way
+      Baroness Guinevere CIVIC        seen   297 spins   2 blocked    19 still     0
+          spun at (848.7,66.0,417.7) WORK: Household Baron: tidying the workplace while short of supplies
+          last (849.3,66.0,404.6) WANDER: route blocked while wander; replanning
+      Alexios          CRAFTSMAN    seen   770 spins   2 blocked     0 still     0
+          spun at (524.3,36.0,162.9) WORK: Carpenter: make the selected order
+      Berthild         CIVIC        seen   297 spins   0 blocked     0 still   245
+          last (320.2,40.0,996.5) SLEEP: on the way
+      Einar            WORKER       seen   297 spins   2 blocked     0 still     0
+          spun at (373.5,64.0,447.5) WORK: Firewood Cutter: gather at a suitable site
+      Count Dracula    CIVIC        seen   297 spins   0 blocked     0 still    58
+          last (147.5,48.0,759.3) PRAY: on the way to prayers
+      Leofric          WORKER       seen   297 spins   0 blocked     0 still    55
+          last (351.7,40.0,957.5) SLEEP: on the way
+      King Richard     CIVIC        seen   297 spins   0 blocked     0 still    48
+          last (276.5,40.0,1034.7) SOCIALIZE: on the way
+      Alaric           PRIEST       seen   297 spins   1 blocked     0 still     0
+          spun at (265.3,39.0,945.9) SOCIALIZE: 
+      Hakim            CARTER       seen   297 spins   2 blocked     0 still     0
+          spun at (922.5,37.0,942.5) WORK: taking a load to Materials stall
+      Duke Edran       CIVIC        seen   297 spins   0 blocked     0 still   192
+          last (186.5,54.0,658.3) PRAY: on the way to prayers
+      Varek            SCHOLAR      seen   297 spins   0 blocked     0 still    59
+          last (144.3,46.0,770.5) PRAY: on the way to prayers
+      Mother Mirel     PRIEST       seen   297 spins   3 blocked     0 still     0
+          spun at (154.6,43.0,776.5) WORK: 
+      Lothar           GUARD        seen   297 spins   2 blocked   124 still     0
+          spun at (205.5,57.0,642.5) PATROL: paused to reconsider a blocked route
+          last (205.5,57.0,642.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   297 spins   1 blocked     0 still    57
+          spun at (372.6,64.0,415.6) HOME: chores at home
+          last (375.2,60.0,422.2) PRAY: on the way to prayers
+      Haskel           MINER        seen   297 spins   2 blocked     0 still     0
+          spun at (204.5,59.0,591.5) WORK: Ore Miner: deliver a real batch
+      never in play: Orrin CRAFTSMAN home (417,702)
+    [life] 16 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 386.431 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 6m 30s
+9 actionable tasks: 1 executed, 8 up-to-date

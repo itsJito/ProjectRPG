@@ -1,0 +1,65 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+  slow: rpg.Gamefixes039Test.theEstateAndItsPeopleHaveIdsNoOneElseHas() 20.335 s
+  slow: rpg.Gamefixes040Test.steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() 22.668 s
+
+SimProfileProbe > profileTheSimulation() SKIPPED
+
+FlyerProbeTest > probe() SKIPPED
+  slow: rpg.ai.FullPackTest.whatNoStoreBuysIsBanked() 20.733 s
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 27.005 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 31.347 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 54.581 s
+
+JumpProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 77.367 s
+
+SoundProbeTest > probe() SKIPPED
+
+TabernaProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 24.208 s
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 51.925 s
+
+LifeProbeTest > probe() SKIPPED
+
+LifeProbeTest > trace() SKIPPED
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 22.336 s
+  slow: rpg.ai.NpcPaceTest.theTownGoingAboutItsMorningNeverSprints() 22.716 s
+
+ReportPauseProbeTest > probe() SKIPPED
+
+StallMapProbeTest > probe() SKIPPED
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 37.246 s
+
+MapDumpProbeTest > dump() SKIPPED
+
+HaunterProbeTest > probe() SKIPPED
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 50.282 s
+
+TextureSheetProbeTest > sheet() SKIPPED
+
+IvyProbeTest > probe() SKIPPED
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 23.642 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 16m 24s
+9 actionable tasks: 1 executed, 8 up-to-date

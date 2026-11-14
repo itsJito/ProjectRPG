@@ -1,0 +1,92 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.43s ({regions=858, overlays=472, variants=491, scarp=46, coast=412, erosion=334, peaks=45, lakes=64, isles=4, rivers=1097, wadis=12, ground=21, roads=589, causeways=3, architecture=948, pitsFilled=1309, pits=429, banks=71, clamp=17, cliffs=49, columns=1034, falls=16, raise=10575, trees=286, outcrops=0, ways=507}), made and lit in 2.20s
+    [water] flow field grown in 958 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+          [stuck] Sir Andrew WORK at (265.50, 41.19, 963.50) -> (265.5, 964.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [life] stop 292,976 done (30 people seen so far)
+    [life] stop 638,932 done (34 people seen so far)
+    [life] stop 167,797 done (54 people seen so far)
+    [life] stop 639,1071 done (56 people seen so far)
+    [life] stop 945,915 done (91 people seen so far)
+    [life] stop 405,820 done (95 people seen so far)
+    [life] stop 207,653 done (113 people seen so far)
+    [life] stop 619,641 done (114 people seen so far)
+    [life] stop 246,484 done (118 people seen so far)
+    [spin] Basil: [3.08 585.7,236.4 SLEEP/go to goal ] [3.08 585.6,236.7 SLEEP/go to goal ] [3.08 585.6,236.9 SLEEP/go to goal ] [3.08 585.6,237.2 SLEEP/go to goal ] [3.08 585.6,237.4 SLEEP/go to goal ] [3.08 585.6,237.6 SLEEP/go to goal ] [3.08 585.6,237.9 SLEEP/go to goal ] [-3.09 585.6,238.1 SLEEP/go to goal ] [-2.54 585.8,238.2 SLEEP/go to goal ] [-2.39 586.0,238.4 SLEEP/go to goal ] [-2.26 586.2,238.5 SLEEP/go to goal ] [-2.36 586.3,238.7 SLEEP/go to goal ] [-2.50 586.5,238.9 SLEEP/go to goal ] [-2.50 586.6,239.1 SLEEP/go to goal ] [-2.54 586.7,239.3 SLEEP/go to goal ] [-2.54 586.9,239.5 SLEEP/go to goal ] [-2.54 587.0,239.7 SLEEP/go to goal ] [-2.54 587.1,240.0 SLEEP/go to goal ] [-2.54 587.3,240.1 SLEEP/go to goal ] [-2.74 587.3,240.4 SLEEP/go to goal ] [-2.98 587.3,240.6 SLEEP/go to goal ] [-3.02 587.3,240.9 SLEEP/go to goal ] [-3.06 587.4,241.1 SLEEP/go to goal ] [-3.06 587.4,241.3 SLEEP/go to goal ] [-3.06 587.4,241.6 SLEEP/go to goal ] [-3.06 587.4,241.8 SLEEP/go to goal ] [-3.06 587.4,242.1 SLEEP/go to goal ] [-3.06 587.4,242.3 SLEEP/go to goal ] [-3.06 587.4,242.6 SLEEP/go to goal ] [-3.06 587.5,242.8 SLEEP/go to goal ] [-3.06 587.5,243.0 SLEEP/go to goal ] [-3.06 587.5,243.2 SLEEP/go to goal ] [-2.86 587.5,243.3 SLEEP/go to goal ] [-2.42 587.7,243.4 SLEEP/go to goal ] [-1.86 587.9,243.4 SLEEP/go to goal ] [-1.86 588.1,243.5 SLEEP/go to goal ] [-2.29 588.3,243.6 SLEEP/go to goal ] [-2.35 588.3,243.6 SLEEP/go to goal ] [-3.10 588.2,243.7 SLEEP/go to goal ] [-3.10 588.2,243.7 SLEEP/go to goal ] [2.75 588.1,243.7 SLEEP/go to goal ] [2.32 588.1,243.7 SLEEP/go to goal ] [1.59 588.0,243.7 SLEEP/go to goal ] [1.64 588.0,243.7 SLEEP/go to goal ] [1.47 587.9,243.7 SLEEP/go to goal ] [1.29 587.9,243.7 SLEEP/go to goal ] [0.99 587.8,243.6 SLEEP/go to goal ] [0.99 587.8,243.6 SLEEP/go to goal ] [0.99 587.9,243.7 SLEEP/go to goal ] [0.99 588.0,243.7 SLEEP/go to goal ] [0.12 588.2,243.7 SLEEP/go to goal ] [-0.31 588.3,243.7 SLEEP/go to goal ] [-1.18 588.4,243.8 SLEEP/go to goal ] [-1.61 588.4,244.1 SLEEP/go to goal ] [-2.48 588.4,244.3 SLEEP/go to goal ] [-2.91 588.4,244.6 SLEEP/go to goal ] [-3.08 588.4,244.8 SLEEP/go to goal ] [-3.08 588.4,245.0 SLEEP/go to goal ] [-3.08 588.4,245.3 SLEEP/go to goal ] [3.13 588.4,245.5 SLEEP/go to goal ] [2.59 588.3,245.6 SLEEP/go to goal ] [2.23 588.1,245.7 SLEEP/go to goal ] [1.97 587.8,245.8 SLEEP/go to goal ] [1.93 587.6,245.8 SLEEP/go to goal ] [1.89 587.4,245.9 SLEEP/go to goal ] [1.89 587.1,246.0 SLEEP/go to goal ] [1.89 586.9,246.1 SLEEP/go to goal ] [1.89 586.7,246.1 SLEEP/go to goal ] [1.89 586.4,246.2 SLEEP/go to goal ] [1.89 586.2,246.3 SLEEP/go to goal ] [1.89 586.0,246.4 HOME/go to goal getting up and dressed] [1.77 585.7,246.4 HOME/go to goal getting up and dressed] [1.67 585.5,246.4 HOME/go to goal getting up and dressed] [1.67 585.2,246.4 HOME/go to goal getting up and dressed] [1.64 585.0,246.4 HOME/go to goal getting up and dressed] [1.64 584.8,246.4 HOME/go to goal getting up and dressed] [1.48 584.8,246.4 HOME/go to goal getting up and dressed] [1.48 584.9,246.4 HOME/go to goal getting up and dressed] [0.61 585.2,246.3 HOME/go to goal getting up and dressed] [0.18 585.4,246.3 HOME/go to goal getting up and dressed] [-0.69 585.6,246.2 HOME/go to goal getting up and dressed] [-1.12 585.9,246.1 HOME/go to goal getting up and dressed] [-1.33 586.1,246.1 HOME/go to goal getting up and dressed] [-1.33 586.4,246.0 HOME/go to goal getting up and dressed] [-1.33 586.6,246.0 HOME/go to goal getting up and dressed] [-1.33 586.8,245.9 HOME/go to goal getting up and dressed] [-1.33 587.1,245.8 HOME/go to goal getting up and dressed] [-1.33 587.3,245.8 HOME/go to goal getting up and dressed] [-1.33 587.6,245.7 HOME/go to goal getting up and dressed] [-1.33 587.8,245.7 HOME/go to goal getting up and dressed] [-1.33 588.0,245.6 HOME/go to goal getting up and dressed] [-1.23 588.2,245.5 HOME/go to goal getting up and dressed] [-0.63 588.3,245.3 HOME/go to goal getting up and dressed] [-0.38 588.3,245.1 HOME/go to goal getting up and dressed] [-0.19 588.4,244.8 HOME/go to goal getting up and dressed] [-0.15 588.4,244.6 HOME/go to goal getting up and dressed] [-0.12 588.4,244.4 HOME/go to goal getting up and dressed] [-0.12 588.4,244.1 HOME/go to goal getting up and dressed] [-0.09 588.5,243.9 HOME/go to goal getting up and dressed] [0.06 588.4,243.7 HOME/go to goal getting up and dressed]
+    [spin] Leontios:L/go to goal ] [-1.26 637.9,157.3 PATROL/go to goal ] [-1.30 638.0,157.3 PATROL/go to goal ] [-1.33 638.1,157.3 PATROL/go to goal ] [-1.33 638.1,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.2,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal ] [-1.38 638.1,157.3 PATROL/go to goal as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.3 PATROL/hold/face as close as I can get] [-1.38 638.1,157.4 PATROL/hold/face as close as I can get] [-1.38 638.1,157.4 PATROL/hold/face as close as I can get] [-1.38 638.1,157.4 PATROL/hold/face as close as I can get] [-1.38 638.0,157.4 PATROL/hold/face as close as I can get] [-1.38 638.0,157.4 PATROL/hold/face as close as I can get] [-1.38 638.0,157.5 PATROL/hold/face as close as I can get] [-1.38 637.8,157.6 PATROL/hold/face as close as I can get] [-1.38 637.8,157.6 PATROL/hold/face as close as I can get] [-1.38 637.8,157.6 PATROL/hold/face as close as I can get] [-1.38 637.8,157.6 PATROL/hold/face as close as I can get] [-1.38 637.7,157.6 PATROL/hold/face as close as I can get] [-1.38 637.7,157.6 PATROL/hold/face as close as I can get] [-1.59 637.7,157.6 PATROL/hold/face as close as I can get] [-2.24 637.6,157.6 PATROL/hold/face as close as I can get] [-2.89 637.6,157.6 PATROL/hold/face as close as I can get] [2.74 637.5,157.7 PATROL/hold/face as close as I can get] [2.14 637.5,157.7 PATROL/hold/face as close as I can get] [2.24 637.5,157.7 PATROL/go to goal as close as I can get] [2.57 637.5,157.8 PATROL/go to goal as close as I can get] [-3.07 637.5,157.8 PATROL/go to goal as close as I can get] [-2.85 637.5,157.9 PATROL/go to goal as close as I can get] [-2.85 637.5,158.0 PATROL/go to goal as close as I can get] [-2.88 637.6,158.0 PATROL/go to goal as close as I can get] [-2.91 637.6,158.0 PATROL/go to goal as close as I can get] [-2.96 637.6,158.1 PATROL/go to goal as close as I can get] [-3.05 637.6,158.1 PATROL/go to goal as close as I can get] [3.07 637.6,158.2 PATROL/go to goal as close as I can get] [3.07 637.5,158.2 PATROL/go to goal as close as I can get] [3.07 637.5,158.2 PATROL/go to goal as close as I can get] [3.07 637.4,158.3 PATROL/go to goal as close as I can get] [3.07 637.4,158.4 PATROL/go to goal as close as I can get] [3.04 637.4,158.4 PATROL/go to goal as close as I can get] [-3.05 637.4,158.5 PATROL/go to goal as close as I can get] [-2.85 637.5,158.6 PATROL/go to goal as close as I can get] [-2.65 637.5,158.6 PATROL/go to goal as close as I can get] [-2.44 637.6,158.7 PATROL/go to goal as close as I can get] [-2.12 637.7,158.7 PATROL/go to goal as close as I can get] [-2.11 637.7,158.7 PATROL/go to goal as close as I can get] [-2.27 637.7,158.7 PATROL/go to goal as close as I can get] [-2.18 637.7,158.7 PATROL/go to goal as close as I can get] [-2.50 637.7,158.8 PATROL/go to goal as close as I can get] [-2.94 637.7,158.8 PATROL/go to goal as close as I can get] [-3.01 637.7,158.9 PATROL/go to goal as close as I can get] [-3.05 637.7,159.0 PATROL/go to goal as close as I can get] [-3.05 637.7,159.0 PATROL/go to goal as close as I can get] [-3.05 637.7,159.1 PATROL/go to goal as close as I can get] [-2.97 637.7,159.1 PATROL/go to goal as close as I can get] [-2.83 637.7,159.1 PATROL/go to goal as close as I can get] [-2.70 637.7,159.1 PATROL/go to goal as close as I can get] [-2.61 637.7,159.1 PATROL/go to goal as close as I can get] [-2.61 637.7,159.1 PATROL/go to goal as close as I can get] [-2.61 637.7,159.0 PATROL/hold/face as close as I can get] [-2.61 637.7,159.0 PATROL/go to goal as close as I can get] [-2.39 637.7,158.8 PATROL/go to goal as close as I can get] [-1.74 637.6,158.6 PATROL/go to goal as close as I can get] [-1.09 637.6,158.3 PATROL/go to goal as close as I can get] [-0.44 637.6,158.1 PATROL/go to goal as close as I can get] [0.21 637.5,157.9 PATROL/go to goal as close as I can get] [0.51 637.5,157.9 PATROL/go to goal as close as I can get] [0.51 637.5,158.0 PATROL/go to goal as close as I can get] [0.51 637.6,158.0 PATROL/go to goal as close as I can get] [-0.14 637.6,158.1 PATROL/go to goal as close as I can get] [-0.79 637.6,158.1 PATROL/go to goal as close as I can get] [-1.44 637.7,158.2 PATROL/go to goal as close as I can get] [-1.55 637.7,158.2 PATROL/go to goal as close as I can get] [-1.55 637.7,158.1 PATROL/go to goal as close as I can get] [-1.55 637.6,158.1 PATROL/hold/face as close as I can get]
+    [life] stop 599,157 done (148 people seen so far)
+    [life] stop 426,458 done (164 people seen so far)
+    [life] stop 873,433 done (181 people seen so far)
+    [life] stop 925,139 done (183 people seen so far)
+    [life] stop 912,602 done (186 people seen so far)
+    [life] stop 263,334 done (188 people seen so far)
+          [crime] ASSAULT by Wenna against world life at (877.5, 741.3), t 477.0
+          [crime] ASSAULT by Garmund against world life at (877.5, 739.6), t 477.5
+          [crime] ASSAULT by Hurk against world life at (877.1, 740.7), t 477.5
+          [crime] ASSAULT by Grisel against world life at (877.8, 740.5), t 477.6
+          [crime] ASSAULT by Vark against world life at (876.5, 740.0), t 477.8
+          [crime] ASSAULT by Rask against world life at (875.6, 740.1), t 478.0
+          [crime] ASSAULT by Hullen against world life at (875.0, 740.5), t 478.9
+          [stuck] Hurk FIGHT at (879.15, 56.00, 740.36) -> (879.9, 740.4), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [stuck] Vark FIGHT at (874.21, 56.00, 743.23) -> (874.9, 743.8), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.4), t 488.6
+          [crime] ASSAULT by Wenna against world life at (877.9, 740.7), t 488.7
+          [crime] ASSAULT by Hullen against world life at (878.2, 740.8), t 489.6
+          [crime] ASSAULT by Vark against world life at (875.4, 741.6), t 490.2
+          [crime] ASSAULT by Hurk against world life at (877.9, 740.8), t 493.8
+          [crime] ASSAULT by Rask against world life at (877.6, 741.7), t 494.1
+          [crime] ASSAULT by Grisel against world life at (877.5, 739.4), t 497.0
+          [crime] ASSAULT by Wenna against world life at (878.0, 741.9), t 498.9
+          [crime] ASSAULT by Hullen against world life at (877.9, 740.4), t 500.2
+          [crime] ASSAULT by Vark against world life at (875.2, 740.5), t 503.3
+          [stuck] Hullen FIGHT at (879.09, 56.00, 741.94) -> (879.9, 741.3), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [crime] ASSAULT by Garmund against world life at (876.5, 739.4), t 505.2
+          [crime] ASSAULT by Rask against world life at (877.6, 741.6), t 506.0
+    [life] stop 877,740 done (196 people seen so far)
+    [life] stop 816,1033 done (199 people seen so far)
+    [life] stop 498,82 done (208 people seen so far)
+    [life] stop 480,217 done (218 people seen so far)
+    [life] stop 224,179 done (221 people seen so far)
+    [life] stop 1032,439 done (222 people seen so far)
+    [life] stop 768,529 done (223 people seen so far)
+
+    [life] 22 stops of 1900 frames; 223 people seen
+      Leontios         GUARD        seen   297 spins   1 blocked     0 still     1
+          spun at (637.6,37.0,158.1) PATROL: as close as I can get
+          last (637.5,37.0,157.6) PATROL: on the way
+      Basil            MERCHANT     seen   297 spins   1 blocked     0 still     0
+          spun at (588.4,37.0,243.7) HOME: getting up and dressed
+      never in play: Merek MINER home (140,612)
+      never in play: Orrin CRAFTSMAN home (417,702)
+    [life] 2 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 390.38 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 7m 20s
+9 actionable tasks: 3 executed, 6 up-to-date

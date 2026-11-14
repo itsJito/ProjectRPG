@@ -1,0 +1,279 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 20408). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-20408.out.log
+Starting 19th build in daemon [uptime: 1 hrs 30 mins 45.222 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 16% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'probe'
+Selected primary task 'probe' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':probe']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#1100,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#1101,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#1102,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:theastrattoengine:compileJava (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#1101,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#1102,Execution worker Thread 2,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#1102,Execution worker Thread 2,5,main]) started.
+:theastrattoengine:buildNative (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#1101,Execution worker,5,main]) started.
+:theastrattoengine:engineResources (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#1101,Execution worker,5,main]) started.
+:theastrattoengine:processResources (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#1101,Execution worker,5,main]) started.
+:theastrattoengine:classes (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#1101,Execution worker,5,main]) started.
+:theastrattoengine:jar (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#1101,Execution worker,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#1101,Execution worker,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:compileJava (Thread[#1103,Execution worker Thread 3,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:classes (Thread[#1103,Execution worker Thread 3,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:compileTestJava (Thread[#1103,Execution worker Thread 3,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:processTestResources (Thread[#1103,Execution worker Thread 3,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:testClasses (Thread[#1103,Execution worker Thread 3,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :probe (Thread[#1103,Execution worker Thread 3,5,main]) started.
+:probe (Thread[#1103,Execution worker Thread 3,5,main]) started.
+Gradle Test Executor 22 started executing tests.
+
+> Task :probe
+Caching disabled for task ':probe' because:
+  Build cache is disabled
+Task ':probe' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 22'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=9 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\probe\work -Drpg.probeFrames=5 -Drpg.probeWho=259,39,933 --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath10392359950329691300txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 22'
+Successfully started process 'Gradle Test Executor 22'
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 15.41s ({regions=925, overlays=466, variants=427, scarp=46, coast=395, erosion=308, peaks=43, lakes=62, isles=4, rivers=711, wadis=13, ground=31, roads=642, causeways=3, architecture=925, pitsFilled=1405, pits=454, banks=57, clamp=13, cliffs=49, columns=1083, falls=17, raise=7880, trees=283, outcrops=0, ways=529}), made and lit in 1.57s
+    [water] flow field grown in 959 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+
+    ================ 259, 39, 933  law Loxford  stand Y 39.0
+    structure here: -
+      near loxford_square             Castle Square                            plaza          27 m lot 217,931-246,942 floor 38
+      near freds_axes                 Fred's Fine Axes                         building       26 m lot 233,914-241,922 floor 39
+      near loxford_store              Loxford General Store                    building       5 m lot 254,924-262,932 floor 38
+      near drunken_duck               The Drunken Duck                         hall           23 m lot 270,942-283,952 floor 39
+      near duck_cellar                The Duck's cellar                        cellar         35 m lot 288,943-291,954 floor 39
+      near cuthmar_farmhouse          Cuthmar's farmhouse                      building       36 m lot 242,895-250,902 floor 38
+      near loxford_cottages_0         Cottage                                  building       24 m lot 244,909-249,915 floor 39
+      near loxford_cottages_1         Cottage                                  building       14 m lot 259,916-264,921 floor 39
+      near loxford_cottages_2         Cottage                                  building       32 m lot 253,898-258,904 floor 38
+      near loxford_cottages_3         Cottage                                  building       32 m lot 270,901-275,906 floor 38
+      near loxford_cottages_9         Cottage                                  building       32 m lot 288,926-293,931 floor 39
+      near loxford_cottages_10        Cottage                                  building       39 m lot 295,924-300,929 floor 39
+      near loxford_cottages_11        Cottage                                  building       39 m lot 294,940-299,945 floor 39
+      object Furniture              Crate                          (254.5, 39.5, 933.5)
+      object Furniture              Pantry shelves                 (255.5, 40.0, 931.5)
+      object Furniture              Crate                          (255.5, 39.5, 929.5)
+      object Furniture              Crate                          (255.5, 39.5, 930.5)
+      object Furniture              Painting                       (255.5, 40.0, 928.5)
+      object Door                   Loxford General Store bedroom door (255.5, 44.2, 928.5)
+      object Door                   Loxford General Store door     (259.0, 40.2, 932.5)
+      object Furniture              Pantry shelves                 (261.5, 40.0, 929.5)
+      object Furniture              Kitchen dresser                (261.5, 40.0, 931.5)
+      object Furniture              Chandelier                     (258.5, 40.0, 928.5)
+      object Furniture              Fireplace                      (258.0, 44.0, 929.5)
+      object Furniture              Kitchen dresser                (256.5, 44.0, 929.5)
+      object Furniture              Candelabrum                    (261.5, 43.5, 929.5)
+      object Furniture              Pantry shelves                 (261.5, 44.0, 931.5)
+      object Furniture              Rug                            (259.0, 43.5, 930.5)
+      object Container              Chest                          (261.5, 43.4, 930.5)
+      npc Ealdra       MERCHANT       (260.5, 39.0, 934.5) goal BANK
+      npc Torren       LAWMAN         (236.5, 39.0, 944.5) goal BANK
+      npc Fred         CRAFTSMAN      (239.5, 40.0, 924.5) goal WORK
+      npc Berthild     CIVIC          (277.5, 40.0, 940.5) goal SLEEP
+      npc Maddoc       MERCHANT       (278.5, 40.0, 940.5) goal SLEEP
+      npc Karlon       CRAFTSMAN      (275.5, 40.0, 940.5) goal SLEEP
+      npc King Richard CIVIC          (232.5, 39.0, 944.5) goal WORK
+      npc Duke Donald  CIVIC          (233.5, 39.0, 944.5) goal WORK
+      npc Maeve        CRAFTSMAN      (234.5, 39.0, 944.5) goal WORK
+      layer Y37 (x 254..264 across, z down; * the point)
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaa*aaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+       aaaaaaaaaaa
+      layer Y38 (x 254..264 across, z down; * the point)
+       bcccccccbdd
+       bcccccccbdd
+       bcccccccbdd
+       bcccccccbdd
+       bbbbccbbbdd
+       dddde*ddddd
+       ddddedddddd
+       ddddddddddd
+       ddddddddddd
+       bbbbbbbbbbb
+       bbbbbbbbbbb
+      layer Y39 (x 254..264 across, z down; * the point)
+       b.......b..
+       bf.....gb..
+       bf......b..
+       bg.....gb..
+       hbbhiihbh..
+       f....*.....
+       ...........
+       ...........
+       ..h........
+       ...........
+       ...........
+      layer Y40 (x 254..264 across, z down; * the point)
+       j.......j..
+       j......gj..
+       k.......k..
+       jg.....gj..
+       hjjhiihjh..
+       .....*.....
+       ...........
+       ...........
+       ..h........
+       ...........
+       ...........
+      layer Y41 (x 254..264 across, z down; * the point)
+       j.......j..
+       j.......j..
+       k.......k..
+       j.......j..
+       hjjjlljjh..
+       l....*m.l..
+       ...........
+       ...........
+       ..h........
+       ...........
+       ...........
+      layer Y42 (x 254..264 across, z down; * the point)
+       lcccccccl..
+       lcccccccl..
+       lcccccccl..
+       lcccccccl..
+       ljjjjjjjl..
+       lllll*lll..
+       ...........
+       ...........
+       ..m........
+       ...........
+       ...........
+      layer Y43 (x 254..264 across, z down; * the point)
+       nijjjjjjo..
+       l.gpp..gl..
+       n......fo..
+       n......go..
+       l.......l..
+       hqlqq*qqh..
+       ...........
+       ...........
+       ...........
+       ...........
+       ...........
+      legend: a=dirt b=cobble c=planks d=grass e=gravel f=crate g=table h=spruce_log i=door j=mossy_bricks k=glass l=dark_planks m=lamp n=#169 o=#170 p=headstone q=#172
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 28.754 s
+
+Gradle Test Executor 22 finished executing tests.
+
+> Task :probe
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\probe
+Generating HTML test report...
+Finished generating test html results (0.007 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\probe
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 33s
+9 actionable tasks: 1 executed, 8 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

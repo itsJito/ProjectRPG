@@ -1,0 +1,92 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+Gamefixes044Test > everyEnterableBuildingIsFittedOutAndApproved() FAILED
+    org.opentest4j.AssertionFailedError: 3: [orrins_leanto scored 93 {architecture=20, furniture=15, lighting=20, function=15, navigation=15, technical=8} [no room inside for its craft table], harlette_cottages_2 scored 89 {architecture=20, furniture=18, lighting=13, function=15, navigation=15, technical=8} [the bedroom (storey 1) has no light], harlette_cottages_2's bedroom is unlit] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyEnterableBuildingIsFittedOutAndApproved(Gamefixes044Test.java:66)
+
+Gamefixes040Test > steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() FAILED
+    java.lang.NullPointerException: Cannot invoke "rpg.world.Jails$Cell.jurisdiction()" because "cell" is null
+        at rpg.objects.Objects.jailCell(Objects.java:344)
+        at rpg.objects.Objects.expanse(Objects.java:358)
+        at rpg.objects.Objects.buildFixtures(Objects.java:282)
+        at rpg.Rpg.init(Rpg.java:243)
+        at astratto.game.Game.add(Game.java:75)
+        at rpg.Gamefixes040Test.open(Gamefixes040Test.java:19)
+
+Gamefixes040Test > aShotFromOutOfSightLeavesTheVictimSearchingNotBlamingThePlayer() FAILED
+    java.lang.NullPointerException: Cannot invoke "rpg.world.Jails$Cell.jurisdiction()" because "cell" is null
+        at rpg.objects.Objects.jailCell(Objects.java:344)
+        at rpg.objects.Objects.expanse(Objects.java:358)
+        at rpg.objects.Objects.buildFixtures(Objects.java:282)
+        at rpg.Rpg.init(Rpg.java:243)
+        at astratto.game.Game.add(Game.java:75)
+        at rpg.Gamefixes040Test.open(Gamefixes040Test.java:19)
+
+Gamefixes040Test > aBodyMadeOnAPieceOfFurnitureIsSetDownBesideIt() FAILED
+    java.lang.NullPointerException: Cannot invoke "rpg.world.Jails$Cell.jurisdiction()" because "cell" is null
+        at rpg.objects.Objects.jailCell(Objects.java:344)
+        at rpg.objects.Objects.expanse(Objects.java:358)
+        at rpg.objects.Objects.buildFixtures(Objects.java:282)
+        at rpg.Rpg.init(Rpg.java:243)
+        at astratto.game.Game.add(Game.java:75)
+        at rpg.Gamefixes040Test.open(Gamefixes040Test.java:19)
+
+Gamefixes040Test > aTableTopIsNoFloorForARoute() FAILED
+    java.lang.NullPointerException: Cannot invoke "rpg.world.Jails$Cell.jurisdiction()" because "cell" is null
+        at rpg.objects.Objects.jailCell(Objects.java:344)
+        at rpg.objects.Objects.expanse(Objects.java:358)
+        at rpg.objects.Objects.buildFixtures(Objects.java:282)
+        at rpg.Rpg.init(Rpg.java:243)
+        at astratto.game.Game.add(Game.java:75)
+        at rpg.Gamefixes040Test.open(Gamefixes040Test.java:19)
+
+Gamefixes041PostsTest > everyonesPostIsFloorAndTheMansionStairsAreOpen() FAILED
+    java.lang.NullPointerException: Cannot invoke "rpg.world.Jails$Cell.jurisdiction()" because "cell" is null
+        at rpg.objects.Objects.jailCell(Objects.java:344)
+        at rpg.objects.Objects.expanse(Objects.java:358)
+        at rpg.objects.Objects.buildFixtures(Objects.java:282)
+        at rpg.Rpg.init(Rpg.java:243)
+        at astratto.game.Game.add(Game.java:75)
+        at rpg.world.Gamefixes041PostsTest.everyonesPostIsFloorAndTheMansionStairsAreOpen(Gamefixes041PostsTest.java:24)
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 50.163 s
+
+54 tests completed, 6 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 53s
+9 actionable tasks: 1 executed, 8 up-to-date

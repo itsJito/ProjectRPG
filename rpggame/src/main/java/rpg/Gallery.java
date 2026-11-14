@@ -82,6 +82,12 @@ final class Gallery {
         // RPG_GALLERY_ONLY=p27 RPG_MAP=shadowveil RPG_REVIEW_ONLY=zone,zone: the 0.4.1 reference cameras - four fixed views of every
         // region and settlement (data: shadowveil_architecture.json 'views'), each taken in the morning and at night
         if ("p27".equals(System.getenv("RPG_GALLERY_ONLY"))) { p27Shots(); return 0; }
+        // RPG_GALLERY_ONLY=p29 RPG_REVIEW_ONLY=a,b: the 0.4.3 review sheets (torch, devui, ...), each by name
+        if ("p29".equals(System.getenv("RPG_GALLERY_ONLY"))) { p29Shots(); return 0; }
+        // RPG_GALLERY_ONLY=interiors RPG_MAP=shadowveil RPG_REVIEW_ONLY=all|id,id|purpose:x (RPG_REVIEW_HOUR=12): the 0.4.4
+        // interior review - every building's entrance, its principal working area and each room's overview, a contact
+        // sheet per building, and the registry written with its screenshots
+        if ("interiors".equals(System.getenv("RPG_GALLERY_ONLY"))) { interiorShots(); return 0; }
         if ("polish024".equals(System.getenv("RPG_GALLERY_ONLY"))) { polish024Shots(); return 0; }
         if ("maintenance".equals(System.getenv("RPG_GALLERY_ONLY"))) { maintenanceShots(); return 0; }
         if ("ultimate".equals(System.getenv("RPG_GALLERY_ONLY"))) { ultimateShots(); return 0; }
@@ -214,6 +220,7 @@ final class Gallery {
         if ("animalfall".equals(System.getenv("RPG_GALLERY_ONLY"))) { animalFall(); return 0; }
         // RPG_GALLERY_ONLY=figures: every build of both sexes from the front, three-quarters, side and back, no interface
         if ("figures".equals(System.getenv("RPG_GALLERY_ONLY"))) { figureShots(); return 0; }
+        if ("outfits".equals(System.getenv("RPG_GALLERY_ONLY"))) { outfitShots(); return 0; }
         if ("menus".equals(System.getenv("RPG_GALLERY_ONLY"))) { menuShots(); creatorShots(); return 0; }
         if ("gear".equals(System.getenv("RPG_GALLERY_ONLY"))) { gearShots(); heldShots(); return 0; }
         // RPG_GALLERY_ONLY=armor: full armour sets worn over loose base clothes (a hooded robe, a skirt), all round, standing and walking
@@ -811,6 +818,268 @@ final class Gallery {
      * an exterior or a terrain) each zone's views from the data, each shot at 08:30 and 22:00 under a clear sky, saved
      * whole (v-zone-view-morning.png / -night.png) and gathered into a sheet per zone (views down, morning and night across).
      */
+    /** (0.4.3) The review sheets of the 0.4.3 pass. */
+    private void p29Shots() {
+        String only = System.getenv("RPG_REVIEW_ONLY");
+        java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        var map = rpg.world.WorldMap.active();
+        java.util.function.Consumer<float[]> stand = pt -> { g.teleport(g.player, pt[0], rpg.world.WorldMap.standY(pt[0], pt[1]), pt[1]); };
+        float[] start = {map.spawnX, map.spawnZ};
+        if (want.test("torch")) {
+            // a torch with a shield on the arm, lit by the guard key, seen through the eyes (frames 1, 4, 7 ...)
+            stand.accept(start); g.controller.snapTo(map.spawnYaw); g.controller.camPitch = -0.1f;
+            g.state.minutes = 22 * 60; g.player.firstPerson = true;
+            g.player.eq.clear();
+            g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.TORCH, 1));
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, new rpg.item.ItemStack(rpg.item.Items.get("iron_shield"), 1));
+            g.combat.sheathe(g.player, false); frames(60);
+            reviewUi("torch-fp-unlit");
+            for (int i = 0; i < 100; i++) { g.controller.in.offDown = i >= 1 && i < 4; frames(1); if (i % 3 == 0 && i < 30) reviewUi("torch-fp-light-f" + (i + 1)); }
+            g.controller.in.offDown = false;
+            System.out.println("[torch] lit with a shield on: " + g.player.torchLit);
+            frames(30); reviewUi("torch-fp-lit");
+            for (int i = 0; i < 24; i++) { g.controller.in.forward = 1; frames(1); if (i % 3 == 0) reviewUi("torch-fp-walk-f" + (i + 1)); }
+            g.controller.in.forward = 0;
+            g.controller.in.offDown = true; frames(20); reviewUi("torch-fp-guard"); g.controller.in.offDown = false; frames(10);
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, null); frames(20); reviewUi("torch-fp-noshield");
+            g.player.firstPerson = false; frames(10);
+            java.util.function.Function<Actor, float[]> front = a -> new float[]{a.x + 1.9f, a.y + 1.6f, a.z - 2.3f, a.x, a.y + 1.0f, a.z};
+            g.player.eq.set(rpg.item.ItemDef.Slot.OFF, new rpg.item.ItemStack(rpg.item.Items.get("iron_shield"), 1)); frames(10);
+            film("torch-tp-shield", 12, i -> { }, front, 0);
+        }
+        if (want.test("fpheld")) {
+            stand.accept(start); g.controller.snapTo(map.spawnYaw); g.state.minutes = 12 * 60; g.player.firstPerson = true;
+            for (String id : new String[]{"iron_sword", "torch"}) for (float pitch : new float[]{0.4f, -0.1f, -0.7f}) {
+                g.player.eq.clear(); g.player.eq.set(rpg.item.ItemDef.Slot.MAIN, new rpg.item.ItemStack(rpg.item.Items.get(id), 1));
+                g.combat.sheathe(g.player, false); g.controller.camPitch = pitch; frames(30);
+                reviewUi("fp-" + id + "-" + pitch);
+            }
+        }
+        // RPG_REVIEW_AT="x,y,z[,dist];...": four views of each point (from the north, east, south and west, a little above),
+        // at noon, the player taken out of the way - for a bug report's coordinates
+        String at = System.getenv("RPG_REVIEW_AT");
+        if (at != null && !at.isBlank()) for (String spec : at.split(";")) {
+            String[] v = spec.trim().split("[, ]+");
+            float x = Float.parseFloat(v[0]) + 0.5f, y = Float.parseFloat(v[1]), z = Float.parseFloat(v[2]) + 0.5f, dist = v.length > 3 ? Float.parseFloat(v[3]) : 14;
+            g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+            g.teleport(g.player, x, rpg.world.WorldMap.standY(x, z), z); g.player.firstPerson = true; Main.preloadAll(g, gfx); frames(40);
+            String[] dirs = {"n", "e", "s", "w"};
+            for (int k = 0; k < 4; k++) {
+                double a = k * Math.PI / 2;
+                float ex = x + (float) Math.sin(a) * dist, ez = z - (float) Math.cos(a) * dist;
+                view(ex, Math.max(y + dist * 0.45f, rpg.world.WorldMap.standY(ex, ez) + 2), ez, x, y + 1, z, "at-" + (int) x + "-" + (int) z + "-" + dirs[k]);
+            }
+            view(x + 0.5f, y + dist * 1.6f, z + 0.5f + dist * 0.2f, x, y, z, "at-" + (int) x + "-" + (int) z + "-top");
+        }
+        // (0.4.6) RPG_REVIEW_WEATHER="x,y,z;name,name,...": each weather brought over a place and let settle, seen from the
+        // street at eye height and from a little above (the weather's own reference shots)
+        String weathers = System.getenv("RPG_REVIEW_WEATHER");
+        if (weathers != null && !weathers.isBlank() && g.weatherSystem != null) {
+            String[] parts = weathers.split(";");
+            String[] v = parts[0].trim().split("[, ]+");
+            float x = Float.parseFloat(v[0]) + 0.5f, y = Float.parseFloat(v[1]), z = Float.parseFloat(v[2]) + 0.5f;
+            double hourW = v.length > 3 ? Double.parseDouble(v[3]) : 13;
+            g.teleport(g.player, x, rpg.world.WorldMap.standY(x, z), z); g.player.firstPerson = true; Main.preloadAll(g, gfx); frames(40);
+            java.util.List<String> names = parts.length > 1 ? java.util.Arrays.asList(parts[1].split(",")) : new java.util.ArrayList<>(g.weatherSystem.presets.keySet());
+            for (String name : names) {
+                g.state.minutes = Math.floor(g.state.minutes / 1440) * 1440 + hourW * 60;
+                if (!g.weatherSystem.force(name.trim(), x, z, 6)) continue;
+                for (int i = 0; i < 240; i++) { game.tick(1 / 60f); draw(new float[]{x, y + 1.7f, z, x + 10, y + 1.2f, z - 6}, 1 / 60f); }
+                String tag = name.trim().toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+                view(x - 5, y + 2.6f, z + 7, x + 8, y + 1.2f, z - 6, "weather-" + tag + "-street");
+                view(x - 6, y + 9, z + 8, x + 8, y, z - 6, "weather-" + tag + "-high");
+            }
+        }
+        // (0.4.5) RPG_REVIEW_IN="x,y,z[,eye];...": from inside, at a standing eye (y is the cell the feet are in), eight
+        // views round and one down-and-forward each way - an interior bug report's coordinates
+        String in = System.getenv("RPG_REVIEW_IN");
+        if (in != null && !in.isBlank()) for (String spec : in.split(";")) {
+            String[] v = spec.trim().split("[, ]+");
+            float x = Float.parseFloat(v[0]) + 0.5f, y = Float.parseFloat(v[1]), z = Float.parseFloat(v[2]) + 0.5f, eye = v.length > 3 ? Float.parseFloat(v[3]) : 1.6f;
+            g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+            g.teleport(g.player, x + 40, rpg.world.WorldMap.standY(x + 40, z), z); Main.preloadAll(g, gfx); gfx.preloadWorld(g, x, z); gfx.preloadChunks(g, x, z); frames(40);
+            for (int i = 0; i < 150; i++) { game.tick(1 / 60f); draw(new float[]{x, y + eye, z, x, y + eye - 0.6f, z - 4}, 1 / 60f); }
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4;
+                float dx = (float) Math.sin(a), dz = -(float) Math.cos(a);
+                view(x, y + eye, z, x + dx * 4, y + eye - 0.6f, z + dz * 4, "in-" + (int) x + "-" + (int) y + "-" + (int) z + "-" + k);
+            }
+        }
+        // (0.4.4) RPG_REVIEW_ONLY=cascade: the tallest fall and a rapid's single step, each poured, from the side and the front
+        if (only != null && only.contains("cascade") && rpg.world.shadowveil.ShadowVeil.terrain() != null) {
+            var falls = rpg.world.shadowveil.ShadowVeil.terrain().falls;
+            int[] tall = null, step = null;
+            for (int[] f : falls) { if (tall == null || f[3] > tall[3]) tall = f; if (f[3] == 1 && step == null && (f[4] != 0 || f[5] != 0)) step = f; }
+            int k = 0;
+            for (int[] f : new int[][]{tall, step}) {
+                if (f == null) continue;
+                float x = f[0] + 0.5f, y = f[1] + 1, z = f[2] + 0.5f, h = f[3];
+                System.out.println("[cascade] " + (k == 0 ? "fall" : "rapid") + " at " + f[0] + "," + f[1] + "," + f[2] + " height " + f[3]);
+                g.teleport(g.player, x + 30, rpg.world.WorldMap.standY(x + 30, z), z); g.state.minutes = 12 * 60;
+                gfx.preloadWorld(g, x, z); gfx.preloadChunks(g, x, z);
+                float d = 6 + h * 0.8f;
+                float[][] cams = {{x + f[4] * d - f[5] * d * 0.6f, y + h * 0.6f + 1.5f, z + f[5] * d + f[4] * d * 0.6f}, {x - f[5] * d, y + h * 0.5f + 1, z + f[4] * d}};
+                for (int c = 0; c < 2; c++) { float[] cam = {cams[c][0], cams[c][1], cams[c][2], x - f[4] * 0.5f, y + h * 0.5f, z - f[5] * 0.5f};
+                    for (int i = 0; i < 120; i++) { game.tick(1 / 60f); draw(cam, 1 / 60f); }
+                    Main.shot(gfx, win.width, win.height, new File(shots, "cascade-" + k + "-" + c + ".png")); }
+                k++;
+            }
+        }
+        if (want.test("devui")) {
+            stand.accept(start); g.controller.snapTo(map.spawnYaw); g.state.minutes = 12 * 60; frames(30);
+            hud.dev.on = true; reviewUi("devui"); hud.dev.on = false;
+        }
+    }
+
+    /**
+     * (0.4.4, gamefixes: at least three genuine in-engine screenshots of every individual building interior - its
+     * entrance, its principal functional area and its overall arrangement - and more for every further room and storey)
+     * Each fitted building in turn: from just inside its main door looking in; before its principal working piece (a
+     * counter, an altar, a station, a bed, a table) from a pace and a half off; and every room from its high far corner.
+     * Each building's shots tiled into one labelled sheet (sheet-id.png); the registry (JSON and report) written beside
+     * them with every building's screenshots listed.
+     */
+    private void interiorShots() {
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (t == null || t.arch == null || t.arch.registry == null) { System.out.println("[interiors] no ShadowVeil registry"); return; }
+        String only = System.getenv().getOrDefault("RPG_REVIEW_ONLY", "all");
+        java.util.Set<String> ids = new java.util.HashSet<>(java.util.Arrays.asList(only.split(",")));
+        float hour = Float.parseFloat(System.getenv().getOrDefault("RPG_REVIEW_HOUR", "12"));
+        g.state.minutes = (int) (hour * 60); g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        int done = 0;
+        long t0 = System.nanoTime();
+        for (var e : t.arch.registry.entries) {
+            var f = e.fit;
+            if (f == null) continue;
+            if (!only.equals("all") && !ids.contains(e.id) && !ids.contains("purpose:" + e.purpose) && !ids.contains("kingdom:" + e.kingdom)) continue;
+            var s = t.arch.byId(e.id);
+            var site = rpg.world.shadowveil.Rooms.site(e.id);
+            e.screenshots.clear();
+            // (0.4.4) RPG_REGISTRY_ONLY=1: the registry written again from shots already taken (a long run cut short
+            // after its last shot), each building's from its files in the folder, in order
+            if (System.getenv("RPG_REGISTRY_ONLY") != null) {
+                String[] have = new File(shots).list((dir, n) -> n.startsWith(e.id + "-") && n.endsWith(".png") && n.substring(e.id.length() + 1, e.id.length() + 2).matches("[1-3]"));
+                if (have != null) { java.util.Arrays.sort(have); e.screenshots.addAll(java.util.Arrays.asList(have)); }
+                e.history.add(rpg.Main.VERSION + ": " + e.screenshots.size() + " screenshots taken (" + (int) hour + ":00)");
+                done++;
+                continue;
+            }
+            List<String> names = new ArrayList<>(), labels = new ArrayList<>();
+            // the world about the building made ready (meshed, lit) before its first shot
+            g.teleport(g.player, s.cx(), rpg.world.WorldMap.standY(s.cx(), s.cz()), s.cz());
+            g.player.firstPerson = true;
+            gfx.preloadWorld(g, s.cx(), s.cz());
+            int[] ap = s.apron();
+            g.teleport(g.player, ap[0] + 0.5f, rpg.world.WorldMap.standY(ap[0] + 0.5f, ap[1] + 0.5f), ap[1] + 0.5f);
+            gfx.preloadChunks(g, s.cx(), s.cz());
+            frames(4);
+            boolean first = true;
+            for (var r : f.rooms) {
+                float cx = (r.rect[0] + r.rect[2] + 1) / 2f, cz = (r.rect[1] + r.rect[3] + 1) / 2f, y = r.y;
+                float eye = y + Math.min(1.65f, r.clear - 0.4f), high = y + Math.min(r.clear - 0.35f, 3.3f);
+                if (first && !e.entrances.isEmpty()) {
+                    // 1. the entrance: just inside the main door, looking into the room
+                    var en = e.entrances.get(0);
+                    float dx = en.facing() == 'e' ? 1 : en.facing() == 'w' ? -1 : 0, dz = en.facing() == 's' ? 1 : en.facing() == 'n' ? -1 : 0;
+                    float along = (en.width() - 1) / 2f;
+                    float ex = en.x() + 0.5f + (dz != 0 ? along : 0) - dx * 0.6f, ez = en.z() + 0.5f + (dx != 0 ? along : 0) - dz * 0.6f;
+                    interiorView(ex, en.y() + 1 + 1.6f, ez, cx - dx * 0, y + 0.9f, cz, e.id + "-1-entrance", names, labels, "entrance");
+                    // 2. the principal working area: the room's main piece, from a pace and a half off toward the room's middle
+                    float[] main = principal(site, r);
+                    if (main != null) {
+                        float vx = main.length > 2 ? main[2] : cx - main[0], vz = main.length > 2 ? main[3] : cz - main[1], l = (float) Math.hypot(vx, vz);
+                        if (l < 0.5f) { vx = -dx; vz = -dz; l = 1; }
+                        // (0.4.4, review) far enough back to see the piece and what is about it, kept inside the room
+                        float px = Math.max(r.rect[0] + 0.5f, Math.min(r.rect[2] + 0.5f, main[0] + vx / l * 3.2f)), pz = Math.max(r.rect[1] + 0.5f, Math.min(r.rect[3] + 0.5f, main[1] + vz / l * 3.2f));
+                        interiorView(px, Math.min(y + 2.1f, y + r.clear - 0.4f), pz, main[0], y + 0.7f, main[1], e.id + "-2-function-" + r.use, names, labels, "work: " + r.use);
+                    }
+                    first = false;
+                }
+                // 3. the room's arrangement: from its high corner farthest from its middle's way in, across to the opposite one
+                float[][] corners = {{r.rect[0] + 0.45f, r.rect[1] + 0.45f}, {r.rect[2] + 0.55f, r.rect[1] + 0.45f}, {r.rect[0] + 0.45f, r.rect[3] + 0.55f}, {r.rect[2] + 0.55f, r.rect[3] + 0.55f}};
+                int best = 0; float bd = -1;
+                for (int k = 0; k < 4; k++) { float d = (float) Math.hypot(corners[k][0] - cx, corners[k][1] - cz) + (g.vox.solid((int) Math.floor(corners[k][0]), (int) Math.floor(high), (int) Math.floor(corners[k][1])) ? -100 : 0); if (d > bd) { bd = d; best = k; } }
+                float[] cc = corners[best], oc = corners[3 - best];
+                // (0.4.4, review) a narrow room (a passage of a kitchen, a cell) is looked down its length from one end:
+                // across it from a corner the view was a wall a pace away
+                int rw = r.rect[2] - r.rect[0] + 1, rd = r.rect[3] - r.rect[1] + 1;
+                if (Math.min(rw, rd) <= 3 && Math.max(rw, rd) > Math.min(rw, rd)) {
+                    if (rw >= rd) { cc = new float[]{r.rect[0] + 0.45f, cz}; oc = new float[]{r.rect[2] + 0.55f, cz}; }
+                    else { cc = new float[]{cx, r.rect[1] + 0.45f}; oc = new float[]{cx, r.rect[3] + 0.55f}; }
+                }
+                // (0.4.4, review) a corner inside a thick wall, or in a tower's round walled off from the room, is no place
+                // for the eye: it steps in toward the middle until it stands in the room's air in sight of the middle
+                for (int step = 0; step < 24; step++) {
+                    int bx = (int) Math.floor(cc[0]), bz = (int) Math.floor(cc[1]);
+                    if (!g.vox.solid(bx, (int) Math.floor(high), bz) && !g.vox.solid(bx, (int) Math.floor(y + 0.5f), bz) && g.vox.sight(cc[0], high, cc[1], cx, y + 1.2f, cz)) break;
+                    float lx = cx - cc[0], lz = cz - cc[1], ll = (float) Math.hypot(lx, lz);
+                    if (ll < 0.6f) break;
+                    cc = new float[]{cc[0] + lx / ll * 0.5f, cc[1] + lz / ll * 0.5f};
+                }
+                interiorView(cc[0], high, cc[1], oc[0], y + 0.4f, oc[1], e.id + "-3-room" + r.level + "-" + r.use + "-" + names.size(), names, labels, "storey " + r.level + ": " + r.use);
+            }
+            e.screenshots.addAll(names);
+            e.history.add(rpg.Main.VERSION + ": " + names.size() + " screenshots taken (" + (int) hour + ":00)");
+            sheet(e.id + " - " + e.name + " (" + e.purpose + ", " + e.kingdom + ") score " + e.score + (e.approved ? " approved" : " NOT approved"), names, labels, "sheet-" + e.id);
+            done++;
+            if (done % 25 == 0) System.out.printf("[interiors] %d buildings, %.0fs%n", done, (System.nanoTime() - t0) / 1e9);
+        }
+        try {
+            java.nio.file.Files.writeString(new File(shots, "registry.json").toPath(), t.arch.registry.json());
+            java.nio.file.Files.writeString(new File(shots, "registry.md").toPath(), t.arch.registry.report());
+        } catch (java.io.IOException ex) { throw new java.io.UncheckedIOException(ex); }
+        System.out.printf("[interiors] %d buildings shot in %.0fs -> %s%n", done, (System.nanoTime() - t0) / 1e9, shots);
+    }
+
+    /** A room's principal piece: its counter, altar, station, throne, desk, bed or table, in that order {x, z}. */
+    private static float[] principal(rpg.world.shadowveil.Rooms.Site site, rpg.world.shadowveil.Architecture.RoomRecord r) {
+        if (site == null) return null;
+        java.util.function.Predicate<float[]> in = p -> p[0] >= r.rect[0] && p[0] <= r.rect[2] + 1 && p[1] >= r.rect[1] && p[1] <= r.rect[3] + 1;
+        for (var a : site.altars) if (in.test(new float[]{a.x, a.z})) return new float[]{a.x, a.z};
+        rpg.objects.Furniture.Kind[] order = {rpg.objects.Furniture.Kind.COUNTER, rpg.objects.Furniture.Kind.SLAB, rpg.objects.Furniture.Kind.DESK, rpg.objects.Furniture.Kind.DINING_TABLE,
+                rpg.objects.Furniture.Kind.FOURPOSTER, rpg.objects.Furniture.Kind.BED, rpg.objects.Furniture.Kind.FIREPLACE, rpg.objects.Furniture.Kind.TABLE, rpg.objects.Furniture.Kind.BENCH};
+        for (var k : order) {
+            if (k == rpg.objects.Furniture.Kind.DESK) for (var st : site.stations) if (in.test(new float[]{st.x, st.z}) && Math.abs(st.floorY - r.y) < 0.5f) return new float[]{st.x, st.z};
+            for (var fu : site.furniture) if (fu.kind == k && fu.floor == r.y && in.test(new float[]{fu.x, fu.z})) {
+                // its front: away from the side it backs onto (quarter turns from +z)
+                float bx = (float) Math.sin(fu.yaw()), bz = (float) Math.cos(fu.yaw());
+                // (a counter faces its customers: its facing is its front; a wall piece's and a bed's is its back)
+                return fu.kind == rpg.objects.Furniture.Kind.COUNTER ? new float[]{fu.x, fu.z, bx, bz} : new float[]{fu.x, fu.z, -bx, -bz};
+            }
+        }
+        return null;
+    }
+
+    private void interiorView(float ex, float ey, float ez, float tx, float ty, float tz, String name, List<String> names, List<String> labels, String label) {
+        // the player out of the shot (the room seen as anyone walking in would see it), the exposure settled to its light
+        for (int i = 0; i < 40; i++) draw(new float[]{ex, ey, ez, tx, ty, tz}, 1 / 30f);
+        Main.shot(gfx, win.width, win.height, new File(shots, name + ".png"));
+        names.add(name + ".png"); labels.add(label);
+    }
+
+    /** Tiles shots into one sheet (half size, three across), each labelled, a title over them. */
+    private void sheet(String title, List<String> names, List<String> labels, String out) {
+        try {
+            List<BufferedImage> imgs = new ArrayList<>();
+            for (String n : names) imgs.add(javax.imageio.ImageIO.read(new File(shots, n)));
+            if (imgs.isEmpty()) return;
+            int w = imgs.get(0).getWidth() / 2, h = imgs.get(0).getHeight() / 2, cols = Math.min(3, imgs.size()), rows = (imgs.size() + cols - 1) / cols;
+            BufferedImage s = new BufferedImage(cols * w, rows * h + 34, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = s.createGraphics();
+            g2.setColor(new Color(24, 24, 28)); g2.fillRect(0, 0, s.getWidth(), s.getHeight());
+            g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.setFont(new Font("SansSerif", Font.BOLD, 18)); g2.setColor(Color.WHITE); g2.drawString(title, 8, 24);
+            for (int i = 0; i < imgs.size(); i++) {
+                int x = (i % cols) * w, y = 34 + (i / cols) * h;
+                g2.drawImage(imgs.get(i), x, y, w, h, null);
+                g2.setColor(new Color(0, 0, 0, 170)); g2.fillRect(x, y, Math.min(w, 12 + labels.get(i).length() * 9), 22);
+                g2.setColor(Color.WHITE); g2.setFont(new Font("SansSerif", Font.PLAIN, 15)); g2.drawString(labels.get(i), x + 6, y + 16);
+            }
+            g2.dispose();
+            javax.imageio.ImageIO.write(s, "png", new File(shots, out + ".png"));
+        } catch (java.io.IOException ex) { throw new java.io.UncheckedIOException(ex); }
+    }
+
     private void p27Shots() {
         String only = System.getenv("RPG_REVIEW_ONLY");
         java.util.function.Predicate<String> want = n -> only == null || only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
@@ -822,14 +1091,32 @@ final class Gallery {
             g.controller.snapTo(rpg.world.WorldMap.active().spawnYaw);
             long pre = System.nanoTime();
             Main.preloadAll(g, gfx);
+            Main.warmFrames(g, gfx, ui, hud, win.width, win.height);
             System.out.printf("[stutter] preload %.2fs%n", (System.nanoTime() - pre) / 1e9);
             float[] ms = new float[600]; int[] meshed = new int[600];
             long prev = System.nanoTime();
-            for (int i = 0; i < ms.length; i++) { g.controller.in.forward = i > 120 ? 1 : 0; long tt = System.nanoTime(); game.tick(1 / 60f); if (i == 0) { System.out.printf("[stutter] first tick %.0f ms%n", (System.nanoTime() - tt) / 1e6); System.out.println(g.profile()); } draw(null, 1 / 60f); long now = System.nanoTime(); ms[i] = (now - prev) / 1e6f; prev = now; meshed[i] = gfx.last == null ? 0 : gfx.last.columnsMeshed * 1000 + gfx.last.columnsPending; }
+            for (int i = 0; i < ms.length; i++) {
+                g.controller.in.forward = i > 120 ? 1 : 0; long tt = System.nanoTime();
+                long[] before = g.prof.clone();
+                game.tick(1 / 60f);
+                long ticked = System.nanoTime();
+                if (i == 0) { System.out.printf("[stutter] first tick %.0f ms%n", (ticked - tt) / 1e6); System.out.println(g.profile()); }
+                long[] sectBefore = gfx.sectNs.clone();
+                draw(null, 1 / 60f); long now = System.nanoTime(); ms[i] = (now - prev) / 1e6f; prev = now; meshed[i] = gfx.last == null ? 0 : gfx.last.columnsMeshed * 1000 + gfx.last.columnsPending;
+                // (0.4.2) a spike named: the tick's share by system, and the draw's
+                if (ms[i] > 33) {
+                    StringBuilder sp = new StringBuilder(String.format("[stutter] spike at %d: %.0f ms - tick %.0f, draw %.0f (scene %.0f, ui %.0f, render %.0f) -", i, ms[i], (ticked - tt) / 1e6, (now - ticked) / 1e6, Main.lastScene, Main.lastUi, Main.lastRender));
+                    for (int k = 0; k < before.length; k++) if (g.prof[k] - before[k] > 5_000_000L) sp.append(String.format(" %s %.0f", Rpg.PROF_NAMES[k], (g.prof[k] - before[k]) / 1e6));
+                    for (int k = 0; k < sectBefore.length; k++) if (gfx.sectNs[k] - sectBefore[k] > 5_000_000L) sp.append(String.format(" scene#%d %.0f", k, (gfx.sectNs[k] - sectBefore[k]) / 1e6));
+                    System.out.println(sp);
+                }
+            }
             g.controller.in.forward = 0;
             float[] sorted = ms.clone(); java.util.Arrays.sort(sorted);
             int over = 0; float worst = 0; int worstAt = 0;
             for (int i = 0; i < ms.length; i++) { if (ms[i] > 33) over++; if (ms[i] > worst) { worst = ms[i]; worstAt = i; } }
+            if (Rpg.PROF) { System.out.println("[stutter] tick profile over the run (ms total):"); System.out.print(g.profile()); }
+            { StringBuilder sb = new StringBuilder("[stutter] scene stretches (ms/frame):"); String[] nm = {"lamps+fires", "lights+falls", "sea", "foliage", "farms+fish+workshops", "fences+animals", "people", "monsters+objects", "focus+projectiles", "debris+particles"}; for (int k = 0; k < nm.length; k++) sb.append(String.format(" %s %.2f", nm[k], gfx.sectNs[k] / 1e6 / ms.length)); System.out.println(sb); }
             System.out.printf("[stutter] median %.1f ms, p95 %.1f, p99 %.1f, worst %.1f at frame %d, %d frames over 33 ms%n", sorted[300], sorted[570], sorted[594], worst, worstAt, over);
             StringBuilder s = new StringBuilder("[stutter] first 60:");
             for (int i = 0; i < 60; i++) s.append(String.format(" %.0f(%d/%d)", ms[i], meshed[i] / 1000, meshed[i] % 1000));
@@ -850,6 +1137,9 @@ final class Gallery {
                 // the eye in open air: backed away from what it looks at (and up a little) until no wall or roof is about it
                 float bx = ex - tx, bz = ez - tz, bl = (float) Math.max(1e-3, Math.hypot(bx, bz));
                 for (int k = 0; k < 40 && boxed(ex, ey, ez); k++) { ex += bx / bl; ez += bz / bl; ey = Math.max(ey + 0.35f, rpg.world.WorldMap.standY(ex, ez) + 1.7f); }
+                // (0.4.2) still walled in (a view whose ground a building has since taken): up over the roofs, looking down on it
+                float ox = (float) a.x(eye[0]), oz = (float) a.z(eye[1]);
+                if (boxed(ex, ey, ez)) { ex = ox; ez = oz; ey = rpg.world.WorldMap.standY(ex, ez) + 1.7f; for (int k = 0; k < 60 && boxed(ex, ey, ez); k++) ey += 1; ey += 4; }
                 rpg.render.Gfx.reviewFogScale = (eye.length > 2 && eye[2] > 15) ? 7 : 1;
                 String name = rpg.world.shadowveil.Atlas.s(v, "name", "view");
                 for (float hour : new float[]{8.5f, 22f}) {
@@ -879,7 +1169,8 @@ final class Gallery {
     private boolean boxed(float x, float y, float z) {
         for (float dx = -0.6f; dx <= 0.6f; dx += 0.6f) for (float dz = -0.6f; dz <= 0.6f; dz += 0.6f) for (float dy = -0.6f; dy <= 0.6f; dy += 0.6f)
             if (g.vox.solid((int) Math.floor(x + dx), (int) Math.floor(y + dy), (int) Math.floor(z + dz)) || rpg.world.Blocks.isLeaves(g.vox.block((int) Math.floor(x + dx), (int) Math.floor(y + dy), (int) Math.floor(z + dz)))) return true;
-        return false;
+        // (0.4.2) a roof over the eye is walled in too (a view whose spot a building has since taken looked at a wall from inside)
+        return !g.vox.sight(x, y, z, x, y + 40, z);
     }
 
     private void p26Shots() {
@@ -1296,7 +1587,7 @@ final class Gallery {
             for (double hour : new double[]{14, 21.5}) {
                 g.state.minutes = hour * 60;
                 place(sh.x - 3.6f, sh.z + 3.4f, 0); frames(30);
-                adapted(new float[]{sh.x - 4.2f, DevMap.FLOOR + 2.1f, sh.z + 4.4f, sh.x, DevMap.FLOOR + 1.3f, sh.z}, "shrine-" + (hour < 18 ? "day" : "night"));
+                adapted(new float[]{sh.x - 4.2f, sh.floor + 2.1f, sh.z + 4.4f, sh.x, sh.floor + 1.3f, sh.z}, "shrine-" + (hour < 18 ? "day" : "night"));
             }
             g.state.minutes = 13 * 60;
         }
@@ -3510,6 +3801,62 @@ final class Gallery {
                 gfx.frame(win.width, win.height);
             }
             Main.shot(gfx, win.width, win.height, new File(shots, "figure-" + (sex == 1 ? "f" : "m") + type + "-" + a + ".png"));
+        }
+    }
+
+    /**
+     * (0.4.5, gamefixes: the clothing update; every equipment tier its own look) Each outfit (the Desert's in its legs and
+     * in its robes) and each tier's armour and arms, worn by the player at noon and seen from four sides; then each
+     * outfit's pieces laid on the ground as things. RPG_REVIEW_ONLY=outfits|tiers|items|id,id picks.
+     */
+    private void outfitShots() {
+        String only = System.getenv().getOrDefault("RPG_REVIEW_ONLY", "");
+        java.util.function.Predicate<String> want = n -> only.isBlank() || java.util.Arrays.asList(only.split(",")).contains(n);
+        for (var n : g.npcs) g.ai.unload(n);
+        g.state.minutes = 12 * 60; g.timeSystem.weather.set(astratto.weather.Weather.Kind.CLEAR); g.timeSystem.weather.snap();
+        float px = 64.5f, pz = 66.5f;
+        java.util.LinkedHashMap<String, java.util.List<rpg.item.ItemDef>> sets = new java.util.LinkedHashMap<>();
+        for (var o : rpg.item.Apparel.outfits().values()) {
+            boolean twoLegs = o.pieces().stream().filter(d -> d.slot == rpg.item.ItemDef.Slot.LEGS).count() > 1;
+            for (int v = 0; v < (twoLegs ? 2 : 1); v++) {
+                java.util.List<rpg.item.ItemDef> l = new java.util.ArrayList<>();
+                boolean robes = v == 1;
+                for (var d : o.pieces()) if (d.slot != rpg.item.ItemDef.Slot.LEGS || !twoLegs || robes == "robe".equals(rpg.render.Garments.shape(d))) l.add(d);
+                if (want.test("outfits") || want.test(o.id())) sets.put(o.id() + (twoLegs ? (robes ? "-robes" : "-legs") : ""), l);
+            }
+        }
+        for (rpg.item.Tier t : rpg.item.Tier.values()) {
+            if (!t.armour() || !(want.test("tiers") || want.test(t.name().toLowerCase()))) continue;
+            java.util.List<rpg.item.ItemDef> l = new java.util.ArrayList<>();
+            for (String k : new String[]{"helm", "body", "legs", "sword", "shield"}) { var d = rpg.item.Items.tierItem(t, k); if (d != null) l.add(d); }
+            sets.put("tier-" + t.name().toLowerCase(), l);
+        }
+        for (var e : sets.entrySet()) {
+            g.player.eq.clear();
+            for (var d : e.getValue()) g.player.eq.set(d.slot == rpg.item.ItemDef.Slot.OFF || d.family == rpg.item.ItemDef.Family.SHIELD ? rpg.item.ItemDef.Slot.OFF : d.slot, new rpg.item.ItemStack(d, 1));
+            g.player.firstPerson = false;
+            place(px, pz, 0); frames(20);
+            float y = g.player.y;
+            for (int k = 0; k < 4; k++) {
+                double a = k * Math.PI / 2;
+                float ex = px + (float) Math.sin(a) * 2.9f, ez = pz + (float) Math.cos(a) * 2.9f;
+                view(ex, y + 1.25f, ez, px, y + 0.95f, pz, "outfit-" + e.getKey() + "-" + k);
+            }
+            // the head close up, front and side
+            view(px, y + 1.75f, pz + 1.3f, px, y + 1.6f, pz, "outfit-" + e.getKey() + "-head0");
+            view(px + 1.3f, y + 1.75f, pz, px, y + 1.6f, pz, "outfit-" + e.getKey() + "-head1");
+        }
+        g.player.eq.clear();
+        if (want.test("items") || !only.isBlank() && !want.test("outfits") && !want.test("tiers")) {
+            for (var o : rpg.item.Apparel.outfits().values()) {
+                place(px - 6, pz - 6, 0); frames(5);
+                java.util.List<rpg.objects.GroundItem> laid = new java.util.ArrayList<>();
+                float y = rpg.world.WorldMap.standY(px, pz);
+                for (int i = 0; i < o.pieces().size(); i++) laid.add(g.objects.drop(new rpg.item.ItemStack(o.pieces().get(i), 1), px - 2.4f + i * 0.8f, y + 0.02f, pz));
+                frames(10);
+                view(px, y + 1.9f, pz + 2.6f, px, y + 0.1f, pz, "items-" + o.id());
+                for (var gi : laid) if (gi != null) gi.removed = true;
+            }
         }
     }
 

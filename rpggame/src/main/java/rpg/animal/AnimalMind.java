@@ -137,6 +137,11 @@ final class AnimalMind {
             boolean hurt = a.cs.lastAttacker == threat.id && g.time - a.cs.lastHurt < 15;
             boolean young = sys.youngNear(a, 9) && sp.defends || sp == Species.BROWN_BEAR && sys.youngNear(a, 12);
             boolean stands = !a.baby && (sp == Species.HORSE ? hurt && sys.couldWin(a, threat) : sp.flight <= 0 || young || hurt && sys.couldWin(a, threat));
+            // (0.4.4, gamefixes: cows auto-aggroed players) a farm beast never squares up to a person who has done it and its
+            // young no harm - someone walking past the herd is shied from, not charged; only a blow (to it, or to its calf)
+            // is fought back against
+            boolean person = !(threat instanceof Animal) && !(threat instanceof rpg.monster.Monster);
+            if (stands && sp.domestic && sp != Species.DOG && person && !hurt && !sys.youngHurtBy(a, threat, 20)) stands = false;
             if (a.baby && mother != null) s.add(new Score(Goal.FLEE, 0.97f, mother.id, "frightened by " + threat.name + "; running to its mother"));
             else if (stands) {
                 if (hurt || d < Math.max(1.6f, sp.wary * 0.3f) || young && d < sp.wary * 0.6f) s.add(new Score(Goal.DEFEND, 0.96f, threat.id, (young ? "protecting its young from " : hurt ? "fighting back against " : "cornered by ") + threat.name));

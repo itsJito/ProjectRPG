@@ -1,0 +1,128 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+RosterProbeTest > roster() STANDARD_OUT
+    [roster] MERCHANT_A             Ada          MERCHANT     -                      Merchant (Store A)
+    [roster] LAWMAN_A               Bram         LAWMAN       -                      Lawman (DevCity)
+    [roster] GUARD                  Cole         GUARD        -                      Guard (DevCity)
+    [roster] WORKER                 Dag          WORKER       -                      Woodcutter
+    [roster] VILLAGER               Eda          VILLAGER     -                      Villager
+    [roster] THIEF                  Finn         THIEF        -                      Thief
+    [roster] MERCHANT_B             Gus          MERCHANT     -                      Merchant (Store B)
+    [roster] LAWMAN_B               Hale         LAWMAN       -                      Lawman (DevTown)
+    [roster] CARTER                 Ivo          CARTER       -                      Carter
+    [roster] QUEST_GIVER            Jun          QUEST_GIVER  -                      Quest giver (test)
+    [roster] CONTACT                Kit          CONTACT      -                      Courier contact (removable)
+    [roster] FARMER                 Mara         FARMER       -                      Livestock farmer
+    [roster] UNDERTAKER             Morrow       UNDERTAKER   -                      Undertaker (DevCity)
+    [roster] FENCE                  Silas        FENCE        -                      Fence (DevTown)
+    [roster] BOBWIN                 Bobwin       GUARD        -                      City watch
+    [roster] BEGGAR                 Oswin        BEGGAR       -                      Vagrant
+    [roster] HEALER                 Maud         HEALER       -                      Herbalist
+    [roster] PRIEST                 Alric        PRIEST       -                      Graveyard chaplain
+    [roster] HUNTER                 Godric       HUNTER       GAME_HUNTER            Game Hunter
+    [roster] SCHOLAR                Isolde       SCHOLAR      -                      Travelling scholar
+    [roster] FISHERMAN              Elowen       FISHERMAN    LAKE_NET_FISHERMAN     Lake Net Fisherman
+    [roster] MINER                  Oren         MINER        ORE_MINER              Ore Miner
+    [roster] CRAFTSMAN              Tamsin       CRAFTSMAN    BLACKSMITH             Blacksmith
+    [roster] KNIGHT                 Alden        KNIGHT       ESCORT_KNIGHT          Escort Knight
+    [roster] PREDATOR_HUNTER        Fenna        HUNTER       PREDATOR_HUNTER        Predator Hunter
+    [roster] TELLER                 Wren         CIVIC        -                      Bank teller
+    [roster] COOK                   Hilda        CRAFTSMAN    COOK                   Cook
+    [roster] QUARRY_WORKER          Bertram      MINER        QUARRY_WORKER          Quarry Worker
+    [roster] BORDER_KNIGHT          Roderic      KNIGHT       BORDER_KNIGHT          Border Knight
+    [roster] SHELLFISH_GATHERER     Wynn         FISHERMAN    SHELLFISH_GATHERER     Shellfish Gatherer
+    [roster] RIVER_FISHERMAN        Corwin       FISHERMAN    RIVER_FISHERMAN        River Fisherman
+    [roster] EMPEROR                Severinus    CIVIC        -                      Emperor of DevPalace
+    [roster] PRAETOR                Cassia       LAWMAN       -                      Praetor (DevPalace)
+    [roster] LEGIONARY_1            Titus        GUARD        -                      Legionary (DevPalace)
+    [roster] LEGIONARY_2            Decimus      GUARD        -                      Legionary (DevPalace)
+    [roster] LEGIONARY_3            Quintus      GUARD        -                      Legionary (DevPalace)
+    [roster] LEGIONARY_4            Sextus       GUARD        -                      Legionary (DevPalace)
+    [roster] SENATOR                Lucilla      CIVIC        -                      Senator
+    [roster] MACELLUM               Flavia       MERCHANT     -                      Trader (the Macellum)
+    [roster] PRIESTESS              Aurelia      PRIEST       -                      Priestess of the temple
+    [roster] MEDICUS                Philon       HEALER       -                      Medicus
+    [roster] PHILOSOPHER            Nikias       SCHOLAR      -                      Philosopher
+    [roster] STONEMASON             Gaius        MINER        QUARRY_WORKER          Quarry Worker
+    [roster] PALACE_BEGGAR          Servius      BEGGAR       -                      Beggar
+    [roster] CITIZEN_1              Octavia      VILLAGER     -                      Citizen of DevPalace
+    [roster] CITIZEN_2              Marcellus    VILLAGER     -                      Citizen of DevPalace
+    [roster] CITIZEN_3              Cornelia     VILLAGER     -                      Citizen of DevPalace
+    [roster] FISHER_P               Lucius       FISHERMAN    RIVER_FISHERMAN        River Fisherman
+    [roster] HUNTRESS               Atalanta     HUNTER       GAME_HUNTER            Game Hunter
+    [roster] CITIZEN_4              Livia        VILLAGER     -                      Citizen of DevPalace
+    [roster] CENTURION              Maximus      KNIGHT       HOUSEHOLD_KNIGHT       Household Knight
+    [roster] ARTHUR                 Arthur       CRAFTSMAN    CARPENTER              Carpenter
+    [roster] LANCELOT               Lancelot     KNIGHT       KNIGHT_ERRANT          Knight Errant
+    [roster] GAWAIN                 Gawain       HUNTER       MONSTER_HUNTER         Monster Hunter
+    [roster] TRISTAN                Tristan      HUNTER       TRAPPER                Trapper
+    [roster] PERCIVAL               Percival     MINER        COAL_MINER             Coal Miner
+    [roster] MERLIN                 Merlin       MINER        GEM_PROSPECTOR         Gem Prospector
+    [roster] CARPENTER_CITY         Aeldric      CRAFTSMAN    CARPENTER              Carpenter
+    [roster] CARPENTER_TOWN         Brannoc      CRAFTSMAN    CARPENTER              Carpenter
+    [roster] CARPENTER_WOOD         Corren       CRAFTSMAN    CARPENTER              Carpenter
+    [roster] CARPENTER_PALACE       Deryn        CRAFTSMAN    CARPENTER              Carpenter
+    [roster] WOODCUTTER_CITY        Eirwen       WORKER       -                      Woodcutter
+    [roster] WOODCUTTER_TOWN        Fennric      WORKER       -                      Woodcutter
+    [roster] MINER_CITY             Garron       MINER        ORE_MINER              Ore Miner
+    [roster] MINER_PALACE           Haldren      MINER        ORE_MINER              Ore Miner
+    [roster] TRADER_CITY            Istren       MERCHANT     -                      Materials Trader
+    [roster] TRADER_PALACE          Maerwyn      MERCHANT     -                      Materials Trader
+    [roster] CROP_FARMER_CITY       Tobin        FARMER       CROP_FARMER            Crop Farmer
+    [roster] ORCHARD_KEEPER_CITY    Hedda        FARMER       ORCHARD_KEEPER         Orchard Keeper
+    [roster] CROP_FARMER_PALACE     Rufus        FARMER       CROP_FARMER            Crop Farmer
+    [roster] ORCHARD_KEEPER_PALACE  Valeria      FARMER       ORCHARD_KEEPER         Orchard Keeper
+    [roster] INNKEEPER_CITY         Hamon        CIVIC        INNKEEPER              Innkeeper
+    [roster] BARTENDER_CITY         Bess         MERCHANT     BARTENDER              Bartender
+    [roster] COOK_CITY              Wilfred      CRAFTSMAN    COOK                   Cook
+    [roster] INNKEEPER_PALACE       Vibius       CIVIC        INNKEEPER              Innkeeper
+    [roster] BARTENDER_PALACE       Julia        MERCHANT     BARTENDER              Bartender
+    [roster] COOK_PALACE            Appius       CRAFTSMAN    COOK                   Cook
+    [roster] GUILD_METALLISTS       Hildric      CRAFTSMAN    BLACKSMITH             Master of the Metallists' Guild
+    [roster] ARMORY                 Odda         MERCHANT     -                      Armourer's merchant (the Armory)
+    [roster] GUILD_FORESTERS        Wendel       WORKER       -                      Master of the Foresters' Guild (Woodcutter)
+    [roster] CARDER                 Mabyn        CRAFTSMAN    CARDER                 Carder
+    [roster] SPINNER                Elsbet       CRAFTSMAN    SPINNER                Spinner
+    [roster] GUILD_ARTISANS         Tamsyn       CRAFTSMAN    WEAVER                 Master of the Artisans' Guild (Weaver)
+    [roster] FULLER                 Osric        CRAFTSMAN    FULLER                 Fuller
+    [roster] DYER                   Rowena       CRAFTSMAN    DYER                   Dyer
+    [roster] GUILD_FARMERS          Ansel        FARMER       -                      Master of the Farmers' Guild
+    [roster] GUILD_PROVISIONERS     Beatrix      CRAFTSMAN    COOK                   Master of the Provisioners' Guild (Cook)
+    [roster] GUILD_MARINERS         Morwen       FISHERMAN    DEEP_WATER_FISHERMAN   Master of the Mariners' Guild
+    [roster] GUILD_ARCANISTS        Sabine       SCHOLAR      -                      Master of the Arcanists' Guild
+    [roster] SMELTER                Brand        CRAFTSMAN    SMELTER                Smelter
+    [roster] COASTAL_FISHER         Kerra        FISHERMAN    COASTAL_FISHERMAN      Coastal Fisherman
+    [roster] BARON                  Edric        CIVIC        HOUSEHOLD_BARON        Household Baron
+    [roster] MANSION_KNIGHT         Roland       KNIGHT       HOUSEHOLD_KNIGHT       Household Knight
+    [roster] MANSION_COOK           Marta        CRAFTSMAN    COOK                   Cook
+    [roster] MANSION_PORTER         Godwin       WORKER       PORTER                 Porter
+    [roster] MANSION_WOODCUTTER     Leofric      WORKER       FIREWOOD_CUTTER        Firewood Cutter
+    [roster] MANSION_ORCHARDIST     Elsie        FARMER       ORCHARD_KEEPER         Orchard Keeper
+    [roster] BANDIT_1               Garth        BANDIT       -                      Bandit
+    [roster] BANDIT_2               Nell         BANDIT       -                      Bandit Archer
+    [roster] BRUTE                  Grimbald     BRUTE        -                      Bandit Brute
+  slow: rpg.probe.RosterProbeTest.roster() 20.892 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 35s
+9 actionable tasks: 4 executed, 5 up-to-date

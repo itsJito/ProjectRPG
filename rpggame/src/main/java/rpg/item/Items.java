@@ -640,4 +640,7 @@ public final class Items {
         d.faithBonus = req >= 30 ? 12 : 5;
         return d;
     }
+
+    // (0.4.5, gamefixes: the clothing update) the outfits' pieces, from data/apparel.json
+    static { Apparel.load(d -> { if (BY_ID.put(d.id, d) != null) throw new IllegalStateException("duplicate item " + d.id); return d; }); }
 }

@@ -109,19 +109,94 @@ public final class AiSystem {
         for (Npc n : new Npc[]{ada, gus, jun, kit, eda, ivo, mara, morrow}) n.pickpocketLevel = 1;
         for(long id:ADDED_ROSTER)addReleaseNpc(id);
         int[][] bs = DevMap.BANDIT_SPAWNS;
-        Npc b1 = npc(Ids.BANDIT_1, "Bandit", Npc.Role.BANDIT, "Hostile test NPC (melee)", bs[0][0] + 0.5f, bs[0][1] + 0.5f, 120);
+        Npc b1 = npc(Ids.BANDIT_1, Names.roster("BANDIT_1", "Garth"), Npc.Role.BANDIT, "Bandit", bs[0][0] + 0.5f, bs[0][1] + 0.5f, 120);
         levels(b1, 12, 12, 10, 14); wear(b1, "bronze_sword", "wooden_shield", "stone_body", "stone_helm"); give(b1, Items.SHRIMP, 2); give(b1, Items.COINS, 15);
-        Npc b2 = npc(Ids.BANDIT_2, "Bandit archer", Npc.Role.BANDIT, "Hostile test NPC (ranged)", bs[1][0] + 0.5f, bs[1][1] + 0.5f, 121);
+        Npc b2 = npc(Ids.BANDIT_2, Names.roster("BANDIT_2", "Nell"), Npc.Role.BANDIT, "Bandit Archer", bs[1][0] + 0.5f, bs[1][1] + 0.5f, 121);
         levels(b2, 8, 8, 8, 12); b2.skills.setLevel(Skill.ARCHERY, 15); wear(b2, "shortbow", null, "stone_body");
         b2.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.BRONZE_ARROWS, 40)); g.state.mint(Items.BRONZE_ARROWS, 40); give(b2, Items.COINS, 10);
-        Npc brute = npc(Ids.BRUTE, "Brute", Npc.Role.BRUTE, "Hostile test NPC (heavy)", bs[2][0] + 0.5f, bs[2][1] + 0.5f, 122);
+        Npc brute = npc(Ids.BRUTE, Names.roster("BRUTE", "Grimbald"), Npc.Role.BRUTE, "Bandit Brute", bs[2][0] + 0.5f, bs[2][1] + 0.5f, 122);
         levels(brute, 35, 40, 30, 45); wear(brute, "iron_mace", null, "chainmail_body", "chainmail_legs"); give(brute, Items.TROUT, 2); give(brute, Items.COINS, 60);
         brute.aggroRange = 9;
         // those with a bed sleep in it
         for (Npc n : g.npcs) { float[] bed = DevMap.bedOf(n.id); if (bed != null) { n.homeX = bed[0]; n.homeZ = bed[1]; } }
         // (0.4.0) on ShadowVeil everyone goes to the home the transfer rules give them (rpg.world.shadowveil.Settle)
         rpg.world.shadowveil.Settle.people(g.npcs);
+        // (0.4.3, gamefixes: every NPC of the lore in their kingdom with their home, work and bed) the census
+        rpg.world.shadowveil.Census.apply(g, g.npcs, (id, name, role, title, female) -> {
+            Npc n = new Npc(id, name, role, title, 0, 0);
+            n.skills.setLevel(Skill.HEALTH, 10);
+            n.look = Appearance.of(group(role), id, female);
+            n.fitBody(); n.yaw = 0;
+            g.npcs.add(n);
+            return n;
+        });
+        if (rpg.world.WorldMap.shadowveil()) scatterStart();
         for (Npc n : g.npcs) { n.restore(); n.social = (n.id % 7) / 10f; n.hunger = (n.id % 5) / 10f; spawnBody(n); }
+    }
+
+    /** (0.4.6) How far apart (m) no two people begin the world, and the farthest (cells) one is moved to keep it. */
+    static final float SPAWN_APART = rpg.Tuning.f("ai.spawnApart", 1.6f);
+    static final int SPAWN_SHIFT = rpg.Tuning.i("ai.spawnShift", 6);
+
+    /**
+     * (0.4.6, gamefixes: NPC spawn points clustered - the player came in to see everyone of a house lined up before its
+     * door) each person begins the world where the hour has them: at their post inside their workplace through the
+     * working hours, in bed by night, about home otherwise; and nobody begins within {@link #SPAWN_APART} of anyone else
+     * (the later one takes the nearest open cell on the same floor that keeps clear of everyone already placed).
+     */
+    private void scatterStart() {
+        double h = g.state.hourOfDay();
+        boolean working = h >= 7 && h < 12 || h >= 13 && h < 18, night = h < 6 || h >= 22;
+        List<float[]> placed = new ArrayList<>();
+        for (Npc n : g.npcs) {
+            var a = rpg.world.shadowveil.Census.of(n.id);
+            if (a != null) {
+                if (working && Float.isFinite(n.postY) && (n.postX != 0 || n.postZ != 0)) { n.x = n.postX; n.z = n.postZ; n.y = n.postY; }
+                else if (night && Float.isFinite(n.homeY)) { n.x = n.homeX; n.z = n.homeZ; n.y = n.homeY; }
+                else {
+                    // no post to keep (a guard, a knight, a scholar): somewhere inside their workplace by day, their home otherwise -
+                    // beside one of its pieces, chosen by who they are - rather than everyone of a house on its doorstep
+                    var site = rpg.world.shadowveil.Rooms.site(working && a.workId() != null ? a.workId() : a.homeId() != null ? a.homeId() : a.workId());
+                    List<rpg.interact.WorldObject> pieces = new ArrayList<>();
+                    if (site != null) { pieces.addAll(site.stations); pieces.addAll(site.chests); pieces.addAll(site.furniture); }
+                    if (!pieces.isEmpty()) {
+                        var o = pieces.get((int) Math.floorMod(n.id * 31 + 7, pieces.size()));
+                        float[] at = apart(o.x, (float) Math.floor(o.y), o.z, placed);
+                        if (!openCell((int) Math.floor(at[0]), (int) Math.floor(at[1] + 0.1f), (int) Math.floor(at[2]))) {
+                            // the piece's own cell is the piece: the nearest open cell beside it (anyone there already counted)
+                            List<float[]> self = new ArrayList<>(placed); self.add(new float[]{o.x, (float) Math.floor(o.y), o.z});
+                            at = apart(o.x, (float) Math.floor(o.y), o.z, self);
+                        }
+                        if (openCell((int) Math.floor(at[0]), (int) Math.floor(at[1] + 0.1f), (int) Math.floor(at[2]))) { n.x = at[0]; n.y = at[1]; n.z = at[2]; }
+                    }
+                }
+            }
+            float[] at = apart(n.x, n.y, n.z, placed);
+            n.x = at[0]; n.y = at[1]; n.z = at[2];
+            n.spawnX = n.x; n.spawnZ = n.z;
+            placed.add(at);
+        }
+    }
+
+    /** A place near a point clear of those already taken: the point itself, else the nearest open cell on its floor that is. */
+    float[] apart(float x, float y, float z, List<float[]> placed) {
+        if (clearOf(x, y, z, placed)) return new float[]{x, y, z};
+        int bx = (int) Math.floor(x), by = (int) Math.floor(y + 0.1f), bz = (int) Math.floor(z);
+        for (int r = 1; r <= SPAWN_SHIFT; r++) for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+            for (int dy : new int[]{0, 1, -1}) {
+                int cx = bx + dx, cy = by + dy, cz = bz + dz;
+                if (!openCell(cx, cy, cz) || !clearOf(cx + 0.5f, cy, cz + 0.5f, placed)) continue;
+                // the same room: a straight line through open cells from the point (never through a wall into the next house)
+                if (!g.vox.navigation.validPoint(cx + 0.5f, cy, cz + 0.5f, d -> true) || g.vox.solid((bx + cx) / 2, cy + 1, (bz + cz) / 2)) continue;
+                return new float[]{cx + 0.5f, cy, cz + 0.5f};
+            }
+        }
+        return new float[]{x, y, z};
+    }
+    private static boolean clearOf(float x, float y, float z, List<float[]> placed) {
+        for (float[] p : placed) if (Math.abs(p[1] - y) < 2 && Math.hypot(p[0] - x, p[2] - z) < SPAWN_APART) return false;
+        return true;
     }
 
     private static final List<Long> ADDED_ROSTER=List.of(Ids.BOBWIN,Ids.BEGGAR,Ids.HEALER,Ids.PRIEST,Ids.HUNTER,Ids.SCHOLAR,Ids.FISHERMAN,Ids.MINER,Ids.CRAFTSMAN,Ids.KNIGHT,Ids.PREDATOR_HUNTER,Ids.TELLER,
@@ -199,7 +274,7 @@ public final class AiSystem {
                 give(tamsin,Items.HAMMER,1);give(tamsin,Items.BRONZE_BAR,8);give(tamsin,Items.BREAD,2);give(tamsin,Items.COINS,120);return tamsin;
             }
             case (int)Ids.KNIGHT -> {
-                Npc alden=npc(id,"Sir Alden",Npc.Role.KNIGHT,"Escort Knight",87.5f,64.5f,149);
+                Npc alden=npc(id,Names.roster("KNIGHT","Alden"),Npc.Role.KNIGHT,"Escort Knight",87.5f,64.5f,149);
                 Profession.ESCORT_KNIGHT.assign(alden);alden.dutyTarget=Ids.CARTER;alden.dutyX=alden.postX;alden.dutyZ=alden.postZ;
                 levels(alden,35,35,40,40);wear(alden,"steel_sword","steel_shield","steel_body");give(alden,Items.TROUT,3);return alden;
             }
@@ -223,7 +298,7 @@ public final class AiSystem {
             case (int)Ids.BORDER_KNIGHT -> {
                 // posted where DevCity's ground meets DevTown's, on the road between them
                 float[] border=border(DevMap.ALPHA,110.5f,58.5f,38.5f,116.5f);
-                Npc roderic=npc(id,"Sir Roderic",Npc.Role.KNIGHT,"Border Knight",border[0],border[1],153);
+                Npc roderic=npc(id,Names.roster("BORDER_KNIGHT","Roderic"),Npc.Role.KNIGHT,"Border Knight",border[0],border[1],153);
                 Profession.BORDER_KNIGHT.assign(roderic);roderic.dutyX=border[0];roderic.dutyZ=border[1];
                 levels(roderic,38,38,42,42);wear(roderic,"steel_sword","steel_shield","steel_body");give(roderic,Items.TROUT,3);return roderic;
             }
@@ -313,9 +388,9 @@ public final class AiSystem {
             case (int) Ids.ARTHUR -> { Npc a = npc(id, "Arthur", Npc.Role.CRAFTSMAN, "Carpenter", DevMap.SAW_AT[0] + 0.5f, DevMap.SAW_AT[1] + 1.8f, 180);
                 Profession.CARPENTER.assign(a); a.skills.setLevel(Skill.CONSTRUCTION, 40); a.skills.setLevel(Skill.CRAFTING, 30); a.postX = DevMap.SAW_AT[0] + 0.5f; a.postZ = DevMap.SAW_AT[1] + 1.8f;
                 give(a, Items.HAMMER, 1); give(a, Items.PLANK, 8); give(a, Items.LOGS, 4); give(a, Items.BREAD, 2); give(a, Items.COINS, 80); yield a; }
-            case (int) Ids.LANCELOT -> { Npc l = npc(id, "Sir Lancelot", Npc.Role.KNIGHT, "Knight Errant", 96.5f, 100.5f, 181);
+            case (int) Ids.LANCELOT -> { Npc l = npc(id, Names.roster("LANCELOT", "Lancelot"), Npc.Role.KNIGHT, "Knight Errant", 96.5f, 100.5f, 181);
                 Profession.KNIGHT_ERRANT.assign(l); levels(l, 46, 46, 46, 46); wear(l, "steel_sword", "steel_shield", "steel_body", "iron_helm", "iron_legs"); give(l, Items.TROUT, 3); yield l; }
-            case (int) Ids.GAWAIN -> { Npc g3 = npc(id, "Sir Gawain", Npc.Role.HUNTER, "Monster Hunter", 44.5f, 44.5f, 182);
+            case (int) Ids.GAWAIN -> { Npc g3 = npc(id, Names.roster("GAWAIN", "Gawain"), Npc.Role.HUNTER, "Monster Hunter", 44.5f, 44.5f, 182);
                 Profession.MONSTER_HUNTER.assign(g3); levels(g3, 36, 36, 34, 38); g3.skills.setLevel(Skill.ARCHERY, 38);
                 wear(g3, "oak_shortbow", null, "iron_body"); give(g3, Items.get("iron_sword"), 1); g3.eq.set(ItemDef.Slot.AMMO, new ItemStack(Items.IRON_ARROWS, 40)); g.state.mint(Items.IRON_ARROWS, 40); give(g3, Items.TROUT, 3); yield g3; }
             case (int) Ids.TRISTAN -> { Npc t = npc(id, "Tristan", Npc.Role.HUNTER, "Trapper", 24.5f, 168.5f, 183);
@@ -345,15 +420,15 @@ public final class AiSystem {
      */
     private Npc household(long id) {
         Npc n = switch ((int) id) {
-            case (int) Ids.BARON -> { Npc b = npc(id, "Baron Edric", Npc.Role.CIVIC, "Household Baron", 46.5f, 143.5f, 1000); Profession.HOUSEHOLD_BARON.assign(b);
+            case (int) Ids.BARON -> { Npc b = npc(id, Names.roster("BARON", "Edric"), Npc.Role.CIVIC, "Household Baron", 46.5f, 143.5f, 1000); Profession.HOUSEHOLD_BARON.assign(b);
                 give(b, Items.COINS, 400); levels(b, 12, 10, 14, 14); b.pickpocketLevel = 20; yield b; }
-            case (int) Ids.MANSION_KNIGHT -> { Npc k = npc(id, "Sir Roland", Npc.Role.KNIGHT, "Household Knight", 46.5f, 153.5f, 1001); Profession.HOUSEHOLD_KNIGHT.assign(k);
+            case (int) Ids.MANSION_KNIGHT -> { Npc k = npc(id, Names.roster("MANSION_KNIGHT", "Roland"), Npc.Role.KNIGHT, "Household Knight", 46.5f, 153.5f, 1001); Profession.HOUSEHOLD_KNIGHT.assign(k);
                 k.dutyTarget = Ids.BARON; k.dutyX = 46.5f; k.dutyZ = 153.5f; levels(k, 38, 38, 40, 40); wear(k, "steel_sword", "steel_shield", "steel_body", "iron_helm"); give(k, Items.BREAD, 2); yield k; }
             case (int) Ids.MANSION_COOK -> { Npc c = npc(id, "Marta", Npc.Role.CRAFTSMAN, "Cook", 41.5f, 138.5f, 1002); Profession.COOK.assign(c);
                 c.skills.setLevel(Skill.COOKING, 32); give(c, Items.COINS, 15); yield c; }
-            case (int) Ids.MANSION_PORTER -> { Npc p = npc(id, "Osric", Npc.Role.WORKER, "Porter", 46.5f, 138.5f, 1003); Profession.PORTER.assign(p);
+            case (int) Ids.MANSION_PORTER -> { Npc p = npc(id, Names.roster("MANSION_PORTER", "Godwin"), Npc.Role.WORKER, "Porter", 46.5f, 138.5f, 1003); Profession.PORTER.assign(p);
                 p.skills.setLevel(Skill.STRENGTH, 22); give(p, Items.COINS, 10); give(p, Items.BREAD, 1); yield p; }
-            case (int) Ids.MANSION_WOODCUTTER -> { Npc w = npc(id, "Bram", Npc.Role.WORKER, "Firewood Cutter", 39.5f, 133.5f, 1004); Profession.FIREWOOD_CUTTER.assign(w);
+            case (int) Ids.MANSION_WOODCUTTER -> { Npc w = npc(id, Names.roster("MANSION_WOODCUTTER", "Leofric"), Npc.Role.WORKER, "Firewood Cutter", 39.5f, 133.5f, 1004); Profession.FIREWOOD_CUTTER.assign(w);
                 w.skills.setLevel(Skill.WOODCUTTING, 24); give(w, Items.get("bronze_axe"), 1); give(w, Items.LOGS, 3); give(w, Items.COINS, 10); give(w, Items.BREAD, 1); yield w; }
             case (int) Ids.MANSION_ORCHARDIST -> { Npc o = npc(id, "Elsie", Npc.Role.FARMER, "Orchard Keeper", 41.5f, 154.5f, 1005); Profession.ORCHARD_KEEPER.assign(o);
                 o.skills.setLevel(Skill.HARVESTING, 20); give(o, Items.COINS, 10); give(o, Items.BREAD, 1); yield o; }
@@ -504,7 +579,7 @@ public final class AiSystem {
     }
 
     /** The townsfolk who are women; everyone else on the roster is a man (the sex follows the name, never a dice roll). */
-    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Sabine", "Bandit archer", "Wren", "Elowen", "Tamsin", "Fenna",
+    private static final java.util.Set<String> FEMALE_NAMES = java.util.Set.of("Ada", "Eda", "Jun", "Kit", "Mara", "Maud", "Isolde", "Sabine", "Wren", "Elowen", "Tamsin", "Fenna",
             "Cassia", "Lucilla", "Flavia", "Aurelia", "Octavia", "Cornelia", "Livia", "Atalanta", "Hedda", "Bess", "Valeria", "Julia", "Marta", "Elsie");
 
     private Npc npc(long id, String name, Npc.Role role, String title, float x, float z, long lookSeed) {
@@ -513,7 +588,7 @@ public final class AiSystem {
         // townsfolk are level 3, their trades in their other skills); fighters (the watch, hunters, outlaws) are given more below
         n.skills.setLevel(Skill.HEALTH, 10);
         // (0.3.7, gamefixes: NPC skin variety) dressed as their kind dresses, each in their own way
-        n.look = Appearance.of(group(role), lookSeed, FEMALE_NAMES.contains(name));
+        n.look = Appearance.of(group(role), lookSeed, FEMALE_NAMES.contains(name) || Names.female(name));
         n.fitBody();
         n.yaw = 0;
         g.npcs.add(n);
@@ -769,15 +844,50 @@ public final class AiSystem {
      * a reason (a foe, a tree being cut, someone it talks to), else the way it is walking, else the way its agent looks.
      * The head looks a little further: at the player when they are close and in sight, at a foe always.
      */
+    /**
+     * (0.4.2, gamefixes: people such as Elowen just stared at the player) whether a person holding still turns to what
+     * their agent watches. Every agent watches the player by default (for its eyes), so a person with nothing to do faced
+     * the player wherever they went; now only one with a reason does - a fight, a watch or a warning, a search or a
+     * look into something, a talk, or a moment of interest in them - and everyone else keeps their own heading.
+     */
+    private boolean heedsTarget(Npc n) {
+        if (n.targetBody > 0 && (g.player == null || n.targetBody != g.player.body)) return true;
+        return switch (n.goal) {
+            case FIGHT, WATCH, WARN, EVICT, SEARCH, INVESTIGATE, FOLLOW, HELD, LOOK -> true;
+            default -> g.time < n.watchUntil || n.speechUntil > g.time;
+        };
+    }
+
+    /** (0.4.4) The spin guard's window (s): a whole turn of heading inside it, without leaving a metre, is a spin. */
+    static final float SPIN_WINDOW = rpg.Tuning.f("ai.spinWindow", 3f);
+
     private void face(Npc n, float dt) {
         float k = 1 - (float) Math.exp(-dt / 0.12f);
         n.svx += (n.vx - n.svx) * k; n.svz += (n.vz - n.svz) * k;
         float speed = (float) Math.hypot(n.svx, n.svz);
         boolean committed=n.cs.busy() || n.working!=null;
+        // (0.4.4, gamefixes: NPCs sometimes spun in circles) a body circling a spot it cannot settle on - a goal a hair out of
+        // reach, a shuffle against something in its way - turns its walking heading round and round without going
+        // anywhere: a whole turn of it within a metre of where it stood, inside a few seconds, is taken as having arrived
+        // (it stops, keeps its heading, and its mind plans afresh)
+        if (n.goal != Brain.Goal.FIGHT && n.goal != Brain.Goal.FLEE) {
+            if (Float.isNaN(n.spinX) || Math.hypot(n.x - n.spinX, n.z - n.spinZ) > 1.0f || g.time - n.spinSince > SPIN_WINDOW) { n.spinX = n.x; n.spinZ = n.z; n.spinSince = g.time; n.spinTurn = 0; n.spinLast = Float.NaN; }
+            if (speed > 0.25f) {
+                float h = (float) Math.atan2(-n.svx, -n.svz);
+                if (!Float.isNaN(n.spinLast)) n.spinTurn += Math.abs(Actor.wrap(h - n.spinLast));
+                n.spinLast = h;
+                if (n.spinTurn > Math.PI * 2) {
+                    n.spins++; n.spinX = Float.NaN;
+                    n.wantYaw = n.yaw; n.svx = n.svz = 0; n.hasGoalPos = false; n.nextThink = 0;
+                    desire(n, A_HOLD);
+                    return;
+                }
+            }
+        }
         if (!committed && speed > 0.8f && n.goal != Brain.Goal.FIGHT) n.wantYaw = Float.NaN;
         // standing with nothing to face, the body keeps its heading - unless its agent holds it facing something
         float target = committed && n.goal != Brain.Goal.FIGHT ? n.cs.busy() || Float.isNaN(n.wantYaw) ? n.yaw : n.wantYaw
-                : !Float.isNaN(n.wantYaw) ? n.wantYaw : speed > 0.4f ? (float) Math.atan2(-n.svx, -n.svz) : n.nativeAction.startsWith("hold") ? n.agentYaw : n.yaw;
+                : !Float.isNaN(n.wantYaw) ? n.wantYaw : speed > 0.4f ? (float) Math.atan2(-n.svx, -n.svz) : n.nativeAction.startsWith("hold") && heedsTarget(n) ? n.agentYaw : n.yaw;
         // a heading within a hair of the present one is no reason to turn (an agent's facing wobbles by a degree or two)
         if (Math.abs(Actor.wrap(target - n.yaw)) < 0.03f) target = n.yaw;
         float rate = n.goal == Brain.Goal.FIGHT ? 9f : speed > 3f ? 4.5f : 6.5f;
@@ -853,7 +963,9 @@ public final class AiSystem {
         float speed = (float) Math.hypot(n.vx, n.vz);
         // (0.3.6, gamefixes: a Pegasus in flight made footstep noises) one in the saddle walks nowhere: the mount carries them
         if (!n.grounded || n.riding != 0 || speed < rpg.actor.Gait.STILL || g.sfx == null || n.distTo(g.player) > 16) { n.stepClock = 0.5f; return; }
-        n.stepClock += dt * rpg.actor.Gait.steps(speed, n.sneaking);
+        int planted = n.newFootPlants();
+        if (planted < 0) n.stepClock += dt * rpg.actor.Gait.steps(speed, n.sneaking);
+        else n.stepClock = planted > 0 ? 1 : Math.min(n.stepClock, 0.99f);
         if (n.stepClock >= 1) { n.stepClock -= 1; g.sfx.footstep(n, Math.min(1, speed / 5f)); g.footfall(n, Math.min(1, speed / 5f)); }
     }
 

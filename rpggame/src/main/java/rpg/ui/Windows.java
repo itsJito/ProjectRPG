@@ -235,7 +235,7 @@ final class Windows {
                         if (d == null) continue;
                         String why = rpg.item.Equipment.refusal(d, g.player.skills);
                         if (Style.button(ui, k.substring(0, 3), bx, yy, 38, 22, live)) g.interact.request(g.player, cab, "take:" + d.id);
-                        if (ui.hover(bx, yy, 38, 22)) hud.tooltip(d.name + "\nRequires " + d.reqSkill.title + " " + d.reqLevel + (why == null ? "\nYou can equip it" : "\n" + why));
+                        if (ui.hover(bx, yy, 38, 22)) hud.tooltip(d.name + d.requirements().entrySet().stream().map(r -> "\nRequires " + r.getKey().title + " " + r.getValue()).reduce("", String::concat) + (why == null ? "\nYou can equip it" : "\n" + why));
                         bx += 41;
                     }
                 }

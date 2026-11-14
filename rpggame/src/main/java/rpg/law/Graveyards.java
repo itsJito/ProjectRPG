@@ -69,7 +69,7 @@ public final class Graveyards {
         } else {
             g.carrying.drop(carrier, false);
             body.x = stone.x; body.y = stone.y; body.z = stone.z; body.heldBy = 0;
-            body.buried = true; body.burialPlot = plot.id; stone.removed = true;
+            body.buried = true; body.burialPlot = plot.id; stone.removed = true; stone.unsolid(g); body.stoneSolid(g);
             g.undertaker.toCustody(body, "buried in " + plot.id);
         }
         g.state.commit("BodyBuried", carrier.id, body.id, plot.jurisdiction, 0, body.name);

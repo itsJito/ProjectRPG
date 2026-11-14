@@ -64,17 +64,67 @@ public final class Repairs {
     }
 
     public boolean contains(long key){return open.containsKey(key);}
+    /** Whether someone knows of a breakage (the tests', the diary's question). */
+    public boolean knows(Npc n,long key){return known.getOrDefault(n.id,java.util.Set.of()).contains(key);}
     public List<Damage> open() { return new ArrayList<>(open.values()); }
+    /** (0.4.6) Every broken pane and block back as it was, and nobody's errand to mend them left. Returns how many. */
+    public int restoreAll() {
+        int n = 0;
+        for (Damage d : open.values()) { if (g.vox.block(d.x(), d.y(), d.z()) != d.original()) g.setBlock(d.x(), d.y(), d.z(), d.original()); n++; }
+        open.clear(); claimedBy.clear(); spots.clear(); known.clear(); reported.clear(); orders.clear();
+        return n;
+    }
 
     /** Knowledge travels by seeing the damage, or by an actual conversation with someone who saw it. */
     public void update() {
         if(open.isEmpty() || g.time<nextObserve || g.npcs.isEmpty())return;
         nextObserve=g.time+0.08;
         Npc witness=g.npcs.get(Math.floorMod(observer++,g.npcs.size()));
-        if(!witness.alive || !witness.loaded || witness.asleep())return;
-        for(Damage damage:open.values())if(witness.distTo(damage.x+0.5f,damage.z+0.5f)<20
-                && g.vox.sightCell(witness.x,witness.eyeY(),witness.z,damage.x,damage.y,damage.z))
-            known.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
+        if(!witness.alive || witness.asleep())return;
+        // (0.4.5, gamefixes: NPCs were not repairing or reporting broken glass) whoever lives or works where the damage is
+        // knows of it once the dust has settled - their own window, their own workshop - seen or not, in play or off it; a
+        // passer-by in play knows what they see
+        for(Damage damage:open.values()) {
+            boolean seen=witness.loaded && witness.distTo(damage.x+0.5f,damage.z+0.5f)<20 && g.vox.sightCell(witness.x,witness.eyeY(),witness.z,damage.x,damage.y,damage.z);
+            boolean theirs=g.time-damage.at>=SETTLE && (Math.hypot(witness.homeX-damage.x-0.5,witness.homeZ-damage.z-0.5)<OWN_REACH || Math.hypot(witness.postX-damage.x-0.5,witness.postZ-damage.z-0.5)<OWN_REACH);
+            if(seen || theirs)known.computeIfAbsent(witness.id,k->new java.util.HashSet<>()).add(damage.key);
+        }
+    }
+    /** (0.4.5) How near their home or post (m) damage is someone's own to know of. */
+    public static final double OWN_REACH=rpg.Tuning.f("repairs.ownReach",14f);
+
+    /**
+     * (0.4.5) Off stage, the same day's work in short: one who knows of damage tells the nearest who can mend it in its
+     * kingdom (the order made as in play), and a mender with the order, the tools and the material mends it at the
+     * spot when the place has settled - the same rules, the same costs, the world changed the same way. Returns what was
+     * done, for the diary, or null.
+     */
+    public String offstage(Npc n) {
+        if(open.isEmpty() || !n.alive)return null;
+        for(long key:new ArrayList<>(known.getOrDefault(n.id,java.util.Set.of()))) {
+            Damage damage=open.get(key);
+            if(damage==null)continue;
+            if(trade(n,damage) && eligible(n,damage)) {
+                float[] at=standSpot(n,damage);
+                if(at==null)continue;
+                n.x=at[0];n.z=at[1];n.y=rpg.world.WorldMap.standY(n.x,n.z);
+                return mend(n,damage)?"mended the damage at ("+damage.x+", "+damage.y+", "+damage.z+")":null;
+            }
+            if(reported.getOrDefault(n.id,java.util.Set.of()).contains(key))continue;
+            Npc best=null;double bd=Double.MAX_VALUE;
+            for(Npc c:g.npcs) {
+                if(c==n || !c.alive || c.summonOwner!=0 || c.hostileToPlayer || !trade(c,damage) || !hammer(c))continue;
+                double d=Math.hypot(c.homeX-damage.x,c.homeZ-damage.z)+(c.homeJurisdiction.equals(damage.jurisdiction)?0:200);
+                if(d<bd){bd=d;best=c;}
+            }
+            if(best==null)continue;
+            known.computeIfAbsent(best.id,k->new java.util.HashSet<>()).add(key);
+            reported.computeIfAbsent(n.id,k->new java.util.HashSet<>()).add(key);
+            if(!orders.containsKey(key))orders.put(key,new Order(n.id,best.id,0,0));
+            g.state.commit("DamageReported",n.id,best.id,damage.jurisdiction,0,Long.toString(key)+" (off-stage)");
+            return "told "+best.name+" of the damage at ("+damage.x+", "+damage.y+", "+damage.z+")";
+        }
+        return null;
     }
     public record Report(Damage damage,Npc recipient) {}
     /** (0.3.9) How many of the damages one knows of are weighed in one think. */
@@ -128,6 +178,20 @@ public final class Repairs {
         g.state.commit("DamageReported",witness.id,recipient.id,damage.jurisdiction,0,Long.toString(damage.key));
         return true;
     }
+    /**
+     * (0.4.5, gamefixes: broken glass was never reported) word sent rather than carried: when the one who mends it is
+     * off in the world (not in play) or the way to them will not be walked, the witness sends word - the same order made,
+     * the mender knowing of it - and the report is done.
+     */
+    public void sendWord(Npc witness, Damage damage, Npc recipient) {
+        if (!open.containsKey(damage.key)) return;
+        witness.damageReportTarget = 0;
+        known.computeIfAbsent(recipient.id, k -> new java.util.HashSet<>()).add(damage.key);
+        reported.computeIfAbsent(witness.id, k -> new java.util.HashSet<>()).add(damage.key);
+        if (trade(recipient, damage) && !orders.containsKey(damage.key)) orders.put(damage.key, new Order(witness.id, recipient.id, 0, 0));
+        g.state.commit("DamageReported", witness.id, recipient.id, damage.jurisdiction, 0, damage.key + " (word sent)");
+    }
+
     public boolean hasWork(Npc worker) {
         for(long key:known.getOrDefault(worker.id,java.util.Set.of())) {
             Damage damage=open.get(key);
@@ -213,14 +277,30 @@ public final class Repairs {
         return false;
     }
 
-    /** Where to stand to work on it: an open cell beside it at the floor, the nearest to the mender. */
+    /** (0.4.5) The spots a mender found no way to, per breakage: the next is looked for elsewhere. */
+    private final Map<Long, java.util.Set<Long>> triedSpots = new HashMap<>();
+    /** The spot it was making for will not be walked to: another, or the job given up for a while if none is left. */
+    public void tryOtherSpot(Npc n, Damage d) {
+        float[] at = spots.remove(d.key);
+        if (at != null) triedSpots.computeIfAbsent(d.key, k -> new java.util.HashSet<>()).add(((long) Math.floor(at[0]) << 32) ^ (long) Math.floor(at[1]) & 0xffffffffL);
+        if (standSpot(n, d) == null) { triedSpots.remove(d.key); abandon(n); }
+        n.legs = null; n.hasGoalPos = false; n.failStreak = 0; n.navPauseUntil = 0;
+    }
+
+    /** Where to stand to work on it: an open cell beside it at its floor (the window's own storey, inside or out), the nearest to the mender. */
     public float[] standSpot(Npc n, Damage d) {
         float[] fixed = spots.get(d.key);
         if (fixed != null) return fixed;
         float[] best = null; float nearest = Float.MAX_VALUE;
-        for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}}) {
+        java.util.Set<Long> tried = triedSpots.getOrDefault(d.key, java.util.Set.of());
+        for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}, {2, 0}, {-2, 0}, {0, 2}, {0, -2}}) {
             int x = d.x + o[0], z = d.z + o[1];
-            if (g.vox.solid(x, rpg.world.Ground.cell(x, z), z) || g.vox.solid(x, rpg.world.Ground.cell(x, z) + 1, z) || !g.vox.solid(x, rpg.world.Ground.cell(x, z) - 1, z)) continue;
+            if (tried.contains(((long) x << 32) ^ (long) z & 0xffffffffL)) continue;
+            // the floor under the breakage's storey (a window's sill is at most a few cells over its floor), else the ground
+            int floor = -1;
+            for (int y = d.y; y >= d.y - 3 && floor < 0; y--) if (g.vox.solid(x, y - 1, z) && !g.vox.solid(x, y, z) && !g.vox.solid(x, y + 1, z)) floor = y;
+            if (floor < 0) floor = rpg.world.Ground.cell(x, z);
+            if (g.vox.solid(x, floor, z) || g.vox.solid(x, floor + 1, z) || !g.vox.solid(x, floor - 1, z)) continue;
             // the outside of a wall first (a window is glazed from the street; indoors may be locked or out of the way)
             boolean roofed = false;
             for (int y = Ground.cell(x, z) + 2; y < Ground.cell(x, z) + 9 && !roofed; y++) roofed = g.vox.solid(x, y, z);

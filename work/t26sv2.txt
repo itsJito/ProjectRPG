@@ -1,0 +1,266 @@
+[1.485s][info][jfr,startup] Started recording 1. No limit specified, using maxsize=250MB as default.
+[1.485s][info][jfr,startup] 
+[1.485s][info][jfr,startup] Use jcmd 19748 JFR.dump name=1 to copy recording data to file.
+[4.092s][warning][os         ] Unable to resolve PDH index: (230)
+[4.092s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[5.293s][warning][os         ] Unable to resolve PDH index: (230)
+[5.293s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[6.406s][warning][os         ] Unable to resolve PDH index: (230)
+[6.406s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[7.555s][warning][os         ] Unable to resolve PDH index: (230)
+[7.555s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[8.633s][warning][os         ] Unable to resolve PDH index: (230)
+[8.634s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[9.713s][warning][os         ] Unable to resolve PDH index: (230)
+[9.713s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[10.800s][warning][os         ] Unable to resolve PDH index: (230)
+[10.800s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[11.885s][warning][os         ] Unable to resolve PDH index: (230)
+[11.885s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[12.982s][warning][os         ] Unable to resolve PDH index: (230)
+[12.982s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[14.066s][warning][os         ] Unable to resolve PDH index: (230)
+[14.066s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[14.153s][warning][os         ] Unable to resolve PDH index: (230)
+[14.153s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[15.263s][warning][os         ] Unable to resolve PDH index: (230)
+[15.263s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[16.341s][warning][os         ] Unable to resolve PDH index: (230)
+[16.341s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[17.434s][warning][os         ] Unable to resolve PDH index: (230)
+[17.434s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[18.515s][warning][os         ] Unable to resolve PDH index: (230)
+[18.515s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[19.596s][warning][os         ] Unable to resolve PDH index: (230)
+[19.596s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[20.690s][warning][os         ] Unable to resolve PDH index: (230)
+[20.690s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[21.791s][warning][os         ] Unable to resolve PDH index: (230)
+[21.791s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[22.883s][warning][os         ] Unable to resolve PDH index: (230)
+[22.883s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[23.987s][warning][os         ] Unable to resolve PDH index: (230)
+[23.988s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[25.070s][warning][os         ] Unable to resolve PDH index: (230)
+[25.070s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[25.200s][warning][os         ] Unable to resolve PDH index: (230)
+[25.200s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[26.301s][warning][os         ] Unable to resolve PDH index: (230)
+[26.302s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[27.391s][warning][os         ] Unable to resolve PDH index: (230)
+[27.391s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[28.482s][warning][os         ] Unable to resolve PDH index: (230)
+[28.482s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[29.560s][warning][os         ] Unable to resolve PDH index: (230)
+[29.560s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[30.648s][warning][os         ] Unable to resolve PDH index: (230)
+[30.648s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[31.744s][warning][os         ] Unable to resolve PDH index: (230)
+[31.744s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[32.824s][warning][os         ] Unable to resolve PDH index: (230)
+[32.824s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[33.911s][warning][os         ] Unable to resolve PDH index: (230)
+[33.911s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[34.992s][warning][os         ] Unable to resolve PDH index: (230)
+[34.992s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[36.086s][warning][os         ] Unable to resolve PDH index: (230)
+[36.086s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[36.167s][warning][os         ] Unable to resolve PDH index: (230)
+[36.167s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[37.259s][warning][os         ] Unable to resolve PDH index: (230)
+[37.259s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[38.362s][warning][os         ] Unable to resolve PDH index: (230)
+[38.362s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[39.449s][warning][os         ] Unable to resolve PDH index: (230)
+[39.449s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[40.544s][warning][os         ] Unable to resolve PDH index: (230)
+[40.544s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[41.643s][warning][os         ] Unable to resolve PDH index: (230)
+[41.643s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[42.766s][warning][os         ] Unable to resolve PDH index: (230)
+[42.766s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[43.860s][warning][os         ] Unable to resolve PDH index: (230)
+[43.860s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[44.953s][warning][os         ] Unable to resolve PDH index: (230)
+[44.953s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[46.037s][warning][os         ] Unable to resolve PDH index: (230)
+[46.037s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[47.128s][warning][os         ] Unable to resolve PDH index: (230)
+[47.128s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[47.211s][warning][os         ] Unable to resolve PDH index: (230)
+[47.211s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[48.304s][warning][os         ] Unable to resolve PDH index: (230)
+[48.304s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[49.387s][warning][os         ] Unable to resolve PDH index: (230)
+[49.387s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[50.466s][warning][os         ] Unable to resolve PDH index: (230)
+[50.467s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[51.559s][warning][os         ] Unable to resolve PDH index: (230)
+[51.559s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[52.638s][warning][os         ] Unable to resolve PDH index: (230)
+[52.638s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[53.726s][warning][os         ] Unable to resolve PDH index: (230)
+[53.727s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[54.812s][warning][os         ] Unable to resolve PDH index: (230)
+[54.812s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[55.896s][warning][os         ] Unable to resolve PDH index: (230)
+[55.896s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[56.969s][warning][os         ] Unable to resolve PDH index: (230)
+[56.969s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[58.074s][warning][os         ] Unable to resolve PDH index: (230)
+[58.074s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[58.151s][warning][os         ] Unable to resolve PDH index: (230)
+[58.151s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[59.253s][warning][os         ] Unable to resolve PDH index: (230)
+[59.253s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[60.335s][warning][os         ] Unable to resolve PDH index: (230)
+[60.335s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[61.413s][warning][os         ] Unable to resolve PDH index: (230)
+[61.413s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[62.504s][warning][os         ] Unable to resolve PDH index: (230)
+[62.504s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[63.594s][warning][os         ] Unable to resolve PDH index: (230)
+[63.594s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[64.692s][warning][os         ] Unable to resolve PDH index: (230)
+[64.692s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[65.780s][warning][os         ] Unable to resolve PDH index: (230)
+[65.780s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[66.859s][warning][os         ] Unable to resolve PDH index: (230)
+[66.859s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[67.945s][warning][os         ] Unable to resolve PDH index: (230)
+[67.945s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[69.026s][warning][os         ] Unable to resolve PDH index: (230)
+[69.026s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[69.107s][warning][os         ] Unable to resolve PDH index: (230)
+[69.107s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[70.219s][warning][os         ] Unable to resolve PDH index: (230)
+[70.219s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[71.311s][warning][os         ] Unable to resolve PDH index: (230)
+[71.311s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[72.387s][warning][os         ] Unable to resolve PDH index: (230)
+[72.387s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[73.470s][warning][os         ] Unable to resolve PDH index: (230)
+[73.470s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[74.557s][warning][os         ] Unable to resolve PDH index: (230)
+[74.557s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[75.645s][warning][os         ] Unable to resolve PDH index: (230)
+[75.645s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[76.722s][warning][os         ] Unable to resolve PDH index: (230)
+[76.722s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[77.858s][warning][os         ] Unable to resolve PDH index: (230)
+[77.858s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[78.945s][warning][os         ] Unable to resolve PDH index: (230)
+[78.945s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[80.024s][warning][os         ] Unable to resolve PDH index: (230)
+[80.024s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[80.107s][warning][os         ] Unable to resolve PDH index: (230)
+[80.107s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[81.218s][warning][os         ] Unable to resolve PDH index: (230)
+[81.218s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[82.323s][warning][os         ] Unable to resolve PDH index: (230)
+[82.323s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[83.407s][warning][os         ] Unable to resolve PDH index: (230)
+[83.407s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[84.485s][warning][os         ] Unable to resolve PDH index: (230)
+[84.485s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[85.575s][warning][os         ] Unable to resolve PDH index: (230)
+[85.575s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[86.652s][warning][os         ] Unable to resolve PDH index: (230)
+[86.652s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[87.738s][warning][os         ] Unable to resolve PDH index: (230)
+[87.738s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[88.827s][warning][os         ] Unable to resolve PDH index: (230)
+[88.827s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[89.902s][warning][os         ] Unable to resolve PDH index: (230)
+[89.902s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[90.992s][warning][os         ] Unable to resolve PDH index: (230)
+[90.992s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[91.071s][warning][os         ] Unable to resolve PDH index: (230)
+[91.071s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[92.168s][warning][os         ] Unable to resolve PDH index: (230)
+[92.168s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[93.255s][warning][os         ] Unable to resolve PDH index: (230)
+[93.255s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[94.340s][warning][os         ] Unable to resolve PDH index: (230)
+[94.340s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[95.420s][warning][os         ] Unable to resolve PDH index: (230)
+[95.420s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[96.517s][warning][os         ] Unable to resolve PDH index: (230)
+[96.517s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[97.595s][warning][os         ] Unable to resolve PDH index: (230)
+[97.595s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[98.681s][warning][os         ] Unable to resolve PDH index: (230)
+[98.681s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[99.771s][warning][os         ] Unable to resolve PDH index: (230)
+[99.771s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[100.847s][warning][os         ] Unable to resolve PDH index: (230)
+[100.847s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[101.927s][warning][os         ] Unable to resolve PDH index: (230)
+[101.927s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[102.008s][warning][os         ] Unable to resolve PDH index: (230)
+[102.008s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[103.102s][warning][os         ] Unable to resolve PDH index: (230)
+[103.102s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[104.199s][warning][os         ] Unable to resolve PDH index: (230)
+[104.199s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[105.278s][warning][os         ] Unable to resolve PDH index: (230)
+[105.278s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[106.362s][warning][os         ] Unable to resolve PDH index: (230)
+[106.362s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[107.440s][warning][os         ] Unable to resolve PDH index: (230)
+[107.440s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[108.535s][warning][os         ] Unable to resolve PDH index: (230)
+[108.535s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[109.620s][warning][os         ] Unable to resolve PDH index: (230)
+[109.620s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[110.706s][warning][os         ] Unable to resolve PDH index: (230)
+[110.706s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[111.792s][warning][os         ] Unable to resolve PDH index: (230)
+[111.792s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[112.882s][warning][os         ] Unable to resolve PDH index: (230)
+[112.882s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[112.960s][warning][os         ] Unable to resolve PDH index: (230)
+[112.960s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[114.070s][warning][os         ] Unable to resolve PDH index: (230)
+[114.070s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[115.158s][warning][os         ] Unable to resolve PDH index: (230)
+[115.158s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[116.244s][warning][os         ] Unable to resolve PDH index: (230)
+[116.244s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[117.325s][warning][os         ] Unable to resolve PDH index: (230)
+[117.325s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[118.409s][warning][os         ] Unable to resolve PDH index: (230)
+[118.409s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[119.488s][warning][os         ] Unable to resolve PDH index: (230)
+[119.488s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[120.576s][warning][os         ] Unable to resolve PDH index: (230)
+[120.577s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[121.652s][warning][os         ] Unable to resolve PDH index: (230)
+[121.652s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[122.741s][warning][os         ] Unable to resolve PDH index: (230)
+[122.741s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[123.822s][warning][os         ] Unable to resolve PDH index: (230)
+[123.822s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[123.896s][warning][os         ] Unable to resolve PDH index: (230)
+[123.896s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[124.980s][warning][os         ] Unable to resolve PDH index: (230)
+[124.980s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[126.050s][warning][os         ] Unable to resolve PDH index: (230)
+[126.050s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[127.130s][warning][os         ] Unable to resolve PDH index: (230)
+[127.130s][warning][os         ] Please check the registry if this performance object/counter is disabled
+[128.246s][warning][os         ] Unable to resolve PDH index: (230)
+[128.246s][warning][os         ] Please check the registry if this performance object/counter is disabled
+
+1 test completed, 1 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 2m 12s

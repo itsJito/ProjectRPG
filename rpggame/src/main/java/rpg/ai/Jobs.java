@@ -41,16 +41,49 @@ final class Jobs {
 
         if(n.job==null)n.job=network(n.profession);
         if(n.job.tick(n)==FAILURE) {
+            n.jobFailAt=g.time;
+            // (0.4.2, gamefixes: fishers still did not fish) a fisher with no water to work just now (the tide out, a
+            // storm, the spot taken) tends their gear on the bank of the nearest water their gear fits, facing it
+            if(n.profession.family==Npc.Role.FISHERMAN && byTheWater(n))return;
             var own=g.econ.shopOf(n);
             if(own!=null && g.econ.rack(own) && !own.stock.isEmpty()) {
                 brain.goTo(n,own.counterX,own.counterZ,false,1.2f);
                 n.lastOutcome=n.profession.title+": minding the rack ("+own.stock.stacks().size()+" pieces for sale)";
                 return;
             }
-            g.ai.desire(n,AiSystem.A_HOLD); n.lastOutcome="No eligible work for "+n.profession.title+"; waiting for supplies or a suitable site";
+            // (0.4.4, gamefixes: NPCs stood about doing nothing) short of supplies, they keep their workplace: to their post,
+            // then about it - to a station, a chest, back - tidying and making ready, until there is work again
+            tendWorkplace(n);
         }
         else n.lastOutcome=n.profession.title+": "+n.job.active();
     }
+    /** How long (game minutes) an Order Knight stands by after a report before the next point of the round. */
+    static final double KNIGHT_ROUND_REST = rpg.Tuning.f("ai.knightRoundRest", 40f);
+
+    /** (0.4.6) How long (game minutes) a worker keeping their workplace stays at each of its spots. */
+    static final double TEND_DWELL = rpg.Tuning.f("ai.tendDwell", 15f);
+    /** (0.4.6) How long (s) after a step of the trade fails the worker stays where they are before going about the workplace. */
+    static final double TEND_SETTLE = rpg.Tuning.f("ai.tendHold", 3f);
+
+    /** Keeping a workplace while there is no work: their post, then its stations and chests in turn, a while at each. */
+    private void tendWorkplace(Npc n) {
+        // (0.4.6, gamefixes: AI spun in circles) a step of the trade that has just failed is tried again from where the
+        // worker stands: walking off toward the workplace's next spot and back each time sent them round on the spot
+        if (g.time - n.jobFailAt < TEND_SETTLE) { g.ai.desire(n, AiSystem.A_HOLD); n.lastOutcome = n.profession.title + ": tidying the workplace while short of supplies"; return; }
+        var a = rpg.world.shadowveil.Census.of(n.id);
+        var site = a == null || a.workId() == null ? null : rpg.world.shadowveil.Rooms.site(a.workId());
+        java.util.List<float[]> spots = new java.util.ArrayList<>();
+        spots.add(new float[]{n.postX, n.postZ});
+        if (site != null) {
+            for (var st : site.stations) spots.add(new float[]{st.x, st.z});
+            for (var c : site.chests) spots.add(new float[]{c.x, c.z});
+        }
+        int k = (int) Math.floorMod((long) (g.state.minutes / TEND_DWELL) + n.id, spots.size());
+        float[] at = spots.get(k);
+        if (brain.goTo(n, at[0], at[1], false, 1.3f)) g.ai.desire(n, AiSystem.A_IDLE);
+        n.lastOutcome = n.profession.title + ": tidying the workplace while short of supplies";
+    }
+
     private void net(Npc n) {
         ItemDef haul=batch(n);
         if(haul!=null) {if(n.job==null)n.job=new TaskNetwork<>(List.of(new TaskNetwork.Method<Npc>("sell the lake catch",person->person.count(haul)>0,person->sell(person,haul))));n.job.tick(n);return;}
@@ -59,7 +92,10 @@ final class Jobs {
         if(out!=null) {
             if(!(g.objects.get(out.source) instanceof Node site)){haul(n,out);return;}
             boolean late=lateForNets();
-            if(!late && !out.due(g)){brain.goTo(n,n.postX,n.postZ,false,1);n.lastOutcome="net soaking; "+out.contents.count(site.product)+" in it so far";return;}
+            // (0.4.2, gamefixes: Elowen stood at her post staring at the player while her net soaked) she keeps watch on the
+            // net from the bank beside it, facing it
+            if(!late && !out.due(g)){float[] watch=g.ai.standSpot(n,site);if(brain.goTo(n,watch[0],watch[1],false,1.2f))n.wantYaw=(float)Math.atan2(-(out.x-n.x),-(out.z-n.z));
+                n.lastOutcome="watching the net from the bank; "+out.contents.count(site.product)+" in it so far";return;}
             // the net is out on the water: hauled in from the bank, within arm's and rope's reach - catch, net and all
             float[] bank=g.ai.standSpot(n,site);
             if(brain.goTo(n,bank[0],bank[1],false,0.8f) && Math.hypot(n.x-out.x,n.z-out.z)<3.5f) haul(n,out);
@@ -125,9 +161,9 @@ final class Jobs {
             return true;
         }
         // nobody buys it: the bank
-        float[] at=g.bank.customerSpot();
+        float[] at=g.bank.customerSpot(n);
         if(!brain.goTo(n,at[0],at[1],false,1.2f)){n.lastOutcome=n.profession.title+": pack full and no buyer; taking "+goods.name.toLowerCase()+" to the bank";return true;}
-        if(!g.bank.open()){g.ai.desire(n,AiSystem.A_HOLD);n.lastOutcome=n.profession.title+": waiting at the bank counter to deposit "+goods.name.toLowerCase();return true;}
+        if(!g.bank.open(n)){g.ai.desire(n,AiSystem.A_HOLD);n.lastOutcome=n.profession.title+": waiting at the bank counter to deposit "+goods.name.toLowerCase();return true;}
         int banked=g.bank.depositGoods(n,goods);
         if(banked<=0){n.unloading=false;n.lastOutcome=n.profession.title+": the bank could not take the "+goods.name.toLowerCase();return false;}
         n.lastOutcome=n.profession.title+": banked "+banked+" "+goods.name.toLowerCase();
@@ -138,17 +174,48 @@ final class Jobs {
         return item.def!=Items.COINS && item.def.toolSkill==null && !item.def.equippable() && item.def!=Items.FISHING_NET;
     }
 
+    /**
+     * (0.4.6, gamefixes: AI still spun in circles) how long (s) a calling's step that failed - a purchase the counter
+     * refused, an order the station would not take - is set aside before it is tried again. A tailor whose purchase failed
+     * turned for her workplace, chose the purchase again the next moment, turned back for the counter, and so round and
+     * round on the spot; now the failed step rests and the rest of the day goes on.
+     */
+    static final double METHOD_REST = rpg.Tuning.f("ai.jobMethodRest", 45f);
+    /** (0.4.6) How many failures in a row of a calling's step set it aside. */
+    static final int METHOD_FAILS = rpg.Tuning.i("ai.jobMethodFails", 3);
+
+    /** A calling's step that rests after it fails (see {@link #METHOD_REST}). */
+    private TaskNetwork.Method<Npc> step(String name, java.util.function.Predicate<Npc> when, java.util.function.Function<Npc, Behavior.Node<Npc>> how) {
+        return new TaskNetwork.Method<>(name, n -> n.methodRest.getOrDefault(name, -1.0) <= g.time && when.test(n), n -> {
+            Behavior.Node<Npc> inner = how.apply(n);
+            return new Behavior.Node<>() {
+                @Override public Behavior.Status tick(Npc p) {
+                    Behavior.Status st = inner.tick(p);
+                    // a step that fails again and again (not once - a swing refused mid-blow is tried again at once) rests
+                    // (failures counted at most one a half second: a refusal repeated over a few frames is one failure)
+                    if (st == FAILURE && g.time - p.methodFailAt.getOrDefault(name, -9.0) >= 0.5) {
+                        p.methodFailAt.put(name, g.time);
+                        if (p.methodFails.merge(name, 1, Integer::sum) >= METHOD_FAILS) { p.methodRest.put(name, g.time + METHOD_REST); p.methodFails.remove(name); }
+                    }
+                    else if (st == SUCCESS) p.methodFails.remove(name);
+                    return st;
+                }
+                @Override public void reset() { inner.reset(); }
+            };
+        });
+    }
+
     private TaskNetwork<Npc> network(Profession occupation) {
         return new TaskNetwork<>(List.of(
-            new TaskNetwork.Method<>("deliver a real batch", n->n.profession==occupation && batch(n)!=null, n->sell(n,batch(n))),
-            new TaskNetwork.Method<>("set wares out on the rack", n->n.profession==occupation && shelve(n)!=null, n->rack(n,shelve(n))),
-            new TaskNetwork.Method<>("make the selected order", n->n.profession==occupation && recipe(n)!=null, n->craft(n,recipe(n))),
-            new TaskNetwork.Method<>("gather at a suitable site", n->n.profession==occupation && site(n)!=null, n->gather(n,site(n))),
+            step("deliver a real batch", n->n.profession==occupation && batch(n)!=null, n->sell(n,batch(n))),
+            step("set wares out on the rack", n->n.profession==occupation && shelve(n)!=null, n->rack(n,shelve(n))),
+            step("make the selected order", n->n.profession==occupation && recipe(n)!=null, n->craft(n,recipe(n))),
+            step("gather at a suitable site", n->n.profession==occupation && site(n)!=null, n->gather(n,site(n))),
             // (0.3.5) the carder's own raw stuff: the cotton field by the cottage, and the farm's flock (the fleece bought off its keeper)
-            new TaskNetwork.Method<>("tend the cotton field", n->n.profession==occupation && occupation==Profession.CARDER && cottonPlot(n)!=null, n->tend(n,cottonPlot(n))),
-            new TaskNetwork.Method<>("shear a sheep", n->n.profession==occupation && occupation==Profession.CARDER && n.count(Items.WOOL)<1 && n.count(Items.COTTON)<1 && sheep(n)!=null, n->shear(n,sheep(n))),
-            new TaskNetwork.Method<>("buy missing inputs", n->n.profession==occupation && purchase(n)!=null, n->buy(n,purchase(n))),
-            new TaskNetwork.Method<>("fetch supplies from the producer", n->n.profession==occupation && supplier(n)!=null, n->fetch(n,supplier(n)))
+            step("tend the cotton field", n->n.profession==occupation && occupation==Profession.CARDER && cottonPlot(n)!=null, n->tend(n,cottonPlot(n))),
+            step("shear a sheep", n->n.profession==occupation && occupation==Profession.CARDER && n.count(Items.WOOL)<1 && n.count(Items.COTTON)<1 && sheep(n)!=null, n->shear(n,sheep(n))),
+            step("buy missing inputs", n->n.profession==occupation && purchase(n)!=null, n->buy(n,purchase(n))),
+            step("fetch supplies from the producer", n->n.profession==occupation && supplier(n)!=null, n->fetch(n,supplier(n)))
         ));
     }
     /** (0.3.5) A plot of the carder's cotton field that wants them: ripe to pick, or bare with seed in hand to sow. */
@@ -273,6 +340,9 @@ final class Jobs {
         return true;
     }
     private Node site(Npc n) {
+        // (0.4.3, gamefixes: woodcutters never cut on ShadowVeil - its trees were left out of every search) a woodcutting
+        // calling looks over the trees about its workplace only, nearest and least worked first
+        if(n.profession.skill==rpg.skill.Skill.WOODCUTTING) return tree(n);
         Node best=null;float score=Float.MAX_VALUE;
         for(Node node:g.objects.nodes) {
             // (0.4.0, optimisation) the cheap question first: ShadowVeil's thousands of trees are never a miner's or a fisher's site
@@ -285,14 +355,72 @@ final class Jobs {
             if(!ZonePolicy.withinReach(n,node.x,node.z))continue;
             // (0.2.9) others already at a deposit or a spot send this worker to the next one, or another side of it
             int others=g.ai.workersOn(node,n);
-            if(node.kind==Node.Kind.FISH && others>0 || others>=3)continue;
+            // (0.4.2) a river's spot is one angler's; a lake's shore, a quay or a beach holds two side by side
+            if(node.kind==Node.Kind.FISH && others>=(node.waters==Node.Waters.RIVER?1:2) || others>=3)continue;
             float distance=n.distTo(node.x,node.z)+others*6;
             if(n.profession==Profession.GEM_PROSPECTOR)distance-=Math.min(4,node.stock)*0.4f; // survey promising, undepleted deposits
             if(distance<score){score=distance;best=node;}
         }
         return best;
     }
+    private Node tree(Npc n) {
+        float px=n.postX!=0?n.postX:n.x,pz=n.postZ!=0?n.postZ:n.z;
+        Node best=null;float score=Float.MAX_VALUE;
+        for(var o:g.objects.near(px,pz,rpg.Tuning.f("jobs.treeReach",48f))) {
+            if(!(o instanceof Node node) || node.kind!=Node.Kind.TREE || node.removed || node.depleted() || n.skills.level(node.skill)<node.level || !AiSystem.carriesTool(n,node) || !safe(node,n))continue;
+            int others=g.ai.workersOn(node,n);
+            if(others>=1)continue;
+            float d=(float)Math.hypot(node.x-px,node.z-pz);
+            if(d<score){score=d;best=node;}
+        }
+        return best;
+    }
+
+    /**
+     * (0.4.2) A fisher's own water if there is one in reach (a river fisher's river), else any water their gear fits
+     * (a river fisher posted by the harbour rod-fishes from the quay rather than standing idle). Never the open sea's
+     * deep water without the deep-water fisher's calling.
+     */
     private boolean fishing(Npc n,Node node) {
+        if(speciality(n,node))return true;
+        if(node.kind!=Node.Kind.FISH || node.needs==null || !n.has(node.needs,1) && n.main()!=node.needs || node.waters==Node.Waters.OFFSHORE)return false;
+        return !ownWaterInReach(n);
+    }
+    /** Whether any water of the fisher's own calling lies within their reach (cached a minute). */
+    private boolean ownWaterInReach(Npc n) {
+        Double until=ownWaterUntil.get(n.id);
+        if(until!=null && until>g.time)return ownWater.getOrDefault(n.id,false);
+        boolean any=false;
+        for(Node node:g.objects.nodes)if(node.kind==Node.Kind.FISH && speciality(n,node) && ZonePolicy.withinReach(n,node.x,node.z)){any=true;break;}
+        ownWater.put(n.id,any);ownWaterUntil.put(n.id,g.time+60);
+        return any;
+    }
+    private final java.util.Map<Long,Boolean> ownWater=new java.util.HashMap<>();
+    private final java.util.Map<Long,Double> ownWaterUntil=new java.util.HashMap<>();
+    /** Gear on the bank: the stand spot of the nearest fishing water in reach their gear fits, facing the water. */
+    private boolean byTheWater(Npc n) {
+        Node best=null;float bd=Float.MAX_VALUE;
+        for(Node node:g.objects.nodes) {
+            if(node.kind!=Node.Kind.FISH || node.needs==null || !n.has(node.needs,1) && n.main()!=node.needs || !ZonePolicy.withinReach(n,node.x,node.z))continue;
+            float d=n.distTo(node.x,node.z);if(d<bd){bd=d;best=node;}
+        }
+        if(best==null)return false;
+        float[] bank=g.ai.standSpot(n,best);
+        if(brain.goTo(n,bank[0],bank[1],false,1.2f)) {
+            n.wantYaw=(float)Math.atan2(-(best.x-n.x),-(best.z-n.z));
+            g.ai.desire(n,AiSystem.A_HOLD);
+        }
+        float tide=(float)Math.sin(g.state.minutes/180*Math.PI);
+        n.lastOutcome=n.profession.title+": mending gear on the bank of "+water(best.name)
+                +(g.timeSystem.weather.rain>0.75f?" (too rough to fish)":tide<-0.2f && n.profession==Profession.COASTAL_FISHERMAN?" (the tide is out)":"");
+        return true;
+    }
+    /** "the Mere" from "Fishing spot (rod, the Mere)"; the name itself otherwise. */
+    private static String water(String spot) {
+        int comma=spot.indexOf(", "),close=spot.lastIndexOf(')');
+        return comma>0 && close>comma ? spot.substring(comma+2,close) : spot;
+    }
+    private boolean speciality(Npc n,Node node) {
         if(node.kind!=Node.Kind.FISH || node.needs==null || !n.has(node.needs,1) && n.main()!=node.needs)return false;
         float tide=(float)Math.sin(g.state.minutes/180*Math.PI);
         boolean severe=g.timeSystem.weather.rain>0.75f;
@@ -425,11 +553,17 @@ final class Jobs {
                     n.lastOutcome="inspecting the commander's assigned site";
                 } else if(n.dutyPhase==1) {
                     if(brain.goTo(n, principal.x, principal.y, principal.z,false,2)) {
-                        n.dutyPhase=2;g.ai.say(n,"The assigned site has been inspected.");
+                        n.dutyPhase=2;n.dutyDoneAt=g.state.minutes;g.ai.say(n,"The assigned site has been inspected.");
                         g.state.commit("KnightDutyReported",n.id,principal.id,n.homeJurisdiction,0,"inspected "+n.dutyX+","+n.dutyZ);
                     }
                     n.lastOutcome="returning the inspection report to "+principal.name;
-                } else {brain.goTo(n, principal.x, principal.y, principal.z,false,3);n.lastOutcome="reported; awaiting a new institutional assignment";}
+                } else if(g.state.minutes-n.dutyDoneAt>=KNIGHT_ROUND_REST) {
+                    // (0.4.4, gamefixes: NPCs stood about doing nothing) the order's next assignment: the next point of the
+                    // kingdom's round, inspected and reported in turn - a knight's day is the round of the realm's ways
+                    float[][] round=rpg.world.WorldMap.shadowveil()?rpg.world.shadowveil.ShadowVeil.patrol(n.homeJurisdiction):null;
+                    if(round!=null && round.length>0){float[] next=round[Math.floorMod((int)(n.id%7)+ ++n.dutyRounds,round.length)];n.dutyX=next[0];n.dutyZ=next[1];}
+                    n.dutyPhase=0;n.lastOutcome="taking up the next inspection of the round";
+                } else {brain.goTo(n, principal.x, principal.y, principal.z,false,3);n.lastOutcome="reported; standing by "+principal.name+" for the next assignment";}
                 return;
             }
             if(n.profession==Profession.HOUSEHOLD_KNIGHT && principal instanceof Npc patron) {
@@ -470,8 +604,14 @@ final class Jobs {
         float side=(n.patrolIndex&1)==0?1:-1, reach=beat(n);
         boolean alongX=reach>0;
         float bx=n.dutyX+(alongX?side*reach:0), bz=n.dutyZ+(alongX?0:side*-reach);
-        if(brain.goTo(n,bx,bz,false,1)) { n.patrolIndex++;n.lastOutcome="inspected the assigned border"; }
+        // (0.4.6, gamefixes: AI spun in circles) at each end of the beat he stands a while looking out along the border
+        // before turning back: turning on his heel the moment he arrived, a few paces from the other end, had him wheel
+        // round and round on the spot
+        if(g.time<n.dwellUntil){g.ai.desire(n,AiSystem.A_HOLD);n.wantYaw=(float)Math.atan2(-(bx-n.dutyX),-(bz-n.dutyZ));n.lastOutcome="watching the border";return;}
+        if(brain.goTo(n,bx,bz,false,1)) { n.patrolIndex++;n.dwellUntil=g.time+BEAT_DWELL;n.lastOutcome="inspected the assigned border"; }
     }
+    /** (0.4.6) How long (s) a border knight stands at each end of his beat. */
+    static final double BEAT_DWELL = rpg.Tuning.f("ai.beatDwell", 12f);
     /** How far the border beat runs from the post: positive along x, negative along z, whichever is clear for longer (at most 5 m). */
     private float beat(Npc n) {
         float y=rpg.world.Ground.at(n.dutyX,n.dutyZ)+1;

@@ -1,0 +1,114 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+
+> Task :theastrattoengine:buildNative
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :theastrattoengine:jar
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 20.38s ({regions=886, overlays=500, variants=669, scarp=54, coast=647, erosion=359, peaks=47, lakes=66, isles=4, rivers=824, wadis=13, ground=22, roads=715, causeways=4, architecture=1095, pitsFilled=1309, pits=464, banks=81, clamp=15, cliffs=53, columns=1115, falls=22, raise=11737, trees=311, outcrops=0, ways=621}), made and lit in 2.58s
+    [water] flow field grown in 1046 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [spin] Alaric: [-2.95 265.5,945.8 SLEEP/go to goal ] [-2.78 265.5,945.7 SLEEP/go to goal ] [-2.13 265.5,945.4 SLEEP/go to goal ] [-1.48 265.4,945.2 SLEEP/go to goal ] [-0.83 265.3,945.0 SLEEP/go to goal ] [-0.18 265.3,944.8 SLEEP/go to goal ] [0.07 265.3,944.6 SLEEP/go to goal ] [0.39 265.2,944.5 SLEEP/go to goal ] [0.57 265.0,944.3 SLEEP/go to goal ] [0.64 264.9,944.1 SLEEP/go to goal ] [0.68 264.7,943.9 SLEEP/go to goal ] [0.68 264.5,943.7 SLEEP/go to goal ] [0.84 264.3,943.6 SLEEP/go to goal ] [0.96 264.1,943.5 SLEEP/go to goal ] [1.00 263.9,943.3 SLEEP/go to goal ] [1.00 263.7,943.2 SOCIALIZE/go to goal ] [1.03 263.6,943.2 SOCIALIZE/go to goal ] [1.13 263.6,943.2 SOCIALIZE/go to goal ] [1.35 263.8,943.3 SOCIALIZE/go to goal ] [2.00 264.0,943.4 SOCIALIZE/go to goal ] [2.65 264.2,943.6 SOCIALIZE/go to goal ] [-2.99 264.4,943.7 SOCIALIZE/go to goal ] [-2.34 264.6,943.9 SOCIALIZE/go to goal ] [-2.41 264.7,944.1 SOCIALIZE/go to goal ] [-2.54 264.8,944.3 SOCIALIZE/go to goal ] [-2.57 264.9,944.5 SOCIALIZE/go to goal ] [-2.60 265.0,944.7 SOCIALIZE/go to goal ] [-2.29 265.2,944.7 SOCIALIZE/go to goal ] [-1.99 265.2,944.7 SOCIALIZE/go to goal ] [-1.83 265.3,944.7 SOCIALIZE/go to goal ] [-2.28 265.3,944.8 SOCIALIZE/go to goal ] [-2.89 265.4,945.0 SOCIALIZE/go to goal ] [-3.00 265.4,945.2 SOCIALIZE/go to goal ] [-3.03 265.4,945.5 SOCIALIZE/go to goal ] [-3.03 265.4,945.7 SOCIALIZE/go to goal ] [-3.03 265.5,945.9 SOCIALIZE/go to goal ] [-2.64 265.6,946.0 SOCIALIZE/go to goal ] [-2.33 265.6,946.0 SOCIALIZE/go to goal ] [-2.33 265.6,946.0 SOCIALIZE/go to goal ] [-2.33 265.6,946.0 SOCIALIZE/go to goal ] [-2.33 265.5,946.0 SOCIALIZE/go to goal ] [-2.76 265.5,946.0 SOCIALIZE/go to goal ] [2.87 265.4,946.0 SOCIALIZE/go to goal ] [2.22 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ] [1.68 265.3,945.9 SOCIALIZE/go to goal ]
+          [stuck] Sir Andrew WORK at (265.50, 41.11, 963.50) -> (265.5, 964.5), go to goal, v (0.00, 0.00) ground false route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [life] stop 292,976 done (30 people seen so far)
+    [life] stop 638,932 done (34 people seen so far)
+    [life] stop 167,797 done (54 people seen so far)
+    [life] stop 639,1071 done (56 people seen so far)
+    [life] stop 945,915 done (91 people seen so far)
+    [life] stop 405,820 done (95 people seen so far)
+    [life] stop 207,653 done (113 people seen so far)
+    [life] stop 619,641 done (114 people seen so far)
+    [life] stop 246,484 done (118 people seen so far)
+    [life] stop 599,157 done (148 people seen so far)
+    [life] stop 426,458 done (164 people seen so far)
+    [life] stop 873,433 done (181 people seen so far)
+    [life] stop 925,139 done (183 people seen so far)
+    [life] stop 912,602 done (186 people seen so far)
+    [life] stop 263,334 done (188 people seen so far)
+          [crime] ASSAULT by Garmund against world life at (876.3, 739.8), t 476.8
+          [crime] ASSAULT by Wenna against world life at (877.5, 739.7), t 477.1
+          [crime] ASSAULT by Vark against world life at (877.1, 739.3), t 477.3
+          [crime] ASSAULT by Grisel against world life at (877.7, 740.4), t 477.8
+          [crime] ASSAULT by Hurk against world life at (877.4, 740.8), t 477.9
+          [crime] ASSAULT by Rask against world life at (875.5, 739.5), t 478.0
+          [crime] ASSAULT by Hullen against world life at (875.2, 739.2), t 478.7
+          [stuck] Hullen FIGHT at (875.21, 57.00, 739.22) -> (875.8, 739.7), combat move, v (0.00, 0.00) ground true route 0 facts [0.08, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 1.0, 0.02]
+          [crime] ASSAULT by Garmund against world life at (876.8, 739.8), t 487.5
+          [crime] ASSAULT by Wenna against world life at (875.3, 739.3), t 487.7
+          [crime] ASSAULT by Hurk against world life at (877.6, 739.3), t 489.5
+          [crime] ASSAULT by Vark against world life at (875.7, 741.7), t 489.6
+          [crime] ASSAULT by Grisel against world life at (876.5, 741.9), t 490.6
+          [crime] ASSAULT by Sigrun against world life at (871.2, 738.9), t 492.3
+          [crime] ASSAULT by Rask against world life at (876.5, 741.0), t 495.3
+          [crime] ASSAULT by Garmund against world life at (876.4, 739.4), t 498.2
+          [crime] ASSAULT by Vark against world life at (875.3, 739.3), t 500.3
+          [crime] ASSAULT by Wenna against world life at (877.6, 739.4), t 500.5
+          [crime] ASSAULT by Hurk against world life at (876.6, 739.1), t 502.2
+          [crime] ASSAULT by Grisel against world life at (876.5, 741.8), t 503.6
+          [crime] ASSAULT by Rask against world life at (875.2, 741.2), t 505.4
+    [life] stop 877,740 done (196 people seen so far)
+    [life] stop 816,1033 done (199 people seen so far)
+    [life] stop 498,82 done (208 people seen so far)
+    [life] stop 480,217 done (218 people seen so far)
+    [life] stop 224,179 done (221 people seen so far)
+    [life] stop 1032,439 done (222 people seen so far)
+    [life] stop 768,529 done (223 people seen so far)
+
+    [life] 22 stops of 1900 frames; 223 people seen
+      Alaric           PRIEST       seen   297 spins   1 blocked     0 still     0
+          spun at (265.3,39.0,945.9) SOCIALIZE: 
+      Astrid           UNDERTAKER   seen   297 spins   0 blocked     0 still    36
+          last (375.2,60.0,422.2) PRAY: on the way to prayers
+      never in play: Merek MINER home (140,612)
+      never in play: Orrin CRAFTSMAN home (417,702)
+    [life] 2 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 383.978 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 7m 2s
+9 actionable tasks: 5 executed, 4 up-to-date

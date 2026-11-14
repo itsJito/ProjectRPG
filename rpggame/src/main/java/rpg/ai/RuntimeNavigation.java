@@ -153,12 +153,25 @@ public final class RuntimeNavigation {
      * reach: on the devmap a search never came near it; across 4,489 chunks an unreachable goal searched (and built) the
      * whole world in one frame - thirteen seconds once, in a fight looking for high ground.
      */
-    private static final int CORRIDOR_ZONES = rpg.Tuning.i("nav.corridorZones", 1200), CORRIDOR_MARGIN = rpg.Tuning.i("nav.corridorMargin", 64);
+    private static final int CORRIDOR_ZONES = rpg.Tuning.i("nav.corridorZones", 1200), CORRIDOR_MARGIN = rpg.Tuning.i("nav.corridorMargin", 64), CORRIDOR_MIN_MARGIN = rpg.Tuning.i("nav.corridorMinMargin", 20);
+    /**
+     * (0.4.4, gamefixes: improved NPC pathfinding) the corridor about a trip's ends, close first; if no way is found that
+     * close, once more with the full margin - the only stair up a palace can stand across its court from both ends of a
+     * short trip (the people upstairs could not be reached from below it, though the way was there).
+     */
     private Set<Integer> corridor(int start,int goal,Predicate<Door> permission,boolean climb,RouteBook book,double now){
+        int trip=Math.max(Math.abs(x(start)-x(goal)),Math.abs(z(start)-z(goal))),margin=Math.max(CORRIDOR_MIN_MARGIN,Math.min(CORRIDOR_MARGIN,trip));
+        Set<Integer> found=corridor(start,goal,permission,climb,book,now,margin);
+        if(found==null && margin<CORRIDOR_MARGIN)found=corridor(start,goal,permission,climb,book,now,CORRIDOR_MARGIN);
+        return found;
+    }
+    private Set<Integer> corridor(int start,int goal,Predicate<Door> permission,boolean climb,RouteBook book,double now,int margin){
         int from=region(start),to=region(goal),opened=0;
         // the search keeps to a box about the two ends (a way that wanders more than four chunks wide of the straight line
         // is not a way anyone takes, and an unreachable goal is given up without building the world round it)
-        int bx0=Math.min(x(start),x(goal))-CORRIDOR_MARGIN,bx1=Math.max(x(start),x(goal))+CORRIDOR_MARGIN,bz0=Math.min(z(start),z(goal))-CORRIDOR_MARGIN,bz1=Math.max(z(start),z(goal))+CORRIDOR_MARGIN;Map<Integer,Integer> previous=new HashMap<>();Map<Integer,Float> costs=new HashMap<>();
+        // (0.4.3, gamefixes: the stutter after loading in - a goblin's three-metre stroll mapped a box of chunks 128 cells
+        // across, 190 ms) the box's margin grows with the trip: a short way is looked for close about its ends
+        int bx0=Math.min(x(start),x(goal))-margin,bx1=Math.max(x(start),x(goal))+margin,bz0=Math.min(z(start),z(goal))-margin,bz1=Math.max(z(start),z(goal))+margin;Map<Integer,Integer> previous=new HashMap<>();Map<Integer,Float> costs=new HashMap<>();
         var queue=new PriorityQueue<Visit>(Comparator.comparingDouble(Visit::estimate).thenComparingInt(Visit::cell));
         costs.put(from,0f);queue.add(new Visit(from,0,0));
         while(!queue.isEmpty()){
@@ -189,8 +202,11 @@ public final class RuntimeNavigation {
         Door door=doors.get(((long)x<<32)|(z&0xffffffffL));return door==null || permission.test(door);
     }
     private int step(int x,int y,int z,boolean climb,boolean raw) {
+        // (0.4.6) a drop is stepped off at the body's own height: head room there first (the engine's search agrees)
+        boolean lean=!solid(x,y,z) && !solid(x,y+1,z);
         for(int dy:new int[]{0,1,-1,-2,-3}) {
             int h=y+dy;
+            if(dy<0 && !lean)break;
             if((raw?surface(x,h,z):exists(x,h,z)) && (climb || !ladder(x,h,z) && !ladder(x,h-1,z)))return key(x,h,z);
             if(dy<0 && solid(x,h,z))break;
         }
@@ -211,6 +227,13 @@ public final class RuntimeNavigation {
     public void spent(long tick) { if (tick != budgetTick) { budgetTick = tick; spentWork = 0; } spentWork += work() - workAt; }
     /** null means no verified route, never a successful empty/partial path. */
     public int[] route(float sx,float sy,float sz,float tx,float ty,float tz,Predicate<Door> permission,boolean climb,long person,RouteBook book,double now) {
+        return route(sx,sy,sz,tx,ty,tz,permission,climb,person,book,now,false);
+    }
+    /**
+     * (0.4.6) fine: the whole way cell by cell, near or not, its turns and changes of level its legs - for a body whose
+     * own steering could not find the short way (the trip handed over whole as one leg left it standing).
+     */
+    public int[] route(float sx,float sy,float sz,float tx,float ty,float tz,Predicate<Door> permission,boolean climb,long person,RouteBook book,double now,boolean fine) {
         searches++;
         int start=key((int)Math.floor(sx),Math.round(sy),(int)Math.floor(sz));
         int goal=key((int)Math.floor(tx),Math.round(ty),(int)Math.floor(tz));
@@ -219,11 +242,13 @@ public final class RuntimeNavigation {
             if(Float.isFinite(supported) && Math.abs(supported-sy)<1.2f)start=key((int)Math.floor(sx),Math.round(supported),(int)Math.floor(sz));
         }
         if(!exists(x(start),y(start),z(start)) || !exists(x(goal),y(goal),z(goal))) {failures++;return null;}
-        if(Math.abs(ty-sy)<.1f && Math.hypot(tx-sx,tz-sz)<22 && validLeg(sx,sy,sz,tx,ty,tz,permission) && (climb || !ladder(x(goal),y(goal),z(goal))))return new int[]{handle(goal)};
+        if(!fine && Math.abs(ty-sy)<.1f && Math.hypot(tx-sx,tz-sz)<22 && validLeg(sx,sy,sz,tx,ty,tz,permission) && (climb || !ladder(x(goal),y(goal),z(goal))))return new int[]{handle(goal)};
         Set<Integer> corridor=corridor(start,goal,permission,climb,book,now);if(corridor==null){failures++;return null;}
         // Nearby trips need no extra stopping points beside swinging door leaves.
         // Region connectivity still validates permissions and ladder capability first.
-        if(Math.hypot(tx-sx,tz-sz)<22)return new int[]{handle(goal)};
+        // (0.4.6) a near trip to another level (up a terrace, a storey) is not handed over whole: the body's own steering
+        // crept round such a climb for minutes; its turns and climbs are legs as a far trip's are
+        if(!fine && Math.hypot(tx-sx,tz-sz)<22 && Math.abs(ty-sy)<1.5f)return new int[]{handle(goal)};
         Map<Integer,Float> cost=new HashMap<>();Map<Integer,Integer> parent=new HashMap<>();
         var queue=new PriorityQueue<Visit>(Comparator.comparingDouble(Visit::estimate).thenComparingInt(Visit::cell));
         cost.put(start,0f);queue.add(new Visit(start,0,estimate(start,goal)));
@@ -251,7 +276,7 @@ public final class RuntimeNavigation {
             int c=cells.get(i),next=i+1<cells.size()?cells.get(i+1):c;
             boolean turn=x(c)-x(prior)!=x(next)-x(c) || z(c)-z(prior)!=z(next)-z(c);
             boolean boundary=x(c)/16!=x(prior)/16 || z(c)/16!=z(prior)/16;
-            if(turn || boundary || y(c)!=y(prior) || estimate(last,c)>=8 || i==cells.size()-1){portals.add(handle(c));last=c;}
+            if(turn || boundary || y(c)!=y(prior) || estimate(last,c)>=(fine?3:8) || i==cells.size()-1){portals.add(handle(c));last=c;}
             prior=c;
         }
         return portals.stream().mapToInt(Integer::intValue).toArray();

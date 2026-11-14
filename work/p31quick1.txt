@@ -1,0 +1,93 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :test
+  slow: rpg.Gamefixes039Test.theEstateAndItsPeopleHaveIdsNoOneElseHas() 26.198 s
+  slow: rpg.Gamefixes040Test.steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() 28.325 s
+
+SimProfileProbe > profileTheSimulation() SKIPPED
+
+FlyerProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 23.92 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 25.344 s
+
+JumpProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 108.935 s
+
+SoundProbeTest > probe() SKIPPED
+
+TabernaProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 63.965 s
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 42.282 s
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 21.192 s
+
+LifeProbeTest > probe() SKIPPED
+
+LifeProbeTest > trace() SKIPPED
+
+ReportPauseProbeTest > probe() SKIPPED
+
+StallMapProbeTest > probe() SKIPPED
+
+Gamefixes044Test > everyEnterableBuildingIsFittedOutAndApproved() FAILED
+    org.opentest4j.AssertionFailedError: 3: [orrins_leanto scored 93 {architecture=20, furniture=15, lighting=20, function=15, navigation=15, technical=8} [no room inside for its craft table], harlette_cottages_2 scored 89 {architecture=20, furniture=18, lighting=13, function=15, navigation=15, technical=8} [the bedroom (storey 1) has no light], harlette_cottages_2's bedroom is unlit] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:42)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:191)
+        at app//rpg.world.Gamefixes044Test.everyEnterableBuildingIsFittedOutAndApproved(Gamefixes044Test.java:66)
+
+Gamefixes044Test > tenMorePeopleKeepTheNewBuildings() FAILED
+    org.opentest4j.AssertionFailedError: expected: <10> but was: <20>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+        at app//rpg.world.Gamefixes044Test.tenMorePeopleKeepTheNewBuildings(Gamefixes044Test.java:177)
+
+IvyProbeTest > probe() SKIPPED
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 34.348 s
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 23.735 s
+
+TextureSheetProbeTest > sheet() SKIPPED
+
+HaunterProbeTest > probe() SKIPPED
+
+MapDumpProbeTest > dump() SKIPPED
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 42.827 s
+
+527 tests completed, 2 failed, 13 skipped
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 17m 20s
+9 actionable tasks: 2 executed, 7 up-to-date

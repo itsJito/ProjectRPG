@@ -22,6 +22,12 @@ import java.util.Map;
 public final class Atlas {
     public final Map<String, Object> root;
     public final int size, height, sea, ceiling;
+    /**
+     * (0.4.6, gamefixes: the world's border was too jarring) open sea added round the design on every side (cells), and the
+     * world's whole width with it: the design's coordinates are moved in by the margin, so it stands where it always did
+     * relative to itself, with more sea about it before the world ends.
+     */
+    public final int margin, world;
     public final long seed;
 
     private Atlas(Map<String, Object> root) {
@@ -31,6 +37,8 @@ public final class Atlas {
         this.sea = i(root, "sea", 30);
         this.ceiling = i(root, "ceiling", 99);
         this.seed = i(root, "seed", 400);
+        this.margin = Math.max(0, i(root, "margin", 0));
+        this.world = size + 2 * margin;
     }
 
     private static Atlas cached;
@@ -67,13 +75,13 @@ public final class Atlas {
 
     // ------------------------------------------------------------------ coordinates
     /** A chunk x (1-based, fractions allowed, a whole number the chunk's middle) to a cell x. */
-    public double x(double chunkX) { return (chunkX - 0.5) * 16.0; }
+    public double x(double chunkX) { return (chunkX - 0.5) * 16.0 + margin; }
     /** A chunk z (south to north) to a cell z (north to south). */
-    public double z(double chunkZ) { return size - (chunkZ - 0.5) * 16.0; }
+    public double z(double chunkZ) { return size + margin - (chunkZ - 0.5) * 16.0; }
     /** A range [x0, x1, z0, z1] of chunks to its cells {x0, z0, x1, z1} (inclusive, cell z north to south). */
     public int[] cells(List<?> rect) {
         int x0 = n(rect.get(0)), x1 = n(rect.get(1)), z0 = n(rect.get(2)), z1 = n(rect.get(3));
-        return new int[]{(x0 - 1) * 16, size - z1 * 16, x1 * 16 - 1, size - 1 - (z0 - 1) * 16};
+        return new int[]{(x0 - 1) * 16 + margin, size + margin - z1 * 16, x1 * 16 - 1 + margin, size + margin - 1 - (z0 - 1) * 16};
     }
 
     // ------------------------------------------------------------------ reading

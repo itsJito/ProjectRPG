@@ -1,0 +1,506 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.11s ({regions=862, overlays=502, variants=479, scarp=45, coast=640, erosion=362, peaks=45, lakes=66, isles=4, rivers=726, wadis=14, ground=25, roads=653, causeways=3, architecture=982, pitsFilled=1309, pits=445, banks=67, clamp=15, cliffs=57, columns=1038, falls=22, raise=11108, trees=323, outcrops=0, ways=587}), made and lit in 2.23s
+    [water] flow field grown in 1110 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Count Dracula (128.50,48.04,744.50) yaw 0.00 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    30 Duke Edran (186.56,54.04,658.52) yaw 0.00 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    30 Varek      (126.50,48.04,748.50) yaw 0.00 want NaN v 0.00,0.00 goal IDLE() act - working null gp false 0.0,0.0,0.0 legs - st 0 nu 0 | (off-stage) Clerk of Harlette: at work
+    [trace]    40 Count Dracula (128.66,48.00,744.50) yaw -0.43 want NaN v 2.15,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    40 Duke Edran (186.60,54.00,658.39) yaw -0.19 want NaN v 0.16,-1.85 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    40 Varek      (126.50,48.00,748.53) yaw 0.00 want NaN v 0.00,0.93 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]    50 Count Dracula (129.06,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    50 Duke Edran (186.60,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    50 Varek      (126.50,48.00,748.85) yaw 0.87 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]    60 Count Dracula (129.47,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    60 Duke Edran (186.59,54.00,658.30) yaw -0.02 want NaN v -0.04,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    60 Varek      (126.50,48.00,749.26) yaw 2.17 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]    70 Count Dracula (129.88,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    70 Duke Edran (186.58,54.00,658.30) yaw -0.02 want NaN v -0.04,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    70 Varek      (126.50,48.00,749.67) yaw 3.03 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]    80 Count Dracula (130.28,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    80 Duke Edran (186.58,54.00,658.30) yaw -0.02 want NaN v -0.04,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    80 Varek      (126.50,48.00,750.07) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]    90 Count Dracula (130.69,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]    90 Duke Edran (186.57,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]    90 Varek      (126.50,48.00,750.48) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,752.5 legs 0/36 st 0 nu 0 | on the way to prayers
+    [trace]   100 Count Dracula (131.10,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   100 Duke Edran (186.57,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   100 Varek      (126.50,48.00,750.89) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,754.5 legs 1/36 st 0 nu 0 | on the way to prayers
+    [trace]   110 Count Dracula (131.51,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   110 Duke Edran (186.57,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   110 Varek      (126.50,48.00,751.30) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,754.5 legs 1/36 st 0 nu 0 | on the way to prayers
+    [trace]   120 Count Dracula (131.92,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   120 Duke Edran (186.56,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   120 Varek      (126.50,48.00,751.71) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,754.5 legs 1/36 st 0 nu 0 | on the way to prayers
+    [trace]   130 Count Dracula (132.33,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   130 Duke Edran (186.56,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   130 Varek      (126.50,48.00,752.12) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,754.5 legs 1/36 st 0 nu 0 | on the way to prayers
+    [trace]   140 Count Dracula (132.73,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   140 Duke Edran (186.55,54.00,658.30) yaw -0.02 want NaN v -0.03,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   140 Varek      (126.50,48.00,752.53) yaw 3.14 want NaN v 0.00,2.45 goal PRAY(Solday: worship) act go to goal working null gp true 126.5,48.0,754.5 legs 1/36 st 0 nu 0 | on the way to prayers
+    [trace]   150 Count Dracula (133.14,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   150 Duke Edran (186.55,54.00,658.30) yaw -0.02 want NaN v -0.02,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   150 Varek      (126.50,48.00,752.93) yaw 3.14 want NaN v -0.33,2.12 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,754.5 legs 2/36 st 0 nu 0 | on the way to prayers
+    [trace]   160 Count Dracula (133.55,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   160 Duke Edran (186.55,54.00,658.30) yaw -0.02 want NaN v -0.02,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   160 Varek      (126.29,48.00,753.18) yaw 2.45 want NaN v -2.22,1.05 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,754.5 legs 2/36 st 0 nu 0 | on the way to prayers
+    [trace]   170 Count Dracula (133.96,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   170 Duke Edran (186.54,54.00,658.30) yaw -0.02 want NaN v -0.02,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   170 Varek      (125.92,48.00,753.36) yaw 2.14 want NaN v -2.22,1.05 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,754.5 legs 2/36 st 0 nu 0 | on the way to prayers
+    [trace]   180 Count Dracula (134.37,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 136.5,48.0,744.5 legs 0/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [0.37375948, -0.37375954] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   180 Duke Edran (186.54,54.00,658.30) yaw -0.02 want NaN v -0.02,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   180 Varek      (125.55,48.00,753.53) yaw 2.05 want NaN v -2.22,1.04 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,754.5 legs 2/36 st 0 nu 0 | on the way to prayers
+    [trace]   190 Count Dracula (134.78,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [0.94320303, -0.9432027] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   190 Duke Edran (186.54,54.00,658.30) yaw -0.02 want NaN v -0.04,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   190 Varek      (125.18,48.00,753.71) yaw 2.02 want NaN v -2.22,1.04 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,754.5 legs 2/36 st 0 nu 0 | on the way to prayers
+    [trace]   200 Count Dracula (135.18,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.750646, -1.7506458] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   200 Duke Edran (186.54,54.00,658.30) yaw -0.02 want NaN v -0.02,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   200 Varek      (124.83,48.00,753.90) yaw 2.13 want NaN v -1.63,1.77 goal PRAY(Solday: worship) act go to goal working null gp true 123.5,48.0,755.5 legs 3/36 st 0 nu 0 | on the way to prayers
+    [trace]   210 Count Dracula (135.59,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500011, -1.7500011] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   210 Duke Edran (186.62,54.00,658.32) yaw -0.13 want NaN v 1.58,0.33 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   210 Varek      (124.57,48.00,754.22) yaw 2.35 want NaN v -1.57,1.88 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,755.5 legs 4/36 st 0 nu 0 | on the way to prayers
+    [trace]   220 Count Dracula (136.00,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   220 Duke Edran (186.86,54.00,658.34) yaw -1.21 want NaN v 0.29,-0.38 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   220 Varek      (124.31,48.00,754.53) yaw 2.43 want NaN v -1.57,1.88 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,755.5 legs 4/36 st 0 nu 0 | on the way to prayers
+    [trace]   230 Count Dracula (136.41,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   230 Duke Edran (186.93,54.00,658.30) yaw -1.10 want NaN v 0.18,-0.19 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   230 Varek      (123.97,48.00,754.75) yaw 2.20 want NaN v -2.18,1.12 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   240 Count Dracula (136.82,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   240 Duke Edran (186.99,54.00,658.30) yaw -1.02 want NaN v 0.29,-0.24 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   240 Varek      (123.60,48.00,754.93) yaw 2.10 want NaN v -2.18,1.12 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   250 Count Dracula (137.23,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   250 Duke Edran (187.11,54.00,658.30) yaw -1.30 want NaN v 1.15,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   250 Varek      (123.30,48.00,755.15) yaw 2.16 want NaN v -1.02,1.90 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   260 Count Dracula (137.63,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers [door Dracula's Manor back door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[135.0, 745.94], [137.0, 745.94]]]
+    [trace]   260 Duke Edran (187.26,54.00,658.30) yaw -1.52 want NaN v 0.69,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   260 Varek      (123.19,48.00,755.54) yaw 2.76 want NaN v -0.56,2.39 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   270 Count Dracula (138.04,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   270 Duke Edran (187.35,54.00,658.30) yaw -1.55 want NaN v 0.49,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   270 Varek      (123.10,48.00,755.93) yaw 2.87 want NaN v -0.56,2.39 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   280 Count Dracula (138.45,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   280 Duke Edran (187.43,54.00,658.30) yaw -1.55 want NaN v 0.38,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   280 Varek      (123.01,48.00,756.33) yaw 2.90 want NaN v -0.56,2.39 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   290 Count Dracula (138.86,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   290 Duke Edran (187.48,54.00,658.30) yaw -1.55 want NaN v 0.22,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 0/1 st 0 nu 0 | on the way to prayers
+    [trace]   290 Varek      (122.91,48.00,756.73) yaw 2.90 want NaN v -0.56,2.39 goal PRAY(Solday: worship) act go to goal working null gp true 122.5,48.0,758.5 legs 5/36 st 0 nu 0 | on the way to prayers
+    [trace]   300 Count Dracula (139.27,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   300 Duke Edran (187.50,54.00,658.30) yaw -1.55 want NaN v 0.09,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 197.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   300 Varek      (122.73,48.00,757.08) yaw 2.63 want NaN v -1.60,1.85 goal PRAY(Solday: worship) act go to goal working null gp true 121.5,48.0,758.5 legs 6/36 st 0 nu 0 | on the way to prayers
+    [trace]   310 Count Dracula (139.68,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   310 Duke Edran (187.50,54.00,658.30) yaw -1.55 want NaN v 0.00,0.00 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 197.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   310 Varek      (122.46,48.00,757.39) yaw 2.49 want NaN v -1.60,1.85 goal PRAY(Solday: worship) act go to goal working null gp true 121.5,48.0,759.5 legs 7/36 st 0 nu 0 | on the way to prayers
+    [trace]   320 Count Dracula (140.08,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   320 Duke Edran (187.52,54.00,658.30) yaw -1.55 want NaN v 0.70,0.02 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 197.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   320 Varek      (122.22,48.00,757.71) yaw 2.56 want NaN v -0.91,2.27 goal PRAY(Solday: worship) act go to goal working null gp true 121.5,48.0,759.5 legs 7/36 st 0 nu 0 | on the way to prayers
+    [trace]   330 Count Dracula (140.49,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   330 Duke Edran (187.82,54.00,658.31) yaw -1.59 want NaN v 3.03,0.06 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 197.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   330 Varek      (122.07,48.00,758.09) yaw 2.70 want NaN v -0.91,2.27 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,759.5 legs 8/36 st 0 nu 0 | on the way to prayers
+    [trace]   340 Count Dracula (140.90,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   340 Duke Edran (188.51,54.00,658.32) yaw -1.59 want NaN v 5.37,0.11 goal HIDE(hiding from world life (last seen 9s ago)) act sprint to goal working null gp true 198.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   340 Varek      (121.91,48.00,758.47) yaw 2.74 want NaN v -0.91,2.27 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   350 Count Dracula (141.31,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   350 Duke Edran (189.59,54.00,658.34) yaw -1.59 want NaN v 7.38,0.13 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 199.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   350 Varek      (121.80,48.00,758.86) yaw 2.80 want NaN v -0.66,2.36 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   360 Count Dracula (141.72,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   360 Duke Edran (190.82,54.00,658.36) yaw -1.59 want NaN v 7.38,0.13 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 200.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   360 Varek      (121.69,48.00,759.25) yaw 2.85 want NaN v -0.66,2.36 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   370 Count Dracula (142.13,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   370 Duke Edran (192.05,54.00,658.38) yaw -1.59 want NaN v 7.38,0.10 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp true 201.5,54.0,658.5 legs 0/1 st 0 nu 0 | running from world life
+    [trace]   370 Varek      (121.58,48.00,759.64) yaw 2.85 want NaN v -0.66,2.36 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   380 Count Dracula (142.53,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 144.5,48.0,744.5 legs 1/32 st 0 nu 0 | on the way to prayers
+    [trace]   380 Duke Edran (193.28,54.00,658.40) yaw -1.59 want NaN v 7.15,0.10 goal HIDE(hiding from world life (last seen 0s ago)) act sprint to goal working null gp false 199.5,54.0,658.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   380 Varek      (121.47,48.00,760.04) yaw 2.85 want NaN v -0.66,2.36 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   390 Count Dracula (142.94,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,744.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   390 Duke Edran (194.28,54.00,658.41) yaw -1.59 want NaN v 4.81,0.07 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   390 Varek      (121.36,47.96,760.43) yaw 2.85 want NaN v -0.66,2.36 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   400 Count Dracula (143.35,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,744.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   400 Duke Edran (194.90,54.00,658.43) yaw -1.59 want NaN v 2.48,0.06 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   400 Varek      (121.30,47.43,760.82) yaw 3.05 want NaN v -0.07,2.34 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   410 Count Dracula (143.76,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,744.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   410 Duke Edran (195.13,54.00,658.43) yaw -1.59 want NaN v 0.15,0.04 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   410 Varek      (121.30,47.58,761.21) yaw 3.09 want NaN v -0.37,2.31 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   420 Count Dracula (144.17,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,744.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   420 Duke Edran (194.99,54.00,658.44) yaw -1.64 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   420 Varek      (121.26,48.15,761.59) yaw 2.90 want NaN v -0.84,2.28 goal PRAY(Solday: worship) act go to goal working null gp true 120.5,48.0,763.5 legs 9/36 st 0 nu 0 | on the way to prayers
+    [trace]   430 Count Dracula (144.58,48.00,744.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,744.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   430 Duke Edran (194.76,54.00,658.45) yaw -2.72 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   430 Varek      (121.11,48.11,761.97) yaw 2.81 want NaN v -0.84,2.22 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   440 Count Dracula (144.98,48.00,744.50) yaw -1.57 want NaN v 2.13,0.34 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   440 Duke Edran (194.54,54.00,658.46) yaw 2.48 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 0s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   440 Varek      (121.07,48.00,762.26) yaw 3.07 want NaN v 0.68,0.99 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   450 Count Dracula (145.22,48.00,744.69) yaw -2.27 want NaN v 0.88,0.12 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   450 Duke Edran (194.31,54.00,658.47) yaw 1.61 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 1s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   450 Varek      (121.35,47.99,762.35) yaw -2.35 want NaN v 2.43,0.31 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   460 Count Dracula (145.33,48.00,744.73) yaw -2.13 want NaN v 0.44,0.93 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   460 Duke Edran (194.09,54.00,658.48) yaw 1.61 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 1s ago)) act go to goal working null gp true 193.0,54.0,658.4 legs 1/1 st 0 nu 0 | hiding from world life
+    [trace]   460 Varek      (121.75,47.58,762.41) yaw -1.76 want NaN v 2.43,0.31 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   470 Count Dracula (145.40,48.00,745.04) yaw -2.87 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   470 Duke Edran (193.86,54.00,658.49) yaw 1.61 want NaN v -1.35,0.05 goal HIDE(hiding from world life (last seen 1s ago)) act go to goal working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   470 Varek      (122.16,47.00,762.46) yaw -1.72 want NaN v 2.42,0.40 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   480 Count Dracula (145.47,48.00,745.45) yaw -2.92 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   480 Duke Edran (193.73,54.00,658.49) yaw 1.61 want NaN v 0.00,0.00 goal HIDE(hiding from world life (last seen 1s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   480 Varek      (122.56,47.00,762.53) yaw -1.72 want NaN v 2.42,0.40 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   490 Count Dracula (145.53,48.00,745.85) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   490 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 2s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   490 Varek      (122.96,47.00,762.59) yaw -1.72 want NaN v 2.42,0.40 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   500 Count Dracula (145.60,48.00,746.25) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   500 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 2s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   500 Varek      (123.36,47.00,762.66) yaw -1.72 want NaN v 2.42,0.40 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   510 Count Dracula (145.67,48.00,746.66) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   510 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 2s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   510 Varek      (123.77,47.44,762.70) yaw -1.72 want NaN v 2.42,0.41 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   520 Count Dracula (145.74,48.00,747.06) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   520 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 2s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   520 Varek      (124.17,48.10,762.71) yaw -1.72 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   530 Count Dracula (145.81,48.00,747.46) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   530 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   530 Varek      (124.57,48.16,762.79) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   540 Count Dracula (145.88,48.00,747.86) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   540 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   540 Varek      (124.97,48.00,762.86) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   550 Count Dracula (145.95,48.00,748.27) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   550 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   550 Varek      (125.37,48.00,762.93) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   560 Count Dracula (146.02,48.00,748.67) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   560 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   560 Varek      (125.78,48.00,763.00) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   570 Count Dracula (146.09,48.00,749.07) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   570 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   570 Varek      (126.18,48.00,763.08) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   580 Count Dracula (146.15,48.00,749.48) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 146.5,48.0,751.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   580 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   580 Varek      (126.58,48.00,763.15) yaw -1.75 want NaN v 2.41,0.44 goal PRAY(Solday: worship) act go to goal working null gp true 128.5,48.0,763.5 legs 10/36 st 0 nu 0 | on the way to prayers
+    [trace]   590 Count Dracula (146.22,48.00,749.88) yaw -2.96 want NaN v 0.41,2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,48.0,751.5 legs 4/32 st 0 nu 0 | on the way to prayers
+    [trace]   590 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   590 Varek      (126.98,48.00,763.22) yaw -1.75 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   600 Count Dracula (146.43,48.00,750.22) yaw -2.68 want NaN v 1.57,1.88 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,48.0,752.5 legs 5/32 st 0 nu 0 | on the way to prayers
+    [trace]   600 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   600 Varek      (127.39,48.00,763.23) yaw -1.65 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   610 Count Dracula (146.69,48.00,750.53) yaw -2.49 want NaN v 1.57,1.88 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,48.0,752.5 legs 5/32 st 0 nu 0 | on the way to prayers
+    [trace]   610 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 3s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   610 Varek      (127.80,48.00,763.24) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   620 Count Dracula (146.90,48.00,750.87) yaw -2.58 want NaN v 0.84,2.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,48.0,752.5 legs 5/32 st 0 nu 0 | on the way to prayers
+    [trace]   620 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 4s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   620 Varek      (128.21,48.00,763.26) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   630 Count Dracula (147.04,48.00,751.25) yaw -2.72 want NaN v 0.84,2.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   630 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 4s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   630 Varek      (128.61,48.00,763.27) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   640 Count Dracula (147.18,48.00,751.64) yaw -2.77 want NaN v 0.38,2.37 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   640 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 4s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   640 Varek      (129.02,48.00,763.28) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   650 Count Dracula (147.20,48.00,752.04) yaw -3.03 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   650 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 4s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   650 Varek      (129.43,48.00,763.29) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   660 Count Dracula (147.22,48.00,752.45) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   660 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 5s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   660 Varek      (129.84,48.00,763.30) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   670 Count Dracula (147.24,48.00,752.86) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   670 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 5s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   670 Varek      (130.25,48.00,763.32) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   680 Count Dracula (147.26,48.00,753.27) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   680 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 5s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   680 Varek      (130.65,48.00,763.33) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   690 Count Dracula (147.28,48.00,753.67) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   690 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 5s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   690 Varek      (131.06,48.00,763.34) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   700 Count Dracula (147.29,48.00,754.08) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   700 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 5s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   700 Varek      (131.47,48.00,763.35) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   710 Count Dracula (147.31,48.00,754.49) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   710 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   710 Varek      (131.88,48.00,763.37) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   720 Count Dracula (147.33,48.00,754.90) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   720 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   720 Varek      (132.29,48.00,763.38) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   730 Count Dracula (147.35,48.00,755.31) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   730 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   730 Varek      (132.69,48.00,763.39) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   740 Count Dracula (147.37,48.00,755.71) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   740 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   740 Varek      (133.10,48.00,763.40) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   750 Count Dracula (147.39,48.00,756.12) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   750 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   750 Varek      (133.51,48.00,763.41) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   760 Count Dracula (147.41,48.00,756.53) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   760 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   760 Varek      (133.92,48.00,763.43) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   770 Count Dracula (147.43,48.00,756.94) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   770 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   770 Varek      (134.33,48.00,763.44) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   780 Count Dracula (147.45,48.00,757.34) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   780 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   780 Varek      (134.73,48.00,763.45) yaw -1.62 want NaN v 2.45,0.07 goal PRAY(Solday: worship) act go to goal working null gp true 136.5,48.0,763.5 legs 11/36 st 0 nu 0 | on the way to prayers
+    [trace]   790 Count Dracula (147.47,48.00,757.75) yaw -3.07 want NaN v 0.11,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   790 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 6s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   790 Varek      (135.14,48.00,763.46) yaw -1.62 want NaN v 2.45,0.02 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   800 Count Dracula (147.48,48.00,758.16) yaw -3.07 want NaN v 0.04,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   800 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 7s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   800 Varek      (135.55,48.00,763.46) yaw -1.58 want NaN v 2.45,0.02 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   810 Count Dracula (147.49,48.00,758.57) yaw -3.11 want NaN v 0.04,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   810 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 7s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   810 Varek      (135.96,48.00,763.46) yaw -1.58 want NaN v 2.45,0.02 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   820 Count Dracula (147.49,48.00,758.97) yaw -3.11 want NaN v 0.03,2.28 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   820 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 7s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   820 Varek      (136.37,48.00,763.47) yaw -1.58 want NaN v 2.45,0.02 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   830 Count Dracula (147.50,48.00,759.26) yaw -3.11 want NaN v 0.01,0.88 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   830 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 7s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   830 Varek      (136.78,48.00,763.47) yaw -1.58 want NaN v 2.45,0.03 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   840 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   840 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   840 Varek      (137.18,48.00,763.48) yaw -1.58 want NaN v 2.45,0.03 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   850 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   850 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   850 Varek      (137.59,48.00,763.48) yaw -1.58 want NaN v 2.45,0.03 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,48.0,763.5 legs 12/36 st 0 nu 0 | on the way to prayers
+    [trace]   860 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   860 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   860 Varek      (137.99,48.00,763.51) yaw -1.70 want NaN v 2.13,0.90 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,47.0,764.5 legs 13/36 st 0 nu 0 | on the way to prayers
+    [trace]   870 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   870 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   870 Varek      (138.33,48.00,763.73) yaw -2.01 want NaN v 2.04,1.35 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,47.0,764.5 legs 13/36 st 0 nu 0 | on the way to prayers
+    [trace]   880 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   880 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   880 Varek      (138.67,48.00,763.95) yaw -2.11 want NaN v 2.04,1.35 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,47.0,764.5 legs 13/36 st 0 nu 0 | on the way to prayers
+    [trace]   890 Count Dracula (147.50,48.00,759.29) yaw -3.11 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 147.5,47.0,759.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   890 Duke Edran (193.73,54.00,658.49) yaw 1.55 want 1.55 v 0.00,0.00 goal HIDE(hiding from world life (last seen 8s ago)) act hold/face working null gp false 193.0,54.0,658.4 legs - st 0 nu 0 | hiding from world life
+    [trace]   890 Varek      (139.01,48.00,764.18) yaw -2.14 want NaN v 2.04,1.35 goal PRAY(Solday: worship) act go to goal working null gp true 139.5,47.0,764.5 legs 13/36 st 0 nu 0 | on the way to prayers
+    [life] stop 186,658 done (25 people seen so far)
+
+    [life] 1 stops of 900 frames; 25 people seen
+      Maelin           SCHOLAR      seen   130 spins   0 blocked     0 still    20
+          last (182.5,60.0,641.7) PRAY: on the way to prayers
+      Duke Edran       CIVIC        seen   130 spins   0 blocked     0 still    14
+          last (186.6,54.0,658.3) PRAY: on the way to prayers
+      Haskel           MINER        seen   130 spins   2 blocked     0 still     0
+          spun at (204.5,59.0,591.5) HOME: getting up and dressed
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (285,1026)
+      never in play: Aldric GUARD home (288,1029)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam VILLAGER home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1030)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde HEALER home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (288,966)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hadwin CIVIC home (271,1031)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Brand GUARD home (430,429)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (924,102)
+      never in play: Father Eirik HEALER home (399,436)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: Yrsa VILLAGER home (432,466)
+      never in play: King Fahad VILLAGER home (954,943)
+      never in play: Cerys VILLAGER home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: Bera VILLAGER home (435,489)
+      never in play: Duke Torkell KNIGHT home (434,426)
+      never in play: King Arthur CRAFTSMAN home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain HUNTER home (890,392)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin MINER home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Sten CRAFTSMAN home (404,474)
+      never in play: Alexios CRAFTSMAN home (513,84)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric FARMER home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (581,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Einar WORKER home (404,484)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CRAFTSMAN home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (942,882)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Petros FISHERMAN home (516,84)
+      never in play: Soren SCHOLAR home (400,440)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Sella CRAFTSMAN home (188,825)
+      never in play: Leofric WORKER home (346,944)
+      never in play: Siv FARMER home (391,451)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (278,1028)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (906,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,914)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (532,161)
+      never in play: Melina FISHERMAN home (518,85)
+      never in play: Spiros WORKER home (516,82)
+      never in play: Timon WORKER home (510,85)
+      never in play: Damon WORKER home (513,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (475,205)
+      never in play: Mimis BEGGAR home (530,109)
+      never in play: Argus THIEF home (474,205)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (512,87)
+      never in play: Sabeen BEGGAR home (510,82)
+      never in play: Halvar CRAFTSMAN home (448,449)
+      never in play: Runa CARTER home (454,447)
+      never in play: Ulven CRAFTSMAN home (433,486)
+      never in play: Nessa MERCHANT home (439,480)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Gunnar GUARD home (447,482)
+      never in play: Astrid UNDERTAKER home (400,433)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (954,908)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+    [life] 3 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 44.386 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 48s
+9 actionable tasks: 1 executed, 8 up-to-date

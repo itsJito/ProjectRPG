@@ -54,6 +54,9 @@ public final class Tuning {
     public static boolean b(String path, boolean fallback) { return at(path) instanceof Boolean v ? v : fallback; }
     public static String s(String path, String fallback) { return at(path) instanceof String v ? v : fallback; }
 
+    /** (0.4.2) The value at a path as it was read (a list, a map), or null. */
+    public static Object raw(String path) { return at(path); }
+
     /** Forgets what was read (the next look reads the files again). */
     public static synchronized void reload() { root = null; }
 }

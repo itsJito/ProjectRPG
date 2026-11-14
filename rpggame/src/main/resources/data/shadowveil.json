@@ -1,387 +1,6406 @@
 {
-  "_about": "ShadowVeil (Alpha 0.4.0): the permanent 1,072 x 1,072 world. Transcribed from projectrpg.txt WORLD BUILDING, which has the final say. Coordinates are the document's: [x, z] 1-based chunks, x west to east, z south to north; a point is the middle of its chunk, fractions are allowed. Heights are block layers (Y). Ranges [x0, x1, z0, z1] are inclusive chunks. Nothing here is code: the generator reads it all.",
-  "include": ["shadowveil_architecture.json"],
-  "size": 1072,
-  "height": 200,
-  "sea": 30,
-  "ceiling": 99,
-  "seed": 400,
-
-  "coast": {
-    "_about": "Ocean on all four edges and every corner. The outer two chunks are the shore belt (shelves, coves, shallows, beaches); inland the ground blends up to the regions over 'blend' blocks.",
-    "deep": 8, "belt": 30, "blend": 44, "floor": 21, "shelf": 27, "beach": 31, "warp": 26, "warpScale": 110,
-    "cliffs": [ { "at": [3, 3], "radius": 5, "blend": 8 }, { "at": [65, 65], "radius": 4, "blend": 8 }, { "at": [2, 40], "radius": 6, "blend": 10 } ]
-  },
-
-  "erosion": { "passes": 18, "talus": 1.6, "cliffTalus": 3.4, "rate": 0.45, "smooth": 2 },
-
-  "regions": [
-    { "id": "loxford_lowlands", "rect": [1, 26, 1, 22], "y": [34, 46], "scale": 150, "ridge": 0.0, "biome": "meadow", "blend": 44, "realm": "WILDS" },
-    { "id": "southern_marches", "rect": [27, 44, 1, 22], "y": [38, 54], "scale": 120, "ridge": 0.15, "biome": "marches", "blend": 44, "realm": "WILDS" },
-    { "id": "azharad_basin", "rect": [45, 67, 1, 22], "y": [33, 42], "scale": 170, "ridge": 0.0, "biome": "desert", "blend": 44, "realm": "WILDS" },
-    { "id": "valgard_highlands", "rect": [1, 18, 23, 31], "y": [46, 62], "scale": 110, "ridge": 0.2, "biome": "highland", "blend": 40, "realm": "WILDS" },
-    { "id": "western_crags", "rect": [1, 18, 32, 45], "y": [56, 86], "scale": 70, "ridge": 0.85, "biome": "crags", "blend": 36, "realm": "WILDS" },
-    { "id": "gallows_heath", "rect": [19, 27, 23, 39], "y": [45, 55], "scale": 90, "ridge": 0.1, "biome": "heath", "blend": 40, "realm": "WILDS" },
-    { "id": "gorrick_shoulder", "rect": [19, 27, 40, 45], "y": [52, 60], "scale": 90, "ridge": 0.2, "biome": "upland", "blend": 30, "realm": "WILDS" },
-    { "id": "dimwater_basin", "rect": [28, 44, 23, 45], "y": [45, 54], "scale": 100, "ridge": 0.0, "biome": "lakeshore", "blend": 40, "realm": "WILDS" },
-    { "id": "dead_wood", "rect": [45, 56, 23, 41], "y": [52, 68], "scale": 90, "ridge": 0.25, "biome": "deadwood", "blend": 40, "realm": "WILDS" },
-    { "id": "camelot_shoulder", "rect": [45, 56, 42, 45], "y": [56, 64], "scale": 90, "ridge": 0.1, "biome": "upland", "blend": 26, "realm": "WILDS" },
-    { "id": "ashmaw_coast", "rect": [57, 67, 23, 45], "y": [40, 66], "scale": 80, "ridge": 0.45, "biome": "volcanic", "blend": 40, "realm": "WILDS" },
-    { "id": "severian_north", "rect": [1, 67, 46, 67], "y": [31, 44], "scale": 160, "ridge": 0.0, "biome": "mediterranean", "blend": 12, "realm": "WILDS" }
-  ],
-
-  "overlays": [
-    { "id": "loxford", "rect": [9, 20, 6, 17], "y": [36, 42], "flatten": 0.75, "biome": "meadow", "blend": 28, "realm": "Loxford" },
-    { "id": "millwood", "rect": [19, 23, 11, 18], "y": [38, 46], "flatten": 0.2, "biome": "oakwood", "blend": 20 },
-    { "id": "goblin_hollow", "rect": [22, 24, 17, 19], "y": [36, 40], "flatten": 0.3, "biome": "oakwood", "blend": 14 },
-    { "id": "watchtower_rise", "rect": [21, 23, 19, 21], "y": [44, 47], "flatten": 0.7, "biome": "meadow", "blend": 14 },
-    { "id": "harlette", "rect": [5, 11, 18, 22], "y": [37, 44], "flatten": 0.7, "biome": "willowmeadow", "blend": 26, "realm": "Harlette" },
-    { "id": "harlette_manor", "rect": [5, 7, 23, 24], "y": [45, 48], "flatten": 0.8, "biome": "meadow", "blend": 14, "realm": "Harlette" },
-    { "id": "valgard", "rect": [6, 15, 25, 31], "y": [48, 58], "flatten": 0.6, "biome": "highland", "blend": 26, "realm": "Valgard" },
-    { "id": "valgard_mines", "rect": [5, 12, 32, 36], "y": [58, 72], "flatten": 0.15, "biome": "crags", "blend": 22 },
-    { "id": "gorrick", "rect": [22, 26, 40, 44], "y": [54, 58], "flatten": 0.85, "biome": "upland", "blend": 18, "realm": "Gorrick" },
-    { "id": "gallows_moor", "rect": [23, 28, 26, 36], "y": [46, 53], "flatten": 0.1, "biome": "heath", "blend": 22 },
-    { "id": "azharad", "rect": [49, 61, 6, 18], "y": [34, 39], "flatten": 0.8, "biome": "desert_town", "blend": 26, "realm": "Azharad" },
-    { "id": "oasis", "rect": [47, 51, 5, 9], "y": [33, 36], "flatten": 0.6, "biome": "oasis", "blend": 18 },
-    { "id": "clay_pits", "rect": [53, 55, 17, 19], "y": [35, 38], "flatten": 0.5, "biome": "claypits", "blend": 12 },
-    { "id": "sandstone_cliffs", "rect": [61, 65, 21, 24], "y": [48, 60], "flatten": 0.0, "biome": "sandstone", "blend": 14 },
-    { "id": "camelot", "rect": [49, 54, 42, 45], "y": [58, 64], "flatten": 0.75, "biome": "upland", "blend": 18, "realm": "Camelot" },
-    { "id": "dead_wood_heart", "rect": [49, 55, 30, 42], "y": [56, 66], "flatten": 0.15, "biome": "deadwood", "blend": 24 },
-    { "id": "severia", "rect": [24, 44, 53, 66], "y": [32, 40], "flatten": 0.7, "biome": "mediterranean", "blend": 22, "realm": "Severia" },
-    { "id": "severia_east", "rect": [47, 58, 51, 61], "y": [34, 42], "flatten": 0.6, "biome": "mediterranean", "blend": 22, "realm": "Severia" },
-    { "id": "vineyard_terraces", "rect": [10, 18, 47, 52], "y": [38, 48], "flatten": 0.2, "terrace": 3, "biome": "vineyard", "blend": 16 },
-    { "id": "cypress_wood", "rect": [6, 18, 54, 64], "y": [34, 44], "flatten": 0.1, "biome": "cypress", "blend": 22 },
-    { "id": "north_crags", "rect": [2, 9, 43, 48], "y": [50, 72], "flatten": 0.0, "biome": "crags", "blend": 18 },
-    { "id": "fossil_cliffs", "rect": [54, 58, 57, 61], "y": [40, 54], "flatten": 0.0, "biome": "chalk", "blend": 12 },
-    { "id": "lookout_point", "rect": [63, 66, 63, 66], "y": [42, 52], "flatten": 0.2, "biome": "mediterranean", "blend": 12 },
-    { "id": "ashmaw_cinder_fields", "rect": [57, 66, 26, 44], "y": [44, 66], "flatten": 0.0, "biome": "volcanic", "blend": 20 }
-  ],
-
-  "peaks": [
-    { "id": "ashmaw", "at": [62, 36], "y": 92, "radius": 92, "crater": 14, "craterDepth": 7, "power": 1.35, "biome": "volcanic", "rough": 0.12 },
-    { "id": "gallows_tor", "at": [12, 41], "y": 89, "radius": 46, "power": 1.6, "biome": "crags", "rough": 0.25 },
-    { "id": "hollow_crags_north", "at": [7, 40], "y": 84, "radius": 40, "power": 1.4, "biome": "crags", "rough": 0.3 },
-    { "id": "crag_pass_shoulder", "at": [16, 36], "y": 74, "radius": 36, "power": 1.3, "biome": "crags", "rough": 0.3 },
-    { "id": "lantern_isle", "isle": true, "at": [37, 36], "y": 55, "radius": 36, "power": 1.5, "biome": "lakeshore", "rough": 0.08 },
-    { "id": "gorge_overlook", "at": [34, 19], "y": 56, "radius": 26, "power": 1.1, "biome": "marches", "rough": 0.1 },
-    { "id": "bone_orchard_rise", "at": [43, 22], "y": 52, "radius": 22, "power": 1.0, "biome": "marches", "rough": 0.1 }
-  ],
-
-  "scarp": {
-    "_about": "The northern scarp between the Dimwater plateau and Severian's band: a cliff line broken by valleys. Lift is how far the plateau stands proud of the blend at the line; gaps are the valleys and ramps.",
-    "z": 45.6, "width": 9, "lift": 9,
-    "gaps": [ { "at": [24, 46], "half": 28 }, { "at": [46, 46], "half": 30 }, { "at": [56, 46.5], "half": 26 }, { "at": [3, 46], "half": 34 }, { "at": [12, 47], "half": 22 } ]
-  },
-
-  "lakes": [
-    { "id": "dimwater", "name": "Dimwater", "at": [36.5, 35], "radii": [6.6, 5.5], "surface": 44, "depth": 9, "warp": 0.16, "marsh": [[33, 41, 2.2, 1.2], [38, 41.5, 2.0, 1.1], [42, 40.5, 1.8, 1.0]], "shorePath": 7, "biome": "lakeshore" },
-    { "id": "mere", "name": "The Mere", "at": [10, 7], "radii": [1.6, 1.15], "surface": 37, "depth": 5, "warp": 0.12, "biome": "willowmeadow" },
-    { "id": "oasis", "name": "The Oasis", "at": [49, 7], "radii": [0.9, 0.7], "surface": 34, "depth": 3, "warp": 0.1, "biome": "oasis" },
-    { "id": "mist_pools_1", "name": "Mist Pools", "at": [27, 43.3], "radii": [0.45, 0.32], "surface": 55, "depth": 2, "warp": 0.2, "biome": "upland" },
-    { "id": "mist_pools_2", "name": "Mist Pools", "at": [27.6, 42.7], "radii": [0.32, 0.26], "surface": 55, "depth": 2, "warp": 0.2, "biome": "upland" },
-    { "id": "mist_pools_3", "name": "Mist Pools", "at": [26.5, 42.5], "radii": [0.28, 0.22], "surface": 55, "depth": 2, "warp": 0.2, "biome": "upland" }
-  ],
-
-  "causeways": [
-    { "id": "west_causeway", "from": [32.2, 36], "to": [36.2, 36], "width": 4, "y": 45 },
-    { "id": "north_causeway", "from": [37, 40.6], "to": [37, 36.9], "width": 4, "y": 45 }
-  ],
-
-  "rivers": [
-    { "id": "gleam", "name": "The Gleam", "width": [5, 12], "bank": 5, "points": [[43, 41.2, 44], [43, 44, 44], [44.6, 45.4, 44], [46, 45.9, 44], [46, 46.2, 32], [46, 47.2, 32], [46.2, 49, 32], [45.8, 53, 31], [46.2, 56, 31], [46, 61, 30], [46.4, 64, 30], [46, 67.6, 30]] },
-    { "id": "murk", "name": "The Murk", "width": [6, 11], "bank": 4, "points": [[37, 29.4, 44], [37, 27, 44], [37.3, 25, 42], [37, 22, 40], [36.6, 20, 38], [37.2, 18, 36], [37, 15, 34], [37, 12, 32], [37.4, 8, 31], [37, 5, 30], [37, 1.2, 30]], "gorge": { "from": 22.5, "to": 16.5, "walls": 14, "ledge": 3 } },
-    { "id": "mere_outflow", "name": "Mere Spill", "width": [3, 5], "bank": 3, "points": [[9.1, 6.4, 37], [7.6, 5.0, 36], [5.8, 3.6, 35], [4.0, 2.6, 34], [3.0, 2.2, 31], [2.4, 1.9, 30], [1.2, 1.3, 30]] },
-    { "id": "willow_brook", "name": "Willow Brook", "width": [3, 6], "bank": 4, "points": [[9, 21.6, 41], [7.4, 20.6, 39], [6.2, 19.8, 38], [4.4, 19.4, 35], [2.6, 19.1, 32], [1.0, 19.0, 30]] },
-    { "id": "mine_runoff", "name": "Mine Runoff", "width": [2, 4], "bank": 3, "points": [[9.4, 33.6, 60], [7.6, 33.0, 55], [5.0, 32.6, 48], [3.2, 32.2, 38], [1.8, 32.0, 31], [0.8, 32.0, 30]] }
-  ],
-
-  "wadis": [
-    { "id": "oasis_wadi", "name": "Oasis Wadi", "width": 6, "depth": 3, "points": [[48.4, 7.6], [47.2, 9.2], [45.8, 10.6], [44.4, 11.8], [41, 12.1], [38.2, 12.1]] }
-  ],
-
-  "falls": [
-    { "id": "gleam_falls", "river": "gleam", "at": [46, 46], "top": 44, "bottom": 32 }
-  ],
-
-  "roads": {
-    "_about": "Main roads connect into loops. 'grade' is the most a road rises per block; 'bridge' is the deck material over water.",
-    "grade": 0.34,
-    "kinds": {
-      "king": { "width": 4, "shoulder": 4, "surface": "cobble", "edge": "gravel", "bridge": "stone_bricks" },
-      "main": { "width": 3, "shoulder": 4, "surface": "gravel", "edge": "dirt", "bridge": "stone_bricks" },
-      "path": { "width": 2, "shoulder": 3, "surface": "dirt", "edge": "bare_patch", "bridge": "planks" },
-      "_towns": "(0.4.1) the settlements' own streets (lamps: a lamp post every so many cells along them), the lanes from doors to the roads, the stone stairways",
-      "street": { "width": 3, "shoulder": 2, "surface": "cobble", "edge": "cobble", "bridge": "stone_bricks", "lamps": 14 },
-      "street_sand": { "width": 3, "shoulder": 2, "surface": "sandstone", "edge": "sandstone", "bridge": "stone_bricks", "lamps": 16 },
-      "street_marble": { "width": 4, "shoulder": 2, "surface": "flagstone", "edge": "flagstone", "bridge": "marble", "lamps": 14 },
-      "track": { "width": 3, "shoulder": 2, "surface": "gravel", "edge": "dirt", "bridge": "planks", "lamps": 18 },
-      "lane": { "width": 2, "shoulder": 1, "surface": "gravel", "edge": "gravel", "bridge": "planks" },
-      "stair": { "width": 3, "shoulder": 3, "surface": "stone_bricks", "edge": "cobble", "bridge": "stone_bricks" }
-    },
-    "list": [
-      { "id": "kings_road", "name": "King's Road", "kind": "king", "points": [[15, 8.75], [17, 11], [19, 14.5], [22, 20], [23, 26], [23.6, 31], [24, 36], [24.2, 39.2], [24, 42], [24, 44.6], [24, 46], [24, 49], [26.4, 54], [29, 59]] },
-      { "id": "southern_road", "name": "Southern Road", "kind": "main", "points": [[18.6, 8.95], [22, 9], [25, 10.2], [28, 11], [32, 11.6], [37, 12], [41, 12.2], [44, 12], [48, 11.4], [52, 11.6], [54.5, 12.0]] },
-      { "id": "western_road", "name": "Western Road", "kind": "main", "points": [[14.6, 8.75], [12, 11], [10, 14.5], [9, 17.5], [8, 20], [9, 23.5], [10, 26.5], [11.4, 26.9], [12.6, 27.4], [14, 28], [15.4, 28.8], [16.2, 30.4], [18, 33], [20, 29], [23, 26]] },
-      { "id": "ore_road", "name": "Ore Road", "kind": "main", "points": [[12.6, 27.4], [12.9, 29.8], [11.6, 31.6], [10.9, 33.2], [11, 36], [14, 37.6], [18, 39], [21, 40.6], [24, 42]] },
-      { "id": "east_road", "name": "East Road", "kind": "main", "points": [[54.5, 12.0], [55.0, 14.6], [55.6, 16.4], [57, 17.4], [58, 20], [58, 24], [54, 26], [50, 28], [47, 30], [46.2, 33.5], [46, 37], [46.8, 40], [47, 43], [47, 46], [47.2, 49], [46.6, 53], [46, 56]] },
-      { "id": "northern_crossing", "name": "Northern Crossing", "kind": "main", "points": [[24, 42], [27, 44.4], [31, 46], [36, 45.4], [41, 45], [44, 46.6], [46, 46.6], [48, 45.4], [49.4, 44.7]] },
-      { "id": "camelot_east_road", "name": "Camelot East Road", "kind": "main", "points": [[54.4, 44.4], [55.6, 45.2], [56, 47], [55.4, 50], [53, 53], [51, 56], [48, 56], [46, 56]] },
-      { "id": "south_lake_road", "name": "South Lake Road", "kind": "main", "points": [[23, 26], [27, 26.6], [30, 27], [34, 27.2], [37, 27], [41, 26.2], [45, 25.4], [48, 25]] },
-      { "id": "severia_streets", "name": "Severian Coast Road", "kind": "street_marble", "points": [[29, 59], [31, 56], [34, 56], [39, 57], [43, 56.6], [46, 56], [50, 56.4], [54, 59], [56, 64]] },
-      { "id": "harbor_way", "name": "Harbor Way", "kind": "street_marble", "points": [[29, 59], [30, 62.5], [30.4, 65]] },
-      { "id": "lake_shore_path", "name": "Dimwater Shore Path", "kind": "path", "ring": "dimwater" },
-      { "id": "goblin_path", "name": "Hollow Path", "kind": "path", "points": [[22, 20], [23, 18]] },
-      { "id": "mere_path", "name": "Mere Path", "kind": "path", "points": [[13.6, 8.6], [12.6, 8.2], [11.6, 7.8], [10.4, 7.6]] },
-      { "id": "cove_path", "name": "Cove Path", "kind": "path", "points": [[37, 12], [37.8, 9], [38.2, 6], [37.6, 3.4]] },
-      { "id": "falls_stair", "name": "Falls Stair", "kind": "stair", "points": [[47, 44.6], [47.2, 46], [47.4, 47.6]] },
-      { "id": "north_crags_path", "name": "North Crags Path", "kind": "path", "points": [[6, 45], [8, 46.6], [10, 48], [12, 49]] },
-      { "id": "pilgrims_coast_path", "name": "Western Coast Path", "kind": "path", "points": [[2.6, 22], [2.6, 30], [2.6, 38], [2.6, 46], [3.4, 52], [6, 56], [12, 59]] },
-      { "id": "forest_postern_path", "name": "Forest Postern Path", "kind": "path", "points": [[51.4, 43.4], [51, 42], [49, 39], [47, 37], [46, 37]] },
-      { "id": "gorrick_lake_postern", "name": "Lake Postern", "kind": "path", "points": [[26, 42], [28, 41], [30, 40]] },
-      { "id": "ashmaw_track", "name": "Ash Track", "kind": "path", "points": [[58, 24], [60, 28], [61, 32], [61.6, 34.6]] },
-      { "id": "garmund_track", "name": "Camp Track", "kind": "path", "points": [[58, 24], [55, 24.6], [53, 25]] },
-      { "id": "dead_wood_track", "name": "Lodge Track", "kind": "path", "points": [[46, 37], [50, 36.4], [55, 36], [55, 31]] },
-      { "id": "spider_track", "name": "Nest Track", "kind": "path", "points": [[50, 36.4], [51, 35]] },
-      { "id": "bunkhouse_track", "name": "Adit Track", "kind": "path", "points": [[11, 36], [12, 38.6], [12, 41]] },
-      { "id": "marble_track", "name": "Marble Track", "kind": "path", "points": [[11.6, 31.6], [8.6, 32.0], [6, 33]] },
-      { "id": "crossroads_spur", "name": "Smugglers' Way", "kind": "path", "points": [[23, 26], [26, 22], [30, 18], [32, 17]] },
-      { "id": "lookout_path", "name": "Lookout Path", "kind": "path", "points": [[56, 64], [60, 64.6], [63, 65], [65, 65]] },
-      { "id": "fossil_path", "name": "Fossil Path", "kind": "path", "points": [[54, 59], [56, 59]] },
-      { "id": "loxford_high_street", "name": "High Street", "kind": "street", "points": [[15.6, 8.8], [16.4, 8.85], [17.4, 8.85], [18.6, 8.95]] },
-      { "id": "church_lane", "name": "Church Lane", "kind": "street", "points": [[15, 8.9], [14.6, 9.6], [14.1, 9.9]] },
-      { "id": "valgard_high_street", "name": "Valgard High Street", "kind": "street", "points": [[10, 26.5], [11.4, 26.9], [12.6, 27.4], [14, 28], [15.4, 28.8]] },
-      { "id": "valgard_north_street", "name": "Residents' Street", "kind": "street", "points": [[14, 28], [14.6, 29.6], [14.8, 31.2]] },
-      { "id": "founders_row", "name": "Founders' Row", "kind": "street", "points": [[12.6, 27.4], [12.4, 26.4], [13.4, 26.1], [14.8, 26.1]] },
-      { "id": "gorrick_street", "name": "Hall Street", "kind": "track", "points": [[22.0, 41.8], [24, 41.8], [26.4, 41.9]] },
-      { "id": "azharad_souq_street", "name": "The Souq", "kind": "street_sand", "points": [[52, 11.6], [52.5, 13.6], [53.6, 14.9], [55.0, 14.6]] },
-      { "id": "azharad_north_street", "name": "Palace Street", "kind": "street_sand", "points": [[54.5, 12.0], [54.8, 13.2], [55.0, 14.6]] },
-      { "id": "azharad_south_street", "name": "South Quarter", "kind": "street_sand", "points": [[54.0, 11.2], [54.6, 9.0], [56, 7.8], [58, 7.6], [60.4, 7.6]] },
-      { "id": "via_palatina", "name": "Via Palatina", "kind": "street_marble", "points": [[31, 56], [32.6, 57.4], [34.4, 58.4], [35, 59]] },
-      { "id": "tenement_row", "name": "Tenement Row", "kind": "street_marble", "points": [[26.4, 54], [28, 55.8], [31, 56]] },
-      { "id": "camelot_ward_street", "name": "The Ward", "kind": "street", "points": [[49.4, 44.7], [50.6, 43.9], [52.0, 43.6], [53.2, 43.7], [54.4, 44.4], [55.6, 45.2]] },
-      { "id": "azharad_east_street", "name": "Khan Street", "kind": "street_sand", "points": [[55.6, 16.4], [58.2, 15.6], [60.4, 14.8], [60.7, 12.2], [60.3, 9.6]] },
-      { "id": "oasis_path", "name": "Oasis Path", "kind": "path", "points": [[48, 11.4], [48.4, 9.4], [49.0, 8.2]] },
-      { "id": "overlook_path", "name": "Overlook Path", "kind": "path", "points": [[30, 18], [32, 18.6], [33.6, 19.0]] },
-      { "id": "via_mese", "name": "The Mese", "kind": "street_marble", "points": [[25.6, 57.2], [29, 57.4], [33, 58.0], [37, 58.6], [41, 59.2], [43.2, 59.0]] },
-      { "id": "north_quay", "name": "North Quay", "kind": "street_marble", "points": [[25.2, 64.4], [29, 64.6], [33, 64.7], [38, 64.5], [43, 64.3], [44.6, 64.2]] },
-      { "id": "quay_road", "name": "Quay Road", "kind": "main", "points": [[44.6, 64.2], [46, 64], [49, 63.6], [52, 63.8], [55.4, 63.8]] },
-      { "id": "palace_east", "name": "Palace Street", "kind": "street_marble", "points": [[35, 59], [38.6, 59.8], [42, 60.6], [43, 62.6], [43, 64.3]] },
-      { "id": "west_avenue", "name": "West Avenue", "kind": "street_marble", "points": [[26.4, 54], [25.6, 57.2], [25.4, 60.4], [25.6, 63.4], [25.2, 64.4]] },
-      { "id": "market_north", "name": "Net Street", "kind": "street_marble", "points": [[29, 59], [28, 61.6], [27, 63.6], [27.4, 64.5]] },
-      { "id": "east_quarter", "name": "Bridge Street", "kind": "street_marble", "points": [[43, 56.6], [43.2, 59.0], [43, 62.6]] },
-      { "id": "south_lane", "name": "Wall Street", "kind": "street_marble", "points": [[31, 56], [33, 54.4], [37, 54.2], [41, 54.4], [43, 56.6]] },
-      { "id": "inner_ring", "name": "Archive Street", "kind": "street_marble", "points": [[29, 59], [30.6, 61.4], [32.4, 62.8], [32.6, 64.6]] },
-      { "id": "museum_lane", "name": "Museum Lane", "kind": "street_marble", "points": [[37, 54.2], [37.4, 56.4], [37, 58.6]] },
-      { "id": "azharad_lane_nw", "name": "Weavers' Lane", "kind": "street_sand", "points": [[50.8, 16.4], [51.6, 15.4], [52.5, 13.6], [51.2, 12.8], [50.8, 12.0]] },
-      { "id": "azharad_lane_n", "name": "Kitchen Lane", "kind": "street_sand", "points": [[51.0, 16.5], [53.4, 16.6], [55.6, 16.4]] },
-      { "id": "azharad_lane_se", "name": "Cistern Lane", "kind": "street_sand", "points": [[54.6, 9.0], [57.4, 9.6], [60.3, 9.6]] },
-      { "id": "azharad_lane_sw", "name": "Bankers' Lane", "kind": "street_sand", "points": [[52, 11.6], [51.4, 10.0], [52.4, 9.2], [54.6, 9.0]] },
-      { "id": "azharad_lane_e", "name": "Khan Lane", "kind": "street_sand", "points": [[58.2, 15.6], [58.4, 13.6], [58.0, 11.0], [57.4, 9.6]] },
-      { "id": "valgard_west_street", "name": "Sanctuary Street", "kind": "street", "points": [[10, 26.5], [8.4, 27.4], [7.9, 28.8], [8.2, 30.4]] },
-      { "id": "loxford_back_lane", "name": "Back Lane", "kind": "street", "points": [[17.4, 8.85], [17.7, 10.0], [17, 11]] },
-      { "id": "pilgrims_stair", "name": "Pilgrim's Stair", "kind": "stair", "points": [[24, 44.6], [24, 47.2]] },
-      { "id": "sandstone_track", "name": "Quarry Track", "kind": "path", "points": [[57, 17.4], [60, 19.6], [63, 22]] }
-    ]
-  },
-
-  "biomes": {
-    "_about": "Per biome: the top block, the soil under it and how deep, the rock below, the face of steep ground, and the trees (species: share of columns).",
-    "meadow":        { "variants": [ { "biome": "oakwood", "share": 0.13, "scale": 60, "lift": 1 }, { "biome": "copse", "share": 0.2, "scale": 26 } ], "top": "grass", "soil": "dirt", "soilDepth": 4, "rock": "stone", "cliff": "stone", "shore": "sand", "trees": { "oak": 0.0035, "birch": 0.0012 }, "plants": 0.06 },
-    "oakwood":       { "top": "grass", "soil": "dirt", "soilDepth": 4, "rock": "stone", "cliff": "stone", "shore": "dirt", "trees": { "oak": 0.028, "tree": 0.008, "birch": 0.004 }, "plants": 0.10 },
-    "willowmeadow":  { "top": "grass", "soil": "dirt", "soilDepth": 4, "rock": "stone", "cliff": "stone", "shore": "mud", "trees": { "willow": 0.006, "oak": 0.0015 }, "plants": 0.08 },
-    "marches":       { "boulders": { "block": "stone", "share": 0.012 }, "variants": [ { "biome": "heath", "share": 0.16, "scale": 70 }, { "biome": "scrubwood", "share": 0.12, "scale": 40, "lift": 1 }, { "biome": "stony", "share": 0.08, "scale": 30, "lift": 1 } ], "top": "dry_grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "gravel", "trees": { "tree": 0.002, "oak": 0.0012 }, "plants": 0.04 },
-    "desert":        { "boulders": { "block": "sandstone", "share": 0.035 }, "variants": [ { "biome": "dunes", "share": 0.26, "scale": 48, "lift": 5 }, { "biome": "sandstone", "share": 0.09, "scale": 28, "lift": 6 }, { "biome": "scrub", "share": 0.16, "scale": 40 } ], "top": "sand", "soil": "sand", "soilDepth": 5, "rock": "sandstone", "cliff": "sandstone", "shore": "sand", "trees": { "acacia": 0.0009 }, "plants": 0.0 },
-    "desert_town":   { "top": "sand", "soil": "sand", "soilDepth": 4, "rock": "sandstone", "cliff": "sandstone", "shore": "sand", "trees": { "palm": 0.0008 }, "plants": 0.0 },
-    "oasis":         { "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "sandstone", "cliff": "sandstone", "shore": "sand", "trees": { "palm": 0.02, "acacia": 0.004 }, "plants": 0.12 },
-    "claypits":      { "top": "clay", "soil": "clay", "soilDepth": 5, "rock": "sandstone", "cliff": "clay", "shore": "clay", "trees": {}, "plants": 0.0 },
-    "sandstone":     { "top": "sandstone", "soil": "sandstone", "soilDepth": 3, "rock": "sandstone", "cliff": "red_sandstone", "shore": "sand", "trees": {}, "plants": 0.0 },
-    "highland":      { "boulders": { "block": "stone", "share": 0.02 }, "variants": [ { "biome": "pinewood", "share": 0.16, "scale": 50, "lift": 1 }, { "biome": "stony", "share": 0.12, "scale": 34, "lift": 1.5 } ], "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "granite", "shore": "gravel", "trees": { "ashpine": 0.004, "birch": 0.0015 }, "plants": 0.05 },
-    "crags":         { "boulders": { "block": "granite", "share": 0.05 }, "top": "stone", "soil": "gravel", "soilDepth": 2, "rock": "stone", "cliff": "granite", "shore": "gravel", "grassBelow": 70, "grassTop": "grass", "trees": { "ashpine": 0.0035 }, "plants": 0.02 },
-    "heath":         { "boulders": { "block": "stone", "share": 0.03 }, "variants": [ { "biome": "marsh", "share": 0.08, "scale": 46, "lift": -1 }, { "biome": "stony", "share": 0.05, "scale": 40, "lift": 2 }, { "biome": "copse", "share": 0.07, "scale": 34 }, { "biome": "meadow", "share": 0.16, "scale": 60 } ], "top": "heath", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "mud", "trees": { "tree": 0.0006 }, "plants": 0.03 },
-    "upland":        { "boulders": { "block": "stone", "share": 0.012 }, "variants": [ { "biome": "pinewood", "share": 0.18, "scale": 46, "lift": 1 }, { "biome": "heath", "share": 0.1, "scale": 40 } ], "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "granite", "shore": "gravel", "trees": { "ashpine": 0.003, "oak": 0.0015 }, "plants": 0.05 },
-    "lakeshore":     { "variants": [ { "biome": "marsh", "share": 0.1, "scale": 32 }, { "biome": "copse", "share": 0.14, "scale": 28 } ], "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "mud", "trees": { "willow": 0.004, "tree": 0.002 }, "plants": 0.08 },
-    "marsh":         { "top": "mud", "soil": "mud", "soilDepth": 3, "rock": "stone", "cliff": "mud", "shore": "mud", "trees": { "willow": 0.003 }, "plants": 0.1 },
-    "deadwood":      { "variants": [ { "biome": "clearing", "share": 0.08, "scale": 30 }, { "biome": "stony", "share": 0.06, "scale": 26, "lift": 2 } ], "top": "podzol", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "mud", "trees": { "deadtree": 0.016, "ashpine": 0.012 }, "plants": 0.02 },
-    "volcanic":      { "boulders": { "block": "basalt", "share": 0.04 }, "variants": [ { "biome": "cinders", "share": 0.14, "scale": 60, "lift": 1 }, { "biome": "scorched", "share": 0.12, "scale": 80 } ], "top": "ash", "soil": "ash", "soilDepth": 2, "rock": "basalt", "cliff": "basalt", "shore": "basalt", "trees": { "deadtree": 0.0006 }, "plants": 0.0 },
-    "mediterranean": { "variants": [ { "biome": "cypress", "share": 0.12, "scale": 44, "lift": 1 }, { "biome": "olivegrove", "share": 0.12, "scale": 36 }, { "biome": "scrub", "share": 0.1, "scale": 40 }, { "biome": "stony", "share": 0.05, "scale": 30, "lift": 1 } ], "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "marble", "shore": "sand", "trees": { "cypress": 0.0025, "oak": 0.0008 }, "plants": 0.05 },
-    "vineyard":      { "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "marble", "shore": "sand", "trees": { "olive": 0.004, "cypress": 0.001 }, "plants": 0.03 },
-    "cypress":       { "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "marble", "shore": "sand", "trees": { "cypress": 0.026, "olive": 0.002 }, "plants": 0.06 },
-    "chalk":         { "top": "grass", "soil": "marble", "soilDepth": 2, "rock": "marble", "cliff": "marble", "shore": "gravel", "trees": {}, "plants": 0.02 },
-    "copse":         { "top": "grass", "soil": "dirt", "soilDepth": 4, "rock": "stone", "cliff": "stone", "shore": "dirt", "trees": { "oak": 0.014, "birch": 0.006, "tree": 0.004 }, "plants": 0.1 },
-    "scrubwood":     { "top": "dry_grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "gravel", "trees": { "tree": 0.012, "oak": 0.004 }, "plants": 0.06 },
-    "stony":         { "top": "gravel", "soil": "gravel", "soilDepth": 2, "rock": "stone", "cliff": "stone", "shore": "gravel", "trees": {}, "plants": 0.0, "boulders": { "block": "stone", "share": 0.12 } },
-    "dunes":         { "top": "sand", "soil": "sand", "soilDepth": 6, "rock": "sandstone", "cliff": "sand", "shore": "sand", "trees": {}, "plants": 0.0 },
-    "scrub":         { "top": "dry_grass", "soil": "sand", "soilDepth": 3, "rock": "sandstone", "cliff": "sandstone", "shore": "sand", "trees": { "acacia": 0.0025, "olive": 0.001 }, "plants": 0.03 },
-    "pinewood":      { "top": "podzol", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "granite", "shore": "gravel", "trees": { "ashpine": 0.03 }, "plants": 0.02 },
-    "clearing":      { "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "mud", "trees": { "deadtree": 0.002 }, "plants": 0.06 },
-    "cinders":       { "top": "basalt", "soil": "ash", "soilDepth": 2, "rock": "basalt", "cliff": "basalt", "shore": "basalt", "trees": {}, "plants": 0.0 },
-    "scorched":      { "top": "gravel", "soil": "ash", "soilDepth": 2, "rock": "basalt", "cliff": "basalt", "shore": "basalt", "trees": { "deadtree": 0.004 }, "plants": 0.0 },
-    "olivegrove":    { "top": "grass", "soil": "dirt", "soilDepth": 3, "rock": "stone", "cliff": "marble", "shore": "sand", "trees": { "olive": 0.02 }, "plants": 0.04 },
-    "beach":         { "top": "sand", "soil": "sand", "soilDepth": 4, "rock": "stone", "cliff": "stone", "shore": "sand", "trees": {}, "plants": 0.0 },
-    "seabed":        { "top": "sand", "soil": "sand", "soilDepth": 3, "rock": "stone", "cliff": "stone", "shore": "sand", "trees": {}, "plants": 0.0 }
-  },
-
-  "trees": {
-    "_about": "Each species: its log and leaves blocks, trunk height range, crown shape and size. The woodcutting node it becomes is named by 'node' (the devmap's kinds).",
-    "tree":     { "log": "log",        "leaves": "leaves",        "trunk": [4, 6], "crown": "round",  "radius": 2.4, "node": "tree" },
-    "oak":      { "log": "oak_log",    "leaves": "oak_leaves",    "trunk": [5, 7], "crown": "round",  "radius": 3.1, "node": "oak" },
-    "birch":    { "log": "birch_log",  "leaves": "leaves",        "trunk": [6, 8], "crown": "tall",   "radius": 2.0, "node": "tree" },
-    "willow":   { "log": "willow_log", "leaves": "willow_leaves", "trunk": [4, 6], "crown": "droop",  "radius": 3.4, "node": "willow" },
-    "palm":     { "log": "jungle_log", "leaves": "oak_leaves",    "trunk": [6, 9], "crown": "fronds", "radius": 3.0, "node": "tree" },
-    "acacia":   { "log": "log",        "leaves": "oak_leaves",    "trunk": [4, 5], "crown": "flat",   "radius": 3.4, "node": "tree" },
-    "cypress":  { "log": "spruce_log", "leaves": "pine_leaves",   "trunk": [2, 3], "crown": "column", "radius": 1.3, "height": [8, 12], "node": "tree" },
-    "olive":    { "log": "oak_log",    "leaves": "oak_leaves",         "trunk": [2, 3], "crown": "round",  "radius": 2.0, "node": "tree" },
-    "ashpine":  { "log": "spruce_log", "leaves": "pine_leaves",         "trunk": [3, 4], "crown": "cone",   "radius": 2.6, "height": [8, 12], "node": "tree" },
-    "deadtree": { "log": "charred_spruce_log", "leaves": "none",  "trunk": [5, 9], "crown": "snag",   "radius": 1.0, "node": "none" }
-  },
-
-  "outcrops": {
-    "_about": "Ore and stone at the surface where the document puts it (Progression & Resources): each a cluster of rocks in a range, how many, and the mineral (rpg.item.Minerals).",
-    "list": [
-      { "id": "starter_copper", "rect": [19, 19, 9, 9], "mineral": "copper", "count": 4 },
-      { "id": "starter_tin", "rect": [19, 19, 9, 9], "mineral": "tin", "count": 4 },
-      { "id": "azharad_coal", "rect": [53, 55, 17, 19], "mineral": "coal", "count": 6 },
-      { "id": "sandstone_quarry", "rect": [62, 64, 22, 23], "mineral": "stone", "count": 6 },
-      { "id": "valgard_iron", "rect": [9, 11, 33, 35], "mineral": "iron", "count": 6 },
-      { "id": "valgard_wrought", "rect": [9, 11, 33, 35], "mineral": "wrought_iron", "count": 3 },
-      { "id": "marble_granite", "rect": [5, 7, 32, 34], "mineral": "granite", "count": 4 },
-      { "id": "crags_iron", "rect": [6, 18, 36, 44], "mineral": "iron", "count": 10 },
-      { "id": "crags_coal", "rect": [6, 18, 36, 44], "mineral": "coal", "count": 8 },
-      { "id": "crags_mithril", "rect": [6, 14, 39, 44], "mineral": "mithril", "count": 4 },
-      { "id": "crags_cobalt", "rect": [6, 12, 41, 44], "mineral": "cobalt", "count": 2 },
-      { "id": "ashmaw_moltenite", "rect": [60, 64, 33, 39], "mineral": "moltenite", "count": 3 },
-      { "id": "ashmaw_dragonite", "rect": [60, 64, 33, 39], "mineral": "dragonite", "count": 2 }
-    ]
-  },
-
-  "mists": {
-    "_about": "Banks of ground mist the volumetric march draws (thickest at dawn, dusk, night and in the wet): each a place, how far round it they lie (chunks), how many banks, their size (cells), their height over the ground or water, density and colour.",
-    "list": [
-      { "id": "dimwater", "at": [36.5, 35], "spread": 6.0, "count": 22, "size": 11, "lift": 1.2, "density": 0.05, "colour": [0.62, 0.68, 0.72] },
-      { "id": "dimwater_marsh", "at": [38, 41], "spread": 4.0, "count": 10, "size": 8, "lift": 0.8, "density": 0.06, "colour": [0.56, 0.62, 0.6] },
-      { "id": "harlette_valley", "at": [7, 20], "spread": 2.6, "count": 12, "size": 9, "lift": 1.0, "density": 0.045, "colour": [0.66, 0.7, 0.72] },
-      { "id": "mist_pools", "at": [27, 43], "spread": 1.2, "count": 6, "size": 7, "lift": 0.6, "density": 0.07, "colour": [0.7, 0.74, 0.78] },
-      { "id": "murk_gorge", "at": [37, 19], "spread": 2.4, "count": 8, "size": 8, "lift": 1.5, "density": 0.04, "colour": [0.58, 0.6, 0.62] },
-      { "id": "dead_wood", "at": [51, 34], "spread": 4.5, "count": 14, "size": 10, "lift": 1.4, "density": 0.04, "colour": [0.46, 0.48, 0.46] },
-      { "id": "gallows_hollows", "at": [27, 31], "spread": 2.0, "count": 8, "size": 8, "lift": 0.9, "density": 0.05, "colour": [0.52, 0.52, 0.56] },
-      { "id": "the_mere", "at": [10, 7], "spread": 1.3, "count": 6, "size": 8, "lift": 0.8, "density": 0.04, "colour": [0.64, 0.7, 0.74] }
-    ]
-  },
-
-  "fishing": [
-    { "name": "Fishing spot (net, the Mere)", "at": [10, 7.6], "gear": "net", "waters": "LAKE" },
-    { "name": "Fishing spot (rod, the Mere)", "at": [9.2, 6.6], "gear": "rod", "waters": "LAKE" },
-    { "name": "Fishing spot (rod, Willow Brook)", "at": [6.4, 19.8], "gear": "rod", "waters": "RIVER" },
-    { "name": "Fishing spot (net, Willow Brook)", "at": [4.2, 19.4], "gear": "net", "waters": "RIVER" },
-    { "name": "Fishing spot (net, Dimwater)", "at": [37, 30.2], "gear": "net", "waters": "LAKE" },
-    { "name": "Fishing spot (rod, Dimwater)", "at": [31, 34], "gear": "rod", "waters": "LAKE" },
-    { "name": "Fishing spot (rod, Dimwater)", "at": [42.6, 36], "gear": "rod", "waters": "LAKE" },
-    { "name": "Fishing spot (rod, the Murk)", "at": [37.2, 14], "gear": "rod", "waters": "RIVER" },
-    { "name": "Fishing spot (rod, the Gleam)", "at": [46.2, 58], "gear": "rod", "waters": "RIVER" },
-    { "name": "Fishing spot (harpoon, Gleam estuary)", "at": [46.4, 66], "gear": "harpoon", "waters": "OFFSHORE" },
-    { "name": "Fishing spot (pot, Smugglers' Cove)", "at": [36.4, 2.6], "gear": "pot", "waters": "SHORE" },
-    { "name": "Fishing spot (net, Smugglers' Cove)", "at": [38, 2.4], "gear": "net", "waters": "SHORE" },
-    { "name": "Fishing spot (rod, the harbor)", "at": [29, 66.4], "gear": "rod", "waters": "COAST" },
-    { "name": "Fishing spot (harpoon, the harbor)", "at": [32, 66.6], "gear": "harpoon", "waters": "OFFSHORE" },
-    { "name": "Fishing spot (net, Azharad's shore)", "at": [60, 1.8], "gear": "net", "waters": "SHORE" },
-    { "name": "Fishing spot (pot, the western shore)", "at": [1.8, 28], "gear": "pot", "waters": "SHORE" }
-  ],
-
-  "realms": {
-    "_about": "Whose law holds where (settled cores; the rest is the wilds). city, town and empire are the three that keep a lawman (the devmap's DevCity, DevTown and DevPalace).",
-    "city": "Loxford", "town": "Harlette", "empire": "Severia",
-    "_tint": "Each realm's grade (projectrpg.txt 'Visual Tint'): day r, g, b, night r, g, b, fog thickness - blended in across 'blend' cells. The wilds' is the ground everywhere else.",
-    "wilds": { "tint": [0.93, 0.93, 0.95, 0.9, 0.9, 0.95, 1.18] },
-    "blend": 48,
-    "list": [
-      { "name": "Loxford", "rects": [[9, 20, 6, 17], [21, 23, 19, 21]], "centre": [15, 8], "tint": [0.94, 0.97, 1.03, 0.92, 0.95, 1.04, 1.12] },
-      { "name": "Harlette", "rects": [[5, 11, 18, 22], [5, 7, 23, 24]], "centre": [8, 20], "tint": [0.95, 1.01, 0.96, 0.92, 0.98, 0.96, 1.3] },
-      { "name": "Valgard", "rects": [[6, 15, 25, 31]], "centre": [10, 28], "tint": [1.0, 1.0, 1.04, 1.06, 0.97, 0.9, 0.95] },
-      { "name": "Gorrick", "rects": [[22, 26, 40, 44]], "centre": [24, 42], "tint": [0.92, 0.95, 0.98, 1.02, 0.96, 0.9, 1.15] },
-      { "name": "Azharad", "rects": [[49, 61, 6, 18]], "centre": [56, 12], "tint": [1.08, 0.99, 0.84, 1.08, 0.94, 0.8, 1.05] },
-      { "name": "Camelot", "rects": [[49, 54, 42, 45]], "centre": [51, 44], "tint": [1.0, 1.0, 1.02, 1.04, 1.0, 0.94, 0.9] },
-      { "name": "Severia", "rects": [[24, 44, 53, 66], [47, 58, 51, 61]], "centre": [29, 59], "tint": [1.05, 1.02, 0.97, 0.98, 0.98, 1.04, 0.8] }
-    ]
-  },
-
-  "spawn": [15, 8],
-
-  "places": {
-    "_about": "Named places from projectrpg.txt, by key: [x, z] chunk, realm. People are sent to these when they come to ShadowVeil.",
-    "loxford_castle": [15, 8], "loxford_church": [14, 11], "freds_axes": [16, 8], "loxford_store": [16, 8], "drunken_duck": [18, 8],
-    "the_mere": [10, 7], "loxford_stables": [13, 7], "loxford_graveyard": [12, 11], "loxford_farm": [16, 11], "baron_farm_hall": [16, 14],
-    "earl_manor": [18, 13], "watchtower": [22, 20], "starter_rocks": [19, 9], "millwood_lodge": [19, 11], "hunting_lodge": [23, 18],
-    "goblin_hollow": [23, 18], "loxford_cottages": [18, 15], "loxford_houses": [11, 14], "loxford_crypt": [12, 11],
-    "azharad_palace": [56, 12], "azharad_bank": [53, 10], "azharad_workshop": [53, 12], "zafir_swords": [51, 11], "mohamed_crafting": [52, 13],
-    "karim_kitchen": [52, 15], "azharad_temple": [57, 14], "azharad_store": [54, 14], "azharad_tannery": [56, 15], "clay_pits": [54, 18],
-    "oasis": [49, 7], "workers_khan": [59, 12], "sandstone_cliffs": [63, 23],
-    "severian_palace": [35, 61], "severian_museum": [39, 57], "severian_bank": [27, 55], "red_moon_inn": [34, 56], "severian_church": [56, 64],
-    "great_market": [29, 59], "harbor": [30, 66], "town_square": [31, 56], "vineyard": [14, 49], "loggers_rest": [12, 59], "pilgrims_gate": [24, 49],
-    "fossil_cliffs": [56, 59], "severian_houses": [52, 51], "tenements": [28, 56],
-    "valgard_keep": [10, 28], "valgard_sanctuary": [9, 30], "metallists_guild": [12, 29], "valgard_bank": [12, 28], "sunkissed_mine": [10, 34],
-    "marble_mine": [6, 33], "white_hart": [9, 27], "founders_row": [13, 26], "south_fields": [9, 25],
-    "gorrick_hall": [24, 42], "hojimo_monastery": [23, 43], "gorrick_bank": [24, 41], "iron_yard": [25, 42], "last_hearth": [24, 40],
-    "workers_lodge": [22, 41], "lake_postern": [26, 42],
-    "dracula_manor": [6, 23], "harlette_green": [8, 20], "willow_brook": [7, 20], "tenant_fields": [10, 20], "harlette_chapel": [8, 22],
-    "shuttered_lantern": [8, 19], "willow_mill": [6, 20],
-    "camelot_keep": [51, 44], "camelot_chapel": [50, 44], "training_grounds": [53, 44], "sinclair_ward": [49, 44], "service_court": [52, 43],
-    "east_gate": [54, 45], "forest_postern": [51, 42],
-    "smugglers_cove": [37, 3], "waystation": [37, 12], "murk_gorge": [37, 19], "marches_crossroads": [23, 26], "gallows_heath": [25, 31],
-    "pilgrims_stair": [24, 46], "hollow_crags": [12, 40], "highland_bunkhouse": [12, 41], "dimwater_shore": [33, 31], "bryn_pile_hut": [37, 30],
-    "lantern_isle": [37, 36], "gleam_falls": [46, 46], "dead_wood_lodge": [55, 36], "clamp_hut": [55, 31], "resin_tent": [62, 43],
-    "snare_hut": [46, 37], "garmund_camp": [53, 25], "ashmaw": [62, 37], "crags_south_lodge": [7, 31], "spider_nest": [51, 35],
-    "murk_caves": [32, 17], "heath_hollows": [27, 31], "bone_orchard": [43, 22], "standing_stones": [9, 26], "mist_pools": [27, 43],
-    "gibbet_grove": [55, 42], "lookout_point": [65, 65], "reed_flats": [30, 27], "tollgate_heath": [28, 11]
-  },
-
-  "transfer": {
-    "_about": "Where each of the devmap's people goes on ShadowVeil (0.4.0 has no buildings: they keep their roles and live round the place named). Rules are tried in order; the first whose fields all match wins. Match on 'id' (Ids constant), 'role' (Npc.Role), 'profession' (Profession), 'jurisdiction' (the devmap town the person belonged to: city, town, empire, wilds) or 'name'.",
-    "rules": [
-      { "id": "ARTHUR", "to": "camelot_keep" }, { "id": "LANCELOT", "to": "camelot_keep" }, { "id": "GAWAIN", "to": "training_grounds" },
-      { "id": "TRISTAN", "to": "east_gate" }, { "id": "PERCIVAL", "to": "training_grounds" }, { "id": "MERLIN", "to": "camelot_chapel" },
-      { "id": "EMPEROR", "to": "severian_palace" }, { "id": "PRAETOR", "to": "severian_palace" }, { "id": "SENATOR", "to": "severian_palace" },
-      { "id": "CENTURION", "to": "severian_palace" }, { "id": "MACELLUM", "to": "great_market" }, { "id": "PRIESTESS", "to": "severian_church" },
-      { "id": "MEDICUS", "to": "town_square" }, { "id": "PHILOSOPHER", "to": "severian_museum" }, { "id": "STONEMASON", "to": "tenements" },
-      { "id": "PALACE_BEGGAR", "to": "harbor" }, { "id": "FISHER_P", "to": "harbor" }, { "id": "HUNTRESS", "to": "cypress_wood_edge" },
-      { "id": "TELLER", "to": "loxford_castle" },
-      { "id": "BANDIT_1", "to": "garmund_camp" }, { "id": "BANDIT_2", "to": "garmund_camp" }, { "id": "BRUTE", "to": "garmund_camp" },
-      { "id": "THIEF", "to": "drunken_duck" }, { "id": "FENCE", "to": "smugglers_cove" }, { "id": "BEGGAR", "to": "loxford_church" },
-      { "id": "HEALER", "to": "the_mere" }, { "id": "PRIEST", "to": "loxford_church" }, { "id": "UNDERTAKER", "to": "loxford_graveyard" },
-      { "id": "HUNTER", "to": "hunting_lodge" }, { "id": "PREDATOR_HUNTER", "to": "crags_south_lodge" }, { "id": "SCHOLAR", "to": "severian_museum" },
-      { "id": "KNIGHT", "to": "watchtower" }, { "id": "BORDER_KNIGHT", "to": "watchtower" },
-      { "id": "FISHERMAN", "to": "the_mere" }, { "id": "RIVER_FISHERMAN", "to": "willow_brook" }, { "id": "SHELLFISH_GATHERER", "to": "smugglers_cove" },
-      { "id": "COASTAL_FISHER", "to": "harbor" }, { "id": "MINER", "to": "starter_rocks" }, { "id": "QUARRY_WORKER", "to": "sandstone_cliffs" },
-      { "id": "MINER_CITY", "to": "sunkissed_mine" }, { "id": "MINER_PALACE", "to": "marble_mine" }, { "id": "SMELTER", "to": "metallists_guild" },
-      { "id": "GUILD_METALLISTS", "to": "metallists_guild" }, { "id": "ARMORY", "to": "founders_row" }, { "id": "GUILD_FORESTERS", "to": "millwood_lodge" },
-      { "id": "GUILD_ARTISANS", "to": "azharad_workshop" }, { "id": "CARDER", "to": "azharad_tannery" }, { "id": "SPINNER", "to": "azharad_tannery" },
-      { "id": "FULLER", "to": "azharad_tannery" }, { "id": "DYER", "to": "azharad_tannery" }, { "id": "GUILD_FARMERS", "to": "tenant_fields" },
-      { "id": "GUILD_PROVISIONERS", "to": "karim_kitchen" }, { "id": "GUILD_MARINERS", "to": "harbor" }, { "id": "GUILD_ARCANISTS", "to": "hojimo_monastery" },
-      { "id": "BARON", "to": "dracula_manor" }, { "id": "MANSION_KNIGHT", "to": "dracula_manor" }, { "id": "MANSION_COOK", "to": "dracula_manor" },
-      { "id": "MANSION_PORTER", "to": "dracula_manor" }, { "id": "MANSION_WOODCUTTER", "to": "willow_mill" }, { "id": "MANSION_ORCHARDIST", "to": "tenant_fields" },
-      { "id": "CARPENTER_CITY", "to": "millwood_lodge" }, { "id": "CARPENTER_TOWN", "to": "willow_mill" }, { "id": "CARPENTER_WOOD", "to": "dead_wood_lodge" },
-      { "id": "CARPENTER_PALACE", "to": "tenements" }, { "id": "WOODCUTTER_CITY", "to": "millwood_lodge" }, { "id": "WOODCUTTER_TOWN", "to": "willow_mill" },
-      { "id": "TRADER_CITY", "to": "waystation" }, { "id": "TRADER_PALACE", "to": "great_market" },
-      { "id": "CROP_FARMER_CITY", "to": "loxford_farm" }, { "id": "ORCHARD_KEEPER_CITY", "to": "baron_farm_hall" },
-      { "id": "CROP_FARMER_PALACE", "to": "vineyard" }, { "id": "ORCHARD_KEEPER_PALACE", "to": "vineyard" },
-      { "id": "INNKEEPER_CITY", "to": "drunken_duck" }, { "id": "BARTENDER_CITY", "to": "drunken_duck" }, { "id": "COOK_CITY", "to": "drunken_duck" },
-      { "id": "INNKEEPER_PALACE", "to": "red_moon_inn" }, { "id": "BARTENDER_PALACE", "to": "red_moon_inn" }, { "id": "COOK_PALACE", "to": "red_moon_inn" },
-      { "id": "COOK", "to": "shuttered_lantern" }, { "id": "CRAFTSMAN", "to": "freds_axes" },
-      { "id": "MERCHANT_A", "to": "loxford_store" }, { "id": "LAWMAN_A", "to": "loxford_castle" }, { "id": "GUARD", "to": "loxford_castle" },
-      { "id": "BOBWIN", "to": "loxford_castle" }, { "id": "WORKER", "to": "millwood_lodge" }, { "id": "VILLAGER", "to": "loxford_cottages" },
-      { "id": "MERCHANT_B", "to": "harlette_green" }, { "id": "LAWMAN_B", "to": "dracula_manor" }, { "id": "CARTER", "to": "loxford_stables" },
-      { "id": "QUEST_GIVER", "to": "drunken_duck" }, { "id": "CONTACT", "to": "waystation" }, { "id": "FARMER", "to": "loxford_stables" },
-      { "role": "LEGIONARY", "to": "severian_palace" }, { "role": "BANDIT", "to": "garmund_camp" }, { "role": "BRUTE", "to": "garmund_camp" },
-      { "jurisdiction": "empire", "to": "town_square" }, { "jurisdiction": "town", "to": "harlette_green" },
-      { "jurisdiction": "city", "to": "loxford_castle" }, { "to": "waystation" }
+ "_about": "ShadowVeil (Alpha 0.4.0): the permanent 1,072 x 1,072 world. Transcribed from projectrpg.txt WORLD BUILDING, which has the final say. Coordinates are the document's: [x, z] 1-based chunks, x west to east, z south to north; a point is the middle of its chunk, fractions are allowed. Heights are block layers (Y). Ranges [x0, x1, z0, z1] are inclusive chunks. Nothing here is code: the generator reads it all.",
+ "include": [
+  "shadowveil_architecture.json",
+  "shadowveil_census.json",
+  "shadowveil_interiors.json"
+ ],
+ "size": 1072,
+ "margin": 48,
+ "height": 200,
+ "sea": 30,
+ "ceiling": 99,
+ "seed": 400,
+ "coast": {
+  "_about": "Ocean on all four edges and every corner. The outer two chunks are the shore belt (shelves, coves, shallows, beaches); inland the ground blends up to the regions over 'blend' blocks.",
+  "deep": 8,
+  "belt": 30,
+  "blend": 44,
+  "floor": 21,
+  "shelf": 27,
+  "beach": 31,
+  "warp": 26,
+  "warpScale": 110,
+  "cliffs": [
+   {
+    "at": [
+     3,
+     3
     ],
-    "scatter": 9
+    "radius": 5,
+    "blend": 8
+   },
+   {
+    "at": [
+     65,
+     65
+    ],
+    "radius": 4,
+    "blend": 8
+   },
+   {
+    "at": [
+     2,
+     40
+    ],
+    "radius": 6,
+    "blend": 10
+   }
+  ]
+ },
+ "erosion": {
+  "passes": 18,
+  "talus": 1.6,
+  "cliffTalus": 3.4,
+  "rate": 0.45,
+  "smooth": 2
+ },
+ "regions": [
+  {
+   "id": "loxford_lowlands", "name": "Loxford Lowlands",
+   "rect": [
+    1,
+    26,
+    1,
+    22
+   ],
+   "y": [
+    34,
+    46
+   ],
+   "scale": 150,
+   "ridge": 0.0,
+   "biome": "meadow",
+   "blend": 44,
+   "realm": "WILDS"
   },
-
-  "fauna": {
-    "_about": "Where the devmap's wildlife goes on ShadowVeil: each animal habitat (rpg.animal.Habitat id) moves whole to a place, its herds and packs keeping their shape; each monster kind's lair (rpg.monster.MonsterKind) to the place its kind lives.",
-    "habitats": { "wild_wood": "millwood_lodge", "farm": "loxford_stables", "south_wood": "dead_wood_lodge", "_default": "millwood_lodge" },
-    "lairs": { "GOBLIN": "goblin_hollow", "BAT": "murk_caves", "IMP": "ashmaw", "GIANT_SPIDER": "spider_nest", "_default": "gallows_heath" }
+  {
+   "id": "southern_marches", "name": "Southern Marches",
+   "rect": [
+    27,
+    44,
+    1,
+    22
+   ],
+   "y": [
+    38,
+    54
+   ],
+   "scale": 120,
+   "ridge": 0.15,
+   "biome": "marches",
+   "blend": 44,
+   "realm": "WILDS"
   },
-
-  "extraPlaces": { "cypress_wood_edge": [14, 58] }
+  {
+   "id": "azharad_basin", "name": "Azharad Basin",
+   "rect": [
+    45,
+    67,
+    1,
+    22
+   ],
+   "y": [
+    33,
+    42
+   ],
+   "scale": 170,
+   "ridge": 0.0,
+   "biome": "desert",
+   "blend": 44,
+   "realm": "WILDS"
+  },
+  {
+   "id": "valgard_highlands", "name": "Valgard Highlands",
+   "rect": [
+    1,
+    18,
+    23,
+    31
+   ],
+   "y": [
+    46,
+    62
+   ],
+   "scale": 110,
+   "ridge": 0.2,
+   "biome": "highland",
+   "blend": 40,
+   "realm": "WILDS"
+  },
+  {
+   "id": "western_crags", "name": "Western Crags",
+   "rect": [
+    1,
+    18,
+    32,
+    45
+   ],
+   "y": [
+    56,
+    86
+   ],
+   "scale": 70,
+   "ridge": 0.85,
+   "biome": "crags",
+   "blend": 36,
+   "realm": "WILDS"
+  },
+  {
+   "id": "gallows_heath", "name": "Gallows Heath",
+   "rect": [
+    19,
+    27,
+    23,
+    39
+   ],
+   "y": [
+    45,
+    55
+   ],
+   "scale": 90,
+   "ridge": 0.1,
+   "biome": "heath",
+   "blend": 40,
+   "realm": "WILDS"
+  },
+  {
+   "id": "gorrick_shoulder", "name": "Gorrick Shoulder",
+   "rect": [
+    19,
+    27,
+    40,
+    45
+   ],
+   "y": [
+    52,
+    60
+   ],
+   "scale": 90,
+   "ridge": 0.2,
+   "biome": "upland",
+   "blend": 30,
+   "realm": "WILDS"
+  },
+  {
+   "id": "dimwater_basin", "name": "Dimwater Basin",
+   "rect": [
+    28,
+    44,
+    23,
+    45
+   ],
+   "y": [
+    45,
+    54
+   ],
+   "scale": 100,
+   "ridge": 0.0,
+   "biome": "lakeshore",
+   "blend": 40,
+   "realm": "WILDS"
+  },
+  {
+   "id": "dead_wood", "name": "Dead Wood",
+   "rect": [
+    45,
+    56,
+    23,
+    41
+   ],
+   "y": [
+    52,
+    68
+   ],
+   "scale": 90,
+   "ridge": 0.25,
+   "biome": "deadwood",
+   "blend": 40,
+   "realm": "WILDS"
+  },
+  {
+   "id": "camelot_shoulder", "name": "Camelot Shoulder",
+   "rect": [
+    45,
+    56,
+    42,
+    45
+   ],
+   "y": [
+    56,
+    64
+   ],
+   "scale": 90,
+   "ridge": 0.1,
+   "biome": "upland",
+   "blend": 26,
+   "realm": "WILDS"
+  },
+  {
+   "id": "ashmaw_coast", "name": "Ashmaw Coast",
+   "rect": [
+    57,
+    67,
+    23,
+    45
+   ],
+   "y": [
+    40,
+    66
+   ],
+   "scale": 80,
+   "ridge": 0.45,
+   "biome": "volcanic",
+   "blend": 40,
+   "realm": "WILDS"
+  },
+  {
+   "id": "severian_north", "name": "Severian North",
+   "rect": [
+    1,
+    67,
+    46,
+    67
+   ],
+   "y": [
+    31,
+    44
+   ],
+   "scale": 160,
+   "ridge": 0.0,
+   "biome": "mediterranean",
+   "blend": 12,
+   "realm": "WILDS"
+  }
+ ],
+ "overlays": [
+  {
+   "id": "loxford",
+   "rect": [
+    9,
+    20,
+    6,
+    17
+   ],
+   "y": [
+    36,
+    42
+   ],
+   "flatten": 0.75,
+   "biome": "meadow",
+   "blend": 28,
+   "realm": "Loxford"
+  },
+  {
+   "id": "millwood",
+   "rect": [
+    19,
+    23,
+    11,
+    18
+   ],
+   "y": [
+    38,
+    46
+   ],
+   "flatten": 0.2,
+   "biome": "oakwood",
+   "blend": 20
+  },
+  {
+   "id": "goblin_hollow",
+   "rect": [
+    22,
+    24,
+    17,
+    19
+   ],
+   "y": [
+    36,
+    40
+   ],
+   "flatten": 0.3,
+   "biome": "oakwood",
+   "blend": 14
+  },
+  {
+   "id": "watchtower_rise",
+   "rect": [
+    21,
+    23,
+    19,
+    21
+   ],
+   "y": [
+    44,
+    47
+   ],
+   "flatten": 0.7,
+   "biome": "meadow",
+   "blend": 14
+  },
+  {
+   "id": "harlette",
+   "rect": [
+    5,
+    11,
+    18,
+    22
+   ],
+   "y": [
+    37,
+    44
+   ],
+   "flatten": 0.7,
+   "biome": "willowmeadow",
+   "blend": 26,
+   "realm": "Harlette"
+  },
+  {
+   "id": "harlette_manor",
+   "rect": [
+    5,
+    7,
+    23,
+    24
+   ],
+   "y": [
+    45,
+    48
+   ],
+   "flatten": 0.8,
+   "biome": "meadow",
+   "blend": 14,
+   "realm": "Harlette"
+  },
+  {
+   "id": "valgard",
+   "rect": [
+    6,
+    15,
+    25,
+    31
+   ],
+   "y": [
+    48,
+    58
+   ],
+   "flatten": 0.6,
+   "biome": "highland",
+   "blend": 26,
+   "realm": "Valgard"
+  },
+  {
+   "id": "valgard_mines",
+   "rect": [
+    5,
+    12,
+    32,
+    36
+   ],
+   "y": [
+    58,
+    72
+   ],
+   "flatten": 0.15,
+   "biome": "crags",
+   "blend": 22
+  },
+  {
+   "id": "gorrick",
+   "rect": [
+    22,
+    26,
+    40,
+    44
+   ],
+   "y": [
+    54,
+    58
+   ],
+   "flatten": 0.85,
+   "biome": "upland",
+   "blend": 18,
+   "realm": "Gorrick"
+  },
+  {
+   "id": "gallows_moor",
+   "rect": [
+    23,
+    28,
+    26,
+    36
+   ],
+   "y": [
+    46,
+    53
+   ],
+   "flatten": 0.1,
+   "biome": "heath",
+   "blend": 22
+  },
+  {
+   "id": "azharad",
+   "rect": [
+    49,
+    61,
+    6,
+    18
+   ],
+   "y": [
+    34,
+    39
+   ],
+   "flatten": 0.8,
+   "biome": "desert_town",
+   "blend": 26,
+   "realm": "Azharad"
+  },
+  {
+   "id": "oasis",
+   "rect": [
+    47,
+    51,
+    5,
+    9
+   ],
+   "y": [
+    33,
+    36
+   ],
+   "flatten": 0.6,
+   "biome": "oasis",
+   "blend": 18
+  },
+  {
+   "id": "clay_pits",
+   "rect": [
+    53,
+    55,
+    17,
+    19
+   ],
+   "y": [
+    35,
+    38
+   ],
+   "flatten": 0.5,
+   "biome": "claypits",
+   "blend": 12
+  },
+  {
+   "id": "sandstone_cliffs",
+   "rect": [
+    61,
+    65,
+    21,
+    24
+   ],
+   "y": [
+    48,
+    60
+   ],
+   "flatten": 0.0,
+   "biome": "sandstone",
+   "blend": 14
+  },
+  {
+   "id": "camelot",
+   "rect": [
+    49,
+    54,
+    42,
+    45
+   ],
+   "y": [
+    58,
+    64
+   ],
+   "flatten": 0.75,
+   "biome": "upland",
+   "blend": 18,
+   "realm": "Camelot"
+  },
+  {
+   "id": "dead_wood_heart",
+   "rect": [
+    49,
+    55,
+    30,
+    42
+   ],
+   "y": [
+    56,
+    66
+   ],
+   "flatten": 0.15,
+   "biome": "deadwood",
+   "blend": 24
+  },
+  {
+   "id": "severia",
+   "rect": [
+    24,
+    44,
+    53,
+    66
+   ],
+   "y": [
+    32,
+    40
+   ],
+   "flatten": 0.7,
+   "biome": "mediterranean",
+   "blend": 22,
+   "realm": "Severia"
+  },
+  {
+   "id": "severia_east",
+   "rect": [
+    47,
+    58,
+    51,
+    61
+   ],
+   "y": [
+    34,
+    42
+   ],
+   "flatten": 0.6,
+   "biome": "mediterranean",
+   "blend": 22,
+   "realm": "Severia"
+  },
+  {
+   "id": "vineyard_terraces",
+   "rect": [
+    10,
+    18,
+    47,
+    52
+   ],
+   "y": [
+    38,
+    48
+   ],
+   "flatten": 0.2,
+   "terrace": 3,
+   "biome": "vineyard",
+   "blend": 16
+  },
+  {
+   "id": "cypress_wood",
+   "rect": [
+    6,
+    18,
+    54,
+    64
+   ],
+   "y": [
+    34,
+    44
+   ],
+   "flatten": 0.1,
+   "biome": "cypress",
+   "blend": 22
+  },
+  {
+   "id": "north_crags",
+   "rect": [
+    2,
+    9,
+    43,
+    48
+   ],
+   "y": [
+    50,
+    72
+   ],
+   "flatten": 0.0,
+   "biome": "crags",
+   "blend": 18
+  },
+  {
+   "id": "fossil_cliffs",
+   "rect": [
+    54,
+    58,
+    57,
+    61
+   ],
+   "y": [
+    40,
+    54
+   ],
+   "flatten": 0.0,
+   "biome": "chalk",
+   "blend": 12
+  },
+  {
+   "id": "lookout_point",
+   "rect": [
+    63,
+    66,
+    63,
+    66
+   ],
+   "y": [
+    42,
+    52
+   ],
+   "flatten": 0.2,
+   "biome": "mediterranean",
+   "blend": 12
+  },
+  {
+   "id": "ashmaw_cinder_fields",
+   "rect": [
+    57,
+    66,
+    26,
+    44
+   ],
+   "y": [
+    44,
+    66
+   ],
+   "flatten": 0.0,
+   "biome": "volcanic",
+   "blend": 20
+  }
+ ],
+ "peaks": [
+  {
+   "id": "ashmaw",
+   "at": [
+    62,
+    36
+   ],
+   "y": 92,
+   "radius": 92,
+   "crater": 14,
+   "craterDepth": 7,
+   "power": 1.35,
+   "biome": "volcanic",
+   "rough": 0.12
+  },
+  {
+   "id": "gallows_tor",
+   "at": [
+    12,
+    41
+   ],
+   "y": 89,
+   "radius": 46,
+   "power": 1.6,
+   "biome": "crags",
+   "rough": 0.25
+  },
+  {
+   "id": "hollow_crags_north",
+   "at": [
+    7,
+    40
+   ],
+   "y": 84,
+   "radius": 40,
+   "power": 1.4,
+   "biome": "crags",
+   "rough": 0.3
+  },
+  {
+   "id": "crag_pass_shoulder",
+   "at": [
+    16,
+    36
+   ],
+   "y": 74,
+   "radius": 36,
+   "power": 1.3,
+   "biome": "crags",
+   "rough": 0.3
+  },
+  {
+   "id": "lantern_isle",
+   "isle": true,
+   "at": [
+    37,
+    36
+   ],
+   "y": 55,
+   "radius": 36,
+   "power": 1.5,
+   "biome": "lakeshore",
+   "rough": 0.08
+  },
+  {
+   "id": "gorge_overlook",
+   "at": [
+    34,
+    19
+   ],
+   "y": 56,
+   "radius": 26,
+   "power": 1.1,
+   "biome": "marches",
+   "rough": 0.1
+  },
+  {
+   "id": "bone_orchard_rise",
+   "at": [
+    43,
+    22
+   ],
+   "y": 52,
+   "radius": 22,
+   "power": 1.0,
+   "biome": "marches",
+   "rough": 0.1
+  }
+ ],
+ "scarp": {
+  "_about": "The northern scarp between the Dimwater plateau and Severian's band: a cliff line broken by valleys. Lift is how far the plateau stands proud of the blend at the line; gaps are the valleys and ramps.",
+  "z": 45.6,
+  "width": 9,
+  "lift": 9,
+  "gaps": [
+   {
+    "at": [
+     24,
+     46
+    ],
+    "half": 28
+   },
+   {
+    "at": [
+     46,
+     46
+    ],
+    "half": 30
+   },
+   {
+    "at": [
+     56,
+     46.5
+    ],
+    "half": 26
+   },
+   {
+    "at": [
+     3,
+     46
+    ],
+    "half": 34
+   },
+   {
+    "at": [
+     12,
+     47
+    ],
+    "half": 22
+   }
+  ]
+ },
+ "lakes": [
+  {
+   "id": "dimwater",
+   "name": "Dimwater",
+   "at": [
+    36.5,
+    35
+   ],
+   "radii": [
+    6.6,
+    5.5
+   ],
+   "surface": 44,
+   "depth": 9,
+   "warp": 0.16,
+   "marsh": [
+    [
+     33,
+     41,
+     2.2,
+     1.2
+    ],
+    [
+     38,
+     41.5,
+     2.0,
+     1.1
+    ],
+    [
+     42,
+     40.5,
+     1.8,
+     1.0
+    ]
+   ],
+   "shorePath": 7,
+   "biome": "lakeshore"
+  },
+  {
+   "id": "mere",
+   "name": "The Mere",
+   "at": [
+    10,
+    7
+   ],
+   "radii": [
+    1.6,
+    1.15
+   ],
+   "surface": 37,
+   "depth": 5,
+   "warp": 0.12,
+   "biome": "willowmeadow"
+  },
+  {
+   "id": "oasis",
+   "name": "The Oasis",
+   "at": [
+    49,
+    7
+   ],
+   "radii": [
+    0.9,
+    0.7
+   ],
+   "surface": 34,
+   "depth": 3,
+   "warp": 0.1,
+   "biome": "oasis"
+  },
+  {
+   "id": "mist_pools_1",
+   "name": "Mist Pools",
+   "at": [
+    27,
+    43.3
+   ],
+   "radii": [
+    0.45,
+    0.32
+   ],
+   "surface": 55,
+   "depth": 2,
+   "warp": 0.2,
+   "biome": "upland"
+  },
+  {
+   "id": "mist_pools_2",
+   "name": "Mist Pools",
+   "at": [
+    27.6,
+    42.7
+   ],
+   "radii": [
+    0.32,
+    0.26
+   ],
+   "surface": 55,
+   "depth": 2,
+   "warp": 0.2,
+   "biome": "upland"
+  },
+  {
+   "id": "mist_pools_3",
+   "name": "Mist Pools",
+   "at": [
+    26.5,
+    42.5
+   ],
+   "radii": [
+    0.28,
+    0.22
+   ],
+   "surface": 55,
+   "depth": 2,
+   "warp": 0.2,
+   "biome": "upland"
+  }
+ ],
+ "causeways": [
+  {
+   "id": "west_causeway",
+   "from": [
+    32.2,
+    36
+   ],
+   "to": [
+    36.2,
+    36
+   ],
+   "width": 4,
+   "y": 45
+  },
+  {
+   "id": "north_causeway",
+   "from": [
+    37,
+    40.6
+   ],
+   "to": [
+    37,
+    36.9
+   ],
+   "width": 4,
+   "y": 45
+  }
+ ],
+ "rivers": [
+  {
+   "id": "gleam",
+   "name": "The Gleam",
+   "width": [
+    5,
+    12
+   ],
+   "bank": 5,
+   "points": [
+    [
+     43,
+     41.2,
+     44
+    ],
+    [
+     43,
+     44,
+     44
+    ],
+    [
+     44.6,
+     45.4,
+     44
+    ],
+    [
+     46,
+     45.9,
+     44
+    ],
+    [
+     46,
+     46.2,
+     32
+    ],
+    [
+     46,
+     47.2,
+     32
+    ],
+    [
+     46.2,
+     49,
+     32
+    ],
+    [
+     45.8,
+     53,
+     31
+    ],
+    [
+     46.2,
+     56,
+     31
+    ],
+    [
+     46,
+     61,
+     30
+    ],
+    [
+     46.4,
+     64,
+     30
+    ],
+    [
+     46,
+     67.6,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "murk",
+   "name": "The Murk",
+   "width": [
+    6,
+    11
+   ],
+   "bank": 4,
+   "points": [
+    [
+     37,
+     29.4,
+     44
+    ],
+    [
+     37,
+     27,
+     44
+    ],
+    [
+     37.3,
+     25,
+     42
+    ],
+    [
+     37,
+     22,
+     40
+    ],
+    [
+     36.6,
+     20,
+     38
+    ],
+    [
+     37.2,
+     18,
+     36
+    ],
+    [
+     37,
+     15,
+     34
+    ],
+    [
+     37,
+     12,
+     32
+    ],
+    [
+     37.4,
+     8,
+     31
+    ],
+    [
+     37,
+     5,
+     30
+    ],
+    [
+     37,
+     1.2,
+     30
+    ]
+   ],
+   "gorge": {
+    "from": 22.5,
+    "to": 16.5,
+    "walls": 14,
+    "ledge": 3
+   }
+  },
+  {
+   "id": "mere_outflow",
+   "name": "Mere Spill",
+   "width": [
+    3,
+    5
+   ],
+   "bank": 3,
+   "points": [
+    [
+     9.1,
+     6.4,
+     37
+    ],
+    [
+     7.6,
+     5.0,
+     36
+    ],
+    [
+     5.8,
+     3.6,
+     35
+    ],
+    [
+     4.0,
+     2.6,
+     34
+    ],
+    [
+     3.0,
+     2.2,
+     31
+    ],
+    [
+     2.4,
+     1.9,
+     30
+    ],
+    [
+     1.2,
+     1.3,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "willow_brook",
+   "name": "Willow Brook",
+   "width": [
+    3,
+    6
+   ],
+   "bank": 4,
+   "points": [
+    [
+     9,
+     21.6,
+     41
+    ],
+    [
+     7.4,
+     20.6,
+     39
+    ],
+    [
+     6.2,
+     19.8,
+     38
+    ],
+    [
+     4.4,
+     19.4,
+     35
+    ],
+    [
+     2.6,
+     19.1,
+     32
+    ],
+    [
+     1.0,
+     19.0,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "mine_runoff",
+   "name": "Mine Runoff",
+   "width": [
+    2,
+    4
+   ],
+   "bank": 3,
+   "points": [
+    [
+     9.4,
+     33.6,
+     60
+    ],
+    [
+     7.6,
+     33.0,
+     55
+    ],
+    [
+     5.0,
+     32.6,
+     48
+    ],
+    [
+     3.2,
+     32.2,
+     38
+    ],
+    [
+     1.8,
+     32.0,
+     31
+    ],
+    [
+     0.8,
+     32.0,
+     30
+    ]
+   ]
+  }
+ ],
+ "wadis": [
+  {
+   "id": "oasis_wadi",
+   "name": "Oasis Wadi",
+   "width": 6,
+   "depth": 3,
+   "points": [
+    [
+     48.4,
+     7.6
+    ],
+    [
+     47.2,
+     9.2
+    ],
+    [
+     45.8,
+     10.6
+    ],
+    [
+     44.4,
+     11.8
+    ],
+    [
+     41,
+     12.1
+    ],
+    [
+     38.2,
+     12.1
+    ]
+   ]
+  }
+ ],
+ "falls": [
+  {
+   "id": "gleam_falls",
+   "river": "gleam",
+   "at": [
+    46,
+    46
+   ],
+   "top": 44,
+   "bottom": 32
+  }
+ ],
+ "roads": {
+  "_about": "Main roads connect into loops. 'grade' is the most a road rises per block; 'bridge' is the deck material over water.",
+  "grade": 0.34,
+  "kinds": {
+   "king": {
+    "width": 4,
+    "shoulder": 4,
+    "surface": "cobble",
+    "edge": "gravel",
+    "bridge": "stone_bricks"
+   },
+   "main": {
+    "width": 3,
+    "shoulder": 4,
+    "surface": "gravel",
+    "edge": "dirt",
+    "bridge": "stone_bricks"
+   },
+   "path": {
+    "width": 2,
+    "shoulder": 3,
+    "surface": "dirt",
+    "edge": "bare_patch",
+    "bridge": "planks"
+   },
+   "_towns": "(0.4.1) the settlements' own streets (lamps: a lamp post every so many cells along them), the lanes from doors to the roads, the stone stairways",
+   "street": {
+    "width": 3,
+    "shoulder": 2,
+    "surface": "cobble",
+    "edge": "cobble",
+    "bridge": "stone_bricks",
+    "lamps": 14
+   },
+   "street_sand": {
+    "width": 3,
+    "shoulder": 2,
+    "surface": "sandstone",
+    "edge": "sandstone",
+    "bridge": "stone_bricks",
+    "lamps": 16
+   },
+   "street_marble": {
+    "width": 4,
+    "shoulder": 2,
+    "surface": "flagstone",
+    "edge": "flagstone",
+    "bridge": "marble",
+    "lamps": 14
+   },
+   "track": {
+    "width": 3,
+    "shoulder": 2,
+    "surface": "gravel",
+    "edge": "dirt",
+    "bridge": "planks",
+    "lamps": 18
+   },
+   "lane": {
+    "width": 2,
+    "shoulder": 1,
+    "surface": "gravel",
+    "edge": "gravel",
+    "bridge": "planks"
+   },
+   "stair": {
+    "width": 3,
+    "shoulder": 3,
+    "surface": "stone_bricks",
+    "edge": "cobble",
+    "bridge": "stone_bricks"
+   }
+  },
+  "list": [
+   {
+    "id": "kings_road",
+    "name": "King's Road",
+    "kind": "king",
+    "points": [
+     [
+      15,
+      8.75
+     ],
+     [
+      17,
+      11
+     ],
+     [
+      19,
+      14.5
+     ],
+     [
+      22,
+      20
+     ],
+     [
+      23,
+      26
+     ],
+     [
+      23.6,
+      31
+     ],
+     [
+      24,
+      36
+     ],
+     [
+      24.2,
+      39.2
+     ],
+     [
+      24,
+      42
+     ],
+     [
+      24,
+      44.6
+     ],
+     [
+      24,
+      46
+     ],
+     [
+      24,
+      49
+     ],
+     [
+      26.4,
+      54
+     ],
+     [
+      29,
+      59
+     ]
+    ]
+   },
+   {
+    "id": "southern_road",
+    "name": "Southern Road",
+    "kind": "main",
+    "points": [
+     [
+      18.6,
+      8.95
+     ],
+     [
+      22,
+      9
+     ],
+     [
+      25,
+      10.2
+     ],
+     [
+      28,
+      11
+     ],
+     [
+      32,
+      11.6
+     ],
+     [
+      37,
+      12
+     ],
+     [
+      41,
+      12.2
+     ],
+     [
+      44,
+      12
+     ],
+     [
+      48,
+      11.4
+     ],
+     [
+      52,
+      11.6
+     ],
+     [
+      54.5,
+      12.0
+     ]
+    ]
+   },
+   {
+    "id": "western_road",
+    "name": "Western Road",
+    "kind": "main",
+    "points": [
+     [
+      14.6,
+      8.75
+     ],
+     [
+      12,
+      11
+     ],
+     [
+      10,
+      14.5
+     ],
+     [
+      9,
+      17.5
+     ],
+     [
+      8,
+      20
+     ],
+     [
+      9,
+      23.5
+     ],
+     [
+      10,
+      26.5
+     ],
+     [
+      11.4,
+      26.9
+     ],
+     [
+      12.6,
+      27.4
+     ],
+     [
+      14,
+      28
+     ],
+     [
+      15.4,
+      28.8
+     ],
+     [
+      16.2,
+      30.4
+     ],
+     [
+      18,
+      33
+     ],
+     [
+      20,
+      29
+     ],
+     [
+      23,
+      26
+     ]
+    ]
+   },
+   {
+    "id": "ore_road",
+    "name": "Ore Road",
+    "kind": "main",
+    "points": [
+     [
+      12.6,
+      27.4
+     ],
+     [
+      12.9,
+      29.8
+     ],
+     [
+      11.6,
+      31.6
+     ],
+     [
+      10.9,
+      33.2
+     ],
+     [
+      11,
+      36
+     ],
+     [
+      14,
+      37.6
+     ],
+     [
+      18,
+      39
+     ],
+     [
+      21,
+      40.6
+     ],
+     [
+      24,
+      42
+     ]
+    ]
+   },
+   {
+    "id": "east_road",
+    "name": "East Road",
+    "kind": "main",
+    "points": [
+     [
+      54.5,
+      12.0
+     ],
+     [
+      55.0,
+      14.6
+     ],
+     [
+      55.6,
+      16.4
+     ],
+     [
+      57,
+      17.4
+     ],
+     [
+      58,
+      20
+     ],
+     [
+      58,
+      24
+     ],
+     [
+      54,
+      26
+     ],
+     [
+      50,
+      28
+     ],
+     [
+      47,
+      30
+     ],
+     [
+      46.2,
+      33.5
+     ],
+     [
+      46,
+      37
+     ],
+     [
+      46.8,
+      40
+     ],
+     [
+      47,
+      43
+     ],
+     [
+      47,
+      46
+     ],
+     [
+      47.2,
+      49
+     ],
+     [
+      46.6,
+      53
+     ],
+     [
+      46,
+      56
+     ]
+    ]
+   },
+   {
+    "id": "northern_crossing",
+    "name": "Northern Crossing",
+    "kind": "main",
+    "points": [
+     [
+      24,
+      42
+     ],
+     [
+      27,
+      44.4
+     ],
+     [
+      31,
+      46
+     ],
+     [
+      36,
+      45.4
+     ],
+     [
+      41,
+      45
+     ],
+     [
+      44,
+      46.6
+     ],
+     [
+      46,
+      46.6
+     ],
+     [
+      48,
+      45.4
+     ],
+     [
+      49.4,
+      44.7
+     ]
+    ]
+   },
+   {
+    "id": "camelot_east_road",
+    "name": "Camelot East Road",
+    "kind": "main",
+    "points": [
+     [
+      54.4,
+      44.4
+     ],
+     [
+      55.6,
+      45.2
+     ],
+     [
+      56,
+      47
+     ],
+     [
+      55.4,
+      50
+     ],
+     [
+      53,
+      53
+     ],
+     [
+      51,
+      56
+     ],
+     [
+      48,
+      56
+     ],
+     [
+      46,
+      56
+     ]
+    ]
+   },
+   {
+    "id": "south_lake_road",
+    "name": "South Lake Road",
+    "kind": "main",
+    "points": [
+     [
+      23,
+      26
+     ],
+     [
+      27,
+      26.6
+     ],
+     [
+      30,
+      27
+     ],
+     [
+      34,
+      27.2
+     ],
+     [
+      37,
+      27
+     ],
+     [
+      41,
+      26.2
+     ],
+     [
+      45,
+      25.4
+     ],
+     [
+      48,
+      25
+     ]
+    ]
+   },
+   {
+    "id": "severia_streets",
+    "name": "Severian Coast Road",
+    "kind": "street_marble",
+    "points": [
+     [
+      29,
+      59
+     ],
+     [
+      31,
+      56
+     ],
+     [
+      34,
+      56
+     ],
+     [
+      39,
+      57
+     ],
+     [
+      43,
+      56.6
+     ],
+     [
+      46,
+      56
+     ],
+     [
+      50,
+      56.4
+     ],
+     [
+      54,
+      59
+     ],
+     [
+      56,
+      64
+     ]
+    ]
+   },
+   {
+    "id": "harbor_way",
+    "name": "Harbor Way",
+    "kind": "street_marble",
+    "points": [
+     [
+      29,
+      59
+     ],
+     [
+      30,
+      62.5
+     ],
+     [
+      30.4,
+      65
+     ]
+    ]
+   },
+   {
+    "id": "lake_shore_path",
+    "name": "Dimwater Shore Path",
+    "kind": "path",
+    "ring": "dimwater"
+   },
+   {
+    "id": "goblin_path",
+    "name": "Hollow Path",
+    "kind": "path",
+    "points": [
+     [
+      22,
+      20
+     ],
+     [
+      23,
+      18
+     ]
+    ]
+   },
+   {
+    "id": "mere_path",
+    "name": "Mere Path",
+    "kind": "path",
+    "points": [
+     [
+      13.6,
+      8.6
+     ],
+     [
+      12.6,
+      8.2
+     ],
+     [
+      11.6,
+      7.8
+     ],
+     [
+      10.4,
+      7.6
+     ]
+    ]
+   },
+   {
+    "id": "cove_path",
+    "name": "Cove Path",
+    "kind": "path",
+    "points": [
+     [
+      37,
+      12
+     ],
+     [
+      37.8,
+      9
+     ],
+     [
+      38.2,
+      6
+     ],
+     [
+      37.6,
+      3.4
+     ]
+    ]
+   },
+   {
+    "id": "falls_stair",
+    "name": "Falls Stair",
+    "kind": "stair",
+    "points": [
+     [
+      47,
+      44.6
+     ],
+     [
+      47.2,
+      46
+     ],
+     [
+      47.4,
+      47.6
+     ]
+    ]
+   },
+   {
+    "id": "north_crags_path",
+    "name": "North Crags Path",
+    "kind": "path",
+    "points": [
+     [
+      6,
+      45
+     ],
+     [
+      8,
+      46.6
+     ],
+     [
+      10,
+      48
+     ],
+     [
+      12,
+      49
+     ]
+    ]
+   },
+   {
+    "id": "pilgrims_coast_path",
+    "name": "Western Coast Path",
+    "kind": "path",
+    "points": [
+     [
+      2.6,
+      22
+     ],
+     [
+      2.6,
+      30
+     ],
+     [
+      2.6,
+      38
+     ],
+     [
+      2.6,
+      46
+     ],
+     [
+      3.4,
+      52
+     ],
+     [
+      6,
+      56
+     ],
+     [
+      12,
+      59
+     ]
+    ]
+   },
+   {
+    "id": "forest_postern_path",
+    "name": "Forest Postern Path",
+    "kind": "path",
+    "points": [
+     [
+      51.4,
+      43.4
+     ],
+     [
+      51,
+      42
+     ],
+     [
+      49,
+      39
+     ],
+     [
+      47,
+      37
+     ],
+     [
+      46,
+      37
+     ]
+    ]
+   },
+   {
+    "id": "gorrick_lake_postern",
+    "name": "Lake Postern",
+    "kind": "path",
+    "points": [
+     [
+      26,
+      42
+     ],
+     [
+      28,
+      41
+     ],
+     [
+      30,
+      40
+     ]
+    ]
+   },
+   {
+    "id": "ashmaw_track",
+    "name": "Ash Track",
+    "kind": "path",
+    "points": [
+     [
+      58,
+      24
+     ],
+     [
+      60,
+      28
+     ],
+     [
+      61,
+      32
+     ],
+     [
+      61.6,
+      34.6
+     ]
+    ]
+   },
+   {
+    "id": "garmund_track",
+    "name": "Camp Track",
+    "kind": "path",
+    "points": [
+     [
+      58,
+      24
+     ],
+     [
+      55,
+      24.6
+     ],
+     [
+      53,
+      25
+     ]
+    ]
+   },
+   {
+    "id": "dead_wood_track",
+    "name": "Lodge Track",
+    "kind": "path",
+    "points": [
+     [
+      46,
+      37
+     ],
+     [
+      50,
+      36.4
+     ],
+     [
+      55,
+      36
+     ],
+     [
+      55,
+      31
+     ]
+    ]
+   },
+   {
+    "id": "spider_track",
+    "name": "Nest Track",
+    "kind": "path",
+    "points": [
+     [
+      50,
+      36.4
+     ],
+     [
+      51,
+      35
+     ]
+    ]
+   },
+   {
+    "id": "bunkhouse_track",
+    "name": "Adit Track",
+    "kind": "path",
+    "points": [
+     [
+      11,
+      36
+     ],
+     [
+      12,
+      38.6
+     ],
+     [
+      12,
+      41
+     ]
+    ]
+   },
+   {
+    "id": "marble_track",
+    "name": "Marble Track",
+    "kind": "path",
+    "points": [
+     [
+      11.6,
+      31.6
+     ],
+     [
+      8.6,
+      32.0
+     ],
+     [
+      6,
+      33
+     ]
+    ]
+   },
+   {
+    "id": "crossroads_spur",
+    "name": "Smugglers' Way",
+    "kind": "path",
+    "points": [
+     [
+      23,
+      26
+     ],
+     [
+      26,
+      22
+     ],
+     [
+      30,
+      18
+     ],
+     [
+      32,
+      17
+     ]
+    ]
+   },
+   {
+    "id": "lookout_path",
+    "name": "Lookout Path",
+    "kind": "path",
+    "points": [
+     [
+      56,
+      64
+     ],
+     [
+      60,
+      64.6
+     ],
+     [
+      63,
+      65
+     ],
+     [
+      65,
+      65
+     ]
+    ]
+   },
+   {
+    "id": "fossil_path",
+    "name": "Fossil Path",
+    "kind": "path",
+    "points": [
+     [
+      54,
+      59
+     ],
+     [
+      56,
+      59
+     ]
+    ]
+   },
+   {
+    "id": "loxford_high_street",
+    "name": "High Street",
+    "kind": "street",
+    "points": [
+     [
+      15.6,
+      8.8
+     ],
+     [
+      16.4,
+      8.85
+     ],
+     [
+      17.4,
+      8.85
+     ],
+     [
+      18.6,
+      8.95
+     ]
+    ]
+   },
+   {
+    "id": "church_lane",
+    "name": "Church Lane",
+    "kind": "street",
+    "points": [
+     [
+      15,
+      8.9
+     ],
+     [
+      14.6,
+      9.6
+     ],
+     [
+      14.1,
+      9.9
+     ]
+    ]
+   },
+   {
+    "id": "valgard_high_street",
+    "name": "Valgard High Street",
+    "kind": "street",
+    "points": [
+     [
+      10,
+      26.5
+     ],
+     [
+      11.4,
+      26.9
+     ],
+     [
+      12.6,
+      27.4
+     ],
+     [
+      14,
+      28
+     ],
+     [
+      15.4,
+      28.8
+     ]
+    ]
+   },
+   {
+    "id": "valgard_north_street",
+    "name": "Residents' Street",
+    "kind": "street",
+    "points": [
+     [
+      14,
+      28
+     ],
+     [
+      14.6,
+      29.6
+     ],
+     [
+      14.8,
+      31.2
+     ]
+    ]
+   },
+   {
+    "id": "founders_row",
+    "name": "Founders' Row",
+    "kind": "street",
+    "points": [
+     [
+      12.6,
+      27.4
+     ],
+     [
+      12.4,
+      26.4
+     ],
+     [
+      13.4,
+      26.1
+     ],
+     [
+      14.8,
+      26.1
+     ]
+    ]
+   },
+   {
+    "id": "gorrick_street",
+    "name": "Hall Street",
+    "kind": "track",
+    "points": [
+     [
+      22.0,
+      41.8
+     ],
+     [
+      24,
+      41.8
+     ],
+     [
+      26.4,
+      41.9
+     ]
+    ]
+   },
+   {
+    "id": "azharad_souq_street",
+    "name": "The Souq",
+    "kind": "street_sand",
+    "points": [
+     [
+      52,
+      11.6
+     ],
+     [
+      52.5,
+      13.6
+     ],
+     [
+      53.6,
+      14.9
+     ],
+     [
+      55.0,
+      14.6
+     ]
+    ]
+   },
+   {
+    "id": "azharad_north_street",
+    "name": "Palace Street",
+    "kind": "street_sand",
+    "points": [
+     [
+      54.5,
+      12.0
+     ],
+     [
+      54.8,
+      13.2
+     ],
+     [
+      55.0,
+      14.6
+     ]
+    ]
+   },
+   {
+    "id": "azharad_south_street",
+    "name": "South Quarter",
+    "kind": "street_sand",
+    "points": [
+     [
+      54.0,
+      11.2
+     ],
+     [
+      54.6,
+      9.0
+     ],
+     [
+      56,
+      7.8
+     ],
+     [
+      58,
+      7.6
+     ],
+     [
+      60.4,
+      7.6
+     ]
+    ]
+   },
+   {
+    "id": "via_palatina",
+    "name": "Via Palatina",
+    "kind": "street_marble",
+    "points": [
+     [
+      31,
+      56
+     ],
+     [
+      32.6,
+      57.4
+     ],
+     [
+      34.4,
+      58.4
+     ],
+     [
+      35,
+      59
+     ]
+    ]
+   },
+   {
+    "id": "tenement_row",
+    "name": "Tenement Row",
+    "kind": "street_marble",
+    "points": [
+     [
+      26.4,
+      54
+     ],
+     [
+      28,
+      55.8
+     ],
+     [
+      31,
+      56
+     ]
+    ]
+   },
+   {
+    "id": "camelot_ward_street",
+    "name": "The Ward",
+    "kind": "street",
+    "points": [
+     [
+      49.4,
+      44.7
+     ],
+     [
+      50.6,
+      43.9
+     ],
+     [
+      52.0,
+      43.6
+     ],
+     [
+      53.2,
+      43.7
+     ],
+     [
+      54.4,
+      44.4
+     ],
+     [
+      55.6,
+      45.2
+     ]
+    ]
+   },
+   {
+    "id": "azharad_east_street",
+    "name": "Khan Street",
+    "kind": "street_sand",
+    "points": [
+     [
+      55.6,
+      16.4
+     ],
+     [
+      58.2,
+      15.6
+     ],
+     [
+      60.4,
+      14.8
+     ],
+     [
+      60.7,
+      12.2
+     ],
+     [
+      60.3,
+      9.6
+     ]
+    ]
+   },
+   {
+    "id": "oasis_path",
+    "name": "Oasis Path",
+    "kind": "path",
+    "points": [
+     [
+      48,
+      11.4
+     ],
+     [
+      48.4,
+      9.4
+     ],
+     [
+      49.0,
+      8.2
+     ]
+    ]
+   },
+   {
+    "id": "overlook_path",
+    "name": "Overlook Path",
+    "kind": "path",
+    "points": [
+     [
+      30,
+      18
+     ],
+     [
+      32,
+      18.6
+     ],
+     [
+      33.6,
+      19.0
+     ]
+    ]
+   },
+   {
+    "id": "via_mese",
+    "name": "The Mese",
+    "kind": "street_marble",
+    "points": [
+     [
+      25.6,
+      57.2
+     ],
+     [
+      29,
+      57.4
+     ],
+     [
+      33,
+      58.0
+     ],
+     [
+      37,
+      58.6
+     ],
+     [
+      41,
+      59.2
+     ],
+     [
+      43.2,
+      59.0
+     ]
+    ]
+   },
+   {
+    "id": "north_quay",
+    "name": "North Quay",
+    "kind": "street_marble",
+    "points": [
+     [
+      25.2,
+      64.4
+     ],
+     [
+      29,
+      64.6
+     ],
+     [
+      33,
+      64.7
+     ],
+     [
+      38,
+      64.5
+     ],
+     [
+      43,
+      64.3
+     ],
+     [
+      44.6,
+      64.2
+     ]
+    ]
+   },
+   {
+    "id": "quay_road",
+    "name": "Quay Road",
+    "kind": "main",
+    "points": [
+     [
+      44.6,
+      64.2
+     ],
+     [
+      46,
+      64
+     ],
+     [
+      49,
+      63.6
+     ],
+     [
+      52,
+      63.8
+     ],
+     [
+      55.4,
+      63.8
+     ]
+    ]
+   },
+   {
+    "id": "palace_east",
+    "name": "Palace Street",
+    "kind": "street_marble",
+    "points": [
+     [
+      35,
+      59
+     ],
+     [
+      38.6,
+      59.8
+     ],
+     [
+      42,
+      60.6
+     ],
+     [
+      43,
+      62.6
+     ],
+     [
+      43,
+      64.3
+     ]
+    ]
+   },
+   {
+    "id": "west_avenue",
+    "name": "West Avenue",
+    "kind": "street_marble",
+    "points": [
+     [
+      26.4,
+      54
+     ],
+     [
+      25.6,
+      57.2
+     ],
+     [
+      25.4,
+      60.4
+     ],
+     [
+      25.6,
+      63.4
+     ],
+     [
+      25.2,
+      64.4
+     ]
+    ]
+   },
+   {
+    "id": "market_north",
+    "name": "Net Street",
+    "kind": "street_marble",
+    "points": [
+     [
+      29,
+      59
+     ],
+     [
+      28,
+      61.6
+     ],
+     [
+      27,
+      63.6
+     ],
+     [
+      27.4,
+      64.5
+     ]
+    ]
+   },
+   {
+    "id": "east_quarter",
+    "name": "Bridge Street",
+    "kind": "street_marble",
+    "points": [
+     [
+      43,
+      56.6
+     ],
+     [
+      43.2,
+      59.0
+     ],
+     [
+      43,
+      62.6
+     ]
+    ]
+   },
+   {
+    "id": "south_lane",
+    "name": "Wall Street",
+    "kind": "street_marble",
+    "points": [
+     [
+      31,
+      56
+     ],
+     [
+      33,
+      54.4
+     ],
+     [
+      37,
+      54.2
+     ],
+     [
+      41,
+      54.4
+     ],
+     [
+      43,
+      56.6
+     ]
+    ]
+   },
+   {
+    "id": "inner_ring",
+    "name": "Archive Street",
+    "kind": "street_marble",
+    "points": [
+     [
+      29,
+      59
+     ],
+     [
+      30.6,
+      61.4
+     ],
+     [
+      32.4,
+      62.8
+     ],
+     [
+      32.6,
+      64.6
+     ]
+    ]
+   },
+   {
+    "id": "museum_lane",
+    "name": "Museum Lane",
+    "kind": "street_marble",
+    "points": [
+     [
+      37,
+      54.2
+     ],
+     [
+      37.4,
+      56.4
+     ],
+     [
+      37,
+      58.6
+     ]
+    ]
+   },
+   {
+    "id": "azharad_lane_nw",
+    "name": "Weavers' Lane",
+    "kind": "street_sand",
+    "points": [
+     [
+      50.8,
+      16.4
+     ],
+     [
+      51.6,
+      15.4
+     ],
+     [
+      52.5,
+      13.6
+     ],
+     [
+      51.2,
+      12.8
+     ],
+     [
+      50.8,
+      12.0
+     ]
+    ]
+   },
+   {
+    "id": "azharad_lane_n",
+    "name": "Kitchen Lane",
+    "kind": "street_sand",
+    "points": [
+     [
+      51.0,
+      16.5
+     ],
+     [
+      53.4,
+      16.6
+     ],
+     [
+      55.6,
+      16.4
+     ]
+    ]
+   },
+   {
+    "id": "azharad_lane_se",
+    "name": "Cistern Lane",
+    "kind": "street_sand",
+    "points": [
+     [
+      54.6,
+      9.0
+     ],
+     [
+      57.4,
+      9.6
+     ],
+     [
+      60.3,
+      9.6
+     ]
+    ]
+   },
+   {
+    "id": "azharad_lane_sw",
+    "name": "Bankers' Lane",
+    "kind": "street_sand",
+    "points": [
+     [
+      52,
+      11.6
+     ],
+     [
+      51.4,
+      10.0
+     ],
+     [
+      52.4,
+      9.2
+     ],
+     [
+      54.6,
+      9.0
+     ]
+    ]
+   },
+   {
+    "id": "azharad_lane_e",
+    "name": "Khan Lane",
+    "kind": "street_sand",
+    "points": [
+     [
+      58.2,
+      15.6
+     ],
+     [
+      58.4,
+      13.6
+     ],
+     [
+      58.0,
+      11.0
+     ],
+     [
+      57.4,
+      9.6
+     ]
+    ]
+   },
+   {
+    "id": "valgard_west_street",
+    "name": "Sanctuary Street",
+    "kind": "street",
+    "points": [
+     [
+      10,
+      26.5
+     ],
+     [
+      8.4,
+      27.4
+     ],
+     [
+      7.9,
+      28.8
+     ],
+     [
+      8.2,
+      30.4
+     ]
+    ]
+   },
+   {
+    "id": "loxford_back_lane",
+    "name": "Back Lane",
+    "kind": "street",
+    "points": [
+     [
+      17.4,
+      8.85
+     ],
+     [
+      17.7,
+      10.0
+     ],
+     [
+      17,
+      11
+     ]
+    ]
+   },
+   {
+    "id": "pilgrims_stair",
+    "name": "Pilgrim's Stair",
+    "kind": "stair",
+    "points": [
+     [
+      24,
+      44.6
+     ],
+     [
+      24,
+      47.2
+     ]
+    ]
+   },
+   {
+    "id": "sandstone_track",
+    "name": "Quarry Track",
+    "kind": "path",
+    "points": [
+     [
+      57,
+      17.4
+     ],
+     [
+      60,
+      19.6
+     ],
+     [
+      63,
+      22
+     ]
+    ]
+   }
+  ]
+ },
+ "biomes": {
+  "_about": "Per biome: the top block, the soil under it and how deep, the rock below, the face of steep ground, and the trees (species: share of columns).",
+  "meadow": {
+   "variants": [
+    {
+     "biome": "oakwood",
+     "share": 0.13,
+     "scale": 60,
+     "lift": 1
+    },
+    {
+     "biome": "copse",
+     "share": 0.2,
+     "scale": 26
+    }
+   ],
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 4,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "sand",
+   "trees": {
+    "oak": 0.0035,
+    "birch": 0.0012
+   },
+   "plants": 0.06
+  },
+  "oakwood": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 4,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "dirt",
+   "trees": {
+    "oak": 0.028,
+    "tree": 0.008,
+    "birch": 0.004
+   },
+   "plants": 0.1
+  },
+  "willowmeadow": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 4,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "mud",
+   "trees": {
+    "willow": 0.006,
+    "oak": 0.0015
+   },
+   "plants": 0.08
+  },
+  "marches": {
+   "boulders": {
+    "block": "stone",
+    "share": 0.012
+   },
+   "variants": [
+    {
+     "biome": "heath",
+     "share": 0.16,
+     "scale": 70
+    },
+    {
+     "biome": "scrubwood",
+     "share": 0.12,
+     "scale": 40,
+     "lift": 1
+    },
+    {
+     "biome": "stony",
+     "share": 0.08,
+     "scale": 30,
+     "lift": 1
+    }
+   ],
+   "top": "dry_grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "gravel",
+   "trees": {
+    "tree": 0.002,
+    "oak": 0.0012
+   },
+   "plants": 0.04
+  },
+  "desert": {
+   "boulders": {
+    "block": "sandstone",
+    "share": 0.035
+   },
+   "variants": [
+    {
+     "biome": "dunes",
+     "share": 0.26,
+     "scale": 48,
+     "lift": 5
+    },
+    {
+     "biome": "sandstone",
+     "share": 0.09,
+     "scale": 28,
+     "lift": 6
+    },
+    {
+     "biome": "scrub",
+     "share": 0.16,
+     "scale": 40
+    }
+   ],
+   "top": "sand",
+   "soil": "sand",
+   "soilDepth": 5,
+   "rock": "sandstone",
+   "cliff": "sandstone",
+   "shore": "sand",
+   "trees": {
+    "acacia": 0.0009
+   },
+   "plants": 0.0
+  },
+  "desert_town": {
+   "top": "sand",
+   "soil": "sand",
+   "soilDepth": 4,
+   "rock": "sandstone",
+   "cliff": "sandstone",
+   "shore": "sand",
+   "trees": {
+    "palm": 0.0008
+   },
+   "plants": 0.0
+  },
+  "oasis": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "sandstone",
+   "cliff": "sandstone",
+   "shore": "sand",
+   "trees": {
+    "palm": 0.02,
+    "acacia": 0.004
+   },
+   "plants": 0.12
+  },
+  "claypits": {
+   "top": "clay",
+   "soil": "clay",
+   "soilDepth": 5,
+   "rock": "sandstone",
+   "cliff": "clay",
+   "shore": "clay",
+   "trees": {},
+   "plants": 0.0
+  },
+  "sandstone": {
+   "top": "sandstone",
+   "soil": "sandstone",
+   "soilDepth": 3,
+   "rock": "sandstone",
+   "cliff": "red_sandstone",
+   "shore": "sand",
+   "trees": {},
+   "plants": 0.0
+  },
+  "highland": {
+   "boulders": {
+    "block": "stone",
+    "share": 0.02
+   },
+   "variants": [
+    {
+     "biome": "pinewood",
+     "share": 0.16,
+     "scale": 50,
+     "lift": 1
+    },
+    {
+     "biome": "stony",
+     "share": 0.12,
+     "scale": 34,
+     "lift": 1.5
+    }
+   ],
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "granite",
+   "shore": "gravel",
+   "trees": {
+    "ashpine": 0.004,
+    "birch": 0.0015
+   },
+   "plants": 0.05
+  },
+  "crags": {
+   "boulders": {
+    "block": "granite",
+    "share": 0.05
+   },
+   "top": "stone",
+   "soil": "gravel",
+   "soilDepth": 2,
+   "rock": "stone",
+   "cliff": "granite",
+   "shore": "gravel",
+   "grassBelow": 70,
+   "grassTop": "grass",
+   "trees": {
+    "ashpine": 0.0035
+   },
+   "plants": 0.02
+  },
+  "heath": {
+   "boulders": {
+    "block": "stone",
+    "share": 0.03
+   },
+   "variants": [
+    {
+     "biome": "marsh",
+     "share": 0.08,
+     "scale": 46,
+     "lift": -1
+    },
+    {
+     "biome": "stony",
+     "share": 0.05,
+     "scale": 40,
+     "lift": 2
+    },
+    {
+     "biome": "copse",
+     "share": 0.07,
+     "scale": 34
+    },
+    {
+     "biome": "meadow",
+     "share": 0.16,
+     "scale": 60
+    }
+   ],
+   "top": "heath",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "mud",
+   "trees": {
+    "tree": 0.0006
+   },
+   "plants": 0.03
+  },
+  "upland": {
+   "boulders": {
+    "block": "stone",
+    "share": 0.012
+   },
+   "variants": [
+    {
+     "biome": "pinewood",
+     "share": 0.18,
+     "scale": 46,
+     "lift": 1
+    },
+    {
+     "biome": "heath",
+     "share": 0.1,
+     "scale": 40
+    }
+   ],
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "granite",
+   "shore": "gravel",
+   "trees": {
+    "ashpine": 0.003,
+    "oak": 0.0015
+   },
+   "plants": 0.05
+  },
+  "lakeshore": {
+   "variants": [
+    {
+     "biome": "marsh",
+     "share": 0.1,
+     "scale": 32
+    },
+    {
+     "biome": "copse",
+     "share": 0.14,
+     "scale": 28
+    }
+   ],
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "mud",
+   "trees": {
+    "willow": 0.004,
+    "tree": 0.002
+   },
+   "plants": 0.08
+  },
+  "marsh": {
+   "top": "mud",
+   "soil": "mud",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "mud",
+   "shore": "mud",
+   "trees": {
+    "willow": 0.003
+   },
+   "plants": 0.1
+  },
+  "deadwood": {
+   "variants": [
+    {
+     "biome": "clearing",
+     "share": 0.08,
+     "scale": 30
+    },
+    {
+     "biome": "stony",
+     "share": 0.06,
+     "scale": 26,
+     "lift": 2
+    }
+   ],
+   "top": "podzol",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "mud",
+   "trees": {
+    "deadtree": 0.016,
+    "ashpine": 0.012
+   },
+   "plants": 0.02
+  },
+  "volcanic": {
+   "boulders": {
+    "block": "basalt",
+    "share": 0.04
+   },
+   "variants": [
+    {
+     "biome": "cinders",
+     "share": 0.14,
+     "scale": 60,
+     "lift": 1
+    },
+    {
+     "biome": "scorched",
+     "share": 0.12,
+     "scale": 80
+    }
+   ],
+   "top": "ash",
+   "soil": "ash",
+   "soilDepth": 2,
+   "rock": "basalt",
+   "cliff": "basalt",
+   "shore": "basalt",
+   "trees": {
+    "deadtree": 0.0006
+   },
+   "plants": 0.0
+  },
+  "mediterranean": {
+   "variants": [
+    {
+     "biome": "cypress",
+     "share": 0.12,
+     "scale": 44,
+     "lift": 1
+    },
+    {
+     "biome": "olivegrove",
+     "share": 0.12,
+     "scale": 36
+    },
+    {
+     "biome": "scrub",
+     "share": 0.1,
+     "scale": 40
+    },
+    {
+     "biome": "stony",
+     "share": 0.05,
+     "scale": 30,
+     "lift": 1
+    }
+   ],
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "marble",
+   "shore": "sand",
+   "trees": {
+    "cypress": 0.0025,
+    "oak": 0.0008
+   },
+   "plants": 0.05
+  },
+  "vineyard": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "marble",
+   "shore": "sand",
+   "trees": {
+    "olive": 0.004,
+    "cypress": 0.001
+   },
+   "plants": 0.03
+  },
+  "cypress": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "marble",
+   "shore": "sand",
+   "trees": {
+    "cypress": 0.026,
+    "olive": 0.002
+   },
+   "plants": 0.06
+  },
+  "chalk": {
+   "top": "grass",
+   "soil": "marble",
+   "soilDepth": 2,
+   "rock": "marble",
+   "cliff": "marble",
+   "shore": "gravel",
+   "trees": {},
+   "plants": 0.02
+  },
+  "copse": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 4,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "dirt",
+   "trees": {
+    "oak": 0.014,
+    "birch": 0.006,
+    "tree": 0.004
+   },
+   "plants": 0.1
+  },
+  "scrubwood": {
+   "top": "dry_grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "gravel",
+   "trees": {
+    "tree": 0.012,
+    "oak": 0.004
+   },
+   "plants": 0.06
+  },
+  "stony": {
+   "top": "gravel",
+   "soil": "gravel",
+   "soilDepth": 2,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "gravel",
+   "trees": {},
+   "plants": 0.0,
+   "boulders": {
+    "block": "stone",
+    "share": 0.12
+   }
+  },
+  "dunes": {
+   "top": "sand",
+   "soil": "sand",
+   "soilDepth": 6,
+   "rock": "sandstone",
+   "cliff": "sand",
+   "shore": "sand",
+   "trees": {},
+   "plants": 0.0
+  },
+  "scrub": {
+   "top": "dry_grass",
+   "soil": "sand",
+   "soilDepth": 3,
+   "rock": "sandstone",
+   "cliff": "sandstone",
+   "shore": "sand",
+   "trees": {
+    "acacia": 0.0025,
+    "olive": 0.001
+   },
+   "plants": 0.03
+  },
+  "pinewood": {
+   "top": "podzol",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "granite",
+   "shore": "gravel",
+   "trees": {
+    "ashpine": 0.03
+   },
+   "plants": 0.02
+  },
+  "clearing": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "mud",
+   "trees": {
+    "deadtree": 0.002
+   },
+   "plants": 0.06
+  },
+  "cinders": {
+   "top": "basalt",
+   "soil": "ash",
+   "soilDepth": 2,
+   "rock": "basalt",
+   "cliff": "basalt",
+   "shore": "basalt",
+   "trees": {},
+   "plants": 0.0
+  },
+  "scorched": {
+   "top": "gravel",
+   "soil": "ash",
+   "soilDepth": 2,
+   "rock": "basalt",
+   "cliff": "basalt",
+   "shore": "basalt",
+   "trees": {
+    "deadtree": 0.004
+   },
+   "plants": 0.0
+  },
+  "olivegrove": {
+   "top": "grass",
+   "soil": "dirt",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "marble",
+   "shore": "sand",
+   "trees": {
+    "olive": 0.02
+   },
+   "plants": 0.04
+  },
+  "beach": {
+   "top": "sand",
+   "soil": "sand",
+   "soilDepth": 4,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "sand",
+   "trees": {},
+   "plants": 0.0
+  },
+  "seabed": {
+   "top": "sand",
+   "soil": "sand",
+   "soilDepth": 3,
+   "rock": "stone",
+   "cliff": "stone",
+   "shore": "sand",
+   "trees": {},
+   "plants": 0.0
+  }
+ },
+ "trees": {
+  "_about": "Each species: its log and leaves blocks, trunk height range, crown shape and size. The woodcutting node it becomes is named by 'node' (the devmap's kinds).",
+  "tree": {
+   "log": "log",
+   "leaves": "leaves",
+   "trunk": [
+    4,
+    6
+   ],
+   "crown": "round",
+   "radius": 2.4,
+   "node": "tree"
+  },
+  "oak": {
+   "log": "oak_log",
+   "leaves": "oak_leaves",
+   "trunk": [
+    5,
+    7
+   ],
+   "crown": "round",
+   "radius": 3.1,
+   "node": "oak"
+  },
+  "birch": {
+   "log": "birch_log",
+   "leaves": "leaves",
+   "trunk": [
+    6,
+    8
+   ],
+   "crown": "tall",
+   "radius": 2.0,
+   "node": "tree"
+  },
+  "willow": {
+   "log": "willow_log",
+   "leaves": "willow_leaves",
+   "trunk": [
+    4,
+    6
+   ],
+   "crown": "droop",
+   "radius": 3.4,
+   "node": "willow"
+  },
+  "palm": {
+   "log": "jungle_log",
+   "leaves": "oak_leaves",
+   "trunk": [
+    6,
+    9
+   ],
+   "crown": "fronds",
+   "radius": 3.0,
+   "node": "tree"
+  },
+  "acacia": {
+   "log": "log",
+   "leaves": "oak_leaves",
+   "trunk": [
+    4,
+    5
+   ],
+   "crown": "flat",
+   "radius": 3.4,
+   "node": "tree"
+  },
+  "cypress": {
+   "log": "spruce_log",
+   "leaves": "pine_leaves",
+   "trunk": [
+    2,
+    3
+   ],
+   "crown": "column",
+   "radius": 1.3,
+   "height": [
+    8,
+    12
+   ],
+   "node": "tree"
+  },
+  "olive": {
+   "log": "oak_log",
+   "leaves": "oak_leaves",
+   "trunk": [
+    2,
+    3
+   ],
+   "crown": "round",
+   "radius": 2.0,
+   "node": "tree"
+  },
+  "ashpine": {
+   "log": "spruce_log",
+   "leaves": "pine_leaves",
+   "trunk": [
+    3,
+    4
+   ],
+   "crown": "cone",
+   "radius": 2.6,
+   "height": [
+    8,
+    12
+   ],
+   "node": "tree"
+  },
+  "deadtree": {
+   "log": "charred_spruce_log",
+   "leaves": "none",
+   "trunk": [
+    5,
+    9
+   ],
+   "crown": "snag",
+   "radius": 1.0,
+   "node": "none"
+  }
+ },
+ "outcrops": {
+  "_about": "Ore and stone at the surface where the document puts it (Progression & Resources): each a cluster of rocks in a range, how many, and the mineral (rpg.item.Minerals).",
+  "list": [
+   {
+    "id": "starter_copper",
+    "rect": [
+     19,
+     19,
+     9,
+     9
+    ],
+    "mineral": "copper",
+    "count": 4
+   },
+   {
+    "id": "starter_tin",
+    "rect": [
+     19,
+     19,
+     9,
+     9
+    ],
+    "mineral": "tin",
+    "count": 4
+   },
+   {
+    "id": "azharad_coal",
+    "rect": [
+     53,
+     55,
+     17,
+     19
+    ],
+    "mineral": "coal",
+    "count": 6
+   },
+   {
+    "id": "sandstone_quarry",
+    "rect": [
+     62,
+     64,
+     22,
+     23
+    ],
+    "mineral": "stone",
+    "count": 6
+   },
+   {
+    "id": "valgard_iron",
+    "rect": [
+     9,
+     11,
+     33,
+     35
+    ],
+    "mineral": "iron",
+    "count": 6
+   },
+   {
+    "id": "valgard_wrought",
+    "rect": [
+     9,
+     11,
+     33,
+     35
+    ],
+    "mineral": "wrought_iron",
+    "count": 3
+   },
+   {
+    "id": "marble_granite",
+    "rect": [
+     5,
+     7,
+     32,
+     34
+    ],
+    "mineral": "granite",
+    "count": 4
+   },
+   {
+    "id": "crags_iron",
+    "rect": [
+     6,
+     18,
+     36,
+     44
+    ],
+    "mineral": "iron",
+    "count": 10
+   },
+   {
+    "id": "crags_coal",
+    "rect": [
+     6,
+     18,
+     36,
+     44
+    ],
+    "mineral": "coal",
+    "count": 8
+   },
+   {
+    "id": "crags_mithril",
+    "rect": [
+     6,
+     14,
+     39,
+     44
+    ],
+    "mineral": "mithril",
+    "count": 4
+   },
+   {
+    "id": "crags_cobalt",
+    "rect": [
+     6,
+     12,
+     41,
+     44
+    ],
+    "mineral": "cobalt",
+    "count": 2
+   },
+   {
+    "id": "ashmaw_moltenite",
+    "rect": [
+     60,
+     64,
+     33,
+     39
+    ],
+    "mineral": "moltenite",
+    "count": 3
+   },
+   {
+    "id": "ashmaw_dragonite",
+    "rect": [
+     60,
+     64,
+     33,
+     39
+    ],
+    "mineral": "dragonite",
+    "count": 2
+   }
+  ]
+ },
+ "mists": {
+  "_about": "Banks of ground mist the volumetric march draws (thickest at dawn, dusk, night and in the wet): each a place, how far round it they lie (chunks), how many banks, their size (cells), their height over the ground or water, density and colour.",
+  "list": [
+   {
+    "id": "dimwater",
+    "at": [
+     36.5,
+     35
+    ],
+    "spread": 6.0,
+    "count": 22,
+    "size": 11,
+    "lift": 1.2,
+    "density": 0.05,
+    "colour": [
+     0.62,
+     0.68,
+     0.72
+    ]
+   },
+   {
+    "id": "dimwater_marsh",
+    "at": [
+     38,
+     41
+    ],
+    "spread": 4.0,
+    "count": 10,
+    "size": 8,
+    "lift": 0.8,
+    "density": 0.06,
+    "colour": [
+     0.56,
+     0.62,
+     0.6
+    ]
+   },
+   {
+    "id": "harlette_valley",
+    "at": [
+     7,
+     20
+    ],
+    "spread": 2.6,
+    "count": 12,
+    "size": 9,
+    "lift": 1.0,
+    "density": 0.045,
+    "colour": [
+     0.66,
+     0.7,
+     0.72
+    ]
+   },
+   {
+    "id": "mist_pools",
+    "at": [
+     27,
+     43
+    ],
+    "spread": 1.2,
+    "count": 6,
+    "size": 7,
+    "lift": 0.6,
+    "density": 0.07,
+    "colour": [
+     0.7,
+     0.74,
+     0.78
+    ]
+   },
+   {
+    "id": "murk_gorge",
+    "at": [
+     37,
+     19
+    ],
+    "spread": 2.4,
+    "count": 8,
+    "size": 8,
+    "lift": 1.5,
+    "density": 0.04,
+    "colour": [
+     0.58,
+     0.6,
+     0.62
+    ]
+   },
+   {
+    "id": "dead_wood",
+    "at": [
+     51,
+     34
+    ],
+    "spread": 4.5,
+    "count": 14,
+    "size": 10,
+    "lift": 1.4,
+    "density": 0.04,
+    "colour": [
+     0.46,
+     0.48,
+     0.46
+    ]
+   },
+   {
+    "id": "gallows_hollows",
+    "at": [
+     27,
+     31
+    ],
+    "spread": 2.0,
+    "count": 8,
+    "size": 8,
+    "lift": 0.9,
+    "density": 0.05,
+    "colour": [
+     0.52,
+     0.52,
+     0.56
+    ]
+   },
+   {
+    "id": "the_mere",
+    "at": [
+     10,
+     7
+    ],
+    "spread": 1.3,
+    "count": 6,
+    "size": 8,
+    "lift": 0.8,
+    "density": 0.04,
+    "colour": [
+     0.64,
+     0.7,
+     0.74
+    ]
+   }
+  ]
+ },
+ "fishing": [
+  {
+   "name": "Fishing spot (net, the Mere)",
+   "at": [
+    10,
+    7.6
+   ],
+   "gear": "net",
+   "waters": "LAKE"
+  },
+  {
+   "name": "Fishing spot (rod, the Mere)",
+   "at": [
+    9.2,
+    6.6
+   ],
+   "gear": "rod",
+   "waters": "LAKE"
+  },
+  {
+   "name": "Fishing spot (rod, Willow Brook)",
+   "at": [
+    6.4,
+    19.8
+   ],
+   "gear": "rod",
+   "waters": "RIVER"
+  },
+  {
+   "name": "Fishing spot (net, Willow Brook)",
+   "at": [
+    4.2,
+    19.4
+   ],
+   "gear": "net",
+   "waters": "RIVER"
+  },
+  {
+   "name": "Fishing spot (net, Dimwater)",
+   "at": [
+    37,
+    30.2
+   ],
+   "gear": "net",
+   "waters": "LAKE"
+  },
+  {
+   "name": "Fishing spot (rod, Dimwater)",
+   "at": [
+    31,
+    34
+   ],
+   "gear": "rod",
+   "waters": "LAKE"
+  },
+  {
+   "name": "Fishing spot (rod, Dimwater)",
+   "at": [
+    42.6,
+    36
+   ],
+   "gear": "rod",
+   "waters": "LAKE"
+  },
+  {
+   "name": "Fishing spot (rod, the Murk)",
+   "at": [
+    37.2,
+    14
+   ],
+   "gear": "rod",
+   "waters": "RIVER"
+  },
+  {
+   "name": "Fishing spot (rod, the Gleam)",
+   "at": [
+    46.2,
+    58
+   ],
+   "gear": "rod",
+   "waters": "RIVER"
+  },
+  {
+   "name": "Fishing spot (harpoon, Gleam estuary)",
+   "at": [
+    46.4,
+    66
+   ],
+   "gear": "harpoon",
+   "waters": "OFFSHORE"
+  },
+  {
+   "name": "Fishing spot (pot, Smugglers' Cove)",
+   "at": [
+    36.4,
+    2.6
+   ],
+   "gear": "pot",
+   "waters": "SHORE"
+  },
+  {
+   "name": "Fishing spot (net, Smugglers' Cove)",
+   "at": [
+    38,
+    2.4
+   ],
+   "gear": "net",
+   "waters": "SHORE"
+  },
+  {
+   "name": "Fishing spot (rod, the harbor)",
+   "at": [
+    29,
+    66.4
+   ],
+   "gear": "rod",
+   "waters": "COAST"
+  },
+  {
+   "name": "Fishing spot (harpoon, the harbor)",
+   "at": [
+    32,
+    66.6
+   ],
+   "gear": "harpoon",
+   "waters": "OFFSHORE"
+  },
+  {
+   "name": "Fishing spot (net, Azharad's shore)",
+   "at": [
+    60,
+    1.8
+   ],
+   "gear": "net",
+   "waters": "SHORE"
+  },
+  {
+   "name": "Fishing spot (pot, the western shore)",
+   "at": [
+    1.8,
+    28
+   ],
+   "gear": "pot",
+   "waters": "SHORE"
+  }
+ ],
+ "fishery": {
+  "_about": "(0.4.2, gamefixes: fishers did not fish) what lives in each kind of fishing water named above - its stock of each kind of fish - and how far round a spot its water reaches (cells). The devmap keeps its own waters; on ShadowVeil every fishing spot is a water of its kind.",
+  "reach": {
+   "LAKE": 10,
+   "RIVER": 8,
+   "COAST": 14,
+   "SHORE": 12,
+   "OFFSHORE": 18
+  },
+  "stock": {
+   "LAKE": {
+    "SHRIMP": 10,
+    "GUPPY": 10,
+    "CRAB": 4,
+    "TROUT": 6,
+    "BASS": 6,
+    "CATFISH": 5,
+    "ELECTRIC_EEL": 3
+   },
+   "RIVER": {
+    "TROUT": 6,
+    "SALMON": 4,
+    "CATFISH": 2,
+    "ELECTRIC_EEL": 2,
+    "SHRIMP": 4
+   },
+   "SHORE": {
+    "SHRIMP": 8,
+    "SARDINE": 14,
+    "HERRING": 8,
+    "CRAB": 3,
+    "LOBSTER": 3,
+    "STARFISH": 4
+   },
+   "COAST": {
+    "SARDINE": 6,
+    "HERRING": 6,
+    "MACKEREL": 10,
+    "COD": 4,
+    "SALMON": 3,
+    "SQUID": 3,
+    "HADDOCK": 3,
+    "SHRIMP": 4
+   },
+   "OFFSHORE": {
+    "TUNA": 5,
+    "COD": 3,
+    "SQUID": 3,
+    "HADDOCK": 2,
+    "SWORDFISH": 1,
+    "SHARK": 1,
+    "ANGLERFISH": 2,
+    "BLUE_MARLIN": 1,
+    "WHALE": 1
+   },
+   "POND": {
+    "GUPPY": 8,
+    "SHRIMP": 6,
+    "TROUT": 2,
+    "BASS": 2
+   }
+  },
+  "tile": 48,
+  "minCells": 24,
+  "fullCells": 400,
+  "shoreDepth": 2,
+  "deepDepth": 7,
+  "_aboutAll": "(0.4.3) every water of the map holds fish: the map in tiles of 'tile' cells, a tile with at least 'minCells' water cells a water of the kind most of them are (the sea by its depth: up to 'shoreDepth' the shore, from 'deepDepth' offshore, the coast between), stocked as that kind is above in proportion to its cells (full stock at 'fullCells')"
+ },
+ "realms": {
+  "_about": "Whose law holds where (settled cores; the rest is the wilds). city, town and empire are the three that keep a lawman (the devmap's DevCity, DevTown and DevPalace).",
+  "city": "Loxford",
+  "town": "Harlette",
+  "empire": "Severia",
+  "_tint": "Each realm's grade (projectrpg.txt 'Visual Tint'): day r, g, b, night r, g, b, fog thickness - blended in across 'blend' cells. The wilds' is the ground everywhere else.",
+  "wilds": {
+   "tint": [
+    0.93,
+    0.93,
+    0.95,
+    0.9,
+    0.9,
+    0.95,
+    1.18
+   ],
+   "fogBiomes": {
+    "meadow": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "willowmeadow": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "clearing": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "copse": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "chalk": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "stony": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "scrub": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "scrubwood": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "marches": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "oakwood": [
+     0.92,
+     1.0,
+     0.92
+    ],
+    "pinewood": [
+     0.9,
+     0.98,
+     0.95
+    ],
+    "marsh": [
+     0.88,
+     0.96,
+     0.9
+    ],
+    "lakeshore": [
+     0.88,
+     0.96,
+     0.9
+    ],
+    "desert": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "desert_town": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "dunes": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "sandstone": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "claypits": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "oasis": [
+     1.12,
+     1.0,
+     0.8
+    ],
+    "volcanic": [
+     0.86,
+     0.8,
+     0.78
+    ],
+    "cinders": [
+     0.86,
+     0.8,
+     0.78
+    ],
+    "scorched": [
+     0.86,
+     0.8,
+     0.78
+    ],
+    "deadwood": [
+     0.85,
+     0.85,
+     0.9
+    ],
+    "highland": [
+     0.92,
+     0.95,
+     1.06
+    ],
+    "crags": [
+     0.92,
+     0.95,
+     1.06
+    ],
+    "upland": [
+     0.92,
+     0.95,
+     1.06
+    ],
+    "heath": [
+     0.92,
+     0.95,
+     1.06
+    ],
+    "mediterranean": [
+     1.05,
+     1.02,
+     0.94
+    ],
+    "vineyard": [
+     1.05,
+     1.02,
+     0.94
+    ],
+    "cypress": [
+     1.05,
+     1.02,
+     0.94
+    ],
+    "olivegrove": [
+     1.05,
+     1.02,
+     0.94
+    ],
+    "beach": [
+     0.95,
+     1.0,
+     1.08
+    ],
+    "seabed": [
+     0.95,
+     1.0,
+     1.08
+    ]
+   }
+  },
+  "blend": 48,
+  "list": [
+   {
+    "name": "Loxford",
+    "rects": [
+     [
+      9,
+      20,
+      6,
+      17
+     ],
+     [
+      21,
+      23,
+      19,
+      21
+     ]
+    ],
+    "centre": [
+     15,
+     8
+    ],
+    "tint": [
+     0.94,
+     0.97,
+     1.03,
+     0.92,
+     0.95,
+     1.04,
+     1.12
+    ],
+    "fog": [
+     0.92,
+     0.97,
+     1.06
+    ]
+   },
+   {
+    "name": "Harlette",
+    "rects": [
+     [
+      5,
+      11,
+      18,
+      22
+     ],
+     [
+      5,
+      7,
+      23,
+      24
+     ]
+    ],
+    "centre": [
+     8,
+     20
+    ],
+    "tint": [
+     0.95,
+     1.01,
+     0.96,
+     0.92,
+     0.98,
+     0.96,
+     1.3
+    ],
+    "fog": [
+     0.86,
+     0.95,
+     0.9
+    ]
+   },
+   {
+    "name": "Valgard",
+    "rects": [
+     [
+      6,
+      15,
+      25,
+      31
+     ]
+    ],
+    "centre": [
+     10,
+     28
+    ],
+    "tint": [
+     1.0,
+     1.0,
+     1.04,
+     1.06,
+     0.97,
+     0.9,
+     0.95
+    ],
+    "fog": [
+     0.9,
+     0.95,
+     1.08
+    ]
+   },
+   {
+    "name": "Gorrick",
+    "rects": [
+     [
+      22,
+      26,
+      40,
+      44
+     ]
+    ],
+    "centre": [
+     24,
+     42
+    ],
+    "tint": [
+     0.92,
+     0.95,
+     0.98,
+     1.02,
+     0.96,
+     0.9,
+     1.15
+    ],
+    "fog": [
+     0.9,
+     0.96,
+     1.1
+    ]
+   },
+   {
+    "name": "Azharad",
+    "rects": [
+     [
+      49,
+      61,
+      6,
+      18
+     ]
+    ],
+    "centre": [
+     56,
+     12
+    ],
+    "tint": [
+     1.08,
+     0.99,
+     0.84,
+     1.08,
+     0.94,
+     0.8,
+     1.05
+    ],
+    "fog": [
+     1.12,
+     1.0,
+     0.8
+    ]
+   },
+   {
+    "name": "Camelot",
+    "rects": [
+     [
+      49,
+      54,
+      42,
+      45
+     ]
+    ],
+    "centre": [
+     51,
+     44
+    ],
+    "tint": [
+     1.0,
+     1.0,
+     1.02,
+     1.04,
+     1.0,
+     0.94,
+     0.9
+    ],
+    "fog": [
+     1.05,
+     1.02,
+     0.95
+    ]
+   },
+   {
+    "name": "Severia",
+    "rects": [
+     [
+      24,
+      44,
+      53,
+      66
+     ],
+     [
+      47,
+      58,
+      51,
+      61
+     ]
+    ],
+    "centre": [
+     29,
+     59
+    ],
+    "tint": [
+     1.05,
+     1.02,
+     0.97,
+     0.98,
+     0.98,
+     1.04,
+     0.8
+    ],
+    "fog": [
+     1.06,
+     1.02,
+     0.94
+    ]
+   }
+  ],
+  "_fog": "(0.4.4, gamefixes: fog tinted by the region you are in) each realm's fog colour (a multiplier on the hour's fog), blended in over its bounds as its tint is; the wilds' by the biome under the eye (wilds.fogBiomes), a neutral one where none is named"
+ },
+ "spawn": [
+  15,
+  8
+ ],
+ "places": {
+  "_about": "Named places from projectrpg.txt, by key: [x, z] chunk, realm. People are sent to these when they come to ShadowVeil.",
+  "loxford_castle": [
+   15,
+   8
+  ],
+  "loxford_church": [
+   14,
+   11
+  ],
+  "freds_axes": [
+   16,
+   8
+  ],
+  "loxford_store": [
+   16,
+   8
+  ],
+  "drunken_duck": [
+   18,
+   8
+  ],
+  "the_mere": [
+   10,
+   7
+  ],
+  "loxford_stables": [
+   13,
+   7
+  ],
+  "loxford_graveyard": [
+   12,
+   11
+  ],
+  "loxford_farm": [
+   16,
+   11
+  ],
+  "baron_farm_hall": [
+   16,
+   14
+  ],
+  "earl_manor": [
+   18,
+   13
+  ],
+  "watchtower": [
+   22,
+   20
+  ],
+  "starter_rocks": [
+   19,
+   9
+  ],
+  "millwood_lodge": [
+   19,
+   11
+  ],
+  "hunting_lodge": [
+   23,
+   18
+  ],
+  "goblin_hollow": [
+   23,
+   18
+  ],
+  "loxford_cottages": [
+   18,
+   15
+  ],
+  "loxford_houses": [
+   11,
+   14
+  ],
+  "loxford_crypt": [
+   12,
+   11
+  ],
+  "azharad_palace": [
+   56,
+   12
+  ],
+  "azharad_bank": [
+   53,
+   10
+  ],
+  "azharad_workshop": [
+   53,
+   12
+  ],
+  "zafir_swords": [
+   51,
+   11
+  ],
+  "mohamed_crafting": [
+   52,
+   13
+  ],
+  "karim_kitchen": [
+   52,
+   15
+  ],
+  "azharad_temple": [
+   57,
+   14
+  ],
+  "azharad_store": [
+   54,
+   14
+  ],
+  "azharad_tannery": [
+   56,
+   15
+  ],
+  "clay_pits": [
+   54,
+   18
+  ],
+  "oasis": [
+   49,
+   7
+  ],
+  "workers_khan": [
+   59,
+   12
+  ],
+  "sandstone_cliffs": [
+   63,
+   23
+  ],
+  "severian_palace": [
+   35,
+   61
+  ],
+  "severian_museum": [
+   39,
+   57
+  ],
+  "severian_bank": [
+   27,
+   55
+  ],
+  "red_moon_inn": [
+   34,
+   56
+  ],
+  "severian_church": [
+   56,
+   64
+  ],
+  "great_market": [
+   29,
+   59
+  ],
+  "harbor": [
+   30,
+   66
+  ],
+  "town_square": [
+   31,
+   56
+  ],
+  "vineyard": [
+   14,
+   49
+  ],
+  "loggers_rest": [
+   12,
+   59
+  ],
+  "pilgrims_gate": [
+   24,
+   49
+  ],
+  "fossil_cliffs": [
+   56,
+   59
+  ],
+  "severian_houses": [
+   52,
+   51
+  ],
+  "tenements": [
+   28,
+   56
+  ],
+  "valgard_keep": [
+   10,
+   28
+  ],
+  "valgard_sanctuary": [
+   9,
+   30
+  ],
+  "metallists_guild": [
+   12,
+   29
+  ],
+  "valgard_bank": [
+   12,
+   28
+  ],
+  "sunkissed_mine": [
+   10,
+   34
+  ],
+  "marble_mine": [
+   6,
+   33
+  ],
+  "white_hart": [
+   9,
+   27
+  ],
+  "founders_row": [
+   13,
+   26
+  ],
+  "south_fields": [
+   9,
+   25
+  ],
+  "gorrick_hall": [
+   24,
+   42
+  ],
+  "hojimo_monastery": [
+   23,
+   43
+  ],
+  "gorrick_bank": [
+   24,
+   41
+  ],
+  "iron_yard": [
+   25,
+   42
+  ],
+  "last_hearth": [
+   24,
+   40
+  ],
+  "workers_lodge": [
+   22,
+   41
+  ],
+  "lake_postern": [
+   26,
+   42
+  ],
+  "dracula_manor": [
+   6,
+   23
+  ],
+  "harlette_green": [
+   8,
+   20
+  ],
+  "willow_brook": [
+   7,
+   20
+  ],
+  "tenant_fields": [
+   10,
+   20
+  ],
+  "harlette_chapel": [
+   8,
+   22
+  ],
+  "shuttered_lantern": [
+   8,
+   19
+  ],
+  "willow_mill": [
+   6,
+   20
+  ],
+  "camelot_keep": [
+   51,
+   44
+  ],
+  "camelot_chapel": [
+   50,
+   44
+  ],
+  "training_grounds": [
+   53,
+   44
+  ],
+  "sinclair_ward": [
+   49,
+   44
+  ],
+  "service_court": [
+   52,
+   43
+  ],
+  "east_gate": [
+   54,
+   45
+  ],
+  "forest_postern": [
+   51,
+   42
+  ],
+  "smugglers_cove": [
+   37,
+   3
+  ],
+  "waystation": [
+   37,
+   12
+  ],
+  "murk_gorge": [
+   37,
+   19
+  ],
+  "marches_crossroads": [
+   23,
+   26
+  ],
+  "gallows_heath": [
+   25,
+   31
+  ],
+  "pilgrims_stair": [
+   24,
+   46
+  ],
+  "hollow_crags": [
+   12,
+   40
+  ],
+  "highland_bunkhouse": [
+   12,
+   41
+  ],
+  "dimwater_shore": [
+   33,
+   31
+  ],
+  "bryn_pile_hut": [
+   37,
+   30
+  ],
+  "lantern_isle": [
+   37,
+   36
+  ],
+  "gleam_falls": [
+   46,
+   46
+  ],
+  "dead_wood_lodge": [
+   55,
+   36
+  ],
+  "clamp_hut": [
+   55,
+   31
+  ],
+  "resin_tent": [
+   62,
+   43
+  ],
+  "snare_hut": [
+   46,
+   37
+  ],
+  "garmund_camp": [
+   53,
+   25
+  ],
+  "ashmaw": [
+   62,
+   37
+  ],
+  "crags_south_lodge": [
+   7,
+   31
+  ],
+  "spider_nest": [
+   51,
+   35
+  ],
+  "murk_caves": [
+   32,
+   17
+  ],
+  "heath_hollows": [
+   27,
+   31
+  ],
+  "bone_orchard": [
+   43,
+   22
+  ],
+  "standing_stones": [
+   9,
+   26
+  ],
+  "mist_pools": [
+   27,
+   43
+  ],
+  "gibbet_grove": [
+   55,
+   42
+  ],
+  "lookout_point": [
+   65,
+   65
+  ],
+  "reed_flats": [
+   30,
+   27
+  ],
+  "tollgate_heath": [
+   28,
+   11
+  ]
+ },
+ "transfer": {
+  "_about": "Where each of the devmap's people goes on ShadowVeil (0.4.0 has no buildings: they keep their roles and live round the place named). Rules are tried in order; the first whose fields all match wins. Match on 'id' (Ids constant), 'role' (Npc.Role), 'profession' (Profession), 'jurisdiction' (the devmap town the person belonged to: city, town, empire, wilds) or 'name'.",
+  "rules": [
+   {
+    "id": "ARTHUR",
+    "to": "camelot_keep"
+   },
+   {
+    "id": "LANCELOT",
+    "to": "camelot_keep"
+   },
+   {
+    "id": "GAWAIN",
+    "to": "training_grounds"
+   },
+   {
+    "id": "TRISTAN",
+    "to": "east_gate"
+   },
+   {
+    "id": "PERCIVAL",
+    "to": "training_grounds"
+   },
+   {
+    "id": "MERLIN",
+    "to": "camelot_chapel"
+   },
+   {
+    "id": "EMPEROR",
+    "to": "severian_palace"
+   },
+   {
+    "id": "PRAETOR",
+    "to": "severian_palace"
+   },
+   {
+    "id": "SENATOR",
+    "to": "severian_palace"
+   },
+   {
+    "id": "CENTURION",
+    "to": "severian_palace"
+   },
+   {
+    "id": "MACELLUM",
+    "to": "great_market"
+   },
+   {
+    "id": "PRIESTESS",
+    "to": "severian_church"
+   },
+   {
+    "id": "MEDICUS",
+    "to": "town_square"
+   },
+   {
+    "id": "PHILOSOPHER",
+    "to": "severian_museum"
+   },
+   {
+    "id": "STONEMASON",
+    "to": "tenements"
+   },
+   {
+    "id": "PALACE_BEGGAR",
+    "to": "harbor"
+   },
+   {
+    "id": "FISHER_P",
+    "to": "harbor"
+   },
+   {
+    "id": "HUNTRESS",
+    "to": "cypress_wood_edge"
+   },
+   {
+    "id": "TELLER",
+    "to": "loxford_castle"
+   },
+   {
+    "id": "BANDIT_1",
+    "to": "garmund_camp"
+   },
+   {
+    "id": "BANDIT_2",
+    "to": "garmund_camp"
+   },
+   {
+    "id": "BRUTE",
+    "to": "garmund_camp"
+   },
+   {
+    "id": "THIEF",
+    "to": "drunken_duck"
+   },
+   {
+    "id": "FENCE",
+    "to": "smugglers_cove"
+   },
+   {
+    "id": "BEGGAR",
+    "to": "loxford_church"
+   },
+   {
+    "id": "HEALER",
+    "to": "the_mere"
+   },
+   {
+    "id": "PRIEST",
+    "to": "loxford_church"
+   },
+   {
+    "id": "UNDERTAKER",
+    "to": "loxford_graveyard"
+   },
+   {
+    "id": "HUNTER",
+    "to": "hunting_lodge"
+   },
+   {
+    "id": "PREDATOR_HUNTER",
+    "to": "crags_south_lodge"
+   },
+   {
+    "id": "SCHOLAR",
+    "to": "severian_museum"
+   },
+   {
+    "id": "KNIGHT",
+    "to": "watchtower"
+   },
+   {
+    "id": "BORDER_KNIGHT",
+    "to": "watchtower"
+   },
+   {
+    "id": "FISHERMAN",
+    "to": "the_mere"
+   },
+   {
+    "id": "RIVER_FISHERMAN",
+    "to": "willow_brook"
+   },
+   {
+    "id": "SHELLFISH_GATHERER",
+    "to": "smugglers_cove"
+   },
+   {
+    "id": "COASTAL_FISHER",
+    "to": "harbor"
+   },
+   {
+    "id": "MINER",
+    "to": "starter_rocks"
+   },
+   {
+    "id": "QUARRY_WORKER",
+    "to": "sandstone_cliffs"
+   },
+   {
+    "id": "MINER_CITY",
+    "to": "sunkissed_mine"
+   },
+   {
+    "id": "MINER_PALACE",
+    "to": "marble_mine"
+   },
+   {
+    "id": "SMELTER",
+    "to": "metallists_guild"
+   },
+   {
+    "id": "GUILD_METALLISTS",
+    "to": "metallists_guild"
+   },
+   {
+    "id": "ARMORY",
+    "to": "founders_row"
+   },
+   {
+    "id": "GUILD_FORESTERS",
+    "to": "millwood_lodge"
+   },
+   {
+    "id": "GUILD_ARTISANS",
+    "to": "azharad_workshop"
+   },
+   {
+    "id": "CARDER",
+    "to": "azharad_tannery"
+   },
+   {
+    "id": "SPINNER",
+    "to": "azharad_tannery"
+   },
+   {
+    "id": "FULLER",
+    "to": "azharad_tannery"
+   },
+   {
+    "id": "DYER",
+    "to": "azharad_tannery"
+   },
+   {
+    "id": "GUILD_FARMERS",
+    "to": "tenant_fields"
+   },
+   {
+    "id": "GUILD_PROVISIONERS",
+    "to": "karim_kitchen"
+   },
+   {
+    "id": "GUILD_MARINERS",
+    "to": "harbor"
+   },
+   {
+    "id": "GUILD_ARCANISTS",
+    "to": "hojimo_monastery"
+   },
+   {
+    "id": "BARON",
+    "to": "dracula_manor"
+   },
+   {
+    "id": "MANSION_KNIGHT",
+    "to": "dracula_manor"
+   },
+   {
+    "id": "MANSION_COOK",
+    "to": "dracula_manor"
+   },
+   {
+    "id": "MANSION_PORTER",
+    "to": "dracula_manor"
+   },
+   {
+    "id": "MANSION_WOODCUTTER",
+    "to": "willow_mill"
+   },
+   {
+    "id": "MANSION_ORCHARDIST",
+    "to": "tenant_fields"
+   },
+   {
+    "id": "CARPENTER_CITY",
+    "to": "millwood_lodge"
+   },
+   {
+    "id": "CARPENTER_TOWN",
+    "to": "willow_mill"
+   },
+   {
+    "id": "CARPENTER_WOOD",
+    "to": "dead_wood_lodge"
+   },
+   {
+    "id": "CARPENTER_PALACE",
+    "to": "tenements"
+   },
+   {
+    "id": "WOODCUTTER_CITY",
+    "to": "millwood_lodge"
+   },
+   {
+    "id": "WOODCUTTER_TOWN",
+    "to": "willow_mill"
+   },
+   {
+    "id": "TRADER_CITY",
+    "to": "waystation"
+   },
+   {
+    "id": "TRADER_PALACE",
+    "to": "great_market"
+   },
+   {
+    "id": "CROP_FARMER_CITY",
+    "to": "loxford_farm"
+   },
+   {
+    "id": "ORCHARD_KEEPER_CITY",
+    "to": "baron_farm_hall"
+   },
+   {
+    "id": "CROP_FARMER_PALACE",
+    "to": "vineyard"
+   },
+   {
+    "id": "ORCHARD_KEEPER_PALACE",
+    "to": "vineyard"
+   },
+   {
+    "id": "INNKEEPER_CITY",
+    "to": "drunken_duck"
+   },
+   {
+    "id": "BARTENDER_CITY",
+    "to": "drunken_duck"
+   },
+   {
+    "id": "COOK_CITY",
+    "to": "drunken_duck"
+   },
+   {
+    "id": "INNKEEPER_PALACE",
+    "to": "red_moon_inn"
+   },
+   {
+    "id": "BARTENDER_PALACE",
+    "to": "red_moon_inn"
+   },
+   {
+    "id": "COOK_PALACE",
+    "to": "red_moon_inn"
+   },
+   {
+    "id": "COOK",
+    "to": "shuttered_lantern"
+   },
+   {
+    "id": "CRAFTSMAN",
+    "to": "freds_axes"
+   },
+   {
+    "id": "MERCHANT_A",
+    "to": "loxford_store"
+   },
+   {
+    "id": "LAWMAN_A",
+    "to": "loxford_castle"
+   },
+   {
+    "id": "GUARD",
+    "to": "loxford_castle"
+   },
+   {
+    "id": "BOBWIN",
+    "to": "loxford_castle"
+   },
+   {
+    "id": "WORKER",
+    "to": "millwood_lodge"
+   },
+   {
+    "id": "VILLAGER",
+    "to": "loxford_cottages"
+   },
+   {
+    "id": "MERCHANT_B",
+    "to": "harlette_green"
+   },
+   {
+    "id": "LAWMAN_B",
+    "to": "dracula_manor"
+   },
+   {
+    "id": "CARTER",
+    "to": "loxford_stables"
+   },
+   {
+    "id": "QUEST_GIVER",
+    "to": "drunken_duck"
+   },
+   {
+    "id": "CONTACT",
+    "to": "waystation"
+   },
+   {
+    "id": "FARMER",
+    "to": "loxford_stables"
+   },
+   {
+    "role": "LEGIONARY",
+    "to": "severian_palace"
+   },
+   {
+    "role": "BANDIT",
+    "to": "garmund_camp"
+   },
+   {
+    "role": "BRUTE",
+    "to": "garmund_camp"
+   },
+   {
+    "jurisdiction": "empire",
+    "to": "town_square"
+   },
+   {
+    "jurisdiction": "town",
+    "to": "harlette_green"
+   },
+   {
+    "jurisdiction": "city",
+    "to": "loxford_castle"
+   },
+   {
+    "to": "waystation"
+   }
+  ],
+  "scatter": 9
+ },
+ "fauna": {
+  "_about": "Where the devmap's wildlife goes on ShadowVeil: each animal habitat (rpg.animal.Habitat id) moves whole to a place, its herds and packs keeping their shape; each monster kind's lair (rpg.monster.MonsterKind) to the place its kind lives.",
+  "habitats": {
+   "wild_wood": "millwood_lodge",
+   "farm": "loxford_stables",
+   "south_wood": "dead_wood_lodge",
+   "_default": "millwood_lodge"
+  },
+  "lairs": {
+   "GOBLIN": "goblin_hollow",
+   "BAT": "murk_caves",
+   "IMP": "ashmaw",
+   "GIANT_SPIDER": "spider_nest",
+   "_default": "gallows_heath"
+  },
+  "wilds": {
+   "_about": "(0.4.3, gamefixes: wildlife throughout the whole world, and logically: no predators near the towns) the wild's own habitats, grown over the whole square: a sample point every 'grid' cells, a habitat 'size' across about it, its animals the groups its biome lists ([species, females, males, young, percent chance]). Prey keeps 'prey' cells clear of any building; a group with a predator in it lives only where the wilds hold sway (no kingdom's law) and 'predator' cells from any settlement's building. Hysteresis keeps the farms' stock and the towns' strays as they are.",
+   "grid": 60,
+   "size": 40,
+   "clearance": {
+    "prey": 36,
+    "predator": 120
+   },
+   "biomes": {
+    "meadow": [
+     [
+      "RABBIT",
+      2,
+      1,
+      2,
+      70
+     ],
+     [
+      "DEER",
+      2,
+      1,
+      1,
+      40
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      25
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      15
+     ]
+    ],
+    "willowmeadow": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      60
+     ],
+     [
+      "DUCK",
+      2,
+      1,
+      1,
+      40
+     ],
+     [
+      "DEER",
+      2,
+      1,
+      0,
+      30
+     ],
+     [
+      "FOX",
+      1,
+      0,
+      0,
+      20
+     ]
+    ],
+    "clearing": [
+     [
+      "DEER",
+      2,
+      1,
+      1,
+      60
+     ],
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "PEGASUS",
+      1,
+      0,
+      0,
+      4
+     ]
+    ],
+    "copse": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      60
+     ],
+     [
+      "DEER",
+      1,
+      1,
+      0,
+      40
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "upland": [
+     [
+      "DEER",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      1,
+      50
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      1,
+      20
+     ]
+    ],
+    "oakwood": [
+     [
+      "DEER",
+      2,
+      1,
+      1,
+      60
+     ],
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      35
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      1,
+      30
+     ],
+     [
+      "BROWN_BEAR",
+      1,
+      0,
+      1,
+      15
+     ]
+    ],
+    "pinewood": [
+     [
+      "DEER",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      1,
+      35
+     ],
+     [
+      "BROWN_BEAR",
+      1,
+      0,
+      1,
+      20
+     ],
+     [
+      "MOUNTAIN_LION",
+      1,
+      0,
+      0,
+      15
+     ]
+    ],
+    "cypress": [
+     [
+      "DEER",
+      2,
+      1,
+      0,
+      40
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      1,
+      50
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "scrubwood": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      1,
+      35
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "highland": [
+     [
+      "DEER",
+      1,
+      1,
+      1,
+      40
+     ],
+     [
+      "MOUNTAIN_LION",
+      1,
+      0,
+      0,
+      30
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      1,
+      25
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      0,
+      40
+     ],
+     [
+      "PEGASUS",
+      1,
+      0,
+      0,
+      3
+     ]
+    ],
+    "crags": [
+     [
+      "MOUNTAIN_LION",
+      1,
+      0,
+      0,
+      35
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      25
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "stony": [
+     [
+      "RABBIT",
+      1,
+      1,
+      1,
+      40
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "heath": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      60
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      1,
+      30
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      0,
+      15
+     ]
+    ],
+    "deadwood": [
+     [
+      "DIRE_WOLF",
+      0,
+      1,
+      0,
+      12
+     ],
+     [
+      "WOLF",
+      2,
+      1,
+      1,
+      35
+     ],
+     [
+      "BROWN_BEAR",
+      1,
+      0,
+      0,
+      25
+     ],
+     [
+      "DEER",
+      1,
+      1,
+      0,
+      35
+     ]
+    ],
+    "marsh": [
+     [
+      "DUCK",
+      2,
+      1,
+      2,
+      60
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      25
+     ]
+    ],
+    "lakeshore": [
+     [
+      "DUCK",
+      2,
+      1,
+      2,
+      60
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "DEER",
+      1,
+      1,
+      0,
+      25
+     ]
+    ],
+    "marches": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "DEER",
+      1,
+      1,
+      1,
+      35
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      25
+     ]
+    ],
+    "mediterranean": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "FOX",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "DEER",
+      1,
+      1,
+      0,
+      20
+     ]
+    ],
+    "olivegrove": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      40
+     ]
+    ],
+    "vineyard": [
+     [
+      "RABBIT",
+      1,
+      1,
+      1,
+      40
+     ]
+    ],
+    "chalk": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      50
+     ],
+     [
+      "FOX",
+      1,
+      0,
+      0,
+      25
+     ]
+    ],
+    "desert": [
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      1,
+      35
+     ]
+    ],
+    "dunes": [
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      20
+     ]
+    ],
+    "scrub": [
+     [
+      "RABBIT",
+      2,
+      1,
+      1,
+      40
+     ],
+     [
+      "COYOTE",
+      1,
+      1,
+      1,
+      35
+     ],
+     [
+      "FOX",
+      1,
+      0,
+      0,
+      20
+     ]
+    ],
+    "sandstone": [
+     [
+      "COYOTE",
+      1,
+      1,
+      0,
+      30
+     ],
+     [
+      "RABBIT",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "claypits": [
+     [
+      "RABBIT",
+      1,
+      1,
+      0,
+      30
+     ]
+    ],
+    "volcanic": [
+     [
+      "COYOTE",
+      1,
+      0,
+      0,
+      15
+     ]
+    ],
+    "cinders": [
+     [
+      "COYOTE",
+      1,
+      0,
+      0,
+      15
+     ]
+    ],
+    "scorched": [
+     [
+      "COYOTE",
+      1,
+      0,
+      0,
+      15
+     ]
+    ]
+   }
+  }
+ },
+ "extraPlaces": {
+  "cypress_wood_edge": [
+   14,
+   58
+  ]
+ },
+ "monsters": {
+  "_about": "(0.4.4, gamefixes: monsters with natural spawn locations and territories in the wilderness - orcs, goblins, the overworld's kinds, not the caves' zombies, skeletons or dragons) A territory grows on the open wilds on a grid (jittered), where its biome holds the kind by its chance, far from every kingdom and homestead ('clearance', cells) and off the roads: its lair (a camp, a nest, a haunt) and the ground its members roam, hunt and return to. Per biome: [kind, lowest level, highest level, how many it holds, chance in a hundred]. Its population is the monster system's own - it breeds when fed and safe, and is not respawned on a timer.",
+  "grid": 88,
+  "most": 40,
+  "clearance": {
+   "town": 110,
+   "homestead": 55,
+   "road": 10
+  },
+  "names": {
+   "GOBLIN": "Goblin camp",
+   "ORC": "Orc warband's camp",
+   "TROLL": "Troll's haunt",
+   "IMP": "Imp nest",
+   "WEREWOLF": "Werewolf's range",
+   "GIANT_SPIDER": "Giant spider's web",
+   "GHOST": "Restless ground"
+  },
+  "biomes": {
+   "oakwood": [
+    [
+     "GOBLIN",
+     1,
+     9,
+     6,
+     30
+    ],
+    [
+     "WEREWOLF",
+     18,
+     28,
+     1,
+     8
+    ]
+   ],
+   "pinewood": [
+    [
+     "GOBLIN",
+     1,
+     9,
+     6,
+     25
+    ],
+    [
+     "WEREWOLF",
+     18,
+     30,
+     1,
+     10
+    ]
+   ],
+   "copse": [
+    [
+     "GOBLIN",
+     1,
+     7,
+     5,
+     20
+    ]
+   ],
+   "deadwood": [
+    [
+     "WEREWOLF",
+     20,
+     32,
+     2,
+     35
+    ],
+    [
+     "GIANT_SPIDER",
+     6,
+     14,
+     2,
+     25
+    ],
+    [
+     "GHOST",
+     15,
+     24,
+     2,
+     20
+    ]
+   ],
+   "heath": [
+    [
+     "IMP",
+     1,
+     8,
+     3,
+     30
+    ],
+    [
+     "GOBLIN",
+     2,
+     10,
+     5,
+     20
+    ]
+   ],
+   "highland": [
+    [
+     "ORC",
+     20,
+     32,
+     5,
+     30
+    ],
+    [
+     "TROLL",
+     55,
+     64,
+     1,
+     10
+    ]
+   ],
+   "crags": [
+    [
+     "ORC",
+     20,
+     34,
+     5,
+     35
+    ],
+    [
+     "TROLL",
+     58,
+     66,
+     1,
+     15
+    ]
+   ],
+   "upland": [
+    [
+     "ORC",
+     18,
+     30,
+     4,
+     25
+    ]
+   ],
+   "stony": [
+    [
+     "ORC",
+     18,
+     28,
+     4,
+     15
+    ]
+   ],
+   "marsh": [
+    [
+     "GIANT_SPIDER",
+     4,
+     12,
+     2,
+     25
+    ],
+    [
+     "IMP",
+     1,
+     6,
+     3,
+     15
+    ]
+   ],
+   "marches": [
+    [
+     "GOBLIN",
+     2,
+     10,
+     5,
+     25
+    ],
+    [
+     "ORC",
+     18,
+     28,
+     4,
+     15
+    ]
+   ],
+   "scrub": [
+    [
+     "GOBLIN",
+     1,
+     8,
+     5,
+     20
+    ]
+   ],
+   "scrubwood": [
+    [
+     "GOBLIN",
+     1,
+     8,
+     5,
+     25
+    ]
+   ],
+   "volcanic": [
+    [
+     "IMP",
+     4,
+     12,
+     4,
+     40
+    ]
+   ],
+   "cinders": [
+    [
+     "IMP",
+     4,
+     12,
+     4,
+     35
+    ]
+   ],
+   "scorched": [
+    [
+     "IMP",
+     4,
+     12,
+     4,
+     30
+    ]
+   ],
+   "desert": [
+    [
+     "GIANT_SPIDER",
+     4,
+     12,
+     2,
+     15
+    ]
+   ],
+   "dunes": [
+    [
+     "GIANT_SPIDER",
+     4,
+     12,
+     2,
+     12
+    ]
+   ],
+   "meadow": [
+    [
+     "GOBLIN",
+     1,
+     6,
+     4,
+     8
+    ]
+   ],
+   "chalk": [
+    [
+     "GOBLIN",
+     1,
+     6,
+     4,
+     8
+    ]
+   ]
+  },
+  "_clearance": "cells kept clear: from any building inside a kingdom's bounds ('town'), from a lone building, hall or home out in the wilds ('homestead'), from a road ('road')"
+ },
+ "gathering": {
+  "_about": "(0.4.5, gamefixes: Harvesting did not work - ShadowVeil had nothing wild to gather) The wild's gathering, grown over the whole square like its trees: a point tried every 'grid' cells (jittered), each kind's chance by the biome there; never on a road, a lane, a lot, a yard, water, a cliff or under a tree. Each kind is a Harvesting node of the same rules as anywhere: its level, what it gives, its experience, the time a pick takes, how many picks before it is bare, and the game minutes it takes to grow back.",
+  "grid": 6,
+  "kinds": {
+   "herb_patch": {
+    "name": "Herb patch",
+    "level": 1,
+    "item": "guam",
+    "xp": 11,
+    "time": 2.2,
+    "stock": 3,
+    "block": "HERB_PATCH",
+    "biomes": {
+     "meadow": 0.05,
+     "oakwood": 0.06,
+     "copse": 0.06,
+     "willowmeadow": 0.06,
+     "lakeshore": 0.05,
+     "clearing": 0.07,
+     "highland": 0.03,
+     "upland": 0.03,
+     "mediterranean": 0.04,
+     "cypress": 0.03,
+     "oasis": 0.08,
+     "heath": 0.025,
+     "marsh": 0.03,
+     "pinewood": 0.02
+    }
+   },
+   "flax": {
+    "name": "Flax",
+    "level": 5,
+    "item": "flax",
+    "xp": 8,
+    "time": 1.8,
+    "stock": 4,
+    "block": "FLAX_PATCH",
+    "biomes": {
+     "meadow": 0.035,
+     "willowmeadow": 0.04,
+     "lakeshore": 0.03,
+     "marsh": 0.025,
+     "heath": 0.015,
+     "mediterranean": 0.02,
+     "vineyard": 0.02
+    }
+   },
+   "berry_bush": {
+    "name": "Redberry bush",
+    "level": 10,
+    "item": "berries",
+    "xp": 18,
+    "time": 2.4,
+    "stock": 3,
+    "block": "BERRY_BUSH",
+    "biomes": {
+     "oakwood": 0.04,
+     "copse": 0.045,
+     "scrubwood": 0.04,
+     "clearing": 0.05,
+     "deadwood": 0.015,
+     "pinewood": 0.025,
+     "upland": 0.02,
+     "highland": 0.015,
+     "heath": 0.02,
+     "scrub": 0.015
+    }
+   }
+  },
+  "clearance": {
+   "_about": "Kept this far (cells) from a lot and from a road: the gatherer's ground is the wild's.",
+   "built": 3,
+   "road": 1
+  }
+ }
 }

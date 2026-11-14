@@ -38,6 +38,8 @@ public final class Ids {
     public static final long BARON = 984, MANSION_KNIGHT = 985, MANSION_COOK = 986, MANSION_PORTER = 987, MANSION_WOODCUTTER = 988, MANSION_ORCHARDIST = 989;
     /** (0.3.7) The Shrines of Light (rpg.world.Shrines). */
     public static final long SHRINE_0 = 990;
+    /** (0.4.5) How many shrines the band holds (one by each graveyard): SHRINE_0 .. SHRINE_0 + SHRINE_COUNT - 1. */
+    public static final int SHRINE_COUNT = 10;
     /** Fixtures are numbered from here in the order they are built. */
     public static final long FIXTURES = 100;
     /** The dungeons' doors, traps and chests (rpg.dungeon.Dungeons), in the order they are built. */
@@ -49,13 +51,19 @@ public final class Ids {
      * of their own, clear of the people and of everything made in play (they were numbered on from the town's fixtures,
      * into the people's own numbers - a bed and a villager shared one, and the fire took the one for the other).
      */
-    public static final long ESTATE = 1L << 40, ESTATE_END = ESTATE + 1_000_000;
+    public static final long ESTATE = 1L << 40, ESTATE_END = ESTATE + 2_000_000;
     /** (0.4.0) ShadowVeil's own gathering nodes (its trees, outcrops and fishing waters), numbered in the estates' band from here. */
     public static final long WILD_NODES = ESTATE + 500_000;
     /** (0.4.1) ShadowVeil's doors, one id per doorway of its buildings (in the order the architecture raised them). */
     public static final long SV_DOORS = ESTATE + 900_000;
     /** (0.4.1) ShadowVeil's garden plots (the farms' rows). */
     public static final long SV_PLOTS = ESTATE + 950_000;
+    /** (0.4.2) ShadowVeil's outdoor furniture (the buildings' dressing: crates, benches). */
+    public static final long SV_PROPS = ESTATE + 970_000;
+    /** (0.4.3) ShadowVeil's own people (the lore's residents the devmap does not share), in the census's order. */
+    public static final long SV_PEOPLE = ESTATE + 990_000;
+    /** (0.4.4) ShadowVeil's interiors: their furniture, inner doors, stations, chests, altars and cell doors, in the order fitted. */
+    public static final long SV_INTERIORS = ESTATE + 1_100_000;
     /** Whether an id is a fixture's (built with the world, kept by its id in a save) rather than made in play. */
     public static boolean fixture(long id) { return id < DYNAMIC || id >= ESTATE && id < ESTATE_END; }
 }

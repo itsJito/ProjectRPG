@@ -1,0 +1,78 @@
+[impulsis profile] per step ms: forces 0.002 broad 0.017 narrow 0.004 islands 0.003 solve 0.000 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 173 (awake 0, proxies 173) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.20 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=10.86 class astratto::AudioService=0.01
+[astratto profile] questions 0.00 ms, commands 0.65 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.012 narrow 0.018 islands 0.002 solve 0.026 support 0.001 integrate+sleep 0.003 prepare 0.001; bodies 13 (awake 13, proxies 0) pairs 19 manifolds 1 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.028 islands 0.001 solve 0.049 support 0.001 integrate+sleep 0.003 prepare 0.001; bodies 13 (awake 13, proxies 0) pairs 37 manifolds 2 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.045 islands 0.001 solve 0.064 support 0.001 integrate+sleep 0.003 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 20 manifolds 21 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.051 islands 0.001 solve 0.071 support 0.001 integrate+sleep 0.003 prepare 0.002; bodies 13 (awake 13, proxies 0) pairs 20 manifolds 21 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.004 narrow 0.059 islands 0.001 solve 0.069 support 0.001 integrate+sleep 0.003 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 37 manifolds 1 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=1.61 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=7.25 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.04 ms per frame
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.058 islands 0.001 solve 0.070 support 0.001 integrate+sleep 0.003 prepare 0.003; bodies 170 (awake 0, proxies 170) pairs 0 manifolds 0 joints 0
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.068 islands 0.002 solve 0.088 support 0.001 integrate+sleep 0.003 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 19 manifolds 18 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.078 islands 0.002 solve 0.101 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 25 manifolds 32 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.081 islands 0.002 solve 0.100 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.080 islands 0.002 solve 0.094 support 0.001 integrate+sleep 0.004 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.008 narrow 0.073 islands 0.002 solve 0.090 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 21 manifolds 1 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.008 narrow 0.066 islands 0.003 solve 0.085 support 0.001 integrate+sleep 0.005 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 35 manifolds 3 joints 12
+[impulsis profile] per step ms: forces 0.003 broad 0.009 narrow 0.142 islands 0.003 solve 0.188 support 0.001 integrate+sleep 0.008 prepare 0.003; bodies 165 (awake 0, proxies 165) pairs 0 manifolds 0 joints 0
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.099 islands 0.002 solve 0.087 support 0.001 integrate+sleep 0.004 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 34 manifolds 22 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.007 narrow 0.134 islands 0.002 solve 0.173 support 0.001 integrate+sleep 0.006 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=5.01 class astratto::ImpulsisService=0.17 class astratto::ChemistryService=0.00 class astratto::AiService=11.27 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.06 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.115 islands 0.002 solve 0.123 support 0.001 integrate+sleep 0.006 prepare 0.008; bodies 13 (awake 13, proxies 0) pairs 33 manifolds 22 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.010 narrow 0.112 islands 0.002 solve 0.127 support 0.002 integrate+sleep 0.005 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 32 manifolds 9 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.006 narrow 0.111 islands 0.002 solve 0.130 support 0.001 integrate+sleep 0.005 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 35 manifolds 22 joints 12
+[impulsis profile] per step ms: forces 0.000 broad 0.006 narrow 0.092 islands 0.002 solve 0.113 support 0.001 integrate+sleep 0.004 prepare 0.006; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 25 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.083 islands 0.002 solve 0.095 support 0.001 integrate+sleep 0.004 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 35 manifolds 23 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.083 islands 0.002 solve 0.097 support 0.001 integrate+sleep 0.004 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 35 manifolds 23 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.068 islands 0.002 solve 0.089 support 0.001 integrate+sleep 0.006 prepare 0.003; bodies 13 (awake 13, proxies 0) pairs 10 manifolds 4 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.082 islands 0.002 solve 0.094 support 0.001 integrate+sleep 0.004 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 35 manifolds 23 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=3.69 class astratto::ImpulsisService=0.17 class astratto::ChemistryService=0.00 class astratto::AiService=13.39 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.18 ms per frame
+[impulsis profile] per step ms: forces 0.000 broad 0.005 narrow 0.077 islands 0.002 solve 0.092 support 0.001 integrate+sleep 0.003 prepare 0.004; bodies 13 (awake 13, proxies 0) pairs 20 manifolds 23 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.086 islands 0.002 solve 0.105 support 0.001 integrate+sleep 0.004 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 18 manifolds 21 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.079 islands 0.002 solve 0.103 support 0.001 integrate+sleep 0.004 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 25 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.072 islands 0.002 solve 0.098 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 25 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.069 islands 0.002 solve 0.094 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 24 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.070 islands 0.002 solve 0.097 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 25 joints 12
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=2.39 class astratto::ImpulsisService=0.13 class astratto::ChemistryService=0.00 class astratto::AiService=9.64 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.66 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.068 islands 0.002 solve 0.093 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 25 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.068 islands 0.002 solve 0.093 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.007 narrow 0.074 islands 0.002 solve 0.098 support 0.001 integrate+sleep 0.004 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.006 narrow 0.074 islands 0.002 solve 0.101 support 0.001 integrate+sleep 0.003 prepare 0.005; bodies 13 (awake 13, proxies 0) pairs 27 manifolds 26 joints 12
+[impulsis profile] per step ms: forces 0.001 broad 0.008 narrow 0.077 islands 0.002 solve 0.101 support 0.001 integrate+sleep 0.005 prepare 0.005; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=2.05 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=13.61 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.98 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.009 narrow 0.066 islands 0.002 solve 0.079 support 0.001 integrate+sleep 0.003 prepare 0.004; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.60 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=11.83 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 1.00 ms per frame
+[impulsis profile] per step ms: forces 0.001 broad 0.016 narrow 0.020 islands 0.003 solve 0.021 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.25 class astratto::ImpulsisService=0.13 class astratto::ChemistryService=0.00 class astratto::AiService=10.97 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.33 ms per frame
+[impulsis profile] per step ms: forces 0.002 broad 0.020 narrow 0.004 islands 0.004 solve 0.000 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.23 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=7.89 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.32 ms per frame
+[impulsis profile] per step ms: forces 0.002 broad 0.018 narrow 0.003 islands 0.003 solve 0.000 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.22 class astratto::ImpulsisService=0.12 class astratto::ChemistryService=0.00 class astratto::AiService=14.26 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.17 ms per frame
+[impulsis profile] per step ms: forces 0.002 broad 0.019 narrow 0.003 islands 0.003 solve 0.000 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 164 (awake 0, proxies 164) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.25 class astratto::ImpulsisService=0.13 class astratto::ChemistryService=0.00 class astratto::AiService=16.31 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.03 ms per frame
+[impulsis profile] per step ms: forces 0.002 broad 0.020 narrow 0.004 islands 0.003 solve 0.000 support 0.002 integrate+sleep 0.003 prepare 0.001; bodies 166 (awake 0, proxies 166) pairs 0 manifolds 0 joints 0
+[astratto profile] mean ms per frame by service: class astratto::ModuleHost=0.00 class astratto::PhysicsService=0.29 class astratto::ImpulsisService=0.15 class astratto::ChemistryService=0.00 class astratto::AiService=13.38 class astratto::AudioService=0.00
+[astratto profile] questions 0.00 ms, commands 0.04 ms per frame
+
+1 test completed, 1 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 1m 37s

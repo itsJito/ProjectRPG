@@ -1,0 +1,3057 @@
+{
+ "interiors": {
+  "_about": "(0.4.4) How every interior of ShadowVeil is fitted out (rpg.world.shadowveil.Fitout). 'programs': per building purpose, the rooms of each storey - 'single' for a one-storey building, else 'ground', 'upper' (every storey between) and 'top' (the highest of three or more) - each room a use and its share of the storey; the first room is the one the way in opens into, the rest lie behind it, walled off where both are big enough ('walls': false keeps them one open room), hung with a door where 'door' says ('plain' or 'locked'). A courtyard's ranges take 'volumes' in turn, biggest first. 'beds' is the fewest beds the building has (its census residents can ask for more); 'bedsBySize' a bed for every so many square cells of footprint where nobody lives yet. 'wealth' (poor, common, rich, royal) picks the furniture a piece's 'wealth' list allows. 'uses': per room use, its pieces in the order they matter - place 'wall' (backed onto a wall; 'corner' wants two), 'bed' (head to a wall; 'beds': the room's share of the building's beds), 'centre' (a table and its 'seats'), 'counter' (across the room: staff behind, customers before; its 'post' and posts), 'rows' (pews), 'altar', 'cells' (a jail's), 'stalls', 'hang' (on a wall), 'rug', 'ceiling'; 'station' (a Recipes.Station) or 'fitting' (chest) instead of a 'kind'; 'trades' sets the stations the census workers' callings need. 'need': a defect if it cannot be placed; 'chance': how likely; 'post': where the building's people stand to work. Every room is lit (its pieces, else candles, else a chandelier).",
+  "cellsPerPiece": 4,
+  "mostPerRoom": 16,
+  "minRoomArea": 6,
+  "wealth": {
+   "sizeClass": {
+    "small": "poor",
+    "medium": "common",
+    "large": "rich"
+   }
+  },
+  "programs": {
+   "_default": {
+    "levels": {
+     "single": [
+      {
+       "use": "hall"
+      }
+     ],
+     "ground": [
+      {
+       "use": "hall"
+      }
+     ],
+     "upper": [
+      {
+       "use": "bedroom"
+      }
+     ]
+    }
+   },
+   "house": {
+    "wealth": "common",
+    "beds": 1,
+    "bedsBySize": 30,
+    "levels": {
+     "single": [
+      {
+       "use": "hearth",
+       "share": 3
+      },
+      {
+       "use": "bedroom",
+       "share": 2,
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "hearth",
+       "share": 3
+      },
+      {
+       "use": "kitchen",
+       "share": 2,
+       "minStorey": 24
+      }
+     ],
+     "upper": [
+      {
+       "use": "bedroom",
+       "share": 1,
+       "door": "plain"
+      },
+      {
+       "use": "bedroom",
+       "share": 1,
+       "door": "plain",
+       "minStorey": 30
+      }
+     ],
+     "top": [
+      {
+       "use": "loft"
+      }
+     ]
+    }
+   },
+   "cottage": {
+    "wealth": "poor",
+    "beds": 1,
+    "bedsBySize": 30,
+    "levels": {
+     "single": [
+      {
+       "use": "hearth",
+       "share": 3
+      },
+      {
+       "use": "bedroom",
+       "share": 2,
+       "walls": false
+      }
+     ],
+     "ground": [
+      {
+       "use": "hearth"
+      }
+     ],
+     "upper": [
+      {
+       "use": "bedroom"
+      }
+     ]
+    }
+   },
+   "farmhouse": {
+    "wealth": "common",
+    "beds": 2,
+    "levels": {
+     "single": [
+      {
+       "use": "kitchen",
+       "share": 3
+      },
+      {
+       "use": "bedroom",
+       "share": 2,
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "kitchen",
+       "share": 3
+      },
+      {
+       "use": "pantry",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "bedroom",
+       "door": "plain"
+      },
+      {
+       "use": "bedroom",
+       "door": "plain",
+       "minStorey": 30
+      }
+     ]
+    }
+   },
+   "hut": {
+    "wealth": "poor",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "hut"
+      }
+     ],
+     "ground": [
+      {
+       "use": "hut"
+      }
+     ],
+     "upper": [
+      {
+       "use": "loft"
+      }
+     ]
+    }
+   },
+   "tenement": {
+    "wealth": "poor",
+    "bedsBySize": 12,
+    "levels": {
+     "single": [
+      {
+       "use": "hearth"
+      },
+      {
+       "use": "dormitory",
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "hearth",
+       "share": 2
+      },
+      {
+       "use": "dormitory",
+       "share": 2,
+       "door": "plain"
+      }
+     ],
+     "upper": [
+      {
+       "use": "dormitory",
+       "door": "plain"
+      },
+      {
+       "use": "dormitory",
+       "door": "plain"
+      }
+     ],
+     "top": [
+      {
+       "use": "dormitory"
+      }
+     ]
+    }
+   },
+   "manor": {
+    "wealth": "rich",
+    "beds": 3,
+    "levels": {
+     "single": [
+      {
+       "use": "great_hall",
+       "share": 3
+      },
+      {
+       "use": "chamber",
+       "share": 2,
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "great_hall",
+       "share": 3
+      },
+      {
+       "use": "kitchen",
+       "share": 2
+      }
+     ],
+     "upper": [
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "study",
+       "minStorey": 60
+      }
+     ],
+     "top": [
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "library"
+      }
+     ]
+    }
+   },
+   "shop": {
+    "wealth": "common",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "shopfloor",
+       "share": 3
+      },
+      {
+       "use": "storeroom",
+       "share": 1,
+       "door": "plain",
+       "minStorey": 60
+      }
+     ],
+     "ground": [
+      {
+       "use": "shopfloor",
+       "share": 3
+      },
+      {
+       "use": "storeroom",
+       "share": 1,
+       "door": "plain",
+       "minStorey": 60
+      }
+     ],
+     "upper": [
+      {
+       "use": "hearth",
+       "share": 1
+      },
+      {
+       "use": "bedroom",
+       "share": 1,
+       "door": "plain"
+      }
+     ],
+     "top": [
+      {
+       "use": "bedroom"
+      }
+     ]
+    }
+   },
+   "workshop": {
+    "wealth": "common",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "workroom",
+       "share": 3
+      },
+      {
+       "use": "storeroom",
+       "share": 1
+      }
+     ],
+     "ground": [
+      {
+       "use": "workroom",
+       "share": 3
+      },
+      {
+       "use": "storeroom",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "hearth",
+       "share": 1
+      },
+      {
+       "use": "bedroom",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    }
+   },
+   "bank": {
+    "wealth": "rich",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "banking_hall",
+       "share": 3
+      },
+      {
+       "use": "vault",
+       "share": 1,
+       "door": "locked",
+       "doorName": "vault",
+       "minStorey": 56
+      }
+     ],
+     "ground": [
+      {
+       "use": "banking_hall",
+       "share": 3
+      },
+      {
+       "use": "vault",
+       "share": 1,
+       "door": "locked",
+       "doorName": "vault",
+       "minStorey": 56
+      }
+     ],
+     "upper": [
+      {
+       "use": "counting_room",
+       "share": 2
+      },
+      {
+       "use": "chamber",
+       "share": 1,
+       "door": "plain"
+      }
+     ],
+     "top": [
+      {
+       "use": "chamber"
+      }
+     ]
+    }
+   },
+   "inn": {
+    "wealth": "common",
+    "beds": 4,
+    "levels": {
+     "single": [
+      {
+       "use": "common_room",
+       "share": 3
+      },
+      {
+       "use": "dormitory",
+       "share": 2,
+       "door": "plain"
+      },
+      {
+       "use": "inn_kitchen",
+       "share": 1,
+       "minStorey": 70
+      }
+     ],
+     "ground": [
+      {
+       "use": "common_room",
+       "share": 3
+      },
+      {
+       "use": "inn_kitchen",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "guest_room",
+       "door": "plain"
+      },
+      {
+       "use": "guest_room",
+       "door": "plain"
+      },
+      {
+       "use": "guest_room",
+       "door": "plain",
+       "minStorey": 50
+      }
+     ],
+     "top": [
+      {
+       "use": "staff_room",
+       "door": "plain"
+      },
+      {
+       "use": "guest_room",
+       "door": "plain"
+      }
+     ]
+    },
+    "volumes": [
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "common_room",
+         "share": 3
+        },
+        {
+         "use": "dormitory",
+         "share": 2,
+         "door": "plain"
+        },
+        {
+         "use": "inn_kitchen",
+         "share": 1,
+         "minStorey": 70
+        }
+       ],
+       "ground": [
+        {
+         "use": "common_room",
+         "share": 3
+        },
+        {
+         "use": "inn_kitchen",
+         "share": 1
+        }
+       ],
+       "upper": [
+        {
+         "use": "guest_room",
+         "door": "plain"
+        },
+        {
+         "use": "guest_room",
+         "door": "plain"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "guest_room",
+         "door": "plain"
+        },
+        {
+         "use": "guest_room",
+         "door": "plain"
+        }
+       ],
+       "ground": [
+        {
+         "use": "guest_room",
+         "door": "plain"
+        },
+        {
+         "use": "guest_room",
+         "door": "plain"
+        }
+       ],
+       "upper": [
+        {
+         "use": "guest_room",
+         "door": "plain"
+        },
+        {
+         "use": "guest_room",
+         "door": "plain"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "stable_room"
+        }
+       ],
+       "ground": [
+        {
+         "use": "storeroom"
+        }
+       ],
+       "upper": [
+        {
+         "use": "dormitory"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "dormitory"
+        }
+       ],
+       "ground": [
+        {
+         "use": "dormitory"
+        }
+       ],
+       "upper": [
+        {
+         "use": "staff_room"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "hall": {
+    "wealth": "common",
+    "beds": 2,
+    "levels": {
+     "single": [
+      {
+       "use": "great_hall",
+       "share": 3
+      },
+      {
+       "use": "dormitory",
+       "share": 2,
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "great_hall",
+       "share": 3
+      },
+      {
+       "use": "kitchen",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "dormitory"
+      }
+     ],
+     "top": [
+      {
+       "use": "dormitory"
+      }
+     ]
+    }
+   },
+   "barracks": {
+    "wealth": "common",
+    "beds": 4,
+    "levels": {
+     "single": [
+      {
+       "use": "mess",
+       "share": 2
+      },
+      {
+       "use": "bunk_room",
+       "share": 3,
+       "door": "plain"
+      }
+     ],
+     "ground": [
+      {
+       "use": "mess",
+       "share": 2
+      },
+      {
+       "use": "armoury",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "bunk_room"
+      }
+     ],
+     "top": [
+      {
+       "use": "bunk_room"
+      }
+     ]
+    }
+   },
+   "church": {
+    "wealth": "rich",
+    "beds": 0,
+    "levels": {
+     "single": [
+      {
+       "use": "nave",
+       "share": 4,
+       "axis": "v"
+      },
+      {
+       "use": "vestry",
+       "share": 1,
+       "door": "plain",
+       "doorName": "vestry",
+       "minStorey": 60
+      }
+     ],
+     "ground": [
+      {
+       "use": "nave",
+       "share": 4,
+       "axis": "v"
+      },
+      {
+       "use": "vestry",
+       "share": 1,
+       "door": "plain",
+       "doorName": "vestry",
+       "minStorey": 60
+      }
+     ],
+     "upper": [
+      {
+       "use": "belfry"
+      }
+     ],
+     "top": [
+      {
+       "use": "belfry"
+      }
+     ]
+    },
+    "volumes": [
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "nave",
+         "share": 4,
+         "axis": "v"
+        },
+        {
+         "use": "vestry",
+         "share": 1,
+         "door": "plain",
+         "doorName": "vestry",
+         "minStorey": 60
+        }
+       ],
+       "ground": [
+        {
+         "use": "nave",
+         "share": 4,
+         "axis": "v"
+        },
+        {
+         "use": "vestry",
+         "share": 1,
+         "door": "plain",
+         "doorName": "vestry",
+         "minStorey": 60
+        }
+       ],
+       "upper": [
+        {
+         "use": "belfry"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "vestry"
+        }
+       ],
+       "ground": [
+        {
+         "use": "vestry"
+        }
+       ],
+       "upper": [
+        {
+         "use": "bedroom"
+        }
+       ],
+       "top": [
+        {
+         "use": "belfry"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "dormitory"
+        }
+       ],
+       "ground": [
+        {
+         "use": "cloister_room"
+        }
+       ],
+       "upper": [
+        {
+         "use": "dormitory"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "vestry"
+        }
+       ],
+       "ground": [
+        {
+         "use": "vestry"
+        }
+       ],
+       "upper": [
+        {
+         "use": "dormitory"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "palace": {
+    "wealth": "royal",
+    "beds": 4,
+    "levels": {
+     "single": [
+      {
+       "use": "throne_room"
+      }
+     ],
+     "ground": [
+      {
+       "use": "throne_room"
+      }
+     ],
+     "upper": [
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "chamber",
+       "door": "plain"
+      }
+     ]
+    },
+    "volumes": [
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "throne_room"
+        }
+       ],
+       "ground": [
+        {
+         "use": "throne_room"
+        }
+       ],
+       "upper": [
+        {
+         "use": "chamber",
+         "door": "plain"
+        },
+        {
+         "use": "chamber",
+         "door": "plain"
+        },
+        {
+         "use": "chamber",
+         "door": "plain",
+         "minStorey": 90
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "great_hall"
+        }
+       ],
+       "ground": [
+        {
+         "use": "great_hall",
+         "share": 3
+        },
+        {
+         "use": "kitchen",
+         "share": 2
+        }
+       ],
+       "upper": [
+        {
+         "use": "library",
+         "share": 2
+        },
+        {
+         "use": "chamber",
+         "share": 1,
+         "door": "plain"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "guardroom"
+        }
+       ],
+       "ground": [
+        {
+         "use": "guardroom",
+         "share": 2
+        },
+        {
+         "use": "armoury",
+         "share": 1
+        }
+       ],
+       "upper": [
+        {
+         "use": "bunk_room"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "study"
+        }
+       ],
+       "ground": [
+        {
+         "use": "study",
+         "share": 1
+        },
+        {
+         "use": "counting_room",
+         "share": 1
+        }
+       ],
+       "upper": [
+        {
+         "use": "chamber",
+         "door": "plain"
+        },
+        {
+         "use": "chamber",
+         "door": "plain"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "castle": {
+    "wealth": "royal",
+    "beds": 4,
+    "levels": {
+     "single": [
+      {
+       "use": "great_hall"
+      }
+     ],
+     "ground": [
+      {
+       "use": "great_hall",
+       "share": 3
+      },
+      {
+       "use": "kitchen",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "chamber",
+       "door": "plain"
+      },
+      {
+       "use": "solar",
+       "minStorey": 90
+      }
+     ],
+     "top": [
+      {
+       "use": "high_room",
+       "share": 2
+      },
+      {
+       "use": "chamber",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    }
+   },
+   "museum": {
+    "wealth": "rich",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "gallery"
+      }
+     ],
+     "ground": [
+      {
+       "use": "gallery",
+       "share": 3
+      },
+      {
+       "use": "study",
+       "share": 1,
+       "door": "plain"
+      }
+     ],
+     "upper": [
+      {
+       "use": "library",
+       "share": 2
+      },
+      {
+       "use": "chamber",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    }
+   },
+   "civic": {
+    "wealth": "rich",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "office",
+       "share": 2
+      },
+      {
+       "use": "records",
+       "share": 1
+      }
+     ],
+     "ground": [
+      {
+       "use": "office",
+       "share": 2
+      },
+      {
+       "use": "records",
+       "share": 1
+      }
+     ],
+     "upper": [
+      {
+       "use": "study",
+       "share": 1
+      },
+      {
+       "use": "chamber",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    },
+    "volumes": [
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "office"
+        }
+       ],
+       "ground": [
+        {
+         "use": "office"
+        }
+       ],
+       "upper": [
+        {
+         "use": "chamber",
+         "door": "plain"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "records"
+        }
+       ],
+       "ground": [
+        {
+         "use": "records"
+        }
+       ],
+       "upper": [
+        {
+         "use": "study"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "kitchen"
+        }
+       ],
+       "ground": [
+        {
+         "use": "kitchen"
+        }
+       ],
+       "upper": [
+        {
+         "use": "dormitory"
+        }
+       ]
+      }
+     },
+     {
+      "levels": {
+       "single": [
+        {
+         "use": "storeroom"
+        }
+       ],
+       "ground": [
+        {
+         "use": "storeroom"
+        }
+       ],
+       "upper": [
+        {
+         "use": "dormitory"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "store": {
+    "wealth": "poor",
+    "beds": 0,
+    "levels": {
+     "single": [
+      {
+       "use": "storeroom"
+      }
+     ],
+     "ground": [
+      {
+       "use": "storeroom"
+      }
+     ],
+     "upper": [
+      {
+       "use": "storeroom"
+      }
+     ]
+    }
+   },
+   "stable": {
+    "wealth": "common",
+    "beds": 0,
+    "levels": {
+     "single": [
+      {
+       "use": "stable_room"
+      }
+     ],
+     "ground": [
+      {
+       "use": "stable_room"
+      }
+     ],
+     "upper": [
+      {
+       "use": "loft"
+      }
+     ]
+    }
+   },
+   "mill": {
+    "wealth": "common",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "mill_floor"
+      }
+     ],
+     "ground": [
+      {
+       "use": "mill_floor"
+      }
+     ],
+     "upper": [
+      {
+       "use": "hearth",
+       "share": 1
+      },
+      {
+       "use": "bedroom",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    }
+   },
+   "tower": {
+    "wealth": "common",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "guardroom"
+      }
+     ],
+     "ground": [
+      {
+       "use": "guardroom"
+      }
+     ],
+     "upper": [
+      {
+       "use": "watch_room"
+      }
+     ],
+     "top": [
+      {
+       "use": "watch_room"
+      }
+     ]
+    }
+   },
+   "gatehouse": {
+    "wealth": "common",
+    "beds": 0,
+    "levels": {
+     "single": [
+      {
+       "use": "guardroom"
+      }
+     ],
+     "ground": [
+      {
+       "use": "guardroom"
+      }
+     ],
+     "upper": [
+      {
+       "use": "watch_room"
+      }
+     ]
+    }
+   },
+   "jail": {
+    "wealth": "common",
+    "beds": 1,
+    "levels": {
+     "single": [
+      {
+       "use": "jail_office",
+       "share": 2
+      },
+      {
+       "use": "cell_block",
+       "share": 3,
+       "axis": "v"
+      }
+     ],
+     "ground": [
+      {
+       "use": "jail_office",
+       "share": 2
+      },
+      {
+       "use": "cell_block",
+       "share": 3,
+       "axis": "v"
+      }
+     ],
+     "upper": [
+      {
+       "use": "guardroom",
+       "share": 1
+      },
+      {
+       "use": "bunk_room",
+       "share": 1,
+       "door": "plain"
+      }
+     ]
+    },
+    "stair": "front"
+   }
+  },
+  "uses": {
+   "hall": {
+    "pieces": [
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "BENCH"
+     },
+     {
+      "place": "wall",
+      "kind": "SIDEBOARD",
+      "w": 2,
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest"
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 2,
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     }
+    ]
+   },
+   "hearth": {
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "FIREPLACE",
+      "w": 2,
+      "h": 2,
+      "need": true,
+      "fallback": {
+       "place": "wall",
+       "station": "RANGE",
+       "post": "kitchen"
+      }
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL",
+      "wealth": [
+       "poor",
+       "common"
+      ]
+     },
+     {
+      "place": "centre",
+      "kind": "DINING_TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "CHAIR",
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "CUPBOARD",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "home"
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR",
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ],
+      "chance": 0.7
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "chance": 0.6
+     },
+     {
+      "place": "hang",
+      "kind": "POT_RACK",
+      "chance": 0.5
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ],
+      "chance": 0.6
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1,
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ],
+      "chance": 0.7
+     },
+     {
+      "place": "wall",
+      "kind": "PLANTER",
+      "chance": 0.4
+     }
+    ]
+   },
+   "kitchen": {
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "wall",
+      "station": "RANGE",
+      "need": true,
+      "post": "kitchen"
+     },
+     {
+      "place": "wall",
+      "kind": "CUPBOARD",
+      "h": 2
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "larder"
+     },
+     {
+      "place": "hang",
+      "kind": "POT_RACK"
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "chance": 0.7
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "pantry": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "larder"
+     },
+     {
+      "place": "wall",
+      "kind": "WINE_RACK",
+      "h": 2,
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     }
+    ]
+   },
+   "bedroom": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1,
+      "wealth": [
+       "poor",
+       "common"
+      ]
+     },
+     {
+      "place": "bed",
+      "kind": "FOURPOSTER",
+      "beds": true,
+      "atLeast": 1,
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "bedroom"
+     },
+     {
+      "place": "wall",
+      "kind": "WARDROBE",
+      "h": 2,
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "DRESSER",
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND",
+      "chance": 0.6
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA",
+      "chance": 0.5
+     },
+     {
+      "place": "wall",
+      "kind": "STOOL",
+      "chance": 0.5
+     },
+     {
+      "place": "hang",
+      "kind": "MIRROR",
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "chance": 0.5,
+      "wealth": [
+       "common",
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1,
+      "chance": 0.6
+     }
+    ]
+   },
+   "loft": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "chance": 0.5
+     }
+    ]
+   },
+   "dormitory": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "count": 2
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 1,
+      "d": 1,
+      "seats": "STOOL",
+      "minArea": 24
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND",
+      "chance": 0.5
+     }
+    ]
+   },
+   "hut": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1
+     },
+     {
+      "place": "wall",
+      "kind": "FIREPLACE",
+      "w": 2,
+      "h": 2,
+      "need": true,
+      "fallback": {
+       "place": "wall",
+       "station": "RANGE"
+      }
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "home"
+     },
+     {
+      "place": "wall",
+      "kind": "STOOL"
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE"
+     },
+     {
+      "place": "hang",
+      "kind": "POT_RACK",
+      "chance": 0.5
+     }
+    ]
+   },
+   "shopfloor": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "counter",
+      "need": true,
+      "depth": 0.6,
+      "fallback": {
+       "place": "wall",
+       "kind": "COUNTER",
+       "w": 3,
+       "post": "counter"
+      }
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "count": 3
+     },
+     {
+      "place": "wall",
+      "kind": "CUPBOARD",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "WINE_RACK",
+      "h": 2,
+      "chance": 0.5
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2,
+      "chance": 0.5
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "chance": 0.4
+     }
+    ],
+    "noBeds": true
+   },
+   "storeroom": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 3
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "store"
+     },
+     {
+      "place": "wall",
+      "kind": "WINE_RACK",
+      "h": 2,
+      "chance": 0.4
+     }
+    ]
+   },
+   "workroom": {
+    "pieces": [
+     {
+      "place": "trades",
+      "need": true,
+      "default": [
+       "CRAFT_TABLE"
+      ]
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "work"
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "chance": 0.5
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "banking_hall": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "teller",
+      "need": true,
+      "depth": 0.55,
+      "posts": 1
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CLOCK",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "clerk"
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "PLANTER"
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "w": 1
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     }
+    ],
+    "noBeds": true
+   },
+   "vault": {
+    "pieces": [
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "vault",
+      "count": 3,
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "counting_room": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "clerk",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CHAIR"
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "records"
+     },
+     {
+      "place": "wall",
+      "kind": "CLOCK",
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING"
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1
+     }
+    ]
+   },
+   "common_room": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "bar",
+      "need": true,
+      "depth": 0.7,
+      "posts": 1,
+      "fallback": {
+       "place": "wall",
+       "kind": "COUNTER",
+       "w": 3,
+       "post": "bar"
+      }
+     },
+     {
+      "place": "wall",
+      "kind": "FIREPLACE",
+      "w": 2,
+      "h": 2
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "BENCH"
+     },
+     {
+      "place": "wall",
+      "kind": "WINE_RACK",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "chance": 0.4
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "chance": 0.6
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "inn_kitchen": {
+    "pieces": [
+     {
+      "place": "wall",
+      "station": "RANGE",
+      "need": true,
+      "post": "cook"
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "larder"
+     },
+     {
+      "place": "wall",
+      "kind": "CUPBOARD",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "POT_RACK"
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "guest_room": {
+    "beds": 1,
+    "bedTag": "guest",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1
+     },
+     {
+      "place": "wall",
+      "fitting": "chest"
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND"
+     },
+     {
+      "place": "wall",
+      "kind": "STOOL"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "chance": 0.4
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1,
+      "chance": 0.5
+     }
+    ]
+   },
+   "staff_room": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "great_hall": {
+    "pieces": [
+     {
+      "place": "centre",
+      "kind": "DINING_TABLE",
+      "w": 4,
+      "d": 2,
+      "seats": "CHAIR",
+      "wealth": [
+       "rich",
+       "royal"
+      ],
+      "post": "head"
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 3,
+      "d": 1,
+      "seats": "BENCH",
+      "wealth": [
+       "poor",
+       "common"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "FIREPLACE",
+      "w": 2,
+      "h": 2,
+      "need": true,
+      "fallback": {
+       "place": "wall",
+       "station": "RANGE"
+      }
+     },
+     {
+      "place": "wall",
+      "kind": "SIDEBOARD",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2,
+      "wealth": [
+       "rich",
+       "royal"
+      ],
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CLOCK",
+      "h": 2,
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK"
+     },
+     {
+      "place": "rug",
+      "w": 3,
+      "d": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA",
+      "count": 2
+     }
+    ]
+   },
+   "chamber": {
+    "beds": 1,
+    "bedTag": "bed",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "FOURPOSTER",
+      "beds": true,
+      "atLeast": 1,
+      "wealth": [
+       "rich",
+       "royal"
+      ]
+     },
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1,
+      "wealth": [
+       "poor",
+       "common"
+      ]
+     },
+     {
+      "place": "wall",
+      "kind": "WARDROBE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DRESSER"
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "chamber"
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR"
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND"
+     },
+     {
+      "place": "wall",
+      "kind": "BATHTUB",
+      "w": 2,
+      "wealth": [
+       "royal"
+      ],
+      "chance": 0.5
+     },
+     {
+      "place": "hang",
+      "kind": "MIRROR"
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "solar": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "SOFA",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "desk"
+     },
+     {
+      "place": "wall",
+      "kind": "PLANTER"
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "count": 2
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     }
+    ]
+   },
+   "study": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "desk",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "CHAIR"
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "records"
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR"
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING"
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 1
+     }
+    ]
+   },
+   "library": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 5,
+      "need": true
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "CHAIR"
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "desk"
+     },
+     {
+      "place": "wall",
+      "kind": "ARMCHAIR"
+     },
+     {
+      "place": "rug",
+      "w": 2,
+      "d": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "high_room": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "teller",
+      "depth": 0.55,
+      "posts": 1,
+      "need": true
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "vault",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "clerk"
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CLOCK",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     }
+    ]
+   },
+   "throne_room": {
+    "pieces": [
+     {
+      "place": "altar",
+      "kind": "ARMCHAIR",
+      "fitting": "throne",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2,
+      "count": 4
+     },
+     {
+      "place": "wall",
+      "kind": "BUST",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "PLANTER",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2,
+      "count": 4
+     },
+     {
+      "place": "rug",
+      "w": 3,
+      "d": 4
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA",
+      "count": 2
+     }
+    ],
+    "noBeds": true
+   },
+   "guardroom": {
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL",
+      "post": "guard"
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "arms"
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "watch_room": {
+    "beds": 1,
+    "bedTag": "bunk",
+    "overflow": [
+     "BED"
+    ],
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 1
+     },
+     {
+      "place": "wall",
+      "kind": "STOOL"
+     },
+     {
+      "place": "wall",
+      "fitting": "chest"
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "armoury": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2,
+      "count": 3
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "count": 3
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "arms",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "mess": {
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 3,
+      "d": 1,
+      "seats": "BENCH",
+      "post": "guard"
+     },
+     {
+      "place": "wall",
+      "kind": "FIREPLACE",
+      "w": 2,
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "arms"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "bunk_room": {
+    "beds": 1,
+    "bedTag": "bunk",
+    "overflow": [
+     "BED"
+    ],
+    "sleeps": true,
+    "pieces": [
+     {
+      "place": "bed",
+      "kind": "BED",
+      "beds": true,
+      "atLeast": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "WASHSTAND"
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "nave": {
+    "pieces": [
+     {
+      "place": "altar",
+      "need": true
+     },
+     {
+      "place": "rows",
+      "kind": "BENCH",
+      "need": true,
+      "from": 2,
+      "to": 3,
+      "minDepth": 7
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CANDELABRA",
+      "count": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER",
+      "count": 1
+     }
+    ],
+    "noBeds": true
+   },
+   "vestry": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "WARDROBE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "desk"
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "vestments"
+     },
+     {
+      "place": "wall",
+      "kind": "CHAIR"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "sleeps": true
+   },
+   "belfry": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "CRATE"
+     },
+     {
+      "place": "wall",
+      "kind": "STOOL"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "sleeps": true
+   },
+   "cloister_room": {
+    "pieces": [
+     {
+      "place": "rows",
+      "kind": "BENCH",
+      "from": 1,
+      "to": 1
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "wall",
+      "kind": "PLANTER",
+      "count": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "gallery": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "BUST",
+      "count": 4,
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "ARMOR_STAND",
+      "h": 2,
+      "count": 3
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING",
+      "count": 4
+     },
+     {
+      "place": "hang",
+      "kind": "TAPESTRY",
+      "w": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "rug",
+      "w": 3,
+      "d": 2
+     },
+     {
+      "place": "ceiling",
+      "kind": "CHANDELIER"
+     }
+    ],
+    "noBeds": true
+   },
+   "office": {
+    "pieces": [
+     {
+      "place": "counter",
+      "kind": "COUNTER",
+      "post": "clerk",
+      "depth": 0.55,
+      "posts": 1
+     },
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "desk",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "records"
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "CLOCK",
+      "h": 2
+     },
+     {
+      "place": "hang",
+      "kind": "PAINTING"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "records": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "BOOKCASE",
+      "h": 2,
+      "count": 3
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2,
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "records"
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "stable_room": {
+    "pieces": [
+     {
+      "place": "stalls",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "tack"
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "chance": 0.4
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "mill_floor": {
+    "pieces": [
+     {
+      "place": "wall",
+      "station": "CRAFT_TABLE",
+      "post": "mill"
+     },
+     {
+      "place": "wall",
+      "kind": "CRATE",
+      "count": 4
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "store"
+     },
+     {
+      "place": "centre",
+      "kind": "TABLE",
+      "w": 2,
+      "d": 1,
+      "seats": "STOOL"
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ]
+   },
+   "jail_office": {
+    "pieces": [
+     {
+      "place": "wall",
+      "kind": "DESK",
+      "post": "jailer",
+      "need": true
+     },
+     {
+      "place": "wall",
+      "kind": "CHAIR"
+     },
+     {
+      "place": "wall",
+      "fitting": "chest",
+      "tag": "confiscated",
+      "need": true
+     },
+     {
+      "place": "hang",
+      "kind": "WEAPON_RACK",
+      "count": 2
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     },
+     {
+      "place": "wall",
+      "kind": "SHELVES",
+      "h": 2
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     }
+    ],
+    "noBeds": true
+   },
+   "cell_block": {
+    "pieces": [
+     {
+      "place": "cells",
+      "need": true,
+      "deep": 3,
+      "wide": 3,
+      "bars": "iron_bars"
+     },
+     {
+      "place": "corner",
+      "kind": "CANDELABRA"
+     },
+     {
+      "place": "wall",
+      "kind": "BENCH",
+      "w": 2
+     }
+    ],
+    "noBeds": true
+   }
+  },
+  "laidTables": [
+   "hearth",
+   "kitchen",
+   "common_room",
+   "great_hall",
+   "mess",
+   "dormitory",
+   "hall",
+   "inn_kitchen",
+   "guardroom"
+  ],
+  "lightPer": 24,
+  "lightsMost": 4,
+  "shareTolerance": 0.22,
+  "sealPocket": 6,
+  "chandelierApart": 4,
+  "partitionMax": 16,
+  "stationMinArea": 16
+ }
+}

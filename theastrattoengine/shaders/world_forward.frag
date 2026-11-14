@@ -11,6 +11,16 @@ uniform float uDensity;
 uniform sampler2D uSceneColor, uSceneDepth,uWaves,uWaterNoise;
 // 1.2: the wave grid's corner (x, z) and cell (m): it follows the camera
 uniform vec3 uWaveGrid;
+// 2.12: the water's motion field round the eye (corner x, z, cell, cells across): flow (m/s), whitewater, open water
+uniform sampler2D uFlowField;
+uniform vec4 uFlowGrid;
+vec4 flowAt(vec2 xz) {
+    if (uFlowGrid.w <= 0.0) return vec4(0.0);
+    vec2 uv = (xz - uFlowGrid.xy) / (uFlowGrid.z * uFlowGrid.w);
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec4(0.0);
+    vec4 t = texture(uFlowField, uv);
+    return vec4((t.rg * 255.0 - 128.0) / 32.0, t.b, t.a);
+}
 uniform mat4 uPV, uInvPV;
 uniform int uWaterSSR;
 layout(location=0) out vec4 oColor;
@@ -51,6 +61,7 @@ void main() {
     vec3 V = normalize(uCam - vWorld);
     if (dot(N, V) < 0.0) N = -N;
     float ripple=0.0,crest=0.0,rippleLight=0.0;
+    vec2 flow=vec2(0.0);float fl=0.0,white=0.0;
     if (liquid && N.y > 0.5) {
         // the ripples: the surface's own slope (dh/dx, dh/dz) from the wave grid, faded out toward its edge
         vec2 uv=(vWorld.xz-uWaveGrid.xy)/(uWaveGrid.z*256.0),pixel=vec2(1.0/256.0);
@@ -62,8 +73,10 @@ void main() {
         vec2 second=texture(uWaterNoise,vWorld.xz*0.17+vec2(-uTime*0.013,uTime*0.021)).gb*2.0-1.0;
         // 2.10: running water carries its surface along: the texture drifts with the flow (two phases, crossfaded, so
         // it never stretches), and a quick stretch shows a little streaked broken water
-        vec2 flow=texture(uWaves,uv).ba*edge.x*edge.y;
-        float fl=length(flow);
+        // 2.12: the motion field reaches past the wave grid: every stretch of water in sight runs its own way
+        vec4 field=flowAt(vWorld.xz);
+        flow=field.xy;white=field.z;
+        fl=length(flow);
         if(fl>0.02) {
             float t0=fract(uTime*0.25),t1=fract(uTime*0.25+0.5),blend=abs(t0*2.0-1.0);
             vec2 a0=texture(uWaterNoise,vWorld.xz*0.21-flow*t0*0.84).rg*2.0-1.0, a1=texture(uWaterNoise,vWorld.xz*0.21-flow*t1*0.84+0.37).rg*2.0-1.0;
@@ -111,6 +124,21 @@ void main() {
         }
     }
     col = mix(col, refl, fres);
+    // 2.12: white water where it runs hard - below a fall, through a rapid, along a fast channel's banks: broken foam
+    // streaked out along the flow and carried down it at the water's own pace
+    if (liquid && N.y > 0.5 && (white > 0.01 || fl > 0.7)) {
+        vec2 dir = fl > 1e-3 ? flow / fl : vec2(1.0, 0.0), across = vec2(-dir.y, dir.x);
+        vec2 q = vec2(dot(vWorld.xz, dir), dot(vWorld.xz, across));
+        float s1 = texture(uWaterNoise, vec2(q.x * 0.16 - uTime * fl * 0.16, q.y * 0.85)).r;
+        float s2 = texture(uWaterNoise, vec2(q.x * 0.34 - uTime * fl * 0.3 + 0.5, q.y * 1.6 + 0.3)).g;
+        float amount = clamp(white * 1.25 + max(0.0, fl - 0.7) * 0.3, 0.0, 1.0);
+        float streak = smoothstep(0.58, 0.86, s1 * 0.6 + s2 * 0.5) * 0.65;
+        float churn = smoothstep(1.0 - amount * 0.75, 1.0 - amount * 0.25, s1 * 0.55 + s2 * 0.55);
+        float w = clamp(max(streak * amount, churn), 0.0, 1.0);
+        vec3 foam = vec3(0.9, 0.94, 0.97) * (irr * 0.85 + uSunCol * 0.6 * smoothstep(0.6, 1.0, sky));
+        col = mix(col, foam, w * 0.85);
+        a = max(a, w * 0.9);
+    }
     if (liquid) {
         // a ring catches the sun on its slopes (a tight glint) and its crests show a touch lighter
         col += uSunCol * pow(max(dot(R, uSunDir), 0.0), 180.0) * (0.6 + 2.4 * ripple) * smoothstep(0.6, 1.0, sky);

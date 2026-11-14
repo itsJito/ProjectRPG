@@ -1,0 +1,620 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 20408). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-20408.out.log
+Starting 12th build in daemon [uptime: 23 mins 10.449 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 16% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'probe'
+Selected primary task 'probe' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':probe']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#666,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#667,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#668,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#670,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:compileJava (Thread[#667,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#667,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#671,Execution worker Thread 5,5,main]) started.
+work action resolve main (project :theastrattoengine) (Thread[#671,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:buildNative (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#671,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:engineResources (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#671,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:processResources (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#671,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:classes (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#671,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:jar (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#671,Execution worker Thread 5,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#671,Execution worker Thread 5,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#670,Execution worker Thread 4,5,main]) started.
+:compileJava (Thread[#670,Execution worker Thread 4,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#670,Execution worker Thread 4,5,main]) started.
+:classes (Thread[#670,Execution worker Thread 4,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#670,Execution worker Thread 4,5,main]) started.
+:compileTestJava (Thread[#670,Execution worker Thread 4,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#670,Execution worker Thread 4,5,main]) started.
+:processTestResources (Thread[#670,Execution worker Thread 4,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#670,Execution worker Thread 4,5,main]) started.
+:testClasses (Thread[#670,Execution worker Thread 4,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :probe (Thread[#670,Execution worker Thread 4,5,main]) started.
+:probe (Thread[#670,Execution worker Thread 4,5,main]) started.
+Gradle Test Executor 13 started executing tests.
+
+> Task :probe
+Caching disabled for task ':probe' because:
+  Build cache is disabled
+Task ':probe' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 13'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=9 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\probe\work -Drpg.probeFrames=6 --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath17604692230588923426txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 13'
+Successfully started process 'Gradle Test Executor 13'
+
+PopulationProbeTest > population() STANDARD_OUT
+    [Load] ShadowVeil grown in 14.83s ({regions=751, overlays=475, variants=415, scarp=47, coast=470, erosion=334, peaks=42, lakes=58, isles=4, rivers=794, wadis=12, ground=26, roads=595, causeways=3, architecture=898, pitsFilled=1405, pits=501, banks=47, clamp=14, cliffs=45, columns=861, falls=15, raise=7541, trees=297, outcrops=0, ways=539}), made and lit in 1.52s
+    [water] flow field grown in 784 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [people] 225 people
+    [person] Ealdra       MERCHANT     -                      home (261,926) Loxford   post (262,927) Loxford  
+    [person] Torren       LAWMAN       -                      home (237,978) Loxford   post (196,938) Loxford  
+    [person] Aldric       GUARD        -                      home (240,981) Loxford   post (230,945) Loxford  
+    [person] Oswin        WORKER       FIREWOOD_CUTTER        home (304,901) Loxford   post (310,885) Loxford  
+    [person] Tam          VILLAGER     -                      home (285,836) Loxford   post (286,838) Loxford  
+    [person] Brannoc      THIEF        -                      home (580,900) WILDS     post (580,900) WILDS    
+    [person] Mara         MERCHANT     -                      home (114,771) Harlette  post (112,768) Harlette 
+    [person] Lucan        LAWMAN       -                      home (95,701) Harlette  post (88,713) Harlette 
+    [person] Ferrick      CARTER       -                      home (192,973) Loxford   post (193,957) Loxford  
+    [person] Garvin       QUEST_GIVER  -                      home (211,897) Loxford   post (220,920) Loxford  
+    [person] Kettil       CONTACT      -                      home (599,876) WILDS     post (603,877) WILDS    
+    [person] Wynn         FARMER       -                      home (204,970) Loxford   post (192,957) Loxford  
+    [person] Father Wulfric UNDERTAKER   -                      home (179,880) Loxford   post (161,910) Loxford  
+    [person] Skarn        FENCE        -                      home (580,1026) WILDS     post (580,1028) WILDS    
+    [person] Bram         GUARD        -                      home (237,982) Loxford   post (237,945) Loxford  
+    [person] Bilal        BEGGAR       -                      home (908,860) Azharad   post (898,852) Azharad  
+    [person] Ysolde       HEALER       -                      home (183,963) Loxford   post (178,963) Loxford  
+    [person] Father Gregory PRIEST       -                      home (212,894) Loxford   post (215,899) Loxford  
+    [person] Rafe         HUNTER       GAME_HUNTER            home (355,801) WILDS     post (352,793) WILDS    
+    [person] Maelin       SCHOLAR      -                      home (130,596) Valgard   post (153,592) Valgard  
+    [person] Bryn         FISHERMAN    LAKE_NET_FISHERMAN     home (571,593) WILDS     post (568,603) WILDS    
+    [person] Brokk        MINER        ORE_MINER              home (199,434) WILDS     post (183,426) WILDS    
+    [person] Fred         CRAFTSMAN    BLACKSMITH             home (240,918) Loxford   post (240,917) Loxford  
+    [person] Sir Andrew   KNIGHT       ORDER_KNIGHT           home (221,896) Loxford   post (218,920) Loxford  
+    [person] Hakon        HUNTER       PREDATOR_HUNTER        home (96,576) WILDS     post (100,570) WILDS    
+    [person] Hadwin       CIVIC        -                      home (223,983) Loxford   post (229,984) Loxford  
+    [person] Danek        CRAFTSMAN    COOK                   home (135,777) Harlette  post (140,771) Harlette 
+    [person] Dawud        MINER        QUARRY_WORKER          home (947,878) Azharad   post (857,792) Azharad  
+    [person] Sir Hedric   KNIGHT       BORDER_KNIGHT          home (359,748) Loxford   post (353,747) Loxford  
+    [person] Gudrik       FISHERMAN    SHELLFISH_GATHERER     home (602,1020) WILDS     post (604,1016) WILDS    
+    [person] Vesna        FISHERMAN    RIVER_FISHERMAN        home (104,773) Harlette  post (109,775) Harlette 
+    [person] King Leonidas CIVIC        -                      home (569,86) Severia   post (551,86) Severia  
+    [person] Baron Photios LAWMAN       -                      home (596,107) Severia   post (587,113) Severia  
+    [person] Leontios     GUARD        -                      home (595,112) Severia   post (587,112) Severia  
+    [person] Anwar        GUARD        -                      home (878,880) Azharad   post (875,886) Azharad  
+    [person] Brand        GUARD        -                      home (382,381) Gorrick   post (389,387) Gorrick  
+    [person] Roder        GUARD        -                      home (148,621) Valgard   post (156,646) Valgard  
+    [person] Baroness Guinevere CIVIC        HOUSEHOLD_BARON        home (817,367) Camelot   post (812,364) Camelot  
+    [person] Zoe          MERCHANT     -                      home (480,117) Severia   post (477,118) Severia  
+    [person] Father Paul  PRIEST       -                      home (876,53) WILDS     post (873,31) WILDS    
+    [person] Father Eirik HEALER       -                      home (351,388) Gorrick   post (355,391) Gorrick  
+    [person] Aristides    SCHOLAR      -                      home (611,151) Severia   post (619,158) Severia  
+    [person] Polyxena     MINER        QUARRY_WORKER          home (877,129) Severia   post (891,127) Severia  
+    [person] Tolis        BEGGAR       -                      home (486,61) Severia   post (485,58) Severia  
+    [person] Yrsa         VILLAGER     -                      home (384,418) Gorrick   post (388,421) Gorrick  
+    [person] King Fahad   VILLAGER     -                      home (906,895) Azharad   post (907,887) Azharad  
+    [person] Cerys        VILLAGER     -                      home (814,420) WILDS     post (822,408) Camelot  
+    [person] Wat          FISHERMAN    RIVER_FISHERMAN        home (182,962) Loxford   post (178,964) Loxford  
+    [person] Tauron       HUNTER       GAME_HUNTER            home (860,509) WILDS     post (866,517) WILDS    
+    [person] Bera         VILLAGER     -                      home (387,441) Gorrick   post (389,438) Gorrick  
+    [person] Duke Torkell KNIGHT       HOUSEHOLD_KNIGHT       home (386,378) Gorrick   post (389,388) Gorrick  
+    [person] King Arthur  CRAFTSMAN    CARPENTER              home (817,371) Camelot   post (818,368) Camelot  
+    [person] Sir Lancelot KNIGHT       KNIGHT_ERRANT          home (809,372) Camelot   post (813,376) Camelot  
+    [person] Sir Gawain   HUNTER       MONSTER_HUNTER         home (842,344) WILDS     post (840,350) WILDS    
+    [person] Viggo        HUNTER       TRAPPER                home (423,408) WILDS     post (425,403) WILDS    
+    [person] Torvik       MINER        COAL_MINER             home (194,439) WILDS     post (183,423) WILDS    
+    [person] Merlin       MINER        GEM_PROSPECTOR         home (779,375) Camelot   post (781,375) Camelot  
+    [person] Dunstan      CRAFTSMAN    CARPENTER              home (304,904) Loxford   post (299,909) Loxford  
+    [person] Olek         CRAFTSMAN    CARPENTER              home (98,743) Harlette  post (98,742) Harlette 
+    [person] Sten         CRAFTSMAN    CARPENTER              home (356,426) Gorrick   post (354,431) Gorrick  
+    [person] Alexios      CRAFTSMAN    CARPENTER              home (465,36) Severia   post (464,35) Severia  
+    [person] Cenric       WORKER       FIREWOOD_CUTTER        home (303,896) Loxford   post (311,886) Loxford  
+    [person] Radek        WORKER       FIREWOOD_CUTTER        home (88,769) Harlette  post (92,748) Harlette 
+    [person] Dorran       MINER        ORE_MINER              home (176,536) WILDS     post (155,545) WILDS    
+    [person] Merek        MINER        QUARRY_WORKER          home (92,564) WILDS     post (84,542) WILDS    
+    [person] Meriwyn      MERCHANT     -                      home (599,871) WILDS     post (603,879) WILDS    
+    [person] Damaris      MERCHANT     -                      home (480,119) Severia   post (477,115) Severia  
+    [person] Cuthmar      FARMER       CROP_FARMER            home (249,898) Loxford   post (249,884) Loxford  
+    [person] Baron Osric  FARMER       ORCHARD_KEEPER         home (244,854) Loxford   post (250,863) Loxford  
+    [person] Kyra         FARMER       CROP_FARMER            home (214,290) WILDS     post (227,269) WILDS    
+    [person] Marinos      FARMER       ORCHARD_KEEPER         home (216,283) WILDS     post (227,269) WILDS    
+    [person] Berthild     CIVIC        INNKEEPER              home (272,944) Loxford   post (276,949) Loxford  
+    [person] Maddoc       MERCHANT     BARTENDER              home (276,946) Loxford   post (279,941) Loxford  
+    [person] Karlon       CRAFTSMAN    COOK                   home (279,945) Loxford   post (282,947) Loxford  
+    [person] Melitta      CIVIC        INNKEEPER              home (533,191) Severia   post (536,198) Severia  
+    [person] Basil        MERCHANT     BARTENDER              home (545,191) Severia   post (540,188) Severia  
+    [person] Lazaros      CRAFTSMAN    COOK                   home (532,191) Severia   post (544,197) Severia  
+    [person] Brennar      CRAFTSMAN    BLACKSMITH             home (182,616) Valgard   post (187,606) Valgard  
+    [person] Fenna        MERCHANT     -                      home (200,655) Valgard   post (204,654) Valgard  
+    [person] Einar        WORKER       FIREWOOD_CUTTER        home (356,436) Gorrick   post (353,403) Gorrick  
+    [person] Layla        CRAFTSMAN    TAILOR                 home (894,832) Azharad   post (892,825) Azharad  
+    [person] Zainab       CRAFTSMAN    TAILOR                 home (895,828) Azharad   post (889,825) Azharad  
+    [person] Baron Jalal  CRAFTSMAN    WEAVER                 home (845,876) Azharad   post (842,886) Azharad  
+    [person] Ziad         CRAFTSMAN    TAILOR                 home (892,829) Azharad   post (891,832) Azharad  
+    [person] Murad        CRAFTSMAN    TAILOR                 home (894,834) Azharad   post (893,825) Azharad  
+    [person] Ilva         FARMER       CROP_FARMER            home (155,758) Harlette  post (151,742) Harlette 
+    [person] Karim        CRAFTSMAN    COOK                   home (830,837) Azharad   post (828,837) Azharad  
+    [person] Petros       FISHERMAN    DEEP_WATER_FISHERMAN   home (468,36) Severia   post (465,31) Severia  
+    [person] Soren        SCHOLAR      -                      home (352,392) Gorrick   post (373,390) Gorrick  
+    [person] Baron Hadrik CRAFTSMAN    SMELTER                home (190,614) Valgard   post (188,606) Valgard  
+    [person] Yannis       FISHERMAN    COASTAL_FISHERMAN      home (462,36) Severia   post (468,31) Severia  
+    [person] Count Dracula CIVIC        HOUSEHOLD_BARON        home (92,702) Harlette  post (86,702) Harlette 
+    [person] Sir Garran   KNIGHT       ORDER_KNIGHT           home (152,624) Valgard   post (152,646) Valgard  
+    [person] Sella        CRAFTSMAN    COOK                   home (140,777) Harlette  post (138,777) Harlette 
+    [person] Orven        WORKER       PORTER                 home (205,613) Valgard   post (201,614) Valgard  
+    [person] Leofric      WORKER       FIREWOOD_CUTTER        home (298,896) Loxford   post (299,910) Loxford  
+    [person] Siv          FARMER       CROP_FARMER            home (343,403) Gorrick   post (328,457) WILDS    
+    [person] Hurk         BANDIT       -                      home (830,693) WILDS     post (830,693) WILDS    
+    [person] Sigrun       BANDIT       -                      home (827,694) WILDS     post (827,694) WILDS    
+    [person] Garmund      BRUTE        -                      home (828,692) WILDS     post (828,692) WILDS    
+    [person] King Richard CIVIC        -                      home (226,977) Loxford   post (228,981) Loxford  
+    [person] Duke Donald  CIVIC        -                      home (227,983) Loxford   post (241,985) Loxford  
+    [person] Count William CIVIC        -                      home (298,884) Loxford   post (289,880) Loxford  
+    [person] Alaric       PRIEST       -                      home (215,896) Loxford   post (216,896) Loxford  
+    [person] Maeve        CRAFTSMAN    TAILOR                 home (230,980) Loxford   post (235,985) Loxford  
+    [person] Hob          GUARD        -                      home (359,742) Loxford   post (353,748) Loxford  
+    [person] Eadmund      CRAFTSMAN    CARPENTER              home (298,902) Loxford   post (304,898) Loxford  
+    [person] Beric        HUNTER       MONSTER_HUNTER         home (356,796) WILDS     post (353,793) WILDS    
+    [person] Duke Bashir  CIVIC        -                      home (903,899) Azharad   post (878,901) Azharad  
+    [person] Count Awhad  CIVIC        -                      home (858,865) Azharad   post (858,860) Azharad  
+    [person] Sir Faris-ul-Azhar KNIGHT       HOUSEHOLD_KNIGHT       home (906,883) Azharad   post (875,889) Azharad  
+    [person] Hassan       SCHOLAR      -                      home (906,888) Azharad   post (887,875) Azharad  
+    [person] Idris        SCHOLAR      -                      home (906,880) Azharad   post (879,884) Azharad  
+    [person] Father Rafiq PRIEST       -                      home (914,859) Azharad   post (918,850) Azharad  
+    [person] Yusuf        PRIEST       -                      home (911,860) Azharad   post (917,855) Azharad  
+    [person] Tariq        CIVIC        -                      home (844,920) Azharad   post (840,917) Azharad  
+    [person] Zafir        CRAFTSMAN    BLACKSMITH             home (804,910) Azharad   post (805,905) Azharad  
+    [person] Osama        CRAFTSMAN    ARMORER                home (937,851) Azharad   post (942,848) Azharad  
+    [person] Marwan       CRAFTSMAN    ARMORER                home (956,823) Azharad   post (955,826) Azharad  
+    [person] Mohamed      MERCHANT     -                      home (816,863) Azharad   post (816,863) Azharad  
+    [person] Rashid       MERCHANT     -                      home (861,866) Azharad   post (858,866) Azharad  
+    [person] Munir        CARTER       -                      home (828,835) Azharad   post (834,841) Azharad  
+    [person] Hakim        CARTER       -                      home (903,877) Azharad   post (875,895) Azharad  
+    [person] Hamid        CRAFTSMAN    CARPENTER              home (937,898) Azharad   post (950,890) Azharad  
+    [person] Nabil        CRAFTSMAN    CARPENTER              home (941,896) Azharad   post (950,895) Azharad  
+    [person] Salim        CRAFTSMAN    CARPENTER              home (946,880) Azharad   post (951,878) Azharad  
+    [person] Kamal        CRAFTSMAN    CARPENTER              home (948,880) Azharad   post (928,893) Azharad  
+    [person] Qasim        WORKER       FIREWOOD_CUTTER        home (939,880) Azharad   post (928,888) Azharad  
+    [person] Fadi         MINER        CLAY_DIGGER            home (873,786) Azharad   post (858,793) Azharad  
+    [person] Jamila       FARMER       CROP_FARMER            home (769,985) Azharad   post (765,950) WILDS    
+    [person] Samira       FARMER       ORCHARD_KEEPER         home (766,985) WILDS     post (766,951) WILDS    
+    [person] Zaid         GUARD        -                      home (891,901) Azharad   post (875,896) Azharad  
+    [person] Sabir        GUARD        -                      home (899,901) Azharad   post (875,885) Azharad  
+    [person] Baron Nuri   CIVIC        HOUSEHOLD_BARON        home (897,875) Azharad   post (893,874) Azharad  
+    [person] Duke Artemios CIVIC        -                      home (553,86) Severia   post (564,118) Severia  
+    [person] Count Constantine CIVIC        -                      home (497,53) Severia   post (493,53) Severia  
+    [person] Sir Nicholas KNIGHT       KNIGHT_ERRANT          home (592,107) Severia   post (587,115) Severia  
+    [person] Sir Kosmas   KNIGHT       ESCORT_KNIGHT          home (590,107) Severia   post (586,115) Severia  
+    [person] Baroness Eudokia CIVIC        -                      home (605,150) Severia   post (609,156) Severia  
+    [person] Father Khalid PRIEST       -                      home (484,112) Severia   post (477,117) Severia  
+    [person] Ione         PRIEST       -                      home (450,34) Severia   post (452,38) Severia  
+    [person] Stavros      CIVIC        -                      home (431,215) Severia   post (435,209) Severia  
+    [person] Demetrios    CRAFTSMAN    BLACKSMITH             home (447,196) Severia   post (442,197) Severia  
+    [person] Irene        SCHOLAR      -                      home (541,86) Severia   post (531,106) Severia  
+    [person] Theodora     CRAFTSMAN    TAILOR                 home (448,173) Severia   post (453,178) Severia  
+    [person] Xenia        CRAFTSMAN    ARMORER                home (590,116) Severia   post (591,119) Severia  
+    [person] Eleni        CRAFTSMAN    TAILOR                 home (449,173) Severia   post (452,182) Severia  
+    [person] Theron       MERCHANT     -                      home (482,113) Severia   post (477,119) Severia  
+    [person] Pavlos       FENCE        -                      home (484,113) Severia   post (477,114) Severia  
+    [person] Melina       FISHERMAN    SHELLFISH_GATHERER     home (470,37) Severia   post (469,31) Severia  
+    [person] Spiros       WORKER       PORTER                 home (468,34) Severia   post (463,22) Severia  
+    [person] Timon        WORKER       PORTER                 home (462,37) Severia   post (464,23) Severia  
+    [person] Damon        WORKER       PORTER                 home (465,34) Severia   post (463,22) Severia  
+    [person] Alkis        CARTER       -                      home (481,118) Severia   post (477,121) Severia  
+    [person] Andreas      CRAFTSMAN    CARPENTER              home (424,152) Severia   post (425,157) Severia  
+    [person] Nikos        CRAFTSMAN    CARPENTER              home (422,152) Severia   post (424,157) Severia  
+    [person] Kallias      CRAFTSMAN    CARPENTER              home (424,157) Severia   post (425,161) Severia  
+    [person] Isidoros     CRAFTSMAN    CARPENTER              home (428,157) Severia   post (429,161) Severia  
+    [person] Orestes      WORKER       FIREWOOD_CUTTER        home (180,131) WILDS     post (196,145) WILDS    
+    [person] Myron        GUARD        -                      home (590,114) Severia   post (587,119) Severia  
+    [person] Perikles     GUARD        -                      home (593,119) Severia   post (587,110) Severia  
+    [person] Zenon        GUARD        -                      home (591,119) Severia   post (587,120) Severia  
+    [person] Argyros      GUARD        -                      home (590,111) Severia   post (587,109) Severia  
+    [person] Gorgias      GUARD        -                      home (595,115) Severia   post (510,134) Severia  
+    [person] Kleon        GUARD        -                      home (595,110) Severia   post (587,122) Severia  
+    [person] Kyros        THIEF        -                      home (427,157) Severia   post (424,161) Severia  
+    [person] Mimis        BEGGAR       -                      home (482,61) Severia   post (486,58) Severia  
+    [person] Argus        THIEF        -                      home (426,157) Severia   post (431,161) Severia  
+    [person] Phaedra      CARTER       -                      home (594,107) Severia   post (587,108) Severia  
+    [person] Leandros     BEGGAR       -                      home (464,39) Severia   post (464,31) Severia  
+    [person] Sabeen       BEGGAR       -                      home (462,34) Severia   post (471,31) Severia  
+    [person] King Phillip CIVIC        -                      home (159,621) Valgard   post (157,623) Valgard  
+    [person] Duke Edran   CIVIC        -                      home (156,624) Valgard   post (147,619) Valgard  
+    [person] Sir Vaelor   KNIGHT       ORDER_KNIGHT           home (129,591) Valgard   post (153,594) Valgard  
+    [person] Father Anselm PRIEST       -                      home (129,594) Valgard   post (133,595) Valgard  
+    [person] Tovin        CRAFTSMAN    ARMORER                home (204,656) Valgard   post (201,652) Valgard  
+    [person] Elric        CIVIC        -                      home (182,634) Valgard   post (186,630) Valgard  
+    [person] Halwen       CRAFTSMAN    CARPENTER              home (215,653) Valgard   post (221,657) Valgard  
+    [person] Hesta        FARMER       CROP_FARMER            home (204,606) Valgard   post (162,687) Valgard  
+    [person] Aldis        CIVIC        INNKEEPER              home (129,657) Valgard   post (127,656) Valgard  
+    [person] Toben        CRAFTSMAN    COOK                   home (129,660) Valgard   post (123,660) Valgard  
+    [person] Halvar       CRAFTSMAN    BLACKSMITH             home (400,401) Gorrick   post (402,400) Gorrick  
+    [person] Runa         CARTER       -                      home (406,399) Gorrick   post (406,404) Gorrick  
+    [person] Ulven        CRAFTSMAN    COOK                   home (385,438) Gorrick   post (387,432) Gorrick  
+    [person] Nessa        MERCHANT     -                      home (391,432) Gorrick   post (382,437) Gorrick  
+    [person] Varek        SCHOLAR      -                      home (89,706) Harlette  post (82,704) Harlette 
+    [person] Father Odran PRIEST       -                      home (150,724) Harlette  post (147,726) Harlette 
+    [person] Mother Mirel PRIEST       -                      home (108,739) Harlette  post (107,729) Harlette 
+    [person] Borin        FARMER       -                      home (154,788) Harlette  post (165,784) Harlette 
+    [person] Sir Bedivere KNIGHT       ESCORT_KNIGHT          home (862,387) Camelot   post (862,376) Camelot  
+    [person] Father Cadren PRIEST       -                      home (783,374) Camelot   post (779,378) Camelot  
+    [person] Elian        PRIEST       -                      home (841,347) WILDS     post (841,350) WILDS    
+    [person] Baron Aldren CIVIC        HOUSEHOLD_BARON        home (797,384) Camelot   post (801,387) Camelot  
+    [person] Wystan       CRAFTSMAN    BLACKSMITH             home (815,416) Camelot   post (820,423) WILDS    
+    [person] Perrin       CRAFTSMAN    CARPENTER              home (814,417) WILDS     post (821,423) WILDS    
+    [person] Rowena       MERCHANT     -                      home (829,423) WILDS     post (823,408) Camelot  
+    [person] Huw          FARMER       -                      home (870,385) WILDS     post (863,376) Camelot  
+    [person] Edric        GUARD        -                      home (870,388) WILDS     post (860,376) Camelot  
+    [person] Vark         BANDIT       -                      home (831,692) WILDS     post (831,692) WILDS    
+    [person] Dolgrin      MINER        GEM_PROSPECTOR         home (201,434) WILDS     post (183,425) WILDS    
+    [person] Pell         WORKER       FIREWOOD_CUTTER        home (865,578) WILDS     post (882,577) WILDS    
+    [person] Ysmay        WORKER       FIREWOOD_CUTTER        home (984,391) WILDS     post (984,391) WILDS    
+    [person] Hask         HUNTER       TRAPPER                home (720,481) WILDS     post (723,486) WILDS    
+    [person] Orrin        CRAFTSMAN    CARPENTER              home (369,654) WILDS     post (370,653) WILDS    
+    [person] Corvane      HUNTER       BOUNTY_HUNTER          home (585,889) WILDS     post (585,889) WILDS    
+    [person] Bogdan       GUARD        -                      home (103,789) Harlette  post (99,784) Harlette 
+    [person] Milena       CIVIC        -                      home (164,723) Harlette  post (161,722) Harlette 
+    [person] Lothar       GUARD        -                      home (166,606) Valgard   post (163,599) Valgard  
+    [person] Hilde        UNDERTAKER   -                      home (129,598) Valgard   post (97,592) Valgard  
+    [person] Gunnar       GUARD        -                      home (402,434) Gorrick   post (409,428) Gorrick  
+    [person] Astrid       UNDERTAKER   -                      home (352,385) Gorrick   post (327,386) WILDS    
+    [person] Nadim        GUARD        -                      home (922,968) Azharad   post (915,972) Azharad  
+    [person] Samir        UNDERTAKER   -                      home (906,860) Azharad   post (816,796) Azharad  
+    [person] Emrys        GUARD        -                      home (846,387) Camelot   post (851,396) Camelot  
+    [person] Rhiannon     CIVIC        -                      home (820,389) Camelot   post (824,392) Camelot  
+    [person] Rask         BANDIT       -                      home (826,693) WILDS     post (826,693) WILDS    
+    [person] Wenna        BANDIT       -                      home (832,693) WILDS     post (832,693) WILDS    
+    [person] Hullen       BANDIT       -                      home (824,692) WILDS     post (824,692) WILDS    
+    [person] Grisel       BANDIT       -                      home (834,693) WILDS     post (834,693) WILDS    
+    [person] Haskel       MINER        ORE_MINER              home (171,535) WILDS     post (156,545) WILDS    
+    [person] Tamsin       MINER        QUARRY_WORKER          home (99,563) WILDS     post (84,542) WILDS    
+    [person] Osk          MINER        GEM_PROSPECTOR         home (200,439) WILDS     post (183,427) WILDS    
+    [person] Mabry        WORKER       FIREWOOD_CUTTER        home (178,131) WILDS     post (198,147) WILDS    
+    [person] Edvin        WORKER       FIREWOOD_CUTTER        home (172,131) WILDS     post (196,148) WILDS    
+    [person] Corra        WORKER       FIREWOOD_CUTTER        home (868,577) WILDS     post (883,580) WILDS    
+    [people] by realm {Severia=50, WILDS=47, Azharad=37, Harlette=15, Gorrick=15, Camelot=10, Valgard=19, Loxford=32}
+    [wild] 222 animals {CAT=3, CHICKEN=7, COW=4, COYOTE=2, DEER=22, DOG=2, DUCK=53, HORSE=3, PIG=4, RABBIT=109, SHEEP=5, WOLF=8}; habitats 100; nearest predator to a town home 160.3652 m: WOLF near Fadi (clay_hut)
+    [wild] predator habitats {BROWN_BEAR=3, COYOTE=5, DIRE_WOLF=1, FOX=4, MOUNTAIN_LION=3, WOLF=4}, nearest to a town home 127.632286 m
+    [census] problems []
+    [clock] Solday 06:14 (Day 1)
+    [clock] Solday 06:29 (Day 1)
+    [clock] Solday 06:42 (Day 1)
+    [clock] Solday 06:56 (Day 1)
+    [clock] Solday 07:09 (Day 1)
+    [clock] Solday 07:22 (Day 1)
+    [clock] Solday 07:35 (Day 1)
+    [clock] Solday 07:47 (Day 1)
+    [clock] Solday 07:59 (Day 1)
+    [clock] Solday 08:11 (Day 1)
+    [clock] Solday 08:23 (Day 1)
+    [clock] Solday 08:34 (Day 1)
+    [day] Ealdra       MERCHANT             moved    8 m loaded true  :  [7] WORK |   [2] SLEEP | on the way  [1] BANK | 
+    [day] Torren       LAWMAN               moved   46 m loaded true  :  [7] PATROL | reached patrol point #  [2] PATROL | on the way  [1] WATCH | watching population
+    [day] Aldric       GUARD                moved   14 m loaded true  :  [12] PATROL | reached patrol point #
+    [day] Oswin        FIREWOOD_CUTTER      moved   10 m loaded true  :  [8] WORK | Firewood Cutter: gather at a suitable site  [3] HOME | getting up and dressed  [1] SLEEP | 
+    [day] Tam          VILLAGER             moved    9 m loaded false :  [7] WORK |   [3] WORK | (off-stage) Cobbler of Loxford: at work  [2] HOME | getting up and dressed
+    [day] Brannoc      THIEF                moved    0 m loaded false :  [12] IDLE | (off-stage) Highwayman: at work
+    [day] Mara         MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Harlette: at work
+    [day] Lucan        LAWMAN               moved    0 m loaded false :  [12] IDLE | (off-stage) Town Guard of Harlette: at work
+    [day] Ferrick      CARTER               moved    7 m loaded true  :  [7] WORK | as close as I can get  [3] WORK |   [1] HOME | chores at home
+    [day] Garvin       QUEST_GIVER          moved   25 m loaded true  :  [7] WORK | paused to reconsider a blocked route  [4] HOME | getting up and dressed  [1] SLEEP | 
+    [day] Kettil       CONTACT              moved    0 m loaded false :  [12] IDLE | (off-stage) Repair Worker: at work
+    [day] Wynn         FARMER               moved   23 m loaded true  :  [8] WORK |   [2] HOME | getting up and dressed  [1] HOME | chores at home
+    [day] Father Wulfric UNDERTAKER           moved   42 m loaded true  :  [6] EAT | paused to reconsider a blocked route  [3] PRAY | on the way to prayers  [2] HOME | getting up and dressed
+    [day] Skarn        FENCE                moved    0 m loaded false :  [12] IDLE | (off-stage) Smuggler: at work
+    [day] Bram         GUARD                moved   41 m loaded true  :  [9] PATROL | reached patrol point #  [2] PATROL | on the way  [1] INVESTIGATE | searching nearby (#)
+    [day] Bilal        BEGGAR               moved    0 m loaded false :  [12] IDLE | (off-stage) Hobo of Azharad: at work
+    [day] Ysolde       HEALER               moved   76 m loaded true  :  [9] HOME | chores at home  [3] PRAY | on the way to prayers
+    [day] Father Gregory PRIEST               moved   25 m loaded true  :  [7] HOME | chores at home  [2] PRAY | on the way to prayers  [2] HOME | getting up and dressed
+    [day] Rafe         GAME_HUNTER          moved    0 m loaded false :  [12] IDLE | (off-stage) Game Hunter: at work
+    [day] Maelin       SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Clerk of Valgard: at work
+    [day] Bryn         LAKE_NET_FISHERMAN   moved    0 m loaded false :  [11] IDLE | (off-stage) Lake Net Fisherman: worked the fishing spot (net, dimwater  [1] IDLE | (off-stage) holding # raw shrimp: no buyer within reach
+    [day] Brokk        ORE_MINER            moved   18 m loaded false :  [11] IDLE | (off-stage) Ore Miner: at work  [1] IDLE | (off-stage) Ore Miner: worked the iron rocks, # iron ore held
+    [day] Fred         BLACKSMITH           moved    8 m loaded true  :  [4] WORK | Blacksmith: make the selected order  [3] WORK | Blacksmith: deliver a real batch  [3] HOME | getting up and dressed
+    [day] Sir Andrew   ORDER_KNIGHT         moved   41 m loaded true  :  [9] WORK | reported; standing by Ferrick for the next assignment  [2] WORK | returning the inspection report to Ferrick  [1] WORK | inspecting the commander's assigned site
+    [day] Hakon        PREDATOR_HUNTER      moved    0 m loaded false :  [12] IDLE | (off-stage) Predator Hunter: at work
+    [day] Hadwin       CIVIC                moved   42 m loaded true  :  [7] WORK | on the way  [3] SOCIALIZE | on the way  [1] SLEEP | 
+    [day] Danek        COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Dawud        QUARRY_WORKER        moved   16 m loaded false :  [11] IDLE | (off-stage) Quarry Worker: at work  [1] IDLE | (off-stage) Quarry Worker: worked the coal rocks, # coal held
+    [day] Sir Hedric   BORDER_KNIGHT        moved    0 m loaded false :  [12] IDLE | (off-stage) Border Knight: at work
+    [day] Gudrik       SHELLFISH_GATHERER   moved    0 m loaded false :  [11] IDLE | (off-stage) Shellfish Gatherer: worked the fishing spot (pot, smuggler  [1] IDLE | (off-stage) holding # raw crab: no buyer within reach
+    [day] Vesna        RIVER_FISHERMAN      moved    0 m loaded false :  [11] IDLE | (off-stage) River Fisherman: worked the fishing spot (rod, willow broo  [1] IDLE | (off-stage) holding # raw trout: no buyer within reach
+    [day] King Leonidas CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Administrator King of Severia: at work
+    [day] Baron Photios LAWMAN               moved    0 m loaded false :  [12] IDLE | (off-stage) Garrison Baron of Severia: at work
+    [day] Leontios     GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) City Guard of Severia: at work
+    [day] Anwar        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) City Guard of Azharad: at work
+    [day] Brand        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Rural Patrol Guard of Gorrick: at work
+    [day] Roder        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Town Guard of Valgard: at work
+    [day] Baroness Guinevere HOUSEHOLD_BARON      moved    0 m loaded false :  [12] IDLE | (off-stage) Household Baron: at work
+    [day] Zoe          MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Severia: at work
+    [day] Father Paul  PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Sun Priest of Severia: at work
+    [day] Father Eirik HEALER               moved    0 m loaded false :  [12] IDLE | (off-stage) Sun Priest of Gorrick: at work
+    [day] Aristides    SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Curator of Severia: at work
+    [day] Polyxena     QUARRY_WORKER        moved    0 m loaded false :  [12] IDLE | (off-stage) Quarry Worker: at work
+    [day] Tolis        BEGGAR               moved    0 m loaded false :  [12] IDLE | (off-stage) Hobo of Severia: at work
+    [day] Yrsa         VILLAGER             moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Gorrick: at work
+    [day] King Fahad   VILLAGER             moved    0 m loaded false :  [12] IDLE | (off-stage) Patron King of Azharad: at work
+    [day] Cerys        VILLAGER             moved    0 m loaded false :  [12] IDLE | (off-stage) Cook of Camelot: at work
+    [day] Wat          RIVER_FISHERMAN      moved   22 m loaded true  :  [11] WORK | River Fisherman: gather at a suitable site  [1] HOME | getting up and dressed
+    [day] Tauron       GAME_HUNTER          moved    0 m loaded false :  [12] IDLE | (off-stage) Game Hunter: at work
+    [day] Bera         VILLAGER             moved    0 m loaded false :  [12] IDLE | (off-stage) Innkeeper of Gorrick: at work
+    [day] Duke Torkell HOUSEHOLD_KNIGHT     moved    0 m loaded false :  [12] IDLE | (off-stage) Household Knight: at work
+    [day] King Arthur  CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Sir Lancelot KNIGHT_ERRANT        moved    0 m loaded false :  [12] IDLE | (off-stage) Knight Errant: at work
+    [day] Sir Gawain   MONSTER_HUNTER       moved    0 m loaded false :  [12] IDLE | (off-stage) Monster Hunter: at work
+    [day] Viggo        TRAPPER              moved    0 m loaded false :  [12] IDLE | (off-stage) Trapper: at work
+    [day] Torvik       COAL_MINER           moved   19 m loaded false :  [11] IDLE | (off-stage) Coal Miner: at work  [1] IDLE | (off-stage) Coal Miner: worked the coal rocks, # coal held
+    [day] Merlin       GEM_PROSPECTOR       moved    0 m loaded false :  [12] IDLE | (off-stage) Gem Prospector: at work
+    [day] Dunstan      CARPENTER            moved   34 m loaded true  :  [6] WORK | Carpenter: deliver a real batch  [3] HOME | getting up and dressed  [2] SLEEP | 
+    [day] Olek         CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Sten         CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Alexios      CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Cenric       FIREWOOD_CUTTER      moved   27 m loaded true  :  [7] WORK | Firewood Cutter: gather at a suitable site  [3] HOME | getting up and dressed  [1] WORK | Firewood Cutter: tidying the workplace while short of supplies
+    [day] Radek        FIREWOOD_CUTTER      moved    0 m loaded false :  [9] IDLE | (off-stage) Firewood Cutter: worked the willow tree, # willow logs hel  [3] IDLE | (off-stage) sold # oak logs at Store B
+    [day] Dorran       ORE_MINER            moved    8 m loaded false :  [11] IDLE | (off-stage) Ore Miner: at work  [1] IDLE | (off-stage) Ore Miner: worked the wrought iron rocks, # wrought iron o
+    [day] Merek        QUARRY_WORKER        moved   49 m loaded false :  [11] IDLE | (off-stage) Quarry Worker: at work  [1] IDLE | (off-stage) Quarry Worker: worked the iron rocks, # iron ore held
+    [day] Meriwyn      MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) Traveling Merchant: at work
+    [day] Damaris      MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) Food Merchant of Severia: at work
+    [day] Cuthmar      CROP_FARMER          moved   32 m loaded true  :  [10] WORK | Crop Farmer: weeding and watering the rows  [1] PRAY | praying at the altar  [1] PRAY | on the way to prayers
+    [day] Baron Osric  ORCHARD_KEEPER       moved   25 m loaded true  :  [8] WORK | Orchard Keeper: looking the trees over and pruning  [3] HOME | getting up and dressed  [1] SOCIALIZE | 
+    [day] Kyra         CROP_FARMER          moved    0 m loaded false :  [12] IDLE | (off-stage) Crop Farmer: weeding and watering the rows
+    [day] Marinos      ORCHARD_KEEPER       moved    0 m loaded false :  [12] IDLE | (off-stage) Orchard Keeper: at work
+    [day] Berthild     INNKEEPER            moved   11 m loaded true  :  [10] SLEEP |   [1] EAT |   [1] EAT | on the way
+    [day] Maddoc       BARTENDER            moved    5 m loaded true  :  [10] SLEEP |   [1] SOCIALIZE |   [1] HOME | getting up and dressed
+    [day] Karlon       COOK                 moved   11 m loaded true  :  [10] SLEEP |   [1] SOCIALIZE | on the way  [1] SOCIALIZE | 
+    [day] Melitta      INNKEEPER            moved    0 m loaded false :  [12] IDLE | (off-stage) Innkeeper: at work
+    [day] Basil        BARTENDER            moved    0 m loaded false :  [12] IDLE | (off-stage) Bartender: at work
+    [day] Lazaros      COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Brennar      BLACKSMITH           moved    0 m loaded false :  [12] IDLE | (off-stage) Blacksmith: at work
+    [day] Fenna        MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Valgard: at work
+    [day] Einar        FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+    [day] Layla        TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Zainab       TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Baron Jalal  WEAVER               moved    0 m loaded false :  [12] IDLE | (off-stage) Weaver: at work
+    [day] Ziad         TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Murad        TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Ilva         CROP_FARMER          moved    0 m loaded false :  [12] IDLE | (off-stage) Crop Farmer: weeding and watering the rows
+    [day] Karim        COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Petros       DEEP_WATER_FISHERMAN moved    0 m loaded false :  [11] IDLE | (off-stage) Deep-Water Fisherman: worked the fishing spot (harpoon, th  [1] IDLE | (off-stage) holding # raw shrimp: no buyer within reach
+    [day] Soren        SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Clerk of Gorrick: at work
+    [day] Baron Hadrik SMELTER              moved    0 m loaded false :  [12] IDLE | (off-stage) Smelter: at work
+    [day] Yannis       COASTAL_FISHERMAN    moved    0 m loaded false :  [11] IDLE | (off-stage) Coastal Fisherman: worked the fishing spot (rod, the harbo  [1] IDLE | (off-stage) holding # raw trout: no buyer within reach
+    [day] Count Dracula HOUSEHOLD_BARON      moved    0 m loaded false :  [12] IDLE | (off-stage) Household Baron: at work
+    [day] Sir Garran   ORDER_KNIGHT         moved    0 m loaded false :  [12] IDLE | (off-stage) Order Knight: at work
+    [day] Sella        COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Orven        PORTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Porter: at work
+    [day] Leofric      FIREWOOD_CUTTER      moved   14 m loaded true  :  [7] WORK | Firewood Cutter: gather at a suitable site  [3] HOME | getting up and dressed  [1] WORK | Firewood Cutter: tidying the workplace while short of supplies
+    [day] Siv          CROP_FARMER          moved    0 m loaded false :  [12] IDLE | (off-stage) Crop Farmer: weeding and watering the rows
+    [day] Hurk         BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Sigrun       BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Garmund      BRUTE                moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] King Richard CIVIC                moved   42 m loaded true  :  [4] WORK |   [4] HOME | getting up and dressed  [3] SOCIALIZE | on the way
+    [day] Duke Donald  CIVIC                moved   43 m loaded true  :  [5] HOME | getting up and dressed  [4] WORK | on the way  [2] EAT | on the way
+    [day] Count William CIVIC                moved   12 m loaded true  :  [7] EAT | on the way  [2] SLEEP |   [2] HOME | getting up and dressed
+    [day] Alaric       PRIEST               moved   24 m loaded true  :  [7] HOME | chores at home  [3] HOME | getting up and dressed  [1] PRAY | praying at the altar
+    [day] Maeve        TAILOR               moved   43 m loaded true  :  [7] WORK | Tailor: tidying the workplace while short of supplies  [3] HOME | getting up and dressed  [2] SLEEP | 
+    [day] Hob          GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Rural Patrol Guard of Loxford: at work
+    [day] Eadmund      CARPENTER            moved   43 m loaded true  :  [6] WORK | Carpenter: make the selected order  [2] WORK | Carpenter: buy missing inputs  [2] HOME | getting up and dressed
+    [day] Beric        MONSTER_HUNTER       moved    0 m loaded false :  [12] IDLE | (off-stage) Monster Hunter: at work
+    [day] Duke Bashir  CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Marshal Duke of Azharad: at work
+    [day] Count Awhad  CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Market Count of Azharad: at work
+    [day] Sir Faris-ul-Azhar HOUSEHOLD_KNIGHT     moved    0 m loaded false :  [12] IDLE | (off-stage) Household Knight: at work
+    [day] Hassan       SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Clerk of Azharad: at work
+    [day] Idris        SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Curator of Azharad: at work
+    [day] Father Rafiq PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Moon Priest of Azharad: at work
+    [day] Yusuf        PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Faith Instructor of Azharad: at work
+    [day] Tariq        CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Azharad: at work
+    [day] Zafir        BLACKSMITH           moved    0 m loaded false :  [12] IDLE | (off-stage) Blacksmith: at work
+    [day] Osama        ARMORER              moved    0 m loaded false :  [12] IDLE | (off-stage) Armorer: at work
+    [day] Marwan       ARMORER              moved    0 m loaded false :  [12] IDLE | (off-stage) Armorer: at work
+    [day] Mohamed      MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Azharad: at work
+    [day] Rashid       MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Azharad: at work
+    [day] Munir        CARTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Caravan Hauler of Azharad: at work
+    [day] Hakim        CARTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Courier of Azharad: at work
+    [day] Hamid        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Nabil        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Salim        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Kamal        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Qasim        FIREWOOD_CUTTER      moved   70 m loaded false :  [12] IDLE | (off-stage) Firewood Cutter: worked the tree, # logs held
+    [day] Fadi         CLAY_DIGGER          moved   11 m loaded false :  [11] IDLE | (off-stage) Clay Digger: at work  [1] IDLE | (off-stage) Clay Digger: worked the coal rocks, # coal held
+    [day] Jamila       CROP_FARMER          moved    0 m loaded false :  [12] IDLE | (off-stage) Crop Farmer: weeding and watering the rows
+    [day] Samira       ORCHARD_KEEPER       moved    0 m loaded false :  [12] IDLE | (off-stage) Orchard Keeper: at work
+    [day] Zaid         GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Gate Guard of Azharad: at work
+    [day] Sabir        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Rural Patrol Guard of Azharad: at work
+    [day] Baron Nuri   HOUSEHOLD_BARON      moved    0 m loaded false :  [12] IDLE | (off-stage) Household Baron: at work
+    [day] Duke Artemios CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Court Duke of Severia: at work
+    [day] Count Constantine CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Revenue Count of Severia: at work
+    [day] Sir Nicholas KNIGHT_ERRANT        moved    0 m loaded false :  [12] IDLE | (off-stage) Knight Errant: at work
+    [day] Sir Kosmas   ESCORT_KNIGHT        moved    0 m loaded false :  [12] IDLE | (off-stage) Escort Knight: at work
+    [day] Baroness Eudokia CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Restoration Baron of Severia: at work
+    [day] Father Khalid PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Moon Priest of Severia: at work
+    [day] Ione         PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Shrine Keeper of Severia: at work
+    [day] Stavros      CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Severia: at work
+    [day] Demetrios    BLACKSMITH           moved    0 m loaded false :  [12] IDLE | (off-stage) Blacksmith: at work
+    [day] Irene        SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Clerk of Severia: at work
+    [day] Theodora     TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Xenia        ARMORER              moved    0 m loaded false :  [12] IDLE | (off-stage) Armorer: at work
+    [day] Eleni        TAILOR               moved    0 m loaded false :  [12] IDLE | (off-stage) Tailor: at work
+    [day] Theron       MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) Weapons Merchant of Severia: at work
+    [day] Pavlos       FENCE                moved    0 m loaded false :  [12] IDLE | (off-stage) Fence of Severia: at work
+    [day] Melina       SHELLFISH_GATHERER   moved    0 m loaded false :  [12] IDLE | (off-stage) Shellfish Gatherer: at work
+    [day] Spiros       PORTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Porter: at work
+    [day] Timon        PORTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Porter: at work
+    [day] Damon        PORTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Porter: at work
+    [day] Alkis        CARTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Courier of Severia: at work
+    [day] Andreas      CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Nikos        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Kallias      CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Isidoros     CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Orestes      FIREWOOD_CUTTER      moved    6 m loaded false :  [12] IDLE | (off-stage) Firewood Cutter: worked the tree, # logs held
+    [day] Myron        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) City Guard of Severia: at work
+    [day] Perikles     GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) City Guard of Severia: at work
+    [day] Zenon        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Gate Guard of Severia: at work
+    [day] Argyros      GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Gate Guard of Severia: at work
+    [day] Gorgias      GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Severia: at work
+    [day] Kleon        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Rural Patrol Guard of Severia: at work
+    [day] Kyros        THIEF                moved    0 m loaded false :  [12] IDLE | (off-stage) Pickpocket of Severia: at work
+    [day] Mimis        BEGGAR               moved    0 m loaded false :  [12] IDLE | (off-stage) Hobo of Severia: at work
+    [day] Argus        THIEF                moved    0 m loaded false :  [12] IDLE | (off-stage) Burglar of Severia: at work
+    [day] Phaedra      CARTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Supply Runner of Severia: at work
+    [day] Leandros     BEGGAR               moved    0 m loaded false :  [12] IDLE | (off-stage) Job Seeker of Severia: at work
+    [day] Sabeen       BEGGAR               moved    0 m loaded false :  [12] IDLE | (off-stage) Displaced Resident of Severia: at work
+    [day] King Phillip CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Lawgiver King of Valgard: at work
+    [day] Duke Edran   CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Logistics Duke of Valgard: at work
+    [day] Sir Vaelor   ORDER_KNIGHT         moved    0 m loaded false :  [12] IDLE | (off-stage) Order Knight: at work
+    [day] Father Anselm PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Sun Priest of Valgard: at work
+    [day] Tovin        ARMORER              moved    0 m loaded false :  [12] IDLE | (off-stage) Armorer: at work
+    [day] Elric        CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Valgard: at work
+    [day] Halwen       CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Hesta        CROP_FARMER          moved    0 m loaded false :  [12] IDLE | (off-stage) Crop Farmer: weeding and watering the rows
+    [day] Aldis        INNKEEPER            moved    0 m loaded false :  [12] IDLE | (off-stage) Innkeeper: at work
+    [day] Toben        COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Halvar       BLACKSMITH           moved    0 m loaded false :  [12] IDLE | (off-stage) Blacksmith: at work
+    [day] Runa         CARTER               moved    0 m loaded false :  [12] IDLE | (off-stage) Supply Runner of Gorrick: at work
+    [day] Ulven        COOK                 moved    0 m loaded false :  [12] IDLE | (off-stage) Cook: at work
+    [day] Nessa        MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Gorrick: at work
+    [day] Varek        SCHOLAR              moved    0 m loaded false :  [12] IDLE | (off-stage) Clerk of Harlette: at work
+    [day] Father Odran PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Sun Priest of Harlette: at work
+    [day] Mother Mirel PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Funerary Priest of Harlette: at work
+    [day] Borin        FARMER               moved    0 m loaded false :  [12] IDLE | (off-stage) Livestock Farmer of Harlette: at work
+    [day] Sir Bedivere ESCORT_KNIGHT        moved    0 m loaded false :  [12] IDLE | (off-stage) Escort Knight: at work
+    [day] Father Cadren PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Sun Priest of Camelot: at work
+    [day] Elian        PRIEST               moved    0 m loaded false :  [12] IDLE | (off-stage) Faith Instructor of Camelot: at work
+    [day] Baron Aldren HOUSEHOLD_BARON      moved    0 m loaded false :  [12] IDLE | (off-stage) Household Baron: at work
+    [day] Wystan       BLACKSMITH           moved    0 m loaded false :  [12] IDLE | (off-stage) Blacksmith: at work
+    [day] Perrin       CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Rowena       MERCHANT             moved    0 m loaded false :  [12] IDLE | (off-stage) General Store Owner of Camelot: at work
+    [day] Huw          FARMER               moved    0 m loaded false :  [12] IDLE | (off-stage) Livestock Farmer of Camelot: at work
+    [day] Edric        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Gate Guard of Camelot: at work
+    [day] Vark         BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Dolgrin      GEM_PROSPECTOR       moved   22 m loaded false :  [11] IDLE | (off-stage) Gem Prospector: at work  [1] IDLE | (off-stage) Gem Prospector: worked the iron rocks, # iron ore held
+    [day] Pell         FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+    [day] Ysmay        FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+    [day] Hask         TRAPPER              moved    0 m loaded false :  [12] IDLE | (off-stage) Trapper: at work
+    [day] Orrin        CARPENTER            moved    0 m loaded false :  [12] IDLE | (off-stage) Carpenter: at work
+    [day] Corvane      BOUNTY_HUNTER        moved    0 m loaded false :  [12] IDLE | (off-stage) Bounty Hunter: at work
+    [day] Bogdan       GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Harlette: at work
+    [day] Milena       CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Harlette: at work
+    [day] Lothar       GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Valgard: at work
+    [day] Hilde        UNDERTAKER           moved    0 m loaded false :  [12] IDLE | (off-stage) Gravedigger of Valgard: at work
+    [day] Gunnar       GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Gorrick: at work
+    [day] Astrid       UNDERTAKER           moved    0 m loaded false :  [12] IDLE | (off-stage) Gravedigger of Gorrick: at work
+    [day] Nadim        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Azharad: at work
+    [day] Samir        UNDERTAKER           moved    0 m loaded false :  [12] IDLE | (off-stage) Gravedigger of Azharad: at work
+    [day] Emrys        GUARD                moved    0 m loaded false :  [12] IDLE | (off-stage) Prison Guard of Camelot: at work
+    [day] Rhiannon     CIVIC                moved    0 m loaded false :  [12] IDLE | (off-stage) Banker of Camelot: at work
+    [day] Rask         BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Wenna        BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Hullen       BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Grisel       BANDIT               moved    0 m loaded false :  [12] IDLE | (off-stage) Bandit: at work
+    [day] Haskel       ORE_MINER            moved   11 m loaded false :  [11] IDLE | (off-stage) Ore Miner: at work  [1] IDLE | (off-stage) Ore Miner: worked the iron rocks, # iron ore held
+    [day] Tamsin       QUARRY_WORKER        moved   52 m loaded false :  [11] IDLE | (off-stage) Quarry Worker: at work  [1] IDLE | (off-stage) Quarry Worker: worked the wrought iron rocks, # wrought ir
+    [day] Osk          GEM_PROSPECTOR       moved   31 m loaded false :  [11] IDLE | (off-stage) Gem Prospector: at work  [1] IDLE | (off-stage) Gem Prospector: worked the iron rocks, # iron ore held
+    [day] Mabry        FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+    [day] Edvin        FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+    [day] Corra        FIREWOOD_CUTTER      moved    0 m loaded false :  [12] IDLE | (off-stage) holding # logs: no buyer within reach
+  slow: rpg.probe.PopulationProbeTest.population() 221.773 s
+
+Gradle Test Executor 13 finished executing tests.
+
+> Task :probe
+Finished generating test XML results (0.012 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\probe
+Generating HTML test report...
+Finished generating test html results (0.019 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\probe
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 46s
+9 actionable tasks: 1 executed, 8 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

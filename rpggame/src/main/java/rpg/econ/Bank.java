@@ -40,31 +40,71 @@ public final class Bank {
     private final Rpg g;
     public Bank(Rpg g) { this.g = g; }
 
-    public Npc teller() { return g.actor(Ids.TELLER) instanceof Npc n ? n : null; }
+    /**
+     * (0.4.4, gamefixes: every kingdom its own bankhouse) A branch of the bank: its banker, where they stand behind the
+     * counter and where a customer stands before it, its kingdom. The accounts are one ledger: a vault opened at any
+     * branch is reached at every other.
+     */
+    public record Branch(String name, String jurisdiction, long teller, float[] tellerSpot, float[] customerSpot) {}
+    private List<Branch> branches;
 
-    /** Where a customer stands to be served: before the counter, in front of the teller's place. */
-    public float[] customerSpot() {
-        // (0.4.1) on ShadowVeil the bank is where its world puts it (the architecture's services): Loxford Castle's keep
-        if (rpg.world.WorldMap.shadowveil()) { float[] p = rpg.world.shadowveil.ShadowVeil.service("bank_customer"); if (p != null) return p; }
-        return new float[]{DevMap.BANK_TELLER[0], DevMap.BANK_COUNTER_Z - 0.9f};
+    /** Every branch (the devmap's one; on ShadowVeil each banker's counter, from the census's posts). */
+    public List<Branch> branches() {
+        if (branches != null && !branches.isEmpty()) return branches;
+        List<Branch> l = new ArrayList<>();
+        if (rpg.world.WorldMap.shadowveil()) {
+            for (var a : rpg.world.shadowveil.Census.all().values()) {
+                float[] post = rpg.world.shadowveil.Census.post(a.id());
+                if (post == null || !"teller".equals(rpg.world.shadowveil.Census.postKind(a.id()))) continue;
+                float[] cust = rpg.world.shadowveil.Census.customerSpot(a.id());
+                String where = a.workId() == null ? "the bank" : rpg.world.shadowveil.Census.placeName(a.workId());
+                l.add(new Branch(where, a.kingdom(), a.id(), new float[]{post[0], post[1]}, cust != null ? cust : new float[]{post[0], post[1] + 2}));
+            }
+        }
+        if (l.isEmpty()) l.add(new Branch("the bank", DevMap.BETA, Ids.TELLER, DevMap.BANK_TELLER, new float[]{DevMap.BANK_TELLER[0], DevMap.BANK_COUNTER_Z - 0.9f}));
+        branches = l;
+        return l;
     }
-    /** Where the teller works. */
-    public float[] tellerSpot() {
-        if (rpg.world.WorldMap.shadowveil()) { float[] p = rpg.world.shadowveil.ShadowVeil.service("bank_teller"); if (p != null) return p; }
-        return DevMap.BANK_TELLER;
+    /** Forgets the branches (the census placed its people again). */
+    public void reset() { branches = null; }
+    /** The branch nearest a point. */
+    public Branch branchNear(float x, float z) {
+        Branch best = null; double bd = Double.MAX_VALUE;
+        for (Branch b : branches()) { double d = Math.hypot(b.customerSpot[0] - x, b.customerSpot[1] - z); if (d < bd) { bd = d; best = b; } }
+        return best;
     }
+    public Branch branchOf(Actor a) { return branchNear(a.x, a.z); }
+    /** Whether someone is a banker at one of the branches. */
+    public boolean isTeller(Npc n) { for (Branch b : branches()) if (b.teller == n.id) return true; return false; }
+    private Branch branchOfTeller(long id) { for (Branch b : branches()) if (b.teller == id) return b; return null; }
 
-    /** Whether the bank is serving: the teller alive, at the counter, not asleep or running. */
-    public boolean open() {
-        Npc t = teller();
+    /** The teller at the branch nearest the player. */
+    public Npc teller() { return teller(branchNear(g.player.x, g.player.z)); }
+    public Npc teller(Branch b) { return b != null && g.actor(b.teller) instanceof Npc n ? n : null; }
+
+    /** Where a customer stands to be served at the branch nearest the player: before the counter, in front of the teller's place. */
+    public float[] customerSpot() { return branchNear(g.player.x, g.player.z).customerSpot; }
+    /** Where a customer stands at the branch nearest someone (an NPC's errand goes to its own town's). */
+    public float[] customerSpot(Actor a) { return branchOf(a).customerSpot; }
+    /** Where the teller works (the branch nearest the player). */
+    public float[] tellerSpot() { return branchNear(g.player.x, g.player.z).tellerSpot; }
+
+    /** Whether the branch nearest the player is serving. */
+    public boolean open() { return open(branchNear(g.player.x, g.player.z)); }
+    /** Whether the branch nearest someone is serving. */
+    public boolean open(Actor a) { return open(branchOf(a)); }
+    /** Whether a branch is serving: its teller alive, at the counter, not asleep or running. */
+    public boolean open(Branch b) {
+        Npc t = teller(b);
         return t != null && t.alive && t.loaded && t.working()
-                && Math.hypot(t.x - tellerSpot()[0], t.z - tellerSpot()[1]) < 1.6;
+                && Math.hypot(t.x - b.tellerSpot[0], t.z - b.tellerSpot[1]) < 1.6;
     }
 
     /** Why someone cannot be served now (null: they can). */
     public String refusal(Actor a) {
-        if (!open()) return "There's nobody at the bank counter.";
-        float[] at = customerSpot();
+        Branch b = branchOf(a);
+        if (!open(b)) return "There's nobody at the bank counter.";
+        float[] at = b.customerSpot;
         if (Math.hypot(a.x - at[0], a.z - at[1]) > 2.6f) return "You need to be at the bank counter.";
         return null;
     }
@@ -85,7 +125,7 @@ public final class Bank {
         if (why != null) return Result.no(why);
         if (a.count(Items.COINS) < ACCOUNT_PRICE) return Result.no("You don't have enough gold to open an account with us.");
         a.takeItems(Items.COINS, ACCOUNT_PRICE);
-        collectFee(ACCOUNT_PRICE);
+        collectFee(a, ACCOUNT_PRICE);
         vault(a);
         g.state.commit(req, "BankAccountOpened", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": one vault, " + FIRST_VAULTS * VAULT_W * VAULT_H + " cells");
         return Result.ok();
@@ -126,7 +166,7 @@ public final class Bank {
         int fromPurse = Math.min(purse, price);
         if (fromPurse > 0) a.takeItems(Items.COINS, fromPurse);
         if (price > fromPurse) takeCoins(a.id, price - fromPurse);
-        collectFee(price);
+        collectFee(a, price);
         Container vault = vaults(a.id).get(0);
         vault.contents.growRows(vault.contents.h + VAULT_H);
         g.state.commit(req, "BankVaultBought", a.id, Ids.TELLER, DevMap.BETA, 0, a.name + ": " + vault.contents.size() + " cells for " + price + " G");
@@ -134,14 +174,14 @@ public final class Bank {
     }
 
     private Container vault(Actor a) {
-        float[] at = tellerSpot();
+        float[] at = branchOf(a).tellerSpot;
         Container c = new Container(g.state.newEntityId(), "bank_vault", "Bank vault", "vault", at[0], rpg.world.Ground.at(at[0], at[1] + 1.5f) - 6, at[1] + 1.5f, FIRST_VAULTS * VAULT_W * VAULT_H, a.id);
         c.ownerOnly = true;
         return g.objects.add(c);
     }
 
-    private void collectFee(int amount) {
-        Npc t = teller();
+    private void collectFee(Actor a, int amount) {
+        Npc t = teller(branchOf(a));
         if (t == null || !t.store(new ItemStack(Items.COINS, amount))) g.state.burn(Items.COINS, amount);
     }
 
@@ -197,7 +237,7 @@ public final class Bank {
 
     /** Why an NPC wants the bank now (null: they do not): too much coin to carry about, or too little to work with. */
     public String errand(Npc n) {
-        if (n.id == Ids.TELLER || !n.alive || n.hostileToPlayer || n.posse) return null;
+        if (isTeller(n) || !n.alive || n.hostileToPlayer || n.posse) return null;
         if (DevMap.WILDS.equals(n.homeJurisdiction)) return null;
         if (g.time < n.bankAgain) return null;
         int purse = n.count(Items.COINS);
@@ -257,7 +297,8 @@ public final class Bank {
 
     /** What the teller offers the player across the counter. */
     public void choices(Npc teller, Dialog d) {
-        if (!open() || !teller.working()) return;
+        Branch b = branchOfTeller(teller.id);
+        if (b == null || !open(b) || !teller.working()) return;
         var p = g.player;
         if (!hasAccount(p.id)) {
             d.choice("I'd like to open an account (25 G).", () -> {

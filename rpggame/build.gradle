@@ -37,16 +37,31 @@ application {
 
 tasks.named('run', JavaExec) { workingDir = projectDir }
 
+// (0.4.2, gamefixes: tests took more than ten minutes, or idled for hours) every test is held to a limit: a test method
+// that runs past it is interrupted and fails with its stack (on its own thread - a game is driven only from the thread
+// that made it), and a test task that still hangs is stopped as a whole past its own limit, so nothing idles for hours;
+// each test that takes longer than twenty seconds is named with its time as it goes
+def testLimits = { Test t, String perTest, java.time.Duration whole ->
+    t.systemProperty 'junit.jupiter.execution.timeout.default', perTest
+    t.systemProperty 'junit.jupiter.execution.timeout.mode', 'enabled'
+    t.timeout = whole
+    t.testLogging { events 'failed', 'skipped'; exceptionFormat = 'full' }
+    t.afterTest { d, r -> if (r.endTime - r.startTime > 20_000) println "  slow: ${d.className}.${d.name} ${(r.endTime - r.startTime) / 1000} s" }
+}
+
 test {
     // (0.4.1) the whole-day simulations (a town's two days, a morning's routines, the smith's and the household's days, the
     // graveyard round, idle knots) are tagged "slow" and run by `gradlew slowTest`; `gradlew test` is the quick suite
-    useJUnitPlatform { excludeTags 'slow' }
+    // (0.4.2) probes (tagged "probe": they print what they find and assert nothing) run only by `gradlew probe`
+    useJUnitPlatform { excludeTags 'slow', 'probe' }
     environment 'ASTRATTO_JAVA_FALLBACK', '0'
     jvmArgs '--enable-native-access=ALL-UNNAMED'
     // (0.4.0) ShadowVeil's cells are grown in the JVM before the engine takes them (230 MB)
     maxHeapSize = '2g'
     if (System.getenv('RPG_JFR') != null) jvmArgs "-XX:StartFlightRecording=filename=${System.getenv('RPG_JFR')},settings=profile"
-    testLogging { events 'failed'; exceptionFormat = 'full' }
+    // the quick suite's classes share two JVMs (each test class still its own world)
+    maxParallelForks = (System.getenv('RPG_TEST_FORKS') ?: '2') as int
+    testLimits(it, '4 m', java.time.Duration.ofMinutes(45))
 }
 
 tasks.register('slowTest', Test) {
@@ -58,7 +73,26 @@ tasks.register('slowTest', Test) {
     environment 'ASTRATTO_JAVA_FALLBACK', '0'
     jvmArgs '--enable-native-access=ALL-UNNAMED'
     maxHeapSize = '2g'
-    testLogging { events 'failed'; exceptionFormat = 'full' }
+    maxParallelForks = (System.getenv('RPG_TEST_FORKS') ?: '2') as int
+    testLimits(it, '8 m', java.time.Duration.ofMinutes(45))
+}
+
+tasks.register('probe', Test) {
+    description = 'The probes (tagged probe, or gated on RPG_PROBE): headless runs that print what they find, for diagnosis. -Prpg.probeWho=... picks whom.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    // the probes are the tagged ones and those gated on RPG_PROBE; -PprobeClass=*Fisher* picks one
+    useJUnitPlatform { if (!project.hasProperty('probeClass')) includeTags 'probe' }
+    environment 'ASTRATTO_JAVA_FALLBACK', '0'
+    environment 'RPG_PROBE', '1'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    maxHeapSize = '2g'
+    if (project.hasProperty('probeClass')) filter { includeTestsMatching project.property('probeClass') }
+    for (String k : ['rpg.probeWho', 'rpg.probeFrames', 'rpg.probeLeg', 'rpg.probeTrace']) if (project.hasProperty(k)) systemProperty k, project.property(k)
+    testLogging { showStandardStreams = true }
+    testLimits(it, '9 m', java.time.Duration.ofMinutes(15))
+    outputs.upToDateWhen { false }
 }
 
 tasks.register('acceptance', JavaExec) {

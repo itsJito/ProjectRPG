@@ -1,0 +1,14 @@
+  slow: rpg.Gamefixes039Test.theEstateAndItsPeopleHaveIdsNoOneElseHas() 28.326 s
+  slow: rpg.Gamefixes040Test.steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() 31.638 s
+  slow: rpg.ai.FullPackTest.whatNoStoreBuysIsBanked() 24.784 s
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 29.649 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 37.73 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 122.744 s
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 66.082 s
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 43.038 s
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 21.428 s
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 20.115 s
+  slow: rpg.ai.NpcPaceTest.theTownGoingAboutItsMorningNeverSprints() 20.106 s
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 37.634 s
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 46.56 s
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 22.288 s

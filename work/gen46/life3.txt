@@ -1,0 +1,961 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 17.91s ({regions=773, overlays=477, variants=427, scarp=48, coast=414, erosion=305, peaks=43, lakes=61, isles=4, rivers=822, wadis=13, ground=26, roads=591, causeways=3, architecture=966, pitsFilled=1405, pits=448, banks=41, clamp=13, cliffs=37, columns=939, falls=16, raise=10609, trees=281, outcrops=0, ways=509}), made and lit in 1.55s
+    [water] flow field grown in 1073 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 4 stand with 3+ others within 2 m
+       Duke Bashir CIVIC (875.5,37.0,894.5) 3 near goal IDLE
+       Idris SCHOLAR (875.5,37.0,894.5) 3 near goal IDLE
+       Hakim CARTER (874.5,37.0,894.5) 3 near goal IDLE
+       Zaid GUARD (874.5,37.0,895.5) 3 near goal IDLE
+
+    [trace]    30 Alkis      (476.50,36.04,120.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME act - working null gp false 0.0,0.0 | getting up and dressed
+    [trace]    40 Alkis      (476.50,36.00,120.49) yaw 0.00 want NaN v 0.14,-0.69 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]    50 Alkis      (476.56,36.00,120.20) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]    60 Alkis      (476.64,36.00,119.80) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]    70 Alkis      (476.72,36.00,119.40) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]    80 Alkis      (476.80,36.00,119.00) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]    90 Alkis      (476.88,36.00,118.60) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   100 Alkis      (476.96,36.00,118.20) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   110 Alkis      (477.04,36.00,117.80) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   120 Alkis      (477.12,36.00,117.40) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   130 Alkis      (477.20,36.00,117.00) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   140 Alkis      (477.28,36.00,116.60) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   150 Alkis      (477.36,36.00,116.20) yaw -0.20 want NaN v 0.48,-2.40 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   160 Alkis      (477.47,36.00,115.83) yaw -0.29 want NaN v 1.24,-1.52 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   170 Alkis      (477.70,36.00,115.71) yaw -0.87 want NaN v 0.12,-0.18 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   180 Alkis      (477.80,36.00,115.68) yaw -1.18 want NaN v 1.75,-0.14 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   190 Alkis      (478.19,36.00,115.66) yaw -1.47 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   200 Alkis      (478.60,36.00,115.64) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   210 Alkis      (479.00,36.00,115.62) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   220 Alkis      (479.41,36.00,115.60) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   230 Alkis      (479.82,36.00,115.58) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   240 Alkis      (480.23,36.00,115.56) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   250 Alkis      (480.64,36.00,115.54) yaw -1.50 want NaN v 2.45,-0.12 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   260 Alkis      (481.04,36.00,115.53) yaw -1.50 want NaN v 2.12,0.22 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   270 Alkis      (481.28,36.00,115.69) yaw -2.09 want NaN v 0.72,0.11 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   280 Alkis      (481.35,36.00,115.89) yaw -2.65 want NaN v 0.16,2.37 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   290 Alkis      (481.37,36.00,116.29) yaw -3.00 want NaN v 0.14,2.45 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   300 Alkis      (481.40,36.00,116.70) yaw -3.06 want NaN v 0.14,2.45 goal HOME act go to goal working null gp true 480.5,118.5 | getting up and dressed
+    [trace]   310 Alkis      (481.42,36.00,117.09) yaw -3.06 want NaN v 0.10,1.75 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   320 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   330 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   340 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   350 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   360 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   370 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   380 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   390 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   400 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   410 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   420 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   430 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   440 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   450 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   460 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   470 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   480 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   490 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   500 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   510 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   520 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   530 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   540 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   550 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   560 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   570 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   580 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   590 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   600 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   610 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   620 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   630 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   640 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   650 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   660 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   670 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   680 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   690 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.5,118.5 | getting up and dressed
+    [trace]   700 Alkis      (481.43,36.00,117.21) yaw -3.06 want NaN v 0.00,0.00 goal HOME act idle working null gp true 480.0,118.7 | getting up and dressed
+    [trace]   710 Alkis      (481.43,36.00,117.30) yaw -3.06 want NaN v 0.09,1.63 goal HOME act go to goal working null gp true 480.0,118.7 | getting up and dressed
+    [trace]   720 Alkis      (481.45,36.00,117.68) yaw -3.06 want NaN v 0.14,2.45 goal HOME act go to goal working null gp true 480.0,118.7 | getting up and dressed
+    [trace]   730 Alkis      (481.47,36.00,118.08) yaw -3.09 want NaN v -0.37,1.96 goal HOME act go to goal working null gp true 480.0,118.7 | getting up and dressed
+    [trace]   740 Alkis      (481.31,36.00,118.30) yaw 2.62 want NaN v -0.08,0.60 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   750 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   760 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   770 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   780 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   790 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   800 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   810 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   820 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   830 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   840 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   850 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   860 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   870 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   880 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   890 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   900 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   910 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   920 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   930 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   940 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   950 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   960 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   970 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   980 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]   990 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1000 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1010 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1020 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1030 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1040 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1050 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1060 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1070 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1080 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1090 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1100 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1110 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1120 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1130 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1140 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1150 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1160 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1170 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1180 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1190 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1200 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1210 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1220 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1230 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1240 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1250 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1260 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1270 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1280 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1290 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1300 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1310 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1320 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1330 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1340 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1350 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1360 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1370 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1380 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1390 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1400 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1410 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1420 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1430 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1440 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1450 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1460 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1470 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1480 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]  1490 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [life] stop 476,118 done (42 people seen so far)
+    [trace]     0 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]    10 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]    20 Alkis      (481.30,36.00,118.31) yaw 2.66 want NaN v 0.00,0.00 goal HOME act idle working null gp false 480.0,118.7 | getting up and dressed
+    [trace]    30 Soren      (372.50,57.04,389.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME act - working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    30 Runa       (405.50,56.04,403.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    30 Astrid     (326.50,62.04,385.50) yaw 0.00 want NaN v 0.00,0.00 goal SOCIALIZE act go to goal working null gp true 326.5,399.5 | 
+    [trace]    40 Soren      (372.48,57.00,389.49) yaw 0.00 want NaN v -0.83,-0.42 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    40 Runa       (405.36,56.00,403.43) yaw 0.43 want NaN v -1.92,-0.96 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    40 Astrid     (326.65,62.00,385.53) yaw -0.43 want NaN v 2.12,0.35 goal SOCIALIZE act go to goal working null gp true 326.5,399.5 | 
+    [trace]    50 Soren      (372.19,57.00,389.34) yaw 0.87 want NaN v -2.19,-1.10 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    50 Runa       (405.00,56.00,403.25) yaw 1.08 want NaN v -2.19,-1.10 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    50 Astrid     (327.05,62.00,385.59) yaw -1.52 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 326.5,399.5 | 
+    [trace]    60 Soren      (371.82,57.00,389.16) yaw 1.08 want NaN v -2.19,-1.10 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    60 Runa       (404.64,56.00,403.06) yaw 1.08 want NaN v -1.86,-1.42 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    60 Astrid     (327.45,62.00,385.66) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    70 Soren      (371.46,57.00,388.98) yaw 1.08 want NaN v -2.19,-1.10 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    70 Runa       (404.39,56.00,402.75) yaw 0.78 want NaN v -1.42,-2.00 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    70 Astrid     (327.86,62.00,385.73) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    80 Soren      (371.30,57.00,388.81) yaw 0.77 want NaN v 0.00,-0.87 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    80 Runa       (404.15,56.00,402.42) yaw 0.66 want NaN v -1.42,-2.00 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    80 Astrid     (328.26,62.00,385.79) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    90 Soren      (371.30,57.00,388.70) yaw 0.34 want NaN v 0.00,-0.40 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]    90 Runa       (403.92,56.00,402.23) yaw 0.87 want NaN v -1.26,0.00 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]    90 Astrid     (328.66,62.00,385.86) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,398.5 | 
+    [trace]   100 Soren      (371.12,57.00,388.66) yaw 1.16 want NaN v -2.31,-0.10 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   100 Runa       (403.76,56.00,402.22) yaw 1.26 want NaN v -0.56,-0.45 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   100 Astrid     (329.07,62.00,385.93) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,397.5 | 
+    [trace]   110 Soren      (370.71,57.00,388.64) yaw 1.48 want NaN v -2.45,-0.08 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   110 Runa       (403.69,56.00,401.96) yaw 0.38 want NaN v -0.32,-2.43 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   110 Astrid     (329.47,62.00,385.99) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,397.5 | 
+    [trace]   120 Soren      (370.41,57.00,388.63) yaw 1.52 want NaN v -0.28,-0.03 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   120 Runa       (403.64,56.00,401.56) yaw 0.18 want NaN v -0.32,-2.43 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   120 Astrid     (329.87,62.00,386.06) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,397.5 | 
+    [trace]   130 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v 0.01,0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   130 Runa       (403.59,56.00,401.15) yaw 0.15 want NaN v -0.32,-2.43 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   130 Astrid     (330.27,62.00,386.13) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   140 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   140 Runa       (403.63,56.00,400.81) yaw -0.12 want NaN v 1.33,-1.57 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   140 Astrid     (330.68,62.00,386.20) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   150 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   150 Runa       (403.87,56.00,400.59) yaw -0.65 want NaN v 0.20,-1.02 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   150 Astrid     (331.08,62.00,386.26) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   160 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   160 Runa       (403.91,56.00,400.43) yaw -0.43 want NaN v 0.55,-0.99 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   160 Astrid     (331.48,62.00,386.33) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 330.5,396.5 | 
+    [trace]   170 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   170 Runa       (404.14,56.00,400.24) yaw -0.86 want NaN v 2.15,-1.18 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   170 Astrid     (331.89,62.00,386.40) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 330.5,395.5 | 
+    [trace]   180 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   180 Runa       (404.50,56.00,400.05) yaw -1.02 want NaN v 2.15,-1.18 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   180 Astrid     (332.16,62.00,386.59) yaw -2.14 want NaN v 0.72,2.00 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   190 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   190 Runa       (404.86,56.00,399.85) yaw -1.05 want NaN v 2.15,-1.18 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   190 Astrid     (332.21,62.00,386.77) yaw -2.50 want NaN v 0.23,0.00 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   200 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   200 Runa       (405.18,56.00,399.67) yaw -1.05 want NaN v 1.54,-0.84 goal HOME act go to goal working null gp true 405.5,399.5 | getting up and dressed
+    [trace]   200 Astrid     (332.24,62.00,386.88) yaw -2.79 want NaN v 0.13,1.75 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   210 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   210 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   210 Astrid     (332.26,62.00,387.26) yaw -3.07 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   220 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   220 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   220 Astrid     (332.27,62.00,387.67) yaw -3.10 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   230 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   230 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   230 Astrid     (332.28,62.00,388.08) yaw -3.10 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   240 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   240 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   240 Astrid     (332.30,62.00,388.49) yaw -3.10 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   250 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   250 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   250 Astrid     (332.32,62.00,388.90) yaw -3.10 want NaN v 0.54,2.37 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   260 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   260 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   260 Astrid     (332.42,62.00,389.29) yaw -2.97 want NaN v 0.61,2.37 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   270 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.06,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   270 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   270 Astrid     (332.52,62.00,389.69) yaw -2.90 want NaN v 0.61,2.37 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   280 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   280 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   280 Astrid     (332.62,62.00,390.08) yaw -2.90 want NaN v 0.61,2.37 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   290 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   290 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   290 Astrid     (332.72,62.00,390.48) yaw -2.90 want NaN v 0.61,2.37 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   300 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   300 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   300 Astrid     (332.84,62.00,390.87) yaw -2.86 want NaN v 0.92,2.27 goal SOCIALIZE act go to goal working null gp true 333.5,392.5 | 
+    [trace]   310 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.06,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   310 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   310 Astrid     (332.99,62.00,391.25) yaw -2.80 want NaN v 0.92,2.27 goal SOCIALIZE act go to goal working null gp true 333.8,392.2 | 
+    [trace]   320 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   320 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   320 Astrid     (333.14,62.00,391.62) yaw -2.76 want NaN v 0.75,1.84 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   330 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.06,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   330 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   330 Astrid     (333.20,62.00,391.76) yaw -2.76 want NaN v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   340 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   340 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   340 Astrid     (333.20,62.00,391.76) yaw 2.65 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   350 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.08,-0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   350 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   350 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   360 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.08,-0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   360 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   360 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   370 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.09,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   370 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   370 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   380 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.06,-0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   380 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   380 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   390 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   390 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   390 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   400 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.08,-0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   400 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   400 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   410 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.02,-0.00 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   410 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   410 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   420 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.09,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   420 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   420 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   430 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.09,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   430 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   430 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   440 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   440 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   440 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   450 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   450 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   450 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   460 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   460 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   460 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   470 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 350.5,392.5 | getting up and dressed
+    [trace]   470 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   470 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   480 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.05,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   480 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   480 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   490 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   490 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   490 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   500 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.05,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   500 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   500 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   510 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.06,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   510 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   510 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   520 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   520 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   520 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   530 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.06,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   530 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   530 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   540 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.07,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   540 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   540 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   550 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   550 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   550 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   560 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.05,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   560 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   560 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | talked with Einar
+    [trace]   570 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   570 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   570 Astrid     (333.20,62.00,391.76) yaw 1.80 want 1.80 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   580 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.09,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   580 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   580 Astrid     (333.20,62.00,391.76) yaw 0.72 want 0.58 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   590 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   590 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   590 Astrid     (333.20,62.00,391.76) yaw -0.36 want -0.55 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   600 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.10,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   600 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   600 Astrid     (333.20,62.00,391.76) yaw -1.45 want -1.66 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   610 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.06,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   610 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   610 Astrid     (333.20,62.00,391.76) yaw -2.53 want -2.77 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   620 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.07,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   620 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   620 Astrid     (333.20,62.00,391.76) yaw 2.67 want 2.43 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   630 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.09,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   630 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   630 Astrid     (333.20,62.00,391.76) yaw 1.59 want 1.35 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   640 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   640 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   640 Astrid     (333.20,62.00,391.76) yaw 0.50 want 0.29 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   650 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   650 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   650 Astrid     (333.20,62.00,391.76) yaw -0.58 want -0.76 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   660 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   660 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   660 Astrid     (333.20,62.00,391.76) yaw -1.66 want -1.80 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   670 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   670 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   670 Astrid     (333.20,62.00,391.76) yaw -2.75 want -2.83 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   680 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   680 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   680 Astrid     (333.20,62.00,391.76) yaw 2.45 want 2.44 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   690 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.08,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   690 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   690 Astrid     (333.20,62.00,391.76) yaw 1.65 want 1.65 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   700 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.05,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   700 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   700 Astrid     (333.20,62.00,391.76) yaw 1.52 want 1.53 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   710 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   710 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   710 Astrid     (333.20,62.00,391.76) yaw 1.99 want 1.99 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   720 Soren      (370.41,57.00,388.61) yaw 1.52 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   720 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   720 Astrid     (333.20,62.00,391.76) yaw 3.03 want 3.07 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   730 Soren      (370.40,57.00,388.61) yaw 1.52 want NaN v -0.01,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   730 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   730 Astrid     (333.20,62.00,391.76) yaw -2.17 want -2.07 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   740 Soren      (370.39,57.00,388.61) yaw 1.52 want NaN v 0.17,0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   740 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   740 Astrid     (333.20,62.00,391.76) yaw -1.08 want -0.93 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   750 Soren      (370.39,57.00,388.61) yaw 1.52 want NaN v 0.17,0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   750 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   750 Astrid     (333.20,62.00,391.76) yaw -0.00 want 0.19 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   760 Soren      (370.37,57.00,388.60) yaw 1.95 want NaN v 0.68,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   760 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   760 Astrid     (333.20,62.00,391.76) yaw 1.08 want 1.31 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   770 Soren      (370.37,57.00,388.59) yaw 3.03 want NaN v 0.72,0.09 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   770 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   770 Astrid     (333.20,62.00,391.76) yaw 2.17 want 2.40 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   780 Soren      (370.37,57.00,388.58) yaw -2.17 want NaN v 0.69,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   780 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   780 Astrid     (333.20,62.00,391.76) yaw -3.03 want 3.49 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   790 Soren      (370.37,57.00,388.57) yaw -1.69 want NaN v 0.63,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   790 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   790 Astrid     (333.20,62.00,391.76) yaw -1.95 want -1.72 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   800 Soren      (370.37,57.00,388.55) yaw -1.69 want NaN v 0.63,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   800 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   800 Astrid     (333.20,62.00,391.76) yaw -0.87 want -0.66 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   810 Soren      (370.38,57.00,388.54) yaw -1.69 want NaN v 0.64,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   810 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   810 Astrid     (333.20,62.00,391.76) yaw 0.22 want 0.38 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   820 Soren      (370.38,57.00,388.51) yaw -1.69 want NaN v 0.64,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   820 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   820 Astrid     (333.20,62.00,391.76) yaw 1.30 want 1.42 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   830 Soren      (370.38,57.00,388.49) yaw -1.69 want NaN v 0.63,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   830 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   830 Astrid     (333.20,62.00,391.76) yaw 2.38 want 2.44 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   840 Soren      (370.39,57.00,388.46) yaw -1.69 want NaN v 0.63,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   840 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   840 Astrid     (333.20,62.00,391.76) yaw -2.82 want -2.82 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   850 Soren      (370.39,57.00,388.42) yaw -1.69 want NaN v 0.62,0.08 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   850 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   850 Astrid     (333.20,62.00,391.76) yaw -2.15 want -2.15 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   860 Soren      (370.40,57.00,388.37) yaw -1.69 want NaN v 0.60,0.07 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   860 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   860 Astrid     (333.20,62.00,391.76) yaw -2.18 want -2.18 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   870 Soren      (370.41,57.00,388.30) yaw -1.69 want NaN v 0.58,0.07 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   870 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   870 Astrid     (333.20,62.00,391.76) yaw -2.90 want -2.90 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   880 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.20,-0.14 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   880 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   880 Astrid     (333.20,62.00,391.76) yaw 2.30 want 2.25 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   890 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   890 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   890 Astrid     (333.20,62.00,391.76) yaw 1.22 want 1.10 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   900 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.02,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   900 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   900 Astrid     (333.20,62.00,391.76) yaw 0.14 want -0.03 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   910 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.08,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   910 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   910 Astrid     (333.20,62.00,391.76) yaw -0.95 want -1.15 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   920 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.08,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   920 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   920 Astrid     (333.20,62.00,391.76) yaw -2.03 want -2.26 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   930 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.16,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   930 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   930 Astrid     (333.20,62.00,391.76) yaw -3.11 want -3.24 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   940 Soren      (370.44,57.00,388.31) yaw -1.60 want NaN v -0.18,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   940 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   940 Astrid     (333.20,62.00,391.76) yaw 2.09 want 1.85 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   950 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.08,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   950 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   950 Astrid     (333.20,62.00,391.76) yaw 1.00 want 0.78 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   960 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.08,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   960 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   960 Astrid     (333.20,62.00,391.76) yaw -0.08 want -0.27 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   970 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.02,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   970 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   970 Astrid     (333.20,62.00,391.76) yaw -1.16 want -1.32 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   980 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v 0.00,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   980 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   980 Astrid     (333.20,62.00,391.76) yaw -2.25 want -2.35 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   990 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.20,0.03 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]   990 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]   990 Astrid     (333.20,62.00,391.76) yaw 2.95 want 2.91 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1000 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1000 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1000 Astrid     (333.20,62.00,391.76) yaw 1.92 want 1.92 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1010 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v 0.01,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1010 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1010 Astrid     (333.20,62.00,391.76) yaw 1.52 want 1.50 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1020 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.14,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1020 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1020 Astrid     (333.20,62.00,391.76) yaw 1.69 want 1.69 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1030 Soren      (370.44,57.00,388.32) yaw -1.60 want NaN v -0.12,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1030 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1030 Astrid     (333.20,62.00,391.76) yaw 2.59 want 2.60 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1040 Soren      (370.44,57.00,388.33) yaw -1.60 want NaN v -0.08,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1040 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1040 Astrid     (333.20,62.00,391.76) yaw -2.61 want -2.54 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1050 Soren      (370.44,57.00,388.33) yaw -1.60 want NaN v 0.05,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1050 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1050 Astrid     (333.20,62.00,391.76) yaw -1.53 want -1.40 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1060 Soren      (370.44,57.00,388.33) yaw -1.60 want NaN v 0.02,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1060 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1060 Astrid     (333.20,62.00,391.76) yaw -0.45 want -0.27 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1070 Soren      (370.44,57.00,388.33) yaw -1.60 want NaN v 0.03,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1070 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1070 Astrid     (333.20,62.00,391.76) yaw 0.64 want 0.85 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1080 Soren      (370.44,57.00,388.34) yaw -1.60 want NaN v 0.03,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1080 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1080 Astrid     (333.20,62.00,391.76) yaw 1.72 want 1.95 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1090 Soren      (370.43,57.00,388.34) yaw -1.60 want NaN v 0.04,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1090 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1090 Astrid     (333.20,62.00,391.76) yaw 2.80 want 3.05 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1100 Soren      (370.43,57.00,388.34) yaw -1.60 want NaN v -0.05,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1100 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1100 Astrid     (333.20,62.00,391.76) yaw -2.40 want -2.16 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1110 Soren      (370.43,57.00,388.34) yaw -1.60 want NaN v 0.01,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1110 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1110 Astrid     (333.20,62.00,391.76) yaw -1.31 want -1.10 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1120 Soren      (370.43,57.00,388.35) yaw -1.60 want NaN v 0.01,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1120 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1120 Astrid     (333.20,62.00,391.76) yaw -0.23 want -0.05 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1130 Soren      (370.43,57.00,388.35) yaw -1.60 want NaN v 0.03,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1130 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1130 Astrid     (333.20,62.00,391.76) yaw 0.85 want 0.99 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1140 Soren      (370.44,57.00,388.35) yaw -1.60 want NaN v -0.03,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1140 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1140 Astrid     (333.20,62.00,391.76) yaw 1.94 want 2.02 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1150 Soren      (370.44,57.00,388.35) yaw -1.60 want NaN v -0.13,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1150 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1150 Astrid     (333.20,62.00,391.76) yaw 3.02 want 3.04 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1160 Soren      (370.43,57.00,388.35) yaw -1.60 want NaN v 0.02,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1160 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1160 Astrid     (333.20,62.00,391.76) yaw -2.34 want -2.34 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1170 Soren      (370.43,57.00,388.36) yaw -1.60 want NaN v -0.02,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1170 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1170 Astrid     (333.20,62.00,391.76) yaw -2.12 want -2.12 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1180 Soren      (370.43,57.00,388.36) yaw -1.60 want NaN v -0.12,-0.03 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1180 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1180 Astrid     (333.20,62.00,391.76) yaw -2.49 want -2.49 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1190 Soren      (370.43,57.00,388.37) yaw -1.60 want NaN v 0.00,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1190 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1190 Astrid     (333.20,62.00,391.76) yaw 2.78 want 2.75 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1200 Soren      (370.43,57.00,388.37) yaw -1.60 want NaN v 0.01,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1200 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1200 Astrid     (333.20,62.00,391.76) yaw 1.70 want 1.60 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1210 Soren      (370.43,57.00,388.37) yaw -1.60 want NaN v -0.10,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1210 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1210 Astrid     (333.20,62.00,391.76) yaw 0.61 want 0.47 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1220 Soren      (370.43,57.00,388.38) yaw -1.60 want NaN v -0.06,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1220 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1220 Astrid     (333.20,62.00,391.76) yaw -0.47 want -0.66 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1230 Soren      (370.43,57.00,388.38) yaw -1.60 want NaN v 0.02,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1230 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1230 Astrid     (333.20,62.00,391.76) yaw -1.55 want -1.77 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1240 Soren      (370.43,57.00,388.39) yaw -1.60 want NaN v -0.10,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1240 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1240 Astrid     (333.20,62.00,391.76) yaw -2.64 want -2.87 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1250 Soren      (370.43,57.00,388.39) yaw -1.60 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1250 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1250 Astrid     (333.20,62.00,391.76) yaw 2.56 want 2.32 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1260 Soren      (370.43,57.00,388.39) yaw -1.60 want NaN v -0.19,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1260 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1260 Astrid     (333.20,62.00,391.76) yaw 1.48 want 1.25 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1270 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.14,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1270 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1270 Astrid     (333.20,62.00,391.76) yaw 0.40 want 0.19 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1280 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.17,0.04 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1280 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1280 Astrid     (333.20,62.00,391.76) yaw -0.69 want -0.86 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1290 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.18,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1290 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1290 Astrid     (333.20,62.00,391.76) yaw -1.77 want -1.89 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1300 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v 0.00,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1300 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1300 Astrid     (333.20,62.00,391.76) yaw -2.85 want -2.92 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1310 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v 0.03,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1310 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1310 Astrid     (333.20,62.00,391.76) yaw 2.35 want 2.34 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1320 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.04,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1320 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1320 Astrid     (333.20,62.00,391.76) yaw 1.59 want 1.59 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1330 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.01,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1330 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1330 Astrid     (333.20,62.00,391.76) yaw 1.52 want 1.54 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1340 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.03,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1340 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1340 Astrid     (333.20,62.00,391.76) yaw 2.15 want 2.15 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1350 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.04,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1350 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1350 Astrid     (333.20,62.00,391.76) yaw -3.06 want 3.27 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1360 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.09,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1360 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1360 Astrid     (333.20,62.00,391.76) yaw -1.98 want -1.87 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1370 Soren      (370.43,57.00,388.40) yaw -1.60 want NaN v -0.13,-0.02 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1370 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1370 Astrid     (333.20,62.00,391.76) yaw -0.89 want -0.73 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1380 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.18,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1380 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1380 Astrid     (333.20,62.00,391.76) yaw 0.19 want 0.39 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1390 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.05,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1390 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1390 Astrid     (333.20,62.00,391.76) yaw 1.27 want 1.50 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1400 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.07,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1400 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1400 Astrid     (333.20,62.00,391.76) yaw 2.36 want 2.60 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1410 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.17,0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1410 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1410 Astrid     (333.20,62.00,391.76) yaw -2.84 want -2.71 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1420 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v 0.01,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1420 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1420 Astrid     (333.20,62.00,391.76) yaw -1.76 want -1.53 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1430 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.10,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1430 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1430 Astrid     (333.20,62.00,391.76) yaw -0.68 want -0.48 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1440 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.09,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1440 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1440 Astrid     (333.20,62.00,391.76) yaw 0.41 want 0.57 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1450 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v 0.01,0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1450 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1450 Astrid     (333.20,62.00,391.76) yaw 1.49 want 1.60 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1460 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.19,0.03 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1460 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1460 Astrid     (333.20,62.00,391.76) yaw 2.57 want 2.62 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1470 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v 0.00,-0.00 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1470 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1470 Astrid     (333.20,62.00,391.76) yaw -2.65 want -2.65 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1480 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v -0.02,-0.01 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1480 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1480 Astrid     (333.20,62.00,391.76) yaw -2.12 want -2.09 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]  1490 Soren      (370.43,57.00,388.41) yaw -1.60 want NaN v 0.02,0.03 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]  1490 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]  1490 Astrid     (333.20,62.00,391.76) yaw -2.23 want -2.23 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [life] stop 370,390 done (58 people seen so far)
+    [trace]     0 Soren      (370.82,57.00,388.30) yaw -1.68 want NaN v 2.35,0.38 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]     0 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]     0 Astrid     (333.20,62.00,391.76) yaw -3.06 want -3.06 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]    10 Soren      (371.19,57.00,388.43) yaw -1.91 want NaN v 1.60,1.25 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]    10 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]    10 Astrid     (333.20,62.00,391.76) yaw 2.92 want 2.92 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]    20 Soren      (371.31,57.00,388.75) yaw -2.50 want NaN v 0.17,2.44 goal HOME act go to goal working null gp true 351.5,392.5 | getting up and dressed
+    [trace]    20 Runa       (405.32,56.00,399.60) yaw -1.05 want NaN v 0.00,0.00 goal HOME act idle working null gp false 405.5,399.5 | getting up and dressed
+    [trace]    20 Astrid     (333.20,62.00,391.76) yaw 2.29 want 2.29 v 0.00,0.00 goal WORK act hold/face working null gp true 326.5,385.5 | paused to reconsider a blocked route
+    [trace]    30 Maelin     (151.50,61.04,588.50) yaw 0.00 want NaN v 0.00,0.00 goal PRAY act - working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    40 Maelin     (151.50,61.00,588.51) yaw 0.00 want NaN v 0.00,0.70 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    50 Maelin     (151.50,61.00,588.81) yaw 0.76 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    60 Maelin     (151.50,61.00,589.22) yaw 1.84 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    70 Maelin     (151.50,61.00,589.62) yaw 2.93 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    80 Maelin     (151.50,61.00,590.03) yaw 3.14 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]    90 Maelin     (151.50,61.00,590.44) yaw 3.14 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   100 Maelin     (151.50,61.00,590.85) yaw 3.14 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   110 Maelin     (151.50,61.00,591.26) yaw 3.14 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   120 Maelin     (151.50,61.00,591.67) yaw 3.14 want NaN v 0.00,2.45 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   130 Maelin     (151.45,61.00,592.04) yaw 3.01 want NaN v -1.10,1.58 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   140 Maelin     (151.23,61.00,592.18) yaw 2.37 want NaN v -0.58,0.43 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   150 Maelin     (151.20,61.00,592.25) yaw 2.47 want NaN v -0.93,0.36 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   160 Maelin     (150.88,61.00,592.30) yaw 1.81 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   170 Maelin     (150.48,61.00,592.36) yaw 1.75 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   180 Maelin     (150.07,61.00,592.42) yaw 1.75 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   190 Maelin     (149.67,61.00,592.48) yaw 1.72 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   200 Maelin     (149.26,61.00,592.53) yaw 1.72 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   210 Maelin     (148.86,61.00,592.59) yaw 1.72 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   220 Maelin     (148.45,61.00,592.65) yaw 1.72 want NaN v -2.43,0.35 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   230 Maelin     (148.05,61.00,592.70) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   240 Maelin     (147.64,61.00,592.75) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   250 Maelin     (147.24,61.00,592.80) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   260 Maelin     (146.83,61.00,592.85) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   270 Maelin     (146.43,61.00,592.90) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   280 Maelin     (146.02,61.00,592.95) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   290 Maelin     (145.62,61.00,593.00) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   300 Maelin     (145.21,61.00,593.05) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   310 Maelin     (144.81,61.00,593.10) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   320 Maelin     (144.40,61.00,593.15) yaw 1.72 want NaN v -2.43,0.30 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   330 Maelin     (144.23,61.00,593.20) yaw 1.83 want NaN v 0.00,0.29 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   340 Maelin     (144.21,61.00,593.23) yaw 2.14 want NaN v -0.70,0.16 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   350 Maelin     (143.92,61.00,593.25) yaw 1.67 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   360 Maelin     (143.51,61.00,593.26) yaw 1.64 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   370 Maelin     (143.10,61.00,593.27) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   380 Maelin     (142.69,61.00,593.28) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   390 Maelin     (142.29,61.00,593.30) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   400 Maelin     (141.88,61.00,593.31) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   410 Maelin     (141.47,61.00,593.32) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   420 Maelin     (141.06,61.00,593.33) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   430 Maelin     (140.65,61.00,593.34) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   440 Maelin     (140.24,61.00,593.35) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   450 Maelin     (139.84,61.00,593.36) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   460 Maelin     (139.43,61.00,593.37) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   470 Maelin     (139.02,61.00,593.38) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   480 Maelin     (138.61,61.00,593.39) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   490 Maelin     (138.20,61.00,593.40) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   500 Maelin     (137.79,61.00,593.42) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   510 Maelin     (137.39,61.00,593.43) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   520 Maelin     (136.98,61.00,593.44) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   530 Maelin     (136.57,61.00,593.45) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   540 Maelin     (136.16,61.00,593.46) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   550 Maelin     (135.75,61.00,593.47) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   560 Maelin     (135.34,61.00,593.48) yaw 1.60 want NaN v -2.45,0.06 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   570 Maelin     (134.98,61.00,593.44) yaw 1.46 want NaN v -1.60,-1.05 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   580 Maelin     (134.80,61.00,593.23) yaw 0.96 want NaN v -0.56,0.00 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   590 Maelin     (134.73,61.00,593.11) yaw 0.61 want NaN v -0.27,-1.86 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   600 Maelin     (134.69,61.00,592.72) yaw 0.18 want NaN v -0.21,-2.44 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   610 Maelin     (134.66,61.00,592.31) yaw 0.11 want NaN v -0.21,-2.44 goal PRAY act go to goal working null gp true 134.5,590.5 | on the way to prayers
+    [trace]   620 Maelin     (134.62,61.00,591.90) yaw 0.11 want NaN v -0.21,-2.44 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   630 Maelin     (134.59,61.00,591.50) yaw 0.11 want NaN v -0.21,-2.44 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   640 Maelin     (134.55,61.00,591.09) yaw 0.11 want NaN v -0.21,-2.44 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   650 Maelin     (134.52,61.00,590.77) yaw 0.11 want NaN v -0.11,-1.32 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   660 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   670 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   680 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   690 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   700 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   710 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   720 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   730 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   740 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   750 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   760 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   770 Maelin     (134.52,61.00,590.70) yaw 0.11 want NaN v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   780 Maelin     (134.52,61.00,590.70) yaw 0.87 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   790 Maelin     (134.52,61.00,590.70) yaw 1.96 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   800 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   810 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   820 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   830 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   840 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   850 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   860 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   870 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   880 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   890 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   900 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   910 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   920 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   930 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   940 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   950 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   960 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   970 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   980 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]   990 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1000 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1010 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1020 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1030 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1040 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1050 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1060 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1070 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1080 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1090 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1100 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1110 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1120 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1130 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1140 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1150 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1160 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1170 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1180 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1190 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1200 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1210 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1220 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1230 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1240 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1250 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1260 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1270 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1280 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1290 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1300 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1310 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1320 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1330 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1340 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1350 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1360 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1370 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1380 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1390 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1400 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1410 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1420 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1430 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1440 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1450 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1460 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1470 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1480 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [trace]  1490 Maelin     (134.52,61.00,590.70) yaw 2.50 want 2.52 v 0.00,0.00 goal PRAY act go to goal working null gp true 134.5,590.1 | on the way to prayers
+    [life] stop 134,590 done (81 people seen so far)
+
+    [life] 3 stops of 1500 frames; 81 people seen
+      Maelin           SCHOLAR      seen   230 spins   0 blocked     0 still   133
+          last (134.5,61.0,590.7) PRAY: on the way to prayers
+      Damaris          MERCHANT     seen   230 spins   0 blocked     0 still   192
+          last (483.8,36.0,115.5) SLEEP: on the way
+      Fenna            MERCHANT     seen   230 spins   4 blocked   125 still     0
+          spun at (206.5,53.0,650.4) HOME: getting up and dressed
+          last (206.5,53.0,650.5) BANK: paused to reconsider a blocked route
+      Einar            WORKER       seen   230 spins   3 blocked     0 still     0
+          spun at (332.4,62.0,392.0) HOME: getting up and dressed
+      Siv              FARMER       seen   230 spins   4 blocked     0 still     0
+          spun at (327.4,53.0,456.6) WORK: Crop Farmer: weeding and watering the rows
+      Stavros          CIVIC        seen   230 spins   4 blocked   103 still     0
+          spun at (430.5,37.0,202.5) WORK: paused to reconsider a blocked route
+          last (430.5,37.0,202.5) WORK: paused to reconsider a blocked route
+      Spiros           WORKER       seen   230 spins   0 blocked     0 still    37
+          last (461.7,38.0,37.9) SLEEP: on the way
+      Elric            CIVIC        seen   230 spins   4 blocked    79 still     0
+          spun at (180.5,55.0,621.5) WORK: paused to reconsider a blocked route
+          last (180.5,55.0,621.5) WORK: paused to reconsider a blocked route
+      Lothar           GUARD        seen   230 spins   2 blocked   124 still     0
+          spun at (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+          last (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   230 spins   3 blocked    14 still     0
+          spun at (333.2,62.0,391.8) HOME: getting up and dressed
+          last (333.2,62.0,391.8) WORK: paused to reconsider a blocked route
+      never in play: Ealdra MERCHANT home (261,926)
+      never in play: Torren LAWMAN home (237,978)
+      never in play: Aldric GUARD home (240,981)
+      never in play: Oswin WORKER home (304,901)
+      never in play: Tam VILLAGER home (285,836)
+      never in play: Brannoc THIEF home (580,900)
+      never in play: Mara MERCHANT home (114,771)
+      never in play: Lucan LAWMAN home (95,701)
+      never in play: Ferrick CARTER home (192,973)
+      never in play: Garvin QUEST_GIVER home (211,897)
+      never in play: Kettil CONTACT home (599,876)
+      never in play: Wynn FARMER home (204,970)
+      never in play: Father Wulfric UNDERTAKER home (179,880)
+      never in play: Skarn FENCE home (580,1026)
+      never in play: Bram GUARD home (237,982)
+      never in play: Bilal BEGGAR home (908,860)
+      never in play: Ysolde HEALER home (183,963)
+      never in play: Father Gregory PRIEST home (212,894)
+      never in play: Rafe HUNTER home (355,801)
+      never in play: Bryn FISHERMAN home (571,593)
+      never in play: Brokk MINER home (199,434)
+      never in play: Fred CRAFTSMAN home (240,918)
+      never in play: Sir Andrew KNIGHT home (221,896)
+      never in play: Hadwin CIVIC home (223,983)
+      never in play: Danek CRAFTSMAN home (135,777)
+      never in play: Dawud MINER home (947,878)
+      never in play: Sir Hedric KNIGHT home (359,748)
+      never in play: Gudrik FISHERMAN home (602,1020)
+      never in play: Vesna FISHERMAN home (104,773)
+      never in play: Anwar GUARD home (878,880)
+      never in play: Baroness Guinevere CIVIC home (817,367)
+      never in play: Father Paul PRIEST home (876,53)
+      never in play: Aristides SCHOLAR home (611,151)
+      never in play: Polyxena MINER home (877,129)
+      never in play: King Fahad VILLAGER home (906,895)
+      never in play: Cerys VILLAGER home (814,420)
+      never in play: Wat FISHERMAN home (182,962)
+      never in play: Tauron HUNTER home (860,509)
+      never in play: King Arthur CRAFTSMAN home (817,371)
+      never in play: Sir Lancelot KNIGHT home (809,372)
+      never in play: Sir Gawain HUNTER home (842,344)
+      never in play: Torvik MINER home (194,439)
+      never in play: Merlin MINER home (779,375)
+      never in play: Dunstan CRAFTSMAN home (304,904)
+      never in play: Olek CRAFTSMAN home (98,743)
+      never in play: Cenric WORKER home (303,896)
+      never in play: Radek WORKER home (88,769)
+      never in play: Meriwyn MERCHANT home (599,871)
+      never in play: Cuthmar FARMER home (249,898)
+      never in play: Baron Osric FARMER home (244,854)
+      never in play: Kyra FARMER home (214,290)
+      never in play: Marinos FARMER home (216,283)
+      never in play: Berthild CIVIC home (272,944)
+      never in play: Maddoc MERCHANT home (276,946)
+      never in play: Karlon CRAFTSMAN home (279,945)
+      never in play: Layla CRAFTSMAN home (894,832)
+      never in play: Zainab CRAFTSMAN home (895,828)
+      never in play: Baron Jalal CRAFTSMAN home (845,876)
+      never in play: Ziad CRAFTSMAN home (892,829)
+      never in play: Murad CRAFTSMAN home (894,834)
+      never in play: Ilva FARMER home (155,758)
+      never in play: Karim CRAFTSMAN home (830,837)
+      never in play: Yannis FISHERMAN home (462,36)
+      never in play: Count Dracula CIVIC home (92,702)
+      never in play: Sella CRAFTSMAN home (140,777)
+      never in play: Leofric WORKER home (298,896)
+      never in play: Hurk BANDIT home (830,693)
+      never in play: Sigrun BANDIT home (827,694)
+      never in play: Garmund BRUTE home (828,692)
+      never in play: King Richard CIVIC home (226,977)
+      never in play: Duke Donald CIVIC home (227,983)
+      never in play: Count William CIVIC home (298,884)
+      never in play: Alaric PRIEST home (215,896)
+      never in play: Maeve CRAFTSMAN home (230,980)
+      never in play: Hob GUARD home (359,742)
+      never in play: Eadmund CRAFTSMAN home (298,902)
+      never in play: Beric HUNTER home (356,796)
+      never in play: Duke Bashir CIVIC home (903,899)
+      never in play: Count Awhad CIVIC home (858,865)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (906,883)
+      never in play: Hassan SCHOLAR home (906,888)
+      never in play: Idris SCHOLAR home (906,880)
+      never in play: Father Rafiq PRIEST home (914,859)
+      never in play: Yusuf PRIEST home (911,860)
+      never in play: Tariq CIVIC home (844,920)
+      never in play: Zafir CRAFTSMAN home (804,910)
+      never in play: Osama CRAFTSMAN home (937,851)
+      never in play: Marwan CRAFTSMAN home (956,823)
+      never in play: Mohamed MERCHANT home (816,863)
+      never in play: Rashid MERCHANT home (861,866)
+      never in play: Munir CARTER home (828,835)
+      never in play: Hakim CARTER home (903,877)
+      never in play: Hamid CRAFTSMAN home (937,898)
+      never in play: Nabil CRAFTSMAN home (945,896)
+      never in play: Salim CRAFTSMAN home (946,880)
+      never in play: Kamal CRAFTSMAN home (948,880)
+      never in play: Qasim WORKER home (939,880)
+      never in play: Fadi MINER home (873,786)
+      never in play: Jamila FARMER home (769,985)
+      never in play: Samira FARMER home (766,985)
+      never in play: Zaid GUARD home (891,901)
+      never in play: Sabir GUARD home (899,901)
+      never in play: Baron Nuri CIVIC home (897,875)
+      never in play: Sir Nicholas KNIGHT home (592,107)
+      never in play: Sir Kosmas KNIGHT home (590,107)
+      never in play: Baroness Eudokia CIVIC home (605,150)
+      never in play: Xenia CRAFTSMAN home (590,116)
+      never in play: Orestes WORKER home (180,131)
+      never in play: Phaedra CARTER home (594,107)
+      never in play: Halwen CRAFTSMAN home (215,653)
+      never in play: Varek SCHOLAR home (89,706)
+      never in play: Father Odran PRIEST home (150,724)
+      never in play: Mother Mirel PRIEST home (108,739)
+      never in play: Borin FARMER home (154,788)
+      never in play: Sir Bedivere KNIGHT home (862,387)
+      never in play: Father Cadren PRIEST home (783,374)
+      never in play: Elian PRIEST home (841,347)
+      never in play: Baron Aldren CIVIC home (797,384)
+      never in play: Wystan CRAFTSMAN home (815,416)
+      never in play: Perrin CRAFTSMAN home (821,423)
+      never in play: Rowena MERCHANT home (829,423)
+      never in play: Huw FARMER home (870,385)
+      never in play: Edric GUARD home (870,388)
+      never in play: Vark BANDIT home (831,692)
+      never in play: Dolgrin MINER home (201,434)
+      never in play: Pell WORKER home (865,578)
+      never in play: Ysmay WORKER home (984,391)
+      never in play: Hask HUNTER home (720,481)
+      never in play: Orrin CRAFTSMAN home (369,654)
+      never in play: Corvane HUNTER home (585,889)
+      never in play: Bogdan GUARD home (103,789)
+      never in play: Milena CIVIC home (164,723)
+      never in play: Nadim GUARD home (922,968)
+      never in play: Samir UNDERTAKER home (906,860)
+      never in play: Emrys GUARD home (846,387)
+      never in play: Rhiannon CIVIC home (820,389)
+      never in play: Rask BANDIT home (826,693)
+      never in play: Wenna BANDIT home (832,693)
+      never in play: Hullen BANDIT home (824,692)
+      never in play: Grisel BANDIT home (834,693)
+      never in play: Osk MINER home (200,439)
+      never in play: Mabry WORKER home (178,131)
+      never in play: Edvin WORKER home (172,131)
+      never in play: Corra WORKER home (868,577)
+    [life] 10 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 74.322 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 46s
+9 actionable tasks: 3 executed, 6 up-to-date

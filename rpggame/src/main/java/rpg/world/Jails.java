@@ -4,13 +4,17 @@ package rpg.world;
 public final class Jails {
     private Jails() { }
     public record Cell(String jurisdiction, int wallX, int frontZ, int endX, int backZ,
-                       int gateX, float x, float z, float releaseX, float releaseZ, DevMap.Piece slab) {
+                       int gateX, float x, float z, float releaseX, float releaseZ, DevMap.Piece slab, int floorY, int[] box) {
+        /** A devmap cell (on the devmap's floor, its box from its walls). */
+        public Cell(String jurisdiction, int wallX, int frontZ, int endX, int backZ, int gateX, float x, float z, float releaseX, float releaseZ, DevMap.Piece slab) {
+            this(jurisdiction, wallX, frontZ, endX, backZ, gateX, x, z, releaseX, releaseZ, slab, DevMap.FLOOR, null);
+        }
         /** Includes the doorway and walls, with a small tolerance for body contact. */
         public boolean contains(float px, float py, float pz) {
-            return Float.isFinite(px) && Float.isFinite(py) && Float.isFinite(pz)
-                    && px >= wallX - 0.25f && px <= endX + 1.25f
-                    && pz >= Math.min(frontZ, backZ) - 0.25f && pz <= Math.max(frontZ, backZ) + 1.25f
-                    && py >= DevMap.FLOOR - 0.5f && py <= DevMap.FLOOR + 3;
+            if (!Float.isFinite(px) || !Float.isFinite(py) || !Float.isFinite(pz) || py < floorY - 0.5f || py > floorY + 3) return false;
+            // (0.4.4) ShadowVeil's cells: their own box {x0, z0, x1, z1}, whichever way they face
+            if (box != null) return px >= box[0] - 0.25f && px <= box[2] + 1.25f && pz >= box[1] - 0.25f && pz <= box[3] + 1.25f;
+            return px >= wallX - 0.25f && px <= endX + 1.25f && pz >= Math.min(frontZ, backZ) - 0.25f && pz <= Math.max(frontZ, backZ) + 1.25f;
         }
     }
     public static final Cell[] CELLS = {
@@ -23,6 +27,8 @@ public final class Jails {
                 new DevMap.Piece("SLAB", 136, 119, 136, 120, 1, 0, 0))
     };
     public static Cell forJurisdiction(String jurisdiction) {
+        // (0.4.4, gamefixes: there were no jails in any kingdom) on ShadowVeil each kingdom's own jail
+        if (WorldMap.shadowveil()) return jurisdiction == null ? null : rpg.world.shadowveil.Rooms.cell(jurisdiction);
         for (Cell cell : CELLS) if (cell.jurisdiction.equals(jurisdiction)) return cell;
         return null;
     }

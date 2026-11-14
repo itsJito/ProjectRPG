@@ -16,8 +16,9 @@ public final class Equipment {
     /** Null when the actor may equip it, else why not. */
     public static String refusal(ItemDef d, Skills skills) {
         if (d == null || !d.equippable()) return "That can't be equipped.";
-        if (d.reqSkill != null && skills.level(d.reqSkill) < d.reqLevel)
-            return "You need " + d.reqSkill.title + " level " + d.reqLevel + " to equip the " + d.name + ".";
+        // (0.4.5) every requirement it asks (an outfit may ask two skills)
+        for (var r : d.requirements().entrySet()) if (skills.level(r.getKey()) < r.getValue())
+            return "You need " + r.getKey().title + " level " + r.getValue() + " to equip the " + d.name + ".";
         return null;
     }
 

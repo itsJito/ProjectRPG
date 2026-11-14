@@ -250,7 +250,7 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
                       {&tonemap_, "fullscreen.vert", "tonemap.frag"}, {&copy_, "fullscreen.vert", "copy.frag"}, {&ui_, "ui2d.vert", "ui2d.frag"}, {&portrait_, "model.vert", "portrait.frag"},
                       {&folG_, "foliage.vert", "foliage_gbuffer.frag"}, {&folS_, "foliage.vert", "foliage_shadow.frag"},
                       {&propG_, "props.vert", "props_gbuffer.frag"}, {&propS_, "props.vert", "props_shadow.frag"}, {&decal_, "decal.vert", "decal.frag"},
-                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}, {&rain_, "fullscreen.vert", "rain.frag"},
+                      {&lens_, "fullscreen.vert", "lens.frag"}, {&leafBake_, "fullscreen.vert", "leaf_bake.frag"}, {&rain_, "fullscreen.vert", "rain.frag"}, {&precip_, "precip.vert", "precip.frag"},
                       {&focus_, "fullscreen.vert", "focus.frag"}};
     for (const P& p : list) {
         if (p.p == &gWorld_ || p.p == &lighting_ || p.p == &vol_ || p.p == &fogApply_ || p.p == &fWorld_ || p.p == &fModel_) continue;
@@ -291,6 +291,9 @@ bool Renderer::create(const astratto_renderer_desc& d, const std::unordered_map<
     // 2D quads
     water_[0]=tex2D(RGBA16F,256,256,LINEAR,1);water_[1]=tex2D(RGBA16F,256,256,LINEAR,1);waterMask_=tex2D(RGBA16F,256,256,NEAREST,1);
     for(GLuint texture:{water_[0],water_[1],waterMask_})g_.ClearTexImage(texture,0,RGBA,FLOAT,nullptr);
+    // 2.12: the water's motion field (still water until the game sends one): 256 x 256 at most, drawn smooth
+    flowField_=tex2D(RGBA8,256,256,LINEAR,1);
+    { std::vector<uint8_t> still(256*256*4,0); for(size_t i=0;i<still.size();i+=4){still[i]=128;still[i+1]=128;} g_.BindTexture(TEXTURE_2D,flowField_);g_.TexSubImage2D(TEXTURE_2D,0,0,0,256,256,RGBA,UNSIGNED_BYTE,still.data()); }
     // Chemical motion stays on the GPU; the CPU uploads only a bounded set of emitters.
     g_.GenVertexArrays(1, &chemistryVao_); g_.GenBuffers(1, &chemistryVbo_); g_.GenBuffers(1, &chemistryState_); g_.GenBuffers(1, &chemistrySources_);
     std::vector<float> empty(4096 * 16, 0);
@@ -1019,11 +1022,11 @@ void Renderer::bankUniforms(Program& s) {
 
 // ------------------------------------------------------------------ the frame
 bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
-    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); emitters_.clear(); quads_.clear(); portraits_.clear();
+    lights_.clear(); lightCount_ = 0; bodyCount_ = 0; models_.clear(); particles_.clear(); emitters_.clear(); precipLayers_.clear(); quads_.clear(); portraits_.clear();
     hasCamera_ = false; hasClear_ = false; grading_ = Grading();
     doFoliage_ = doProps_ = doDecals_ = false;
     decalVerts_.clear();
-    smoke_.clear(); ripples_.clear(); flows_.clear();
+    smoke_.clear(); ripples_.clear();
     astratto_handle world = worldHandle_;
     bool worldSaid = false;
     uint32_t at = 0;
@@ -1090,11 +1093,28 @@ bool Renderer::parse(const uint8_t* cmds, uint32_t bytes) {
                 if(ripples_.size()<32*4)ripples_.insert(ripples_.end(),{c.x,c.z,c.radius,c.strength});
                 break;
             }
-            case ASTRATTO_RCMD_WATER_FLOW: {
-                astratto_rcmd_water_flow c;
-                if(!readRecord(r,head.bytes,c)) { error_="short water flow record";return false; }
-                if(!std::isfinite(c.x0+c.z0+c.x1+c.z1+c.vx+c.vz) || c.x1<c.x0 || c.z1<c.z0 || std::abs(c.vx)>8 || std::abs(c.vz)>8) { error_="invalid water flow";return false; }
-                if(flows_.size()<32*8) { flows_.insert(flows_.end(),{c.x0,c.z0,c.x1,c.z1,c.vx,c.vz,0,0}); }
+            case ASTRATTO_RCMD_WATER_FIELD: {
+                astratto_rcmd_water_field c;
+                if(!readRecord(r,head.bytes,c) || c.n==0 || c.n>256 || head.bytes<sizeof c+static_cast<uint64_t>(c.n)*c.n*4) { error_="invalid water field record";return false; }
+                if(!std::isfinite(c.x0+c.z0+c.cell) || c.cell<=0 || c.cell>16) { error_="invalid water field";return false; }
+                g_.BindTexture(TEXTURE_2D,flowField_);
+                g_.PixelStorei(UNPACK_ALIGNMENT,1);
+                g_.TexSubImage2D(TEXTURE_2D,0,0,0,static_cast<GLsizei>(c.n),static_cast<GLsizei>(c.n),RGBA,UNSIGNED_BYTE,r+sizeof c);
+                g_.PixelStorei(UNPACK_ALIGNMENT,4);
+                flowGrid_[0]=c.x0;flowGrid_[1]=c.z0;flowGrid_[2]=c.cell;flowGrid_[3]=static_cast<float>(c.n);
+                break;
+            }
+            case ASTRATTO_RCMD_PRECIP: {
+                astratto_rcmd_precip c;
+                if (!readRecord(r, head.bytes, c) || c.count > 8 || head.bytes < sizeof c + static_cast<uint64_t>(c.count) * sizeof(astratto_precip_layer)) { error_ = "invalid precipitation record"; return false; }
+                if (!std::isfinite(c.wind_x + c.wind_z + c.time + c.light)) { error_ = "invalid precipitation"; return false; }
+                precipWind_[0] = c.wind_x; precipWind_[1] = c.wind_z; precipTime_ = std::fmod(c.time, 4096.0f); precipLight_ = c.light;
+                const float* f = reinterpret_cast<const float*>(r + sizeof c);
+                for (uint32_t i = 0; i < c.count; i++) {
+                    bool ok = true;
+                    for (int k = 0; k < 17; k++) ok = ok && std::isfinite(f[i * 20 + k]);
+                    if (ok && f[i * 20 + 1] >= 1 && f[i * 20 + 1] <= 65536 && f[i * 20 + 5] > 1) precipLayers_.insert(precipLayers_.end(), f + i * 20, f + i * 20 + 20);
+                }
                 break;
             }
             case ASTRATTO_RCMD_EMITTER: {
@@ -1443,14 +1463,27 @@ void Renderer::shadowPass(VoxelWorld*) {
         // behind and flickered) the first two hold every shadow of someone moving near the eye - a rider at a gallop, the
         // mount under them - and are drawn every frame: drawn every other frame, a shadow in the second stood a frame
         // behind its body and jumped to it the next, a flicker along every shadow at the cascades' seam
-        const bool due = cascadeAge_ < 0 || i <= 1 || (i == 2 && (frameNo_ & 1) == 1) || (i == 3 && (frameNo_ & 7) == 3);
-        if (!due || !lit) continue;
+        bool due = cascadeAge_ < 0 || i <= 1 || (i == 2 && (frameNo_ & 1) == 1) || (i == 3 && (frameNo_ & 7) == 3);
+        if (!lit) continue;
         const float zn = i == 0 ? nearP : splits_[i - 1], zf = splits_[i];
         // bounding sphere of the frustum slice: stable under rotation, so the map does not shimmer when the view turns
         const float zc = (zn + zf) * 0.5f;
         float cx = cam_.x + cam_.fx * zc, cy = cam_.y + cam_.fy * zc, cz = cam_.z + cam_.fz * zc;
+        // (game 0.4.4, gamefixes: shadows wrong once the sun or a light left the view) a far cascade kept from an earlier
+        // frame covers where the view was: turned away (the sun behind), the ground now in view fell outside the old map
+        // and was shaded from its edge. It is redrawn at once when the slice's middle has moved a tenth of its radius off,
+        // or the sun has moved
+        if (!due) {
+            const float ox = cx - cascadeAt_[i][0], oy = cy - cascadeAt_[i][1], oz = cz - cascadeAt_[i][2];
+            const float sd = std::fabs(sunDir_[0] - cascadeSun_[0]) + std::fabs(sunDir_[1] - cascadeSun_[1]) + std::fabs(sunDir_[2] - cascadeSun_[2]);
+            if (ox * ox + oy * oy + oz * oz > (cascadeAt_[i][3] * 0.1f) * (cascadeAt_[i][3] * 0.1f) || sd > 0.002f) due = true;
+        }
+        if (!due) continue;
+        cascadeAt_[i][0] = cx; cascadeAt_[i][1] = cy; cascadeAt_[i][2] = cz;
+        if (i == n - 1) { cascadeSun_[0] = sunDir_[0]; cascadeSun_[1] = sunDir_[1]; cascadeSun_[2] = sunDir_[2]; }
         const float hx = zf * tanX, hy = zf * tanY, dz = zf - zc;
         const float radius = static_cast<float>(std::sqrt(static_cast<double>(hx * hx + hy * hy + dz * dz))) * 1.02f;
+        cascadeAt_[i][3] = radius;
         const float texel = 2 * radius / static_cast<float>(shadowRes_);
         // the sphere's centre snapped to whole shadow texels in light space
         float px = cx * sxr + cy * syr + cz * szr, py = cx * sux + cy * suy + cz * suz;
@@ -1887,10 +1920,9 @@ void Renderer::advanceWater(VoxelWorld* world) {
     waterWaves_.f1("uImpulseScale",steps>0?1.0f/static_cast<float>(steps):0.0f);
     waterWaves_.i1("uImpulses",static_cast<int>(ripples_.size()/4));
     if(!ripples_.empty())g_.Uniform4fv(waterWaves_.loc("uImpulse"),static_cast<GLsizei>(ripples_.size()/4),ripples_.data());
-    // 2.10: where the water runs (rects and their velocity, two vec4s each): the step writes the flow beside the
-    // surface's height, and the surface's texture drifts with it
-    waterWaves_.i1("uFlows",static_cast<int>(flows_.size()/8));
-    if(!flows_.empty())g_.Uniform4fv(waterWaves_.loc("uFlow"),static_cast<GLsizei>(flows_.size()/4),flows_.data());
+    // 2.12: where the water runs: the motion field the game sent (the step writes the flow beside the surface's height)
+    waterWaves_.tex("uFlowField",1,TEXTURE_2D,flowField_);
+    waterWaves_.f4("uFlowGrid",flowGrid_[0],flowGrid_[1],flowGrid_[2],flowGrid_[3]);
     for(int i=0;i<steps;i++) {
         waterClock_+=STEP;waterWaves_.f1("uTime",waterClock_);
         waterWaves_.i2("uShift",i==0?shiftX:0,i==0?shiftZ:0);
@@ -1947,6 +1979,8 @@ void Renderer::forwardPass(VoxelWorld* world) {
     fWorld_.i1("uWaterSSR", q_.ssr ? 1 : 0);
     fWorld_.tex("uWaves",8,TEXTURE_2D,water_[waterIndex_]);
     fWorld_.f3("uWaveGrid",waterOrigin_[0],waterOrigin_[1],WATER_CELL);
+    fWorld_.tex("uFlowField",10,TEXTURE_2D,flowField_);
+    fWorld_.f4("uFlowGrid",flowGrid_[0],flowGrid_[1],flowGrid_[2],flowGrid_[3]);
     fWorld_.tex("uWaterNoise",9,TEXTURE_2D,textures_.count(noiseTex_)?textures_[noiseTex_].id:white_);
     probeUniforms(fWorld_, 1);
     fWorld_.f3("uCam", cam_.x, cam_.y, cam_.z);
@@ -2064,6 +2098,44 @@ void Renderer::rainPass() {
     g_.Disable(BLEND);
 }
 
+// (2.13) the precipitation (see precip.vert): every layer one instanced draw of quads, over the resolved image
+void Renderer::precipPass() {
+    g_.BindFramebuffer(FRAMEBUFFER, lensFbo_);
+    g_.Viewport(0, 0, ow_, oh_);
+    g_.Disable(DEPTH_TEST);
+    g_.Enable(BLEND);
+    g_.BlendFunc(ONE, ONE_MINUS_SRC_ALPHA);
+    precip_.use();
+    precip_.mat4("uPV", pv_.m);
+    const float* v = cam_.view.m;
+    precip_.f3("uRight", v[0], v[4], v[8]);
+    precip_.f3("uUp", v[1], v[5], v[9]);
+    precip_.f3("uCam", cam_.x, cam_.y, cam_.z);
+    precip_.f2("uWind", precipWind_[0], precipWind_[1]);
+    precip_.f2("uWorld", static_cast<float>(sizeX_), static_cast<float>(sizeZ_));
+    precip_.f1("uTime", precipTime_);
+    precip_.tex("uRoof", 0, TEXTURE_2D, roofTex_);
+    precip_.tex("uDepth", 1, TEXTURE_2D, gDepth_);
+    precip_.f2("uScreen", static_cast<float>(ow_), static_cast<float>(oh_));
+    precip_.f1("uNear", cam_.nearP);
+    precip_.f1("uFar", cam_.farP);
+    // the light on it: the sky's ambient and a little of the sun's, the fog's colour mixed in (it is seen through it)
+    const float L = precipLight_;
+    precip_.f3("uLight", (ambient_[0] * 1.4f + sunCol_[0] * 0.12f + fogCol_[0] * 0.3f) * L, (ambient_[1] * 1.4f + sunCol_[1] * 0.12f + fogCol_[1] * 0.3f) * L,
+               (ambient_[2] * 1.4f + sunCol_[2] * 0.12f + fogCol_[2] * 0.3f) * L);
+    g_.BindVertexArray(fsVao_);
+    for (size_t i = 0; i + 20 <= precipLayers_.size(); i += 20) {
+        const float* f = precipLayers_.data() + i;
+        precip_.f4("uLayer", f[0], f[2], f[3], f[4]);
+        precip_.f4("uBox", f[5], f[6], f[7], f[8]);
+        precip_.f4("uMotion", f[9], f[10], f[11], f[12]);
+        precip_.f4("uColor", f[13], f[14], f[15], f[16]);
+        g_.DrawArraysInstanced(TRIANGLE_STRIP, 0, 4, static_cast<GLsizei>(f[1]));
+    }
+    g_.BindVertexArray(0);
+    g_.Disable(BLEND);
+}
+
 // ------------------------------------------------------------------ TAA, bloom, exposure, tone map
 void Renderer::resolve(int windowW, int windowH) {
     // ASTRATTO_PROFILE_RESOLVE: each step of the resolve timed (the GPU drained between steps: for measuring only)
@@ -2155,7 +2227,18 @@ void Renderer::resolve(int windowW, int windowH) {
             fullscreen();
             sceneTex = lensTex_;
         }
-        rainPass();
+        if (precipLayers_.empty()) rainPass();
+    }
+    if (!precipLayers_.empty() && roofTex_ != 0 && sizeX_ > 0 && lensFbo_ != 0) {
+        if (sceneTex != lensTex_) {
+            g_.BindFramebuffer(FRAMEBUFFER, lensFbo_);
+            g_.Viewport(0, 0, ow_, oh_);
+            copy_.use();
+            copy_.tex("uTex", 0, TEXTURE_2D, sceneTex);
+            fullscreen();
+            sceneTex = lensTex_;
+        }
+        precipPass();
     }
     mark(1);
     // bloom: threshold on the way down, tent filter on the way back up

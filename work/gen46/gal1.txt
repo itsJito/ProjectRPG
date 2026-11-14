@@ -1,0 +1,58 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 21:45:57 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 20.43s ({regions=813, overlays=577, variants=341, scarp=60, coast=518, erosion=504, peaks=74, lakes=85, isles=4, rivers=666, wadis=15, ground=19, roads=571, causeways=3, architecture=1014, pitsFilled=1405, pits=604, banks=59, clamp=13, cliffs=39, columns=975, falls=17, raise=12500, trees=329, outcrops=0, ways=586}), made and lit in 1.92s
+[Load] ShadowVeil 22.45s
+[Load] renderer and UI 2.36s
+[water] flow field grown in 662 ms: 38934 columns moving
+[gathering] 787 wild herb patches, flax and berry bushes
+[monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 39 meshes, 1.56s
+[Load] 239 furniture models made in 0.09s
+[Load] first rendered frame 7.65s
+[Load] the world about the spawn made ready in 16.16s
+[Load] game frame 1: scene 8 ms, interface 814 ms, render 25 ms
+[Load] game frame 2: scene 8 ms, interface 4 ms, render 9 ms
+[Load] game frame 3: scene 7 ms, interface 3 ms, render 8 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-166-910-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-166-910-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-166-910-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-166-910-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-166-910-top.png
+[Load] growth about the spawn: 25 chunks made, 62 meshes, 0.29s
+[Load] 0 furniture models made in 0.00s
+[Load] the world about the spawn made ready in 0.56s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-217-913-n.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-217-913-e.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-217-913-s.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-217-913-w.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p32\at-217-913-top.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m
+8 actionable tasks: 1 executed, 7 up-to-date

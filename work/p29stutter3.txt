@@ -1,0 +1,97 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.63s ({regions=693, overlays=539, variants=409, scarp=61, coast=431, erosion=361, peaks=56, lakes=75, isles=5, rivers=598, wadis=14, ground=20, roads=661, causeways=3, architecture=372, pitsFilled=1405, pits=504, banks=58, clamp=13, cliffs=52, columns=610, falls=16, raise=513, trees=258, outcrops=0, ways=262}), made and lit in 1.67s
+[Load] ShadowVeil 8.38s
+[Load] renderer and UI 2.23s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.10s
+[Load] first rendered frame 5.75s
+[Load] the world about the spawn made ready in 9.17s
+[Load] game frame 1: scene 28 ms, interface 976 ms, render 22 ms
+[Load] game frame 2: scene 7 ms, interface 4 ms, render 5 ms
+[Load] the first frames drawn behind the loading screen in 1.04s
+[stutter] preload 10.21s
+[stutter] first tick 36 ms
+engine.frame (native)      753.29 ms
+ai                          80.66 ms
+animals                     63.22 ms
+afterFrame                  39.33 ms
+monsters                    23.00 ms
+objects.update              18.96 ms
+controller.update           14.68 ms
+foliage.update              12.26 ms
+chemistry.update             9.81 ms
+combat.update                3.21 ms
+gore.update                  2.90 ms
+econ.update                  2.53 ms
+law.update                   2.01 ms
+magic.update                 1.98 ms
+undertaker.update            1.61 ms
+fx.update                    1.30 ms
+traps.update                 0.84 ms
+dungeons.update              0.36 ms
+time+death                   0.29 ms
+spareWatch                   0.12 ms
+glass.update                 0.09 ms
+prog.update                  0.03 ms
+interact.update              0.03 ms
+carrying.update              0.03 ms
+prayers.update               0.02 ms
+
+[Load] game frame 3: scene 9 ms, interface 5 ms, render 6 ms
+[stutter] spike at 7: 62 ms - tick 32, draw 30 - engine.frame (native) 16 afterFrame 6
+[stutter] spike at 164: 75 ms - tick 68, draw 7 - engine.frame (native) 57
+[stutter] spike at 188: 84 ms - tick 79, draw 5 - engine.frame (native) 73
+[stutter] spike at 212: 74 ms - tick 70, draw 4 - engine.frame (native) 65
+[stutter] spike at 236: 72 ms - tick 67, draw 5 - engine.frame (native) 62
+[stutter] spike at 260: 83 ms - tick 75, draw 8 - engine.frame (native) 70
+[stutter] spike at 284: 82 ms - tick 78, draw 4 - foliage.update 5 engine.frame (native) 67
+[stutter] spike at 299: 62 ms - tick 13, draw 49 -
+[stutter] spike at 308: 80 ms - tick 76, draw 4 - engine.frame (native) 72
+[stutter] spike at 332: 86 ms - tick 81, draw 5 - engine.frame (native) 77
+[stutter] spike at 356: 81 ms - tick 76, draw 5 - engine.frame (native) 72
+[stutter] spike at 380: 83 ms - tick 79, draw 5 - engine.frame (native) 73
+[stutter] spike at 404: 85 ms - tick 80, draw 5 - engine.frame (native) 70
+[stutter] spike at 428: 83 ms - tick 79, draw 4 - engine.frame (native) 74
+[stutter] spike at 452: 84 ms - tick 80, draw 4 - engine.frame (native) 75
+[stutter] spike at 476: 73 ms - tick 69, draw 3 - engine.frame (native) 66
+[stutter] spike at 500: 66 ms - tick 63, draw 3 - engine.frame (native) 60
+[stutter] spike at 524: 80 ms - tick 76, draw 4 - engine.frame (native) 69
+[stutter] spike at 548: 70 ms - tick 67, draw 3 - engine.frame (native) 63
+[stutter] spike at 572: 66 ms - tick 63, draw 3 - engine.frame (native) 59
+[stutter] spike at 596: 73 ms - tick 69, draw 3 - engine.frame (native) 65
+[stutter] median 11.9 ms, p95 41.5, p99 83.2, worst 86.3 at frame 332, 37 frames over 33 ms
+[stutter] first 60: 58(0/0) 43(0/0) 48(0/0) 41(0/0) 41(0/0) 45(0/0) 45(0/0) 62(0/0) 31(0/0) 32(0/0) 33(0/0) 28(0/0) 27(0/0) 30(0/0) 42(0/0) 31(0/0) 32(0/0) 32(0/0) 31(0/0) 28(0/0) 29(0/0) 30(0/0) 29(0/0) 25(0/0) 25(0/0) 27(0/0) 28(0/0) 29(0/0) 26(0/0) 36(0/0) 23(0/0) 23(0/0) 22(0/0) 22(0/0) 25(0/0) 22(0/0) 25(0/0) 23(0/0) 26(0/0) 24(0/0) 23(0/0) 21(0/0) 20(0/0) 35(0/0) 28(0/0) 19(0/0) 18(0/0) 17(0/0) 25(0/0) 17(0/0) 17(0/0) 16(0/0) 18(0/0) 16(0/0) 19(0/0) 22(0/0) 25(0/0) 22(0/0) 20(0/0) 27(0/0)
+engine.frame (native)     3697.09 ms
+afterFrame                1159.99 ms
+objects.update             744.72 ms
+animals                    699.76 ms
+monsters                   371.17 ms
+foliage.update             269.70 ms
+controller.update          165.74 ms
+ai                         103.70 ms
+combat.update               84.78 ms
+undertaker.update           69.57 ms
+chemistry.update            66.46 ms
+gore.update                 39.11 ms
+magic.update                25.71 ms
+law.update                  24.36 ms
+time+death                  19.25 ms
+spareWatch                  15.10 ms
+traps.update                13.54 ms
+fx.update                    5.80 ms
+econ.update                  4.97 ms
+glass.update                 3.98 ms
+carrying.update              2.24 ms
+dungeons.update              2.15 ms
+interact.update              1.99 ms
+prog.update                  1.53 ms
+prayers.update               1.20 ms
+

@@ -1,0 +1,112 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.79s ({regions=777, overlays=580, variants=440, scarp=77, coast=390, erosion=368, peaks=48, lakes=70, isles=8, rivers=679, wadis=12, ground=30, roads=626, causeways=3, architecture=327, pitsFilled=1341, pits=541, banks=47, clamp=14, cliffs=35, columns=788, falls=16, raise=469, trees=409, outcrops=0}), made and lit in 1.86s
+[Load] ShadowVeil 8.72s
+[Load] renderer and UI 2.12s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.09s
+[prof] monster GOBLIN IDLE: senses 0, sense 4, think 0, act 13 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 25 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 254 ms
+[prof] monster GIANT_SPIDER IDLE: senses 0, sense 0, think 0, act 16 ms
+[Load] first rendered frame 5.73s
+[Load] the world about the spawn made ready in 8.83s
+[Load] game frame 1: scene 26 ms, interface 943 ms, render 24 ms
+[Load] game frame 2: scene 10 ms, interface 4 ms, render 5 ms
+[Load] the first frames drawn behind the loading screen in 1.01s
+[stutter] preload 9.84s
+[stutter] first tick 23 ms
+engine.frame (native)      500.56 ms
+monsters                   352.11 ms
+ai                          51.34 ms
+afterFrame                  25.73 ms
+animals                     17.21 ms
+foliage.update              16.94 ms
+objects.update              16.20 ms
+chemistry.update            11.64 ms
+controller.update            8.04 ms
+econ.update                  2.49 ms
+law.update                   2.01 ms
+gore.update                  1.68 ms
+undertaker.update            1.67 ms
+magic.update                 1.47 ms
+fx.update                    0.95 ms
+combat.update                0.95 ms
+traps.update                 0.85 ms
+dungeons.update              0.49 ms
+time+death                   0.24 ms
+glass.update                 0.09 ms
+spareWatch                   0.08 ms
+carrying.update              0.03 ms
+prog.update                  0.03 ms
+interact.update              0.03 ms
+prayers.update               0.02 ms
+
+[Load] game frame 3: scene 7 ms, interface 5 ms, render 5 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 23 ms
+[stutter] spike at 4: 64 ms - tick 41, draw 23 - monsters 25 afterFrame 7
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 15 ms
+[prof] monster GIANT_SPIDER IDLE: senses 0, sense 0, think 0, act 108 ms
+[stutter] spike at 12: 130 ms - tick 118, draw 11 - monsters 110
+[prof] monster GOBLIN PATROL: senses 0, sense 0, think 0, act 68 ms
+[stutter] spike at 117: 77 ms - tick 72, draw 4 - monsters 69
+[prof] monster GOBLIN PATROL: senses 0, sense 0, think 0, act 18 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 23 ms
+[stutter] spike at 299: 62 ms - tick 11, draw 51 -
+[stutter] median 12.8 ms, p95 23.3, p99 54.6, worst 129.6 at frame 12, 15 frames over 33 ms
+[stutter] first 60: 44(0/0) 39(0/0) 55(0/0) 27(0/0) 64(0/0) 57(0/0) 40(0/0) 53(0/0) 28(0/0) 22(0/0) 35(0/0) 25(0/0) 130(0/0) 19(0/0) 32(0/0) 20(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 19(0/0) 18(0/0) 18(0/0) 20(0/0) 20(0/0) 21(0/0) 27(0/0) 17(0/0) 21(0/0) 28(0/0) 20(0/0) 20(0/0) 23(0/0) 18(0/0) 21(0/0) 16(0/0) 23(0/0) 15(0/0) 17(0/0) 15(0/0) 15(0/0) 16(0/0) 17(0/0) 15(0/0) 25(0/0) 19(0/0) 15(0/0) 15(0/0) 16(0/0) 16(0/0) 14(0/0) 14(0/0) 16(0/0) 15(0/0) 14(0/0) 18(0/0) 16(0/0) 16(0/0) 14(0/0) 21(0/0)
+engine.frame (native)     1494.03 ms
+monsters                  1491.41 ms
+afterFrame                 674.99 ms
+objects.update             592.28 ms
+foliage.update             246.48 ms
+animals                    245.14 ms
+controller.update          155.48 ms
+ai                          72.10 ms
+undertaker.update           57.48 ms
+chemistry.update            51.77 ms
+combat.update               38.04 ms
+time+death                  20.85 ms
+gore.update                 20.08 ms
+law.update                  19.28 ms
+magic.update                14.73 ms
+traps.update                14.52 ms
+spareWatch                   8.94 ms
+fx.update                    5.91 ms
+econ.update                  5.16 ms
+glass.update                 4.51 ms
+interact.update              2.41 ms
+carrying.update              2.24 ms
+dungeons.update              2.14 ms
+prog.update                  1.80 ms
+prayers.update               1.41 ms
+
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 35s
+8 actionable tasks: 1 executed, 7 up-to-date

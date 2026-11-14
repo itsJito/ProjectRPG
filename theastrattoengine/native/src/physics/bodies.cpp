@@ -36,12 +36,28 @@ int stairDir(const VoxelWorld* w, int x, int y, int z) {
 }  // namespace
 
 // ------------------------------------------------------------------ movers
-float Mover::stairHeight(const VoxelWorld* w, int bx, int by, int bz, float px, float pz, float r) {
-    const int d = stairDir(w, bx, by, bz);
+namespace {
+/** How high a tread stands under a point, rising along one of the four ways. */
+float treadHeight(int d, int bx, int by, int bz, float px, float pz, float r) {
     const int dx = STAIR_DX[d], dz = STAIR_DZ[d];
     const float t = (dx != 0 ? (dx > 0 ? px - static_cast<float>(bx) : static_cast<float>(bx + 1) - px) : (dz > 0 ? pz - static_cast<float>(bz) : static_cast<float>(bz + 1) - pz)) + std::max(0.0f, r - 0.1f);
     if (t <= 0) return static_cast<float>(by);
     return static_cast<float>(by) + std::min(1.0f, t + 0.125f);
+}
+}  // namespace
+
+float Mover::stairHeight(const VoxelWorld* w, int bx, int by, int bz, float px, float pz, float r) {
+    // 2.12: a tread where a flight turns rises along both ways it is walked - in from the step below, out to the step
+    // above - and stands at the lower of the two: a body comes onto it low from the step below and is lifted as it
+    // crosses toward the next (a turning flight's corner rose only toward the next step, and stood a whole lip high
+    // before anyone climbing up to it)
+    int up = -1, down = -1;
+    if (w != nullptr) {
+        for (int d = 0; d < 4 && up < 0; d++) if (stairCell(w, bx + STAIR_DX[d], by + 1, bz + STAIR_DZ[d])) up = d;
+        for (int d = 0; d < 4 && down < 0; d++) if (stairCell(w, bx - STAIR_DX[d], by - 1, bz - STAIR_DZ[d])) down = d;
+    }
+    if (up >= 0 && down >= 0 && up != down) return std::min(treadHeight(up, bx, by, bz, px, pz, r), treadHeight(down, bx, by, bz, px, pz, r));
+    return treadHeight(stairDir(w, bx, by, bz), bx, by, bz, px, pz, r);
 }
 
 bool Mover::bodyFree(const VoxelWorld* w, float x, float y, float z, float r, float h) {

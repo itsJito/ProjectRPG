@@ -1,0 +1,94 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 7.07s ({regions=1299, overlays=580, variants=326, scarp=58, coast=295, erosion=342, peaks=56, lakes=78, isles=5, rivers=625, wadis=14, ground=29, roads=622, causeways=3, architecture=368, pitsFilled=1341, pits=575, banks=49, clamp=13, cliffs=37, columns=882, falls=15, raise=496, trees=260, outcrops=0}), made and lit in 1.69s
+[Load] ShadowVeil 8.84s
+[Load] renderer and UI 5.13s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 0.90s
+[Load] first rendered frame 5.67s
+[Load] the world about the spawn made ready in 9.06s
+[stutter] preload 9.06s
+[stutter] first tick 35 ms
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+
+[stutter] median 12.7 ms, p95 25.4, p99 49.3, worst 1328.7 at frame 0, 16 frames over 33 ms
+[stutter] first 60: 1329(0/0) 49(0/0) 52(0/0) 30(0/0) 48(0/0) 46(0/0) 37(0/0) 39(0/0) 31(0/0) 41(0/0) 35(0/0) 25(0/0) 138(0/0) 22(0/0) 39(0/0) 21(0/0) 22(0/0) 18(0/0) 18(0/0) 19(0/0) 20(0/0) 20(0/0) 18(0/0) 20(0/0) 17(0/0) 18(0/0) 22(0/0) 18(0/0) 26(0/0) 28(0/0) 17(0/0) 17(0/0) 22(0/0) 16(0/0) 20(0/0) 17(0/0) 22(0/0) 16(0/0) 19(0/0) 15(0/0) 17(0/0) 16(0/0) 16(0/0) 15(0/0) 30(0/0) 20(0/0) 17(0/0) 14(0/0) 14(0/0) 15(0/0) 14(0/0) 14(0/0) 16(0/0) 15(0/0) 15(0/0) 19(0/0) 15(0/0) 14(0/0) 15(0/0) 26(0/0)
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 40s
+8 actionable tasks: 1 executed, 7 up-to-date

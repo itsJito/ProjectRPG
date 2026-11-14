@@ -1,0 +1,84 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 36.09s ({regions=937, overlays=589, variants=295, scarp=94, coast=532, erosion=444, peaks=56, lakes=103, isles=7, rivers=817, wadis=13, ground=34, roads=648, causeways=4, architecture=972, pitsFilled=1383, pits=742, banks=60, clamp=22, cliffs=79, columns=995, falls=15, raise=27835, trees=290, outcrops=0, ways=471}), made and lit in 2.26s
+[Load] ShadowVeil 38.69s
+[Load] renderer and UI 12.79s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 26 meshes, 1.46s
+[Load] first rendered frame 7.77s
+[Load] game frame 1: scene 37 ms, interface 2386 ms, render 41 ms
+[Load] game frame 2: scene 13 ms, interface 5 ms, render 83 ms
+[Load] game frame 3: scene 13 ms, interface 5 ms, render 84 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-2-function-great_hall.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room0-great_hall-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room0-kitchen-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room1-chamber-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room1-chamber-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room1-solar-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room2-high_room-7.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_castle-3-room2-chamber-8.png
+[Load] growth about the spawn: 24 chunks made, 54 meshes, 0.36s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_store-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_store-2-function-shopfloor.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_store-3-room0-shopfloor-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_store-3-room1-hearth-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_store-3-room1-bedroom-4.png
+[Load] growth about the spawn: 9 chunks made, 62 meshes, 0.27s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-2-function-common_room.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-3-room0-common_room-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-3-room0-inn_kitchen-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-3-room1-guest_room-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\drunken_duck-3-room1-guest_room-5.png
+[Load] growth about the spawn: 23 chunks made, 75 meshes, 0.77s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-2-function-nave.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-3-room0-nave-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-3-room0-vestry-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-3-room0-vestry-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-3-room1-bedroom-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_church-3-room2-belfry-6.png
+[Load] growth about the spawn: 49 chunks made, 111 meshes, 0.82s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-2-function-workroom.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-3-room0-workroom-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-3-room0-storeroom-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-3-room1-hearth-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\metallists_guild-3-room1-bedroom-5.png
+[Load] growth about the spawn: 7 chunks made, 121 meshes, 0.17s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-2-function-banking_hall.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-3-room0-banking_hall-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-3-room0-vault-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-3-room1-counting_room-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\valgard_bank-3-room1-chamber-5.png
+[Load] growth about the spawn: 25 chunks made, 142 meshes, 0.67s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_houses_2-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_houses_2-2-function-hearth.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_houses_2-3-room0-hearth-2.png
+[Load] growth about the spawn: 49 chunks made, 173 meshes, 0.05s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\azharad_homes_5-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\azharad_homes_5-2-function-hearth.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\azharad_homes_5-3-room0-hearth-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\azharad_homes_5-3-room1-bedroom-3.png
+[Load] growth about the spawn: 49 chunks made, 57 meshes, 0.71s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\severia_homes_3-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\severia_homes_3-2-function-hearth.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\severia_homes_3-3-room0-hearth-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\severia_homes_3-3-room1-bedroom-3.png
+[Load] growth about the spawn: 49 chunks made, 86 meshes, 0.59s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-2-function-gaol_office.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-3-room0-gaol_office-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-3-room0-cell_block-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-3-room1-guardroom-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s1\loxford_gaol-3-room1-bunk_room-5.png
+[interiors] 10 buildings shot in 84s -> build/review-p30/s1

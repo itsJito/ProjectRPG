@@ -65,7 +65,25 @@ public final class Wreckage {
     private static final Map<String, Part[]> PARTS = new HashMap<>();
     public int wrecked;
 
-    public Wreckage(Rpg g) { this.g = g; }
+    public Wreckage(Rpg g) { this.g = g; g.vox.furnitureCells = this::occupied; }
+
+    /** (0.4.5) The cells the standing, breakable furniture occupies (its collision), kept as pieces come and go. */
+    private final java.util.HashSet<Long> cells = new java.util.HashSet<>();
+    private int cellsFor = -1, cellsWrecked = -1;
+    /** Whether a cell is a breakable piece of furniture's own (a blow passes into it to meet the piece). */
+    public boolean occupied(long key) {
+        if (cellsFor != g.objects.furniture.size() || cellsWrecked != wrecked) {
+            cells.clear();
+            for (Furniture f : g.objects.furniture) {
+                if (!f.exists() || !breakable(f.kind) || f.kind.block == rpg.world.Blocks.AIR) continue;
+                State st = states.get(f.id);
+                if (st != null && st.wrecked) continue;
+                for (int x = f.x0; x <= f.x1; x++) for (int z = f.z0; z <= f.z1; z++) for (int y = 0; y < Math.max(1, f.h); y++) cells.add(rpg.world.Voxels.cellKey(x, f.floor + y, z));
+            }
+            cellsFor = g.objects.furniture.size(); cellsWrecked = wrecked;
+        }
+        return cells.contains(key);
+    }
 
     /** Whether a kind of furnishing can be broken (the built-in, the graves and the shops' counters cannot). */
     public static boolean breakable(Furniture.Kind k) {
@@ -227,7 +245,7 @@ public final class Wreckage {
         float yaw = f.yaw(), qw = (float) Math.cos(yaw / 2), qy = (float) Math.sin(yaw / 2);
         long body = g.game.reserve(AstrattoNative.KIND_RIGID);
         float mass = Math.max(0.05f, p.volume() * (l.metal() > 0.5f ? 3000 : l.rough() <= 0.55f && l.rough() >= 0.45f ? 2400 : 600));
-        g.game.commands().rigidCreate(body, AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_DEBRIS | AstrattoNative.RIGID_NO_MOVERS,
+        g.game.commands().rigidCreate(body, AstrattoNative.SHAPE_BOX, AstrattoNative.RIGID_DEBRIS | AstrattoNative.RIGID_YIELD,
                 Math.max(0.01f, p.sx() / 2), Math.max(0.01f, p.sy() / 2), Math.max(0.01f, p.sz() / 2), mass, c[0], c[1], c[2], qw, 0, qy, 0,
                 dirW[0] * sp + (rnd.nextFloat() - 0.5f), 0.6f + rnd.nextFloat() * 1.2f + Math.max(0, dirW[1]) * sp, dirW[2] * sp + (rnd.nextFloat() - 0.5f),
                 (rnd.nextFloat() - 0.5f) * 8, (rnd.nextFloat() - 0.5f) * 8, (rnd.nextFloat() - 0.5f) * 8, 0.7f, 0.15f, Breakables.MATERIAL_WOOD, null);
@@ -282,6 +300,26 @@ public final class Wreckage {
             out[p.layer()].boxes().rgb(p.cx(), p.cy(), p.cz(), p.sx(), p.sy(), p.sz(), rgb);
         }
         return out;
+    }
+
+    /**
+     * (0.4.6, gamefixes: reset all destruction on reloading, sleeping, dying or using the shrine) every broken piece of
+     * furniture whole again where it stood - a chandelier back on its chain, its candles lit - and the splinters gone.
+     * Returns how many were mended.
+     */
+    public int restoreAll() {
+        int n = 0;
+        for (var e : states.entrySet()) {
+            State s = e.getValue();
+            if (s.gone.isEmpty() && !s.wrecked) continue;
+            if (g.objects.get(e.getKey()) instanceof Furniture f && s.wrecked) { f.placed = true; f.place(g, true); }
+            n++;
+        }
+        states.clear();
+        cellsFor = -1;
+        while (!shards.isEmpty()) release(shards.pollFirst());
+        wrecked = 0;
+        return n;
     }
 
     // ------------------------------------------------------------------ the world remembers

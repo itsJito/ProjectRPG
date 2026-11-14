@@ -1,0 +1,165 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 20408). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-20408.out.log
+Starting 39th build in daemon [uptime: 2 hrs 37 mins 43.201 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 17% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'slowTest'
+Selected primary task 'slowTest' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':slowTest']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#2096,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#2097,Execution worker,5,main]) started.
+destroyer locations for task group 0 (Thread[#2099,Execution worker Thread 3,5,main]) started.
+:processResources (Thread[#2096,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+other build task :theastrattoengine:compileJava (Thread[#2097,Execution worker,5,main]) started.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#2095,included builds,5,main]) started.
+:theastrattoengine:buildNative (Thread[#2095,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#2095,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#2095,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#2095,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#2095,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#2095,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#2095,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#2095,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#2095,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#2097,Execution worker,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#2100,Execution worker Thread 4,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#2096,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#2096,included builds Thread 2,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :classes (Thread[#2096,included builds Thread 2,5,main]) started.
+:classes (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#2097,Execution worker,5,main]) started.
+:compileTestJava (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[#2097,Execution worker,5,main]) started.
+:processTestResources (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#2097,Execution worker,5,main]) started.
+:testClasses (Thread[#2097,Execution worker,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :slowTest (Thread[#2097,Execution worker,5,main]) started.
+:slowTest (Thread[#2097,Execution worker,5,main]) started.
+Gradle Test Executor 40 started executing tests.
+Gradle Test Executor 41 started executing tests.
+
+> Task :slowTest
+Caching disabled for task ':slowTest' because:
+  Build cache is disabled
+Task ':slowTest' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 40'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=8 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\slowTest\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath2222555167552047849txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 40'
+Starting process 'Gradle Test Executor 41'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=8 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\slowTest\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath15313687125227835578txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 41'
+Successfully started process 'Gradle Test Executor 40'
+Successfully started process 'Gradle Test Executor 41'
+
+Gradle Test Executor 41 finished executing tests.
+
+> Task :slowTest
+
+StairWalkTest > everyStaircaseIsWalkedUpAndDown() STANDARD_OUT
+    [Load] ShadowVeil grown in 17.61s ({regions=780, overlays=501, variants=855, scarp=52, coast=449, erosion=311, peaks=48, lakes=68, isles=4, rivers=748, wadis=14, ground=35, roads=728, causeways=3, architecture=1268, pitsFilled=1405, pits=604, banks=51, clamp=15, cliffs=45, columns=1462, falls=19, raise=8688, trees=291, outcrops=0, ways=528}), made and lit in 1.60s
+    [water] flow field grown in 815 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [stairs] 200 of 962 walked, 0 failed
+    [stairs] 400 of 962 walked, 0 failed
+    [stairs] 600 of 962 walked, 0 failed
+    [stairs] 800 of 962 walked, 0 failed
+    [stairs] 962 walks, 0 failed
+  slow: rpg.world.StairWalkTest.everyStaircaseIsWalkedUpAndDown() 544.369 s
+
+Gradle Test Executor 40 finished executing tests.
+
+> Task :slowTest
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\slowTest
+Generating HTML test report...
+Finished generating test html results (0.032 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\slowTest
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 9m 9s
+9 actionable tasks: 1 executed, 8 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

@@ -33,6 +33,19 @@ void main() {
         float stretch = 1.0 + min(speed * 0.17, 3.6);   // (gamefixes: blood) streaks, not beads
         p = iPosSize.xyz + (dir * q.y * stretch + side * q.x) * iPosSize.w;
     }
+    // 2.12: a drop of a falling sheet of water: a thin streak along its velocity, longer the faster it falls (a
+    // drop not yet born carries no velocity and is drawn as nothing)
+    if (kind == 11) {
+        vec3 vel = vec3(iParams.x, iColor.a, iParams.w);
+        float speed = length(vel);
+        vec3 dir = speed > 1e-3 ? vel / speed : vec3(0.0, -1.0, 0.0);
+        vec3 view = normalize(cross(uRight, uUp));
+        vec3 side = cross(dir, view);
+        side = length(side) > 1e-3 ? normalize(side) : uRight;
+        float stretch = 1.5 + min(speed * 0.55, 5.0);
+        p = iPosSize.xyz + (dir * q.y * stretch + side * q.x * 0.55) * iPosSize.w;
+        if (iColor.a == 0.0) p = iPosSize.xyz;
+    }
     vQ = q; vColor = iColor; vParams = iParams;
     gl_Position = uPV * vec4(p, 1.0);
     vClipW = gl_Position.w;

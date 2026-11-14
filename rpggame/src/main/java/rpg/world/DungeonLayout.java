@@ -88,11 +88,13 @@ public final class DungeonLayout {
     }
     /** The dungeon whose region holds a point, or null (the overworld). */
     public static DungeonLayout at(float x, float z) {
-        if (x < X0 - 1) return null;
+        // (0.4.3, gamefixes: the map switched to a devmap dungeon on parts of ShadowVeil) the dungeons are laid out in the
+        // devmap's east strip; on any other map those cells are open country, never a dungeon's rooms
+        if (x < X0 - 1 || !WorldMap.devmap()) return null;
         for (DungeonLayout l : all()) if (x >= l.ox && x < l.ox + l.w && z >= l.oz && z < l.oz + l.d) return l;
         return null;
     }
-    public static boolean inDungeonRegion(float x) { return x >= DevMap.SX; }
+    public static boolean inDungeonRegion(float x) { return x >= DevMap.SX && WorldMap.devmap(); }
 
     // ------------------------------------------------------------------ generation (micro, macro, elite)
     private void generate() {

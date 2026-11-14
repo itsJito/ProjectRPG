@@ -1,0 +1,1059 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.58s ({regions=829, overlays=490, variants=449, scarp=46, coast=451, erosion=322, peaks=43, lakes=67, isles=4, rivers=672, wadis=13, ground=31, roads=619, causeways=3, architecture=936, pitsFilled=1405, pits=483, banks=52, clamp=13, cliffs=58, columns=987, falls=15, raise=10951, trees=299, outcrops=0, ways=707}), made and lit in 1.50s
+    [water] flow field grown in 886 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]     0 Ealdra     (261.50,39.05,926.50) yaw 0.00 want NaN v 0.00,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | 
+    [trace]    10 Ealdra     (261.37,39.00,926.50) yaw 0.43 want NaN v -1.96,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | 
+    [trace]    20 Ealdra     (260.97,39.00,926.50) yaw 1.30 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | 
+    [trace]    30 Lothar     (158.50,57.04,594.50) yaw 0.00 want NaN v 0.00,0.00 goal PATROL act - working null gp false 0.0,0.0 | 
+    [trace]    40 Lothar     (158.50,57.00,594.50) yaw 0.87 want 1.01 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    50 Lothar     (158.50,57.00,594.50) yaw 1.95 want 2.14 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    60 Lothar     (158.50,57.00,594.50) yaw 3.03 want 3.25 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    70 Lothar     (158.50,57.00,594.50) yaw -2.17 want -1.93 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    80 Lothar     (158.50,57.00,594.50) yaw -1.08 want -0.84 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    90 Lothar     (158.50,57.00,594.50) yaw 0.00 want 0.23 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   100 Lothar     (158.50,57.00,594.50) yaw 1.08 want 1.29 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   110 Lothar     (158.50,57.00,594.50) yaw 2.17 want 2.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   120 Lothar     (158.50,57.00,594.50) yaw -3.03 want -2.91 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   130 Lothar     (158.50,57.00,594.50) yaw -1.95 want -1.88 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   140 Lothar     (158.50,57.00,594.50) yaw -0.87 want -0.86 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   150 Lothar     (158.50,57.00,594.50) yaw -0.13 want -0.13 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   160 Lothar     (158.50,57.00,594.50) yaw -0.10 want -0.12 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   170 Lothar     (158.50,57.00,594.50) yaw -0.75 want -0.75 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   180 Lothar     (158.50,57.00,594.50) yaw -1.83 want -1.88 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   190 Lothar     (158.50,57.00,594.50) yaw -2.91 want -3.02 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   200 Lothar     (158.50,57.00,594.50) yaw 2.29 want 2.13 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   210 Lothar     (158.50,57.00,594.50) yaw 1.20 want 1.00 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   220 Lothar     (158.50,57.00,594.50) yaw 0.12 want -0.11 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   230 Lothar     (158.50,57.00,594.50) yaw -0.96 want -1.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   240 Lothar     (158.50,57.00,594.50) yaw -2.05 want -2.29 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   250 Lothar     (158.50,57.00,594.50) yaw -3.13 want -3.35 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   260 Lothar     (158.50,57.00,594.50) yaw 2.07 want 1.87 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   270 Lothar     (158.50,57.00,594.50) yaw 0.99 want 0.83 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   280 Lothar     (158.50,57.00,594.50) yaw -0.10 want -0.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   290 Lothar     (158.50,57.00,594.50) yaw -1.18 want -1.23 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]   300 Lothar     (158.50,57.00,594.50) yaw -1.83 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   310 Lothar     (158.50,57.00,594.50) yaw -0.74 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   320 Lothar     (158.50,57.00,594.50) yaw 0.34 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   330 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   340 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   350 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   360 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   370 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   380 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   390 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   400 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   410 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   420 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   430 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   440 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   450 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   460 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   470 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   480 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   490 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   500 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   510 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   520 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   530 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   540 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   550 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   560 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   570 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   580 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   590 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   600 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   610 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   620 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   630 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   640 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   650 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   660 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   670 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   680 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   690 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   700 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   710 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   720 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   730 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   740 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   750 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   760 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   770 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   780 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   790 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   800 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   810 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   820 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   830 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   840 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   850 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   860 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   870 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   880 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   890 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   900 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   910 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   920 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   930 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   940 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   950 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   960 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   970 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   980 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]   990 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1000 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1010 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1020 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1030 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1040 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1050 Lothar     (158.50,57.00,594.50) yaw 0.77 want 0.79 v 0.00,0.00 goal WATCH act hold/face working null gp false 153.5,654.5 | watching world life
+    [trace]  1060 Lothar     (158.50,57.00,594.50) yaw 0.99 want 1.13 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1070 Lothar     (158.50,57.00,594.50) yaw 2.07 want 2.16 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1080 Lothar     (158.50,57.00,594.50) yaw -3.13 want 3.18 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1090 Lothar     (158.50,57.00,594.50) yaw -2.24 want -2.24 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1100 Lothar     (158.50,57.00,594.50) yaw -2.07 want -2.08 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1110 Lothar     (158.50,57.00,594.50) yaw -2.51 want -2.51 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1120 Lothar     (158.50,57.00,594.50) yaw 2.73 want 2.70 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1130 Lothar     (158.50,57.00,594.50) yaw 1.65 want 1.55 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1140 Lothar     (158.50,57.00,594.50) yaw 0.57 want 0.42 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1150 Lothar     (158.50,57.00,594.50) yaw -0.52 want -0.71 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1160 Lothar     (158.50,57.00,594.50) yaw -1.60 want -1.82 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1170 Lothar     (158.50,57.00,594.50) yaw -2.68 want -2.92 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1180 Lothar     (158.50,57.00,594.50) yaw 2.52 want 2.28 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1190 Lothar     (158.50,57.00,594.50) yaw 1.43 want 1.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1200 Lothar     (158.50,57.00,594.50) yaw 0.35 want 0.14 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1210 Lothar     (158.50,57.00,594.50) yaw -0.73 want -0.90 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1220 Lothar     (158.50,57.00,594.50) yaw -1.82 want -1.94 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1230 Lothar     (158.50,57.00,594.50) yaw -2.90 want -2.96 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1240 Lothar     (158.50,57.00,594.50) yaw 2.30 want 2.30 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1250 Lothar     (158.50,57.00,594.50) yaw 1.60 want 1.60 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1260 Lothar     (158.50,57.00,594.50) yaw 1.60 want 1.60 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1270 Lothar     (158.50,57.00,594.50) yaw 2.28 want 2.28 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1280 Lothar     (158.50,57.00,594.50) yaw -2.92 want -2.87 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1290 Lothar     (158.50,57.00,594.50) yaw -1.84 want -1.73 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1300 Lothar     (158.50,57.00,594.50) yaw -0.76 want -0.59 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1310 Lothar     (158.50,57.00,594.50) yaw 0.33 want 0.53 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1320 Lothar     (158.50,57.00,594.50) yaw 1.41 want 1.64 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1330 Lothar     (158.50,57.00,594.50) yaw 2.49 want 2.73 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1340 Lothar     (158.50,57.00,594.50) yaw -2.71 want -2.47 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1350 Lothar     (158.50,57.00,594.50) yaw -1.62 want -1.40 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1360 Lothar     (158.50,57.00,594.50) yaw -0.54 want -0.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1370 Lothar     (158.50,57.00,594.50) yaw 0.54 want 0.70 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1380 Lothar     (158.50,57.00,594.50) yaw 1.63 want 1.73 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1390 Lothar     (158.50,57.00,594.50) yaw 2.71 want 2.76 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1400 Lothar     (158.50,57.00,594.50) yaw -2.53 want -2.53 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1410 Lothar     (158.50,57.00,594.50) yaw -2.07 want -2.05 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1420 Lothar     (158.50,57.00,594.50) yaw -2.20 want -2.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1430 Lothar     (158.50,57.00,594.50) yaw -3.07 want -3.08 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1440 Lothar     (158.50,57.00,594.50) yaw 2.13 want 2.05 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1450 Lothar     (158.50,57.00,594.50) yaw 1.04 want 0.91 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1460 Lothar     (158.50,57.00,594.50) yaw -0.04 want -0.22 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1470 Lothar     (158.50,57.00,594.50) yaw -1.12 want -1.33 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1480 Lothar     (158.50,57.00,594.50) yaw -2.21 want -2.44 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]  1490 Lothar     (158.50,57.00,594.50) yaw 2.99 want 2.75 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [life] stop 158,594 done (24 people seen so far)
+    [trace]     0 Lothar     (158.50,57.00,594.50) yaw 2.02 want 1.78 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    10 Lothar     (158.50,57.00,594.50) yaw 1.34 want 1.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    20 Lothar     (158.50,57.00,594.50) yaw 0.41 want 0.41 v 0.00,0.00 goal PATROL act hold/face working null gp false 153.5,654.5 | paused to reconsider a blocked route
+    [trace]    30 Astrid     (326.50,62.04,385.50) yaw 0.00 want NaN v 0.00,0.00 goal SOCIALIZE act - working null gp true 326.5,399.5 | 
+    [trace]    40 Astrid     (326.51,62.00,385.50) yaw 0.00 want NaN v 0.69,0.12 goal SOCIALIZE act go to goal working null gp true 326.5,399.5 | 
+    [trace]    50 Astrid     (326.80,62.00,385.55) yaw -0.76 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 326.5,399.5 | 
+    [trace]    60 Astrid     (327.20,62.00,385.62) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    70 Astrid     (327.61,62.00,385.68) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    80 Astrid     (328.01,62.00,385.75) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 327.5,398.5 | 
+    [trace]    90 Astrid     (328.41,62.00,385.82) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,398.5 | 
+    [trace]   100 Astrid     (328.82,62.00,385.89) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,397.5 | 
+    [trace]   110 Astrid     (329.22,62.00,385.95) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 328.5,397.5 | 
+    [trace]   120 Astrid     (329.62,62.00,386.02) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,397.5 | 
+    [trace]   130 Astrid     (330.02,62.00,386.09) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   140 Astrid     (330.43,62.00,386.15) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   150 Astrid     (330.83,62.00,386.22) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 329.5,396.5 | 
+    [trace]   160 Astrid     (331.23,62.00,386.29) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 330.5,396.5 | 
+    [trace]   170 Astrid     (331.64,62.00,386.36) yaw -1.73 want NaN v 2.42,0.40 goal SOCIALIZE act go to goal working null gp true 330.5,395.5 | 
+    [trace]   180 Astrid     (332.02,62.00,386.44) yaw -1.76 want NaN v 1.75,1.06 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   190 Astrid     (332.18,62.00,386.74) yaw -2.50 want NaN v 0.28,2.43 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   200 Astrid     (332.22,62.00,386.77) yaw -2.38 want NaN v 0.20,0.00 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   210 Astrid     (332.25,62.00,386.96) yaw -2.94 want NaN v 0.09,2.33 goal SOCIALIZE act go to goal working null gp true 331.5,395.5 | 
+    [trace]   220 Astrid     (332.26,62.00,387.37) yaw -3.06 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   230 Astrid     (332.27,62.00,387.77) yaw -3.10 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   240 Astrid     (332.29,62.00,388.18) yaw -3.10 want NaN v 0.08,2.45 goal SOCIALIZE act go to goal working null gp true 332.5,394.5 | 
+    [trace]   250 Astrid     (332.33,62.00,388.59) yaw -3.05 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   260 Astrid     (332.43,62.00,388.98) yaw -2.95 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   270 Astrid     (332.52,62.00,389.38) yaw -2.92 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   280 Astrid     (332.62,62.00,389.78) yaw -2.92 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   290 Astrid     (332.71,62.00,390.18) yaw -2.92 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   300 Astrid     (332.80,62.00,390.57) yaw -2.92 want NaN v 0.57,2.38 goal SOCIALIZE act go to goal working null gp true 333.5,393.5 | 
+    [trace]   310 Astrid     (332.92,62.00,390.96) yaw -2.85 want NaN v 0.86,2.29 goal SOCIALIZE act go to goal working null gp true 333.5,392.5 | 
+    [trace]   320 Astrid     (333.07,62.00,391.35) yaw -2.82 want NaN v 0.86,2.29 goal SOCIALIZE act go to goal working null gp true 333.8,392.2 | 
+    [trace]   330 Astrid     (333.20,62.00,391.69) yaw -2.82 want NaN v 0.45,1.20 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   340 Astrid     (333.22,62.00,391.75) yaw -2.92 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   350 Astrid     (333.22,62.00,391.75) yaw 2.28 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   360 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   370 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   380 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   390 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   400 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   410 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   420 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   430 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   440 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   450 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   460 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   470 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   480 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   490 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   500 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   510 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   520 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   530 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   540 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   550 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   560 Astrid     (333.22,62.00,391.75) yaw 1.98 want 1.98 v 0.00,0.00 goal SOCIALIZE act hold/face working null gp false 333.8,392.2 | 
+    [trace]   570 Astrid     (333.22,62.00,391.75) yaw 1.22 want 1.14 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   580 Astrid     (333.22,62.00,391.75) yaw 0.14 want 0.00 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   590 Astrid     (333.22,62.00,391.75) yaw -0.94 want -1.13 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   600 Astrid     (333.22,62.00,391.75) yaw -2.03 want -2.24 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   610 Astrid     (333.22,62.00,391.75) yaw -3.11 want -3.35 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   620 Astrid     (333.22,62.00,391.75) yaw 2.09 want 1.85 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   630 Astrid     (333.22,62.00,391.75) yaw 1.01 want 0.77 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   640 Astrid     (333.22,62.00,391.75) yaw -0.08 want -0.29 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   650 Astrid     (333.22,62.00,391.75) yaw -1.16 want -1.34 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   660 Astrid     (333.22,62.00,391.75) yaw -2.24 want -2.38 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   670 Astrid     (333.22,62.00,391.75) yaw 2.96 want 2.88 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   680 Astrid     (333.22,62.00,391.75) yaw 1.87 want 1.86 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   690 Astrid     (333.22,62.00,391.75) yaw 1.12 want 1.12 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   700 Astrid     (333.22,62.00,391.75) yaw 0.99 want 1.00 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   710 Astrid     (333.22,62.00,391.75) yaw 1.45 want 1.45 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   720 Astrid     (333.22,62.00,391.75) yaw 2.50 want 2.54 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   730 Astrid     (333.22,62.00,391.75) yaw -2.70 want -2.60 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   740 Astrid     (333.22,62.00,391.75) yaw -1.62 want -1.46 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   750 Astrid     (333.22,62.00,391.75) yaw -0.53 want -0.34 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   760 Astrid     (333.22,62.00,391.75) yaw 0.55 want 0.77 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   770 Astrid     (333.22,62.00,391.75) yaw 1.63 want 1.87 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   780 Astrid     (333.22,62.00,391.75) yaw 2.72 want 2.96 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   790 Astrid     (333.22,62.00,391.75) yaw -2.48 want -2.25 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   800 Astrid     (333.22,62.00,391.75) yaw -1.40 want -1.19 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   810 Astrid     (333.22,62.00,391.75) yaw -0.32 want -0.15 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   820 Astrid     (333.22,62.00,391.75) yaw 0.77 want 0.89 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   830 Astrid     (333.22,62.00,391.75) yaw 1.85 want 1.91 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   840 Astrid     (333.22,62.00,391.75) yaw 2.93 want 2.93 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   850 Astrid     (333.22,62.00,391.75) yaw -2.68 want -2.68 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   860 Astrid     (333.22,62.00,391.75) yaw -2.71 want -2.71 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   870 Astrid     (333.22,62.00,391.75) yaw 2.86 want 2.86 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   880 Astrid     (333.22,62.00,391.75) yaw 1.77 want 1.71 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   890 Astrid     (333.22,62.00,391.75) yaw 0.69 want 0.57 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   900 Astrid     (333.22,62.00,391.75) yaw -0.39 want -0.56 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   910 Astrid     (333.22,62.00,391.75) yaw -1.48 want -1.68 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   920 Astrid     (333.22,62.00,391.75) yaw -2.56 want -2.79 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   930 Astrid     (333.22,62.00,391.75) yaw 2.64 want 2.40 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   940 Astrid     (333.22,62.00,391.75) yaw 1.56 want 1.32 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   950 Astrid     (333.22,62.00,391.75) yaw 0.47 want 0.25 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   960 Astrid     (333.22,62.00,391.75) yaw -0.61 want -0.81 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   970 Astrid     (333.22,62.00,391.75) yaw -1.69 want -1.85 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   980 Astrid     (333.22,62.00,391.75) yaw -2.78 want -2.88 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   990 Astrid     (333.22,62.00,391.75) yaw 2.42 want 2.38 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1000 Astrid     (333.22,62.00,391.75) yaw 1.39 want 1.39 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1010 Astrid     (333.22,62.00,391.75) yaw 0.99 want 0.97 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1020 Astrid     (333.22,62.00,391.75) yaw 1.16 want 1.16 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1030 Astrid     (333.22,62.00,391.75) yaw 2.06 want 2.07 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1040 Astrid     (333.22,62.00,391.75) yaw 3.14 want 3.22 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1050 Astrid     (333.22,62.00,391.75) yaw -2.06 want -1.93 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1060 Astrid     (333.22,62.00,391.75) yaw -0.98 want -0.80 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1070 Astrid     (333.22,62.00,391.75) yaw 0.11 want 0.32 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1080 Astrid     (333.22,62.00,391.75) yaw 1.19 want 1.42 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1090 Astrid     (333.22,62.00,391.75) yaw 2.27 want 2.51 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1100 Astrid     (333.22,62.00,391.75) yaw -2.93 want -2.69 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1110 Astrid     (333.22,62.00,391.75) yaw -1.84 want -1.63 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1120 Astrid     (333.22,62.00,391.75) yaw -0.76 want -0.58 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1130 Astrid     (333.22,62.00,391.75) yaw 0.32 want 0.46 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1140 Astrid     (333.22,62.00,391.75) yaw 1.41 want 1.49 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1150 Astrid     (333.22,62.00,391.75) yaw 2.49 want 2.51 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1160 Astrid     (333.22,62.00,391.75) yaw -2.87 want -2.87 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1170 Astrid     (333.22,62.00,391.75) yaw -2.65 want -2.65 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1180 Astrid     (333.22,62.00,391.75) yaw -3.02 want -3.02 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1190 Astrid     (333.22,62.00,391.75) yaw 2.25 want 2.22 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1200 Astrid     (333.22,62.00,391.75) yaw 1.17 want 1.07 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1210 Astrid     (333.22,62.00,391.75) yaw 0.08 want -0.06 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1220 Astrid     (333.22,62.00,391.75) yaw -1.00 want -1.19 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]  1230 Astrid     (333.22,62.00,391.75) yaw -1.22 want 0.40 v 0.00,0.00 goal LOOK act hold/face working null gp false 352.0,384.5 | 
+    [trace]  1240 Astrid     (333.22,62.00,391.75) yaw -0.13 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1250 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1260 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1270 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1280 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1290 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1300 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1310 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1320 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1330 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1340 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1350 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1360 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1370 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1380 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1390 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1400 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1410 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1420 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1430 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1440 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1450 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal LOOK act idle working null gp false 352.0,384.5 | 
+    [trace]  1460 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 352.0,384.5 | noticed something
+    [trace]  1470 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 352.0,384.5 | noticed something
+    [trace]  1480 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 352.0,384.5 | noticed something
+    [trace]  1490 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 352.0,384.5 | noticed something
+    [life] stop 324,370 done (39 people seen so far)
+    [trace]     0 Astrid     (333.22,62.00,391.75) yaw 0.40 want 0.40 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 352.0,384.5 | noticed something
+    [trace]    10 Astrid     (333.22,62.00,391.73) yaw 0.40 want 0.40 v 0.04,-0.70 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    20 Astrid     (333.23,62.00,391.44) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    30 Sir Nicholas (586.50,37.04,114.50) yaw 0.00 want NaN v 0.05,0.00 goal WORK act go to goal working null gp true 587.5,114.5 |  [door Palace barracks door open false locked false blocked false angle [0.0, 0.0] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    30 Astrid     (333.26,62.00,391.03) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    40 Sir Nicholas (586.66,37.00,114.50) yaw -0.43 want NaN v 2.19,0.00 goal WORK act go to goal working null gp true 587.5,114.5 |  [door Palace barracks door open false locked false blocked false angle [0.0, 0.0] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    40 Astrid     (333.28,62.00,390.63) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    50 Sir Nicholas (587.06,37.00,114.50) yaw -1.52 want NaN v 2.03,0.00 goal WORK act go to goal working null gp false 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.0, 0.0] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    50 Astrid     (333.30,62.00,390.22) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    60 Sir Nicholas (587.26,37.00,114.50) yaw -1.57 want NaN v 0.10,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.0, 0.0] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    60 Astrid     (333.32,62.00,389.81) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    70 Sir Nicholas (587.09,37.00,114.50) yaw -1.46 want NaN v -2.24,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [-0.030425176, 0.030425176] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    70 Astrid     (333.34,62.00,389.40) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    80 Sir Nicholas (586.69,37.00,114.50) yaw -0.38 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [-0.29042977, 0.29042977] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    80 Astrid     (333.37,62.00,388.99) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]    90 Sir Nicholas (586.28,37.00,114.50) yaw 0.70 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]    90 Astrid     (333.39,62.00,388.59) yaw -0.03 want NaN v 0.13,-2.45 goal INVESTIGATE act go to goal working null gp true 333.5,386.5 | going to look
+    [trace]   100 Sir Nicholas (585.90,37.00,114.50) yaw 1.57 want NaN v -1.87,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   100 Astrid     (333.41,62.00,388.18) yaw -0.03 want NaN v -0.09,-2.37 goal INVESTIGATE act go to goal working null gp true 332.5,386.5 | going to look
+    [trace]   110 Sir Nicholas (585.71,37.00,114.50) yaw 1.57 want NaN v 0.03,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   110 Astrid     (333.26,62.00,387.82) yaw 0.32 want NaN v -1.22,-2.12 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   120 Sir Nicholas (585.90,37.00,114.50) yaw 1.57 want 1.57 v 2.37,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   120 Astrid     (333.05,62.00,387.46) yaw 0.45 want NaN v -1.22,-2.12 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   130 Sir Nicholas (586.31,37.00,114.50) yaw 2.55 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   130 Astrid     (332.92,62.00,387.09) yaw 0.33 want NaN v -0.29,-2.43 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   140 Sir Nicholas (586.72,37.00,114.50) yaw -2.65 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked true angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   140 Astrid     (332.87,62.00,386.68) yaw 0.20 want NaN v -0.29,-2.43 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   150 Sir Nicholas (587.10,37.00,114.50) yaw -1.57 want NaN v 1.88,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked true angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   150 Astrid     (332.83,62.00,386.28) yaw 0.13 want NaN v -0.29,-2.43 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   160 Sir Nicholas (587.29,37.00,114.50) yaw -1.57 want NaN v -0.03,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked true angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   160 Astrid     (332.78,62.00,385.87) yaw 0.13 want NaN v -0.29,-2.43 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   170 Sir Nicholas (587.10,37.00,114.50) yaw -1.35 want NaN v -2.36,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked true angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   170 Astrid     (332.73,62.00,385.46) yaw 0.13 want NaN v -0.29,-2.43 goal INVESTIGATE act go to goal working null gp true 332.5,383.5 | going to look
+    [trace]   180 Sir Nicholas (586.69,37.00,114.50) yaw -0.27 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   180 Astrid     (332.70,62.00,385.06) yaw 0.10 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   190 Sir Nicholas (586.28,37.00,114.50) yaw 0.81 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   190 Astrid     (332.68,62.00,384.65) yaw 0.06 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   200 Sir Nicholas (585.90,37.00,114.50) yaw 1.57 want NaN v -1.75,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   200 Astrid     (332.67,62.00,384.24) yaw 0.06 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   210 Sir Nicholas (585.79,37.00,114.50) yaw 1.57 want NaN v 0.59,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   210 Astrid     (332.66,62.00,383.83) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   220 Sir Nicholas (586.07,37.00,114.50) yaw 2.00 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   220 Astrid     (332.65,62.00,383.43) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   230 Sir Nicholas (586.48,37.00,114.50) yaw 3.09 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   230 Astrid     (332.63,62.00,383.02) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   240 Sir Nicholas (586.89,37.00,114.50) yaw -2.11 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [-1.75, 1.75] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   240 Astrid     (332.62,62.00,382.61) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   250 Sir Nicholas (587.19,37.00,114.50) yaw -1.57 want NaN v 0.80,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [-1.7196885, 1.7196885] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   250 Astrid     (332.61,62.00,382.20) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   260 Sir Nicholas (587.14,37.00,114.50) yaw -1.57 want NaN v -1.53,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [-1.3205602, 1.4598241] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   260 Astrid     (332.60,62.00,381.79) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   270 Sir Nicholas (586.77,37.00,114.50) yaw -0.70 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [-0.8443924, 1.0599309] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   270 Astrid     (332.59,62.00,381.38) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   280 Sir Nicholas (586.36,37.00,114.50) yaw 0.38 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   280 Astrid     (332.57,62.00,380.98) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   290 Sir Nicholas (585.96,37.00,114.50) yaw 1.46 want NaN v -2.08,0.00 goal WORK act go to goal working null gp false 585.0,114.5 | inspected the assigned border
+    [trace]   290 Astrid     (332.56,62.00,380.57) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 332.5,378.5 | going to look
+    [trace]   300 Sir Nicholas (585.72,37.00,114.50) yaw 1.57 want NaN v -0.43,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   300 Astrid     (332.55,62.00,380.16) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 331.5,378.5 | going to look
+    [trace]   310 Sir Nicholas (585.71,37.00,114.50) yaw 1.57 want NaN v 0.00,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   310 Astrid     (332.54,62.00,379.75) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 331.5,376.5 | going to look
+    [trace]   320 Sir Nicholas (585.77,37.00,114.50) yaw 1.57 want NaN v 1.40,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   320 Astrid     (332.52,62.00,379.34) yaw 0.03 want NaN v -0.07,-2.45 goal INVESTIGATE act go to goal working null gp true 331.5,376.5 | going to look
+    [trace]   330 Sir Nicholas (586.14,37.00,114.50) yaw 2.65 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   330 Astrid     (332.43,62.00,378.95) yaw 0.21 want NaN v -0.87,-2.29 goal INVESTIGATE act go to goal working null gp true 331.5,376.5 | going to look
+    [trace]   340 Sir Nicholas (586.55,37.00,114.50) yaw -2.55 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.4310092, -1.4451709] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   340 Astrid     (332.29,62.00,378.57) yaw 0.32 want NaN v -0.87,-2.29 goal INVESTIGATE act go to goal working null gp true 331.5,376.5 | going to look
+    [trace]   350 Sir Nicholas (586.96,37.00,114.50) yaw -1.57 want NaN v 2.34,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.4292134, -1.4411708] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   350 Astrid     (332.14,62.00,378.19) yaw 0.35 want NaN v -0.87,-2.29 goal INVESTIGATE act go to goal working null gp true 331.5,376.5 | going to look
+    [trace]   360 Sir Nicholas (587.21,37.00,114.50) yaw -1.57 want NaN v 0.36,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.4406252, -1.4437784] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   360 Astrid     (331.93,62.00,377.90) yaw 0.61 want NaN v -2.00,-0.82 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   370 Sir Nicholas (587.09,37.00,114.50) yaw -1.57 want NaN v -1.97,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.4500006, -1.450001] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   370 Astrid     (331.54,62.00,377.81) yaw 1.16 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   380 Sir Nicholas (586.69,37.00,114.50) yaw -0.49 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.45, -1.45] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   380 Astrid     (331.14,62.00,377.72) yaw 1.32 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   390 Sir Nicholas (586.28,37.00,114.50) yaw 0.60 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   390 Astrid     (330.74,62.00,377.64) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   400 Sir Nicholas (585.90,37.00,114.50) yaw 1.57 want NaN v -1.74,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   400 Astrid     (330.35,62.00,377.55) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   410 Sir Nicholas (585.79,37.00,114.50) yaw 1.57 want NaN v 0.60,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   410 Astrid     (329.95,62.00,377.46) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   420 Sir Nicholas (586.07,37.00,114.50) yaw 2.00 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   420 Astrid     (329.55,62.00,377.38) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   430 Sir Nicholas (586.48,37.00,114.50) yaw 3.09 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   430 Astrid     (329.15,62.00,377.29) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   440 Sir Nicholas (586.89,37.00,114.50) yaw -2.11 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.45, -1.4500002] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   440 Astrid     (328.75,62.00,377.20) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   450 Sir Nicholas (587.19,37.00,114.50) yaw -1.57 want NaN v 0.80,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.45, -1.45] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   450 Astrid     (328.35,62.00,377.12) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   460 Sir Nicholas (587.14,37.00,114.50) yaw -1.57 want NaN v -1.53,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door (open) open true locked false blocked false angle [1.45, -1.45] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   460 Astrid     (327.95,62.00,377.03) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   470 Sir Nicholas (586.77,37.00,114.50) yaw -0.70 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [1.3693131, -1.3693129] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   470 Astrid     (327.55,62.00,376.94) yaw 1.35 want NaN v -2.39,-0.52 goal INVESTIGATE act go to goal working null gp true 325.5,376.5 | going to look
+    [trace]   480 Sir Nicholas (586.36,37.00,114.50) yaw 0.38 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   480 Astrid     (327.15,62.00,376.86) yaw 1.35 want NaN v -2.27,-0.72 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   490 Sir Nicholas (585.97,37.00,114.49) yaw 1.46 want NaN v -1.43,-0.35 goal WORK act go to goal working null gp false 585.0,114.5 | inspected the assigned border
+    [trace]   490 Astrid     (326.83,62.00,376.63) yaw 1.03 want NaN v -1.87,-1.59 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   500 Sir Nicholas (585.87,37.00,114.46) yaw 1.41 want NaN v 0.62,-0.07 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   500 Astrid     (326.52,62.00,376.36) yaw 0.93 want NaN v -1.87,-1.59 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   510 Sir Nicholas (586.15,37.00,114.46) yaw 0.89 want NaN v 2.45,0.06 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   510 Astrid     (326.20,62.00,376.10) yaw 0.90 want NaN v -1.87,-1.59 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   520 Sir Nicholas (586.56,37.00,114.48) yaw -0.20 want NaN v 2.45,0.06 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   520 Astrid     (325.89,62.00,375.84) yaw 0.90 want NaN v -1.72,-1.46 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   530 Sir Nicholas (586.97,37.00,114.49) yaw -1.28 want NaN v 2.30,0.06 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   530 Astrid     (325.66,61.82,375.63) yaw 0.90 want NaN v -1.22,-1.04 goal INVESTIGATE act go to goal working null gp true 325.5,375.5 | going to look
+    [trace]   540 Sir Nicholas (587.26,37.00,114.49) yaw -1.60 want NaN v 0.89,0.02 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   540 Astrid     (325.48,61.04,375.47) yaw 0.86 want NaN v -0.99,-1.11 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   550 Sir Nicholas (587.29,37.00,114.49) yaw -1.60 want NaN v 0.00,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   550 Astrid     (325.34,61.00,375.14) yaw 0.48 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   560 Sir Nicholas (587.20,37.00,114.49) yaw -1.60 want NaN v -1.63,0.01 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   560 Astrid     (325.22,61.00,374.75) yaw 0.36 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   570 Sir Nicholas (586.82,37.00,114.50) yaw -2.68 want NaN v -2.45,0.01 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   570 Astrid     (325.09,61.00,374.36) yaw 0.33 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   580 Sir Nicholas (586.41,37.00,114.50) yaw 2.52 want NaN v -2.45,0.01 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   580 Astrid     (324.97,61.00,373.97) yaw 0.33 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   590 Sir Nicholas (586.01,37.00,114.50) yaw 1.57 want NaN v -2.22,0.01 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   590 Astrid     (324.85,61.00,373.59) yaw 0.33 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   600 Sir Nicholas (585.77,37.00,114.50) yaw 1.57 want NaN v -0.26,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   600 Astrid     (324.72,61.00,373.20) yaw 0.33 want NaN v -0.74,-2.33 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   610 Sir Nicholas (585.91,37.00,114.50) yaw 1.68 want NaN v 2.07,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   610 Astrid     (324.61,61.00,372.81) yaw 0.30 want NaN v -0.21,-2.44 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   620 Sir Nicholas (586.31,37.00,114.50) yaw 2.77 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   620 Astrid     (324.58,61.00,372.40) yaw 0.15 want NaN v -0.21,-2.44 goal INVESTIGATE act go to goal working null gp true 324.5,371.5 | going to look
+    [trace]   630 Sir Nicholas (586.72,37.00,114.50) yaw -2.43 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   630 Astrid     (324.55,61.62,372.24) yaw 0.12 want NaN v -0.15,-2.45 goal INVESTIGATE act go to goal working null gp true 323.5,370.5 | going to look
+    [trace]   640 Sir Nicholas (587.10,37.00,114.50) yaw -1.57 want NaN v 1.74,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   640 Astrid     (324.52,62.16,372.07) yaw 0.08 want NaN v -0.11,-2.45 goal INVESTIGATE act go to goal working null gp true 323.5,370.5 | going to look
+    [trace]   650 Sir Nicholas (587.21,37.00,114.50) yaw -1.57 want NaN v -0.60,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   650 Astrid     (324.49,62.10,371.67) yaw 0.09 want NaN v -0.40,-2.30 goal INVESTIGATE act go to goal working null gp true 323.5,370.5 | going to look
+    [trace]   660 Sir Nicholas (586.93,37.00,114.50) yaw -2.00 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   660 Astrid     (324.31,62.00,371.34) yaw 0.46 want NaN v -1.69,-1.77 goal INVESTIGATE act go to goal working null gp true 323.5,370.5 | going to look
+    [trace]   670 Sir Nicholas (586.52,37.00,114.50) yaw -3.09 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   670 Astrid     (324.03,62.66,371.24) yaw 0.65 want NaN v -1.47,-1.93 goal INVESTIGATE act go to goal working null gp true 323.5,369.5 | going to look
+    [trace]   680 Sir Nicholas (586.11,37.00,114.50) yaw 2.11 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   680 Astrid     (323.82,63.18,371.08) yaw 0.59 want NaN v -1.04,-2.11 goal INVESTIGATE act go to goal working null gp true 323.5,369.5 | going to look
+    [trace]   690 Sir Nicholas (585.81,37.00,114.50) yaw 1.57 want NaN v -0.80,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   690 Astrid     (323.73,63.08,370.82) yaw 0.40 want NaN v -0.04,-0.77 goal INVESTIGATE act go to goal working null gp true 323.5,369.5 | going to look
+    [trace]   700 Sir Nicholas (585.86,37.00,114.50) yaw 1.57 want NaN v 1.53,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   700 Astrid     (323.75,63.00,370.70) yaw 0.07 want NaN v 0.08,-0.10 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   710 Sir Nicholas (586.23,37.00,114.50) yaw 2.44 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   710 Astrid     (323.75,63.00,370.70) yaw 0.50 want 0.52 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   720 Sir Nicholas (586.64,37.00,114.50) yaw -2.76 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   720 Astrid     (323.75,63.00,370.70) yaw 0.70 want 0.72 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   730 Sir Nicholas (587.04,37.00,114.50) yaw -1.68 want NaN v 2.08,0.00 goal WORK act go to goal working null gp false 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   730 Astrid     (323.75,63.00,370.70) yaw 0.89 want 0.91 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   740 Sir Nicholas (587.22,37.00,114.50) yaw -1.57 want NaN v -0.13,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   740 Astrid     (323.75,63.00,370.70) yaw 1.06 want 1.08 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   750 Sir Nicholas (587.01,37.00,114.50) yaw -1.79 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   750 Astrid     (323.75,63.00,370.70) yaw 1.23 want 1.23 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   760 Sir Nicholas (586.60,37.00,114.50) yaw -2.87 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   760 Astrid     (323.75,63.00,370.70) yaw 1.35 want 1.36 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   770 Sir Nicholas (586.20,37.00,114.50) yaw 2.33 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   770 Astrid     (323.75,63.00,370.70) yaw 1.45 want 1.47 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   780 Sir Nicholas (585.84,37.00,114.50) yaw 1.57 want NaN v -1.27,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   780 Astrid     (323.75,63.00,370.70) yaw 1.52 want 1.54 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   790 Sir Nicholas (585.82,37.00,114.50) yaw 1.57 want NaN v 1.06,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   790 Astrid     (323.75,63.00,370.70) yaw 1.58 want 1.59 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   800 Sir Nicholas (586.15,37.00,114.50) yaw 2.22 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   800 Astrid     (323.75,63.00,370.70) yaw 1.58 want 1.61 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   810 Sir Nicholas (586.56,37.00,114.50) yaw -2.98 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   810 Astrid     (323.75,63.00,370.70) yaw 1.58 want 1.59 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   820 Sir Nicholas (586.97,37.00,114.50) yaw -1.90 want NaN v 2.31,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   820 Astrid     (323.75,63.00,370.70) yaw 1.55 want 1.54 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   830 Sir Nicholas (587.21,37.00,114.50) yaw -1.57 want NaN v 0.34,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   830 Astrid     (323.75,63.00,370.70) yaw 1.49 want 1.46 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   840 Sir Nicholas (587.09,37.00,114.50) yaw -1.57 want NaN v -2.00,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   840 Astrid     (323.75,63.00,370.70) yaw 1.38 want 1.36 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   850 Sir Nicholas (586.69,37.00,114.50) yaw -2.65 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   850 Astrid     (323.75,63.00,370.70) yaw 1.23 want 1.23 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   860 Sir Nicholas (586.28,37.00,114.50) yaw 2.55 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   860 Astrid     (323.75,63.00,370.70) yaw 1.09 want 1.07 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   870 Sir Nicholas (585.90,37.00,114.50) yaw 1.57 want NaN v -1.74,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   870 Astrid     (323.75,63.00,370.70) yaw 0.92 want 0.90 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 323.5,369.5 | looking round the spot
+    [trace]   880 Sir Nicholas (585.79,37.00,114.50) yaw 1.57 want NaN v 0.60,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   880 Astrid     (323.75,63.00,370.70) yaw 1.08 want 1.08 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   890 Sir Nicholas (586.07,37.00,114.50) yaw 2.00 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   890 Astrid     (323.75,63.00,370.70) yaw 1.58 want 1.58 v 0.00,0.00 goal HOME act hold/face working null gp false 352.0,384.5 | getting up and dressed
+    [trace]   900 Sir Nicholas (586.48,37.00,114.50) yaw 3.09 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   910 Sir Nicholas (586.89,37.00,114.50) yaw -2.11 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   920 Sir Nicholas (587.19,37.00,114.50) yaw -1.57 want NaN v 0.80,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   930 Sir Nicholas (587.14,37.00,114.50) yaw -1.57 want NaN v -1.53,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   940 Sir Nicholas (586.77,37.00,114.50) yaw -2.44 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]   950 Sir Nicholas (586.36,37.00,114.50) yaw 2.76 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]   960 Sir Nicholas (585.96,37.00,114.50) yaw 1.68 want NaN v -2.08,0.00 goal WORK act go to goal working null gp false 585.0,114.5 | inspected the assigned border
+    [trace]   970 Sir Nicholas (585.78,37.00,114.50) yaw 1.57 want NaN v 0.13,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   980 Sir Nicholas (585.99,37.00,114.50) yaw 1.79 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]   990 Sir Nicholas (586.40,37.00,114.50) yaw 2.87 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1000 Sir Nicholas (586.80,37.00,114.50) yaw -2.33 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1010 Sir Nicholas (587.16,37.00,114.50) yaw -1.57 want NaN v 1.27,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1020 Sir Nicholas (587.18,37.00,114.50) yaw -1.57 want NaN v -1.06,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1030 Sir Nicholas (586.85,37.00,114.50) yaw -2.22 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1040 Sir Nicholas (586.45,37.00,114.52) yaw 2.98 want NaN v -2.03,1.20 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1050 Sir Nicholas (586.12,37.00,114.70) yaw 2.00 want NaN v -1.76,0.64 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1060 Sir Nicholas (585.83,37.00,114.70) yaw 1.79 want NaN v -1.12,0.20 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1070 Sir Nicholas (585.82,37.00,114.70) yaw 2.13 want NaN v 1.14,0.17 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1080 Sir Nicholas (586.16,37.00,114.68) yaw 2.89 want NaN v 2.43,-0.32 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1090 Sir Nicholas (586.56,37.00,114.62) yaw -2.31 want NaN v 2.43,-0.32 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1100 Sir Nicholas (586.97,37.00,114.57) yaw -1.44 want NaN v 2.29,-0.30 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1110 Sir Nicholas (587.22,37.00,114.53) yaw -1.44 want NaN v 0.33,-0.11 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1120 Sir Nicholas (587.09,37.00,114.52) yaw -1.27 want NaN v -2.00,-0.05 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1130 Sir Nicholas (586.69,37.00,114.51) yaw -0.18 want NaN v -2.45,-0.03 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1140 Sir Nicholas (586.28,37.00,114.51) yaw 0.90 want NaN v -2.45,-0.03 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1150 Sir Nicholas (585.90,37.00,114.50) yaw 1.55 want NaN v -1.74,-0.02 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1160 Sir Nicholas (585.79,37.00,114.50) yaw 1.55 want NaN v 0.59,-0.01 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1170 Sir Nicholas (586.07,37.00,114.50) yaw 1.12 want NaN v 2.45,-0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1180 Sir Nicholas (586.48,37.00,114.50) yaw 0.03 want NaN v 2.45,-0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1190 Sir Nicholas (586.89,37.00,114.50) yaw -1.05 want NaN v 2.45,-0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1200 Sir Nicholas (587.19,37.00,114.50) yaw -1.57 want NaN v 0.80,-0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1210 Sir Nicholas (587.14,37.00,114.50) yaw -1.57 want NaN v -1.53,-0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1220 Sir Nicholas (586.77,37.00,114.50) yaw -0.70 want NaN v -2.45,-0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1230 Sir Nicholas (586.36,37.00,114.50) yaw 0.38 want NaN v -2.45,-0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1240 Sir Nicholas (586.01,37.00,114.45) yaw 1.43 want NaN v -1.07,-1.13 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1250 Sir Nicholas (585.95,37.00,114.31) yaw 0.79 want NaN v 0.80,-0.37 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1260 Sir Nicholas (586.24,37.00,114.32) yaw -0.29 want NaN v 2.43,0.34 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1270 Sir Nicholas (586.64,37.00,114.38) yaw -1.05 want NaN v 2.43,0.34 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1280 Sir Nicholas (587.04,37.00,114.44) yaw -1.70 want NaN v 2.07,0.29 goal WORK act go to goal working null gp false 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1290 Sir Nicholas (587.28,37.00,114.47) yaw -1.70 want NaN v 0.44,0.06 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1300 Sir Nicholas (587.17,37.00,114.47) yaw -1.78 want NaN v -1.89,0.04 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1310 Sir Nicholas (586.77,37.00,114.48) yaw -2.86 want NaN v -2.45,0.04 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1320 Sir Nicholas (586.37,37.00,114.49) yaw 2.34 want NaN v -2.45,0.04 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1330 Sir Nicholas (585.97,37.00,114.49) yaw 1.59 want NaN v -2.10,0.03 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1340 Sir Nicholas (585.78,37.00,114.50) yaw 1.59 want NaN v 0.11,0.01 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1350 Sir Nicholas (585.99,37.00,114.50) yaw 1.80 want NaN v 2.44,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1360 Sir Nicholas (586.40,37.00,114.50) yaw 2.89 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1370 Sir Nicholas (586.80,37.00,114.50) yaw -2.31 want NaN v 2.45,0.01 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1380 Sir Nicholas (587.16,37.00,114.50) yaw -1.57 want NaN v 1.27,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1390 Sir Nicholas (587.18,37.00,114.50) yaw -1.57 want NaN v -1.06,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1400 Sir Nicholas (586.85,37.00,114.50) yaw -1.90 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1410 Sir Nicholas (586.44,37.00,114.50) yaw -2.98 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1420 Sir Nicholas (586.03,37.00,114.50) yaw 2.22 want NaN v -2.31,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border
+    [trace]  1430 Sir Nicholas (585.76,37.00,114.50) yaw 1.57 want NaN v -0.61,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1440 Sir Nicholas (585.84,37.00,114.50) yaw 1.57 want NaN v 1.73,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1450 Sir Nicholas (586.23,37.00,114.50) yaw 2.55 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border
+    [trace]  1460 Sir Nicholas (586.64,37.00,114.50) yaw -2.65 want NaN v 2.45,0.00 goal WORK act go to goal working null gp true 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1470 Sir Nicholas (587.04,37.00,114.50) yaw -1.57 want NaN v 2.08,0.00 goal WORK act go to goal working null gp false 587.5,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1480 Sir Nicholas (587.22,37.00,114.50) yaw -1.57 want NaN v -0.13,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]  1490 Sir Nicholas (587.01,37.00,114.50) yaw -1.79 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [life] stop 586,112 done (59 people seen so far)
+    [trace]     0 Sir Nicholas (586.60,37.00,114.50) yaw -2.76 want NaN v -2.45,0.00 goal WORK act go to goal working null gp true 585.0,114.5 | inspected the assigned border [door Palace barracks door open false locked false blocked false angle [0.056770653, -0.056787014] hinge [[588.94, 112.0], [588.94, 114.0]]]
+    [trace]    10 Sir Nicholas (586.24,37.00,114.50) yaw 2.33 want NaN v -1.28,0.00 goal INVESTIGATE act hold/face working null gp false 585.0,114.5 | noticed something
+    [trace]    20 Sir Nicholas (586.18,37.00,114.50) yaw 1.46 want 0.05 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 585.0,114.5 | noticed something
+    [trace]    30 Sir Nicholas (586.18,37.00,114.50) yaw 0.38 want 0.05 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 585.0,114.5 | noticed something
+    [trace]    30 Elian      (840.50,35.04,349.50) yaw 0.00 want NaN v 0.00,0.00 goal PRAY act - working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    40 Sir Nicholas (586.18,37.00,114.50) yaw 0.05 want 0.05 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 585.0,114.5 | noticed something
+    [trace]    40 Elian      (840.50,35.00,349.50) yaw 0.65 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    50 Sir Nicholas (586.18,37.00,114.49) yaw 0.05 want 0.05 v 0.11,-0.69 goal INVESTIGATE act go to goal working null gp true 586.5,112.5 | going to look
+    [trace]    50 Elian      (840.50,35.00,349.50) yaw 1.73 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    60 Sir Nicholas (586.22,37.00,114.20) yaw -0.16 want NaN v 0.39,-2.42 goal INVESTIGATE act go to goal working null gp true 586.1,112.1 | going to look
+    [trace]    60 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    70 Sir Nicholas (586.29,37.00,113.79) yaw -0.16 want NaN v 0.39,-2.42 goal INVESTIGATE act go to goal working null gp true 586.1,112.1 | going to look
+    [trace]    70 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    80 Sir Nicholas (586.36,37.00,113.39) yaw -0.16 want NaN v 0.39,-2.42 goal INVESTIGATE act go to goal working null gp true 586.1,112.1 | going to look
+    [trace]    80 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    90 Sir Nicholas (586.41,37.00,113.08) yaw -0.16 want NaN v 0.13,-0.81 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]    90 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   100 Sir Nicholas (586.41,37.00,113.05) yaw 0.17 want 0.69 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   100 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   110 Sir Nicholas (586.41,37.00,113.05) yaw 0.89 want 0.89 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   110 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   120 Sir Nicholas (586.41,37.00,113.05) yaw 1.08 want 1.08 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   120 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   130 Sir Nicholas (586.41,37.00,113.05) yaw 1.25 want 1.25 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   130 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   140 Sir Nicholas (586.41,37.00,113.05) yaw 1.39 want 1.39 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   140 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   150 Sir Nicholas (586.41,37.00,113.05) yaw 1.51 want 1.52 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   150 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   160 Sir Nicholas (586.41,37.00,113.05) yaw 1.61 want 1.62 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   160 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   170 Sir Nicholas (586.41,37.00,113.05) yaw 1.68 want 1.69 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   170 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   180 Sir Nicholas (586.41,37.00,113.05) yaw 1.71 want 1.73 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   180 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   190 Sir Nicholas (586.41,37.00,113.05) yaw 1.71 want 1.74 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   190 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   200 Sir Nicholas (586.41,37.00,113.05) yaw 1.71 want 1.71 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   200 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   210 Sir Nicholas (586.41,37.00,113.05) yaw 1.67 want 1.66 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   210 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   220 Sir Nicholas (586.41,37.00,113.05) yaw 1.61 want 1.58 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   220 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   230 Sir Nicholas (586.41,37.00,113.05) yaw 1.47 want 1.47 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   230 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   240 Sir Nicholas (586.41,37.00,113.05) yaw 1.34 want 1.33 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   240 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   250 Sir Nicholas (586.41,37.00,113.05) yaw 1.17 want 1.17 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   250 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   260 Sir Nicholas (586.41,37.00,113.05) yaw 0.99 want 0.99 v 0.00,0.00 goal INVESTIGATE act hold/face working null gp false 586.1,112.1 | looking round the spot
+    [trace]   260 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   270 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   280 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   290 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   300 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   310 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   320 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   330 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   340 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   350 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   360 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   370 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   380 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   390 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   400 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   410 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   420 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   430 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   440 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   450 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   460 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   470 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   480 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   490 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   500 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   510 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   520 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   530 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   540 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   550 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   560 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   570 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   580 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   590 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   600 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   610 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   620 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   630 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   640 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   650 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   660 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   670 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   680 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   690 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   700 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   710 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   720 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   730 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   740 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   750 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   760 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   770 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   780 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   790 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   800 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   810 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   820 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   830 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   840 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   850 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   860 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   870 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   880 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   890 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   900 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   910 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   920 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   930 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   940 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   950 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   960 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   970 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   980 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]   990 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1000 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1010 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1020 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1030 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1040 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1050 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1060 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1070 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1080 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1090 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1100 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1110 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1120 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1130 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1140 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1150 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1160 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1170 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1180 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1190 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1200 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1210 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1220 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1230 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1240 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1250 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1260 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1270 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1280 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1290 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1300 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1310 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1320 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1330 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1340 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1350 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1360 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1370 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1380 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1390 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1400 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1410 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1420 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1430 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1440 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1450 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1460 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1470 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1480 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]  1490 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [life] stop 840,350 done (76 people seen so far)
+    [trace]     0 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    10 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    20 Elian      (840.50,35.00,349.50) yaw 2.36 want NaN v 0.00,0.00 goal PRAY act hold/face working null gp false 0.0,0.0 | on the way to prayers
+    [trace]    30 Ealdra     (260.65,39.04,926.50) yaw 1.57 want NaN v 0.00,0.00 goal BANK act - working null gp true 255.5,926.5 | on the way
+    [trace]    40 Ealdra     (260.63,39.00,926.50) yaw 1.57 want NaN v -0.70,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]    50 Ealdra     (260.34,39.00,926.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]    60 Ealdra     (259.93,39.00,926.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]    70 Ealdra     (259.52,39.00,926.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]    80 Ealdra     (259.11,39.00,926.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]    90 Ealdra     (258.71,39.00,926.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]   100 Ealdra     (258.30,39.00,926.52) yaw 1.61 want NaN v -2.39,0.24 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]   110 Ealdra     (257.90,39.00,926.52) yaw 1.61 want NaN v -2.45,-0.02 goal BANK act go to goal working null gp true 255.5,926.5 | on the way
+    [trace]   120 Ealdra     (257.49,39.00,926.52) yaw 1.57 want NaN v -2.45,-0.02 goal BANK act go to goal working null gp true 255.5,926.5 | on the way [door Loxford General Store bedroom door open false locked false blocked false angle [0.0] hinge [[255.0, 928.5]]]
+    [trace]   130 Ealdra     (257.08,39.00,926.51) yaw 1.57 want NaN v -2.45,-0.02 goal BANK act go to goal working null gp true 255.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [6.7721086E-4] hinge [[255.0, 928.5]]]
+    [trace]   140 Ealdra     (256.67,39.00,926.51) yaw 1.57 want NaN v -2.45,-0.02 goal BANK act go to goal working null gp true 255.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [0.15489559] hinge [[255.0, 928.5]]]
+    [trace]   150 Ealdra     (256.26,39.00,926.51) yaw 1.57 want NaN v -2.45,-0.02 goal BANK act go to goal working null gp true 255.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [0.57125837] hinge [[255.0, 928.5]]]
+    [trace]   160 Ealdra     (255.93,39.00,926.60) yaw 1.81 want NaN v -1.36,1.49 goal BANK act go to goal working null gp true 255.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.2408259] hinge [[255.0, 928.5]]]
+    [trace]   170 Ealdra     (255.78,39.00,926.77) yaw 2.14 want NaN v -0.51,0.12 goal BANK act go to goal working null gp true 256.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.748993] hinge [[255.0, 928.5]]]
+    [trace]   180 Ealdra     (255.71,39.00,926.98) yaw 2.71 want NaN v -0.33,2.43 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   190 Ealdra     (255.65,39.00,927.38) yaw 2.93 want NaN v -0.33,2.43 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   200 Ealdra     (255.60,39.00,927.78) yaw 2.97 want NaN v -0.33,2.43 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked true angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   210 Ealdra     (255.59,39.00,928.15) yaw 3.12 want NaN v 0.75,1.55 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked true angle [1.7500006] hinge [[255.0, 928.5]]]
+    [trace]   220 Ealdra     (255.85,39.00,928.28) yaw -2.30 want NaN v 2.44,0.20 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked true angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   230 Ealdra     (256.26,39.00,928.32) yaw -1.78 want NaN v 2.44,0.20 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   240 Ealdra     (256.67,39.00,928.35) yaw -1.68 want NaN v 2.44,0.20 goal BANK act go to goal working null gp true 258.5,928.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   250 Ealdra     (256.99,39.00,928.46) yaw -1.90 want NaN v 1.20,1.58 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   260 Ealdra     (257.14,39.00,928.82) yaw -2.58 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   270 Ealdra     (257.29,39.00,929.21) yaw -2.72 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   280 Ealdra     (257.43,39.00,929.59) yaw -2.76 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store bedroom door (open) open true locked false blocked false angle [1.7500004] hinge [[255.0, 928.5]]]
+    [trace]   290 Ealdra     (257.57,39.00,929.97) yaw -2.76 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way
+    [trace]   300 Ealdra     (257.71,39.00,930.36) yaw -2.79 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way
+    [trace]   310 Ealdra     (257.85,39.00,930.74) yaw -2.79 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [0.15489992, -0.15489991] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   320 Ealdra     (257.99,39.00,931.12) yaw -2.79 want NaN v 0.85,2.30 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [0.57114154, -0.5711415] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   330 Ealdra     (258.11,39.00,931.51) yaw -2.82 want NaN v 0.48,2.40 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.2405943, -1.2405939] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   340 Ealdra     (258.19,39.00,931.77) yaw -2.81 want NaN v 0.45,0.00 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.748976, -1.7489765] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   350 Ealdra     (258.25,39.00,931.82) yaw -2.60 want NaN v 0.27,1.16 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked true angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   360 Ealdra     (258.28,39.00,932.16) yaw -3.00 want NaN v 0.16,2.44 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked true angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   370 Ealdra     (258.31,39.00,932.57) yaw -3.06 want NaN v 0.16,2.44 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked true angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   380 Ealdra     (258.33,39.00,932.98) yaw -3.06 want NaN v 0.16,2.44 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked true angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   390 Ealdra     (258.36,39.00,933.38) yaw -3.06 want NaN v 0.16,2.44 goal BANK act go to goal working null gp true 258.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   400 Ealdra     (258.39,39.00,933.79) yaw -3.06 want NaN v -0.01,2.29 goal BANK act go to goal working null gp true 255.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   410 Ealdra     (258.23,39.00,934.07) yaw 2.73 want NaN v -2.04,1.17 goal BANK act go to goal working null gp true 255.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   420 Ealdra     (257.87,39.00,934.26) yaw 2.19 want NaN v -2.17,1.13 goal BANK act go to goal working null gp true 255.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   430 Ealdra     (257.51,39.00,934.45) yaw 2.08 want NaN v -2.17,1.13 goal BANK act go to goal working null gp true 255.5,935.5 | on the way [door Loxford General Store door (open) open true locked false blocked false angle [1.7500004, -1.7500004] hinge [[258.0, 932.94], [260.0, 932.94]]]
+    [trace]   440 Ealdra     (257.15,39.00,934.64) yaw 2.08 want NaN v -2.17,1.13 goal BANK act go to goal working null gp true 255.5,935.5 | on the way
+    [trace]   450 Ealdra     (256.87,39.00,934.85) yaw 2.22 want NaN v -0.61,1.59 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   460 Ealdra     (256.91,39.00,935.20) yaw 3.06 want NaN v 0.61,2.37 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   470 Ealdra     (257.01,39.00,935.59) yaw -2.98 want NaN v 0.61,2.37 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   480 Ealdra     (257.10,39.00,935.77) yaw -2.71 want NaN v 0.50,0.00 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   490 Ealdra     (257.18,39.00,935.77) yaw -2.10 want NaN v 0.48,0.00 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   500 Ealdra     (257.26,39.00,935.83) yaw -2.23 want NaN v 0.40,1.28 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   510 Ealdra     (257.32,39.00,936.18) yaw -2.92 want NaN v 0.33,2.43 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   520 Ealdra     (257.35,39.00,936.58) yaw -3.06 want NaN v -0.58,2.25 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   530 Ealdra     (257.23,39.00,936.94) yaw 2.93 want NaN v 0.00,2.00 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   540 Ealdra     (257.22,39.00,937.26) yaw 3.05 want NaN v -0.35,1.83 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   550 Ealdra     (257.02,39.00,937.58) yaw 2.66 want NaN v -1.52,1.92 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   560 Ealdra     (256.77,39.00,937.90) yaw 2.54 want NaN v -1.52,1.92 goal BANK act go to goal working null gp true 255.5,939.5 | on the way
+    [trace]   570 Ealdra     (256.51,39.00,938.21) yaw 2.47 want NaN v -1.91,1.34 goal BANK act go to goal working null gp true 253.5,939.5 | on the way
+    [trace]   580 Ealdra     (256.14,39.00,938.37) yaw 2.12 want NaN v -2.25,0.96 goal BANK act go to goal working null gp true 253.5,939.5 | on the way
+    [trace]   590 Ealdra     (255.77,39.00,938.53) yaw 2.02 want NaN v -2.25,0.96 goal BANK act go to goal working null gp true 253.5,939.5 | on the way
+    [trace]   600 Ealdra     (255.39,39.00,938.69) yaw 1.98 want NaN v -2.25,0.96 goal BANK act go to goal working null gp true 253.5,939.5 | on the way
+    [trace]   610 Ealdra     (255.02,39.00,938.86) yaw 1.98 want NaN v -1.86,1.21 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   620 Ealdra     (254.83,39.00,939.17) yaw 2.50 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   630 Ealdra     (254.71,39.00,939.56) yaw 2.75 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   640 Ealdra     (254.59,39.00,939.95) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   650 Ealdra     (254.47,39.00,940.35) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   660 Ealdra     (254.35,39.00,940.74) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   670 Ealdra     (254.23,39.00,941.13) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   680 Ealdra     (254.11,39.00,941.52) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   690 Ealdra     (253.99,39.00,941.91) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   700 Ealdra     (253.87,39.00,942.30) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   710 Ealdra     (253.75,39.00,942.69) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   720 Ealdra     (253.63,39.00,943.08) yaw 2.82 want NaN v -0.72,2.34 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   730 Ealdra     (253.58,39.00,943.48) yaw 2.98 want NaN v -0.20,2.44 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   740 Ealdra     (253.55,39.34,943.77) yaw 3.01 want NaN v -0.18,2.44 goal BANK act go to goal working null gp true 253.5,944.5 | on the way
+    [trace]   750 Ealdra     (253.51,40.07,943.80) yaw 3.05 want NaN v -0.37,2.14 goal BANK act go to goal working null gp true 250.5,944.5 | on the way
+    [trace]   760 Ealdra     (253.43,40.18,944.13) yaw 2.93 want NaN v -0.64,1.76 goal BANK act go to goal working null gp true 250.5,944.5 | on the way
+    [trace]   770 Ealdra     (253.27,40.00,944.36) yaw 2.60 want NaN v -1.65,0.67 goal BANK act go to goal working null gp true 250.5,944.5 | on the way
+    [trace]   780 Ealdra     (252.89,40.00,944.40) yaw 1.82 want NaN v -2.45,0.10 goal BANK act go to goal working null gp true 250.5,944.5 | on the way
+    [trace]   790 Ealdra     (252.49,40.00,944.42) yaw 1.67 want NaN v -2.45,0.10 goal BANK act go to goal working null gp true 250.5,944.5 | on the way
+    [trace]   800 Ealdra     (252.09,40.00,944.46) yaw 1.69 want NaN v -2.12,0.97 goal BANK act go to goal working null gp true 250.5,945.5 | on the way
+    [trace]   810 Ealdra     (251.75,40.00,944.68) yaw 2.03 want NaN v -2.05,1.35 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   820 Ealdra     (251.41,40.00,944.90) yaw 2.11 want NaN v -2.05,1.35 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   830 Ealdra     (251.02,40.00,944.99) yaw 1.83 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   840 Ealdra     (250.61,40.00,945.01) yaw 1.70 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   850 Ealdra     (250.20,40.00,945.04) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   860 Ealdra     (249.80,40.00,945.06) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   870 Ealdra     (249.39,40.00,945.08) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   880 Ealdra     (248.98,40.00,945.11) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   890 Ealdra     (248.57,40.00,945.13) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   900 Ealdra     (248.17,40.00,945.16) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   910 Ealdra     (247.76,40.00,945.18) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   920 Ealdra     (247.35,40.00,945.21) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   930 Ealdra     (246.94,40.00,945.23) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   940 Ealdra     (246.54,40.00,945.25) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   950 Ealdra     (246.13,40.00,945.28) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   960 Ealdra     (245.72,40.00,945.30) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   970 Ealdra     (245.31,40.00,945.33) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   980 Ealdra     (244.90,40.00,945.35) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]   990 Ealdra     (244.50,40.00,945.38) yaw 1.64 want NaN v -2.45,0.15 goal BANK act go to goal working null gp true 242.5,945.5 | on the way
+    [trace]  1000 Ealdra     (244.09,40.00,945.40) yaw 1.64 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1010 Ealdra     (243.68,40.00,945.41) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1020 Ealdra     (243.27,40.00,945.42) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1030 Ealdra     (242.86,40.00,945.42) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1040 Ealdra     (242.46,40.00,945.43) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1050 Ealdra     (242.05,40.00,945.44) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1060 Ealdra     (241.64,40.00,945.45) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 239.5,945.5 | on the way
+    [trace]  1070 Ealdra     (241.23,40.00,945.46) yaw 1.61 want NaN v -2.45,0.05 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1080 Ealdra     (240.82,40.00,945.46) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1090 Ealdra     (240.41,40.00,945.47) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1100 Ealdra     (240.01,40.00,945.47) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1110 Ealdra     (239.60,40.00,945.47) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1120 Ealdra     (239.19,40.00,945.47) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1130 Ealdra     (238.78,40.00,945.48) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1140 Ealdra     (238.37,40.00,945.48) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1150 Ealdra     (237.96,40.00,945.48) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1160 Ealdra     (237.56,40.00,945.48) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1170 Ealdra     (237.15,40.00,945.48) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1180 Ealdra     (236.74,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1190 Ealdra     (236.33,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1200 Ealdra     (235.92,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1210 Ealdra     (235.51,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,945.5 | on the way
+    [trace]  1220 Ealdra     (235.11,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1230 Ealdra     (234.70,40.00,945.49) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1240 Ealdra     (234.29,40.00,945.50) yaw 1.58 want NaN v -2.45,0.01 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1250 Ealdra     (233.94,40.00,945.57) yaw 1.76 want NaN v -1.41,1.26 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1260 Ealdra     (233.81,40.00,945.77) yaw 2.35 want NaN v -0.41,0.12 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1270 Ealdra     (233.76,40.00,945.82) yaw 2.40 want NaN v -0.20,1.16 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1280 Ealdra     (233.74,40.00,946.16) yaw 3.01 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1290 Ealdra     (233.73,40.00,946.57) yaw 3.08 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1300 Ealdra     (233.71,40.00,946.98) yaw 3.08 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1310 Ealdra     (233.70,40.00,947.38) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1320 Ealdra     (233.69,40.00,947.79) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1330 Ealdra     (233.67,40.00,948.20) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1340 Ealdra     (233.66,40.00,948.61) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1350 Ealdra     (233.65,40.00,949.02) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1360 Ealdra     (233.63,40.00,949.42) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1370 Ealdra     (233.62,40.00,949.83) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1380 Ealdra     (233.61,40.00,950.24) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1390 Ealdra     (233.59,40.00,950.65) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1400 Ealdra     (233.58,40.00,951.05) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1410 Ealdra     (233.57,40.00,951.46) yaw 3.11 want NaN v -0.08,2.45 goal BANK act go to goal working null gp true 233.5,953.5 | on the way
+    [trace]  1420 Ealdra     (233.56,40.00,951.87) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1430 Ealdra     (233.55,40.00,952.28) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1440 Ealdra     (233.55,40.00,952.69) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1450 Ealdra     (233.55,40.00,953.09) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1460 Ealdra     (233.54,40.00,953.50) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1470 Ealdra     (233.54,40.00,953.91) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1480 Ealdra     (233.54,40.00,954.32) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [trace]  1490 Ealdra     (233.53,40.00,954.72) yaw 3.11 want NaN v -0.02,2.45 goal BANK act go to goal working null gp true 233.5,959.5 | on the way
+    [life] stop 258,926 done (106 people seen so far)
+
+    [life] 5 stops of 1500 frames; 106 people seen
+      Oswin            WORKER       seen   230 spins   0 blocked     0 still    60
+          last (274.7,40.0,900.5) PRAY: on the way to prayers
+      Merek            MINER        seen   230 spins   4 blocked     0 still     0
+          spun at (81.6,46.0,539.5) WORK: Quarry Worker: tidying the workplace while short of supplies
+      Berthild         CIVIC        seen   230 spins   0 blocked     0 still   177
+          last (271.5,43.9,951.1) SLEEP: on the way
+      Maddoc           MERCHANT     seen   230 spins   0 blocked     0 still   132
+          last (271.5,44.0,951.1) SLEEP: on the way
+      Karlon           CRAFTSMAN    seen   230 spins   0 blocked     0 still    83
+          last (281.5,40.0,948.8) SLEEP: on the way
+      Lazaros          CRAFTSMAN    seen   164 spins   0 blocked     0 still    32
+          last (538.5,41.0,198.7) SLEEP: on the way
+      Fenna            MERCHANT     seen   230 spins   4 blocked   125 still     0
+          spun at (206.5,53.0,650.4) HOME: getting up and dressed
+          last (206.5,53.0,650.5) BANK: paused to reconsider a blocked route
+      Einar            WORKER       seen   230 spins   2 blocked    14 still     0
+          spun at (332.4,62.0,392.1) HOME: getting up and dressed
+          last (332.4,62.0,392.1) INVESTIGATE: paused to reconsider a blocked route
+      Baron Hadrik     CRAFTSMAN    seen   230 spins   0 blocked     0 still    93
+          last (182.5,56.0,605.3) SLEEP: on the way
+      Siv              FARMER       seen   230 spins   4 blocked     0 still     0
+          spun at (327.4,53.0,456.6) WORK: Crop Farmer: weeding and watering the rows
+      King Richard     CIVIC        seen   230 spins   0 blocked     0 still   147
+          last (228.5,40.0,986.7) SOCIALIZE: on the way
+      Sir Nicholas     KNIGHT       seen   230 spins   4 blocked     0 still     0
+          spun at (586.4,37.0,114.5) WORK: inspected the assigned border
+      Elric            CIVIC        seen   230 spins   4 blocked   104 still     0
+          spun at (179.5,53.0,624.6) WORK: paused to reconsider a blocked route
+          last (179.5,53.0,624.6) WORK: paused to reconsider a blocked route
+      Elian            PRIEST       seen   230 spins   0 blocked     0 still   229
+          last (840.5,35.0,349.5) PRAY: on the way to prayers
+      Lothar           GUARD        seen   230 spins   2 blocked   102 still     0
+          spun at (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+          last (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   230 spins   3 blocked     0 still     0
+          spun at (333.2,62.0,391.7) LOOK: 
+      never in play: Brannoc THIEF home (580,900)
+      never in play: Mara MERCHANT home (114,771)
+      never in play: Lucan LAWMAN home (95,701)
+      never in play: Kettil CONTACT home (599,876)
+      never in play: Skarn FENCE home (580,1026)
+      never in play: Bilal BEGGAR home (908,860)
+      never in play: Rafe HUNTER home (355,801)
+      never in play: Bryn FISHERMAN home (571,593)
+      never in play: Brokk MINER home (199,434)
+      never in play: Danek CRAFTSMAN home (135,777)
+      never in play: Dawud MINER home (947,878)
+      never in play: Sir Hedric KNIGHT home (359,748)
+      never in play: Gudrik FISHERMAN home (602,1020)
+      never in play: Vesna FISHERMAN home (104,773)
+      never in play: Anwar GUARD home (878,880)
+      never in play: Zoe MERCHANT home (480,117)
+      never in play: Father Paul PRIEST home (876,53)
+      never in play: Polyxena MINER home (877,129)
+      never in play: Tolis BEGGAR home (486,61)
+      never in play: King Fahad VILLAGER home (906,895)
+      never in play: Tauron HUNTER home (860,509)
+      never in play: Viggo HUNTER home (423,408)
+      never in play: Torvik MINER home (194,439)
+      never in play: Olek CRAFTSMAN home (98,743)
+      never in play: Alexios CRAFTSMAN home (465,36)
+      never in play: Radek WORKER home (88,769)
+      never in play: Meriwyn MERCHANT home (599,871)
+      never in play: Damaris MERCHANT home (480,119)
+      never in play: Kyra FARMER home (214,290)
+      never in play: Marinos FARMER home (216,283)
+      never in play: Layla CRAFTSMAN home (894,832)
+      never in play: Zainab CRAFTSMAN home (895,828)
+      never in play: Baron Jalal CRAFTSMAN home (845,876)
+      never in play: Ziad CRAFTSMAN home (892,829)
+      never in play: Murad CRAFTSMAN home (894,834)
+      never in play: Ilva FARMER home (155,758)
+      never in play: Karim CRAFTSMAN home (830,837)
+      never in play: Petros FISHERMAN home (468,36)
+      never in play: Yannis FISHERMAN home (462,36)
+      never in play: Count Dracula CIVIC home (92,702)
+      never in play: Sella CRAFTSMAN home (140,777)
+      never in play: Hurk BANDIT home (830,693)
+      never in play: Sigrun BANDIT home (827,694)
+      never in play: Garmund BRUTE home (828,692)
+      never in play: Hob GUARD home (359,742)
+      never in play: Beric HUNTER home (356,796)
+      never in play: Duke Bashir CIVIC home (903,899)
+      never in play: Count Awhad CIVIC home (858,865)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (906,883)
+      never in play: Hassan SCHOLAR home (906,888)
+      never in play: Idris SCHOLAR home (906,880)
+      never in play: Father Rafiq PRIEST home (914,859)
+      never in play: Yusuf PRIEST home (911,860)
+      never in play: Tariq CIVIC home (844,920)
+      never in play: Zafir CRAFTSMAN home (804,910)
+      never in play: Osama CRAFTSMAN home (937,851)
+      never in play: Marwan CRAFTSMAN home (956,823)
+      never in play: Mohamed MERCHANT home (816,863)
+      never in play: Rashid MERCHANT home (861,866)
+      never in play: Munir CARTER home (828,835)
+      never in play: Hakim CARTER home (903,877)
+      never in play: Hamid CRAFTSMAN home (937,898)
+      never in play: Nabil CRAFTSMAN home (945,896)
+      never in play: Salim CRAFTSMAN home (946,880)
+      never in play: Kamal CRAFTSMAN home (948,880)
+      never in play: Qasim WORKER home (939,880)
+      never in play: Fadi MINER home (873,786)
+      never in play: Jamila FARMER home (769,985)
+      never in play: Samira FARMER home (766,985)
+      never in play: Zaid GUARD home (891,901)
+      never in play: Sabir GUARD home (899,901)
+      never in play: Baron Nuri CIVIC home (897,875)
+      never in play: Count Constantine CIVIC home (497,53)
+      never in play: Father Khalid PRIEST home (484,112)
+      never in play: Ione PRIEST home (450,34)
+      never in play: Stavros CIVIC home (431,215)
+      never in play: Demetrios CRAFTSMAN home (447,196)
+      never in play: Theodora CRAFTSMAN home (448,173)
+      never in play: Eleni CRAFTSMAN home (449,173)
+      never in play: Theron MERCHANT home (482,113)
+      never in play: Pavlos FENCE home (484,113)
+      never in play: Melina FISHERMAN home (470,37)
+      never in play: Spiros WORKER home (468,34)
+      never in play: Timon WORKER home (462,37)
+      never in play: Damon WORKER home (465,34)
+      never in play: Alkis CARTER home (481,118)
+      never in play: Andreas CRAFTSMAN home (424,152)
+      never in play: Nikos CRAFTSMAN home (422,152)
+      never in play: Kallias CRAFTSMAN home (424,157)
+      never in play: Isidoros CRAFTSMAN home (428,157)
+      never in play: Orestes WORKER home (180,131)
+      never in play: Kyros THIEF home (427,157)
+      never in play: Mimis BEGGAR home (482,61)
+      never in play: Argus THIEF home (426,157)
+      never in play: Leandros BEGGAR home (464,39)
+      never in play: Sabeen BEGGAR home (462,34)
+      never in play: Varek SCHOLAR home (89,706)
+      never in play: Father Odran PRIEST home (150,724)
+      never in play: Mother Mirel PRIEST home (108,739)
+      never in play: Borin FARMER home (154,788)
+      never in play: Vark BANDIT home (831,692)
+      never in play: Dolgrin MINER home (201,434)
+      never in play: Pell WORKER home (865,578)
+      never in play: Ysmay WORKER home (984,391)
+      never in play: Hask HUNTER home (720,481)
+      never in play: Orrin CRAFTSMAN home (369,654)
+      never in play: Corvane HUNTER home (585,889)
+      never in play: Bogdan GUARD home (103,789)
+      never in play: Milena CIVIC home (164,723)
+      never in play: Nadim GUARD home (922,968)
+      never in play: Samir UNDERTAKER home (906,860)
+      never in play: Rask BANDIT home (826,693)
+      never in play: Wenna BANDIT home (832,693)
+      never in play: Hullen BANDIT home (824,692)
+      never in play: Grisel BANDIT home (834,693)
+      never in play: Osk MINER home (200,439)
+      never in play: Mabry WORKER home (178,131)
+      never in play: Edvin WORKER home (172,131)
+      never in play: Corra WORKER home (868,577)
+    [life] 16 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 96.906 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 42s
+9 actionable tasks: 1 executed, 8 up-to-date

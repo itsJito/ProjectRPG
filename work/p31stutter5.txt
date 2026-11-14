@@ -1,0 +1,141 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 16:08:21 (MSVC)
+[Load] native services 0.05s
+[Load] ShadowVeil grown in 15.72s ({regions=882, overlays=518, variants=422, scarp=60, coast=343, erosion=365, peaks=56, lakes=85, isles=5, rivers=669, wadis=14, ground=20, roads=658, causeways=3, architecture=890, pitsFilled=1405, pits=651, banks=51, clamp=14, cliffs=51, columns=931, falls=22, raise=8122, trees=263, outcrops=0, ways=587}), made and lit in 1.67s
+[Load] ShadowVeil 17.48s
+[Load] renderer and UI 2.18s
+[water] flow field grown in 711 ms: 38934 columns moving
+[gathering] 787 wild herb patches, flax and berry bushes
+[monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 41 meshes, 1.46s
+[Load] 243 furniture models made in 0.09s
+[Load] first rendered frame 5.67s
+[Load] the world about the spawn made ready in 13.33s
+[Load] game frame 1: scene 9 ms, interface 782 ms, render 29 ms
+[Load] game frame 2: scene 9 ms, interface 3 ms, render 8 ms
+[Load] game frame 3: scene 10 ms, interface 3 ms, render 22 ms
+[Load] the first frames drawn behind the loading screen in 2.00s
+[stutter] preload 15.33s
+[stutter] first tick 15 ms
+engine.frame (native)     4421.98 ms
+afterFrame                 304.91 ms
+animals                    162.20 ms
+ai                          92.84 ms
+controller.update           56.21 ms
+objects.update              52.82 ms
+chemistry.update            36.72 ms
+foliage.update              36.10 ms
+combat.update               13.95 ms
+gore.update                  9.23 ms
+traps.update                 8.15 ms
+magic.update                 6.61 ms
+law.update                   4.32 ms
+time+death                   3.92 ms
+monsters                     3.63 ms
+spareWatch                   2.74 ms
+econ.update                  2.31 ms
+fx.update                    2.18 ms
+undertaker.update            1.89 ms
+glass.update                 0.57 ms
+dungeons.update              0.49 ms
+interact.update              0.37 ms
+carrying.update              0.32 ms
+prog.update                  0.12 ms
+prayers.update               0.09 ms
+
+[stutter] spike at 0: 37 ms - tick 15, draw 22 (scene 6, ui 2, render 10) - afterFrame 6
+[stutter] spike at 1: 45 ms - tick 14, draw 31 (scene 6, ui 2, render 23) -
+[stutter] spike at 3: 41 ms - tick 13, draw 28 (scene 6, ui 2, render 21) -
+[stutter] spike at 7: 34 ms - tick 12, draw 22 (scene 7, ui 2, render 13) -
+[stutter] spike at 14: 39 ms - tick 24, draw 15 (scene 5, ui 2, render 8) - foliage.update 5
+[stutter] spike at 29: 34 ms - tick 18, draw 16 (scene 3, ui 2, render 11) -
+[stutter] spike at 104: 36 ms - tick 17, draw 18 (scene 6, ui 1, render 11) -
+[stutter] spike at 194: 35 ms - tick 19, draw 16 (scene 4, ui 9, render 3) -
+[stutter] spike at 359: 40 ms - tick 15, draw 25 (scene 13, ui 0, render 12) - scene#3 9
+[stutter] spike at 401: 44 ms - tick 7, draw 37 (scene 25, ui 0, render 12) - scene#3 21
+[stutter] spike at 404: 36 ms - tick 14, draw 22 (scene 4, ui 1, render 17) -
+[stutter] spike at 494: 37 ms - tick 13, draw 23 (scene 20, ui 1, render 3) - scene#1 15
+[stutter] tick profile over the run (ms total):
+engine.frame (native)     6501.92 ms
+afterFrame                1529.99 ms
+animals                    604.40 ms
+controller.update          348.13 ms
+objects.update             305.57 ms
+ai                         226.28 ms
+foliage.update             222.41 ms
+chemistry.update           135.89 ms
+combat.update              105.64 ms
+gore.update                 40.47 ms
+magic.update                26.51 ms
+law.update                  24.66 ms
+traps.update                23.73 ms
+time+death                  20.19 ms
+spareWatch                  16.16 ms
+monsters                    12.15 ms
+fx.update                    6.23 ms
+glass.update                 4.76 ms
+undertaker.update            4.39 ms
+econ.update                  4.24 ms
+carrying.update              2.84 ms
+interact.update              2.73 ms
+dungeons.update              2.58 ms
+prayers.update               1.71 ms
+prog.update                  1.40 ms
+[stutter] scene stretches (ms/frame): lamps+fires 0.85 lights+falls 0.94 sea 0.01 foliage 0.20 farms+fish+workshops 0.05 fences+animals 0.78 people 0.45 monsters+objects 1.12 focus+projectiles 0.33 debris+particles 0.01
+[stutter] median 16.8 ms, p95 28.7, p99 36.7, worst 45.3 at frame 1, 12 frames over 33 ms
+[stutter] first 60: 37(0/0) 45(0/0) 28(0/0) 41(0/0) 29(0/0) 29(0/0) 25(0/0) 34(0/0) 27(0/0) 27(0/0) 24(0/0) 31(0/0) 24(0/0) 32(0/0) 39(0/0) 33(0/0) 26(0/0) 32(0/0) 28(0/0) 28(0/0) 23(0/0) 28(0/0) 24(0/0) 26(0/0) 21(0/0) 26(0/0) 24(0/0) 29(0/0) 23(0/0) 34(0/0) 23(0/0) 27(0/0) 22(0/0) 25(0/0) 22(0/0) 26(0/0) 21(0/0) 24(0/0) 21(0/0) 25(0/0) 21(0/0) 25(0/0) 20(0/0) 20(0/0) 28(0/0) 22(0/0) 18(0/0) 21(0/0) 16(0/0) 18(0/0) 15(0/0) 23(0/0) 16(0/0) 21(0/0) 21(0/0) 21(0/0) 17(0/0) 21(0/0) 17(0/0) 29(0/0)
+engine.frame (native)     6501.92 ms
+afterFrame                1529.99 ms
+animals                    604.40 ms
+controller.update          348.13 ms
+objects.update             305.57 ms
+ai                         226.28 ms
+foliage.update             222.41 ms
+chemistry.update           135.89 ms
+combat.update              105.64 ms
+gore.update                 40.47 ms
+magic.update                26.51 ms
+law.update                  24.66 ms
+traps.update                23.73 ms
+time+death                  20.19 ms
+spareWatch                  16.16 ms
+monsters                    12.15 ms
+fx.update                    6.23 ms
+glass.update                 4.76 ms
+undertaker.update            4.39 ms
+econ.update                  4.24 ms
+carrying.update              2.84 ms
+interact.update              2.73 ms
+dungeons.update              2.58 ms
+prayers.update               1.71 ms
+prog.update                  1.40 ms
+
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 54s
+8 actionable tasks: 1 executed, 7 up-to-date

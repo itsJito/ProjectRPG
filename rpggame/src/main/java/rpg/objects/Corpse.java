@@ -22,6 +22,8 @@ public final class Corpse extends Container {
     public boolean delivered;
     /** (0.3.0) when the body was first known of in the world (game seconds): word of it reaches the undertaker in time, seen or not. */
     public double knownAt = -1;
+    /** (0.4.6) Taken up by the law (the watch or the undertaker): it, and the blood it leaves, are no new scene for anyone. */
+    public boolean inCare;
 
     public Corpse(long id, String name, long body, float x, float y, float z, long owner) {
         super(id, "corpse", name + "'s body", "corpse", x, y, z, 40, owner);
@@ -90,6 +92,6 @@ public final class Corpse extends Container {
         return Result.ok();
     }
 
-    @Override public java.util.Map<String, Object> save() { var m = super.save(); m.put("delivered", delivered); return m; }
-    @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); delivered = astratto.util.Json.bool(m, "delivered", false); heldBy = 0; }
+    @Override public java.util.Map<String, Object> save() { var m = super.save(); m.put("delivered", delivered); if (inCare) m.put("inCare", true); return m; }
+    @Override public void load(Rpg g, java.util.Map<String, Object> m) { super.load(g, m); delivered = astratto.util.Json.bool(m, "delivered", false); inCare = astratto.util.Json.bool(m, "inCare", false); heldBy = 0; }
 }

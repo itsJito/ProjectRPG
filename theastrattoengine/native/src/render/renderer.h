@@ -192,12 +192,16 @@ private:
     gl::GLuint leafTex_ = 0;                // 2.5: the baked leaf cards (64 x 64 x 16, RG: cut, midrib)
     void bakeLeaves();
     Program gWorld_, gModel_, sWorld_, sModel_, lighting_, cull_, gtao_, aoBlur_, ssr_, vol_, fogApply_, fWorld_, fModel_, particle_, taa_,
-            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_, rain_, focus_;
+            bloomDown_, bloomUp_, lum_, exposure_, tonemap_, copy_, ui_, portrait_, probeCs_, lens_, rain_, focus_, precip_;
     // (0.3.8) the rain: the height of the highest solid thing in each column of the world (R16F, x by z), kept with the
     // voxel volume; the rain is drawn only above it
     gl::GLuint roofTex_ = 0;
     std::vector<float> roofCol_;
     void rainPass();
+    /** (2.13) This frame's precipitation layers (20 floats each), its wind and clock, drawn after the temporal pass. */
+    void precipPass();
+    std::vector<float> precipLayers_;
+    float precipWind_[2] = {0, 0}, precipTime_ = 0, precipLight_ = 1;
 
     // targets
     int rw_ = 0, rh_ = 0, winW_ = 0, winH_ = 0;
@@ -222,6 +226,9 @@ private:
     int focusIdx_ = 0;
     gl::GLuint shadowTex_ = 0, shadowFbo_[4] = {};
     int shadowRes_ = 0, shadowLayers_ = 0, cascadeAge_ = -1;
+    // (game 0.4.4, gamefixes: shadows wrong once the sun or a light left the view) where each cascade was last drawn round,
+    // its radius, and the sun's direction then: a far cascade is redrawn as soon as the view has moved out from under it
+    float cascadeAt_[4][4] = {}, cascadeSun_[3] = {};
     gl::GLuint layerMat_ = 0, fsVao_ = 0, lightBuf_ = 0, tileBuf_ = 0, white_ = 0;
     int tilesX_ = 0, tilesY_ = 0;
     static constexpr int TILE = 16, MAX_LIGHTS = 256, MAX_BODIES = 24;
@@ -255,7 +262,9 @@ private:
     std::vector<float> waterMaskData_;
     int waterCells_ = 0;
     std::vector<float> ripples_;
-    std::vector<float> flows_;   // 2.10: x0, z0, x1, z1, vx, vz, -, - per moving stretch of water
+    /** 2.12: the water's motion round the eye (RGBA8, astratto_rcmd_water_field), its corner, cell and size (0 until one is sent). */
+    gl::GLuint flowField_ = 0;
+    float flowGrid_[4] = {0, 0, 1, 0};
     std::vector<float> particles_;       // 12 floats a particle
     std::vector<Quads> quads_;
     std::vector<Portrait> portraits_;

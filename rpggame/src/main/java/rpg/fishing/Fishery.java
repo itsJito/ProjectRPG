@@ -31,6 +31,8 @@ import rpg.world.Expanse;
  * grabs it).
  */
 public final class Fishery {
+    /** (0.4.6) How long (s) a fish presses against something before it takes another way, and how long it keeps to that way. */
+    static final float FISH_STUCK = rpg.Tuning.f("fish.stuck", 0.6f), FISH_ESCAPE = rpg.Tuning.f("fish.escape", 1.8f);
     /** One body of water and its stock: the kind of water, its bounds, how many of each kind it holds and can hold. */
     public static final class Water {
         public final String name;
@@ -88,6 +90,7 @@ public final class Fishery {
 
     public Fishery(Rpg g) {
         this.g = g;
+        if (rpg.world.WorldMap.shadowveil()) { shadowveilWaters(); return; }
         // the fresh waters
         waters.add(new Water("the fishing pond", FishKind.W.POND, DevMap.POND_X0, DevMap.POND_Z0, DevMap.POND_X1, DevMap.POND_Z1)
                 .hold(FishKind.SHRIMP, 10).hold(FishKind.GUPPY, 12).hold(FishKind.CRAB, 4).hold(FishKind.TROUT, 4).hold(FishKind.BASS, 3).hold(FishKind.CATFISH, 3));
@@ -122,6 +125,8 @@ public final class Fishery {
     /** Whether a cell of water belongs to a water's kind (the sea's reaches overlap: the depth decides). */
     private boolean cellOf(Water w, int x, int z) {
         if (!w.contains(x + 0.5f, z + 0.5f)) return false;
+        // (0.4.2) ShadowVeil's waters are the water cells within their reach (the devmap's coast shelf is not its sea's)
+        if (rpg.world.WorldMap.shadowveil()) return g.fluids.water(x, rpg.world.Ground.cell(x, z) - 1, z) || g.vox.block(x, rpg.world.Ground.cell(x, z), z) == rpg.world.Blocks.WATER;
         return switch (w.cls) {
             case FishKind.W.SHORE -> Coast.shelf(x, z);
             case FishKind.W.SEA -> Coast.depth(x, z) >= 2 && !Coast.shelf(x, z) && !Coast.deep(x, z);
@@ -402,6 +407,83 @@ public final class Fishery {
      * 12 m): one more of the stock of that water (it can hold one more than it did), swimming at once. Null when there is
      * no water there deep enough for it.
      */
+    /**
+     * (0.4.2, gamefixes: fishers still did not fish) ShadowVeil's waters: every fishing spot the design names is a water
+     * of its kind round the spot (the Mere, the brooks, Dimwater, the Gleam, the harbour, the coves), stocked as its kind
+     * is ({@code shadowveil.json} "fishery"). The devmap's ponds, stream and four reaches of sea are not this world's: a
+     * rod at the Mere found "nothing in these waters", and no fisher could catch anything.
+     */
+    private void shadowveilWaters() {
+        var a = rpg.world.shadowveil.Atlas.get();
+        java.util.Map<String, Object> fishery = rpg.world.shadowveil.Atlas.map(a.root, "fishery");
+        java.util.Map<String, Object> reach = rpg.world.shadowveil.Atlas.map(fishery, "reach"), stock = rpg.world.shadowveil.Atlas.map(fishery, "stock");
+        for (java.util.Map<String, Object> f : rpg.world.shadowveil.Atlas.list(a.root, "fishing")) {
+            double[] p = rpg.world.shadowveil.Atlas.pt(f.get("at"));
+            int[] spot = rpg.world.shadowveil.ShadowVeil.fishingSpot((float) a.x(p[0]), (float) a.z(p[1]));
+            if (spot == null) continue;
+            String kind = rpg.world.shadowveil.Atlas.s(f, "waters", "LAKE");
+            int cls = switch (kind) { case "RIVER" -> FishKind.W.RIVER; case "SHORE" -> FishKind.W.SHORE; case "COAST" -> FishKind.W.SEA; case "OFFSHORE" -> FishKind.W.DEEP; default -> FishKind.W.LAKE; };
+            int r = rpg.world.shadowveil.Atlas.i(reach, kind, 10);
+            String name = rpg.world.shadowveil.Atlas.s(f, "name", "a fishing water");
+            int comma = name.indexOf(", "), close = name.lastIndexOf(')');
+            Water w = new Water(comma > 0 && close > comma ? name.substring(comma + 2, close) : name, cls, spot[0] - r, spot[1] - r, spot[0] + r, spot[1] + r);
+            for (var e : rpg.world.shadowveil.Atlas.map(stock, kind).entrySet()) {
+                try { if (e.getValue() instanceof Number n) w.hold(FishKind.valueOf(e.getKey()), n.intValue()); }
+                catch (IllegalArgumentException unknown) { System.err.println("[fishery] no fish called " + e.getKey()); }
+            }
+            waters.add(w);
+        }
+        allWaters(stock);
+    }
+
+    /**
+     * (0.4.3, gamefixes: no fish in any of the oceans, rivers, lakes or ponds) every water of ShadowVeil holds fish, not
+     * only the fishing spots' reaches: the map in tiles ('fishery.tile' cells), each with enough water ('fishery.minCells')
+     * a water of the kind most of its cells are - a river, a lake or pond, the sea's shore, coast or open deep by its
+     * depth - stocked as its kind is, in proportion to how much water it holds. The spots' own waters come first (a
+     * fisher's catch is still their spot's), these after.
+     */
+    private void allWaters(java.util.Map<String, Object> stock) {
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (t == null) return;
+        java.util.Map<String, Object> fishery = rpg.world.shadowveil.Atlas.map(rpg.world.shadowveil.Atlas.get().root, "fishery");
+        int tile = rpg.world.shadowveil.Atlas.i(fishery, "tile", 48), min = rpg.world.shadowveil.Atlas.i(fishery, "minCells", 24);
+        int shore = rpg.world.shadowveil.Atlas.i(fishery, "shoreDepth", 2), deep = rpg.world.shadowveil.Atlas.i(fishery, "deepDepth", 7);
+        for (int x0 = 0; x0 < t.S; x0 += tile) for (int z0 = 0; z0 < t.S; z0 += tile) {
+            int river = 0, lake = 0, sh = 0, co = 0, off = 0;
+            for (int x = x0; x < Math.min(t.S, x0 + tile); x++) for (int z = z0; z < Math.min(t.S, z0 + tile); z++) {
+                int i = t.idx(x, z);
+                if (t.water[i] < 0 || t.deck[i] >= 0) continue;
+                int f = t.flags[i], depth = t.water[i] - t.top[i];
+                if (depth < 1) continue;
+                if ((f & rpg.world.shadowveil.Terrain.SEA) != 0) { if (depth <= shore) sh++; else if (depth >= deep) off++; else co++; }
+                else if ((f & rpg.world.shadowveil.Terrain.RIVER) != 0) river++;
+                else lake++;
+            }
+            int total = river + lake + sh + co + off;
+            if (total < min) continue;
+            String kind; int cls, cells;
+            if (off >= Math.max(co, sh) && off >= river + lake) { kind = "OFFSHORE"; cls = FishKind.W.DEEP; cells = off; }
+            else if (co + sh >= river + lake) { kind = co >= sh ? "COAST" : "SHORE"; cls = co >= sh ? FishKind.W.SEA : FishKind.W.SHORE; cells = co + sh; }
+            else if (river >= lake) { kind = "RIVER"; cls = FishKind.W.RIVER; cells = river; }
+            else { kind = lake < 120 ? "POND" : "LAKE"; cls = lake < 120 ? FishKind.W.POND : FishKind.W.LAKE; cells = lake; }
+            Water w = new Water(waterName(kind, cls, x0 + tile / 2, z0 + tile / 2), cls, x0, z0, Math.min(t.S, x0 + tile) - 1, Math.min(t.S, z0 + tile) - 1);
+            float share = Math.min(1f, cells / (float) rpg.world.shadowveil.Atlas.i(fishery, "fullCells", 400));
+            for (var e : rpg.world.shadowveil.Atlas.map(stock, kind).entrySet()) {
+                try { if (e.getValue() instanceof Number n) { int c = Math.round(n.intValue() * share); if (c > 0) w.hold(FishKind.valueOf(e.getKey()), c); } }
+                catch (IllegalArgumentException unknown) { System.err.println("[fishery] no fish called " + e.getKey()); }
+            }
+            if (w.total() > 0) waters.add(w);
+        }
+    }
+    /** A water's name: the lake's, the realm's or the wilds' it lies in, by its kind. */
+    private static String waterName(String kind, int cls, int x, int z) {
+        String where = rpg.world.shadowveil.ShadowVeil.jurisdiction(x, z);
+        String what = switch (kind) { case "OFFSHORE" -> "the open sea"; case "COAST" -> "the coastal waters"; case "SHORE" -> "the shallows"; case "RIVER" -> "the river";
+            default -> cls == FishKind.W.POND ? "the pond" : "the lake"; };
+        return DevMap.WILDS.equals(where) ? what : what + " by " + where;
+    }
+
     public Fish release(FishKind k, float x, float z) {
         float bestD = Float.MAX_VALUE; float[] at = null;
         for (int dx = -12; dx <= 12; dx++) for (int dz = -12; dz <= 12; dz++) {
@@ -639,6 +721,9 @@ public final class Fishery {
         }
         // the heading: toward its target, or its own wandering one
         float want = Float.isNaN(tx) ? f.wantYaw : (float) Math.atan2(-(tx - f.x), -(tz - f.z));
+        // (0.4.6, gamefixes: a fish could stay stuck swimming into a block) one held against the bank or a stone for a
+        // moment takes the clearest open way out for a while, whatever it was after (its target is taken up again after)
+        if (g.time < f.escapeUntil) want = f.escapeYaw;
         // the banks: a look ahead; wet one way or another, turn that way
         float ahead = 0.35f + len * 0.55f;
         float lx = f.x - (float) Math.sin(want) * ahead, lz = f.z - (float) Math.cos(want) * ahead;
@@ -662,9 +747,23 @@ public final class Fishery {
         float nx = f.x + f.vx * dt, ny = f.y + f.vy * dt, nz = f.z + f.vz * dt;
         float half = Math.max(0.03f, len * 0.12f);
         ny = Math.max(bed + half * 0.5f, Math.min(s - half * 0.4f, ny));
-        if (wet(nx, ny, nz)) { f.x = nx; f.y = ny; f.z = nz; }
-        else if (wet(f.x, ny, f.z)) { f.y = ny; f.vx *= -0.3f; f.vz *= -0.3f; f.wantYaw = f.yaw + 3.14f; }
-        else { f.vx = f.vz = f.vy = 0; f.wantYaw = f.yaw + 3.14f; }
+        boolean moved = wet(nx, ny, nz);
+        if (moved) { f.x = nx; f.y = ny; f.z = nz; }
+        else if (wet(f.x, ny, f.z)) { f.y = ny; f.vx *= -0.3f; f.vz *= -0.3f; if (Math.abs(Actor.wrap(f.wantYaw - f.yaw)) < 1) f.wantYaw = f.yaw + 3.14f; }
+        else { f.vx = f.vz = f.vy = 0; if (Math.abs(Actor.wrap(f.wantYaw - f.yaw)) < 1) f.wantYaw = f.yaw + 3.14f; }
+        // pressed against something (or making no way at all while it means to swim): count it; past a moment, the way out
+        if (!moved || speed > 0.2f && f.speed() < 0.05f) f.stuckT += dt; else f.stuckT = Math.max(0, f.stuckT - dt * 2);
+        if (f.stuckT > FISH_STUCK && g.time >= f.escapeUntil) {
+            float bestYaw = f.yaw + 3.14f, bestRun = -1;
+            for (int k = 0; k < 12; k++) {
+                float yy = f.yaw + 3.14f + (k % 2 == 0 ? 1 : -1) * (k / 2) * 0.52f;
+                float run = 0;
+                for (float d = 0.3f; d <= 2.4f; d += 0.3f) { if (!wet(f.x - (float) Math.sin(yy) * d, f.y, f.z - (float) Math.cos(yy) * d)) break; run = d; }
+                if (run > bestRun) { bestRun = run; bestYaw = yy; }
+            }
+            f.escapeYaw = bestYaw; f.wantYaw = bestYaw; f.escapeUntil = g.time + FISH_ESCAPE; f.stuckT = 0;
+            f.yaw = Actor.wrap(f.yaw + Actor.wrap(bestYaw - f.yaw) * 0.5f);
+        }
         f.pitch = (float) Math.atan2(f.vy, Math.max(0.05f, (float) Math.hypot(f.vx, f.vz))) * 0.6f;
         float sp = f.speed();
         f.phase += dt * (2.2f + sp / Math.max(0.15f, len) * 1.6f);

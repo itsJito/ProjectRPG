@@ -1,0 +1,22 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 14.34s ({regions=644, overlays=530, variants=297, scarp=58, coast=422, erosion=357, peaks=56, lakes=76, isles=5, rivers=684, wadis=14, ground=29, roads=516, causeways=4, architecture=639, pitsFilled=1383, pits=479, banks=45, clamp=14, cliffs=46, columns=670, falls=16, raise=7864, trees=252, outcrops=0, ways=592}), made and lit in 1.55s
+[Load] ShadowVeil 15.97s
+[Load] renderer and UI 2.05s
+[addons] loaded [low_health.lua, session_gold.lua]
+[cascade] fall at 725,32,340 height 12
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 0.87s
+[Load] first rendered frame 5.46s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\cascade2\cascade-0-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\cascade2\cascade-0-1.png
+[cascade] rapid at 11,30,566 height 1
+[Load] growth about the spawn: 28 chunks made, 54 meshes, 0.21s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\cascade2\cascade-1-0.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\cascade2\cascade-1-1.png

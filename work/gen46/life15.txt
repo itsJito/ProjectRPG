@@ -1,0 +1,673 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.01s ({regions=913, overlays=495, variants=617, scarp=49, coast=649, erosion=319, peaks=44, lakes=80, isles=6, rivers=1154, wadis=13, ground=20, roads=613, causeways=4, architecture=999, pitsFilled=1309, pits=404, banks=78, clamp=14, cliffs=58, columns=894, falls=15, raise=10717, trees=312, outcrops=0, ways=495}), made and lit in 2.16s
+    [water] flow field grown in 1535 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]     0 Ealdra     (309.50,39.05,974.50) yaw 0.00 want NaN v 0.00,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]     0 Berthild   (323.50,40.05,996.50) yaw 0.00 want NaN v 0.00,0.00 goal SLEEP act - working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    10 Ealdra     (309.37,39.00,974.50) yaw 0.33 want NaN v -1.96,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    10 Berthild   (323.38,40.00,996.50) yaw 0.33 want NaN v -1.91,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    20 Ealdra     (308.97,39.00,974.50) yaw 1.41 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    20 Berthild   (322.98,40.00,996.50) yaw 1.41 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    30 Ealdra     (308.56,39.00,974.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    30 Berthild   (322.57,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    40 Ealdra     (308.16,39.00,974.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    40 Berthild   (322.16,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    50 Ealdra     (307.75,39.00,974.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    50 Berthild   (321.76,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    60 Ealdra     (307.34,39.00,974.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    60 Berthild   (321.35,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    70 Ealdra     (306.93,39.00,974.50) yaw 1.57 want NaN v -2.45,0.00 goal BANK act go to goal working null gp true 303.5,39.0,974.5 legs 0/30 st 0 nu 0 | 
+    [trace]    70 Berthild   (320.94,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    80 Ealdra     (306.59,39.00,974.45) yaw 1.42 want NaN v -1.19,-1.03 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]    80 Berthild   (320.53,40.00,996.50) yaw 1.57 want NaN v -2.45,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]    90 Ealdra     (306.62,39.00,974.30) yaw 0.55 want NaN v 0.60,-1.18 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]    90 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   100 Ealdra     (306.69,39.57,974.05) yaw -0.14 want NaN v 0.08,-1.89 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   100 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   110 Ealdra     (306.62,39.63,973.74) yaw 0.21 want NaN v -0.92,-1.36 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   110 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   120 Ealdra     (306.42,39.83,973.54) yaw 0.73 want NaN v -1.71,-0.83 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   120 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   130 Ealdra     (306.06,40.19,973.48) yaw 1.33 want NaN v -2.45,0.08 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   130 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   140 Ealdra     (305.65,40.60,973.49) yaw 1.52 want NaN v -2.45,0.02 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   140 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   150 Ealdra     (305.25,41.00,973.49) yaw 1.56 want NaN v -2.45,0.02 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   150 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   160 Ealdra     (304.84,41.42,973.50) yaw 1.56 want NaN v -2.45,0.01 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   160 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   170 Ealdra     (304.43,41.82,973.50) yaw 1.56 want NaN v -2.45,0.01 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   170 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   180 Ealdra     (304.02,42.23,973.50) yaw 1.56 want NaN v -2.45,0.01 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   180 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   190 Ealdra     (303.93,42.99,973.48) yaw 1.45 want NaN v 0.18,-0.32 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   190 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   200 Ealdra     (303.98,43.32,973.39) yaw 0.77 want NaN v 0.41,-0.72 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   200 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   210 Ealdra     (304.07,43.05,973.24) yaw -0.32 want NaN v 0.65,-1.12 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   210 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   220 Ealdra     (304.24,43.00,972.94) yaw -0.52 want NaN v 1.24,-2.11 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   220 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   230 Ealdra     (304.52,43.00,972.72) yaw -0.89 want NaN v 2.31,-0.31 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   230 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   240 Ealdra     (304.93,43.00,972.69) yaw -1.38 want NaN v 2.45,-0.13 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   240 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   250 Ealdra     (305.34,43.00,972.67) yaw -1.49 want NaN v 2.45,-0.13 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   250 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   260 Ealdra     (305.75,43.00,972.65) yaw -1.49 want NaN v 2.45,-0.13 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   260 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   270 Ealdra     (306.15,43.00,972.63) yaw -1.52 want NaN v 2.45,-0.13 goal SLEEP act go to goal working null gp true 308.5,43.0,972.5 legs 0/1 st 0 nu 0 | 
+    [trace]   270 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   280 Ealdra     (306.53,43.00,972.61) yaw -1.52 want NaN v 1.51,-0.08 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   280 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   290 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   290 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   300 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   300 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   310 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   310 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   320 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   320 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   330 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   330 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   340 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   340 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   350 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal SLEEP act idle working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | 
+    [trace]   350 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   360 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   360 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   370 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   370 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   380 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   380 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   390 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   390 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   400 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   400 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   410 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   410 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   420 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   420 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 0 nu 0 | 
+    [trace]   430 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   430 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp false 319.5,44.0,990.5 legs - st 1 nu 0 | no headway; finding another way
+    [trace]   440 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   440 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   450 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   450 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   460 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   460 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   470 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   470 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   480 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   480 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   490 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   490 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   500 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   500 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   510 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   510 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   520 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   520 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   530 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   530 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   540 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   540 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   550 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   550 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   560 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   560 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   570 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   570 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   580 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   580 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   590 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   590 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   600 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   600 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   610 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   610 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   620 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   620 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   630 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   630 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   640 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   640 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   650 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   650 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   660 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   660 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   670 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   670 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   680 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   680 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   690 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   690 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   700 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   700 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   710 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   710 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   720 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   720 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   730 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   730 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   740 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   740 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   750 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   750 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   760 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   760 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   770 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   770 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   780 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   780 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 1 nu 0 | on the way
+    [trace]   790 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   790 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp false 319.5,44.0,990.5 legs - st 2 nu 0 | no headway; finding another way
+    [trace]   800 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   800 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   810 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   810 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   820 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   820 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   830 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   830 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   840 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   840 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   850 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   850 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   860 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   860 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   870 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   870 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   880 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   880 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]   890 Ealdra     (306.62,43.00,972.60) yaw -1.52 want NaN v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | running from world life
+    [trace]   890 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [life] stop 306,974 done (30 people seen so far)
+    [trace]     0 Ealdra     (306.62,43.00,972.60) yaw -1.62 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]     0 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]    10 Ealdra     (306.62,43.00,972.60) yaw -2.71 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    10 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]    20 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    20 Berthild   (320.23,40.00,996.50) yaw 1.57 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 319.5,44.0,990.5 legs 0/1 st 2 nu 0 | on the way
+    [trace]    30 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    30 Duke Edran (186.50,54.04,658.50) yaw 0.00 want NaN v 0.00,0.00 goal HOME act hold/face working null gp false 0.0,0.0,0.0 legs - st 0 nu 0 | getting up and dressed
+    [trace]    30 Lothar     (205.50,57.04,642.50) yaw 0.00 want NaN v 0.00,0.00 goal PATROL act - working null gp false 0.0,0.0,0.0 legs - st 0 nu 0 | 
+    [trace]    40 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    40 Duke Edran (186.46,54.00,658.50) yaw 0.00 want NaN v -1.17,0.00 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    40 Lothar     (205.50,57.00,642.50) yaw -0.29 want -0.30 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]    50 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    50 Duke Edran (186.11,54.00,658.50) yaw 0.98 want NaN v -2.45,0.00 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    50 Lothar     (205.50,57.00,642.50) yaw -0.06 want -0.06 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]    60 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    60 Duke Edran (185.73,54.00,658.56) yaw 1.73 want NaN v -1.91,1.29 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    60 Lothar     (205.50,57.00,642.50) yaw 0.87 want 0.89 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]    70 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    70 Duke Edran (185.42,54.00,658.82) yaw 2.14 want NaN v -1.85,1.61 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    70 Lothar     (205.50,57.00,642.50) yaw 1.95 want 2.03 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]    80 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    80 Duke Edran (185.12,54.00,659.09) yaw 2.25 want NaN v -1.85,1.61 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    80 Lothar     (205.50,57.00,642.50) yaw 3.03 want 3.17 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]    90 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]    90 Duke Edran (184.81,53.98,659.36) yaw 2.28 want NaN v -1.85,1.61 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]    90 Lothar     (205.50,57.00,642.50) yaw -2.17 want -1.99 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   100 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   100 Duke Edran (184.51,53.51,659.64) yaw 2.32 want NaN v -1.58,1.80 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   100 Lothar     (205.50,57.00,642.50) yaw -1.08 want -0.87 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   110 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   110 Duke Edran (184.29,53.00,659.97) yaw 2.51 want NaN v -1.12,2.18 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   110 Lothar     (205.50,57.00,642.50) yaw 0.00 want 0.24 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   120 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   120 Duke Edran (184.10,53.00,660.33) yaw 2.62 want NaN v -1.12,2.18 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   120 Lothar     (205.50,57.00,642.50) yaw 1.08 want 1.33 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   130 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   130 Duke Edran (183.91,53.00,660.69) yaw 2.65 want NaN v -1.12,0.00 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   130 Lothar     (205.50,57.00,642.50) yaw 2.17 want 2.40 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   140 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   140 Duke Edran (183.76,53.00,660.70) yaw 2.09 want NaN v -0.72,0.00 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   140 Lothar     (205.50,57.00,642.50) yaw -3.03 want -2.82 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   150 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   150 Duke Edran (183.68,53.00,660.73) yaw 2.06 want NaN v -0.29,0.93 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   150 Lothar     (205.50,57.00,642.50) yaw -1.95 want -1.77 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   160 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   160 Duke Edran (183.65,53.00,661.04) yaw 2.96 want NaN v -0.11,2.45 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   160 Lothar     (205.50,57.00,642.50) yaw -0.87 want -0.73 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   170 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   170 Duke Edran (183.63,53.00,661.45) yaw 3.08 want NaN v -0.11,2.45 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   170 Lothar     (205.50,57.00,642.50) yaw 0.22 want 0.30 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   180 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   180 Duke Edran (183.62,53.00,661.86) yaw 3.08 want NaN v -0.11,2.45 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   180 Lothar     (205.50,57.00,642.50) yaw 1.30 want 1.32 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   190 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   190 Duke Edran (183.60,53.00,662.27) yaw 3.08 want NaN v -0.11,2.45 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   190 Lothar     (205.50,57.00,642.50) yaw 2.19 want 2.19 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   200 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   200 Duke Edran (183.58,53.00,662.68) yaw 3.08 want NaN v -0.11,2.45 goal HOME act go to goal working null gp true 183.5,53.0,664.5 legs 2/28 st 0 nu 0 | getting up and dressed
+    [trace]   200 Lothar     (205.50,57.00,642.50) yaw 2.35 want 2.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   210 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   210 Duke Edran (183.46,53.00,663.05) yaw 2.85 want NaN v -1.35,2.04 goal HOME act go to goal working null gp true 182.5,54.0,664.5 legs 3/28 st 0 nu 0 | getting up and dressed
+    [trace]   210 Lothar     (205.50,57.00,642.50) yaw 1.91 want 1.91 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   220 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   220 Duke Edran (183.30,53.34,663.39) yaw 2.65 want NaN v -1.42,2.00 goal HOME act go to goal working null gp true 182.5,54.0,664.5 legs 3/28 st 0 nu 0 | getting up and dressed
+    [trace]   220 Lothar     (205.50,57.00,642.50) yaw 0.88 want 0.84 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   230 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   230 Duke Edran (183.28,54.07,663.71) yaw 2.53 want NaN v -1.41,1.89 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   230 Lothar     (205.50,57.00,642.50) yaw -0.21 want -0.30 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   240 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   240 Duke Edran (183.08,54.18,664.03) yaw 2.57 want NaN v -0.96,2.00 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   240 Lothar     (205.50,57.00,642.50) yaw -1.29 want -1.44 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   250 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   250 Duke Edran (182.99,54.00,664.39) yaw 2.86 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   250 Lothar     (205.50,57.00,642.50) yaw -2.37 want -2.56 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   260 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   260 Duke Edran (183.01,54.00,664.80) yaw 3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   260 Lothar     (205.50,57.00,642.50) yaw 2.83 want 2.61 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   270 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   270 Duke Edran (183.03,54.00,665.21) yaw -3.14 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   270 Lothar     (205.50,57.00,642.50) yaw 1.74 want 1.51 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   280 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   280 Duke Edran (183.05,54.00,665.61) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   280 Lothar     (205.50,57.00,642.50) yaw 0.66 want 0.42 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   290 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   290 Duke Edran (183.07,54.00,666.02) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   290 Lothar     (205.50,57.00,642.50) yaw -0.42 want -0.65 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   300 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   300 Duke Edran (183.08,54.00,666.43) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   300 Lothar     (205.50,57.00,642.50) yaw -1.51 want -1.71 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   310 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   310 Duke Edran (183.10,54.00,666.84) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   310 Lothar     (205.50,57.00,642.50) yaw -2.59 want -2.76 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   320 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   320 Duke Edran (183.12,54.00,667.24) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   320 Lothar     (205.50,57.00,642.50) yaw 2.61 want 2.49 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   330 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   330 Duke Edran (183.14,54.00,667.65) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   330 Lothar     (205.50,57.00,642.50) yaw 1.53 want 1.46 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   340 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   340 Duke Edran (183.16,54.00,668.06) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   340 Lothar     (205.50,57.00,642.50) yaw 0.44 want 0.44 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   350 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   350 Duke Edran (183.18,54.00,668.47) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   350 Lothar     (205.50,57.00,642.50) yaw -0.26 want -0.26 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   360 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   360 Duke Edran (183.20,54.00,668.87) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   360 Lothar     (205.50,57.00,642.50) yaw -0.26 want -0.26 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   370 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   370 Duke Edran (183.22,54.00,669.28) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   370 Lothar     (205.50,57.00,642.50) yaw 0.42 want 0.42 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   380 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   380 Duke Edran (183.23,54.00,669.69) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   380 Lothar     (205.50,57.00,642.50) yaw 1.50 want 1.56 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   390 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   390 Duke Edran (183.25,54.00,670.10) yaw -3.11 want NaN v 0.11,2.45 goal HOME act go to goal working null gp true 203.5,53.0,671.5 legs 0/1 st 0 nu 0 | getting up and dressed
+    [trace]   390 Lothar     (205.50,57.00,642.50) yaw 2.59 want 2.70 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   400 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   400 Duke Edran (183.27,54.00,670.36) yaw -3.08 want NaN v 0.10,0.35 goal PRAY act go to goal working null gp true 183.5,53.0,668.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   400 Lothar     (205.50,57.00,642.50) yaw -2.61 want -2.45 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   410 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   410 Duke Edran (183.30,54.00,670.23) yaw -2.90 want NaN v 0.25,-1.98 goal PRAY act go to goal working null gp true 183.5,53.0,668.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   410 Lothar     (205.50,57.00,642.50) yaw -1.53 want -1.33 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   420 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   420 Duke Edran (183.34,53.68,669.86) yaw -1.81 want NaN v 0.28,-2.43 goal PRAY act go to goal working null gp true 183.5,53.0,668.5 legs 0/32 st 0 nu 0 | on the way to prayers
+    [trace]   420 Lothar     (205.50,57.00,642.50) yaw -0.45 want -0.22 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   430 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   430 Duke Edran (183.37,53.00,669.48) yaw -0.73 want NaN v -0.31,-1.83 goal PRAY act go to goal working null gp true 180.5,54.0,668.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   430 Lothar     (205.50,57.00,642.50) yaw 0.64 want 0.88 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   440 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   440 Duke Edran (183.31,53.53,669.26) yaw 0.35 want NaN v -1.46,-1.05 goal PRAY act go to goal working null gp true 180.5,54.0,668.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   440 Lothar     (205.50,57.00,642.50) yaw 1.72 want 1.96 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   450 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   450 Duke Edran (183.22,54.14,669.10) yaw 0.95 want NaN v -1.87,-0.82 goal PRAY act go to goal working null gp true 180.5,54.0,668.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   450 Lothar     (205.50,57.00,642.50) yaw 2.80 want 3.03 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   460 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   460 Duke Edran (182.88,54.13,668.99) yaw 1.19 want NaN v -2.27,-0.58 goal PRAY act go to goal working null gp true 180.5,54.0,668.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   460 Lothar     (205.50,57.00,642.50) yaw -2.40 want -2.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   470 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   470 Duke Edran (182.48,54.00,668.90) yaw 1.30 want NaN v -2.40,-0.49 goal PRAY act go to goal working null gp true 180.5,54.0,668.5 legs 2/32 st 0 nu 0 | on the way to prayers
+    [trace]   470 Lothar     (205.50,57.00,642.50) yaw -1.31 want -1.16 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   480 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   480 Duke Edran (182.09,54.00,668.81) yaw 1.33 want NaN v -1.94,-1.02 goal PRAY act go to goal working null gp true 180.5,54.0,666.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   480 Lothar     (205.50,57.00,642.50) yaw -0.23 want -0.12 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   490 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   490 Duke Edran (181.84,54.00,668.52) yaw 0.83 want NaN v -1.35,-2.04 goal PRAY act go to goal working null gp true 180.5,54.0,666.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   490 Lothar     (205.50,57.00,642.50) yaw 0.85 want 0.90 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   500 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   500 Duke Edran (181.61,54.00,668.18) yaw 0.66 want NaN v -1.35,-2.04 goal PRAY act go to goal working null gp true 180.5,54.0,666.5 legs 3/32 st 0 nu 0 | on the way to prayers
+    [trace]   500 Lothar     (205.50,57.00,642.50) yaw 1.90 want 1.90 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   510 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   510 Duke Edran (181.38,54.00,667.85) yaw 0.63 want NaN v -1.84,-1.54 goal PRAY act go to goal working null gp true 179.5,54.0,666.5 legs 4/32 st 0 nu 0 | on the way to prayers
+    [trace]   510 Lothar     (205.50,57.00,642.50) yaw 2.35 want 2.37 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   520 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   520 Duke Edran (181.05,54.00,667.61) yaw 0.87 want NaN v -1.99,-1.43 goal PRAY act go to goal working null gp true 179.5,54.0,666.5 legs 4/32 st 0 nu 0 | on the way to prayers
+    [trace]   520 Lothar     (205.50,57.00,642.50) yaw 2.22 want 2.22 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   530 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   530 Duke Edran (180.72,54.00,667.37) yaw 0.90 want NaN v -1.99,-1.43 goal PRAY act go to goal working null gp true 179.5,54.0,665.5 legs 5/32 st 0 nu 0 | on the way to prayers
+    [trace]   530 Lothar     (205.50,57.00,642.50) yaw 1.35 want 1.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   540 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   540 Duke Edran (180.46,54.00,667.06) yaw 0.71 want NaN v -1.29,-2.09 goal PRAY act go to goal working null gp true 179.5,54.0,665.5 legs 5/32 st 0 nu 0 | on the way to prayers
+    [trace]   540 Lothar     (205.50,57.00,642.50) yaw 0.27 want 0.20 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   550 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   550 Duke Edran (180.25,54.00,666.71) yaw 0.60 want NaN v -1.29,-2.09 goal PRAY act go to goal working null gp true 177.5,54.0,665.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   550 Lothar     (205.50,57.00,642.50) yaw -0.81 want -0.94 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   560 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   560 Duke Edran (180.01,54.00,666.40) yaw 0.67 want NaN v -1.97,-1.14 goal PRAY act go to goal working null gp true 177.5,54.0,665.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   560 Lothar     (205.50,57.00,642.50) yaw -1.90 want -2.07 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   570 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   570 Duke Edran (179.63,54.00,666.26) yaw 1.09 want NaN v -2.31,-0.82 goal PRAY act go to goal working null gp true 177.5,54.0,665.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   570 Lothar     (205.50,57.00,642.50) yaw -2.98 want -3.19 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   580 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   580 Duke Edran (179.25,54.00,666.12) yaw 1.19 want NaN v -2.31,-0.82 goal PRAY act go to goal working null gp true 177.5,54.0,665.5 legs 6/32 st 0 nu 0 | on the way to prayers
+    [trace]   580 Lothar     (205.50,57.00,642.50) yaw 2.22 want 1.99 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   590 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   590 Duke Edran (178.93,54.00,665.93) yaw 1.02 want NaN v -1.14,-1.95 goal PRAY act go to goal working null gp true 177.5,54.0,662.5 legs 7/32 st 0 nu 0 | on the way to prayers
+    [trace]   590 Lothar     (205.50,57.00,642.50) yaw 1.14 want 0.90 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   600 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   600 Duke Edran (178.77,54.00,665.56) yaw 0.54 want NaN v -0.94,-2.26 goal PRAY act go to goal working null gp true 177.5,54.0,662.5 legs 7/32 st 0 nu 0 | on the way to prayers
+    [trace]   600 Lothar     (205.50,57.00,642.50) yaw 0.05 want -0.18 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   610 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   610 Duke Edran (178.61,54.00,665.18) yaw 0.43 want NaN v -0.94,-2.26 goal PRAY act go to goal working null gp true 177.5,54.0,662.5 legs 7/32 st 0 nu 0 | on the way to prayers
+    [trace]   610 Lothar     (205.50,57.00,642.50) yaw -1.03 want -1.25 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   620 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   620 Duke Edran (178.46,54.00,664.80) yaw 0.40 want NaN v -0.94,-2.26 goal PRAY act go to goal working null gp true 177.5,54.0,662.5 legs 7/32 st 0 nu 0 | on the way to prayers
+    [trace]   620 Lothar     (205.50,57.00,642.50) yaw -2.11 want -2.30 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   630 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   630 Duke Edran (178.30,54.00,664.42) yaw 0.40 want NaN v -0.94,-2.26 goal PRAY act go to goal working null gp true 177.5,54.0,662.5 legs 7/32 st 0 nu 0 | on the way to prayers
+    [trace]   630 Lothar     (205.50,57.00,642.50) yaw 3.09 want -3.34 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   640 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   640 Duke Edran (178.14,54.00,664.05) yaw 0.40 want NaN v -1.30,-1.97 goal PRAY act go to goal working null gp true 176.5,54.0,662.5 legs 8/32 st 0 nu 0 | on the way to prayers
+    [trace]   640 Lothar     (205.50,57.00,642.50) yaw 2.00 want 1.91 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   650 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   650 Duke Edran (177.85,54.00,663.76) yaw 0.70 want NaN v -1.79,-1.67 goal PRAY act go to goal working null gp true 176.5,54.0,662.5 legs 8/32 st 0 nu 0 | on the way to prayers
+    [trace]   650 Lothar     (205.50,57.00,642.50) yaw 0.92 want 0.89 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   660 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   660 Duke Edran (177.55,54.00,663.49) yaw 0.77 want NaN v -1.79,-1.67 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   660 Lothar     (205.50,57.00,642.50) yaw -0.02 want -0.02 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   670 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   670 Duke Edran (177.37,54.00,663.17) yaw 0.55 want NaN v -0.05,-2.33 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   670 Lothar     (205.50,57.00,642.50) yaw -0.26 want -0.26 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   680 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   680 Duke Edran (177.39,54.00,662.77) yaw 0.11 want NaN v 0.12,-2.45 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   680 Lothar     (205.50,57.00,642.50) yaw 0.06 want 0.06 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   690 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   690 Duke Edran (177.41,54.00,662.36) yaw -0.01 want NaN v 0.12,-2.45 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   690 Lothar     (205.50,57.00,642.50) yaw 1.06 want 1.09 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   700 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   700 Duke Edran (177.43,54.00,661.95) yaw -0.04 want NaN v 0.12,-2.45 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   700 Lothar     (205.50,57.00,642.50) yaw 2.14 want 2.23 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   710 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   710 Duke Edran (177.45,54.00,661.54) yaw -0.04 want NaN v 0.12,-2.45 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   710 Lothar     (205.50,57.00,642.50) yaw -3.06 want 3.37 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   720 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   720 Duke Edran (177.47,54.00,661.14) yaw -0.04 want NaN v 0.12,-2.45 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   720 Lothar     (205.50,57.00,642.50) yaw -1.97 want -1.79 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   730 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   730 Duke Edran (177.45,54.00,660.74) yaw 0.06 want NaN v -0.95,-2.25 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   730 Lothar     (205.50,57.00,642.50) yaw -0.89 want -0.67 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   740 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   740 Duke Edran (177.29,54.00,660.36) yaw 0.30 want NaN v -0.95,-2.26 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   740 Lothar     (205.50,57.00,642.50) yaw 0.19 want 0.43 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   750 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   750 Duke Edran (177.14,54.81,660.31) yaw 0.34 want NaN v -0.82,-2.31 goal PRAY act go to goal working null gp true 176.5,55.0,658.5 legs 9/32 st 0 nu 0 | on the way to prayers
+    [trace]   750 Lothar     (205.50,57.00,642.50) yaw 1.28 want 1.52 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   760 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   760 Duke Edran (177.01,55.20,660.05) yaw 0.34 want NaN v -0.63,-2.27 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   760 Lothar     (205.50,57.00,642.50) yaw 2.36 want 2.59 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   770 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   770 Duke Edran (176.95,55.01,659.70) yaw 0.20 want NaN v 0.20,-1.68 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   770 Lothar     (205.50,57.00,642.50) yaw -2.84 want -2.63 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   780 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   780 Duke Edran (177.11,55.00,659.50) yaw -0.49 want NaN v 1.22,-1.38 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   780 Lothar     (205.50,57.00,642.50) yaw -1.76 want -1.58 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   790 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   790 Duke Edran (177.26,55.00,659.30) yaw -0.66 want NaN v 0.71,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   790 Lothar     (205.50,57.00,642.50) yaw -0.67 want -0.55 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   800 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   800 Duke Edran (177.35,55.00,659.30) yaw -1.16 want NaN v 0.47,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   800 Lothar     (205.50,57.00,642.50) yaw 0.41 want 0.48 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   810 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   810 Duke Edran (177.43,55.00,659.30) yaw -1.43 want NaN v 0.37,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   810 Lothar     (205.50,57.00,642.50) yaw 1.49 want 1.50 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   820 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   820 Duke Edran (177.48,55.00,659.30) yaw -1.47 want NaN v 0.22,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   820 Lothar     (205.50,57.00,642.50) yaw 2.28 want 2.28 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   830 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   830 Duke Edran (177.50,55.00,659.30) yaw -1.47 want NaN v 0.10,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   830 Lothar     (205.50,57.00,642.50) yaw 2.35 want 2.33 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   840 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   840 Duke Edran (177.51,55.00,659.30) yaw -1.47 want NaN v 0.02,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   840 Lothar     (205.50,57.00,642.50) yaw 1.78 want 1.78 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   850 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   850 Duke Edran (177.51,55.00,659.30) yaw -1.47 want NaN v -0.02,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   850 Lothar     (205.50,57.00,642.50) yaw 0.72 want 0.67 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   860 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   860 Duke Edran (177.51,55.00,659.30) yaw -1.47 want NaN v -0.02,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   860 Lothar     (205.50,57.00,642.50) yaw -0.37 want -0.47 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   870 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   870 Duke Edran (177.50,55.00,659.30) yaw -1.47 want NaN v -0.02,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   870 Lothar     (205.50,57.00,642.50) yaw -1.45 want -1.61 v 0.00,0.00 goal PATROL act hold/face working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | paused to reconsider a blocked route
+    [trace]   880 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   880 Duke Edran (177.50,55.00,659.30) yaw -1.47 want NaN v -0.01,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   880 Lothar     (205.47,57.00,642.50) yaw -1.61 want -1.61 v -0.93,0.00 goal WANDER act wander working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | 
+    [trace]   890 Ealdra     (306.62,43.00,972.60) yaw 2.82 want 2.82 v 0.00,0.00 goal HIDE act hold/face working null gp false 308.5,43.0,972.5 legs - st 0 nu 0 | hiding from world life
+    [trace]   890 Duke Edran (177.50,55.00,659.30) yaw -1.47 want NaN v -0.01,0.00 goal PRAY act go to goal working null gp true 177.5,56.0,658.5 legs 10/32 st 0 nu 0 | on the way to prayers
+    [trace]   890 Lothar     (205.19,57.00,642.50) yaw -2.26 want NaN v -1.96,0.00 goal WANDER act wander working null gp false 201.5,57.0,702.5 legs - st 0 nu 0 | 
+    [life] stop 190,650 done (54 people seen so far)
+
+    [life] 2 stops of 900 frames; 54 people seen
+      Dorran           MINER        seen   130 spins   2 blocked     0 still     0
+          spun at (202.5,58.0,592.5) HOME: getting up and dressed
+      Merek            MINER        seen   130 spins   2 blocked     0 still     0
+          spun at (129.5,46.0,587.5) HOME: getting up and dressed
+      Berthild         CIVIC        seen   130 spins   0 blocked     0 still    78
+          last (320.2,40.0,996.5) SLEEP: on the way
+      Leofric          WORKER       seen   130 spins   0 blocked     0 still    56
+          last (351.7,40.0,957.5) SLEEP: on the way
+      Alaric           PRIEST       seen   130 spins   1 blocked     0 still     0
+          spun at (265.3,39.0,944.3) SOCIALIZE: 
+      Lothar           GUARD        seen   130 spins   2 blocked   125 still     0
+          spun at (205.5,57.0,642.5) PATROL: paused to reconsider a blocked route
+          last (205.5,57.0,642.5) PATROL: paused to reconsider a blocked route
+      Haskel           MINER        seen   130 spins   2 blocked     0 still     0
+          spun at (204.5,59.0,591.5) HOME: getting up and dressed
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Brand GUARD home (430,429)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (924,102)
+      never in play: Father Eirik HEALER home (399,436)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: Yrsa VILLAGER home (432,466)
+      never in play: King Fahad VILLAGER home (954,943)
+      never in play: Cerys VILLAGER home (862,468)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: Bera VILLAGER home (435,489)
+      never in play: Duke Torkell KNIGHT home (434,426)
+      never in play: King Arthur CRAFTSMAN home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain HUNTER home (890,392)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin MINER home (827,423)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Sten CRAFTSMAN home (404,474)
+      never in play: Alexios CRAFTSMAN home (513,84)
+      never in play: Radek WORKER home (136,817)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Melitta CIVIC home (581,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Einar WORKER home (404,484)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CRAFTSMAN home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (942,882)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Petros FISHERMAN home (516,84)
+      never in play: Soren SCHOLAR home (400,440)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Count Dracula CIVIC home (140,750)
+      never in play: Sella CRAFTSMAN home (188,825)
+      never in play: Siv FARMER home (391,451)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: Hob GUARD home (407,790)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (906,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,914)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (532,161)
+      never in play: Melina FISHERMAN home (518,85)
+      never in play: Spiros WORKER home (516,82)
+      never in play: Timon WORKER home (510,85)
+      never in play: Damon WORKER home (513,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (475,205)
+      never in play: Mimis BEGGAR home (530,109)
+      never in play: Argus THIEF home (474,205)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (512,87)
+      never in play: Sabeen BEGGAR home (510,82)
+      never in play: Halvar CRAFTSMAN home (448,449)
+      never in play: Runa CARTER home (454,447)
+      never in play: Ulven CRAFTSMAN home (433,486)
+      never in play: Nessa MERCHANT home (439,480)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Father Odran PRIEST home (198,772)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Milena CIVIC home (212,771)
+      never in play: Gunnar GUARD home (447,482)
+      never in play: Astrid UNDERTAKER home (400,433)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (954,908)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+    [life] 7 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 54.71 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 58s
+9 actionable tasks: 1 executed, 8 up-to-date

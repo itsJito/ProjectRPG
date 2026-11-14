@@ -1,0 +1,88 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources
+> Task :compileJava
+> Task :classes
+
+> Task :shadowveil
+ShadowVeil grown and surveyed in 21.1s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y97
+  5213 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y39 (target 37-44)
+  harlette_manor median Y46 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y60 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y97 (design 92)
+  gallows_tor top Y94 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y54 (design 56)
+  bone_orchard_rise top Y49 (design 52)
+  unreachable chunk [56,48]
+  shore belt reached: 100%
+  district loxford_houses: 14 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 40 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shrine: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  training_quarters: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_33: no lane to a road within reach
+  azharad_graveyard: no lane to a road within reach
+  544 lanes laid from doors to the roads
+  294 cells of bridge parapet
+  191 street lamps
+  590 structures, 566 doorways, 931 reserved volumes
+  unlit_lantern lantern_cellars: 160 water samples inside its reserved volume (its roof must hold them out)
+  orrins_leanto: no room at home for a craft table (its user works at the nearest)
+  1508 rooms fitted out in 509 buildings: 7346 pieces, 484 staircases
+  625 exterior pieces dressed (94 of them furniture); cells refused: {no ground=3, occupied=60, road=13}
+  38 door steps laid where doorways stood above their ground
+  cut off: training_quarters (Training-ground quarters) at 889,413
+  521 structures ready for their interiors
+  590 structures planned
+  ! 1 chunks have no ground a walker can reach
+  ! no ground for camelot_keep near chunk [51.3, 44.6] (20 x 16)
+  ! 1 structures' fronts cannot be walked to from Loxford Castle
+FAILED (3)
+
+> Task :shadowveil FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':shadowveil'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1m 31s
+8 actionable tasks: 3 executed, 5 up-to-date

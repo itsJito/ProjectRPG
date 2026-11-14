@@ -1,0 +1,96 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :shadowveil
+ShadowVeil grown and surveyed in 11.1s -> C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\shadowveil
+  highest ground Y96
+  5134 trees, 60 ore rocks, 62 roads
+  loxford median Y39 (target 36-42)
+  harlette median Y40 (target 37-44)
+  harlette_manor median Y47 (target 45-48)
+  valgard median Y53 (target 48-58)
+  gorrick median Y55 (target 54-58)
+  azharad median Y36 (target 34-39)
+  camelot median Y60 (target 58-64)
+  severia median Y36 (target 32-40)
+  severia_east median Y38 (target 34-42)
+  ashmaw top Y96 (design 92)
+  gallows_tor top Y93 (design 89)
+  hollow_crags_north top Y84 (design 84)
+  crag_pass_shoulder top Y81 (design 74)
+  lantern_isle top Y51 (design 55)
+  gorge_overlook top Y54 (design 56)
+  bone_orchard_rise top Y55 (design 52)
+  shore belt reached: 97%
+  district loxford_houses: 13 houses
+  district loxford_cottages: 22 houses
+  district harlette_cottages: 7 houses
+  district valgard_homes: 40 houses
+  district azharad_homes: 90 houses
+  district azharad_south_quarter: 8 houses
+  district severia_homes: 170 houses
+  district severia_east_housing: 50 houses
+  mere_shack: no lane to a road within reach
+  hesta_farmhouse: no lane to a road within reach
+  terrace_garden: no lane to a road within reach
+  resin_camp: no lane to a road within reach
+  valgard_homes_32: no lane to a road within reach
+  532 lanes laid from doors to the roads
+  374 cells of bridge parapet
+  189 street lamps
+  576 structures, 557 doorways, 919 reserved volumes
+  unlit_lantern lantern_cellars: 147 water samples inside its reserved volume (its roof must hold them out)
+  not ready: loxford_castle (Loxford Castle, castle): doorway 214,986 opens onto a wall; doorway 215,986 opens onto a wall
+  not ready: valgard_keep (Valgard Keep, castle): interior volume obstructed: 208 solid cells where 172 are allowed
+  not ready: pilgrims_gate (Pilgrim's Gate, gatehouse): no stair shaft reserved through its upper floors
+  not ready: tollgate (Tollgate Heath toll, gatehouse): no entrance; no interior volume reserved
+  not ready: unlit_lantern (The Unlit Lantern, tower): interior volume obstructed: 280 solid cells where 220 are allowed
+  508 structures ready for their interiors
+  576 structures planned
+  ! reserved volumes overlap: border_watchtower interior_round and border_watchtower stair
+  ! reserved volumes overlap: goblin_hollow goblin_hollow and goblin_hollow connection
+  ! reserved volumes overlap: sunkissed_mine sunkissed_mine and sunkissed_mine connection
+  ! reserved volumes overlap: marble_mine marble_mine and marble_mine connection
+  ! reserved volumes overlap: harbor_beacon interior_round and harbor_beacon stair
+  ! reserved volumes overlap: culvert_cave culvert and culvert_cave connection
+  ! reserved volumes overlap: murk_caves murk_caves and murk_caves connection
+  ! reserved volumes overlap: highland_adit highland_adit and highland_adit connection
+  ! reserved volumes overlap: crags_mine_south hollow_crags_mine_1 and crags_mine_south connection
+  ! reserved volumes overlap: crags_mine_west hollow_crags_mine_2 and crags_mine_west connection
+  ! reserved volumes overlap: unlit_lantern interior_round and unlit_lantern stair
+  ! reserved volumes overlap: spider_nest spider_nest and spider_nest connection
+  ! reserved volumes overlap: ashmaw_throat ashmaw_throat and ashmaw_throat connection
+  ! 5 structures are not ready for their interiors (see registry.md)
+FAILED (14)
+
+> Task :shadowveil FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':shadowveil'.
+> Process 'command 'C:\Program Files\Java\jdk-24\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 13s
+8 actionable tasks: 1 executed, 7 up-to-date

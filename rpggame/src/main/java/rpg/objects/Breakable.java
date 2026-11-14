@@ -77,6 +77,19 @@ public final class Breakable extends Container {
         for (int i = 0; i < n; i++) if (mat[i] != AIR) { hp[i] = TOUGH[mat[i]]; c++; }
         built = c;
         qw = (float) Math.cos(yaw / 2); qy = (float) Math.sin(yaw / 2);
+        homeX = x; homeY = y; homeZ = z; homeYaw = yaw;
+    }
+    /** (0.4.6) Where and how it was first set down (a restored world puts it back there, whole). */
+    public final float homeX, homeY, homeZ, homeYaw;
+    /** Whole again where it was first set down: every voxel back, its pose its first. */
+    public void rebuild() {
+        java.util.Arrays.fill(mat, AIR); java.util.Arrays.fill(board, (byte) 0);
+        java.util.Arrays.fill(vox.col, 0);
+        Shapes.build(this);
+        for (int i = 0; i < mat.length; i++) hp[i] = mat[i] != AIR ? TOUGH[mat[i]] : 0;
+        lost = 0; broken = false; removed = false;
+        x = homeX; y = homeY; z = homeZ; qw = (float) Math.cos(homeYaw / 2); qx = 0; qy = (float) Math.sin(homeYaw / 2); qz = 0;
+        version++;
     }
 
     public int index(int x, int y, int z) { return (x * form.sy + y) * form.sz + z; }

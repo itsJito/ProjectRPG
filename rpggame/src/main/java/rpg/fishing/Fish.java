@@ -34,6 +34,9 @@ public final class Fish implements Interactable {
     public String why = "";
     /** The wander heading and depth it is easing toward; the time of its next decision. */
     public float wantYaw, wantY;
+    /** (0.4.6) How long it has been pressed against something it cannot swim through, and the way out it then takes (until when). */
+    public float stuckT, escapeYaw;
+    public double escapeUntil;
     public double thinkAt, stateSince, fleeUntil, biteAt, breathAt;
     /** When it was last hurt (its health shows for a while after). */
     public double lastHurt = -99;

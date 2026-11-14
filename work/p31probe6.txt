@@ -1,0 +1,289 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 20408). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-20408.out.log
+Starting 14th build in daemon [uptime: 32 mins 34.125 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 16% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'probe'
+Selected primary task 'probe' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':probe']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#793,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#792,included builds,5,main]) started.
+:processResources (Thread[#793,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#792,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#794,Execution worker,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#792,included builds,5,main]) started.
+:theastrattoengine:buildNative (Thread[#792,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#796,Execution worker Thread 3,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#792,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#792,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#792,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#792,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#792,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#792,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+work action resolve main (project :theastrattoengine) (Thread[#797,Execution worker Thread 4,5,main]) started.
+Resolve mutations for :theastrattoengine:jar (Thread[#797,Execution worker Thread 4,5,main]) started.
+:theastrattoengine:jar (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+other build task :theastrattoengine:jar (Thread[#797,Execution worker Thread 4,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :processResources
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':processResources' is not up-to-date because:
+  Input property 'rootSpec$1' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\resources\data\tuning.json has changed.
+Resolve mutations for :compileJava (Thread[#797,Execution worker Thread 4,5,main]) started.
+:compileJava (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\ai\Brain.java has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\world\Repairs.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.001 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 508 classes completed in 26.543 secs.
+Class dependency analysis for incremental compilation took 0.216 secs.
+Resolve mutations for :classes (Thread[#797,Execution worker Thread 4,5,main]) started.
+:classes (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#797,Execution worker Thread 4,5,main]) started.
+:compileTestJava (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\ai\Brain.class has changed.
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\world\Repairs.class has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\probe\Pass31ProbeTest.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.019 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 162 classes completed in 8.933 secs.
+Class dependency analysis for incremental compilation took 0.078 secs.
+Resolve mutations for :processTestResources (Thread[#797,Execution worker Thread 4,5,main]) started.
+:processTestResources (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#797,Execution worker Thread 4,5,main]) started.
+:testClasses (Thread[#797,Execution worker Thread 4,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :probe (Thread[#797,Execution worker Thread 4,5,main]) started.
+:probe (Thread[#797,Execution worker Thread 4,5,main]) started.
+Gradle Test Executor 16 started executing tests.
+
+> Task :probe
+Caching disabled for task ':probe' because:
+  Build cache is disabled
+Task ':probe' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 16'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=9 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\probe\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath7487565737604984639txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 16'
+Successfully started process 'Gradle Test Executor 16'
+
+Pass31ProbeTest > probe() STANDARD_OUT
+    [Load] ShadowVeil grown in 15.29s ({regions=770, overlays=492, variants=586, scarp=48, coast=403, erosion=306, peaks=41, lakes=70, isles=5, rivers=735, wadis=14, ground=18, roads=593, causeways=3, architecture=907, pitsFilled=1405, pits=488, banks=42, clamp=16, cliffs=46, columns=798, falls=14, raise=8043, trees=261, outcrops=0, ways=533}), made and lit in 1.53s
+    [water] flow field grown in 1118 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [p31] npcs 225
+    [p31] shrine Loxford Graveyard at 180.0,40.0,898.0 floor 39 block under 48
+    [p31] shrine Harlette Graveyard at 115.0,44.0,723.0 floor 43 block under 48
+    [p31] shrine Valgard Graveyard at 101.0,56.0,592.0 floor 55 block under 48
+    [p31] shrine Gorrick Graveyard at 329.0,63.0,382.0 floor 62 block under 48
+    [p31] shrine Azharad Graveyard at 825.0,38.0,794.0 floor 37 block under 48
+    [p31] shrine Severian Necropolis at 413.0,38.0,130.0 floor 37 block under 48
+    [p31] shrine Camelot Graveyard at 783.0,62.0,411.0 floor 61 block under 48
+    [p31] mender Oswin          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 295,904
+    [p31] mender King Arthur    CRAFTSMAN  CARPENTER    hammer true planks 8 at 824,365
+    [p31] mender Dunstan        CRAFTSMAN  CARPENTER    hammer true planks 6 at 295,906
+    [p31] mender Olek           CRAFTSMAN  CARPENTER    hammer true planks 6 at 95,739
+    [p31] mender Sten           CRAFTSMAN  CARPENTER    hammer true planks 6 at 351,428
+    [p31] mender Alexios        CRAFTSMAN  CARPENTER    hammer true planks 6 at 461,32
+    [p31] mender Cenric         WORKER     FIREWOOD_CUTTER hammer false planks 0 at 295,903
+    [p31] mender Radek          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 82,758
+    [p31] mender Einar          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 326,400
+    [p31] mender Orven          WORKER     PORTER       hammer false planks 0 at 201,614
+    [p31] mender Leofric        WORKER     FIREWOOD_CUTTER hammer false planks 0 at 294,906
+    [p31] mender Eadmund        CRAFTSMAN  CARPENTER    hammer true planks 0 at 295,908
+    [p31] mender Hamid          CRAFTSMAN  CARPENTER    hammer true planks 0 at 954,886
+    [p31] mender Nabil          CRAFTSMAN  CARPENTER    hammer true planks 0 at 954,891
+    [p31] mender Salim          CRAFTSMAN  CARPENTER    hammer true planks 0 at 949,876
+    [p31] mender Kamal          CRAFTSMAN  CARPENTER    hammer true planks 0 at 928,893
+    [p31] mender Qasim          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 923,815
+    [p31] mender Spiros         WORKER     PORTER       hammer false planks 0 at 463,22
+    [p31] mender Timon          WORKER     PORTER       hammer false planks 0 at 464,23
+    [p31] mender Damon          WORKER     PORTER       hammer false planks 0 at 463,22
+    [p31] mender Andreas        CRAFTSMAN  CARPENTER    hammer true planks 0 at 422,160
+    [p31] mender Nikos          CRAFTSMAN  CARPENTER    hammer true planks 0 at 421,160
+    [p31] mender Kallias        CRAFTSMAN  CARPENTER    hammer true planks 0 at 425,161
+    [p31] mender Isidoros       CRAFTSMAN  CARPENTER    hammer true planks 0 at 429,161
+    [p31] mender Orestes        WORKER     FIREWOOD_CUTTER hammer false planks 0 at 202,137
+    [p31] mender Halwen         CRAFTSMAN  CARPENTER    hammer true planks 0 at 218,660
+    [p31] mender Perrin         CRAFTSMAN  CARPENTER    hammer true planks 0 at 818,426
+    [p31] mender Pell           WORKER     FIREWOOD_CUTTER hammer false planks 0 at 867,565
+    [p31] mender Ysmay          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 949,360
+    [p31] mender Orrin          CRAFTSMAN  CARPENTER    hammer true planks 0 at 367,650
+    [p31] mender Mabry          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 209,148
+    [p31] mender Edvin          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 189,157
+    [p31] mender Corra          WORKER     FIREWOOD_CUTTER hammer false planks 0 at 861,586
+    [p31] pane 180,40,880
+    [p31] t=0s open 1 mended 0 block 0
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 7 knows false goal IDLE report false | 
+    [p31] t=60s open 1 mended 0 block 0
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal PRAY report true | praying at the altar
+    [p31] t=120s open 1 mended 0 block 0
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal REPORT_DAMAGE report true | paused to reconsider a blocked route
+    [p31] t=180s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 94 knows true goal REPORT_DAMAGE report true | as close as I can get
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31] t=240s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 69 knows true goal PATROL report false | reached patrol point 5
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 112 knows true goal WORK report false | on the way to mend the broken window at (180, 880)
+    [p31] t=300s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 93 knows true goal EAT report false | 
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 96 knows true goal WORK report false | on the way to mend the broken window at (180, 880)
+    [p31] t=360s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 57 knows true goal PATROL report false | 
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 116 knows true goal WORK report false | on the way to mend the broken window at (180, 880)
+    [p31] t=420s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 100 knows true goal PATROL report false | reached patrol point 1
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 118 knows true goal WORK report false | Carpenter: tidying the workplace while short of supplies
+    [p31] t=480s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 47 knows true goal PATROL report false | reached patrol point 4
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 120 knows true goal WORK report false | Carpenter: tidying the workplace while short of supplies
+    [p31] t=540s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 69 knows true goal PATROL report false | reached patrol point 2
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 124 knows true goal HOME report false | a meal at home
+          [stuck] Maddoc SOCIALIZE at (279.77, 40.00, 941.55) -> (279.1, 941.2), go to goal, v (-0.03, 0.02) ground true route 0 facts [0.08, 0.02, 1.0, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
+    [p31] t=600s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 77 knows true goal PATROL report false | reached patrol point 5
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 126 knows true goal HOME report false | a meal at home
+    [p31] t=660s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 105 knows true goal INVESTIGATE report false | looking round the spot
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 126 knows true goal HOME report false | a meal at home
+    [p31] t=720s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 73 knows true goal PATROL report false | reached patrol point 2
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 125 knows true goal HOME report false | chores at home
+    [p31] t=780s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 73 knows true goal PATROL report false | reached patrol point 5
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 125 knows true goal HOME report false | chores at home
+    [p31] t=840s open 1 mended 0 block 0
+    [p31]   Torren         LAWMAN     loaded true  home 113 post 60 now 69 knows true goal PATROL report false | reached patrol point 2
+    [p31]   Father Wulfric UNDERTAKER loaded true  home 1 post 35 now 39 knows true goal EAT report false | paused to reconsider a blocked route
+    [p31]   Dunstan        CRAFTSMAN  loaded true  home 126 post 122 now 126 knows true goal HOME report false | chores at home
+    [p31] glass: open 1 mended 0
+    [p31] plots 773 first Barley (ripe) at 246.5,39.15,886.5 ground 39.0
+    [p31] options [harvest]
+    [p31] perform Result[status=STARTED, reason=null]
+          [crime] THEFT by p31 against Cuthmar at (247.4, 886.5), t 902.7
+    [p31] after: Tilled plot (empty) pack 0 harvests 108
+
+Gradle Test Executor 16 finished executing tests.
+
+> Task :probe FAILED
+  slow: rpg.probe.Pass31ProbeTest.probe() 591.835 s
+
+Pass31ProbeTest > probe() FAILED
+    java.util.concurrent.TimeoutException: probe() timed out after 9 minutes
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+        at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+1 test completed, 1 failed
+Finished generating test XML results (0.004 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\probe
+Generating HTML test report...
+Finished generating test html results (0.01 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\probe
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':probe'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/probe/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 10m 53s
+9 actionable tasks: 4 executed, 5 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

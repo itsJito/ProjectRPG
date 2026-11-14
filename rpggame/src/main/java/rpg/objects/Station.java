@@ -20,6 +20,8 @@ import rpg.item.Recipes.Recipe;
  */
 public class Station extends WorldObject {
     public final Recipes.Station kind;
+    /** (0.4.4) The floor it stands on (its cell above the floor's blocks), where known: an upper storey's station is drawn there. */
+    public float floorY = Float.NaN;
 
     public Station(long id, String def, String name, Recipes.Station kind, float x, float y, float z) {
         super(id, def, name, x, y, z);

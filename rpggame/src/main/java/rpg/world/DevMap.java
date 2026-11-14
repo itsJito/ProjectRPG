@@ -247,8 +247,12 @@ public final class DevMap {
     public static long build(NativeEngine e) {
         if (!e.blockTable(Blocks.engineDefs())) throw new IllegalStateException("block table refused: " + e.lastError());
         WorldMap.activateDevmap();
-        long world = e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, null, null, 0);
-        if (world == 0) throw new IllegalStateException("world refused: " + e.lastError());
+        long t0 = System.nanoTime();
+        // (0.4.2, gamefixes: the tests took far more than ten minutes) the devmap is the same every time it is built:
+        // its cells and light, once lit (8 s, the engine lighting it whole), are kept and every later build in the same
+        // run is made straight from them. The builders below still run every time (they set up the map's own records).
+        long world = BUILT_CELLS != null ? 0 : e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, null, null, 0);
+        if (BUILT_CELLS == null && world == 0) throw new IllegalStateException("world refused: " + e.lastError());
         CommandBuffer b = new CommandBuffer(1 << 16);
         BuildingKit.reset();
         new Builder(b).all();
@@ -262,12 +266,35 @@ public final class DevMap {
         rpg.econ.Inns.build(b);
         // (0.3.5) Guild Row on the seafront
         rpg.econ.Guilds.build(b);
-        b.lightAll();
-        b.pristineSave();
-        if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());
-        b.free();
+        long t1 = System.nanoTime();
+        if (BUILT_CELLS != null) {
+            b.free();
+            world = e.createWorld(DungeonLayout.WORLD_X, SY, SZ, STONE, BUILT_CELLS, BUILT_LIGHT, 0);
+            if (world == 0) throw new IllegalStateException("world refused: " + e.lastError());
+            CommandBuffer p = new CommandBuffer(256);
+            p.pristineSave();
+            if (!e.edit(world, p)) throw new IllegalStateException("map edits refused: " + e.lastError());
+            p.free();
+        } else {
+            b.lightAll();
+            b.pristineSave();
+            if (!e.edit(world, b)) throw new IllegalStateException("map edits refused: " + e.lastError());
+            b.free();
+            if (CACHE) {
+                var v = e.view(world);
+                byte[] cells = new byte[v.sizeX * v.sizeY * v.sizeZ], light = new byte[cells.length];
+                v.blocks().get(0, cells);
+                var lv = v.light();
+                if (lv != null) { lv.get(0, light); BUILT_LIGHT = light; BUILT_CELLS = cells; }
+            }
+        }
+        if (rpg.Rpg.PROF) System.out.printf("[devmap] commands %.0f ms, applied %.0f ms%s%n", (t1 - t0) / 1e6, (System.nanoTime() - t1) / 1e6, BUILT_CELLS != null ? " (cached)" : "");
         return world;
     }
+    /** The built devmap's cells and light, kept after the first build of a run (never changed after; see build). */
+    private static byte[] BUILT_CELLS, BUILT_LIGHT;
+    /** Whether the built devmap is kept for later builds in the same run (RPG_DEVMAP_CACHE=0 builds it afresh each time). */
+    private static final boolean CACHE = !"0".equals(System.getenv("RPG_DEVMAP_CACHE"));
 
     /**
      * (0.2.9, gamefixes: stairs and ladders all round the DevMap, DevCity and DevPalace) ways up to the high places the

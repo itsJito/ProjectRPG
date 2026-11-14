@@ -60,6 +60,8 @@ public final class Foliage {
     private static final double RECOVER=2.2;
     /** (0.4.0) Chunks of growth kept before the far ones are let go, and how far (chunks) is far. */
     private static final int EVICT_OVER=rpg.Tuning.i("foliage.keepChunks",120), EVICT_RING=rpg.Tuning.i("foliage.evictRing",6);
+    /** (0.4.6) How many rings of chunks about the player growth is laid out to, and how many chunks a pass at most. */
+    private static final int GEN_RINGS=rpg.Tuning.i("foliage.genRings",4), GEN_PER_PASS=rpg.Tuning.i("foliage.genPerPass",3);
     private double evictAt;
     private final float[] push=new float[32];
     /** (0.4.0) The overworld's chunks on the map in play (the devmap's 12 x 16, ShadowVeil's 67 x 67). */
@@ -171,9 +173,13 @@ public final class Foliage {
             chunks.values().removeIf(c->{boolean far=Math.max(Math.abs(c.x/16-centerX),Math.abs(c.z/16-centerZ))>EVICT_RING;if(far)gone.addAll(c.plants);return far;});
             if(!gone.isEmpty()){g.objects.unlist(gone);farOrder.clear();epoch++;}
         }
-        boolean generated=false;
-        for(int ring=0;ring<=2 && !generated;ring++)for(int dz=-ring;dz<=ring && !generated;dz++)for(int dx=-ring;dx<=ring;dx++) {
-            int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated=true;break;
+        // (0.4.6, gamefixes: running or flying fast, plants popped in ahead) the growth is laid out further ahead (out past
+        // what is drawn) and a few chunks a pass, nearest first: one chunk a quarter second within two rings fell behind
+        // anyone moving faster than a jog, and the ground ahead filled in under their eyes
+        int generated=0;
+        for(int ring=0;ring<=GEN_RINGS && generated<GEN_PER_PASS;ring++)for(int dz=-ring;dz<=ring && generated<GEN_PER_PASS;dz++)for(int dx=-ring;dx<=ring && generated<GEN_PER_PASS;dx++) {
+            if(Math.max(Math.abs(dx),Math.abs(dz))!=ring)continue;
+            int x=centerX+dx,z=centerZ+dz;if(x<0 || z<0 || x>=CHUNKS_X || z>=CHUNKS_Z || chunks.containsKey(x+z*CHUNKS_X))continue;generate(x,z);generated++;
         }
         // (0.3.6, gamefixes: stutter / aggressive optimization) the chunks about the player are looked over every pass; the
         // rest of the map's growth a few chunks a pass in turn (every plant on the map was checked four times a second, a

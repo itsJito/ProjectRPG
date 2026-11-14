@@ -118,10 +118,14 @@ public final class Rpg implements GameModule {
     /** (0.3.5) The guilds, their halls on Guild Row, the Armory. */
     public rpg.econ.Guilds guilds;
     public final astratto.weather.TimeSystem timeSystem = new astratto.weather.TimeSystem();
+    /** (0.4.6) Each region's weather, turning over with the hours (rpg.world.WeatherSystem). */
+    public rpg.world.WeatherSystem weatherSystem;
     public Fx fx;
     public Sfx sfx;
     /** The score (set by the window's loop; null in automated runs). */
     public rpg.audio.Music music;
+    /** (0.4.2) The place as the ear hears it (the music's mood, the ambience's level). */
+    public rpg.audio.Soundscape soundscape;
     public Hud ui;
     /** The profile being played (null in automated runs): where the game is saved. */
     public Profiles.Profile profile;
@@ -158,12 +162,18 @@ public final class Rpg implements GameModule {
         fluids = new rpg.world.Fluids(vox);
         // (0.4.0) the map in play: the devmap (legacy, for regression testing) or ShadowVeil (rpg.world.WorldMap)
         map = rpg.world.WorldMap.active();
-        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) DevMap.currents(fluids); else rpg.world.shadowveil.ShadowVeil.currents(fluids);
+        if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) { DevMap.currents(fluids); fluids.field = rpg.world.FlowField.of(fluids.currents(), map.sizeX, map.sizeZ); }
+        else { rpg.world.shadowveil.ShadowVeil.currents(fluids); if (rpg.world.shadowveil.ShadowVeil.terrain() != null) rpg.dungeon.DungeonSites.bind(rpg.world.shadowveil.ShadowVeil.terrain().arch); }
         fx = new Fx();
         fx.ground = (x, y, z) -> vox.groundY(x, y, z);
         sfx = Sfx.shared(game);
         sfx.ground = a -> vox.block((int) Math.floor(a.x), (int) Math.floor(a.y - 0.05f), (int) Math.floor(a.z));
-        if (!scripted) sfx.ambience("devmapambience.ogg", 0.35f);
+        // (0.4.6) a step in shallow water splashes; open ground the snow has settled on crunches
+        sfx.wading = a -> fluids != null && fluids.in(a.x, a.y + 0.1f, a.z) && fluids.depth(a.x, a.y + 0.1f, a.z) < 0.9f;
+        sfx.snowy = a -> timeSystem.weather.snowCover > 0.3f && vox.skyLight((int) Math.floor(a.x), (int) Math.floor(a.y) + 1, (int) Math.floor(a.z)) > 0.7f;
+        // (0.4.2, gamefixes: the audio to each region and context) the soundscape reads the place; the bed's level follows it
+        soundscape = new rpg.audio.Soundscape(this);
+        if (!scripted) sfx.ambience(soundscape.bedFile(), 0.35f);
         prog = new Progression(this);
         objects = new Objects(this);
         glass = new rpg.objects.Glass(this);
@@ -186,6 +196,13 @@ public final class Rpg implements GameModule {
         undertaker = new rpg.law.Undertaker(this);
         graveyards = new rpg.law.Graveyards(this);
         if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) graveyards.plots.add(new rpg.law.Graveyards.Plot("DevCity graveyard", DevMap.ALPHA, 113, rpg.world.Ground.at(113, 89), 89, 8, 4));
+        // (0.4.4, gamefixes: each kingdom its own graveyard) every graveyard of ShadowVeil keeps its plot for the burials
+        else if (rpg.world.shadowveil.ShadowVeil.terrain() != null && rpg.world.shadowveil.ShadowVeil.terrain().arch != null)
+            for (var s : rpg.world.shadowveil.ShadowVeil.terrain().arch.structures) {
+                float[] plot = s.points.get("plot");
+                if (plot == null || !s.template.equals("graveyard")) continue;
+                graveyards.plots.add(new rpg.law.Graveyards.Plot(s.name, rpg.world.shadowveil.ShadowVeil.terrain().arch.realmOf(s), plot[0], rpg.world.shadowveil.ShadowVeil.standY(plot[0], plot[1]), plot[1], (int) plot[2], (int) plot[3]));
+            }
         honor = new rpg.law.Honor(this);
         econ = new Economy(this);
         bank = new rpg.econ.Bank(this);
@@ -202,6 +219,7 @@ public final class Rpg implements GameModule {
         farming = new rpg.world.Farming(this);
         inns = new rpg.econ.Inns(this);
         waterContacts = new rpg.world.WaterContacts(this);
+        weatherSystem = new rpg.world.WeatherSystem(this);
         if (map.kind == rpg.world.WorldMap.Kind.DEVMAP) {
             timeSystem.regions.add(new astratto.weather.TimeSystem.Region("Devmap",-32,-32,rpg.world.DungeonLayout.WORLD_X+32,DevMap.SZ+32,16,astratto.weather.TimeSystem.Profile.NEUTRAL));
             timeSystem.fogVolumes.add(new astratto.weather.TimeSystem.Fog(60,rpg.world.Ground.at(60, 88)+0.5f,88,5,0.035f,0.38f,0.46f,0.5f));
@@ -366,6 +384,11 @@ public final class Rpg implements GameModule {
         time += dt;
         lastDt = dt;
         state.tick++;
+        // (0.4.2) the ambience bed's level follows the place and the hour (a few times a second is plenty for a fade)
+        if (soundscape != null && sfx != null && player != null && (state.tick & 7) == 0) {
+            double hr = state.hourOfDay();
+            sfx.ambienceLevel(soundscape.bedLevel(hr < 5.5 || hr >= 20.5, dt * 8));
+        }
         // (0.3.0) the Weekly System's clock: slower by day, quicker by night, paused, scaled, run by the distance the
         // player travels or carried on to an arrival - the calendar says how far it goes this frame
         var calendar = state.cal();
@@ -374,6 +397,8 @@ public final class Rpg implements GameModule {
         } else calendar.tick(dt * cfg.minutesPerSecond);
         travelX = player.x; travelZ = player.z;
         state.minutes = calendar.totalMinutes();
+        if (weatherSystem == null) weatherSystem = new rpg.world.WeatherSystem(this);
+        weatherSystem.update();
         timeSystem.update(state.minutes,dt,player.x,player.eyeY(),player.z);
         game.commands().chemWind(timeSystem.weather.windX,timeSystem.weather.windZ);
         game.commands().chemWeather(timeSystem.weather.rain);
@@ -381,6 +406,7 @@ public final class Rpg implements GameModule {
         death.update();
         if (PROF) mark(0);
         law.update();
+        worldEdge();
         if (PROF) mark(1);
         controller.update(dt);
         if (PROF) mark(2);
@@ -504,17 +530,9 @@ public final class Rpg implements GameModule {
         if (fight) return rpg.audio.Music.Mood.COMBAT;
         for (Npc n : npcs) if (n.alive && n.loaded && n.hunt != null && n.hunt.target == player.id && n.distTo(player) < 45) return rpg.audio.Music.Mood.HUNTED;
         double h = state.hourOfDay();
-        boolean night = h < 5.5 || h >= 20.5;
-        if (DevMap.inDungeon(player.x, player.z)) return rpg.audio.Music.Mood.DUNGEON;
-        // standing at a town's altar (DevTown's shrine, DevPalace's temple) the hymn plays
-        if (Math.hypot(player.x - DevMap.ALTAR[0] - 0.5, player.z - DevMap.ALTAR[1] - 0.5) < 9
-                || Math.hypot(player.x - rpg.world.Expanse.ALTAR[0], player.z - rpg.world.Expanse.ALTAR[1]) < 9) return rpg.audio.Music.Mood.SACRED;
-        if (DevMap.PALACE.equals(DevMap.jurisdiction(player.x, player.z))) return night ? rpg.audio.Music.Mood.PALACE_NIGHT : rpg.audio.Music.Mood.PALACE_DAY;
-        boolean wood = player.x >= DevMap.WILD_X0 && player.x <= DevMap.WILD_X1 && player.z >= DevMap.WILD_Z0 && player.z <= DevMap.WILD_Z1;
-        if (wood) return night ? rpg.audio.Music.Mood.WOOD_NIGHT : rpg.audio.Music.Mood.WOOD_DAY;
-        boolean town = !DevMap.WILDS.equals(DevMap.jurisdiction(player.x, player.z));
-        if (town) return night ? rpg.audio.Music.Mood.TOWN_NIGHT : rpg.audio.Music.Mood.TOWN_DAY;
-        return night ? rpg.audio.Music.Mood.OPEN_NIGHT : rpg.audio.Music.Mood.OPEN_DAY;
+        // (0.4.2) the place itself - underground, at an altar, a palace's realm, a town, a wood, the open - is the
+        // soundscape's to read, on whichever map
+        return soundscape.placeMood(h < 5.5 || h >= 20.5);
     }
 
     /** Someone (a person or an animal) fighting the player within a distance. */
@@ -745,6 +763,38 @@ public final class Rpg implements GameModule {
     }
 
     /** Wakes the player at the graveyard (GDD 3.12: the nearest reachable one; the devmap has the one). */
+    /**
+     * (0.4.6, gamefixes: reset all destruction and everything upon reloading, sleeping, dying or using the shrine) the
+     * world mended: broken furniture (a chandelier and its light among it), crates and barrels, windows and walls all as
+     * they were built, the debris swept away.
+     */
+    public void restoreWorld(String why) {
+        int f = wreckage == null ? 0 : wreckage.restoreAll(), b = breakables == null ? 0 : breakables.restoreAll(), r = repairs == null ? 0 : repairs.restoreAll();
+        if (f + b + r > 0) { mapDirty = true; state.commit("WorldRestored", player == null ? 0 : player.id, 0, null, 0, why + ": " + f + " furnishings, " + b + " crates and barrels, " + r + " blocks"); }
+    }
+
+    /** (0.4.6) How far (cells) from the world's edge the open sea starts to tell, the share of health it takes a second there and at the edge, how often (s). */
+    static final float EDGE_START = Tuning.f("world.edgeStart", 40f), EDGE_HURT_MIN = Tuning.f("world.edgeHurtMin", 0.08f), EDGE_HURT_MAX = Tuning.f("world.edgeHurtMax", 0.45f), EDGE_TICK = Tuning.f("world.edgeTick", 1f);
+    private double edgeNext, edgeWarned = -99;
+
+    /**
+     * (0.4.6, gamefixes: the world's border was too jarring; the map now runs a few chunks further out to sea, and the
+     * player takes great harm before reaching its edge) past the shore and out over the open sea toward the world's edge,
+     * the cold and the swell batter whoever is out there - lightly at first, then harder the further they go, until it
+     * kills - so nobody reaches the edge. On a mount or swimming, the same.
+     */
+    private void worldEdge() {
+        if (player == null || !player.alive || !rpg.world.WorldMap.shadowveil() || rpg.world.shadowveil.ShadowVeil.terrain() == null) return;
+        int S = rpg.world.shadowveil.ShadowVeil.terrain().S;
+        float e = Math.min(Math.min(player.x, player.z), Math.min(S - player.x, S - player.z));
+        if (e >= EDGE_START || time < edgeNext) return;
+        edgeNext = time + EDGE_TICK;
+        float depth = Math.max(0, Math.min(1, (EDGE_START - e) / EDGE_START));
+        int harm = Math.max(1, Math.round(player.maxHp() * (EDGE_HURT_MIN + (EDGE_HURT_MAX - EDGE_HURT_MIN) * depth * depth)));
+        if (time - edgeWarned > 8) { edgeWarned = time; chat.add(depth < 0.5 ? "The open sea is bitterly cold and the swell batters you. Turn back to the shore." : "You cannot last out here. Turn back now!", rpg.Chat.Kind.WARN); }
+        combat.environmentalDamage(player, harm, "the open sea");
+    }
+
     public void respawn() {
         player.alive = true;
         player.diedAt = -1;
@@ -758,6 +808,7 @@ public final class Rpg implements GameModule {
         teleport(player, wake[0], rpg.world.Ground.at(wake[0], wake[1]), wake[1]);
         controller.snapTo(0);
         law.playerRespawned();
+        restoreWorld("woke after dying");
         state.commit("PlayerRespawned", player.id, 0, DevMap.ALPHA, 0, "at the graveyard");
         chat.say("You wake among the graves, with nothing but the clothes you were born to.");
     }

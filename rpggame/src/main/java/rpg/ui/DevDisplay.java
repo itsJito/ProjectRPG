@@ -9,8 +9,8 @@ import rpg.world.DevMap;
 import rpg.world.WorldMap;
 
 /**
- * (0.4.1, gamefixes: a devmode console command showing a developer display - FPS, XYZ, the NPCs' line of sight -
- * genuinely useful for bug reports) The developer display: {@code devmode} in the console turns it on and off. One panel
+ * (0.4.1, gamefixes: a devmode (0.4.2: devui) console command showing a developer display - FPS, XYZ, the NPCs' line of sight -
+ * genuinely useful for bug reports) The developer display: {@code devui} in the console turns it on and off. One panel
  * down the left of the screen with everything a bug report needs to say where and when and what:
  * <ul>
  * <li>frames: the rate over the last second (its worst frame too), the render's load (chunks, quads, models, lights);</li>
@@ -82,7 +82,7 @@ public final class DevDisplay {
                 + (g.interact.focus != null ? "   focus: " + g.interact.focus.label() : ""));
         // when
         var w = g.timeSystem.weather;
-        out.add(String.format("%s   weather %s  rain %.2f  fog %.2f  overcast %.2f", g.state.clockText(), w.kind(), w.rain, w.fog, w.overcast));
+        out.add(String.format("time: %s   weather %s  rain %.2f  fog %.2f  overcast %.2f", g.state.clockText(), w.kind(), w.rain, w.fog, w.overcast));
         // who
         int full = 0, far = 0, off = 0, dead = 0;
         for (Npc o : g.npcs) {
@@ -102,7 +102,7 @@ public final class DevDisplay {
                     !o.loaded ? "off-stage" : sees ? (range ? "SEES you" : "clear line") : "no line", aw == null ? 0 : aw.level, o.goal, o.lastOutcome == null ? "-" : o.lastOutcome));
         }
         Runtime rt = Runtime.getRuntime();
-        out.add(String.format("%s   map %s seed %s   heap %d / %d MB   tick %d", rpg.Main.VERSION, m.id, WorldMap.shadowveil() ? String.valueOf(rpg.world.shadowveil.Atlas.get().seed) : "-",
+        out.add(String.format("build: %s   map %s seed %s   heap %d / %d MB   tick %d", rpg.Main.VERSION, m.id, WorldMap.shadowveil() ? String.valueOf(rpg.world.shadowveil.Atlas.get().seed) : "-",
                 (rt.totalMemory() - rt.freeMemory()) >> 20, rt.maxMemory() >> 20, g.state.tick));
         return out;
     }
@@ -143,14 +143,74 @@ public final class DevDisplay {
             ui.line(p[0], p[1], q[0], q[1], 1.5f, col);
             ui.shadow(o.name, p[0] - ui.width(o.name, 11) / 2, p[1] - 16, 11, col | 0xFF000000);
         }
+        // (0.4.4, gamefixes: devui cleaner, smaller and more readable, its background transparent, the text on black) no
+        // panel at all: every run of text sits on its own tight black backing, so the world shows between the lines; the
+        // frame rate coloured by how smooth it is, the position in X green, Y red, Z blue, then label and value per line,
+        // and the people near as a compact table
         List<String> lines = lines();
-        float x = 8, y = 64, lw = 0;
-        for (String s : lines) lw = Math.max(lw, ui.width(s, 12));
-        lw = Math.min(lw + 14, w - 16);
-        ui.rect(x, y, lw, 22 + lines.size() * 15, 0xC8101014);
-        ui.border(x, y, lw, 22 + lines.size() * 15, 1, Style.EDGE);
-        ui.text("DEVMODE  (devreport writes this to reports/)", x + 6, y + 4, 12, Style.INFO);
-        for (int i = 0; i < lines.size(); i++) ui.text(lines.get(i), x + 6, y + 22 + i * 15, 12, i == 0 ? 0xFFE8E8A0 : lines.get(i).startsWith("  ") ? 0xFFC8D8E8 : 0xFFE0E0E0);
+        Ui2D.Face was = ui.use(ui.chat);
+        try {
+            final float S = 13, ROW = 17, BIG = 18, GAP = 6;
+            float x = 12, cy = 136;   // under the resource bars
+            String fpsLine = lines.isEmpty() ? "" : lines.get(0), where = "";
+            List<String> rest = new ArrayList<>();
+            for (int i = 1; i < lines.size(); i++) { String l = lines.get(i); if (l.startsWith("XYZ ")) where = l.substring(l.indexOf("chunk")); else if (!l.startsWith("  ")) rest.add(l); }
+            float fps = parseFps(fpsLine);
+            int fc = fps >= 60 ? 0xFF7CE07C : fps >= 30 ? 0xFFE8D060 : 0xFFE86050;
+            float cx = x + chip(ui, "DEV", x, cy, S, Style.INFO) + GAP;
+            chip(ui, fpsLine, cx, cy, S, fc);
+            cy += ROW + 2;
+            cx = x;
+            cx += chip(ui, String.format("X %.2f", pl.x), cx, cy, BIG, 0xFF5CE65C) + GAP;
+            cx += chip(ui, String.format("Y %.2f", pl.y), cx, cy, BIG, 0xFFFF5A5A) + GAP;
+            chip(ui, String.format("Z %.2f", pl.z), cx, cy, BIG, 0xFF5AA0FF);
+            cy += BIG + 7;
+            if (!where.isEmpty()) { chip(ui, where, x, cy, S, 0xFFB8C0CC); cy += ROW; }
+            for (String l : rest) {
+                int cut = l.indexOf(':');
+                if (cut > 0 && cut < 14) {
+                    float lw = chip(ui, l.substring(0, cut + 1), x, cy, S, 0xFF8C96A4);
+                    chip(ui, l.substring(cut + 1).trim(), x + lw, cy, S, 0xFFF0F0F0);
+                } else chip(ui, l, x, cy, S, 0xFFF0F0F0);
+                cy += ROW;
+            }
+            // the people near: name, distance, sight, what they do (one line each)
+            List<Npc> people = nearest(5);
+            if (!people.isEmpty()) {
+                cy += 4;
+                for (Npc o : people) {
+                    float d = (float) Math.hypot(o.x - pl.x, o.z - pl.z);
+                    boolean sees = o.loaded && g.vox.sight(o.x, o.eyeY(), o.z, pl.x, pl.eyeY(), pl.z);
+                    String sight = !o.loaded ? "off-stage" : sees ? (d < 24 ? "sees you" : "clear") : "no line";
+                    float px = x;
+                    px += chip(ui, fit(ui, o.name, 110, S), px, cy, S, 0xFFFFFFFF);
+                    px += chip(ui, String.format("%.0f m", d), px, cy, S, 0xFFF0F0F0);
+                    px += chip(ui, sight, px, cy, S, !o.loaded ? 0xFF8C96A4 : sees ? 0xFF7CE07C : 0xFFE8B84A);
+                    chip(ui, fit(ui, o.goal + (o.lastOutcome == null ? "" : ": " + o.lastOutcome), Math.max(120, w * 0.33f), S), px, cy, S, 0xFFD8D0C0);
+                    cy += ROW;
+                }
+            }
+        } finally { ui.use(was); }
+    }
+
+    /** A run of text on its own tight black backing; returns the width it took (with a hair's gap after it). */
+    private static float chip(Ui2D ui, String t, float x, float y, float size, int color) {
+        if (t == null || t.isEmpty()) return 0;
+        float tw = ui.width(t, size);
+        ui.rect(x, y - 1, tw + 8, size + 5, 0xD0000000);
+        ui.text(t, x + 4, y + 1, size, color);
+        return tw + 10;
+    }
+
+    /** Text cut to a width, with an ellipsis. */
+    private static String fit(Ui2D ui, String s, float max, float size) {
+        if (ui.width(s, size) <= max) return s;
+        while (s.length() > 1 && ui.width(s + "...", size) > max) s = s.substring(0, s.length() - 1);
+        return s + "...";
+    }
+
+    private static float parseFps(String line) {
+        try { return line.startsWith("FPS ") ? Float.parseFloat(line.substring(4, line.indexOf(' ', 4))) : 0; } catch (RuntimeException e) { return 0; }
     }
 
     /** Writes the display, the nearest person's AI readout and the last chat to reports/bug-<time>.txt; returns the file. */

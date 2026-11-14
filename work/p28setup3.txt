@@ -1,0 +1,62 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+SetupProbeTest > setupStages() STANDARD_OUT
+    [devmap] commands 489 ms, applied 9640 ms (cached)
+    [setup] create 245 ms, devmap 10185 ms, rpg 7147 ms, first tick 2144 ms, close 24 ms
+    [devmap] commands 20 ms, applied 28 ms (cached)
+    [setup] create 2 ms, devmap 49 ms, rpg 462 ms, first tick 1540 ms, close 36 ms
+    [devmap] commands 18 ms, applied 22 ms (cached)
+    [setup] create 3 ms, devmap 42 ms, rpg 418 ms, first tick 1555 ms, close 30 ms
+    [devmap] commands 17 ms, applied 29 ms (cached)
+    [setup] create 2 ms, devmap 47 ms, rpg 436 ms, first tick 1702 ms, close 26 ms
+    engine.frame (native)     1354.66 ms
+    ai                         314.61 ms
+    monsters                    14.50 ms
+    foliage.update               6.90 ms
+    afterFrame                   3.79 ms
+    objects.update               1.73 ms
+    law.update                   1.13 ms
+    animals                      1.11 ms
+    dungeons.update              1.06 ms
+    chemistry.update             0.88 ms
+    controller.update            0.61 ms
+    combat.update                0.24 ms
+    gore.update                  0.18 ms
+    undertaker.update            0.15 ms
+    traps.update                 0.08 ms
+    magic.update                 0.07 ms
+    glass.update                 0.05 ms
+    time+death                   0.03 ms
+    spareWatch                   0.02 ms
+    carrying.update              0.02 ms
+    fx.update                    0.01 ms
+    interact.update              0.01 ms
+    econ.update                  0.01 ms
+    prog.update                  0.00 ms
+    prayers.update               0.00 ms
+
+  slow: rpg.probe.SetupProbeTest.setupStages() 26.154 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 32s
+9 actionable tasks: 1 executed, 8 up-to-date

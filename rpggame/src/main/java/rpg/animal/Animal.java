@@ -66,6 +66,10 @@ public final class Animal extends Actor implements Interactable {
     /** The route last asked of the engine. */
     float rx, rz;
     boolean routed;
+    /** (0.4.2, aggressive optimization) a goal its routes could not reach (searched to the cap): left alone until then. */
+    float giveUpX = Float.NaN, giveUpZ;
+    double giveUpUntil;
+    int cappedRoutes, lastRepaths;
     /** Carcass: how long scavengers have eaten at it (game minutes). */
     /** When each person last petted it (a bond grows from a pattern, not from clicking). */
     public final Map<Long, Double> pettedAt = new HashMap<>();
@@ -85,6 +89,11 @@ public final class Animal extends Actor implements Interactable {
     public boolean running;
     /** On the slow (young or spent) gaits. */
     public boolean slow;
+    /** (0.4.5, optimisation) When it next looks about, and the pace last sent to its engine agent (sent only when it changes). */
+    public transient double nextSenseAt;
+    public transient float sentRate = -1;
+    /** (0.4.6) The hooves' beat (Animals.hooves). */
+    public transient float hoofClock;
     // ---- a carcass
     public double diedAt = -1;
     public boolean butchered;

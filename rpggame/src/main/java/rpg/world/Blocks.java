@@ -61,7 +61,17 @@ public final class Blocks {
             // Dead Wood's needle-litter floor (podzol), the Marches' and the south's sun-dried grass
             ASH = 210, HEATH = 211, PODZOL = 212, DRY_GRASS = 213,
             // 0.4.0: the conifers' needles (ShadowVeil's ash-pines, cypress and olives): sprays of fine dark leaves, seen through
-            PINE_LEAVES = 214, COUNT = 215;
+            PINE_LEAVES = 214,
+            // 0.4.2 (gamefixes: building textures unique to each territory, with the dual-material blocks): each kingdom's
+            // own walling - Loxford's lime-pointed rubble, Harlette's ochre limewashed daub, Valgard's granite ashlar,
+            // Gorrick's tarred weatherboard, Azharad's straw-flecked adobe, Severia's warm stucco, Camelot's white ashlar -
+            // and their two-faced twins (DUAL2 on) finished inside in plaster or boards
+            RUBBLE_STONE = 215, OCHRE_DAUB = 216, GRANITE_ASHLAR = 217, TARRED_PLANKS = 218, ADOBE = 219, STUCCO = 220, WHITE_ASHLAR = 221,
+            DUAL2 = 222,
+            // 0.4.4 (gamefixes: every kingdom its own jail with proper cells; Severia built as Rome and Byzantium built) a
+            // jail's iron bars (seen through, solid to bodies), the Romans' thin fired brick, a floor of mosaic tesserae,
+            // and the Byzantine banded wall - courses of brick between courses of dressed stone
+            IRON_BARS = 250, ROMAN_BRICK = 251, MOSAIC = 252, BANDED_MASONRY = 253, COUNT = 254;
     /**
      * (0.2.9, gamefixes: ground textures should transition better) each ground's rank for the renderer's edge blend: a
      * higher rank creeps over a lower one's top at the seam, raggedly - grass over a bare patch, over dirt, over sand,
@@ -82,15 +92,18 @@ public final class Blocks {
             {STONE_BRICKS, WALLPAPER_GREEN}, {STONE_BRICKS, WALLPAPER_RED}, {STONE_BRICKS, WAINSCOT}, {STONE_BRICKS, WALLPAPER_BLUE},
             {TIMBER_FRAME, WALLPAPER_GREEN}, {TIMBER_FRAME, WALLPAPER_RED}, {TIMBER_FRAME, WAINSCOT}, {TIMBER_FRAME, WALLPAPER_BLUE}, {TIMBER_FRAME, PLASTER},
             {WALLPAPER_GREEN, WALLPAPER_RED}, {WAINSCOT, WALLPAPER_GREEN}, {WAINSCOT, WALLPAPER_RED}, {WALLPAPER_BLUE, WAINSCOT}, {PLASTER, WAINSCOT},
-            {PLASTER, WALLPAPER_RED}, {PLASTER, WALLPAPER_GREEN}, {WALLPAPER_BLUE, WALLPAPER_RED}, {PLASTER, WALLPAPER_BLUE}};
-    /** How many pairs the first run of two-faced ids (DUAL0 on) holds; the rest are from DUAL1. */
-    static final int DUAL_FIRST = 6;
+            {PLASTER, WALLPAPER_RED}, {PLASTER, WALLPAPER_GREEN}, {WALLPAPER_BLUE, WALLPAPER_RED}, {PLASTER, WALLPAPER_BLUE},
+            // 0.4.2: the territories' walls (the third run, DUAL2 on)
+            {RUBBLE_STONE, PLASTER}, {OCHRE_DAUB, PLASTER}, {GRANITE_ASHLAR, PLASTER}, {TARRED_PLANKS, PLANKS}, {ADOBE, PLASTER}, {STUCCO, PLASTER}, {WHITE_ASHLAR, PLASTER}};
+    /** How many pairs the first run of two-faced ids (DUAL0 on) holds; the second run (DUAL1 on) ends at DUAL_SECOND; the rest are from DUAL2. */
+    static final int DUAL_FIRST = 6, DUAL_SECOND = 24;
     /** A pair's first id (its inside toward +x; the next three toward -x, +z, -z). */
-    static int dualBase(int pair) { return pair < DUAL_FIRST ? DUAL0 + pair * 4 : DUAL1 + (pair - DUAL_FIRST) * 4; }
+    static int dualBase(int pair) { return pair < DUAL_FIRST ? DUAL0 + pair * 4 : pair < DUAL_SECOND ? DUAL1 + (pair - DUAL_FIRST) * 4 : DUAL2 + (pair - DUAL_SECOND) * 4; }
     /** The pair a two-faced id belongs to, or -1. */
     static int pairOf(int id) {
         if (id >= DUAL0 && id < DUAL0 + DUAL_FIRST * 4) return (id - DUAL0) / 4;
-        if (id >= DUAL1 && id < DUAL1 + (DUAL_PAIRS.length - DUAL_FIRST) * 4) return DUAL_FIRST + (id - DUAL1) / 4;
+        if (id >= DUAL1 && id < DUAL1 + (DUAL_SECOND - DUAL_FIRST) * 4) return DUAL_FIRST + (id - DUAL1) / 4;
+        if (id >= DUAL2 && id < DUAL2 + (DUAL_PAIRS.length - DUAL_SECOND) * 4) return DUAL_SECOND + (id - DUAL2) / 4;
         return -1;
     }
     /** Inner-face directions of a two-faced block: toward +x, -x, +z, -z. */
@@ -146,7 +159,8 @@ public final class Blocks {
             case GRASS, DIRT, BARE_PATCH, CLAY, MUD, HEATH, PODZOL, DRY_GRASS -> Material.EARTH;
             case ASH -> Material.SAND;
             case SAND -> Material.SAND;
-            case WAINSCOT, PARQUET, DARK_PLANKS -> Material.WOOD;
+            case WAINSCOT, PARQUET, DARK_PLANKS, TARRED_PLANKS -> Material.WOOD;
+            case OCHRE_DAUB, ADOBE -> Material.EARTH;
             case VELVET_CARPET, WALLPAPER_GREEN, WALLPAPER_RED, WALLPAPER_BLUE -> Material.CLOTH;
             case THATCH -> Material.STRAW;
             case BRASS_BLOCK -> Material.METAL;
@@ -158,7 +172,7 @@ public final class Blocks {
             case LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, HEDGE, HERB_PATCH, FLAX_PATCH, BERRY_BUSH -> Material.FOLIAGE;
             case WHITE_CARPET, BLACK_CARPET, BROWN_CARPET, RED_CARPET, BED -> Material.CLOTH;
             case HAY_BALE -> Material.STRAW;
-            case IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, ANVIL, LAMP -> Material.METAL;
+            case IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, ANVIL, LAMP, IRON_BARS -> Material.METAL;
             case COAL_BLOCK -> Material.COAL;
             case GLASS, WHITE_GLASS, LIGHT_BLUE_GLASS -> Material.GLASS;
             case WATER -> Material.WATER;
@@ -181,6 +195,7 @@ public final class Blocks {
                 BROWN_CARPET, RED_CARPET, LIMESTONE_BRICKS, IRON_BLOCK, GOLD_BLOCK, COPPER_BLOCK, COAL_BLOCK, HAY_BALE,
                 WALLPAPER_GREEN, WALLPAPER_RED, WAINSCOT, PARQUET, DARK_PLANKS, CHECKER_TILE, FLAGSTONE, SLATE_ROOF, TIMBER_FRAME, MOSSY_BRICKS,
                 TERRACOTTA, VELVET_CARPET, THATCH, BASALT, GRAVEL, BRASS_BLOCK, WALLPAPER_BLUE, ASH, HEATH, PODZOL, DRY_GRASS,
+                RUBBLE_STONE, OCHRE_DAUB, GRANITE_ASHLAR, TARRED_PLANKS, ADOBE, STUCCO, WHITE_ASHLAR, ROMAN_BRICK, MOSAIC, BANDED_MASONRY,
                 CHARRED_PLANKS, CHARRED_LOG, CHARRED_OAK_LOG, CHARRED_WILLOW_LOG, CHARRED_SPRUCE_LOG, CHARRED_JUNGLE_LOG, CHARRED_BIRCH_LOG, CHARRED_BEAM, CHARRED_ROOF -> true; default -> false; };
     }
     /** Plants drawn as crossed planes that bodies walk through (gamefixes: no foliage is ever solid - the berry bush neither). */
@@ -202,11 +217,14 @@ public final class Blocks {
             L_PAPER_GREEN = 83, L_PAPER_RED = 84, L_WAINSCOT = 85, L_PARQUET = 86, L_DARK_PLANKS = 87, L_CHECKER = 88, L_FLAGSTONE = 89,
             L_SLATE = 90, L_TIMBER = 91, L_MOSSY = 92, L_TERRACOTTA = 93, L_VELVET = 94, L_THATCH = 95, L_BASALT = 96, L_STAINED = 97,
             L_GRAVEL = 98, L_BRASS = 99, L_PAPER_BLUE = 100, L_THATCH_TOP = 101, L_BASALT_TOP = 102,
-            L_ASH = 103, L_HEATH = 104, L_HEATH_SIDE = 105, L_PODZOL = 106, L_PODZOL_SIDE = 107, L_DRY_GRASS = 108, L_DRY_GRASS_SIDE = 109, L_PINE_LEAVES = 110;
+            L_ASH = 103, L_HEATH = 104, L_HEATH_SIDE = 105, L_PODZOL = 106, L_PODZOL_SIDE = 107, L_DRY_GRASS = 108, L_DRY_GRASS_SIDE = 109, L_PINE_LEAVES = 110,
+            L_RUBBLE = 111, L_DAUB = 112, L_ASHLAR = 113, L_TARRED = 114, L_ADOBE = 115, L_STUCCO = 116, L_WHITE_ASHLAR = 117,
+            // (0.4.4) after the charred twins' run
+            L_IRON_BARS = 131, L_ROMAN_BRICK = 132, L_MOSAIC = 133, L_BANDED = 134;
     /** Texture layers, each TEX x TEX texels: 64 to the metre; from CHAR_LAYER0 on, the charred twins of the wood layers. */
-    public static final int CHAR_LAYER0 = 111, LAYERS = 124, TEX = 64;
+    public static final int CHAR_LAYER0 = 118, CHAR_END = 131, LAYERS = 135, TEX = 64;
     /** Per charred layer, the layer it was charred from (filled with FACES). */
-    private static final int[] CHAR_FROM = new int[LAYERS - CHAR_LAYER0];
+    private static final int[] CHAR_FROM = new int[CHAR_END - CHAR_LAYER0];
 
     /** Per block id: top, side, bottom layer. */
     private static final int[][] FACES = new int[COUNT][];
@@ -237,6 +255,8 @@ public final class Blocks {
         f(TERRACOTTA, L_TERRACOTTA); f(VELVET_CARPET, L_VELVET); f(THATCH, L_THATCH_TOP, L_THATCH, L_THATCH_TOP); f(BASALT, L_BASALT_TOP, L_BASALT, L_BASALT_TOP);
         f(STAINED_GLASS, L_STAINED); f(GRAVEL, L_GRAVEL); f(BRASS_BLOCK, L_BRASS);
         f(ASH, L_ASH); f(HEATH, L_HEATH, L_HEATH_SIDE, L_DIRT); f(PODZOL, L_PODZOL, L_PODZOL_SIDE, L_DIRT); f(DRY_GRASS, L_DRY_GRASS, L_DRY_GRASS_SIDE, L_DIRT); f(PINE_LEAVES, L_PINE_LEAVES);
+        f(RUBBLE_STONE, L_RUBBLE); f(OCHRE_DAUB, L_DAUB); f(GRANITE_ASHLAR, L_ASHLAR); f(TARRED_PLANKS, L_TARRED); f(ADOBE, L_ADOBE); f(STUCCO, L_STUCCO); f(WHITE_ASHLAR, L_WHITE_ASHLAR);
+        f(IRON_BARS, L_IRON_BARS); f(ROMAN_BRICK, L_ROMAN_BRICK); f(MOSAIC, L_MOSAIC, L_ROMAN_BRICK, L_ROMAN_BRICK); f(BANDED_MASONRY, L_BANDED);
         // each charrable wood cube's twin: its own faces, each charred (one charred layer per wood layer)
         int next = CHAR_LAYER0;
         int[] charOf = new int[CHAR_LAYER0];
@@ -251,7 +271,7 @@ public final class Blocks {
         }
         // two-faced blocks: the outside's top and side, the inside's side as the inner face (the mesher's bottom layer)
         for (int id = 0; id < COUNT; id++) if (dual(id)) FACES[id] = new int[]{FACES[outerOf(id)][0], FACES[outerOf(id)][1], FACES[innerOf(id)][1]};
-        if (next != LAYERS) throw new IllegalStateException("charred layers: " + (next - CHAR_LAYER0) + ", LAYERS expects " + (LAYERS - CHAR_LAYER0));
+        if (next != CHAR_END) throw new IllegalStateException("charred layers: " + (next - CHAR_LAYER0) + ", CHAR_END expects " + (CHAR_END - CHAR_LAYER0));
     }
     private static void f(int id, int top, int side, int bottom) { FACES[id] = new int[]{top, side, bottom}; }
     private static void f(int id, int all) { f(id, all, all, all); }
@@ -302,6 +322,8 @@ public final class Blocks {
         d[WATER] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_LIQUID | AstrattoNative.BLOCK_SKY_DIM | AstrattoNative.BLOCK_LIGHT_PASS | AstrattoNative.BLOCK_HAZARD);
         d[ICE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_LIGHT_PASS);
         d[FENCE] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT);
+        // (0.4.4) a jail's bars: solid to every body, seen and lit through
+        d[IRON_BARS] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_SOLID | AstrattoNative.BLOCK_CUTOUT | AstrattoNative.BLOCK_LIGHT_PASS); d[IRON_BARS].surface = 1;
         // a shut door's cells: not solid (the leaf itself, a rigid body on its hinge, is what stops a body), but a door to
         // routes (only those who open doors pass) and opaque to eyes and light
         d[DOOR] = new NativeEngine.BlockDef(AstrattoNative.BLOCK_OPAQUE | AstrattoNative.BLOCK_DOOR);
@@ -329,6 +351,7 @@ public final class Blocks {
         for (int leaves : new int[]{LEAVES, OAK_LEAVES, WILLOW_LEAVES, PINE_LEAVES, BERRY_BUSH}) r[leaves] = def(FACES[leaves], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_LEAF);
         r[HEDGE]=def(FACES[HEDGE],AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT | AstrattoNative.RB_SWAY);
         r[FENCE] = def(FACES[FENCE], AstrattoNative.RB_SOLID); r[FENCE].shape = SHAPE_HIDDEN;   // the game draws fences as models (Props.fences)
+        r[IRON_BARS] = def(FACES[IRON_BARS], AstrattoNative.RB_SOLID | AstrattoNative.RB_CUTOUT);
         r[DOOR] = def(FACES[DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
         r[DOOR].shape = SHAPE_HIDDEN;
         r[LOCKED_DOOR] = def(FACES[LOCKED_DOOR], AstrattoNative.RB_DOOR | AstrattoNative.RB_SOLID);
@@ -372,7 +395,7 @@ public final class Blocks {
 
     /** One layer's texels: the material's own painting (Textures); a charred layer is its wood painted, then burnt over. */
     static int[][] layer(int l) {
-        if (l < CHAR_LAYER0) return Textures.layer(l);
+        if (l < CHAR_LAYER0 || l >= CHAR_END) return Textures.layer(l);
         int[][] wood = Textures.layer(CHAR_FROM[l - CHAR_LAYER0]);
         Painter fire = new Painter(l);
         for (int y = 0; y < TEX; y++) for (int x = 0; x < TEX; x++) wood[y * TEX + x] = fire.charred(wood[y * TEX + x], x, y);
@@ -511,9 +534,11 @@ public final class Blocks {
                 {L_DARK_PLANKS, 0.5f, 0f}, {L_CHECKER, 0.18f, 0f}, {L_FLAGSTONE, 0.8f, 0f}, {L_SLATE, 0.5f, 0f}, {L_TIMBER, 0.86f, 0f},
                 {L_MOSSY, 0.88f, 0f}, {L_TERRACOTTA, 0.7f, 0f}, {L_VELVET, 0.97f, 0f}, {L_THATCH, 0.97f, 0f}, {L_THATCH_TOP, 0.97f, 0f},
                 {L_BASALT, 0.6f, 0f}, {L_BASALT_TOP, 0.55f, 0f}, {L_STAINED, 0.06f, 0f}, {L_GRAVEL, 0.93f, 0f}, {L_BRASS, 0.24f, 1f},
-                {L_ASH, 0.96f, 0f}, {L_HEATH, 0.9f, 0f}, {L_HEATH_SIDE, 0.9f, 0f}, {L_PODZOL, 0.92f, 0f}, {L_PODZOL_SIDE, 0.9f, 0f}, {L_DRY_GRASS, 0.9f, 0f}, {L_DRY_GRASS_SIDE, 0.9f, 0f}};
+                {L_ASH, 0.96f, 0f}, {L_HEATH, 0.9f, 0f}, {L_HEATH_SIDE, 0.9f, 0f}, {L_PODZOL, 0.92f, 0f}, {L_PODZOL_SIDE, 0.9f, 0f}, {L_DRY_GRASS, 0.9f, 0f}, {L_DRY_GRASS_SIDE, 0.9f, 0f},
+                // 0.4.2: rubble and daub and adobe dry and dull, ashlar faintly worn smooth, tar a little glossy, stucco matte
+                {L_RUBBLE, 0.88f, 0f}, {L_DAUB, 0.93f, 0f}, {L_ASHLAR, 0.72f, 0f}, {L_TARRED, 0.55f, 0f}, {L_ADOBE, 0.95f, 0f}, {L_STUCCO, 0.9f, 0f}, {L_WHITE_ASHLAR, 0.74f, 0f}};
         for (Object[] t : table) { int l = (Integer) t[0]; m[l * 4] = (byte) rough((Float) t[1]); m[l * 4 + 1] = (byte) clamp((Float) t[2] * 255); }
-        for (int l = CHAR_LAYER0; l < LAYERS; l++) m[l * 4] = (byte) rough(0.97f);   // char is dry and dull
+        for (int l = CHAR_LAYER0; l < CHAR_END; l++) m[l * 4] = (byte) rough(0.97f);   // char is dry and dull
         m[L_LAMP * 4 + 2] = (byte) 255;
         m[L_FURNACE * 4 + 2] = (byte) 120;
         for (int l = 0; l < LAYERS; l++) m[l * 4 + 3] = (byte) rough((m[l * 4] & 255) / 255f * 0.55f);

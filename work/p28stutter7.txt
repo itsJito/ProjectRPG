@@ -1,0 +1,109 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 6.86s ({regions=829, overlays=558, variants=319, scarp=57, coast=388, erosion=485, peaks=52, lakes=76, isles=5, rivers=822, wadis=15, ground=34, roads=534, causeways=4, architecture=334, pitsFilled=1341, pits=515, banks=58, clamp=14, cliffs=50, columns=808, falls=17, raise=555, trees=293, outcrops=0}), made and lit in 1.92s
+[Load] ShadowVeil 8.86s
+[Load] renderer and UI 2.69s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.18s
+[prof] monster GOBLIN IDLE: senses 0, sense 4, think 0, act 12 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 21 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 207 ms
+[Load] first rendered frame 5.66s
+[Load] the world about the spawn made ready in 8.97s
+[Load] game frame 1: scene 20 ms, interface 691 ms, render 29 ms
+[Load] game frame 2: scene 12 ms, interface 5 ms, render 6 ms
+[Load] the first frames drawn behind the loading screen in 0.77s
+[stutter] preload 9.74s
+[stutter] first tick 26 ms
+engine.frame (native)      537.37 ms
+monsters                   298.82 ms
+ai                          55.81 ms
+afterFrame                  26.54 ms
+animals                     19.09 ms
+objects.update              18.76 ms
+foliage.update              18.62 ms
+chemistry.update            10.91 ms
+controller.update            9.43 ms
+econ.update                  4.36 ms
+fx.update                    2.48 ms
+law.update                   2.16 ms
+gore.update                  2.15 ms
+magic.update                 1.85 ms
+undertaker.update            1.83 ms
+combat.update                1.10 ms
+traps.update                 0.83 ms
+dungeons.update              0.42 ms
+time+death                   0.28 ms
+glass.update                 0.14 ms
+spareWatch                   0.11 ms
+prog.update                  0.06 ms
+carrying.update              0.04 ms
+interact.update              0.04 ms
+prayers.update               0.02 ms
+
+[Load] game frame 3: scene 6 ms, interface 5 ms, render 6 ms
+[prof] monster GOBLIN IDLE: senses 0, sense 0, think 0, act 18 ms
+[stutter] spike at 8: 66 ms - tick 21, draw 45 - engine.frame (native) 10
+[prof] monster GIANT_SPIDER IDLE: senses 0, sense 0, think 0, act 91 ms
+[stutter] spike at 12: 114 ms - tick 102, draw 12 - monsters 93
+[prof] monster GOBLIN PATROL: senses 0, sense 0, think 0, act 62 ms
+[stutter] spike at 117: 71 ms - tick 68, draw 3 - monsters 63
+[prof] monster GOBLIN PATROL: senses 0, sense 0, think 0, act 23 ms
+[stutter] spike at 299: 61 ms - tick 11, draw 50 -
+[stutter] median 12.8 ms, p95 24.2, p99 51.2, worst 114.3 at frame 12, 17 frames over 33 ms
+[stutter] first 60: 46(0/0) 41(0/0) 50(0/0) 29(0/0) 51(0/0) 46(0/0) 43(0/0) 37(0/0) 66(0/0) 24(0/0) 39(0/0) 27(0/0) 114(0/0) 20(0/0) 32(0/0) 21(0/0) 22(0/0) 21(0/0) 21(0/0) 21(0/0) 19(0/0) 19(0/0) 19(0/0) 20(0/0) 20(0/0) 21(0/0) 27(0/0) 22(0/0) 26(0/0) 35(0/0) 20(0/0) 20(0/0) 23(0/0) 17(0/0) 25(0/0) 19(0/0) 24(0/0) 18(0/0) 18(0/0) 16(0/0) 18(0/0) 18(0/0) 18(0/0) 17(0/0) 26(0/0) 23(0/0) 19(0/0) 19(0/0) 20(0/0) 18(0/0) 18(0/0) 17(0/0) 17(0/0) 17(0/0) 16(0/0) 20(0/0) 16(0/0) 16(0/0) 15(0/0) 21(0/0)
+engine.frame (native)     1538.55 ms
+monsters                  1123.52 ms
+afterFrame                 696.79 ms
+objects.update             590.38 ms
+animals                    245.97 ms
+foliage.update             210.64 ms
+controller.update          158.81 ms
+ai                          75.98 ms
+undertaker.update           56.82 ms
+chemistry.update            53.05 ms
+combat.update               38.94 ms
+gore.update                 22.82 ms
+time+death                  21.32 ms
+law.update                  19.44 ms
+magic.update                16.32 ms
+traps.update                12.05 ms
+spareWatch                   9.05 ms
+fx.update                    7.18 ms
+econ.update                  7.04 ms
+glass.update                 5.31 ms
+dungeons.update              2.62 ms
+carrying.update              2.12 ms
+interact.update              2.05 ms
+prog.update                  1.90 ms
+prayers.update               1.65 ms
+
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 36s
+8 actionable tasks: 1 executed, 7 up-to-date

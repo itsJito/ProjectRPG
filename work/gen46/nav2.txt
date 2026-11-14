@@ -1,0 +1,84 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+InteriorNavProbeTest > storeys() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.07s ({regions=942, overlays=514, variants=524, scarp=47, coast=478, erosion=372, peaks=45, lakes=67, isles=4, rivers=787, wadis=14, ground=24, roads=625, causeways=3, architecture=952, pitsFilled=1309, pits=409, banks=76, clamp=14, cliffs=49, columns=862, falls=16, raise=11297, trees=292, outcrops=0, ways=609}), made and lit in 2.14s
+    [water] flow field grown in 1186 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [leg] route [-1894500170]
+    [leg] region of 186,54,658 = 184,54,658
+    [leg] region of 182,60,647 = 180,60,640
+    [leg] region of 182,60,646 = 180,60,640
+    [leg] column 186,658: 52=2 53=1 54=0 55=0 56=0 57=0
+    [leg] column 182,647: 58=2 59=7 60=0 61=0 62=0 63=0
+    [nav] sanctuary_jaehaerys from 200.5,60.0,643.5
+      storey y60 (x 175..198 across, z 637..650 down)
+       ####################oooo
+       ##o##ooooooooooooo##oooo
+       #ooo#ooo#o#o#o#o#oo#oooo
+       ##oo#ooo#o#o#o#o#o##oooo
+       ###o#ooo#o#o#o#o#o######
+       #oooDooo#o#o#o#o#ooo#xo#
+       ##oo#ooo#o#o#o#o#ooooooD
+       ###o##oooooooooooooooooD
+       #ooo#ooo#o#o#o#o#ooo##o#
+       #o####oo#o#o#o#o#o######
+       #oo##ooo#o#o#o#o#o##oooo
+       ##oo#ooo#o#o#o#o#oo#oooo
+       ##oo##ooooooooooo###oooo
+       ####################oooo
+      storey y66 (x 175..198 across, z 637..650 down)
+       ########################
+       ########################
+       ########################
+       ########################
+       ########################
+       ###################xxx##
+       ###################Sxx##
+       ####################xx##
+       ########################
+       ########################
+       ########################
+       ########################
+       ########################
+       ########################
+      storey y72 (x 175..198 across, z 637..650 down)
+       ########################
+       ########################
+       ########################
+       xxxxxxxxxxxxxxxxxxxxx###
+       ########################
+       #####################x##
+       ###################xxxx#
+       ######################x#
+       ######################S#
+       ########################
+       xxxxxxxxxxxxxxxxxxxxx###
+       ########################
+       ########################
+       ########################
+  slow: rpg.probe.InteriorNavProbeTest.storeys() 33.915 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 38s
+9 actionable tasks: 1 executed, 8 up-to-date

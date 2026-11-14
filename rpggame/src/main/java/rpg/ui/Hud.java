@@ -131,7 +131,7 @@ public final class Hud {
         group("world", "overlays", Placement.at(Anchor.SCREEN, 0, 0), "prompt", Placement.at(Anchor.SCREEN, 0, 0), "death", Placement.at(Anchor.SCREEN, 0, 0));
         group("vitals", "vitals", Placement.at(Anchor.TOP_LEFT, 16, 18), "party", Placement.at(Anchor.TOP_LEFT, 16, 142), "sentence", Placement.at(Anchor.TOP, 0, 18), "sneak", Placement.at(Anchor.BOTTOM, 0, 90), "actionbar", Placement.at(Anchor.BOTTOM, 0, 10), "xpdrops", Placement.at(Anchor.TOP_RIGHT, 190, 18));
         group("hud", "minimap", Placement.at(Anchor.TOP_RIGHT, 16, 16), "area", Placement.at(Anchor.TOP_RIGHT, 16, 186),
-                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "levelbanner", Placement.at(Anchor.TOP, 0, 96), "bountynotice", Placement.at(Anchor.TOP, 0, 150),
+                "wanted", Placement.at(Anchor.TOP_RIGHT, 16, 244), "target", Placement.at(Anchor.TOP, 0, 16), "honor", Placement.at(Anchor.TOP, 0, 66), "levelup", Placement.at(Anchor.TOP, 0, 74), "levelbanner", Placement.at(Anchor.TOP, 0, 96), "bountynotice", Placement.at(Anchor.TOP, 0, 150), "regionbanner", Placement.at(Anchor.TOP, 0, 16),
                 "chat", Placement.at(Anchor.BOTTOM_LEFT, 12, 12), "work", Placement.at(Anchor.CENTER, 0, 92));
         group("frame", "frame", Placement.at(Anchor.CENTER, 0, FRAME_Y));
         // what is not the player's own (a container, a body, a shop) stands apart, left of the frame (Windows.detach)
@@ -404,10 +404,10 @@ public final class Hud {
             y += (f.height() + 8) * Math.min(1, f.alpha * 1.6f);
         }
     }
-    static final String[] TOP_STACK = {"sentence", "target", "levelbanner", "levelup", "honor", "bountynotice"};
+    static final String[] TOP_STACK = {"regionbanner", "sentence", "target", "levelbanner", "levelup", "honor", "bountynotice"};
 
     /** cl_showfps and cl_showpos: the frame rate, and where you are, top left over everything. */
-    /** (0.4.1) The developer display (devmode). */
+    /** (0.4.1) The developer display (the devui command). */
     public final DevDisplay dev;
 
     private void overlays(Ui2D ui) {
@@ -547,7 +547,7 @@ public final class Hud {
         b.append(String.format("\n%.1f kg, %d x %d", s.weight(), d.gw, d.gh));
         if (s.inner != null) b.append("\nHolds ").append(s.inner.stacks().size()).append(" item(s) in ").append(s.inner.w).append(" x ").append(s.inner.h);
         if (s.stolen) b.append("\nStolen from ").append(g.nameOf(s.owner));
-        if (d.reqSkill != null) b.append("\nRequires ").append(d.reqSkill.title).append(" ").append(d.reqLevel);
+        for (var r : d.requirements().entrySet()) b.append("\nRequires ").append(r.getKey().title).append(" ").append(r.getValue());
         return b.toString();
     }
 

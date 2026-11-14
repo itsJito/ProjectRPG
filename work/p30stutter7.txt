@@ -1,0 +1,111 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 12 2026 02:59:59 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 18.18s ({regions=863, overlays=542, variants=342, scarp=68, coast=371, erosion=404, peaks=54, lakes=80, isles=5, rivers=826, wadis=18, ground=44, roads=875, causeways=5, architecture=907, pitsFilled=1383, pits=947, banks=199, clamp=20, cliffs=89, columns=816, falls=17, raise=9619, trees=298, outcrops=1, ways=723}), made and lit in 1.87s
+[Load] ShadowVeil 20.13s
+[Load] renderer and UI 5.93s
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 28 meshes, 1.05s
+[Load] 215 furniture models made in 0.09s
+[Load] first rendered frame 5.98s
+[Load] the world about the spawn made ready in 10.15s
+[Load] game frame 1: scene 23 ms, interface 1023 ms, render 33 ms
+[Load] game frame 2: scene 10 ms, interface 6 ms, render 8 ms
+[Load] game frame 3: scene 9 ms, interface 7 ms, render 14 ms
+[Load] the first frames drawn behind the loading screen in 2.72s
+[stutter] preload 12.87s
+[stutter] first tick 25 ms
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+
+[stutter] spike at 17: 108 ms - tick 27, draw 81 (scene 7, ui 4, render 70) -
+[stutter] spike at 18: 98 ms - tick 41, draw 56 (scene 19, ui 4, render 33) -
+[stutter] spike at 20: 62 ms - tick 21, draw 41 (scene 14, ui 4, render 22) -
+[stutter] spike at 29: 88 ms - tick 23, draw 65 (scene 5, ui 32, render 28) -
+[stutter] spike at 40: 68 ms - tick 24, draw 44 (scene 4, ui 3, render 37) -
+[stutter] spike at 43: 77 ms - tick 19, draw 58 (scene 15, ui 4, render 38) -
+[stutter] spike at 44: 172 ms - tick 50, draw 122 (scene 107, ui 5, render 9) -
+[stutter] spike at 45: 85 ms - tick 37, draw 47 (scene 12, ui 10, render 25) -
+[stutter] spike at 52: 62 ms - tick 30, draw 32 (scene 5, ui 3, render 23) -
+[stutter] spike at 62: 63 ms - tick 48, draw 14 (scene 5, ui 2, render 7) -
+[stutter] spike at 75: 191 ms - tick 56, draw 135 (scene 4, ui 15, render 116) -
+[stutter] spike at 77: 189 ms - tick 11, draw 179 (scene 6, ui 2, render 171) -
+[stutter] spike at 78: 75 ms - tick 13, draw 62 (scene 4, ui 2, render 56) -
+[stutter] spike at 79: 248 ms - tick 10, draw 237 (scene 5, ui 2, render 230) -
+[stutter] spike at 80: 81 ms - tick 11, draw 70 (scene 4, ui 2, render 65) -
+[stutter] spike at 81: 140 ms - tick 11, draw 129 (scene 4, ui 2, render 123) -
+[stutter] spike at 84: 101 ms - tick 11, draw 90 (scene 24, ui 3, render 63) -
+[stutter] spike at 85: 109 ms - tick 12, draw 97 (scene 5, ui 2, render 90) -
+[stutter] spike at 89: 129 ms - tick 28, draw 101 (scene 5, ui 3, render 93) -
+[stutter] spike at 104: 67 ms - tick 55, draw 12 (scene 5, ui 3, render 4) -
+[stutter] spike at 129: 87 ms - tick 14, draw 73 (scene 4, ui 31, render 38) -
+[stutter] spike at 139: 70 ms - tick 30, draw 40 (scene 5, ui 2, render 33) -
+[stutter] spike at 213: 83 ms - tick 70, draw 13 (scene 4, ui 1, render 8) -
+[stutter] spike at 246: 86 ms - tick 10, draw 76 (scene 3, ui 7, render 66) -
+[stutter] spike at 247: 245 ms - tick 10, draw 235 (scene 4, ui 1, render 230) -
+[stutter] spike at 248: 341 ms - tick 54, draw 287 (scene 3, ui 1, render 282) -
+[stutter] spike at 249: 222 ms - tick 17, draw 191 (scene 5, ui 2, render 184) -
+[stutter] spike at 251: 117 ms - tick 11, draw 106 (scene 3, ui 1, render 102) -
+[stutter] spike at 255: 93 ms - tick 20, draw 74 (scene 40, ui 3, render 30) -
+[stutter] spike at 274: 75 ms - tick 55, draw 20 (scene 7, ui 3, render 9) -
+[stutter] spike at 299: 82 ms - tick 14, draw 68 (scene 60, ui 1, render 7) -
+[stutter] spike at 513: 61 ms - tick 9, draw 52 (scene 35, ui 1, render 16) -
+[stutter] spike at 584: 66 ms - tick 59, draw 8 (scene 3, ui 1, render 3) -
+[stutter] scene stretches (ms/frame): lamps+fires 0.76 lights+falls 1.01 sea 0.01 foliage 0.28 farms+fish+workshops 0.05 fences+animals 0.96 people 0.53 monsters+objects 1.35 focus+projectiles 0.33 debris+particles 0.01
+[stutter] median 21.6 ms, p95 62.5, p99 189.3, worst 341.4 at frame 248, 99 frames over 33 ms
+[stutter] first 60: 49(0/0) 41(0/0) 34(0/0) 41(0/0) 34(0/0) 41(0/0) 34(0/0) 32(0/0) 29(0/0) 40(0/0) 30(0/0) 33(0/0) 41(0/0) 35(0/0) 53(0/0) 35(0/0) 32(0/0) 108(0/0) 98(0/0) 46(0/0) 62(0/0) 45(0/0) 29(0/0) 34(0/0) 28(0/0) 32(0/0) 27(0/0) 29(0/0) 26(0/0) 88(0/0) 31(0/0) 32(0/0) 46(0/0) 38(0/0) 34(0/0) 40(0/0) 30(0/0) 43(0/0) 39(0/0) 32(0/0) 68(0/0) 40(0/0) 31(0/0) 77(0/0) 172(0/0) 85(0/0) 42(0/0) 33(0/0) 24(0/0) 35(0/0) 30(0/0) 32(0/0) 62(0/0) 60(0/0) 24(0/0) 32(0/0) 23(0/0) 25(0/0) 22(0/0) 39(0/0)
+time+death                   0.00 ms
+law.update                   0.00 ms
+controller.update            0.00 ms
+interact.update              0.00 ms
+combat.update                0.00 ms
+gore.update                  0.00 ms
+prayers.update               0.00 ms
+magic.update                 0.00 ms
+ai                           0.00 ms
+carrying.update              0.00 ms
+chemistry.update             0.00 ms
+traps.update                 0.00 ms
+dungeons.update              0.00 ms
+foliage.update               0.00 ms
+objects.update               0.00 ms
+undertaker.update            0.00 ms
+spareWatch                   0.00 ms
+glass.update                 0.00 ms
+econ.update                  0.00 ms
+prog.update                  0.00 ms
+fx.update                    0.00 ms
+animals                      0.00 ms
+monsters                     0.00 ms
+engine.frame (native)        0.00 ms
+afterFrame                   0.00 ms
+

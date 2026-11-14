@@ -1,0 +1,108 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :test
+  slow: rpg.Gamefixes039Test.theEstateAndItsPeopleHaveIdsNoOneElseHas() 22.875 s
+  slow: rpg.Gamefixes040Test.steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() 24.18 s
+
+SimProfileProbe > profileTheSimulation() SKIPPED
+  slow: rpg.actor.FirstPersonResponseTest.firstPersonAnswersTheKeysSoonerThanThirdPerson() 31.911 s
+  slow: rpg.ai.FullPackTest.whatNoStoreBuysIsBanked() 47.332 s
+  slow: rpg.ai.CombatTacticsTest.incomingFireChoosesPhysicalCoverAndDestroyedCoverIsReconsidered() 22.468 s
+  slow: rpg.ai.FullPackTest.aFullPackIsSoldWhereAStoreBuys() 24.174 s
+
+FlyerProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes029Test.everyNewLadderCanBeClimbedToTheTop() 21.643 s
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 39.374 s
+  slow: rpg.ai.Gamefixes032Test.anOrcBelowAPlayerOnAWallRoarsAndThrowsStonesUp() 22.056 s
+  slow: rpg.ai.Gamefixes031Test.aSaddledWildHorseIsBrokenInFarFasterThanABareOne() 30.151 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 118.568 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 40.591 s
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 82.926 s
+  slow: rpg.ai.Gamefixes034Test.underWaterTooLongTheBreathRunsOutAndItHurts() 21.152 s
+
+JumpProbeTest > probe() SKIPPED
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 31.533 s
+
+LifeProbeTest > probe() SKIPPED
+
+LifeProbeTest > trace() SKIPPED
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 30.046 s
+  slow: rpg.ai.NpcPaceTest.theTownGoingAboutItsMorningNeverSprints() 29.743 s
+
+SoundProbeTest > probe() SKIPPED
+
+TabernaProbeTest > probe() SKIPPED
+
+ReportPauseProbeTest > probe() SKIPPED
+
+StallMapProbeTest > probe() SKIPPED
+  slow: rpg.animal.WadingTest.aCowWadesIntoThePond() 22.631 s
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 58.888 s
+  slow: rpg.combat.PunchBanditTest.punchingABanditInTownRunsClean() 24.926 s
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 25.83 s
+
+SummonStressTest > summoningOverAndOverNeverBreaksTheWorld(Path) FAILED
+    org.opentest4j.AssertionFailedError: no corpse for a conjured ally ==> expected: <3> but was: <4>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:166)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:664)
+        at app//rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(SummonStressTest.java:79)
+  slow: rpg.combat.WaveSpellTest.everyWaveStrikesWhatItsBreadthPassesOver() 54.469 s
+  slow: rpg.law.BountyPaymentTest.aPettyBountyIsAFineNeverAFight() 20.811 s
+  slow: rpg.law.LieToGuardTest.aSuccessfulLieCallsOffTheWholeWatch() 23.505 s
+
+HaunterProbeTest > probe() SKIPPED
+  slow: rpg.world.CampfireSpreadTest.aCampfireOnGrassStaysACampfire() 21.815 s
+  slow: rpg.world.FireSpreadTest.aPlankWallBurnsAlongOverAMinuteNotInSeconds() 20.809 s
+
+IvyProbeTest > probe() SKIPPED
+
+MapDumpProbeTest > dump() SKIPPED
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 42.008 s
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 24.015 s
+
+TextureSheetProbeTest > sheet() SKIPPED
+Requesting stop of task ':test' as it has exceeded its configured timeout of 45m.
+
+UltimateWorldTest > lakeNetsRetainTheirActualToolAndCatchAcrossLoad(Path) SKIPPED
+
+494 tests completed, 1 failed, 14 skipped
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> Timeout has been exceeded
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 45m 20s
+9 actionable tasks: 2 executed, 7 up-to-date
+EXIT 1

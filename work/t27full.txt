@@ -1,0 +1,161 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+
+> Task :theastrattoengine:buildNative
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+ai_service.cpp
+c_api.cpp
+audio_device.cpp
+audio_service.cpp
+chemistry_service.cpp
+engine.cpp
+collide.cpp
+impulsis_service.cpp
+space.cpp
+module_host.cpp
+pathfinder.cpp
+walkability.cpp
+sight.cpp
+bodies.cpp
+physics_service.cpp
+
+> Task :compileJava
+> Task :classes
+
+> Task :theastrattoengine:buildNative
+ragdoll.cpp
+sydney.cpp
+chunk_mesher.cpp
+layers.cpp
+renderer.cpp
+voxel_world.cpp
+   Creating library C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.lib and object C:\Users\John\Documents\ProjectRPG\theastrattoengine\native\obj\astratto.exp
+
+> Task :theastrattoengine:engineResources
+> Task :theastrattoengine:processResources
+> Task :theastrattoengine:classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :theastrattoengine:jar
+> Task :test
+
+WeeklyLifeTest > theTownsLiveThroughTwoDaysAtSpeed() FAILED
+    org.opentest4j.AssertionFailedError: Philon was not at work when the plan said work
+    sown 36, harvested 36, apples 53, meals eaten at an inn 50, patrons 34
+      DevCity Inn: meals 6 drinks 17 nights 0 produce bought 34; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 apple, 1 apple, 1 vegetable_stew, 1 bread, 1 bread, 1 bread, 1 bread, 1 apple, 1 potato, 1 potato, 1 onion, 1 onion, 14 barley, 1 hops, 5 glass_bottle]
+      DevPalace Taberna: meals 16 drinks 11 nights 0 produce bought 68; bar now [1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 ale, 1 apple, 1 potato, 1 potato, 1 potato, 1 apple, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 hot_cider, 1 apple, 1 onion, 1 potato, 1 bread, 1 apple, 1 onion, 1 onion, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 apple, 1 onion, 1 apple, 1 barley, 16 hops, 3 glass_bottle, 1 apple, 1 apple, 1 apple, 1 onion, 1 onion, 1 onion, 1 apple, 1 apple, 1 bread, 1 bread, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 carrot, 1 potato, 1 potato, 1 potato, 1 potato, 1 onion, 1 hot_cider, 1 bread]
+    goals: {FIRE_RESPONSE=7, BANK=380, SLEEP=13424, HIDE=183, WANDER=1376, SEARCH=416, FLEE=180, INN=2737, FIGHT=107, WARN=22, CASE=159, SOCIALIZE=3442, RETURN=4, PATROL=1710, IDLE=3, SHELTER=9402, INVESTIGATE=1274, EAT=1225, WORK=21981, ERRAND=1391, REPORT_CRIME=231, LOOK=63, HOME=7426, PRAY=378}
+      Ada          SHOP     work 369/411 blocked   2/ 720  
+      Bram         WATCH    work 135/135 blocked   4/ 720  as close as I can get
+      Cole         WATCH    work 164/164 blocked   0/ 720  searching nearby (0)
+      Dag          TRADE    work 294/312 blocked   6/ 720  
+      Eda          TRADE    work 317/319 blocked   1/ 720  as close as I can get
+      Gus          SHOP     work 337/363 blocked   0/ 720  
+      Hale         WATCH    work 306/307 blocked   0/ 720  looking round the spot
+      Ivo          TRADE    work 248/303 blocked   0/ 720  creeping closer to look
+      Jun          SHOP     work 387/404 blocked   0/ 720  
+      Kit          SHOP     work 318/387 blocked   0/ 720  
+      Mara         GROWER   work 205/286 blocked   0/ 720  
+      Morrow       CLERGY   work 256/304 blocked   2/ 720  as close as I can get
+      Silas        SHOP     work 174/262 blocked   0/ 720  
+      Bobwin       WATCH    work 140/140 blocked   0/ 720  searching nearby (2)
+      Oswin        LEISURED work  57/ 88 blocked   0/ 720  
+      Maud         CLERGY   work 235/250 blocked   0/ 720  
+      Alric        CLERGY   work 230/233 blocked   0/ 720  
+      Godric       TRADE    work 333/352 blocked   0/ 720  
+      Isolde       LEISURED work 196/196 blocked   0/ 720  
+      Elowen       TRADE    work 305/310 blocked   0/ 720  
+      Oren         TRADE    work  88/116 blocked   0/ 252  getting clear of an uncontrolled fire
+      Tamsin       TRADE    work 167/186 blocked   2/ 720  
+      Sir Alden    WATCH    work 161/162 blocked   0/ 720  getting up and dressed
+      Fenna        TRADE    work 385/388 blocked   0/ 720  creeping closer to look
+      Wren         SHOP     work 405/408 blocked  53/ 720  
+      Hilda        TRADE    work 253/265 blocked   0/ 720  
+      Bertram      TRADE    work 222/239 blocked   0/ 720  
+      Sir Roderic  WATCH    work 297/307 blocked   0/ 720  
+      Wynn         TRADE    work 173/202 blocked   0/ 720  
+      Corwin       TRADE    work  57/ 58 blocked   0/ 117  running from Wolf
+      Severinus    SHOP     work 280/388 blocked   0/ 720  as close as I can get
+      Cassia       WATCH    work 302/303 blocked   0/ 720  
+      Titus        WATCH    work 308/308 blocked   0/ 720  
+      Decimus      WATCH    work 304/305 blocked   0/ 720  getting up and dressed
+      Quintus      WATCH    work 168/169 blocked   0/ 720  
+      Sextus       WATCH    work 165/166 blocked   0/ 720  getting up and dressed
+      Lucilla      SHOP     work 248/344 blocked   0/ 720  as close as I can get
+      Flavia       SHOP     work 315/329 blocked   0/ 720  
+      Aurelia      CLERGY   work 275/331 blocked   0/ 720  as close as I can get
+      Philon       CLERGY   work 101/311 blocked   2/ 720  as close as I can get
+      Nikias       LEISURED work   0/  0 blocked   0/ 720  
+      Gaius        TRADE    work 273/290 blocked   0/ 720  as close as I can get
+      Servius      LEISURED work   0/  0 blocked   0/ 720  
+      Octavia      TRADE    work 220/260 blocked   2/ 720  as close as I can get
+      Marcellus    TRADE    work 282/333 blocked   0/ 720  as close as I can get
+      Cornelia     TRADE    work 157/306 blocked   0/ 720  as close as I can get
+      Lucius       TRADE    work 281/301 blocked   0/ 720  
+      Atalanta     TRADE    work 406/408 blocked   0/ 720  
+      Livia        TRADE    work 166/201 blocked   0/ 720  as close as I can get
+      Maximus      WATCH    work 309/309 blocked   0/ 720  
+      Arthur       TRADE    work 188/270 blocked   4/ 720  as close as I can get
+      Sir Lancelot WATCH    work 134/135 blocked   0/ 720  
+      Sir Gawain   TRADE    work  43/ 49 blocked   0/ 192  
+      Tristan      TRADE    work 391/396 blocked   0/ 720  
+      Percival     TRADE    work 184/213 blocked   2/ 720  as close as I can get
+      Merlin       TRADE    work 215/224 blocked   8/ 720  
+      Aeldric      TRADE    work 217/228 blocked   4/ 720  
+      Brannoc      TRADE    work 349/374 blocked   0/ 720  creeping closer to look
+      Corren       TRADE    work 301/305 blocked 126/ 720  paused to reconsider a blocked route
+      Deryn        TRADE    work 142/282 blocked   0/ 720  as close as I can get
+      Eirwen       TRADE    work 253/256 blocked  14/ 720  fetching help
+      Fennric      TRADE    work 285/296 blocked  37/ 720  looking round the spot
+      Garron       TRADE    work 242/257 blocked 161/ 720  paused to reconsider a blocked route
+      Haldren      TRADE    work 256/294 blocked  55/ 720  as close as I can get
+      Istren       SHOP     work 221/294 blocked   2/ 720  
+      Maerwyn      SHOP     work 300/336 blocked   0/ 720  as close as I can get
+      Tobin        GROWER   work 254/256 blocked   0/ 720  
+      Hedda        GROWER   work 290/301 blocked   0/ 720  as close as I can get
+      Rufus        GROWER   work 322/332 blocked   0/ 720  
+      Valeria      GROWER   work 289/320 blocked   0/ 720  
+      Hamon        INN      work 308/476 blocked   0/ 720  as close as I can get
+      Bess         INN      work 341/437 blocked   0/ 720  as close as I can get
+      Wilfred      INN      work 315/370 blocked   0/ 720  as close as I can get
+      Vibius       INN      work 449/486 blocked   0/ 720  
+      Julia        INN      work 478/531 blocked   0/ 720  as close as I can get
+      Appius       INN      work 379/462 blocked   0/ 720  as close as I can get
+      Hildric      TRADE    work  86/173 blocked   0/ 720  creeping closer to look
+      Odda         SHOP     work 208/323 blocked   0/ 720  on the way
+      Wendel       TRADE    work 143/235 blocked   1/ 720  
+      Mabyn        TRADE    work 191/287 blocked   0/ 720  as close as I can get
+      Elsbet       TRADE    work 185/299 blocked   2/ 720  creeping closer to look
+      Tamsyn       TRADE    work 301/317 blocked   0/ 720  
+      Osric        TRADE    work 282/298 blocked   0/ 720  
+      Rowena       TRADE    work 393/404 blocked   0/ 720  
+      Ansel        GROWER   work 178/324 blocked   0/ 720  as close as I can get
+      Beatrix      TRADE    work 184/340 blocked   0/ 720  as close as I can get
+      Morwen       TRADE    work 153/230 blocked   0/ 720  as close as I can get
+      Sabine       LEISURED work   0/  0 blocked   0/ 720  as close as I can get
+      Brand        TRADE    work 261/345 blocked   0/ 720  as close as I can get
+      Kerra        TRADE    work 281/318 blocked   0/ 720  as close as I can get
+      Baron Edric  SHOP     work 401/411 blocked   0/ 720  
+      Sir Roland   WATCH    work 308/311 blocked   2/ 720  on the way
+      Marta        TRADE    work 361/365 blocked   2/ 720  on the way
+      Osric        TRADE    work 378/383 blocked   3/ 720  on the way
+      Bram         TRADE    work 371/377 blocked   3/ 720  on the way
+      Elsie        GROWER   work 270/280 blocked   3/ 720  on the way
+     ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.ai.WeeklyLifeTest.theTownsLiveThroughTwoDaysAtSpeed(WeeklyLifeTest.java:117)
+
+Gamefixes041PostsTest > everyonesPostIsFloorAndTheMansionStairsAreOpen() FAILED
+    org.opentest4j.AssertionFailedError: posts on furniture or in the air: [Corren stands on something at (90.5, 134.5)] ==> expected: <true> but was: <false>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+        at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+        at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+        at app//rpg.world.Gamefixes041PostsTest.everyonesPostIsFloorAndTheMansionStairsAreOpen(Gamefixes041PostsTest.java:33)

@@ -1,0 +1,15 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 00:31:22 (MSVC)
+[Load] native services 0.31s
+[Load] ShadowVeil grown in 17.97s ({regions=674, overlays=454, variants=279, scarp=51, coast=405, erosion=363, peaks=48, lakes=71, isles=5, rivers=638, wadis=13, ground=20, roads=568, causeways=3, architecture=947, pitsFilled=1383, pits=514, banks=59, clamp=17, cliffs=52, columns=1330, falls=19, raise=10520, trees=277, outcrops=0, ways=563}), made and lit in 2.57s
+[Load] ShadowVeil 20.78s
+[Load] renderer and UI 14.90s
+[monsters] 10 wilderness territories (passed over: 7 wet or road, 28 in a realm, 68 near the settled, 8 by a road, 23 by their biome's chances; 759 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[interiors] 509 buildings shot in 6s -> build/review-p30/final

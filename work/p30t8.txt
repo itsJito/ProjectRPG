@@ -1,0 +1,14 @@
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 64.243 s
+
+13 tests completed, 1 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 2m 16s

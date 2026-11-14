@@ -1,0 +1,47 @@
+## Pass 34 - Alpha 0.4.3 "Full House" (Hoodie)
+
+The structural, functional and NPC-readiness pass on ShadowVeil, with the 0.4.2 bug list. The lore's whole roster (projectrpg.txt, every "NPCs Present" list: 205 people) is now registered and spawned, each with a home, a planned bed, a workplace and exterior stand-ins until the interiors of 0.4.4; the farms, waters and wilds are populated; the bug list is fixed. No interior was built. The devmap is untouched (every new behaviour is gated on ShadowVeil, data-only, or a fix to a shared bug).
+
+New tests: `rpg.world.Gamefixes043Test` (roster and names, homes/beds/work and the routes between them, stations and farmed fields, fish in every kind of water, wildlife and predator clearance, clear ways and claimed lots, devmap gating, goto places, pos, version). `Gamefixes042Test` reads homes from the census. New probes: `rpg.probe.WorldInspectProbeTest` (`-Prpg.probeWho="x,y,z;..."`: the structure, objects, fields, people and cell layers at a point), `PopulationProbeTest` (roster, wildlife, census problems, every person's outcomes over `-Prpg.probeFrames` game hours), `RosterProbeTest`. Gallery `RPG_GALLERY_ONLY=p29` (`RPG_REVIEW_ONLY=torch,fpheld,devui`; `RPG_REVIEW_AT="x,y,z[,dist];..."` four views and a top view of any point, with `RPG_MAP=shadowveil`).
+
+### The census (rpg.world.shadowveil.Census, data/shadowveil_census.json)
+- The data is generated from projectrpg.txt and the building registry (work/gen/census.py, write_census.py) and kept as plain data: per person a one-word name (titles and honorifics moved to `title`), kingdom, Npc role and profession (mapped from the lore calling), home and workplace (registry ids, resolved from the lore's home text and, for gatherers and growers, the nearest field, wood yard, mine mouth or quarry), sex. 100 entries name the roster person (`body`, an Ids constant) who plays them on ShadowVeil - renamed and re-dressed there only; the other 105 are made for ShadowVeil alone (`Ids.SV_PEOPLE` + index) with kits by role from the data.
+- `Census.apply` runs in `AiSystem.init` after the transfer rules: name, title ("Blacksmith of Valgard"), profession when it belongs to the role, look regenerated when the sex changes, home stage and work stage (`stageOf`: two cells before the structure's first doorway, people sharing one side by side; an open place's middle; a mine's mouth), each snapped to a cell that is solid underfoot and open two high (`standable`), a planned bed inside the home's largest reserved interior along its walls, upstairs where there is one (`bed`; a bedroll at the stand-in for camps and caves). Home/post/duty/spawn set from the stages; a named service post (the teller at the bank) still wins. The registry gets residents, workers, planned beds and stations (written in registry.json).
+- `Census.worksites`: the stations each calling needs (data `stations`: smiths anvil + furnace, builders sawbench + crafting table, cooks a range, the cloth trades their own) set once per workplace on open ground beside its work stage, never on a road, a lane, a lot or a stand-in; block and Station object together (ids `SV_PEOPLE + 10000`).
+- Night: `Npc.indoors`. `Offstage.update` sends a census resident whose goal is SLEEP and who stands at their home stage inside, off-stage, between the data's `bedHour` and `wakeHour`, wherever the player is; they come out at their door in the morning.
+- Bounty hunter Corvane has no home (the documented exception); `Census.problems()` lists anyone else without a home, bed or work stage (empty).
+- Mononyms on both maps for the titled roster people via tuning `names.roster` (KNIGHT Alden, BORDER_KNIGHT Roderic, LANCELOT, GAWAIN, BARON Edric, MANSION_KNIGHT Roland, MANSION_PORTER Godwin, MANSION_WOODCUTTER Leofric - the duplicate Osric and Bram).
+- `Household.covers` is devmap-only (the DevMansion's household ran on devmap coordinates on ShadowVeil).
+
+### Work
+- `Jobs.site` never offered trees (ShadowVeil's thousands were skipped for cost), so woodcutting callings never cut: `Jobs.tree` searches the trees about the workplace through the object grid (`jobs.treeReach` 48 m), one cutter a tree.
+- Farms: `ShadowVeil.farms` now farms every field and garden the architecture raised (data `census.fields`: templates, `unfarmed` - the vineyard's vines - and crops by kingdom), kept by the census crop farmer working it, else the nearest crop farmer of its kingdom within `reach`, else open. `Kit.field` lays its furrows on the plots' rows (even rows from the lot's north edge) so the crops stand on tilled earth; its hay and row blocks between.
+
+### Wildlife (rpg.animal.Animals)
+- On ShadowVeil the farm's stock moves to its stables; the devmap's wild wood and southern wood no longer come (they were moved whole to Millwood and Dead Wood - wolves, lions and bears beside Loxford). `wilds()` grows habitats over the whole map from `shadowveil.json` fauna `wilds`: a point every `grid` cells (jittered), its biome's groups each by its chance, prey clear of every structure by `clearance.prey`, any group with a predator only where no kingdom's law holds and `clearance.predator` from every settled structure and census home. Each drinks at the nearest bank and rests about its middle; groups set down where they are (`groupAt`). Result: 101 habitats, 21 predator ranges, the nearest 125 m from a town home.
+
+### Fish
+- `Fishery.allWaters`: besides the fishing spots' own waters, the whole map in `fishery.tile` tiles; a tile with `minCells` water cells is a water of the kind most of them are (sea by depth: shore, coast, offshore; river; lake, or pond under 120 cells), stocked as its kind in proportion to its cells (`fullCells`). Fish swim live near the player as before.
+
+### Map and console
+- `DungeonLayout.at` and `inDungeonRegion` answer only on the devmap: on ShadowVeil every point east of x 192 counted as inside a devmap dungeon (the map switched to a dungeon's chart; monsters and the renderer took it too). The devmap's area signs (Store B, Chancery B...) are drawn on the devmap only. The devmap furnace's smoke and light likewise.
+- `goto` takes `ShadowVeil.destinations()`: the start, each kingdom (its heart on dry ground), every named place and every cave/mine mouth; `restart`/`reset` go to the map's spawn; `reset bounty` names the seven kingdoms. New `pos`: the cell X Y Z printed and put on the clipboard (Windows `clip`, else the desktop toolkit).
+- Devui: the panel set in the chat face at 16 px under the resource bars, a header with the frame rate coloured by smoothness, the position in 30 px figures (X green, Y red, Z blue, the order the request gave), labelled lines, the people near as a table (name, calling, distance, sight, awareness, goal).
+
+### Torch
+- `PlayerController`: the guard key lights a drawn torch whatever the off hand holds (a shield blocked it). `Rig`: a first-person carry pose in view space (it was carried about the shoulder, outside the view: the torch and its light were invisible) and brought before the face to be lit; a shield arm stays put while lighting. The player's own torch light casts no shadow in first person (the head shadowed the ground).
+
+### Structures
+- Fences: drawn by the renderer as models from the devmap's fence pass only; ShadowVeil's (every field's, pen's, garden's) were invisible blocks. `Kit.Canvas.set` records each fence's chunk and height span (`Terrain.fenceSpans`); `Gfx.fenceChunk` draws them on either map.
+- Valgard (246, 55, 607): houses stood a cell from the town wall's face, leaving blind slots; the wall now claims its band from two cells outside to one inside its thickness. The aqueduct's claim is three cells either side; it never writes into a lot, and where the ground stands over the channel it runs on as a buried conduit instead of cutting a trench through the town.
+- Cave mouths (the culvert cave, 573, 40, 899): `Architecture.mound` raised a dome flagged as cliff everywhere - a heap of bare cobble on the meadow. It now rises smoothly, grassed, rock only on the face about the opening, no trees on it; `Kit.mouth` raises an earthen bank over a cave passage that would stand out of the ground.
+- Ways: `Architecture.clearWays`, the last stage of growing, clears litter (loose logs, earth, rock, hay, crates, leaves at head height) from two cells over every road, lane and square outside a lot, and takes props off the ways; trunks of living trees stay.
+- Survey PASSED: 576 structures, 512 ready for their interiors.
+
+### Load stutter
+- Measured with the gallery's stutter mode: worst 205 ms three seconds in, all one goblin's first idle step - `RuntimeNavigation.corridor` searched a box 64 cells beyond both ends of even a three-metre trip, building navigation for every chunk in it. The margin now grows with the trip (`nav.corridorMinMargin` 20 to `nav.corridorMargin` 64). (Steering monsters straight instead handed the goal to the engine's own steering and cost 60-85 ms every 0.4 s - reverted.)
+- `Main.warmFrames` runs `load.warmTicks` (45) ticks with a frame every third behind the loading screen, so first-time work is done before play. Result: first second about 20 ms a frame (was 25-55), median 12.1 ms, p95 21 ms, worst 65 ms, 6 frames over 33 ms of 600 (was 205 ms, 20 frames).
+
+### Open
+- Water flow and "harsh" water blocks: the gamefixes line gave no coordinates; the rivers seen (Willow Brook, the Gleam) render their one-cell steps as sloped facets. Not changed this pass.
+

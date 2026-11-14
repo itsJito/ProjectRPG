@@ -35,13 +35,15 @@ public final class Swimming {
     /** The constants, per tick: stroke push, drag (kept fraction), gravity, the jump's rise and the crouch's dive, the bank's lift. */
     public static final float ACCEL = 0.02f, DRAG = 0.8f, DRAG_SPRINT = 0.9f, DRAG_UP = 0.8f, GRAVITY = 0.02f, RISE = 0.04f, DIVE = 0.04f, EXIT_LIFT = 0.3f;
     /** A current's push: m/s of current to blocks per tick per tick. */
-    public static final float FLOW_K = 0.0175f;
+    // (0.4.5, gamefixes: rivers pulled the player too hard - a swimmer was carried at nearly twice the water's own pace)
+    // a body afloat drifts at about two thirds of the water's speed, and a strong swimmer makes headway against it
+    public static final float FLOW_K = rpg.Tuning.f("water.swimPush", 0.0065f);
     /** (0.3.6) Water this many blocks deep or more floats a body; shallower, one standing on the bottom wades. */
     public static final int FLOAT_DEPTH = 2;
     /** (0.3.6) How much of its pace a body wading keeps, at the deepest wading (the water to the chest) and at the shin. */
     public static final float WADE_DEEP = 0.5f, WADE_SHALLOW = 0.85f;
     /** How much of the current a wading body takes (at the deepest wading; scaled by how deep it stands). */
-    public static final float WADE_FLOW = 0.8f;
+    public static final float WADE_FLOW = rpg.Tuning.f("water.wadePush", 0.35f);
     /** The share of a walking body's pace the water it stands in leaves it (1 on dry ground). */
     public float wadePace(Actor a) {
         if (a.swimMode != WADE) return 1;
@@ -168,7 +170,10 @@ public final class Swimming {
         boolean deepEnough = s.submerged >= (FLOAT_LINE - 0.12f) * s.height || s.eyeUnder;
         if (s.swimming) s.swimming = s.sprint && s.inWater && fwd > 0.1f;
         else s.swimming = s.sprint && s.inWater && fwd > 0.1f && deepEnough;
-        if (s.swimming) setBox(s, SWIM_BOX, SWIM_BOX);
+        // the flat swimming box only where it fits (pressed to a wall it stays as it is), and a body found inside rock is eased
+        // up out of it, never down
+        if (s.swimming && (s.width == SWIM_BOX && s.height == SWIM_BOX || free(s.x, s.y, s.z, SWIM_BOX, SWIM_BOX, false))) setBox(s, SWIM_BOX, SWIM_BOX);
+        if (!free(s.x, s.y, s.z, s.width, s.height, false)) for (double up = 0.05; up <= 1.2; up += 0.05) if (free(s.x, s.y + up, s.z, s.width, s.height, false)) { s.y += up; s.py = s.y; break; }
         else if (s.height < p.height && free(s.x, s.y, s.z, 0.6f, p.height, false)) { setBox(s, 0.6f, p.height); sample(p, s); }
         boolean cramped = !s.swimming && s.height < p.height;
         // 4. the strokes' push (stronger with Agility)
@@ -249,13 +254,18 @@ public final class Swimming {
         else if (axis == 1) { if (d > 0) maxY += d; else minY += d; }
         else { if (d > 0) maxZ += d; else minZ += d; }
         int x0 = (int) Math.floor(minX + eps), x1 = (int) Math.floor(maxX - eps), y0 = (int) Math.floor(minY + eps), y1 = (int) Math.floor(maxY - eps), z0 = (int) Math.floor(minZ + eps), z1 = (int) Math.floor(maxZ - eps);
+        // (0.4.4, gamefixes: stopping a sprint swim against a wall pushed the player under the map) only the cells ahead of
+        // the moving face stop it: a cell the box already overlaps (a wall it was widened into beside it) used to count as a
+        // face behind it, and turned a small rise into a drop of the body's whole height - through the bed of the lake
+        double sign = Math.signum(d);
         for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) for (int z = z0; z <= z1; z++) {
             if (!g.vox.solid(x, y, z)) continue;
-            if (axis == 0) d = d > 0 ? Math.min(d, x - (s.x + r)) : Math.max(d, x + 1 - (s.x - r));
-            else if (axis == 1) d = d > 0 ? Math.min(d, y - (s.y + s.height)) : Math.max(d, y + 1 - s.y);
-            else d = d > 0 ? Math.min(d, z - (s.z + r)) : Math.max(d, z + 1 - (s.z - r));
+            if (axis == 0) { if (d > 0 ? x + eps < s.x + r : x + 1 - eps > s.x - r) continue; d = d > 0 ? Math.min(d, x - (s.x + r)) : Math.max(d, x + 1 - (s.x - r)); }
+            else if (axis == 1) { if (d > 0 ? y + eps < s.y + s.height : y + 1 - eps > s.y) continue; d = d > 0 ? Math.min(d, y - (s.y + s.height)) : Math.max(d, y + 1 - s.y); }
+            else { if (d > 0 ? z + eps < s.z + r : z + 1 - eps > s.z - r) continue; d = d > 0 ? Math.min(d, z - (s.z + r)) : Math.max(d, z + 1 - (s.z - r)); }
         }
-        // never pulled backwards by a cell already overlapped (a body wedged a hair into a face)
+        // never carried backwards: a move is shortened, never reversed
+        if (Math.signum(d) != sign) d = 0;
         return Math.abs(d) < eps ? 0 : d;
     }
 

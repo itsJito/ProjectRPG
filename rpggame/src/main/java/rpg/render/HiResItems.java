@@ -99,6 +99,9 @@ final class HiResItems {
             int ex = side < 0 ? cx - span : cx + span + 1;
             switch (s) {
                 case 3 -> { for (int d = 1; d <= 3; d++) m.set(ex + side * (d / 2), y - d, cz, c); }                                  // Black: down-swept
+                case 0 -> { m.set(ex, y + 2, cz, k.wrap()); m.set(ex, y - 1, cz + 1, k.wrap()); }                                       // Stone: a crossbar bound on with cord
+                case 1 -> { m.set(ex + side, y, cz, c); m.set(ex + side, y + 1, cz + 1, sh(c, 1.15f)); }                               // Bronze: flared, cast ends
+                case 5 -> { for (int d = 1; d <= 3; d++) { m.set(ex + side * (d / 2), y + 1, cz - d, c); m.set(ex + side * (d / 2), y + 1, cz + 1 + d, c); } }   // Steel: quillons swept fore and aft
                 case 4, 6 -> { for (int d = 1; d <= 3; d++) { m.set(ex + side * (d / 3), y + 1 + d, cz, c); m.set(ex + side * (d / 3), y + 1 + d, cz + 1, c); } }  // up-swept
                 case 8 -> { for (int d = 1; d <= 4; d++) m.set(ex + side * (d > 2 ? 1 : 0), y + 1 + d, cz, c); m.set(ex - side, y + 6, cz, c); }   // Thorium: curled
                 case 10, 12 -> { for (int d = 1; d <= 5; d++) for (int z = 0; z < 2; z++) m.set(ex + side * d / 2, y + 1 + d, cz + z, d % 2 == 0 ? sh(c, 1.2f) : c); }  // Dragon: wings
@@ -106,6 +109,7 @@ final class HiResItems {
                 default -> { m.set(ex, y + 2, cz, c); m.set(ex, y + 2, cz + 1, c); }                                                     // a knob at each end
             }
         }
+        if (s == 4) for (int a = 0; a < 32; a++) { double an = a * Math.PI / 16; for (int z = -1; z <= 2; z++) m.set(cx + (int) Math.round(Math.cos(an) * 4.5) , y + 5 + (int) Math.round(Math.sin(an) * 4.5), cz + z, sh(c, 1.1f)); }   // White: a ring round the blade's root
         if (s == 7) for (int x = -3; x <= 4; x++) for (int z = -3; z <= 4; z++) { float dx = x - 0.5f, dz = z - 0.5f; if (dx * dx + dz * dz <= 14) m.set(cx + x, y, cz + z, c); }   // Titanium: a disc guard
     }
 
@@ -119,6 +123,11 @@ final class HiResItems {
             int y = y0 + i, left = len - i;
             float w = left > tip ? hw * (1 - 0.12f * i / (float) len) : hw * (left / (float) tip);
             if (k.style() == 9 && left > tip) w += (i % 6 < 3 ? 0.4f : 0);                         // Granite: stepped, hewn
+            // (0.4.6, gamefixes: every tier its own look, not only its colour) Stone knapped to a ragged edge; Bronze cast
+            // as a leaf, swelling past the middle; Steel a long, even, tapering blade
+            if (k.style() == 0 && left > tip) w += (i % 3 == 0 ? -0.55f : (i % 5 == 1 ? 0.35f : 0));
+            if (k.style() == 1 && left > tip) { float f = i / (float) (len - tip); w *= 0.75f + 0.95f * (float) Math.sin(Math.PI * Math.min(1, f * 0.85f + 0.08f)); }
+            if (k.style() == 5 && left > tip) w *= 1 - 0.18f * i / (float) len;
             int iw = Math.max(0, Math.round(w));
             for (int x = -iw; x <= iw + 1; x++) {
                 float off = Math.abs(x - 0.5f);
@@ -128,6 +137,11 @@ final class HiResItems {
                     int c = edge ? k.edge() : k.blade();
                     if (fuller && !edge && off < 0.6f && i > 2 && left > tip + 3) c = sh(k.blade(), 0.72f);
                     if (k.style() == 11 && !edge && off < 0.6f && i % 7 == 3 && left > tip + 2) c = metal(0xF0C850);   // Godly: gold inlay
+                    if (k.style() == 0) { c = (i * 7 + x * 5 + z * 3) % 5 == 0 ? sh(k.blade(), 0.8f) : (i + x) % 4 == 0 ? sh(k.blade(), 1.12f) : k.blade(); if (fuller && !edge && off < 0.6f) c = k.blade(); }   // Stone: flaked facets, no fuller
+                    if (k.style() == 2 && !edge && (i * 5 + x * 3) % 13 == 0) c = sh(k.blade(), 0.78f);         // Iron: hammer marks of the forge
+                    if (k.style() == 5 && !edge && i % 9 == 4 && left > tip + 2) c = sh(k.blade(), 1.12f);       // Steel: the polish's bands
+                    if (k.style() == 8 && !edge && (i * 3 + x * 5) % 11 == 0) c = k.gem();                      // Molten: veins of glowing heat
+                    if (k.style() == 3 && edge) c = sh(k.edge(), 0.85f);                                          // Black: a blackened, dull edge
                     m.set(cx + x, y, cz + z, c);
                 }
             }
@@ -342,7 +356,23 @@ final class HiResItems {
             }
             default -> {
                 if (edge) return k.guard();
-                return (x + y) % 11 == 0 ? k.edge() : k.blade();
+                // (0.4.5) the plate's surface by its tier's design (ArmourDesign), as it is painted when worn
+                ArmourDesign ad = ArmourDesign.of(t);
+                int b = k.blade(), e = k.edge(), dk = sh(b, 0.7f);
+                int glow = ad.glow() >= 0 ? mat(ad.glow()) : b, accent = ad.accent() >= 0 ? metal(ad.accent()) : e;
+                return switch (ad.pattern()) {
+                    case "slab" -> y % 5 == 4 || (x + (y / 5 % 2) * 3) % 6 == 5 ? sh(b, 0.65f) : (x + y) % 9 == 0 ? mat(0x6A5030) : b;
+                    case "scale" -> { int v = y % 3, u = (x + (y / 3 % 2) * 2) % 4; yield v == 2 || u == 0 ? dk : v == 0 ? e : b; }
+                    case "rivets" -> y % 6 == 0 ? dk : y % 6 == 1 && x % 4 == 1 ? e : sh(b, 0.9f);
+                    case "flutes" -> x % 3 == 0 ? e : x % 3 == 2 ? dk : b;
+                    case "lames" -> y % 3 == 0 ? dk : y % 3 == 1 ? e : b;
+                    case "chisel" -> sh(b, 0.82f + ((x / 3 * 7 + y / 3 * 13 + z / 3 * 5) % 6) * 0.06f);
+                    case "chevron" -> { int v = (Math.abs(x - 18) + y) % 6; yield v < 2 ? e : v == 2 ? dk : b; }
+                    case "cracks" -> ((x * 5 + y * 3 + z * 7) % 13 == 0 || (x + y * 2) % 17 == 0) ? glow : sh(b, 0.6f);
+                    case "filigree" -> (x + y) % 5 == 0 && (x * y) % 3 == 0 || y % 8 == 0 && x % 2 == 0 ? accent : b;
+                    case "jagged" -> { int v = (x * 2 + y) % 7; yield v == 0 ? dk : v == 1 ? e : (x * 3 + y) % 17 == 0 ? glow : b; }
+                    default -> (x + y) % 11 == 0 ? e : b;
+                };
             }
         }
     }
@@ -379,6 +409,20 @@ final class HiResItems {
         if (style == 10) for (int sd = -1; sd <= 1; sd += 2) for (int i = 0; i < 8; i++) for (int j = 0; j < 2; j++) m.set(c + sd * (c - 2 + i / 2), n - 6 + i, c - 2 + j, mat(0xE8D8B0));
         if (style == 11) for (int x = 2; x < n - 2; x++) for (int z = 2; z < n - 2; z++) { float dx = x - c + 0.5f, dz = z - c + 0.5f, r = (float) Math.sqrt(dx * dx + dz * dz); if (r > c - 3.5f && r < c - 2) { m.set(x, n - 4, z, metal(0xF0C850)); if ((x + z) % 4 == 0) m.set(x, n - 3, z, metal(0xF0C850)); } }
         if (k.gem() != 0 && st == Stuff.PLATE) m.set(c, c + 3, n - 1, k.gem());
+        // (0.4.5) the crest of its tier's design
+        if (t != null && st == Stuff.PLATE) {
+            ArmourDesign ad = ArmourDesign.of(t);
+            switch (ad.crest()) {
+                case "ridge" -> { for (int z = 3; z < n - 3; z++) m.set(c, n - 1 - Math.abs(z - c) / 5, z, sh(k.blade(), 1.2f)); }
+                case "plume" -> { for (int z = 2; z < n - 4; z++) for (int y = 0; y < 5 - Math.abs(z - c + 3) / 3; y++) { m.set(c, n + y - 1, z, mat(0x9A1C1C)); m.set(c + 1, n + y - 1, z, mat(0x8A1818)); } }
+                case "horns" -> { for (int sd = -1; sd <= 1; sd += 2) for (int i = 0; i < 9; i++) for (int j = 0; j < 2; j++) m.set(c + sd * (c - 3 + i / 3), n - 9 + i, c - 1 + j, mat(i > 6 ? 0xE8D8B0 : 0xD0C098)); }
+                case "wings" -> { for (int sd = -1; sd <= 1; sd += 2) for (int i = 0; i < 7; i++) for (int j = 0; j < 5 - i / 2; j++) m.set(c + sd * (c - 1), n - 8 + i, c + j, sh(k.edge(), 1.05f)); }
+                case "crown" -> { for (int x = 2; x < n - 2; x++) for (int z = 2; z < n - 2; z++) { float dx = x - c + 0.5f, dz = z - c + 0.5f, r = (float) Math.sqrt(dx * dx + dz * dz); if (r > c - 3.5f && r < c - 2) { m.set(x, n - 4, z, ad.accent() >= 0 ? metal(ad.accent()) : k.edge()); if ((x + z) % 3 == 0) { m.set(x, n - 3, z, ad.accent() >= 0 ? metal(ad.accent()) : k.edge()); m.set(x, n - 2, z, ad.accent() >= 0 ? metal(ad.accent()) : k.edge()); } } } }
+                case "spikes" -> { for (int i = -2; i <= 2; i++) for (int y = 0; y < 5 - Math.abs(i); y++) m.set(c, n - 2 + y, c + i * 3, sh(k.blade(), 0.75f)); }
+                default -> { }
+            }
+            if (ad.glow() >= 0) for (int x = c - 4; x <= c + 4; x++) m.set(x, c + 2, n - 3, mat(ad.glow()));
+        }
         return new ItemModels.Model(m, c, 0.5f, c);
     }
 
@@ -406,6 +450,20 @@ final class HiResItems {
                 if (q > 1 || q < 0.55f) continue;
                 if (st == Stuff.PLATE ? py < -0.2f : py < -0.6f) continue;
                 m.set(x, y, z, skin(t, k, x, y, z, py < -0.1f && st == Stuff.PLATE));
+            }
+        }
+        // (0.4.5) the pauldrons' shape of its tier's design
+        if (t != null && st == Stuff.PLATE) {
+            ArmourDesign ad = ArmourDesign.of(t);
+            for (int sd = 0; sd < 2; sd++) {
+                int px = sd == 0 ? 4 : w - 5, dir = sd == 0 ? -1 : 1;
+                switch (ad.pauldron()) {
+                    case "spiked" -> { for (int i = 0; i < 3; i++) for (int y = 0; y < 4; y++) m.set(px + dir * (y / 2), h - 2 + y - 1, 5 + i * 4, sh(k.blade(), 0.72f)); }
+                    case "flared" -> { for (int z = 1; z < dd - 1; z++) for (int i = 0; i < 3; i++) m.set(px + dir * (2 + i), h - 6 + i, z, ad.accent() >= 0 && i == 2 ? metal(ad.accent()) : k.edge()); }
+                    case "layered" -> { for (int l = 0; l < 3; l++) for (int z = 2; z < dd - 2; z++) m.set(px + dir * (1 + l), h - 5 - l * 2, z, k.guard()); }
+                    case "slab" -> { for (int z = 1; z < dd - 1; z++) for (int y = h - 9; y < h - 2; y++) m.set(px + dir, y, z, sh(k.blade(), 0.85f)); }
+                    default -> { }
+                }
             }
         }
         int fz = dd - 1;

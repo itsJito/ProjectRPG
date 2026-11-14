@@ -1,0 +1,38 @@
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 00:31:22 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 26.07s ({regions=6004, overlays=753, variants=436, scarp=65, coast=541, erosion=403, peaks=56, lakes=105, isles=5, rivers=832, wadis=15, ground=39, roads=1080, causeways=4, architecture=1926, pitsFilled=1383, pits=709, banks=61, clamp=14, cliffs=66, columns=894, falls=25, raise=11065, trees=287, outcrops=0, ways=639}), made and lit in 2.35s
+[Load] ShadowVeil 28.51s
+[Load] renderer and UI 3.02s
+[monsters] 10 wilderness territories (passed over: 7 wet or road, 28 in a realm, 68 near the settled, 8 by a road, 23 by their biome's chances; 759 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 38 meshes, 1.52s
+[Load] first rendered frame 6.96s
+[Load] game frame 1: scene 89 ms, interface 1140 ms, render 47 ms
+[Load] game frame 2: scene 12 ms, interface 7 ms, render 91 ms
+[Load] game frame 3: scene 12 ms, interface 7 ms, render 132 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\iron_yard_forge-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\iron_yard_forge-2-function-workroom.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\iron_yard_forge-3-room0-workroom-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\iron_yard_forge-3-room0-storeroom-3.png
+[Load] growth about the spawn: 49 chunks made, 77 meshes, 1.20s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-2-function-great_hall.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room0-great_hall-2.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room0-kitchen-3.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room1-chamber-4.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room1-chamber-5.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room1-solar-6.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room2-high_room-7.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\camelot_keep-3-room2-chamber-8.png
+[Load] growth about the spawn: 49 chunks made, 125 meshes, 1.58s
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\loxford_houses_11-1-entrance.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\loxford_houses_11-2-function-hearth.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-p30\s4\loxford_houses_11-3-room0-hearth-2.png
+[interiors] 3 buildings shot in 36s -> build/review-p30/s4

@@ -25,6 +25,8 @@ public final class Terrain {
 
     public final Atlas atlas;
     public final int S, H, sea;
+    /** (0.4.6) The open sea added round the design (Atlas.margin): every noise is sampled as the design had it, so the land is unchanged. */
+    private final int OX;
     /** The ground's top cell per column (index x * S + z). */
     public final int[] top;
     /** The water's top cell per column, or -1. */
@@ -47,10 +49,28 @@ public final class Terrain {
     public record Road(String id, String name, String kind, int[] path) {}
     /** (0.4.1) The built world: every structure's lot, doors and reserved volumes (Architecture). */
     public Architecture arch;
+    /**
+     * (0.4.2, gamefixes: church glass let no light through; ShadowVeil's lamps lit nothing) every lamp and every pane of
+     * stained glass the builders set, {x, y, z} - the renderer's night lights and its sunlit windows (a later edit that
+     * removed one is checked against the cells when they are read).
+     */
+    public final List<int[]> lampCells = new ArrayList<>(), stainedCells = new ArrayList<>();
+    /**
+     * (0.4.3, gamefixes: invisible blocks in a ring round the farm) the heights fences stand at in each chunk (key
+     * cx + cz * 1024: {lowest, highest}) - a fence is drawn as a model, so the renderer must know where to look for them
+     */
+    public final java.util.Map<Integer, int[]> fenceSpans = new java.util.HashMap<>();
+    public void fenceAt(int x, int y, int z) {
+        int[] sp = fenceSpans.computeIfAbsent((x >> 4) + (z >> 4) * 1024, k -> new int[]{y, y});
+        sp[0] = Math.min(sp[0], y); sp[1] = Math.max(sp[1], y);
+    }
     /** (0.4.1) Trees the structures plant (orchards, groves): {x, z} and the species, grown with the rest. */
     final List<int[]> extraTrees = new ArrayList<>();
     final List<String> extraSpecies = new ArrayList<>();
-    /** (0.4.1) Where a river falls: {x, bottom y, z, height} at each cell of a falls' curtain (the spray is drawn there). */
+    /**
+     * (0.4.1) Where a river falls: {x, bottom y, z, height, dx, dz} at each cell below a drop - the lower stretch's cell, its
+     * surface's height under the lip, how far the water falls, and the way it pours (from the higher cell toward it).
+     */
     public final List<int[]> falls = new ArrayList<>();
     /** Milliseconds each stage took (for the load log). */
     public final Map<String, Long> timings = new java.util.LinkedHashMap<>();
@@ -60,7 +80,8 @@ public final class Terrain {
 
     private Terrain(Atlas a) {
         this.atlas = a;
-        S = a.size; H = a.height; sea = a.sea;
+        S = a.world; H = a.height; sea = a.sea;
+        OX = a.margin;
         top = new int[S * S]; water = new int[S * S]; deck = new int[S * S]; flags = new int[S * S]; biome = new byte[S * S];
         h = new float[S * S];
         java.util.Arrays.fill(water, -1);
@@ -108,6 +129,8 @@ public final class Terrain {
             t.arch.raise(); at = t.stage("raise", at);
             t.trees(); at = t.stage("trees", at);
             t.outcrops(); at = t.stage("outcrops", at);
+            // (0.4.3) the ways walked clear of litter, last of all
+            if (t.arch != null) { t.arch.clearWays(); t.arch.doorSteps(); at = t.stage("ways", at); }
         } else { t.plantTrees(false); t.outcrops(); at = t.stage("trees", at); }
         return t;
     }
@@ -134,8 +157,8 @@ public final class Terrain {
     private double regionHeight(Map<String, Object> r, double x, double z) {
         List<?> y = Atlas.arr(r, "y");
         double lo = Atlas.dn(y.get(0)), hi = Atlas.dn(y.get(1)), scale = Atlas.d(r, "scale", 120), ridge = Atlas.d(r, "ridge", 0);
-        double wx = x + warpX.at(x / 180, z / 180) * 38, wz = z + warpZ.at(x / 180, z / 180) * 38;
-        double n = noise.fbm(wx / scale, wz / scale, 5);
+        double wx = x + warpX.at((x - OX) / 180, (z - OX) / 180) * 38, wz = z + warpZ.at((x - OX) / 180, (z - OX) / 180) * 38;
+        double n = noise.fbm((wx - OX) / scale, (wz - OX) / scale, 5);
         if (ridge > 0) n = lerp(n, noise.ridge(wx / (scale * 1.3), wz / (scale * 1.3), 5), ridge);
         return lo + (hi - lo) * n;
     }
@@ -143,7 +166,7 @@ public final class Terrain {
     /** The domain warp every region's and overlay's edge is drawn through: organic shapes from ruled boxes. */
     private double warpOf(int x, int z, int axis) {
         Noise n = axis == 0 ? warpX : warpZ;
-        return n.at(x / 170.0 + axis * 13, z / 170.0 - axis * 7) * 58 + n.at(x / 52.0 + 50, z / 52.0 + 50) * 16 + n.at(x / 17.0 - 30, z / 17.0 + 30) * 4;
+        return n.at((x - OX) / 170.0 + axis * 13, (z - OX) / 170.0 - axis * 7) * 58 + n.at((x - OX) / 52.0 + 50, (z - OX) / 52.0 + 50) * 16 + n.at((x - OX) / 17.0 - 30, (z - OX) / 17.0 + 30) * 4;
     }
 
     // ------------------------------------------------------------------ 1. the regions
@@ -170,10 +193,27 @@ public final class Terrain {
                 double hb = b < 0 ? ha : regionHeight(regions.get(b), x, z);
                 h[idx(x, z)] = (float) lerp(hb, ha, t);
                 // the biome's seam dithered and frayed, never ruled
-                double fray = t + (Noise.hash(atlas.seed, x, z, 41) - 0.5) * 0.5 + detail.at(x / 9.0, z / 9.0) * 0.18;
+                double fray = t + (Noise.hash(atlas.seed, x - OX, z - OX, 41) - 0.5) * 0.5 + detail.at((x - OX) / 9.0, (z - OX) / 9.0) * 0.18;
                 biome[idx(x, z)] = b < 0 || fray >= 0.5 ? regionBiome[a] : regionBiome[b];
             }
         });
+    }
+
+    /** (0.4.6) The id of the region a point lies deepest in (the weather's climates are chosen by it), or null off the map. */
+    public String regionId(int x, int z) {
+        if (regions == null || x < 0 || z < 0 || x >= S || z >= S) return null;
+        double wx = x + 0.5 + warpOf(x, z, 0), wz = z + 0.5 + warpOf(x, z, 1), best = -1e9;
+        int a = -1;
+        for (int k = 0; k < regions.size(); k++) { double d = inside(regionCells[k], wx, wz); if (d > best) { best = d; a = k; } }
+        return a < 0 ? null : Atlas.s(regions.get(a), "id", null);
+    }
+    /** (0.4.6) The name of the region a point lies deepest in (its data's "name"), drawn through the same warp as the ground; null off the map. */
+    public String regionName(int x, int z) {
+        if (regions == null || x < 0 || z < 0 || x >= S || z >= S) return null;
+        double wx = x + 0.5 + warpOf(x, z, 0), wz = z + 0.5 + warpOf(x, z, 1), best = -1e9;
+        int a = -1;
+        for (int k = 0; k < regions.size(); k++) { double d = inside(regionCells[k], wx, wz); if (d > best) { best = d; a = k; } }
+        return a < 0 ? null : Atlas.s(regions.get(a), "name", Atlas.s(regions.get(a), "id", null));
     }
 
     // ------------------------------------------------------------------ 2. settlements and named grounds
@@ -185,11 +225,11 @@ public final class Terrain {
             byte b = biomeId(Atlas.s(o, "biome", "meadow"));
             int x0 = Math.max(0, (int) (r[0] - blend)), x1 = Math.min(S - 1, (int) (r[2] + blend)), z0 = Math.max(0, (int) (r[1] - blend)), z1 = Math.min(S - 1, (int) (r[3] + blend));
             for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
-                double d = rounded(r, x + 0.5 + warpOf(x, z, 0) * 0.45, z + 0.5 + warpOf(x, z, 1) * 0.45, Atlas.d(o, "round", 2.6)) + detail.at(x / 40.0, z / 40.0) * blend * 0.35;
+                double d = rounded(r, x + 0.5 + warpOf(x, z, 0) * 0.45, z + 0.5 + warpOf(x, z, 1) * 0.45, Atlas.d(o, "round", 2.6)) + detail.at((x - OX) / 40.0, (z - OX) / 40.0) * blend * 0.35;
                 double w = smooth(-blend, blend, d);
                 if (w <= 0) continue;
                 int i = idx(x, z);
-                double own = noise.fbm((x + 911) / 90.0, (z - 377) / 90.0, 4);
+                double own = noise.fbm((x - OX + 911) / 90.0, (z - OX - 377) / 90.0, 4);
                 double target = lo + (hi - lo) * lerp(own, 0.5, flat);
                 // what the ground was, held into the range, eased toward the settlement's own level as it is flattened
                 double held = Math.max(lo, Math.min(hi, h[i]));
@@ -199,7 +239,7 @@ public final class Terrain {
                     oh = step + smooth(0.62, 1.0, f) * terrace;
                 }
                 h[i] = (float) lerp(h[i], oh, w);
-                if (w + (Noise.hash(atlas.seed, x, z, 43) - 0.5) * 0.45 + detail.at(x / 8.0, z / 8.0) * 0.15 > 0.5) biome[i] = b;
+                if (w + (Noise.hash(atlas.seed, x - OX, z - OX, 43) - 0.5) * 0.45 + detail.at((x - OX) / 8.0, (z - OX) / 8.0) * 0.15 > 0.5) biome[i] = b;
             }
         }
     }
@@ -228,11 +268,11 @@ public final class Terrain {
                     for (int k = 0; k < vs.size(); k++) {
                         Map<String, Object> v = vs.get(k);
                         double scale = Atlas.d(v, "scale", 70), share = Atlas.d(v, "share", 0.15);
-                        double wx = x + warpX.at(x / 90.0 + k, z / 90.0) * scale * 0.35, wz = z + warpZ.at(x / 90.0, z / 90.0 - k) * scale * 0.35;
-                        double n = noise.fbm((wx + salt * 1013 + k * 377) / scale, (wz - salt * 701 + k * 911) / scale, 3);
+                        double wx = x + warpX.at((x - OX) / 90.0 + k, (z - OX) / 90.0) * scale * 0.35, wz = z + warpZ.at((x - OX) / 90.0, (z - OX) / 90.0 - k) * scale * 0.35;
+                        double n = noise.fbm((wx - OX + salt * 1013 + k * 377) / scale, (wz - OX - salt * 701 + k * 911) / scale, 3);
                         // fbm sits round 0.5: the top 'share' of it, roughly, is the patch
                         double edge = 0.5 + (0.5 - share) * 0.42;
-                        double fray = (Noise.hash(atlas.seed, x, z, 60 + k) - 0.5) * 0.012;
+                        double fray = (Noise.hash(atlas.seed, x - OX, z - OX, 60 + k) - 0.5) * 0.012;
                         if (n + fray > edge) {
                             biome[i] = to[k];
                             // a patch rises or sinks gently from its rim (a mound, a hollow), never a step
@@ -255,7 +295,7 @@ public final class Terrain {
             double crater = Atlas.d(p, "crater", 0), craterDepth = Atlas.d(p, "craterDepth", 0), rough = Atlas.d(p, "rough", 0.2);
             byte b = biomeId(Atlas.s(p, "biome", "crags"));
             for (int x = (int) Math.max(0, cx - R); x <= Math.min(S - 1, cx + R); x++) for (int z = (int) Math.max(0, cz - R); z <= Math.min(S - 1, cz + R); z++) {
-                double r = Math.hypot(x + 0.5 - cx, z + 0.5 - cz) * (1 + noise.at(x / 30.0, z / 30.0) * rough);
+                double r = Math.hypot(x + 0.5 - cx, z + 0.5 - cz) * (1 + noise.at((x - OX) / 30.0, (z - OX) / 30.0) * rough);
                 // a crater's rim is the summit: the cone reaches its height at the rim, the crater sinks inside it
                 double f = crater > 0 ? Math.max(0, Math.min(1, (R - r) / (R - crater))) : Math.max(0, 1 - r / R);
                 if (r >= R) continue;
@@ -285,9 +325,9 @@ public final class Terrain {
                 double gx = atlas.x(Atlas.pt(g.get("at"))[0]), half = Atlas.d(g, "half", 24);
                 gap = Math.max(gap, smooth(half, half * 0.5, Math.abs(x + 0.5 - gx)));
             }
-            double wobble = noise.at(x / 140.0, 3.3) * 34 + noise.at(x / 37.0, 9.1) * 9;
+            double wobble = noise.at((x - OX) / 140.0, 3.3) * 34 + noise.at((x - OX) / 37.0, 9.1) * 9;
             // the cliff's own height wanders: higher bluffs, lower steps, and its foot frays into slopes
-            double tall = 0.55 + noise.fbm(x / 90.0, 17.0, 3) * 0.9;
+            double tall = 0.55 + noise.fbm((x - OX) / 90.0, 17.0, 3) * 0.9;
             for (int z = (int) (line - 4 * width); z <= (int) (line + 4 * width); z++) {
                 if (z < 0 || z >= S) continue;
                 int i = idx(x, z);
@@ -316,10 +356,12 @@ public final class Terrain {
         java.util.stream.IntStream.range(0, S).parallel().forEach(x -> {
             for (int z = 0; z < S; z++) {
                 int i = idx(x, z);
-                double e = Math.min(Math.min(x + 0.5, z + 0.5), Math.min(S - 0.5 - x, S - 0.5 - z));
+                // (0.4.6) the belt runs round the design's own edge; the margin past it is open sea, deepening to the world's edge
+                int M = atlas.margin, D = atlas.size;
+                double e = Math.min(Math.min(x + 0.5 - M, z + 0.5 - M), Math.min(D + M - 0.5 - x, D + M - 0.5 - z));
                 // coves bite deep, headlands stand out a little: the very edge is always open sea
-                double wv = noise.at(x / wscale + 40, z / wscale - 40) * warp + noise.at(x / (wscale * 0.35) - 9, z / (wscale * 0.35) + 9) * warp * 0.45
-                        + detail.at(x / 22.0, z / 22.0) * warp * 0.2;
+                double wv = noise.at((x - OX) / wscale + 40, (z - OX) / wscale - 40) * warp + noise.at((x - OX) / (wscale * 0.35) - 9, (z - OX) / (wscale * 0.35) + 9) * warp * 0.45
+                        + detail.at((x - OX) / 22.0, (z - OX) / 22.0) * warp * 0.2;
                 e += Math.min(wv, deep * 0.6);
                 if (e >= belt + blend) continue;
                 double cliffBlend = blend;
@@ -330,7 +372,7 @@ public final class Terrain {
                 }
                 // the belt: deep sea at the very edge, a shelf, shallows and coves, beaches up to the land
                 double band = smooth(deep, belt, e);
-                double beltH = e < deep ? lerp(floor, shelf, Math.max(0, e / deep)) : lerp(shelf, beach, band) + noise.at(x / 26.0, z / 26.0) * 1.6;
+                double beltH = e < deep ? lerp(floor, shelf, Math.max(0, e / deep)) : lerp(shelf, beach, band) + noise.at((x - OX) / 26.0, (z - OX) / 26.0) * 1.6;
                 double land = smooth(belt * 0.55, belt + cliffBlend, e);
                 double v = lerp(beltH, h[i], land);
                 h[i] = (float) v;
@@ -401,7 +443,7 @@ public final class Terrain {
                 double q = lakeQ(x + 0.5, z + 0.5, cx, cz, rx, rz, warp);
                 int i = idx(x, z);
                 if (q < 1) {
-                    double bed = surface - 1 - depth * Math.pow(1 - q * q, 0.6) + noise.at(x / 12.0, z / 12.0) * 0.8;
+                    double bed = surface - 1 - depth * Math.pow(1 - q * q, 0.6) + noise.at((x - OX) / 12.0, (z - OX) / 12.0) * 0.8;
                     if (h[i] > bed) h[i] = (float) bed;
                     flags[i] |= LAKE;
                     water[i] = surface;
@@ -423,7 +465,7 @@ public final class Terrain {
                     int i = idx(x, z);
                     biome[i] = marsh; flags[i] |= MARSH;
                     // a finger of reed-bed: ground at the water's height, pools of standing water in its hollows
-                    double pool = noise.at(x / 7.0 + 5, z / 7.0 - 9) + (1 - q) * 0.5;
+                    double pool = noise.at((x - OX) / 7.0 + 5, (z - OX) / 7.0 - 9) + (1 - q) * 0.5;
                     if (q < 1 && pool > 0.25) { h[i] = surface - 1; water[i] = surface; flags[i] |= LAKE; }
                     else h[i] = (float) Math.max(surface, Math.min(h[i], surface + 1 + q));
                 }
@@ -433,7 +475,7 @@ public final class Terrain {
     private double lakeQ(double x, double z, double cx, double cz, double rx, double rz, double warp) {
         double dx = (x - cx) / rx, dz = (z - cz) / rz;
         double a = Math.atan2(dz, dx);
-        double wob = 1 + noise.at(Math.cos(a) * 1.7 + cx * 0.01, Math.sin(a) * 1.7 + cz * 0.01) * warp + detail.at(x / 18.0, z / 18.0) * warp * 0.35;
+        double wob = 1 + noise.at(Math.cos(a) * 1.7 + (cx - OX) * 0.01, Math.sin(a) * 1.7 + (cz - OX) * 0.01) * warp + detail.at((x - OX) / 18.0, (z - OX) / 18.0) * warp * 0.35;
         return Math.sqrt(dx * dx + dz * dz) / wob;
     }
 
@@ -829,7 +871,7 @@ public final class Terrain {
                     boolean edge = false;
                     for (int n : new int[]{i - S, i + S, i - 1, i + 1}) if (n >= 0 && n < flags.length && (flags[n] & ROAD) == 0) edge = true;
                     // (0.4.1) worn in patches along the verge, not cell by cell (a road read as torn at its edges)
-                    surface = edge && detail.at(x / 3.5, z / 3.5) > 0.05 ? rm[1] : rm[0];
+                    surface = edge && detail.at((x - OX) / 3.5, (z - OX) / 3.5) > 0.05 ? rm[1] : rm[0];
                 }
                 if ((flags[i] & WADI) != 0) surface = Blocks.SAND;
                 for (int y = 0; y <= t && y < H; y++) {
@@ -851,20 +893,24 @@ public final class Terrain {
     }
 
     /**
-     * (0.4.1, gamefixes: water does not actually flow) where a river drops - its falls, the steps of its rapids - the water
-     * pours over the lip as a curtain: each cell below a higher stretch of the same river is filled from its own surface up
-     * to the stretch above, so the drop is a sheet of falling water, not a step of still water with air in front of it.
+     * (0.4.1, gamefixes: water does not actually flow; 0.4.4: flowing water shouldn't be a true block) where a river drops -
+     * its falls, every step of its rapids - is recorded, cell by cell below the lip with the way the water pours; nothing is
+     * built there. The renderer pours each one near the eye as a falling sheet of water (a cascade of drops over the lip,
+     * spray and mist where it lands), so the step between two stretches reads as water pouring, not as a column of still
+     * blocks standing in the air.
      */
     private void curtains() {
         for (int x = 1; x < S - 1; x++) for (int z = 1; z < S - 1; z++) {
             int i = idx(x, z);
             if ((flags[i] & RIVER) == 0 || water[i] < 0 || deck[i] >= 0) continue;
-            int up = water[i];
-            for (int n : new int[]{i - S, i + S, i - 1, i + 1}) if ((flags[n] & RIVER) != 0 && water[n] > up && deck[n] < 0) up = water[n];
-            if (up - water[i] < 2) continue;
-            int base = i * H;
-            for (int y = water[i] + 1; y <= up && y < H; y++) if (cells[base + y] == 0) cells[base + y] = (byte) Blocks.WATER;
-            falls.add(new int[]{x, water[i], z, up - water[i]});
+            int up = water[i], dx = 0, dz = 0;
+            int[][] nb = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+            for (int[] d : nb) {
+                int n = idx(x + d[0], z + d[1]);
+                if ((flags[n] & RIVER) != 0 && water[n] > up && deck[n] < 0) { up = water[n]; dx = -d[0]; dz = -d[1]; }
+            }
+            if (up - water[i] < 1) continue;
+            falls.add(new int[]{x, water[i], z, up - water[i], dx, dz});
         }
     }
 
@@ -876,7 +922,7 @@ public final class Terrain {
         Map<String, Object> biomeDefs = atlas.map("biomes");
         int cell = 4;
         for (int cx = 0; cx < S / cell; cx++) for (int cz = 0; cz < S / cell; cz++) {
-            int x = cx * cell + (int) (Noise.hash(atlas.seed, cx, cz, 1) * cell), z = cz * cell + (int) (Noise.hash(atlas.seed, cx, cz, 2) * cell);
+            int x = cx * cell + (int) (Noise.hash(atlas.seed, cx - OX / cell, cz - OX / cell, 1) * cell), z = cz * cell + (int) (Noise.hash(atlas.seed, cx - OX / cell, cz - OX / cell, 2) * cell);
             if (x < 3 || z < 3 || x >= S - 3 || z >= S - 3) continue;
             int i = idx(x, z);
             if (water[i] >= 0 || (flags[i] & (ROAD | CLIFF | BRIDGE | CAUSEWAY | WADI | BUILT | YARD)) != 0) continue;
@@ -889,9 +935,9 @@ public final class Terrain {
                 if ((flags[n] & (ROAD | BRIDGE | BUILT)) != 0 || (Math.abs(dx) <= 1 && Math.abs(dz) <= 1 && (Math.abs(top[n] - top[i]) > 1 || water[n] >= 0))) clear = false;
             }
             if (!clear) continue;
-            double roll = Noise.hash(atlas.seed, x, z, 3);
+            double roll = Noise.hash(atlas.seed, x - OX, z - OX, 3);
             // a wood's density waxes and wanes across it: clearings and thickets, not an even plantation
-            double patch = 0.45 + noise.fbm(x / 64.0 + 300, z / 64.0 - 300, 3) * 1.1;
+            double patch = 0.45 + noise.fbm((x - OX) / 64.0 + 300, (z - OX) / 64.0 - 300, 3) * 1.1;
             String pick = null; double acc = 0;
             for (var e : trees.entrySet()) {
                 acc += Atlas.dn(e.getValue()) * cell * cell * patch;
@@ -936,17 +982,30 @@ public final class Terrain {
                 Map<String, Object> d = Atlas.map(Atlas.map(biomeDefs, k), "boulders");
                 return d.isEmpty() ? new int[]{0, 0} : new int[]{block(Atlas.s(d, "block", "stone")), (int) (Atlas.d(d, "share", 0) * 1_000_000)};
             });
-            if (spec[1] <= 0 || Noise.hash(atlas.seed, x, z, 90) * 1_000_000 * 9 >= spec[1] * 9 * 9) continue;
-            int n = 1 + (int) (Noise.hash(atlas.seed, x, z, 91) * 4);
+            if (spec[1] <= 0 || Noise.hash(atlas.seed, x - OX, z - OX, 90) * 1_000_000 * 9 >= spec[1] * 9 * 9) continue;
+            int n = 1 + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 91) * 4);
             for (int k = 0; k < n; k++) {
-                int bx = x + (int) (Noise.hash(atlas.seed, x, z, 92 + k) * 3) - 1, bz = z + (int) (Noise.hash(atlas.seed, x, z, 96 + k) * 3) - 1;
+                int bx = x + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 92 + k) * 3) - 1, bz = z + (int) (Noise.hash(atlas.seed, x - OX, z - OX, 96 + k) * 3) - 1;
                 int j = idx(bx, bz);
                 if (water[j] >= 0 || (flags[j] & (ROAD | BRIDGE | TREE | BUILT | YARD)) != 0) continue;
+                // (0.4.5, gamefixes: stray blocks against the buildings made a town look terrible) the wild's stones keep
+                // their distance from every lot, yard, square, lane and road: they are the country's, never a street's
+                if (nearSettled(bx, bz, BOULDER_CLEAR)) continue;
                 int y = top[j] + (k == 0 && n > 2 ? 1 : 0);
                 set(bx, top[j] + 1, bz, spec[0], false);
                 if (y > top[j]) set(bx, top[j] + 2, bz, spec[0], false);
             }
         }
+    }
+    static final int BOULDER_CLEAR = rpg.Tuning.i("terrain.boulderClear", 5);
+    /** Whether a lot, yard, square, lane or road lies within r cells of a column. */
+    private boolean nearSettled(int x, int z, int r) {
+        for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            int ax = x + dx, az = z + dz;
+            if (ax < 0 || az < 0 || ax >= S || az >= S) continue;
+            if ((flags[idx(ax, az)] & (BUILT | YARD | SQUARE | LANE | ROAD)) != 0) return true;
+        }
+        return false;
     }
     private void set(int x, int y, int z, int b, boolean overwrite) {
         if (x < 0 || z < 0 || x >= S || z >= S || y < 0 || y >= H) return;
@@ -957,7 +1016,7 @@ public final class Terrain {
         Map<String, Object> d = Atlas.map(treeDefs, sp);
         int log = block(Atlas.s(d, "log", "log")), leaves = block(Atlas.s(d, "leaves", "leaves"));
         double[] trunkR = Atlas.pt(d.get("trunk"));
-        double roll = Noise.hash(atlas.seed, x, z, 9);
+        double roll = Noise.hash(atlas.seed, x - OX, z - OX, 9);
         int trunk = (int) Math.round(lerp(trunkR[0], trunkR.length > 1 ? trunkR[1] : trunkR[0], roll));
         double r = Atlas.d(d, "radius", 2.5) * (0.85 + roll * 0.3);
         String crown = Atlas.s(d, "crown", "round");
@@ -1007,8 +1066,8 @@ public final class Terrain {
                     if (dd > r) continue;
                     for (int dy = -1; dy <= 1; dy++) if (dd <= r - Math.abs(dy) * 0.8) set(x + dx, cy + dy, z + dz, leaves, false);
                     // the willow's curtain: long strands hanging from the rim
-                    if (dd > r - 1.2 && Noise.hash(atlas.seed, x + dx, z + dz, 4) < 0.55) {
-                        int hang = 1 + (int) (Noise.hash(atlas.seed, x + dx, z + dz, 6) * 3);
+                    if (dd > r - 1.2 && Noise.hash(atlas.seed, x + dx - OX, z + dz - OX, 4) < 0.55) {
+                        int hang = 1 + (int) (Noise.hash(atlas.seed, x + dx - OX, z + dz - OX, 6) * 3);
                         for (int s = 1; s <= hang; s++) set(x + dx, cy - 1 - s, z + dz, leaves, false);
                     }
                 }
@@ -1019,7 +1078,7 @@ public final class Terrain {
                 int R = (int) Math.ceil(r), RY = (int) Math.ceil(ry), cy = y + trunk;
                 for (int dx = -R; dx <= R; dx++) for (int dz = -R; dz <= R; dz++) for (int dy = -RY + 1; dy <= RY; dy++) {
                     double q = (dx * dx + dz * dz) / (r * r) + (dy * dy) / (ry * ry);
-                    if (q <= 1 + (Noise.hash(atlas.seed, x + dx * 7, z + dz * 7, 20 + dy) - 0.5) * 0.35) set(x + dx, cy + dy, z + dz, leaves, false);
+                    if (q <= 1 + (Noise.hash(atlas.seed, x + dx * 7 - OX, z + dz * 7 - OX, 20 + dy) - 0.5) * 0.35) set(x + dx, cy + dy, z + dz, leaves, false);
                 }
             }
         }

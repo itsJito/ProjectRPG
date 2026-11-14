@@ -1,0 +1,391 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.74s ({regions=852, overlays=498, variants=464, scarp=48, coast=631, erosion=289, peaks=43, lakes=64, isles=4, rivers=740, wadis=12, ground=21, roads=590, causeways=3, architecture=941, pitsFilled=1309, pits=421, banks=73, clamp=15, cliffs=58, columns=1532, falls=16, raise=11533, trees=281, outcrops=0, ways=560}), made and lit in 2.22s
+    [water] flow field grown in 2148 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]    30 Duke Edran (186.50,54.04,658.50) yaw 0.00 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act - working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    40 Duke Edran (186.50,54.00,658.50) yaw 0.00 want NaN v 0.23,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    50 Duke Edran (186.72,54.00,658.50) yaw -0.54 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    60 Duke Edran (187.13,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    70 Duke Edran (187.54,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    80 Duke Edran (187.95,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]    90 Duke Edran (188.36,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   100 Duke Edran (188.77,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   110 Duke Edran (189.17,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   120 Duke Edran (189.58,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   130 Duke Edran (189.99,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   140 Duke Edran (190.40,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 192.5,54.0,658.5 legs 0/19 st 0 nu 0 | on the way to prayers
+    [trace]   150 Duke Edran (190.81,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   160 Duke Edran (191.22,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   170 Duke Edran (191.62,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   180 Duke Edran (192.03,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   190 Duke Edran (192.44,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   200 Duke Edran (192.85,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   210 Duke Edran (193.26,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   220 Duke Edran (193.67,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   230 Duke Edran (194.07,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   240 Duke Edran (194.48,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   250 Duke Edran (194.89,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   260 Duke Edran (195.30,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   270 Duke Edran (195.71,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   280 Duke Edran (196.12,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   290 Duke Edran (196.52,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   300 Duke Edran (196.93,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   310 Duke Edran (197.34,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   320 Duke Edran (197.75,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   330 Duke Edran (198.16,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   340 Duke Edran (198.57,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,54.0,658.5 legs 1/19 st 0 nu 0 | on the way to prayers
+    [trace]   350 Duke Edran (198.97,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   360 Duke Edran (199.38,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   370 Duke Edran (199.79,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   380 Duke Edran (200.20,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   390 Duke Edran (200.61,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   400 Duke Edran (201.02,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   410 Duke Edran (201.42,54.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   420 Duke Edran (201.69,54.39,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,55.0,658.5 legs 2/19 st 0 nu 0 | on the way to prayers
+    [trace]   430 Duke Edran (201.75,55.09,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,56.0,658.5 legs 3/19 st 0 nu 0 | on the way to prayers
+    [trace]   440 Duke Edran (202.16,55.17,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,56.0,658.5 legs 3/19 st 0 nu 0 | on the way to prayers
+    [trace]   450 Duke Edran (202.57,55.00,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,56.0,658.5 legs 3/19 st 0 nu 0 | on the way to prayers
+    [trace]   460 Duke Edran (202.69,55.70,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,57.0,657.5 legs 4/19 st 0 nu 0 | on the way to prayers
+    [trace]   470 Duke Edran (202.89,56.18,658.50) yaw -1.57 want NaN v 2.45,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,57.0,657.5 legs 4/19 st 0 nu 0 | on the way to prayers
+    [trace]   480 Duke Edran (203.29,56.06,658.49) yaw -1.57 want NaN v 2.23,-0.17 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,57.0,657.5 legs 4/19 st 0 nu 0 | on the way to prayers
+    [trace]   490 Duke Edran (203.53,56.00,658.36) yaw -1.14 want NaN v 0.54,-1.63 goal PRAY(morning prayers at the altar) act go to goal working null gp true 203.5,57.0,657.5 legs 4/19 st 0 nu 0 | on the way to prayers
+    [trace]   500 Duke Edran (203.56,56.78,658.30) yaw -0.28 want NaN v -0.06,-2.13 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,57.0,656.5 legs 6/19 st 0 nu 0 | on the way to prayers
+    [trace]   510 Duke Edran (203.51,57.20,658.09) yaw 0.06 want NaN v -0.52,-2.09 goal PRAY(morning prayers at the altar) act go to goal working null gp true 202.5,57.0,656.5 legs 6/19 st 0 nu 0 | on the way to prayers
+    [trace]   520 Duke Edran (203.39,57.01,657.75) yaw 0.29 want NaN v -1.08,-2.02 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   530 Duke Edran (203.09,57.00,657.49) yaw 0.77 want NaN v -2.08,-1.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   540 Duke Edran (202.74,57.00,657.28) yaw 0.94 want NaN v -2.08,-1.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   550 Duke Edran (202.40,57.00,657.06) yaw 0.97 want NaN v -2.08,-1.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   560 Duke Edran (202.05,57.00,656.84) yaw 1.00 want NaN v -2.08,-1.30 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   570 Duke Edran (201.69,57.00,656.67) yaw 1.12 want NaN v -2.43,-0.34 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   580 Duke Edran (201.31,57.06,656.61) yaw 1.35 want NaN v -2.43,-0.34 goal PRAY(morning prayers at the altar) act go to goal working null gp true 200.5,58.0,656.5 legs 7/19 st 0 nu 0 | on the way to prayers
+    [trace]   590 Duke Edran (201.31,57.94,656.57) yaw 1.43 want NaN v -2.45,-0.10 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,58.0,656.5 legs 8/19 st 0 nu 0 | on the way to prayers
+    [trace]   600 Duke Edran (200.96,58.21,656.56) yaw 1.50 want NaN v -2.45,-0.10 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,59.0,655.5 legs 9/19 st 0 nu 0 | on the way to prayers
+    [trace]   610 Duke Edran (200.56,58.00,656.54) yaw 1.50 want NaN v -2.20,-0.49 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,59.0,655.5 legs 9/19 st 0 nu 0 | on the way to prayers
+    [trace]   620 Duke Edran (200.25,58.00,656.31) yaw 1.03 want NaN v -1.67,-1.80 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,59.0,655.5 legs 9/19 st 0 nu 0 | on the way to prayers
+    [trace]   630 Duke Edran (200.00,58.91,656.31) yaw 0.74 want NaN v -1.32,-2.07 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   640 Duke Edran (199.81,59.21,656.02) yaw 0.53 want NaN v -0.88,-2.24 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   650 Duke Edran (199.70,59.00,655.63) yaw 0.32 want NaN v -0.43,-2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   660 Duke Edran (199.63,59.00,655.23) yaw 0.22 want NaN v -0.43,-2.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   670 Duke Edran (199.57,59.00,654.83) yaw 0.17 want NaN v -0.13,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   680 Duke Edran (199.55,59.00,654.42) yaw 0.10 want NaN v -0.13,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,653.5 legs 10/19 st 0 nu 0 | on the way to prayers
+    [trace]   690 Duke Edran (199.53,59.74,654.32) yaw 0.07 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   700 Duke Edran (199.53,60.19,654.09) yaw 0.04 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   710 Duke Edran (199.53,60.03,653.69) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   720 Duke Edran (199.53,60.00,653.28) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   730 Duke Edran (199.53,60.00,652.87) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   740 Duke Edran (199.52,60.00,652.46) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   750 Duke Edran (199.52,60.00,652.05) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   760 Duke Edran (199.52,60.00,651.64) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   770 Duke Edran (199.52,60.00,651.23) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   780 Duke Edran (199.52,60.00,650.82) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   790 Duke Edran (199.52,60.00,650.41) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   800 Duke Edran (199.52,60.00,650.01) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   810 Duke Edran (199.51,60.00,649.60) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   820 Duke Edran (199.51,60.00,649.19) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   830 Duke Edran (199.51,60.00,648.78) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   840 Duke Edran (199.51,60.00,648.37) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   850 Duke Edran (199.51,60.00,647.96) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   860 Duke Edran (199.51,60.00,647.55) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,645.5 legs 11/19 st 0 nu 0 | on the way to prayers
+    [trace]   870 Duke Edran (199.51,60.00,647.14) yaw 0.01 want NaN v -0.01,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,643.5 legs 12/19 st 0 nu 0 | on the way to prayers
+    [trace]   880 Duke Edran (199.50,60.00,646.73) yaw 0.01 want NaN v -0.00,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,643.5 legs 12/19 st 0 nu 0 | on the way to prayers
+    [trace]   890 Duke Edran (199.50,60.00,646.32) yaw 0.01 want NaN v -0.00,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,643.5 legs 12/19 st 0 nu 0 | on the way to prayers
+    [trace]   900 Duke Edran (199.50,60.00,645.92) yaw 0.01 want NaN v -0.00,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,643.5 legs 12/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   910 Duke Edran (199.50,60.00,645.51) yaw 0.01 want NaN v -0.00,-2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 199.5,60.0,643.5 legs 12/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked false angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   920 Duke Edran (199.50,60.00,645.10) yaw 0.01 want NaN v -0.38,-2.17 goal PRAY(morning prayers at the altar) act go to goal working null gp true 197.5,60.0,643.5 legs 13/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked false angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   930 Duke Edran (199.31,60.00,644.82) yaw 0.44 want NaN v -0.23,-1.41 goal PRAY(morning prayers at the altar) act go to goal working null gp true 197.5,60.0,643.5 legs 13/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked false angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   940 Duke Edran (199.26,60.00,644.60) yaw 0.35 want NaN v -1.16,-1.23 goal PRAY(morning prayers at the altar) act go to goal working null gp true 197.5,60.0,643.5 legs 13/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   950 Duke Edran (198.94,60.00,644.39) yaw 0.88 want NaN v -2.12,-1.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   960 Duke Edran (198.55,60.00,644.35) yaw 1.37 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   970 Duke Edran (198.14,60.00,644.36) yaw 1.53 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   980 Duke Edran (197.74,60.00,644.37) yaw 1.56 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked true angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]   990 Duke Edran (197.33,60.00,644.38) yaw 1.56 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door (open) open true locked false blocked false angle [1.75, -1.75] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]  1000 Duke Edran (196.92,60.00,644.38) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door open false locked false blocked false angle [1.7311064, -1.7311064] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]  1010 Duke Edran (196.51,60.00,644.39) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers [door Sanctuary of Jaehaerys door open false locked false blocked false angle [1.4976013, -1.4976013] hinge [[198.5, 643.0], [198.5, 645.0]]]
+    [trace]  1020 Duke Edran (196.10,60.00,644.40) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1030 Duke Edran (195.69,60.00,644.41) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1040 Duke Edran (195.29,60.00,644.42) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1050 Duke Edran (194.88,60.00,644.43) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1060 Duke Edran (194.47,60.00,644.43) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1070 Duke Edran (194.06,60.00,644.44) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1080 Duke Edran (193.65,60.00,644.45) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 191.5,60.0,644.5 legs 15/19 st 0 nu 0 | on the way to prayers
+    [trace]  1090 Duke Edran (193.24,60.00,644.46) yaw 1.59 want NaN v -2.45,0.05 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1100 Duke Edran (192.84,60.00,644.46) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1110 Duke Edran (192.43,60.00,644.46) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1120 Duke Edran (192.02,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1130 Duke Edran (191.61,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1140 Duke Edran (191.20,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1150 Duke Edran (190.79,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1160 Duke Edran (190.39,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1170 Duke Edran (189.98,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1180 Duke Edran (189.57,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1190 Duke Edran (189.16,60.00,644.47) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1200 Duke Edran (188.75,60.00,644.48) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1210 Duke Edran (188.34,60.00,644.48) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1220 Duke Edran (187.94,60.00,644.48) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1230 Duke Edran (187.53,60.00,644.48) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1240 Duke Edran (187.12,60.00,644.48) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1250 Duke Edran (186.71,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1260 Duke Edran (186.30,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1270 Duke Edran (185.89,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1280 Duke Edran (185.49,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 183.5,60.0,644.5 legs 16/19 st 0 nu 0 | on the way to prayers
+    [trace]  1290 Duke Edran (185.08,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,644.5 legs 17/19 st 0 nu 0 | on the way to prayers
+    [trace]  1300 Duke Edran (184.67,60.00,644.49) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,644.5 legs 17/19 st 0 nu 0 | on the way to prayers
+    [trace]  1310 Duke Edran (184.26,60.00,644.50) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,644.5 legs 17/19 st 0 nu 0 | on the way to prayers
+    [trace]  1320 Duke Edran (183.85,60.00,644.50) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1330 Duke Edran (183.44,60.00,644.50) yaw 1.59 want NaN v -2.45,0.01 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1340 Duke Edran (183.05,60.00,644.51) yaw 1.59 want NaN v -1.99,0.53 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1350 Duke Edran (182.81,60.00,644.70) yaw 2.12 want NaN v -0.92,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1360 Duke Edran (182.70,60.00,644.70) yaw 1.84 want NaN v -0.41,0.12 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1370 Duke Edran (182.66,60.00,644.90) yaw 2.72 want NaN v -0.15,2.44 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1380 Duke Edran (182.63,60.00,645.31) yaw 3.03 want NaN v -0.15,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1390 Duke Edran (182.61,60.00,645.72) yaw 3.06 want NaN v -0.15,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.5 legs 18/19 st 0 nu 0 | on the way to prayers
+    [trace]  1400 Duke Edran (182.58,60.00,646.13) yaw 3.06 want NaN v -0.15,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1410 Duke Edran (182.56,60.00,646.53) yaw 3.06 want NaN v -0.15,2.45 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1420 Duke Edran (182.53,60.00,646.94) yaw 3.06 want NaN v -0.14,2.38 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1430 Duke Edran (182.52,60.00,647.25) yaw 3.06 want NaN v -0.07,1.10 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1440 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1450 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1460 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1470 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1480 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [trace]  1490 Duke Edran (182.51,60.00,647.30) yaw 3.06 want NaN v 0.00,0.00 goal PRAY(morning prayers at the altar) act go to goal working null gp true 182.5,60.0,647.9 legs 19/19 st 0 nu 0 | on the way to prayers
+    [life] stop 200,672 done (25 people seen so far)
+
+    [life] 1 stops of 1500 frames; 25 people seen
+      Elric            CIVIC        seen   230 spins   3 blocked    51 still     0
+          spun at (242.7,56.0,664.5) WORK: paused to reconsider a blocked route
+          last (242.7,56.0,664.5) WORK: paused to reconsider a blocked route
+      Haskel           MINER        seen   230 spins   4 blocked     0 still     0
+          spun at (204.5,59.0,591.5) WORK: Ore Miner: deliver a real batch
+      never in play: Ealdra MERCHANT home (309,974)
+      never in play: Torren LAWMAN home (285,1026)
+      never in play: Aldric GUARD home (288,1029)
+      never in play: Oswin WORKER home (352,949)
+      never in play: Tam VILLAGER home (333,884)
+      never in play: Brannoc THIEF home (628,948)
+      never in play: Mara MERCHANT home (162,819)
+      never in play: Lucan LAWMAN home (143,749)
+      never in play: Ferrick CARTER home (240,1021)
+      never in play: Garvin QUEST_GIVER home (259,945)
+      never in play: Kettil CONTACT home (647,924)
+      never in play: Wynn FARMER home (252,1018)
+      never in play: Father Wulfric UNDERTAKER home (227,928)
+      never in play: Skarn FENCE home (628,1074)
+      never in play: Bram GUARD home (285,1030)
+      never in play: Bilal BEGGAR home (956,908)
+      never in play: Ysolde HEALER home (231,1011)
+      never in play: Father Gregory PRIEST home (260,942)
+      never in play: Rafe HUNTER home (403,849)
+      never in play: Bryn FISHERMAN home (619,641)
+      never in play: Brokk MINER home (247,482)
+      never in play: Fred CRAFTSMAN home (288,966)
+      never in play: Sir Andrew KNIGHT home (269,944)
+      never in play: Hadwin CIVIC home (271,1031)
+      never in play: Danek CRAFTSMAN home (183,825)
+      never in play: Dawud MINER home (995,926)
+      never in play: Sir Hedric KNIGHT home (407,796)
+      never in play: Gudrik FISHERMAN home (650,1068)
+      never in play: Vesna FISHERMAN home (152,821)
+      never in play: King Leonidas CIVIC home (617,134)
+      never in play: Baron Photios LAWMAN home (644,155)
+      never in play: Leontios GUARD home (643,160)
+      never in play: Anwar GUARD home (926,928)
+      never in play: Brand GUARD home (430,429)
+      never in play: Baroness Guinevere CIVIC home (865,415)
+      never in play: Zoe MERCHANT home (528,165)
+      never in play: Father Paul PRIEST home (924,102)
+      never in play: Father Eirik HEALER home (399,436)
+      never in play: Aristides SCHOLAR home (659,199)
+      never in play: Polyxena MINER home (925,177)
+      never in play: Tolis BEGGAR home (534,109)
+      never in play: Yrsa VILLAGER home (432,466)
+      never in play: King Fahad VILLAGER home (954,943)
+      never in play: Cerys VILLAGER home (862,468)
+      never in play: Wat FISHERMAN home (230,1010)
+      never in play: Tauron HUNTER home (908,557)
+      never in play: Bera VILLAGER home (435,489)
+      never in play: Duke Torkell KNIGHT home (434,426)
+      never in play: King Arthur CRAFTSMAN home (865,419)
+      never in play: Sir Lancelot KNIGHT home (857,420)
+      never in play: Sir Gawain HUNTER home (890,392)
+      never in play: Viggo HUNTER home (471,456)
+      never in play: Torvik MINER home (242,487)
+      never in play: Merlin MINER home (827,423)
+      never in play: Dunstan CRAFTSMAN home (352,952)
+      never in play: Olek CRAFTSMAN home (146,791)
+      never in play: Sten CRAFTSMAN home (404,474)
+      never in play: Alexios CRAFTSMAN home (513,84)
+      never in play: Cenric WORKER home (351,944)
+      never in play: Radek WORKER home (136,817)
+      never in play: Merek MINER home (140,612)
+      never in play: Meriwyn MERCHANT home (647,919)
+      never in play: Damaris MERCHANT home (528,167)
+      never in play: Cuthmar FARMER home (297,946)
+      never in play: Baron Osric FARMER home (292,902)
+      never in play: Kyra FARMER home (262,338)
+      never in play: Marinos FARMER home (264,331)
+      never in play: Berthild CIVIC home (320,992)
+      never in play: Maddoc MERCHANT home (324,994)
+      never in play: Karlon CRAFTSMAN home (327,993)
+      never in play: Melitta CIVIC home (581,239)
+      never in play: Basil MERCHANT home (593,239)
+      never in play: Lazaros CRAFTSMAN home (580,239)
+      never in play: Einar WORKER home (404,484)
+      never in play: Layla CRAFTSMAN home (942,880)
+      never in play: Zainab CRAFTSMAN home (943,876)
+      never in play: Baron Jalal CRAFTSMAN home (893,924)
+      never in play: Ziad CRAFTSMAN home (940,877)
+      never in play: Murad CRAFTSMAN home (942,882)
+      never in play: Ilva FARMER home (203,806)
+      never in play: Karim CRAFTSMAN home (878,885)
+      never in play: Petros FISHERMAN home (516,84)
+      never in play: Soren SCHOLAR home (400,440)
+      never in play: Yannis FISHERMAN home (510,84)
+      never in play: Sella CRAFTSMAN home (188,825)
+      never in play: Leofric WORKER home (346,944)
+      never in play: Siv FARMER home (391,451)
+      never in play: Hurk BANDIT home (878,741)
+      never in play: Sigrun BANDIT home (875,742)
+      never in play: Garmund BRUTE home (876,740)
+      never in play: King Richard CIVIC home (274,1025)
+      never in play: Duke Donald CIVIC home (275,1031)
+      never in play: Count William CIVIC home (346,932)
+      never in play: Alaric PRIEST home (263,944)
+      never in play: Maeve CRAFTSMAN home (278,1028)
+      never in play: Hob GUARD home (407,790)
+      never in play: Eadmund CRAFTSMAN home (346,950)
+      never in play: Beric HUNTER home (404,844)
+      never in play: Duke Bashir CIVIC home (951,947)
+      never in play: Count Awhad CIVIC home (906,913)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (954,931)
+      never in play: Hassan SCHOLAR home (954,936)
+      never in play: Idris SCHOLAR home (954,928)
+      never in play: Father Rafiq PRIEST home (962,907)
+      never in play: Yusuf PRIEST home (959,908)
+      never in play: Tariq CIVIC home (892,968)
+      never in play: Zafir CRAFTSMAN home (852,958)
+      never in play: Osama CRAFTSMAN home (985,899)
+      never in play: Marwan CRAFTSMAN home (1004,871)
+      never in play: Mohamed MERCHANT home (864,911)
+      never in play: Rashid MERCHANT home (909,914)
+      never in play: Munir CARTER home (876,883)
+      never in play: Hakim CARTER home (951,925)
+      never in play: Hamid CRAFTSMAN home (985,946)
+      never in play: Nabil CRAFTSMAN home (989,944)
+      never in play: Salim CRAFTSMAN home (994,928)
+      never in play: Kamal CRAFTSMAN home (996,928)
+      never in play: Qasim WORKER home (987,928)
+      never in play: Fadi MINER home (921,834)
+      never in play: Jamila FARMER home (817,1033)
+      never in play: Samira FARMER home (814,1033)
+      never in play: Zaid GUARD home (939,949)
+      never in play: Sabir GUARD home (947,949)
+      never in play: Baron Nuri CIVIC home (945,923)
+      never in play: Duke Artemios CIVIC home (601,134)
+      never in play: Count Constantine CIVIC home (545,101)
+      never in play: Sir Nicholas KNIGHT home (640,155)
+      never in play: Sir Kosmas KNIGHT home (638,155)
+      never in play: Baroness Eudokia CIVIC home (653,198)
+      never in play: Father Khalid PRIEST home (532,160)
+      never in play: Ione PRIEST home (498,82)
+      never in play: Stavros CIVIC home (479,263)
+      never in play: Demetrios CRAFTSMAN home (495,244)
+      never in play: Irene SCHOLAR home (589,134)
+      never in play: Theodora CRAFTSMAN home (496,221)
+      never in play: Xenia CRAFTSMAN home (638,164)
+      never in play: Eleni CRAFTSMAN home (497,221)
+      never in play: Theron MERCHANT home (530,161)
+      never in play: Pavlos FENCE home (532,161)
+      never in play: Melina FISHERMAN home (518,85)
+      never in play: Spiros WORKER home (516,82)
+      never in play: Timon WORKER home (510,85)
+      never in play: Damon WORKER home (513,82)
+      never in play: Alkis CARTER home (529,166)
+      never in play: Andreas CRAFTSMAN home (472,200)
+      never in play: Nikos CRAFTSMAN home (470,200)
+      never in play: Kallias CRAFTSMAN home (472,205)
+      never in play: Isidoros CRAFTSMAN home (476,205)
+      never in play: Orestes WORKER home (228,179)
+      never in play: Myron GUARD home (638,162)
+      never in play: Perikles GUARD home (641,167)
+      never in play: Zenon GUARD home (639,167)
+      never in play: Argyros GUARD home (638,159)
+      never in play: Gorgias GUARD home (643,163)
+      never in play: Kleon GUARD home (643,158)
+      never in play: Kyros THIEF home (475,205)
+      never in play: Mimis BEGGAR home (530,109)
+      never in play: Argus THIEF home (474,205)
+      never in play: Phaedra CARTER home (642,155)
+      never in play: Leandros BEGGAR home (512,87)
+      never in play: Sabeen BEGGAR home (510,82)
+      never in play: Halvar CRAFTSMAN home (448,449)
+      never in play: Runa CARTER home (454,447)
+      never in play: Ulven CRAFTSMAN home (433,486)
+      never in play: Nessa MERCHANT home (439,480)
+      never in play: Varek SCHOLAR home (137,754)
+      never in play: Mother Mirel PRIEST home (156,787)
+      never in play: Borin FARMER home (202,836)
+      never in play: Sir Bedivere KNIGHT home (910,435)
+      never in play: Father Cadren PRIEST home (831,422)
+      never in play: Elian PRIEST home (889,395)
+      never in play: Baron Aldren CIVIC home (845,432)
+      never in play: Wystan CRAFTSMAN home (863,464)
+      never in play: Perrin CRAFTSMAN home (862,465)
+      never in play: Rowena MERCHANT home (877,471)
+      never in play: Huw FARMER home (918,433)
+      never in play: Edric GUARD home (918,436)
+      never in play: Vark BANDIT home (879,740)
+      never in play: Dolgrin MINER home (249,482)
+      never in play: Pell WORKER home (913,626)
+      never in play: Ysmay WORKER home (1032,439)
+      never in play: Hask HUNTER home (768,529)
+      never in play: Orrin CRAFTSMAN home (417,702)
+      never in play: Corvane HUNTER home (633,937)
+      never in play: Bogdan GUARD home (148,837)
+      never in play: Gunnar GUARD home (447,482)
+      never in play: Astrid UNDERTAKER home (400,433)
+      never in play: Nadim GUARD home (971,1019)
+      never in play: Samir UNDERTAKER home (954,908)
+      never in play: Emrys GUARD home (892,435)
+      never in play: Rhiannon CIVIC home (868,437)
+      never in play: Rask BANDIT home (874,741)
+      never in play: Wenna BANDIT home (880,741)
+      never in play: Hullen BANDIT home (872,740)
+      never in play: Grisel BANDIT home (882,741)
+      never in play: Tamsin MINER home (147,611)
+      never in play: Osk MINER home (248,487)
+      never in play: Mabry WORKER home (226,179)
+      never in play: Edvin WORKER home (220,179)
+      never in play: Corra WORKER home (916,625)
+    [life] 2 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 51.864 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 56s
+9 actionable tasks: 1 executed, 8 up-to-date

@@ -202,6 +202,11 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                             else if (b.flags & ASTRATTO_RB_CUTOUT) vis = !nOcc && nid != bid && !(leaf(bid) && leaf(nid));   // 2.11: a crown's own faces under its cards
                             else vis = !nOcc;
                             if (ny >= H_ && a == 1) vis = true;
+                            // (0.4.6, gamefixes: water stepped down a block with a sheer wall of water between) where the
+                            // surface steps down to lower water beside it, the higher water's surface slopes down to meet
+                            // it (its top corners drop, below) and the wall it would have shown there is not drawn
+                            if (vis && liq && a != 1 && !nliq && !nOcc && ny >= 1 && (def(id(nx, ny - 1, nz)).flags & ASTRATTO_RB_LIQUID)
+                                    && !(def(id(lx, wy + 1, lz)).flags & ASTRATTO_RB_LIQUID)) vis = false;
                             if (vis) {
                                 int layer, var;
                                 if (a == 1 && sgn > 0) { layer = b.layerTop; var = b.varTop; }
@@ -263,6 +268,23 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                                 }
                                 const int flags = ((b.flags & ASTRATTO_RB_EMISSIVE) ? 1 : 0) | ((b.flags & ASTRATTO_RB_SWAY) ? 2 : 0) | (liq ? 4 : 0);
                                 key = 1ull | (static_cast<uint64_t>(layer) << 1) | (static_cast<uint64_t>(var - 1) << 11) | (static_cast<uint64_t>(flags) << 13) | ((trans ? 1ull : 0ull) << 16);
+                                if (liq && a == 1 && sgn > 0 && wy >= 1) {
+                                    // which of its top corners drop to the water below a step: any whose four cells hold
+                                    // open air over water at this height (every cell round a corner reads the same four,
+                                    // so the slopes meet without a crack)
+                                    uint64_t drop = 0;
+                                    for (int c = 0; c < 4; c++) {
+                                        const int du = (c == 1 || c == 2) ? 1 : 0, dv = (c >= 2) ? 1 : 0;
+                                        bool low = false;
+                                        for (int ox = du - 1; ox <= du && !low; ox++) for (int oz = dv - 1; oz <= dv && !low; oz++) {
+                                            if (ox == 0 && oz == 0) continue;
+                                            const Block& side = def(id(lx + ox, wy, lz + oz));
+                                            low = !(side.flags & (ASTRATTO_RB_LIQUID | ASTRATTO_RB_OCCLUDES)) && (def(id(lx + ox, wy - 1, lz + oz)).flags & ASTRATTO_RB_LIQUID);
+                                        }
+                                        if (low) drop |= 1ull << c;
+                                    }
+                                    key |= drop << 57;
+                                }
                                 for (int c = 0; c < 4; c++) key |= (static_cast<uint64_t>(ca[c]) << (17 + c * 2)) | (static_cast<uint64_t>(cs[c]) << (25 + c * 4)) | (static_cast<uint64_t>(cb[c]) << (41 + c * 4));
                                 any = true;
                             }
@@ -276,9 +298,10 @@ bool ChunkMesher::mesh(const astratto_mesh_io& io) {
                     const uint64_t k = mask_[static_cast<size_t>(u + v * su)];
                     if (k == 0) { u++; continue; }
                     int wdt = 1;
-                    while (u + wdt < su && mask_[static_cast<size_t>(u + wdt + v * su)] == k) wdt++;
+                    const bool sloped = (k >> 57) != 0;   // a sloped water corner: its own quad (never merged)
+                    while (!sloped && u + wdt < su && mask_[static_cast<size_t>(u + wdt + v * su)] == k) wdt++;
                     int hgt = 1;
-                    for (bool going = true; going && v + hgt < sv;) {
+                    for (bool going = !sloped; going && v + hgt < sv;) {
                         for (int t = 0; t < wdt; t++) if (mask_[static_cast<size_t>(u + t + (v + hgt) * su)] != k) { going = false; break; }
                         if (going) hgt++;
                     }
@@ -393,9 +416,10 @@ void ChunkMesher::emitQuad(uint64_t k, int a, int ua, int va, int sgn, int norma
     // flip triangulation to avoid AO anisotropy
     if (ao[0] + sk[0] + ao[2] + sk[2] < ao[1] + sk[1] + ao[3] + sk[3]) order = reversed ? revF : fwdF;
     int pos[3];
+    const int drop = static_cast<int>((k >> 57) & 15);
     for (int oi = 0; oi < 4; oi++) {
         const int c = order[oi];
-        pos[a] = plane; pos[ua] = cu[c]; pos[va] = cv[c];
+        pos[a] = plane - ((drop >> c) & 1); pos[ua] = cu[c]; pos[va] = cv[c];
         putVertex(out, pos[0], pos[1], pos[2], normal, cu[c], cv[c], layer, var, flags, sk[c], bl[c], ao[c]);
     }
 }

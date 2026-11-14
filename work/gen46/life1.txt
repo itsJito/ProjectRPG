@@ -1,0 +1,189 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.41s ({regions=855, overlays=490, variants=606, scarp=46, coast=463, erosion=403, peaks=49, lakes=67, isles=4, rivers=761, wadis=12, ground=18, roads=574, causeways=3, architecture=979, pitsFilled=1405, pits=533, banks=52, clamp=18, cliffs=49, columns=1093, falls=17, raise=11406, trees=271, outcrops=0, ways=598}), made and lit in 1.64s
+    [water] flow field grown in 786 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 4 stand with 3+ others within 2 m
+       Duke Bashir CIVIC (875.5,37.0,894.5) 3 near goal IDLE
+       Idris SCHOLAR (875.5,37.0,894.5) 3 near goal IDLE
+       Hakim CARTER (874.5,37.0,894.5) 3 near goal IDLE
+       Zaid GUARD (874.5,37.0,895.5) 3 near goal IDLE
+
+    [life] stop 244,928 done (29 people seen so far)
+    [life] stop 590,884 done (33 people seen so far)
+    [life] stop 119,749 done (53 people seen so far)
+    [life] stop 591,1023 done (55 people seen so far)
+    [life] stop 898,870 done (91 people seen so far)
+    [life] stop 357,772 done (96 people seen so far)
+    [life] stop 160,604 done (115 people seen so far)
+    [life] stop 571,593 done (116 people seen so far)
+    [life] stop 198,436 done (120 people seen so far)
+    [life] stop 551,109 done (150 people seen so far)
+    [life] stop 378,410 done (166 people seen so far)
+    [life] stop 825,385 done (183 people seen so far)
+    [life] stop 877,91 done (185 people seen so far)
+    [life] stop 864,554 done (188 people seen so far)
+    [life] stop 215,286 done (190 people seen so far)
+          [crime] ASSAULT by Vark against world life at (829.0, 692.0), t 601.8
+          [crime] ASSAULT by Wenna against world life at (829.5, 693.3), t 602.1
+          [crime] ASSAULT by Rask against world life at (828.4, 693.5), t 602.2
+          [crime] ASSAULT by Hurk against world life at (829.0, 693.5), t 602.2
+          [crime] ASSAULT by Grisel against world life at (829.7, 692.4), t 602.8
+          [crime] ASSAULT by Garmund against world life at (829.8, 691.9), t 603.1
+          [crime] ASSAULT by Hullen against world life at (828.0, 692.9), t 603.2
+          [crime] ASSAULT by Vark against world life at (829.6, 693.6), t 612.4
+          [crime] ASSAULT by Hullen against world life at (828.0, 694.3), t 613.3
+          [crime] ASSAULT by Wenna against world life at (829.6, 693.6), t 614.1
+          [crime] ASSAULT by Rask against world life at (829.9, 692.7), t 615.7
+          [crime] ASSAULT by Hurk against world life at (828.4, 694.1), t 615.8
+          [crime] ASSAULT by Garmund against world life at (828.5, 693.5), t 615.8
+          [crime] ASSAULT by Vark against world life at (829.3, 692.7), t 622.9
+          [crime] ASSAULT by Hullen against world life at (828.4, 694.1), t 623.8
+          [crime] ASSAULT by Grisel against world life at (830.0, 691.3), t 624.9
+          [crime] ASSAULT by Wenna against world life at (828.9, 693.9), t 625.2
+          [crime] ASSAULT by Rask against world life at (829.2, 694.2), t 626.0
+          [crime] ASSAULT by Hurk against world life at (829.9, 692.4), t 626.7
+          [crime] ASSAULT by Garmund against world life at (829.6, 692.4), t 630.5
+          [crime] ASSAULT by Vark against world life at (829.9, 692.8), t 633.5
+          [crime] ASSAULT by Hullen against world life at (829.2, 693.8), t 634.2
+          [crime] ASSAULT by Rask against world life at (829.6, 691.4), t 636.1
+          [crime] ASSAULT by Grisel against world life at (829.6, 693.8), t 636.2
+          [crime] ASSAULT by Wenna against world life at (828.7, 693.9), t 636.7
+          [crime] ASSAULT by Hurk against world life at (829.8, 693.3), t 637.3
+    [life] stop 829,692 done (198 people seen so far)
+    [life] stop 768,985 done (200 people seen so far)
+    [life] stop 450,34 done (209 people seen so far)
+    [life] stop 432,169 done (219 people seen so far)
+    [life] stop 176,131 done (222 people seen so far)
+    [life] stop 984,391 done (223 people seen so far)
+    [life] stop 720,481 done (224 people seen so far)
+
+    [life] 22 stops of 2400 frames; 224 people seen
+      Ealdra           MERCHANT     seen   380 spins   0 blocked     0 still   221
+          last (258.5,39.0,926.2) SLEEP: on the way
+      Maelin           SCHOLAR      seen   380 spins   0 blocked     0 still   265
+          last (134.5,61.0,590.7) PRAY: on the way to prayers
+      Father Paul      PRIEST       seen   380 spins   0 blocked     0 still    64
+          last (874.0,34.0,51.3) PRAY: on the way to prayers
+      Father Eirik     HEALER       seen   380 spins   0 blocked     0 still   263
+          last (371.0,57.0,388.7) PRAY: on the way to prayers
+      King Arthur      CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (813.8,66.0,374.5) WORK: Carpenter: buy missing inputs
+      Sten             CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (359.4,51.0,431.5) WORK: Carpenter: tidying the workplace while short of supplies
+      Alexios          CRAFTSMAN    seen  1015 spins   2 blocked     0 still     0
+          spun at (476.3,36.0,115.1) WORK: Carpenter: make the selected order
+      Einar            WORKER       seen   380 spins   2 blocked     0 still     0
+          spun at (325.5,66.0,399.5) WORK: Firewood Cutter: gather at a suitable site
+      Zainab           CRAFTSMAN    seen   380 spins   7 blocked     0 still     0
+          spun at (888.8,37.0,825.0) WORK: Tailor: tidying the workplace while short of supplies
+      Ziad             CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (890.5,37.0,826.4) WORK: Tailor: buy missing inputs
+      Murad            CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (891.2,37.0,825.2) WORK: Tailor: buy missing inputs
+      Karim            CRAFTSMAN    seen   380 spins   3 blocked     0 still     0
+          spun at (828.4,37.0,836.2) WORK: Cook: make the selected order
+      Soren            SCHOLAR      seen   380 spins   0 blocked     0 still   318
+          last (370.4,57.0,388.6) PRAY: on the way to prayers
+      Baron Hadrik     CRAFTSMAN    seen   380 spins   1 blocked     0 still     0
+          spun at (192.6,56.0,611.2) WORK: Smelter: tidying the workplace while short of supplies
+      Beric            HUNTER       seen   380 spins   1 blocked     0 still     0
+          spun at (341.6,46.0,778.5) WORK: no observed eligible target for Monster Hunter
+      Duke Bashir      CIVIC        seen   380 spins   0 blocked     0 still    50
+          last (915.4,37.0,853.3) PRAY: on the way to prayers
+      Hassan           SCHOLAR      seen   380 spins   0 blocked     0 still   186
+          last (911.3,37.0,853.5) PRAY: on the way to prayers
+      Zafir            CRAFTSMAN    seen   760 spins   6 blocked     0 still     0
+          spun at (806.3,37.0,903.7) WORK: Blacksmith: buy missing inputs
+      Rashid           MERCHANT     seen   380 spins   0 blocked     0 still   120
+          last (873.7,37.0,859.3) PRAY: on the way to prayers
+      Hamid            CRAFTSMAN    seen   380 spins   3 blocked     0 still     0
+          spun at (928.8,37.0,889.3) WORK: Carpenter: buy missing inputs
+      Nabil            CRAFTSMAN    seen   380 spins   2 blocked     0 still     0
+          spun at (928.5,37.0,889.9) WORK: Carpenter: buy missing inputs
+      Salim            CRAFTSMAN    seen   380 spins   4 blocked     0 still     0
+          spun at (928.8,37.0,888.1) WORK: Carpenter: buy missing inputs
+      Kamal            CRAFTSMAN    seen   380 spins   7 blocked     0 still     0
+          spun at (928.2,37.0,890.4) WORK: Carpenter: buy missing inputs
+      Sir Nicholas     KNIGHT       seen   380 spins   7 blocked     0 still     0
+          spun at (585.9,37.0,114.5) WORK: inspected the assigned border
+      Baroness Eudokia CIVIC        seen   380 spins   0 blocked     0 still   194
+          last (615.2,36.0,158.8) WORK: on the way
+      Demetrios        CRAFTSMAN    seen   380 spins   6 blocked     0 still     0
+          spun at (442.8,37.0,193.0) WORK: Blacksmith: buy missing inputs
+      Xenia            CRAFTSMAN    seen   380 spins   7 blocked     0 still     0
+          spun at (587.5,37.0,115.8) WORK: Armorer: tidying the workplace while short of supplies
+      Alkis            CARTER       seen  1140 spins   4 blocked   241 still     0
+          spun at (476.5,36.0,120.5) WORK: paused to reconsider a blocked route
+          last (476.5,36.0,120.5) WORK: paused to reconsider a blocked route
+      Orestes          WORKER       seen   380 spins   7 blocked     0 still     0
+          spun at (194.1,38.0,136.7) WORK: Firewood Cutter: tidying the workplace while short of supplies
+      Phaedra          CARTER       seen   380 spins   2 blocked   137 still     0
+          spun at (586.5,37.0,107.5) WORK: paused to reconsider a blocked route
+          last (586.5,37.0,107.5) WORK: paused to reconsider a blocked route
+      Halwen           CRAFTSMAN    seen   380 spins   7 blocked     0 still     0
+          spun at (216.9,53.0,659.4) WORK: Carpenter: buy missing inputs
+      Toben            CRAFTSMAN    seen   760 spins   2 blocked     0 still     0
+          spun at (126.3,54.0,656.7) WORK: Cook: tidying the workplace while short of supplies
+      Halvar           CRAFTSMAN    seen   380 spins   6 blocked     0 still     0
+          spun at (403.8,56.0,402.3) WORK: Blacksmith: buy missing inputs
+      Runa             CARTER       seen   380 spins   2 blocked   122 still     0
+          spun at (405.5,56.0,403.5) WORK: paused to reconsider a blocked route
+          last (405.5,56.0,403.5) WORK: paused to reconsider a blocked route
+      Ulven            CRAFTSMAN    seen   380 spins   3 blocked     0 still     0
+          spun at (381.7,54.0,438.3) WORK: Cook: buy missing inputs
+      Father Odran     PRIEST       seen   380 spins   0 blocked     0 still   279
+          last (144.3,43.0,723.5) PRAY: on the way to prayers
+      Mother Mirel     PRIEST       seen   380 spins   5 blocked     0 still   101
+          spun at (106.5,43.0,728.5) PRAY: on the way to prayers
+          last (106.5,43.0,728.5) PRAY: on the way to prayers
+      Wystan           CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (820.3,61.0,408.8) WORK: Blacksmith: buy missing inputs
+      Perrin           CRAFTSMAN    seen   380 spins   5 blocked     0 still     0
+          spun at (818.8,61.0,408.0) WORK: Carpenter: tidying the workplace while short of supplies
+      Pell             WORKER       seen   380 spins   6 blocked     0 still     0
+          spun at (880.0,57.0,568.4) WORK: Firewood Cutter: gather at a suitable site
+      Lothar           GUARD        seen   380 spins   2 blocked   124 still     0
+          spun at (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+          last (158.5,57.0,594.5) PATROL: paused to reconsider a blocked route
+      Astrid           UNDERTAKER   seen   380 spins   5 blocked   118 still     0
+          spun at (326.6,66.0,399.1) WORK: paused to reconsider a blocked route
+          last (326.6,66.0,399.1) WORK: paused to reconsider a blocked route
+      Haskel           MINER        seen   650 spins   2 blocked     0 still     0
+          spun at (155.5,58.0,544.5) WORK: Ore Miner: deliver a real batch
+      Mabry            WORKER       seen   380 spins   7 blocked     0 still     0
+          spun at (205.4,38.0,145.0) WORK: Firewood Cutter: tidying the workplace while short of supplies
+      Edvin            WORKER       seen   380 spins   7 blocked     0 still     0
+          spun at (192.8,38.0,154.7) WORK: Firewood Cutter: gather at a suitable site
+      Corra            WORKER       seen   380 spins   4 blocked     0 still     0
+          spun at (882.5,57.0,564.4) WORK: Firewood Cutter: gather at a suitable site
+      never in play: Orrin CRAFTSMAN home (369,654)
+    [life] 46 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 493.527 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8m 18s
+9 actionable tasks: 2 executed, 7 up-to-date

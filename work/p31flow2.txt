@@ -1,0 +1,184 @@
+Initialized native services in: C:\Users\John\.gradle\native
+Initialized jansi services in: C:\Users\John\.gradle\native
+The client will now receive all logging from the daemon (pid: 20408). The daemon log file: C:\Users\John\.gradle\daemon\8.14.3\daemon-20408.out.log
+Starting 6th build in daemon [uptime: 14 mins 58.652 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 16% of 384 MiB]
+Using 6 worker leases.
+Now considering [C:\Users\John\Documents\ProjectRPG\rpggame, C:\Users\John\Documents\ProjectRPG\theastrattoengine] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\John\Documents\ProjectRPG\rpggame\settings.gradle'.
+Now considering [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame] as hierarchies to watch
+Projects loaded. Root project using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Included projects: [root project 'rpggame']
+
+> Configure project :theastrattoengine
+Evaluating project ':theastrattoengine' using build file 'C:\Users\John\Documents\ProjectRPG\theastrattoengine\build.gradle'.
+Resolved plugin [id: 'java-library']
+Registering project ':theastrattoengine' in composite build. Will substitute for module 'astratto:theastrattoengine'.
+
+> Configure project :
+Evaluating root project 'rpggame' using build file 'C:\Users\John\Documents\ProjectRPG\rpggame\build.gradle'.
+Resolved plugin [id: 'application']
+All projects evaluated.
+Task name matched 'probe'
+Selected primary task 'probe' from project :
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Found project 'project :theastrattoengine' as substitute for module 'astratto:theastrattoengine'.
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':probe']
+Tasks that were excluded: []
+Resolve mutations for :processResources (Thread[#342,included builds Thread 2,5,main]) started.
+Resolve mutations for :theastrattoengine:compileJava (Thread[#341,included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[#344,Execution worker Thread 2,5,main]) started.
+:processResources (Thread[#342,included builds Thread 2,5,main]) started.
+:theastrattoengine:compileJava (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:compileJava UP-TO-DATE
+Caching disabled for task ':theastrattoengine:compileJava' because:
+  Build cache is disabled
+Skipping task ':theastrattoengine:compileJava' as it is up-to-date.
+Resolve mutations for :theastrattoengine:buildNative (Thread[#341,included builds,5,main]) started.
+other build task :theastrattoengine:compileJava (Thread[#347,Execution worker Thread 5,5,main]) started.
+:theastrattoengine:buildNative (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:buildNative UP-TO-DATE
+Caching disabled for task ':theastrattoengine:buildNative' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Skipping task ':theastrattoengine:buildNative' as it is up-to-date.
+Resolve mutations for :theastrattoengine:engineResources (Thread[#341,included builds,5,main]) started.
+:theastrattoengine:engineResources (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:engineResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:engineResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:engineResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:processResources (Thread[#341,included builds,5,main]) started.
+:theastrattoengine:processResources (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:processResources UP-TO-DATE
+Caching disabled for task ':theastrattoengine:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:processResources' as it is up-to-date.
+Resolve mutations for :theastrattoengine:classes (Thread[#341,included builds,5,main]) started.
+:theastrattoengine:classes (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:classes UP-TO-DATE
+Skipping task ':theastrattoengine:classes' as it has no actions.
+Resolve mutations for :theastrattoengine:jar (Thread[#341,included builds,5,main]) started.
+:theastrattoengine:jar (Thread[#341,included builds,5,main]) started.
+
+> Task :theastrattoengine:jar UP-TO-DATE
+Caching disabled for task ':theastrattoengine:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':theastrattoengine:jar' as it is up-to-date.
+work action resolve main (project :theastrattoengine) (Thread[#346,Execution worker Thread 4,5,main]) started.
+other build task :theastrattoengine:jar (Thread[#345,Execution worker Thread 3,5,main]) started.
+work action resolve theastrattoengine-2.0.0.jar (project :theastrattoengine) (Thread[#346,Execution worker Thread 4,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :compileJava (Thread[#342,included builds Thread 2,5,main]) started.
+:compileJava (Thread[#342,included builds Thread 2,5,main]) started.
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\world\FlowField.java has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\world\shadowveil\Fitout.java has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\main\java\rpg\world\shadowveil\ShadowVeil.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.003 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Log level has changed, stopping idle worker daemon with out-of-date log level.
+Compiling with JDK Java compiler API.
+Incremental compilation of 512 classes completed in 25.431 secs.
+Class dependency analysis for incremental compilation took 0.249 secs.
+Resolve mutations for :classes (Thread[#342,included builds Thread 2,5,main]) started.
+:classes (Thread[#342,included builds Thread 2,5,main]) started.
+
+> Task :classes
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[#346,Execution worker Thread 4,5,main]) started.
+:compileTestJava (Thread[#346,Execution worker Thread 4,5,main]) started.
+
+> Task :compileTestJava
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Task ':compileTestJava' is not up-to-date because:
+  Input property 'classpath' file C:\Users\John\Documents\ProjectRPG\rpggame\build\classes\java\main\rpg\world\FlowField.class has changed.
+  Input property 'stableSources' file C:\Users\John\Documents\ProjectRPG\rpggame\src\test\java\rpg\world\Gamefixes045Test.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.024 secs.
+Compiling with toolchain 'C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2'.
+Compiling with JDK Java compiler API.
+Incremental compilation of 162 classes completed in 10.244 secs.
+Class dependency analysis for incremental compilation took 0.076 secs.
+Resolve mutations for :processTestResources (Thread[#346,Execution worker Thread 4,5,main]) started.
+:processTestResources (Thread[#346,Execution worker Thread 4,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[#346,Execution worker Thread 4,5,main]) started.
+:testClasses (Thread[#346,Execution worker Thread 4,5,main]) started.
+
+> Task :testClasses
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :probe (Thread[#346,Execution worker Thread 4,5,main]) started.
+:probe (Thread[#346,Execution worker Thread 4,5,main]) started.
+Gradle Test Executor 6 started executing tests.
+
+> Task :probe
+Caching disabled for task ':probe' because:
+  Build cache is disabled
+Task ':probe' is not up-to-date because:
+  Task.upToDateWhen is false.
+Starting process 'Gradle Test Executor 6'. Working directory: C:\Users\John\Documents\ProjectRPG\rpggame Command: C:\Users\John\.gradle\jdks\azul_systems__inc_-21-amd64-windows.2\bin\java.exe -Djunit.jupiter.execution.timeout.default=9 m -Djunit.jupiter.execution.timeout.mode=enabled -Dorg.gradle.internal.worker.tmpdir=C:\Users\John\Documents\ProjectRPG\rpggame\build\tmp\probe\work --enable-native-access=ALL-UNNAMED @C:\Users\John\.gradle\.tmp\gradle-worker-classpath7084231995431611315txt -Xmx2g -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 6'
+Successfully started process 'Gradle Test Executor 6'
+
+FlowProbeTest > flow() STANDARD_OUT
+    [Load] ShadowVeil grown in 15.17s ({regions=759, overlays=488, variants=439, scarp=49, coast=426, erosion=327, peaks=43, lakes=64, isles=4, rivers=678, wadis=14, ground=32, roads=623, causeways=3, architecture=939, pitsFilled=1405, pits=495, banks=52, clamp=16, cliffs=45, columns=926, falls=15, raise=7964, trees=284, outcrops=0, ways=444}), made and lit in 1.50s
+    [water] flow field grown in 491 ms: 4190 columns moving
+    [flow] still river 3,30,566 flags 4 around:   . . . . .   . . . . .   . . 30 30 30   . . 30 30 30   . . 30 30 30
+    [flow] still river 33,32,776 flags 4 around:   32 32 32 32 32   32 32 32 32 32   32 32 32 32 32   32 32 32 32 32   . . . . .
+    [flow] still river 62,45,558 flags 4 around:   . . . . .   . . 45 45 46   44 45 45 45 46   44 44 45 45 45   44 44 . . .
+    [flow] still river 93,38,754 flags 4 around:   . . . 38 38   . . 38 38 38   . 38 38 38 38   38 38 38 38 38   38 38 38 38 38
+    [flow] still river 128,37,985 flags 4 around:   . . 37 37 37   . 37 37 37 37   37 37 37 37 37   37 37 37 37 .   37 37 . . .
+    [flow] still river 577,44,655 flags 4 around:   44 44 44 44 .   44 44 44 44 .   44 44 44 44 .   44 44 44 44 44   44 44 43 43 43
+    [flow] still river 580,44,618 flags 4 around:   . . . 44 44   . . 44 44 44   . . 44 44 44   . . 44 44 44   . . 44 44 44
+    [flow] still river 581,32,896 flags 4 around:   32 32 32 32 32   . 32 32 32 32   . 32 32 32 32   . . 32 32 32   . . 32 32 32
+    [flow] still river 583,42,681 flags 4 around:   42 42 42 42 42   42 42 42 42 42   42 42 42 42 42   42 42 42 42 42   42 42 42 42 42
+    [flow] still river 584,36,794 flags 36 around:   . . 36 36 36   . . 36 36 36   . . 36 36 36   . 36 36 36 36   . 36 36 36 36
+    [flow] still river 585,31,928 flags 4 around:   31 31 31 31 31   31 31 31 31 31   . 31 31 31 31   . 31 31 31 31   . 31 31 31 31
+    [flow] still river 587,41,697 flags 4 around:   41 41 41 . .   41 41 41 . .   41 41 41 41 .   41 41 41 41 .   41 41 41 41 41
+    [flow] still river 588,31,929 flags 4 around:   31 31 31 31 31   31 31 31 31 31   31 31 31 31 31   31 31 31 31 31   31 31 31 31 31
+    [flow] still river 590,34,837 flags 4 around:   34 34 34 34 34   34 34 34 34 34   34 34 34 34 34   34 34 34 34 34   34 34 34 34 34
+    [flow] still river 593,34,833 flags 4 around:   . . . . .   34 34 . . .   34 34 34 . .   34 34 34 34 .   34 34 34 34 .
+    [flow] still river columns 5865; falls 290
+
+Gradle Test Executor 6 finished executing tests.
+
+> Task :probe
+Finished generating test XML results (0.003 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\test-results\probe
+Generating HTML test report...
+Finished generating test html results (0.011 secs) into: C:\Users\John\Documents\ProjectRPG\rpggame\build\reports\tests\probe
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m
+9 actionable tasks: 3 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\John\Documents\ProjectRPG\theastrattoengine, C:\Users\John\Documents\ProjectRPG\rpggame]

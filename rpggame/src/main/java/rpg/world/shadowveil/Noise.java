@@ -5,7 +5,7 @@ package rpg.world.shadowveil;
  * permutation, quintic fade), summed in octaves (fbm) or folded into ridges. Pure function of the seed and the point, so
  * the same design always grows the same world.
  */
-final class Noise {
+public final class Noise {
     private final int[] perm = new int[512];
     private static final double[][] GRAD = new double[16][];
     static {
@@ -60,7 +60,7 @@ final class Noise {
     }
 
     /** A fixed pseudo-random number 0..1 for an integer point (tree spots, ore spots). */
-    static double hash(long seed, int x, int z, int salt) {
+    public static double hash(long seed, int x, int z, int salt) {
         long h = seed * 0x9E3779B97F4A7C15L ^ (x * 0xC2B2AE3D27D4EB4FL) ^ (z * 0x165667B19E3779F9L) ^ (salt * 0x27D4EB2F165667C5L);
         h ^= h >>> 29; h *= 0xBF58476D1CE4E5B9L; h ^= h >>> 32; h *= 0x94D049BB133111EBL; h ^= h >>> 29;
         return (h >>> 11) * 0x1.0p-53;

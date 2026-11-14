@@ -460,6 +460,19 @@ final class Textures {
             case L_WILLOW_LEAVES -> leaves(cv, 0x78AE3A, 6.0f, 1.3f, 260, 0.27f);
             // (0.4.0) the conifers' needles: many short narrow blades, a cool deep green, gaps of sky between the sprays
             case L_PINE_LEAVES -> leaves(cv, 0x2C5A30, 3.6f, 0.9f, 380, 0.2f);
+            // 0.4.2 (gamefixes: each territory's buildings their own) the kingdoms' walling
+            case L_RUBBLE -> { stones(cv, 9, 0x8C887E, 0.24f, 3.0f, 0xC9BDA4, 1.5f, 0.6f); cracks(cv, 3, 0x5C564E); moss(cv, 0x5E7E34, 5, true); grime(cv, 0.06f); }
+            case L_DAUB -> daub(cv);
+            case L_ASHLAR -> { bricks(cv, 3, 2, 0x989AA0, 0.1f, 0x55575E, 0.6f, 2.4f, 0.7f); speckle(cv, 0x2E3036, 0xD8D8DC, 260); grime(cv, 0.05f); }
+            case L_TARRED -> { boards(cv, 5, true, 0x54463A, 0.16f, 1.4f, true, 0.15f); grainLines(cv, true, 0x76624E, 12); grainLines(cv, true, 0x2A221C, 10); grime(cv, 0.05f); }
+            case L_ADOBE -> adobe(cv);
+            case L_STUCCO -> stucco(cv);
+            case L_WHITE_ASHLAR -> { bricks(cv, 3, 2, 0xE4DFD2, 0.06f, 0xA8A090, 0.5f, 2.2f, 0.5f); grime(cv, 0.04f); }
+            // 0.4.4: the jail's bars, Rome's thin brick, a mosaic floor, Byzantium's banded wall
+            case L_IRON_BARS -> ironBars(cv);
+            case L_ROMAN_BRICK -> { bricks(cv, 8, 2, 0xB4623E, 0.16f, 0xD6C8A8, 1.3f, 1.4f, 0.6f); grime(cv, 0.05f); }
+            case L_MOSAIC -> mosaic(cv);
+            case L_BANDED -> banded(cv);
             // the hedge: small clipped leaves packed tight on a dark body, barely a gap in it, the light on its top edge
             case L_HEDGE -> leaves(cv, 0x2F7428, 2.8f, 1.5f, 420, 0.08f);
             case L_BERRY -> berries(cv);
@@ -702,8 +715,11 @@ final class Textures {
             else cv.set(i, rgb(((x / 16 + y / 16) & 1) == 0 ? 0xA8C4D2 : 0x90ACBA), 1);
             boolean lead = Math.abs(r - 6) < 0.8f || Math.abs(r - 14) < 0.8f || Math.abs(r - 22) < 0.9f || r >= 6 && r < 22 && Math.abs(ang * 10 - Math.round(ang * 10)) * r * 0.63f < 0.6f
                     || r >= 22 && (Math.floorMod(x + y, 16) == 0 || Math.floorMod(x - y, 16) == 0) || x == 0 || y == 0;
-            if (lead) cv.set(i, rgb(0x2A2A30), 1);
-            else cv.light(i, (cv.noise(4, x, y) - 0.5f) * 0.25f);
+            // (0.4.2, gamefixes: church glass was not see-through and let no light in) the leading is opaque; the panes
+            // are coloured glass - the jewels deep and half-clear, the plain quarries round them clearer still - so the
+            // window is seen through and the day comes through it tinted
+            if (lead) { cv.set(i, rgb(0x2A2A30), 1); cv.a[i] = 255; }
+            else { cv.light(i, (cv.noise(4, x, y) - 0.5f) * 0.25f); cv.a[i] = r < 22 ? 150 + cv.noise(3, x, y) * 30 : 105 + cv.noise(3, x, y) * 25; }
         }
     }
 
@@ -1100,6 +1116,106 @@ final class Textures {
             cv.tone(x, y, r, r * 0.6f, cv.rf() * 3, cv.rf() < 0.5f ? 0.08f : -0.07f, 1f);
         }
         for (int k = 0; k < 2; k++) cv.wander(cv.rf() * T, cv.rf() * T, cv.rf() * 6.28f, 4, 1.8f, 0.9f, 0.22f, rgb(0xB8A482), 0.5f);
+    }
+    /** (0.4.2) Harlette's daub: limewash over clay, warm ochre-cream, the trowel's patches, straw showing through here and there. */
+    static void daub(Canvas cv) {
+        cv.fill(0xE2CC98);
+        cv.mottle(0.16f, 11);
+        for (int k = 0; k < 12; k++) { float x = cv.rf() * T, y = cv.rf() * T, r = 6 + cv.rf() * 9; cv.tone(x, y, r, r * 0.7f, cv.rf() * 3, cv.rf() < 0.5f ? 0.09f : -0.1f, 1f); }
+        for (int k = 0; k < 26; k++) { float x = cv.rf() * T, y = cv.rf() * T, a = cv.rs() * 0.6f; cv.stroke(x, y, x + (float) Math.cos(a) * 3.5f, y + (float) Math.sin(a) * 3.5f, 0.35f, 0.25f, rgb(0xB8964E), 0.55f); }
+        grime(cv, 0.07f);
+    }
+    /** (0.4.2) Azharad's adobe: sun-dried mud plaster, straw-flecked, crazed fine, a mud brick bared where the skin fell away. */
+    static void adobe(Canvas cv) {
+        cv.fill(0xC49A66);
+        cv.mottle(0.22f, 13);
+        for (int k = 0; k < 40; k++) { float x = cv.rf() * T, y = cv.rf() * T, a = cv.rs() * 3f; cv.stroke(x, y, x + (float) Math.cos(a) * 2.6f, y + (float) Math.sin(a) * 2.6f, 0.3f, 0.2f, rgb(0xE0C080), 0.6f); }
+        cracks(cv, 6, 0x7E5C3A);
+        float bx = cv.rf() * (T - 24), by = cv.rf() * (T - 14);
+        for (int y = (int) by; y < by + 12; y++) for (int x = (int) bx; x < bx + 22; x++) {
+            int i = Canvas.w(y) * T + Canvas.w(x);
+            boolean joint = (y - (int) by) % 6 == 0 || (x - (int) bx + ((y - (int) by) / 6 % 2) * 5) % 11 == 0;
+            cv.set(i, rgb(joint ? 0x7A5A3A : 0xA87A50), 0.75f);
+        }
+    }
+    /** (0.4.2) Severia's stucco: a warm ochre render, smooth and sun-faded, darker where the rain runs, a patch of brick showing. */
+    static void stucco(Canvas cv) {
+        cv.fill(0xE0B482);
+        cv.mottle(0.1f, 17);
+        for (int x = 0; x < T; x++) for (int y = 0; y < T; y++) { float n = cv.noise(4, x * 0.3f, y); if (n < 0.3f) cv.light(y * T + x, -(0.3f - n) * 0.35f); }
+        for (int k = 0; k < 8; k++) { float x = cv.rf() * T, y = cv.rf() * T, r = 8 + cv.rf() * 8; cv.tone(x, y, r, r * 0.6f, cv.rf() * 3, cv.rf() < 0.5f ? 0.06f : -0.07f, 1f); }
+        float px = cv.rf() * (T - 18), py = cv.rf() * (T - 10);
+        for (int y = (int) py; y < py + 8; y++) for (int x = (int) px; x < px + 16; x++) {
+            int i = Canvas.w(y) * T + Canvas.w(x);
+            boolean joint = (y - (int) py) % 4 == 0 || (x - (int) px + ((y - (int) py) / 4 % 2) * 4) % 8 == 0;
+            cv.set(i, rgb(joint ? 0xC8B49A : 0xA8583A), 0.85f);
+        }
+    }
+    /** (0.4.4) A jail's iron bars: four round uprights through two flat bands, the gaps between them open. */
+    static void ironBars(Canvas cv) {
+        java.util.Arrays.fill(cv.a, 0);
+        float[] iron = rgb(0x3E3E44);
+        for (int y = 0; y < T; y++) for (int x = 0; x < T; x++) {
+            int bx = x % 16;
+            boolean bar = bx >= 6 && bx < 11, band = y >= 4 && y < 9 || y >= 55 && y < 60;
+            if (!bar && !band) continue;
+            int i = y * T + x;
+            float k = (cv.noise(5, x * 0.4f, y * 2) - 0.5f) * 0.3f;
+            if (bar && !band) k += bx == 6 ? -0.35f : bx == 7 ? 0.45f : bx == 8 ? 0.2f : bx == 10 ? -0.5f : 0;
+            if (band) k += (y == 4 || y == 55) ? 0.45f : (y == 8 || y == 59) ? -0.5f : 0;
+            float[] o = shade(iron, k);
+            cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2]; cv.a[i] = 255;
+        }
+        for (int k = 0; k < 14; k++) cv.tone(cv.rf() * T, cv.rf() * T, 1.5f, 3, 0, -0.25f, 1);
+    }
+    /**
+     * (0.4.4) A mosaic floor of small square tesserae on a cream ground: a lattice of diamonds in terracotta and ochre with
+     * a dark blue knot at each crossing, a border band of blue and red along two edges so the tiles join into a carpet.
+     */
+    static void mosaic(Canvas cv) {
+        float[] cream = rgb(0xE6DABE), red = rgb(0xA8452E), ochre = rgb(0xC89A44), blue = rgb(0x2E4C7A), grout = rgb(0x9A8E78);
+        int ts = 4;
+        for (int ty = 0; ty < T / ts; ty++) for (int tx = 0; tx < T / ts; tx++) {
+            int cx = tx - 8, cy = ty - 8;
+            int d = Math.abs(cx) + Math.abs(cy);
+            float[] c = cream;
+            if (ty <= 1 || tx <= 1) c = ty == 0 || tx == 0 ? blue : red;
+            else if (d == 6 || d == 7) c = red;
+            else if (d == 3) c = ochre;
+            else if (d == 0 || d == 1) c = blue;
+            else if (Math.abs(cx) == Math.abs(cy) && d > 7) c = ochre;
+            float[] jit = shade(c, cv.rs() * 0.12f);
+            for (int y = 0; y < ts; y++) for (int x = 0; x < ts; x++) {
+                int i = (ty * ts + y) * T + tx * ts + x;
+                boolean gap = x == ts - 1 || y == ts - 1;
+                float[] o = gap ? shade(grout, cv.rs() * 0.1f) : shade(jit, (x == 0 || y == 0 ? 0.12f : 0) + (cv.noise(5, tx * ts + x, ty * ts + y) - 0.5f) * 0.12f);
+                cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+            }
+        }
+        grime(cv, 0.03f);
+        for (int k = 0; k < 4; k++) cv.tone(cv.rf() * T, cv.rf() * T, 10, 8, cv.rf() * 3, -0.06f, 1);
+    }
+    /**
+     * (0.4.4) The Byzantine banded wall: a deep course of pale dressed stone, then a band of three courses of thin red
+     * brick set in thick mortar, twice to the tile.
+     */
+    static void banded(Canvas cv) {
+        bricks(cv, 2, 1, 0xD8CCAE, 0.08f, 0xB0A486, 0.8f, 2.2f, 0.6f);
+        float[] brick = rgb(0xAE5636), mortar = rgb(0xD4C6A6);
+        for (int band : new int[]{0, 32}) {
+            for (int y = band; y < band + 13; y++) for (int x = 0; x < T; x++) {
+                int i = y * T + x, ry = (y - band) % 4, row = (y - band) / 4;
+                int off = (row % 2) * 8, bx = Math.floorMod(x + off, 16);
+                boolean joint = ry == 3 || bx == 15 || y == band + 12;
+                float[] o = joint ? shade(mortar, (cv.noise(4, x, y) - 0.5f) * 0.3f) : shade(brick, (ry == 0 ? 0.25f : ry == 2 ? -0.3f : 0) + (cv.noise(3, x + row * 9, y) - 0.5f) * 0.35f);
+                cv.r[i] = o[0]; cv.g[i] = o[1]; cv.b[i] = o[2];
+            }
+        }
+        grime(cv, 0.05f);
+    }
+    /** Fine flecks of two colours (granite's dark and light crystals). */
+    static void speckle(Canvas cv, int dark, int light, int n) {
+        for (int k = 0; k < n; k++) { int i = Canvas.w((int) (cv.rf() * T)) * T + Canvas.w((int) (cv.rf() * T)); cv.set(i, rgb(cv.rf() < 0.6f ? dark : light), 0.45f); }
     }
     static void grainLines(Canvas cv, boolean horizontal, int col, int n) {
         for (int k = 0; k < n; k++) {

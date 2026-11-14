@@ -38,9 +38,6 @@ public final class Settle {
         if (home == null) home = ShadowVeil.dry(WorldMap.active().spawnX, WorldMap.active().spawnZ);
         // a post a few steps from the bed (their work in the place, not on the pillow)
         float[] post = ShadowVeil.dry(home[0] + (float) Math.cos(n.id * 1.7) * 4, home[1] + (float) Math.sin(n.id * 1.7) * 4);
-        // (0.4.1) a post the world names for this person (the teller at the bank in Loxford Castle's keep)
-        float[] named = ShadowVeil.post(idName(n.id));
-        if (named != null) { home = named; post = named; }
         n.x = home[0]; n.z = home[1]; n.y = ShadowVeil.standY(n.x, n.z);
         n.homeX = home[0]; n.homeZ = home[1];
         n.postX = post[0]; n.postZ = post[1];

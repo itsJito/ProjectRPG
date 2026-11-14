@@ -71,8 +71,14 @@ public final class Furniture extends WorldObject {
     public final int floor;
     /** (0.3.8) The renderer's key for its model (made once). */
     public transient String drawKey;
+    /** (0.4.4) The seed its model was made with (its look, and whether it is the plain one). */
+    public transient int drawSeed;
     /** (0.3.8) A fireplace's fire: game minutes of wood left in the grate (0: cold). */
     public float fuel;
+    /** (0.4.4) A working household's version of the piece (a stone hearth, not a marble fireplace). */
+    public boolean plain;
+    /** (0.4.4) A table laid for a meal (its bowls, cups, bread and candle drawn on it). */
+    public boolean laid;
 
     public Furniture(long id, Kind kind, int x0, int z0, int x1, int z1, int h, int facing, long owner, boolean placed) {
         this(id, kind, x0, z0, x1, z1, h, facing, owner, placed, DevMap.FLOOR);
@@ -148,6 +154,7 @@ public final class Furniture extends WorldObject {
             double minutes = Math.max(60, ((6 - hour + 24) % 24) * 60);
             g.state.commit(req, "Slept", a.id, id, jurisdiction(), 0, String.format("%.0f minutes in %s", minutes, label()));
             g.advanceTime(minutes, "sleeping");
+            if (a == g.player) g.restoreWorld("slept");
             a.hp = a.maxHp(); a.stamina = a.maxStamina();
             if (a == g.player) g.chat.say("You sleep soundly and wake at " + g.state.clockText() + ", rested.");
             return Result.ok();

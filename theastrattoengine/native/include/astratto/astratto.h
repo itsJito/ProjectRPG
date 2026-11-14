@@ -751,7 +751,8 @@ enum {
     ASTRATTO_RIGID_NO_SLEEP = 1u << 4,
     ASTRATTO_RIGID_BULLET = 1u << 5,     /* fast and small: its sweep is checked against the world each step (no tunnelling) */
     ASTRATTO_RIGID_REPORT = 1u << 6,     /* report its impacts (ASTRATTO_EVT_RIGID_IMPACT) */
-    ASTRATTO_RIGID_DEBRIS = 1u << 7      /* collides with the world and bodies, but not with other debris */
+    ASTRATTO_RIGID_DEBRIS = 1u << 7,     /* collides with the world and bodies, but not with other debris */
+    ASTRATTO_RIGID_YIELD = 1u << 8       /* characters push it about but are never held back by it (debris underfoot) */
 };
 typedef struct astratto_cmd_rigid_create {
     astratto_record head;
@@ -1398,7 +1399,8 @@ enum {
     ASTRATTO_RCMD_RIPPLE = 19,        /* astratto_rcmd_ripple: surface impulse in world x/z, radius and acceleration */
     ASTRATTO_RCMD_EMITTER = 18,       /* GPU element particles, bounded persistent pool */
     ASTRATTO_RCMD_ATMOS = 20,         /* astratto_rcmd_atmos: the ambient cube and the colour grade of an environment preset (API 2.9) */
-    ASTRATTO_RCMD_WATER_FLOW = 21,    /* astratto_rcmd_water_flow: a stretch of water moving (x/z rect, m/s); this frame (API 2.10) */
+    ASTRATTO_RCMD_WATER_FIELD = 21,   /* astratto_rcmd_water_field + n*n RGBA8: the water's motion round the eye, kept until replaced (API 2.12; was 2.10's per-frame rects) */
+    ASTRATTO_RCMD_PRECIP = 22,        /* astratto_rcmd_precip + count * astratto_precip_layer: this frame's precipitation (API 2.13) */
     ASTRATTO_RCMD_PORTRAIT = 17       /* astratto_rcmd_portrait + count * astratto_portrait_part; ordered among UI quads */
 
 };
@@ -1433,7 +1435,14 @@ typedef struct astratto_rcmd_model {
     float r, g, b, a, emissive, light, roughness, metallic;
 } astratto_rcmd_model;
 typedef struct astratto_rcmd_ripple { astratto_record head; float x,z,radius,strength; } astratto_rcmd_ripple;
-typedef struct astratto_rcmd_water_flow { astratto_record head; float x0,z0,x1,z1,vx,vz; } astratto_rcmd_water_flow;
+/* 2.12: a square of n x n cells from (x0, z0), cell metres each, row by row along x: R, G the flow along x and z
+   (128 + 32 per m/s), B whitewater (0..255), A how much of the cell is open water (0..255) */
+typedef struct astratto_rcmd_water_field { astratto_record head; float x0,z0,cell; uint32_t n,reserved; } astratto_rcmd_water_field;
+/* (2.13) precipitation: the wind and the clock, then each layer - kind (0 rain, 1 snow, 2 hail, 3 dust, 4 splash),
+   instances, fall (m/s), size, streak length, tile width, tile height, ground band low and high, wind share, turbulence,
+   ground (1: kept in the band over the roof), seed salt, r, g, b, alpha, and the light's scale */
+typedef struct astratto_rcmd_precip { astratto_record head; uint32_t count, reserved; float wind_x, wind_z, time, light; } astratto_rcmd_precip;
+typedef struct astratto_precip_layer { float kind, instances, fall, size, length, tile, tall, low, high, wind, turbulence, ground, salt, r, g, b, alpha, reserved[3]; } astratto_precip_layer;
 typedef struct astratto_rcmd_emitter { astratto_record head; uint64_t id; float position[4], color[4], motion[4], params[4]; } astratto_rcmd_emitter;
 typedef struct astratto_rcmd_particles { astratto_record head; uint32_t count, reserved; } astratto_rcmd_particles;
 /* 2D: quads in pixels from the top-left; a vertex is x y u v r g b a mode (0 colour, 1 texture, 2 text: alpha from red). */

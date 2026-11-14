@@ -444,8 +444,18 @@ public final class MonsterMind {
 
     private void wanderNear(Monster m, float cx, float cz, float r) {
         if (!m.hasGoalPos || Math.hypot(m.x - m.tx, m.z - m.tz) < 1 || g.time - m.stateSince > 20) {
-            double a = sys.rnd(m) * Math.PI * 2; float d = r * (0.4f + 0.6f * (float) sys.rnd(m));
-            m.tx = cx + (float) Math.sin(a) * d; m.tz = cz + (float) Math.cos(a) * d; m.hasGoalPos = true; m.stateSince = g.time;
+            // (0.4.2, gamefixes: the stutter after loading in - an idle goblin's wander point inside the rock of its den
+            // cost a quarter-second route search that could only fail) a point is only taken where a body can stand
+            boolean found = false;
+            for (int k = 0; k < 6 && !found; k++) {
+                double a = sys.rnd(m) * Math.PI * 2; float d = r * (0.4f + 0.6f * (float) sys.rnd(m));
+                float x = cx + (float) Math.sin(a) * d, z = cz + (float) Math.cos(a) * d;
+                if (!m.kind.flies() && !g.vox.navigation.validPoint(x, m.y, z, door -> false) && !g.vox.navigation.validPoint(x, rpg.world.WorldMap.standY(x, z), z, door -> false)) continue;
+                m.tx = x; m.tz = z; found = true;
+            }
+            m.stateSince = g.time;
+            if (!found) { m.hasGoalPos = false; hold(m); return; }
+            m.hasGoalPos = true;
         }
         if (sys.moveTo(m, m.tx, m.tz, false, 0.8f)) hold(m);
     }

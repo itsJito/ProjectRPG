@@ -43,6 +43,24 @@ void applyAngular(Body& a, Body* b, V3 L) {
     if (b && b->invMass > 0) b->w += b->invI * L;
 }
 
+/**
+ * (2.12, a game's ask: broken things pushed about but never in the way) in a contact between a character and a yielding
+ * body, the character is as good as immovable: the body is pushed, the character is not pushed back. Returns the body whose
+ * mass is to be taken as infinite for the contact (the character's proxy), or null.
+ */
+Body* yieldingProxy(Body& a, Body* b) {
+    if (!b) return nullptr;
+    if (a.proxy && (b->flags & ASTRATTO_RIGID_YIELD)) return &a;
+    if (b->proxy && (a.flags & ASTRATTO_RIGID_YIELD)) return b;
+    return nullptr;
+}
+/** Holds a body's mass at infinity for a scope (the yielding contact's solve), and gives it back after. */
+struct HeldFast {
+    Body* b; float m;
+    explicit HeldFast(Body* body) : b(body), m(body ? body->invMass : 0) { if (b) b->invMass = 0; }
+    ~HeldFast() { if (b) b->invMass = m; }
+};
+
 }  // namespace
 
 // ------------------------------------------------------------------ bodies and joints
@@ -364,6 +382,7 @@ void Space::prepare(float dt) {
         Body* B = m.b >= 0 ? &bodies_[static_cast<size_t>(m.b)] : nullptr;
         A.contacts++;
         if (B) B->contacts++;
+        HeldFast fast(yieldingProxy(A, B));
         for (int i = 0; i < m.count; i++) {
             Contact& c = m.pts[i];
             basis(c.n, c.t1, c.t2);
@@ -384,6 +403,7 @@ void Space::warmStart() {
     for (Manifold& m : manifolds_) {
         Body& A = bodies_[static_cast<size_t>(m.a)];
         Body* B = m.b >= 0 ? &bodies_[static_cast<size_t>(m.b)] : nullptr;
+        HeldFast fast(yieldingProxy(A, B));
         for (int i = 0; i < m.count; i++) {
             Contact& c = m.pts[i];
             const V3 P = c.n * c.Pn + c.t1 * c.Pt1 + c.t2 * c.Pt2;
@@ -397,6 +417,7 @@ void Space::solveVelocities() {
         Body& A = bodies_[static_cast<size_t>(m.a)];
         Body* B = m.b >= 0 ? &bodies_[static_cast<size_t>(m.b)] : nullptr;
         if (!A.awake && (!B || !B->awake)) continue;
+        HeldFast fast(yieldingProxy(A, B));
         for (int i = 0; i < m.count; i++) {
             Contact& c = m.pts[i];
             // the normal: never pulls (the accumulated impulse stays at or above zero)

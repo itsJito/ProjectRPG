@@ -1,0 +1,28 @@
+  slow: rpg.Gamefixes039Test.theEstateAndItsPeopleHaveIdsNoOneElseHas() 23.445 s
+  slow: rpg.Gamefixes040Test.steppingDownFromAHorseTakesItsTimeAndEndsOnTheGroundBesideIt() 26.355 s
+  slow: rpg.ai.FullPackTest.whatNoStoreBuysIsBanked() 28.158 s
+  slow: rpg.ai.Gamefixes032Test.aFireSpellStillBurnsGrassAfterWalkingTheWholeMap() 38.178 s
+  slow: rpg.ai.Gamefixes033Test.aPettyFineIsAskedForOnceAndNotAgainWhileItStandsUnchanged() 31.915 s
+  slow: rpg.ai.Gamefixes032Test.theCropFarmerHarvestsAndResowsHisRows() 133.168 s
+  slow: rpg.ai.Gamefixes034Test.aleLendsFiveStrengthThatEbbsAndLeavesTheBottle() 88.138 s
+  slow: rpg.animal.WadingTest.ducksTakeToTheirPondOfTheirOwnAccord() 57.963 s
+  slow: rpg.ai.Gamefixes036Test.theFenceTradesWithACustomerWhoseBladeIsOut() 25.58 s
+  slow: rpg.combat.PunchBanditTest.punchingABanditInTownRunsClean() 21.462 s
+  slow: rpg.ai.NewResidentsTest.theFiveGetOnWithTheirTrades() 25.995 s
+  slow: rpg.ai.NpcPaceTest.theTownGoingAboutItsMorningNeverSprints() 20.125 s
+  slow: rpg.combat.SummonStressTest.summoningOverAndOverNeverBreaksTheWorld(Path) 39.066 s
+  slow: rpg.world.ShadowVeilTest.aWholeGameDayRunsWithoutAFault() 53.009 s
+  slow: rpg.world.RepairsTest.theCarpenterPutsABrokenWindowBack() 27.109 s
+
+514 tests completed, 1 failed, 13 skipped
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 18m 45s

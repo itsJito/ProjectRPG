@@ -30,6 +30,9 @@ public final class Fluids {
 
     public Fluids(Voxels vox) { this.vox = vox; }
 
+    /** (0.4.5) The water's motion everywhere (FlowField): set once the map's water is known. */
+    public FlowField field;
+
     public void current(int x0, int z0, int x1, int z1, float dx, float dz, float speed) {
         float l = (float) Math.hypot(dx, dz);
         currents.add(new Current(Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1), dx / l, dz / l, speed));
@@ -124,23 +127,12 @@ public final class Fluids {
      */
     public float[] flow(float x, float y, float z) {
         float[] out = new float[2];
-        int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
-        if (!in(x, y, z) && !in(x, y - 0.5f, z)) return out;
-        // (0.4.1) where reaches overlap (a river's bends) the water runs at their average, never their sum
-        int over = 0;
-        for (Current c : currents) {
-            if (!c.holds(bx, bz)) continue;
-            // across the channel: 1 in the middle, about half at the bank
-            float wide = Math.abs(c.dz) > Math.abs(c.dx) ? c.x1 - c.x0 + 1 : c.z1 - c.z0 + 1;
-            float across = Math.abs(c.dz) > Math.abs(c.dx) ? x - (c.x0 + c.x1 + 1) * 0.5f : z - (c.z0 + c.z1 + 1) * 0.5f;
-            float middle = 1 - 0.5f * Math.min(1, Math.abs(across) / Math.max(0.5f, wide * 0.5f));
-            float s = surface(x, y, z);
-            float near = Float.isNaN(s) ? 1 : Math.max(0.35f, 1 - Math.max(0, s - y) * 0.35f);
-            out[0] += c.dx * c.speed * middle * near;
-            out[1] += c.dz * c.speed * middle * near;
-            over++;
-        }
-        if (over > 1) { out[0] /= over; out[1] /= over; }
+        if (field == null || !in(x, y, z) && !in(x, y - 0.5f, z)) return out;
+        // (0.4.5) from the field (eased between columns), strongest at the surface and slack along the bed
+        field.sample(x, z, out);
+        float s = surface(x, y, z);
+        float near = Float.isNaN(s) ? 1 : Math.max(0.35f, 1 - Math.max(0, s - y) * 0.35f);
+        out[0] *= near; out[1] *= near;
         return out;
     }
 }

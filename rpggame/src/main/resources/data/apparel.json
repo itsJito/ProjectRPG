@@ -1,0 +1,852 @@
+{
+ "_about": "(0.4.5, gamefixes: the clothing update) Wearable outfits: each piece an item (its slot, worth, size in the pack, weight, protection) and its look - the shape it is drawn with (rpg.render.Garments) and its colours. 'requires' is every skill level the whole outfit asks (none: anyone may wear it). Who wears them is the census kits' 'outfits'.",
+ "outfits": {
+  "pigskin": {
+   "name": "Pigskin outfit",
+   "requires": {},
+   "pieces": [
+    {
+     "id": "pigskin_hood",
+     "name": "Pigskin hood",
+     "slot": "HEAD",
+     "value": 160,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 0.4,
+     "armor": 0.5,
+     "examine": "A purple hood that covers the head and shadows the face.",
+     "look": {
+      "shape": "hood",
+      "color": "7E3AA6",
+      "trim": "4E2470",
+      "lining": "341C46"
+     }
+    },
+    {
+     "id": "pigskin_shirt",
+     "name": "Pigskin shirt",
+     "slot": "BODY",
+     "value": 220,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.8,
+     "armor": 1,
+     "examine": "A dark purple tunic, cut close.",
+     "look": {
+      "shape": "tunic",
+      "color": "58287E",
+      "trim": "7E3AA6",
+      "fit": "fitted",
+      "collar": "high",
+      "belt": "2A2230"
+     }
+    },
+    {
+     "id": "pigskin_robe",
+     "name": "Pigskin robe",
+     "slot": "LEGS",
+     "value": 240,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 1.0,
+     "armor": 0.5,
+     "examine": "Long purple lower robes that brush the ankles.",
+     "look": {
+      "shape": "robe",
+      "color": "7E3AA6",
+      "trim": "4E2470",
+      "length": 11.6,
+      "under": "4A4650"
+     }
+    },
+    {
+     "id": "pigskin_gloves",
+     "name": "Pigskin gloves",
+     "slot": "HANDS",
+     "value": 90,
+     "cells": [
+      2,
+      1
+     ],
+     "weight": 0.2,
+     "armor": 0.5,
+     "examine": "Gloves of dark fabric.",
+     "look": {
+      "shape": "gloves",
+      "color": "2E2A34",
+      "trim": "4E2470"
+     }
+    },
+    {
+     "id": "pigskin_boots",
+     "name": "Pigskin boots",
+     "slot": "FEET",
+     "value": 110,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Simple dark boots.",
+     "look": {
+      "shape": "boots",
+      "color": "2A2630",
+      "rows": 9,
+      "sole": "18161C"
+     }
+    },
+    {
+     "id": "pigskin_cloak",
+     "name": "Pigskin cloak",
+     "slot": "CAPE",
+     "value": 280,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 1.2,
+     "armor": 0.5,
+     "examine": "A flowing purple cape.",
+     "look": {
+      "shape": "cloak",
+      "color": "7E3AA6",
+      "trim": "4E2470",
+      "lining": "7A7480",
+      "length": 20
+     }
+    },
+    {
+     "id": "pigskin_logo",
+     "name": "Pigskin logo",
+     "slot": "NECK",
+     "value": 140,
+     "cells": [
+      1,
+      1
+     ],
+     "weight": 0.05,
+     "armor": 0,
+     "examine": "The cult's insignia, worn on a cord about the neck.",
+     "look": {
+      "shape": "insignia",
+      "color": "B8B0C4",
+      "cord": "2A2230",
+      "mark": "7E3AA6"
+     }
+    }
+   ]
+  },
+  "rogue": {
+   "name": "Rogue outfit",
+   "requires": {
+    "AGILITY": 50,
+    "THIEVING": 50
+   },
+   "pieces": [
+    {
+     "id": "rogue_mask",
+     "name": "Rogue mask",
+     "slot": "HEAD",
+     "value": 300,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 0.3,
+     "armor": 0.5,
+     "examine": "A black hood that hides all but the eyes.",
+     "look": {
+      "shape": "mask",
+      "color": "1C1C20",
+      "trim": "0E0E10"
+     }
+    },
+    {
+     "id": "rogue_top",
+     "name": "Rogue top",
+     "slot": "BODY",
+     "value": 420,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 1.4,
+     "armor": 2,
+     "examine": "A tight tunic of black leather.",
+     "look": {
+      "shape": "tunic",
+      "color": "18181C",
+      "trim": "0E0E10",
+      "fit": "fitted",
+      "collar": "high",
+      "leather": true,
+      "belt": "0E0E10",
+      "straps": "2A2A30"
+     }
+    },
+    {
+     "id": "rogue_trousers",
+     "name": "Rogue trousers",
+     "slot": "LEGS",
+     "value": 360,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.8,
+     "armor": 1,
+     "examine": "Slim black trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "1A1A1E",
+      "trim": "0E0E10",
+      "fit": "slim"
+     }
+    },
+    {
+     "id": "rogue_gloves",
+     "name": "Rogue gloves",
+     "slot": "HANDS",
+     "value": 240,
+     "cells": [
+      2,
+      1
+     ],
+     "weight": 0.15,
+     "armor": 0.5,
+     "examine": "Fitted black gloves.",
+     "look": {
+      "shape": "gloves",
+      "color": "141418",
+      "trim": "0E0E10"
+     }
+    },
+    {
+     "id": "rogue_boots",
+     "name": "Rogue boots",
+     "slot": "FEET",
+     "value": 280,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 0.7,
+     "armor": 0.5,
+     "examine": "Soft dark leather boots.",
+     "look": {
+      "shape": "boots",
+      "color": "1E1A18",
+      "rows": 11,
+      "sole": "0E0C0C",
+      "trim": "2A2420"
+     }
+    }
+   ]
+  },
+  "prospector": {
+   "name": "Prospector outfit",
+   "requires": {
+    "MINING": 30
+   },
+   "pieces": [
+    {
+     "id": "prospector_helmet",
+     "name": "Prospector helmet",
+     "slot": "HEAD",
+     "value": 260,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 1.2,
+     "armor": 2,
+     "examine": "A sturdy mining helmet, its lamp long since smoked black.",
+     "look": {
+      "shape": "mining_helmet",
+      "color": "8C7A52",
+      "trim": "5E5034",
+      "lamp": "F2D27A"
+     }
+    },
+    {
+     "id": "prospector_jacket",
+     "name": "Prospector jacket",
+     "slot": "BODY",
+     "value": 300,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 2.0,
+     "armor": 2,
+     "examine": "A thick tan work jacket, dusted grey with rock.",
+     "look": {
+      "shape": "jacket",
+      "color": "B08A58",
+      "trim": "7A5A34",
+      "fit": "loose",
+      "collar": "fold",
+      "pockets": true,
+      "dust": "9A9890",
+      "hem": 3.4
+     }
+    },
+    {
+     "id": "prospector_legs",
+     "name": "Prospector legs",
+     "slot": "LEGS",
+     "value": 220,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 1.4,
+     "armor": 1,
+     "examine": "Loose, hard-wearing work trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "8A7654",
+      "trim": "4E4232",
+      "fit": "loose",
+      "dust": "8E8C84",
+      "patches": "5E5040"
+     }
+    },
+    {
+     "id": "prospector_boots",
+     "name": "Prospector boots",
+     "slot": "FEET",
+     "value": 200,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 1.6,
+     "armor": 1,
+     "examine": "Heavy mining boots with iron at the toe.",
+     "look": {
+      "shape": "boots",
+      "color": "4A3624",
+      "rows": 12,
+      "sole": "1A140E",
+      "toe": "6A6A70",
+      "heavy": true
+     }
+    }
+   ]
+  },
+  "desert_commoner": {
+   "name": "Commoner's desert outfit",
+   "style": "commoner",
+   "requires": {},
+   "pieces": [
+    {
+     "id": "commoner_fez",
+     "name": "Commoner's fez",
+     "slot": "HEAD",
+     "value": 60,
+     "cells": [
+      1,
+      1
+     ],
+     "weight": 0.2,
+     "armor": 0.2,
+     "examine": "A small cylindrical red hat with a tassel.",
+     "look": {
+      "shape": "fez",
+      "color": "A0302A",
+      "tassel": "1A1A1A"
+     }
+    },
+    {
+     "id": "commoner_desert_top",
+     "name": "Commoner's desert top",
+     "slot": "BODY",
+     "value": 90,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.6,
+     "armor": 0.5,
+     "examine": "A loose, pale tunic for the desert's heat.",
+     "look": {
+      "shape": "tunic",
+      "color": "D8CCAE",
+      "trim": "8C7452",
+      "fit": "loose",
+      "collar": "slit",
+      "hem": 6.5,
+      "sash": "8C5A34",
+      "embroidery": false
+     }
+    },
+    {
+     "id": "commoner_desert_overcoat",
+     "name": "Commoner's desert overcoat",
+     "slot": "CAPE",
+     "value": 160,
+     "cells": [
+      3,
+      4
+     ],
+     "weight": 1.4,
+     "armor": 1,
+     "examine": "A long, layered outer garment, worn open over the tunic.",
+     "look": {
+      "shape": "overcoat",
+      "color": "B49C74",
+      "trim": "8C7452",
+      "length": 12.5,
+      "layers": 1
+     }
+    },
+    {
+     "id": "commoner_desert_legs",
+     "name": "Commoner's desert legs",
+     "slot": "LEGS",
+     "value": 70,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.5,
+     "armor": 0.5,
+     "examine": "Lightweight beige trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "CDBB94",
+      "trim": "8C7452",
+      "fit": "loose",
+      "gathered": true
+     }
+    },
+    {
+     "id": "commoner_desert_robes",
+     "name": "Commoner's desert robes",
+     "slot": "LEGS",
+     "value": 130,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Long, flowing desert robes.",
+     "look": {
+      "shape": "robe",
+      "color": "C2AE86",
+      "trim": "8C7452",
+      "length": 11.6,
+      "under": "CDBB94"
+     }
+    }
+   ]
+  },
+  "desert_noble": {
+   "name": "Noble's desert outfit",
+   "style": "noble",
+   "requires": {},
+   "pieces": [
+    {
+     "id": "noble_fez",
+     "name": "Noble's fez",
+     "slot": "HEAD",
+     "value": 180,
+     "cells": [
+      1,
+      1
+     ],
+     "weight": 0.2,
+     "armor": 0.2,
+     "examine": "A small cylindrical red hat with a tassel.",
+     "look": {
+      "shape": "fez",
+      "color": "B02A28",
+      "tassel": "C8A050",
+      "band": "C8A050"
+     }
+    },
+    {
+     "id": "noble_desert_top",
+     "name": "Noble's desert top",
+     "slot": "BODY",
+     "value": 270,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.6,
+     "armor": 0.5,
+     "examine": "A loose, pale tunic for the desert's heat.",
+     "look": {
+      "shape": "tunic",
+      "color": "EEE6D2",
+      "trim": "C8A050",
+      "fit": "loose",
+      "collar": "slit",
+      "hem": 6.5,
+      "sash": "2E5A5A",
+      "embroidery": true
+     }
+    },
+    {
+     "id": "noble_desert_overcoat",
+     "name": "Noble's desert overcoat",
+     "slot": "CAPE",
+     "value": 480,
+     "cells": [
+      3,
+      4
+     ],
+     "weight": 1.4,
+     "armor": 1,
+     "examine": "A long, layered outer garment, worn open over the tunic.",
+     "look": {
+      "shape": "overcoat",
+      "color": "2E7E72",
+      "trim": "C8A050",
+      "length": 12.5,
+      "layers": 2
+     }
+    },
+    {
+     "id": "noble_desert_legs",
+     "name": "Noble's desert legs",
+     "slot": "LEGS",
+     "value": 210,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.5,
+     "armor": 0.5,
+     "examine": "Lightweight beige trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "D8CCAE",
+      "trim": "C8A050",
+      "fit": "loose",
+      "gathered": true
+     }
+    },
+    {
+     "id": "noble_desert_robes",
+     "name": "Noble's desert robes",
+     "slot": "LEGS",
+     "value": 390,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Long, flowing desert robes.",
+     "look": {
+      "shape": "robe",
+      "color": "E2D8C0",
+      "trim": "C8A050",
+      "length": 11.6,
+      "under": "D8CCAE"
+     }
+    }
+   ]
+  },
+  "desert_royal": {
+   "name": "Royal desert outfit",
+   "style": "royal",
+   "requires": {},
+   "pieces": [
+    {
+     "id": "royal_fez",
+     "name": "Royal fez",
+     "slot": "HEAD",
+     "value": 480,
+     "cells": [
+      1,
+      1
+     ],
+     "weight": 0.2,
+     "armor": 0.2,
+     "examine": "A small cylindrical red hat with a tassel.",
+     "look": {
+      "shape": "fez",
+      "color": "9A1C24",
+      "tassel": "E0B848",
+      "band": "E0B848"
+     }
+    },
+    {
+     "id": "royal_desert_top",
+     "name": "Royal desert top",
+     "slot": "BODY",
+     "value": 720,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.6,
+     "armor": 0.5,
+     "examine": "A loose, pale tunic for the desert's heat.",
+     "look": {
+      "shape": "tunic",
+      "color": "F6F0E2",
+      "trim": "E0B848",
+      "fit": "loose",
+      "collar": "slit",
+      "hem": 6.5,
+      "sash": "6A2A4A",
+      "embroidery": true
+     }
+    },
+    {
+     "id": "royal_desert_overcoat",
+     "name": "Royal desert overcoat",
+     "slot": "CAPE",
+     "value": 1280,
+     "cells": [
+      3,
+      4
+     ],
+     "weight": 1.4,
+     "armor": 1,
+     "examine": "A long, layered outer garment, worn open over the tunic.",
+     "look": {
+      "shape": "overcoat",
+      "color": "6E2E96",
+      "trim": "E0B848",
+      "length": 12.5,
+      "layers": 2
+     }
+    },
+    {
+     "id": "royal_desert_legs",
+     "name": "Royal desert legs",
+     "slot": "LEGS",
+     "value": 560,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.5,
+     "armor": 0.5,
+     "examine": "Lightweight beige trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "E6DCC4",
+      "trim": "E0B848",
+      "fit": "loose",
+      "gathered": true
+     }
+    },
+    {
+     "id": "royal_desert_robes",
+     "name": "Royal desert robes",
+     "slot": "LEGS",
+     "value": 1040,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Long, flowing desert robes.",
+     "look": {
+      "shape": "robe",
+      "color": "F2ECDC",
+      "trim": "E0B848",
+      "length": 11.6,
+      "under": "E6DCC4"
+     }
+    }
+   ]
+  },
+  "farmer": {
+   "name": "Farmer's outfit",
+   "requires": {
+    "HARVESTING": 5
+   },
+   "pieces": [
+    {
+     "id": "farmers_strawhat",
+     "name": "Farmer's strawhat",
+     "slot": "HEAD",
+     "value": 40,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 0.2,
+     "armor": 0.2,
+     "examine": "A wide hat of woven straw.",
+     "look": {
+      "shape": "straw_hat",
+      "color": "D8BC6C",
+      "band": "7A4A2A",
+      "weave": "BCA056"
+     }
+    },
+    {
+     "id": "farmers_shirt",
+     "name": "Farmer's shirt",
+     "slot": "BODY",
+     "value": 60,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Simple, earthy workwear, a jacket over a shirt.",
+     "look": {
+      "shape": "jacket",
+      "color": "8A7048",
+      "trim": "5E4A2E",
+      "fit": "loose",
+      "collar": "fold",
+      "hem": 3.4,
+      "under": "C8BC9C",
+      "rolled": true
+     }
+    },
+    {
+     "id": "farmers_boro_trousers",
+     "name": "Farmer's boro trousers",
+     "slot": "LEGS",
+     "value": 50,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.8,
+     "armor": 0.5,
+     "examine": "Loose trousers, patched and stitched over and over.",
+     "look": {
+      "shape": "trousers",
+      "color": "3E4A5E",
+      "trim": "2E3646",
+      "fit": "loose",
+      "patches": "5A6A7E",
+      "stitch": "D8D2C2"
+     }
+    },
+    {
+     "id": "farmers_boots",
+     "name": "Farmer's boots",
+     "slot": "FEET",
+     "value": 60,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 1.2,
+     "armor": 0.5,
+     "examine": "Sturdy brown work boots.",
+     "look": {
+      "shape": "boots",
+      "color": "6A4A2C",
+      "rows": 10,
+      "sole": "2A1C10"
+     }
+    }
+   ]
+  },
+  "lumberjack": {
+   "name": "Lumberjack outfit",
+   "requires": {
+    "WOODCUTTING": 40
+   },
+   "pieces": [
+    {
+     "id": "lumberjack_hat",
+     "name": "Lumberjack hat",
+     "slot": "HEAD",
+     "value": 90,
+     "cells": [
+      2,
+      1
+     ],
+     "weight": 0.2,
+     "armor": 0.3,
+     "examine": "A dark, fitted cap.",
+     "look": {
+      "shape": "cap",
+      "color": "2A2A30",
+      "trim": "1A1A1E",
+      "peak": true
+     }
+    },
+    {
+     "id": "lumberjack_top",
+     "name": "Lumberjack top",
+     "slot": "BODY",
+     "value": 160,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.8,
+     "armor": 0.5,
+     "examine": "A red-and-black checked work shirt.",
+     "look": {
+      "shape": "shirt",
+      "color": "A82424",
+      "trim": "1A1414",
+      "fit": "regular",
+      "collar": "fold",
+      "check": "1A1414",
+      "rolled": true
+     }
+    },
+    {
+     "id": "lumberjack_legs",
+     "name": "Lumberjack legs",
+     "slot": "LEGS",
+     "value": 120,
+     "cells": [
+      3,
+      3
+     ],
+     "weight": 0.9,
+     "armor": 0.5,
+     "examine": "Plain grey work trousers.",
+     "look": {
+      "shape": "trousers",
+      "color": "6A6A6E",
+      "trim": "4A4A4E",
+      "fit": "regular",
+      "braces": "2A1A12"
+     }
+    },
+    {
+     "id": "lumberjack_boots",
+     "name": "Lumberjack boots",
+     "slot": "FEET",
+     "value": 140,
+     "cells": [
+      2,
+      2
+     ],
+     "weight": 1.6,
+     "armor": 1,
+     "examine": "Heavy dark leather boots.",
+     "look": {
+      "shape": "boots",
+      "color": "2A2018",
+      "rows": 12,
+      "sole": "140E0A",
+      "laces": "8A6A3A",
+      "heavy": true
+     }
+    }
+   ]
+  }
+ }
+}

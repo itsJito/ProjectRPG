@@ -1,0 +1,523 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.29s ({regions=760, overlays=467, variants=446, scarp=49, coast=599, erosion=343, peaks=48, lakes=67, isles=5, rivers=741, wadis=13, ground=31, roads=590, causeways=3, architecture=1055, pitsFilled=1405, pits=595, banks=49, clamp=16, cliffs=42, columns=818, falls=16, raise=11656, trees=303, outcrops=0, ways=533}), made and lit in 1.64s
+    [water] flow field grown in 1434 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 0 stand with 3+ others within 2 m
+
+    [trace]     0 Bram       (237.50,50.05,985.50) yaw 0.00 want NaN v 0.00,0.00 goal PATROL act go to goal working null gp true 236.5,50.0,987.5 legs 2/34 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]     0 Hadwin     (228.50,50.05,983.50) yaw 0.00 want -0.00 v 0.00,0.00 goal WORK act - working null gp false 0.0,0.0,0.0 legs - |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]     0 King Richard (226.50,40.05,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act - working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    10 Bram       (237.44,50.00,985.62) yaw 0.33 want NaN v -0.88,1.75 goal PATROL act go to goal working null gp true 236.5,50.0,987.5 legs 2/34 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]    10 Hadwin     (228.50,50.00,983.50) yaw 0.00 want -0.00 v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    10 King Richard (226.50,40.00,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    20 Bram       (237.26,50.00,985.97) yaw 1.41 want NaN v -1.10,2.19 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]    20 Hadwin     (228.50,50.00,983.50) yaw 0.00 want -0.00 v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    20 King Richard (226.50,40.00,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    30 Bram       (237.08,50.00,986.34) yaw 2.49 want NaN v -1.10,2.19 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]    30 Hadwin     (228.50,50.00,983.50) yaw 0.00 want -0.00 v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    30 King Richard (226.50,40.00,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    40 Bram       (236.90,50.00,986.70) yaw 2.68 want NaN v -1.10,2.19 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]    40 Hadwin     (228.50,50.00,983.50) yaw 0.00 want -0.00 v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    40 King Richard (226.50,40.00,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    50 Bram       (236.60,50.00,986.95) yaw 2.32 want NaN v -2.19,1.10 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [0.0] hinge [[235.0, 987.06]]]
+    [trace]    50 Hadwin     (228.50,50.00,983.59) yaw 0.00 want -0.00 v 0.00,1.63 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    50 King Richard (226.50,40.00,979.50) yaw 0.00 want NaN v 0.00,0.00 goal WORK act idle working null gp false 0.0,0.0,0.0 legs - | 
+    [trace]    60 Bram       (236.30,50.00,987.13) yaw 2.23 want NaN v -0.46,1.02 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [0.1275727] hinge [[235.0, 987.06]]]
+    [trace]    60 Hadwin     (228.50,50.00,983.97) yaw 0.98 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door open false locked false blocked false angle [0.0] hinge [[228.0, 985.94]]]
+    [trace]    60 King Richard (226.43,40.00,979.63) yaw 0.33 want NaN v -0.94,1.88 goal SOCIALIZE act go to goal working null gp true 239.5,45.0,984.5 legs 0/1 | 
+    [trace]    70 Bram       (236.30,50.00,987.27) yaw 2.72 want NaN v 0.00,0.56 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [0.51807153] hinge [[235.0, 987.06]]]
+    [trace]    70 Hadwin     (228.50,50.00,984.38) yaw 2.06 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [0.010156076] hinge [[228.0, 985.94]]]
+    [trace]    70 King Richard (226.25,40.00,979.99) yaw 1.41 want NaN v -1.10,2.19 goal SOCIALIZE act go to goal working null gp true 238.5,45.0,984.5 legs 0/1 | 
+    [trace]    80 Bram       (236.23,50.00,987.33) yaw 2.38 want NaN v -1.51,0.25 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.1627432] hinge [[235.0, 987.06]]]
+    [trace]    80 Hadwin     (228.50,50.00,984.79) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [0.21747117] hinge [[228.0, 985.94]]]
+    [trace]    80 King Richard (226.07,40.00,980.36) yaw 2.49 want NaN v -1.10,2.19 goal SOCIALIZE act go to goal working null gp true 238.5,45.0,984.5 legs 0/1 | 
+    [trace]    90 Bram       (235.85,50.00,987.36) yaw 1.72 want NaN v -2.45,0.14 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.4500074] hinge [[235.0, 987.06]]]
+    [trace]    90 Hadwin     (228.50,50.00,985.20) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [0.6852043] hinge [[228.0, 985.94]]]
+    [trace]    90 King Richard (225.89,40.00,980.69) yaw 2.62 want NaN v -1.05,0.23 goal SOCIALIZE act go to goal working null gp true 238.5,45.0,984.5 legs 0/1 | 
+    [trace]   100 Bram       (235.45,50.00,987.39) yaw 1.65 want NaN v -2.45,0.14 goal PATROL act go to goal working null gp true 233.5,50.0,987.5 legs 3/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   100 Hadwin     (228.50,50.00,985.61) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.404305] hinge [[228.0, 985.94]]]
+    [trace]   100 King Richard (225.74,40.00,980.70) yaw 2.08 want NaN v -0.63,0.00 goal SOCIALIZE act go to goal working null gp true 237.5,45.0,984.5 legs 0/1 | 
+    [trace]   110 Bram       (235.04,50.00,987.41) yaw 1.65 want NaN v -2.45,0.14 goal PATROL act go to goal working null gp true 233.5,50.0,986.5 legs 4/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   110 Hadwin     (228.50,50.00,986.01) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500011] hinge [[228.0, 985.94]]]
+    [trace]   110 King Richard (225.67,40.00,980.75) yaw 2.24 want NaN v -0.32,1.28 goal SOCIALIZE act go to goal working null gp true 236.5,45.0,984.5 legs 0/1 | 
+    [trace]   120 Bram       (234.63,50.00,987.42) yaw 1.62 want NaN v -2.29,-0.54 goal PATROL act go to goal working null gp true 232.5,50.0,986.5 legs 5/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   120 Hadwin     (228.50,50.00,986.42) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   120 King Richard (225.63,40.00,981.11) yaw 2.97 want NaN v -0.22,2.44 goal SOCIALIZE act go to goal working null gp true 236.5,45.0,984.5 legs 0/1 | 
+    [trace]   130 Bram       (234.26,50.00,987.27) yaw 1.28 want NaN v -2.25,-0.98 goal PATROL act go to goal working null gp true 232.5,50.0,986.5 legs 5/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   130 Hadwin     (228.50,50.00,986.83) yaw 3.14 want NaN v 0.00,2.45 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   130 King Richard (225.59,40.00,981.51) yaw 3.03 want NaN v -0.22,2.44 goal SOCIALIZE act go to goal working null gp true 236.5,45.0,984.5 legs 0/1 | 
+    [trace]   140 Bram       (233.88,50.00,987.10) yaw 1.20 want NaN v -2.25,-0.98 goal PATROL act go to goal working null gp true 232.5,50.0,985.5 legs 6/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   140 Hadwin     (228.53,50.00,987.21) yaw -3.06 want NaN v 0.81,1.61 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   140 King Richard (225.64,40.00,981.90) yaw -3.02 want NaN v 1.13,2.18 goal SOCIALIZE act go to goal working null gp true 235.5,45.0,984.5 legs 0/1 | 
+    [trace]   150 Bram       (233.59,50.00,986.84) yaw 0.90 want NaN v -1.54,-1.91 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.4500004] hinge [[235.0, 987.06]]]
+    [trace]   150 Hadwin     (228.81,49.52,987.37) yaw -2.27 want NaN v 2.41,0.46 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   150 King Richard (225.70,40.00,982.26) yaw -3.01 want NaN v 0.00,2.06 goal SOCIALIZE act go to goal working null gp true 235.5,45.0,984.5 legs 0/1 | 
+    [trace]   160 Bram       (233.33,50.00,986.53) yaw 0.74 want NaN v -1.54,-1.91 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   160 Hadwin     (229.21,49.24,987.44) yaw -1.84 want NaN v 2.43,0.27 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   160 King Richard (225.83,40.00,982.61) yaw -2.81 want NaN v 1.38,2.02 goal SOCIALIZE act go to goal working null gp true 234.5,45.0,984.5 legs 0/1 | 
+    [trace]   170 Bram       (233.05,50.00,986.24) yaw 0.80 want NaN v -2.21,-1.06 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   170 Hadwin     (229.62,48.71,987.46) yaw -1.68 want NaN v 2.45,0.10 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   170 King Richard (226.06,40.00,982.94) yaw -2.61 want NaN v 1.39,2.02 goal SOCIALIZE act go to goal working null gp true 234.5,45.0,984.5 legs 0/1 | 
+    [trace]   180 Bram       (232.68,50.00,986.07) yaw 1.04 want NaN v -2.21,-1.06 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   180 Hadwin     (230.03,48.34,987.48) yaw -1.65 want NaN v 2.45,0.11 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   180 King Richard (226.27,40.00,983.29) yaw -2.58 want NaN v 1.40,2.01 goal SOCIALIZE act go to goal working null gp true 234.5,45.0,984.5 legs 0/1 | 
+    [trace]   190 Bram       (232.31,50.00,985.89) yaw 1.08 want NaN v 0.00,-1.06 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   190 Hadwin     (230.41,47.96,987.48) yaw -1.58 want NaN v 2.11,-0.14 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   190 King Richard (226.50,40.00,983.63) yaw -2.58 want NaN v 1.40,2.01 goal SOCIALIZE act go to goal working null gp true 233.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   200 Bram       (232.30,50.00,985.74) yaw 0.57 want NaN v 0.00,-0.64 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   200 Hadwin     (230.62,47.70,987.36) yaw -1.15 want NaN v 0.42,-1.58 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   200 King Richard (226.70,40.00,983.96) yaw -2.61 want NaN v 0.00,1.98 goal SOCIALIZE act go to goal working null gp true 233.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   210 Bram       (232.26,50.00,985.67) yaw 0.64 want NaN v -1.16,-0.26 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   210 Hadwin     (230.65,47.68,987.30) yaw -0.90 want NaN v -0.02,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   210 King Richard (226.70,40.00,984.28) yaw -2.96 want NaN v 0.00,1.78 goal SOCIALIZE act go to goal working null gp true 232.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   220 Bram       (231.91,50.00,985.65) yaw 1.44 want NaN v -2.45,-0.10 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   220 Hadwin     (230.63,47.70,987.30) yaw -0.90 want NaN v -0.13,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   220 King Richard (226.85,40.00,984.58) yaw -2.68 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 232.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   230 Bram       (231.51,50.00,985.63) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   230 Hadwin     (230.61,47.72,987.30) yaw -0.90 want NaN v -0.15,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   230 King Richard (227.12,40.00,984.89) yaw -2.50 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 232.5,45.0,984.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   240 Bram       (231.10,50.00,985.61) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   240 Hadwin     (230.58,47.74,987.30) yaw -0.90 want NaN v -0.14,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   240 King Richard (227.39,40.00,985.20) yaw -2.46 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 231.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   250 Bram       (230.69,50.00,985.60) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 | 
+    [trace]   250 Hadwin     (230.56,47.76,987.30) yaw -0.90 want NaN v -0.11,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   250 King Richard (227.65,40.00,985.51) yaw -2.46 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 231.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   260 Bram       (230.28,50.00,985.58) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,985.5 legs 7/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   260 Hadwin     (230.55,47.78,987.30) yaw -0.90 want NaN v -0.09,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   260 King Richard (227.92,40.00,985.82) yaw -2.46 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 231.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   270 Bram       (229.87,50.00,985.56) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,987.5 legs 8/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   270 Hadwin     (230.53,47.79,987.30) yaw -0.90 want NaN v -0.07,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   270 King Richard (228.18,40.00,986.13) yaw -2.46 want NaN v 1.59,1.86 goal SOCIALIZE act go to goal working null gp true 230.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   280 Bram       (229.47,50.00,985.54) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,987.5 legs 8/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   280 Hadwin     (230.52,47.80,987.30) yaw -0.90 want NaN v -0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   280 King Richard (228.33,40.00,986.49) yaw -2.72 want NaN v 0.41,2.42 goal SOCIALIZE act go to goal working null gp true 230.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   290 Bram       (229.06,50.00,985.52) yaw 1.51 want NaN v -2.45,-0.11 goal PATROL act go to goal working null gp true 228.5,50.0,987.5 legs 8/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   290 Hadwin     (230.52,47.81,987.30) yaw -0.90 want NaN v -0.04,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   290 King Richard (228.40,40.00,986.70) yaw -2.71 want NaN v 0.39,0.00 goal SOCIALIZE act go to goal working null gp true 229.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   300 Bram       (228.77,50.00,985.65) yaw 1.91 want NaN v -1.03,1.74 goal PATROL act go to goal working null gp true 228.5,50.0,987.5 legs 8/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   300 Hadwin     (230.51,47.82,987.30) yaw -0.90 want NaN v -0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   300 King Richard (228.45,40.00,986.70) yaw -2.23 want NaN v 0.28,0.00 goal SOCIALIZE act go to goal working null gp true 229.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   310 Bram       (228.66,50.00,985.75) yaw 2.21 want NaN v -0.38,1.26 goal PATROL act go to goal working null gp true 229.5,49.0,987.5 legs 9/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   310 Hadwin     (230.51,47.82,987.30) yaw -0.90 want NaN v -0.02,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   310 King Richard (228.49,40.00,986.70) yaw -2.13 want NaN v 0.15,0.00 goal SOCIALIZE act go to goal working null gp true 229.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   320 Bram       (228.62,50.00,986.10) yaw 2.90 want NaN v -0.21,2.44 goal PATROL act go to goal working null gp true 229.5,49.0,987.5 legs 9/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   320 Hadwin     (230.51,47.82,987.30) yaw -0.90 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   320 King Richard (228.51,40.00,986.70) yaw -2.13 want NaN v 0.06,0.00 goal SOCIALIZE act go to goal working null gp true 228.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   330 Bram       (228.59,50.00,986.51) yaw 3.01 want NaN v -0.21,2.44 goal PATROL act go to goal working null gp true 229.5,49.0,987.5 legs 9/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   330 Hadwin     (230.50,47.82,987.30) yaw -0.90 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   330 King Richard (228.51,40.00,986.70) yaw -2.13 want NaN v 0.00,0.00 goal SOCIALIZE act go to goal working null gp true 227.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   340 Bram       (228.55,50.00,986.92) yaw 3.04 want NaN v -0.21,2.44 goal PATROL act go to goal working null gp true 229.5,49.0,987.5 legs 9/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   340 Hadwin     (230.50,47.83,987.30) yaw -0.90 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   340 King Richard (228.51,40.00,986.70) yaw -2.13 want NaN v -0.02,0.00 goal SOCIALIZE act go to goal working null gp true 227.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   350 Bram       (228.58,50.00,987.26) yaw -3.07 want NaN v 0.98,1.33 goal PATROL act go to goal working null gp true 229.5,49.0,987.5 legs 9/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   350 Hadwin     (230.50,47.83,987.30) yaw -0.90 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   350 King Richard (228.51,40.00,986.70) yaw -2.13 want NaN v -0.02,0.00 goal SOCIALIZE act go to goal working null gp true 227.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   360 Bram       (228.89,49.44,987.39) yaw -2.16 want NaN v 2.41,0.44 goal PATROL act go to goal working null gp true 230.5,48.0,987.5 legs 10/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   360 Hadwin     (230.50,47.83,987.30) yaw -0.90 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   360 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v -0.02,0.00 goal SOCIALIZE act go to goal working null gp true 226.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   370 Bram       (229.29,49.16,987.45) yaw -1.82 want NaN v 2.44,0.16 goal PATROL act go to goal working null gp true 230.5,48.0,987.5 legs 10/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   370 Hadwin     (230.50,47.83,987.30) yaw -0.90 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   370 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v -0.01,0.00 goal SOCIALIZE act go to goal working null gp true 226.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   380 Bram       (229.70,48.63,987.47) yaw -1.67 want NaN v 2.45,0.10 goal PATROL act go to goal working null gp true 230.5,48.0,987.5 legs 10/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   380 Hadwin     (230.50,47.83,987.30) yaw -0.90 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   380 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v -0.00,0.00 goal SOCIALIZE act go to goal working null gp true 226.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   390 Bram       (230.00,48.32,987.52) yaw -1.71 want NaN v 1.29,0.49 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 | 
+    [trace]   390 Hadwin     (230.56,47.77,987.30) yaw -1.01 want NaN v 1.08,-0.04 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   390 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v -0.00,0.00 goal SOCIALIZE act go to goal working null gp true 225.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   400 Bram       (230.16,48.18,987.60) yaw -1.85 want NaN v 0.63,0.21 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 | 
+    [trace]   400 Hadwin     (230.69,47.64,987.30) yaw -1.50 want NaN v 0.49,-0.03 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   400 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v 0.00,0.00 goal SOCIALIZE act go to goal working null gp true 225.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   410 Bram       (230.21,48.00,987.55) yaw -1.33 want NaN v 0.07,-1.17 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 | 
+    [trace]   410 Hadwin     (230.76,47.57,987.30) yaw -1.50 want NaN v 0.56,-0.05 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   410 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v 0.00,0.00 goal SOCIALIZE act go to goal working null gp true 225.5,45.0,985.5 legs 0/1 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   420 Bram       (230.24,48.00,987.30) yaw -0.28 want NaN v 0.46,-0.12 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   420 Hadwin     (230.84,47.49,987.30) yaw -1.50 want NaN v 0.46,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   420 King Richard (228.50,40.00,986.70) yaw -2.13 want NaN v 0.00,0.00 goal HIDE act go to goal working null gp true 222.5,40.0,983.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   430 Bram       (230.30,48.00,987.30) yaw -0.85 want NaN v 0.28,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   430 Hadwin     (230.90,47.43,987.30) yaw -1.53 want NaN v 0.28,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   430 King Richard (228.49,40.00,986.69) yaw -2.13 want NaN v 0.00,0.00 goal HIDE act sprint to goal working null gp true 222.5,40.0,983.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   440 Bram       (230.34,47.99,987.30) yaw -0.95 want NaN v 0.20,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   440 Hadwin     (230.94,47.39,987.30) yaw -1.53 want NaN v 0.12,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   440 King Richard (228.49,40.00,986.69) yaw -2.13 want NaN v 0.00,0.00 goal HIDE act sprint to goal working null gp true 222.5,40.0,983.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   450 Bram       (230.36,47.97,987.30) yaw -0.95 want NaN v 0.12,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   450 Hadwin     (230.96,47.37,987.30) yaw -1.53 want NaN v 0.04,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   450 King Richard (228.45,40.00,986.67) yaw -2.13 want NaN v -1.03,-0.55 goal HIDE act sprint to goal working null gp true 222.5,40.0,983.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   460 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.07,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   460 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   460 King Richard (228.11,40.00,986.49) yaw -3.11 want NaN v -3.09,-1.65 goal HIDE act sprint to goal working null gp true 223.5,40.0,981.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   470 Bram       (230.37,47.95,987.30) yaw -0.95 want NaN v 0.04,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   470 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v -0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   470 King Richard (227.44,40.00,986.13) yaw 2.26 want NaN v -4.87,-2.86 goal HIDE act sprint to goal working null gp true 223.5,40.0,980.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   480 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v -0.06,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   480 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v -0.06,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   480 King Richard (226.67,40.00,985.48) yaw 1.51 want NaN v -4.25,-5.11 goal HIDE act sprint to goal working null gp true 223.5,40.0,979.5 legs 0/1 | running from world life [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   490 Bram       (230.36,47.97,987.30) yaw -0.95 want NaN v -0.08,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   490 Hadwin     (230.96,47.37,987.30) yaw -1.53 want NaN v -0.08,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   490 King Richard (226.01,40.00,984.49) yaw 0.76 want NaN v -3.92,-6.25 goal HIDE act sprint to goal working null gp true 225.5,40.0,977.5 legs 0/1 | running from world life
+    [trace]   500 Bram       (230.35,47.98,987.30) yaw -0.95 want NaN v -0.08,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   500 Hadwin     (230.95,47.38,987.30) yaw -1.53 want NaN v -0.08,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   500 King Richard (225.44,40.00,983.43) yaw 0.51 want NaN v -2.32,-6.57 goal HIDE act sprint to goal working null gp true 224.5,40.0,979.5 legs 0/1 | running from world life
+    [trace]   510 Bram       (230.33,47.99,987.30) yaw -0.95 want NaN v -0.06,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   510 Hadwin     (230.94,47.39,987.30) yaw -1.53 want NaN v -0.06,-0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   510 King Richard (225.13,40.00,982.47) yaw 0.39 want NaN v -1.46,-4.62 goal HIDE act run to goal working null gp true 224.5,40.0,978.5 legs 0/1 | running from world life
+    [trace]   520 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.04,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   520 Hadwin     (230.93,47.40,987.30) yaw -1.53 want NaN v -0.04,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   520 King Richard (224.95,40.00,981.87) yaw 0.33 want NaN v -0.65,-2.45 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   530 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.03,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked true angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   530 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | 
+    [trace]   530 King Richard (224.88,40.00,981.64) yaw 0.30 want NaN v -0.05,-0.20 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   540 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.01,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   540 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   540 King Richard (224.88,40.00,981.64) yaw -0.14 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   550 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v -0.01,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   550 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   550 King Richard (224.88,40.00,981.64) yaw -1.22 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   560 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v -0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500006] hinge [[228.0, 985.94]]]
+    [trace]   560 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   560 King Richard (224.88,40.00,981.64) yaw -2.30 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   570 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   570 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   570 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   580 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   580 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   580 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   590 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   590 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   590 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   600 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   600 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   600 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   610 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   610 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   610 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   620 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   620 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   620 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   630 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   630 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   630 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   640 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v 0.05,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   640 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   640 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   650 Bram       (230.33,48.00,987.30) yaw -0.95 want NaN v 0.07,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   650 Hadwin     (230.93,47.40,987.30) yaw -1.53 want NaN v 0.07,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   650 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   660 Bram       (230.34,47.99,987.30) yaw -0.95 want NaN v 0.06,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   660 Hadwin     (230.94,47.39,987.30) yaw -1.53 want NaN v 0.06,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   660 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   670 Bram       (230.35,47.97,987.30) yaw -0.95 want NaN v 0.05,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   670 Hadwin     (230.95,47.38,987.30) yaw -1.53 want NaN v 0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   670 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   680 Bram       (230.36,47.96,987.30) yaw -0.95 want NaN v 0.03,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   680 Hadwin     (230.96,47.37,987.30) yaw -1.53 want NaN v 0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   680 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   690 Bram       (230.36,47.96,987.30) yaw -0.95 want NaN v 0.02,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   690 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.02,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   690 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   700 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.01,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   700 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   700 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   710 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   710 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   710 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   720 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   720 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   720 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   730 Bram       (230.36,47.96,987.30) yaw -0.95 want NaN v -0.05,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 11/34 |  [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   730 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v -0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   730 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   740 Bram       (230.35,47.98,987.30) yaw -0.95 want NaN v -0.08,-0.00 goal PATROL act go to goal working null gp false 230.5,45.0,986.5 legs - | no headway; finding another way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   740 Hadwin     (230.95,47.37,987.30) yaw -1.53 want NaN v -0.08,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   740 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   750 Bram       (230.34,47.99,987.30) yaw -0.95 want NaN v -0.07,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   750 Hadwin     (230.94,47.39,987.30) yaw -1.53 want NaN v -0.07,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   750 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   760 Bram       (230.33,48.00,987.30) yaw -0.95 want NaN v -0.05,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   760 Hadwin     (230.93,47.40,987.30) yaw -1.53 want NaN v -0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   760 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   770 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.03,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   770 Hadwin     (230.92,47.40,987.30) yaw -1.53 want NaN v -0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   770 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   780 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.02,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   780 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.02,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   780 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   790 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v -0.01,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   790 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   790 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   800 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v -0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   800 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   800 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   810 Bram       (230.31,48.00,987.30) yaw -0.95 want NaN v -0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   810 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v -0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   810 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   820 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v 0.04,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   820 Hadwin     (230.92,47.41,987.30) yaw -1.53 want NaN v 0.04,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   820 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   830 Bram       (230.32,48.00,987.30) yaw -0.95 want NaN v 0.07,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   830 Hadwin     (230.93,47.40,987.30) yaw -1.53 want NaN v 0.07,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   830 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   840 Bram       (230.34,47.99,987.30) yaw -0.95 want NaN v 0.11,0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   840 Hadwin     (230.94,47.39,987.30) yaw -1.53 want NaN v 0.03,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   840 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   850 Bram       (230.35,47.98,987.30) yaw -0.95 want NaN v 0.05,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   850 Hadwin     (230.95,47.38,987.30) yaw -1.53 want NaN v 0.05,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   850 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   860 Bram       (230.36,47.97,987.30) yaw -0.95 want NaN v 0.04,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   860 Hadwin     (230.96,47.37,987.30) yaw -1.53 want NaN v 0.04,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   860 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   870 Bram       (230.36,47.96,987.30) yaw -0.95 want NaN v 0.02,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   870 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.02,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   870 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   880 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.01,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   880 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.01,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   880 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [trace]   890 Bram       (230.37,47.96,987.30) yaw -0.95 want NaN v 0.00,-0.00 goal PATROL act go to goal working null gp true 230.5,45.0,986.5 legs 0/23 | on the way [door Loxford Castle chamber door (open) open true locked false blocked false angle [1.7500004] hinge [[228.0, 985.94]]]
+    [trace]   890 Hadwin     (230.97,47.36,987.30) yaw -1.53 want NaN v 0.00,0.00 goal SLEEP act go to goal working null gp true 222.5,45.0,984.5 legs 0/1 | on the way
+    [trace]   890 King Richard (224.88,40.00,981.64) yaw -2.38 want -2.38 v 0.00,0.00 goal HIDE act hold/face working null gp false 225.5,40.0,977.5 legs - | hiding from world life
+    [life] stop 230,987 done (21 people seen so far)
+
+    [life] 1 stops of 900 frames; 21 people seen
+      Ealdra           MERCHANT     seen   130 spins   0 blocked     0 still   117
+          last (258.5,39.0,926.2) SLEEP: on the way
+      Bram             GUARD        seen   130 spins   0 blocked     0 still    26
+          last (230.3,48.0,987.3) PATROL: on the way
+      Sir Andrew       KNIGHT       seen   130 spins   2 blocked     0 still     0
+          spun at (215.5,51.0,916.5) WORK: inspecting the commander's assigned site
+      Hadwin           CIVIC        seen   130 spins   0 blocked     0 still    60
+          last (230.9,47.4,987.3) SLEEP: on the way
+      Alaric           PRIEST       seen   130 spins   1 blocked     0 still     0
+          spun at (217.4,39.0,896.8) SOCIALIZE: 
+      never in play: Oswin WORKER home (304,901)
+      never in play: Tam VILLAGER home (285,836)
+      never in play: Brannoc THIEF home (580,900)
+      never in play: Mara MERCHANT home (114,771)
+      never in play: Lucan LAWMAN home (95,701)
+      never in play: Kettil CONTACT home (599,876)
+      never in play: Father Wulfric UNDERTAKER home (179,880)
+      never in play: Skarn FENCE home (580,1026)
+      never in play: Bilal BEGGAR home (908,860)
+      never in play: Rafe HUNTER home (355,801)
+      never in play: Maelin SCHOLAR home (130,596)
+      never in play: Bryn FISHERMAN home (571,593)
+      never in play: Brokk MINER home (199,434)
+      never in play: Hakon HUNTER home (96,576)
+      never in play: Danek CRAFTSMAN home (135,777)
+      never in play: Dawud MINER home (947,878)
+      never in play: Sir Hedric KNIGHT home (359,748)
+      never in play: Gudrik FISHERMAN home (602,1020)
+      never in play: Vesna FISHERMAN home (104,773)
+      never in play: King Leonidas CIVIC home (569,86)
+      never in play: Baron Photios LAWMAN home (596,107)
+      never in play: Leontios GUARD home (595,112)
+      never in play: Anwar GUARD home (878,880)
+      never in play: Brand GUARD home (382,381)
+      never in play: Roder GUARD home (148,621)
+      never in play: Baroness Guinevere CIVIC home (817,367)
+      never in play: Zoe MERCHANT home (480,117)
+      never in play: Father Paul PRIEST home (876,53)
+      never in play: Father Eirik HEALER home (351,388)
+      never in play: Aristides SCHOLAR home (611,151)
+      never in play: Polyxena MINER home (877,129)
+      never in play: Tolis BEGGAR home (486,61)
+      never in play: Yrsa VILLAGER home (384,418)
+      never in play: King Fahad VILLAGER home (906,895)
+      never in play: Cerys VILLAGER home (814,420)
+      never in play: Tauron HUNTER home (860,509)
+      never in play: Bera VILLAGER home (387,441)
+      never in play: Duke Torkell KNIGHT home (386,378)
+      never in play: King Arthur CRAFTSMAN home (817,371)
+      never in play: Sir Lancelot KNIGHT home (809,372)
+      never in play: Sir Gawain HUNTER home (842,344)
+      never in play: Viggo HUNTER home (423,408)
+      never in play: Torvik MINER home (194,439)
+      never in play: Merlin MINER home (779,375)
+      never in play: Dunstan CRAFTSMAN home (304,904)
+      never in play: Olek CRAFTSMAN home (98,743)
+      never in play: Sten CRAFTSMAN home (356,426)
+      never in play: Alexios CRAFTSMAN home (465,36)
+      never in play: Cenric WORKER home (303,896)
+      never in play: Radek WORKER home (88,769)
+      never in play: Dorran MINER home (176,536)
+      never in play: Merek MINER home (92,564)
+      never in play: Meriwyn MERCHANT home (599,871)
+      never in play: Damaris MERCHANT home (480,119)
+      never in play: Baron Osric FARMER home (244,854)
+      never in play: Kyra FARMER home (214,290)
+      never in play: Marinos FARMER home (216,283)
+      never in play: Melitta CIVIC home (533,191)
+      never in play: Basil MERCHANT home (545,191)
+      never in play: Lazaros CRAFTSMAN home (532,191)
+      never in play: Brennar CRAFTSMAN home (182,616)
+      never in play: Fenna MERCHANT home (200,655)
+      never in play: Einar WORKER home (356,436)
+      never in play: Layla CRAFTSMAN home (894,832)
+      never in play: Zainab CRAFTSMAN home (895,828)
+      never in play: Baron Jalal CRAFTSMAN home (845,876)
+      never in play: Ziad CRAFTSMAN home (892,829)
+      never in play: Murad CRAFTSMAN home (894,834)
+      never in play: Ilva FARMER home (155,758)
+      never in play: Karim CRAFTSMAN home (830,837)
+      never in play: Petros FISHERMAN home (468,36)
+      never in play: Soren SCHOLAR home (352,392)
+      never in play: Baron Hadrik CRAFTSMAN home (190,614)
+      never in play: Yannis FISHERMAN home (462,36)
+      never in play: Count Dracula CIVIC home (92,702)
+      never in play: Sir Garran KNIGHT home (152,624)
+      never in play: Sella CRAFTSMAN home (140,777)
+      never in play: Orven WORKER home (205,613)
+      never in play: Leofric WORKER home (298,896)
+      never in play: Siv FARMER home (343,403)
+      never in play: Hurk BANDIT home (830,693)
+      never in play: Sigrun BANDIT home (827,694)
+      never in play: Garmund BRUTE home (828,692)
+      never in play: Count William CIVIC home (298,884)
+      never in play: Hob GUARD home (359,742)
+      never in play: Eadmund CRAFTSMAN home (298,902)
+      never in play: Beric HUNTER home (356,796)
+      never in play: Duke Bashir CIVIC home (903,899)
+      never in play: Count Awhad CIVIC home (858,865)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (906,883)
+      never in play: Hassan SCHOLAR home (906,888)
+      never in play: Idris SCHOLAR home (906,880)
+      never in play: Father Rafiq PRIEST home (914,859)
+      never in play: Yusuf PRIEST home (911,860)
+      never in play: Tariq CIVIC home (844,920)
+      never in play: Zafir CRAFTSMAN home (804,910)
+      never in play: Osama CRAFTSMAN home (937,851)
+      never in play: Marwan CRAFTSMAN home (956,823)
+      never in play: Mohamed MERCHANT home (816,863)
+      never in play: Rashid MERCHANT home (861,866)
+      never in play: Munir CARTER home (828,835)
+      never in play: Hakim CARTER home (903,877)
+      never in play: Hamid CRAFTSMAN home (937,898)
+      never in play: Nabil CRAFTSMAN home (945,896)
+      never in play: Salim CRAFTSMAN home (946,880)
+      never in play: Kamal CRAFTSMAN home (948,880)
+      never in play: Qasim WORKER home (939,880)
+      never in play: Fadi MINER home (873,786)
+      never in play: Jamila FARMER home (769,985)
+      never in play: Samira FARMER home (766,985)
+      never in play: Zaid GUARD home (891,901)
+      never in play: Sabir GUARD home (899,901)
+      never in play: Baron Nuri CIVIC home (897,875)
+      never in play: Duke Artemios CIVIC home (553,86)
+      never in play: Count Constantine CIVIC home (497,53)
+      never in play: Sir Nicholas KNIGHT home (592,107)
+      never in play: Sir Kosmas KNIGHT home (590,107)
+      never in play: Baroness Eudokia CIVIC home (605,150)
+      never in play: Father Khalid PRIEST home (484,112)
+      never in play: Ione PRIEST home (450,34)
+      never in play: Stavros CIVIC home (431,215)
+      never in play: Demetrios CRAFTSMAN home (447,196)
+      never in play: Irene SCHOLAR home (541,86)
+      never in play: Theodora CRAFTSMAN home (448,173)
+      never in play: Xenia CRAFTSMAN home (590,116)
+      never in play: Eleni CRAFTSMAN home (449,173)
+      never in play: Theron MERCHANT home (482,113)
+      never in play: Pavlos FENCE home (484,113)
+      never in play: Melina FISHERMAN home (470,37)
+      never in play: Spiros WORKER home (468,34)
+      never in play: Timon WORKER home (462,37)
+      never in play: Damon WORKER home (465,34)
+      never in play: Alkis CARTER home (481,118)
+      never in play: Andreas CRAFTSMAN home (424,152)
+      never in play: Nikos CRAFTSMAN home (422,152)
+      never in play: Kallias CRAFTSMAN home (424,157)
+      never in play: Isidoros CRAFTSMAN home (428,157)
+      never in play: Orestes WORKER home (180,131)
+      never in play: Myron GUARD home (590,114)
+      never in play: Perikles GUARD home (593,119)
+      never in play: Zenon GUARD home (591,119)
+      never in play: Argyros GUARD home (590,111)
+      never in play: Gorgias GUARD home (595,115)
+      never in play: Kleon GUARD home (595,110)
+      never in play: Kyros THIEF home (427,157)
+      never in play: Mimis BEGGAR home (482,61)
+      never in play: Argus THIEF home (426,157)
+      never in play: Phaedra CARTER home (594,107)
+      never in play: Leandros BEGGAR home (464,39)
+      never in play: Sabeen BEGGAR home (462,34)
+      never in play: King Phillip CIVIC home (159,621)
+      never in play: Duke Edran CIVIC home (156,624)
+      never in play: Sir Vaelor KNIGHT home (129,591)
+      never in play: Father Anselm PRIEST home (129,594)
+      never in play: Tovin CRAFTSMAN home (204,656)
+      never in play: Elric CIVIC home (182,634)
+      never in play: Halwen CRAFTSMAN home (215,653)
+      never in play: Hesta FARMER home (204,606)
+      never in play: Aldis CIVIC home (129,657)
+      never in play: Toben CRAFTSMAN home (129,660)
+      never in play: Halvar CRAFTSMAN home (400,401)
+      never in play: Runa CARTER home (406,399)
+      never in play: Ulven CRAFTSMAN home (385,438)
+      never in play: Nessa MERCHANT home (391,432)
+      never in play: Varek SCHOLAR home (89,706)
+      never in play: Father Odran PRIEST home (150,724)
+      never in play: Mother Mirel PRIEST home (108,739)
+      never in play: Borin FARMER home (154,788)
+      never in play: Sir Bedivere KNIGHT home (862,387)
+      never in play: Father Cadren PRIEST home (783,374)
+      never in play: Elian PRIEST home (841,347)
+      never in play: Baron Aldren CIVIC home (797,384)
+      never in play: Wystan CRAFTSMAN home (815,416)
+      never in play: Perrin CRAFTSMAN home (821,423)
+      never in play: Rowena MERCHANT home (829,423)
+      never in play: Huw FARMER home (870,385)
+      never in play: Edric GUARD home (870,388)
+      never in play: Vark BANDIT home (831,692)
+      never in play: Dolgrin MINER home (201,434)
+      never in play: Pell WORKER home (865,578)
+      never in play: Ysmay WORKER home (984,391)
+      never in play: Hask HUNTER home (720,481)
+      never in play: Orrin CRAFTSMAN home (369,654)
+      never in play: Corvane HUNTER home (585,889)
+      never in play: Bogdan GUARD home (103,789)
+      never in play: Milena CIVIC home (164,723)
+      never in play: Lothar GUARD home (166,606)
+      never in play: Hilde UNDERTAKER home (129,598)
+      never in play: Gunnar GUARD home (402,434)
+      never in play: Astrid UNDERTAKER home (352,385)
+      never in play: Nadim GUARD home (922,968)
+      never in play: Samir UNDERTAKER home (906,860)
+      never in play: Emrys GUARD home (846,387)
+      never in play: Rhiannon CIVIC home (820,389)
+      never in play: Rask BANDIT home (826,693)
+      never in play: Wenna BANDIT home (832,693)
+      never in play: Hullen BANDIT home (824,692)
+      never in play: Grisel BANDIT home (834,693)
+      never in play: Haskel MINER home (171,535)
+      never in play: Tamsin MINER home (99,563)
+      never in play: Osk MINER home (200,439)
+      never in play: Mabry WORKER home (178,131)
+      never in play: Edvin WORKER home (172,131)
+      never in play: Corra WORKER home (868,577)
+    [life] 5 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 44.005 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 59s
+9 actionable tasks: 2 executed, 7 up-to-date

@@ -1,0 +1,16 @@
+{
+ "_about": "(0.4.5, gamefixes: lay the ground for the dungeons of the next update) Every underground place ShadowVeil has a mouth for, as data: what it is ('kind': a monster's 'lair', a working 'mine', a 'hideout', a 'crypt'), the theme its rooms will be built in (rpg.world.DungeonLayout.Theme: CAVE, WARREN, CRYPT, HALL), how many levels deep it is planned to go, and the creatures whose lair it is (rpg.monster.MonsterKind - the same lairs shadowveil.json's fauna names). Bound at load to its structure's mouth and the volume the architecture reserved beyond it (rpg.dungeon.DungeonSites); the next update builds the rooms into those volumes.",
+ "sites": {
+  "goblin_hollow":     {"kind": "lair",    "theme": "WARREN", "levels": 2, "creatures": ["GOBLIN"]},
+  "murk_caves":        {"kind": "lair",    "theme": "CAVE",   "levels": 2, "creatures": ["BAT"]},
+  "spider_nest":       {"kind": "lair",    "theme": "CAVE",   "levels": 2, "creatures": ["GIANT_SPIDER"]},
+  "ashmaw_throat":     {"kind": "lair",    "theme": "CAVE",   "levels": 3, "creatures": ["IMP"]},
+  "culvert_cave":      {"kind": "hideout", "theme": "CAVE",   "levels": 1, "creatures": []},
+  "sunkissed_mine":    {"kind": "mine",    "theme": "HALL",   "levels": 2, "creatures": []},
+  "marble_mine":       {"kind": "mine",    "theme": "HALL",   "levels": 2, "creatures": []},
+  "highland_adit":     {"kind": "mine",    "theme": "HALL",   "levels": 1, "creatures": []},
+  "crags_mine_south":  {"kind": "mine",    "theme": "HALL",   "levels": 1, "creatures": []},
+  "crags_mine_west":   {"kind": "mine",    "theme": "HALL",   "levels": 1, "creatures": []},
+  "loxford_graveyard": {"kind": "crypt",   "theme": "CRYPT",  "levels": 1, "creatures": []}
+ }
+}

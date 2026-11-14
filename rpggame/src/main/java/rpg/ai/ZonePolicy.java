@@ -3,7 +3,7 @@ package rpg.ai;
 import rpg.world.DevMap;
 
 /** Routine territory preferences; immediate self-defense is evaluated before these proactive decisions. */
-final class ZonePolicy {
+public final class ZonePolicy {
     private ZonePolicy() {}
     /** (0.3.9) An outlaw of the wilds - unless they walk with the player now, under the player's word. */
     static boolean outlaw(Npc n) { return n.companionOf == 0 && (n.role == Npc.Role.BANDIT || n.role == Npc.Role.BRUTE || n.role == Npc.Role.THIEF); }
@@ -15,7 +15,7 @@ final class ZonePolicy {
     static final float LEASH = rpg.Tuning.f("shadowveil.leash", 120f);
     static boolean traveller(Npc n) { return n.companionOf != 0 || n.hunt != null || n.posse || (n.role == Npc.Role.CARTER || n.role == Npc.Role.CONTACT) && n.goal == Brain.Goal.WORK; }
     /** (0.4.1) Whether a place is within a routine's reach of home (always, on the devmap). */
-    static boolean withinReach(Npc n, float x, float z) {
+    public static boolean withinReach(Npc n, float x, float z) {
         return !rpg.world.WorldMap.shadowveil() || traveller(n) || Math.hypot(x - n.homeX, z - n.homeZ) <= LEASH - 4;
     }
     static boolean routineAllowed(Npc n, float x, float z) {

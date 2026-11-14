@@ -1,0 +1,32 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+SetupProbeTest > setupStages() STANDARD_OUT
+    [setup] create 142 ms, devmap 8383 ms, rpg 6596 ms, first tick 2142 ms, close 22 ms
+    [setup] create 2 ms, devmap 8404 ms, rpg 410 ms, first tick 1688 ms, close 23 ms
+    [setup] create 2 ms, devmap 7979 ms, rpg 377 ms, first tick 1629 ms, close 24 ms
+    [setup] create 2 ms, devmap 8531 ms, rpg 369 ms, first tick 1575 ms, close 23 ms
+  slow: rpg.probe.SetupProbeTest.setupStages() 48.372 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 58s
+9 actionable tasks: 2 executed, 7 up-to-date

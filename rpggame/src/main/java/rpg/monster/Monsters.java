@@ -74,6 +74,70 @@ public final class Monsters {
         float[] web = clearGround(DevMap.SPIDER_WEB[0], DevMap.SPIDER_WEB[1]);
         Lair spiders = addLair(MonsterKind.GIANT_SPIDER, "Spider's web", web[0], web[1], 1, 12, 2);
         spawn(MonsterKind.GIANT_SPIDER, 6, web[0], web[1], spiders);
+        if (rpg.world.WorldMap.shadowveil()) territories();
+    }
+
+    /**
+     * (0.4.4, gamefixes: monsters with natural spawn locations and territories in the wilderness) ShadowVeil's wild ground
+     * given its overworld monsters from the data ({@code shadowveil.json} "monsters"): on a jittered grid over the wilds,
+     * each point's biome offers its kinds by their chances; a territory takes root only far from every kingdom, homestead
+     * and road, its lair set on dry open ground, half its number living there to begin with - the rest it breeds.
+     */
+    private void territories() {
+        var a = rpg.world.shadowveil.Atlas.get();
+        var data = a.map("monsters");
+        var t = rpg.world.shadowveil.ShadowVeil.terrain();
+        if (data.isEmpty() || t == null) return;
+        int grid = rpg.world.shadowveil.Atlas.i(data, "grid", 88), most = rpg.world.shadowveil.Atlas.i(data, "most", 40);
+        var clear = rpg.world.shadowveil.Atlas.map(data, "clearance"); var names = rpg.world.shadowveil.Atlas.map(data, "names"); var biomes = rpg.world.shadowveil.Atlas.map(data, "biomes");
+        float town = (float) rpg.world.shadowveil.Atlas.d(clear, "town", 110), homestead = (float) rpg.world.shadowveil.Atlas.d(clear, "homestead", 55), road = (float) rpg.world.shadowveil.Atlas.d(clear, "road", 10);
+        // each settled point with the berth it is given: a kingdom's buildings a wide one, a lone homestead in the wilds less
+        java.util.List<float[]> settled = new ArrayList<>();
+        if (t.arch != null) for (var st : t.arch.structures) {
+            boolean wild = DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(st.cx(), st.cz()));
+            if (!wild) settled.add(new float[]{st.cx(), st.cz(), town});
+            else if (st.template.equals("building") || st.template.equals("hall")) settled.add(new float[]{st.cx(), st.cz(), homestead});
+        }
+        for (var as : rpg.world.shadowveil.Census.all().values()) if (as.homeStage() != null) {
+            float[] h = as.homeStage();
+            settled.add(new float[]{h[0], h[1], DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(h[0], h[1])) ? homestead : town});
+        }
+        int made = 0, wet = 0, realm = 0, town0 = 0, road0 = 0, biome0 = 0;
+        for (int x = grid / 2; x < t.S - 8 && made < most; x += grid) for (int z = grid / 2; z < t.S - 8 && made < most; z += grid) {
+            float px = x + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 151) - 0.5) * grid * 0.6), pz = z + (float) ((rpg.world.shadowveil.Noise.hash(a.seed, x, z, 152) - 0.5) * grid * 0.6);
+            float[] p = rpg.world.shadowveil.ShadowVeil.dry(px, pz);
+            int i = t.idx((int) p[0], (int) p[1]);
+            if (t.water[i] >= 0 || (t.flags[i] & rpg.world.shadowveil.Terrain.ROAD) != 0) { wet++; continue; }
+            if (!DevMap.WILDS.equals(rpg.world.shadowveil.ShadowVeil.jurisdiction(p[0], p[1]))) { realm++; continue; }
+            boolean crowded = false;
+            for (float[] s : settled) if (Math.hypot(s[0] - p[0], s[1] - p[1]) < s[2]) { crowded = true; break; }
+            if (crowded) { town0++; continue; }
+            if (nearRoad(t, (int) p[0], (int) p[1], (int) road)) { road0++; continue; }
+            int k = 0, before = made;
+            for (Object o : rpg.world.shadowveil.Atlas.arr(biomes, t.biomeAt((int) p[0], (int) p[1]))) {
+                java.util.List<?> gr = (java.util.List<?>) o; k++;
+                MonsterKind kind;
+                try { kind = MonsterKind.valueOf(String.valueOf(gr.get(0))); } catch (IllegalArgumentException e) { continue; }
+                if (rpg.world.shadowveil.Noise.hash(a.seed, x + k, z, 153 + kind.ordinal()) >= rpg.world.shadowveil.Atlas.dn(gr.get(4)) / 100.0) continue;
+                int lo = rpg.world.shadowveil.Atlas.n(gr.get(1)), hi = rpg.world.shadowveil.Atlas.n(gr.get(2)), cap = rpg.world.shadowveil.Atlas.n(gr.get(3));
+                Lair l = new Lair(g.state.newEntityId(), kind, rpg.world.shadowveil.Atlas.s(names, kind.name(), kind.title + "s' ground"), p[0], p[1], lo, hi, cap);
+                lairs.add(l);
+                int start = Math.max(1, (cap + 1) / 2);
+                for (int n = 0; n < start; n++) {
+                    double ang = n * 2.4 + x, r = 1.5 + n * 0.9;
+                    float[] q = rpg.world.shadowveil.ShadowVeil.dry(p[0] + (float) Math.cos(ang) * (float) r, p[1] + (float) Math.sin(ang) * (float) r);
+                    spawn(kind, lo + (int) ((hi - lo) * rpg.world.shadowveil.Noise.hash(a.seed, x + n, z, 154)), q[0], q[1], l);
+                }
+                made++;
+                break;   // one territory to a point
+            }
+            if (made == before) biome0++;
+        }
+        System.out.println("[monsters] " + made + " wilderness territories (passed over: " + wet + " wet or road, " + realm + " in a realm, " + town0 + " near the settled, " + road0 + " by a road, " + biome0 + " by their biome's chances; " + settled.size() + " settled points)");
+    }
+    private static boolean nearRoad(rpg.world.shadowveil.Terrain t, int x, int z, int r) {
+        for (int dx = -r; dx <= r; dx += 2) for (int dz = -r; dz <= r; dz += 2) { int xx = x + dx, zz = z + dz; if (t.in(xx, zz) && (t.flags[t.idx(xx, zz)] & rpg.world.shadowveil.Terrain.ROAD) != 0) return true; }
+        return false;
     }
 
     public Lair addLair(MonsterKind kind, String name, float x, float z, int minLevel, int maxLevel, int cap) {
@@ -382,10 +446,19 @@ public final class Monsters {
     }
 
     // ------------------------------------------------------------------ the frame
+    /** (0.4.4) Beyond this (cells, along x plus z) from the player a monster rests unsimulated. */
+    static final float FAR_REST = rpg.Tuning.f("monsters.farRest", 220f);
+
     public void update(float dt) {
         for (Monster m : new ArrayList<>(monsters)) {
             if (!m.alive || !m.loaded || m.body == 0) continue;
             if (m.reacting) continue;
+            // (0.4.4, optimisation: the wilds' territories) a monster far beyond the player's reach rests where it is - no
+            // senses, no mind, its body still - until the player comes within its reach again (a fight in progress goes on)
+            if (rpg.world.WorldMap.shadowveil() && m.fightTarget == 0 && Math.abs(m.x - g.player.x) + Math.abs(m.z - g.player.z) > FAR_REST) {
+                g.game.commands().moverInput(m.body, 0, 0, 0, 0, 30, MOVER_STANCE_ONLY);
+                continue;
+            }
             if (m.windup != null && g.time >= m.windupUntil) {
                 Actor victim = g.actor(m.strikeTarget);
                 m.strikeAt = g.time;
@@ -398,14 +471,20 @@ public final class Monsters {
                 g.ai.faceAt(m, dt);
                 continue;
             }
+            long p0 = Rpg.PROF ? System.nanoTime() : 0;
             g.ai.monsterSenses(m, dt);
+            long p1 = Rpg.PROF ? System.nanoTime() : 0;
             // (0.2.3) each on its own beat, never the whole camp sensing on one frame
             double due = nextSense.computeIfAbsent(m.id, id -> g.time + rpg.ai.Stealth.phase(id) * 0.25);
             if (g.time >= due) { mind.sense(m, 0.25f); nextSense.put(m.id, Math.max(due + 0.25, g.time + 0.05)); }
+            long p2 = Rpg.PROF ? System.nanoTime() : 0;
             mind.drives(m, dt);
             if (g.time >= m.nextThink) mind.think(m);
+            long p3 = Rpg.PROF ? System.nanoTime() : 0;
             m.sneaking = m.state == State.STALK;
             if (!m.cs.busy() || m.cs.phase == Actor.Combat.Phase.RECOVER) mind.act(m, dt);
+            // (0.4.2) a monster's slow step named in the profile (the stutter hunt)
+            if (Rpg.PROF && System.nanoTime() - p0 > 15_000_000L) System.out.printf("[prof] monster %s %s: senses %.0f, sense %.0f, think %.0f, act %.0f ms%n", m.kind, m.state, (p1 - p0) / 1e6, (p2 - p1) / 1e6, (p3 - p2) / 1e6, (System.nanoTime() - p3) / 1e6);
             if (m.kind.flies()) fly(m, dt);
             else g.game.commands().moverInput(m.body, 0, 0, 0, 0, 30, MOVER_STANCE_ONLY | (m.sneaking ? MOVER_CROUCH : 0));
             // regeneration out of the fight (trolls mend fast; fire halts it)

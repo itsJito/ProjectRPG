@@ -734,7 +734,9 @@ public final class Gore {
         Evidence best = null;
         for (Evidence e : evidence) {
             if (seen.contains(e.id) || e.source == n.id) continue;
-            if (e.kind == Kind.BODY && inLawfulCare(e)) continue;
+            // (0.4.6, gamefixes: a guard who set a body down took its fresh blood for a new trail) a body the law has taken up,
+            // and every stain it leaves, is the law's business already - set down or carried
+            if (inLawfulCare(e)) continue;
             float dx = e.x - n.x, dz = e.z - n.z, d = (float) Math.hypot(dx, dz);
             float reach = e.kind == Kind.BODY ? 18 : e.kind == Kind.LIMB ? 12 : 6 + e.size * 6;
             if (d > reach) continue;
@@ -796,6 +798,7 @@ public final class Gore {
      */
     private boolean inLawfulCare(Evidence e) {
         if (!(g.actor(e.source) instanceof Npc dead)) return false;
+        if (!dead.alive && g.objects.get(dead.corpse) instanceof rpg.objects.Corpse body && body.inCare) return true;
         if (!dead.alive && dead.corpse == 0 && g.objects.everything().stream().anyMatch(object -> object instanceof rpg.objects.Container grave && grave.buried && grave.owner == dead.id)) return true;
         if (g.actor(dead.carriedBy) instanceof Npc carrier && (carrier.role == Npc.Role.GUARD || carrier.role == Npc.Role.LAWMAN || carrier.role == Npc.Role.UNDERTAKER)) return true;
         return e.x >= DevMap.GRAVE_X0 && e.x <= DevMap.GRAVE_X1 + 1 && e.z >= DevMap.GRAVE_Z0 - 1 && e.z <= DevMap.GRAVE_Z1 + 1;

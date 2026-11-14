@@ -1,0 +1,127 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.70s ({regions=773, overlays=496, variants=390, scarp=48, coast=406, erosion=461, peaks=46, lakes=70, isles=4, rivers=703, wadis=13, ground=28, roads=588, causeways=3, architecture=1000, pitsFilled=1405, pits=530, banks=46, clamp=13, cliffs=42, columns=1171, falls=16, raise=11030, trees=279, outcrops=0, ways=495}), made and lit in 1.66s
+    [water] flow field grown in 1027 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+
+    ================ 230, 46, 987  law Loxford  stand Y 40.0
+    structure here: loxford_castle Loxford Castle (castle) lot 210,946 - 253,991 floor 39
+      near loxford_stables            Stables & Pasture                        stable         38 m lot 190,957-205,974 floor 38
+      object Furniture              Duke Donald's bed              (227.0, 45.5, 983.0)
+      object Furniture              Bedside table                  (227.5, 45.5, 984.5)
+      object Furniture              Chair                          (227.5, 40.5, 983.5)
+      object Furniture              Chair                          (228.5, 40.5, 983.5)
+      object Furniture              Chair                          (229.5, 40.5, 983.5)
+      object Furniture              Chair                          (230.5, 40.5, 983.5)
+      object Furniture              Suit of armour                 (233.5, 41.0, 987.5)
+      object Furniture              Armchair                       (233.5, 45.5, 983.5)
+      object Furniture              Bookcase                       (232.5, 46.0, 983.5)
+      object Furniture              Bookcase                       (231.5, 46.0, 983.5)
+      object Furniture              Potted fern                    (229.5, 45.5, 986.5)
+      object Furniture              Chandelier                     (226.5, 51.0, 983.5)
+      object Door                   Loxford Castle chamber door    (228.5, 46.2, 985.5)
+      object Patch                  ivy                            (229.5, 40.0, 989.5)
+      npc Aldric       GUARD          (225.5, 40.0, 978.5) goal PATROL
+      npc Bram         GUARD          (237.5, 50.0, 985.5) goal PATROL
+      npc Hadwin       CIVIC          (228.5, 50.0, 983.5) goal WORK
+      npc King Richard CIVIC          (226.5, 40.0, 979.5) goal WORK
+      npc Duke Donald  CIVIC          (240.5, 45.0, 984.5) goal WORK
+      npc Maeve        CRAFTSMAN      (234.5, 40.0, 984.5) goal WORK
+      layer Y44 (x 226..234 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       ..aa*aaaa
+       bbbbbbbbb
+       .........
+       ccccccccc
+       ccccccccc
+      layer Y45 (x 226..234 across, z down; * the point)
+       dde..ffg.
+       .he......
+       ..i......
+       jjeh.....
+       ..aa*ak..
+       lllllllll
+       .........
+       ccccccccc
+       ccccccccc
+      layer Y46 (x 226..234 across, z down; * the point)
+       ..e..ff..
+       ..e......
+       ..i......
+       ..e......
+       ..aa*k...
+       mllmllmll
+       .........
+       ccccccccc
+       ccccccccc
+      layer Y47 (x 226..234 across, z down; * the point)
+       ..e......
+       ..e......
+       ..e......
+       ..e......
+       ..aa*....
+       mllmllmll
+       .........
+       ccccccccc
+       ccccccccc
+      layer Y48 (x 226..234 across, z down; * the point)
+       ..e......
+       ..e......
+       ..e......
+       ..e......
+       ..ak*....
+       bllbllbll
+       .........
+       .........
+       .c.c.c.c.
+      layer Y49 (x 226..234 across, z down; * the point)
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aaaaaaaaa
+       aak.*.aaa
+       bbbbbbbbb
+       .........
+       .........
+       .........
+      layer Y50 (x 226..234 across, z down; * the point)
+       .........
+       .........
+       .........
+       ...jjj...
+       ....*.j..
+       lllllllll
+       .........
+       .........
+       .........
+      legend: a=planks b=cobble c=stone_bricks d=bed e=plaster f=bookcase g=seat h=table i=door j=fence k=stairs l=#91 m=glass
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 32.117 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 36s
+9 actionable tasks: 1 executed, 8 up-to-date

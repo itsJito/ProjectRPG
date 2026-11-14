@@ -1,0 +1,166 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :probe
+
+WorldInspectProbeTest > inspect() STANDARD_OUT
+    [Load] ShadowVeil grown in 19.30s ({regions=864, overlays=521, variants=456, scarp=48, coast=657, erosion=369, peaks=44, lakes=66, isles=4, rivers=729, wadis=13, ground=21, roads=578, causeways=3, architecture=958, pitsFilled=1309, pits=453, banks=80, clamp=15, cliffs=48, columns=1272, falls=17, raise=10974, trees=373, outcrops=0, ways=688}), made and lit in 2.44s
+    [water] flow field grown in 1008 ms: 39016 columns moving
+    [gathering] 767 wild herb patches, flax and berry bushes
+    [monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+
+    ================ 185, 55, 655  law Valgard  stand Y 59.0
+    structure here: -
+      near valgard_keep               Valgard Keep                             castle         26 m lot 185,660-214,691 floor 52
+      near sanctuary_jaehaerys        Sanctuary of Jaehaerys                   church         11 m lot 175,637-198,650 floor 59
+      near valgard_homes_33           House                                    building       27 m lot 175,677-182,684 floor 53
+      near valgard_homes_34           House                                    building       37 m lot 162,683-166,687 floor 53
+      near valgard_homes_35           House                                    building       20 m lot 171,668-178,675 floor 52
+      near valgard_homes_36           House                                    building       14 m lot 171,660-175,664 floor 53
+      near valgard_homes_37           House                                    building       23 m lot 162,643-166,647 floor 55
+      near valgard_homes_38           House                                    building       27 m lot 162,633-168,639 floor 57
+      near valgard_jail               Valgard Jail                             building       25 m lot 204,643-214,655 floor 56
+      object Node                   Tree                           (184.5, 60.2, 654.5)
+      object Furniture              Tapestry                       (181.0, 61.0, 649.5)
+      object Furniture              Candelabrum                    (180.5, 60.5, 649.5)
+      npc Maelin       SCHOLAR        (199.5, 60.0, 640.5) goal IDLE
+      npc King Phillip CIVIC          (193.5, 53.0, 659.5) goal IDLE
+      npc Duke Edran   CIVIC          (187.5, 53.0, 659.5) goal IDLE
+      npc Sir Vaelor   KNIGHT         (200.5, 59.0, 644.5) goal IDLE
+      npc Father Anselm PRIEST         (174.5, 60.0, 639.5) goal IDLE
+      npc Lothar       GUARD          (205.5, 57.0, 642.5) goal IDLE
+      layer Y53 (x 178..192 across, z down; * the point)
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaa*aaaaaaa
+       aaaaaaaaaaaaaaa
+       bbbbbbccccccccc
+       bbbbcbddddddddd
+       bbbbd...eee....
+       bbbbd..ee.eeeee
+       dddbd.ee...eeee
+       ddddd.e....ee..
+      layer Y54 (x 178..192 across, z down; * the point)
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaa*aaaaaaa
+       bbbbbbbbbbbbbbb
+       bbbbbbccccccccc
+       bbbbcd.........
+       dddd....fff....
+       dddd...ff.fffff
+       ...d..ff...ffff
+       ......f....ff..
+      layer Y55 (x 178..192 across, z down; * the point)
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       aaaaaaaaaaaaaaa
+       bbbbaabbbbbbbbb
+       bbbbbbb*bbbbbbb
+       bbbbbbbbbbbbbbb
+       bbbbbbccccccccc
+       ddbbc..........
+       ........fff....
+       .......ff.fffff
+       ......ff...ffff
+       ......f....ff..
+      layer Y56 (x 178..192 across, z down; * the point)
+       bbbbbbbbbbbbbab
+       bbbbbbbbbbbbaab
+       bbbbbbbbbbbaaaa
+       bbbbbbbbbbbaaaa
+       bbbbbbbbbbbbaab
+       bbbbbbbbbbbbbbb
+       bbbbbbbbbbbbbbb
+       bbbbbbb*bbbbbbb
+       bbbbbbbbbbbbbbb
+       ddddddccccccccc
+       ..ddc..........
+       ........fff....
+       .......ff.fffff
+       ......ff...ffff
+       ......f....ff..
+      layer Y57 (x 178..192 across, z down; * the point)
+       bbbbbbbbbbbbbgb
+       bbbbbbbbbbbbggb
+       bbbbbbbbbbbgggg
+       bbbbbbbbbbbgggg
+       bbbbbbbbbbbbggb
+       bbbbbbbbbbbbbbb
+       bbbbbbbbbbbbbbb
+       bbbbbbb*bbbbbbb
+       ddddddddddddddd
+       ...............
+       ...............
+       ........fff....
+       .......ff.fffff
+       ......ff...ffff
+       ......f....ff..
+      layer Y58 (x 178..192 across, z down; * the point)
+       bbbbbbbbbbbbbgb
+       bbbbbbbbbbbbggb
+       bbbbbbbbbbbgggg
+       bbbbbbbbbbbgggg
+       bbbbbbbbbbbbggb
+       bbbbbbbbbbbbbbb
+       ddddbbddddddddd
+       ddddddd*ddddddd
+       ...............
+       ...............
+       ...............
+       ........fff....
+       .......ff.fffff
+       ......ff...ffff
+       ......f....ff..
+      layer Y59 (x 178..192 across, z down; * the point)
+       hhhhhhhhhhhhhhh
+       hhhhhhhhhhhhhhh
+       eeeeeeeeeeeeeee
+       dddddddddddgggg
+       ddddddddddddggd
+       ddddddddddddddd
+       ....ddi........
+       .......*.......
+       ...............
+       ...............
+       ...............
+       ........fff....
+       .......ff.fffff
+       ......ff...ffff
+       ......f....ff..
+      legend: a=stone b=dirt c=granite d=grass e=stone_bricks f=granite_ashlar g=gravel h=planks i=birch_log
+  slow: rpg.probe.WorldInspectProbeTest.inspect() 33.765 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 37s
+9 actionable tasks: 1 executed, 8 up-to-date

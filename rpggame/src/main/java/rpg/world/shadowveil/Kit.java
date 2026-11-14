@@ -29,9 +29,15 @@ final class Kit {
         Canvas(Terrain t) { this.t = t; S = t.S; H = t.H; }
         boolean in(int x, int y, int z) { return x >= 0 && z >= 0 && x < S && z < S && y >= 0 && y < H; }
         int get(int x, int y, int z) { return in(x, y, z) ? t.cells[(x * S + z) * H + y] & 0xFF : Blocks.AIR; }
-        void set(int x, int y, int z, int id) { if (in(x, y, z)) t.cells[(x * S + z) * H + y] = (byte) id; }
+        void set(int x, int y, int z, int id) {
+            if (!in(x, y, z)) return;
+            t.cells[(x * S + z) * H + y] = (byte) id;
+            if (id == Blocks.LAMP) t.lampCells.add(new int[]{x, y, z});
+            else if (id == Blocks.STAINED_GLASS) t.stainedCells.add(new int[]{x, y, z});
+            else if (id == Blocks.FENCE) t.fenceAt(x, y, z);
+        }
         /** Sets a cell only where it is open air (leaves what is already built). */
-        void soft(int x, int y, int z, int id) { if (in(x, y, z) && t.cells[(x * S + z) * H + y] == 0) t.cells[(x * S + z) * H + y] = (byte) id; }
+        void soft(int x, int y, int z, int id) { if (in(x, y, z) && t.cells[(x * S + z) * H + y] == 0) set(x, y, z, id); }
         /** Fills down from y until ground (or 24 cells): a footing under whatever stands at y. */
         void footing(int x, int y, int z, int id) {
             for (int k = y; k > y - 24 && k > 0; k--) {
@@ -72,7 +78,8 @@ final class Kit {
         }
         /** A two-faced wall cell: outside material out, its inside finish toward the room (local inward du, dv). */
         void wall(int u, int y, int v, int outer, int du, int dv) {
-            int inner = BuildingKit.innerFinish(outer);
+            // (0.4.2) on ShadowVeil a timber-framed wall is plastered inside too (the devmap's own walls keep theirs)
+            int inner = outer == Blocks.TIMBER_FRAME ? Blocks.PLASTER : BuildingKit.innerFinish(outer);
             if (inner == outer) { put(u, y, v, outer); return; }
             int[] wd = dir(du, dv);
             int in = wd[0] > 0 ? Blocks.IN_PX : wd[0] < 0 ? Blocks.IN_NX : wd[1] > 0 ? Blocks.IN_PZ : Blocks.IN_NZ;
@@ -89,19 +96,39 @@ final class Kit {
     /** A culture's materials (data: the style's block names) and its roofs' pitch. */
     static final class Style {
         final Map<String, Integer> blocks = new HashMap<>();
+        /**
+         * (0.4.2, gamefixes: every building in a territory its own) a material given as a list is the territory's palette
+         * for it: each building draws its own from it ({@link #vary}), so neighbours differ while the street stays of one
+         * culture.
+         */
+        final Map<String, int[]> palette = new HashMap<>();
         double pitch = 1;
         String roofShape = "gable";
         int b(String key) { Integer v = blocks.get(key); return v == null ? blocks.getOrDefault("wall", Blocks.STONE_BRICKS) : v; }
         /** This style with one material set outright (a block id). */
-        Style withBlock(String key, int id) { Style s = with(Map.of()); s.blocks.put(key, id); return s; }
+        Style withBlock(String key, int id) { Style s = with(Map.of()); s.blocks.put(key, id); s.palette.remove(key); return s; }
         Style with(Map<String, Object> over) {
             Style s = new Style();
-            s.blocks.putAll(blocks); s.pitch = pitch; s.roofShape = roofShape;
+            s.blocks.putAll(blocks); s.palette.putAll(palette); s.pitch = pitch; s.roofShape = roofShape;
             for (var e : over.entrySet()) {
                 if (e.getKey().equals("pitch") && e.getValue() instanceof Number n) s.pitch = n.doubleValue();
                 else if (e.getKey().equals("roofShape") && e.getValue() instanceof String r) s.roofShape = r;
-                else if (e.getValue() instanceof String name && MATERIAL_KEYS.contains(e.getKey())) s.blocks.put(e.getKey(), block(name));
+                else if (e.getValue() instanceof String name && MATERIAL_KEYS.contains(e.getKey())) { s.blocks.put(e.getKey(), block(name)); s.palette.remove(e.getKey()); }
+                else if (e.getValue() instanceof List<?> l && !l.isEmpty() && MATERIAL_KEYS.contains(e.getKey())) {
+                    int[] ids = new int[l.size()];
+                    for (int i = 0; i < ids.length; i++) ids[i] = block(String.valueOf(l.get(i)));
+                    s.palette.put(e.getKey(), ids); s.blocks.put(e.getKey(), ids[0]);
+                }
             }
+            return s;
+        }
+        /** This style as one building draws it: each palette's material picked by the building's own seed. */
+        Style vary(long seed) {
+            if (palette.isEmpty()) return this;
+            Style s = with(Map.of());
+            int k = 0;
+            for (var e : new java.util.TreeMap<>(palette).entrySet()) s.blocks.put(e.getKey(), e.getValue()[(int) (hash(seed, k++, e.getValue().length, 91) * e.getValue().length) % e.getValue().length]);
+            s.palette.clear();
             return s;
         }
     }
@@ -212,6 +239,8 @@ final class Kit {
                 boolean well = u >= w - 3 && u <= w - 2 && v >= d - 3 && v <= d - 2;
                 f.put(u, y0 - 1, v, well ? Blocks.AIR : floor);
             }
+            // (0.4.2, gamefixes: vertical circulation reserved for 0.4.3's stairs) the well kept open, ground to top
+            if (k == 1) out.reserve("stair", f, w - 3, P + 1, d - 3, w - 2, top, d - 2);
             if (k > 0) for (int u = 0; u < w; u++) { f.put(u, y0 - 1, -jv, trim); f.put(u, y0 - 1, d - 1 + jv, trim); }
             if (k > 0) for (int v = 0; v < d; v++) { f.put(0, y0 - 1, v, trim); f.put(w - 1, y0 - 1, v, trim); }
             // windows: two tall where the storey allows, a lintel over each; none beside a corner or the door
@@ -358,12 +387,18 @@ final class Kit {
             for (int[] n : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) { int a = u + n[0], b = v + n[1]; if (a < 0 || b < 0 || a >= w || b >= d || !inside.test(a, b)) return true; }
             return false;
         };
+        // (0.4.2, gamefixes: vertical circulation kept for 0.4.3) a stair well left open through every floor, by the wall
+        // opposite the door
+        int su = (int) Math.round(cu) - 1, svFar = (int) Math.round(cv);
+        while (svFar + 1 < d - 1 && !rim.test(su, svFar + 2) && inside.test(su, svFar + 2)) svFar++;
+        final int sv = svFar;
+        java.util.function.BiPredicate<Integer, Integer> well = (u, v) -> u >= su && u <= su + 1 && v >= sv && v <= sv + 1 && !rim.test(u, v);
         for (int u = 0; u < w; u++) for (int v = 0; v < d; v++) {
             if (!inside.test(u, v)) continue;
             f.put(u, P, v, floor); f.footing(u, P - 1, v, base);
             for (int y = P + 1; y <= P + H; y++) {
                 if (rim.test(u, v)) f.put(u, y, v, y == P + 1 ? base : wall);
-                else f.put(u, y, v, (y - P) % 6 == 0 ? floor : Blocks.AIR);
+                else f.put(u, y, v, (y - P) % 6 == 0 && !(well.test(u, v) && y < P + H) ? floor : Blocks.AIR);
             }
         }
         // slits up the tower, a quarter turn apart each storey
@@ -383,10 +418,11 @@ final class Kit {
             out.door(f, du, dv, dw, P, 0, -1);
             f.put(du, P + 3, dv, trim); if (dw > 1) f.put(du + 1, P + 3, dv, trim);
         }
-        out.reserve("interior", f, 1, P + 1, 1, w - 2, P + H, d - 2);
+        out.reserve(round ? "interior_round" : "interior", f, 1, P + 1, 1, w - 2, P + H - 1, d - 2);
+        if (H >= 12) out.reserve("stair", f, su, P + 1, sv, su + 1, P + H - 1, sv + 1);
         String crown = o.s("crown", "crenel");
         int topY = P + H;
-        if (crown.equals("crenel") || crown.equals("cone") || crown.equals("pyramid")) {
+        if (crown.equals("crenel") || crown.equals("cone") || crown.equals("pyramid") || crown.equals("dome")) {
             // the fighting top: a floor, a corbel a cell out, merlons on it
             for (int u = -1; u <= w; u++) for (int v = -1; v <= d; v++) {
                 boolean in = u >= 0 && v >= 0 && u < w && v < d && inside.test(u, v);
@@ -411,6 +447,8 @@ final class Kit {
             f.put((int) Math.round(cu), topY + 2 + h, (int) Math.round(cv), s.b("accent"));
         }
         if (crown.equals("lantern")) lanternCrown(f, s, (int) Math.round(cu), (int) Math.round(cv), (int) Math.floor(r), topY);
+        // (0.4.4, gamefixes: Severia as Rome and Byzantium) a dome on the tower's top, its finial at the crown
+        if (crown.equals("dome")) dome(f, s.b("dome"), cu, cv, r + 0.4, topY + 1, s.b("accent"));
         // a cellar stair down from the tower's floor (the Lantern's cellars), its volume reserved under the isle
         if (o.has("cellar")) stairDown(f, s, (int) Math.round(cu) - 1, (int) Math.round(cv) - 1, P, o.i("cellar", 10), 's', out, o.s("cellarReserve", "cellar"));
         out.points.put("top", new float[]{f.point(cu, cv)[0], topY + 1, f.point(cu, cv)[1]});
@@ -447,7 +485,9 @@ final class Kit {
         boolean[] gap = new boolean[line.size()];
         for (int i = 0; i < line.size(); i++) {
             int[] p = line.get(i);
-            for (int dx = -thick; dx <= thick && !gap[i]; dx++) for (int dz = -thick; dz <= thick && !gap[i]; dz++) {
+            // (0.4.3, gamefixes: map glitches at 246, 55, 607 - a road running beside Valgard's wall lifted fifteen cells
+            // of it onto an arch) only a road, river or lake under the wall's own footprint opens a gateway
+            for (int dx = 0; dx < thick && !gap[i]; dx++) for (int dz = 0; dz < thick && !gap[i]; dz++) {
                 int x = p[0] + dx, z = p[1] + dz;
                 if (t.in(x, z) && (t.flags[t.idx(x, z)] & (Terrain.ROAD | Terrain.RIVER | Terrain.LAKE)) != 0 && (t.flags[t.idx(x, z)] & Terrain.BUILT) == 0) gap[i] = true;
             }
@@ -455,6 +495,16 @@ final class Kit {
         }
         boolean[] wide = gap.clone();
         for (int i = 0; i < line.size(); i++) if (gap[i]) for (int j = Math.max(0, i - 2); j <= Math.min(line.size() - 1, i + 2); j++) wide[j] = true;
+        // an opening longer than a gate (a road that runs along the wall's line) is a breach, open to the sky between its
+        // towers - never the wall carried on a long bridge over the road
+        boolean[] breach = new boolean[line.size()];
+        for (int i = 0; i < line.size(); ) {
+            if (!wide[i]) { i++; continue; }
+            int j = i;
+            while (j < line.size() && wide[j]) j++;
+            if (j - i > 9) for (int k = i; k < j; k++) breach[k] = true;
+            i = j;
+        }
         for (int i = 0; i < line.size(); i++) {
             int[] p = line.get(i);
             for (int ox = 0; ox < thick; ox++) for (int oz = 0; oz < thick; oz++) {
@@ -463,6 +513,7 @@ final class Kit {
                 int i2 = t.idx(x, z);
                 if ((t.flags[i2] & (Terrain.RIVER | Terrain.LAKE | Terrain.SEA)) != 0) continue;
                 int g = c.ground(x, z);
+                if (breach[i]) { for (int y = g + 1; y <= g + high + 2; y++) c.set(x, y, z, Blocks.AIR); continue; }
                 if (wide[i]) {
                     // the gateway: an arch over the road, the wall carried over it
                     for (int y = g + 1; y <= g + high; y++) c.set(x, y, z, y >= g + 6 ? wall : Blocks.AIR);
@@ -544,10 +595,23 @@ final class Kit {
         // doors from the court into each range
         int cw = w - 2 * ring, cd = d - 2 * ring;
         if (cw > 2 && cd > 2) {
-            int[][] inner = {{ring + cw / 2 + 2, ring - 1}, {ring + cw / 2, d - ring}, {ring - 1, ring + cd / 2}, {w - ring, ring + cd / 2}};
-            for (int[] dd : inner) { f.put(dd[0], P + 1, dd[1], Blocks.AIR); f.put(dd[0], P + 2, dd[1], Blocks.AIR); }
+            // (0.4.2) each range's door from the court, registered (its room's way in for 0.4.3), facing the court
+            int[][] inner = {{ring + cw / 2 + 2, ring - 1, 0, 1}, {ring + cw / 2, d - ring, 0, -1}, {ring - 1, ring + cd / 2, 1, 0}, {w - ring, ring + cd / 2, -1, 0}};
+            for (int[] dd : inner) {
+                f.put(dd[0], P + 1, dd[1], Blocks.AIR); f.put(dd[0], P + 2, dd[1], Blocks.AIR);
+                out.gate(f, dd[0], dd[1], 1, P, dd[2], dd[3]);
+            }
         }
-        out.reserve("interior", f, 1, P + 1, 1, w - 2, top, d - 2);
+        // (0.4.2, gamefixes: interiors reserved as the rooms they will be) the four ranges round the court, each its own
+        // volume (the court is open sky, never a room), and a stair well through the upper floors at the front range's end
+        out.reserve("interior", f, 1, P + 1, 1, w - 2, top, ring - 2);
+        out.reserve("interior", f, 1, P + 1, d - ring + 1, w - 2, top, d - 2);
+        out.reserve("interior", f, 1, P + 1, ring - 1 + 1, ring - 2, top, d - ring);
+        out.reserve("interior", f, w - ring + 1, P + 1, ring, w - 2, top, d - ring);
+        if (storeys > 1 && ring >= 4) {
+            for (int k = 1; k < storeys; k++) for (int u = 2; u <= 3; u++) for (int v = 2; v <= 3; v++) f.put(u, P + k * wallH, v, Blocks.AIR);
+            out.reserve("stair", f, 2, P + 1, 2, 3, top, 3);
+        }
         out.points.put("court", f.point(w / 2.0 - 0.5, d / 2.0 - 0.5));
         if (o.b("well", true)) well(f, s, w / 2, d / 2, P);
         if (o.has("dome")) {
@@ -654,16 +718,15 @@ final class Kit {
         // banners either side of the keep door
         int banner = s.b("banner");
         if (banner != Blocks.AIR) for (int side : new int[]{ku + kw / 2 - 3, ku + kw / 2 + 2}) for (int y = P + 5; y <= P + 8; y++) f.put(side, y, kv - 1, banner);
-        // where a new arrival wakes: in the keep's hall, a few steps in, facing the door and the gate beyond it
-        float[] door = kf.point(kw / 2.0 - 0.5, 0), wake = kf.point(kw / 2.0 - 0.5, Math.min(kd - 3, 5));
+        // where a new arrival wakes: (0.4.2, gamefixes: players spawned inside the building) out in the court before the
+        // keep's door, a few steps from its threshold, looking out over the ward to the gate
+        float[] door = kf.point(kw / 2.0 - 0.5, 0), wake = kf.point(kw / 2.0 - 0.5, -o.i("spawnStep", 4));
         out.points.put("spawn", wake);
-        // the bank's ground-floor counter at the back of the hall (its high room comes with the keep's interior)
-        out.points.put("bankTeller", kf.point(kw / 2.0 - 0.5, kd - 3));
-        out.points.put("bankCustomer", kf.point(kw / 2.0 - 0.5, kd - 5));
-        out.points.put("spawnLook", door);
+        out.points.put("spawnLook", f.point(gu + gw / 2.0 - 0.5, -3));
         out.points.put("keepDoor", door);
-        // the undercroft's stair, down from the court's back corner
-        int su = thick + 2, sv = d - thick - 4;
+        // the undercroft's stair, down from the court (0.4.2: it stood inside the back corner tower's base, its head
+        // walled in on every side - now in the open court beside the front tower, its head approached from the gate side)
+        int su = thick + tr + 2, sv = thick + tr + 3;
         stairDown(f, s, su, sv, P, o.i("undercroftDepth", 10), 's', out, "undercroft");
         // a well in the court, and the court's lamps
         well(f, s, w / 2 + kw / 2 + 3 < w - thick - 2 ? Math.min(w - thick - 3, w / 2 + kw / 2 + 3) : w / 2, thick + 5, P);
@@ -721,6 +784,8 @@ final class Kit {
         for (int a = 0; a <= 1; a++) { f.put(u + a, footY - 1, footV, lining); f.put(u + a, footY, footV, Blocks.AIR); f.put(u + a, footY + 1, footV, Blocks.AIR); f.put(u + a, footY + 2, footV, Blocks.AIR); }
         for (int a = 0; a <= 1; a++) for (int y = footY; y <= footY + 1; y++) f.put(u + a, y, footV + dv, Blocks.LOCKED_DOOR);
         f.put(u - 1, P + 1, v, s.b("post")); f.put(u + 2, P + 1, v, s.b("post"));
+        // (0.4.2) the stair's head is the way in (an opening, no door: the sealed door is at its foot)
+        out.gate(f, u, v, 2, P, 0, -dv);
         // what lies beyond, kept
         int r0 = footV + dv, r1 = footV + dv * 18;
         out.reserve(kind, f, u - 6, Math.max(1, footY - 8), Math.min(r0, r1), u + 7, footY + 4, Math.max(r0, r1));
@@ -744,15 +809,23 @@ final class Kit {
         int lining = s.b("lining"), rock = s.b("rock"), post = s.b("post"), trim = s.b("trim");
         int cu = f.w / 2;
         int u0 = cu - wide / 2, u1 = u0 + wide - 1;
+        // (0.4.2, gamefixes: caves are real places to go inside - their entrances planned for it) the passage falls a
+        // cell every second step, under the hill rather than along its skin
+        int fall = o.i("fall", 2);
+        // (0.4.3, gamefixes: the culvert cave at 573, 40, 899 was a box of loose cobble on the open meadow) where the
+        // passage would stand out of the ground, the hill it runs into is raised first - an earthen mound over it, its
+        // flanks falling away to the ground, grassed as the ground about it - so the mouth opens in a bank, not a box
+        if (kind.equals("cave")) mound(f, seed, u0, u1, len, fall, tall);
         for (int k = 0; k < len; k++) {
-            int floorY = P - k / 3;
+            int floorY = P - k / fall;
             for (int u = u0 - 1; u <= u1 + 1; u++) {
                 boolean side = u < u0 || u > u1;
                 for (int y = floorY - 1; y <= floorY + tall + 1; y++) {
                     boolean roofC = y == floorY + tall + 1, floorC = y == floorY - 1;
                     if (side || roofC || floorC) {
                         int cur = f.get(u, y, k);
-                        if (kind.equals("cave")) { if (cur == Blocks.AIR && (floorC || k > 1)) f.put(u, y, k, rock); else if (cur != Blocks.AIR && hash(seed, u, y + k * 31, 74) < 0.35) f.put(u, y, k, rock); }
+                        // the rock shows only about the mouth (its first two steps); further in, the bank's own earth
+                        if (kind.equals("cave")) { if (cur == Blocks.AIR || k <= 1) f.put(u, y, k, rock); else if (hash(seed, u, y + k * 31, 74) < 0.2) f.put(u, y, k, rock); }
                         else f.put(u, y, k, kind.equals("mine") && !floorC && (k % 3 == 0) ? post : lining);
                     } else f.put(u, y, k, Blocks.AIR);
                 }
@@ -765,11 +838,37 @@ final class Kit {
             for (int u = u0 - 1; u <= u1 + 1; u++) f.put(u, P + tall + 1, 0, kind.equals("mine") ? post : trim);
         }
         // the sealed end
-        int endY = P - (len - 1) / 3;
+        int endY = P - (len - 1) / fall;
         for (int u = u0; u <= u1; u++) for (int y = endY; y < endY + tall; y++) f.put(u, y, len, kind.equals("cave") ? rock : Blocks.LOCKED_DOOR);
-        out.gate(f, cu - (wide >= 2 ? 1 : 0), 0, Math.min(2, wide), P, 0, -1);
-        out.reserve(o.s("reserve", "dungeon"), f, u0 - 8, Math.max(1, endY - o.i("reserveDepth", 14)), len + 1, u1 + 8, endY + tall + 2, len + 24);
+        // the way in: its sill is the passage's floor (a step down from the ground before it)
+        out.gate(f, cu - (wide >= 2 ? 1 : 0), 0, Math.min(2, wide), P - 1, 0, -1);
+        // what lies beyond, kept under rock: the volume's roof a few cells under the lowest ground over it, however the
+        // hill falls away behind; where that is below the passage's end, a shaft reserved to join them
+        int cover = o.i("cover", 3), lowest = Integer.MAX_VALUE;
+        for (int u = u0 - 8; u <= u1 + 8; u++) for (int v = len + 1; v <= len + 24; v++) lowest = Math.min(lowest, f.c.ground(f.wx(u, v), f.wz(u, v)));
+        int roofY = Math.min(endY + tall + 2, lowest - cover - 1);
+        String vol = o.s("reserve", "dungeon");
+        out.reserve(vol, f, u0 - 8, Math.max(2, roofY - o.i("reserveDepth", 14)), len + 1, u1 + 8, roofY, len + 24);
+        if (roofY < endY + tall) out.reserve("connection", f, u0, Math.max(2, roofY - 1), len + 1, u1, endY + tall, len + 2);
         out.points.put("mouth", f.point(cu, 0));
+    }
+
+    /** (0.4.3) The bank a cave's passage runs into: earth over its whole length, two cells over its roof, sloping away. */
+    static void mound(Frame f, long seed, int u0, int u1, int len, int fall, int tall) {
+        for (int u = u0 - 6; u <= u1 + 6; u++) for (int v = 0; v <= len + 5; v++) {
+            int x = f.wx(u, v), z = f.wz(u, v);
+            int g = f.c.ground(x, z);
+            if (f.c.get(x, g, z) == Blocks.WATER) continue;
+            int roof = f.P - Math.min(v, len - 1) / fall + tall + 1;
+            int side = Math.max(0, Math.max(u0 - 1 - u, u - (u1 + 1)));
+            int front = v == 0 ? 1 : 0, back = Math.max(0, v - len);
+            int top = roof + 2 - side - front - back + (hash(seed, u, v, 77) < 0.3 ? 1 : 0);
+            if (top <= g) continue;
+            int surface = f.c.get(x, g, z);
+            if (surface == Blocks.AIR || surface == Blocks.STONE || surface == Blocks.COBBLE || surface == Blocks.GRAVEL) surface = Blocks.GRASS;
+            for (int y = g; y < top; y++) f.c.set(x, y, z, Blocks.DIRT);
+            f.c.set(x, top, z, surface);
+        }
     }
 
     /** A market stall: four posts, a cloth awning, a counter across the front. */
@@ -821,12 +920,15 @@ final class Kit {
     static void field(Frame f, Style s, Opts o, long seed, Out out) {
         int w = f.w, d = f.d, P = f.P;
         int furrow = block(o.s("furrow", "dirt")), crop = block(o.s("crop", "grass")), rowBlock = block(o.s("rowBlock", "none"));
+        // (0.4.3) the furrows run east-west on the lot's even rows from its north edge - where the farming system's rows of
+        // plots lie (Farming.Field rows z0 + 2, z0 + 4 ...), whichever way the field faces
+        int zNorth = Math.min(f.wz(0, 0), f.wz(w - 1, d - 1));
         for (int u = 1; u < w - 1; u++) for (int v = 1; v < d - 1; v++) {
             int x = f.wx(u, v), z = f.wz(u, v), g = f.c.ground(x, z);
             if (f.c.get(x, g, z) == Blocks.WATER) continue;
-            f.c.set(x, g, z, (u % 2 == 0) ? furrow : crop);
-            if (u % 2 == 1 && rowBlock != Blocks.AIR && v > 1 && v < d - 2) f.c.set(x, g + 1, z, rowBlock);
-            else if (u % 2 == 1 && o.b("hay", false) && hash(seed, u, v, 75) < 0.04) f.c.set(x, g + 1, z, Blocks.HAY_BALE);
+            f.c.set(x, g, z, ((z - zNorth) % 2 == 0) ? furrow : crop);
+            if ((z - zNorth) % 2 != 0 && rowBlock != Blocks.AIR && v > 1 && v < d - 2) f.c.set(x, g + 1, z, rowBlock);
+            else if ((z - zNorth) % 2 != 0 && o.b("hay", false) && hash(seed, u, v, 75) < 0.04) f.c.set(x, g + 1, z, Blocks.HAY_BALE);
         }
         if (o.b("fenced", true)) fence(f, s, 0, 0, w - 1, d - 1, P, w / 2 - 1);
         out.points.put("field", f.point(w / 2.0, d / 2.0));
@@ -1141,16 +1243,28 @@ final class Kit {
             f.put(u, P, v, u >= w / 2 - 1 && u <= w / 2 ? s.b("court") : Blocks.GRASS);
             for (int y = P + 1; y <= P + 5; y++) f.put(u, y, v, Blocks.AIR);
         }
-        int mark = s.b("rock");
         boolean crypt = o.b("crypt", false);
+        // (0.4.6, gamefixes: random patches of cobblestone about the graveyards) the old graves are headstones, not blocks
+        // of the style's rock with a bare patch before them: their places go out with the graveyard (Rooms sets a weathered
+        // stone and its mound at each, solid to walk into), and the turf over them is left whole
+        java.util.List<Float> old = new java.util.ArrayList<>();
+        // (0.4.4, gamefixes: each kingdom its own graveyard, the burials its undertakers make) the rows left of the
+        // middle path nearest the gate are kept open for new graves: the burial plot (its stones set as the dead come)
+        int plotU0 = 1, plotU1 = w / 2 - 3, plotV0 = 2, plotV1 = Math.min(d - (crypt ? 10 : 3), 2 + 5);
         for (int u = 2; u < w - 2; u += 3) for (int v = 3; v < d - (crypt ? 9 : 2); v += 3) {
             if (u >= w / 2 - 2 && u <= w / 2 + 1) continue;
+            if (u >= plotU0 && u <= plotU1 && v >= plotV0 && v <= plotV1) continue;
             if (hash(seed, u, v, 90) < 0.15) continue;
-            f.put(u, P + 1, v, mark);
-            if (hash(seed, u, v, 91) < 0.4) f.put(u, P + 2, v, mark);
-            f.put(u, P, v + 1, Blocks.BARE_PATCH);
+            float[] at = f.point(u + 0.5, v + 0.5);
+            old.add(at[0]); old.add(at[1]);
         }
+        if (!old.isEmpty()) { float[] l = new float[old.size()]; for (int i = 0; i < l.length; i++) l[i] = old.get(i); out.points.put("oldGraves", l); }
         fence(f, s, 0, 0, w - 1, d - 1, P, w / 2 - 1);
+        if (plotU1 - plotU0 >= 2 && plotV1 - plotV0 >= 2) {
+            int ax = f.wx(plotU0, plotV0), az = f.wz(plotU0, plotV0), bx = f.wx(plotU1, plotV1), bz = f.wz(plotU1, plotV1);
+            int x0 = Math.min(ax, bx), z0 = Math.min(az, bz), x1 = Math.max(ax, bx), z1 = Math.max(az, bz);
+            out.points.put("plot", new float[]{x0 + 0.7f, z0 + 0.75f, Math.max(1, (int) ((x1 - x0 + 1) / 1.4f)), Math.max(1, (int) ((z1 - z0 + 1) / 1.5f))});
+        }
         if (crypt) {
             int cw = 6, cd = 6, cu = (w - cw) / 2, cv = d - cd - 1;
             Frame cf = sub(f, cu, cv, cw, cd);
@@ -1203,6 +1317,18 @@ final class Kit {
         int banner = s.b("banner");
         if (banner != Blocks.AIR) for (int y = P + 7; y <= P + 9 && y < P + H; y++) { f.put(gu - 2, y, -1, banner); f.put(gu + gw + 1, y, -1, banner); }
         out.points.put("gate", f.point(w / 2.0, d / 2.0));
+        // (0.4.2) the guard rooms either side of the passage: a door into each from the passage, and the rooms reserved
+        int mid = d / 2;
+        if (gu >= 3) {
+            f.put(gu - 1, P + 1, mid, Blocks.AIR); f.put(gu - 1, P + 2, mid, Blocks.AIR);
+            out.door(f, gu - 1, mid, 1, P, 1, 0);
+            out.reserve("interior", f, 1, P + 1, 1, gu - 2, P + H - 1, d - 2);
+        }
+        if (w - (gu + gw) >= 3) {
+            f.put(gu + gw, P + 1, mid, Blocks.AIR); f.put(gu + gw, P + 2, mid, Blocks.AIR);
+            out.door(f, gu + gw, mid, 1, P, -1, 0);
+            out.reserve("interior", f, gu + gw + 1, P + 1, 1, w - 2, P + H - 1, d - 2);
+        }
     }
 
     /** A classical front (the Museum, the Severian civic halls): steps up to a portico of columns, the building behind it. */

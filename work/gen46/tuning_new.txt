@@ -1,0 +1,15 @@
+ai.jobMethodRest 45; ai.tendDwell 15
+doors.passReach 1.8
+ai.spawnApart 1.6; ai.spawnShift 6
+ai.carterLeg 25
+ai.beatDwell 12
+ai.nudgeReach 1.9; ai.nudgeRest 8
+ai.ladderAloft 3.5
+law.heldGoodsCells 320; law.escapeHeard 40; law.escapeSearch 120
+law.shoveTolerance 3; law.shoveMemory 120
+world.edgeStart 40; world.edgeHurtMin 0.08; world.edgeHurtMax 0.45; world.edgeTick 1
+fish.stuck 0.6; fish.escape 1.8
+reactions.caughtLimit 0.9; reactions.downLimit 6
+foliage.genRings 4; foliage.genPerPass 3
+ai.jobMethodFails 3
+audio.hoofHeard 30

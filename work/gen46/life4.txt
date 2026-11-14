@@ -1,0 +1,279 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+WorldLifeProbeTest > life() STANDARD_OUT
+    [Load] ShadowVeil grown in 18.42s ({regions=854, overlays=477, variants=423, scarp=48, coast=623, erosion=346, peaks=43, lakes=64, isles=4, rivers=659, wadis=16, ground=32, roads=746, causeways=3, architecture=974, pitsFilled=1405, pits=465, banks=50, clamp=13, cliffs=39, columns=1030, falls=19, raise=10480, trees=289, outcrops=0, ways=682}), made and lit in 1.51s
+    [water] flow field grown in 1234 ms: 38934 columns moving
+    [gathering] 787 wild herb patches, flax and berry bushes
+    [monsters] 9 wilderness territories (passed over: 7 wet or road, 28 in a realm, 69 near the settled, 8 by a road, 23 by their biome's chances; 771 settled points)
+    [life] start: 225 people, 4 stand with 3+ others within 2 m
+       Duke Bashir CIVIC (875.5,37.0,894.5) 3 near goal IDLE
+       Idris SCHOLAR (875.5,37.0,894.5) 3 near goal IDLE
+       Hakim CARTER (874.5,37.0,894.5) 3 near goal IDLE
+       Zaid GUARD (874.5,37.0,895.5) 3 near goal IDLE
+
+    [trace]    30 Soren      (372.50,57.04,389.50) yaw 0.00 want NaN v -0.04,-0.02 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door open false locked false blocked false angle [0.0] hinge [[370.0, 388.94]]]
+    [trace]    40 Soren      (372.35,57.00,389.43) yaw 0.43 want NaN v -1.96,-0.98 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door open false locked false blocked false angle [0.0] hinge [[370.0, 388.94]]]
+    [trace]    50 Soren      (371.99,57.00,389.25) yaw 1.08 want NaN v -2.19,-1.10 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door open false locked false blocked false angle [0.0] hinge [[370.0, 388.94]]]
+    [trace]    60 Soren      (371.63,57.00,389.06) yaw 1.08 want NaN v -2.19,-1.10 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door open false locked false blocked false angle [0.0] hinge [[370.0, 388.94]]]
+    [trace]    70 Soren      (371.31,57.00,388.88) yaw 1.05 want NaN v -0.35,-1.05 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked false angle [-0.102675386] hinge [[370.0, 388.94]]]
+    [trace]    80 Soren      (371.30,57.00,388.74) yaw 0.52 want NaN v 0.00,-0.59 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked false angle [-0.4671242] hinge [[370.0, 388.94]]]
+    [trace]    90 Soren      (371.24,57.00,388.67) yaw 0.76 want NaN v -1.39,-0.22 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.086417] hinge [[370.0, 388.94]]]
+    [trace]   100 Soren      (370.87,57.00,388.65) yaw 1.45 want NaN v -2.45,-0.09 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4500057] hinge [[370.0, 388.94]]]
+    [trace]   110 Soren      (370.47,57.00,388.64) yaw 1.52 want NaN v -2.45,-0.09 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4500004] hinge [[370.0, 388.94]]]
+    [trace]   120 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.10,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4515147] hinge [[370.0, 388.94]]]
+    [trace]   130 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.04,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4510522] hinge [[370.0, 388.94]]]
+    [trace]   140 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.08,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504995] hinge [[370.0, 388.94]]]
+    [trace]   150 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.09,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504259] hinge [[370.0, 388.94]]]
+    [trace]   160 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.07,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4500805] hinge [[370.0, 388.94]]]
+    [trace]   170 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.07,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4505719] hinge [[370.0, 388.94]]]
+    [trace]   180 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.07,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.450563] hinge [[370.0, 388.94]]]
+    [trace]   190 Soren      (370.40,57.00,388.63) yaw 1.52 want NaN v -0.09,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4509711] hinge [[370.0, 388.94]]]
+    [trace]   200 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.09,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4503989] hinge [[370.0, 388.94]]]
+    [trace]   210 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4502202] hinge [[370.0, 388.94]]]
+    [trace]   220 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.09,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504515] hinge [[370.0, 388.94]]]
+    [trace]   230 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504932] hinge [[370.0, 388.94]]]
+    [trace]   240 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.05,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4501337] hinge [[370.0, 388.94]]]
+    [trace]   250 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.03,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504066] hinge [[370.0, 388.94]]]
+    [trace]   260 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.04,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4499259] hinge [[370.0, 388.94]]]
+    [trace]   270 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.08,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4504496] hinge [[370.0, 388.94]]]
+    [trace]   280 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.09,-0.01 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4505819] hinge [[370.0, 388.94]]]
+    [trace]   290 Soren      (370.40,57.00,388.62) yaw 1.52 want NaN v -0.07,-0.00 goal SLEEP act go to goal working null gp true 351.5,390.5 |  [door Hojimo Monastery door (open) open true locked false blocked true angle [-1.4505806] hinge [[370.0, 388.94]]]
+    [life] stop 370,390 done (16 people seen so far)
+
+    [life] 1 stops of 300 frames; 16 people seen
+      never in play: Ealdra MERCHANT home (261,926)
+      never in play: Torren LAWMAN home (237,978)
+      never in play: Aldric GUARD home (240,981)
+      never in play: Oswin WORKER home (304,901)
+      never in play: Tam VILLAGER home (285,836)
+      never in play: Brannoc THIEF home (580,900)
+      never in play: Mara MERCHANT home (114,771)
+      never in play: Lucan LAWMAN home (95,701)
+      never in play: Ferrick CARTER home (192,973)
+      never in play: Garvin QUEST_GIVER home (211,897)
+      never in play: Kettil CONTACT home (599,876)
+      never in play: Wynn FARMER home (204,970)
+      never in play: Father Wulfric UNDERTAKER home (179,880)
+      never in play: Skarn FENCE home (580,1026)
+      never in play: Bram GUARD home (237,982)
+      never in play: Bilal BEGGAR home (908,860)
+      never in play: Ysolde HEALER home (183,963)
+      never in play: Father Gregory PRIEST home (212,894)
+      never in play: Rafe HUNTER home (355,801)
+      never in play: Maelin SCHOLAR home (130,596)
+      never in play: Bryn FISHERMAN home (571,593)
+      never in play: Brokk MINER home (199,434)
+      never in play: Fred CRAFTSMAN home (240,918)
+      never in play: Sir Andrew KNIGHT home (221,896)
+      never in play: Hakon HUNTER home (96,576)
+      never in play: Hadwin CIVIC home (223,983)
+      never in play: Danek CRAFTSMAN home (135,777)
+      never in play: Dawud MINER home (947,878)
+      never in play: Sir Hedric KNIGHT home (359,748)
+      never in play: Gudrik FISHERMAN home (602,1020)
+      never in play: Vesna FISHERMAN home (104,773)
+      never in play: King Leonidas CIVIC home (569,86)
+      never in play: Baron Photios LAWMAN home (596,107)
+      never in play: Leontios GUARD home (595,112)
+      never in play: Anwar GUARD home (878,880)
+      never in play: Roder GUARD home (148,621)
+      never in play: Baroness Guinevere CIVIC home (817,367)
+      never in play: Zoe MERCHANT home (480,117)
+      never in play: Father Paul PRIEST home (876,53)
+      never in play: Aristides SCHOLAR home (611,151)
+      never in play: Polyxena MINER home (877,129)
+      never in play: Tolis BEGGAR home (486,61)
+      never in play: King Fahad VILLAGER home (906,895)
+      never in play: Cerys VILLAGER home (814,420)
+      never in play: Wat FISHERMAN home (182,962)
+      never in play: Tauron HUNTER home (860,509)
+      never in play: King Arthur CRAFTSMAN home (817,371)
+      never in play: Sir Lancelot KNIGHT home (809,372)
+      never in play: Sir Gawain HUNTER home (842,344)
+      never in play: Torvik MINER home (194,439)
+      never in play: Merlin MINER home (779,375)
+      never in play: Dunstan CRAFTSMAN home (304,904)
+      never in play: Olek CRAFTSMAN home (98,743)
+      never in play: Alexios CRAFTSMAN home (465,36)
+      never in play: Cenric WORKER home (303,896)
+      never in play: Radek WORKER home (88,769)
+      never in play: Dorran MINER home (176,536)
+      never in play: Merek MINER home (92,564)
+      never in play: Meriwyn MERCHANT home (599,871)
+      never in play: Damaris MERCHANT home (480,119)
+      never in play: Cuthmar FARMER home (249,898)
+      never in play: Baron Osric FARMER home (244,854)
+      never in play: Kyra FARMER home (214,290)
+      never in play: Marinos FARMER home (216,283)
+      never in play: Berthild CIVIC home (272,944)
+      never in play: Maddoc MERCHANT home (276,946)
+      never in play: Karlon CRAFTSMAN home (279,945)
+      never in play: Melitta CIVIC home (533,191)
+      never in play: Basil MERCHANT home (545,191)
+      never in play: Lazaros CRAFTSMAN home (532,191)
+      never in play: Brennar CRAFTSMAN home (182,616)
+      never in play: Fenna MERCHANT home (200,655)
+      never in play: Layla CRAFTSMAN home (894,832)
+      never in play: Zainab CRAFTSMAN home (895,828)
+      never in play: Baron Jalal CRAFTSMAN home (845,876)
+      never in play: Ziad CRAFTSMAN home (892,829)
+      never in play: Murad CRAFTSMAN home (894,834)
+      never in play: Ilva FARMER home (155,758)
+      never in play: Karim CRAFTSMAN home (830,837)
+      never in play: Petros FISHERMAN home (468,36)
+      never in play: Baron Hadrik CRAFTSMAN home (190,614)
+      never in play: Yannis FISHERMAN home (462,36)
+      never in play: Count Dracula CIVIC home (92,702)
+      never in play: Sir Garran KNIGHT home (152,624)
+      never in play: Sella CRAFTSMAN home (140,777)
+      never in play: Orven WORKER home (205,613)
+      never in play: Leofric WORKER home (298,896)
+      never in play: Hurk BANDIT home (830,693)
+      never in play: Sigrun BANDIT home (827,694)
+      never in play: Garmund BRUTE home (828,692)
+      never in play: King Richard CIVIC home (226,977)
+      never in play: Duke Donald CIVIC home (227,983)
+      never in play: Count William CIVIC home (298,884)
+      never in play: Alaric PRIEST home (215,896)
+      never in play: Maeve CRAFTSMAN home (230,980)
+      never in play: Hob GUARD home (359,742)
+      never in play: Eadmund CRAFTSMAN home (298,902)
+      never in play: Beric HUNTER home (356,796)
+      never in play: Duke Bashir CIVIC home (903,899)
+      never in play: Count Awhad CIVIC home (858,865)
+      never in play: Sir Faris-ul-Azhar KNIGHT home (906,883)
+      never in play: Hassan SCHOLAR home (906,888)
+      never in play: Idris SCHOLAR home (906,880)
+      never in play: Father Rafiq PRIEST home (914,859)
+      never in play: Yusuf PRIEST home (911,860)
+      never in play: Tariq CIVIC home (844,920)
+      never in play: Zafir CRAFTSMAN home (804,910)
+      never in play: Osama CRAFTSMAN home (937,851)
+      never in play: Marwan CRAFTSMAN home (956,823)
+      never in play: Mohamed MERCHANT home (816,863)
+      never in play: Rashid MERCHANT home (861,866)
+      never in play: Munir CARTER home (828,835)
+      never in play: Hakim CARTER home (903,877)
+      never in play: Hamid CRAFTSMAN home (937,898)
+      never in play: Nabil CRAFTSMAN home (945,896)
+      never in play: Salim CRAFTSMAN home (946,880)
+      never in play: Kamal CRAFTSMAN home (948,880)
+      never in play: Qasim WORKER home (939,880)
+      never in play: Fadi MINER home (873,786)
+      never in play: Jamila FARMER home (769,985)
+      never in play: Samira FARMER home (766,985)
+      never in play: Zaid GUARD home (891,901)
+      never in play: Sabir GUARD home (899,901)
+      never in play: Baron Nuri CIVIC home (897,875)
+      never in play: Duke Artemios CIVIC home (553,86)
+      never in play: Count Constantine CIVIC home (497,53)
+      never in play: Sir Nicholas KNIGHT home (592,107)
+      never in play: Sir Kosmas KNIGHT home (590,107)
+      never in play: Baroness Eudokia CIVIC home (605,150)
+      never in play: Father Khalid PRIEST home (484,112)
+      never in play: Ione PRIEST home (450,34)
+      never in play: Stavros CIVIC home (431,215)
+      never in play: Demetrios CRAFTSMAN home (447,196)
+      never in play: Irene SCHOLAR home (541,86)
+      never in play: Theodora CRAFTSMAN home (448,173)
+      never in play: Xenia CRAFTSMAN home (590,116)
+      never in play: Eleni CRAFTSMAN home (449,173)
+      never in play: Theron MERCHANT home (482,113)
+      never in play: Pavlos FENCE home (484,113)
+      never in play: Melina FISHERMAN home (470,37)
+      never in play: Spiros WORKER home (468,34)
+      never in play: Timon WORKER home (462,37)
+      never in play: Damon WORKER home (465,34)
+      never in play: Alkis CARTER home (481,118)
+      never in play: Andreas CRAFTSMAN home (424,152)
+      never in play: Nikos CRAFTSMAN home (422,152)
+      never in play: Kallias CRAFTSMAN home (424,157)
+      never in play: Isidoros CRAFTSMAN home (428,157)
+      never in play: Orestes WORKER home (180,131)
+      never in play: Myron GUARD home (590,114)
+      never in play: Perikles GUARD home (593,119)
+      never in play: Zenon GUARD home (591,119)
+      never in play: Argyros GUARD home (590,111)
+      never in play: Gorgias GUARD home (595,115)
+      never in play: Kleon GUARD home (595,110)
+      never in play: Kyros THIEF home (427,157)
+      never in play: Mimis BEGGAR home (482,61)
+      never in play: Argus THIEF home (426,157)
+      never in play: Phaedra CARTER home (594,107)
+      never in play: Leandros BEGGAR home (464,39)
+      never in play: Sabeen BEGGAR home (462,34)
+      never in play: King Phillip CIVIC home (159,621)
+      never in play: Duke Edran CIVIC home (156,624)
+      never in play: Sir Vaelor KNIGHT home (129,591)
+      never in play: Father Anselm PRIEST home (129,594)
+      never in play: Tovin CRAFTSMAN home (204,656)
+      never in play: Elric CIVIC home (182,634)
+      never in play: Halwen CRAFTSMAN home (215,653)
+      never in play: Hesta FARMER home (204,606)
+      never in play: Aldis CIVIC home (129,657)
+      never in play: Toben CRAFTSMAN home (129,660)
+      never in play: Varek SCHOLAR home (89,706)
+      never in play: Father Odran PRIEST home (150,724)
+      never in play: Mother Mirel PRIEST home (108,739)
+      never in play: Borin FARMER home (154,788)
+      never in play: Sir Bedivere KNIGHT home (862,387)
+      never in play: Father Cadren PRIEST home (783,374)
+      never in play: Elian PRIEST home (841,347)
+      never in play: Baron Aldren CIVIC home (797,384)
+      never in play: Wystan CRAFTSMAN home (815,416)
+      never in play: Perrin CRAFTSMAN home (821,423)
+      never in play: Rowena MERCHANT home (829,423)
+      never in play: Huw FARMER home (870,385)
+      never in play: Edric GUARD home (870,388)
+      never in play: Vark BANDIT home (831,692)
+      never in play: Dolgrin MINER home (201,434)
+      never in play: Pell WORKER home (865,578)
+      never in play: Ysmay WORKER home (984,391)
+      never in play: Hask HUNTER home (720,481)
+      never in play: Orrin CRAFTSMAN home (369,654)
+      never in play: Corvane HUNTER home (585,889)
+      never in play: Bogdan GUARD home (103,789)
+      never in play: Milena CIVIC home (164,723)
+      never in play: Lothar GUARD home (166,606)
+      never in play: Hilde UNDERTAKER home (129,598)
+      never in play: Nadim GUARD home (922,968)
+      never in play: Samir UNDERTAKER home (906,860)
+      never in play: Emrys GUARD home (846,387)
+      never in play: Rhiannon CIVIC home (820,389)
+      never in play: Rask BANDIT home (826,693)
+      never in play: Wenna BANDIT home (832,693)
+      never in play: Hullen BANDIT home (824,692)
+      never in play: Grisel BANDIT home (834,693)
+      never in play: Haskel MINER home (171,535)
+      never in play: Tamsin MINER home (99,563)
+      never in play: Osk MINER home (200,439)
+      never in play: Mabry WORKER home (178,131)
+      never in play: Edvin WORKER home (172,131)
+      never in play: Corra WORKER home (868,577)
+    [life] 0 people with trouble
+
+  slow: rpg.probe.WorldLifeProbeTest.life() 36.083 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 40s
+9 actionable tasks: 2 executed, 7 up-to-date

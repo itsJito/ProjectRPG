@@ -1,0 +1,97 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :probe
+
+FisherProbeTest > fishersThroughAMorning() STANDARD_OUT
+    [Load] ShadowVeil grown in 8.66s ({regions=982, overlays=477, variants=476, scarp=46, coast=535, erosion=354, peaks=51, lakes=103, isles=7, rivers=1247, wadis=21, ground=46, roads=1232, causeways=4, architecture=559, pitsFilled=1341, pits=542, banks=55, clamp=24, cliffs=62, columns=1028, falls=16, raise=324, trees=423, outcrops=1}), made and lit in 3.35s
+          [death] the player was killed by ? at (161.5, 960.5), t 24.8
+    == Elowen FISHERMAN (Lake Net Fisherman) post (158, 958) at (159, 958)
+      Solday 07:00 (Day 1) (158.5, 957.5) goal PRAY  the altar is crowded; prayers later
+      Solday 07:03 (Day 1) (167.6, 956.6) goal WORK  
+      Solday 07:07 (Day 1) (169.8, 952.6) goal WORK  
+      Solday 07:10 (Day 1) (163.2, 950.9) goal WORK  net soaking; 0 in it so far
+      Solday 07:13 (Day 1) (172.2, 953.8) goal WORK  net soaking; 0 in it so far
+      Solday 07:17 (Day 1) (165.4, 956.8) goal WORK  net soaking; 0 in it so far
+      Solday 07:20 (Day 1) (158.2, 957.5) goal WORK  net soaking; 0 in it so far
+      Solday 07:24 (Day 1) (158.2, 957.5) goal WORK  net soaking; 0 in it so far
+      Solday 07:27 (Day 1) (158.2, 957.5) goal WORK  net soaking; 0 in it so far
+      Solday 07:31 (Day 1) (157.5, 957.5) goal WORK  (off-stage) Lake Net Fisherman: at work
+    == Wynn FISHERMAN (Shellfish Gatherer) post (577, 1038) at (577, 1038)
+      Solday 07:34 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:37 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:40 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:44 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:47 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:50 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:54 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 07:57 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 08:00 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+      Solday 08:03 (Day 1) (576.5, 1037.5) goal WORK  No eligible work for Shellfish Gatherer; waiting for supplies or a suitable site
+    == Corwin FISHERMAN (River Fisherman) post (103, 754) at (93, 761)
+      Solday 08:06 (Day 1) (92.5, 760.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:09 (Day 1) (93.3, 760.5) goal WORK  River Fisherman: deliver a real batch
+      Solday 08:13 (Day 1) (93.3, 760.5) goal WORK  River Fisherman: deliver a real batch
+      Solday 08:16 (Day 1) (99.9, 760.8) goal WORK  River Fisherman: deliver a real batch
+      Solday 08:19 (Day 1) (109.0, 761.4) goal WORK  River Fisherman: deliver a real batch
+      Solday 08:22 (Day 1) (118.0, 763.0) goal WORK  River Fisherman: deliver a real batch
+      Solday 08:25 (Day 1) (125.6, 766.3) goal WORK  River Fisherman: gather at a suitable site
+      Solday 08:28 (Day 1) (116.9, 763.7) goal WORK  River Fisherman: gather at a suitable site
+      Solday 08:31 (Day 1) (107.8, 762.5) goal WORK  River Fisherman: gather at a suitable site
+      Solday 08:34 (Day 1) (103.7, 762.5) goal WORK  River Fisherman: gather at a suitable site
+    == Lucius FISHERMAN (River Fisherman) post (469, 26) at (457, 19)
+      Solday 08:37 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:40 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:43 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:46 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:49 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:52 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:55 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 08:58 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 09:01 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+      Solday 09:04 (Day 1) (456.8, 18.5) goal WORK  No eligible work for River Fisherman; waiting for supplies or a suitable site
+    == Morwen FISHERMAN (Deep-Water Fisherman) post (475, 36) at (488, 29)
+      Solday 09:07 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:10 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:13 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:16 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:19 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:22 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:25 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:27 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:30 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+      Solday 09:33 (Day 1) (488.3, 28.7) goal WORK  No eligible work for Deep-Water Fisherman; waiting for supplies or a suitable site
+    == Kerra FISHERMAN (Coastal Fisherman) post (465, 27) at (456, 19)
+      Solday 09:36 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:39 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:42 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:44 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:47 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:50 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:53 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:56 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 09:59 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+      Solday 10:01 (Day 1) (456.2, 18.5) goal WORK  No eligible work for Coastal Fisherman; waiting for supplies or a suitable site
+  slow: rpg.probe.FisherProbeTest.fishersThroughAMorning() 176.896 s
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 52s
+9 actionable tasks: 2 executed, 7 up-to-date
+EXIT 0

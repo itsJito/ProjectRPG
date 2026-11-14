@@ -45,6 +45,8 @@ public final class ItemModels {
         // wooden gear keeps the wood designs (planked shield, a wooden blade)
         Tier t = d.tier == Tier.WOODEN ? null : d.tier;
         if (d.id.startsWith("cape_")) return HiResItems.skillcape(Skill.valueOf(d.id.substring(5).toUpperCase()));
+        // (0.4.5) an outfit's piece: built from its look (Garments)
+        if (d.wear != null) return HiResItems.doubled(Garments.model(d));
         if (HiResItems.bottled(d)) return HiResItems.bottle(d);
         switch (d.family) {
             case SWORD: return HiResItems.sword(d, t);

@@ -1,0 +1,55 @@
+> Task :theastrattoengine:compileJava UP-TO-DATE
+> Task :theastrattoengine:buildNative UP-TO-DATE
+> Task :theastrattoengine:engineResources UP-TO-DATE
+> Task :theastrattoengine:processResources UP-TO-DATE
+> Task :theastrattoengine:classes UP-TO-DATE
+> Task :theastrattoengine:jar UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :gallery
+Astratto Engine 2.0 - SHADOWVEIL
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.lwjgl.system.MemoryUtil (file:/C:/Users/John/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar)
+WARNING: Please consider reporting this to the maintainers of class org.lwjgl.system.MemoryUtil
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.
+[Boot] NVIDIA GeForce GTX 1050 Ti/PCIe/SSE2  -  OpenGL 4.5.0 NVIDIA 582.66
+Astratto Engine native core, API 2.10, built Nov 13 2026 22:44:56 (MSVC)
+[Load] native services 0.04s
+[Load] ShadowVeil grown in 18.26s ({regions=965, overlays=567, variants=375, scarp=58, coast=477, erosion=375, peaks=57, lakes=75, isles=4, rivers=590, wadis=14, ground=38, roads=568, causeways=3, architecture=848, pitsFilled=1309, pits=558, banks=85, clamp=12, cliffs=73, columns=832, falls=18, raise=10830, trees=281, outcrops=0, ways=514}), made and lit in 2.20s
+[Load] ShadowVeil 20.53s
+[Load] renderer and UI 2.21s
+[water] flow field grown in 1307 ms: 39016 columns moving
+[gathering] 767 wild herb patches, flax and berry bushes
+[monsters] 7 wilderness territories (passed over: 8 wet or road, 29 in a realm, 76 near the settled, 4 by a road, 45 by their biome's chances; 770 settled points)
+[addons] loaded [low_health.lua, session_gold.lua]
+[Load] growth about the spawn: 49 chunks made, 37 meshes, 1.56s
+[Load] 240 furniture models made in 0.09s
+[Load] first rendered frame 6.44s
+[Load] the world about the spawn made ready in 13.93s
+[Load] game frame 1: scene 12 ms, interface 954 ms, render 24 ms
+[Load] game frame 2: scene 23 ms, interface 3 ms, render 13 ms
+[Load] game frame 3: scene 7 ms, interface 3 ms, render 8 ms
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-rain-eye.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-rain-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-snow-eye.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-snow-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-sandstorm-eye.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-sandstorm-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-thunderstorm-eye.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-thunderstorm-high.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-dense_fog-eye.png
+[shot] C:\Users\John\Documents\ProjectRPG\rpggame\build\review-weather2\weather-dense_fog-high.png
+
+[Incubating] Problems report is available at: file:///C:/Users/John/Documents/ProjectRPG/rpggame/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 9s
+8 actionable tasks: 1 executed, 7 up-to-date

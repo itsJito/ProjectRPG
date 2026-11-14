@@ -21,8 +21,14 @@ import rpg.item.Items;
 public class Container extends WorldObject {
     public final Inventory contents;
     public final Map<String, Integer> custodySlots = new java.util.HashMap<>();
+    /** (0.4.6) Whose held possessions a jail's chest keeps (0: nobody's), returned to them when they are let out. */
+    public long custodyOf;
+    /** (0.4.6) A graveyard's old grave: a headstone and its mound to look at and walk round, with nothing to do at it. */
+    public boolean decor;
     public boolean locked;
     public int lockLevel;
+    /** (0.4.4) The floor it stands on, where known (a chest upstairs is drawn on its own floor, not the ground's top). */
+    public float floorY = Float.NaN;
     public final String kind;
     /** Who may take freely besides the owner (a grave's owner only). */
     public boolean ownerOnly;
@@ -39,7 +45,7 @@ public class Container extends WorldObject {
         super(id, def, name, x, y, z);
         this.kind = kind; this.owner = owner;
         // a chest is a 10 x 10 grid, a grave or a corpse 10 x 4 like a person's own, a cart's crate 10 x 6
-        int[] dims = switch (kind) { case "chest" -> new int[]{10, 10}; case "corpse" -> new int[]{10, 4}; case "grave" -> size>40?new int[]{16,Math.max(1,(size+15)/16)}:new int[]{10,4}; case "cargo" -> new int[]{10, 6}; case "memorial", "claim", "escrow" -> new int[]{16, Math.max(1,(size+15)/16)}; default -> new int[]{10, Math.max(1, (size + 9) / 10)}; };
+        int[] dims = switch (kind) { case "chest" -> size > 100 ? new int[]{16, Math.max(1, (size + 15) / 16)} : new int[]{10, 10}; case "corpse" -> new int[]{10, 4}; case "grave" -> size>40?new int[]{16,Math.max(1,(size+15)/16)}:new int[]{10,4}; case "cargo" -> new int[]{10, 6}; case "memorial", "claim", "escrow" -> new int[]{16, Math.max(1,(size+15)/16)}; default -> new int[]{10, Math.max(1, (size + 9) / 10)}; };
         this.contents = new Inventory(dims[0], dims[1]);
         // A death record holds the complete possessions, including filled worn bags.
         this.contents.container = !kind.equals("grave") && !kind.equals("corpse") && !kind.equals("memorial") && !kind.equals("claim") && !kind.equals("escrow");
@@ -53,12 +59,29 @@ public class Container extends WorldObject {
      * (0.2.2, gamefixes: the undertaker's chest and every other had no collision) a chest is solid: a fixed box exactly
      * its drawn size, as the bounty boards are, so bodies stand against it and it can be stood on.
      */
+    /** (0.4.4) A chest's body stands on its own floor (an upstairs chest's stood on the roof, a downstairs one's on the floor above). */
     public void solid(Rpg g) {
         if (solidBody != 0 || g.game == null) return;
         solidBody = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
         g.game.commands().rigidCreate(solidBody, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, CHEST_HX, CHEST_HY, CHEST_HZ, 0,
-                x, rpg.world.Ground.at(x, z) + CHEST_HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+                x, (Float.isFinite(floorY) ? floorY : rpg.world.Ground.at(x, z)) + CHEST_HY, z, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
     }
+
+    /**
+     * (0.4.6, gamefixes: graves in graveyards had no collision) a grave's headstone stands in the way as stone does: a
+     * fixed body the size of the slab where it is drawn (its plot's stone, or a buried bundle's), so nobody walks through it.
+     */
+    public void stoneSolid(Rpg g) {
+        if (solidBody != 0 || g.game == null || heldBy != 0) return;
+        float off = burialPlot.isEmpty() ? 0.45f : 0, sz = z + off + STONE_HZ + 0.06f;
+        solidBody = g.game.reserve(astratto.bridge.AstrattoNative.KIND_RIGID);
+        g.game.commands().rigidCreate(solidBody, astratto.bridge.AstrattoNative.SHAPE_BOX, astratto.bridge.AstrattoNative.RIGID_STATIC, STONE_HX, STONE_HY, STONE_HZ, 0,
+                x, rpg.world.Ground.at(x, sz) + STONE_HY, sz, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6f, 0.1f, 0, null);
+    }
+    /** A headstone's half sizes: across, up, through (m). */
+    static final float STONE_HX = 0.3f, STONE_HY = 0.45f, STONE_HZ = 0.08f;
+    /** The fixed body taken away (the container gone from the world). */
+    public void unsolid(Rpg g) { if (solidBody != 0 && g.game != null) { g.game.commands().release(solidBody); solidBody = 0; } }
 
     /** A transient view over an actor's live inventory; never registered or serialized as a second owner. */
     protected Container(long id,String name,String kind,float x,float y,float z,long owner,Inventory contents) {
@@ -72,7 +95,7 @@ public class Container extends WorldObject {
         if (kind.equals("vault")) return g.bank.vaultRefusal(a, this);
         return super.reach(g, a, range);
     }
-    @Override public String label() { return name + ((kind.equals("memorial") || kind.equals("grave") && buried) ? buried ? " (Filled)" : " (Unfilled)" : locked ? " (locked)" : ""); }
+    @Override public String label() { if (decor) return name; return name + ((kind.equals("memorial") || kind.equals("grave") && buried) ? buried ? " (Filled)" : " (Unfilled)" : locked ? " (locked)" : ""); }
 
 
     public boolean isTheft(Actor a) { return owner != 0 && owner != a.id; }
@@ -80,7 +103,7 @@ public class Container extends WorldObject {
     @Override public List<Option> options(Rpg g, Actor a) {
         List<Option> o = new ArrayList<>();
         float r = g.cfg.interactRange;
-        if (kind.equals("claim") || kind.equals("escrow") || kind.equals("vault")) return o;
+        if (decor || kind.equals("claim") || kind.equals("escrow") || kind.equals("vault")) return o;
         if (kind.equals("memorial") && !buried) {
             o.add(Option.when(g.carrying.busy(a), "bury", "Bury carried body", 10, "Carry a body to this unfilled grave first.", r));
             return o;
@@ -210,8 +233,8 @@ public class Container extends WorldObject {
 
     @Override public String inspect(Rpg g) { return super.inspect(g) + "\n  locked=" + locked + " contents=" + contents.stacks(); }
 
-    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("locked", locked); m.put("buried", buried); m.put("burialPlot", burialPlot); m.put("gridCells", contents.size()); m.put("items", ItemIO.inventory(contents)); if (!custodySlots.isEmpty()) m.put("custodySlots", custodySlots); return m; }
-    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); buried = astratto.util.Json.bool(m, "buried", false); burialPlot = astratto.util.Json.str(m, "burialPlot", ""); locked = astratto.util.Json.bool(m, "locked", locked); ItemIO.inventory(contents, astratto.util.Json.list(m, "items")); custodySlots.clear();
+    @Override public Map<String, Object> save() { Map<String, Object> m = super.save(); m.put("locked", locked); m.put("buried", buried); m.put("burialPlot", burialPlot); m.put("gridCells", contents.size()); m.put("items", ItemIO.inventory(contents)); if (!custodySlots.isEmpty()) m.put("custodySlots", custodySlots); if (custodyOf != 0) m.put("custodyOf", custodyOf); return m; }
+    @Override public void load(Rpg g, Map<String, Object> m) { super.load(g, m); buried = astratto.util.Json.bool(m, "buried", false); burialPlot = astratto.util.Json.str(m, "burialPlot", ""); locked = astratto.util.Json.bool(m, "locked", locked); ItemIO.inventory(contents, astratto.util.Json.list(m, "items")); custodySlots.clear(); custodyOf = (long) astratto.util.Json.num(m, "custodyOf", 0); if (kind.equals("grave") && buried) stoneSolid(g); if (removed) unsolid(g);
         var slots = astratto.util.Json.obj(m, "custodySlots"); if (slots != null) for (var entry : slots.entrySet()) if (entry.getValue() instanceof Number value) custodySlots.put(entry.getKey(), value.intValue());
     }
 }
